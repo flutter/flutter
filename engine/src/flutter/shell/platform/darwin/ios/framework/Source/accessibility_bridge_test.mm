@@ -1880,8 +1880,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   id argument = accessibility_notifications[0][@"argument"];
   XCTAssertTrue([argument isKindOfClass:[NSString class]]);
   XCTAssertEqualObjects(argument, @"page 2 of 2");
-  // The previously focused object is still in the tree, so focus must not be
-  // disturbed by an additional layout-changed notification.
+  // Nothing else moved, so there is no layout-changed notification.
   XCTAssertEqual([accessibility_notifications count], 1ul);
 }
 
@@ -1968,10 +1967,15 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
   bridge->UpdateSemantics(/*nodes=*/second_update, /*actions=*/actions);
 
-  XCTAssertEqual([accessibility_notifications count], 1ul);
+  XCTAssertEqual([accessibility_notifications count], 2ul);
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
                  UIAccessibilityPageScrolledNotification);
   XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], @"page 2 of 2");
+  // The existing layout change handling still runs. The focused row survived,
+  // so it does not move focus.
+  XCTAssertEqual([accessibility_notifications[1][@"notification"] unsignedIntValue],
+                 UIAccessibilityLayoutChangedNotification);
+  XCTAssertEqualObjects(accessibility_notifications[1][@"argument"], [NSNull null]);
 }
 
 - (void)testScrollAnnouncementCountsOnlyVisibleRows {

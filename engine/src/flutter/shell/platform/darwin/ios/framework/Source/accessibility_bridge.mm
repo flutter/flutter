@@ -381,8 +381,8 @@ void AccessibilityBridge::UpdateSemantics(
     }
 
     if (scrolledObject) {
-      // Checked before `layoutChanged` because a scroll moves its children,
-      // which almost always sets `layoutChanged` too.
+      // Not an `else` of `layoutChanged`: a scroll moves its children, which
+      // almost always sets `layoutChanged` too.
       //
       // A scroll spans many frames, so only announce when the status changes.
       AccessibilityScrollStatus status = ComputeScrollStatus(scrolledObject);
@@ -391,16 +391,8 @@ void AccessibilityBridge::UpdateSemantics(
         ios_delegate_->PostAccessibilityNotification(UIAccessibilityPageScrolledNotification,
                                                      FormatScrollStatus(status));
       }
-
-      // Move focus only if the scroll removed the focused element; otherwise
-      // VoiceOver would be pulled away from what the user is reading.
-      if (last_focused_semantics_object_id_ != kSemanticObjectIdInvalid &&
-          ![objects_ objectForKey:@(last_focused_semantics_object_id_)]) {
-        ios_delegate_->PostAccessibilityNotification(
-            UIAccessibilityLayoutChangedNotification,
-            FindNextFocusableIfNecessary().nativeAccessibility);
-      }
-    } else if (layoutChanged) {
+    }
+    if (layoutChanged) {
       SemanticsObject* next = FindNextFocusableIfNecessary();
       SemanticsObject* lastFocused = [objects_ objectForKey:@(last_focused_semantics_object_id_)];
       // Only specify the focus item if the new focus is different, avoiding double focuses on the
