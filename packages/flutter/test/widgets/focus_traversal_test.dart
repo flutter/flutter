@@ -3111,174 +3111,33 @@ void main() {
     testWidgets('Up focuses the card directly above when each row is a FocusScope', (
       WidgetTester tester,
     ) async {
-      // A vertical list of rows, where each row is its own FocusScope holding
-      // a title and a horizontal list of equal-size cards. Arrow keys move
-      // focus between rows by asking the enclosing scope for a directional
-      // move, so traversal starts from the row scope rather than the card.
-      // Down from the first card of row 0 lands on the first card of row 1.
-      // Up must come back to the first card of row 0, not another card.
-      const rowCount = 3;
-      const cardsPerRow = 4;
-      final rowScopes = List<FocusScopeNode>.generate(
-        rowCount,
-        (int row) => FocusScopeNode(debugLabel: 'Row scope $row'),
-      );
-      final gridNodes = List<List<FocusNode>>.generate(
-        rowCount,
-        (int row) => List<FocusNode>.generate(
-          cardsPerRow,
-          (int col) => FocusNode(debugLabel: 'Card $row-$col'),
-        ),
-      );
-      addTearDown(() {
-        for (final scope in rowScopes) {
-          scope.dispose();
-        }
-        for (final FocusNode node in gridNodes.flattened) {
-          node.dispose();
-        }
-      });
-
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: ListView(
-            children: List<Widget>.generate(rowCount, (int row) {
-              return FocusScope(
-                node: rowScopes[row],
-                onKeyEvent: (FocusNode node, KeyEvent event) {
-                  if (event is! KeyDownEvent) {
-                    return KeyEventResult.ignored;
-                  }
-                  if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-                    rowScopes[row].enclosingScope?.focusInDirection(TraversalDirection.down);
-                    return KeyEventResult.handled;
-                  }
-                  if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-                    rowScopes[row].enclosingScope?.focusInDirection(TraversalDirection.up);
-                    return KeyEventResult.handled;
-                  }
-                  return KeyEventResult.ignored;
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    // Row title, which makes the scope taller than its cards.
-                    const SizedBox(height: 40, width: 100),
-                    SizedBox(
-                      height: 150,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: List<Widget>.generate(cardsPerRow, (int col) {
-                          return Focus(
-                            focusNode: gridNodes[row][col],
-                            autofocus: row == 0 && col == 0,
-                            child: Container(
-                              width: 360,
-                              margin: const EdgeInsets.only(right: 10),
-                              color: getTestColor(row),
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ),
-        ),
-      );
+      final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
+          _createRowScopeNodes(rowCount: 3, cardsPerRow: 4);
+      await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes));
+      gridNodes[0][0].requestFocus();
       await tester.pump();
       expect(gridNodes[0][0].hasPrimaryFocus, isTrue);
 
+      // Down from the first card of row 0 lands on the first card of row 1.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();
       expect(gridNodes[1][0].hasPrimaryFocus, isTrue);
 
+      // Up must come back to the first card of row 0, not another card.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
-      expect(gridNodes[0][1].hasPrimaryFocus, isFalse);
       expect(gridNodes[0][0].hasPrimaryFocus, isTrue);
     });
 
     testWidgets('Up escapes the enclosing scope when the row header is taller than the cards', (
       WidgetTester tester,
     ) async {
-      // Same structure as the previous test, but each row's header is taller
-      // than its cards, so a row scope's own rect extends above its focused
-      // card. Up must escape to the row above instead of being trapped by the
-      // enclosing scope handing focus back to the same card.
-      const rowCount = 2;
-      const cardsPerRow = 2;
-      final rowScopes = List<FocusScopeNode>.generate(
-        rowCount,
-        (int row) => FocusScopeNode(debugLabel: 'Row scope $row'),
-      );
-      final gridNodes = List<List<FocusNode>>.generate(
-        rowCount,
-        (int row) => List<FocusNode>.generate(
-          cardsPerRow,
-          (int col) => FocusNode(debugLabel: 'Card $row-$col'),
-        ),
-      );
-      addTearDown(() {
-        for (final scope in rowScopes) {
-          scope.dispose();
-        }
-        for (final FocusNode node in gridNodes.flattened) {
-          node.dispose();
-        }
-      });
-
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: ListView(
-            children: List<Widget>.generate(rowCount, (int row) {
-              return FocusScope(
-                node: rowScopes[row],
-                onKeyEvent: (FocusNode node, KeyEvent event) {
-                  if (event is! KeyDownEvent) {
-                    return KeyEventResult.ignored;
-                  }
-                  if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-                    rowScopes[row].enclosingScope?.focusInDirection(TraversalDirection.down);
-                    return KeyEventResult.handled;
-                  }
-                  if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-                    rowScopes[row].enclosingScope?.focusInDirection(TraversalDirection.up);
-                    return KeyEventResult.handled;
-                  }
-                  return KeyEventResult.ignored;
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    // Row header, taller than the cards below it.
-                    const SizedBox(height: 200, width: 100),
-                    SizedBox(
-                      height: 150,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: List<Widget>.generate(cardsPerRow, (int col) {
-                          return Focus(
-                            focusNode: gridNodes[row][col],
-                            autofocus: row == 0 && col == 0,
-                            child: Container(
-                              width: 360,
-                              margin: const EdgeInsets.only(right: 10),
-                              color: getTestColor(row),
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ),
-        ),
-      );
+      // The row scope's own rect extends above its focused card, so Up must
+      // not pick the scope, which would hand focus back to the same card.
+      final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
+          _createRowScopeNodes(rowCount: 2, cardsPerRow: 2);
+      await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes, headerHeight: 200));
+      gridNodes[0][0].requestFocus();
       await tester.pump();
       expect(gridNodes[0][0].hasPrimaryFocus, isTrue);
 
@@ -3288,8 +3147,73 @@ void main() {
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
-      expect(gridNodes[1][0].hasPrimaryFocus, isFalse);
       expect(gridNodes[0][0].hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Down focuses the card directly below instead of the closer row scope', (
+      WidgetTester tester,
+    ) async {
+      // The header makes the scope of row 1 taller than its cards, so its
+      // center is closer to the focused card than the card directly below.
+      final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
+          _createRowScopeNodes(rowCount: 3, cardsPerRow: 4);
+      await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes));
+      gridNodes[0][1].requestFocus();
+      await tester.pump();
+      expect(gridNodes[0][1].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(gridNodes[1][1].hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Up focuses the card directly above instead of the closer row scope', (
+      WidgetTester tester,
+    ) async {
+      // The footer makes the scope of row 0 taller than its cards, so its
+      // center is closer to the focused card than the card directly above.
+      // Picking the scope would restore its last focused card instead.
+      final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
+          _createRowScopeNodes(rowCount: 2, cardsPerRow: 4);
+      await tester.pumpWidget(
+        _buildRowScopes(rowScopes, gridNodes, headerHeight: 0, footerHeight: 40),
+      );
+      gridNodes[0][0].requestFocus();
+      await tester.pump();
+      gridNodes[1][1].requestFocus();
+      await tester.pump();
+      expect(gridNodes[1][1].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(gridNodes[0][1].hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Moving within a row clears the directional history of the enclosing scope', (
+      WidgetTester tester,
+    ) async {
+      // Without scrollables, Up would otherwise pop the enclosing scope's
+      // history and restore the last focused card of row 0.
+      final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
+          _createRowScopeNodes(rowCount: 2, cardsPerRow: 2);
+      await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes, scrollable: false));
+      gridNodes[0][0].requestFocus();
+      await tester.pump();
+      expect(gridNodes[0][0].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(gridNodes[1][0].hasPrimaryFocus, isTrue);
+
+      // Right moves within row 1, so the path recorded by the enclosing scope
+      // no longer leads to the focused card.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(gridNodes[1][1].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(gridNodes[0][1].hasPrimaryFocus, isTrue);
     });
 
     testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (
@@ -4424,3 +4348,87 @@ class SkipAllButFirstAndLastPolicy extends FocusTraversalPolicy
 
 /// Creates a list of [length] to track focus changes during the test suite.
 List<bool?> _createFocusTracker(int length) => List<bool?>.generate(length, (int index) => null);
+
+// A scope node per row and a focus node per card, all disposed at teardown.
+(List<FocusScopeNode>, List<List<FocusNode>>) _createRowScopeNodes({
+  required int rowCount,
+  required int cardsPerRow,
+}) {
+  final rowScopes = List<FocusScopeNode>.generate(
+    rowCount,
+    (int row) => FocusScopeNode(debugLabel: 'Row scope $row'),
+  );
+  final gridNodes = List<List<FocusNode>>.generate(
+    rowCount,
+    (int row) =>
+        List<FocusNode>.generate(cardsPerRow, (int col) => FocusNode(debugLabel: 'Card $row-$col')),
+  );
+  addTearDown(() {
+    for (final scope in rowScopes) {
+      scope.dispose();
+    }
+    for (final FocusNode node in gridNodes.flattened) {
+      node.dispose();
+    }
+  });
+  return (rowScopes, gridNodes);
+}
+
+// A list of rows, where each row is its own FocusScope holding a header, a
+// row of equal-size cards, and a footer. Arrow keys move focus between rows by
+// asking the enclosing scope for a directional move, so traversal starts from
+// the row scope rather than the card. The list and the rows scroll unless
+// [scrollable] is false.
+Widget _buildRowScopes(
+  List<FocusScopeNode> rowScopes,
+  List<List<FocusNode>> gridNodes, {
+  double headerHeight = 40,
+  double footerHeight = 0,
+  bool scrollable = true,
+}) {
+  final rows = List<Widget>.generate(rowScopes.length, (int row) {
+    final cards = List<Widget>.generate(gridNodes[row].length, (int col) {
+      return Focus(
+        focusNode: gridNodes[row][col],
+        child: Container(
+          width: 360,
+          margin: const EdgeInsets.only(right: 10),
+          color: getTestColor(row),
+        ),
+      );
+    });
+    return FocusScope(
+      node: rowScopes[row],
+      onKeyEvent: (FocusNode node, KeyEvent event) {
+        if (event is! KeyDownEvent) {
+          return KeyEventResult.ignored;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+          rowScopes[row].enclosingScope?.focusInDirection(TraversalDirection.down);
+          return KeyEventResult.handled;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+          rowScopes[row].enclosingScope?.focusInDirection(TraversalDirection.up);
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          SizedBox(height: headerHeight, width: 100),
+          SizedBox(
+            height: 150,
+            child: scrollable
+                ? ListView(scrollDirection: Axis.horizontal, children: cards)
+                : Row(children: cards),
+          ),
+          SizedBox(height: footerHeight, width: 100),
+        ],
+      ),
+    );
+  });
+  return TestWidgetsApp(
+    home: scrollable ? ListView(children: rows) : Column(children: rows),
+  );
+}

@@ -713,7 +713,8 @@ class _DirectionalPolicyData {
 /// data for the affected [FocusScopeNode]. If the previous direction was the
 /// opposite of the current direction, then the this policy will request focus
 /// on the previously focused node. Change to another direction other than the
-/// current one or its opposite will clear the stack.
+/// current one or its opposite will clear the stack, as will a directional move
+/// within another [FocusScopeNode].
 ///
 /// For instance, if the focus moves down, down, down, and then up, up, up, it
 /// will follow the same path through the widgets in both directions. However,
@@ -817,11 +818,17 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     // A scope's rect spans all of its children, so search from the innermost
     // focused node to reflect where focus actually is.
     focusedChild = focusedChild.innermostFocusedChild;
-    // A node that resolves back to the focused node, like an enclosing scope,
-    // would hand focus straight back to it, trapping it there.
-    traversalDescendants = traversalDescendants.where(
-      (FocusNode node) => node.innermostFocusedChild != focusedChild,
-    );
+    // Focusing a scope hands focus on to one of its descendants, so a scope
+    // whose descendants are candidates themselves only gets in their way with
+    // a rect that spans all of them. A scope without traversable descendants
+    // still counts, unless it would hand focus straight back to the focused
+    // node, trapping it there.
+    traversalDescendants = traversalDescendants.where((FocusNode node) {
+      if (node is! FocusScopeNode) {
+        return true;
+      }
+      return node.traversalDescendants.isEmpty && node.innermostFocusedChild != focusedChild;
+    });
     switch (direction) {
       case TraversalDirection.down:
       case TraversalDirection.up:
@@ -1207,6 +1214,9 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     FocusScopeNode nearestScope,
     FocusNode focusedChild,
   ) {
+    // Moving within this scope leaves the history of every other scope stale,
+    // since it no longer describes the path that led to the focused node.
+    _policyData.removeWhere((FocusScopeNode scope, _) => scope != nearestScope);
     final _DirectionalPolicyData? policyData = _policyData[nearestScope];
     final newEntry = _DirectionalPolicyDataEntry(node: focusedChild, direction: direction);
     if (policyData != null) {
@@ -1368,7 +1378,8 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   /// policy data for the affected [FocusScopeNode]. If the previous direction
   /// was the opposite of the current direction, then the this policy will
   /// request focus on the previously focused node. Change to another direction
-  /// other than the current one or its opposite will clear the stack.
+  /// other than the current one or its opposite will clear the stack, as will a
+  /// directional move within another [FocusScopeNode].
   ///
   /// If this function returns true when called by a subclass, then the subclass
   /// should return true and not request focus from any node.

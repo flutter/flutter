@@ -499,9 +499,7 @@ void main() {
       final child = FocusNode(debugLabel: 'Child');
       addTearDown(child.dispose);
       final FocusAttachment childAttachment = child.attach(context);
-      outerScopeAttachment.reparent(
-        parent: tester.binding.focusManager.rootScope,
-      );
+      outerScopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
       innerScopeAttachment.reparent(parent: outerScope);
       childAttachment.reparent(parent: innerScope);
 
