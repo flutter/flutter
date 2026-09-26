@@ -1978,8 +1978,32 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         scrollController.position.axis == notificationAxis;
   }
 
+  // Whether the notification was sent by the ScrollView this scrollbar is
+  // attached to.
+  //
+  // Sibling ScrollViews share a scrollbar's notification scope, so without this
+  // check the metrics of an unrelated ScrollView can be applied to this
+  // scrollbar. Returns true when there is not enough information to tell the
+  // scroll views apart, preserving the behavior of the ScrollController-less
+  // and multiple-position cases.
+  bool _isOwnNotification(BuildContext? notificationContext) {
+    final ScrollController? scrollController = _effectiveScrollController;
+    if (scrollController == null ||
+        !scrollController.hasClients ||
+        scrollController.positions.length > 1) {
+      return true;
+    }
+    final BuildContext? positionContext = scrollController.position.context.notificationContext;
+    return notificationContext == null ||
+        positionContext == null ||
+        notificationContext == positionContext;
+  }
+
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
     if (!widget.notificationPredicate(notification.asScrollUpdate())) {
+      return false;
+    }
+    if (!_isOwnNotification(notification.context)) {
       return false;
     }
 
@@ -2008,6 +2032,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (!widget.notificationPredicate(notification)) {
+      return false;
+    }
+    if (!_isOwnNotification(notification.context)) {
       return false;
     }
 
