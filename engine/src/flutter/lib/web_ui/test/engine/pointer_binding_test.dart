@@ -1359,6 +1359,62 @@ void testMain() {
     ui_web.browser.debugOperatingSystemOverride = null;
   });
 
+  test('leaves Control+wheel to the browser outside of macOS', () {
+    final _ButtonedEventMixin context = _PointerEventContext();
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    for (final ui_web.OperatingSystem os in <ui_web.OperatingSystem>[
+      ui_web.OperatingSystem.windows,
+      ui_web.OperatingSystem.linux,
+    ]) {
+      ui_web.browser.debugOperatingSystemOverride = os;
+      packets.clear();
+
+      // A trackpad pinch: the browser sets ctrlKey, but no key is pressed.
+      // The framework receives a scale and the browser must not zoom the page.
+      DomEvent event = context.wheel(
+        buttons: 0,
+        clientX: 10,
+        clientY: 10,
+        deltaX: 0,
+        deltaY: 100,
+        ctrlKey: true,
+      );
+      rootElement.dispatchEvent(event);
+      expect(packets, hasLength(1), reason: '$os');
+      expect(packets[0].data.last.signalKind, equals(ui.PointerSignalKind.scale));
+      expect(event.defaultPrevented, isTrue, reason: '$os');
+
+      // The zoom shortcut: the Control key is physically held down. The event
+      // is left entirely to the browser.
+      keyboardConverter.handleEvent(keyDownEvent('ControlLeft', 'Control', kCtrl));
+      event = context.wheel(
+        buttons: 0,
+        clientX: 10,
+        clientY: 10,
+        deltaX: 0,
+        deltaY: 100,
+        ctrlKey: true,
+      );
+      rootElement.dispatchEvent(event);
+      expect(packets, hasLength(1), reason: '$os');
+      expect(event.defaultPrevented, isFalse, reason: '$os');
+      keyboardConverter.handleEvent(keyUpEvent('ControlLeft', 'Control', kCtrl));
+
+      // Releasing the key brings back normal scrolling.
+      event = context.wheel(buttons: 0, clientX: 10, clientY: 10, deltaX: 0, deltaY: 100);
+      rootElement.dispatchEvent(event);
+      expect(packets, hasLength(2), reason: '$os');
+      expect(packets[1].data.last.signalKind, equals(ui.PointerSignalKind.scroll));
+      expect(event.defaultPrevented, isTrue, reason: '$os');
+    }
+
+    ui_web.browser.debugOperatingSystemOverride = null;
+  });
+
   test('does reverse flip of scroll axis when "shift" key is pressed (macOS)', () {
     final _ButtonedEventMixin context = _PointerEventContext();
     final packets = <ui.PointerDataPacket>[];
