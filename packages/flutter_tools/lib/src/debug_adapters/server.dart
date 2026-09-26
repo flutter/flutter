@@ -8,6 +8,7 @@ import 'package:dap_adapters/dap_adapters.dart' hide DapServer;
 
 import '../base/file_system.dart';
 import '../base/platform.dart';
+import '../cache.dart';
 import 'flutter_adapter.dart';
 import 'flutter_adapter_args.dart';
 import 'flutter_test_adapter.dart';
@@ -25,18 +26,22 @@ class DapServer {
     StreamSink<List<int>> output, {
     required FileSystem fileSystem,
     required Platform platform,
-    this.ipv6 = false,
-    this.enableDds = true,
+    Cache? cache,
     this.enableAuthCodes = true,
-    bool test = false,
+    this.enableDds = true,
+    String? flutterSdkRoot,
+    this.ipv6 = false,
     this.logger,
     void Function(Object? e)? onError,
+    bool test = false,
   }) : channel = ByteStreamServerChannel(input, output, logger) {
     adapter = test
         ? FlutterTestDebugAdapter(
             channel,
             fileSystem: fileSystem,
             platform: platform,
+            cache: cache,
+            flutterSdkRoot: flutterSdkRoot,
             ipv6: ipv6,
             enableFlutterDds: enableDds,
             enableAuthCodes: enableAuthCodes,
@@ -47,6 +52,8 @@ class DapServer {
             channel,
             fileSystem: fileSystem,
             platform: platform,
+            cache: cache,
+            flutterSdkRoot: flutterSdkRoot,
             enableFlutterDds: enableDds,
             enableAuthCodes: enableAuthCodes,
             logger: logger,

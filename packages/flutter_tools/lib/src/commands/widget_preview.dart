@@ -15,11 +15,12 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../context/tool_context.dart';
@@ -46,6 +47,8 @@ import 'create_base.dart';
 
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
@@ -53,6 +56,8 @@ class WidgetPreviewCommand extends FlutterCommand {
   }) {
     addSubcommand(
       WidgetPreviewStartCommand(
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: toolContext,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
         dtdServicesOverride: dtdServicesOverride,
@@ -122,6 +127,8 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
 
 final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with CreateBase {
   WidgetPreviewStartCommand({
+    required this._buildSystem,
+    required this._buildTargets,
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
@@ -203,6 +210,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final bool verbose;
 
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
+
   @override
   WidgetPreviewMachineAwareLogger get logger =>
       toolContext.logger as WidgetPreviewMachineAwareLogger;
@@ -212,8 +222,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   Platform get platform => toolContext.platform;
 
   ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
-
-  OperatingSystemUtils get os => toolContext.os;
 
   ProcessManager get processManager => toolContext.processManager;
 
@@ -328,7 +336,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           organization: 'flutter',
           projectName: kWidgetPreviewScaffoldName,
           titleCaseProjectName: 'Widget Preview Scaffold',
-          flutterRoot: Cache.flutterRoot!,
+          flutterRoot: cache.flutterRoot,
           dartSdkVersionBounds: '^${cache.dartSdkBuild}',
           web: true,
         ),
@@ -574,9 +582,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       final String target = bundle.defaultMainPath;
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
-        target: target,
         buildInfo: debuggingOptions.buildInfo,
-        platform: platform,
+        target: target,
+        toolContext: toolContext,
       );
 
       if (boolArg(kLaunchPreviewer)) {
@@ -584,16 +592,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         final connectionInfo = Completer<DebugConnectionInfo>();
         _widgetPreviewApp = ResidentWebRunner(
           flutterDevice,
+          buildSystem: _buildSystem,
+          buildTargets: _buildTargets,
+          toolContext: toolContext,
           target: target,
           debuggingOptions: debuggingOptions,
           analytics: analytics,
           flutterProject: widgetPreviewScaffoldProject,
-          fileSystem: fs,
-          logger: logger,
-          terminal: terminal,
-          platform: platform,
-          outputPreferences: toolContext.outputPreferences,
-          systemClock: toolContext.systemClock,
           // Explicitly provide the project root path rather than relying on the current directory
           // as the current directory exists within $TMP. At least on MacOS, when setting the
           // current directory to the widget_preview_scaffold project created under
