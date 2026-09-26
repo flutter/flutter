@@ -89,7 +89,6 @@ workspace:
 dependencies:
   _discoveryapis_commons: 1.0.8
   _fe_analyzer_shared: 107.0.0
-  adaptive_breakpoints: 0.1.7
   analyzer: 14.3.0
   animations: 2.2.0
   archive: 3.6.1
@@ -226,4 +225,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: dhbdld
+# PUBSPEC CHECKSUM: t38an0
