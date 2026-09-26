@@ -1047,6 +1047,37 @@ abstract class _CachedLayoutCalculation<Input extends Object, Output> {
   String eventLabel(RenderBox renderBox);
 }
 
+// The maximum number of distinct inputs a single memoized layout computation
+// will remember before evicting older entries. These caches exist so that
+// multiple queries for the *same* input within one layout pass are cheap;
+// they are not meant to remember every input ever seen. Without a bound, a
+// render object whose incoming constraints keep changing from one layout
+// pass to the next (for example because it sits inside a container that is
+// being resized) accumulates one cache entry per distinct constraints value
+// forever - nothing calls markNeedsLayout (which is what clears this cache)
+// on an object just because a parent asked it for a dry layout or intrinsic
+// dimension with different inputs than before.
+//
+// This needs to stay well above the number of distinct inputs a single
+// layout pass can legitimately query - for example, RenderBox shares one
+// cache across all four intrinsic-dimension computations (min/max width,
+// min/max height), and a single pass can reasonably probe a double-digit
+// number of distinct values across those. 128 comfortably covers realistic
+// single-pass usage while still bounding the cache across the lifetime of
+// the render object.
+const int _kMaxCachedLayoutResultsPerComputation = 128;
+
+V _memoizeBounded<K extends Object, V>(Map<K, V> cache, K key, V Function() compute) {
+  final V? cached = cache[key];
+  if (cached != null) {
+    return cached;
+  }
+  if (cache.length >= _kMaxCachedLayoutResultsPerComputation) {
+    cache.clear();
+  }
+  return cache[key] = compute();
+}
+
 final class _DryLayout implements _CachedLayoutCalculation<BoxConstraints, Size> {
   const _DryLayout();
 
@@ -1056,7 +1087,8 @@ final class _DryLayout implements _CachedLayoutCalculation<BoxConstraints, Size>
     BoxConstraints input,
     Size Function(BoxConstraints) computer,
   ) {
-    return (cacheStorage._cachedDryLayoutSizes ??= <BoxConstraints, Size>{}).putIfAbsent(
+    return _memoizeBounded(
+      cacheStorage._cachedDryLayoutSizes ??= <BoxConstraints, Size>{},
       input,
       () => computer(input),
     );
@@ -1090,8 +1122,7 @@ final class _Baseline
       TextBaseline.ideographic =>
         cacheStorage._cachedIdeoBaseline ??= <BoxConstraints, BaselineOffset>{},
     };
-    BaselineOffset ifAbsent() => computer(input);
-    return cache.putIfAbsent(input.$1, ifAbsent);
+    return _memoizeBounded(cache, input.$1, () => computer(input));
   }
 
   @override
@@ -1118,8 +1149,9 @@ enum _IntrinsicDimension implements _CachedLayoutCalculation<double, double> {
 
   @override
   double memoize(_LayoutCacheStorage cacheStorage, double input, double Function(double) computer) {
-    return (cacheStorage._cachedIntrinsicDimensions ??= <(_IntrinsicDimension, double), double>{})
-        .putIfAbsent((this, input), () => computer(input));
+    final Map<(_IntrinsicDimension, double), double> cache =
+        cacheStorage._cachedIntrinsicDimensions ??= <(_IntrinsicDimension, double), double>{};
+    return _memoizeBounded(cache, (this, input), () => computer(input));
   }
 
   @override
