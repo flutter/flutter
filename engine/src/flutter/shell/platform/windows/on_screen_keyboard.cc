@@ -468,9 +468,8 @@ bool OnScreenKeyboardWin::EnsureInputPane(HWND hwnd) {
   session->pane = pane;
 
   auto showing_handler = Callback<InputPaneVisibilityHandler>(
-      [runner = task_runner_, weak = weak_factory_.GetWeakPtr(),
-       view_hwnd = hwnd](IInputPane* /*sender*/,
-                         IInputPaneVisibilityEventArgs* args) {
+    [this, view_hwnd = hwnd](IInputPane* /*sender*/,
+      IInputPaneVisibilityEventArgs* args) {
         DipRect occluded_dip{};
         if (args) {
           Rect occluded{};
@@ -481,40 +480,28 @@ bool OnScreenKeyboardWin::EnsureInputPane(HWND hwnd) {
             occluded_dip.height = occluded.Height;
           }
         }
-        // Capture the coordinate-space conversion with the event. The root
-        // window may move before the marshalled task runs.
-        HWND root = RootWindow(view_hwnd);
+        if (!window_api_->IsWindowValid(view_hwnd)) {
+          return S_OK;
+        }
+        HWND root = window_api_->GetRootWindow(view_hwnd);
         const double scale = static_cast<double>(GetDpiForHWND(root)) /
                              static_cast<double>(kDefaultDpi);
         POINT origin{0, 0};
         ClientToScreen(root, &origin);
-        // InputPane is not agile; marshal before touching engine state.
-        runner->RunNowOrPostTask(
-            [weak, view_hwnd, occluded_dip, scale, origin]() {
-              if (!weak || !weak->window_api_->IsWindowValid(view_hwnd)) {
-                return;
-              }
-              RECT view_client{};
-              if (!weak->window_api_->GetClientScreenRect(view_hwnd,
-                                                          &view_client)) {
-                return;
-              }
-              weak->HandleVisibilityEvent(view_hwnd, true, occluded_dip, scale,
-                                          origin, view_client);
-            });
+        RECT view_client{};
+        if (!window_api_->GetClientScreenRect(view_hwnd, &view_client)) {
+          return S_OK;
+        }
+        HandleVisibilityEvent(view_hwnd, true, occluded_dip, scale, origin,
+                              view_client);
         return S_OK;
       });
   auto hiding_handler = Callback<InputPaneVisibilityHandler>(
-      [runner = task_runner_, weak = weak_factory_.GetWeakPtr()](
-          IInputPane* /*sender*/, IInputPaneVisibilityEventArgs* /*args*/) {
-        runner->RunNowOrPostTask([weak]() {
-          if (!weak) {
-            return;
-          }
-          RECT empty{};
-          weak->HandleVisibilityEvent(nullptr, false, DipRect{}, 1.0,
-                                      POINT{0, 0}, empty);
-        });
+    [this](IInputPane* /*sender*/, IInputPaneVisibilityEventArgs* /*args*/) {[this](IInputPane* /*sender*/,
+      IInputPaneVisibilityEventArgs* /*args*/) {
+ RECT empty{};
+ HandleVisibilityEvent(nullptr, false, DipRect{}, 1.0, POINT{0, 0},
+                       empty);
         return S_OK;
       });
 
