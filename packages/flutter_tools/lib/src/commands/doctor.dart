@@ -15,16 +15,15 @@ class DoctorCommand extends FlutterCommand {
   /// Creates a new [DoctorCommand].
   ///
   /// If [doctor] is omitted, it defaults to [globals.doctor]. If
-  /// [androidLicenseValidator] is omitted, it is lazily resolved from the
+  /// [_androidLicenseValidator] is omitted, it is lazily resolved from the
   /// active context when `--android-licenses` is supplied.
   DoctorCommand({
-    android_workflow.AndroidLicenseValidator? androidLicenseValidator,
+    this._androidLicenseValidator,
     Doctor? doctor,
     this.extensionManager,
     required super.toolContext,
     this.verbose = false,
-  }) : _androidLicenseValidator = androidLicenseValidator,
-       _explicitDoctor = doctor {
+  }) : _explicitDoctor = doctor {
     argParser.addFlag(
       'android-licenses',
       negatable: false,

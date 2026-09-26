@@ -36,8 +36,7 @@ void main(List<String> arguments) {
     )
     ..addFlag(
       'exclusion',
-      help:
-          'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
+      help: 'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
       defaultsTo: true,
     )
     ..addOption(
@@ -330,8 +329,8 @@ buildscript {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "9.1.0" apply false
-    id "org.jetbrains.kotlin.android" version "2.4.0" apply false
+    id "com.android.application" version "9.3.1" apply false
+    id "org.jetbrains.kotlin.android" version "2.4.20" apply false
 }
 
 include ":app"
@@ -427,8 +426,8 @@ buildscript {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "9.1.0" apply false
-    id("org.jetbrains.kotlin.android") version "2.4.0" apply false
+    id("com.android.application") version "9.3.1" apply false
+    id("org.jetbrains.kotlin.android") version "2.4.20" apply false
 }
 
 include(":app")
@@ -439,7 +438,7 @@ distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-9.3.1-all.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.5.0-all.zip
 ''';
 
 Iterable<Directory> discoverAndroidDirectories(Directory repoRoot) {

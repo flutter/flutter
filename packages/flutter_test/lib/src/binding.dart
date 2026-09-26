@@ -307,14 +307,13 @@ mixin _ChildWindowHierarchyMixin {
 
 class _TestWindowController extends WindowController with _ChildWindowHierarchyMixin {
   _TestWindowController({
-    required WindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     Size? size,
     BoxConstraints? constraints,
     String? title,
-  }) : _delegate = delegate,
-       _size = size ?? const Size(800, 600),
+  }) : _size = size ?? const Size(800, 600),
        _constraints = constraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
        super.empty() {
@@ -466,15 +465,14 @@ void _removeChildFromParent(BaseWindowController? parent, BaseWindowController c
 
 class _TestDialogWindowController extends DialogWindowController with _ChildWindowHierarchyMixin {
   _TestDialogWindowController({
-    required DialogWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     BaseWindowController? parent,
     Size? size,
     BoxConstraints? constraints,
     String? title,
-  }) : _delegate = delegate,
-       _parent = parent,
+  }) : _parent = parent,
        _size = size ?? const Size(800, 600),
        _constraints = constraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
@@ -575,18 +573,14 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
 
 class _TestTooltipWindowController extends TooltipWindowController with _ChildWindowHierarchyMixin {
   _TestTooltipWindowController({
-    required TooltipWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
-    required BoxConstraints constraints,
-    required ui.Rect anchorRect,
-    required WindowPositioner positioner,
+    required this._constraints,
+    required this._anchorRect,
+    required this._positioner,
     required BaseWindowController parent,
-  }) : _delegate = delegate,
-       _constraints = constraints,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
-       _parent = parent,
+  }) : _parent = parent,
        super.empty() {
     rootView = _TestFlutterView(
       controller: this,
@@ -646,18 +640,14 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
 
 class _TestPopupWindowController extends PopupWindowController with _ChildWindowHierarchyMixin {
   _TestPopupWindowController({
-    required PopupWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
-    required BoxConstraints constraints,
-    required ui.Rect anchorRect,
-    required WindowPositioner positioner,
+    required this._constraints,
+    required this._anchorRect,
+    required this._positioner,
     required BaseWindowController parent,
-  }) : _delegate = delegate,
-       _constraints = constraints,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
-       _parent = parent,
+  }) : _parent = parent,
        super.empty() {
     rootView = _TestFlutterView(
       controller: this,
@@ -721,21 +711,16 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
 class _TestSatelliteWindowController extends SatelliteWindowController
     with _ChildWindowHierarchyMixin {
   _TestSatelliteWindowController({
-    required SatelliteWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     required BaseWindowController parent,
-    ui.Rect? anchorRect,
-    required WindowPositioner positioner,
+    this._anchorRect,
+    required this._positioner,
     Size? size,
     BoxConstraints? constraints,
     String? title,
-  }) : _delegate = delegate,
-       _parent = parent,
-       // ignore: unused_field
-       _anchorRect = anchorRect,
-       // ignore: unused_field
-       _positioner = positioner,
+  }) : _parent = parent,
        _size = size ?? const Size(800, 600),
        _constraints = constraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
@@ -839,8 +824,7 @@ class _TestSatelliteWindowController extends SatelliteWindowController
 /// for tests.
 /// * [WindowingOwner], the base class.
 class _TestWindowingOwner extends WindowingOwner {
-  _TestWindowingOwner({required TestPlatformDispatcher platformDispatcher})
-    : _platformDispatcher = platformDispatcher;
+  _TestWindowingOwner({required this._platformDispatcher});
 
   final TestPlatformDispatcher _platformDispatcher;
   BaseWindowController? _activeWindowController;
@@ -1166,8 +1150,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     if (buildOwner == null) {
       return;
     }
-    buildOwner!.focusManager
-        .listenToApplicationLifecycleChangesIfSupported(); // ignore: invalid_use_of_visible_for_testing_member
+    buildOwner!.focusManager.listenToApplicationLifecycleChangesIfSupported(); // ignore: invalid_use_of_visible_for_testing_member
   }
 
   @override
@@ -1705,8 +1688,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Called by the [testWidgets] and [benchmarkWidgets] functions to
   /// run a test.
   ///
-  /// The `invariantTester` argument is called after the `testBody`'s [Future]
-  /// completes. If it throws, then the test is marked as failed.
+  /// The `invariantTester` argument is called inside this method immediately
+  /// after the `testBody` completes and the widget tree is unmounted (for
+  /// example, to verify that tickers and semantics handles were disposed).
+  ///
+  /// This should not be confused with framework-level invariant checks (such as
+  /// verifying that debug flags were reset and pending timers disposed) and
+  /// binding state cleanups, which are performed in [postTest] after the
+  /// [Future] returned by this method completes and after any per-test
+  /// `addTearDown` callbacks have executed.
   ///
   /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
   /// show a label on the screen during the test. The description comes from
@@ -1735,8 +1725,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // our main future completing.
       assert(Zone.current == _parentZone);
       if (_pendingExceptionDetails != null) {
-        debugPrint =
-            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(_pendingExceptionDetails!, testDescription);
         _pendingExceptionDetails = null;
       }
@@ -1799,8 +1788,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     var exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
       if (_pendingExceptionDetails != null) {
-        debugPrint =
-            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
         if (exceptionCount == 0) {
           exceptionCount = 2;
           FlutterError.dumpErrorToConsole(_pendingExceptionDetails!, forceReport: true);
@@ -1845,8 +1833,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // However, if someone tries hard enough they could get in a state where this happens.
         // If we silently dropped these errors on the ground, nobody would ever know. So instead
         // we raise them and fail the test after it has already completed.
-        debugPrint =
-            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(
           FlutterErrorDetails(
             exception: exception,
@@ -1964,17 +1951,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(inTest);
     // So that we can assert that it remains the same after the test finishes.
     _beforeTestCheckIntrinsicSizes = debugCheckIntrinsicSizes;
+    _beforeTestAutoUpdateGoldens = autoUpdateGoldenFiles && !isBrowser;
+    _beforeTestReportTestException = reportTestException;
+    _beforeTestErrorWidgetBuilder = ErrorWidget.builder;
+    _beforeTestShouldPropagateDevicePointerEvents = shouldPropagateDevicePointerEvents;
+    _shouldVerifyInvariants = false;
 
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
     // Pretend that the first frame produced in the test body is the first frame
     // sent to the engine.
     resetFirstFrameSent();
-
-    final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles && !isBrowser;
-    final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
-    final ErrorWidgetBuilder errorWidgetBuilderBeforeTest = ErrorWidget.builder;
-    final bool shouldPropagateDevicePointerEventsBeforeTest = shouldPropagateDevicePointerEvents;
 
     // run the test
     await testBody();
@@ -1994,19 +1981,57 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         _testTextInput.unregister();
       }
       invariantTester();
-      _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
-      _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
-      _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
-      _verifyShouldPropagateDevicePointerEventsUnset(shouldPropagateDevicePointerEventsBeforeTest);
-      _verifyInvariants();
+      _verifyPostPumpInvariants();
+      _shouldVerifyInvariants = true;
     }
 
     assert(inTest);
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
   }
 
+  bool _beforeTestAutoUpdateGoldens = false;
+  late TestExceptionReporter _beforeTestReportTestException;
+  late ErrorWidgetBuilder _beforeTestErrorWidgetBuilder;
+  bool _beforeTestShouldPropagateDevicePointerEvents = false;
   late bool _beforeTestCheckIntrinsicSizes;
 
+  // Whether post-test invariant verifications should run in [postTest].
+  //
+  // Set to true only if the test body completed without exceptions and the
+  // widget tree was unmounted. If the test encountered an exception, invariant
+  // checks are skipped to avoid spurious errors (e.g., active animations or
+  // unreset debug flags from aborted tests) from obscuring the real failure.
+  bool _shouldVerifyInvariants = false;
+
+  /// Verifies invariants that must hold immediately after the widget tree is
+  /// unmounted and pumped at the end of the test body, before teardowns run.
+  ///
+  /// This is an exceptional hook called inside `_runTestBody` right after
+  /// the widget tree is replaced with `_postTestMessage` and pumped. Almost all
+  /// invariant checks belong in `_verifyInvariants` instead of here.
+  ///
+  /// Use this method only for rare, specialized checks that strictly depend on
+  /// the immediate synchronous state of the test zone right after the final
+  /// pump (such as asserting that no unflushed microtasks remain in `FakeAsync`).
+  /// Checks placed here cannot be reset or cleaned up by user `addTearDown`
+  /// callbacks.
+  void _verifyPostPumpInvariants() {}
+
+  /// Verifies framework-level invariants after the test body and all user
+  /// `addTearDown` callbacks have finished executing.
+  ///
+  /// This method is called in [postTest] and is the default place for invariant
+  /// verifications. The vast majority of invariants belong here, including
+  /// persistent framework state, global debug flags (such as
+  /// [debugDefaultTargetPlatformOverride] or [timeDilation]), and resources
+  /// (such as pending [Timer]s or active animations). Running these checks in
+  /// [postTest] allows tests to cleanly reset state using `addTearDown`.
+  ///
+  /// See also:
+  ///
+  ///  * `_verifyPostPumpInvariants`, which is used in rare cases where an
+  ///    invariant strictly requires the immediate synchronous state following
+  ///    widget disposal (such as `FakeAsync.microtaskCount` being zero).
   void _verifyInvariants() {
     assert(
       debugAssertNoTransientCallbacks(
@@ -2062,13 +2087,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void _verifyAutoUpdateGoldensUnset(bool valueBeforeTest) {
     assert(() {
       if (autoUpdateGoldenFiles != valueBeforeTest) {
-        FlutterError.reportError(
-          FlutterErrorDetails(
-            exception: FlutterError('The value of autoUpdateGoldenFiles was changed by the test.'),
-            stack: StackTrace.current,
-            library: 'Flutter test framework',
-          ),
-        );
+        throw FlutterError('The value of autoUpdateGoldenFiles was changed by the test.');
       }
       return true;
     }());
@@ -2082,13 +2101,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // So we reset the error reporter to its initial value and then report
         // this error.
         reportTestException = valueBeforeTest;
-        FlutterError.reportError(
-          FlutterErrorDetails(
-            exception: FlutterError('The value of reportTestException was changed by the test.'),
-            stack: StackTrace.current,
-            library: 'Flutter test framework',
-          ),
-        );
+        throw FlutterError('The value of reportTestException was changed by the test.');
       }
       return true;
     }());
@@ -2097,13 +2110,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void _verifyErrorWidgetBuilderUnset(ErrorWidgetBuilder valueBeforeTest) {
     assert(() {
       if (ErrorWidget.builder != valueBeforeTest) {
-        FlutterError.reportError(
-          FlutterErrorDetails(
-            exception: FlutterError('The value of ErrorWidget.builder was changed by the test.'),
-            stack: StackTrace.current,
-            library: 'Flutter test framework',
-          ),
-        );
+        throw FlutterError('The value of ErrorWidget.builder was changed by the test.');
       }
       return true;
     }());
@@ -2112,14 +2119,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void _verifyShouldPropagateDevicePointerEventsUnset(bool valueBeforeTest) {
     assert(() {
       if (shouldPropagateDevicePointerEvents != valueBeforeTest) {
-        FlutterError.reportError(
-          FlutterErrorDetails(
-            exception: FlutterError(
-              'The value of shouldPropagateDevicePointerEvents was changed by the test.',
-            ),
-            stack: StackTrace.current,
-            library: 'Flutter test framework',
-          ),
+        throw FlutterError(
+          'The value of shouldPropagateDevicePointerEvents was changed by the test.',
         );
       }
       return true;
@@ -2157,8 +2158,34 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   /// Called by the [testWidgets] function after a test is executed.
+  ///
+  /// Subclasses that override this method must call `super.postTest()` and must
+  /// not throw exceptions. This method will not throw errors; any invariant
+  /// failures detected during verification are reported via
+  /// [reportTestException].
+  @mustCallSuper
   void postTest() {
     assert(inTest);
+    FlutterErrorDetails? invariantError;
+    if (_shouldVerifyInvariants) {
+      _shouldVerifyInvariants = false;
+      try {
+        _verifyAutoUpdateGoldensUnset(_beforeTestAutoUpdateGoldens && !isBrowser);
+        _verifyReportTestExceptionUnset(_beforeTestReportTestException);
+        _verifyErrorWidgetBuilderUnset(_beforeTestErrorWidgetBuilder);
+        _verifyShouldPropagateDevicePointerEventsUnset(
+          _beforeTestShouldPropagateDevicePointerEvents,
+        );
+        _verifyInvariants();
+      } catch (error, stack) {
+        invariantError = FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          context: ErrorDescription('running invariant verifications after a test'),
+          library: 'Flutter test framework',
+        );
+      }
+    }
     FlutterError.onError = _oldExceptionHandler;
     FlutterError.demangleStackTrace = _oldStackTraceDemangler;
     _pendingExceptionDetails = null;
@@ -2194,6 +2221,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(ServicesBinding.instance == WidgetsBinding.instance);
     // ignore: invalid_use_of_visible_for_testing_member
     ServicesBinding.instance.resetInternalState();
+
+    if (invariantError != null) {
+      reportTestException(invariantError, '');
+    }
   }
 }
 
@@ -2345,7 +2376,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
               },
             ),
           );
-          result.complete(null);
+          result.complete();
         });
       } catch (exception, stack) {
         FlutterError.reportError(
@@ -2359,7 +2390,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             },
           ),
         );
-        result.complete(null);
+        result.complete();
       }
       result.future.whenComplete(() {
         _pendingAsyncTasks!.complete();
@@ -2549,6 +2580,12 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  void _verifyPostPumpInvariants() {
+    super._verifyPostPumpInvariants();
+    assert(_currentFakeAsync!.microtaskCount == 0); // Shouldn't be possible.
+  }
+
+  @override
   void _verifyInvariants() {
     super._verifyInvariants();
 
@@ -2569,7 +2606,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       timersPending = true;
     }
     assert(!timersPending, 'A Timer is still pending even after the widget tree was disposed.');
-    assert(_currentFakeAsync!.microtaskCount == 0); // Shouldn't be possible.
   }
 
   @override

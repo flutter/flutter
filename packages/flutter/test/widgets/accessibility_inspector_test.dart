@@ -59,9 +59,8 @@ void main() {
 
     Future<Map<String, Object?>> callExtension(String name) async {
       return json.decode(
-            json.encode(await accessibilityExtensions[name]!(const <String, String>{})),
-          )
-          as Map<String, Object?>;
+        json.encode(await accessibilityExtensions[name]!(const <String, String>{})),
+      ) as Map<String, Object?>;
     }
 
     // Calling getSemanticsTree before semantics is enabled returns an error.
