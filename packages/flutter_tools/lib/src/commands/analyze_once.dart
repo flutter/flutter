@@ -55,7 +55,7 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
     }
 
-    final errors = <AnalysisError>[];
+    final errorsByFile = <String, List<AnalysisError>>{};
 
     final server = AnalysisServer(
       sdkPath,
@@ -75,7 +75,7 @@ class AnalyzeOnce extends AnalyzeBase {
     Status? progress;
     try {
       void handleAnalysisErrors(FileAnalysisErrors fileErrors) {
-        errors.addAll(fileErrors.errors);
+        errorsByFile[fileErrors.file] = fileErrors.errors;
       }
 
       server.onErrors.listen(handleAnalysisErrors);
@@ -117,6 +117,10 @@ class AnalyzeOnce extends AnalyzeBase {
       progress?.cancel();
       timer?.stop();
     }
+
+    final List<AnalysisError> errors = errorsByFile.values
+        .expand((List<AnalysisError> fileErrors) => fileErrors)
+        .toList();
 
     // emit benchmarks
     if (isBenchmarking) {

@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -72,21 +71,11 @@ HotRunner createHotRunner(
   Terminal? terminal,
   Xcode? xcode,
 }) {
-  final ToolContext(
-    artifacts: contextArtifacts,
-    cache: contextCache,
-    config: contextConfig,
-    fs: contextFs,
-    logger: contextLogger,
-    os: contextOs,
-    outputPreferences: contextOutputPreferences,
-    platform: contextPlatform,
-    processManager: contextProcessManager,
-    terminal: contextTerminal,
-  ) = DelegatingToolContext(
+  final toolContext = DelegatingToolContext(
     artifacts: artifacts,
     cache: cache,
     config: config,
+    flutterVersion: flutterVersion,
     fs: fileSystem,
     logger: logger,
     os: osUtils,
@@ -95,77 +84,62 @@ HotRunner createHotRunner(
     processManager: processManager,
     terminal: terminal as AnsiTerminal?,
   );
+  buildSystem ??= FlutterBuildSystem(
+    fileSystem: toolContext.fs,
+    logger: toolContext.logger,
+    platform: toolContext.platform,
+  );
 
   if (reassembleHelper != null) {
     return HotRunner(
       flutterDevices,
-      debuggingOptions: debuggingOptions,
-      target: target,
-      analytics: analytics,
-      applicationBinary: applicationBinary,
-      artifacts: contextArtifacts,
-      benchmarkMode: benchmarkMode,
       buildSystem: buildSystem,
       buildTargets: buildTargets ?? const BuildTargetsImpl(),
-      cache: contextCache,
+      debuggingOptions: debuggingOptions,
+      target: target,
+      toolContext: toolContext,
+      xcode: xcode,
+      analytics: analytics,
+      applicationBinary: applicationBinary,
+      benchmarkMode: benchmarkMode,
       commandHelp: commandHelp,
-      config: contextConfig,
       dartBuilder: dartBuilder,
       dillOutputPath: dillOutputPath,
-      fileSystem: contextFs,
-      flutterVersion: flutterVersion,
       hostIsIde: hostIsIde,
       hotRunnerConfig: hotRunnerConfig,
-      logger: contextLogger,
       machine: machine,
       nativeAssetsYamlFile: nativeAssetsYamlFile,
-      osUtils: contextOs,
-      outputPreferences: contextOutputPreferences,
-      platform: contextPlatform,
-      processManager: contextProcessManager,
       projectFileInvalidator: projectFileInvalidator,
       projectRootPath: projectRootPath,
       reassembleHelper: reassembleHelper,
       reloadSourcesHelper: reloadSourcesHelper,
       stayResident: stayResident,
       stopwatchFactory: stopwatchFactory,
-      terminal: contextTerminal,
-      xcode: xcode,
     );
   }
   return HotRunner(
     flutterDevices,
-    debuggingOptions: debuggingOptions,
-    target: target,
-    analytics: analytics,
-    applicationBinary: applicationBinary,
-    artifacts: contextArtifacts,
-    benchmarkMode: benchmarkMode,
     buildSystem: buildSystem,
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
-    cache: contextCache,
+    debuggingOptions: debuggingOptions,
+    target: target,
+    toolContext: toolContext,
+    xcode: xcode,
+    analytics: analytics,
+    applicationBinary: applicationBinary,
+    benchmarkMode: benchmarkMode,
     commandHelp: commandHelp,
-    config: contextConfig,
     dartBuilder: dartBuilder,
     dillOutputPath: dillOutputPath,
-    fileSystem: contextFs,
-    flutterVersion: flutterVersion,
     hostIsIde: hostIsIde,
     hotRunnerConfig: hotRunnerConfig,
-    logger: contextLogger,
     machine: machine,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
-    osUtils: contextOs,
-    outputPreferences: contextOutputPreferences,
-    platform: contextPlatform,
-    processManager: contextProcessManager,
     projectFileInvalidator: projectFileInvalidator,
     projectRootPath: projectRootPath,
     reloadSourcesHelper: reloadSourcesHelper,
     stayResident: stayResident,
     stopwatchFactory: stopwatchFactory,
-    terminal: contextTerminal,
-    xcode: xcode,
   );
 }
 

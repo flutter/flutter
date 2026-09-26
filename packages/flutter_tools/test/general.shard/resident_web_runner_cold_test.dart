@@ -7,9 +7,6 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -17,6 +14,7 @@ import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -60,12 +58,12 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        ),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -95,12 +93,12 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        ),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -127,12 +125,12 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        ),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -158,12 +156,12 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        ),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -192,12 +190,12 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        ),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),

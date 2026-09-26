@@ -67,52 +67,44 @@ class DeviceReloadReport {
 class HotRunner extends ResidentRunner {
   HotRunner(
     super.flutterDevices, {
+    required super.buildSystem,
+    required super.buildTargets,
     required super.debuggingOptions,
     required super.target,
+    required super.toolContext,
+    required super.xcode,
     super.analytics,
     this.applicationBinary,
-    super.artifacts,
     this.benchmarkMode = false,
-    super.buildSystem,
-    super.buildTargets,
-    super.cache,
     super.commandHelp,
-    super.config,
     super.dartBuilder,
     super.dillOutputPath,
-    super.fileSystem,
-    super.flutterVersion,
     this.hostIsIde = false,
-    this._hotRunnerConfig,
-    super.logger,
+    HotRunnerConfig? hotRunnerConfig,
     super.machine,
     this._nativeAssetsYamlFile,
-    super.osUtils,
-    super.outputPreferences,
-    super.platform,
-    super.processManager,
-    this._projectFileInvalidator,
+    ProjectFileInvalidator? projectFileInvalidator,
     super.projectRootPath,
     this._reassembleHelper,
     this._reloadSourcesHelper = defaultReloadSourcesHelper,
     super.stayResident,
     this._stopwatchFactory = const StopwatchFactory(),
-    super.terminal,
-    super.xcode,
-  }) : super(hotMode: true);
+  }) : hotRunnerConfig = hotRunnerConfig ?? HotRunnerConfig(),
+       projectFileInvalidator =
+           projectFileInvalidator ??
+           ProjectFileInvalidator(
+             fileSystem: toolContext.fs,
+             platform: toolContext.platform,
+             logger: toolContext.logger,
+           ),
+       super(hotMode: true);
 
   final StopwatchFactory _stopwatchFactory;
   final ReloadSourcesHelper _reloadSourcesHelper;
   final ReassembleHelper? _reassembleHelper;
   final String? _nativeAssetsYamlFile;
-  final ProjectFileInvalidator? _projectFileInvalidator;
-  final HotRunnerConfig? _hotRunnerConfig;
-
-  ProjectFileInvalidator get projectFileInvalidator =>
-      _projectFileInvalidator ??
-      ProjectFileInvalidator(fileSystem: fileSystem, platform: platform, logger: logger);
-
-  HotRunnerConfig get hotRunnerConfig => _hotRunnerConfig ?? HotRunnerConfig();
+  final ProjectFileInvalidator projectFileInvalidator;
+  final HotRunnerConfig hotRunnerConfig;
 
   final bool benchmarkMode;
   final File? applicationBinary;

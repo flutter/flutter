@@ -13,9 +13,7 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../context/tool_context.dart';
@@ -72,11 +70,11 @@ const _kIntegrationTestDirectory = 'integration_test';
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
     required ToolContext toolContext,
-    bool verboseHelp = false,
-    this.testWrapper = const TestWrapper(),
-    FlutterTestRunner? testRunner,
-    this.verbose = false,
     this.nativeAssetsBuilder,
+    FlutterTestRunner? testRunner,
+    this.testWrapper = const TestWrapper(),
+    this.verbose = false,
+    bool verboseHelp = false,
   }) : _toolContext = toolContext,
        _testRunner = testRunner ?? FlutterTestRunner(toolContext: toolContext),
        super(toolContext: toolContext) {
@@ -377,9 +375,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) {
     final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
 
-    final List<Uri> testUris = argResults!.rest
-        .map((String arg) => _parseTestArgument(arg, fs))
-        .toList();
+    final List<Uri> testUris = argResults!.rest.map(_parseTestArgument).toList();
     if (testUris.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like "hit_test.dart" don't get run.
@@ -438,13 +434,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
-      :Artifacts artifacts,
       :FileSystem fs,
       :Logger logger,
-      :OperatingSystemUtils os,
-      :Platform platform,
-      :ProcessManager processManager,
-      :ProcessUtils processUtils,
       :FlutterProjectFactory projectFactory,
       :Stdio stdio,
     ) = _toolContext;
@@ -543,10 +534,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         impellerStatus: debuggingOptions.enableImpeller,
         buildMode: debuggingOptions.buildInfo.mode,
         packageConfigPath: buildInfo.packageConfigPath,
-        fs: fs,
-        processManager: processManager,
-        artifacts: artifacts,
-        logger: logger,
       );
     }
     if (buildTestAssets || nativeAssetsJson != null) {
@@ -815,7 +802,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   /// Parses a test file/directory target passed as an argument and returns it
   /// as an absolute `file:///` [Uri] with optional querystring for name/line/col.
-  Uri _parseTestArgument(String arg, FileSystem fs) {
+  Uri _parseTestArgument(String arg) {
+    final ToolContext(:FileSystem fs, :Platform platform) = _toolContext;
+
     // We can't parse Windows paths as URIs if they have query strings, so
     // parse the file and query parts separately.
     final int queryStart = arg.indexOf('?');
@@ -825,7 +814,16 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     filePart = fs.path.absolute(filePart);
     filePart = fs.path.normalize(filePart);
 
-    return Uri.file(filePart).replace(query: queryPart.isEmpty ? null : queryPart);
+    try {
+      return Uri.file(
+        filePart,
+        windows: platform.isWindows,
+      ).replace(query: queryPart.isEmpty ? null : queryPart);
+    } on ArgumentError catch (e) {
+      throwToolExit('Invalid test path "$arg": ${e.message}');
+    } on FormatException catch (e) {
+      throwToolExit('Invalid test path "$arg": ${e.message}');
+    }
   }
 
   Future<void> _buildTestAsset({
@@ -833,11 +831,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     required ImpellerStatus impellerStatus,
     required BuildMode buildMode,
     required String packageConfigPath,
-    required FileSystem fs,
-    required ProcessManager processManager,
-    required Artifacts artifacts,
-    required Logger logger,
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+    ) = _toolContext;
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
       packageConfigPath: packageConfigPath,
@@ -849,7 +850,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit('Error: Failed to build asset bundle');
     }
     if (_needsRebuild(assetBundle.entries, flavor)) {
-      final Config config = _toolContext.config;
       await writeBundle(
         fs.directory(fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets')),
         assetBundle.entries,

@@ -45,9 +45,10 @@ class FlutterDriverFactory {
     if (web) {
       return WebDriverService(toolContext: _toolContext, dartSdkPath: _dartSdkPath);
     }
+    final ToolContext(:Logger logger, :Platform platform) = _toolContext;
     return FlutterDriverService(
-      logger: _toolContext.logger,
-      platform: _toolContext.platform,
+      logger: logger,
+      platform: platform,
       processUtils: _processUtils,
       dartSdkPath: _dartSdkPath,
       applicationPackageFactory: _applicationPackageFactory,
