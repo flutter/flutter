@@ -152,8 +152,8 @@ TEST_F(ShellTest, AnimatorDoesNotNotifyIdleBeforeRender) {
     ASSERT_FALSE(delegate.notify_idle_called_);
     // Immediately request a frame saying it can reuse the last layer tree to
     // avoid more calls to BeginFrame by the animator.
-    animator->RequestFrame(false);
     task_runners.GetPlatformTaskRunner()->PostTask(flush_vsync_task);
+    animator->RequestFrame(false);
   });
   latch.Wait();
   ASSERT_FALSE(delegate.notify_idle_called_);
@@ -171,8 +171,8 @@ TEST_F(ShellTest, AnimatorDoesNotNotifyIdleBeforeRender) {
         });
         // Request a frame that builds a layer tree and renders a frame.
         // When the frame is rendered, render_latch will be signaled.
-        animator->RequestFrame(true);
         task_runners.GetPlatformTaskRunner()->PostTask(flush_vsync_task);
+        animator->RequestFrame(true);
       },
       // See kNotifyIdleTaskWaitTime in animator.cc.
       fml::TimeDelta::FromMilliseconds(60));
@@ -186,8 +186,8 @@ TEST_F(ShellTest, AnimatorDoesNotNotifyIdleBeforeRender) {
     ASSERT_FALSE(delegate.notify_idle_called_);
     // False to avoid getting cals to BeginFrame that will request more frames
     // before we are ready.
-    animator->RequestFrame(false);
     task_runners.GetPlatformTaskRunner()->PostTask(flush_vsync_task);
+    animator->RequestFrame(false);
   });
   latch.Wait();
 
@@ -250,8 +250,8 @@ TEST_F(ShellTest, AnimatorDoesNotNotifyDelegateIfPipelineIsNotEmpty) {
         animator->Render(kImplicitViewId, std::move(layer_tree), 1.0);
         begin_frame_latch.Signal();
       });
-      animator->RequestFrame();
       task_runners.GetPlatformTaskRunner()->PostTask(flush_vsync_task);
+      animator->RequestFrame();
     });
     begin_frame_latch.Wait();
   }

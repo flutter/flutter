@@ -172,7 +172,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         if (!surface) {
           return false;
         }
-        surface->PresentWithTransaction(surface_frame.submit_info().present_with_transaction);
+        surface->PresentWithTransaction(strong_layer.presentsWithTransaction);
 
         if (clip_rect && clip_rect->IsEmpty()) {
           if (!surface->PreparePresent()) {

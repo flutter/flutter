@@ -28,25 +28,17 @@
 /// A fake compositor that simulates presenting layer surface by increasing
 /// and decreasing IOSurface use count.
 @interface TestCompositor : NSObject {
-  FlutterMetalLayer* _layer;
   IOSurfaceRef _presentedSurface;
 }
+- (void)commitTexture:(id<MTLTexture>)texture;
 @end
 
 @implementation TestCompositor
 
-- (instancetype)initWithLayer:(FlutterMetalLayer*)layer {
-  self = [super init];
-  if (self) {
-    self->_layer = layer;
-  }
-  return self;
-}
-
 /// Increment use count of currently presented surface and decrement use count
 /// of previously presented surface.
-- (void)commitTransaction {
-  IOSurfaceRef surface = (__bridge IOSurfaceRef)self->_layer.contents;
+- (void)commitTexture:(id<MTLTexture>)texture {
+  IOSurfaceRef surface = texture.iosurface;
   if (self->_presentedSurface) {
     IOSurfaceDecrementUseCount(self->_presentedSurface);
   }
@@ -75,6 +67,26 @@
 - (void)removeMetalLayer:(FlutterMetalLayer*)layer {
 }
 
+- (void)testAlwaysPresentsWithTransaction {
+  FlutterMetalLayer* layer = [self addMetalLayer];
+  XCTAssertTrue(layer.presentsWithTransaction);
+
+  layer.presentsWithTransaction = NO;
+  XCTAssertTrue(layer.presentsWithTransaction);
+
+  [self removeMetalLayer:layer];
+}
+
+- (void)testAlwaysComposited {
+  FlutterMetalLayer* layer = [self addMetalLayer];
+  XCTAssertFalse(layer.opaque);
+
+  layer.opaque = YES;
+  XCTAssertFalse(layer.opaque);
+
+  [self removeMetalLayer:layer];
+}
+
 // For unknown reason sometimes CI fails to create IOSurface. Bail out
 // to prevent flakiness.
 #define BAIL_IF_NO_DRAWABLE(drawable)                        \
@@ -85,7 +97,7 @@
 
 - (void)testFlip {
   FlutterMetalLayer* layer = [self addMetalLayer];
-  TestCompositor* compositor = [[TestCompositor alloc] initWithLayer:layer];
+  TestCompositor* compositor = [[TestCompositor alloc] init];
 
   id<MTLTexture> t1, t2, t3;
 
@@ -93,19 +105,19 @@
   BAIL_IF_NO_DRAWABLE(drawable);
   t1 = drawable.texture;
   [drawable present];
-  [compositor commitTransaction];
+  [compositor commitTexture:drawable.texture];
 
   drawable = [layer nextDrawable];
   BAIL_IF_NO_DRAWABLE(drawable);
   t2 = drawable.texture;
   [drawable present];
-  [compositor commitTransaction];
+  [compositor commitTexture:drawable.texture];
 
   drawable = [layer nextDrawable];
   BAIL_IF_NO_DRAWABLE(drawable);
   t3 = drawable.texture;
   [drawable present];
-  [compositor commitTransaction];
+  [compositor commitTexture:drawable.texture];
 
   // If there was no frame drop, layer should return oldest presented
   // texture.
@@ -114,17 +126,17 @@
   XCTAssertEqual(drawable.texture, t1);
 
   [drawable present];
-  [compositor commitTransaction];
+  [compositor commitTexture:drawable.texture];
 
   drawable = [layer nextDrawable];
   XCTAssertEqual(drawable.texture, t2);
   [drawable present];
-  [compositor commitTransaction];
+  [compositor commitTexture:drawable.texture];
 
   drawable = [layer nextDrawable];
   XCTAssertEqual(drawable.texture, t3);
   [drawable present];
-  [compositor commitTransaction];
+  [compositor commitTexture:drawable.texture];
 
   drawable = [layer nextDrawable];
   XCTAssertEqual(drawable.texture, t1);
@@ -135,7 +147,7 @@
 
 - (void)testFlipWithDroppedFrame {
   FlutterMetalLayer* layer = [self addMetalLayer];
-  TestCompositor* compositor = [[TestCompositor alloc] initWithLayer:layer];
+  TestCompositor* compositor = [[TestCompositor alloc] init];
 
   id<MTLTexture> t1, t2, t3;
 
@@ -143,20 +155,20 @@
   BAIL_IF_NO_DRAWABLE(drawable);
   t1 = drawable.texture;
   [drawable present];
-  [compositor commitTransaction];
+  [compositor commitTexture:drawable.texture];
   XCTAssertTrue(IOSurfaceIsInUse(t1.iosurface));
 
   drawable = [layer nextDrawable];
   BAIL_IF_NO_DRAWABLE(drawable);
   t2 = drawable.texture;
   [drawable present];
-  [compositor commitTransaction];
+  [compositor commitTexture:drawable.texture];
 
   drawable = [layer nextDrawable];
   BAIL_IF_NO_DRAWABLE(drawable);
   t3 = drawable.texture;
   [drawable present];
-  [compositor commitTransaction];
+  [compositor commitTexture:drawable.texture];
 
   // Simulate compositor holding on to t3 for a while.
   IOSurfaceIncrementUseCount(t3.iosurface);
@@ -172,7 +184,7 @@
   drawable = [layer nextDrawable];
   XCTAssertEqual(drawable.texture, t2);
   [drawable present];
-  [compositor commitTransaction];
+  [compositor commitTexture:drawable.texture];
 
   // Next drawable should be t1, since it was never picked up by compositor.
   drawable = [layer nextDrawable];
@@ -240,7 +252,7 @@
 
 - (void)testTimeout {
   FlutterMetalLayer* layer = [self addMetalLayer];
-  TestCompositor* compositor = [[TestCompositor alloc] initWithLayer:layer];
+  TestCompositor* compositor = [[TestCompositor alloc] init];
 
   id<CAMetalDrawable> drawable = [layer nextDrawable];
   BAIL_IF_NO_DRAWABLE(drawable);
@@ -257,7 +269,7 @@
 
   [(id<FlutterMetalDrawable>)drawable flutterPrepareForPresent:mockCommandBuffer];
   [drawable present];
-  [compositor commitTransaction];
+  [compositor commitTexture:drawable.texture];
 
   // Drawable will not be available until the command buffer completes.
   drawable = [layer nextDrawable];
@@ -276,12 +288,12 @@
   @autoreleasepool {
     FlutterMetalLayer* layer = [self addMetalLayer];
     weakLayer = layer;
-    TestCompositor* compositor = [[TestCompositor alloc] initWithLayer:layer];
+    TestCompositor* compositor = [[TestCompositor alloc] init];
 
     id<CAMetalDrawable> drawable = [layer nextDrawable];
     BAIL_IF_NO_DRAWABLE(drawable);
     [drawable present];
-    [compositor commitTransaction];
+    [compositor commitTexture:drawable.texture];
 
     [self removeMetalLayer:layer];
   }
@@ -296,7 +308,7 @@
 
 - (void)testResizeAndPresent {
   FlutterMetalLayer* layer = [self addMetalLayer];
-  TestCompositor* compositor = [[TestCompositor alloc] initWithLayer:layer];
+  TestCompositor* compositor = [[TestCompositor alloc] init];
 
   id<CAMetalDrawable> oldSizeDrawable1 = [layer nextDrawable];
   BAIL_IF_NO_DRAWABLE(oldSizeDrawable1);
@@ -308,15 +320,15 @@
 
   // After resizing, present the drawables that were allocated using the old size.
   [oldSizeDrawable1 present];
-  [compositor commitTransaction];
+  [compositor commitTexture:oldSizeDrawable1.texture];
   [oldSizeDrawable2 present];
-  [compositor commitTransaction];
+  [compositor commitTexture:oldSizeDrawable2.texture];
 
   // Verify that textures with the old size have been removed from the layer.
   for (int i = 0; i < 4; i++) {
     id<CAMetalDrawable> drawable = [layer nextDrawable];
     [drawable present];
-    [compositor commitTransaction];
+    [compositor commitTexture:drawable.texture];
     XCTAssertEqual(drawable.texture.width, newSize);
   }
 
