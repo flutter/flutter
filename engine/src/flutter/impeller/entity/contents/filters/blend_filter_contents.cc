@@ -116,12 +116,40 @@ static std::optional<Entity> AdvancedBlend(
     return std::nullopt;
   }
 
+  Rect subpass_coverage = coverage;
+  if (entity.GetContents()) {
+    auto coverage_hint = entity.GetContents()->GetCoverageHint();
+
+    if (coverage_hint.has_value()) {
+      auto maybe_subpass_coverage =
+          subpass_coverage.Intersection(*coverage_hint);
+      if (!maybe_subpass_coverage.has_value()) {
+        return std::nullopt;  // Nothing to render.
+      }
+
+      subpass_coverage = *maybe_subpass_coverage;
+    }
+  }
+
+  // The subpass render target has an integral size, so it only covers this
+  // much of |subpass_coverage|. The texture coordinates must describe the same
+  // rect as the quad, which spans the render target: if they describe the
+  // full, fractional coverage instead, the contents are scaled by the ratio
+  // between the two, and that ratio changes from frame to frame for animated
+  // content. Both the allocation and the sampled rect use this one size.
+  const Size render_target_size = subpass_coverage.GetSize().Floor();
+  const Rect render_target_coverage =
+      Rect::MakeOriginSize(subpass_coverage.GetOrigin(), render_target_size);
+  if (render_target_coverage.IsEmpty()) {
+    return std::nullopt;  // Nothing to render.
+  }
+
   auto dst_snapshot =
       inputs[0]->GetSnapshot("AdvancedBlend(Dst)", renderer, entity);
   if (!dst_snapshot.has_value()) {
     return std::nullopt;
   }
-  auto maybe_dst_uvs = dst_snapshot->GetCoverageUVs(coverage);
+  auto maybe_dst_uvs = dst_snapshot->GetCoverageUVs(render_target_coverage);
   if (!maybe_dst_uvs.has_value()) {
     return std::nullopt;
   }
@@ -138,7 +166,7 @@ static std::optional<Entity> AdvancedBlend(
       }
       return Entity::FromSnapshot(dst_snapshot.value(), entity.GetBlendMode());
     }
-    auto maybe_src_uvs = src_snapshot->GetCoverageUVs(coverage);
+    auto maybe_src_uvs = src_snapshot->GetCoverageUVs(render_target_coverage);
     if (!maybe_src_uvs.has_value()) {
       if (!dst_snapshot.has_value()) {
         return std::nullopt;
@@ -146,21 +174,6 @@ static std::optional<Entity> AdvancedBlend(
       return Entity::FromSnapshot(dst_snapshot.value(), entity.GetBlendMode());
     }
     src_uvs = maybe_src_uvs.value();
-  }
-
-  Rect subpass_coverage = coverage;
-  if (entity.GetContents()) {
-    auto coverage_hint = entity.GetContents()->GetCoverageHint();
-
-    if (coverage_hint.has_value()) {
-      auto maybe_subpass_coverage =
-          subpass_coverage.Intersection(*coverage_hint);
-      if (!maybe_subpass_coverage.has_value()) {
-        return std::nullopt;  // Nothing to render.
-      }
-
-      subpass_coverage = *maybe_subpass_coverage;
-    }
   }
 
   //----------------------------------------------------------------------------
@@ -226,9 +239,10 @@ static std::optional<Entity> AdvancedBlend(
     auto blend_uniform = data_host_buffer.EmplaceUniform(blend_info);
     FS::BindBlendInfo(pass, blend_uniform);
 
-    frame_info.mvp = pass.GetOrthographicTransform() *
-                     Matrix::MakeTranslation(coverage.GetOrigin() -
-                                             subpass_coverage.GetOrigin());
+    frame_info.mvp =
+        pass.GetOrthographicTransform() *
+        Matrix::MakeTranslation(render_target_coverage.GetOrigin() -
+                                subpass_coverage.GetOrigin());
 
     auto uniform_view = data_host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(pass, uniform_view);
@@ -242,12 +256,12 @@ static std::optional<Entity> AdvancedBlend(
     return std::nullopt;
   }
   fml::StatusOr<RenderTarget> render_target =
-      renderer.MakeSubpass("Advanced Blend Filter",            //
-                           ISize(subpass_coverage.GetSize()),  //
-                           command_buffer,                     //
-                           callback,                           //
-                           /*msaa_enabled=*/false,             //
-                           /*depth_stencil_enabled=*/false     //
+      renderer.MakeSubpass("Advanced Blend Filter",         //
+                           ISize(render_target_size),       //
+                           command_buffer,                  //
+                           callback,                        //
+                           /*msaa_enabled=*/false,          //
+                           /*depth_stencil_enabled=*/false  //
       );
   if (!render_target.ok()) {
     return std::nullopt;
