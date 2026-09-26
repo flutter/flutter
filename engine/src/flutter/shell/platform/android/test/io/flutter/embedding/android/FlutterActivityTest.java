@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.window.BackEvent;
@@ -102,17 +103,26 @@ public class FlutterActivityTest {
 
   @Test
   @SuppressWarnings("deprecation")
-  public void onCreatePreservesLightStatusBarFlag() {
+  public void onCreatePreservesLightSystemBarFlags() {
     Intent intent = FlutterActivity.createDefaultIntent(ctx);
     FlutterActivity activity = Robolectric.buildActivity(FlutterActivity.class, intent).get();
     View decorView = activity.getWindow().getDecorView();
-    decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+    int initialSystemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      initialSystemUiVisibility |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+    }
+    decorView.setSystemUiVisibility(initialSystemUiVisibility);
 
     activity.onCreate(null);
 
     assertEquals(
         View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
         decorView.getSystemUiVisibility() & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      assertEquals(
+          View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+          decorView.getSystemUiVisibility() & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+    }
   }
 
   @Test

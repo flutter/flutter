@@ -820,11 +820,15 @@ public class FlutterActivity extends Activity
       window.setStatusBarColor(0x40000000);
     }
     View decorView = window.getDecorView();
+    int themeSystemUiVisibility = decorView.getSystemUiVisibility();
     int systemUiVisibility = PlatformPlugin.DEFAULT_SYSTEM_UI;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       // Preserve the status bar icon brightness configured by the Android theme.
-      systemUiVisibility |=
-          decorView.getSystemUiVisibility() & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+      systemUiVisibility |= themeSystemUiVisibility & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      // Preserve the navigation bar icon brightness configured by the Android theme.
+      systemUiVisibility |= themeSystemUiVisibility & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
     }
     decorView.setSystemUiVisibility(systemUiVisibility);
   }
