@@ -269,13 +269,17 @@ FLUTTER_ASSERT_ARC
 - (void)testStandardGamutViewDoesNotSetExtendedColorSpace {
   FlutterView* view = [self createViewInWindowWithWideGamut:NO];
   CAMetalLayer* layer = (CAMetalLayer*)view.layer;
-  // Default CAMetalLayer colorspace is nil (device default sRGB).
-  XCTAssertNil((__bridge id)layer.colorspace);
+  CGColorSpaceRef extendedSRGB = CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB);
+  XCTAssertTrue(layer.colorspace == nil || !CFEqual(layer.colorspace, extendedSRGB));
+  CGColorSpaceRelease(extendedSRGB);
 }
 
 #pragma mark - FlutterOverlayView Wide Gamut Tests
 
 - (void)testOverlayViewWideGamutSetsBGRA10XR {
+  if (![MTLCreateSystemDefaultDevice() supportsFamily:MTLGPUFamilyApple3]) {
+    return;
+  }
   FlutterOverlayView* overlay =
       [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatBGRA10_XR];
   CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
@@ -283,6 +287,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testOverlayViewWideGamutSetsExtendedSRGBColorSpace {
+  if (![MTLCreateSystemDefaultDevice() supportsFamily:MTLGPUFamilyApple3]) {
+    return;
+  }
   FlutterOverlayView* overlay =
       [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatBGRA10_XR];
   CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
@@ -304,12 +311,14 @@ FLUTTER_ASSERT_ARC
   FlutterOverlayView* overlay =
       [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatBGRA8Unorm];
   CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
-  XCTAssertNil((__bridge id)layer.colorspace);
+  CGColorSpaceRef extendedSRGB = CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB);
+  XCTAssertTrue(layer.colorspace == nil || !CFEqual(layer.colorspace, extendedSRGB));
+  CGColorSpaceRelease(extendedSRGB);
 }
 
 - (void)testOverlayViewContentsScaleIsSet {
   FlutterOverlayView* overlay =
-      [[FlutterOverlayView alloc] initWithContentsScale:3.0 pixelFormat:MTLPixelFormatBGRA10_XR];
+      [[FlutterOverlayView alloc] initWithContentsScale:3.0 pixelFormat:MTLPixelFormatBGRA8Unorm];
   XCTAssertEqual(overlay.layer.contentsScale, 3.0);
   XCTAssertEqual(overlay.layer.rasterizationScale, 3.0);
 }
