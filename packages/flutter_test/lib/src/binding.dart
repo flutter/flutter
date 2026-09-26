@@ -1763,12 +1763,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
   }
 
+  String _currentTestDescription = '';
+
   Future<void> _runTest(
     Future<void> Function() testBody,
     VoidCallback invariantTester,
     String description,
   ) {
     assert(inTest);
+    _currentTestDescription = description;
 
     // Set the handler only if there is currently none.
     if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(
@@ -2185,6 +2188,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           library: 'Flutter test framework',
         );
       }
+      invariantError ??= _pendingExceptionDetails;
     }
     FlutterError.onError = _oldExceptionHandler;
     FlutterError.demangleStackTrace = _oldStackTraceDemangler;
@@ -2223,8 +2227,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     ServicesBinding.instance.resetInternalState();
 
     if (invariantError != null) {
-      reportTestException(invariantError, '');
+      reportTestException(invariantError, _currentTestDescription);
     }
+    _currentTestDescription = '';
   }
 }
 
