@@ -131,7 +131,7 @@ TEST_F(WindowManagerTest, CreateRegularWindow) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateRegularWindow(
           engine_id(), regular_creation_request());
-  EXPECT_EQ(view_id, 0);
+  EXPECT_EQ(view_id, 1);
 }
 
 TEST_F(WindowManagerTest, GetWindowHandle) {
@@ -356,7 +356,7 @@ TEST_F(WindowManagerTest, CreateModelessDialogWindow) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateDialogWindow(
           engine_id(), &creation_request);
-  EXPECT_EQ(view_id, 0);
+  EXPECT_EQ(view_id, 1);
 }
 
 TEST_F(WindowManagerTest, CreateModalDialogWindow) {
@@ -383,7 +383,7 @@ TEST_F(WindowManagerTest, CreateModalDialogWindow) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateDialogWindow(
           engine_id(), &creation_request);
-  EXPECT_EQ(view_id, 1);
+  EXPECT_EQ(view_id, 2);
 
   const HWND window_handle =
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
@@ -926,7 +926,7 @@ TEST_F(WindowManagerTest, CreateRegularWindowSizedToContent) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateRegularWindow(
           engine_id(), &creation_request);
-  EXPECT_GE(view_id, 0);
+  EXPECT_GE(view_id, 1);
 }
 
 // TODO(team-windows): Fix flakes. See:
@@ -1130,6 +1130,36 @@ TEST_F(WindowManagerTest,
 
   const LONG style = GetWindowLong(window_handle, GWL_STYLE);
   EXPECT_EQ(style & WS_THICKFRAME, 0L);
+}
+
+TEST_F(WindowManagerTest,
+       OnPreEngineRestartDestroysWindowsWithoutDispatchingMessages) {
+  IsolateScope isolate_scope(isolate());
+
+  static bool received_message = false;
+  WindowingInitRequest init_request{
+      .on_message = [](WindowsMessage* message) { received_message = true; }};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const int64_t first_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND first_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), first_view_id);
+  const int64_t second_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND second_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), second_view_id);
+
+  received_message = false;
+  EngineModifier{engine()}.Restart();
+
+  EXPECT_FALSE(received_message);
+  EXPECT_FALSE(IsWindow(first_window_handle));
+  EXPECT_FALSE(IsWindow(second_window_handle));
 }
 
 // Verifies that |OnEngineShutdown| destroys popup windows BEFORE clearing

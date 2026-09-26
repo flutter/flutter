@@ -383,10 +383,15 @@ static void fl_view_present_layers(FlRenderable* renderable,
   FlView* self = FL_VIEW(renderable);
 
 #if !FLUTTER_LINUX_GTK4
+  // Disposal releases the renderer even if the engine still holds the view.
   if (self->renderer != nullptr) {
     fl_view_renderer_present_layers(self->renderer, layers, layers_count);
   }
 #else
+  if (self->cancellable == nullptr ||
+      g_cancellable_is_cancelled(self->cancellable)) {
+    return;
+  }
   // The engine can present its first frame before the GTK widget is realized.
   // The compositor is created during realization, so request a replacement
   // after realization rather than dropping the only frame for a new view.
@@ -581,6 +586,9 @@ static void fl_view_dispose(GObject* object) {
   }
 
   g_clear_object(&self->render_context);
+#if !FLUTTER_LINUX_GTK4
+  g_clear_object(&self->renderer);
+#endif
   g_clear_object(&self->engine);
   g_clear_object(&self->compositor);
   g_clear_pointer(&self->background_color, gdk_rgba_free);
@@ -750,7 +758,7 @@ static void setup_engine(FlView* self) {
           fl_view_renderer_opengl_new(self->engine, self->sized_to_content));
       break;
   }
-
+  g_object_ref_sink(self->renderer);
   self->render_area = GTK_WIDGET(self->renderer);
   gtk_widget_set_hexpand(self->render_area, TRUE);
   gtk_widget_set_vexpand(self->render_area, TRUE);

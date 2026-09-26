@@ -64,7 +64,7 @@ std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
   return impeller::DisplayListToTexture(
       display_list, render_target_size, *context,
       /*reset_host_buffer=*/false,
-      /*generate_mips=*/true, impeller_pixel_format);
+      /*generate_mips=*/false, impeller_pixel_format);
 }
 
 std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(

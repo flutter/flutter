@@ -4316,7 +4316,7 @@ void _testRoute() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-      <sem aria-label="this is a route label"><sem></sem></sem>
+      <sem role="region" aria-label="this is a route label"><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -5305,6 +5305,46 @@ void _testMenus() {
       object.element.getAttribute('aria-owns'),
       'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
     );
+  });
+
+  test('menu sets role="none" on unlabeled intermediate generic and scrollable containers', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.menu,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: 2,
+              flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+              actions: ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
+              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+              children: <SemanticsNodeUpdate>[
+                tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
+                tester.updateNode(id: 4, role: ui.SemanticsRole.menuItem),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject menuObject = tester.getSemanticsObject(0);
+    final SemanticsObject outerGenericObject = tester.getSemanticsObject(1);
+    final SemanticsObject scrollableObject = tester.getSemanticsObject(2);
+    expect(menuObject.element.getAttribute('aria-owns'), 'flt-semantic-node-3 flt-semantic-node-4');
+    expect(outerGenericObject.element.getAttribute('role'), 'none');
+    expect(scrollableObject.element.getAttribute('role'), 'none');
+    semantics().semanticsEnabled = false;
   });
 
   test('nested menus have correct menu item nodes', () {
