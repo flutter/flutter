@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -169,6 +170,48 @@ void main() {
       addTearDown(() async {
         await Future<void>.value();
       });
+    },
+  );
+
+  // Verifies that when an invariant reports an error via [FlutterError.reportError]
+  // (such as an undisposed transient animation callback), [TestWidgetsFlutterBinding.postTest]
+  // captures and forwards it to [reportTestException] with the test description.
+  test(
+    'direct runTest with active transient callback reports exception and description in postTest',
+    () async {
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      final TestExceptionReporter oldReporter = reportTestException;
+      FlutterErrorDetails? reportedDetails;
+      String? reportedDescription;
+      reportTestException = (FlutterErrorDetails details, String testDescription) {
+        reportedDetails = details;
+        reportedDescription = testDescription;
+      };
+      addTearDown(() {
+        reportTestException = oldReporter;
+      });
+
+      Ticker? ticker;
+      await binding.runTest(
+        () async {
+          ticker = Ticker((Duration duration) {})..start();
+        },
+        () {},
+        description: 'sample leaking ticker test',
+      );
+
+      addTearDown(() {
+        ticker?.stop();
+        ticker?.dispose();
+      });
+
+      binding.postTest();
+      expect(reportedDetails, isNotNull);
+      expect(
+        reportedDetails!.exceptionAsString(),
+        contains('An animation is still running even after the widget tree was disposed.'),
+      );
+      expect(reportedDescription, 'sample leaking ticker test');
     },
   );
 }
