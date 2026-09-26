@@ -13,6 +13,15 @@ import io.flutter.Build.API_LEVELS;
  * SeekBar, adds progress action, and handles range info.
  */
 public class SliderRoleConfigurator extends BaseRoleConfigurator {
+  private static AccessibilityNodeInfo.RangeInfo createRangeInfo(
+      int type, float min, float max, float current) {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
+      return AccessibilityNodeInfo.RangeInfo.obtain(type, min, max, current);
+    } else {
+      return new AccessibilityNodeInfo.RangeInfo(type, min, max, current);
+    }
+  }
+
   @Override
   protected void configureRole(
       AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
@@ -49,18 +58,17 @@ public class SliderRoleConfigurator extends BaseRoleConfigurator {
           }
         }
         result.setRangeInfo(
-            AccessibilityNodeInfo.RangeInfo.obtain(
+            createRangeInfo(
                 AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, min, max, parsedValue));
       } catch (NumberFormatException e) {
         if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
           result.setRangeInfo(
-              AccessibilityNodeInfo.RangeInfo.obtain(
+              createRangeInfo(
                   AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INDETERMINATE, 0.0f, 0.0f, 0.0f));
         } else {
           // Fallback to RANGE_TYPE_FLOAT with 0.0.
           result.setRangeInfo(
-              AccessibilityNodeInfo.RangeInfo.obtain(
-                  AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, 0.0f, 0.0f, 0.0f));
+              createRangeInfo(AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, 0.0f, 0.0f, 0.0f));
         }
       }
     }
