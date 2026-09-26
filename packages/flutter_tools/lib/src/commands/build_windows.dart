@@ -12,10 +12,9 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart';
 import '../windows/build_windows.dart';
 import '../windows/visual_studio.dart';
 import 'build.dart';
@@ -25,20 +24,11 @@ class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand({
     required this.buildSystem,
     required ToolContext super.toolContext,
-    required bool verboseHelp,
+    required super.verboseHelp,
     required this._featureFlags,
     required this._visualStudio,
-  }) : super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         verboseHelp: verboseHelp,
-       ) {
-    addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-    usesFlavorOption();
-    argParser.addFlag(
-      'config-only',
-      help: 'Update the project configuration without performing a build.',
-    );
+  }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
+    registerOptionBundles(const <OptionBundle>[DesktopBuildOptionsBundle()]);
   }
 
   final BuildSystem buildSystem;
@@ -66,7 +56,7 @@ class BuildWindowsCommand extends BuildSubCommand {
 
   final VisualStudio _visualStudio;
 
-  bool get configOnly => boolArg('config-only');
+  bool get configOnly => getValue(DesktopBuildOptionsBundle.configOnly);
 
   @override
   Future<FlutterCommandResult> runCommand() async {

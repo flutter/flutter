@@ -856,24 +856,6 @@ abstract class FlutterCommand extends Command<void> {
     BuildInfoOptions.ignoreDeprecation.addTo(argParser, hideOverride: hide);
   }
 
-  /// Adds build options common to all of the desktop build commands.
-  void addCommonDesktopBuildOptions({required bool verboseHelp}) {
-    addBuildModeFlags(verboseHelp: verboseHelp);
-    addBuildPerformanceFile(hide: !verboseHelp);
-    addDartObfuscationOption();
-    addEnableExperimentation(hide: !verboseHelp);
-    addSplitDebugInfoOption();
-    addTreeShakeIconsFlag();
-    usesAnalyzeSizeFlag();
-    usesDartDefineOption();
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    usesPubOption();
-    usesTargetOption();
-    usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    usesBuildNumberOption();
-    usesBuildNameOption();
-  }
-
   /// The build mode that this command will use if no build mode is
   /// explicitly specified.
   ///
