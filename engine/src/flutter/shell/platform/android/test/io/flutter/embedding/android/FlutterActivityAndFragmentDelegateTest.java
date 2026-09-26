@@ -17,14 +17,18 @@ import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.view.View;
 import android.window.BackEvent;
@@ -87,8 +91,25 @@ public class FlutterActivityAndFragmentDelegateTest {
     // being tested.
     mockFlutterEngine = mockFlutterEngine();
 
+    Activity mockActivity = mock(Activity.class);
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    ActivityInfo mockActivityInfo = new ActivityInfo();
+    mockActivityInfo.exported = true;
+    ComponentName mockComponentName = new ComponentName("com.test", "TestActivity");
+    when(mockActivity.getComponentName()).thenReturn(mockComponentName);
+    try {
+      when(mockPackageManager.getActivityInfo(
+              org.mockito.ArgumentMatchers.any(ComponentName.class),
+              org.mockito.ArgumentMatchers.anyInt()))
+          .thenReturn(mockActivityInfo);
+    } catch (PackageManager.NameNotFoundException e) {
+    }
+    when(mockActivity.getPackageManager()).thenReturn(mockPackageManager);
+    when(mockActivity.getPackageName()).thenReturn("com.test");
+
     // Create a mocked Host, which is required by the delegate being tested.
     mockHost = mock(FlutterActivityAndFragmentDelegate.Host.class);
+    when(mockHost.getActivity()).thenReturn(mockActivity);
     when(mockHost.getContext()).thenReturn(ctx);
     when(mockHost.getLifecycle()).thenReturn(mock(Lifecycle.class));
     when(mockHost.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
@@ -106,6 +127,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(mockHost.attachToEngineAutomatically()).thenReturn(true);
 
     mockHost2 = mock(FlutterActivityAndFragmentDelegate.Host.class);
+    when(mockHost2.getActivity()).thenReturn(mockActivity);
     when(mockHost2.getContext()).thenReturn(ctx);
     when(mockHost2.getLifecycle()).thenReturn(mock(Lifecycle.class));
     when(mockHost2.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
@@ -332,6 +354,20 @@ public class FlutterActivityAndFragmentDelegateTest {
     // ---- Test setup ----
     FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
     Activity mockActivity = mock(Activity.class);
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    ActivityInfo mockActivityInfo = new ActivityInfo();
+    mockActivityInfo.exported = true;
+    ComponentName mockComponentName = new ComponentName("com.test", "TestActivity");
+    when(mockActivity.getComponentName()).thenReturn(mockComponentName);
+    try {
+      when(mockPackageManager.getActivityInfo(
+              org.mockito.ArgumentMatchers.any(ComponentName.class),
+              org.mockito.ArgumentMatchers.anyInt()))
+          .thenReturn(mockActivityInfo);
+    } catch (PackageManager.NameNotFoundException e) {
+    }
+    when(mockActivity.getPackageManager()).thenReturn(mockPackageManager);
+    when(mockActivity.getPackageName()).thenReturn("com.test");
     Intent mockIntent = mock(Intent.class);
     when(mockFlutterLoader.findAppBundlePath()).thenReturn("default_flutter_assets/path");
     FlutterInjector.setInstance(
@@ -968,6 +1004,72 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Verify that the navigation channel was given the push route message.
     verify(mockFlutterEngine.getNavigationChannel(), times(1)).pushRouteInformation(expected);
+  }
+
+  @Test
+  public void itSendsPushRouteInformationMessageWhenIntentIsSelfSent() {
+    when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+
+    String expected = "http://myApp/custom/route?query=test";
+    Intent mockIntent = mock(Intent.class);
+    when(mockIntent.getData()).thenReturn(Uri.parse(expected));
+    when(mockHost.getActivity()).thenReturn(mock(Activity.class));
+
+    try (org.mockito.MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(true);
+
+      delegate.onNewIntent(mockIntent);
+
+      verify(mockFlutterEngine.getNavigationChannel(), times(1)).pushRouteInformation(expected);
+    }
+  }
+
+  @Test
+  public void itSendsPushRouteInformationMessageWhenIntentIsValidForDeeplinking() {
+    when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+
+    String expected = "http://myApp/custom/route?query=test";
+    Intent mockIntent = mock(Intent.class);
+    when(mockIntent.getData()).thenReturn(Uri.parse(expected));
+    when(mockHost.getActivity()).thenReturn(mock(Activity.class));
+
+    try (org.mockito.MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      mockedIntentUtils
+          .when(() -> IntentUtils.isIntentValidForDeeplinking(any(), any()))
+          .thenReturn(true);
+
+      delegate.onNewIntent(mockIntent);
+
+      verify(mockFlutterEngine.getNavigationChannel(), times(1)).pushRouteInformation(expected);
+    }
+  }
+
+  @Test
+  public void itDoesNotSendPushRouteInformationMessageWhenIntentIsNotSelfSentAndNotValid() {
+    when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+
+    String expected = "http://myApp/custom/route?query=test";
+    Intent mockIntent = mock(Intent.class);
+    when(mockIntent.getData()).thenReturn(Uri.parse(expected));
+    when(mockHost.getActivity()).thenReturn(mock(Activity.class));
+
+    try (org.mockito.MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      mockedIntentUtils
+          .when(() -> IntentUtils.isIntentValidForDeeplinking(any(), any()))
+          .thenReturn(false);
+
+      delegate.onNewIntent(mockIntent);
+
+      verify(mockFlutterEngine.getNavigationChannel(), never()).pushRouteInformation(expected);
+    }
   }
 
   @Test

@@ -575,7 +575,12 @@ std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
     std::unique_ptr<WindowBindingHandler> window,
     bool is_sized_to_content,
     const BoxConstraints& box_constraints,
+    bool allow_implicit_view,
     FlutterWindowsViewSizingDelegate* sizing_delegate) {
+  if (!allow_implicit_view && next_view_id_ == kImplicitViewId) {
+    ++next_view_id_;
+  }
+
   auto view_id = next_view_id_;
   auto view = std::make_unique<FlutterWindowsView>(
       view_id, this, std::move(window), is_sized_to_content, box_constraints,
@@ -1097,6 +1102,7 @@ void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
 void FlutterWindowsEngine::OnPreEngineRestart() {
   // Reset the keyboard's state on hot restart.
   InitializeKeyboard();
+  window_manager_->OnPreEngineRestart();
 }
 
 std::string FlutterWindowsEngine::GetExecutableName() const {
