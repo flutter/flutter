@@ -525,12 +525,11 @@ void main() {
             color: const Color(0xFFFFFFFF),
             onGenerateRoute: (RouteSettings settings) {
               return PageRouteBuilder<void>(
-                pageBuilder:
-                    (
-                      BuildContext context,
-                      Animation<double> animation,
-                      Animation<double> secondaryAnimation,
-                    ) => const SizedBox(),
+                pageBuilder: (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) => const SizedBox(),
               );
             },
           ),
@@ -540,22 +539,20 @@ void main() {
         Navigator.of(context)
           ..push(
             PageRouteBuilder<void>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => _TestRouteAwareWidget(observer: observer, onEvent: eventsA.add),
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => _TestRouteAwareWidget(observer: observer, onEvent: eventsA.add),
             ),
           )
           ..push(
             PageRouteBuilder<void>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => const Text('Route B', textDirection: TextDirection.ltr),
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => const Text('Route B', textDirection: TextDirection.ltr),
             ),
           );
 
@@ -577,12 +574,11 @@ void main() {
             color: const Color(0xFFFFFFFF),
             onGenerateRoute: (RouteSettings settings) {
               return PageRouteBuilder<void>(
-                pageBuilder:
-                    (
-                      BuildContext context,
-                      Animation<double> animation,
-                      Animation<double> secondaryAnimation,
-                    ) => const SizedBox(),
+                pageBuilder: (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) => const SizedBox(),
               );
             },
           ),
@@ -592,22 +588,20 @@ void main() {
         Navigator.of(context)
           ..push(
             PageRouteBuilder<void>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => _TestRouteAwareWidget(observer: observer, onEvent: eventsA.add),
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => _TestRouteAwareWidget(observer: observer, onEvent: eventsA.add),
             ),
           )
           ..push(
             RawDialogRoute<void>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => const Text('Route B', textDirection: TextDirection.ltr),
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => const Text('Route B', textDirection: TextDirection.ltr),
             ),
           );
 
