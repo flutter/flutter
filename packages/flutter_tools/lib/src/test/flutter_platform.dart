@@ -897,10 +897,10 @@ class _AsyncError {
 /// indicates when the tests have finished.
 @visibleForTesting
 Future<void> pipeHarnessToRemote({
-  required int id,
   required StreamChannel<Object?> harnessChannel,
-  required StreamChannel<String> remoteChannel,
+  required int id,
   required Logger logger,
+  required StreamChannel<String> remoteChannel,
 }) async {
   logger.printTrace('test $id: Waiting for test harness or tests to finish');
 

@@ -1854,7 +1854,15 @@ resolution: workspace
       globals.fs.currentDirectory = package.path;
 
       final fakePackageTest = FakePackageTest();
-      final testCommand = TestCommand(testWrapper: fakePackageTest);
+      final testCommand = TestCommand(
+        toolContext: FakeToolContext(
+          fs: globals.fs,
+          logger: logger,
+          platform: globals.platform,
+          processManager: globals.processManager,
+        ),
+        testWrapper: fakePackageTest,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await expectLater(
