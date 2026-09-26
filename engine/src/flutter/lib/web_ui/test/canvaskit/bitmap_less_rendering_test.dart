@@ -42,11 +42,11 @@ void testMain() {
       final ui.Scene scene = builder.build();
       final LayerTree layerTree = (scene as LayerScene).layerTree;
 
-      final rasterizer = OffscreenCanvasRasterizer(
-        (OffscreenCanvasProvider canvasProvider) => CkOffscreenSurface(canvasProvider),
+      final rasterizer = SingleSurfaceRasterizer(
+        (OnscreenCanvasProvider canvasProvider) => CkOnscreenSurface(canvasProvider),
       );
 
-      final OffscreenCanvasViewRasterizer viewRasterizer = rasterizer.createViewRasterizer(
+      final SingleSurfaceViewRasterizer viewRasterizer = rasterizer.createViewRasterizer(
         EnginePlatformDispatcher.instance.implicitView!,
       );
       await viewRasterizer.draw(layerTree, null);

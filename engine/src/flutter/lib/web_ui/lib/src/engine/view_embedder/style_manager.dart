@@ -39,8 +39,6 @@ class StyleManager {
 
   static void styleSceneHost(DomElement sceneHost, {bool debugShowSemanticsNodes = false}) {
     assert(sceneHost.tagName.toLowerCase() == DomManager.sceneHostTagName.toLowerCase());
-    // Don't allow the scene to receive pointer events.
-    sceneHost.style.pointerEvents = 'none';
     // When debugging semantics, make the scene semi-transparent so that the
     // semantics tree is more prominent.
     if (debugShowSemanticsNodes) {
