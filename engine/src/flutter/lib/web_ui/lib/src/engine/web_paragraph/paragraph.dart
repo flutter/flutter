@@ -1473,10 +1473,11 @@ class ChildStyleNode extends StyleNode {
   @override
   double? get _wordSpacing => style.wordSpacing ?? parent._wordSpacing;
 
+  // Preserve `style.height` as-is (including `ui.kTextHeightNone`) so a child
+  // span can explicitly override a non-null parent height and disable the
+  // height multiplier during layout.
   @override
-  double? get _height {
-    return style.height == ui.kTextHeightNone ? null : (style.height ?? parent._height);
-  }
+  double? get _height => style.height ?? parent._height;
 
   @override
   ui.TextLeadingDistribution? get _leadingDistribution =>

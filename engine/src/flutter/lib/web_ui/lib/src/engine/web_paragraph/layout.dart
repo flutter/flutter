@@ -417,13 +417,26 @@ class TextLayout {
       line.updateBoundingBox(ellipsisBlock);
     }
 
-    // Now when we calculated all line metrics we have to correct placeholders that depend on it
+    // First pass: calculate each placeholder's ascent/descent and update the line's
+    // bounding box, since a taller placeholder can increase `line.fontBoundingBoxAscent`.
     for (final LineBlock block in line.visualBlocks) {
       if (block is! PlaceholderBlock) {
         continue;
       }
       block.calculatePlaceholderTop(line.fontBoundingBoxAscent, line.fontBoundingBoxDescent);
       line.updateBoundingBox(block);
+    }
+    // Second pass: now that `line.fontBoundingBoxAscent` is finalized across all blocks,
+    // compute the vertical position (`advance.top`) for each PlaceholderBlock relative to the line.
+    for (final LineBlock block in line.visualBlocks) {
+      if (block is PlaceholderBlock) {
+        block.advance = ui.Rect.fromLTWH(
+          block.spanShiftFromLineStart,
+          line.fontBoundingBoxAscent - block.ascent,
+          block.span.width,
+          block.span.height,
+        );
+      }
     }
 
     line.advance = ui.Rect.fromLTWH(
@@ -547,13 +560,20 @@ class TextLayout {
         double left, right, top, bottom;
         switch (boxHeightStyle) {
           case ui.BoxHeightStyle.tight:
-            top =
-                firstRect.top +
-                line.advance.top +
-                line.fontBoundingBoxAscent -
-                block.multipliedFontBoundingBoxAscent;
-            bottom = top + block.multipliedHeight;
-            assert((block.multipliedHeight - (bottom - top).abs() < epsilon));
+            if (block is PlaceholderBlock) {
+              // For PlaceholderBlock, `firstRect` is `block.advance`, which already has
+              // `top = line.fontBoundingBoxAscent - block.ascent` relative to the line.
+              top = firstRect.top + line.advance.top;
+              bottom = top + block.span.height;
+            } else {
+              top =
+                  firstRect.top +
+                  line.advance.top +
+                  line.fontBoundingBoxAscent -
+                  block.multipliedFontBoundingBoxAscent;
+              bottom = top + block.multipliedHeight;
+              assert((block.multipliedHeight - (bottom - top).abs() < epsilon));
+            }
           case ui.BoxHeightStyle.max:
             top = line.advance.top;
             bottom = line.advance.bottom;
@@ -1077,7 +1097,9 @@ abstract class LineBlock {
     this.textRange,
     this.shiftFromLineStart,
   ) {
-    if (span.style.height == null) {
+    // When height is null or kTextHeightNone, disable the height multiplier
+    // and use the font's raw ascent and descent directly.
+    if (span.style.height == null || span.style.height == ui.kTextHeightNone) {
       _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent;
       _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent;
       return;
@@ -1258,10 +1280,6 @@ class PlaceholderBlock extends LineBlock {
         ascent = lineAscent - diff;
         descent = lineDescent - diff;
     }
-    final double top = lineAscent - ascent;
-    // The advance needs to be calculated relative to the line. In order to do that, we need to start
-    // from the span's own advance within the line.
-    advance = ui.Rect.fromLTWH(spanShiftFromLineStart, top, span.width, span.height);
   }
 
   // TODO(jlavrova): Why are we using separate properties instead of `rawFontBoundingBoxAscent` and `rawFontBoundingBoxDescent`?

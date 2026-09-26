@@ -429,4 +429,37 @@ Future<void> testMain() async {
     expect(span3.start, 25);
     expect(span3.end, 25 + 1);
   });
+
+  test('WebTextStyle with kTextHeightNone overrides parent height', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 10, height: 2.0);
+    final textStyle = WebTextStyle(height: kTextHeightNone);
+
+    final WebTextStyle mergedStyle = paragraphStyle.textStyle.mergeWith(textStyle);
+    expect(mergedStyle.height, kTextHeightNone);
+
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(textStyle);
+    builder.addText('Hello');
+    final WebParagraph paragraph = builder.build();
+    expect((paragraph.spans.single as TextSpan).style.height, kTextHeightNone);
+  });
+
+  test('WebStrutStyle with kTextHeightNone does not apply height multiplier', () {
+    final strutStyleWithHeight = WebStrutStyle(fontSize: 10, fontFamily: 'Arial', height: 2.0);
+    strutStyleWithHeight.calculateMetrics();
+
+    final strutStyleWithNone = WebStrutStyle(
+      fontSize: 10,
+      fontFamily: 'Arial',
+      height: kTextHeightNone,
+    );
+    strutStyleWithNone.calculateMetrics();
+
+    final strutStyleDefault = WebStrutStyle(fontSize: 10, fontFamily: 'Arial');
+    strutStyleDefault.calculateMetrics();
+
+    expect(strutStyleWithNone.strutAscent, strutStyleDefault.strutAscent);
+    expect(strutStyleWithNone.strutDescent, strutStyleDefault.strutDescent);
+    expect(strutStyleWithNone.strutAscent, isNot(strutStyleWithHeight.strutAscent));
+  });
 }
