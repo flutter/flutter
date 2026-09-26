@@ -32,6 +32,19 @@ Shader::UniformBinding::GetMemberMetadata(const std::string& name) const {
   return &(*result);
 }
 
+const impeller::ShaderStructMemberMetadata*
+Shader::PushConstantBinding::GetMemberMetadata(const std::string& name) const {
+  auto result =
+      std::find_if(metadata.members.begin(), metadata.members.end(),
+                   [&name](const impeller::ShaderStructMemberMetadata& member) {
+                     return member.name == name;
+                   });
+  if (result == metadata.members.end()) {
+    return nullptr;
+  }
+  return &(*result);
+}
+
 IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, Shader);
 
 Shader::Shader() = default;
@@ -47,7 +60,8 @@ fml::RefPtr<Shader> Shader::Make(
     std::vector<impeller::ShaderStageBufferLayout> layouts,
     std::unordered_map<std::string, UniformBinding> uniform_structs,
     std::unordered_map<std::string, TextureBinding> uniform_textures,
-    std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts) {
+    std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts,
+    std::optional<PushConstantBinding> push_constants) {
   auto shader = fml::MakeRefCounted<Shader>();
   shader->library_id_ = std::move(library_id);
   shader->entrypoint_ = std::move(entrypoint);
@@ -58,6 +72,7 @@ fml::RefPtr<Shader> Shader::Make(
   shader->uniform_structs_ = std::move(uniform_structs);
   shader->uniform_textures_ = std::move(uniform_textures);
   shader->descriptor_set_layouts_ = std::move(descriptor_set_layouts);
+  shader->push_constants_ = std::move(push_constants);
   shader->RebuildBindingOrder();
   return shader;
 }
@@ -111,6 +126,7 @@ void Shader::ResetFrom(Shader& other) {
   uniform_structs_ = std::move(other.uniform_structs_);
   uniform_textures_ = std::move(other.uniform_textures_);
   descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
+  push_constants_ = std::move(other.push_constants_);
   RebuildBindingOrder();
   if (code_changed) {
     is_dirty_ = true;
@@ -155,6 +171,10 @@ std::shared_ptr<impeller::VertexDescriptor> Shader::CreateVertexDescriptor()
   auto vertex_descriptor = std::make_shared<impeller::VertexDescriptor>();
   vertex_descriptor->SetStageInputs(inputs_, layouts_);
   return vertex_descriptor;
+}
+
+const Shader::PushConstantBinding* Shader::GetPushConstantBlock() const {
+  return push_constants_.has_value() ? &push_constants_.value() : nullptr;
 }
 
 const std::vector<impeller::ShaderStageIOSlot>& Shader::GetStageInputs() const {
@@ -296,6 +316,32 @@ int InternalFlutterGpu_Shader_GetUniformMemberOffset(
 
   auto member_name = tonic::StdStringFromDart(member_name_handle);
   const auto* member = uniform->GetMemberMetadata(member_name);
+  if (member == nullptr) {
+    return -1;
+  }
+
+  return member->offset;
+}
+
+int InternalFlutterGpu_Shader_GetPushConstantSize(
+    flutter::gpu::Shader* wrapper) {
+  const auto* block = wrapper->GetPushConstantBlock();
+  if (block == nullptr) {
+    return -1;
+  }
+  return block->slot.size_in_bytes;
+}
+
+int InternalFlutterGpu_Shader_GetPushConstantMemberOffset(
+    flutter::gpu::Shader* wrapper,
+    Dart_Handle member_name_handle) {
+  const auto* block = wrapper->GetPushConstantBlock();
+  if (block == nullptr) {
+    return -1;
+  }
+
+  auto member_name = tonic::StdStringFromDart(member_name_handle);
+  const auto* member = block->GetMemberMetadata(member_name);
   if (member == nullptr) {
     return -1;
   }

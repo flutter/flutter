@@ -50,6 +50,35 @@ Future<void> canReflectUniformStructs() async {
   assert(colorOffset! == 64);
 }
 
+@pragma('vm:entry-point')
+Future<void> canReflectPushConstants() async {
+  final gpu.RenderPipeline pipeline = await createPushConstantsRenderPipeline();
+
+  assert(pipeline.vertexShader.pushConstantSizeInBytes == 80);
+  assert(pipeline.vertexShader.getPushConstantMemberOffsetInBytes('color') == 0);
+  assert(pipeline.vertexShader.getPushConstantMemberOffsetInBytes('mvp') == 16);
+  assert(pipeline.vertexShader.getPushConstantMemberOffsetInBytes('nope') == null);
+
+  // Both stages declare the same block, so both report it.
+  assert(pipeline.fragmentShader.pushConstantSizeInBytes == 80);
+
+  // A shader without a block reports null rather than zero.
+  final gpu.RenderPipeline unlit = await createUnlitRenderPipeline();
+  assert(unlit.vertexShader.pushConstantSizeInBytes == null);
+
+  assert(gpu.gpuContext.maxPushConstantSizeInBytes >= 80);
+}
+
+Future<gpu.RenderPipeline> createPushConstantsRenderPipeline() async {
+  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('playground');
+  assert(library != null);
+  final gpu.Shader? vertex = library!['PushConstantsVertex'];
+  assert(vertex != null);
+  final gpu.Shader? fragment = library['PushConstantsFragment'];
+  assert(fragment != null);
+  return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
+}
+
 Future<gpu.RenderPipeline> createUnlitRenderPipeline() async {
   final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('playground');
   assert(library != null);
@@ -58,6 +87,47 @@ Future<gpu.RenderPipeline> createUnlitRenderPipeline() async {
   final gpu.Shader? fragment = library['UnlitFragment'];
   assert(fragment != null);
   return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
+}
+
+@pragma('vm:entry-point')
+Future<void> canDrawWithPushConstants(int width, int height) async {
+  final gpu.Texture renderTexture = gpu.gpuContext.createTexture(
+    gpu.StorageMode.devicePrivate,
+    width,
+    height,
+  );
+
+  final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+  final renderTarget = gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: renderTexture));
+  final gpu.RenderPass encoder = commandBuffer.createRenderPass(renderTarget);
+
+  final gpu.RenderPipeline pipeline = await createPushConstantsRenderPipeline();
+  encoder.bindPipeline(pipeline);
+
+  final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+  final gpu.BufferView vertices = transients.emplace(
+    float32(<double>[
+      -0.5, 0.5, //
+      0.0, -0.5, //
+      0.5, 0.5, //
+    ]),
+  );
+  encoder.bindVertexBuffer(vertices);
+
+  encoder.setPushConstants(
+    float32(<double>[
+      0, 1, 0, 1, // color
+      1, 0, 0, 0, // mvp
+      0, 1, 0, 0, // mvp
+      0, 0, 1, 0, // mvp
+      0, 0, 0, 1, // mvp
+    ]),
+  );
+  encoder.draw(3);
+
+  commandBuffer.submit();
+
+  setDisplayTexture(renderTexture);
 }
 
 ByteData float32(List<double> values) {
