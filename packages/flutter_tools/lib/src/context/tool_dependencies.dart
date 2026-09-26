@@ -109,6 +109,7 @@ class ToolDependencies {
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidStudio? androidStudio,
+    Artifacts? artifacts,
     BotDetector? botDetector,
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
@@ -362,14 +363,16 @@ class ToolDependencies {
         cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
 
     // Artifacts will be updated later if a local engine is used.
-    final finalArtifacts = DeferredArtifacts(
-      CachedArtifacts(
-        fileSystem: finalFS,
-        cache: finalCache,
-        platform: finalPlatform,
-        operatingSystemUtils: finalOS,
-      ),
-    );
+    final Artifacts finalArtifacts =
+        artifacts ??
+        DeferredArtifacts(
+          CachedArtifacts(
+            fileSystem: finalFS,
+            cache: finalCache,
+            platform: finalPlatform,
+            operatingSystemUtils: finalOS,
+          ),
+        );
 
     final XCDevice finalXCDevice =
         xcdevice ??
