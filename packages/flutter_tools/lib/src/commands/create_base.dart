@@ -372,10 +372,10 @@ mixin CreateBase on FlutterCommand {
     bool implementationTests = false,
   }) {
     final FlutterVersion flutterVersion = _context.flutterVersion;
-    final String pluginDartClass = _createPluginClassName(projectName);
-    final pluginClass = pluginDartClass.endsWith('Plugin')
-        ? pluginDartClass
-        : '${pluginDartClass}Plugin';
+    final String projectNameUpperCamelCase = _createPluginClassName(projectName);
+    final pluginClass = projectNameUpperCamelCase.endsWith('Plugin')
+        ? projectNameUpperCamelCase
+        : '${projectNameUpperCamelCase}Plugin';
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase = pluginClassSnakeCase.toUpperCase();
     final String pluginClassLowerCamelCase =
@@ -390,8 +390,11 @@ mixin CreateBase on FlutterCommand {
     return <String, Object?>{
       'organization': organization,
       'projectName': projectName,
+      'projectNameUpperCamelCase': projectNameUpperCamelCase,
+      'projectNameCapitalSnakeCase': projectName.toUpperCase(),
       'titleCaseProjectName': titleCaseProjectName,
       'androidIdentifier': androidIdentifier,
+      'androidIdentifierPosixPath': androidIdentifier.replaceAll('.', '/'),
       'iosIdentifier': appleIdentifier,
       'macosIdentifier': appleIdentifier,
       'darwinIdentifier': appleIdentifier,
@@ -405,7 +408,7 @@ mixin CreateBase on FlutterCommand {
       'pluginClassSnakeCase': pluginClassSnakeCase,
       'pluginClassLowerCamelCase': pluginClassLowerCamelCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
-      'pluginDartClass': pluginDartClass,
+      'pluginDartClass': projectNameUpperCamelCase,
       'pluginProjectUUID': const Uuid().v4().toUpperCase(),
       'withFfi': withFfiPluginHook || withFfiPackage,
       'withFfiPackage': withFfiPackage,
@@ -414,6 +417,7 @@ mixin CreateBase on FlutterCommand {
       'withSwiftPackageManager': withSwiftPackageManager,
       'withPluginHook': withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook,
       'withEmptyMain': withEmptyMain,
+      'withJava': androidLanguage == 'java',
       'androidLanguage': androidLanguage,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
       'iosDevelopmentTeam': iosDevelopmentTeam ?? '',

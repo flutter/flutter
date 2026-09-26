@@ -86,6 +86,32 @@ parenting, presentation, size requests, maximize, and fullscreen through their
 GTK4 equivalents. GTK4 tooltip and popup controllers use `GtkPopover` for
 parent-relative placement instead of GTK3 `GdkWindow` positioning.
 
+### Native Visual Selection
+
+GTK3 uses `GdkScreen` and `GdkVisual` to select an RGBA visual before a window
+is realized. This enables translucent windows on composited X11 desktops.
+The GTK3 path in `fl_linux_windowing.cc` preserves this upstream behavior.
+Window creation now performs this selection in the engine, so the Dart
+`_GdkScreen` and `_GdkVisual` wrappers are redundant and have been removed.
+
+GTK4 removed these types and `gtk_widget_set_visual`; GTK4 manages surface
+formats internally. The native helper calls the visual-selection APIs only
+when built for GTK3. Their removal from Dart does not remove GTK3's RGBA
+visual selection or establish GTK4 transparency parity.
+
+GTK4 transparency instead uses a transparent CSS background and alpha-bearing
+rendered content. Its [migration guide](https://docs.gtk.org/gtk4/migrating-3to4.html#stop-using-gtk-widget-set-app-paintable)
+recommends CSS in place of `gtk_widget_set_app_paintable`. Flutter must preserve
+alpha through its render path as well as configure the GTK background; the
+current unsupported `setAppPaintable` operation does not imply that GTK4 itself
+cannot render transparent windows.
+
+PRs changing Linux windowing should state this compatibility boundary.
+Public windowing APIs should describe the desired transparency capability,
+with backend-specific availability, rather than require `GdkScreen`,
+`GdkVisual`, or explicit visual selection. Requiring those GTK3 mechanisms
+would tie applications to APIs that are unavailable in GTK4.
+
 ### Upstream API Recommendations
 
 These limitations are candidates for improving the experimental windowing API

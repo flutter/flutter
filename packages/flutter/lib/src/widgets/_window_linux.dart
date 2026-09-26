@@ -18,6 +18,7 @@ import 'dart:convert';
 import 'dart:ffi' as ffi;
 import 'dart:io';
 import 'dart:ui' show Display, FlutterView;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -393,9 +394,8 @@ abstract mixin class BaseWindowControllerLinux {
     if (_LinuxWindowing.gtkMajorVersion >= 4) {
       throw UnsupportedError('GTK4 does not support gtk_window_begin_move_drag.');
     }
-    _GtkWindow.fromInstance(
-      windowHandle.cast(),
-    ).beginMoveDrag(button: button, rootX: rootX, rootY: rootY, timestamp: timestamp);
+    _GtkWindow.fromInstance(windowHandle.cast())
+        .beginMoveDrag(button: button, rootX: rootX, rootY: rootY, timestamp: timestamp);
   }
 
   /// Starts an interactive resize in response to a pointer button press.
@@ -1357,6 +1357,9 @@ final class _LinuxWindowingWindow {
   final int viewId;
 }
 
+// Native window creation selects GTK3's RGBA visual before realization in
+// fl_linux_windowing.cc. GdkScreen and GdkVisual therefore need no Dart wrappers;
+// GTK4 removed these APIs and manages its surface formats internally.
 class _LinuxWindowing {
   static int get gtkMajorVersion => _getGtkMajorVersion();
 
@@ -1646,10 +1649,10 @@ String? _nativeToString(ffi.Pointer<ffi.Uint8> value) {
 
 /// Wraps GObject.
 class _GObject {
-  /// Creates a wrapper to an existing [GObject] in [instance].
+  /// Creates a wrapper to an existing GObject in [instance].
   const _GObject(this.instance);
 
-  /// The pointer to the underlying [GObject].
+  /// The pointer to the underlying GObject.
   final ffi.Pointer<ffi.NativeType> instance;
 
   /// Drop reference to this object.
@@ -1663,7 +1666,7 @@ class _GObject {
 
 /// Wraps GtkContainer.
 class _GtkContainer extends _GtkWidget {
-  /// Creates a wrapper to an existing [GtkContainer] in [instance].
+  /// Creates a wrapper to an existing GtkContainer in [instance].
   const _GtkContainer(super.instance);
 
   /// Adds [child] widget to this container.
@@ -1682,7 +1685,7 @@ class _GtkContainer extends _GtkWidget {
 
 /// Wraps GtkWidget.
 class _GtkWidget extends _GObject {
-  /// Creates a wrapper to an existing [GtkWidget] in [instance].
+  /// Creates a wrapper to an existing GtkWidget in [instance].
   const _GtkWidget(super.instance);
 
   /// Creates the GDK resources associated with a widget.
@@ -1848,9 +1851,8 @@ class _GtkPopover extends _GtkWidget {
   }
 
   void setPointingTo(Rect rect) {
-    final ffi.Pointer<_GdkRectangle> nativeRect = _gMalloc0(
-      ffi.sizeOf<_GdkRectangle>(),
-    ).cast<_GdkRectangle>();
+    final ffi.Pointer<_GdkRectangle> nativeRect = _gMalloc0(ffi.sizeOf<_GdkRectangle>())
+        .cast<_GdkRectangle>();
     nativeRect.ref
       ..x = rect.left.round()
       ..y = rect.top.round()
@@ -1923,7 +1925,7 @@ class _GtkPopover extends _GtkWidget {
 
 /// Wraps GdkWindow.
 class _GdkWindow extends _GObject {
-  /// Creates a wrapper to an existing [GdkWindow] in [instance].
+  /// Creates a wrapper to an existing GdkWindow in [instance].
   const _GdkWindow(super.instance);
 
   /// Gets the window state.
@@ -1951,9 +1953,8 @@ class _GdkWindow extends _GObject {
     int rectAnchorDx = 0,
     int rectAnchorDy = 0,
   }) {
-    final ffi.Pointer<_GdkRectangle> rect = _gMalloc0(
-      ffi.sizeOf<_GdkRectangle>(),
-    ).cast<_GdkRectangle>();
+    final ffi.Pointer<_GdkRectangle> rect = _gMalloc0(ffi.sizeOf<_GdkRectangle>())
+        .cast<_GdkRectangle>();
     final _GdkRectangle r = rect.ref;
     r.x = x;
     r.y = y;
@@ -2133,9 +2134,8 @@ class _GtkWindow extends _GtkContainer {
       _gtkWidgetSetSizeRequest(instance, minWidth ?? -1, minHeight ?? -1);
       return;
     }
-    final ffi.Pointer<_GdkGeometry> geometry = _gMalloc0(
-      ffi.sizeOf<_GdkGeometry>(),
-    ).cast<_GdkGeometry>();
+    final ffi.Pointer<_GdkGeometry> geometry = _gMalloc0(ffi.sizeOf<_GdkGeometry>())
+        .cast<_GdkGeometry>();
     final _GdkGeometry g = geometry.ref;
     var geometryMask = 0;
     if (minWidth != null || minHeight != null) {

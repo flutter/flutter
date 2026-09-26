@@ -145,6 +145,21 @@ class IMockGLESImpl {
                                       const GLchar* uniformBlockName) {
     return 0;
   }
+  virtual GLuint CreateShader(GLenum type) { return 0; }
+  virtual GLuint CreateProgram() { return 0; }
+  virtual void GetShaderiv(GLuint shader, GLenum pname, GLint* params) {}
+  virtual void ActiveTexture(GLenum texture) {}
+  virtual void Uniform1i(GLint location, GLint v0) {}
+  virtual void GetActiveUniform(GLuint program,
+                                GLuint index,
+                                GLsizei bufSize,
+                                GLsizei* length,
+                                GLint* size,
+                                GLenum* type,
+                                GLchar* name) {}
+  virtual GLint GetUniformLocation(GLuint program, const GLchar* name) {
+    return -1;
+  }
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -349,6 +364,28 @@ class MockGLESImpl : public IMockGLESImpl {
               GetUniformBlockIndex,
               (GLuint program, const GLchar* uniformBlockName),
               (override));
+  MOCK_METHOD(GLuint, CreateShader, (GLenum type), (override));
+  MOCK_METHOD(GLuint, CreateProgram, (), (override));
+  MOCK_METHOD(void,
+              GetShaderiv,
+              (GLuint shader, GLenum pname, GLint* params),
+              (override));
+  MOCK_METHOD(void, ActiveTexture, (GLenum texture), (override));
+  MOCK_METHOD(void, Uniform1i, (GLint location, GLint v0), (override));
+  MOCK_METHOD(void,
+              GetActiveUniform,
+              (GLuint program,
+               GLuint index,
+               GLsizei bufSize,
+               GLsizei* length,
+               GLint* size,
+               GLenum* type,
+               GLchar* name),
+              (override));
+  MOCK_METHOD(GLint,
+              GetUniformLocation,
+              (GLuint program, const GLchar* name),
+              (override));
 };
 
 /// @brief      Provides a mocked version of the |ProcTableGLES| class.
@@ -364,7 +401,8 @@ class MockGLES final {
   static std::shared_ptr<MockGLES> Init(
       std::unique_ptr<MockGLESImpl> impl,
       const std::optional<std::vector<const char*>>& extensions = std::nullopt,
-      const char* version_string = "OpenGL ES 3.0");
+      const char* version_string = "OpenGL ES 3.0",
+      const char* renderer_string = "");
 
   /// @brief      Returns an initialized |MockGLES| instance.
   ///
@@ -374,7 +412,8 @@ class MockGLES final {
   static std::shared_ptr<MockGLES> Init(
       const std::optional<std::vector<const char*>>& extensions = std::nullopt,
       const char* version_string = "OpenGL ES 3.0",
-      ProcTableGLES::Resolver resolver = kMockResolverGLES);
+      ProcTableGLES::Resolver resolver = kMockResolverGLES,
+      const char* renderer_string = "");
 
   /// @brief      Returns a configured |ProcTableGLES| instance.
   const ProcTableGLES& GetProcTable() const { return proc_table_; }

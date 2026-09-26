@@ -31,6 +31,20 @@ TEST_F(FlViewGtk4AccessibilityTest, PresentBeforeRealizeDoesNotWarn) {
       static_cast<GLogLevelFlags>(G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL)));
 }
 
+TEST_F(FlViewGtk4AccessibilityTest,
+       PresentLayersAfterDisposeDoesNotRequestFrame) {
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  g_object_run_dispose(G_OBJECT(view));
+
+  flutter::testing::fl_reset_received_gtk_log_levels();
+  fl_renderable_present_layers(FL_RENDERABLE(view), nullptr, 0);
+
+  EXPECT_FALSE(view->needs_frame_after_realize);
+  EXPECT_FALSE(flutter::testing::fl_has_received_gtk_log_level(
+      static_cast<GLogLevelFlags>(G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL)));
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
