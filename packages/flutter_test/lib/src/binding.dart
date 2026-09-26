@@ -1530,7 +1530,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [dispatchEvent].
   ///
   /// When [handlePointerEvent] is called directly, [pointerEventSource]
-  /// is [TestBindingEventSource.device].
+  /// is [TestBindingEventSource.device]. During dispatch, this may instead
+  /// temporarily reflect the source that started the pointer's lifecycle.
   ///
   /// This means that pointer events triggered by the [WidgetController] (e.g.
   /// via [WidgetController.tap]) will result in actual interactions with the
@@ -2939,11 +2940,15 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.test], then
   /// the event is forwarded to [GestureBinding.dispatchEvent] as usual;
-  /// additionally, down pointers are painted on the screen.
+  /// additionally, down pointers are painted on the screen. Events for an
+  /// existing pointer are dispatched using the source that handled its down
+  /// event, even when the current event was scheduled outside that source's
+  /// scope.
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.device], then
   /// the event, after being transformed to the local coordinate system, is
-  /// forwarded to [deviceEventDispatcher].
+  /// forwarded to [deviceEventDispatcher], unless
+  /// [shouldPropagateDevicePointerEvents] is true.
   @override
   void handlePointerEvent(PointerEvent event) {
     if (_testZone != null) {
@@ -2953,7 +2958,34 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     }
   }
 
+  // Keep the source from the down event because later events can be delivered
+  // after the source's synchronous scope has ended. In particular,
+  // GestureBinding.cancelPointer schedules its cancel in a microtask.
+  final Map<int, TestBindingEventSource> _pointerEventSourceForPointer =
+      <int, TestBindingEventSource>{};
+
   void _handlePointerEvent(PointerEvent event) {
+    if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
+      _pointerEventSourceForPointer[event.pointer] = pointerEventSource;
+    }
+    final TestBindingEventSource? originSource = _pointerEventSourceForPointer[event.pointer];
+    final bool pointerDisengaged =
+        event is PointerUpEvent ||
+        event is PointerCancelEvent ||
+        event is PointerRemovedEvent ||
+        event is PointerPanZoomEndEvent;
+
+    if (pointerDisengaged) {
+      _pointerEventSourceForPointer.remove(event.pointer);
+    }
+    if (originSource != null && originSource != pointerEventSource) {
+      withPointerEventSource(originSource, () => _dispatchPointerEvent(event));
+    } else {
+      _dispatchPointerEvent(event);
+    }
+  }
+
+  void _dispatchPointerEvent(PointerEvent event) {
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
         RenderView? target;
@@ -3109,6 +3141,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void postTest() {
+    _pointerEventSourceForPointer.clear();
     super.postTest();
     assert(!_expectingFrame);
     assert(_pendingFrame == null);
