@@ -8,7 +8,7 @@ import static android.os.Looper.getMainLooper;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.shadows.ShadowLooper.shadowOf;
 
 import android.app.Presentation;
 import android.content.Context;
