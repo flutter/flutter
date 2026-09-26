@@ -6037,6 +6037,53 @@ class Expanded extends Flexible {
   const Expanded({super.key, super.flex, required super.child}) : super(fit: FlexFit.tight);
 }
 
+/// A widget that its [Row], [Column] or [Flex] parent ignores when placing
+/// [Flex.spacing] between children, if [excluding] is true.
+///
+/// When [excluding] is true, the [child] is still laid out, painted and hit
+/// tested as usual, but the parent places no spacing before or after it, and
+/// does not count it when distributing free space according to
+/// [MainAxisAlignment.spaceBetween], [MainAxisAlignment.spaceAround] or
+/// [MainAxisAlignment.spaceEvenly]. This is typically used with a child that
+/// takes no space, so that the remaining children are laid out as if it were
+/// not in the list of children.
+///
+/// Whether the child is excluded does not depend on its size, so a child that
+/// animates to a zero size keeps its spacing unless [excluding] is true.
+///
+/// This widget must be a direct child of the [Row], [Column] or [Flex], or the
+/// child of a [Flexible] or [Expanded] that is. It has no effect elsewhere.
+///
+/// See also:
+///
+///  * [Visibility.excludeFromSpacing], which uses this widget to hide a child
+///    as if it were not in the list of children.
+///  * [RenderExcludeFromSpacing], the render object for this widget.
+class ExcludeFromSpacing extends SingleChildRenderObjectWidget {
+  /// Creates a widget that may be excluded from its parent's spacing.
+  const ExcludeFromSpacing({super.key, this.excluding = true, super.child});
+
+  /// Whether the parent [Row], [Column] or [Flex] places no spacing around
+  /// this widget.
+  final bool excluding;
+
+  @override
+  RenderExcludeFromSpacing createRenderObject(BuildContext context) {
+    return RenderExcludeFromSpacing(excluding: excluding);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderExcludeFromSpacing renderObject) {
+    renderObject.excluding = excluding;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('excluding', excluding));
+  }
+}
+
 /// A widget that displays its children in multiple horizontal or vertical runs.
 ///
 /// A [Wrap] lays out each child and attempts to place the child adjacent to the
