@@ -4,6 +4,8 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 
+#include <algorithm>
+#include <cmath>
 #include <utility>
 
 #include "flutter/fml/logging.h"
@@ -104,11 +106,169 @@ void AccessibilityBridge::AccessibilityObjectDidLoseFocus(int32_t id) {
   }
 }
 
+namespace {
+
+// Keys into UIKit's accessibility strings, so scroll announcements match native
+// scroll views in every language iOS supports. The keys are undocumented, so
+// each has an English fallback.
+//
+// TODO(LouiseHsu): Have the framework supply these strings instead, removing
+// the dependency on undocumented keys.
+// https://github.com/flutter/flutter/issues/189285
+constexpr char kUIKitAccessibilityBundleId[] = "com.apple.UIKit.axbundle";
+constexpr char kUIKitAccessibilityTable[] = "Accessibility";
+constexpr char kScrollPageStatusKey[] = "scroll.page.summary";
+constexpr char kScrollRowStatusKey[] = "table.scrollbypage.status";
+constexpr char kScrollPageStatusFallback[] = "page %1$@ of %2$@";
+constexpr char kScrollRowStatusFallback[] = "rows %1$@ to %2$@ of %3$@";
+
+// UIKit's accessibility strings bundle, or nil if not loaded yet. iOS loads it
+// when VoiceOver starts, so only a successful lookup is cached.
+NSBundle* UIKitAccessibilityBundle() {
+  static NSBundle* bundle = nil;
+  if (!bundle) {
+    bundle = [NSBundle bundleWithIdentifier:@(kUIKitAccessibilityBundleId)];
+  }
+  return bundle;
+}
+
+// Formats `value` with the current locale's digits.
+NSString* LocalizedCount(int64_t value) {
+  return [NSNumberFormatter localizedStringFromNumber:@(value)
+                                          numberStyle:NSNumberFormatterDecimalStyle];
+}
+
+// Replaces %1$@, %2$@, ... in `format` with `arguments`, or returns nil if a
+// placeholder is left over. Avoids +stringWithFormat: because `format` comes
+// from a system file and could have more specifiers than arguments.
+NSString* SubstitutePositionalArguments(NSString* format, NSArray<NSString*>* arguments) {
+  NSMutableString* result = [format mutableCopy];
+  for (NSUInteger i = 0; i < arguments.count; ++i) {
+    NSString* token = [NSString stringWithFormat:@"%%%lu$@", static_cast<unsigned long>(i + 1)];
+    [result replaceOccurrencesOfString:token
+                            withString:arguments[i]
+                               options:0
+                                 range:NSMakeRange(0, result.length)];
+  }
+  if ([result rangeOfString:@"$@"].location != NSNotFound ||
+      [result rangeOfString:@"%@"].location != NSNotFound) {
+    return nil;
+  }
+  return result;
+}
+
+// Looks up `key` in UIKit's table and fills in `arguments`, falling back to
+// `fallback_format` if that fails.
+NSString* LocalizedScrollStatus(const char* key,
+                                const char* fallback_format,
+                                NSArray<NSString*>* arguments) {
+  NSString* fallback = @(fallback_format);
+  NSString* format = fallback;
+  if (NSBundle* bundle = UIKitAccessibilityBundle()) {
+    NSString* localized = [bundle localizedStringForKey:@(key)
+                                                  value:fallback
+                                                  table:@(kUIKitAccessibilityTable)];
+    if (localized.length > 0) {
+      format = localized;
+    }
+  }
+  NSString* result = SubstitutePositionalArguments(format, arguments);
+  if (result) {
+    return result;
+  }
+  return SubstitutePositionalArguments(fallback, arguments);
+}
+
+// Computes the numbers to announce for `object`'s scroll position. Builds no
+// strings, so it is cheap enough to run on every frame of a scroll.
+AccessibilityScrollStatus ComputeScrollStatus(SemanticsObject* object) {
+  const flutter::SemanticsNode& node = object.node;
+
+  AccessibilityScrollStatus status;
+  status.uid = object.uid;
+
+  // "rows x to y of z", when the scrollable reports child indexes.
+  if (node.scrollChildren > 0) {
+    // Skip off-screen cache extent rows, which the framework marks hidden.
+    int64_t visible = 0;
+    for (SemanticsObject* child in object.children) {
+      if (!child.node.flags.isHidden) {
+        ++visible;
+      }
+    }
+    int64_t total = node.scrollChildren;
+    int64_t first = std::clamp<int64_t>(node.scrollIndex + 1, 1, total);
+    status.form = AccessibilityScrollStatus::Form::kRows;
+    status.first = first;
+    status.last = std::min(total, first + std::max<int64_t>(visible, 1) - 1);
+    status.total = total;
+    return status;
+  }
+
+  // Otherwise "page x of y", from the scroll extents.
+  double position = node.scrollPosition;
+  double extent_min = node.scrollExtentMin;
+  double extent_max = node.scrollExtentMax;
+  if (std::isnan(position) || std::isnan(extent_max) || !std::isfinite(extent_max)) {
+    // No page count exists for an infinite or unknown extent.
+    return status;
+  }
+  if (std::isnan(extent_min)) {
+    extent_min = 0.0;
+  }
+
+  const bool horizontal = node.HasAction(flutter::SemanticsAction::kScrollLeft) ||
+                          node.HasAction(flutter::SemanticsAction::kScrollRight);
+  const double viewport = horizontal ? node.rect.width() : node.rect.height();
+  if (viewport <= 0.0) {
+    return status;
+  }
+
+  // A partial last screen counts as a page. The tolerance stops floating point
+  // error in the extents from adding a page.
+  constexpr double kPageTolerance = 1e-6;
+  const double range = std::max(extent_max - extent_min, 0.0);
+  int64_t total_pages = std::max<int64_t>(
+      static_cast<int64_t>(std::ceil((range + viewport) / viewport - kPageTolerance)), 1);
+
+  // Map scroll progress onto the pages so the end is always the last page;
+  // `position / viewport` can't reach it unless the content is a whole number
+  // of screens.
+  int64_t current_page = 1;
+  if (range > 0.0 && total_pages > 1) {
+    const double progress = std::clamp((position - extent_min) / range, 0.0, 1.0);
+    current_page = 1 + static_cast<int64_t>(std::round(progress * (total_pages - 1)));
+  }
+  status.form = AccessibilityScrollStatus::Form::kPage;
+  status.first = std::clamp<int64_t>(current_page, 1, total_pages);
+  status.total = total_pages;
+  return status;
+}
+
+// Renders `status` as the string UIAccessibilityPageScrolledNotification
+// expects, or nil if there is nothing accurate to say.
+NSString* FormatScrollStatus(const AccessibilityScrollStatus& status) {
+  switch (status.form) {
+    case AccessibilityScrollStatus::Form::kNone:
+      return nil;
+    case AccessibilityScrollStatus::Form::kRows:
+      return LocalizedScrollStatus(kScrollRowStatusKey, kScrollRowStatusFallback, @[
+        LocalizedCount(status.first), LocalizedCount(status.last), LocalizedCount(status.total)
+      ]);
+    case AccessibilityScrollStatus::Form::kPage:
+      return LocalizedScrollStatus(kScrollPageStatusKey, kScrollPageStatusFallback,
+                                   @[ LocalizedCount(status.first), LocalizedCount(status.total) ]);
+  }
+}
+
+}  // namespace
+
 void AccessibilityBridge::UpdateSemantics(
     flutter::SemanticsNodeUpdates nodes,
     const flutter::CustomAccessibilityActionUpdates& actions) {
   BOOL layoutChanged = NO;
-  BOOL scrollOccured = NO;
+  // The object whose scroll position changed in this update, if any.
+  SemanticsObject* scrolledObject = nil;
   BOOL needsAnnouncement = NO;
   for (const auto& entry : actions) {
     const flutter::CustomAccessibilityAction& action = entry.second;
@@ -124,7 +284,9 @@ void AccessibilityBridge::UpdateSemantics(
     const flutter::SemanticsNode& node = entry.second;
     SemanticsObject* object = GetOrCreateObject(node.id, nodes);
     layoutChanged = layoutChanged || [object nodeWillCauseLayoutChange:&node];
-    scrollOccured = scrollOccured || [object nodeWillCauseScroll:&node];
+    if ([object nodeWillCauseScroll:&node]) {
+      scrolledObject = object;
+    }
     needsAnnouncement = [object nodeShouldTriggerAnnouncement:&node];
     [object setSemanticsNode:&node];
     NSUInteger newChildCountInTraversalOrder = node.childrenInTraversalOrder.size();
@@ -245,6 +407,19 @@ void AccessibilityBridge::UpdateSemantics(
                                                  routeName);
   }
 
+  if (scrolledObject) {
+    // Not an `else` of `layoutChanged`: a scroll moves its children, which
+    // almost always sets `layoutChanged` too.
+    //
+    // A scroll spans many frames, so only announce when the status changes.
+    AccessibilityScrollStatus status = ComputeScrollStatus(scrolledObject);
+    if (status != last_scroll_status_) {
+      last_scroll_status_ = status;
+      ios_delegate_->PostAccessibilityNotification(UIAccessibilityPageScrolledNotification,
+                                                   FormatScrollStatus(status));
+    }
+  }
+
   if (layoutChanged) {
     SemanticsObject* next = FindNextFocusableIfNecessary();
     SemanticsObject* lastFocused = [objects_ objectForKey:@(last_focused_semantics_object_id_)];
@@ -254,13 +429,6 @@ void AccessibilityBridge::UpdateSemantics(
     ios_delegate_->PostAccessibilityNotification(
         UIAccessibilityLayoutChangedNotification,
         (routeChanged || next != lastFocused) ? next.nativeAccessibility : NULL);
-  } else if (scrollOccured) {
-    // TODO(chunhtai): figure out what string to use for notification. At this
-    // point, it is guarantee the previous focused object is still in the tree
-    // so that we don't need to worry about focus lost. (e.g. "Screen 0 of 3")
-    ios_delegate_->PostAccessibilityNotification(
-        UIAccessibilityPageScrolledNotification,
-        FindNextFocusableIfNecessary().nativeAccessibility);
   }
 }
 
@@ -451,6 +619,7 @@ void AccessibilityBridge::clearState() {
   [objects_ removeAllObjects];
   previous_route_id_ = 0;
   previous_routes_.clear();
+  last_scroll_status_ = {};
   view_controller_.viewIfLoaded.accessibilityElements = nil;
 }
 
