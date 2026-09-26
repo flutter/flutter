@@ -57,6 +57,7 @@ void main() {
   late FakeToolContext toolContext;
 
   setUp(() {
+    Cache.flutterRoot = getFlutterRoot();
     fs = MemoryFileSystem.test(
       style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
@@ -1831,6 +1832,42 @@ resolution: workspace
     overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'throws ToolExit when test argument contains Windows reserved characters',
+    () async {
+      final Directory package = globals.fs.directory('package');
+      package.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_pubspecContents);
+      writePackageConfigFiles(
+        directory: package,
+        packages: <String, String>{
+          'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+          'integration_test': 'file:///path/to/flutter/packages/integration_test',
+        },
+        mainLibName: 'my_app',
+        devDependencies: <String>['test_api', 'integration_test'],
+      );
+      globals.fs.currentDirectory = package.path;
+
+      final fakePackageTest = FakePackageTest();
+      final testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await expectLater(
+        () => commandRunner.run(const <String>['test', '--no-pub', r'test\foo*bar_test.dart']),
+        throwsToolExit(
+          message: r'Invalid test path "test\foo*bar_test.dart": Illegal character in path',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     },
   );
 }

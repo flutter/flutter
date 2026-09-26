@@ -825,7 +825,16 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     filePart = fs.path.absolute(filePart);
     filePart = fs.path.normalize(filePart);
 
-    return Uri.file(filePart).replace(query: queryPart.isEmpty ? null : queryPart);
+    try {
+      return Uri.file(
+        filePart,
+        windows: globals.platform.isWindows,
+      ).replace(query: queryPart.isEmpty ? null : queryPart);
+    } on ArgumentError catch (e) {
+      throwToolExit('Invalid test path "$arg": ${e.message}');
+    } on FormatException catch (e) {
+      throwToolExit('Invalid test path "$arg": ${e.message}');
+    }
   }
 
   Future<void> _buildTestAsset({
