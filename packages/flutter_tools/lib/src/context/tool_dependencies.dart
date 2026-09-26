@@ -468,6 +468,7 @@ class ToolDependencies {
           logger: finalLogger,
           processManager: finalProcessManager,
           androidSdk: finalAndroidSdk,
+          operatingSystemUtils: finalOS,
         );
 
     return ToolDependencies(

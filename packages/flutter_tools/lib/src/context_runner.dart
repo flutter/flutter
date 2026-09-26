@@ -218,6 +218,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         fileSystem: globals.fs,
         androidWorkflow: androidWorkflow!,
+        operatingSystemUtils: globals.os,
       ),
       FeatureFlags: () => FlutterFeatureFlags(
         flutterVersion: globals.flutterVersion,
