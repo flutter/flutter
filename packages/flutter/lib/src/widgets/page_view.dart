@@ -442,9 +442,11 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   @override
   void restoreScrollOffset() {
     if (!hasPixels) {
-      final value =
-          PageStorage.maybeOf(context.storageContext)?.readState(context.storageContext) as double?;
-      if (value != null) {
+      final Object? value = PageStorage.maybeOf(
+        context.storageContext,
+      )?.readState(context.storageContext);
+      // Other widgets can save their own state under the same PageStorageKeys.
+      if (value is double) {
         _pageToUseOnStartup = value;
       }
     }
