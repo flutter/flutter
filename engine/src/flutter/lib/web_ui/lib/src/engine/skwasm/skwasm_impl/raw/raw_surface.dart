@@ -61,7 +61,7 @@ external void surfaceDestroy(SurfaceHandle surface);
 )
 external void surfaceSetResourceCacheLimitBytes(SurfaceHandle surface, int bytes);
 
-@Native<Int32 Function(SurfaceHandle, Pointer<PictureHandle>, Int)>(
+@Native<Int32 Function(SurfaceHandle, Pointer<PictureHandle>, Int, Bool)>(
   symbol: 'surface_renderPictures',
   isLeaf: true,
 )
@@ -69,6 +69,7 @@ external CallbackId surfaceRenderPictures(
   SurfaceHandle surface,
   Pointer<PictureHandle> picture,
   int count,
+  bool captureImageBitmaps,
 );
 
 @Native<Int32 Function(SurfaceHandle, ImageHandle, Int)>(

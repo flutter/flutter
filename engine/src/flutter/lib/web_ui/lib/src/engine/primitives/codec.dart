@@ -238,13 +238,17 @@ class _StaticEngineCodec extends EngineCodec {
     if (_disposed) {
       return Future<ui.FrameInfo>.error(StateError('Cannot call getNextFrame() after dispose()'));
     }
+    // Creating a Skwasm image may transfer an ImageBitmap to the raster worker,
+    // which detaches it from the main thread. Capture the dimensions first.
+    final int width = _staticImageSource.width;
+    final int height = _staticImageSource.height;
     // Synchronously instruct the backend renderer to convert the normalized
     // DOM asset into a backend-specific representation (e.g., uploading to a GPU texture).
     final BackendImage backendImage = renderer.createImageFromImageSource(_staticImageSource);
     final ui.Image image = EngineImage(
       backendImage,
-      _staticImageSource.width,
-      _staticImageSource.height,
+      width,
+      height,
       imageSource: _staticImageSource,
     );
     return Future<ui.FrameInfo>.value(AnimatedImageFrameInfo(Duration.zero, image));
