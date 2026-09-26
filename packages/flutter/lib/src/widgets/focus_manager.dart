@@ -1984,15 +1984,17 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     // A node has requested to be the next focus, and isn't already the primary
     // focus.
     if (_markedForFocus != null && _markedForFocus != _primaryFocus) {
-      // The pending node might no longer be able to receive focus.
-      // Find another valid node to focus on. If none is found, use the
-      // current primary focus, or the root scope as a last fallback.
+      // The requested node might no longer be able to receive focus.
+      // Unfocus it to relocate focus to a valid node, keeping the current
+      // primary focus if it is still valid, or the root scope otherwise.
       if (!_markedForFocus!.canRequestFocus) {
         _markedForFocus!.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
+        FocusNode? fallback = _primaryFocus;
+        if (fallback == null || !fallback.canRequestFocus) {
+          fallback = rootScope;
+        }
         if (_markedForFocus == null || !_markedForFocus!.canRequestFocus) {
-          _markedForFocus = _primaryFocus != null && _primaryFocus!.canRequestFocus
-              ? _primaryFocus
-              : rootScope;
+          _markedForFocus = fallback;
         }
       }
       final Set<FocusNode> previousPath = previousFocus?.ancestors.toSet() ?? <FocusNode>{};
