@@ -136,8 +136,7 @@ class SawTooth extends Curve {
 
   @override
   double transformInternal(double t) {
-    t *= count;
-    return t - t.truncateToDouble();
+    return (t * count) % 1.0;
   }
 
   @override
@@ -1265,8 +1264,7 @@ class _DecelerateCurve extends Curve {
     // Intended to match the behavior of:
     // https://android.googlesource.com/platform/frameworks/base/+/main/core/java/android/view/animation/DecelerateInterpolator.java
     // ...as of December 2016.
-    t = 1.0 - t;
-    return 1.0 - t * t;
+    return t * (2 - t);
   }
 }
 

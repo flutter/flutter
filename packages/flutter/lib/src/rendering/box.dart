@@ -807,8 +807,7 @@ class BoxHitTestResult extends HitTestResult {
     required BoxHitTest hitTest,
   }) {
     if (transform != null) {
-      transform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
-      if (transform == null) {
+      if (Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform)) == null) {
         // Objects are not visible on screen and cannot be hit-tested.
         return false;
       }

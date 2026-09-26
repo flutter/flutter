@@ -288,9 +288,12 @@ class RenderWebImage extends RenderShiftedBox {
   Size _sizeForConstraints(BoxConstraints constraints) {
     // Folds the given |width| and |height| into |constraints| so they can all
     // be treated uniformly.
-    constraints = BoxConstraints.tightFor(width: _width, height: _height).enforce(constraints);
+    final BoxConstraints boxConstraints = BoxConstraints.tightFor(
+      width: _width,
+      height: _height,
+    ).enforce(constraints);
 
-    return constraints.constrainSizeAndAttemptToPreserveAspectRatio(
+    return boxConstraints.constrainSizeAndAttemptToPreserveAspectRatio(
       Size(_image.naturalWidth.toDouble(), _image.naturalHeight.toDouble()),
     );
   }
