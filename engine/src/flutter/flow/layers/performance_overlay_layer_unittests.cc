@@ -45,7 +45,6 @@ static std::string GetGoldenFilePath(int refresh_rate, bool is_new) {
 
 static void TestPerformanceOverlayLayerGold(int refresh_rate) {
   std::string golden_file_path = GetGoldenFilePath(refresh_rate, false);
-  std::string new_golden_file_path = GetGoldenFilePath(refresh_rate, true);
 
   FixedRefreshRateStopwatch mock_stopwatch(
       fml::RefreshRateToFrameBudget(refresh_rate));
@@ -107,6 +106,7 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
 #else
   const bool golden_data_matches = golden_data->equals(snapshot_data.get());
   if (!golden_data_matches) {
+    std::string new_golden_file_path = GetGoldenFilePath(refresh_rate, true);
     SkFILEWStream wstream(new_golden_file_path.c_str());
     wstream.write(snapshot_data->data(), snapshot_data->size());
     wstream.flush();

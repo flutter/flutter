@@ -41,6 +41,9 @@ class SemanticsHelper {
       : MobileSemanticsEnabler();
 
   @visibleForTesting
+  SemanticsEnabler get semanticsEnabler => _semanticsEnabler;
+
+  @visibleForTesting
   set semanticsEnabler(SemanticsEnabler semanticsEnabler) {
     _semanticsEnabler = semanticsEnabler;
   }
@@ -49,17 +52,26 @@ class SemanticsHelper {
     return _semanticsEnabler.shouldEnableSemantics(event);
   }
 
-  DomElement get accessibilityPlaceholder => _semanticsEnabler.accessibilityPlaceholder;
+  /// Notifies that a Flutter view rooted at [viewRoot] was created, so that a
+  /// placeholder can be put where this form factor needs it.
+  void addPlaceholderForView(DomElement viewRoot) {
+    _semanticsEnabler.addPlaceholderForView(viewRoot);
+  }
+
+  /// Notifies that the Flutter view rooted at [viewRoot] is going away.
+  void removePlaceholderForView(DomElement viewRoot) {
+    _semanticsEnabler.removePlaceholderForView(viewRoot);
+  }
 
   void updatePlaceholderLabel(String message) {
     _semanticsEnabler.updatePlaceholderLabel(message);
   }
 
-  /// Stops waiting for the user to enable semantics and removes the
-  /// placeholder.
+  /// Stops waiting for the user to enable semantics and removes all
+  /// placeholders.
   ///
   /// This is used when semantics is enabled programmatically and therefore the
-  /// placehodler is no longer needed.
+  /// placeholders are no longer needed.
   void dispose() {
     _semanticsEnabler.dispose();
   }
@@ -98,16 +110,101 @@ abstract class SemanticsEnabler {
   /// should be forwarded to the framework.
   bool tryEnableSemantics(DomEvent event);
 
-  /// The placeholder element for enabling accessibility.
+  /// The placeholder each view is using, keyed by the view's root element.
+  ///
+  /// Views that share a host share one placeholder, so several entries can
+  /// point at the same element. See [addPlaceholderForView].
+  final Map<DomElement, DomElement> _placeholderByViewRoot = <DomElement, DomElement>{};
+
+  /// The placeholders that are currently waiting for the user to enable
+  /// accessibility.
+  ///
+  /// One per host, so one for the whole page on desktop and one per view on
+  /// mobile.
+  @visibleForTesting
+  Iterable<DomElement> get placeholders => _placeholderByViewRoot.values.toSet();
+
+  /// The element the placeholder for [viewRoot] is prepended to.
+  ///
+  /// This is the only thing the two form factors disagree on, and they
+  /// disagree for a reason. See [DesktopSemanticsEnabler] and
+  /// [MobileSemanticsEnabler].
+  ///
+  /// Returning null means no placeholder can be placed right now.
+  DomElement? placeholderHostFor(DomElement viewRoot);
+
+  /// Gives the Flutter view rooted at [viewRoot] a placeholder inside
+  /// [placeholderHostFor].
+  ///
+  /// Views that resolve to the same host share one placeholder, because
+  /// enabling semantics is a page-wide setting and a second button would only
+  /// add another stop for the assistive technology user to step over. On
+  /// desktop every view resolves to the body, so the page gets a single
+  /// placeholder no matter how many views it holds.
   ///
   /// On focus the element announces that accessibility can be enabled by
   /// tapping/clicking. (Announcement depends on the assistive technology)
-  late final DomElement accessibilityPlaceholder = _prepareAccessibilityPlaceholder();
+  void addPlaceholderForView(DomElement viewRoot) {
+    if (_placeholderByViewRoot.containsKey(viewRoot)) {
+      // Already registered, so the view either owns a placeholder or is
+      // already sharing one.
+      return;
+    }
+    final DomElement? host = placeholderHostFor(viewRoot);
+    if (host == null) {
+      return;
+    }
+    DomElement? placeholder = _placeholderIn(host);
+    if (placeholder == null) {
+      placeholder = _prepareAccessibilityPlaceholder();
+      // First child, so that whatever else the host holds stays on top of it
+      // and keeps receiving DOM events, platform views in particular. Pointer
+      // events that do land on the placeholder still bubble up to the view
+      // root, where [PointerBinding] listens for them.
+      host.prepend(placeholder);
+    }
+    _placeholderByViewRoot[viewRoot] = placeholder;
+  }
+
+  /// The placeholder already attached to [host], if there is one.
+  DomElement? _placeholderIn(DomElement host) {
+    for (final DomElement placeholder in placeholders) {
+      if (placeholder.parent == host) {
+        return placeholder;
+      }
+    }
+    return null;
+  }
+
+  /// Removes the placeholder [addPlaceholderForView] gave [viewRoot], unless
+  /// another view is still sharing it.
+  void removePlaceholderForView(DomElement viewRoot) {
+    final DomElement? placeholder = _placeholderByViewRoot.remove(viewRoot);
+    if (placeholder != null && !_placeholderByViewRoot.containsValue(placeholder)) {
+      placeholder.remove();
+    }
+  }
+
+  /// Removes every placeholder, so the engine stops waiting for the user to
+  /// enable semantics.
+  ///
+  /// Separate from [dispose] so that the enabler can retire its placeholders
+  /// without destroying itself.
+  void removeAllPlaceholders() {
+    for (final DomElement placeholder in placeholders) {
+      placeholder.remove();
+    }
+    _placeholderByViewRoot.clear();
+  }
 
   DomElement _prepareAccessibilityPlaceholder();
 
-  /// Updates the placeholder's label to the given [message].
-  void updatePlaceholderLabel(String message);
+  /// Updates the label of every placeholder to the given [message].
+  void updatePlaceholderLabel(String message) {
+    for (final DomElement placeholder in placeholders) {
+      placeholder.setAttribute('aria-label', message);
+    }
+  }
 
   /// Whether platform is still considering enabling semantics.
   ///
@@ -115,10 +212,14 @@ abstract class SemanticsEnabler {
   /// they activate the semantics.
   ///
   /// If not they are sent to framework as normal events.
-  bool get isWaitingToEnableSemantics;
+  bool get isWaitingToEnableSemantics => _placeholderByViewRoot.isNotEmpty;
 
-  /// Stops waiting for the user to enable semantics and removes the placeholder.
-  void dispose();
+  /// Releases everything this enabler owns.
+  ///
+  /// Only the owner of the enabler calls this.
+  void dispose() {
+    removeAllPlaceholders();
+  }
 }
 
 /// The desktop semantics enabler uses a simpler strategy compared to mobile.
@@ -131,12 +232,28 @@ abstract class SemanticsEnabler {
 /// and enables semantics.
 @visibleForTesting
 class DesktopSemanticsEnabler extends SemanticsEnabler {
-  /// A temporary placeholder used to capture a request to activate semantics.
-  DomElement? _semanticsPlaceholder;
-
-  /// Whether we are waiting for the user to enable semantics.
+  /// Hosts the placeholder in the document body, never inside the view.
+  ///
+  /// Every view answers with the same host, so the page ends up with one
+  /// shared placeholder rather than one per view. Semantics is enabled for the
+  /// whole engine at once, so a second button would do nothing new and would
+  /// only add another Tab stop ahead of the page content.
+  ///
+  /// It has to be the first thing the user tabs to, because once browser focus
+  /// enters a view, Flutter's own focus traversal can consume Tab and never
+  /// hand it back: a `Navigator` not built by `WidgetsApp` traverses with
+  /// `TraversalEdgeBehavior.parentScope`, which closed-loops within the view,
+  /// reports the key as handled, and the engine then calls `preventDefault`.
+  /// Screen reader users in focus mode reach this button by Tab, so nesting it
+  /// would put it out of reach.
+  ///
+  /// Being 1x1 and offscreen it never covers page content, which is why it can
+  /// live in the body at all. Compare with [MobileSemanticsEnabler], which has
+  /// the opposite constraint.
+  ///
+  /// See https://github.com/flutter/flutter/issues/152838
   @override
-  bool get isWaitingToEnableSemantics => _semanticsPlaceholder != null;
+  DomElement? placeholderHostFor(DomElement viewRoot) => domDocument.body;
 
   @override
   bool tryEnableSemantics(DomEvent event) {
@@ -169,7 +286,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     }
 
     // Check for the event target.
-    final enableConditionPassed = event.target == _semanticsPlaceholder;
+    final bool enableConditionPassed = placeholders.contains(event.target);
 
     if (!enableConditionPassed) {
       // This was not a semantics activating event; forward as normal.
@@ -177,15 +294,13 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     }
 
     EngineSemantics.instance.semanticsEnabled = true;
-    dispose();
+    removeAllPlaceholders();
     return false;
   }
 
   @override
   DomElement _prepareAccessibilityPlaceholder() {
-    final DomElement placeholder = _semanticsPlaceholder = createDomElement(
-      'flt-semantics-placeholder',
-    );
+    final DomElement placeholder = createDomElement('flt-semantics-placeholder');
 
     // Only listen to "click" because other kinds of events are reported via
     // PointerBinding.
@@ -205,11 +320,10 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     placeholder
       ..setAttribute('role', 'button')
       ..setAttribute('aria-live', 'polite')
-      ..setAttribute('tabindex', '0');
+      ..setAttribute('tabindex', '0')
+      ..setAttribute('aria-label', ui_web.accessibilityPlaceholderMessage);
 
-    updatePlaceholderLabel(ui_web.accessibilityPlaceholderMessage);
-
-    // The placeholder sits just outside the window so only AT can reach it.
+    // The placeholder sits just outside the viewport so only AT can reach it.
     placeholder.style
       ..position = 'absolute'
       ..left = '-1px'
@@ -218,24 +332,13 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
       ..height = '1px';
     return placeholder;
   }
-
-  @override
-  void updatePlaceholderLabel(String message) {
-    _semanticsPlaceholder?.setAttribute('aria-label', message);
-  }
-
-  @override
-  void dispose() {
-    _semanticsPlaceholder?.remove();
-    _semanticsPlaceholder = null;
-  }
 }
 
 @visibleForTesting
 class MobileSemanticsEnabler extends SemanticsEnabler {
   /// We do not immediately enable semantics when the user requests it, but
   /// instead wait for a short period of time before doing it. This is because
-  /// the request comes as an event targeted on the [_semanticsPlaceholder].
+  /// the request comes as an event targeted on a placeholder.
   /// This event, depending on the browser, comes as a burst of events.
   /// For example, Safari on IOS sends "touchstart", "touchend", and "click".
   /// So during a short time period we consume all events and prevent forwarding
@@ -245,26 +348,31 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
   @visibleForTesting
   Timer? semanticsActivationTimer;
 
-  /// A temporary placeholder used to capture a request to activate semantics.
-  DomElement? _semanticsPlaceholder;
-
   /// The number of events we processed that could potentially activate
   /// semantics.
   int semanticsActivationAttempts = 0;
 
-  /// Instructs [_tryEnableSemantics] to remove [_semanticsPlaceholder].
+  /// Instructs [tryEnableSemantics] to remove the placeholders.
   ///
-  /// For Blink browser engine the placeholder is removed upon any next event.
+  /// For Blink browser engine the placeholders are removed upon any next event.
   ///
-  /// For Webkit browser engine the placeholder is removed upon the next
+  /// For Webkit browser engine the placeholders are removed upon the next
   /// "touchend" event. This is to prevent Safari from swallowing the event
   /// that happens on an element that's being removed. Blink doesn't have
   /// this issue.
   bool _schedulePlaceholderRemoval = false;
 
-  /// Whether we are waiting for the user to enable semantics.
+  /// Hosts the placeholder inside the view it belongs to.
+  ///
+  /// This placeholder fills its host so that touch exploration can find it
+  /// anywhere in the app, so hosting it in the document body would put it on
+  /// top of the whole page and swallow every tap aimed at the HTML around an
+  /// embedded view. Compare with [DesktopSemanticsEnabler], which has the
+  /// opposite constraint.
+  ///
+  /// See https://github.com/flutter/flutter/issues/152838
   @override
-  bool get isWaitingToEnableSemantics => _semanticsPlaceholder != null;
+  DomElement? placeholderHostFor(DomElement viewRoot) => viewRoot;
 
   @override
   bool tryEnableSemantics(DomEvent event) {
@@ -283,7 +391,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
           event.type == 'pointerup' ||
           event.type == 'click';
       if (removeNow) {
-        dispose();
+        removeAllPlaceholders();
       }
       return true;
     }
@@ -328,7 +436,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
     }
 
     // Look at where exactly (within 1 pixel) the event landed. If it landed
-    // exactly in the middle of the placeholder we interpret it as a signal
+    // exactly in the middle of a placeholder we interpret it as a signal
     // to enable accessibility. This is because when VoiceOver and TalkBack
     // generate a tap it lands it in the middle of the focused element. This
     // method is a bit flawed in that a user's finger could theoretically land
@@ -340,13 +448,15 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
     // than normal, but the app will continue functioning as normal. Our
     // semantics tree is designed to not interfere with Flutter's gesture
     // detection.
-    var enableConditionPassed = false;
     late final DomPoint activationPoint;
 
     switch (event.type) {
       case 'click':
         final click = event as DomMouseEvent;
-        activationPoint = click.offset;
+        // Client coordinates, not offset coordinates. The rects below are
+        // relative to the viewport, and a placeholder no longer starts at the
+        // top-left corner of the page, so the two would not line up.
+        activationPoint = click.client;
       case 'touchstart':
       case 'touchend':
         final touchEvent = event as DomTouchEvent;
@@ -360,23 +470,26 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
         return true;
     }
 
-    final DomRect activatingElementRect = _semanticsPlaceholder!.getBoundingClientRect();
-    final double midX =
-        activatingElementRect.left + (activatingElementRect.right - activatingElementRect.left) / 2;
-    final double midY =
-        activatingElementRect.top + (activatingElementRect.bottom - activatingElementRect.top) / 2;
-    final double deltaX = activationPoint.x.toDouble() - midX;
-    final double deltaY = activationPoint.y.toDouble() - midY;
-    final double deltaSquared = deltaX * deltaX + deltaY * deltaY;
-    if (deltaSquared < 1.0) {
-      enableConditionPassed = true;
-    }
+    final bool enableConditionPassed = placeholders.any((DomElement placeholder) {
+      final DomRect activatingElementRect = placeholder.getBoundingClientRect();
+      final double midX =
+          activatingElementRect.left +
+          (activatingElementRect.right - activatingElementRect.left) / 2;
+      final double midY =
+          activatingElementRect.top +
+          (activatingElementRect.bottom - activatingElementRect.top) / 2;
+      final double deltaX = activationPoint.x.toDouble() - midX;
+      final double deltaY = activationPoint.y.toDouble() - midY;
+      final double deltaSquared = deltaX * deltaX + deltaY * deltaY;
+      return deltaSquared < 1.0;
+    });
 
     if (enableConditionPassed) {
       assert(semanticsActivationTimer == null);
       _schedulePlaceholderRemoval = true;
       semanticsActivationTimer = Timer(_periodToConsumeEvents, () {
-        dispose();
+        semanticsActivationTimer = null;
+        removeAllPlaceholders();
         EngineSemantics.instance.semanticsEnabled = true;
       });
       return false;
@@ -388,9 +501,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
 
   @override
   DomElement _prepareAccessibilityPlaceholder() {
-    final DomElement placeholder = _semanticsPlaceholder = createDomElement(
-      'flt-semantics-placeholder',
-    );
+    final DomElement placeholder = createDomElement('flt-semantics-placeholder');
 
     // Only listen to "click" because other kinds of events are reported via
     // PointerBinding.
@@ -402,8 +513,12 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       true.toJS,
     );
 
-    placeholder.setAttribute('role', 'button');
-    updatePlaceholderLabel(ui_web.accessibilityPlaceholderMessage);
+    placeholder
+      ..setAttribute('role', 'button')
+      ..setAttribute('aria-label', ui_web.accessibilityPlaceholderMessage);
+    // The placeholder covers its view so that the user can find it by touch
+    // exploration anywhere in the app. It must not reach beyond the view, or it
+    // would swallow taps aimed at the HTML content around it.
     placeholder.style
       ..position = 'absolute'
       ..left = '0'
@@ -415,14 +530,9 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
   }
 
   @override
-  void updatePlaceholderLabel(String message) {
-    _semanticsPlaceholder?.setAttribute('aria-label', message);
-  }
-
-  @override
   void dispose() {
-    _semanticsPlaceholder?.remove();
-    _semanticsPlaceholder = null;
+    semanticsActivationTimer?.cancel();
     semanticsActivationTimer = null;
+    super.dispose();
   }
 }

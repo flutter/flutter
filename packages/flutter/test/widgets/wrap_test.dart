@@ -1105,4 +1105,16 @@ void main() {
       wrap.size,
     );
   });
+
+  testWidgets('Wrap does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Wrap(children: <Widget>[Placeholder()])),
+      ),
+    );
+    expect(tester.getSize(find.byType(Wrap)), Size.zero);
+  });
 }

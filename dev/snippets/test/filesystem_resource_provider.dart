@@ -262,6 +262,12 @@ class _PhysicalFolder extends _PhysicalResource implements Folder {
   }
 
   @override
+  File getFile(String relPath) => getChildAssumingFile(relPath);
+
+  @override
+  Folder getFolder(String relPath) => getChildAssumingFolder(relPath);
+
+  @override
   List<Resource> getChildren() {
     try {
       final children = <Resource>[];

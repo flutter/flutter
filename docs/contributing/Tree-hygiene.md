@@ -36,18 +36,16 @@ The general process for submitting code to a Flutter repository is as follows:
    we close the PR without landing it, so other people can take it over.
 
 3. Discuss your design on the issue. See [Design Documents](Design-Documents.md) for advice.
-   You may find it useful to create a Google Doc to
-   solicit feedback (use the template at [flutter.dev/go/template](https://flutter.dev/go/template)).
-   You may wish to e-mail the mailing list, or discuss the topic
-   on our [Chat](Chat.md) channels. The more buy-in you get from the rest of the
+   For larger architectural proposals or breaking changes, follow the [Flutter RFC process](https://github.com/flutter/rfc) (see [RFC 000.0002](https://github.com/flutter/rfc/blob/main/rfc/000.0002-flutter-rfc-review-process.md)).
+   You may wish to discuss the topic on our [Chat](Chat.md) channels. The more buy-in you get from the rest of the
    team (especially the relevant leads), the easier the rest of the process will be.
    You can put the label "proposal" on your issue to indicate that you have a design
    up for discussion in the issue.
 
 4. If the work you are doing affects our privacy surface, such as modifying how
    we collect analytics, crash logs, or the like, then please reach out to a Googler
-   to discuss your changes (you'll want to start a Google Doc to
-   solicit feedback, use the template at [flutter.dev/go/template](https://flutter.dev/go/template)),
+   to discuss your changes (you'll want to start an RFC or design doc to
+   solicit feedback, see [Design Documents](Design-Documents.md)),
    who will be happy to loop in one of our engineers who explicitly focus on privacy issues
    so that they're able to give feedback on the work you plan to do.
 
@@ -511,7 +509,7 @@ In cases where these tests pass but we can nonetheless imagine reasonable scenar
 
 ### 2. Evaluate the breaking change
 
-If your change counts as a breaking change, seriously consider whether it is truly necessary and beneficial. Consider writing a [design document](Design-Documents.md). Discuss it with your code reviewer. Raise it in [Chat](Chat.md).
+If your change counts as a breaking change, seriously consider whether it is truly necessary and beneficial. Per the [RFC Threshold](https://github.com/flutter/rfc/blob/main/rfc/000.0002-flutter-rfc-review-process.md#when-to-write-an-rfc-the-threshold), breaking changes require a full design doc (RFC) in the [flutter/rfc](https://github.com/flutter/rfc) repository before coding the change. The RFC is categorized under the primary subsystem being changed (e.g. `130` for widgets, `210` for graphics; see [RFC 000.0001](https://github.com/flutter/rfc/blob/main/rfc/000.0001-flutter-architecture-and-reference-taxonomy.md) for taxonomy). Also review our guidance in [Design Documents](Design-Documents.md), discuss it with your code reviewer, and raise it in [Chat](Chat.md).
 
 ### 3. Prepare your change.
 

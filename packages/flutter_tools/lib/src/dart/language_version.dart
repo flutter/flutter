@@ -14,9 +14,6 @@ final _declarationEnd = RegExp('(import)|(library)|(part)');
 const _blockCommentStart = '/*';
 const _blockCommentEnd = '*/';
 
-/// The first language version where null safety was available by default.
-final nullSafeVersion = LanguageVersion(2, 12);
-
 LanguageVersion? _currentLanguageVersion;
 
 /// Lookup the current Dart language version.
