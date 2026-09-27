@@ -1267,7 +1267,7 @@ void main() {
       isA<FlutterError>().having(
         (FlutterError error) => error.toString(),
         'message',
-        allOf(contains('failed to call super.dispose'), contains('before the first await')),
+        allOf(contains('failed to call super.dispose'), contains('not after an await')),
       ),
     );
   });

@@ -1301,9 +1301,11 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// {@macro flutter.widgets.State.initState}
   ///
   /// Implementations of this method should end with a call to the inherited
-  /// method, as in `super.dispose()`. This call must be made synchronously,
-  /// not after an `await`, because the framework checks that it was made as
-  /// soon as this method returns.
+  /// method, as in `super.dispose()`. The framework does not wait for any
+  /// [Future] returned by this method, and checks that `super.dispose()` was
+  /// called as soon as this method returns, so this method should not be
+  /// asynchronous. Asynchronous cleanup can be started, without being awaited,
+  /// before calling `super.dispose()`.
   ///
   /// ## Caveats
   ///
@@ -6059,8 +6061,9 @@ class StatefulElement extends ComponentElement {
           'that all the resources used by the widget are fully released.',
         ),
         ErrorHint(
-          'super.dispose() must be called synchronously. If dispose() is marked async, call '
-          'super.dispose() before the first await.',
+          'The framework does not await dispose(), so super.dispose() must be called '
+          'synchronously, not after an await. Consider making dispose() synchronous and '
+          'starting any asynchronous cleanup without awaiting it.',
         ),
       ]);
     }());
