@@ -1100,10 +1100,7 @@ void main() {
 
     // The dry layout must agree with the actual layout.
     final RenderBox wrap = tester.renderObject<RenderBox>(find.byType(Wrap));
-    expect(
-      wrap.getDryLayout(const BoxConstraints(maxWidth: 100.0, maxHeight: 600.0)),
-      wrap.size,
-    );
+    expect(wrap.getDryLayout(const BoxConstraints(maxWidth: 100.0, maxHeight: 600.0)), wrap.size);
   });
 
   testWidgets('Wrap does not crash at zero area', (WidgetTester tester) async {
