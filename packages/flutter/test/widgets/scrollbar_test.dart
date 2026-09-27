@@ -4400,6 +4400,66 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(scrollbarCursor(), SystemMouseCursors.grab);
   });
 
+  testWidgets('RawScrollbar without a controller follows the ScrollView it wraps', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/175012
+    // A scrollbar that inherits a PrimaryScrollController must still paint for
+    // the scroll view it wraps, even when that controller is attached to a
+    // different scroll view.
+    final inner = ScrollController();
+    addTearDown(inner.dispose);
+    final primary = ScrollController();
+    addTearDown(primary.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: primary,
+            child: Column(
+              children: <Widget>[
+                // Attaches to the PrimaryScrollController above.
+                SizedBox(
+                  height: 200.0,
+                  child: ListView(
+                    primary: true,
+                    children: const <Widget>[SizedBox(height: 4000.0)],
+                  ),
+                ),
+                SizedBox(
+                  height: 200.0,
+                  child: RawScrollbar(
+                    // No controller: the PrimaryScrollController is inherited,
+                    // but it belongs to the list above.
+                    child: ListView(
+                      controller: inner,
+                      children: const <Widget>[SizedBox(height: 4000.0)],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Scrolling the wrapped list fades its own scrollbar in.
+    await tester.drag(find.byType(RawScrollbar), const Offset(0.0, -20.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(inner.offset, greaterThan(0.0));
+    expect(
+      find.byType(RawScrollbar),
+      paints..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 200.0)),
+    );
+  });
+
   testWidgets('RawScrollbar ignores metrics from a sibling ScrollView', (
     WidgetTester tester,
   ) async {

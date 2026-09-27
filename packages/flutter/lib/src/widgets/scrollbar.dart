@@ -1046,6 +1046,11 @@ class RawScrollbar extends StatefulWidget {
   /// of this widget needs to manage the ScrollController and either pass it to
   /// a scrollable descendant or use a PrimaryScrollController to share it.
   ///
+  /// Passing a ScrollController also names the scroll view this scrollbar is
+  /// for: the scrollbar then ignores scroll notifications from any other scroll
+  /// view, such as a sibling of the one it wraps. Without a ScrollController,
+  /// the scrollbar follows the notifications of whatever it wraps.
+  ///
   /// {@tool snippet}
   /// Here is an example of using the [controller] attribute to enable
   /// scrollbar dragging for multiple independent ListViews:
@@ -1958,11 +1963,16 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   //
   // Sibling ScrollViews share a scrollbar's notification scope, so without this
   // check the metrics of an unrelated ScrollView can be applied to this
-  // scrollbar. Returns true when there is not enough information to tell the
-  // scroll views apart, preserving the behavior of the ScrollController-less
-  // and multiple-position cases.
+  // scrollbar.
+  //
+  // This only applies when a controller was explicitly provided, since that
+  // names the scrollable this scrollbar is for. An inherited
+  // PrimaryScrollController carries no such meaning: it may well be attached to
+  // some other scroll view, and painting is documented to follow the child's
+  // notifications. Returns true whenever there is not enough information to
+  // tell the scroll views apart, preserving the existing behavior.
   bool _isOwnNotification(BuildContext? notificationContext) {
-    final ScrollController? scrollController = _effectiveScrollController;
+    final ScrollController? scrollController = widget.controller;
     if (scrollController == null ||
         !scrollController.hasClients ||
         scrollController.positions.length > 1) {
