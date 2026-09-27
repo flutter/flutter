@@ -527,7 +527,8 @@ void main() {
     final child3 = children[3].parentData! as SliverMultiBoxAdaptorParentData;
     expect(child3.layoutOffset, 300.0);
 
-    expect(children[2].parentData, isNull);
+    final child2 = children[2].parentData! as SliverMultiBoxAdaptorParentData;
+    expect(child2.layoutOffset, 200.0);
   });
 
   test('RenderSliverVariedExtentList invalidation on resize', () {
