@@ -540,6 +540,51 @@ GLint mockGetUniformLocation(GLuint program, const GLchar* name) {
 static_assert(CheckSameSignature<decltype(mockGetUniformLocation),  //
                                  decltype(glGetUniformLocation)>::value);
 
+void mockTexParameteri(GLenum target, GLenum pname, GLint param) {
+  CallMockMethod(&IMockGLESImpl::TexParameteri, target, pname, param);
+}
+
+static_assert(CheckSameSignature<decltype(mockTexParameteri),  //
+                                 decltype(glTexParameteri)>::value);
+
+void mockUseProgram(GLuint program) {
+  CallMockMethod(&IMockGLESImpl::UseProgram, program);
+}
+
+static_assert(CheckSameSignature<decltype(mockUseProgram),  //
+                                 decltype(glUseProgram)>::value);
+
+void mockEnable(GLenum cap) {
+  CallMockMethod(&IMockGLESImpl::Enable, cap);
+}
+
+static_assert(CheckSameSignature<decltype(mockEnable),  //
+                                 decltype(glEnable)>::value);
+
+void mockDisable(GLenum cap) {
+  CallMockMethod(&IMockGLESImpl::Disable, cap);
+}
+
+static_assert(CheckSameSignature<decltype(mockDisable),  //
+                                 decltype(glDisable)>::value);
+
+void mockScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
+  CallMockMethod(&IMockGLESImpl::Scissor, x, y, width, height);
+}
+
+static_assert(CheckSameSignature<decltype(mockScissor),  //
+                                 decltype(glScissor)>::value);
+
+void mockColorMask(GLboolean red,
+                   GLboolean green,
+                   GLboolean blue,
+                   GLboolean alpha) {
+  CallMockMethod(&IMockGLESImpl::ColorMask, red, green, blue, alpha);
+}
+
+static_assert(CheckSameSignature<decltype(mockColorMask),  //
+                                 decltype(glColorMask)>::value);
+
 // static
 IPLR_NO_THREAD_SAFETY_ANALYSIS std::shared_ptr<MockGLES> MockGLES::Init(
     std::unique_ptr<MockGLESImpl> impl,
@@ -696,6 +741,18 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockGetActiveUniform);
   } else if (strcmp(name, "glGetUniformLocation") == 0) {
     return reinterpret_cast<void*>(mockGetUniformLocation);
+  } else if (strcmp(name, "glTexParameteri") == 0) {
+    return reinterpret_cast<void*>(mockTexParameteri);
+  } else if (strcmp(name, "glUseProgram") == 0) {
+    return reinterpret_cast<void*>(mockUseProgram);
+  } else if (strcmp(name, "glEnable") == 0) {
+    return reinterpret_cast<void*>(mockEnable);
+  } else if (strcmp(name, "glDisable") == 0) {
+    return reinterpret_cast<void*>(mockDisable);
+  } else if (strcmp(name, "glScissor") == 0) {
+    return reinterpret_cast<void*>(mockScissor);
+  } else if (strcmp(name, "glColorMask") == 0) {
+    return reinterpret_cast<void*>(mockColorMask);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }

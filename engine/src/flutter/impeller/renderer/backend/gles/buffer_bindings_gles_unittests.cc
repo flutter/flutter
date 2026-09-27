@@ -500,5 +500,42 @@ TEST(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit) {
       Range{0, fixture.bound_textures.size()}, Range{0, 0}));
 }
 
+TEST(BufferBindingsGLESTest, SkipsRedundantSamplerConfigurationOnSameTexture) {
+  auto impl = MakeSixteenUnitMockImpl();
+  auto* raw_impl = impl.get();
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(impl));
+  BoundTexturesFixture fixture(
+      std::make_unique<ProcTableGLES>(kMockResolverGLES));
+  fixture.AddTextures(ShaderStage::kFragment, 1);
+  ASSERT_TRUE(fixture.reactor->React());
+
+  BufferBindingsGLES bindings;
+  bindings.SetUniformBindings(std::move(fixture.uniform_bindings));
+  std::vector<BufferResource> bound_buffers;
+
+  // First bind on ES 3.0 configures MIN_FILTER, MAG_FILTER, MAX_LEVEL, WRAP_S,
+  // WRAP_T (5 calls). Second bind with the same sampler descriptor skips all
+  // TexParameteri calls.
+  EXPECT_CALL(*raw_impl, TexParameteri(GL_TEXTURE_2D, _, _)).Times(5);
+
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
+
+  // Changing the sampler descriptor must re-configure the texture (5 calls).
+  SamplerDescriptor linear_desc;
+  linear_desc.min_filter = MinMagFilter::kLinear;
+  linear_desc.mag_filter = MinMagFilter::kLinear;
+  fixture.bound_textures[0].sampler =
+      fixture.sampler_library->GetSampler(linear_desc);
+  EXPECT_CALL(*raw_impl, TexParameteri(GL_TEXTURE_2D, _, _)).Times(5);
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
+}
+
 }  // namespace testing
 }  // namespace impeller

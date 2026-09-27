@@ -83,7 +83,7 @@ void testMain() {
         expect(await matchImage(tabImage, spaceImage), isTrue);
         expect(await matchImage(tabImage, tofuImage), isFalse);
       },
-      skip: isSafari || isFirefox,
+      skip: isWimp || isSafari || isFirefox,
     ); // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     // TODO(jacksongardner): https://github.com/flutter/flutter/issues/183944
   }, skip: isSafari || isFirefox);

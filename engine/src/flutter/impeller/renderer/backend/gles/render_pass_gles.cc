@@ -5,6 +5,9 @@
 #include "impeller/renderer/backend/gles/render_pass_gles.h"
 
 #include <cstdint>
+#include <optional>
+#include <tuple>
+#include <utility>
 
 #include "flutter/fml/trace_event.h"
 #include "fml/closure.h"
@@ -43,25 +46,49 @@ void RenderPassGLES::OnSetLabel(std::string_view label) {
   label_ = label;
 }
 
+struct BlendStateCache {
+  bool blending_enabled = false;
+  ColorWriteMask write_mask = ColorWriteMaskBits::kAll;
+  std::optional<std::tuple<BlendFactor, BlendFactor, BlendFactor, BlendFactor>>
+      blend_factors;
+  std::optional<std::pair<BlendOperation, BlendOperation>> blend_ops;
+};
+
 void ConfigureBlending(const ProcTableGLES& gl,
-                       const ColorAttachmentDescriptor* color) {
+                       const ColorAttachmentDescriptor* color,
+                       BlendStateCache& cache) {
   if (color->blending_enabled) {
-    gl.Enable(GL_BLEND);
-    gl.BlendFuncSeparate(
-        ToBlendFactor(color->src_color_blend_factor),  // src color
-        ToBlendFactor(color->dst_color_blend_factor),  // dst color
-        ToBlendFactor(color->src_alpha_blend_factor),  // src alpha
-        ToBlendFactor(color->dst_alpha_blend_factor)   // dst alpha
-    );
-    gl.BlendEquationSeparate(
-        ToBlendOperation(color->color_blend_op),  // mode color
-        ToBlendOperation(color->alpha_blend_op)   // mode alpha
-    );
-  } else {
+    if (!cache.blending_enabled) {
+      gl.Enable(GL_BLEND);
+      cache.blending_enabled = true;
+    }
+    const auto factors = std::make_tuple(
+        color->src_color_blend_factor, color->dst_color_blend_factor,
+        color->src_alpha_blend_factor, color->dst_alpha_blend_factor);
+    if (cache.blend_factors != factors) {
+      gl.BlendFuncSeparate(
+          ToBlendFactor(color->src_color_blend_factor),  // src color
+          ToBlendFactor(color->dst_color_blend_factor),  // dst color
+          ToBlendFactor(color->src_alpha_blend_factor),  // src alpha
+          ToBlendFactor(color->dst_alpha_blend_factor)   // dst alpha
+      );
+      cache.blend_factors = factors;
+    }
+    const auto ops =
+        std::make_pair(color->color_blend_op, color->alpha_blend_op);
+    if (cache.blend_ops != ops) {
+      gl.BlendEquationSeparate(
+          ToBlendOperation(color->color_blend_op),  // mode color
+          ToBlendOperation(color->alpha_blend_op)   // mode alpha
+      );
+      cache.blend_ops = ops;
+    }
+  } else if (cache.blending_enabled) {
     gl.Disable(GL_BLEND);
+    cache.blending_enabled = false;
   }
 
-  {
+  if (cache.write_mask != color->write_mask) {
     const auto is_set = [](ColorWriteMask mask,
                            ColorWriteMask check) -> GLboolean {
       return (mask & check) ? GL_TRUE : GL_FALSE;
@@ -73,48 +100,90 @@ void ConfigureBlending(const ProcTableGLES& gl,
         is_set(color->write_mask, ColorWriteMaskBits::kBlue),   // blue
         is_set(color->write_mask, ColorWriteMaskBits::kAlpha)   // alpha
     );
+    cache.write_mask = color->write_mask;
   }
 }
 
-void ConfigureStencil(GLenum face,
-                      const ProcTableGLES& gl,
-                      const StencilAttachmentDescriptor& stencil,
-                      uint32_t stencil_reference) {
-  gl.StencilOpSeparate(
-      face,                                    // face
-      ToStencilOp(stencil.stencil_failure),    // stencil fail
-      ToStencilOp(stencil.depth_failure),      // depth fail
-      ToStencilOp(stencil.depth_stencil_pass)  // depth stencil pass
-  );
-  gl.StencilFuncSeparate(face,                                        // face
-                         ToCompareFunction(stencil.stencil_compare),  // func
-                         stencil_reference,                           // ref
-                         stencil.read_mask                            // mask
-  );
-  gl.StencilMaskSeparate(face, stencil.write_mask);
+struct StencilFaceStateCache {
+  std::optional<
+      std::tuple<StencilOperation, StencilOperation, StencilOperation>>
+      ops;
+  std::optional<std::tuple<CompareFunction, uint32_t, uint32_t>> func;
+  uint32_t write_mask = 0xFFFFFFFF;
+};
+
+struct StencilStateCache {
+  bool stencil_test_enabled = false;
+  StencilFaceStateCache front;
+  StencilFaceStateCache back;
+};
+
+void ConfigureStencilFace(GLenum face,
+                          const ProcTableGLES& gl,
+                          const StencilAttachmentDescriptor& stencil,
+                          uint32_t stencil_reference,
+                          StencilFaceStateCache& face_cache) {
+  const auto ops =
+      std::make_tuple(stencil.stencil_failure, stencil.depth_failure,
+                      stencil.depth_stencil_pass);
+  if (face_cache.ops != ops) {
+    gl.StencilOpSeparate(
+        face,                                    // face
+        ToStencilOp(stencil.stencil_failure),    // stencil fail
+        ToStencilOp(stencil.depth_failure),      // depth fail
+        ToStencilOp(stencil.depth_stencil_pass)  // depth stencil pass
+    );
+    face_cache.ops = ops;
+  }
+  const auto func = std::make_tuple(stencil.stencil_compare, stencil_reference,
+                                    stencil.read_mask);
+  if (face_cache.func != func) {
+    gl.StencilFuncSeparate(face,                                        // face
+                           ToCompareFunction(stencil.stencil_compare),  // func
+                           stencil_reference,                           // ref
+                           stencil.read_mask                            // mask
+    );
+    face_cache.func = func;
+  }
+  if (face_cache.write_mask != stencil.write_mask) {
+    gl.StencilMaskSeparate(face, stencil.write_mask);
+    face_cache.write_mask = stencil.write_mask;
+  }
 }
 
 void ConfigureStencil(const ProcTableGLES& gl,
                       const PipelineDescriptor& pipeline,
-                      uint32_t stencil_reference) {
+                      uint32_t stencil_reference,
+                      StencilStateCache& cache) {
   if (!pipeline.HasStencilAttachmentDescriptors()) {
-    gl.Disable(GL_STENCIL_TEST);
+    if (cache.stencil_test_enabled) {
+      gl.Disable(GL_STENCIL_TEST);
+      cache.stencil_test_enabled = false;
+    }
     return;
   }
 
-  gl.Enable(GL_STENCIL_TEST);
+  if (!cache.stencil_test_enabled) {
+    gl.Enable(GL_STENCIL_TEST);
+    cache.stencil_test_enabled = true;
+  }
   const auto& front = pipeline.GetFrontStencilAttachmentDescriptor();
   const auto& back = pipeline.GetBackStencilAttachmentDescriptor();
 
-  if (front.has_value() && back.has_value() && front == back) {
-    ConfigureStencil(GL_FRONT_AND_BACK, gl, *front, stencil_reference);
+  if (front.has_value() && back.has_value() && front == back &&
+      cache.front.ops == cache.back.ops &&
+      cache.front.func == cache.back.func &&
+      cache.front.write_mask == cache.back.write_mask) {
+    ConfigureStencilFace(GL_FRONT_AND_BACK, gl, *front, stencil_reference,
+                         cache.front);
+    cache.back = cache.front;
     return;
   }
   if (front.has_value()) {
-    ConfigureStencil(GL_FRONT, gl, *front, stencil_reference);
+    ConfigureStencilFace(GL_FRONT, gl, *front, stencil_reference, cache.front);
   }
   if (back.has_value()) {
-    ConfigureStencil(GL_BACK, gl, *back, stencil_reference);
+    ConfigureStencilFace(GL_BACK, gl, *back, stencil_reference, cache.back);
   }
 }
 
@@ -362,13 +431,17 @@ static void EncodeViewport(const ProcTableGLES& gl,
   const float y_flip_value = flip_y ? -1.0f : 1.0f;
 
   std::optional<Viewport> current_viewport;
+  std::optional<IRect32> current_scissor;
+  BlendStateCache blend_cache;
+  StencilStateCache stencil_cache;
+  bool depth_test_enabled = false;
+  std::optional<CompareFunction> current_depth_compare;
+  bool current_depth_write_enabled = true;
+  const PipelineGLES* current_pipeline = nullptr;
   CullMode current_cull_mode = CullMode::kNone;
   WindingOrder current_winding_order = WindingOrder::kClockwise;
   // Inverted to keep front-facing consistent under the vertex y-flip.
   gl.FrontFace(flip_y ? GL_CCW : GL_CW);
-
-  const PipelineGLES* previous_pipeline = nullptr;
-  uint32_t previous_stencil_reference = ~0u;
 
   for (const auto& command : commands) {
 #ifdef IMPELLER_DEBUG
@@ -391,37 +464,38 @@ static void EncodeViewport(const ProcTableGLES& gl,
       return false;
     }
 
-    if (previous_pipeline != &pipeline) {
-      //--------------------------------------------------------------------------
-      /// Configure blending.
-      ///
-      ConfigureBlending(gl, color_attachment);
+    //--------------------------------------------------------------------------
+    /// Configure blending.
+    ///
+    ConfigureBlending(gl, color_attachment, blend_cache);
 
-      //--------------------------------------------------------------------------
-      /// Setup stencil.
-      ///
-      ConfigureStencil(gl, pipeline.GetDescriptor(), command.stencil_reference);
+    //--------------------------------------------------------------------------
+    /// Setup stencil.
+    ///
+    ConfigureStencil(gl, pipeline.GetDescriptor(), command.stencil_reference,
+                     stencil_cache);
 
-      //--------------------------------------------------------------------------
-      /// Configure depth.
-      ///
-      if (auto depth =
-              pipeline.GetDescriptor().GetDepthStencilAttachmentDescriptor();
-          depth.has_value()) {
+    //--------------------------------------------------------------------------
+    /// Configure depth.
+    ///
+    if (auto depth =
+            pipeline.GetDescriptor().GetDepthStencilAttachmentDescriptor();
+        depth.has_value()) {
+      if (!depth_test_enabled) {
         gl.Enable(GL_DEPTH_TEST);
-        gl.DepthFunc(ToCompareFunction(depth->depth_compare));
-        gl.DepthMask(depth->depth_write_enabled ? GL_TRUE : GL_FALSE);
-      } else {
-        gl.Disable(GL_DEPTH_TEST);
+        depth_test_enabled = true;
       }
-
-      previous_stencil_reference = command.stencil_reference;
-    } else if (previous_stencil_reference != command.stencil_reference) {
-      //--------------------------------------------------------------------------
-      /// Setup stencil.
-      ///
-      ConfigureStencil(gl, pipeline.GetDescriptor(), command.stencil_reference);
-      previous_stencil_reference = command.stencil_reference;
+      if (current_depth_compare != depth->depth_compare) {
+        gl.DepthFunc(ToCompareFunction(depth->depth_compare));
+        current_depth_compare = depth->depth_compare;
+      }
+      if (current_depth_write_enabled != depth->depth_write_enabled) {
+        gl.DepthMask(depth->depth_write_enabled ? GL_TRUE : GL_FALSE);
+        current_depth_write_enabled = depth->depth_write_enabled;
+      }
+    } else if (depth_test_enabled) {
+      gl.Disable(GL_DEPTH_TEST);
+      depth_test_enabled = false;
     }
 
     //--------------------------------------------------------------------------
@@ -438,9 +512,11 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Setup the scissor rect.
     ///
-    if (command.scissor.has_value()) {
+    if (command.scissor.has_value() && current_scissor != command.scissor) {
       const auto& scissor = command.scissor.value();
-      gl.Enable(GL_SCISSOR_TEST);
+      if (!current_scissor.has_value()) {
+        gl.Enable(GL_SCISSOR_TEST);
+      }
       // Same flip handling as the viewport above.
       const auto scissor_y_gl =
           flip_y ? scissor.GetY()
@@ -448,6 +524,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
       gl.Scissor(scissor.GetX(),  // x
                  scissor_y_gl,    // y
                  scissor.GetWidth(), scissor.GetHeight());
+      current_scissor = scissor;
     }
 
     //--------------------------------------------------------------------------
@@ -509,7 +586,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Bind the pipeline program.
     ///
-    if (previous_pipeline != &pipeline) {
+    if (current_pipeline != &pipeline) {
       if (!pipeline.BindProgram()) {
         return false;
       }
@@ -521,7 +598,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
         gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);
       }
 
-      previous_pipeline = &pipeline;
+      current_pipeline = &pipeline;
     }
 
     //--------------------------------------------------------------------------
