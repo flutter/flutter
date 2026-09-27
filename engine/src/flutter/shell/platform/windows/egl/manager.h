@@ -23,6 +23,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/egl/context.h"
+#include "flutter/shell/platform/windows/egl/program_cache.h"
 #include "flutter/shell/platform/windows/egl/surface.h"
 #include "flutter/shell/platform/windows/egl/window_surface.h"
 
@@ -39,7 +40,11 @@ enum class GpuPreference {
 // destroy surfaces
 class Manager {
  public:
-  static std::unique_ptr<Manager> Create(GpuPreference gpu_preference);
+  // Keeps the GL programs that ANGLE compiles in |program_cache|, if there is
+  // one, so that later launches do not compile them again.
+  static std::unique_ptr<Manager> Create(
+      GpuPreference gpu_preference,
+      std::unique_ptr<ProgramCache> program_cache = nullptr);
 
   virtual ~Manager();
 
@@ -90,7 +95,8 @@ class Manager {
  protected:
   // Creates a new surface manager retaining reference to the passed-in target
   // for the lifetime of the manager.
-  explicit Manager(GpuPreference gpu_preference);
+  explicit Manager(GpuPreference gpu_preference,
+                   std::unique_ptr<ProgramCache> program_cache = nullptr);
 
  private:
   // Number of active instances of Manager
@@ -101,7 +107,8 @@ class Manager {
       DXGI_GPU_PREFERENCE preference);
 
   // Initialize the EGL display.
-  bool InitializeDisplay(GpuPreference gpu_preference);
+  bool InitializeDisplay(GpuPreference gpu_preference,
+                         std::unique_ptr<ProgramCache> program_cache);
 
   // Initialize the EGL configs.
   bool InitializeConfig();

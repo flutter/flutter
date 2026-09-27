@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_PROJECT_BUNDLE_H_
 
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -100,6 +101,12 @@ class FlutterProjectBundle {
   // Returns whether the Flutter GPU API is enabled.
   bool enable_flutter_gpu() const { return enable_flutter_gpu_; }
 
+  // Returns the folder for compiled GPU programs, if the app set one. An
+  // empty path turns the cache off.
+  const std::optional<std::wstring>& program_cache_path() const {
+    return program_cache_path_;
+  }
+
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
@@ -130,6 +137,9 @@ class FlutterProjectBundle {
 
   // Whether the Flutter GPU API is enabled.
   bool enable_flutter_gpu_ = false;
+
+  // The folder for compiled GPU programs, if the app set one.
+  std::optional<std::wstring> program_cache_path_;
 };
 
 }  // namespace flutter

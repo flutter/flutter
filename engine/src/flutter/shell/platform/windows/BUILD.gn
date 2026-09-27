@@ -64,6 +64,8 @@ source_set("flutter_windows_source") {
     "egl/manager.h",
     "egl/proc_table.cc",
     "egl/proc_table.h",
+    "egl/program_cache.cc",
+    "egl/program_cache.h",
     "egl/surface.cc",
     "egl/surface.h",
     "egl/window_surface.cc",
@@ -154,6 +156,9 @@ source_set("flutter_windows_source") {
   libs = [
     "dwmapi.lib",
     "imm32.lib",
+    "ole32.lib",
+    "shell32.lib",
+    "version.lib",
   ]
 
   configs += [
@@ -186,6 +191,7 @@ source_set("flutter_windows_source") {
     "//flutter/shell/platform/common/client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows",
+    "//flutter/shell/version",
 
     # libEGL_static MUST be ordered before libGLESv2_static in this list. If
     # reversed, a linker error will occur, reporting DllMain already defined in
@@ -228,6 +234,7 @@ executable("flutter_windows_unittests") {
     "direct_manipulation_unittests.cc",
     "display_manager_unittests.cc",
     "dpi_utils_unittests.cc",
+    "egl/program_cache_unittests.cc",
     "flutter_project_bundle_unittests.cc",
     "flutter_window_unittests.cc",
     "flutter_windows_engine_unittests.cc",

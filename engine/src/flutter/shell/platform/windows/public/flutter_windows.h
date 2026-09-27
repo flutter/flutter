@@ -133,6 +133,14 @@ typedef struct {
   // Flutter GPU requires the Impeller renderer.
   // If not set defaults to false.
   bool enable_flutter_gpu;
+
+  // The folder in which the engine keeps the GPU programs it compiles, so
+  // that later launches load them instead of compiling them again.
+  // If null, the engine uses a folder under the user's local application
+  // data folder, named after the executable's company and product names.
+  // If empty, compiled programs are not kept. A relative path is taken as
+  // relative to the local application data folder.
+  const wchar_t* program_cache_path;
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========
