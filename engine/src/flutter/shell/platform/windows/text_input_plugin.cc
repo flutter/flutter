@@ -136,8 +136,7 @@ TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger,
                        ? task_runner
                        : (engine != nullptr ? engine->task_runner() : nullptr)),
       get_focus_(std::move(get_focus)),
-      active_model_(nullptr),
-      weak_factory_(this) {
+      active_model_(nullptr) {
   FML_DCHECK(engine_);
   FML_DCHECK(task_runner_);
   FML_DCHECK(get_focus_);
@@ -150,6 +149,7 @@ TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger,
 }
 
 TextInputPlugin::~TextInputPlugin() {
+  alive_.reset();
   if (tsf_bridge_ != nullptr) {
     tsf_bridge_->ClearFocus();
   }
@@ -660,13 +660,14 @@ void TextInputPlugin::ScheduleTsfNonEditable() {
   }
   const HWND hwnd = GetClientWindowHandle();
   const uint64_t generation = ++tsf_focus_generation_;
+  const std::weak_ptr<int> alive = alive_;
   task_runner_->PostDelayedTask(
-      [weak = weak_factory_.GetWeakPtr(), generation, hwnd]() {
-        if (!weak || generation != weak->tsf_focus_generation_ ||
-            weak->active_model_ != nullptr) {
+      [this, alive, generation, hwnd]() {
+        if (!alive.lock() || generation != tsf_focus_generation_ ||
+            active_model_ != nullptr) {
           return;
         }
-        weak->tsf_bridge_->FocusNonEditable(hwnd);
+        tsf_bridge_->FocusNonEditable(hwnd);
       },
       kTsfFocusDebounce);
 }

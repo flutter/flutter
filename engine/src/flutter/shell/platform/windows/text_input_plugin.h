@@ -15,7 +15,6 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/geometry/geometry.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
@@ -246,7 +245,9 @@ class TextInputPlugin : public TsfTextStoreDelegate {
       0.0, 0.0, 0.0, 0.0,  //
       0.0, 0.0, 0.0, 0.0};
 
-  fml::WeakPtrFactory<TextInputPlugin> weak_factory_;
+  // Lifetime token for the deferred TSF document switch posted to
+  // |task_runner_|. Reset in the destructor so that task fails closed.
+  std::shared_ptr<int> alive_ = std::make_shared<int>(0);
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextInputPlugin);
 };
