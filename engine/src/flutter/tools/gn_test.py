@@ -30,8 +30,10 @@ class GNTestCase(unittest.TestCase):
     self._expect_build_dir(['--android', '--runtime-mode', 'release'],
                            os.path.join('out', 'android_release'))
     self._expect_build_dir(['--web'], os.path.join('out', 'wasm_debug'))
-    self._expect_build_dir(['--web', '--runtime-mode', 'profile'], os.path.join('out', 'wasm_profile'))
-    self._expect_build_dir(['--web', '--runtime-mode', 'release'], os.path.join('out', 'wasm_release'))
+    self._expect_build_dir(['--web', '--runtime-mode', 'profile'],
+                           os.path.join('out', 'wasm_profile'))
+    self._expect_build_dir(['--web', '--runtime-mode', 'release'],
+                           os.path.join('out', 'wasm_release'))
 
   def _gn_args(self, arg_list):
     args = gn.parse_args(['gn'] + arg_list)
