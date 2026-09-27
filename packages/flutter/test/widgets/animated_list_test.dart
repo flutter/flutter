@@ -1375,6 +1375,52 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(AnimatedList), findsNothing);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192533
+  testWidgets('SliverAnimatedList unmounted in the frame that completes removeItem', (
+    WidgetTester tester,
+  ) async {
+    final listKey = GlobalKey<SliverAnimatedListState>();
+    late StateSetter setHostState;
+    var showList = true;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setHostState = setState;
+            return showList
+                ? CustomScrollView(
+                    slivers: <Widget>[
+                      SliverAnimatedList(
+                        key: listKey,
+                        initialItemCount: 1,
+                        itemBuilder: (_, _, _) => const SizedBox(height: 40),
+                      ),
+                    ],
+                  )
+                : const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    listKey.currentState!.removeItem(
+      0,
+      (_, Animation<double> animation) =>
+          SizeTransition(sizeFactor: animation, child: const SizedBox(height: 40)),
+      duration: const Duration(milliseconds: 100),
+    );
+    await tester.pump();
+
+    // Time passes without frames, then the list is unmounted.
+    await tester.binding.delayed(const Duration(milliseconds: 150));
+    setHostState(() => showList = false);
+    await _pumpWebStyleFrame(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SliverAnimatedList), findsNothing);
+  });
 }
 
 // Pumps one frame the way the web engine does: handleBeginFrame and

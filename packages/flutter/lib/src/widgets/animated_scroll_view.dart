@@ -1287,6 +1287,8 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     for (final _ActiveItem item in _incomingItems.followedBy(_outgoingItems)) {
       item.controller!.dispose();
     }
+    _incomingItems.clear();
+    _outgoingItems.clear();
     super.dispose();
   }
 
@@ -1396,8 +1398,9 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     });
 
     controller.forward().then<void>((_) {
-      // The state may be disposed before this runs, in which case the
-      // controller was already disposed in dispose().
+      // On the web this can run after the state is disposed, since microtasks
+      // are not flushed between onBeginFrame and onDrawFrame. The controller
+      // was already disposed in dispose() by then.
       if (!mounted) {
         return;
       }
@@ -1445,8 +1448,9 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     });
 
     controller.reverse().then<void>((void value) {
-      // The state may be disposed before this runs, in which case the
-      // controller was already disposed in dispose().
+      // On the web this can run after the state is disposed, since microtasks
+      // are not flushed between onBeginFrame and onDrawFrame. The controller
+      // was already disposed in dispose() by then.
       if (!mounted) {
         return;
       }

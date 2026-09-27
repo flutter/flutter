@@ -743,6 +743,111 @@ void main() {
     );
     await tester.pump();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192533
+  testWidgets('AnimatedGrid unmounted in the frame that completes removeItem', (
+    WidgetTester tester,
+  ) async {
+    final gridKey = GlobalKey<AnimatedGridState>();
+    late StateSetter setHostState;
+    var showGrid = true;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setHostState = setState;
+            return showGrid
+                ? AnimatedGrid(
+                    key: gridKey,
+                    initialItemCount: 1,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                    ),
+                    itemBuilder: (_, _, _) => const SizedBox(),
+                  )
+                : const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    gridKey.currentState!.removeItem(
+      0,
+      (_, Animation<double> animation) =>
+          ScaleTransition(scale: animation, child: const SizedBox()),
+      duration: const Duration(milliseconds: 100),
+    );
+    await tester.pump();
+
+    // Time passes without frames, then the grid is unmounted.
+    await tester.binding.delayed(const Duration(milliseconds: 150));
+    setHostState(() => showGrid = false);
+    await _pumpWebStyleFrame(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(AnimatedGrid), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192533
+  testWidgets('SliverAnimatedGrid unmounted in the frame that completes removeItem', (
+    WidgetTester tester,
+  ) async {
+    final gridKey = GlobalKey<SliverAnimatedGridState>();
+    late StateSetter setHostState;
+    var showGrid = true;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setHostState = setState;
+            return showGrid
+                ? CustomScrollView(
+                    slivers: <Widget>[
+                      SliverAnimatedGrid(
+                        key: gridKey,
+                        initialItemCount: 1,
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                        ),
+                        itemBuilder: (_, _, _) => const SizedBox(),
+                      ),
+                    ],
+                  )
+                : const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    gridKey.currentState!.removeItem(
+      0,
+      (_, Animation<double> animation) =>
+          ScaleTransition(scale: animation, child: const SizedBox()),
+      duration: const Duration(milliseconds: 100),
+    );
+    await tester.pump();
+
+    // Time passes without frames, then the grid is unmounted.
+    await tester.binding.delayed(const Duration(milliseconds: 150));
+    setHostState(() => showGrid = false);
+    await _pumpWebStyleFrame(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SliverAnimatedGrid), findsNothing);
+  });
+}
+
+// Pumps one frame the way the web engine does: handleBeginFrame and
+// handleDrawFrame run in the same task and microtasks are flushed only after
+// both. A plain pump() flushes microtasks between the two, like the mobile
+// engines do, which hides the bug in #192533.
+Future<void> _pumpWebStyleFrame(WidgetTester tester) async {
+  final TestWidgetsFlutterBinding binding = tester.binding;
+  binding.handleBeginFrame(Duration(microseconds: binding.clock.now().microsecondsSinceEpoch));
+  binding.handleDrawFrame();
+  await tester.pump();
 }
 
 class _StatefulListItem extends StatefulWidget {
