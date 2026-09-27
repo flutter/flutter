@@ -61,7 +61,7 @@ class CupertinoPageScaffold extends StatefulWidget {
   /// behavior. To override such behavior, wrap each of the [navigationBar]'s
   /// components inside a [MediaQuery] with the desired [TextScaler].
   // TODO(xster): document its page transition animation when ready
-  final ObstructingPreferredSizeWidget? navigationBar;
+  final ObstructingWidget? navigationBar;
 
   /// Widget to show in the main content area.
   ///
@@ -137,70 +137,81 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> with Widg
 
   @override
   Widget build(BuildContext context) {
-    Widget paddedContent = widget.child;
-
     final Color backgroundColor =
         CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ??
         CupertinoTheme.of(context).scaffoldBackgroundColor;
 
     final MediaQueryData existingMediaQuery = MediaQuery.of(context);
+    final bool fullObstruction = widget.navigationBar?.shouldFullyObstruct(context) ?? false;
+
+    final Widget scaffold;
     if (widget.navigationBar != null) {
-      // TODO(xster): Use real size after partial layout instead of preferred size.
-      // https://github.com/flutter/flutter/issues/12912
-      final double topPadding =
-          widget.navigationBar!.preferredSize.height + existingMediaQuery.padding.top;
+      final Widget navBar = SizedBox(
+        width: double.infinity,
+        child: MediaQuery.withNoTextScaling(child: widget.navigationBar!),
+      );
+      scaffold = EdgeInsetsOverlay(
+        top: navBar,
+        builder: (BuildContext context, BoxConstraints constraints, EdgeInsets padding) {
+          Widget paddedContent = widget.child;
 
-      // Propagate bottom padding and include viewInsets if appropriate
-      final double bottomPadding = widget.resizeToAvoidBottomInset
-          ? existingMediaQuery.viewInsets.bottom
-          : 0.0;
+          // Propagate bottom padding and include viewInsets if appropriate
+          final double bottomPadding = widget.resizeToAvoidBottomInset
+              ? existingMediaQuery.viewInsets.bottom
+              : 0.0;
 
-      final EdgeInsets newViewInsets = widget.resizeToAvoidBottomInset
-          // The insets are consumed by the scaffolds and no longer exposed to
-          // the descendant subtree.
-          ? existingMediaQuery.viewInsets.copyWith(bottom: 0.0)
-          : existingMediaQuery.viewInsets;
+          final EdgeInsets newViewInsets = widget.resizeToAvoidBottomInset
+              // The insets are consumed by the scaffolds and no longer exposed to
+              // the descendant subtree.
+              ? existingMediaQuery.viewInsets.copyWith(bottom: 0.0)
+              : existingMediaQuery.viewInsets;
 
-      final bool fullObstruction = widget.navigationBar!.shouldFullyObstruct(context);
+          // If navigation bar is opaquely obstructing, directly shift the main content
+          // down. If translucent, let main content draw behind navigation bar but hint the
+          // obstructed area.
+          if (fullObstruction) {
+            paddedContent = MediaQuery(
+              data: existingMediaQuery
+                  // If the navigation bar is opaque, the top media query padding is fully consumed by the navigation bar.
+                  .removePadding(removeTop: true)
+                  .copyWith(viewInsets: newViewInsets),
+              child: Padding(
+                padding: padding + EdgeInsets.only(bottom: bottomPadding),
+                child: paddedContent,
+              ),
+            );
+          } else {
+            paddedContent = MediaQuery(
+              data: existingMediaQuery.copyWith(
+                padding: existingMediaQuery.padding.copyWith(top: padding.top),
+                viewInsets: newViewInsets,
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(bottom: bottomPadding),
+                child: paddedContent,
+              ),
+            );
+          }
 
-      // If navigation bar is opaquely obstructing, directly shift the main content
-      // down. If translucent, let main content draw behind navigation bar but hint the
-      // obstructed area.
-      if (fullObstruction) {
-        paddedContent = MediaQuery(
-          data: existingMediaQuery
-              // If the navigation bar is opaque, the top media query padding is fully consumed by the navigation bar.
-              .removePadding(removeTop: true)
-              .copyWith(viewInsets: newViewInsets),
-          child: Padding(
-            padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-            child: paddedContent,
-          ),
-        );
-      } else {
+          return paddedContent;
+        },
+      );
+    } else {
+      Widget paddedContent = widget.child;
+      if (widget.resizeToAvoidBottomInset) {
+        // If there is no navigation bar, still may need to add padding in order
+        // to support resizeToAvoidBottomInset.
         paddedContent = MediaQuery(
           data: existingMediaQuery.copyWith(
-            padding: existingMediaQuery.padding.copyWith(top: topPadding),
-            viewInsets: newViewInsets,
+            viewInsets: existingMediaQuery.viewInsets.copyWith(bottom: 0),
           ),
           child: Padding(
-            padding: EdgeInsets.only(bottom: bottomPadding),
+            padding: EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom),
             child: paddedContent,
           ),
         );
       }
-    } else if (widget.resizeToAvoidBottomInset) {
-      // If there is no navigation bar, still may need to add padding in order
-      // to support resizeToAvoidBottomInset.
-      paddedContent = MediaQuery(
-        data: existingMediaQuery.copyWith(
-          viewInsets: existingMediaQuery.viewInsets.copyWith(bottom: 0),
-        ),
-        child: Padding(
-          padding: EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom),
-          child: paddedContent,
-        ),
-      );
+      scaffold = paddedContent;
     }
 
     return ScrollNotificationObserver(
@@ -211,14 +222,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> with Widg
           child: Stack(
             children: <Widget>[
               // The main content being at the bottom is added to the stack first.
-              paddedContent,
-              if (widget.navigationBar != null)
-                Positioned(
-                  top: 0.0,
-                  left: 0.0,
-                  right: 0.0,
-                  child: MediaQuery.withNoTextScaling(child: widget.navigationBar!),
-                ),
+              scaffold,
               // Add a touch handler the size of the status bar on top of all contents
               // to handle scroll to top by status bar taps.
               Positioned(
@@ -270,18 +274,23 @@ class CupertinoPageScaffoldBackgroundColor extends InheritedWidget {
   }
 }
 
+/// Widget that reports whether it fully obstructs widgets behind it.
+///
+/// Used by [CupertinoPageScaffold] to either shift away fully obstructed content
+/// or provide a padding guide to partially obstructed content.
+abstract class ObstructingWidget implements Widget {
+  /// If true, this widget fully obstructs widgets behind it by its measured size.
+  ///
+  /// If false, this widget partially obstructs.
+  bool shouldFullyObstruct(BuildContext context);
+}
+
 /// Widget that has a preferred size and reports whether it fully obstructs
 /// widgets behind it.
 ///
 /// Used by [CupertinoPageScaffold] to either shift away fully obstructed content
 /// or provide a padding guide to partially obstructed content.
-abstract class ObstructingPreferredSizeWidget implements PreferredSizeWidget {
-  /// If true, this widget fully obstructs widgets behind it by the specified
-  /// size.
-  ///
-  /// If false, this widget partially obstructs.
-  bool shouldFullyObstruct(BuildContext context);
-}
+abstract class ObstructingPreferredSizeWidget implements ObstructingWidget, PreferredSizeWidget {}
 
 final class _HitTestableAtOrigin extends StatelessWidget {
   const _HitTestableAtOrigin(this.globalKey);

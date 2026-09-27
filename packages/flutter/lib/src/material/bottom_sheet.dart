@@ -398,15 +398,15 @@ class _BottomSheetState extends State<BottomSheet> {
         onNotification: extentChanged,
         child: !showDragHandle
             ? widget.builder(context)
-            : Stack(
-                alignment: Alignment.topCenter,
-                children: <Widget>[
-                  dragHandle!,
-                  Padding(
-                    padding: const EdgeInsets.only(top: kMinInteractiveDimension),
-                    child: widget.builder(context),
-                  ),
-                ],
+            : EdgeInsetsOverlay(
+                top: dragHandle,
+                builder:
+                    (BuildContext context, BoxConstraints constraints, EdgeInsets overlayPadding) {
+                      return Padding(
+                        padding: EdgeInsets.only(top: overlayPadding.top),
+                        child: widget.builder(context),
+                      );
+                    },
               ),
       ),
     );
