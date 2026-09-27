@@ -224,6 +224,7 @@ TEST(TsfBridgeWinInitializeTest, SkipsActivationWhenComIsMta) {
   ASSERT_TRUE(SUCCEEDED(hr));
 
   TsfBridgeWin bridge;
+  bridge.FocusNonEditable(reinterpret_cast<HWND>(1));
   EXPECT_FALSE(bridge.available());
 
   if (hr == S_OK) {

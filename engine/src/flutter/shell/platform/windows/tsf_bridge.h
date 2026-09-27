@@ -111,6 +111,9 @@ class TsfBridgeWin : public TsfBridge {
                ITfDocumentMgr* editable_document_mgr,
                std::function<void(TsfTextStoreDelegate*)> set_delegate);
 
+  // Activates TSF on first use. ITfThreadMgr::Activate waits for the STA
+  // message pump, so this must not run from engine startup.
+  bool EnsureInitialized();
   bool Initialize();
   void MaybeInitializeEmptyTextStore();
   HRESULT InitializeDisabledContext(ITfContext* context);
@@ -128,6 +131,7 @@ class TsfBridgeWin : public TsfBridge {
   TfEditCookie empty_edit_cookie_ = TF_INVALID_EDIT_COOKIE;
   HWND focused_hwnd_ = nullptr;
   HWND associated_hwnd_ = nullptr;
+  bool initialize_attempted_ = false;
   bool available_ = false;
   std::function<void(TsfTextStoreDelegate*)> set_delegate_;
 

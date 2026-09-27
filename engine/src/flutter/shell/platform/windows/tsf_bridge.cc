@@ -32,8 +32,14 @@ void LogTsfFailure(const char* api, HRESULT hr) {
 
 }  // namespace
 
-TsfBridgeWin::TsfBridgeWin() {
-  Initialize();
+TsfBridgeWin::TsfBridgeWin() = default;
+
+bool TsfBridgeWin::EnsureInitialized() {
+  if (initialize_attempted_) {
+    return available_;
+  }
+  initialize_attempted_ = true;
+  return Initialize();
 }
 
 TsfBridgeWin::TsfBridgeWin(
@@ -44,6 +50,7 @@ TsfBridgeWin::TsfBridgeWin(
     : thread_mgr_(thread_mgr),
       empty_document_mgr_(empty_document_mgr),
       editable_document_mgr_(editable_document_mgr),
+      initialize_attempted_(true),
       available_(true),
       set_delegate_(std::move(set_delegate)) {}
 
@@ -219,7 +226,7 @@ HRESULT TsfBridgeWin::InitializeDisabledContext(ITfContext* context) {
 }
 
 void TsfBridgeWin::FocusEditable(HWND hwnd, TsfTextStoreDelegate* delegate) {
-  if (!available_ || hwnd == nullptr) {
+  if (!EnsureInitialized() || hwnd == nullptr) {
     return;
   }
   if (associated_hwnd_ != nullptr && associated_hwnd_ != hwnd) {
@@ -239,7 +246,7 @@ void TsfBridgeWin::FocusEditable(HWND hwnd, TsfTextStoreDelegate* delegate) {
 }
 
 void TsfBridgeWin::FocusNonEditable(HWND hwnd) {
-  if (!available_) {
+  if (!EnsureInitialized()) {
     return;
   }
   if (set_delegate_) {
