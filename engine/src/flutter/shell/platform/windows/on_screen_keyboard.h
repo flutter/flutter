@@ -14,7 +14,6 @@
 #include <optional>
 
 #include "flutter/fml/macros.h"
-#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 
 namespace flutter {
@@ -173,6 +172,7 @@ class OnScreenKeyboardWin : public OnScreenKeyboard {
                              const RECT& view_client_screen);
 
   // Handles the end of an interactive move or resize reported by WinEvent.
+  // Called on the platform thread.
   void OnRootWindowMoveSizeEnded(HWND hwnd);
 
  protected:
@@ -193,6 +193,11 @@ class OnScreenKeyboardWin : public OnScreenKeyboard {
   // Subscribes to InputPane Showing/Hiding for |hwnd|. No-op on COM/WinRT
   // failure (CO_E_NOTINITIALIZED, REGDB_E_CLASSNOTREG, invalid HWND).
   bool EnsureInputPane(HWND hwnd);
+
+  // Platform-thread work for an InputPane Showing or Hiding event. The COM
+  // callbacks marshal onto this thread before calling these.
+  void OnInputPaneShowing(HWND view_hwnd, const DipRect& occluded_dip);
+  void OnInputPaneHiding();
 
   void UpdateWindowForOcclusion(HWND root, HWND view);
   void RestoreWindowAfterKeyboard();
@@ -218,7 +223,10 @@ class OnScreenKeyboardWin : public OnScreenKeyboard {
   HWND original_placement_root_ = nullptr;
   uint64_t geometry_generation_ = 0;
 
-  fml::WeakPtrFactory<OnScreenKeyboardWin> weak_factory_;
+  // Lifetime token for tasks posted from WinRT threads and from the platform
+  // task runner. Reset in the destructor so those tasks fail closed.
+  // HostWindowSized uses the same pattern for raster-thread posts.
+  std::shared_ptr<int> alive_ = std::make_shared<int>(0);
 
   FML_DISALLOW_COPY_AND_ASSIGN(OnScreenKeyboardWin);
 };

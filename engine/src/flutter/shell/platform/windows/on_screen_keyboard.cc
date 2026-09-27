@@ -43,8 +43,17 @@ using WindowsCreateStringReferenceFn = HRESULT(WINAPI*)(PCWSTR,
                                                         HSTRING_HEADER*,
                                                         HSTRING*);
 
+// Copied out of the hook map so the WinEvent callback can reach the platform
+// thread without using |OnScreenKeyboardWin| first. The keyboard is used only
+// after the lifetime token locks.
+struct MoveSizeHookTarget {
+  OnScreenKeyboardWin* keyboard = nullptr;
+  std::weak_ptr<int> alive;
+  TaskRunner* task_runner = nullptr;
+};
+
 std::mutex g_move_size_hooks_mutex;
-std::unordered_map<HWINEVENTHOOK, OnScreenKeyboardWin*> g_move_size_hooks;
+std::unordered_map<HWINEVENTHOOK, MoveSizeHookTarget> g_move_size_hooks;
 
 void CALLBACK OnMoveSizeWinEvent(HWINEVENTHOOK hook,
                                  DWORD event,
@@ -56,17 +65,22 @@ void CALLBACK OnMoveSizeWinEvent(HWINEVENTHOOK hook,
   if (event != EVENT_SYSTEM_MOVESIZEEND || hwnd == nullptr) {
     return;
   }
-  OnScreenKeyboardWin* keyboard = nullptr;
+  MoveSizeHookTarget target;
   {
     std::lock_guard<std::mutex> lock(g_move_size_hooks_mutex);
     const auto iterator = g_move_size_hooks.find(hook);
-    if (iterator != g_move_size_hooks.end()) {
-      keyboard = iterator->second;
+    if (iterator == g_move_size_hooks.end()) {
+      return;
     }
+    target = iterator->second;
   }
-  if (keyboard != nullptr) {
-    keyboard->OnRootWindowMoveSizeEnded(hwnd);
-  }
+  target.task_runner->RunNowOrPostTask(
+      [keyboard = target.keyboard, alive = target.alive, hwnd]() {
+        if (!alive.lock()) {
+          return;
+        }
+        keyboard->OnRootWindowMoveSizeEnded(hwnd);
+      });
 }
 
 HMODULE CombaseModule() {
@@ -266,14 +280,16 @@ OnScreenKeyboardWin::OnScreenKeyboardWin(TaskRunner* task_runner)
 OnScreenKeyboardWin::OnScreenKeyboardWin(
     TaskRunner* task_runner,
     std::unique_ptr<OnScreenKeyboardWin32Api> window_api)
-    : task_runner_(task_runner),
-      window_api_(std::move(window_api)),
-      weak_factory_(this) {
+    : task_runner_(task_runner), window_api_(std::move(window_api)) {
   FML_DCHECK(task_runner_);
   FML_DCHECK(window_api_);
 }
 
 OnScreenKeyboardWin::~OnScreenKeyboardWin() {
+  // Drop the token before unsubscribing or restoring the window. An in-flight
+  // WinRT callback may still post; that task fails the lock.
+  alive_.reset();
+  pane_session_.reset();
   RestoreWindowAfterKeyboard();
 }
 
@@ -423,17 +439,18 @@ void OnScreenKeyboardWin::RequestVisibility(HWND hwnd, bool show) {
   pending_hwnd_ = hwnd;
   pending_show_ = show;
   const uint64_t generation = ++generation_;
+  const std::weak_ptr<int> alive = alive_;
   task_runner_->PostDelayedTask(
-      [weak = weak_factory_.GetWeakPtr(), generation]() {
-        if (!weak || generation != weak->generation_) {
+      [this, alive, generation]() {
+        if (!alive.lock() || generation != generation_) {
           return;
         }
-        const bool show = weak->pending_show_;
-        const HWND hwnd = weak->pending_hwnd_;
-        weak->pending_show_ = false;
+        const bool show = pending_show_;
+        const HWND hwnd = pending_hwnd_;
+        pending_show_ = false;
         // A Dismiss may supersede an applied Display before Showing arrives.
-        weak->show_request_in_flight_ = show;
-        weak->ApplyVisibility(hwnd, show);
+        show_request_in_flight_ = show;
+        ApplyVisibility(hwnd, show);
       },
       kDisplayDismissDebounce);
 }
@@ -447,6 +464,7 @@ void OnScreenKeyboardWin::CancelPendingDisplay() {
 }
 
 bool OnScreenKeyboardWin::EnsureInputPane(HWND hwnd) {
+  FML_DCHECK(task_runner_->RunsTasksOnCurrentThread());
   if (pane_session_ && pane_session_->view_hwnd == hwnd &&
       pane_session_->pane) {
     return true;
@@ -467,9 +485,16 @@ bool OnScreenKeyboardWin::EnsureInputPane(HWND hwnd) {
   session->view_hwnd = hwnd;
   session->pane = pane;
 
+  // Showing/Hiding are agile and run on a WinRT thread. Copy the lifetime
+  // token and task runner here, while still on the platform thread. The
+  // callback reads only the event arguments, then the keyboard is used after
+  // the token locks on the platform thread.
+  OnScreenKeyboardWin* const keyboard = this;
+  const std::weak_ptr<int> alive = alive_;
+  TaskRunner* const task_runner = task_runner_;
   auto showing_handler = Callback<InputPaneVisibilityHandler>(
-      [this, view_hwnd = hwnd](IInputPane* /*sender*/,
-                               IInputPaneVisibilityEventArgs* args) {
+      [keyboard, alive, task_runner, view_hwnd = hwnd](
+          IInputPane* /*sender*/, IInputPaneVisibilityEventArgs* args) {
         DipRect occluded_dip{};
         if (args) {
           Rect occluded{};
@@ -480,70 +505,91 @@ bool OnScreenKeyboardWin::EnsureInputPane(HWND hwnd) {
             occluded_dip.height = occluded.Height;
           }
         }
-        if (!window_api_->IsWindowValid(view_hwnd)) {
-          return S_OK;
-        }
-        HWND root = window_api_->GetRootWindow(view_hwnd);
-        const double scale = static_cast<double>(GetDpiForHWND(root)) /
-                             static_cast<double>(kDefaultDpi);
-        POINT origin{0, 0};
-        ClientToScreen(root, &origin);
-        RECT view_client{};
-        if (!window_api_->GetClientScreenRect(view_hwnd, &view_client)) {
-          return S_OK;
-        }
-        HandleVisibilityEvent(view_hwnd, true, occluded_dip, scale, origin,
-                              view_client);
+        task_runner->RunNowOrPostTask(
+            [keyboard, alive, view_hwnd, occluded_dip]() {
+              if (!alive.lock()) {
+                return;
+              }
+              keyboard->OnInputPaneShowing(view_hwnd, occluded_dip);
+            });
         return S_OK;
       });
   auto hiding_handler = Callback<InputPaneVisibilityHandler>(
-    [this](IInputPane* /*sender*/, IInputPaneVisibilityEventArgs* /*args*/) {[this](IInputPane* /*sender*/,
-      IInputPaneVisibilityEventArgs* /*args*/) {
-      RECT empty{};
-      HandleVisibilityEvent(nullptr, false, DipRect{}, 1.0, POINT{0, 0}, empty);
-      return S_OK;
+      [keyboard, alive, task_runner](IInputPane* /*sender*/,
+                                     IInputPaneVisibilityEventArgs* /*args*/) {
+        task_runner->RunNowOrPostTask([keyboard, alive]() {
+          if (!alive.lock()) {
+            return;
+          }
+          keyboard->OnInputPaneHiding();
+        });
+        return S_OK;
       });
 
-    if (!showing_handler || !hiding_handler) {
-      LogInputPaneFailure("Callback", E_OUTOFMEMORY);
-      return false;
-    }
+  if (!showing_handler || !hiding_handler) {
+    LogInputPaneFailure("Callback", E_OUTOFMEMORY);
+    return false;
+  }
 
-    hr = pane->add_Showing(showing_handler.Get(), &session->showing_token);
-    if (FAILED(hr)) {
-      LogInputPaneFailure("add_Showing", hr);
-      return false;
-    }
-    session->showing_subscribed = true;
+  hr = pane->add_Showing(showing_handler.Get(), &session->showing_token);
+  if (FAILED(hr)) {
+    LogInputPaneFailure("add_Showing", hr);
+    return false;
+  }
+  session->showing_subscribed = true;
 
-    hr = pane->add_Hiding(hiding_handler.Get(), &session->hiding_token);
-    if (FAILED(hr)) {
-      LogInputPaneFailure("add_Hiding", hr);
-      return false;
-    }
-    session->hiding_subscribed = true;
+  hr = pane->add_Hiding(hiding_handler.Get(), &session->hiding_token);
+  if (FAILED(hr)) {
+    LogInputPaneFailure("add_Hiding", hr);
+    return false;
+  }
+  session->hiding_subscribed = true;
 
-    pane_session_ = std::move(session);
-    return true;
+  pane_session_ = std::move(session);
+  return true;
+}
+
+void OnScreenKeyboardWin::OnInputPaneShowing(HWND view_hwnd,
+                                             const DipRect& occluded_dip) {
+  FML_DCHECK(task_runner_->RunsTasksOnCurrentThread());
+  if (!window_api_->IsWindowValid(view_hwnd)) {
+    return;
+  }
+  HWND root = window_api_->GetRootWindow(view_hwnd);
+  const double scale = static_cast<double>(GetDpiForHWND(root)) /
+                       static_cast<double>(kDefaultDpi);
+  POINT origin{0, 0};
+  ClientToScreen(root, &origin);
+  RECT view_client{};
+  if (!window_api_->GetClientScreenRect(view_hwnd, &view_client)) {
+    return;
+  }
+  HandleVisibilityEvent(view_hwnd, true, occluded_dip, scale, origin,
+                        view_client);
+}
+
+void OnScreenKeyboardWin::OnInputPaneHiding() {
+  FML_DCHECK(task_runner_->RunsTasksOnCurrentThread());
+  RECT empty{};
+  HandleVisibilityEvent(nullptr, false, DipRect{}, 1.0, POINT{0, 0}, empty);
 }
 
 void OnScreenKeyboardWin::OnRootWindowMoveSizeEnded(HWND hwnd) {
-    task_runner_->RunNowOrPostTask([weak = weak_factory_.GetWeakPtr(), hwnd]() {
-      if (!weak || !weak->shown_ || hwnd != weak->tracked_root_) {
-        return;
-      }
-      // EVENT_SYSTEM_MOVESIZEEND represents the end of an interactive move
-      // or resize. Restore to that user-selected placement, rather than the
-      // placement from before the keyboard opened.
-      WINDOWPLACEMENT placement{};
-      placement.length = sizeof(placement);
-      if (weak->window_api_->GetPlacement(hwnd, &placement)) {
-        weak->original_window_placement_ = placement;
-        weak->original_placement_root_ = hwnd;
-      }
-      weak->UpdateWindowForOcclusion(hwnd, weak->tracked_view_);
-      weak->NotifyVisibilityChanged();
-    });
+  FML_DCHECK(task_runner_->RunsTasksOnCurrentThread());
+  if (!shown_ || hwnd != tracked_root_) {
+    return;
+  }
+  // EVENT_SYSTEM_MOVESIZEEND represents the end of an interactive move or
+  // resize. Restore to that user-selected placement, rather than the placement
+  // from before the keyboard opened.
+  WINDOWPLACEMENT placement{};
+  placement.length = sizeof(placement);
+  if (window_api_->GetPlacement(hwnd, &placement)) {
+    original_window_placement_ = placement;
+    original_placement_root_ = hwnd;
+  }
+  UpdateWindowForOcclusion(hwnd, tracked_view_);
+  NotifyVisibilityChanged();
 }
 
 void OnScreenKeyboardWin::StartTrackingWindow(HWND root, HWND view) {
@@ -563,7 +609,8 @@ void OnScreenKeyboardWin::StartTrackingWindow(HWND root, HWND view) {
     move_size_hook_ = window_api_->SetMoveSizeEndHook(OnMoveSizeWinEvent);
     if (move_size_hook_ != nullptr) {
       std::lock_guard<std::mutex> lock(g_move_size_hooks_mutex);
-      g_move_size_hooks[move_size_hook_] = this;
+      g_move_size_hooks[move_size_hook_] =
+          MoveSizeHookTarget{this, alive_, task_runner_};
     }
 }
 
@@ -671,16 +718,16 @@ void OnScreenKeyboardWin::HandleVisibilityEvent(
           // Apply restored-window geometry only after the final observation has
           // remained stable for the debounce interval.
           notify_immediately = false;
+          const std::weak_ptr<int> alive = alive_;
           task_runner_->PostDelayedTask(
-              [weak = weak_factory_.GetWeakPtr(), geometry_generation, root,
-               view_hwnd]() {
-                if (!weak || !weak->shown_ ||
-                    geometry_generation != weak->geometry_generation_ ||
-                    root != weak->tracked_root_) {
+              [this, alive, geometry_generation, root, view_hwnd]() {
+                if (!alive.lock() || !shown_ ||
+                    geometry_generation != geometry_generation_ ||
+                    root != tracked_root_) {
                   return;
                 }
-                weak->UpdateWindowForOcclusion(root, view_hwnd);
-                weak->NotifyVisibilityChanged();
+                UpdateWindowForOcclusion(root, view_hwnd);
+                NotifyVisibilityChanged();
               },
               kDisplayDismissDebounce);
         }
@@ -692,10 +739,11 @@ void OnScreenKeyboardWin::HandleVisibilityEvent(
       show_request_in_flight_ = false;
       physical_bottom_inset_ = 0.0;
       const uint64_t geometry_generation = ++geometry_generation_;
+      const std::weak_ptr<int> alive = alive_;
       task_runner_->PostDelayedTask(
-          [weak = weak_factory_.GetWeakPtr(), geometry_generation]() {
-            if (weak && geometry_generation == weak->geometry_generation_) {
-              weak->RestoreWindowAfterKeyboard();
+          [this, alive, geometry_generation]() {
+            if (alive.lock() && geometry_generation == geometry_generation_) {
+              RestoreWindowAfterKeyboard();
             }
           },
           kDisplayDismissDebounce);
