@@ -258,6 +258,10 @@ class Placeholder {
     r'^([a-zA-Z_$][a-zA-Z0-9_$]*\.)*[a-zA-Z_$][a-zA-Z0-9_$]*(\s*<[a-zA-Z0-9_$,\s<>?]+>)?\??$',
   );
 
+  /// Optional parameter names are written into the generated source as named
+  /// arguments, so they must be plain Dart identifiers.
+  static final RegExp _validIdentifierRegExp = RegExp(r'^[a-zA-Z_$][a-zA-Z0-9_$]*$');
+
   /// Validates that [type] represents a syntactically valid Dart type identifier.
   static bool _isValidType(String type) {
     if (type.isEmpty) {
@@ -343,6 +347,13 @@ class Placeholder {
     }
     final Map<String, Object?> optionalParameterMap = value;
     return optionalParameterMap.keys.map<OptionalParameter>((String parameterName) {
+      if (!_validIdentifierRegExp.hasMatch(parameterName)) {
+        throw L10nException(
+          'Invalid optional parameter name "$parameterName" for placeholder "$name" in message '
+          '"$resourceId". Optional parameter names must be valid Dart identifiers, such as '
+          '"decimalDigits".',
+        );
+      }
       return OptionalParameter(parameterName, optionalParameterMap[parameterName]!);
     }).toList();
   }
