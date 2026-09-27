@@ -82,6 +82,8 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   JavaLocalRef ImageGetHardwareBuffer(JavaLocalRef image) override;
 
+  std::optional<SkISize> ImageGetSize(JavaLocalRef image) override;
+
   void ImageClose(JavaLocalRef image) override;
 
   void HardwareBufferClose(JavaLocalRef hardware_buffer) override;
