@@ -555,9 +555,7 @@ void main() {
     await tester.pumpWidget(parent);
 
     expect(error, isFlutterError);
-    // The error is line-wrapped when it is rendered, so collapse the whitespace
-    // before looking for the sentences.
-    final String message = error.toString().replaceAll(RegExp(r'\s+'), ' ');
+    final message = error.toString();
     expect(
       message,
       contains(
@@ -565,10 +563,9 @@ void main() {
         'was called before ExpectFailState.initState() completed',
       ),
     );
-    // The reason the call is too early is that initState() runs once and is not
-    // run again when the inherited widget changes, so the error should say so
-    // rather than claiming the rebuilt widget does not see the change.
-    expect(message, contains('calls initState() only once per State object'));
+    // The error should explain that initState() runs only once for each State
+    // object, so a value it reads from an inherited widget is never updated.
+    expect(message, contains('calls initState() only once for each State object'));
     expect(message, contains('is never updated when that inherited widget changes'));
     expect(message, contains('can be placed in the didChangeDependencies method'));
   });
