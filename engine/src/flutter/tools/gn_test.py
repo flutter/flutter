@@ -43,6 +43,17 @@ class GNTestCase(unittest.TestCase):
         self._gn_args(['--ios', '--simulator', '--simulator-cpu', 'x64'])['target_cpu'], 'x64'
     )
     self.assertEqual(self._gn_args(['--ios'])['target_cpu'], 'arm64')
+    self.assertEqual(self._gn_args(['--web'])['flutter_runtime_mode'], 'debug')
+    self.assertEqual(
+        self._gn_args(['--web', '--runtime-mode', 'profile'])['flutter_runtime_mode'], 'profile'
+    )
+    self.assertEqual(
+        self._gn_args(['--web', '--runtime-mode', 'release'])['flutter_runtime_mode'], 'release'
+    )
+    self.assertEqual(
+        self._gn_args(['--target-os', 'wasm', '--runtime-mode', 'release'])['flutter_runtime_mode'],
+        'release'
+    )
 
   def test_cannot_use_android_and_enable_unittests(self):
     with self.assertRaises(Exception):
