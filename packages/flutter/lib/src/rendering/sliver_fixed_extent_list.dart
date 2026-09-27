@@ -681,10 +681,10 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     int result = _itemOffsetCache.length - 1;
     while (low <= high) {
       final int mid = (low + high) ~/ 2;
-      final bool condition = findMax 
-          ? _itemOffsetCache[mid] >= scrollOffset 
+      final bool isPastScrollOffset = findMax
+          ? _itemOffsetCache[mid] >= scrollOffset
           : _itemOffsetCache[mid] > scrollOffset;
-      if (condition) {
+      if (isPastScrollOffset) {
         result = mid;
         high = mid - 1;
       } else {
