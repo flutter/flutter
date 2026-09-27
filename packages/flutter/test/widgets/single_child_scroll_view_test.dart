@@ -1170,6 +1170,12 @@ void main() {
       await tester.pump();
     }
 
+    // Rows are removed from the end: the trailing edge moves, the leading edge stays.
+    Future<void> shrinkContent(WidgetTester tester, {required int rows}) async {
+      rebuildContent(() => extraRows -= rows);
+      await tester.pump();
+    }
+
     testWidgets('during a drag past the leading edge', (WidgetTester tester) async {
       final ScrollController controller = await pumpOverscrollable(tester);
 
@@ -1288,6 +1294,34 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expect(controller.position.pixels, maxScrollExtent + 32.0);
+    });
+
+    testWidgets('during a drag past the trailing edge while the content shrinks at that edge', (
+      WidgetTester tester,
+    ) async {
+      final ScrollController controller = await pumpOverscrollable(tester);
+      final double maxScrollExtent = controller.position.maxScrollExtent;
+      controller.jumpTo(maxScrollExtent);
+      await tester.pump();
+
+      final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
+      final double overscroll = controller.position.pixels - maxScrollExtent;
+      expect(overscroll, greaterThan(20.0));
+
+      // The edge the drag is past moves in and the offset follows it, keeping the overscroll, as
+      // RangeMaintainingScrollPhysics does for a sliver viewport.
+      await shrinkContent(tester, rows: 5);
+      expect(controller.position.maxScrollExtent, maxScrollExtent - 5 * 32.0);
+      expect(controller.position.pixels, maxScrollExtent - 5 * 32.0 + overscroll);
+
+      // Down to content that fits the viewport: the offset keeps the overscroll past zero.
+      await shrinkContent(tester, rows: 20);
+      expect(controller.position.maxScrollExtent, 0.0);
+      expect(controller.position.pixels, overscroll);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.position.pixels, 0.0);
     });
   });
 }
