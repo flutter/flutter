@@ -306,6 +306,9 @@ static GtkATContext* fl_gtk4_accessible_node_get_at_context(
     return GTK_AT_CONTEXT(g_object_ref(self->at_context));
   }
 
+  if (self->view == nullptr) {
+    return nullptr;
+  }
   GtkWidget* widget = GTK_WIDGET(self->view);
   GdkDisplay* display = gtk_widget_get_display(widget);
   if (display == nullptr) {
@@ -325,7 +328,9 @@ static GtkAccessible* fl_gtk4_accessible_node_get_accessible_parent(
   if (self->parent != nullptr) {
     return GTK_ACCESSIBLE(g_object_ref(self->parent));
   }
-  return GTK_ACCESSIBLE(g_object_ref(self->view->render_area));
+  return self->view == nullptr
+             ? nullptr
+             : GTK_ACCESSIBLE(g_object_ref(self->view->render_area));
 }
 
 static GtkAccessible* fl_gtk4_accessible_node_get_first_accessible_child(
@@ -917,11 +922,23 @@ static void fl_view_gtk4_accessibility_rebuild_native_tree(
         render_area, GTK_ACCESSIBLE(self->root_node));
   }
 
+  // Disconnect the entire removed subtree while the table still owns every
+  // node. Accessibility clients may retain nodes after their parents are freed.
   g_hash_table_iter_init(&nodes_iter, self->native_nodes_by_id);
   while (g_hash_table_iter_next(&nodes_iter, &node_key, &node_value)) {
     if (!g_hash_table_contains(visited, node_key)) {
+      auto* node = FL_GTK4_ACCESSIBLE_NODE(node_value);
+      node->parent = nullptr;
+      node->next_sibling = nullptr;
+      node->view = nullptr;
+      g_ptr_array_set_size(node->children, 0);
       fl_gtk_runtime_accessible_set_accessible_parent(
           GTK_ACCESSIBLE(node_value), nullptr, nullptr);
+    }
+  }
+  g_hash_table_iter_init(&nodes_iter, self->native_nodes_by_id);
+  while (g_hash_table_iter_next(&nodes_iter, &node_key, nullptr)) {
+    if (!g_hash_table_contains(visited, node_key)) {
       g_hash_table_iter_remove(&nodes_iter);
     }
   }

@@ -45,6 +45,126 @@ TEST_F(FlViewGtk4AccessibilityTest,
       static_cast<GLogLevelFlags>(G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL)));
 }
 
+TEST_F(FlViewGtk4AccessibilityTest, RemovedSubtreeClearsRetainedLinks) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  int32_t children[] = {1};
+  int32_t grandchildren[] = {2, 3};
+  FlutterSemanticsNode2 root = {};
+  root.child_count = 1;
+  root.children_in_traversal_order = children;
+  FlutterSemanticsNode2 parent = {};
+  parent.id = 1;
+  parent.child_count = 2;
+  parent.children_in_traversal_order = grandchildren;
+  FlutterSemanticsNode2 child = {};
+  child.id = 2;
+  FlutterSemanticsNode2 sibling = {};
+  sibling.id = 3;
+  FlutterSemanticsNode2* nodes[] = {&root, &parent, &child, &sibling};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 4;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) native_root =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  g_autoptr(GtkAccessible) removed_parent =
+      fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
+          native_root);
+  ASSERT_NE(removed_parent, nullptr);
+  g_autoptr(GtkAccessible) retained_child =
+      fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
+          removed_parent);
+  ASSERT_NE(retained_child, nullptr);
+  GWeakRef parent_ref;
+  g_weak_ref_init(&parent_ref, removed_parent);
+
+  root.child_count = 0;
+  root.children_in_traversal_order = nullptr;
+  update.node_count = 1;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) stale_child =
+      fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
+          removed_parent);
+  EXPECT_EQ(stale_child, nullptr);
+  g_clear_object(&removed_parent);
+  g_autoptr(GObject) surviving_parent = G_OBJECT(g_weak_ref_get(&parent_ref));
+  EXPECT_EQ(surviving_parent, nullptr);
+  g_weak_ref_clear(&parent_ref);
+
+  auto* iface = reinterpret_cast<FlGtkAccessibleInterface4_10*>(
+      GTK_ACCESSIBLE_GET_IFACE(retained_child));
+  g_autoptr(GtkAccessible) stale_parent =
+      iface->get_accessible_parent(retained_child);
+  EXPECT_EQ(stale_parent, nullptr);
+  g_autoptr(GtkAccessible) stale_sibling =
+      fl_view_gtk4_accessibility_ref_next_native_sibling_for_testing(
+          retained_child);
+  EXPECT_EQ(stale_sibling, nullptr);
+}
+
+TEST_F(FlViewGtk4AccessibilityTest, RemovedParentPreservesReparentedChild) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  int32_t children[] = {1};
+  int32_t grandchildren[] = {2};
+  FlutterSemanticsNode2 root = {};
+  root.child_count = 1;
+  root.children_in_traversal_order = children;
+  FlutterSemanticsNode2 parent = {};
+  parent.id = 1;
+  parent.child_count = 1;
+  parent.children_in_traversal_order = grandchildren;
+  FlutterSemanticsNode2 child = {};
+  child.id = 2;
+  FlutterSemanticsNode2* nodes[] = {&root, &parent, &child};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 3;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) native_root =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  g_autoptr(GtkAccessible) removed_parent =
+      fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
+          native_root);
+  ASSERT_NE(removed_parent, nullptr);
+  g_autoptr(GtkAccessible) retained_child =
+      fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
+          removed_parent);
+  ASSERT_NE(retained_child, nullptr);
+
+  root.children_in_traversal_order = grandchildren;
+  update.node_count = 1;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) current_child =
+      fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
+          native_root);
+  EXPECT_EQ(current_child, retained_child);
+  g_autoptr(GtkAccessible) stale_child =
+      fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
+          removed_parent);
+  EXPECT_EQ(stale_child, nullptr);
+  auto* iface = reinterpret_cast<FlGtkAccessibleInterface4_10*>(
+      GTK_ACCESSIBLE_GET_IFACE(retained_child));
+  g_autoptr(GtkAccessible) current_parent =
+      iface->get_accessible_parent(retained_child);
+  EXPECT_EQ(current_parent, native_root);
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
