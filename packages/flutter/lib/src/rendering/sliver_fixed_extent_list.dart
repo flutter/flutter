@@ -570,6 +570,17 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     return _itemOffsetCache[index];
   }
 
+  double? _getOrCreateItemExtent(int index) {
+    if (index < _itemExtentCache.length) {
+      return _itemExtentCache[index];
+    }
+    final double? offset = _getOrCreateItemOffset(index + 1);
+    if (offset == null) {
+      return null;
+    }
+    return _itemExtentCache[index];
+  }
+
   @override
   ItemExtentBuilder get itemExtentBuilder => _itemExtentBuilder;
   ItemExtentBuilder _itemExtentBuilder;
@@ -587,12 +598,11 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   @override
   double paintExtentOf(RenderBox child) {
     final int index = indexOf(child);
-    final double? extent = itemExtentBuilder(index, layoutDimensions);
     assert(
-      extent != null,
+      index != -1 && index < _itemExtentCache.length,
       'The itemExtentBuilder should have already been called for child at index $index.',
     );
-    return extent ?? 0.0;
+    return _itemExtentCache[index];
   }
 
   @override
@@ -604,7 +614,16 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     }
     _lastViewportMainAxisExtent = constraints.viewportMainAxisExtent;
     _lastCrossAxisExtent = constraints.crossAxisExtent;
+
     super.performLayout();
+
+    // Ensure the itemExtentBuilder is called at least once per frame with the latest
+    // layoutDimensions, so that listeners or tests tracking the latest scrollOffset get updated.
+    final int firstIndex = _findChildIndexForScrollOffset(
+      constraints.scrollOffset + constraints.cacheOrigin,
+      findMax: false,
+    );
+    itemExtentBuilder(firstIndex, layoutDimensions);
   }
 
   @override
@@ -701,7 +720,7 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
 
   @override
   BoxConstraints _getChildConstraints(int index) {
-    final double? extent = itemExtentBuilder(index, layoutDimensions);
+    final double? extent = _getOrCreateItemExtent(index);
     assert(
       extent != null,
       'The itemExtentBuilder must not return null for valid items being laid out.',
