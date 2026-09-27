@@ -61,14 +61,14 @@ class _ImgElementPlatformViewState extends State<ImgElementPlatformView> {
 
   void _onPlatformViewCreated(int viewId) {
     final img = ui_web.platformViewRegistry.getViewById(viewId) as web.HTMLImageElement;
-    if (!mounted) {
+    if (!mounted || widget.src == null) {
       img.src = '';
       return;
     }
     _imgElement = img;
     if (_srcUpdatedBeforeCreated) {
       _srcUpdatedBeforeCreated = false;
-      img.src = widget.src ?? '';
+      img.src = widget.src!;
     }
   }
 
@@ -82,7 +82,7 @@ class _ImgElementPlatformViewState extends State<ImgElementPlatformView> {
         _srcUpdatedBeforeCreated = false;
       } else if (_imgElement != null) {
         _imgElement!.src = widget.src!;
-      } else {
+      } else if (oldWidget.src != null) {
         _srcUpdatedBeforeCreated = true;
       }
     }

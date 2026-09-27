@@ -523,6 +523,22 @@ void runTests() {
     expect(imgElement.src, isNot(contains('frame_')));
   });
 
+  testWidgets('ImgElementPlatformView clears <img> src when updated to null', (
+    WidgetTester tester,
+  ) async {
+    final String url = _uniqueUrl(tester.testDescription);
+    await tester.pumpWidget(ImgElementPlatformView(url));
+    await tester.pumpAndSettle();
+
+    final FakePlatformView imgElementPlatformView = fakePlatformViewRegistry.views.single;
+    final imgElement = imgElementPlatformView.htmlElement as web.HTMLImageElement;
+    expect(imgElement.src, url);
+
+    await tester.pumpWidget(ImgElementPlatformView(null));
+    await tester.pumpAndSettle();
+    expect(imgElement.getAttribute('src'), isEmpty);
+  });
+
   testWidgets(
     'NetworkImage with WebHtmlElementStrategy.prefer clears both off-DOM and platform view <img> src when unmounted and evicted',
     (WidgetTester tester) async {
