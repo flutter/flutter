@@ -1253,6 +1253,25 @@ void main() {
     );
   });
 
+  testWidgets('dispose() error explains that super.dispose() must be called synchronously', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const _AsyncDisposeWidget());
+
+    // Removing the widget calls dispose(), which returns before it reaches
+    // super.dispose() because of the await.
+    await tester.pumpWidget(Container());
+
+    expect(
+      tester.takeException(),
+      isA<FlutterError>().having(
+        (FlutterError error) => error.toString(),
+        'message',
+        allOf(contains('failed to call super.dispose'), contains('before the first await')),
+      ),
+    );
+  });
+
   testWidgets('State toString', (WidgetTester tester) async {
     final state = TestState();
     expect(state.toString(), contains('no widget'));
@@ -2709,4 +2728,22 @@ class _NullElement extends Element {
 
   @override
   bool get debugDoingBuild => throw UnimplementedError();
+}
+
+class _AsyncDisposeWidget extends StatefulWidget {
+  const _AsyncDisposeWidget();
+
+  @override
+  State<_AsyncDisposeWidget> createState() => _AsyncDisposeWidgetState();
+}
+
+class _AsyncDisposeWidgetState extends State<_AsyncDisposeWidget> {
+  @override
+  Future<void> dispose() async {
+    await Future<void>.value();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
 }
