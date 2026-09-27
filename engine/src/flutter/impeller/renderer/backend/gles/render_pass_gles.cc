@@ -367,6 +367,9 @@ static void EncodeViewport(const ProcTableGLES& gl,
   // Inverted to keep front-facing consistent under the vertex y-flip.
   gl.FrontFace(flip_y ? GL_CCW : GL_CW);
 
+  const PipelineGLES* previous_pipeline = nullptr;
+  uint32_t previous_stencil_reference = ~0u;
+
   for (const auto& command : commands) {
 #ifdef IMPELLER_DEBUG
     fml::ScopedCleanupClosure pop_cmd_debug_marker(
@@ -388,27 +391,37 @@ static void EncodeViewport(const ProcTableGLES& gl,
       return false;
     }
 
-    //--------------------------------------------------------------------------
-    /// Configure blending.
-    ///
-    ConfigureBlending(gl, color_attachment);
+    if (previous_pipeline != &pipeline) {
+      //--------------------------------------------------------------------------
+      /// Configure blending.
+      ///
+      ConfigureBlending(gl, color_attachment);
 
-    //--------------------------------------------------------------------------
-    /// Setup stencil.
-    ///
-    ConfigureStencil(gl, pipeline.GetDescriptor(), command.stencil_reference);
+      //--------------------------------------------------------------------------
+      /// Setup stencil.
+      ///
+      ConfigureStencil(gl, pipeline.GetDescriptor(), command.stencil_reference);
 
-    //--------------------------------------------------------------------------
-    /// Configure depth.
-    ///
-    if (auto depth =
-            pipeline.GetDescriptor().GetDepthStencilAttachmentDescriptor();
-        depth.has_value()) {
-      gl.Enable(GL_DEPTH_TEST);
-      gl.DepthFunc(ToCompareFunction(depth->depth_compare));
-      gl.DepthMask(depth->depth_write_enabled ? GL_TRUE : GL_FALSE);
-    } else {
-      gl.Disable(GL_DEPTH_TEST);
+      //--------------------------------------------------------------------------
+      /// Configure depth.
+      ///
+      if (auto depth =
+              pipeline.GetDescriptor().GetDepthStencilAttachmentDescriptor();
+          depth.has_value()) {
+        gl.Enable(GL_DEPTH_TEST);
+        gl.DepthFunc(ToCompareFunction(depth->depth_compare));
+        gl.DepthMask(depth->depth_write_enabled ? GL_TRUE : GL_FALSE);
+      } else {
+        gl.Disable(GL_DEPTH_TEST);
+      }
+
+      previous_stencil_reference = command.stencil_reference;
+    } else if (previous_stencil_reference != command.stencil_reference) {
+      //--------------------------------------------------------------------------
+      /// Setup stencil.
+      ///
+      ConfigureStencil(gl, pipeline.GetDescriptor(), command.stencil_reference);
+      previous_stencil_reference = command.stencil_reference;
     }
 
     //--------------------------------------------------------------------------
@@ -496,15 +509,19 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Bind the pipeline program.
     ///
-    if (!pipeline.BindProgram()) {
-      return false;
-    }
+    if (previous_pipeline != &pipeline) {
+      if (!pipeline.BindProgram()) {
+        return false;
+      }
 
-    //--------------------------------------------------------------------------
-    /// Bind the y-flip uniform if the vertex shader declares it.
-    const GLint y_flip_loc = pipeline.GetYFlipUniformLocation();
-    if (y_flip_loc >= 0) {
-      gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);
+      //--------------------------------------------------------------------------
+      /// Bind the y-flip uniform if the vertex shader declares it.
+      const GLint y_flip_loc = pipeline.GetYFlipUniformLocation();
+      if (y_flip_loc >= 0) {
+        gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);
+      }
+
+      previous_pipeline = &pipeline;
     }
 
     //--------------------------------------------------------------------------
