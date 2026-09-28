@@ -91,6 +91,51 @@ void main() {
     );
 
     testUsingContext(
+      'empty pubspec with data assets from hook',
+      () async {
+        writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'my_app');
+        globals.fs.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync('');
+        final File dataAssetFile = globals.fs.file('data/foo.txt')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('hello');
+
+        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+          flutterHookResult: FlutterHookResult(
+            buildStart: DateTime.now(),
+            buildEnd: DateTime.now(),
+            dataAssets: <HookAsset>[
+              HookAsset(file: dataAssetFile.uri, name: 'data/foo.txt', package: 'my_app'),
+            ],
+            dependencies: <Uri>[dataAssetFile.uri],
+          ),
+        );
+        expect(bundle.entries.keys, contains('packages/my_app/data/foo.txt'));
+        expect(
+          const StandardMessageCodec().decodeMessage(
+            ByteData.sublistView(
+              Uint8List.fromList(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()),
+            ),
+          ),
+          <Object?, Object?>{
+            'packages/my_app/data/foo.txt': <Object?>[
+              <Object?, Object?>{'asset': 'packages/my_app/data/foo.txt'},
+            ],
+          },
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        Platform: () => platform,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
       'wildcard directories do not include subdirectories',
       () async {
         writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'my_app');
