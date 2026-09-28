@@ -6,13 +6,18 @@ package com.flutter.gradle.testing
 
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.Cmake
 import com.android.build.api.dsl.LibraryBuildType
 import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.dsl.NdkBuild
 import io.mockk.every
 import io.mockk.mockk
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import java.io.File
 
 /**
  * Mocks the Android extension for unit tests reading `compileSdk`, `ndkVersion`, or `buildTypes` via the public DSL.
@@ -112,4 +117,79 @@ fun setUpMockLibraryAndroidExtension(
     every { project.gradle.startParameter.isOffline } returns false
 
     return mockLibraryExtension
+}
+
+/**
+ * Test fixture holding the mocked public DSL objects for external native build and NDK fallback tests.
+ */
+data class MockExternalNativeBuildConfig(
+    val androidExtension: ApplicationExtension,
+    val cmake: Cmake,
+    val ndkBuild: NdkBuild,
+    val cmakeArguments: MutableList<String>,
+    val buildType: ApplicationBuildType
+)
+
+/**
+ * Mocks `externalNativeBuild` (`cmake` and `ndkBuild`), `buildTypes`, and `layout.buildDirectory`
+ * on a Gradle [Project] for testing NDK download and synthetic CMake fallback configuration.
+ */
+fun setUpMockExternalNativeBuild(
+    project: Project,
+    ndkVersion: String? = "29.0.13846066",
+    cmakePath: File? = null,
+    ndkBuildPath: File? = null,
+    buildDirectory: File = File("/randomapp/build/app/")
+): MockExternalNativeBuildConfig {
+    val mockCmake =
+        mockk<Cmake>(relaxed = true) {
+            every { path } returns cmakePath
+        }
+    val mockNdkBuild =
+        mockk<NdkBuild>(relaxed = true) {
+            every { path } returns ndkBuildPath
+        }
+    val cmakeArguments = mutableListOf<String>()
+    val mockBuildType =
+        mockk<ApplicationBuildType>(relaxed = true) {
+            every { name } returns "Debug"
+            every { externalNativeBuild.cmake.arguments } returns cmakeArguments
+        }
+    val mockAndroidExtension =
+        mockk<ApplicationExtension>(relaxed = true) {
+            every { externalNativeBuild.cmake } returns mockCmake
+            every { externalNativeBuild.ndkBuild } returns mockNdkBuild
+            if (ndkVersion != null) {
+                every { this@mockk.ndkVersion } returns ndkVersion
+            }
+            val container =
+                mockk<NamedDomainObjectContainer<ApplicationBuildType>>(relaxed = true) {
+                    every { iterator() } answers { mutableListOf(mockBuildType).iterator() }
+                }
+            every { buildTypes } returns container
+        }
+    every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockAndroidExtension
+    every { project.extensions.findByName("android") } returns mockAndroidExtension
+
+    val mockDirectory =
+        mockk<Directory> {
+            every { asFile } returns buildDirectory
+        }
+    val mockDirectoryProperty =
+        mockk<DirectoryProperty>(relaxed = true) {
+            every { dir(any<String>()) } returns this
+            every { get() } returns mockDirectory
+        }
+    every { project.layout.buildDirectory } returns mockDirectoryProperty
+
+    every { project.gradle.startParameter.taskNames } returns emptyList()
+    every { project.gradle.startParameter.isOffline } returns false
+
+    return MockExternalNativeBuildConfig(
+        androidExtension = mockAndroidExtension,
+        cmake = mockCmake,
+        ndkBuild = mockNdkBuild,
+        cmakeArguments = cmakeArguments,
+        buildType = mockBuildType
+    )
 }

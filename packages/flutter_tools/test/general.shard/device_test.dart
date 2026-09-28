@@ -213,50 +213,47 @@ void main() {
       ]);
     });
 
-    testWithoutContext(
-      'refreshExtendedWirelessDeviceDiscoverers only refreshes discoverers that require extended time',
-      () async {
-        final normalDiscoverer = FakePollingDeviceDiscovery();
-        final extendedDiscoverer = FakePollingDeviceDiscovery(
-          requiresExtendedWirelessDeviceDiscovery: true,
-        );
+    testWithoutContext('refreshExtendedWirelessDeviceDiscoverers only refreshes discoverers that require extended time', () async {
+      final normalDiscoverer = FakePollingDeviceDiscovery();
+      final extendedDiscoverer = FakePollingDeviceDiscovery(
+        requiresExtendedWirelessDeviceDiscovery: true,
+      );
 
-        final attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
-        final wirelessDevice = FakeDevice(
-          'Wireless device',
-          'wireless-device',
-          connectionInterface: DeviceConnectionInterface.wireless,
-        );
+      final attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final wirelessDevice = FakeDevice(
+        'Wireless device',
+        'wireless-device',
+        connectionInterface: DeviceConnectionInterface.wireless,
+      );
 
-        normalDiscoverer.addDevice(attachedDevice);
-        extendedDiscoverer.addDevice(wirelessDevice);
+      normalDiscoverer.addDevice(attachedDevice);
+      extendedDiscoverer.addDevice(wirelessDevice);
 
-        final deviceManager = TestDeviceManager(
-          <Device>[],
-          logger: BufferLogger.test(),
-          deviceDiscoveryOverrides: <DeviceDiscovery>[normalDiscoverer, extendedDiscoverer],
-        );
-        await deviceManager.refreshExtendedWirelessDeviceDiscoverers();
-        expect(await deviceManager.getAllDevices(), <Device>[attachedDevice, wirelessDevice]);
+      final deviceManager = TestDeviceManager(
+        <Device>[],
+        logger: BufferLogger.test(),
+        deviceDiscoveryOverrides: <DeviceDiscovery>[normalDiscoverer, extendedDiscoverer],
+      );
+      await deviceManager.refreshExtendedWirelessDeviceDiscoverers();
+      expect(await deviceManager.getAllDevices(), <Device>[attachedDevice, wirelessDevice]);
 
-        final newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
-        normalDiscoverer.addDevice(newAttachedDevice);
+      final newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      normalDiscoverer.addDevice(newAttachedDevice);
 
-        final newWirelessDevice = FakeDevice(
-          'New wireless device',
-          'new-wireless-device',
-          connectionInterface: DeviceConnectionInterface.wireless,
-        );
-        extendedDiscoverer.addDevice(newWirelessDevice);
+      final newWirelessDevice = FakeDevice(
+        'New wireless device',
+        'new-wireless-device',
+        connectionInterface: DeviceConnectionInterface.wireless,
+      );
+      extendedDiscoverer.addDevice(newWirelessDevice);
 
-        await deviceManager.refreshExtendedWirelessDeviceDiscoverers();
-        expect(await deviceManager.getAllDevices(), <Device>[
-          attachedDevice,
-          wirelessDevice,
-          newWirelessDevice,
-        ]);
-      },
-    );
+      await deviceManager.refreshExtendedWirelessDeviceDiscoverers();
+      expect(await deviceManager.getAllDevices(), <Device>[
+        attachedDevice,
+        wirelessDevice,
+        newWirelessDevice,
+      ]);
+    });
   });
 
   testWithoutContext('PollingDeviceDiscovery startPolling', () {
@@ -444,23 +441,20 @@ void main() {
       expect(filtered, <Device>[]);
     });
 
-    testWithoutContext(
-      'uses DeviceDiscoverySupportFilter.isDeviceSupportedForProject instead of device.isSupportedForProject',
-      () async {
-        final devices = <Device>[unsupported, unsupportedForProject];
-        final deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
-        final supportFilter =
-            TestDeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
-              flutterProject: FakeFlutterProject(),
-            );
-        supportFilter.isAlwaysSupportedForProjectOverride = true;
-        final filter = DeviceDiscoveryFilter(supportFilter: supportFilter);
+    testWithoutContext('uses DeviceDiscoverySupportFilter.isDeviceSupportedForProject instead of device.isSupportedForProject', () async {
+      final devices = <Device>[unsupported, unsupportedForProject];
+      final deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
+      final supportFilter =
+          TestDeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
+            flutterProject: FakeFlutterProject(),
+          );
+      supportFilter.isAlwaysSupportedForProjectOverride = true;
+      final filter = DeviceDiscoveryFilter(supportFilter: supportFilter);
 
-        final List<Device> filtered = await deviceManager.getDevices(filter: filter);
+      final List<Device> filtered = await deviceManager.getDevices(filter: filter);
 
-        expect(filtered, <Device>[unsupportedForProject]);
-      },
-    );
+      expect(filtered, <Device>[unsupportedForProject]);
+    });
 
     testUsingContext('Unconnected devices filtered out by default', () async {
       final devices = <Device>[unconnectedDevice];
@@ -555,53 +549,50 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'Run getAllDevices and refreshAllDevices at same time with refreshAllDevices finishing first',
-      () async {
-        fakeAsync((FakeAsync async) {
-          final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
-          final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+    testWithoutContext('Run getAllDevices and refreshAllDevices at same time with refreshAllDevices finishing first', () async {
+      fakeAsync((FakeAsync async) {
+        final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+        final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
 
-          const timeToGetInitialDevices = Duration(seconds: 5);
-          const timeToRefreshDevices = Duration(seconds: 1);
-          final initialDevices = <Device>[device2];
-          final refreshDevices = <Device>[device1];
+        const timeToGetInitialDevices = Duration(seconds: 5);
+        const timeToRefreshDevices = Duration(seconds: 1);
+        final initialDevices = <Device>[device2];
+        final refreshDevices = <Device>[device1];
 
-          final deviceManager = TestDeviceManager(
-            <Device>[],
-            logger: BufferLogger.test(),
-            fakeDiscoverer: FakePollingDeviceDiscoveryWithTimeout(<List<Device>>[
-              initialDevices,
-              refreshDevices,
-            ], timeout: timeToGetInitialDevices),
-          );
+        final deviceManager = TestDeviceManager(
+          <Device>[],
+          logger: BufferLogger.test(),
+          fakeDiscoverer: FakePollingDeviceDiscoveryWithTimeout(<List<Device>>[
+            initialDevices,
+            refreshDevices,
+          ], timeout: timeToGetInitialDevices),
+        );
 
-          // Expect that the cache is set by refreshCache process (1 second timeout).
-          // Then later when getOrSetCache finishes (5 second timeout), it does not update the cache.
-          // Ending with devices from the refreshCache process.
-          final Future<List<Device>> refreshCache = deviceManager.refreshAllDevices(
-            timeout: timeToRefreshDevices,
-          );
-          final Future<List<Device>> getOrSetCache = deviceManager.getAllDevices();
+        // Expect that the cache is set by refreshCache process (1 second timeout).
+        // Then later when getOrSetCache finishes (5 second timeout), it does not update the cache.
+        // Ending with devices from the refreshCache process.
+        final Future<List<Device>> refreshCache = deviceManager.refreshAllDevices(
+          timeout: timeToRefreshDevices,
+        );
+        final Future<List<Device>> getOrSetCache = deviceManager.getAllDevices();
 
-          // After 1 second, the refreshCache should be done
-          async.elapse(const Duration(seconds: 1));
-          expect(refreshCache, completion(<Device>[device2]));
-          // double check values in cache are as expected
-          Future<List<Device>> getFromCache = deviceManager.getAllDevices();
-          expect(getFromCache, completion(<Device>[device2]));
+        // After 1 second, the refreshCache should be done
+        async.elapse(const Duration(seconds: 1));
+        expect(refreshCache, completion(<Device>[device2]));
+        // double check values in cache are as expected
+        Future<List<Device>> getFromCache = deviceManager.getAllDevices();
+        expect(getFromCache, completion(<Device>[device2]));
 
-          // After 5 seconds, getOrSetCache should be done
-          async.elapse(const Duration(seconds: 5));
-          expect(getOrSetCache, completion(<Device>[device2]));
-          // double check values in cache are as expected
-          getFromCache = deviceManager.getAllDevices();
-          expect(getFromCache, completion(<Device>[device2]));
+        // After 5 seconds, getOrSetCache should be done
+        async.elapse(const Duration(seconds: 5));
+        expect(getOrSetCache, completion(<Device>[device2]));
+        // double check values in cache are as expected
+        getFromCache = deviceManager.getAllDevices();
+        expect(getFromCache, completion(<Device>[device2]));
 
-          async.flushMicrotasks();
-        });
-      },
-    );
+        async.flushMicrotasks();
+      });
+    });
 
     testWithoutContext('refreshAllDevices twice', () async {
       fakeAsync((FakeAsync async) {
@@ -825,33 +816,30 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'Get launch arguments for physical device with debugging disabled with available launch arguments',
-      () {
-        final original = DebuggingOptions.disabled(
-          BuildInfo.debug,
-          traceAllowlist: 'foo',
-          enableImpeller: ImpellerStatus.disabled,
-        );
+    testWithoutContext('Get launch arguments for physical device with debugging disabled with available launch arguments', () {
+      final original = DebuggingOptions.disabled(
+        BuildInfo.debug,
+        traceAllowlist: 'foo',
+        enableImpeller: ImpellerStatus.disabled,
+      );
 
-        final List<String> launchArguments = original.getIOSLaunchArguments(
-          EnvironmentType.physical,
-          '/test',
-          <String, dynamic>{'trace-startup': true},
-        );
+      final List<String> launchArguments = original.getIOSLaunchArguments(
+        EnvironmentType.physical,
+        '/test',
+        <String, dynamic>{'trace-startup': true},
+      );
 
-        expect(
-          launchArguments.join(' '),
-          <String>[
-            '--enable-dart-profiling',
-            '--trace-allowlist="foo"',
-            '--route=/test',
-            '--trace-startup',
-            '--enable-impeller=false',
-          ].join(' '),
-        );
-      },
-    );
+      expect(
+        launchArguments.join(' '),
+        <String>[
+          '--enable-dart-profiling',
+          '--trace-allowlist="foo"',
+          '--route=/test',
+          '--trace-startup',
+          '--enable-impeller=false',
+        ].join(' '),
+      );
+    });
 
     testWithoutContext(
       'Get launch arguments for simulator device with debugging enabled with all launch arguments',
@@ -1005,38 +993,35 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'Get launch arguments for manifest injection with debugging enabled - debug-mode specific flags',
-      () {
-        final original = DebuggingOptions.enabled(
-          BuildInfo.debug,
-          startPaused: true,
-          disableServiceAuthCodes: true,
-          disableServiceOriginCheck: true,
-          dartFlags: 'baz',
-          useTestFonts: true,
-          verboseSystemLogs: true,
-          testFlag: true,
-        );
+    testWithoutContext('Get launch arguments for manifest injection with debugging enabled - debug-mode specific flags', () {
+      final original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        disableServiceOriginCheck: true,
+        dartFlags: 'baz',
+        useTestFonts: true,
+        verboseSystemLogs: true,
+        testFlag: true,
+      );
 
-        final Set<String> launchArguments = original.getAndroidLaunchArguments();
+      final Set<String> launchArguments = original.getAndroidLaunchArguments();
 
-        expect(
-          launchArguments,
-          containsAll(<String>[
-            '--enable-checked-mode',
-            '--verify-entry-points',
-            '--start-paused',
-            '--disable-service-auth-codes',
-            '--disable-service-origin-check',
-            '--dart-flags=baz',
-            '--use-test-fonts',
-            '--verbose-logging',
-            '--test-flag',
-          ]),
-        );
-      },
-    );
+      expect(
+        launchArguments,
+        containsAll(<String>[
+          '--enable-checked-mode',
+          '--verify-entry-points',
+          '--start-paused',
+          '--disable-service-auth-codes',
+          '--disable-service-origin-check',
+          '--dart-flags=baz',
+          '--use-test-fonts',
+          '--verbose-logging',
+          '--test-flag',
+        ]),
+      );
+    });
 
     testWithoutContext('Get launch arguments for manifest injection - debugging disabled', () {
       final original = DebuggingOptions.disabled(BuildInfo.release);

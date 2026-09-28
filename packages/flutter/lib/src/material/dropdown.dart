@@ -1065,8 +1065,8 @@ class DropdownButton<T> extends StatefulWidget {
     this.barrierDismissible = true,
     this.mouseCursor,
     this.dropdownMenuItemMouseCursor,
-    required InputDecoration inputDecoration,
-    required bool isEmpty,
+    required InputDecoration this._inputDecoration,
+    required this._isEmpty,
   }) : assert(
          items == null ||
              items.isEmpty ||
@@ -1082,9 +1082,7 @@ class DropdownButton<T> extends StatefulWidget {
        ),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
        underline = null,
-       menuWidth = null,
-       _inputDecoration = inputDecoration,
-       _isEmpty = isEmpty;
+       menuWidth = null;
 
   /// The list of items the user can select.
   ///

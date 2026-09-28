@@ -16,15 +16,12 @@ class LLDBInitMigration extends ProjectMigrator {
     IosProject project,
     BuildInfo buildInfo,
     super.logger, {
-    required FileSystem fileSystem,
-    required EnvironmentType environmentType,
-    String? deviceID,
+    required this._fileSystem,
+    required this._environmentType,
+    this._deviceID,
   }) : _xcodeProject = project,
        _buildInfo = buildInfo,
-       _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-       _fileSystem = fileSystem,
-       _environmentType = environmentType,
-       _deviceID = deviceID;
+       _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
 
   final IosProject _xcodeProject;
   final BuildInfo _buildInfo;

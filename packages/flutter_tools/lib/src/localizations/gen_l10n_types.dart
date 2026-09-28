@@ -219,7 +219,7 @@ class OptionalParameter {
 class Placeholder {
   Placeholder(this.resourceId, this.name, Map<String, Object?> attributes)
     : example = _stringAttribute(resourceId, name, attributes, 'example'),
-      type = _stringAttribute(resourceId, name, attributes, 'type'),
+      type = _typeAttribute(resourceId, name, attributes),
       format = _stringAttribute(resourceId, name, attributes, 'format'),
       optionalParameters = _optionalParameters(resourceId, name, attributes),
       isCustomDateFormat = _boolAttribute(resourceId, name, attributes, 'isCustomDateFormat');
@@ -245,6 +245,44 @@ class Placeholder {
   // 'format' can contain a number of date time formats separated by `dateFormatPartsDelimiter`.
   List<String> get dateFormatParts => format?.split(_dateFormatPartsDelimiter) ?? <String>[];
   bool get hasValidDateFormat => dateFormatParts.every(validDateFormats.contains);
+
+  // Matches valid Dart type syntax:
+  // - Optional library or namespace prefixes, e.g. `prefix.`, `package.prefix.`
+  // - Leading Dart identifier for the type name (letters, numbers, underscores, $)
+  // - Optional generic type arguments enclosed in angle brackets, restricted to valid type characters (letters, numbers, underscores, $, commas, spaces, nested angle brackets, and ?)
+  // - Optional trailing nullability operator `?`
+  //
+  // Enforcing full-string anchoring and disallowing wildcard characters prevents code injection
+  // from crafted ARB placeholder types attempting to break out of generated method parameter declarations.
+  static final RegExp _validTypeRegExp = RegExp(
+    r'^([a-zA-Z_$][a-zA-Z0-9_$]*\.)*[a-zA-Z_$][a-zA-Z0-9_$]*(\s*<[a-zA-Z0-9_$,\s<>?]+>)?\??$',
+  );
+
+  /// Validates that [type] represents a syntactically valid Dart type identifier.
+  static bool _isValidType(String type) {
+    if (type.isEmpty) {
+      return false;
+    }
+    return _validTypeRegExp.hasMatch(type);
+  }
+
+  /// Parses and validates the "type" attribute for placeholder [name].
+  ///
+  /// Throws an [L10nException] if the type is present but does not conform to
+  /// valid Dart type syntax.
+  static String? _typeAttribute(String resourceId, String name, Map<String, Object?> attributes) {
+    final String? type = _stringAttribute(resourceId, name, attributes, 'type');
+    if (type == null) {
+      return null;
+    }
+    if (!_isValidType(type)) {
+      throw L10nException(
+        'Invalid placeholder type "$type" for placeholder "$name" in message "$resourceId". '
+        'Placeholder types must be valid Dart type names.',
+      );
+    }
+    return type;
+  }
 
   static String? _stringAttribute(
     String resourceId,

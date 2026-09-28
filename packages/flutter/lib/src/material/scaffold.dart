@@ -643,10 +643,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 }
 
 class _ScaffoldMessengerScope extends InheritedWidget {
-  const _ScaffoldMessengerScope({
-    required super.child,
-    required ScaffoldMessengerState scaffoldMessengerState,
-  }) : _scaffoldMessengerState = scaffoldMessengerState;
+  const _ScaffoldMessengerScope({required super.child, required this._scaffoldMessengerState});
 
   final ScaffoldMessengerState _scaffoldMessengerState;
 

@@ -451,9 +451,7 @@ class FormState extends State<Form> {
 }
 
 class _FormScope extends InheritedWidget {
-  const _FormScope({required super.child, required FormState formState, required int generation})
-    : _formState = formState,
-      _generation = generation;
+  const _FormScope({required super.child, required this._formState, required this._generation});
 
   final FormState _formState;
 
@@ -825,6 +823,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     }
   }
 
+  @protected
   @override
   void dispose() {
     _errorText.dispose();

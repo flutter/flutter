@@ -39,6 +39,16 @@ class FlCompositorOpenGLTest : public flutter::testing::LinuxTest {
   FlCompositorOpenGL* compositor = nullptr;
 };
 
+// The layers replace the target contents, so a frame with nothing to
+// rasterize (which has no layers) clears the previous frame.
+TEST_F(FlCompositorOpenGLTest, CompositeNoLayers) {
+  compositor = fl_compositor_opengl_new(opengl_manager);
+
+  EXPECT_CALL(epoxy, glClear(GL_COLOR_BUFFER_BIT));
+
+  fl_compositor_opengl_composite_layers(compositor, nullptr, 0);
+}
+
 TEST_F(FlCompositorOpenGLTest, Composite) {
   constexpr size_t width = 100;
   constexpr size_t height = 100;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -269,9 +270,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     count + newStartAfterSelection;
                 insideSelection.add(
                   TextSpan(
-                    style: const TextStyle(
-                      color: Colors.red,
-                    ).merge(entry.value.style),
+                    style: const TextStyle(color: Colors.red)
+                        .merge(entry.value.style),
                     text: rawText.substring(newStart, newStartAfterSelection),
                   ),
                 );

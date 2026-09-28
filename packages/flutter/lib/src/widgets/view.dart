@@ -460,6 +460,7 @@ class _RawViewElement extends RenderTreeRootElement {
     onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
     onSemanticsUpdate: _handleSemanticsUpdate,
     onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
+    onFlushedPaint: _handleFlushPaint,
   );
 
   PipelineOwner get _effectivePipelineOwner =>
@@ -475,6 +476,12 @@ class _RawViewElement extends RenderTreeRootElement {
 
   void _handleSemanticsUpdate(SemanticsUpdate update) {
     (widget as _RawViewInternal).view.updateSemantics(update);
+  }
+
+  void _handleFlushPaint(bool isDirty) {
+    if (isDirty) {
+      (_effectivePipelineOwner.rootNode as RenderView?)?.markNeedsCompositeFrame();
+    }
   }
 
   @override
@@ -637,12 +644,7 @@ class _PipelineOwnerScope extends InheritedWidget {
 }
 
 class _MultiChildComponentWidget extends Widget {
-  const _MultiChildComponentWidget({
-    super.key,
-    List<Widget> views = const <Widget>[],
-    Widget? child,
-  }) : _views = views,
-       _child = child;
+  const _MultiChildComponentWidget({super.key, this._views = const <Widget>[], this._child});
 
   // It is up to the subclasses to make the relevant properties public.
   final List<Widget> _views;
