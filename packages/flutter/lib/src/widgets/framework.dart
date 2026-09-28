@@ -1305,7 +1305,19 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// [Future] returned by this method, and checks that `super.dispose()` was
   /// called as soon as this method returns, so this method should not be
   /// asynchronous. Asynchronous cleanup can be started, without being awaited,
-  /// before calling `super.dispose()`.
+  /// before calling `super.dispose()`:
+  ///
+  /// ```dart
+  /// // (e.g. in a stateful widget)
+  /// late final StreamSubscription<int> _subscription;
+  ///
+  /// @override
+  /// void dispose() {
+  ///   // Starts the cancellation without waiting for it to complete.
+  ///   unawaited(_subscription.cancel());
+  ///   super.dispose();
+  /// }
+  /// ```
   ///
   /// ## Caveats
   ///

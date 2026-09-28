@@ -1262,12 +1262,17 @@ void main() {
     // super.dispose() because of the await.
     await tester.pumpWidget(Container());
 
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
     expect(
-      tester.takeException(),
-      isA<FlutterError>().having(
-        (FlutterError error) => error.toString(),
-        'message',
-        allOf(contains('failed to call super.dispose'), contains('not after an await')),
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        '_AsyncDisposeWidgetState.dispose failed to call super.dispose.\n'
+        'dispose() implementations must always call their superclass dispose() method, to '
+        'ensure that all the resources used by the widget are fully released.\n'
+        'The framework does not await dispose(), so super.dispose() must be called '
+        'synchronously, not after an await. Consider making dispose() synchronous and '
+        'starting any asynchronous cleanup without awaiting it.',
       ),
     );
   });
