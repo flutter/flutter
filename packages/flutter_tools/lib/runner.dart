@@ -22,6 +22,7 @@ import 'src/base/process.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
+import 'src/emulator.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
@@ -60,6 +61,7 @@ Future<int> run(
       analytics: globals.analytics,
       androidSdk: globals.androidSdk,
       androidStudio: globals.androidStudio,
+      artifacts: globals.artifacts,
       botDetector: globals.botDetector,
       buildSystem: globals.buildSystem,
       buildTargets: globals.buildTargets,
@@ -69,6 +71,8 @@ Future<int> run(
       config: globals.config,
       crashReporter: globals.crashReporter,
       customDevicesConfig: globals.customDevicesConfig,
+      doctor: globals.doctor,
+      emulatorManager: emulatorManager,
       featureFlags: featureFlags,
       flutterVersion: globals.flutterVersion,
       fs: globals.fs,
@@ -85,6 +89,7 @@ Future<int> run(
       platform: globals.platform,
       plistParser: globals.plistParser,
       preRunValidator: globals.preRunValidator,
+      processInfo: globals.processInfo,
       processManager: globals.processManager,
       projectFactory: globals.projectFactory,
       shutdownHooks: shutdownHooks,
