@@ -466,17 +466,13 @@ class ChromiumLauncher {
       // Terminate the failed browser process so it releases its debugging port
       // and profile lock before the next attempt starts.
       process.kill();
-      try {
-        await process.exitCode.timeout(
-          const Duration(seconds: 2),
-          onTimeout: () {
-            ProcessSignal.sigkill.kill(process);
-            return 137;
-          },
-        );
-      } on Exception {
-        // Ignore any errors waiting for the failed process to exit.
-      }
+      await process.exitCode.timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          ProcessSignal.sigkill.kill(process);
+          return 137;
+        },
+      );
     }
   }
 
