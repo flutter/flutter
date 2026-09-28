@@ -1768,7 +1768,8 @@ TEST_F(FlutterWindowsEngineTest, AddViewFailureDoesNotHang) {
 
   std::unique_ptr<FlutterWindowsView> implicit_view =
       engine->CreateView(std::move(implicit_window),
-                         /*is_sized_to_content=*/false, BoxConstraints());
+                         /*is_sized_to_content=*/false, BoxConstraints(),
+                         /*allow_implicit_view=*/true);
 
   EXPECT_TRUE(implicit_view);
 
@@ -1777,7 +1778,8 @@ TEST_F(FlutterWindowsEngineTest, AddViewFailureDoesNotHang) {
 
   EXPECT_DEBUG_DEATH(
       engine->CreateView(std::move(second_window),
-                         /*is_sized_to_content=*/false, BoxConstraints()),
+                         /*is_sized_to_content=*/false, BoxConstraints(),
+                         /*allow_implicit_view=*/false),
       "FlutterEngineAddView returned an unexpected result");
 }
 
@@ -1875,10 +1877,12 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
 
   auto view1 = windows_engine->CreateView(std::move(window_binding_handler1),
                                           /*is_sized_to_content=*/false,
-                                          BoxConstraints());
+                                          BoxConstraints(),
+                                          /*allow_implicit_view=*/false);
   auto view2 = windows_engine->CreateView(std::move(window_binding_handler2),
                                           /*is_sized_to_content=*/false,
-                                          BoxConstraints());
+                                          BoxConstraints(),
+                                          /*allow_implicit_view=*/false);
 
   // Act: UpdateSemanticsEnabled will trigger the semantics updates
   // to get sent.
