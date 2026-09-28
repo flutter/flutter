@@ -32,8 +32,7 @@ import 'scrollable.dart';
 BuildContext? _getAncestor(BuildContext context, {int count = 1}) {
   BuildContext? target;
   context.visitAncestorElements((Element ancestor) {
-    count--;
-    if (count == 0) {
+    if (count - 1 == 0) {
       target = ancestor;
       return false;
     }

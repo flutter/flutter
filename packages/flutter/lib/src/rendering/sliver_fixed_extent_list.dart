@@ -74,8 +74,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     int index,
   ) {
     if (itemExtentBuilder == null) {
-      itemExtent = this.itemExtent!;
-      return itemExtent * index;
+      return this.itemExtent! * index;
     } else {
       var offset = 0.0;
       double? itemExtent;
@@ -222,8 +221,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     double itemExtent,
   ) {
     if (itemExtentBuilder == null) {
-      itemExtent = this.itemExtent!;
-      return childManager.childCount * itemExtent;
+      return childManager.childCount * this.itemExtent!;
     } else {
       var offset = 0.0;
       double? itemExtent;
