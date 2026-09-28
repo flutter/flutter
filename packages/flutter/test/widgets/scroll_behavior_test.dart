@@ -32,55 +32,53 @@ class TestScrollBehavior extends ScrollBehavior {
 }
 
 void main() {
-  testWidgets(
-    'Assert in buildScrollbar that controller != null when using it',
-    (WidgetTester tester) async {
-      const defaultBehavior = ScrollBehavior();
-      late BuildContext capturedContext;
+  testWidgets('Assert in buildScrollbar that controller != null when using it', (
+    WidgetTester tester,
+  ) async {
+    const defaultBehavior = ScrollBehavior();
+    late BuildContext capturedContext;
 
-      await tester.pumpWidget(
-        ScrollConfiguration(
-          // Avoid the default ones here.
-          behavior: const ScrollBehavior().copyWith(scrollbars: false),
-          child: SingleChildScrollView(
-            child: Builder(
-              builder: (BuildContext context) {
-                capturedContext = context;
-                return Container(height: 1000.0);
-              },
-            ),
+    await tester.pumpWidget(
+      ScrollConfiguration(
+        // Avoid the default ones here.
+        behavior: const ScrollBehavior().copyWith(scrollbars: false),
+        child: SingleChildScrollView(
+          child: Builder(
+            builder: (BuildContext context) {
+              capturedContext = context;
+              return Container(height: 1000.0);
+            },
           ),
         ),
-      );
+      ),
+    );
 
-      const details = ScrollableDetails(direction: AxisDirection.down);
-      final Widget child = Container();
+    const details = ScrollableDetails(direction: AxisDirection.down);
+    final Widget child = Container();
 
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.iOS:
-          // Does not throw if we aren't using it.
-          defaultBehavior.buildScrollbar(capturedContext, child, details);
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          expect(
-            () {
-              defaultBehavior.buildScrollbar(capturedContext, child, details);
-            },
-            throwsA(
-              isA<AssertionError>().having(
-                (AssertionError error) => error.toString(),
-                'description',
-                contains('details.controller != null'),
-              ),
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        // Does not throw if we aren't using it.
+        defaultBehavior.buildScrollbar(capturedContext, child, details);
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(
+          () {
+            defaultBehavior.buildScrollbar(capturedContext, child, details);
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('details.controller != null'),
             ),
-          );
-      }
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+          ),
+        );
+    }
+  }, variant: TargetPlatformVariant.all());
 
   // Regression test for https://github.com/flutter/flutter/issues/89681
   testWidgets('_WrappedScrollBehavior shouldNotify test', (WidgetTester tester) async {
@@ -133,28 +131,22 @@ void main() {
     expect(metrics.viewportDimension, equals(600.0));
   });
 
-  testWidgets(
-    'ScrollBehavior default android overscroll indicator',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: ScrollConfiguration(
-            behavior: const ScrollBehavior(),
-            child: ListView(
-              children: const <Widget>[
-                SizedBox(height: 1000.0, width: 1000.0, child: Text('Test')),
-              ],
-            ),
+  testWidgets('ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ScrollConfiguration(
+          behavior: const ScrollBehavior(),
+          child: ListView(
+            children: const <Widget>[SizedBox(height: 1000.0, width: 1000.0, child: Text('Test'))],
           ),
         ),
-      );
+      ),
+    );
 
-      expect(find.byType(StretchingOverscrollIndicator), findsNothing);
-      expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-  );
+    expect(find.byType(StretchingOverscrollIndicator), findsNothing);
+    expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('ScrollBehavior multitouchDragStrategy test - 1', (WidgetTester tester) async {
     const behavior1 = ScrollBehavior();
@@ -420,9 +412,8 @@ void main() {
                       behavior: onceCopiedBehavior.copyWith(),
                       child: Builder(
                         builder: (BuildContext context) {
-                          twiceCopiedPhysics = ScrollConfiguration.of(
-                            context,
-                          ).getScrollPhysics(context);
+                          twiceCopiedPhysics = ScrollConfiguration.of(context)
+                              .getScrollPhysics(context);
                           return SingleChildScrollView(child: Container(height: 1000));
                         },
                       ),
@@ -466,9 +457,8 @@ void main() {
                       behavior: onceCopiedBehavior.copyWith(),
                       child: Builder(
                         builder: (BuildContext context) {
-                          twiceCopiedPlatform = ScrollConfiguration.of(
-                            context,
-                          ).getPlatform(context);
+                          twiceCopiedPlatform = ScrollConfiguration.of(context)
+                              .getPlatform(context);
                           return SingleChildScrollView(child: Container(height: 1000));
                         },
                       ),

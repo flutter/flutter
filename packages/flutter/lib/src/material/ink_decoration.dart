@@ -329,11 +329,11 @@ class InkDecoration extends InkFeature {
   InkDecoration({
     required Decoration? decoration,
     bool isVisible = true,
-    required ImageConfiguration configuration,
+    required this._configuration,
     required super.controller,
     required super.referenceBox,
     super.onRemoved,
-  }) : _configuration = configuration {
+  }) {
     this.decoration = decoration;
     this.isVisible = isVisible;
     controller.addInkFeature(this);

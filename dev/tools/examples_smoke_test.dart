@@ -31,10 +31,10 @@ FutureOr<dynamic> main() async {
     path.absolute(path.dirname(path.dirname(path.dirname(_kPlatform.script.toFilePath())))),
   );
   final Directory apiDir = flutterDir
-    .childDirectory('packages')
-    .childDirectory('flutter')
-    .childDirectory('examples')
-    .childDirectory('api');
+      .childDirectory('packages')
+      .childDirectory('flutter')
+      .childDirectory('examples')
+      .childDirectory('api');
   final File integrationTest = await generateTest(apiDir);
   try {
     await runSmokeTests(flutterDir: flutterDir, integrationTest: integrationTest, apiDir: apiDir);

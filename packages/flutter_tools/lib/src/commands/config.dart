@@ -27,16 +27,12 @@ import '../runner/flutter_command_runner.dart';
 
 class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   ConfigCommand({
-    required AndroidContext androidContext,
-    required ToolContext toolContext,
+    required this._androidContext,
+    required ToolContext super.toolContext,
     required this.featureFlags,
-    bool verboseHelp = false,
-    ExtensionManager? extensionManager,
-  }) : _androidContext = androidContext,
-       _toolContext = toolContext,
-       _extensionManager = extensionManager,
-       _verboseHelp = verboseHelp,
-       super(toolContext: toolContext);
+    this._verboseHelp = false,
+    this._extensionManager,
+  }) : _toolContext = toolContext;
 
   final AndroidContext _androidContext;
   final ToolContext _toolContext;
@@ -65,20 +61,17 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       'clear-ios-signing-settings',
       negatable: false,
       aliases: <String>['clear-ios-signing-cert'],
-      help:
-          'Clear the saved development certificate or provisioning profile choice used to sign apps for iOS device deployment.',
+      help: 'Clear the saved development certificate or provisioning profile choice used to sign apps for iOS device deployment.',
     );
     parser.addFlag(
       'select-ios-signing-settings',
       negatable: false,
-      help:
-          'Complete prompt to select and save code signing settings used to sign apps for iOS device deployment.',
+      help: 'Complete prompt to select and save code signing settings used to sign apps for iOS device deployment.',
     );
     parser.addOption('android-sdk', help: 'The Android SDK directory.');
     parser.addOption(
       'android-studio-dir',
-      help:
-          'The Android Studio installation directory. If unset, flutter will search for valid installations at well-known locations.',
+      help: 'The Android Studio installation directory. If unset, flutter will search for valid installations at well-known locations.',
     );
     parser.addOption(
       'jdk-dir',
@@ -265,18 +258,12 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
     if (argResults!.wasParsed('select-ios-signing-settings')) {
       final settings = XcodeCodeSigningSettings(
-        config: config,
-        logger: logger,
-        platform: _toolContext.platform,
-        processUtils: _toolContext.processUtils,
-        fileSystem: fs,
-        fileSystemUtils: _toolContext.fileSystemUtils,
-        terminal: _toolContext.terminal,
         plistParser: PlistParser(
           fileSystem: fs,
           logger: logger,
           processManager: _toolContext.processManager,
         ),
+        toolContext: _toolContext,
       );
 
       await settings.selectSettings();
@@ -370,8 +357,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   Future<String> get settingsText async {
     final Config config = _toolContext.config;
     final featuresByName = <String, Feature>{
-      for (final feature in featureFlags.allFeatures)
-        if (feature.configSetting case final configSetting?) configSetting: feature,
+      for (final feature in featureFlags.allFeatures) ?feature.configSetting: feature,
     };
     final String channel = _toolContext.flutterVersion.channel;
     final keys = <String>{

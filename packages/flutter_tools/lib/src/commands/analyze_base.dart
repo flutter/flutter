@@ -20,20 +20,19 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
   AnalyzeBase(
     this.argResults, {
-    required this.repoPackages,
+    required this.artifacts,
     required this.fileSystem,
     required this.logger,
     required this.platform,
     required this.processManager,
-    required this.terminal,
-    required this.artifacts,
+    required this.repoPackages,
     required this.suppressAnalytics,
+    required this.terminal,
   });
 
   /// The parsed argument results for execution.
@@ -56,7 +55,7 @@ abstract class AnalyzeBase {
   final bool suppressAnalytics;
 
   @protected
-  String get flutterRoot => globals.fs.path.absolute(Cache.flutterRoot!);
+  String get flutterRoot => fileSystem.path.absolute(Cache.flutterRoot!);
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
@@ -151,13 +150,13 @@ class PackageDependency {
   }
 
   bool get hasConflict => values.length > 1;
-  bool get hasConflictAffectingFlutterRepo {
+  bool hasConflictAffectingFlutterRepo(FileSystem fileSystem) {
     final String? flutterRoot = Cache.flutterRoot;
-    assert(flutterRoot != null && globals.fs.path.isAbsolute(flutterRoot));
+    assert(flutterRoot != null && fileSystem.path.isAbsolute(flutterRoot));
     for (final List<String> targetSources in values.values) {
       for (final source in targetSources) {
-        assert(globals.fs.path.isAbsolute(source));
-        if (globals.fs.path.isWithin(flutterRoot!, source)) {
+        assert(fileSystem.path.isAbsolute(source));
+        if (fileSystem.path.isWithin(flutterRoot!, source)) {
           return true;
         }
       }
@@ -209,26 +208,24 @@ class PackageDependencyTracker {
   }
 
   void checkForConflictingDependencies(
-    Iterable<Directory> pubSpecDirectories,
-    PackageDependencyTracker dependencies,
-  ) {
+    Iterable<Directory> pubSpecDirectories, {
+    required FileSystem fileSystem,
+  }) {
     for (final directory in pubSpecDirectories) {
-      final String pubSpecYamlPath = globals.fs.path.join(directory.path, 'pubspec.yaml');
-      final File pubSpecYamlFile = globals.fs.file(pubSpecYamlPath);
+      final String pubSpecYamlPath = fileSystem.path.join(directory.path, 'pubspec.yaml');
+      final File pubSpecYamlFile = fileSystem.file(pubSpecYamlPath);
       if (pubSpecYamlFile.existsSync()) {
         // we are analyzing the actual canonical source for this package;
         // make sure we remember that, in case all the packages are actually
         // pointing elsewhere somehow.
-        final dynamic pubSpecYaml = yaml.loadYaml(
-          globals.fs.file(pubSpecYamlPath).readAsStringSync(),
-        );
+        final dynamic pubSpecYaml = yaml.loadYaml(pubSpecYamlFile.readAsStringSync());
         if (pubSpecYaml is yaml.YamlMap) {
           final dynamic packageName = pubSpecYaml['name'];
           if (packageName is String) {
-            final String packagePath = globals.fs.path.normalize(
-              globals.fs.path.absolute(globals.fs.path.join(directory.path, 'lib')),
+            final String packagePath = fileSystem.path.normalize(
+              fileSystem.path.absolute(fileSystem.path.join(directory.path, 'lib')),
             );
-            dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
+            addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
           } else {
             throwToolExit('pubspec.yaml is malformed. The name should be a String.');
           }
@@ -238,13 +235,13 @@ class PackageDependencyTracker {
       }
     }
 
-    if (dependencies.hasConflicts) {
+    if (hasConflicts) {
       final message = StringBuffer();
-      message.writeln(dependencies.generateConflictReport());
+      message.writeln(generateConflictReport());
       message.writeln(
         'Make sure you have run "pub upgrade" in all the directories mentioned above.',
       );
-      if (dependencies.hasConflictsAffectingFlutterRepo) {
+      if (hasConflictsAffectingFlutterRepo(fileSystem)) {
         message.writeln(
           'For packages in the flutter repository, try using "flutter update-packages" to do all of them at once.\n'
           'If you need to actually upgrade them, consider "flutter update-packages --force-upgrade". '
@@ -263,9 +260,9 @@ class PackageDependencyTracker {
     return packages.values.any((PackageDependency dependency) => dependency.hasConflict);
   }
 
-  bool get hasConflictsAffectingFlutterRepo {
+  bool hasConflictsAffectingFlutterRepo(FileSystem fileSystem) {
     return packages.values.any(
-      (PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo,
+      (PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo(fileSystem),
     );
   }
 

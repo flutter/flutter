@@ -54,14 +54,13 @@ const _kDefaultIndex = '''
 </html>
 ''';
 
-typedef DwdsLauncher =
-    Future<Dwds> Function({
-      required AssetReader assetReader,
-      required Stream<BuildResult> buildResults,
-      required ConnectionProvider chromeConnection,
-      required ToolConfiguration toolConfiguration,
-      bool useDwdsWebSocketConnection,
-    });
+typedef DwdsLauncher = Future<Dwds> Function({
+  required AssetReader assetReader,
+  required Stream<BuildResult> buildResults,
+  required ConnectionProvider chromeConnection,
+  required ToolConfiguration toolConfiguration,
+  bool useDwdsWebSocketConnection,
+});
 
 /// A web server which handles serving JavaScript and assets.
 ///
@@ -80,11 +79,9 @@ class WebAssetServer implements AssetReader {
     required this.useLocalCanvasKit,
     required this.fileSystem,
     required this.logger,
-    String? baseHref,
-    Map<String, String> webDefines = const <String, String>{},
-  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)),
-       _baseHref = baseHref,
-       _webDefines = webDefines {
+    this._baseHref,
+    this._webDefines = const <String, String>{},
+  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)) {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (_ddcModuleSystem) {
@@ -166,9 +163,8 @@ class WebAssetServer implements AssetReader {
     for (final relativeModulePath in modulePaths) {
       final metadata = ModuleMetadata.fromJson(
         json.decode(
-              utf8.decode(_webMemoryFS.metadataFiles['$relativeModulePath.metadata']!.toList()),
-            )
-            as Map<String, dynamic>,
+          utf8.decode(_webMemoryFS.metadataFiles['$relativeModulePath.metadata']!.toList()),
+        ) as Map<String, dynamic>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
       moduleToLibrary.add(<String, Object>{

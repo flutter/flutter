@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 /// A minimal [WidgetsApp] wrapper for use in widget tests.
@@ -294,19 +297,17 @@ class TestWidgetsApp extends StatelessWidget {
   static PageRoute<T> _defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
     return PageRouteBuilder<T>(
       settings: settings,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => builder(context),
-      transitionsBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            Widget child,
-          ) => child,
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => builder(context),
+      transitionsBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+        Widget child,
+      ) => child,
     );
   }
 

@@ -6,9 +6,11 @@
 
 #include <memory>
 
+#include "messages.g.h"
+
 namespace {{projectName}} {
 
-class {{pluginClass}} : public flutter::Plugin {
+class {{pluginClass}} : public flutter::Plugin, public {{pluginClass}}Api {
  public:
   static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
@@ -20,10 +22,7 @@ class {{pluginClass}} : public flutter::Plugin {
   {{pluginClass}}(const {{pluginClass}}&) = delete;
   {{pluginClass}}& operator=(const {{pluginClass}}&) = delete;
 
-  // Called when a method is called on this plugin's channel from Dart.
-  void HandleMethodCall(
-      const flutter::MethodCall<flutter::EncodableValue> &method_call,
-      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+  ErrorOr<std::string> GetPlatformVersion() override;
 };
 
 }  // namespace {{projectName}}
