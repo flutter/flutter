@@ -301,7 +301,7 @@ constexpr std::optional<VertexAttribGLES> ToVertexAttribGLES(
     case VertexAttributeFormat::kUInt32x4:
       return integer(4, GL_UNSIGNED_INT);
 
-    case VertexAttributeFormat::kUNorm10_10_10_2:
+    case VertexAttributeFormat::kUNormR10G10B10A2:
       if (!support.packed_2_10_10_10) {
         return std::nullopt;
       }

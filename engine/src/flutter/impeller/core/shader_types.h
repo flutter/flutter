@@ -264,7 +264,7 @@ enum class VertexAttributeFormat {
   /// Four unsigned normalized components packed into 32 bits, with 10 bits
   /// each for red, green, and blue and 2 bits for alpha. Alpha occupies the
   /// most significant bits.
-  kUNorm10_10_10_2,
+  kUNormR10G10B10A2,
 };
 
 /// @brief  Whether a shader input declared as `type` can read an attribute
@@ -301,7 +301,7 @@ constexpr bool IsVertexFormatReadableAs(VertexAttributeFormat format,
     case VertexAttributeFormat::kUNorm16:
     case VertexAttributeFormat::kUNorm16x2:
     case VertexAttributeFormat::kUNorm16x4:
-    case VertexAttributeFormat::kUNorm10_10_10_2:
+    case VertexAttributeFormat::kUNormR10G10B10A2:
       format_class = ScalarClass::kFloat;
       break;
     case VertexAttributeFormat::kSInt8:

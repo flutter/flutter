@@ -73,7 +73,7 @@ TEST(BufferBindingsGLESTest, ToVertexAttribGLESPackedFormats) {
   EXPECT_EQ(bgra->type, static_cast<GLenum>(GL_UNSIGNED_BYTE));
   EXPECT_EQ(bgra->normalized, GL_TRUE);
 
-  auto packed = ToVertexAttribGLES(VertexAttributeFormat::kUNorm10_10_10_2,
+  auto packed = ToVertexAttribGLES(VertexAttributeFormat::kUNormR10G10B10A2,
                                    kFullVertexFormatSupport);
   ASSERT_TRUE(packed.has_value());
   EXPECT_EQ(packed->size, 4);
@@ -101,7 +101,7 @@ TEST(BufferBindingsGLESTest, ToVertexAttribGLESRejectsUnsupportedFormats) {
   EXPECT_FALSE(ToVertexAttribGLES(VertexAttributeFormat::kUNorm8x4BGRA, kFloor)
                    .has_value());
   EXPECT_FALSE(
-      ToVertexAttribGLES(VertexAttributeFormat::kUNorm10_10_10_2, kFloor)
+      ToVertexAttribGLES(VertexAttributeFormat::kUNormR10G10B10A2, kFloor)
           .has_value());
   EXPECT_FALSE(ToVertexAttribGLES(VertexAttributeFormat::kInvalid,
                                   kFullVertexFormatSupport)
@@ -428,7 +428,7 @@ TEST(BufferBindingsGLESTest, RegisterVertexStageInputRejectsUnusableFormat) {
       .vec_size = 4,
       .columns = 1,
       .offset = 0,
-      .vertex_format = VertexAttributeFormat::kUNorm10_10_10_2,
+      .vertex_format = VertexAttributeFormat::kUNormR10G10B10A2,
   };
   std::vector<ShaderStageIOSlot> inputs = {input};
   std::vector<ShaderStageBufferLayout> layouts = {

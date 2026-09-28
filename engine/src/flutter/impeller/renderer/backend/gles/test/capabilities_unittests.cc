@@ -153,7 +153,7 @@ TEST(CapabilitiesGLES, VertexFormatsOnTheES2Floor) {
   EXPECT_FALSE(
       capabilities->SupportsVertexFormat(VertexAttributeFormat::kSInt32));
   EXPECT_FALSE(capabilities->SupportsVertexFormat(
-      VertexAttributeFormat::kUNorm10_10_10_2));
+      VertexAttributeFormat::kUNormR10G10B10A2));
   EXPECT_FALSE(
       capabilities->SupportsVertexFormat(VertexAttributeFormat::kUNorm8x4BGRA));
   EXPECT_FALSE(
@@ -173,7 +173,7 @@ TEST(CapabilitiesGLES, VertexFormatsOnES3) {
   EXPECT_TRUE(
       capabilities->SupportsVertexFormat(VertexAttributeFormat::kSInt32));
   EXPECT_TRUE(capabilities->SupportsVertexFormat(
-      VertexAttributeFormat::kUNorm10_10_10_2));
+      VertexAttributeFormat::kUNormR10G10B10A2));
 
   // The byte-swizzled format stays extension-gated on ES.
   EXPECT_FALSE(
