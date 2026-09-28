@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -171,4 +172,45 @@ void main() {
       });
     },
   );
+
+  // Verifies that invariant checks that report failures via
+  // [FlutterError.reportError] instead of throwing (such as
+  // [SchedulerBinding.debugAssertNoTransientCallbacks]) are captured and
+  // reported with the test description in [TestWidgetsFlutterBinding.postTest].
+  test('postTest reports invariant failures logged via FlutterError.reportError', () async {
+    FlutterErrorDetails? reportedError;
+    String? reportedDescription;
+    final TestExceptionReporter oldReporter = reportTestException;
+    reportTestException = (FlutterErrorDetails details, String testDescription) {
+      reportedError = details;
+      reportedDescription = testDescription;
+    };
+    addTearDown(() {
+      reportTestException = oldReporter;
+    });
+
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    // A Ticker reschedules its frame callback on every tick, so it survives the
+    // frames pumped while unmounting the tree. A one-shot frame callback would
+    // be consumed by those frames instead.
+    late final Ticker ticker;
+    await binding.runTest(
+      () async {
+        ticker = Ticker((Duration _) {})..start();
+      },
+      () {},
+      description: 'leaking ticker test',
+    );
+
+    expect(() => binding.postTest(), returnsNormally);
+    expect(reportedError, isNotNull);
+    expect(
+      reportedError!.exception,
+      'An animation is still running even after the widget tree was disposed.',
+    );
+    expect(reportedDescription, 'leaking ticker test');
+    expect(binding.inTest, isFalse);
+
+    ticker.dispose();
+  });
 }
