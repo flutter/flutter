@@ -14,9 +14,6 @@ import 'package:pub_semver/pub_semver.dart';
 /// projects.
 Future<void> main() async {
   await task(
-    combine(<TaskFunction>[
-      // Pre AGP 8.3
-      ModuleTest(gradleVersion: '8.4', agpVersion: Version.parse('8.2.1')).call,
-    ]),
+    buildAndroidHostAppWithModuleAarTest(gradleVersion: '8.4', agpVersion: Version.parse('8.2.1')),
   );
 }

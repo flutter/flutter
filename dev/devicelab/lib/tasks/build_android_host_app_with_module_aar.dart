@@ -18,23 +18,19 @@ import '../framework/utils.dart';
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 
-/// Combines several TaskFunctions with trivial success value into one.
-TaskFunction combine(List<TaskFunction> tasks) {
-  return () async {
-    for (final task in tasks) {
-      final TaskResult result = await task();
-      if (result.failed) {
-        return result;
-      }
-    }
-    return TaskResult.success(null);
-  };
+/// Returns a task that builds a Flutter module as an AAR and consumes it from
+/// a native Android host app built with [gradleVersion] and [agpVersion].
+TaskFunction buildAndroidHostAppWithModuleAarTest({
+  required String gradleVersion,
+  required Version agpVersion,
+}) {
+  return _ModuleTest(gradleVersion: gradleVersion, agpVersion: agpVersion).call;
 }
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
-class ModuleTest {
-  ModuleTest({this.gradleVersion = '7.6.3', Version? agpVersion})
+class _ModuleTest {
+  _ModuleTest({this.gradleVersion = '7.6.3', Version? agpVersion})
     : agpVersion = agpVersion ?? Version(8, 3, 0);
 
   static const String buildTarget = 'module-gradle';

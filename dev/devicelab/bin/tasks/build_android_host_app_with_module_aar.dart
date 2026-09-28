@@ -13,9 +13,9 @@ import 'package:pub_semver/pub_semver.dart';
 /// `android_java17_build_android_host_app_with_module_aar.dart`.
 Future<void> main() async {
   await task(
-    combine(<TaskFunction>[
-      // Post AGP 8.3 + rc candidates can work
-      ModuleTest(gradleVersion: '9.5.0', agpVersion: Version.parse('9.3.1')).call,
-    ]),
+    buildAndroidHostAppWithModuleAarTest(
+      gradleVersion: '9.5.0',
+      agpVersion: Version.parse('9.3.1'),
+    ),
   );
 }
