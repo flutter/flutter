@@ -307,7 +307,7 @@ static inline flutter::Shell::CreateCallback<flutter::PlatformView>
 InferOpenGLPlatformViewCreationCallback(
     const FlutterRendererConfig* config,
     void* user_data,
-    const flutter::PlatformViewEmbedder::PlatformDispatchTable&
+    flutter::PlatformViewEmbedder::PlatformDispatchTable
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
@@ -424,6 +424,13 @@ InferOpenGLPlatformViewCreationCallback(
   };
 
   const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
+  if (SAFE_ACCESS(open_gl_config, setup_callback, nullptr) != nullptr) {
+    platform_dispatch_table.renderer_setup_callback =
+        [ptr = open_gl_config->setup_callback, user_data]() {
+          ptr(user_data);
+        };
+  }
+
   std::function<bool()> gl_make_resource_current_callback = nullptr;
   if (SAFE_ACCESS(open_gl_config, make_resource_current, nullptr) != nullptr) {
     gl_make_resource_current_callback =
@@ -619,7 +626,7 @@ static flutter::Shell::CreateCallback<flutter::PlatformView>
 InferVulkanPlatformViewCreationCallback(
     const FlutterRendererConfig* config,
     void* user_data,
-    const flutter::PlatformViewEmbedder::PlatformDispatchTable&
+    flutter::PlatformViewEmbedder::PlatformDispatchTable
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
@@ -630,6 +637,13 @@ InferVulkanPlatformViewCreationCallback(
   }
 
 #ifdef SHELL_ENABLE_VULKAN
+  const FlutterVulkanRendererConfig* vulkan_config = &config->vulkan;
+  if (SAFE_ACCESS(vulkan_config, setup_callback, nullptr) != nullptr) {
+    platform_dispatch_table.renderer_setup_callback =
+        [ptr = vulkan_config->setup_callback, user_data]() {
+          ptr(user_data);
+        };
+  }
   std::function<void*(VkInstance, const char*)>
       vulkan_get_instance_proc_address =
           [ptr = config->vulkan.get_instance_proc_address_callback, user_data](

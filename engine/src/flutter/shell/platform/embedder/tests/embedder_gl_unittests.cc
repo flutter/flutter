@@ -5344,6 +5344,40 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneToOpenGLSurfaces) {
   ASSERT_EQ(context.GetSurfacePresentCount(), 0u);
 }
 
+TEST_F(EmbedderTest, RendererConfigSetupCallback) {
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
+
+  fml::AutoResetWaitableEvent setup_latch;
+  bool setup_called = false;
+  void* received_user_data = nullptr;
+
+  auto& renderer_config = context.GetRendererConfig();
+  ASSERT_EQ(renderer_config.type, kOpenGL);
+
+  struct CallbackPayload {
+    fml::AutoResetWaitableEvent* latch;
+    bool* called;
+    void** user_data;
+  };
+  static CallbackPayload g_callback_payload;
+  g_callback_payload = {&setup_latch, &setup_called, &received_user_data};
+
+  renderer_config.open_gl.setup_callback = [](void* user_data) {
+    *g_callback_payload.called = true;
+    *g_callback_payload.user_data = user_data;
+    g_callback_payload.latch->Signal();
+  };
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  setup_latch.Wait();
+  ASSERT_TRUE(setup_called);
+  ASSERT_EQ(received_user_data, &context);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     EmbedderTestGlVk,
     EmbedderTestMultiBackend,

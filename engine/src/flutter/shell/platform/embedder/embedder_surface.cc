@@ -10,6 +10,8 @@ EmbedderSurface::EmbedderSurface() = default;
 
 EmbedderSurface::~EmbedderSurface() = default;
 
+void EmbedderSurface::SetupImpellerContext() {}
+
 std::shared_ptr<impeller::Context> EmbedderSurface::CreateImpellerContext()
     const {
   return nullptr;

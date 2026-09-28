@@ -22,6 +22,8 @@ class EmbedderSurface {
 
   virtual std::unique_ptr<Surface> CreateGPUSurface() = 0;
 
+  virtual void SetupImpellerContext();
+
   virtual std::shared_ptr<impeller::Context> CreateImpellerContext() const;
 
   virtual sk_sp<GrDirectContext> CreateResourceContext() const;
