@@ -14,7 +14,7 @@ library;
 import 'package:file/file.dart';
 
 import '../../src/common.dart';
-import '../test_utils.dart' show platform;
+import '../test_utils.dart' show getLocalEngineArguments, platform;
 import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
@@ -45,9 +45,11 @@ void main() {
         await inTempDir((Directory tempDirectory) async {
           final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
           final Directory exampleDirectory = packageDirectory.childDirectory('example');
+          await addCodeAssetOpenHelper(packageName, packageDirectory);
+          await addCodeAssetCallToExampleApp(packageName, packageDirectory);
 
           final ProcessTestResult result = await runFlutter(
-            <String>['run', '-d$device', '--$buildMode'],
+            <String>[...getLocalEngineArguments(), 'run', '-d$device', '--$buildMode'],
             exampleDirectory.path,
             <Transition>[
               Multiple.contains(
