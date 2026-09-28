@@ -20,8 +20,8 @@ extension _HasDebugPrefix on Token {
   }
 }
 
-/// An [AnalysisRule] that verifies debug-only symbols (whose names start with
-/// `debug`, `_debug`, `Debug`, or `_Debug`) are only accessed inside
+/// An [AnalysisRule] that verifies debug-only members / types (whose names start with
+/// `debug`, `_debug`, `Debug`, or `_Debug`) are only accessed / referenced inside
 /// `assert(...)` statements/initializers or inside another debug-only
 /// declaration.
 class AccessDebugMembersOnlyInAsserts extends FlutterAnalysisRule {
@@ -39,123 +39,172 @@ class AccessDebugMembersOnlyInAsserts extends FlutterAnalysisRule {
 
   @override
   void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final visitor = _AccessDebugMembersOnlyInAssertsVisitor(this);
-    registry
-      ..addCompilationUnit(this, visitor)
-      ..addAssertInitializer(this, visitor)
-      ..addAssertStatement(this, visitor)
-      ..addConstructorDeclaration(this, visitor)
-      ..addFunctionDeclaration(this, visitor)
-      ..addMethodDeclaration(this, visitor)
-      ..addNamedType(this, visitor)
-      ..addSimpleIdentifier(this, visitor);
+    registry.addCompilationUnit(this, _AccessDebugMembersOnlyInAssertsVisitor(this));
   }
 }
 
-// The goal of this visitor is to catch debug-only member accesses, as well as
-// references to debug-only types in signatures.
 class _AccessDebugMembersOnlyInAssertsVisitor extends SimpleAstVisitor<void> {
   _AccessDebugMembersOnlyInAssertsVisitor(this.rule);
 
   final AnalysisRule rule;
 
-  // The end offset of the most recently entered exempt scope (an assert or a
-  // debug-only function, method, or constructor declaration) in the current
-  // compilation unit.
-  //
-  // Because `RuleVisitorRegistry` only notifies visitors when entering a node
-  // (and not when exiting), `_exemptEndOffset` is not reset when traversal gets
-  // out of the node. Instead, we check whether a visited node's `offset` is
-  // before `_exemptEndOffset` (and only update `_exemptEndOffset` when a new
-  // exempt node ends after the current one, so nested nodes do not shrink the
-  // range).
-  int _exemptEndOffset = -1;
-
-  bool _isInExemptScope(AstNode node) => node.offset < _exemptEndOffset;
-
-  void _recordExemptScope(AstNode node) {
-    if (node.end > _exemptEndOffset) {
-      _exemptEndOffset = node.end;
-    }
-  }
-
   @override
   void visitCompilationUnit(CompilationUnit node) {
-    _exemptEndOffset = -1;
+    node.declarations.accept(_DebugMemberVisitor(rule));
+  }
+}
+
+// The goal of this visitor is to catch debug-only member accesses (by checking SimpleIdentifiers),
+// and references to debug-only types in signatures (by checking NamedTypes).
+class _DebugMemberVisitor extends RecursiveAstVisitor<void> {
+  _DebugMemberVisitor(this.rule);
+
+  final AnalysisRule rule;
+
+  // Asserts, annotations, and comments can't have violations.
+  @override
+  void visitAssertInitializer(AssertInitializer node) {}
+
+  @override
+  void visitAssertStatement(AssertStatement node) {}
+
+  @override
+  void visitAnnotation(Annotation node) {}
+
+  @override
+  void visitComment(Comment node) {}
+
+  // Types declarations. These can't have violations if they are debug-only
+  // themselves.
+  @override
+  void visitClassDeclaration(ClassDeclaration node) {
+    if (node.namePart.typeName._isDebugOnlySymbol) {
+      return;
+    }
+    super.visitClassDeclaration(node);
   }
 
   @override
-  void visitAssertInitializer(AssertInitializer node) => _recordExemptScope(node);
-  @override
-  void visitAssertStatement(AssertStatement node) => _recordExemptScope(node);
+  void visitEnumDeclaration(EnumDeclaration node) {
+    if (node.namePart.typeName._isDebugOnlySymbol) {
+      return;
+    }
+    super.visitEnumDeclaration(node);
+  }
 
+  @override
+  void visitExtensionTypeDeclaration(ExtensionTypeDeclaration node) {
+    if (node.namePart.typeName._isDebugOnlySymbol) {
+      return;
+    }
+    super.visitExtensionTypeDeclaration(node);
+  }
+
+  @override
+  void visitMixinDeclaration(MixinDeclaration node) {
+    if (node.name._isDebugOnlySymbol) {
+      return;
+    }
+    super.visitMixinDeclaration(node);
+  }
+
+  @override
+  void visitClassTypeAlias(ClassTypeAlias node) {
+    if (node.name._isDebugOnlySymbol) {
+      return;
+    }
+    super.visitClassTypeAlias(node);
+  }
+
+  @override
+  void visitFunctionTypeAlias(FunctionTypeAlias node) {
+    if (node.name._isDebugOnlySymbol) {
+      return;
+    }
+    super.visitFunctionTypeAlias(node);
+  }
+
+  @override
+  void visitGenericTypeAlias(GenericTypeAlias node) {
+    if (node.name._isDebugOnlySymbol) {
+      return;
+    }
+    super.visitGenericTypeAlias(node);
+  }
+
+  @override
+  void visitTypeParameter(TypeParameter node) {
+    if (node.name._isDebugOnlySymbol) {
+      return;
+    }
+    super.visitTypeParameter(node);
+  }
+
+  // Executable declarations (constructors, functions, and methods).
   @override
   void visitConstructorDeclaration(ConstructorDeclaration node) {
     if (node.name?._isDebugOnlySymbol ?? false) {
-      _recordExemptScope(node);
+      return;
     }
+    super.visitConstructorDeclaration(node);
   }
 
   @override
   void visitFunctionDeclaration(FunctionDeclaration node) {
     if (node.name._isDebugOnlySymbol) {
-      _recordExemptScope(node);
+      return;
     }
+    super.visitFunctionDeclaration(node);
   }
 
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
     if (node.name._isDebugOnlySymbol) {
-      _recordExemptScope(node);
+      return;
     }
+    super.visitMethodDeclaration(node);
   }
 
-  static bool _isAllowedDebugAccess(AstNode node) {
-    for (AstNode? ancestor = node.parent; ancestor != null; ancestor = ancestor.parent) {
-      final bool isExempt = switch (ancestor) {
-        // We don't care about directives, comments, or metadata annotations.
-        Directive() || Comment() || Annotation() => true,
-        // When a variable declaration list's type is a debug-only type, all
-        // declared variables must have a debug prefix.
-        VariableDeclarationList(:final NodeList<VariableDeclaration> variables) => variables.every(
-          (VariableDeclaration v) => v.name._isDebugOnlySymbol,
-        ),
-        // A debug-only concrete type can access debug-only members and types.
-        ClassDeclaration(:final ClassNamePart namePart) ||
-        EnumDeclaration(:final ClassNamePart namePart) ||
-        ExtensionTypeDeclaration(
-          :final ClassNamePart namePart,
-        ) => namePart.typeName._isDebugOnlySymbol,
-        MixinDeclaration(:final Token name) ||
-        TypeAlias(:final Token name) ||
-        VariableDeclaration(:final Token name) ||
-        EnumConstantDeclaration(:final Token name) ||
-        // Explicitly prevents debug-only type references in type parameters,
-        // as those can be phantom types.
-        TypeParameter(:final Token name) => name._isDebugOnlySymbol,
-        _ => false,
-      };
-      if (isExempt) {
-        return true;
-      }
+  // Variable and enum constant declarations.
+  @override
+  void visitVariableDeclarationList(VariableDeclarationList node) {
+    if (node.variables.every((VariableDeclaration v) => v.name._isDebugOnlySymbol)) {
+      return;
     }
-    return false;
+    super.visitVariableDeclarationList(node);
   }
 
   @override
+  void visitVariableDeclaration(VariableDeclaration node) {
+    if (node.name._isDebugOnlySymbol) {
+      return;
+    }
+    super.visitVariableDeclaration(node);
+  }
+
+  @override
+  void visitEnumConstantDeclaration(EnumConstantDeclaration node) {
+    if (node.name._isDebugOnlySymbol) {
+      return;
+    }
+    super.visitEnumConstantDeclaration(node);
+  }
+
+  // These 2 visitor methods are only called for nodes in non-debug-only context,
+  // where debug-only references are illegal.
+  @override
   void visitNamedType(NamedType node) {
-    if (!_isInExemptScope(node) && node.name._isDebugOnlySymbol && !_isAllowedDebugAccess(node)) {
+    if (node.name._isDebugOnlySymbol) {
       rule.reportAtToken(node.name, arguments: <Object>[node.name.lexeme]);
     }
+    super.visitNamedType(node);
   }
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
-    if (!_isInExemptScope(node) &&
-        node.token._isDebugOnlySymbol &&
-        !node.inDeclarationContext() &&
-        !_isAllowedDebugAccess(node)) {
+    if (node.token._isDebugOnlySymbol) {
       rule.reportAtNode(node, arguments: <Object>[node.name]);
     }
+    super.visitSimpleIdentifier(node);
   }
 }
