@@ -96,7 +96,7 @@ void main() {
           ],
         );
 
-        codeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(update);
+        codeGenerator.populatePreviewsInGeneratedPreviewScaffold(update);
 
         const expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: implementation_imports
@@ -187,7 +187,7 @@ List<_i1.WidgetPreview> previews() => [
         ],
       );
 
-      codeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(update);
+      codeGenerator.populatePreviewsInGeneratedPreviewScaffold(update);
 
       const expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: implementation_imports

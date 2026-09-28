@@ -14,7 +14,7 @@ import 'dtd_types.dart';
 /// Generates the Dart source responsible for importing widget previews from the developer's project
 /// into the widget preview scaffold.
 class PreviewCodeGenerator {
-  PreviewCodeGenerator({required this.widgetPreviewScaffoldProject, required this.fs});
+  PreviewCodeGenerator({required this.fs, required this.widgetPreviewScaffoldProject});
 
   final FileSystem fs;
 
@@ -147,7 +147,7 @@ class PreviewCodeGenerator {
   ///   ),
   /// ];
   /// ```
-  void populatePreviewsInGeneratedPreviewScaffoldLsp(FlutterWidgetPreviews update) {
+  void populatePreviewsInGeneratedPreviewScaffold(FlutterWidgetPreviews update) {
     final allocator = PreviewPrefixedAllocator()..populateKnownImportPrefixes(update.namespaces);
     final emitter = cb.DartEmitter(useNullSafetySyntax: true, allocator: allocator);
     final lib = cb.Library(
@@ -155,7 +155,7 @@ class PreviewCodeGenerator {
         ..ignoreForFile.add('implementation_imports')
         ..body.addAll(<cb.Spec>[
           cb.Method(
-            (cb.MethodBuilder b) => _buildGeneratedPreviewMethodLsp(previews: update, builder: b),
+            (cb.MethodBuilder b) => _buildGeneratedPreviewMethod(previews: update, builder: b),
           ),
         ]),
     );
@@ -173,7 +173,7 @@ class PreviewCodeGenerator {
     );
   }
 
-  void _buildGeneratedPreviewMethodLsp({
+  void _buildGeneratedPreviewMethod({
     required FlutterWidgetPreviews previews,
     required cb.MethodBuilder builder,
   }) {
@@ -190,7 +190,7 @@ class PreviewCodeGenerator {
         for (final preview in sortedPreviews)
           // Previews can only be defined under the lib/ directory.
           if (preview.packageName != null)
-            _buildPreviewsLsp(preview: preview, uri: preview.libraryUri),
+            _buildPreviews(preview: preview, uri: preview.libraryUri),
       ]).code
       ..name = _kPreviewsFunctionName
       ..returns =
@@ -202,10 +202,7 @@ class PreviewCodeGenerator {
               .build();
   }
 
-  cb.Expression _buildPreviewsLsp({
-    required FlutterWidgetPreviewDetails preview,
-    required Uri uri,
-  }) {
+  cb.Expression _buildPreviews({required FlutterWidgetPreviewDetails preview, required Uri uri}) {
     final args = <String, cb.Expression>{
       _kPackageName: cb.literalString(preview.packageName!),
       _kScriptUri: cb.literalString(preview.scriptUri.toString()),
@@ -247,7 +244,7 @@ class PreviewCodeGenerator {
 }
 
 class PreviewPrefixedAllocator implements cb.Allocator {
-  static const _doNotPrefix = ['dart:core'];
+  static const _doNotPrefix = <String>{'dart:core'};
   static const _kImportPrefix = '_i';
   static const _kPackageSchemePrefix = 'package:';
   static const _kDartSchemePrefix = 'dart:';

@@ -388,7 +388,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         'Ensure that the analysis server is running and reachable. Details: $e',
       );
     }
-    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(originalPreviews);
+    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(originalPreviews);
 
     final int result = await runPreviewEnvironment(
       widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
@@ -430,7 +430,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   }
 
   void onChangeDetected(FlutterWidgetPreviews update) {
-    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(update);
+    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(update);
     logger.printStatus('Triggering reload based on update to script: ${update.scriptUris}');
     _widgetPreviewApp?.restart();
   }

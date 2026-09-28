@@ -5,56 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/token.dart';
-import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
-import 'package:collection/collection.dart';
-
-extension TokenExtension on Token {
-  /// Convenience getter to identify tokens for private fields and functions.
-  bool get isPrivate => toString().startsWith('_');
-
-  /// Convenience getter to identify WidgetBuilder types.
-  bool get isWidgetBuilder => toString() == 'WidgetBuilder';
-
-  /// Convenience getter to identify Widget types.
-  bool get isWidget => toString() == 'Widget';
-}
-
-extension on InterfaceType {
-  bool isType({required String typeName, required Uri uri}) {
-    if (getDisplayString() == typeName && element.library.uri == uri) {
-      return true;
-    }
-    return allSupertypes.firstWhereOrNull((e) {
-          return e.getDisplayString() == typeName && e.element.library.uri == uri;
-        }) !=
-        null;
-  }
-}
-
-extension AnnotationExtension on Annotation {
-  static final Uri widgetPreviewsLibraryUri = Uri.parse(
-    'package:flutter/src/widget_previews/widget_previews.dart',
-  );
-
-  bool _isPreviewType(String typeName) {
-    final Element? element = elementAnnotation!.element;
-    if (element is ConstructorElement) {
-      final InterfaceType type = element.enclosingElement.thisType;
-      return type.isType(typeName: typeName, uri: widgetPreviewsLibraryUri);
-    }
-    return false;
-  }
-
-  /// Convenience getter to identify `@Preview` annotations
-  bool get isPreview => _isPreviewType('Preview');
-
-  /// Convenience getter to identify `@MultiPreview` annotations
-  bool get isMultiPreview => _isPreviewType('MultiPreview');
-}
-
 /// Convenience getters for examining [String] paths.
 extension StringExtension on String {
   static final RegExp _pathSeparator = RegExp(r'[/\\]');
