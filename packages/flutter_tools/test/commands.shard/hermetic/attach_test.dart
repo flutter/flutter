@@ -1603,24 +1603,22 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
   @override
   HotRunner build(
     List<FlutterDevice> devices, {
+    required Analytics analytics,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
     required String target,
     required ToolContext toolContext,
     required Xcode? xcode,
-    bool benchmarkMode = false,
     File? applicationBinary,
+    bool benchmarkMode = false,
+    String? dillOutputPath,
     bool hostIsIde = false,
     HotRunnerConfig? hotRunnerConfig,
+    String? nativeAssetsYamlFile,
     ProjectFileInvalidator? projectFileInvalidator,
     String? projectRootPath,
-    String? packagesFilePath,
-    String? dillOutputPath,
     bool stayResident = true,
-    FlutterProject? flutterProject,
-    String? nativeAssetsYamlFile,
-    required Analytics analytics,
   }) {
     if (_artifactTester != null) {
       for (final device in devices) {

@@ -1101,6 +1101,7 @@ name: my_app
         flutterDevice,
         logger: logger,
         systemClock: SystemClock.fixed(DateTime(2001)),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         debuggingOptions: DebuggingOptions.enabled(
           const BuildInfo(
             BuildMode.debug,
@@ -2206,22 +2207,21 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
           stayResident: false,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
+          }),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-          analytics: globals.analytics,
+          analytics: const NoOpAnalytics(),
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         );
 
         expect(await residentWebRunner.run(), 0);
       },
       overrides: <Type, Generator>{
-        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-          Target target,
-          Environment environment,
-        ) {
-          expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
-        }),
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         Pub: ThrowingPub.new,
@@ -2237,10 +2237,15 @@ flutter:
           flutterDevice,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
+          }),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-          analytics: globals.analytics,
+          analytics: const NoOpAnalytics(),
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         );
 
@@ -2252,12 +2257,6 @@ flutter:
         expect(result.code, 0);
       },
       overrides: <Type, Generator>{
-        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-          Target target,
-          Environment environment,
-        ) {
-          expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
-        }),
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         Pub: ThrowingPub.new,
@@ -2274,22 +2273,21 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, webUseWasm: true),
           stayResident: false,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
+          }),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-          analytics: globals.analytics,
+          analytics: const NoOpAnalytics(),
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         );
 
         expect(await residentWebRunner.run(), 0);
       },
       overrides: <Type, Generator>{
-        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-          Target target,
-          Environment environment,
-        ) {
-          expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
-        }),
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         Pub: ThrowingPub.new,
@@ -2312,7 +2310,14 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.release, webUseWasm: true),
           stayResident: false,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            if (target is WebServiceWorker) {
+              capturedConfig = target.compileConfigs.first;
+            }
+          }),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
@@ -2335,14 +2340,6 @@ flutter:
         expect(commandOptions, contains('--strip-wasm'));
       },
       overrides: <Type, Generator>{
-        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-          Target target,
-          Environment environment,
-        ) {
-          if (target is WebServiceWorker) {
-            capturedConfig = target.compileConfigs.first;
-          }
-        }),
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         Pub: ThrowingPub.new,
@@ -2361,7 +2358,14 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, webUseWasm: true),
           stayResident: false,
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            if (target is WebServiceWorker) {
+              capturedConfig = target.compileConfigs.first;
+            }
+          }),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
@@ -2384,14 +2388,6 @@ flutter:
         expect(commandOptions, contains('--no-strip-wasm'));
       },
       overrides: <Type, Generator>{
-        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-          Target target,
-          Environment environment,
-        ) {
-          if (target is WebServiceWorker) {
-            capturedConfig = target.compileConfigs.first;
-          }
-        }),
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         Pub: ThrowingPub.new,
@@ -2402,20 +2398,23 @@ flutter:
 
 ResidentRunner setUpResidentRunner(
   FlutterDevice flutterDevice, {
+  BuildSystem? buildSystem,
+  DebuggingOptions? debuggingOptions,
   Logger? logger,
   SystemClock? systemClock,
-  DebuggingOptions? debuggingOptions,
 }) {
   return ResidentWebRunner(
     flutterDevice,
     flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
     debuggingOptions: debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
     analytics: globals.analytics,
-    buildSystem: FlutterBuildSystem(
-      fileSystem: globals.fs,
-      platform: FakePlatform(),
-      logger: BufferLogger.test(),
-    ),
+    buildSystem:
+        buildSystem ??
+        FlutterBuildSystem(
+          fileSystem: globals.fs,
+          platform: FakePlatform(),
+          logger: BufferLogger.test(),
+        ),
     buildTargets: const BuildTargetsImpl(),
     toolContext: test_fakes.FakeToolContext(
       fs: globals.fs,

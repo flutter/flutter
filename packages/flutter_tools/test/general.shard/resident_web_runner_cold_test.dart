@@ -93,7 +93,7 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildSystem: TestBuildSystem.all(BuildResult(success: false)),
         buildTargets: const BuildTargetsImpl(),
         toolContext: FakeToolContext(
           fs: fileSystem,
@@ -125,7 +125,7 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildSystem: TestBuildSystem.error(Exception('foo')),
         buildTargets: const BuildTargetsImpl(),
         toolContext: FakeToolContext(
           fs: fileSystem,
@@ -190,7 +190,10 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildSystem: TestBuildSystem.list(<BuildResult>[
+          BuildResult(success: true),
+          BuildResult(success: false),
+        ]),
         buildTargets: const BuildTargetsImpl(),
         toolContext: FakeToolContext(
           fs: fileSystem,
