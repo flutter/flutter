@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport '_goldens_io.dart';
+/// @docImport 'window.dart';
 library;
 
 import 'dart:convert' show LineSplitter;

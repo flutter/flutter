@@ -94,6 +94,7 @@ void main() {
     testUsingContext('daemon.version command should succeed', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -112,6 +113,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -223,6 +225,7 @@ void main() {
     testUsingContext('printError should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -245,6 +248,7 @@ void main() {
     testUsingContext('printWarning should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -268,6 +272,7 @@ void main() {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           logToStdout: true,
           featureFlags: featureFlags,
@@ -284,6 +289,7 @@ void main() {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           logToStdout: true,
           featureFlags: featureFlags,
@@ -301,6 +307,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -330,6 +337,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -353,6 +361,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -374,6 +383,7 @@ void main() {
     testUsingContext('daemon.shutdown command should stop daemon', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -390,6 +400,7 @@ void main() {
     testUsingContext('app.restart without an appId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -406,6 +417,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -427,6 +439,7 @@ void main() {
     testUsingContext('app.stop without appId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -441,6 +454,7 @@ void main() {
     testUsingContext('device.getDevices should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -456,6 +470,7 @@ void main() {
     testUsingContext('device.getDevices reports available devices', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -478,6 +493,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -537,6 +553,7 @@ void main() {
     testUsingContext('device.discoverDevices should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -552,6 +569,7 @@ void main() {
     testUsingContext('device.discoverDevices reports available devices', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -573,6 +591,7 @@ void main() {
     testUsingContext('device.supportsRuntimeMode returns correct value', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -598,6 +617,7 @@ void main() {
     testUsingContext('device.logReader.start and .stop starts and stops log reader', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -653,6 +673,7 @@ void main() {
       testUsingContext('device.startApp and .stopApp starts and stops an app', () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -730,6 +751,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -801,6 +823,7 @@ void main() {
     testUsingContext('device.getDiagnostics returns correct value', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -827,6 +850,7 @@ void main() {
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -843,6 +867,7 @@ void main() {
     testUsingContext('emulator.launch coldboot parameter must be boolean', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -859,6 +884,7 @@ void main() {
     testUsingContext('emulator.getEmulators should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -877,6 +903,7 @@ void main() {
 
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -906,6 +933,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -931,6 +959,7 @@ void main() {
     testUsingContext('devtools.serve command should return null fields if null returned', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -967,6 +996,7 @@ void main() {
 
           daemon = Daemon(
             daemonConnection,
+            toolContext: DelegatingToolContext(),
             notifyingLogger: notifyingLogger,
             featureFlags: featureFlags,
             fileSystem: globals.fs,
@@ -1051,6 +1081,7 @@ void main() {
 
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1081,6 +1112,7 @@ void main() {
 
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1107,6 +1139,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1139,6 +1172,242 @@ void main() {
             ),
           ),
         );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'app.restart sent before the app has started waits for startup',
+      () async {
+        daemon = Daemon(
+          daemonConnection,
+          toolContext: DelegatingToolContext(),
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
+        final runner = FakeRestartableResidentRunner();
+        final startApp = Completer<void>();
+        final exitApp = Completer<void>();
+
+        final Future<AppInstance> launched = daemon.appDomain.launch(
+          runner,
+          ({
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+          }) async {
+            await startApp.future;
+            appStartedCompleter?.complete();
+            await exitApp.future;
+          },
+          FakeAndroidDevice(),
+          null, // projectDirectory
+          true, // enableHotReload
+          globals.fs.directory('/'), // cwd
+          LaunchMode.run,
+          MachineOutputLogger(parent: notifyingLogger),
+        );
+
+        // `app.start` is sent before the runner has finished starting up, so
+        // the client already has the app ID at this point.
+        final DaemonMessage startEvent = await daemonStreams.outputs.stream.firstWhere(
+          (DaemonMessage message) => message.data['event'] == 'app.start',
+        );
+        final appId = (startEvent.data['params']! as Map<String, Object?>)['appId']! as String;
+
+        final Future<OperationResult> restarted = daemon.appDomain.restart(<String, Object?>{
+          'appId': appId,
+        })!;
+
+        // The restart must not reach the runner while startup is in flight.
+        await pumpEventQueue();
+        expect(runner.restartCount, 0);
+
+        startApp.complete();
+        await launched;
+
+        expect(await restarted, OperationResult.ok);
+        expect(runner.restartCount, 1);
+
+        exitApp.complete();
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'app.restart sent before the app has started reports an error if startup fails',
+      () async {
+        daemon = Daemon(
+          daemonConnection,
+          toolContext: DelegatingToolContext(),
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
+        final runner = FakeRestartableResidentRunner();
+        final exitApp = Completer<void>();
+
+        final Future<AppInstance> launched = daemon.appDomain.launch(
+          runner,
+          ({
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+          }) async {
+            // App exits without ever completing appStartedCompleter.
+            await exitApp.future;
+          },
+          FakeAndroidDevice(),
+          null, // projectDirectory
+          true, // enableHotReload
+          globals.fs.directory('/'), // cwd
+          LaunchMode.run,
+          MachineOutputLogger(parent: notifyingLogger),
+        );
+
+        final DaemonMessage startEvent = await daemonStreams.outputs.stream.firstWhere(
+          (DaemonMessage message) => message.data['event'] == 'app.start',
+        );
+        final appId = (startEvent.data['params']! as Map<String, Object?>)['appId']! as String;
+
+        final Future<OperationResult> restarted = daemon.appDomain.restart(<String, Object?>{
+          'appId': appId,
+        })!;
+
+        exitApp.complete();
+
+        final Matcher matcher = throwsA(
+          isA<DaemonException>().having(
+            (DaemonException e) => e.message,
+            'message',
+            'App failed to start',
+          ),
+        );
+        await expectLater(() => launched, matcher);
+        // The pending restart gets an error rather than hanging forever.
+        await expectLater(() => restarted, matcher);
+        expect(runner.restartCount, 0);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'a pending app.restart gets an error when startup throws a non-Exception',
+      () async {
+        daemon = Daemon(
+          daemonConnection,
+          toolContext: DelegatingToolContext(),
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
+        final runner = FakeRestartableResidentRunner();
+        final failStartup = Completer<void>();
+
+        final Future<AppInstance> launched = daemon.appDomain.launch(
+          runner,
+          ({
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+          }) async {
+            await failStartup.future;
+            // An Error, not an Exception, so `launch` does not convert it into
+            // a `stop` event. The `finally` that assigns currentDirectory can
+            // throw a TypeError this way.
+            throw StateError('startup blew up');
+          },
+          FakeAndroidDevice(),
+          null, // projectDirectory
+          true, // enableHotReload
+          globals.fs.directory('/'), // cwd
+          LaunchMode.run,
+          MachineOutputLogger(parent: notifyingLogger),
+        );
+
+        final DaemonMessage startEvent = await daemonStreams.outputs.stream.firstWhere(
+          (DaemonMessage message) => message.data['event'] == 'app.start',
+        );
+        final appId = (startEvent.data['params']! as Map<String, Object?>)['appId']! as String;
+
+        final Future<OperationResult> restarted = daemon.appDomain.restart(<String, Object?>{
+          'appId': appId,
+        })!;
+
+        failStartup.complete();
+
+        await expectLater(() => launched, throwsStateError);
+        // Without settling `started` on this path the restart would hang.
+        await expectLater(() => restarted, throwsStateError);
+        expect(runner.restartCount, 0);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'a failed start does not fault a runner listener that has no error handler',
+      () async {
+        daemon = Daemon(
+          daemonConnection,
+          toolContext: DelegatingToolContext(),
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
+        final exitApp = Completer<void>();
+        var listenerFired = false;
+
+        final Future<AppInstance> launched = daemon.appDomain.launch(
+          FakeRestartableResidentRunner(),
+          ({
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+          }) async {
+            // HotRunner.run attaches exactly this shape of listener for its
+            // startup analytics, with no onError. Completing the runner's
+            // completer with an error would fault it.
+            unawaited(
+              appStartedCompleter?.future.then((_) {
+                listenerFired = true;
+              }),
+            );
+            // App exits without ever completing appStartedCompleter.
+            await exitApp.future;
+          },
+          FakeAndroidDevice(),
+          null, // projectDirectory
+          true, // enableHotReload
+          globals.fs.directory('/'), // cwd
+          LaunchMode.run,
+          MachineOutputLogger(parent: notifyingLogger),
+        );
+
+        exitApp.complete();
+
+        await expectLater(
+          () => launched,
+          throwsA(
+            isA<DaemonException>().having(
+              (DaemonException e) => e.message,
+              'message',
+              'App failed to start',
+            ),
+          ),
+        );
+
+        // Let any unhandled async error reach the test zone.
+        await pumpEventQueue();
+        expect(listenerFired, isFalse);
       },
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
@@ -1582,4 +1851,18 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 
   @override
   DebuggingOptions get debuggingOptions => DebuggingOptions.enabled(BuildInfo.debug);
+}
+
+class FakeRestartableResidentRunner extends FakeResidentRunner {
+  int restartCount = 0;
+
+  @override
+  Future<OperationResult> restart({
+    bool fullRestart = false,
+    bool pause = false,
+    String? reason,
+  }) async {
+    restartCount++;
+    return OperationResult.ok;
+  }
 }
