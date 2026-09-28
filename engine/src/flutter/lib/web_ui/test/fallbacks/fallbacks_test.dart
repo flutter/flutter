@@ -19,6 +19,21 @@ void main() {
 @JS()
 external bool get crossOriginIsolated;
 
+@JS('_flutter.loader.load')
+external JSPromise<JSAny?> _flutterLoaderLoad(JSAny? options);
+
+@JS('_flutter.buildConfig')
+external JSAny? get _flutterBuildConfig;
+
+@JS('_flutter.buildConfig')
+external set _flutterBuildConfig(JSAny? value);
+
+@JS('WebAssembly.validate')
+external JSFunction get _wasmValidate;
+
+@JS('WebAssembly.validate')
+external set _wasmValidate(JSFunction value);
+
 Future<void> testMain() async {
   setUpUnitTests(setUpTestViewDimensions: false);
 
@@ -32,6 +47,71 @@ Future<void> testMain() async {
     } else {
       expect(isWasm, isFalse);
       expect(isCanvasKit, isTrue);
+    }
+  });
+
+  test('loader strictly honors wasmAllowList and WasmGC capability for dart2wasm builds', () async {
+    final JSAny? originalBuildConfig = _flutterBuildConfig;
+    final JSFunction originalValidate = _wasmValidate;
+    try {
+      _flutterBuildConfig = <String, Object?>{
+        'builds': <Map<String, Object?>>[
+          <String, Object?>{
+            'compileTarget': 'dart2wasm',
+            'renderer': 'canvaskit',
+            'mainWasmPath': 'main.dart.wasm',
+            'jsSupportRuntimePath': 'main.dart.mjs',
+          },
+        ],
+      }.jsify();
+
+      // 1. When wasmAllowList disables the browser engine, dart2wasm/canvaskit
+      // must be rejected even if the browser supports WasmGC.
+      final JSAny? optOutOptions = <String, Object?>{
+        'config': <String, Object?>{
+          'wasmAllowList': <String, bool>{
+            'gecko': false,
+            'webkit': false,
+            'blink': false,
+            'unknown': false,
+          },
+        },
+      }.jsify();
+
+      await expectLater(
+        _flutterLoaderLoad(optOutOptions).toDart,
+        throwsA(
+          predicate<Object>(
+            (Object e) => e.toString().contains('FlutterLoader could not find a build compatible'),
+          ),
+        ),
+      );
+
+      // 2. When WasmGC capability validation fails, explicit opt-in via
+      // wasmAllowList must still reject the dart2wasm build.
+      _wasmValidate = (() => false).toJS;
+      final JSAny? optInOptions = <String, Object?>{
+        'config': <String, Object?>{
+          'wasmAllowList': <String, bool>{
+            'gecko': true,
+            'webkit': true,
+            'blink': true,
+            'unknown': true,
+          },
+        },
+      }.jsify();
+
+      await expectLater(
+        _flutterLoaderLoad(optInOptions).toDart,
+        throwsA(
+          predicate<Object>(
+            (Object e) => e.toString().contains('FlutterLoader could not find a build compatible'),
+          ),
+        ),
+      );
+    } finally {
+      _wasmValidate = originalValidate;
+      _flutterBuildConfig = originalBuildConfig;
     }
   });
 }
