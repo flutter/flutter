@@ -17,8 +17,6 @@ import '../base/logger.dart';
 import '../base/signals.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
-import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
@@ -55,15 +53,14 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
-    required this._buildSystem,
-    required this._buildTargets,
-    required ToolContext toolContext,
+    required super.buildSystem,
+    required super.buildTargets,
+    required super.toolContext,
     @visibleForTesting this._flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     super.verboseHelp = false,
-  }) : _toolContext = toolContext,
-       _fsUtils = FileSystemUtils(fileSystem: toolContext.fs, platform: toolContext.platform) {
+  }) : _fsUtils = FileSystemUtils(fileSystem: toolContext.fs, platform: toolContext.platform) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
 
@@ -195,14 +192,8 @@ class DriveCommand extends RunCommandBase {
     return true;
   }
 
-  final BuildSystem _buildSystem;
-  final BuildTargets _buildTargets;
   FlutterDriverFactory? _flutterDriverFactory;
   final FileSystemUtils _fsUtils;
-  final ToolContext _toolContext;
-
-  @override
-  ToolContext get toolContext => _toolContext;
 
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
@@ -251,7 +242,7 @@ class DriveCommand extends RunCommandBase {
     if (isWirelessIOSDevice &&
         localArgResults != null &&
         !localArgResults.wasParsed('publish-port')) {
-      _toolContext.logger.printTrace(
+      toolContext.logger.printTrace(
         'A wireless iOS device is being used. Changing `publish-port` to be enabled.',
       );
       return false;
@@ -261,7 +252,7 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<void> validateCommand() async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     if (userIdentifier != null) {
       final Device? device = await findTargetDevice();
       if (device is! AndroidDevice) {
@@ -307,7 +298,7 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final String? testFile = _getTestFile();
     if (testFile == null) {
       throwToolExit(null);
@@ -343,11 +334,11 @@ class DriveCommand extends RunCommandBase {
     _flutterDriverFactory ??= FlutterDriverFactory(
       analytics: analytics,
       applicationPackageFactory: ApplicationPackageFactory.instance!,
-      buildSystem: _buildSystem,
-      buildTargets: _buildTargets,
-      dartSdkPath: _toolContext.artifacts.getArtifactPath(.engineDartBinary),
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
+      dartSdkPath: toolContext.artifacts.getArtifactPath(.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     );
     final File packageConfigFile = findPackageConfigFileOrDefault(fs.currentDirectory);
 
@@ -477,7 +468,7 @@ class DriveCommand extends RunCommandBase {
   }
 
   void _registerScreenshotCallbacks(Device device, Directory screenshotDir) {
-    final ToolContext(:Logger logger, :Signals signals) = _toolContext;
+    final ToolContext(:Logger logger, :Signals signals) = toolContext;
     logger.printTrace('Registering signal handlers...');
     final tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
@@ -501,7 +492,7 @@ class DriveCommand extends RunCommandBase {
 
   void _unregisterScreenshotCallbacks() {
     if (screenshotTokens != null) {
-      final ToolContext(:Logger logger, :Signals signals) = _toolContext;
+      final ToolContext(:Logger logger, :Signals signals) = toolContext;
       logger.printTrace('Unregistering signal handlers...');
       for (final MapEntry<ProcessSignal, Object> entry in screenshotTokens!.entries) {
         signals.removeHandler(entry.key, entry.value);
@@ -511,7 +502,7 @@ class DriveCommand extends RunCommandBase {
   }
 
   String? _getTestFile() {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     if (argResults!['driver'] != null) {
       return stringArg('driver');
     }
@@ -557,7 +548,7 @@ class DriveCommand extends RunCommandBase {
     if (!device.supportsScreenshot) {
       return;
     }
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     try {
       outputDirectory.createSync(recursive: true);
       final File outputFile = _fsUtils.getUniqueFile(outputDirectory, 'drive', 'png');
