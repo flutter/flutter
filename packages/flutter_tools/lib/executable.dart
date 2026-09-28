@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
 import 'src/android/android_workflow.dart' as android_workflow;
+import 'src/android/gradle.dart';
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -254,17 +255,13 @@ List<FlutterCommand> generateCommands({
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),
-  AttachCommand(
-    verboseHelp: verboseHelp,
-    stdio: toolDependencies.toolContext.stdio,
-    logger: toolDependencies.toolContext.logger,
-    terminal: toolDependencies.toolContext.terminal,
-    signals: toolDependencies.toolContext.signals,
-    platform: toolDependencies.toolContext.platform,
-    processInfo: ProcessInfo(toolDependencies.toolContext.fs),
-    fileSystem: toolDependencies.toolContext.fs,
-  ),
+  AttachCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   BuildCommand(
+    androidBuilder: AndroidGradleBuilder.fromContexts(
+      analytics: toolDependencies.analytics,
+      androidContext: toolDependencies.androidContext,
+      toolContext: toolDependencies.toolContext,
+    ),
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
     buildSystem: toolDependencies.buildSystem,
@@ -319,15 +316,7 @@ List<FlutterCommand> generateCommands({
     extensionManager: extensionManager,
   ),
   DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
-  DriveCommand(
-    verboseHelp: verboseHelp,
-    fileSystem: toolDependencies.toolContext.fs,
-    logger: toolDependencies.toolContext.logger,
-    platform: toolDependencies.toolContext.platform,
-    terminal: toolDependencies.toolContext.terminal,
-    outputPreferences: toolDependencies.toolContext.outputPreferences,
-    signals: toolDependencies.toolContext.signals,
-  ),
+  DriveCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   EmulatorsCommand(
     doctor: toolDependencies.doctor,
     emulatorManager: toolDependencies.emulatorManager,
@@ -350,7 +339,7 @@ List<FlutterCommand> generateCommands({
     platform: toolDependencies.toolContext.platform,
     featureFlags: featureFlags,
   ),
-  RunCommand(verboseHelp: verboseHelp),
+  RunCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(toolContext: toolDependencies.toolContext),
   TestCommand(

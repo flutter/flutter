@@ -2,19 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/android_builder.dart';
+import '../android/android_sdk.dart';
 import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
+import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
-import '../globals.dart' as globals;
+import '../build_system/build_system.dart';
+import '../context/android_context.dart';
+import '../context/tool_context.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
-  BuildApkCommand({required super.logger, super.verboseHelp = false}) {
+  BuildApkCommand({
+    required this._androidBuilder,
+    required this._androidContext,
+    required this._buildSystem,
+    required ToolContext toolContext,
+    super.verboseHelp = false,
+  }) : super(logger: toolContext.logger, toolContext: toolContext) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),
@@ -49,6 +61,22 @@ class BuildApkCommand extends BuildSubCommand {
     help: 'The target platform for which the app is compiled.',
   );
 
+  final AndroidBuilder _androidBuilder;
+  final AndroidContext _androidContext;
+  final BuildSystem _buildSystem;
+
+  @visibleForTesting
+  AndroidBuilder get androidBuilder => _androidBuilder;
+
+  @visibleForTesting
+  AndroidContext get androidContext => _androidContext;
+
+  @visibleForTesting
+  AndroidSdk? get androidSdk => _androidContext.androidSdk;
+
+  @visibleForTesting
+  BuildSystem get buildSystem => _buildSystem;
+
   BuildMode get _buildMode {
     if (getValue(CommonOptions.releaseMode)) {
       return BuildMode.release;
@@ -72,6 +100,25 @@ class BuildApkCommand extends BuildSubCommand {
             BuildMode.debug || BuildMode.jitRelease => _kDefaultJitArchs,
           }
         : targetPlatform;
+  }
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
+
+  @override
+  FlutterProject get project =>
+      toolContext.projectFactory.fromDirectory(toolContext.fs.currentDirectory);
+
+  @override
+  String get targetFile {
+    if (argResults?.wasParsed('target') ?? false) {
+      return stringArg('target')!;
+    }
+    final List<String>? rest = argResults?.rest;
+    if (rest != null && rest.isNotEmpty) {
+      return rest.first;
+    }
+    return toolContext.fs.path.join('lib', 'main.dart');
   }
 
   @override
@@ -114,8 +161,9 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (globals.androidSdk == null) {
-      exitWithNoSdkMessage();
+    final ToolContext(:Logger logger, :Terminal terminal) = toolContext;
+    if (androidSdk == null) {
+      exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final BuildInfo buildInfo = await getBuildInfo();
 
@@ -125,8 +173,8 @@ class BuildApkCommand extends BuildSubCommand {
       targetArchs: _targetArchs.map<CpuArch>(getCpuArchForName),
     );
     validateBuild(androidBuildInfo);
-    globals.terminal.usesTerminalUi = true;
-    await androidBuilder?.buildApk(
+    terminal.usesTerminalUi = true;
+    await _androidBuilder.buildApk(
       project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
@@ -135,7 +183,7 @@ class BuildApkCommand extends BuildSubCommand {
 
     final bool impellerEnabled = project.android.computeImpellerEnabled();
     final buildLabel = impellerEnabled ? 'manifest-impeller-enabled' : 'manifest-impeller-disabled';
-    globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
+    analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
 
     return FlutterCommandResult.success();
   }

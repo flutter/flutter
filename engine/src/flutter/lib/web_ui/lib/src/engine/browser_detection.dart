@@ -37,11 +37,14 @@ bool get isWasm => ui_web.browser.isWasm;
 // Whether the detected `operatingSystem` is `OperatingSystem.iOs`.
 bool get _isIOS => ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs;
 
+/// Returns true if the browser is on macOS, false otherwise.
+bool get isMacOS => ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs;
+
 /// Whether the browser is running on macOS or iOS.
 ///
 /// - See [operatingSystem].
 /// - See [OperatingSystem].
-bool get isMacOrIOS => _isIOS || ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs;
+bool get isMacOrIOS => _isIOS || isMacOS;
 
 /// Detect iOS 15.
 bool get isIOS15 => debugIsIOS15 ?? _isIOS && ui_web.browser.userAgent.contains('OS 15_');

@@ -9,6 +9,7 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../web/compile.dart';
+import '../web/content_hash.dart';
 import '../web/web_constants.dart';
 import '../web/web_options.dart';
 import '../web_template.dart';
@@ -168,7 +169,11 @@ class BuildWebCommand extends BuildSubCommand {
         );
       }
       if (webContentHash) {
-        _validateIndexHtmlForContentHash(indexHtmlFile);
+        final File bootstrapJsFile = project.web.directory.childFile('flutter_bootstrap.js');
+        _validateIndexHtmlForContentHash(
+          indexHtmlFile,
+          bootstrapJsFile: bootstrapJsFile.existsSync() ? bootstrapJsFile : null,
+        );
       }
     }
 
@@ -202,17 +207,16 @@ class BuildWebCommand extends BuildSubCommand {
         '\nServing tip: Configure your web host to serve "index.html" and "flutter_bootstrap.js"\n'
         'with "Cache-Control: no-cache" (or revalidation) so browser clients immediately pick up new deployments.\n'
         'Hashed entrypoint files (*.<hash>.*) can be served with long-term immutable caching (e.g. "Cache-Control: max-age=31536000, immutable").\n'
+        'When "--no-web-resources-cdn" is used, bundled "canvaskit/**" files are not content-hashed ("urlHashed: false" in "precache_manifest.json") and should not be served with "immutable" caching.\n'
         'See https://docs.flutter.dev/deployment/web for caching guidance.',
       );
     }
     return FlutterCommandResult.success();
   }
 
-  static final RegExp _htmlCommentRegex = RegExp(r'<!--[\s\S]*?-->');
-
-  void _validateIndexHtmlForContentHash(File indexHtmlFile) {
+  void _validateIndexHtmlForContentHash(File indexHtmlFile, {File? bootstrapJsFile}) {
     final String indexHtmlContent = indexHtmlFile.readAsStringSync();
-    final String uncommentedContent = indexHtmlContent.replaceAll(_htmlCommentRegex, '');
+    final String uncommentedContent = stripHtmlAndJsComments(indexHtmlContent);
     if (uncommentedContent.contains('main.dart.js') ||
         uncommentedContent.contains('loadEntrypoint')) {
       throwToolExit(
@@ -222,6 +226,37 @@ class BuildWebCommand extends BuildSubCommand {
         'which automatically resolves content-hashed entrypoints. '
         'Please update web/index.html or run "flutter create . --platforms web" to migrate.',
       );
+    }
+    if (!uncommentedContent.contains('flutter_bootstrap.js') &&
+        !uncommentedContent.contains('{{flutter_bootstrap_js}}') &&
+        !uncommentedContent.contains('{{flutter_build_config}}')) {
+      throwToolExit(
+        'Cannot build with "--web-content-hash" because web/index.html does not '
+        'reference "flutter_bootstrap.js", "{{flutter_bootstrap_js}}", or "{{flutter_build_config}}".\n'
+        'Modern Flutter Web applications use the templated "flutter_bootstrap.js" loader script '
+        'which automatically resolves content-hashed entrypoints. '
+        'Please update web/index.html or run "flutter create . --platforms web" to migrate.',
+      );
+    }
+    if (bootstrapJsFile != null) {
+      final String bootstrapContent = bootstrapJsFile.readAsStringSync();
+      final String uncommentedBootstrap = stripHtmlAndJsComments(bootstrapContent);
+      if (uncommentedBootstrap.contains('main.dart.js') ||
+          uncommentedBootstrap.contains('loadEntrypoint')) {
+        throwToolExit(
+          'Cannot build with "--web-content-hash" because web/flutter_bootstrap.js contains '
+          'direct references to "main.dart.js" or the deprecated "FlutterLoader.loadEntrypoint" API.\n'
+          'Please update web/flutter_bootstrap.js to use "{{flutter_build_config}}" and '
+          '"_flutter.loader.load()".',
+        );
+      }
+      if (!uncommentedBootstrap.contains('{{flutter_build_config}}')) {
+        throwToolExit(
+          'Cannot build with "--web-content-hash" because web/flutter_bootstrap.js does not '
+          'contain the "{{flutter_build_config}}" placeholder required to inject content-hashed '
+          'entrypoint and manifest filenames.',
+        );
+      }
     }
   }
 }
