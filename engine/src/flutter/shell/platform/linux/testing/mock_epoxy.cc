@@ -49,17 +49,31 @@ typedef struct {
 typedef struct {
 } MockSurface;
 
+typedef struct {
+  int dummy;
+} MockSync;
+
 static MockEpoxy* mock = nullptr;
 static bool display_initialized = false;
 static MockDisplay mock_display;
 static MockConfig mock_config;
 static MockContext mock_context;
 static MockSurface mock_surface;
+static MockSync mock_sync;
 
 static EGLint mock_error = EGL_SUCCESS;
 
 MockEpoxy::MockEpoxy() {
   mock = this;
+
+  // Assume a driver that supports fences; tests that care override this.
+  ON_CALL(*this, epoxy_has_egl_extension)
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*this, eglCreateSyncKHR).WillByDefault(::testing::Return(&mock_sync));
+  ON_CALL(*this, eglDestroySyncKHR).WillByDefault(::testing::Return(EGL_TRUE));
+  ON_CALL(*this, eglClientWaitSyncKHR)
+      .WillByDefault(::testing::Return(EGL_CONDITION_SATISFIED_KHR));
+  ON_CALL(*this, eglWaitSyncKHR).WillByDefault(::testing::Return(EGL_TRUE));
 }
 
 MockEpoxy::~MockEpoxy() {
@@ -373,10 +387,21 @@ EGLBoolean _eglQuerySurface(EGLDisplay dpy,
     return EGL_FALSE;
   }
 
-  // The mock surfaces have no size, so anything drawing to them will see a
-  // size change on the first frame.
+  // The mock surfaces have the size the test asked for, which is zero unless
+  // it was set, so anything drawing to them will see a size change on the
+  // first frame.
   if (value != nullptr) {
-    *value = 0;
+    switch (attribute) {
+      case EGL_WIDTH:
+        *value = mock->egl_surface_width;
+        break;
+      case EGL_HEIGHT:
+        *value = mock->egl_surface_height;
+        break;
+      default:
+        *value = 0;
+        break;
+    }
   }
 
   return bool_success();
@@ -411,7 +436,32 @@ EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     return EGL_FALSE;
   }
 
+  if (mock) {
+    mock->eglSwapBuffers();
+  }
+
   return bool_success();
+}
+
+EGLSyncKHR _eglCreateSyncKHR(EGLDisplay dpy,
+                             EGLenum type,
+                             const EGLint* attrib_list) {
+  return mock->eglCreateSyncKHR(dpy, type, attrib_list);
+}
+
+EGLBoolean _eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync) {
+  return mock->eglDestroySyncKHR(dpy, sync);
+}
+
+EGLint _eglClientWaitSyncKHR(EGLDisplay dpy,
+                             EGLSyncKHR sync,
+                             EGLint flags,
+                             EGLTimeKHR timeout) {
+  return mock->eglClientWaitSyncKHR(dpy, sync, flags, timeout);
+}
+
+EGLint _eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags) {
+  return mock->eglWaitSyncKHR(dpy, sync, flags);
 }
 
 static GLuint bound_texture_2d;
@@ -465,6 +515,12 @@ void _glClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
   mock->glClearColor(r, g, b, a);
 }
 
+void _glClear(GLbitfield mask) {
+  if (mock) {
+    mock->glClear(mask);
+  }
+}
+
 GLuint _glCreateShader(GLenum shaderType) {
   return 0;
 }
@@ -492,6 +548,12 @@ void _glDeleteTextures(GLsizei n, const GLuint* textures) {
 void _glFinish() {
   if (mock) {
     mock->glFinish();
+  }
+}
+
+void _glViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
+  if (mock) {
+    mock->glViewport(x, y, width, height);
   }
 }
 
@@ -577,6 +639,12 @@ static void _glGetFramebufferAttachmentParameteriv(GLenum target,
   } else if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME) {
     auto it = framebuffer_renderbuffers.find(attachment);
     *params = (it != framebuffer_renderbuffers.end()) ? it->second : 0;
+  }
+}
+
+static void _glGetFloatv(GLenum pname, GLfloat* data) {
+  if (mock) {
+    mock->glGetFloatv(pname, data);
   }
 }
 
@@ -709,6 +777,10 @@ void _glShaderSource(GLuint shader,
                      const GLchar* const* string,
                      const GLint* length) {}
 
+bool epoxy_has_egl_extension(EGLDisplay dpy, const char* extension) {
+  return mock->epoxy_has_egl_extension(dpy, extension);
+}
+
 bool epoxy_has_gl_extension(const char* extension) {
   return mock->epoxy_has_gl_extension(extension);
 }
@@ -781,6 +853,15 @@ EGLBoolean (*epoxy_eglQuerySurface)(EGLDisplay dpy,
 EGLBoolean (*epoxy_eglDestroySurface)(EGLDisplay dpy, EGLSurface surface);
 EGLBoolean (*epoxy_eglDestroyContext)(EGLDisplay dpy, EGLContext ctx);
 EGLBoolean (*epoxy_eglSwapInterval)(EGLDisplay dpy, EGLint interval);
+EGLSyncKHR (*epoxy_eglCreateSyncKHR)(EGLDisplay dpy,
+                                     EGLenum type,
+                                     const EGLint* attrib_list);
+EGLBoolean (*epoxy_eglDestroySyncKHR)(EGLDisplay dpy, EGLSyncKHR sync);
+EGLint (*epoxy_eglClientWaitSyncKHR)(EGLDisplay dpy,
+                                     EGLSyncKHR sync,
+                                     EGLint flags,
+                                     EGLTimeKHR timeout);
+EGLint (*epoxy_eglWaitSyncKHR)(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags);
 
 void (*epoxy_glAttachShader)(GLuint program, GLuint shader);
 void (*epoxy_glBindFramebuffer)(GLenum target, GLuint framebuffer);
@@ -803,6 +884,7 @@ void (*epoxy_glDeleteFramebuffers)(GLsizei n, const GLuint* framebuffers);
 void (*expoxy_glDeleteShader)(GLuint shader);
 void (*epoxy_glDeleteTextures)(GLsizei n, const GLuint* textures);
 void (*epoxy_glFinish)();
+void (*epoxy_glViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
 void (*epoxy_glFramebufferRenderbuffer)(GLenum target,
                                         GLenum attachment,
                                         GLenum renderbuffertarget,
@@ -885,6 +967,10 @@ static void library_init() {
   epoxy_eglDestroySurface = _eglDestroySurface;
   epoxy_eglDestroyContext = _eglDestroyContext;
   epoxy_eglSwapInterval = _eglSwapInterval;
+  epoxy_eglCreateSyncKHR = _eglCreateSyncKHR;
+  epoxy_eglDestroySyncKHR = _eglDestroySyncKHR;
+  epoxy_eglClientWaitSyncKHR = _eglClientWaitSyncKHR;
+  epoxy_eglWaitSyncKHR = _eglWaitSyncKHR;
 
   epoxy_glAttachShader = _glAttachShader;
   epoxy_glBindFramebuffer = _glBindFramebuffer;
@@ -892,6 +978,7 @@ static void library_init() {
   epoxy_glBindTexture = _glBindTexture;
   epoxy_glBlitFramebuffer = _glBlitFramebuffer;
   epoxy_glCompileShader = _glCompileShader;
+  epoxy_glClear = _glClear;
   epoxy_glClearColor = _glClearColor;
   epoxy_glCreateProgram = _glCreateProgram;
   epoxy_glCreateShader = _glCreateShader;
@@ -900,6 +987,7 @@ static void library_init() {
   epoxy_glDeleteShader = _glDeleteShader;
   epoxy_glDeleteTextures = _glDeleteTextures;
   epoxy_glFinish = _glFinish;
+  epoxy_glViewport = _glViewport;
   epoxy_glDisable = _glDisable;
   epoxy_glEnable = _glEnable;
   epoxy_glFramebufferRenderbuffer = _glFramebufferRenderbuffer;
@@ -911,6 +999,7 @@ static void library_init() {
   epoxy_glGenTextures = _glGenTextures;
   epoxy_glGetFramebufferAttachmentParameteriv =
       _glGetFramebufferAttachmentParameteriv;
+  epoxy_glGetFloatv = _glGetFloatv;
   epoxy_glGetIntegerv = _glGetIntegerv;
   epoxy_glGetProgramiv = _glGetProgramiv;
   epoxy_glGetProgramInfoLog = _glGetProgramInfoLog;

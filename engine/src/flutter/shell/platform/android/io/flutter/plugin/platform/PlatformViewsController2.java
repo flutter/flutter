@@ -11,6 +11,7 @@ import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
 import android.util.SparseArray;
 import android.view.AttachedSurfaceControl;
 import android.view.Gravity;
@@ -75,8 +76,17 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private final SparseArray<FlutterMutatorView> platformViewParent;
   private final MotionEventTracker motionEventTracker;
 
-  private final ArrayList<SurfaceControl.Transaction> pendingTransactions;
-  private final ArrayList<SurfaceControl.Transaction> activeTransactions;
+  // Guarded by transactionLock: the raster thread appends; the platform thread drains.
+  private final ArrayList<SurfaceControl.Transaction> pendingRasterTransactions;
+  private final Object transactionLock = new Object();
+
+  // Platform-thread only: populated by swapTransactions(), drained by onEndFrame().
+  private final ArrayList<SurfaceControl.Transaction> activeRasterTransactions;
+
+  // Platform-thread only. Clips and overlay visibility share one transaction per frame.
+  private SurfaceControl.Transaction pendingPlatformTransaction;
+  private SurfaceControl.Transaction activePlatformTransaction;
+
   private Surface overlayerSurface = null;
   private SurfaceControl overlaySurfaceControl = null;
 
@@ -86,8 +96,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     accessibilityEventsDelegate = new AccessibilityEventsDelegate();
     platformViews = new SparseArray<>();
     platformViewParent = new SparseArray<>();
-    pendingTransactions = new ArrayList<>();
-    activeTransactions = new ArrayList<>();
+    pendingRasterTransactions = new ArrayList<>();
+    activeRasterTransactions = new ArrayList<>();
     motionEventTracker = MotionEventTracker.getInstance();
   }
 
@@ -269,6 +279,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     destroyOverlaySurface();
     flutterView = null;
 
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+      dropTransactions();
+    }
+
     // Notify that the platform view have been detached from FlutterView.
     for (int index = 0; index < platformViews.size(); index++) {
       final PlatformView view = platformViews.valueAt(index);
@@ -436,6 +450,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   @VisibleForTesting
   public void disposePlatformView(int viewId) {
     channelHandler.dispose(viewId);
+  }
+
+  @VisibleForTesting
+  FlutterMutatorView getPlatformViewParent(int viewId) {
+    return platformViewParent.get(viewId);
   }
 
   /**
@@ -611,7 +630,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       return;
     }
     SurfaceControl.Transaction tx =
-        createTransaction().setAlpha(sc, opacity).setCrop(sc, screenRect);
+        platformTransaction().setAlpha(sc, opacity).setCrop(sc, screenRect);
   }
 
   @RequiresApi(API_LEVELS.API_34)
@@ -626,7 +645,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
         SurfaceControl surfaceControl = surfaceView.getSurfaceControl();
         if (surfaceControl != null && surfaceControl.isValid()) {
           SurfaceControl.Transaction tx =
-              createTransaction()
+              platformTransaction()
                   .setAlpha(surfaceControl, opacity)
                   .setCrop(surfaceControl, screenRect);
         } else {
@@ -666,22 +685,29 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     parentView.setVisibility(View.GONE);
   }
 
+  @UiThread
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-    for (int i = 0; i < activeTransactions.size(); i++) {
-      tx = tx.merge(activeTransactions.get(i));
-    }
-    activeTransactions.clear();
+    final SurfaceControl.Transaction platformTx = activePlatformTransaction;
+    activePlatformTransaction = null;
 
-    // This runs on the platform thread but is posted from the raster thread, so by the time it
-    // runs the FlutterView may have been detached from the controller, or detached from its
-    // window (in which case getRootSurfaceControl() returns null). Throwing here is fatal rather
-    // than merely wrong: the JNI caller, onEndFrame2(), turns a pending Java exception into an
-    // abort() via FML_CHECK(fml::jni::CheckException(env)).
+    // Use a fresh destination so cleanup cannot close a raster input still in native use.
+    // Bypass newTransaction(), which tests may override to return an existing input.
+    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    if (platformTx != null) {
+      tx = tx.merge(platformTx);
+      platformTx.close();
+    }
+    for (SurfaceControl.Transaction rasterTx : activeRasterTransactions) {
+      tx = tx.merge(rasterTx);
+    }
+    activeRasterTransactions.clear();
+
+    // The view or its window may detach before this posted frame runs.
     final AttachedSurfaceControl rootSurfaceControl =
         flutterView == null ? null : flutterView.getRootSurfaceControl();
     if (rootSurfaceControl == null) {
+      // Release the unapplied transaction and its owned fence FDs.
       tx.close();
       return;
     }
@@ -690,30 +716,77 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     rootSurfaceControl.applyTransactionOnDraw(tx);
   }
 
-  // NOT called from UI thread.
-  public synchronized void swapTransactions() {
-    activeTransactions.clear();
-    activeTransactions.addAll(pendingTransactions);
-    pendingTransactions.clear();
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  public void swapTransactions() {
+    // Do not close discarded raster inputs; native producers may still use them.
+    activeRasterTransactions.clear();
+    synchronized (transactionLock) {
+      activeRasterTransactions.addAll(pendingRasterTransactions);
+      pendingRasterTransactions.clear();
+    }
+
+    if (activePlatformTransaction != null) {
+      // Discard a platform transaction whose onEndFrame() never ran.
+      activePlatformTransaction.close();
+    }
+    activePlatformTransaction = pendingPlatformTransaction;
+    pendingPlatformTransaction = null;
   }
 
-  // NOT called from UI thread.
+  /**
+   * Discards the transaction state of the view that just detached.
+   *
+   * <p>Platform transactions are closed here: they only touch SurfaceControls that this detach
+   * invalidates, including the overlay that {@link #destroyOverlaySurface()} just released, and
+   * nothing outside the platform thread references them. Raster transactions are dropped without
+   * closing them, because their native producers may still be writing into them.
+   */
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  private void dropTransactions() {
+    activeRasterTransactions.clear();
+    synchronized (transactionLock) {
+      pendingRasterTransactions.clear();
+    }
+
+    if (activePlatformTransaction != null) {
+      activePlatformTransaction.close();
+      activePlatformTransaction = null;
+    }
+    if (pendingPlatformTransaction != null) {
+      pendingPlatformTransaction.close();
+      pendingPlatformTransaction = null;
+    }
+  }
+
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  private SurfaceControl.Transaction platformTransaction() {
+    if (pendingPlatformTransaction == null) {
+      pendingPlatformTransaction = newTransaction();
+    }
+    return pendingPlatformTransaction;
+  }
+
+  // Called from the raster thread through FlutterJNI.
   @RequiresApi(API_LEVELS.API_34)
   public SurfaceControl.Transaction createTransaction() {
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-    pendingTransactions.add(tx);
+    final SurfaceControl.Transaction tx = newTransaction();
+    // This lock protects the list, not AHBSwapchainImplVK::Present's later native writes.
+    // Those can race merging or GC freeing the transaction. Fix both hazards by retaining it
+    // natively and publishing only after the writes finish.
+    synchronized (transactionLock) {
+      pendingRasterTransactions.add(tx);
+    }
     return tx;
   }
 
-  // NOT called from UI thread.
+  /** Allocates a transaction so tests can spy on the instance retained by the controller. */
+  @VisibleForTesting
   @RequiresApi(API_LEVELS.API_34)
-  public void applyTransactions() {
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-    for (int i = 0; i < pendingTransactions.size(); i++) {
-      tx = tx.merge(pendingTransactions.get(i));
-    }
-    tx.apply();
-    pendingTransactions.clear();
+  SurfaceControl.Transaction newTransaction() {
+    return new SurfaceControl.Transaction();
   }
 
   @RequiresApi(API_LEVELS.API_34)
@@ -750,7 +823,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlaySurfaceControl == null) {
       return;
     }
-    SurfaceControl.Transaction tx = createTransaction();
+    SurfaceControl.Transaction tx = platformTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
   }
 
@@ -759,7 +832,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlaySurfaceControl == null) {
       return;
     }
-    SurfaceControl.Transaction tx = createTransaction();
+    SurfaceControl.Transaction tx = platformTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
   }
 
@@ -866,6 +939,19 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
             return;
           }
           embeddedView.clearFocus();
+        }
+
+        @Override
+        public void onRejectGesture(int viewId, long gestureId) {
+          final MotionEvent event =
+              motionEventTracker.peek(MotionEventTracker.MotionEventId.from(gestureId));
+          if (event == null) {
+            return;
+          }
+          final FlutterMutatorView parentView = platformViewParent.get(viewId);
+          if (parentView != null) {
+            parentView.onFlutterWonGesture(event.getDownTime());
+          }
         }
 
         @Override

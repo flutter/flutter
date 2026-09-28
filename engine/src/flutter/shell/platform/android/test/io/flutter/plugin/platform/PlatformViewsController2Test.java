@@ -46,10 +46,19 @@ import io.flutter.plugin.common.StandardMethodCodec;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.view.TextureRegistry;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
@@ -508,49 +517,324 @@ public class PlatformViewsController2Test {
     verify(platformView, times(1)).dispose();
   }
 
-  // Class member variable
-  private SurfaceControl.Transaction mCapturedTx;
+  private static class TransactionTrackingController extends PlatformViewsController2 {
+    final List<SurfaceControl.Transaction> transactions = new ArrayList<>();
+
+    @Override
+    SurfaceControl.Transaction newTransaction() {
+      SurfaceControl.Transaction tx = spy(super.newTransaction());
+      transactions.add(tx);
+      return tx;
+    }
+  }
+
+  private AttachedSurfaceControl attachToViewWithOverlay(PlatformViewsController2 controller) {
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    when(rootSurfaceControl.buildReparentTransaction(any()))
+        .thenReturn(new SurfaceControl.Transaction());
+    controller.attachToView(flutterView);
+    controller.createOverlaySurface();
+    return rootSurfaceControl;
+  }
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void showOverlaySurfaceDefersTransactionUntilEndFrame() {
-
-    PlatformViewsController2 controller =
-        new PlatformViewsController2() {
-          @Override
-          public SurfaceControl.Transaction createTransaction() {
-            // Call super to ensure the real transaction is added to the private
-            // 'pendingTransactions' list
-            SurfaceControl.Transaction realTx = super.createTransaction();
-            // Spy on it so we can verify calls like 'apply()'
-            mCapturedTx = spy(realTx);
-            return mCapturedTx;
-          }
-        };
-
-    PlatformViewRegistryImpl registry = new PlatformViewRegistryImpl();
-    controller.setRegistry(registry);
-
-    // Mocks
-    FlutterView mockFlutterView = mock(FlutterView.class);
-    AttachedSurfaceControl mockAttachedSurfaceControl = mock(AttachedSurfaceControl.class);
-
-    when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
-    when(mockAttachedSurfaceControl.buildReparentTransaction(any()))
-        .thenReturn(new SurfaceControl.Transaction());
-
-    controller.attachToView(mockFlutterView);
-    controller.createOverlaySurface();
+    TransactionTrackingController controller = new TransactionTrackingController();
+    AttachedSurfaceControl rootSurfaceControl = attachToViewWithOverlay(controller);
 
     controller.showOverlaySurface();
-    assertNotNull("Transaction should have been created", mCapturedTx);
-    verify(mCapturedTx, never()).apply();
+    assertEquals(1, controller.transactions.size());
+    SurfaceControl.Transaction platformTx = controller.transactions.get(0);
+    verify(platformTx, never()).apply();
+    verify(platformTx, never()).close();
 
     controller.swapTransactions();
     controller.onEndFrame();
 
-    verify(mockAttachedSurfaceControl, times(1))
+    verify(rootSurfaceControl, times(1))
         .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    verify(platformTx).close();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void overlayMutationsSharePlatformTransactionUntilSwap() {
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
+
+    controller.showOverlaySurface();
+    controller.hideOverlaySurface();
+    assertEquals(1, controller.transactions.size());
+    SurfaceControl.Transaction platformTx = controller.transactions.get(0);
+    verify(platformTx).setVisibility(any(SurfaceControl.class), eq(true));
+    verify(platformTx).setVisibility(any(SurfaceControl.class), eq(false));
+
+    controller.swapTransactions();
+
+    controller.showOverlaySurface();
+    assertEquals(2, controller.transactions.size());
+    assertNotSame(platformTx, controller.transactions.get(1));
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createTransactionIsolatesRasterSubmissionsRegardlessOfCallingThread() {
+    TransactionTrackingController controller = new TransactionTrackingController();
+    AttachedSurfaceControl rootSurfaceControl = attachToViewWithOverlay(controller);
+    controller.showOverlaySurface();
+    SurfaceControl.Transaction platformTx = controller.transactions.get(0);
+
+    // The JNI entry point always creates raster transactions, even on this test's main thread.
+    SurfaceControl.Transaction rasterTx1 = controller.createTransaction();
+    SurfaceControl.Transaction rasterTx2 = controller.createTransaction();
+    assertNotSame(platformTx, rasterTx1);
+    assertNotSame(platformTx, rasterTx2);
+    assertNotSame(rasterTx1, rasterTx2);
+
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(rootSurfaceControl, times(1))
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    verify(platformTx).close();
+    verify(rasterTx1, never()).close();
+    verify(rasterTx2, never()).close();
+  }
+
+  /** How the controller discards a frame while a producer still holds its raster transaction. */
+  private enum FrameDiscard {
+    /** Drop an active frame by swapping again, as a skipped onEndFrame() would. */
+    SWAP_AGAIN,
+    /** Detach the view before the transaction is swapped into the active list. */
+    DETACH_BEFORE_SWAP,
+    /** Run the frame that was posted from the raster thread just before the detach. */
+    DETACH_THEN_END_FRAME
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void swapTransactionsDoesNotCloseRasterTransactionInUse() throws Exception {
+    assertRasterTransactionInUseIsNotClosed(FrameDiscard.SWAP_AGAIN);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void detachFromViewDoesNotCloseRasterTransactionInUse() throws Exception {
+    assertRasterTransactionInUseIsNotClosed(FrameDiscard.DETACH_BEFORE_SWAP);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onEndFrameDoesNotCloseRasterTransactionInUseAfterDetach() throws Exception {
+    assertRasterTransactionInUseIsNotClosed(FrameDiscard.DETACH_THEN_END_FRAME);
+  }
+
+  private void assertRasterTransactionInUseIsNotClosed(FrameDiscard discard) throws Exception {
+    final SurfaceControl.Transaction rasterTx = spy(new SurfaceControl.Transaction());
+    PlatformViewsController2 controller =
+        new PlatformViewsController2() {
+          @Override
+          SurfaceControl.Transaction newTransaction() {
+            return rasterTx;
+          }
+        };
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    FlutterView flutterView = mock(FlutterView.class);
+    controller.attachToView(flutterView);
+
+    final CountDownLatch published = new CountDownLatch(1);
+    final CountDownLatch releaseProducer = new CountDownLatch(1);
+    final AtomicReference<Throwable> producerFailure = new AtomicReference<>();
+    Thread rasterThread =
+        new Thread(
+            () -> {
+              try {
+                SurfaceControl.Transaction tx = controller.createTransaction();
+                published.countDown();
+                // Model native code retaining the borrowed transaction after createTransaction().
+                if (!releaseProducer.await(10, TimeUnit.SECONDS)) {
+                  throw new AssertionError("Platform thread did not release the producer");
+                }
+                verify(tx, never()).close();
+              } catch (Throwable t) {
+                producerFailure.set(t);
+              }
+            });
+    rasterThread.setDaemon(true);
+    rasterThread.start();
+    try {
+      assertTrue("Producer did not publish a transaction", published.await(10, TimeUnit.SECONDS));
+      switch (discard) {
+        case SWAP_AGAIN:
+          controller.swapTransactions();
+          controller.swapTransactions();
+          break;
+        case DETACH_BEFORE_SWAP:
+          controller.detachFromView();
+          break;
+        case DETACH_THEN_END_FRAME:
+          controller.swapTransactions();
+          controller.detachFromView();
+          controller.onEndFrame();
+          break;
+      }
+      verify(rasterTx, never()).close();
+    } finally {
+      releaseProducer.countDown();
+      rasterThread.join(10000);
+    }
+    assertFalse("Producer did not terminate", rasterThread.isAlive());
+    if (producerFailure.get() != null) {
+      throw new AssertionError("Raster producer failed", producerFailure.get());
+    }
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onEndFrameUsesSeparateMergeDestinationForRasterOnlyFrame() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    controller.attachToView(flutterView);
+
+    SurfaceControl.Transaction rasterTx = controller.createTransaction();
+
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(rootSurfaceControl).applyTransactionOnDraw(argThat(tx -> tx != null && tx != rasterTx));
+    verify(flutterView).invalidate();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void swapTransactionsClosesDiscardedPlatformTransaction() {
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
+    controller.showOverlaySurface();
+    // Defensive coverage: production calls onEndFrame() between swaps.
+    controller.swapTransactions();
+    controller.swapTransactions();
+
+    verify(controller.transactions.get(0)).close();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void detachFromViewClosesPlatformTransactions() {
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
+
+    controller.showOverlaySurface();
+    controller.swapTransactions();
+    // The active transaction from the frame above and a pending one from the frame that never
+    // reached onEndFrame().
+    controller.showOverlaySurface();
+    assertEquals(2, controller.transactions.size());
+
+    controller.detachFromView();
+
+    // Both target the overlay SurfaceControl that detachFromView() just released.
+    verify(controller.transactions.get(0)).close();
+    verify(controller.transactions.get(1)).close();
+  }
+
+  /**
+   * Detects list corruption that causes merge(null) and a JNI abort.
+   *
+   * <p>Detection is probabilistic and excludes native writes after publication. Barrier timeouts
+   * skip the run, so this does not test liveness.
+   */
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createTransactionIsSafeWhenRasterAndPlatformThreadsRaceOnFrames() throws Exception {
+    final PlatformViewsController2 controller = new PlatformViewsController2();
+    attachToViewWithOverlay(controller);
+
+    final int rasterThreadCount = 4;
+    // Larger batches increase the opportunity for add() to overlap clear()/addAll().
+    final int presentsPerRound = 64;
+    final int rounds = 300;
+    final long timeoutMs = 30000;
+
+    // Start producers and the frame swap together each round to encourage overlap.
+    final CyclicBarrier roundStart = new CyclicBarrier(rasterThreadCount + 1);
+    // Product failures take precedence over harness skips.
+    final AtomicReference<Throwable> raceFailure = new AtomicReference<>();
+    final AtomicReference<Throwable> harnessFailure = new AtomicReference<>();
+    final AtomicBoolean running = new AtomicBoolean(true);
+    final List<Thread> rasterThreads = new ArrayList<>();
+
+    for (int i = 0; i < rasterThreadCount; i++) {
+      final Thread rasterThread =
+          new Thread(
+              () -> {
+                try {
+                  for (int round = 0; round < rounds && running.get(); round++) {
+                    roundStart.await(timeoutMs, TimeUnit.MILLISECONDS);
+                    for (int present = 0; present < presentsPerRound; present++) {
+                      controller.createTransaction();
+                    }
+                  }
+                } catch (TimeoutException e) {
+                  harnessFailure.compareAndSet(null, e);
+                } catch (BrokenBarrierException e) {
+                  // The participant that stopped early recorded the cause.
+                } catch (Throwable t) {
+                  raceFailure.compareAndSet(null, t);
+                } finally {
+                  running.set(false);
+                  roundStart.reset();
+                }
+              },
+              "fake-raster-" + i);
+      rasterThread.setDaemon(true);
+      rasterThreads.add(rasterThread);
+      rasterThread.start();
+    }
+
+    try {
+      for (int round = 0; round < rounds; round++) {
+        roundStart.await(timeoutMs, TimeUnit.MILLISECONDS);
+
+        controller.showOverlaySurface();
+        controller.hideOverlaySurface();
+
+        controller.swapTransactions();
+        controller.onEndFrame();
+      }
+    } catch (TimeoutException | BrokenBarrierException e) {
+      harnessFailure.compareAndSet(null, e);
+    } catch (Throwable t) {
+      raceFailure.compareAndSet(null, t);
+    } finally {
+      running.set(false);
+      for (Thread rasterThread : rasterThreads) {
+        // Repeat resets in case a producer enters await() after an earlier reset.
+        for (int attempt = 0; attempt < 500 && rasterThread.isAlive(); attempt++) {
+          roundStart.reset();
+          rasterThread.join(10);
+        }
+        if (rasterThread.isAlive()) {
+          raceFailure.compareAndSet(
+              null, new AssertionError(rasterThread.getName() + " did not terminate"));
+        }
+      }
+    }
+
+    if (raceFailure.get() != null) {
+      throw new AssertionError("Concurrent transaction processing failed.", raceFailure.get());
+    }
+    Assume.assumeNoException(
+        "Stress run interrupted by a barrier failure; transaction failures are reported above.",
+        harnessFailure.get());
   }
 
   @Test
@@ -564,6 +848,8 @@ public class PlatformViewsController2Test {
     when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
 
     controller.attachToView(mockFlutterView);
+    controller.createTransaction();
+    controller.swapTransactions();
     controller.detachFromView();
 
     // onEndFrame is posted from the raster thread, so it can run after the view was detached.
@@ -585,10 +871,59 @@ public class PlatformViewsController2Test {
     when(mockFlutterView.getRootSurfaceControl()).thenReturn(null);
 
     controller.attachToView(mockFlutterView);
+    controller.createTransaction();
+    controller.swapTransactions();
 
     controller.onEndFrame();
 
     verify(mockFlutterView, never()).invalidate();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void itInformsMutatorViewWhenGestureIsRejected() {
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 platformViewsController = new PlatformViewsController2();
+    platformViewsController.setRegistry(registryImpl);
+
+    int platformViewId = 0;
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    attach(jni, platformViewsController);
+
+    createPlatformView(jni, platformViewsController, platformViewId, "testType");
+
+    assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
+
+    FlutterMutatorView parentView = platformViewsController.getPlatformViewParent(platformViewId);
+    assertNotNull(parentView);
+    assertFalse(parentView.getFlutterWonGesture());
+
+    // Without active gesture, rejectGesture has no effect.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 100L);
+    assertFalse(parentView.getFlutterWonGesture());
+
+    // Start active gesture with downTime 100.
+    final MotionEvent downEvent =
+        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    final MotionEventTracker.MotionEventId eventId =
+        MotionEventTracker.getInstance().track(downEvent);
+    parentView.onTouchEvent(downEvent);
+
+    // Mismatched gestureId does not set flutterWonGesture.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 99999L);
+    assertFalse(parentView.getFlutterWonGesture());
+
+    // Matching gestureId sets flutterWonGesture.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, eventId.getId());
+    assertTrue(parentView.getFlutterWonGesture());
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {
@@ -647,6 +982,24 @@ public class PlatformViewsController2Test {
     jni.handlePlatformMessage(
         "flutter/platform_views_2",
         encodeMethodCall(platformDisposeMethodCall),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+  }
+
+  private static void rejectGesturePlatformView(
+      FlutterJNI jni,
+      PlatformViewsController2 platformViewsController,
+      int platformViewId,
+      long gestureId) {
+    final Map<String, Object> args = new HashMap<>();
+    args.put("id", platformViewId);
+    args.put("gestureId", gestureId);
+
+    final MethodCall platformRejectGestureMethodCall = new MethodCall("rejectGesture", args);
+
+    jni.handlePlatformMessage(
+        "flutter/platform_views_2",
+        encodeMethodCall(platformRejectGestureMethodCall),
         /*replyId=*/ 0,
         /*messageData=*/ 0);
   }

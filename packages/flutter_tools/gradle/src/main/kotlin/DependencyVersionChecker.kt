@@ -140,12 +140,14 @@ object DependencyVersionChecker {
         }
 
         val kgpVersion: Version? = VersionFetcher.getKGPVersion(project)
-        if (kgpVersion != null) {
+        val usesBuiltInKotlin = FlutterPluginUtils.isBuiltInKotlinEnabled(project, agpVersion)
+
+        if (kgpVersion != null && !usesBuiltInKotlin) {
             checkKGPVersion(kgpVersion, project)
         } else {
             project.logger.debug(
-                "Unable to detect project Kotlin Gradle Plugin version. Skipping Kotlin min-version enforcement. " +
-                    "This is expected if the project uses AGP built-in Kotlin (android.builtInKotlin) or does not apply KGP."
+                "Skipping Kotlin min-version enforcement because the project uses " +
+                    "AGP built-in Kotlin or does not apply KGP."
             )
         }
     }

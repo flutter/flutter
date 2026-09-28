@@ -8,6 +8,7 @@
 #include <epoxy/gl.h>
 #include <gtk/gtk.h>
 
+#include "flutter/shell/platform/linux/fl_gl_fence.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_subsurface.h"
 
@@ -69,15 +70,21 @@ void fl_subsurface_egl_resize(FlSubsurfaceEGL* egl,
  * @texture_id: the OpenGL texture holding the frame to present.
  * @width: the frame width in pixels.
  * @height: the frame height in pixels.
+ * @fence: (allow-none): an #FlGLFence reached when @texture_id has finished
+ * rendering, or %NULL if the rendering is known to have completed.
  *
  * Blits @texture_id to the subsurface window surface and swaps buffers, then
  * restores the engine's rendering context. @texture_id must have been rendered
  * by the engine (or a context sharing resources with it).
+ *
+ * The frame is presented using the subsurface's own context, so @fence is
+ * waited for once that context is current.
  */
 void fl_subsurface_egl_present(FlSubsurfaceEGL* egl,
                                GLuint texture_id,
                                size_t width,
-                               size_t height);
+                               size_t height,
+                               FlGLFence* fence);
 
 G_END_DECLS
 

@@ -49,9 +49,8 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 
   Iterable<Map<String, dynamic>> getServiceExtensionStateChangedEvents(String extensionName) {
-    return getEventsDispatched(
-      'Flutter.ServiceExtensionStateChanged',
-    ).where((Map<String, dynamic> event) => event['extension'] == extensionName);
+    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
+        .where((Map<String, dynamic> event) => event['extension'] == extensionName);
   }
 
   Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
@@ -105,9 +104,11 @@ late TestServiceExtensionsBinding binding;
 
 Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingResult) async {
   var completed = false;
-  pendingResult.whenComplete(() {
-    completed = true;
-  });
+  unawaited(
+    pendingResult.whenComplete(() {
+      completed = true;
+    }),
+  );
   expect(binding.frameScheduled, isFalse);
   await binding.flushMicrotasks();
   expect(binding.frameScheduled, isTrue);
@@ -424,9 +425,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isTrue);
@@ -495,9 +498,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isTrue);
@@ -557,9 +562,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isTrue);
@@ -1029,9 +1036,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(completed, true);
     expect(binding.frameScheduled, isFalse);
@@ -1050,9 +1059,11 @@ void main() {
       <String, String>{'enabled': 'false'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(completed, isTrue);
     expect(binding.frameScheduled, isTrue);
@@ -1093,9 +1104,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isTrue);
@@ -1154,9 +1167,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isTrue);
@@ -1215,9 +1230,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isTrue);
@@ -1268,9 +1285,11 @@ void main() {
       FoundationServiceExtensions.reassemble.name,
       <String, String>{},
     );
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, false);
