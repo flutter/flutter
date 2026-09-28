@@ -828,7 +828,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     expanded_coverage_hint = coverage_hint->Expand(blur_info.local_padding);
   }
 
-  Entity snapshot_entity = entity.Clone();
+  Entity snapshot_entity;
   snapshot_entity.SetTransform(
       Matrix::MakeTranslation(blur_info.source_space_offset) *
       Matrix::MakeScale(blur_info.source_space_scalar));

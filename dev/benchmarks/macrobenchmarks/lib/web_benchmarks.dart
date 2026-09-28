@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:html';
+library;
+
 import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:js_interop';
@@ -98,13 +101,11 @@ Future<void> main(List<String> args) async {
           'API required for orchestrating macrobenchmarks.',
     );
   final ArgResults argResults = parser.parse(args);
-  Uri serverOrigin;
-  if (argResults.wasParsed('port')) {
-    final int port = int.parse(argResults['port'] as String);
-    serverOrigin = Uri.http('localhost:$port');
-  } else {
-    serverOrigin = Uri.base;
-  }
+  const portEnv = String.fromEnvironment('BENCHMARK_SERVER_PORT');
+  final int? port = argResults.wasParsed('port')
+      ? int.tryParse(argResults['port'] as String)
+      : int.tryParse(portEnv);
+  final Uri serverOrigin = port != null ? Uri.http('localhost:$port') : Uri.base;
 
   _client = LocalBenchmarkServerClient(serverOrigin);
 
@@ -118,14 +119,6 @@ Future<void> main(List<String> args) async {
 
   await _runBenchmark(nextBenchmark);
   web.window.location.reload();
-}
-
-/// Shared entrypoint used for DDC, which runs the macrobenchmarks server on a
-/// separate port.
-// TODO(markzipan): Use `main` in `'web_benchmarks.dart` when Flutter Web supports the `--dart-entrypoint-args` flag.
-// ignore: unreachable_from_main
-Future<void> sharedMain(List<String> args) {
-  return main(args);
 }
 
 Future<void> _runBenchmark(String benchmarkName) async {
@@ -460,7 +453,7 @@ class LocalBenchmarkServerClient {
     );
   }
 
-  /// This is the same as calling [html.HttpRequest.request] but it doesn't
+  /// This is the same as calling [HttpRequest.request] but it doesn't
   /// crash on 404, which we use to detect `flutter run`.
   Future<web.XMLHttpRequest> _requestXhr(
     Uri url, {

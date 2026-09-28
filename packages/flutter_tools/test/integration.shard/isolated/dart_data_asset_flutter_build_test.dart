@@ -53,9 +53,9 @@ void main() {
         }
         for (final manifestFile in manifestFiles) {
           final Uint8List manifestData = manifestFile.readAsBytesSync();
-          final manifest =
-              const StandardMessageCodec().decodeMessage(ByteData.sublistView(manifestData))
-                  as Map<Object?, Object?>;
+          final manifest = const StandardMessageCodec().decodeMessage(
+            ByteData.sublistView(manifestData),
+          ) as Map<Object?, Object?>;
           for (final id in available) {
             final key = 'packages/$packageName/data/$id';
             final entry = manifest[key]! as List<Object?>;

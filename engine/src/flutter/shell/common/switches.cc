@@ -238,27 +238,27 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
 
   // Enable the VM Service
   settings.enable_vm_service =
-      !command_line.HasOption(FlagForSwitch(Switch::DisableVMService));
+      !command_line.HasOption(FlagForSwitch(Switch::kDisableVmService));
 
   // Enable mDNS VM Service Publication
   settings.enable_vm_service_publication = !command_line.HasOption(
-      FlagForSwitch(Switch::DisableVMServicePublication));
+      FlagForSwitch(Switch::kDisableVmServicePublication));
 
   // Set VM Service Host
-  if (command_line.HasOption(FlagForSwitch(Switch::DeviceVMServiceHost))) {
-    command_line.GetOptionValue(FlagForSwitch(Switch::DeviceVMServiceHost),
+  if (command_line.HasOption(FlagForSwitch(Switch::kDeviceVmServiceHost))) {
+    command_line.GetOptionValue(FlagForSwitch(Switch::kDeviceVmServiceHost),
                                 &settings.vm_service_host);
   }
   // Default the VM Service port based on --ipv6 if not set.
   if (settings.vm_service_host.empty()) {
     settings.vm_service_host =
-        command_line.HasOption(FlagForSwitch(Switch::IPv6)) ? "::1"
-                                                            : "127.0.0.1";
+        command_line.HasOption(FlagForSwitch(Switch::kIPv6)) ? "::1"
+                                                             : "127.0.0.1";
   }
 
   // Set VM Service Port
-  if (command_line.HasOption(FlagForSwitch(Switch::DeviceVMServicePort))) {
-    if (!GetSwitchValue(command_line, Switch::DeviceVMServicePort,
+  if (command_line.HasOption(FlagForSwitch(Switch::kDeviceVmServicePort))) {
+    if (!GetSwitchValue(command_line, Switch::kDeviceVmServicePort,
                         &settings.vm_service_port)) {
       FML_LOG(INFO)
           << "VM Service port specified was malformed. Will default to "
@@ -267,59 +267,59 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   }
 
   settings.may_insecurely_connect_to_all_domains = !command_line.HasOption(
-      FlagForSwitch(Switch::DisallowInsecureConnections));
+      FlagForSwitch(Switch::kDisallowInsecureConnections));
 
-  command_line.GetOptionValue(FlagForSwitch(Switch::DomainNetworkPolicy),
+  command_line.GetOptionValue(FlagForSwitch(Switch::kDomainNetworkPolicy),
                               &settings.domain_network_policy);
 
   // Disable need for authentication codes for VM service communication, if
   // specified.
   settings.disable_service_auth_codes =
-      command_line.HasOption(FlagForSwitch(Switch::DisableServiceAuthCodes));
+      command_line.HasOption(FlagForSwitch(Switch::kDisableServiceAuthCodes));
 
   // Disable WebSocket origin checks for the VM service, if specified.
   settings.disable_service_origin_check =
-      command_line.HasOption(FlagForSwitch(Switch::DisableServiceOriginCheck));
+      command_line.HasOption(FlagForSwitch(Switch::kDisableServiceOriginCheck));
 
   // Allow fallback to automatic port selection if binding to a specified port
   // fails.
   settings.enable_service_port_fallback =
-      command_line.HasOption(FlagForSwitch(Switch::EnableServicePortFallback));
+      command_line.HasOption(FlagForSwitch(Switch::kEnableServicePortFallback));
 
   // Checked mode overrides.
   settings.disable_dart_asserts =
-      command_line.HasOption(FlagForSwitch(Switch::DisableDartAsserts));
+      command_line.HasOption(FlagForSwitch(Switch::kDisableDartAsserts));
 
   settings.start_paused =
-      command_line.HasOption(FlagForSwitch(Switch::StartPaused));
+      command_line.HasOption(FlagForSwitch(Switch::kStartPaused));
 
   settings.enable_checked_mode =
-      command_line.HasOption(FlagForSwitch(Switch::EnableCheckedMode));
+      command_line.HasOption(FlagForSwitch(Switch::kEnableCheckedMode));
 
   settings.enable_dart_profiling =
-      command_line.HasOption(FlagForSwitch(Switch::EnableDartProfiling));
+      command_line.HasOption(FlagForSwitch(Switch::kEnableDartProfiling));
 
   settings.profile_startup =
-      command_line.HasOption(FlagForSwitch(Switch::ProfileStartup));
+      command_line.HasOption(FlagForSwitch(Switch::kProfileStartup));
 
   settings.enable_software_rendering =
-      command_line.HasOption(FlagForSwitch(Switch::EnableSoftwareRendering));
+      command_line.HasOption(FlagForSwitch(Switch::kEnableSoftwareRendering));
 
   settings.endless_trace_buffer =
-      command_line.HasOption(FlagForSwitch(Switch::EndlessTraceBuffer));
+      command_line.HasOption(FlagForSwitch(Switch::kEndlessTraceBuffer));
 
   settings.trace_startup =
-      command_line.HasOption(FlagForSwitch(Switch::TraceStartup));
+      command_line.HasOption(FlagForSwitch(Switch::kTraceStartup));
 
 #if !FLUTTER_RELEASE
   settings.trace_skia = true;
 
-  if (command_line.HasOption(FlagForSwitch(Switch::TraceSkia))) {
+  if (command_line.HasOption(FlagForSwitch(Switch::kTraceSkia))) {
     // If --trace-skia is specified, then log all Skia events.
     settings.trace_skia_allowlist.reset();
   } else {
     std::string trace_skia_allowlist;
-    command_line.GetOptionValue(FlagForSwitch(Switch::TraceSkiaAllowlist),
+    command_line.GetOptionValue(FlagForSwitch(Switch::kTraceSkiaAllowlist),
                                 &trace_skia_allowlist);
     if (trace_skia_allowlist.size()) {
       settings.trace_skia_allowlist = ParseCommaDelimited(trace_skia_allowlist);
@@ -330,59 +330,60 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
 #endif  // !FLUTTER_RELEASE
 
   std::string trace_allowlist;
-  command_line.GetOptionValue(FlagForSwitch(Switch::TraceAllowlist),
+  command_line.GetOptionValue(FlagForSwitch(Switch::kTraceAllowlist),
                               &trace_allowlist);
   settings.trace_allowlist = ParseCommaDelimited(trace_allowlist);
 
   settings.trace_systrace =
-      command_line.HasOption(FlagForSwitch(Switch::TraceSystrace));
+      command_line.HasOption(FlagForSwitch(Switch::kTraceSystrace));
 
-  command_line.GetOptionValue(FlagForSwitch(Switch::TraceToFile),
+  command_line.GetOptionValue(FlagForSwitch(Switch::kTraceToFile),
                               &settings.trace_to_file);
 
   settings.profile_microtasks =
-      command_line.HasOption(FlagForSwitch(Switch::ProfileMicrotasks));
+      command_line.HasOption(FlagForSwitch(Switch::kProfileMicrotasks));
 
-  settings.skia_deterministic_rendering_on_cpu =
-      command_line.HasOption(FlagForSwitch(Switch::SkiaDeterministicRendering));
+  settings.skia_deterministic_rendering_on_cpu = command_line.HasOption(
+      FlagForSwitch(Switch::kSkiaDeterministicRendering));
 
   settings.verbose_logging =
-      command_line.HasOption(FlagForSwitch(Switch::VerboseLogging));
+      command_line.HasOption(FlagForSwitch(Switch::kVerboseLogging));
 
-  command_line.GetOptionValue(FlagForSwitch(Switch::FlutterAssetsDir),
+  command_line.GetOptionValue(FlagForSwitch(Switch::kFlutterAssetsDir),
                               &settings.assets_path);
 
   std::vector<std::string_view> aot_shared_library_name =
-      command_line.GetOptionValues(FlagForSwitch(Switch::AotSharedLibraryName));
+      command_line.GetOptionValues(
+          FlagForSwitch(Switch::kAotSharedLibraryName));
 
   std::vector<std::string_view> vmservice_shared_library_name =
       command_line.GetOptionValues(
-          FlagForSwitch(Switch::AotVMServiceSharedLibraryName));
+          FlagForSwitch(Switch::kAotVmServiceSharedLibraryName));
   for (auto path : vmservice_shared_library_name) {
     settings.vmservice_snapshot_library_path.emplace_back(path);
   }
 
   std::string snapshot_asset_path;
-  command_line.GetOptionValue(FlagForSwitch(Switch::SnapshotAssetPath),
+  command_line.GetOptionValue(FlagForSwitch(Switch::kSnapshotAssetPath),
                               &snapshot_asset_path);
 
   std::string vm_snapshot_data_filename;
-  command_line.GetOptionValue(FlagForSwitch(Switch::VmSnapshotData),
+  command_line.GetOptionValue(FlagForSwitch(Switch::kVmSnapshotData),
                               &vm_snapshot_data_filename);
 
-  command_line.GetOptionValue(FlagForSwitch(Switch::Route), &settings.route);
+  command_line.GetOptionValue(FlagForSwitch(Switch::kRoute), &settings.route);
 
   std::string vm_snapshot_instr_filename;
-  command_line.GetOptionValue(FlagForSwitch(Switch::VmSnapshotInstructions),
+  command_line.GetOptionValue(FlagForSwitch(Switch::kVmSnapshotInstructions),
                               &vm_snapshot_instr_filename);
 
   std::string isolate_snapshot_data_filename;
-  command_line.GetOptionValue(FlagForSwitch(Switch::IsolateSnapshotData),
+  command_line.GetOptionValue(FlagForSwitch(Switch::kIsolateSnapshotData),
                               &isolate_snapshot_data_filename);
 
   std::string isolate_snapshot_instr_filename;
   command_line.GetOptionValue(
-      FlagForSwitch(Switch::IsolateSnapshotInstructions),
+      FlagForSwitch(Switch::kIsolateSnapshotInstructions),
       &isolate_snapshot_instr_filename);
 
   if (!aot_shared_library_name.empty()) {
@@ -400,21 +401,21 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
         {snapshot_asset_path, isolate_snapshot_instr_filename});
   }
 
-  command_line.GetOptionValue(FlagForSwitch(Switch::CacheDirPath),
+  command_line.GetOptionValue(FlagForSwitch(Switch::kCacheDirPath),
                               &settings.temp_directory_path);
 
   bool leak_vm = "true" == command_line.GetOptionValueWithDefault(
-                               FlagForSwitch(Switch::LeakVM), "true");
+                               FlagForSwitch(Switch::kLeakVm), "true");
   settings.leak_vm = leak_vm;
 
   if (settings.icu_initialization_required) {
-    command_line.GetOptionValue(FlagForSwitch(Switch::ICUDataFilePath),
+    command_line.GetOptionValue(FlagForSwitch(Switch::kIcuDataFilePath),
                                 &settings.icu_data_path);
-    if (command_line.HasOption(FlagForSwitch(Switch::ICUSymbolPrefix))) {
+    if (command_line.HasOption(FlagForSwitch(Switch::kIcuSymbolPrefix))) {
       std::string icu_symbol_prefix, native_lib_path;
-      command_line.GetOptionValue(FlagForSwitch(Switch::ICUSymbolPrefix),
+      command_line.GetOptionValue(FlagForSwitch(Switch::kIcuSymbolPrefix),
                                   &icu_symbol_prefix);
-      command_line.GetOptionValue(FlagForSwitch(Switch::ICUNativeLibPath),
+      command_line.GetOptionValue(FlagForSwitch(Switch::kIcuNativeLibPath),
                                   &native_lib_path);
 
 #if FML_OS_ANDROID
@@ -428,9 +429,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   }
 
   settings.use_test_fonts =
-      command_line.HasOption(FlagForSwitch(Switch::UseTestFonts));
+      command_line.HasOption(FlagForSwitch(Switch::kUseTestFonts));
   settings.use_asset_fonts =
-      !command_line.HasOption(FlagForSwitch(Switch::DisableAssetFonts));
+      !command_line.HasOption(FlagForSwitch(Switch::kDisableAssetFonts));
 
 #if FML_OS_IOS || FML_OS_IOS_SIMULATOR || SLIMPELLER
 // On these configurations, the Impeller flags are completely ignored with the
@@ -438,7 +439,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
 #else   // FML_OS_IOS && !FML_OS_IOS_SIMULATOR
   {
     std::string enable_impeller_value;
-    if (command_line.GetOptionValue(FlagForSwitch(Switch::EnableImpeller),
+    if (command_line.GetOptionValue(FlagForSwitch(Switch::kEnableImpeller),
                                     &enable_impeller_value)) {
       settings.enable_impeller =
           enable_impeller_value.empty() || "true" == enable_impeller_value;
@@ -448,7 +449,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
 
   {
     std::string impeller_backend_value;
-    if (command_line.GetOptionValue(FlagForSwitch(Switch::ImpellerBackend),
+    if (command_line.GetOptionValue(FlagForSwitch(Switch::kImpellerBackend),
                                     &impeller_backend_value)) {
       if (!impeller_backend_value.empty()) {
         settings.requested_rendering_backend = impeller_backend_value;
@@ -457,20 +458,20 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   }
 
   settings.enable_vulkan_validation =
-      command_line.HasOption(FlagForSwitch(Switch::EnableVulkanValidation));
+      command_line.HasOption(FlagForSwitch(Switch::kEnableVulkanValidation));
   settings.enable_opengl_gpu_tracing =
-      command_line.HasOption(FlagForSwitch(Switch::EnableOpenGLGPUTracing));
+      command_line.HasOption(FlagForSwitch(Switch::kEnableOpenGlgpuTracing));
   settings.enable_vulkan_gpu_tracing =
-      command_line.HasOption(FlagForSwitch(Switch::EnableVulkanGPUTracing));
+      command_line.HasOption(FlagForSwitch(Switch::kEnableVulkanGpuTracing));
 
   settings.enable_embedder_api =
-      command_line.HasOption(FlagForSwitch(Switch::EnableEmbedderAPI));
+      command_line.HasOption(FlagForSwitch(Switch::kEnableEmbedderApi));
 
   settings.prefetched_default_font_manager = command_line.HasOption(
-      FlagForSwitch(Switch::PrefetchedDefaultFontManager));
+      FlagForSwitch(Switch::kPrefetchedDefaultFontManager));
 
   std::string all_dart_flags;
-  if (command_line.GetOptionValue(FlagForSwitch(Switch::DartFlags),
+  if (command_line.GetOptionValue(FlagForSwitch(Switch::kDartFlags),
                                   &all_dart_flags)) {
     // Assume that individual flags are comma separated.
     std::vector<std::string> flags = ParseCommaDelimited(all_dart_flags);
@@ -483,56 +484,64 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   }
 
 #if !FLUTTER_RELEASE
-  command_line.GetOptionValue(FlagForSwitch(Switch::LogTag), &settings.log_tag);
+  command_line.GetOptionValue(FlagForSwitch(Switch::kLogTag),
+                              &settings.log_tag);
 #endif
 
-  settings.dump_skp_on_shader_compilation =
-      command_line.HasOption(FlagForSwitch(Switch::DumpSkpOnShaderCompilation));
+  settings.dump_skp_on_shader_compilation = command_line.HasOption(
+      FlagForSwitch(Switch::kDumpSkpOnShaderCompilation));
 
   settings.cache_sksl =
-      command_line.HasOption(FlagForSwitch(Switch::CacheSkSL));
+      command_line.HasOption(FlagForSwitch(Switch::kCacheSkSl));
 
   settings.purge_persistent_cache =
-      command_line.HasOption(FlagForSwitch(Switch::PurgePersistentCache));
+      command_line.HasOption(FlagForSwitch(Switch::kPurgePersistentCache));
 
-  if (command_line.HasOption(FlagForSwitch(Switch::OldGenHeapSize))) {
+  if (command_line.HasOption(FlagForSwitch(Switch::kOldGenHeapSize))) {
     std::string old_gen_heap_size;
-    command_line.GetOptionValue(FlagForSwitch(Switch::OldGenHeapSize),
+    command_line.GetOptionValue(FlagForSwitch(Switch::kOldGenHeapSize),
                                 &old_gen_heap_size);
     settings.old_gen_heap_size = std::stoi(old_gen_heap_size);
   }
 
   if (command_line.HasOption(
-          FlagForSwitch(Switch::ResourceCacheMaxBytesThreshold))) {
+          FlagForSwitch(Switch::kResourceCacheMaxBytesThreshold))) {
     std::string resource_cache_max_bytes_threshold;
     command_line.GetOptionValue(
-        FlagForSwitch(Switch::ResourceCacheMaxBytesThreshold),
+        FlagForSwitch(Switch::kResourceCacheMaxBytesThreshold),
         &resource_cache_max_bytes_threshold);
     settings.resource_cache_max_bytes_threshold =
         std::stoi(resource_cache_max_bytes_threshold);
   }
 
   settings.enable_platform_isolates =
-      command_line.HasOption(FlagForSwitch(Switch::EnablePlatformIsolates));
+      command_line.HasOption(FlagForSwitch(Switch::kEnablePlatformIsolates));
 
-  settings.enable_surface_control = command_line.HasOption(
-      FlagForSwitch(Switch::EnableAndroidHcppAndSurfaceControl));
+  {
+    std::string enable_surface_control_value;
+    if (command_line.GetOptionValue(
+            FlagForSwitch(Switch::kEnableAndroidHcppAndSurfaceControl),
+            &enable_surface_control_value)) {
+      settings.enable_surface_control = enable_surface_control_value.empty() ||
+                                        "true" == enable_surface_control_value;
+    }
+  }
 
   constexpr std::string_view kMergedThreadEnabled = "enabled";
   constexpr std::string_view kMergedThreadDisabled = "disabled";
   constexpr std::string_view kMergedThreadMergeAfterLaunch = "mergeAfterLaunch";
   if (command_line.HasOption(
-          FlagForSwitch(Switch::DisableMergedPlatformUIThread))) {
+          FlagForSwitch(Switch::kDisableMergedPlatformUiThread))) {
     FML_CHECK(!require_merged_platform_ui_thread)
         << "This platform does not support the "
-        << FlagForSwitch(Switch::DisableMergedPlatformUIThread) << " flag";
+        << FlagForSwitch(Switch::kDisableMergedPlatformUiThread) << " flag";
 
     settings.merged_platform_ui_thread =
         Settings::MergedPlatformUIThread::kDisabled;
   } else if (command_line.HasOption(
-                 FlagForSwitch(Switch::MergedPlatformUIThread))) {
+                 FlagForSwitch(Switch::kMergedPlatformUiThread))) {
     std::string merged_platform_ui;
-    command_line.GetOptionValue(FlagForSwitch(Switch::MergedPlatformUIThread),
+    command_line.GetOptionValue(FlagForSwitch(Switch::kMergedPlatformUiThread),
                                 &merged_platform_ui);
     if (merged_platform_ui == kMergedThreadEnabled) {
       settings.merged_platform_ui_thread =
@@ -540,7 +549,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
     } else if (merged_platform_ui == kMergedThreadDisabled) {
       FML_CHECK(!require_merged_platform_ui_thread)
           << "This platform does not support the "
-          << FlagForSwitch(Switch::MergedPlatformUIThread) << "="
+          << FlagForSwitch(Switch::kMergedPlatformUiThread) << "="
           << kMergedThreadDisabled << " flag";
 
       settings.merged_platform_ui_thread =
@@ -552,11 +561,11 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   }
 
   settings.enable_flutter_gpu =
-      command_line.HasOption(FlagForSwitch(Switch::EnableFlutterGPU));
+      command_line.HasOption(FlagForSwitch(Switch::kEnableFlutterGpu));
   settings.impeller_enable_lazy_shader_mode =
-      command_line.HasOption(FlagForSwitch(Switch::ImpellerLazyShaderMode));
+      command_line.HasOption(FlagForSwitch(Switch::kImpellerLazyShaderMode));
   settings.impeller_use_sdfs =
-      command_line.HasOption(FlagForSwitch(Switch::ImpellerUseSDFs));
+      command_line.HasOption(FlagForSwitch(Switch::kImpellerUseSdFs));
 
   return settings;
 }
