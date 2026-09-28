@@ -1274,7 +1274,7 @@ bool _isMeasuringFrame = false;
 /// [WidgetBuildRecorder] only measures frames that build widgets, and ignores
 /// frames that clear the screen.
 ///
-/// Warm-up frames are not measured. If [profile.isWarmingUp] is true,
+/// Warm-up frames are not measured. If [Profile.isWarmingUp] is true,
 /// this function does nothing.
 void startMeasureFrame(Profile profile) {
   if (_calledStartMeasureFrame) {
@@ -1295,7 +1295,7 @@ void startMeasureFrame(Profile profile) {
 /// See [startMeasureFrame] for details on what this instrumentation is used
 /// for.
 ///
-/// Warm-up frames are not measured. If [profile.isWarmingUp] was true
+/// Warm-up frames are not measured. If [Profile.isWarmingUp] was true
 /// when the corresponding [startMeasureFrame] was called,
 /// this function does nothing.
 void endMeasureFrame() {
