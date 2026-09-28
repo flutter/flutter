@@ -648,6 +648,95 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqualObjects(substring, @"bbbbaaaabbbbaaaa");
 }
 
+- (void)testPasteNotifiesInputDelegateAroundTextAndSelectionChanges {
+  for (NSNumber* enableDeltaModel in @[ @NO, @YES ]) {
+    NSMutableDictionary* config = self.mutableTemplateCopy;
+    config[@"enableDeltaModel"] = enableDeltaModel;
+    [self setClientId:123 configuration:config];
+    FlutterTextInputView* inputView = self.installedInputViews[0];
+    [inputView setTextInputState:@{
+      @"text" : @"前abc後",
+      @"selectionBase" : @1,
+      @"selectionExtent" : @4,
+      @"composingBase" : @-1,
+      @"composingExtent" : @-1,
+    }];
+    UIPasteboard.generalPasteboard.string = @"日本語";
+
+    id inputDelegate = OCMStrictProtocolMock(@protocol(UITextInputDelegate));
+    [inputDelegate setExpectationOrderMatters:YES];
+    inputView.inputDelegate = inputDelegate;
+    OCMExpect([inputDelegate textWillChange:inputView]).andDo(^(NSInvocation* invocation) {
+      XCTAssertEqualObjects(inputView.text, @"前abc後");
+    });
+    OCMExpect([inputDelegate selectionWillChange:inputView]).andDo(^(NSInvocation* invocation) {
+      XCTAssertTrue(
+          NSEqualRanges(((FlutterTextRange*)inputView.selectedTextRange).range, NSMakeRange(1, 3)));
+    });
+    OCMExpect([inputDelegate selectionDidChange:inputView]).andDo(^(NSInvocation* invocation) {
+      XCTAssertTrue(
+          NSEqualRanges(((FlutterTextRange*)inputView.selectedTextRange).range, NSMakeRange(4, 0)));
+    });
+    OCMExpect([inputDelegate textDidChange:inputView]).andDo(^(NSInvocation* invocation) {
+      XCTAssertEqualObjects(inputView.text, @"前日本語後");
+      XCTAssertNil(inputView.markedTextRange);
+    });
+
+    [inputView paste:nil];
+    OCMVerifyAll(inputDelegate);
+
+    // The next IME composition must be independent of the pasted text.
+    [inputView setMarkedText:@"かな" selectedRange:NSMakeRange(2, 0)];
+    XCTAssertEqualObjects(inputView.text, @"前日本語かな後");
+    XCTAssertTrue(
+        NSEqualRanges(((FlutterTextRange*)inputView.markedTextRange).range, NSMakeRange(4, 2)));
+    inputView.inputDelegate = nil;
+    [inputDelegate stopMocking];
+  }
+}
+
+- (void)testPasteWhileComposingAllowsNewComposition {
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
+  FlutterTextInputView* inputView = self.installedInputViews[0];
+  [inputView insertText:@"前"];
+  [inputView setMarkedText:@"かな" selectedRange:NSMakeRange(1, 0)];
+  UIPasteboard.generalPasteboard.string = @"貼付";
+  id inputDelegate = OCMStrictProtocolMock(@protocol(UITextInputDelegate));
+  inputView.inputDelegate = inputDelegate;
+  OCMExpect([inputDelegate textWillChange:inputView]);
+  OCMExpect([inputDelegate selectionWillChange:inputView]);
+  OCMExpect([inputDelegate selectionDidChange:inputView]);
+  OCMExpect([inputDelegate textDidChange:inputView]);
+
+  [inputView paste:nil];
+  OCMVerifyAll(inputDelegate);
+  XCTAssertEqualObjects(inputView.text, @"前貼付");
+  XCTAssertNil(inputView.markedTextRange);
+
+  [inputView setMarkedText:@"にほん" selectedRange:NSMakeRange(3, 0)];
+  XCTAssertEqualObjects(inputView.text, @"前貼付にほん");
+  XCTAssertTrue(
+      NSEqualRanges(((FlutterTextRange*)inputView.markedTextRange).range, NSMakeRange(3, 3)));
+  [inputView insertText:@"日本"];
+  XCTAssertEqualObjects(inputView.text, @"前貼付日本");
+  XCTAssertNil(inputView.markedTextRange);
+  inputView.inputDelegate = nil;
+}
+
+- (void)testKeyboardInsertDoesNotNotifyInputDelegate {
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
+  FlutterTextInputView* inputView = self.installedInputViews[0];
+  id inputDelegate = OCMStrictProtocolMock(@protocol(UITextInputDelegate));
+  inputView.inputDelegate = inputDelegate;
+
+  [inputView setMarkedText:@"かな" selectedRange:NSMakeRange(2, 0)];
+  [inputView insertText:@"仮名"];
+
+  XCTAssertEqualObjects(inputView.text, @"仮名");
+  XCTAssertNil(inputView.markedTextRange);
+  inputView.inputDelegate = nil;
+}
+
 - (void)testCanPerformActionForSelectActions {
   NSDictionary* config = self.mutableTemplateCopy;
   [self setClientId:123 configuration:config];
@@ -780,9 +869,12 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   UIPasteboard.generalPasteboard.color = UIColor.redColor;
   XCTAssertNil(UIPasteboard.generalPasteboard.string);
   XCTAssertFalse([inputView canPerformAction:@selector(paste:) withSender:nil]);
+  id inputDelegate = OCMStrictProtocolMock(@protocol(UITextInputDelegate));
+  inputView.inputDelegate = inputDelegate;
   [inputView paste:nil];
 
   XCTAssertEqualObjects(inputView.text, @"");
+  inputView.inputDelegate = nil;
 }
 
 - (void)testNoZombies {
