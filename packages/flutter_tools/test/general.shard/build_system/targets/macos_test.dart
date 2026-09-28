@@ -840,6 +840,11 @@ void main() {
           .createSync(recursive: true);
 
       processManager.addCommands(<FakeCommand>[
+        // One SDK version lookup per architecture.
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'macosx', '--show-sdk-version'],
+          stdout: '12.0',
+        ),
         const FakeCommand(
           command: <String>['xcrun', '--sdk', 'macosx', '--show-sdk-version'],
           stdout: '12.0',

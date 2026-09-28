@@ -9,6 +9,7 @@ import '../build_info.dart';
 import '../darwin/darwin.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/xcode.dart';
+
 import 'file_system.dart';
 import 'logger.dart';
 import 'process.dart';
@@ -188,12 +189,11 @@ class AOTSnapshotter {
           ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
           : FlutterDarwinPlatform.macos.deploymentTarget().toString();
 
-      final String sdkName =
-          sdkRoot ??
-          (platform == TargetPlatform.ios
-              ? XcodeSdk.IPhoneOS.platformName
-              : XcodeSdk.MacOSX.platformName);
-      final String sdkVersion = await _xcode.sdkVersion(sdkName);
+      // The iOS targets always pass the SDK root (the SDKROOT Xcode build
+      // setting), which lets xcrun resolve the exact device or simulator SDK
+      // being built against. The macOS targets do not plumb SDKROOT through,
+      // so fall back to the default macOS SDK there.
+      final String sdkVersion = await _xcode.sdkVersion(sdkRoot ?? XcodeSdk.MacOSX.platformName);
 
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-macho-dylib',

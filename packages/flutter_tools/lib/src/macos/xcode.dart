@@ -267,26 +267,22 @@ class Xcode {
     return runResult.stdout.trim();
   }
 
-  final Map<String, Future<String>> _sdkVersionCache = <String, Future<String>>{};
-
-  /// Returns the SDK version for the given [sdkName].
+  /// Returns the version of the SDK identified by [sdk].
   ///
-  /// Examples of [sdkName] include 'iphoneos', 'iphonesimulator', and 'macosx'.
-  Future<String> sdkVersion(String sdkName) {
-    return _sdkVersionCache.putIfAbsent(sdkName, () async {
-      final RunResult runResult = await _processUtils.run(<String>[
-        ...xcrunCommand(),
-        '--sdk',
-        sdkName,
-        '--show-sdk-version',
-      ]);
-      if (runResult.exitCode != 0) {
-        // If it fails, remove from cache so we can try again later if needed.
-        unawaited(_sdkVersionCache.remove(sdkName));
-        throwToolExit('Could not find SDK version: ${runResult.stderr}');
-      }
-      return runResult.stdout.trim();
-    });
+  /// [sdk] is passed to `xcrun --sdk` and may be either a canonical SDK name
+  /// (for example 'iphoneos', 'iphonesimulator', or 'macosx') or the absolute
+  /// path to an SDK root, such as Xcode's `SDKROOT` build setting.
+  Future<String> sdkVersion(String sdk) async {
+    final RunResult runResult = await _processUtils.run(<String>[
+      ...xcrunCommand(),
+      '--sdk',
+      sdk,
+      '--show-sdk-version',
+    ]);
+    if (runResult.exitCode != 0) {
+      throwToolExit('Could not find SDK version: ${runResult.stderr}');
+    }
+    return runResult.stdout.trim();
   }
 
   String? getSimulatorPath() {

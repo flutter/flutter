@@ -509,6 +509,21 @@ void main() {
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });
 
+          testWithoutContext('--show-sdk-version with SDK root path', () async {
+            const sdkRoot =
+                '/Applications/Xcode.app/Contents/Developer/Platforms/'
+                'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.0.sdk';
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>['xcrun', '--sdk', sdkRoot, '--show-sdk-version'],
+                stdout: '26.0\n',
+              ),
+            );
+
+            expect(await xcode.sdkVersion(sdkRoot), '26.0');
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+
           testWithoutContext('--show-sdk-version fails', () async {
             fakeProcessManager.addCommand(
               const FakeCommand(
@@ -525,6 +540,7 @@ void main() {
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });
         });
+
         group('SDK Platform Version', () {
           testWithoutContext('--show-sdk-platform-version iphonesimulator', () async {
             fakeProcessManager.addCommand(
