@@ -10602,10 +10602,12 @@ void main() {
       TextEditingValue oldValue,
       TextEditingValue newValue,
     ) {
-      if (newValue.text == 'I will be modified by the formatter.') {
-        newValue = collapsedAtEnd('Flutter is the best!');
-      }
-      return newValue;
+      final TextEditingValue newTextEditingValue = switch (newValue.text ==
+          'I will be modified by the formatter.') {
+        true => collapsedAtEnd('Flutter is the best!'),
+        false => newValue,
+      };
+      return newTextEditingValue;
     });
     late StateSetter setState;
 

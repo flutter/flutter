@@ -1155,11 +1155,11 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
     assert(!name.contains(','));
     assert(!name.startsWith('r-'));
     final List<String> routes = _routes.value.split(',');
-    name = restoreState ? 'r-$name' : name;
+    final newName = restoreState ? 'r-$name' : name;
     if (index != null) {
-      routes.insert(index, name);
+      routes.insert(index, newName);
     } else {
-      routes.add(name);
+      routes.add(newName);
     }
     setState(() {
       _routes.value = routes.join(',');
