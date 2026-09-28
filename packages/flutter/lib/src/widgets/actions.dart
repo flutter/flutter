@@ -197,7 +197,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   bool _debugCanHandleIntent<I extends Intent>(I? intent) {
     final Object? badIntentString = switch (intent) {
       T() => null,
-      Object(:final runtimeType) => runtimeType,
+      Object(:final Type runtimeType) => runtimeType,
       // The List literal is needed to reify the type I.
       // ignore: literal_only_boolean_expressions
       null when <I>[] is List<T> => null,
