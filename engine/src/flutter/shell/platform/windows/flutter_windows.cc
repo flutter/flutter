@@ -262,8 +262,6 @@ void FlutterDesktopEnginePostPlatformThreadTask(FlutterDesktopEngineRef engine,
                                                 void* user_data) {
   FML_DCHECK(callback) << "Callback must not be null";
   struct Context {
-    // A constructor (rather than aggregate initialization) is required because
-    // the copy operations are deleted.
     Context(VoidCallback callback, VoidCallback on_cancel, void* user_data)
         : callback(callback), on_cancel(on_cancel), user_data(user_data) {}
 
