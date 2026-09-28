@@ -1662,10 +1662,7 @@ class _LargeTitle extends SingleChildRenderObjectWidget {
 }
 
 class _RenderLargeTitle extends RenderShiftedBox {
-  _RenderLargeTitle({required Alignment alignment, required double height})
-    : _alignment = alignment,
-      _height = height,
-      super(null);
+  _RenderLargeTitle({required this._alignment, required this._height}) : super(null);
 
   Alignment get alignment => _alignment;
   Alignment _alignment;
@@ -2204,9 +2201,8 @@ class _NavigationBarStaticComponents {
   }
 
   static TextScaler _clampedTextScaler(BuildContext context) {
-    return MediaQuery.textScalerOf(
-      context,
-    ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor);
+    return MediaQuery.textScalerOf(context)
+        .clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor);
   }
 }
 

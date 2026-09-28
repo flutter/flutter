@@ -46,10 +46,19 @@ import io.flutter.plugin.common.StandardMethodCodec;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.view.TextureRegistry;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
@@ -175,8 +184,8 @@ public class PlatformViewsController2Test {
   public void itUsesActionEventTypeFromFrameworkEventAsActionChanged() {
     MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
     PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
-    PlatformViewsController2 platformViewsController2 = new PlatformViewsController2();
-    platformViewsController2.setRegistry(registryImpl);
+    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
+    PlatformViewsController2.setRegistry(registryImpl);
 
     MotionEvent original =
         MotionEvent.obtain(
@@ -209,324 +218,11 @@ public class PlatformViewsController2Test {
             original.getFlags(),
             motionEventId.getId());
     MotionEvent resolvedEvent =
-        platformViewsController2.toMotionEvent(
+        PlatformViewsController2.toMotionEvent(
             1, // density
             frameWorkTouch);
-    assertEquals(frameWorkTouch.action, resolvedEvent.getAction());
-    assertNotEquals(original.getAction(), resolvedEvent.getAction());
-  }
-
-  @Test
-  public void toMotionEvent_handlesPointerCountMatch() {
-    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
-    PlatformViewsController2 platformViewsController2 = new PlatformViewsController2();
-
-    MotionEvent original =
-        MotionEvent.obtain(
-            10, // downTime
-            10, // eventTime
-            MotionEvent.ACTION_DOWN,
-            100, // x
-            100, // y
-            0 // metaState
-            );
-
-    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
-
-    List<List<Integer>> pointerProperties =
-        Arrays.asList(Arrays.asList(original.getPointerId(0), original.getToolType(0)));
-    List<List<Double>> pointerCoords =
-        Arrays.asList(
-            Arrays.asList(
-                (double) original.getOrientation(),
-                (double) original.getPressure(),
-                (double) original.getSize(),
-                (double) original.getToolMajor(),
-                (double) original.getToolMinor(),
-                (double) original.getTouchMajor(),
-                (double) original.getTouchMinor(),
-                110.0, // x - slightly offset
-                110.0 // y - slightly offset
-                ));
-
-    PlatformViewTouch touch =
-        new PlatformViewTouch(
-            0, // viewId
-            original.getDownTime(),
-            original.getEventTime(),
-            original.getAction(),
-            1, // pointerCount - matches original
-            pointerProperties,
-            pointerCoords,
-            original.getMetaState(),
-            original.getButtonState(),
-            original.getXPrecision(),
-            original.getYPrecision(),
-            original.getDeviceId(),
-            original.getEdgeFlags(),
-            original.getSource(),
-            original.getFlags(),
-            motionEventId.getId());
-
-    MotionEvent resolvedEvent =
-        platformViewsController2.toMotionEvent(
-            1, // density
-            touch);
-
-    assertEquals(110.0f, resolvedEvent.getX(), 0.001f);
-    assertEquals(110.0f, resolvedEvent.getY(), 0.001f);
-    assertEquals(original.getDownTime(), resolvedEvent.getDownTime());
-    assertEquals(original.getEventTime(), resolvedEvent.getEventTime());
-    assertEquals(original.getAction(), resolvedEvent.getAction());
-  }
-
-  @Test
-  public void toMotionEvent_handlesPointerCountMismatch() {
-    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
-    PlatformViewsController2 platformViewsController2 = new PlatformViewsController2();
-
-    MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[2];
-    properties[0] = new MotionEvent.PointerProperties();
-    properties[0].id = 0;
-    properties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
-    properties[1] = new MotionEvent.PointerProperties();
-    properties[1].id = 1;
-    properties[1].toolType = MotionEvent.TOOL_TYPE_FINGER;
-
-    MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[2];
-    coords[0] = new MotionEvent.PointerCoords();
-    coords[0].x = 100;
-    coords[0].y = 100;
-    coords[1] = new MotionEvent.PointerCoords();
-    coords[1].x = 200;
-    coords[1].y = 200;
-
-    MotionEvent original =
-        MotionEvent.obtain(
-            10, // downTime
-            10, // eventTime
-            MotionEvent.ACTION_MOVE,
-            2, // pointerCount
-            properties,
-            coords,
-            0, // metaState
-            0, // buttonState
-            1.0f, // xPrecision
-            1.0f, // yPrecision
-            0, // deviceId
-            0, // edgeFlags
-            0, // source
-            0 // flags
-            );
-
-    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
-
-    List<List<Integer>> frameworkPointerProperties =
-        Arrays.asList(Arrays.asList(0, MotionEvent.TOOL_TYPE_FINGER));
-
-    List<List<Double>> frameworkPointerCoords =
-        Arrays.asList(Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0));
-
-    PlatformViewTouch touch =
-        new PlatformViewTouch(
-            0, // viewId
-            original.getDownTime(),
-            original.getEventTime(),
-            original.getAction(),
-            1, // pointerCount - mismatch! (original has 2)
-            frameworkPointerProperties,
-            frameworkPointerCoords,
-            original.getMetaState(),
-            original.getButtonState(),
-            original.getXPrecision(),
-            original.getYPrecision(),
-            original.getDeviceId(),
-            original.getEdgeFlags(),
-            original.getSource(),
-            original.getFlags(),
-            motionEventId.getId());
-
-    MotionEvent resolvedEvent =
-        platformViewsController2.toMotionEvent(
-            1, // density
-            touch);
-
-    assertEquals(1, resolvedEvent.getPointerCount());
-    assertEquals(100.0f, resolvedEvent.getX(0), 0.001f);
-    assertEquals(100.0f, resolvedEvent.getY(0), 0.001f);
-    assertEquals(original.getDownTime(), resolvedEvent.getDownTime());
-    assertEquals(original.getEventTime(), resolvedEvent.getEventTime());
-    assertEquals(original.getAction(), resolvedEvent.getAction());
-    assertEquals(original.getMetaState(), resolvedEvent.getMetaState());
-  }
-
-  @Test
-  public void toMotionEvent_multiTouchWithPointerCountMismatch() {
-    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
-    PlatformViewsController2 platformViewsController2 = new PlatformViewsController2();
-
-    MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[3];
-    properties[0] = new MotionEvent.PointerProperties();
-    properties[0].id = 0;
-    properties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
-    properties[1] = new MotionEvent.PointerProperties();
-    properties[1].id = 1;
-    properties[1].toolType = MotionEvent.TOOL_TYPE_FINGER;
-    properties[2] = new MotionEvent.PointerProperties();
-    properties[2].id = 2;
-    properties[2].toolType = MotionEvent.TOOL_TYPE_FINGER;
-
-    MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[3];
-    coords[0] = new MotionEvent.PointerCoords();
-    coords[0].x = 100;
-    coords[0].y = 100;
-    coords[1] = new MotionEvent.PointerCoords();
-    coords[1].x = 200;
-    coords[1].y = 200;
-    coords[2] = new MotionEvent.PointerCoords();
-    coords[2].x = 300;
-    coords[2].y = 300;
-
-    MotionEvent original =
-        MotionEvent.obtain(
-            10, // downTime
-            10, // eventTime
-            MotionEvent.ACTION_MOVE,
-            3, // pointerCount
-            properties,
-            coords,
-            0, // metaState
-            0, // buttonState
-            1.0f, // xPrecision
-            1.0f, // yPrecision
-            0, // deviceId
-            0, // edgeFlags
-            0, // source
-            0 // flags
-            );
-
-    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
-
-    List<List<Integer>> frameworkPointerProperties =
-        Arrays.asList(
-            Arrays.asList(0, MotionEvent.TOOL_TYPE_FINGER),
-            Arrays.asList(1, MotionEvent.TOOL_TYPE_FINGER));
-
-    List<List<Double>> frameworkPointerCoords =
-        Arrays.asList(
-            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 50.0, 50.0), // pointer 0
-            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0) // pointer 1
-            );
-
-    PlatformViewTouch touch =
-        new PlatformViewTouch(
-            0, // viewId
-            original.getDownTime(),
-            original.getEventTime(),
-            original.getAction(),
-            2, // pointerCount - mismatch! (original has 3)
-            frameworkPointerProperties,
-            frameworkPointerCoords,
-            original.getMetaState(),
-            original.getButtonState(),
-            original.getXPrecision(),
-            original.getYPrecision(),
-            original.getDeviceId(),
-            original.getEdgeFlags(),
-            original.getSource(),
-            original.getFlags(),
-            motionEventId.getId());
-
-    MotionEvent resolvedEvent =
-        platformViewsController2.toMotionEvent(
-            1, // density
-            touch);
-
-    assertEquals(2, resolvedEvent.getPointerCount());
-    assertEquals(50.0f, resolvedEvent.getX(0), 0.001f);
-    assertEquals(50.0f, resolvedEvent.getY(0), 0.001f);
-    assertEquals(100.0f, resolvedEvent.getX(1), 0.001f);
-    assertEquals(100.0f, resolvedEvent.getY(1), 0.001f);
-  }
-
-  @Test
-  public void toMotionEvent_handlesActionMismatch() {
-    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
-    PlatformViewsController2 platformViewsController2 = new PlatformViewsController2();
-
-    MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[2];
-    properties[0] = new MotionEvent.PointerProperties();
-    properties[0].id = 0;
-    properties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
-    properties[1] = new MotionEvent.PointerProperties();
-    properties[1].id = 1;
-    properties[1].toolType = MotionEvent.TOOL_TYPE_FINGER;
-
-    MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[2];
-    coords[0] = new MotionEvent.PointerCoords();
-    coords[0].x = 100;
-    coords[0].y = 100;
-    coords[1] = new MotionEvent.PointerCoords();
-    coords[1].x = 200;
-    coords[1].y = 200;
-
-    MotionEvent original =
-        MotionEvent.obtain(
-            10, // downTime
-            10, // eventTime
-            MotionEvent.ACTION_POINTER_UP, // action = 6
-            2, // pointerCount
-            properties,
-            coords,
-            0, // metaState
-            0, // buttonState
-            1.0f, // xPrecision
-            1.0f, // yPrecision
-            0, // deviceId
-            0, // edgeFlags
-            0, // source
-            0 // flags
-            );
-
-    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
-
-    List<List<Integer>> frameworkPointerProperties =
-        Arrays.asList(
-            Arrays.asList(0, MotionEvent.TOOL_TYPE_FINGER),
-            Arrays.asList(1, MotionEvent.TOOL_TYPE_FINGER));
-
-    List<List<Double>> frameworkPointerCoords =
-        Arrays.asList(
-            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0),
-            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 200.0, 200.0));
-
-    PlatformViewTouch touch =
-        new PlatformViewTouch(
-            0, // viewId
-            original.getDownTime(),
-            original.getEventTime(),
-            MotionEvent.ACTION_MOVE, // Framework sends ACTION_MOVE (2)
-            2, // pointerCount - matches original!
-            frameworkPointerProperties,
-            frameworkPointerCoords,
-            original.getMetaState(),
-            original.getButtonState(),
-            original.getXPrecision(),
-            original.getYPrecision(),
-            original.getDeviceId(),
-            original.getEdgeFlags(),
-            original.getSource(),
-            original.getFlags(),
-            motionEventId.getId());
-
-    MotionEvent resolvedEvent =
-        platformViewsController2.toMotionEvent(
-            1, // density
-            touch);
-
-    assertEquals(MotionEvent.ACTION_MOVE, resolvedEvent.getAction());
-    assertNotEquals(original.getAction(), resolvedEvent.getAction());
-    assertEquals(2, resolvedEvent.getPointerCount());
+    assertEquals(resolvedEvent.getAction(), original.getAction());
+    assertNotEquals(resolvedEvent.getAction(), frameWorkTouch.action);
   }
 
   private MotionEvent makePlatformViewTouchAndInvokeToMotionEvent(
@@ -821,49 +517,324 @@ public class PlatformViewsController2Test {
     verify(platformView, times(1)).dispose();
   }
 
-  // Class member variable
-  private SurfaceControl.Transaction mCapturedTx;
+  private static class TransactionTrackingController extends PlatformViewsController2 {
+    final List<SurfaceControl.Transaction> transactions = new ArrayList<>();
+
+    @Override
+    SurfaceControl.Transaction newTransaction() {
+      SurfaceControl.Transaction tx = spy(super.newTransaction());
+      transactions.add(tx);
+      return tx;
+    }
+  }
+
+  private AttachedSurfaceControl attachToViewWithOverlay(PlatformViewsController2 controller) {
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    when(rootSurfaceControl.buildReparentTransaction(any()))
+        .thenReturn(new SurfaceControl.Transaction());
+    controller.attachToView(flutterView);
+    controller.createOverlaySurface();
+    return rootSurfaceControl;
+  }
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void showOverlaySurfaceDefersTransactionUntilEndFrame() {
-
-    PlatformViewsController2 controller =
-        new PlatformViewsController2() {
-          @Override
-          public SurfaceControl.Transaction createTransaction() {
-            // Call super to ensure the real transaction is added to the private
-            // 'pendingTransactions' list
-            SurfaceControl.Transaction realTx = super.createTransaction();
-            // Spy on it so we can verify calls like 'apply()'
-            mCapturedTx = spy(realTx);
-            return mCapturedTx;
-          }
-        };
-
-    PlatformViewRegistryImpl registry = new PlatformViewRegistryImpl();
-    controller.setRegistry(registry);
-
-    // Mocks
-    FlutterView mockFlutterView = mock(FlutterView.class);
-    AttachedSurfaceControl mockAttachedSurfaceControl = mock(AttachedSurfaceControl.class);
-
-    when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
-    when(mockAttachedSurfaceControl.buildReparentTransaction(any()))
-        .thenReturn(new SurfaceControl.Transaction());
-
-    controller.attachToView(mockFlutterView);
-    controller.createOverlaySurface();
+    TransactionTrackingController controller = new TransactionTrackingController();
+    AttachedSurfaceControl rootSurfaceControl = attachToViewWithOverlay(controller);
 
     controller.showOverlaySurface();
-    assertNotNull("Transaction should have been created", mCapturedTx);
-    verify(mCapturedTx, never()).apply();
+    assertEquals(1, controller.transactions.size());
+    SurfaceControl.Transaction platformTx = controller.transactions.get(0);
+    verify(platformTx, never()).apply();
+    verify(platformTx, never()).close();
 
     controller.swapTransactions();
     controller.onEndFrame();
 
-    verify(mockAttachedSurfaceControl, times(1))
+    verify(rootSurfaceControl, times(1))
         .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    verify(platformTx).close();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void overlayMutationsSharePlatformTransactionUntilSwap() {
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
+
+    controller.showOverlaySurface();
+    controller.hideOverlaySurface();
+    assertEquals(1, controller.transactions.size());
+    SurfaceControl.Transaction platformTx = controller.transactions.get(0);
+    verify(platformTx).setVisibility(any(SurfaceControl.class), eq(true));
+    verify(platformTx).setVisibility(any(SurfaceControl.class), eq(false));
+
+    controller.swapTransactions();
+
+    controller.showOverlaySurface();
+    assertEquals(2, controller.transactions.size());
+    assertNotSame(platformTx, controller.transactions.get(1));
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createTransactionIsolatesRasterSubmissionsRegardlessOfCallingThread() {
+    TransactionTrackingController controller = new TransactionTrackingController();
+    AttachedSurfaceControl rootSurfaceControl = attachToViewWithOverlay(controller);
+    controller.showOverlaySurface();
+    SurfaceControl.Transaction platformTx = controller.transactions.get(0);
+
+    // The JNI entry point always creates raster transactions, even on this test's main thread.
+    SurfaceControl.Transaction rasterTx1 = controller.createTransaction();
+    SurfaceControl.Transaction rasterTx2 = controller.createTransaction();
+    assertNotSame(platformTx, rasterTx1);
+    assertNotSame(platformTx, rasterTx2);
+    assertNotSame(rasterTx1, rasterTx2);
+
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(rootSurfaceControl, times(1))
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    verify(platformTx).close();
+    verify(rasterTx1, never()).close();
+    verify(rasterTx2, never()).close();
+  }
+
+  /** How the controller discards a frame while a producer still holds its raster transaction. */
+  private enum FrameDiscard {
+    /** Drop an active frame by swapping again, as a skipped onEndFrame() would. */
+    SWAP_AGAIN,
+    /** Detach the view before the transaction is swapped into the active list. */
+    DETACH_BEFORE_SWAP,
+    /** Run the frame that was posted from the raster thread just before the detach. */
+    DETACH_THEN_END_FRAME
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void swapTransactionsDoesNotCloseRasterTransactionInUse() throws Exception {
+    assertRasterTransactionInUseIsNotClosed(FrameDiscard.SWAP_AGAIN);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void detachFromViewDoesNotCloseRasterTransactionInUse() throws Exception {
+    assertRasterTransactionInUseIsNotClosed(FrameDiscard.DETACH_BEFORE_SWAP);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onEndFrameDoesNotCloseRasterTransactionInUseAfterDetach() throws Exception {
+    assertRasterTransactionInUseIsNotClosed(FrameDiscard.DETACH_THEN_END_FRAME);
+  }
+
+  private void assertRasterTransactionInUseIsNotClosed(FrameDiscard discard) throws Exception {
+    final SurfaceControl.Transaction rasterTx = spy(new SurfaceControl.Transaction());
+    PlatformViewsController2 controller =
+        new PlatformViewsController2() {
+          @Override
+          SurfaceControl.Transaction newTransaction() {
+            return rasterTx;
+          }
+        };
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    FlutterView flutterView = mock(FlutterView.class);
+    controller.attachToView(flutterView);
+
+    final CountDownLatch published = new CountDownLatch(1);
+    final CountDownLatch releaseProducer = new CountDownLatch(1);
+    final AtomicReference<Throwable> producerFailure = new AtomicReference<>();
+    Thread rasterThread =
+        new Thread(
+            () -> {
+              try {
+                SurfaceControl.Transaction tx = controller.createTransaction();
+                published.countDown();
+                // Model native code retaining the borrowed transaction after createTransaction().
+                if (!releaseProducer.await(10, TimeUnit.SECONDS)) {
+                  throw new AssertionError("Platform thread did not release the producer");
+                }
+                verify(tx, never()).close();
+              } catch (Throwable t) {
+                producerFailure.set(t);
+              }
+            });
+    rasterThread.setDaemon(true);
+    rasterThread.start();
+    try {
+      assertTrue("Producer did not publish a transaction", published.await(10, TimeUnit.SECONDS));
+      switch (discard) {
+        case SWAP_AGAIN:
+          controller.swapTransactions();
+          controller.swapTransactions();
+          break;
+        case DETACH_BEFORE_SWAP:
+          controller.detachFromView();
+          break;
+        case DETACH_THEN_END_FRAME:
+          controller.swapTransactions();
+          controller.detachFromView();
+          controller.onEndFrame();
+          break;
+      }
+      verify(rasterTx, never()).close();
+    } finally {
+      releaseProducer.countDown();
+      rasterThread.join(10000);
+    }
+    assertFalse("Producer did not terminate", rasterThread.isAlive());
+    if (producerFailure.get() != null) {
+      throw new AssertionError("Raster producer failed", producerFailure.get());
+    }
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onEndFrameUsesSeparateMergeDestinationForRasterOnlyFrame() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    controller.attachToView(flutterView);
+
+    SurfaceControl.Transaction rasterTx = controller.createTransaction();
+
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(rootSurfaceControl).applyTransactionOnDraw(argThat(tx -> tx != null && tx != rasterTx));
+    verify(flutterView).invalidate();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void swapTransactionsClosesDiscardedPlatformTransaction() {
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
+    controller.showOverlaySurface();
+    // Defensive coverage: production calls onEndFrame() between swaps.
+    controller.swapTransactions();
+    controller.swapTransactions();
+
+    verify(controller.transactions.get(0)).close();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void detachFromViewClosesPlatformTransactions() {
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
+
+    controller.showOverlaySurface();
+    controller.swapTransactions();
+    // The active transaction from the frame above and a pending one from the frame that never
+    // reached onEndFrame().
+    controller.showOverlaySurface();
+    assertEquals(2, controller.transactions.size());
+
+    controller.detachFromView();
+
+    // Both target the overlay SurfaceControl that detachFromView() just released.
+    verify(controller.transactions.get(0)).close();
+    verify(controller.transactions.get(1)).close();
+  }
+
+  /**
+   * Detects list corruption that causes merge(null) and a JNI abort.
+   *
+   * <p>Detection is probabilistic and excludes native writes after publication. Barrier timeouts
+   * skip the run, so this does not test liveness.
+   */
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createTransactionIsSafeWhenRasterAndPlatformThreadsRaceOnFrames() throws Exception {
+    final PlatformViewsController2 controller = new PlatformViewsController2();
+    attachToViewWithOverlay(controller);
+
+    final int rasterThreadCount = 4;
+    // Larger batches increase the opportunity for add() to overlap clear()/addAll().
+    final int presentsPerRound = 64;
+    final int rounds = 300;
+    final long timeoutMs = 30000;
+
+    // Start producers and the frame swap together each round to encourage overlap.
+    final CyclicBarrier roundStart = new CyclicBarrier(rasterThreadCount + 1);
+    // Product failures take precedence over harness skips.
+    final AtomicReference<Throwable> raceFailure = new AtomicReference<>();
+    final AtomicReference<Throwable> harnessFailure = new AtomicReference<>();
+    final AtomicBoolean running = new AtomicBoolean(true);
+    final List<Thread> rasterThreads = new ArrayList<>();
+
+    for (int i = 0; i < rasterThreadCount; i++) {
+      final Thread rasterThread =
+          new Thread(
+              () -> {
+                try {
+                  for (int round = 0; round < rounds && running.get(); round++) {
+                    roundStart.await(timeoutMs, TimeUnit.MILLISECONDS);
+                    for (int present = 0; present < presentsPerRound; present++) {
+                      controller.createTransaction();
+                    }
+                  }
+                } catch (TimeoutException e) {
+                  harnessFailure.compareAndSet(null, e);
+                } catch (BrokenBarrierException e) {
+                  // The participant that stopped early recorded the cause.
+                } catch (Throwable t) {
+                  raceFailure.compareAndSet(null, t);
+                } finally {
+                  running.set(false);
+                  roundStart.reset();
+                }
+              },
+              "fake-raster-" + i);
+      rasterThread.setDaemon(true);
+      rasterThreads.add(rasterThread);
+      rasterThread.start();
+    }
+
+    try {
+      for (int round = 0; round < rounds; round++) {
+        roundStart.await(timeoutMs, TimeUnit.MILLISECONDS);
+
+        controller.showOverlaySurface();
+        controller.hideOverlaySurface();
+
+        controller.swapTransactions();
+        controller.onEndFrame();
+      }
+    } catch (TimeoutException | BrokenBarrierException e) {
+      harnessFailure.compareAndSet(null, e);
+    } catch (Throwable t) {
+      raceFailure.compareAndSet(null, t);
+    } finally {
+      running.set(false);
+      for (Thread rasterThread : rasterThreads) {
+        // Repeat resets in case a producer enters await() after an earlier reset.
+        for (int attempt = 0; attempt < 500 && rasterThread.isAlive(); attempt++) {
+          roundStart.reset();
+          rasterThread.join(10);
+        }
+        if (rasterThread.isAlive()) {
+          raceFailure.compareAndSet(
+              null, new AssertionError(rasterThread.getName() + " did not terminate"));
+        }
+      }
+    }
+
+    if (raceFailure.get() != null) {
+      throw new AssertionError("Concurrent transaction processing failed.", raceFailure.get());
+    }
+    Assume.assumeNoException(
+        "Stress run interrupted by a barrier failure; transaction failures are reported above.",
+        harnessFailure.get());
   }
 
   @Test
@@ -877,6 +848,8 @@ public class PlatformViewsController2Test {
     when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
 
     controller.attachToView(mockFlutterView);
+    controller.createTransaction();
+    controller.swapTransactions();
     controller.detachFromView();
 
     // onEndFrame is posted from the raster thread, so it can run after the view was detached.
@@ -898,6 +871,8 @@ public class PlatformViewsController2Test {
     when(mockFlutterView.getRootSurfaceControl()).thenReturn(null);
 
     controller.attachToView(mockFlutterView);
+    controller.createTransaction();
+    controller.swapTransactions();
 
     controller.onEndFrame();
 
@@ -906,72 +881,49 @@ public class PlatformViewsController2Test {
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void createFlutterPlatformViewEagerlyAttachesToFlutterView() {
+  public void itInformsMutatorViewWhenGestureIsRejected() {
     PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
-    PlatformViewsController2 controller = new PlatformViewsController2();
-    controller.setRegistry(registryImpl);
+    PlatformViewsController2 platformViewsController = new PlatformViewsController2();
+    platformViewsController.setRegistry(registryImpl);
+
+    int platformViewId = 0;
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
     FlutterJNI jni = new FlutterJNI();
-    FlutterView flutterView = attach(jni, controller);
+    jni.attachToNative();
+    attach(jni, platformViewsController);
 
-    PlatformViewRegistry registry = controller.getRegistry();
-    registry.registerViewFactory(
-        CountingPlatformView.VIEW_TYPE_ID,
-        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
-          @Override
-          public PlatformView create(Context context, int viewId, Object args) {
-            return new CountingPlatformView(context);
-          }
-        });
+    createPlatformView(jni, platformViewsController, platformViewId, "testType");
 
-    int viewId = 0;
-    final PlatformViewCreationRequest request =
-        PlatformViewCreationRequest.createHCPPRequest(
-            viewId, CountingPlatformView.VIEW_TYPE_ID, View.LAYOUT_DIRECTION_LTR, null);
-    PlatformView pView = controller.createFlutterPlatformView(request);
-    assertNotNull(pView);
-    assertNotNull(pView.getView().getParent());
-    assertTrue(pView.getView().getParent() instanceof FlutterMutatorView);
-    FlutterMutatorView mutatorView = (FlutterMutatorView) pView.getView().getParent();
-    assertEquals(flutterView, mutatorView.getParent());
-  }
+    assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
 
-  @Test
-  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void attachToViewEagerlyAttachesPreExistingPlatformViews() {
-    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
-    PlatformViewsController2 controller = new PlatformViewsController2();
-    controller.setRegistry(registryImpl);
-    final Context context = ApplicationProvider.getApplicationContext();
-    FlutterJNI jni = new FlutterJNI();
-    final DartExecutor executor = new DartExecutor(jni, mock(AssetManager.class));
-    executor.onAttachedToJNI();
-    controller.attach(context, executor);
+    FlutterMutatorView parentView = platformViewsController.getPlatformViewParent(platformViewId);
+    assertNotNull(parentView);
+    assertFalse(parentView.getFlutterWonGesture());
 
-    PlatformViewRegistry registry = controller.getRegistry();
-    registry.registerViewFactory(
-        CountingPlatformView.VIEW_TYPE_ID,
-        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
-          @Override
-          public PlatformView create(Context context, int viewId, Object args) {
-            return new CountingPlatformView(context);
-          }
-        });
+    // Without active gesture, rejectGesture has no effect.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 100L);
+    assertFalse(parentView.getFlutterWonGesture());
 
-    int viewId = 0;
-    final PlatformViewCreationRequest request =
-        PlatformViewCreationRequest.createHCPPRequest(
-            viewId, CountingPlatformView.VIEW_TYPE_ID, View.LAYOUT_DIRECTION_LTR, null);
-    PlatformView pView = controller.createFlutterPlatformView(request);
-    assertNotNull(pView);
-    assertNull(pView.getView().getParent());
+    // Start active gesture with downTime 100.
+    final MotionEvent downEvent =
+        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    final MotionEventTracker.MotionEventId eventId =
+        MotionEventTracker.getInstance().track(downEvent);
+    parentView.onTouchEvent(downEvent);
 
-    FlutterView flutterView = new FlutterView(context, new FlutterSurfaceView(context));
-    controller.attachToView(flutterView);
+    // Mismatched gestureId does not set flutterWonGesture.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 99999L);
+    assertFalse(parentView.getFlutterWonGesture());
 
-    assertNotNull(pView.getView().getParent());
-    assertTrue(pView.getView().getParent() instanceof FlutterMutatorView);
-    FlutterMutatorView mutatorView = (FlutterMutatorView) pView.getView().getParent();
-    assertEquals(flutterView, mutatorView.getParent());
+    // Matching gestureId sets flutterWonGesture.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, eventId.getId());
+    assertTrue(parentView.getFlutterWonGesture());
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {
@@ -1030,6 +982,24 @@ public class PlatformViewsController2Test {
     jni.handlePlatformMessage(
         "flutter/platform_views_2",
         encodeMethodCall(platformDisposeMethodCall),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+  }
+
+  private static void rejectGesturePlatformView(
+      FlutterJNI jni,
+      PlatformViewsController2 platformViewsController,
+      int platformViewId,
+      long gestureId) {
+    final Map<String, Object> args = new HashMap<>();
+    args.put("id", platformViewId);
+    args.put("gestureId", gestureId);
+
+    final MethodCall platformRejectGestureMethodCall = new MethodCall("rejectGesture", args);
+
+    jni.handlePlatformMessage(
+        "flutter/platform_views_2",
+        encodeMethodCall(platformRejectGestureMethodCall),
         /*replyId=*/ 0,
         /*messageData=*/ 0);
   }

@@ -74,9 +74,8 @@ class _PopupSurfaceExampleState extends State<PopupSurfaceExample> {
                     decoration: _shouldPaintSurface
                         ? null
                         : BoxDecoration(
-                            color: CupertinoTheme.of(
-                              context,
-                            ).scaffoldBackgroundColor,
+                            color: CupertinoTheme.of(context)
+                                .scaffoldBackgroundColor,
                             borderRadius: .circular(8.0),
                           ),
                     child: const Text('This is a popup surface.'),

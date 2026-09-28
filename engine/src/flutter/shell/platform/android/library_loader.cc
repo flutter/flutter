@@ -17,12 +17,13 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
   bool result = false;
 
-  // Register FlutterEmbedderNative.
-  result = flutter::android::FlutterEmbedderNative::RegisterJni(env);
-  FML_CHECK(result);
-
   // Register FlutterMain.
   result = flutter::FlutterMain::Register(env);
+  FML_CHECK(result);
+
+  // Register FlutterEmbedderNative as the exclusive native entrypoint registrar
+  // for io.flutter.embedding.engine.FlutterJNI.
+  result = flutter::android::FlutterEmbedderNative::RegisterJni(env);
   FML_CHECK(result);
 
   // Register AndroidImageDecoder.

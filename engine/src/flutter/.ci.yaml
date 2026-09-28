@@ -11,6 +11,7 @@ enabled_branches:
 platform_properties:
   linux:
     properties:
+      presubmit_max_attempts: "3"
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
@@ -23,6 +24,7 @@ platform_properties:
       cpu: x86
   mac:
     properties:
+      presubmit_max_attempts: "3"
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
@@ -36,6 +38,7 @@ platform_properties:
         }
   windows:
     properties:
+      presubmit_max_attempts: "3"
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
@@ -49,7 +52,6 @@ targets:
     enabled_branches:
       - master
     recipe: engine_v2/engine_v2
-    bringup: true
     properties:
       config_name: local_engine
     # local_engine schedules a bunch of other builds, so it's likely to timeout waiting for those builds to run.
@@ -591,8 +593,6 @@ targets:
   - name: Windows windows_unopt
     recipe: engine_v2/builder
     timeout: 120
-    # TODO(#177172): dashboard super unhealthy
-    bringup: true
     properties:
       config_name: windows_unopt
 
@@ -604,7 +604,7 @@ targets:
   #
   - name: Linux linux_android_aot_engine_size_exp
     recipe: engine_v2/engine_v2
-    bringup: true
+    presubmit: false
     timeout: 120
     enabled_branches:
       # Don't run this on release branches

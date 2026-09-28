@@ -12,6 +12,7 @@
 #include <mutex>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "flutter/fml/macros.h"
@@ -23,14 +24,39 @@
 namespace flutter {
 namespace android {
 
+/// @brief Parses SurfaceControl and HCPP flags from a single command-line
+/// argument.
+/// @param arg The argument string to inspect (e.g.,
+/// "--enable-hcpp-and-surface-control=true").
+/// @return true if the argument enables HCPP/SurfaceControl, false if it
+/// disables it,
+///         or std::nullopt if the argument is unrelated.
+std::optional<bool> ParseHcppFlag(std::string_view arg);
+
+/// @brief Parses merged platform and UI thread flags from a single command-line
+/// argument.
+/// @param arg The argument string to inspect (e.g.,
+/// "--merged-platform-ui-thread=true").
+/// @return true if the argument enables merged threads, false if it disables
+/// it,
+///         or std::nullopt if the argument is unrelated.
+std::optional<bool> ParseMergedPlatformUIThreadFlag(std::string_view arg);
+
 /// @brief Minimum Android API level required for Impeller autoselection.
 constexpr int kMinimumAndroidApiLevelForImpeller = 29;
+
+/// @brief Minimum Android API level required for SurfaceControl / HCPP
+/// (Android 14 / API 34).
+constexpr int kMinimumAndroidApiLevelForSurfaceControl = 34;
 
 /// @brief VM initialization arguments and configuration parameters provided
 /// from the Android platform / Java embedder layer.
 struct AndroidVMArgs {
   /// Command-line argument strings passed to the engine (e.g. from FlutterJNI).
   std::vector<std::string> command_line_args;
+
+  /// Path to the Flutter assets directory containing project assets.
+  std::string assets_path;
 
   /// Path to the application kernel snapshot or dill asset (debug/JIT).
   std::string kernel_path;
@@ -91,11 +117,18 @@ struct AndroidVMArgs {
   /// Whether systrace tracing is enabled.
   bool trace_systrace = false;
 
+  /// Whether SurfaceControl (HC++) is enabled.
+  bool enable_surface_control = false;
+
+  /// Whether platform and UI threads are merged.
+  bool merged_platform_ui_thread = false;
+
   /// Initial VM service URI (if available).
   std::string vm_service_uri;
 
   bool operator==(const AndroidVMArgs& other) const {
     return command_line_args == other.command_line_args &&
+           assets_path == other.assets_path &&
            kernel_path == other.kernel_path &&
            app_storage_path == other.app_storage_path &&
            engine_caches_path == other.engine_caches_path &&
@@ -123,13 +156,21 @@ struct AndroidVMArgs {
            enable_impeller == other.enable_impeller &&
            enable_software_rendering == other.enable_software_rendering &&
            trace_systrace == other.trace_systrace &&
+           enable_surface_control == other.enable_surface_control &&
+           merged_platform_ui_thread == other.merged_platform_ui_thread &&
            vm_service_uri == other.vm_service_uri;
   }
 };
 
 /// @brief Determines the appropriate rendering API for the Android device.
-AndroidRenderingAPI SelectRenderingAPI(const AndroidVMArgs& args,
-                                       bool is_vivante = false);
+AndroidRenderingAPI SelectRenderingAPI(
+    const AndroidVMArgs& args,
+    std::optional<bool> is_vivante = std::nullopt);
+
+/// @brief Determines whether SurfaceControl / HCPP is supported for the given
+/// VM arguments and resolved rendering API.
+bool ShouldEnableSurfaceControl(const AndroidVMArgs& args,
+                                AndroidRenderingAPI rendering_api);
 
 /// @brief Abstract interface for font collection prefetching.
 ///
@@ -291,6 +332,13 @@ class AndroidVMInit {
       std::shared_ptr<FontCollectionProvider> font_provider = nullptr,
       std::shared_ptr<AndroidAOTProvider> aot_provider = nullptr);
   virtual ~AndroidVMInit();
+
+  /// @brief Sets the process-global VM initialization arguments from
+  /// FlutterMain::Init.
+  static void SetGlobalVMArgs(const AndroidVMArgs& args);
+
+  /// @brief Returns the process-global VM initialization arguments if set.
+  static std::optional<AndroidVMArgs> GetGlobalVMArgs();
 
   /// @brief Initializes the global VM settings and configurations.
   bool Init(const AndroidVMArgs& args);

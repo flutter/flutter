@@ -8,6 +8,12 @@
 #include "flutter/fml/trace_event.h"
 
 #if defined(_WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #else
 #include <dlfcn.h>
@@ -24,13 +30,37 @@ DefaultOSLibrary::DefaultOSLibrary(std::string name) : name_(std::move(name)) {
   TRACE_EVENT1("flutter", "DefaultOSLibrary::DefaultOSLibrary", "name",
                name_.c_str());
 #if defined(_WIN32)
-  handle_ = reinterpret_cast<void*>(LoadLibraryA(name_.c_str()));
+  if (name_.empty()) {
+    handle_ = reinterpret_cast<void*>(GetModuleHandleW(nullptr));
+    owns_handle_ = false;
+  } else {
+    int wlen = MultiByteToWideChar(CP_UTF8, 0, name_.c_str(), -1, nullptr, 0);
+    if (wlen > 1) {
+      std::wstring wname(wlen - 1, L'\0');
+      MultiByteToWideChar(CP_UTF8, 0, name_.c_str(), -1, &wname[0], wlen);
+      handle_ = reinterpret_cast<void*>(LoadLibraryW(wname.c_str()));
+    }
+  }
 #else
-  handle_ = dlopen(name_.c_str(), RTLD_LAZY | RTLD_LOCAL);
+  dlerror();
+  const char* dl_path = name_.empty() ? nullptr : name_.c_str();
+  handle_ = dlopen(dl_path, RTLD_LAZY | RTLD_LOCAL);
+  if (name_.empty()) {
+    owns_handle_ = false;
+  }
 #endif
   if (!handle_) {
+#if defined(_WIN32)
+    [[maybe_unused]] DWORD error = GetLastError();
     FML_DLOG(INFO) << "DefaultOSLibrary: Failed to open dynamic library '"
-                   << name_ << "'";
+                   << name_ << "', GetLastError=" << error;
+#else
+    const char* raw_error = dlerror();
+    [[maybe_unused]] const char* error =
+        raw_error ? raw_error : "unknown error";
+    FML_DLOG(INFO) << "DefaultOSLibrary: Failed to open dynamic library '"
+                   << name_ << "': " << error;
+#endif
   }
 }
 
@@ -68,13 +98,25 @@ void* DefaultOSLibrary::ResolveSymbol(const char* symbol_name) const {
 #if defined(_WIN32)
   void* sym = reinterpret_cast<void*>(
       GetProcAddress(reinterpret_cast<HMODULE>(handle_), symbol_name));
-#else
-  void* sym = dlsym(handle_, symbol_name);
-#endif
   if (!sym) {
+    [[maybe_unused]] DWORD error = GetLastError();
     FML_DLOG(INFO) << "DefaultOSLibrary: Symbol '" << symbol_name
-                   << "' not found in library '" << name_ << "'";
+                   << "' not found in library '" << name_
+                   << "', GetLastError=" << error;
   }
+#else
+  // Clear any error left pending by an earlier call so that the |dlerror|
+  // below unambiguously describes this |dlsym|.
+  dlerror();
+  void* sym = dlsym(handle_, symbol_name);
+  if (!sym) {
+    const char* raw_error = dlerror();
+    [[maybe_unused]] const char* error =
+        raw_error ? raw_error : "unknown error";
+    FML_DLOG(INFO) << "DefaultOSLibrary: Symbol '" << symbol_name
+                   << "' not found in library '" << name_ << "': " << error;
+  }
+#endif
   return sym;
 }
 
@@ -101,16 +143,34 @@ std::shared_ptr<OSLibrary> DefaultOSLibraryLoader::LoadDynamicLibrary(
   if (!library_name) {
     return nullptr;
   }
-  std::lock_guard<std::mutex> lock(mutex_);
   std::string key(library_name);
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = loaded_libraries_.find(key);
+    if (it != loaded_libraries_.end()) {
+      return it->second;
+    }
+  }
+
+  // Perform expensive OS dynamic library loading outside application mutex
+  // to eliminate AB-BA lock inversion hazards and dynamic linker
+  // self-deadlocks.
+  auto lib = std::make_shared<DefaultOSLibrary>(key);
+
+  std::lock_guard<std::mutex> lock(mutex_);
   auto it = loaded_libraries_.find(key);
   if (it != loaded_libraries_.end()) {
+    // Another thread loaded or negative-cached it while we were loading.
     return it->second;
   }
-  auto lib = std::make_shared<DefaultOSLibrary>(key);
+
   if (!lib->IsValid()) {
+    // Negative caching: store nullptr to prevent repeated disk I/O and dlopen
+    // probes on the hot path for missing optional libraries.
+    loaded_libraries_[key] = nullptr;
     return nullptr;
   }
+
   loaded_libraries_[key] = lib;
   return lib;
 }
@@ -137,7 +197,9 @@ bool DefaultOSLibraryLoader::IsLibraryLoaded(const char* library_name) const {
     return false;
   }
   std::lock_guard<std::mutex> lock(mutex_);
-  return loaded_libraries_.find(library_name) != loaded_libraries_.end();
+  auto it = loaded_libraries_.find(library_name);
+  return it != loaded_libraries_.end() && it->second != nullptr &&
+         it->second->IsValid();
 }
 
 // =============================================================================
@@ -161,7 +223,7 @@ const std::string& MockOSLibrary::GetName() const {
 void* MockOSLibrary::ResolveSymbol(const char* symbol_name) const {
   TRACE_EVENT2("flutter", "MockOSLibrary::ResolveSymbol", "library",
                name_.c_str(), "symbol", symbol_name ? symbol_name : "<null>");
-  if (!symbol_name || !is_valid_) {
+  if (!symbol_name || !is_valid_.load()) {
     return nullptr;
   }
   std::lock_guard<std::mutex> lock(mutex_);
@@ -173,13 +235,13 @@ void* MockOSLibrary::ResolveSymbol(const char* symbol_name) const {
 }
 
 bool MockOSLibrary::IsValid() const {
-  return is_valid_;
+  return is_valid_.load();
 }
 
 void MockOSLibrary::SetValid(bool valid) {
   TRACE_EVENT2("flutter", "MockOSLibrary::SetValid", "name", name_.c_str(),
                "valid", valid ? "true" : "false");
-  is_valid_ = valid;
+  is_valid_.store(valid);
 }
 
 void MockOSLibrary::SetSymbol(const std::string& symbol_name,
@@ -253,13 +315,18 @@ bool MockOSLibraryLoader::IsLibraryLoaded(const char* library_name) const {
     return false;
   }
   std::lock_guard<std::mutex> lock(mutex_);
-  return libraries_.find(library_name) != libraries_.end();
+  auto it = libraries_.find(library_name);
+  return it != libraries_.end() && it->second != nullptr &&
+         it->second->IsValid();
 }
 
 void MockOSLibraryLoader::RegisterLibrary(const std::string& library_name,
                                           std::shared_ptr<OSLibrary> library) {
   TRACE_EVENT1("flutter", "MockOSLibraryLoader::RegisterLibrary", "name",
                library_name.c_str());
+  if (!library) {
+    return;
+  }
   std::lock_guard<std::mutex> lock(mutex_);
   libraries_[library_name] = std::move(library);
 }
@@ -269,15 +336,19 @@ void MockOSLibraryLoader::SetSymbol(const std::string& library_name,
                                     void* symbol_ptr) {
   TRACE_EVENT2("flutter", "MockOSLibraryLoader::SetSymbol", "library",
                library_name.c_str(), "symbol", symbol_name.c_str());
-  std::lock_guard<std::mutex> lock(mutex_);
-  auto it = libraries_.find(library_name);
   std::shared_ptr<MockOSLibrary> mock_lib;
-  if (it != libraries_.end()) {
-    mock_lib = std::static_pointer_cast<MockOSLibrary>(it->second);
-  }
-  if (!mock_lib) {
-    mock_lib = std::make_shared<MockOSLibrary>(library_name);
-    libraries_[library_name] = mock_lib;
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = libraries_.find(library_name);
+    if (it != libraries_.end() && it->second != nullptr) {
+      if (it->second->AsMockOSLibrary() != nullptr) {
+        mock_lib = std::static_pointer_cast<MockOSLibrary>(it->second);
+      }
+    }
+    if (!mock_lib) {
+      mock_lib = std::make_shared<MockOSLibrary>(library_name);
+      libraries_[library_name] = mock_lib;
+    }
   }
   mock_lib->SetSymbol(symbol_name, symbol_ptr);
 }
@@ -293,6 +364,34 @@ void MockOSLibraryLoader::ClearLibraries() {
   TRACE_EVENT0("flutter", "MockOSLibraryLoader::ClearLibraries");
   std::lock_guard<std::mutex> lock(mutex_);
   libraries_.clear();
+}
+
+namespace {
+struct DefaultLoaderStorage {
+  std::mutex mutex;
+  std::shared_ptr<OSLibraryLoader> loader;
+};
+
+DefaultLoaderStorage& GetDefaultLoaderStorage() {
+  static DefaultLoaderStorage* storage = new DefaultLoaderStorage();
+  return *storage;
+}
+}  // namespace
+
+std::shared_ptr<OSLibraryLoader> OSLibraryLoader::GetDefaultLibraryLoader() {
+  auto& storage = GetDefaultLoaderStorage();
+  std::lock_guard<std::mutex> lock(storage.mutex);
+  if (!storage.loader) {
+    storage.loader = std::make_shared<DefaultOSLibraryLoader>();
+  }
+  return storage.loader;
+}
+
+void OSLibraryLoader::SetDefaultLibraryLoader(
+    std::shared_ptr<OSLibraryLoader> loader) {
+  auto& storage = GetDefaultLoaderStorage();
+  std::lock_guard<std::mutex> lock(storage.mutex);
+  storage.loader = std::move(loader);
 }
 
 }  // namespace android

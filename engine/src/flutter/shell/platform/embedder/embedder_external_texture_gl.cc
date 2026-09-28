@@ -11,6 +11,7 @@
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
+#include "impeller/renderer/backend/gles/gles.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/texture_gles.h"
 
@@ -136,6 +137,12 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     int64_t texture_id,
     impeller::AiksContext* aiks_context,
     const SkISize& size) {
+  if (!aiks_context || !aiks_context->GetContext() ||
+      aiks_context->GetContext()->GetBackendType() !=
+          impeller::Context::BackendType::kOpenGLES) {
+    return nullptr;
+  }
+
   std::unique_ptr<FlutterOpenGLTexture> texture =
       external_texture_callback_(texture_id, size.width(), size.height());
 
@@ -155,18 +162,12 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     return nullptr;
   }
 
-#ifndef GL_TEXTURE_EXTERNAL_OES
-#define GL_TEXTURE_EXTERNAL_OES 0x8D65
-#endif
-
   impeller::TextureDescriptor desc;
-  desc.size = (texture->width != 0 && texture->height != 0)
-                  ? impeller::ISize(texture->width, texture->height)
-                  : impeller::ISize(size.width(), size.height());
+  desc.size = impeller::ISize(texture->width, texture->height);
   desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
-  desc.type = (texture->target == GL_TEXTURE_EXTERNAL_OES)
-                  ? impeller::TextureType::kTextureExternalOES
-                  : impeller::TextureType::kTexture2D;
+  if (texture->target == GL_TEXTURE_EXTERNAL_OES) {
+    desc.type = impeller::TextureType::kTextureExternalOES;
+  }
 
   impeller::ContextGLES& context =
       impeller::ContextGLES::Cast(*aiks_context->GetContext());
@@ -179,6 +180,7 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     FML_LOG(ERROR) << "Could not create external texture";
     return nullptr;
   }
+  image->MarkContentsInitialized();
 
   VoidCallback destruction_callback = texture->destruction_callback;
   if (!destruction_callback) {

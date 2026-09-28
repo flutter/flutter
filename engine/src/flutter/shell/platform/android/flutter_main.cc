@@ -6,15 +6,11 @@
 
 #include "flutter/shell/platform/android/flutter_main.h"
 
-#if defined(__ANDROID__)
 #include <android/log.h>
 #include <sys/system_properties.h>
-#endif
 #include <cstring>
-#include <iostream>
 #include <memory>
 #include <optional>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -29,21 +25,20 @@
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_vm_init.h"
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 
-constexpr int kMinimumAndroidApiLevelForImpeller = 29;
-
 namespace {
 
-fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 
 // Workaround for crashes in Vivante GL driver on Android.
 //
 // See:
 //   * https://github.com/flutter/flutter/issues/167850
 //   * http://crbug.com/141785
-#if defined(__ANDROID__)
+#ifdef FML_OS_ANDROID
 bool IsVivante() {
   char product_model[PROP_VALUE_MAX];
   __system_property_get("ro.hardware.egl", product_model);
@@ -53,16 +48,18 @@ bool IsVivante() {
 bool IsVivante() {
   return false;
 }
-#endif  // defined(__ANDROID__)
+#endif  // FML_OS_ANDROID
 
 }  // anonymous namespace
 
 FlutterMain::FlutterMain(const flutter::Settings& settings,
                          flutter::AndroidRenderingAPI android_rendering_api,
-                         const flutter::android::AndroidVMArgs& vm_args)
+                         const android::AndroidVMArgs& vm_args,
+                         std::shared_ptr<android::AndroidVMInit> vm_init)
     : settings_(settings),
       android_rendering_api_(android_rendering_api),
-      vm_args_(vm_args) {
+      vm_args_(vm_args),
+      vm_init_(std::move(vm_init)) {
   TRACE_EVENT0("flutter", "FlutterMain::FlutterMain");
 }
 
@@ -71,18 +68,6 @@ FlutterMain::~FlutterMain() {
 }
 
 static std::unique_ptr<FlutterMain> g_flutter_main;
-
-bool FlutterMain::IsInitialized() {
-  return g_flutter_main != nullptr;
-}
-
-void FlutterMain::ResetForTesting() {
-  g_flutter_main.reset();
-  if (g_flutter_jni_class) {
-    delete g_flutter_jni_class;
-    g_flutter_jni_class = nullptr;
-  }
-}
 
 FlutterMain& FlutterMain::Get() {
   TRACE_EVENT0("flutter", "FlutterMain::Get");
@@ -96,14 +81,30 @@ const flutter::Settings& FlutterMain::GetSettings() const {
   return settings_;
 }
 
-flutter::AndroidRenderingAPI FlutterMain::GetAndroidRenderingAPI() {
+flutter::AndroidRenderingAPI FlutterMain::GetAndroidRenderingAPI() const {
   TRACE_EVENT0("flutter", "FlutterMain::GetAndroidRenderingAPI");
   return android_rendering_api_;
 }
 
-const flutter::android::AndroidVMArgs& FlutterMain::GetVMArgs() const {
+const android::AndroidVMArgs& FlutterMain::GetVMArgs() const {
   TRACE_EVENT0("flutter", "FlutterMain::GetVMArgs");
   return vm_args_;
+}
+
+std::shared_ptr<android::AndroidVMInit> FlutterMain::GetVMInit() const {
+  TRACE_EVENT0("flutter", "FlutterMain::GetVMInit");
+  return vm_init_;
+}
+
+void FlutterMain::SetSettingsForTesting(const flutter::Settings& settings) {
+  android::AndroidVMArgs args;
+  auto vm_init = std::make_shared<android::AndroidVMInit>();
+  g_flutter_main.reset(
+      new FlutterMain(settings, AndroidRenderingAPI::kSoftware, args, vm_init));
+}
+
+void FlutterMain::ResetSettingsForTesting() {
+  g_flutter_main.reset();
 }
 
 void FlutterMain::Init(JNIEnv* env,
@@ -124,82 +125,13 @@ void FlutterMain::Init(JNIEnv* env,
     }
   }
 
-  auto command_line = fml::CommandLineFromIterators(args.begin(), args.end());
   flutter::Settings settings;
   settings.enable_platform_isolates = true;
 
-  std::string enable_surface_control_value;
-  if (command_line.GetOptionValue("enable-hcpp-and-surface-control",
-                                  &enable_surface_control_value)) {
-    settings.enable_surface_control = enable_surface_control_value.empty() ||
-                                      "true" == enable_surface_control_value;
-  }
-
-  std::string enable_impeller_value;
-  if (command_line.GetOptionValue("enable-impeller", &enable_impeller_value)) {
-    settings.enable_impeller =
-        enable_impeller_value.empty() || "true" == enable_impeller_value;
-  }
-
-  if (command_line.HasOption("enable-software-rendering")) {
-    settings.enable_software_rendering = true;
-  }
-
-  std::string requested_rendering_backend;
-  if (command_line.GetOptionValue("requested-rendering-backend",
-                                  &requested_rendering_backend) ||
-      command_line.GetOptionValue("impeller-backend",
-                                  &requested_rendering_backend)) {
-    settings.requested_rendering_backend = requested_rendering_backend;
-  }
-
-  if (command_line.HasOption("prefetched-default-font-manager")) {
-    settings.prefetched_default_font_manager = true;
-  }
-
-  if (command_line.HasOption("leak-vm")) {
-    std::string leak_vm_value;
-    command_line.GetOptionValue("leak-vm", &leak_vm_value);
-    settings.leak_vm = leak_vm_value.empty() || "true" == leak_vm_value;
-  }
-
-  if (command_line.HasOption("log-tag")) {
-    command_line.GetOptionValue("log-tag", &settings.log_tag);
-  }
-
-  if (command_line.HasOption("resource-cache-max-bytes-threshold")) {
-    std::string threshold;
-    command_line.GetOptionValue("resource-cache-max-bytes-threshold",
-                                &threshold);
-    settings.resource_cache_max_bytes_threshold =
-        std::strtoull(threshold.c_str(), nullptr, 10);
-  }
-
-  if (command_line.HasOption("enable-vulkan-validation")) {
-    settings.enable_vulkan_validation = true;
-  }
-
-  if (command_line.HasOption("verbose-logging")) {
-    settings.verbose_logging = true;
-  }
-
-  std::string all_dart_flags;
-  if (command_line.GetOptionValue("dart-flags", &all_dart_flags)) {
-    std::stringstream ss(all_dart_flags);
-    std::string flag;
-    while (std::getline(ss, flag, ',')) {
-      if (!flag.empty()) {
-        settings.dart_flags.push_back(flag);
-      }
-    }
-  }
-
-#if defined(__ANDROID__)
   if (engineCachesPath != nullptr) {
     fml::paths::InitializeAndroidCachesPath(
         fml::jni::JavaStringToString(env, engineCachesPath));
   }
-#endif
 
   if (kernelPath != nullptr) {
     auto application_kernel_path =
@@ -211,29 +143,45 @@ void FlutterMain::Init(JNIEnv* env,
 
   settings.log_message_callback = [](const std::string& tag,
                                      const std::string& message) {
-#if defined(__ANDROID__)
     __android_log_print(ANDROID_LOG_INFO, tag.c_str(), "%.*s",
                         static_cast<int>(message.size()), message.c_str());
-#else
-    if (!tag.empty()) {
-      std::cout << tag << ": ";
-    }
-    std::cout << message << std::endl;
-#endif
   };
 
-  AndroidRenderingAPI android_rendering_api =
-      SelectedRenderingAPI(settings, api_level);
-
-  // Initialize AndroidVMArgs and pass to FlutterEmbedderNative / AndroidVMInit.
+  // Initialize AndroidVMArgs and parse flags.
   android::AndroidVMArgs vm_args;
   vm_args.command_line_args = args;
+  for (const auto& arg : args) {
+    if (arg == "--enable-software-rendering") {
+      vm_args.enable_software_rendering = true;
+    } else if (arg == "--enable-impeller=false" ||
+               arg == "--enable-impeller=0") {
+      vm_args.enable_impeller = false;
+    } else if (arg == "--enable-impeller" || arg == "--enable-impeller=true" ||
+               arg == "--enable-impeller=1") {
+      vm_args.enable_impeller = true;
+    } else if (arg.rfind("--impeller-backend=", 0) == 0) {
+      vm_args.requested_rendering_backend =
+          arg.substr(std::string("--impeller-backend=").length());
+    } else if (auto hcpp = android::ParseHcppFlag(arg); hcpp.has_value()) {
+      vm_args.enable_surface_control = *hcpp;
+    } else if (auto merged = android::ParseMergedPlatformUIThreadFlag(arg);
+               merged.has_value()) {
+      vm_args.merged_platform_ui_thread = *merged;
+    } else if (arg.rfind("--aot-shared-library-name=", 0) == 0) {
+      std::string candidate =
+          arg.substr(std::string("--aot-shared-library-name=").length());
+      if (fml::IsFile(candidate)) {
+        vm_args.aot_library_path = candidate;
+      }
+    }
+  }
   if (kernelPath != nullptr) {
     vm_args.kernel_path = fml::jni::JavaStringToString(env, kernelPath);
   }
   if (appStoragePath != nullptr) {
     vm_args.app_storage_path =
         fml::jni::JavaStringToString(env, appStoragePath);
+    vm_args.assets_path = vm_args.app_storage_path;
   }
   if (engineCachesPath != nullptr) {
     vm_args.engine_caches_path =
@@ -242,20 +190,99 @@ void FlutterMain::Init(JNIEnv* env,
   vm_args.init_time_millis = initTimeMillis;
   vm_args.api_level = api_level;
 
-  g_flutter_main.reset(
-      new FlutterMain(settings, android_rendering_api, vm_args));
-  g_flutter_main->SetupDartVMServiceUriCallback(env);
-}
+  AndroidRenderingAPI android_rendering_api =
+      android::SelectRenderingAPI(vm_args, IsVivante());
 
-void FlutterMain::SetupDartVMServiceUriCallback(JNIEnv* env) {
-  TRACE_EVENT0("flutter", "FlutterMain::SetupDartVMServiceUriCallback");
-  if (!g_flutter_jni_class && env) {
-    jclass clazz = env->FindClass("io/flutter/embedding/engine/FlutterJNI");
-    if (!clazz) {
-      return;
-    }
-    g_flutter_jni_class = new fml::jni::ScopedJavaGlobalRef<jclass>(env, clazz);
+  settings.enable_impeller =
+      (android_rendering_api == AndroidRenderingAPI::kImpellerAutoselect ||
+       android_rendering_api == AndroidRenderingAPI::kImpellerOpenGLES ||
+       android_rendering_api == AndroidRenderingAPI::kImpellerVulkan);
+  settings.enable_software_rendering =
+      (android_rendering_api == AndroidRenderingAPI::kSoftware);
+  settings.requested_rendering_backend = vm_args.requested_rendering_backend;
+  vm_args.enable_impeller = settings.enable_impeller;
+  vm_args.enable_software_rendering = settings.enable_software_rendering;
+  vm_args.enable_surface_control =
+      android::ShouldEnableSurfaceControl(vm_args, android_rendering_api);
+  settings.enable_surface_control = vm_args.enable_surface_control;
+  if (settings.enable_impeller) {
+    vm_args.command_line_args.push_back("--enable-impeller=true");
+  } else {
+    vm_args.command_line_args.push_back("--enable-impeller=false");
   }
+  if (android_rendering_api == AndroidRenderingAPI::kImpellerVulkan) {
+    vm_args.requested_rendering_backend = "vulkan";
+  } else if (android_rendering_api == AndroidRenderingAPI::kImpellerOpenGLES
+#if !SLIMPELLER
+             || android_rendering_api == AndroidRenderingAPI::kSkiaOpenGLES
+#endif
+  ) {
+    vm_args.requested_rendering_backend = "opengles";
+  }
+
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (!vm_args.app_storage_path.empty() && s_procs.SetCallbackCachePath) {
+    s_procs.SetCallbackCachePath(vm_args.app_storage_path.c_str());
+  }
+  if (s_procs.LoadCallbackCache) {
+    s_procs.LoadCallbackCache();
+  }
+
+  if (env != nullptr) {
+    if (g_flutter_jni_class == nullptr) {
+      g_flutter_jni_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
+          env, env->FindClass("io/flutter/embedding/engine/FlutterJNI"));
+    }
+    if (!g_flutter_jni_class->is_null() &&
+        s_procs.RegisterVMServiceUriCallback) {
+      fml::MessageLoop::EnsureInitializedForCurrentThread();
+      fml::TaskRunner* platform_runner =
+          fml::MessageLoop::GetCurrent().GetTaskRunner().get();
+      intptr_t callback_handle = 0;
+      FlutterVMServiceUriCallbackConfig uri_config = {
+          .struct_size = sizeof(FlutterVMServiceUriCallbackConfig),
+          .callback =
+              [](const char* uri, void* user_data) {
+                auto* runner = static_cast<fml::TaskRunner*>(user_data);
+                std::string uri_str(uri ? uri : "");
+                runner->PostTask([uri_str] {
+                  JNIEnv* env = fml::jni::AttachCurrentThread();
+                  if (!g_flutter_jni_class || g_flutter_jni_class->is_null()) {
+                    return;
+                  }
+                  jfieldID uri_field = env->GetStaticFieldID(
+                      g_flutter_jni_class->obj(), "vmServiceUri",
+                      "Ljava/lang/String;");
+                  if (uri_field == nullptr) {
+                    return;
+                  }
+                  fml::jni::ScopedJavaLocalRef<jstring> java_uri =
+                      fml::jni::StringToJavaString(env, uri_str);
+                  env->SetStaticObjectField(g_flutter_jni_class->obj(),
+                                            uri_field, java_uri.obj());
+                });
+              },
+          .user_data = platform_runner,
+      };
+      s_procs.RegisterVMServiceUriCallback(&uri_config, &callback_handle);
+    }
+  }
+
+  auto vm_init = std::make_shared<android::AndroidVMInit>();
+  vm_init->Init(vm_args);
+
+  // Propagate to FlutterEmbedderNative and AndroidVMInit global registries.
+  android::AndroidVMInit::SetGlobalVMArgs(vm_args);
+  android::FlutterEmbedderNative::SetDefaultVMInit(vm_init);
+  android::FlutterEmbedderNative::SetDefaultVMArgs(vm_args);
+
+  g_flutter_main.reset(
+      new FlutterMain(settings, android_rendering_api, vm_args, vm_init));
 }
 
 static void PrefetchDefaultFontManager(JNIEnv* env, jclass jcaller) {
@@ -294,36 +321,13 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     const flutter::Settings& settings,
     int api_level) {
   TRACE_EVENT0("flutter", "FlutterMain::SelectedRenderingAPI");
-#if !SLIMPELLER
-  if (settings.enable_software_rendering) {
-    if (settings.enable_impeller) {
-      FML_CHECK(!settings.enable_impeller)
-          << "Impeller does not support software rendering. Either disable "
-             "software rendering or disable impeller.";
-    }
-    return AndroidRenderingAPI::kSoftware;
-  }
-
-#ifndef FLUTTER_RELEASE
-  if (settings.requested_rendering_backend == "opengles" &&
-      settings.enable_impeller) {
-    return AndroidRenderingAPI::kImpellerOpenGLES;
-  }
-  if (settings.requested_rendering_backend == "vulkan" &&
-      settings.enable_impeller) {
-    return AndroidRenderingAPI::kImpellerVulkan;
-  }
-#endif
-
-  if (settings.enable_impeller &&
-      api_level >= kMinimumAndroidApiLevelForImpeller && !IsVivante()) {
-    return AndroidRenderingAPI::kImpellerAutoselect;
-  }
-
-  return AndroidRenderingAPI::kSkiaOpenGLES;
-#else
-  return AndroidRenderingAPI::kImpellerAutoselect;
-#endif  // !SLIMPELLER
+  android::AndroidVMArgs args;
+  args.enable_impeller = settings.enable_impeller;
+  args.enable_software_rendering = settings.enable_software_rendering;
+  args.requested_rendering_backend =
+      settings.requested_rendering_backend.value_or("");
+  args.api_level = api_level;
+  return android::SelectRenderingAPI(args, IsVivante());
 }
 
 }  // namespace flutter

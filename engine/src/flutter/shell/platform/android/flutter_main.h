@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_FLUTTER_MAIN_H_
 
 #include <jni.h>
+#include <memory>
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
@@ -23,14 +24,28 @@ class FlutterMain {
   static FlutterMain& Get();
 
   const flutter::Settings& GetSettings() const;
-  flutter::AndroidRenderingAPI GetAndroidRenderingAPI();
+  flutter::AndroidRenderingAPI GetAndroidRenderingAPI() const;
+  const android::AndroidVMArgs& GetVMArgs() const;
+  std::shared_ptr<android::AndroidVMInit> GetVMInit() const;
 
   static AndroidRenderingAPI SelectedRenderingAPI(
       const flutter::Settings& settings,
       int api_level);
 
-  static bool IsInitialized();
-  const flutter::android::AndroidVMArgs& GetVMArgs() const;
+  // Test helpers to configure settings without JNI initialization.
+  static void SetSettingsForTesting(const flutter::Settings& settings);
+  static void ResetSettingsForTesting();
+
+ private:
+  const flutter::Settings settings_;
+  const flutter::AndroidRenderingAPI android_rendering_api_;
+  const android::AndroidVMArgs vm_args_;
+  std::shared_ptr<android::AndroidVMInit> vm_init_;
+
+  explicit FlutterMain(const flutter::Settings& settings,
+                       flutter::AndroidRenderingAPI android_rendering_api,
+                       const android::AndroidVMArgs& vm_args,
+                       std::shared_ptr<android::AndroidVMInit> vm_init);
 
   static void Init(JNIEnv* env,
                    jclass clazz,
@@ -41,19 +56,6 @@ class FlutterMain {
                    jstring engineCachesPath,
                    jlong initTimeMillis,
                    jint api_level);
-
-  static void ResetForTesting();
-
- private:
-  const flutter::Settings settings_;
-  const flutter::AndroidRenderingAPI android_rendering_api_;
-  const flutter::android::AndroidVMArgs vm_args_;
-
-  explicit FlutterMain(const flutter::Settings& settings,
-                       flutter::AndroidRenderingAPI android_rendering_api,
-                       const flutter::android::AndroidVMArgs& vm_args);
-
-  void SetupDartVMServiceUriCallback(JNIEnv* env);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterMain);
 };

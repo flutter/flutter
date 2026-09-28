@@ -105,6 +105,7 @@ enum class SemanticsRole : int32_t {
   kMain = 30,
   kNavigation = 31,
   kRegion = 32,
+  kSlider = 33,
 };
 
 /// C/C++ representation of `SemanticsValidationResult` defined in
@@ -170,7 +171,7 @@ struct SemanticsNode {
   int32_t headingLevel = 0;
 
   std::string linkUrl;
-  SemanticsRole role;
+  SemanticsRole role = SemanticsRole::kNone;
   SemanticsValidationResult validationResult = SemanticsValidationResult::kNone;
   // A locale string in BCP 47 format
   std::string locale;

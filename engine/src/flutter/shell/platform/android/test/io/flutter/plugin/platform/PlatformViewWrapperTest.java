@@ -13,6 +13,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
@@ -22,6 +23,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -263,6 +265,39 @@ public class PlatformViewWrapperTest {
     eventSent =
         wrapperView.requestSendAccessibilityEvent(embeddedView, mock(AccessibilityEvent.class));
     assertTrue(eventSent);
+  }
+
+  @Test
+  public void onTouchEvent_delegatesToGestureTrackerAndRequestsUnbufferedOnMove() {
+    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
+    final MotionEvent[] lastRequestedEvent = new MotionEvent[1];
+    final PlatformViewWrapper view =
+        new PlatformViewWrapper(ctx) {
+          @Override
+          void requestUnbuffered(MotionEvent event) {
+            lastRequestedEvent[0] = event;
+          }
+        };
+    view.setTouchProcessor(touchProcessor);
+
+    // Before Flutter wins the arena: touches are buffered.
+    final MotionEvent downEvent =
+        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    view.onTouchEvent(downEvent);
+    assertTrue(view.isGestureActive());
+    assertEquals(100, view.getCurrentDownTime());
+    assertNull(lastRequestedEvent[0]);
+
+    // Matching gestureId sets flutterWonGesture.
+    view.onFlutterWonGesture(100);
+    assertTrue(view.getFlutterWonGesture());
+
+    // Subsequent move event triggers unbuffered dispatch.
+    final MotionEvent moveEvent =
+        MotionEvent.obtain(100, 101, MotionEvent.ACTION_MOVE, 10.0f, 10.0f, 0);
+    view.onTouchEvent(moveEvent);
+    assertEquals(moveEvent, lastRequestedEvent[0]);
+    assertFalse(view.getFlutterWonGesture());
   }
 
   @Implements(ViewGroup.class)

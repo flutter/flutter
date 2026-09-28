@@ -13,111 +13,6 @@ import("//flutter/shell/config.gni")
 import("//flutter/shell/version/version.gni")
 import("//flutter/vulkan/config.gni")
 
-config("jni_headers_config") {
-  include_dirs = [ "//flutter/shell/platform/android/jni/include" ]
-}
-
-source_set("flutter_embedder_native_src") {
-  visibility = [ ":*" ]
-
-  sources = [
-    "android_engine_group.cc",
-    "android_engine_group.h",
-    "android_hardware_buffer.cc",
-    "android_hardware_buffer.h",
-    "android_mutators_mapper.cc",
-    "android_mutators_mapper.h",
-    "android_platform_views_controller.cc",
-    "android_platform_views_controller.h",
-    "android_semantics_mapper.cc",
-    "android_semantics_mapper.h",
-    "android_surface_control.cc",
-    "android_surface_control.h",
-    "android_vm_init.cc",
-    "android_vm_init.h",
-    "android_vsync_waiter.cc",
-    "android_vsync_waiter.h",
-    "android_vulkan_texture.cc",
-    "android_vulkan_texture.h",
-    "android_window_metrics_mapper.cc",
-    "android_window_metrics_mapper.h",
-    "apk_asset_provider.cc",
-    "apk_asset_provider.h",
-    "flutter_embedder_native.cc",
-    "flutter_embedder_native.h",
-    "flutter_main.cc",
-    "flutter_main.h",
-    "jni_delegate.cc",
-    "jni_delegate.h",
-    "jni_router.cc",
-    "jni_router.h",
-    "jvm_invoker.cc",
-    "jvm_invoker.h",
-    "os_library_loader.cc",
-    "os_library_loader.h",
-  ]
-
-  defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
-
-  public_deps = [
-    "//flutter/assets",
-    "//flutter/common",
-    "//flutter/fml",
-    "//flutter/shell/platform/embedder:embedder_headers",
-  ]
-
-  deps = [ "//flutter/shell/platform/embedder:embedder_as_internal_library" ]
-
-  public_configs = [
-    "//flutter:config",
-    ":jni_headers_config",
-  ]
-
-  if (is_android) {
-    libs = [
-      "android",
-      "EGL",
-      "GLESv2",
-    ]
-  }
-}
-
-shared_library("flutter_embedder_native") {
-  inputs = [ "android_exports.lst" ]
-  output_name = "flutter_embedder"
-  deps = [ ":flutter_embedder_native_src" ]
-  if (is_android || is_linux) {
-    ldflags = [ "-Wl,--version-script=" +
-                rebase_path("android_exports.lst", root_build_dir) ]
-  }
-}
-
-executable("flutter_embedder_native_unittests") {
-  visibility = [ "*" ]
-  testonly = true
-  sources = [
-    "android_engine_group_unittests.cc",
-    "android_hardware_buffer_unittests.cc",
-    "android_mutator_unittests.cc",
-    "android_semantics_unittests.cc",
-    "android_surface_control_unittests.cc",
-    "android_vm_init_unittests.cc",
-    "android_vsync_waiter_unittests.cc",
-    "android_vulkan_texture_unittests.cc",
-    "android_window_metrics_unittests.cc",
-    "apk_asset_provider_unittests.cc",
-    "flutter_embedder_native_unittests.cc",
-  ]
-  public_configs = [ "//flutter:config" ]
-  deps = [
-    ":flutter_embedder_native_src",
-    "//flutter/fml",
-    "//flutter/shell/platform/android/jni:mock_jni_env",
-    "//flutter/third_party/googletest:gmock",
-    "//flutter/third_party/googletest:gtest",
-  ]
-}
-
 if (is_android) {
   source_set("image_generator") {
     sources = [
@@ -126,11 +21,10 @@ if (is_android) {
     ]
 
     public_deps = [
+      "//flutter/fml",
       "//flutter/lib/ui",
       "//flutter/skia",
     ]
-
-    deps = [ "//flutter/fml" ]
 
     libs = [
       "android",
@@ -144,6 +38,7 @@ if (is_android) {
     sources = [
       "android_image_generator_unittests.cc",
       "android_mutator_unittests.cc",
+      "android_semantics_unittests.cc",
       "apk_asset_provider_unittests.cc",
       "flutter_shell_native_unittests.cc",
     ]
@@ -157,10 +52,127 @@ if (is_android) {
     ]
   }
 
+  executable("flutter_embedder_native_unittests") {
+    visibility = [ "*" ]
+    testonly = true
+    sources = [
+      "android_compositor_unittests.cc",
+      "android_engine_group_unittests.cc",
+      "android_hardware_buffer_unittests.cc",
+      "android_mutator_unittests.cc",
+      "android_semantics_unittests.cc",
+      "android_surface_control_unittests.cc",
+      "android_surface_manager_unittests.cc",
+      "android_task_runners_unittests.cc",
+      "android_vm_init_unittests.cc",
+      "android_vsync_waiter_unittests.cc",
+      "android_vulkan_texture_unittests.cc",
+      "android_window_metrics_unittests.cc",
+      "apk_asset_provider_unittests.cc",
+      "flutter_embedder_native_unittests.cc",
+    ]
+    public_configs = [ "//flutter:config" ]
+    deps = [
+      ":flutter_embedder_native_src",
+      "//flutter/fml",
+      "//flutter/shell/platform/android/jni:mock_jni_env",
+      "//flutter/third_party/googletest:gmock",
+      "//flutter/third_party/googletest:gtest",
+      "//flutter/third_party/icu",
+    ]
+  }
+
+  config("jni_headers_config") {
+    if (!is_android) {
+      include_dirs = [ "//flutter/shell/platform/android/jni/include" ]
+    }
+  }
+
+  source_set("flutter_embedder_native_src") {
+    visibility = [ ":*" ]
+
+    sources = [
+      "android_compositor.cc",
+      "android_compositor.h",
+      "android_engine_group.cc",
+      "android_engine_group.h",
+      "android_hardware_buffer.cc",
+      "android_hardware_buffer.h",
+      "android_mutators_mapper.cc",
+      "android_mutators_mapper.h",
+      "android_platform_views_controller.cc",
+      "android_platform_views_controller.h",
+      "android_semantics_mapper.cc",
+      "android_semantics_mapper.h",
+      "android_surface_control.cc",
+      "android_surface_control.h",
+      "android_surface_manager.cc",
+      "android_surface_manager.h",
+      "android_task_runners.cc",
+      "android_task_runners.h",
+      "android_vm_init.cc",
+      "android_vm_init.h",
+      "android_vsync_waiter.cc",
+      "android_vsync_waiter.h",
+      "android_vulkan_texture.cc",
+      "android_vulkan_texture.h",
+      "android_window_metrics_mapper.cc",
+      "android_window_metrics_mapper.h",
+      "apk_asset_provider.cc",
+      "apk_asset_provider.h",
+      "flutter_embedder_native.cc",
+      "flutter_embedder_native.h",
+      "jni_delegate.cc",
+      "jni_delegate.h",
+      "jni_router.cc",
+      "jni_router.h",
+      "jvm_invoker.cc",
+      "jvm_invoker.h",
+      "os_library_loader.cc",
+      "os_library_loader.h",
+    ]
+
+    defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
+
+    public_deps = [
+      "//flutter/assets",
+      "//flutter/fml",
+      "//flutter/shell/platform/embedder:embedder_headers",
+    ]
+
+    deps = [
+      "//flutter/shell/platform/embedder:embedder_as_internal_library",
+      "//flutter/third_party/icu",
+    ]
+
+    public_configs = [
+      "//flutter:config",
+      "//flutter/third_party/icu:icu_config",
+      ":jni_headers_config",
+    ]
+
+    if (is_android) {
+      libs = [
+        "android",
+        "EGL",
+        "GLESv2",
+      ]
+    }
+  }
+
+  shared_library("flutter_embedder_native") {
+    inputs = [ "android_exports.lst" ]
+    output_name = "flutter_embedder"
+    deps = [ ":flutter_embedder_native_src" ]
+    ldflags = [ "-Wl,--version-script=" +
+                rebase_path("android_exports.lst", root_build_dir) ]
+  }
+
   shared_library("flutter_shell_native") {
     inputs = [ "android_exports.lst" ]
     output_name = "flutter"
     deps = [
+      # Direct dependency retained intentionally for explicit linkage intent.
       ":flutter_embedder_native_src",
       ":flutter_shell_native_src",
     ]
@@ -179,7 +191,11 @@ if (is_android) {
   source_set("flutter_shell_native_src") {
     visibility = [ ":*" ]
 
-    sources = [ "library_loader.cc" ]
+    sources = [
+      "flutter_main.cc",
+      "flutter_main.h",
+      "library_loader.cc",
+    ]
 
     public_deps = [
       ":flutter_embedder_native_src",
@@ -199,6 +215,7 @@ if (is_android) {
       "GLESv2",
     ]
   }
+
   action("gen_android_build_config_java") {
     script = "//flutter/tools/gen_android_buildconfig.py"
 
@@ -243,6 +260,7 @@ if (is_android) {
     "io/flutter/embedding/android/FlutterTextureView.java",
     "io/flutter/embedding/android/FlutterView.java",
     "io/flutter/embedding/android/FlutterViewDelegate.java",
+    "io/flutter/embedding/android/IntentUtils.java",
     "io/flutter/embedding/android/KeyChannelResponder.java",
     "io/flutter/embedding/android/KeyData.java",
     "io/flutter/embedding/android/KeyEmbedderResponder.java",
@@ -360,6 +378,7 @@ if (is_android) {
     "io/flutter/plugin/platform/PlatformPlugin.java",
     "io/flutter/plugin/platform/PlatformView.java",
     "io/flutter/plugin/platform/PlatformViewFactory.java",
+    "io/flutter/plugin/platform/PlatformViewGestureTracker.java",
     "io/flutter/plugin/platform/PlatformViewRegistry.java",
     "io/flutter/plugin/platform/PlatformViewRegistryImpl.java",
     "io/flutter/plugin/platform/PlatformViewRenderTarget.java",
@@ -393,6 +412,7 @@ if (is_android) {
     "io/flutter/view/MenuRoleConfigurator.java",
     "io/flutter/view/ProgressBarRoleConfigurator.java",
     "io/flutter/view/RoleConfiguratorFactory.java",
+    "io/flutter/view/SliderRoleConfigurator.java",
     "io/flutter/view/TextureRegistry.java",
     "io/flutter/view/VsyncWaiter.java",
   ]
@@ -704,11 +724,6 @@ if (is_android) {
       "--include-embedding-dependencies",
       "true",
     ]
-  }
-
-  # TODO(jsimmons): remove this placeholder when it is no longer used by the LUCI recipes
-  group("robolectric_tests") {
-    deps = [ ":android_jar" ]
   }
 
   zip_bundle("android_symbols") {

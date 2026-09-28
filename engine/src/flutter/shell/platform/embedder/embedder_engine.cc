@@ -4,9 +4,6 @@
 
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 
-#include <cstdlib>
-#include <cstring>
-
 #include "flutter/fml/make_copyable.h"
 #include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
 
@@ -32,7 +29,7 @@ EmbedderEngine::EmbedderEngine(
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
     std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver,
-    std::optional<FlutterRendererConfig> renderer_config)
+    std::vector<ImageGeneratorFactoryRegistration> image_generators)
     : thread_host_(std::move(thread_host)),
       task_runners_(task_runners),
       run_configuration_(std::move(run_configuration)),
@@ -40,19 +37,24 @@ EmbedderEngine::EmbedderEngine(
                                               on_create_platform_view,
                                               on_create_rasterizer)),
       external_texture_resolver_(std::move(external_texture_resolver)),
-      renderer_config_(renderer_config) {}
+      image_generators_(std::move(image_generators)) {}
 
 EmbedderEngine::EmbedderEngine(
     std::shared_ptr<EmbedderThreadHost> thread_host,
     const flutter::TaskRunners& task_runners,
     std::unique_ptr<Shell> shell,
-    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver,
-    std::optional<FlutterRendererConfig> renderer_config)
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
     : thread_host_(std::move(thread_host)),
       task_runners_(task_runners),
+      run_configuration_(nullptr),
       shell_(std::move(shell)),
-      external_texture_resolver_(std::move(external_texture_resolver)),
-      renderer_config_(renderer_config) {}
+      external_texture_resolver_(std::move(external_texture_resolver)) {}
+
+EmbedderEngine::EmbedderEngine(const flutter::TaskRunners& task_runners,
+                               std::unique_ptr<Shell> shell)
+    : task_runners_(task_runners),
+      run_configuration_(nullptr),
+      shell_(std::move(shell)) {}
 
 EmbedderEngine::~EmbedderEngine() = default;
 
@@ -69,6 +71,12 @@ bool EmbedderEngine::LaunchShell() {
   shell_ = Shell::Create(
       flutter::PlatformData(), task_runners_, shell_args_->settings,
       shell_args_->on_create_platform_view, shell_args_->on_create_rasterizer);
+
+  for (auto& image_generator : image_generators_) {
+    RegisterImageGenerator(std::move(image_generator.factory),
+                           image_generator.priority);
+  }
+  image_generators_.clear();
 
   // Reset the args no matter what. They will never be used to initialize a
   // shell again.
@@ -88,55 +96,56 @@ void EmbedderEngine::CollectThreadHost() {
   }
 
   // Once collected, EmbedderThreadHost::RunnerIsValid will return false for
-  // all runners belonging to this thread host. If other engines are still
-  // sharing this thread host (e.g. spawned engines), only invalidate and
-  // destroy when the last engine collects it.
-  if (thread_host_.use_count() > 1) {
-    thread_host_.reset();
-    return;
-  }
+  // all runners belonging to this thread host. This must be done with UI task
+  // runner blocked to prevent possible raciness that could happen when
+  // destroying the thread host in the middle of UI task runner execution. This
+  // is not an issue for other runners, because raster task runner should not
+  // have anything scheduled after engine shutdown and platform task runner is
+  // where this method is called from.
+  if (thread_host_.use_count() == 1) {
+    if (thread_host_->GetTaskRunners().GetUITaskRunner() &&
+        !thread_host_->GetTaskRunners()
+             .GetUITaskRunner()
+             ->RunsTasksOnCurrentThread()) {
+      fml::AutoResetWaitableEvent ui_thread_running;
+      fml::AutoResetWaitableEvent ui_thread_block;
+      fml::AutoResetWaitableEvent ui_thread_finished;
 
-  // This must be done with UI task runner blocked to prevent possible
-  // raciness that could happen when destroying the thread host in the middle
-  // of UI task runner execution. This is not an issue for other runners,
-  // because raster task runner should not have anything scheduled after engine
-  // shutdown and platform task runner is where this method is called from.
-  if (thread_host_->GetTaskRunners().GetUITaskRunner() &&
-      !thread_host_->GetTaskRunners()
-           .GetUITaskRunner()
-           ->RunsTasksOnCurrentThread()) {
-    fml::AutoResetWaitableEvent ui_thread_running;
-    fml::AutoResetWaitableEvent ui_thread_block;
-    fml::AutoResetWaitableEvent ui_thread_finished;
+      thread_host_->GetTaskRunners().GetUITaskRunner()->PostTask([&] {
+        ui_thread_running.Signal();
+        ui_thread_block.Wait();
+        ui_thread_finished.Signal();
+      });
 
-    thread_host_->GetTaskRunners().GetUITaskRunner()->PostTask([&] {
-      ui_thread_running.Signal();
-      ui_thread_block.Wait();
-      ui_thread_finished.Signal();
-    });
+      // Wait until the task is running on the UI thread.
+      ui_thread_running.Wait();
+      thread_host_->InvalidateActiveRunners();
+      ui_thread_block.Signal();
 
-    // Wait until the task is running on the UI thread.
-    ui_thread_running.Wait();
-    thread_host_->InvalidateActiveRunners();
-    ui_thread_block.Signal();
-
-    // Needed to keep ui_thread_block in scope until the UI thread execution
-    // finishes.
-    ui_thread_finished.Wait();
-  } else {
-    thread_host_->InvalidateActiveRunners();
+      // Needed to keep ui_thread_block in scope until the UI thread execution
+      // finishes.
+      ui_thread_finished.Wait();
+    } else {
+      thread_host_->InvalidateActiveRunners();
+    }
   }
   thread_host_.reset();
 }
 
+void EmbedderEngine::SetRunConfiguration(RunConfiguration run_configuration) {
+  run_configuration_.~RunConfiguration();
+  new (&run_configuration_) RunConfiguration(std::move(run_configuration));
+}
+
+bool EmbedderEngine::HasValidRunConfiguration() const {
+  return run_configuration_.IsValid();
+}
+
 bool EmbedderEngine::RunRootIsolate() {
-  if (!IsValid() || !run_configuration_.has_value() ||
-      !run_configuration_->IsValid()) {
+  if (!IsValid() || !run_configuration_.IsValid()) {
     return false;
   }
-  auto config = std::move(run_configuration_.value());
-  run_configuration_.reset();
-  shell_->RunEngine(std::move(config));
+  shell_->RunEngine(std::move(run_configuration_));
   return true;
 }
 
@@ -146,6 +155,10 @@ bool EmbedderEngine::IsValid() const {
 
 const TaskRunners& EmbedderEngine::GetTaskRunners() const {
   return task_runners_;
+}
+
+std::shared_ptr<EmbedderThreadHost> EmbedderEngine::GetThreadHost() const {
+  return thread_host_;
 }
 
 bool EmbedderEngine::NotifyCreated() {
@@ -307,7 +320,6 @@ bool EmbedderEngine::PostRenderThreadTask(const fml::closure& task) {
 }
 
 bool EmbedderEngine::RunTask(const FlutterTask* task) {
-  TRACE_EVENT0("flutter", "EmbedderEngine::RunTask");
   // The shell doesn't need to be running or valid for access to the thread
   // host. This is why there is no `IsValid` check here. This allows embedders
   // to perform custom task runner interop before the shell is running.
@@ -372,119 +384,22 @@ bool EmbedderEngine::ScheduleFrame() {
   return true;
 }
 
-bool EmbedderEngine::LoadDartDeferredLibrary(
-    int64_t loading_unit_id,
-    std::unique_ptr<const fml::Mapping> snapshot_data,
-    std::unique_ptr<const fml::Mapping> snapshot_instructions) {
-  TRACE_EVENT0("flutter", "EmbedderEngine::LoadDartDeferredLibrary");
-  if (!IsValid() || !snapshot_data || !snapshot_instructions) {
-    return false;
-  }
-  auto platform_view = shell_->GetPlatformView();
-  if (!platform_view) {
-    return false;
-  }
-  platform_view->LoadDartDeferredLibrary(static_cast<intptr_t>(loading_unit_id),
-                                         std::move(snapshot_data),
-                                         std::move(snapshot_instructions));
-  return true;
-}
-
-bool EmbedderEngine::NotifyDartDeferredLibraryLoadError(
-    int64_t loading_unit_id,
-    const std::string& error_message,
-    bool transient) {
-  TRACE_EVENT0("flutter", "EmbedderEngine::NotifyDartDeferredLibraryLoadError");
-  if (!IsValid()) {
-    return false;
-  }
-  auto platform_view = shell_->GetPlatformView();
-  if (!platform_view) {
-    return false;
-  }
-  platform_view->LoadDartDeferredLibraryError(
-      static_cast<intptr_t>(loading_unit_id), error_message, transient);
-  return true;
-}
-
-bool EmbedderEngine::Screenshot(FlutterEngineScreenshotInfo* screenshot_out) {
-  TRACE_EVENT0("flutter", "EmbedderEngine::Screenshot");
-  if (!IsValid() || !screenshot_out) {
-    return false;
-  }
-  if (!shell_) {
-    return false;
-  }
-  auto raster_screenshot =
-      shell_->Screenshot(Rasterizer::ScreenshotType::UncompressedImage, false);
-  if (!raster_screenshot.data || raster_screenshot.data->size() == 0) {
-    return false;
-  }
-
-  TRACE_EVENT0("flutter", "EmbedderEngine::ScreenshotBufferAlloc");
-  const size_t size = raster_screenshot.data->size();
-  void* pixels = std::malloc(size);
-  if (!pixels) {
-    return false;
-  }
-  std::memcpy(pixels, raster_screenshot.data->data(), size);
-
-  screenshot_out->width = raster_screenshot.frame_size.width;
-  screenshot_out->height = raster_screenshot.frame_size.height;
-  screenshot_out->row_bytes = raster_screenshot.frame_size.height > 0
-                                  ? (size / raster_screenshot.frame_size.height)
-                                  : (raster_screenshot.frame_size.width * 4);
-  screenshot_out->pixels = pixels;
-  screenshot_out->pixels_size = size;
-
-  return true;
-}
-
-bool EmbedderEngine::RegisterImageDecoder(ImageGeneratorFactory factory,
-                                          int32_t priority) {
-  TRACE_EVENT0("flutter", "EmbedderEngine::RegisterImageDecoder");
-  if (!IsValid()) {
-    return false;
-  }
-  shell_->RegisterImageDecoder(std::move(factory), priority);
-  return true;
-}
-
-bool EmbedderEngine::UpdateAssetResolverByType(
-    std::unique_ptr<AssetResolver> updated_asset_resolver,
-    AssetResolver::AssetResolverType type) {
-  TRACE_EVENT0("flutter", "EmbedderEngine::UpdateAssetResolverByType");
-  if (!IsValid()) {
-    return false;
-  }
-  auto platform_view = shell_->GetPlatformView();
-  if (!platform_view) {
-    return false;
-  }
-  platform_view->UpdateAssetResolverByType(std::move(updated_asset_resolver),
-                                           type);
-  return true;
-}
-
 Shell& EmbedderEngine::GetShell() {
   FML_DCHECK(shell_);
   return *shell_.get();
 }
 
-const std::optional<FlutterRendererConfig>& EmbedderEngine::GetRendererConfig()
-    const {
-  return renderer_config_;
-}
-
 std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
+    const std::shared_ptr<EmbedderThreadHost>& thread_host,
+    const TaskRunners& task_runners,
     RunConfiguration run_configuration,
     const std::string& initial_route,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
-    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver,
-    std::optional<FlutterRendererConfig> renderer_config) const {
-  TRACE_EVENT0("flutter", "EmbedderEngine::Spawn");
-  if (!IsValid() || !run_configuration.IsValid()) {
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
+    const {
+  if (!IsValid()) {
+    FML_LOG(ERROR) << "Cannot spawn from an invalid engine.";
     return nullptr;
   }
 
@@ -492,18 +407,99 @@ std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
       shell_->Spawn(std::move(run_configuration), initial_route,
                     on_create_platform_view, on_create_rasterizer);
   if (!spawned_shell) {
+    FML_LOG(ERROR) << "Failed to spawn shell.";
     return nullptr;
   }
 
-  auto spawned_engine = std::make_unique<EmbedderEngine>(
-      thread_host_, task_runners_, std::move(spawned_shell),
-      std::move(external_texture_resolver), renderer_config);
+  std::shared_ptr<EmbedderThreadHost> target_thread_host =
+      thread_host ? thread_host : thread_host_;
 
-  if (!spawned_engine->NotifyCreated()) {
-    return nullptr;
+  return std::make_unique<EmbedderEngine>(
+      std::move(target_thread_host), task_runners, std::move(spawned_shell),
+      std::move(external_texture_resolver));
+}
+
+bool EmbedderEngine::UpdateAssetResolver(
+    std::unique_ptr<AssetResolver> updated_asset_resolver,
+    AssetResolver::AssetResolverType type) {
+  if (!IsValid()) {
+    return false;
   }
 
-  return spawned_engine;
+  auto platform_view = shell_->GetPlatformView();
+  if (!platform_view) {
+    return false;
+  }
+
+  platform_view->UpdateAssetResolverByType(std::move(updated_asset_resolver),
+                                           type);
+  return true;
+}
+
+bool EmbedderEngine::LoadDartDeferredLibrary(
+    intptr_t loading_unit_id,
+    std::unique_ptr<const fml::Mapping> snapshot_data,
+    std::unique_ptr<const fml::Mapping> snapshot_instructions) {
+  if (!IsValid()) {
+    return false;
+  }
+
+  auto platform_view = shell_->GetPlatformView();
+  if (!platform_view) {
+    return false;
+  }
+
+  platform_view->LoadDartDeferredLibrary(loading_unit_id,
+                                         std::move(snapshot_data),
+                                         std::move(snapshot_instructions));
+  return true;
+}
+
+bool EmbedderEngine::LoadDartDeferredLibraryError(
+    intptr_t loading_unit_id,
+    const std::string& error_message,
+    bool transient) {
+  if (!IsValid()) {
+    return false;
+  }
+
+  auto platform_view = shell_->GetPlatformView();
+  if (!platform_view) {
+    return false;
+  }
+
+  platform_view->LoadDartDeferredLibraryError(loading_unit_id, error_message,
+                                              transient);
+  return true;
+}
+
+bool EmbedderEngine::RegisterImageGenerator(ImageGeneratorFactory factory,
+                                            int32_t priority) {
+  if (!IsValid() || !shell_) {
+    return false;
+  }
+
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(),
+      fml::MakeCopyable(
+          [this, &latch, factory = std::move(factory), priority]() mutable {
+            if (IsValid()) {
+              shell_->RegisterImageDecoder(std::move(factory), priority);
+            }
+            latch.Signal();
+          }));
+  latch.Wait();
+  return true;
+}
+
+Rasterizer::Screenshot EmbedderEngine::Screenshot(
+    Rasterizer::ScreenshotType type,
+    bool base64_encode) const {
+  if (!IsValid()) {
+    return {};
+  }
+  return shell_->Screenshot(type, base64_encode);
 }
 
 }  // namespace flutter

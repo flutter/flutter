@@ -28,6 +28,45 @@ class MockJvmInvokerForEngineGroup : public JvmInvoker {
   MOCK_METHOD(void, ClearPendingException, (), (override));
 
   MOCK_METHOD(bool,
+              HandlePlatformMessage,
+              (const std::string& channel,
+               const uint8_t* message,
+               size_t message_size,
+               int32_t response_id,
+               int64_t message_data),
+              (override));
+
+  MOCK_METHOD(bool,
+              HandlePlatformMessageResponse,
+              (int32_t response_id, const uint8_t* data, size_t data_size),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateSemantics,
+              (const std::vector<uint8_t>& buffer,
+               const std::vector<std::string>& strings,
+               const std::vector<std::vector<uint8_t>>& string_attribute_args),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateCustomAccessibilityActions,
+              (const std::vector<uint8_t>& actions_buffer,
+               const std::vector<std::string>& action_strings),
+              (override));
+
+  MOCK_METHOD(bool, SetSemanticsTreeEnabled, (bool enabled), (override));
+  MOCK_METHOD(bool,
+              SetApplicationLocale,
+              (const std::string& locale),
+              (override));
+  MOCK_METHOD(bool, OnFirstFrame, (), (override));
+  MOCK_METHOD(bool, OnPreEngineRestart, (), (override));
+  MOCK_METHOD(bool,
+              RequestDartDeferredLibrary,
+              (int loading_unit_id),
+              (override));
+
+  MOCK_METHOD(bool,
               InvokeVoidMethod,
               (const std::string& method_name,
                const std::string& signature,
@@ -70,6 +109,23 @@ class MockJvmInvokerForEngineGroup : public JvmInvoker {
               (override));
 
   MOCK_METHOD(bool, PostJvmTask, (std::function<void()> task), (override));
+
+  MOCK_METHOD(bool,
+              DecodeImage,
+              (const uint8_t* data, size_t size, int64_t generator_handle),
+              (override));
+
+  MOCK_METHOD(bool,
+              PushPlatformViewMutators,
+              (int64_t view_id,
+               int32_t x,
+               int32_t y,
+               int32_t width,
+               int32_t height,
+               int32_t view_width,
+               int32_t view_height,
+               const std::vector<uint8_t>& payload),
+              (override));
 };
 
 }  // namespace
@@ -311,6 +367,20 @@ TEST(DefaultAndroidEngineGroupProviderTest, NullArgumentSafety) {
   EXPECT_EQ(provider.ShutdownEngine(nullptr), kInvalidArguments);
   EXPECT_EQ(provider.DeinitializeEngine(nullptr), kInvalidArguments);
   EXPECT_EQ(out_engine, nullptr);
+
+  auto parent_handle =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x1000);
+  FlutterEngineSpawnConfig invalid_config = {};
+  invalid_config.struct_size = sizeof(FlutterEngineSpawnConfig) - 1;
+  EXPECT_EQ(provider.SpawnEngine(parent_handle, &invalid_config, &out_engine),
+            kInvalidArguments);
+
+  FlutterRendererConfig renderer_config = {};
+  FlutterProjectArgs invalid_args = {};
+  invalid_args.struct_size = sizeof(FlutterProjectArgs) - 1;
+  EXPECT_EQ(provider.InitializeEngine(&renderer_config, &invalid_args, nullptr,
+                                      &out_engine),
+            kInvalidArguments);
 }
 
 // =============================================================================
@@ -710,6 +780,173 @@ TEST(AndroidEngineGroupConcurrentTest,
   EXPECT_EQ(group->GetActiveEngineCount(), 1u);
   EXPECT_TRUE(group->ShutdownEngine(1));
   EXPECT_EQ(group->GetActiveEngineCount(), 0u);
+}
+
+TEST(AndroidEngineGroupTest, SetPrimaryEngineDefaultZeroId) {
+  auto provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  auto group = std::make_shared<AndroidEngineGroup>(provider);
+  auto root_handle =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x1234);
+
+  // Calling with default engine_id = 0 must auto-assign a non-zero ID.
+  group->SetPrimaryEngine(root_handle);
+
+  EXPECT_EQ(group->GetPrimaryEngine(), root_handle);
+  int64_t assigned_id = group->GetPrimaryEngineId();
+  EXPECT_GT(assigned_id, 0);
+  EXPECT_EQ(group->GetActiveEngineCount(), 1u);
+  EXPECT_TRUE(group->IsEngineActive(assigned_id));
+  EXPECT_TRUE(group->IsEngineActive(root_handle));
+
+  auto record = group->GetEngineRecord(assigned_id);
+  ASSERT_TRUE(record.has_value());
+  EXPECT_EQ(record->engine_id, assigned_id);
+  EXPECT_EQ(record->engine_handle, root_handle);
+  EXPECT_TRUE(record->is_running);
+  EXPECT_FALSE(record->is_garbage_collected);
+  EXPECT_GT(record->spawned_time_nanos, 0);
+
+  EXPECT_TRUE(group->ShutdownEngine(root_handle));
+  EXPECT_EQ(group->GetActiveEngineCount(), 0u);
+  EXPECT_FALSE(group->IsEngineActive(assigned_id));
+}
+
+TEST(AndroidEngineGroupTest, ForwardCompatibleFlutterProjectArgs) {
+  auto provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  auto group = std::make_shared<AndroidEngineGroup>(provider);
+  auto root_handle =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x1000);
+  group->SetPrimaryEngine(root_handle, 1);
+
+  struct ExtendedProjectArgs {
+    FlutterProjectArgs base_args;
+    uint64_t extra_future_field_1;
+    uint64_t extra_future_field_2;
+  };
+
+  ExtendedProjectArgs ext = {};
+  ext.base_args.struct_size = sizeof(ExtendedProjectArgs);
+  ext.base_args.engine_id = 777;
+  ext.base_args.custom_dart_entrypoint = "customForwardEntrypoint";
+  const char* argv[] = {"--future-flag1", "--future-flag2"};
+  ext.base_args.dart_entrypoint_argc = 2;
+  ext.base_args.dart_entrypoint_argv = argv;
+
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.custom_args = &ext.base_args;
+  spawn_config.initial_route = "/forward_route";
+
+  auto spawned = group->SpawnEngineWithConfig(root_handle, &spawn_config);
+  ASSERT_NE(spawned, nullptr);
+  EXPECT_EQ(group->GetActiveEngineCount(), 2u);
+  EXPECT_TRUE(group->IsEngineActive(777));
+
+  auto record = group->GetEngineRecord(777);
+  ASSERT_TRUE(record.has_value());
+  EXPECT_EQ(record->engine_id, 777);
+  EXPECT_EQ(record->spawn_args.entrypoint, "customForwardEntrypoint");
+  EXPECT_EQ(record->spawn_args.initial_route, "/forward_route");
+  ASSERT_EQ(record->spawn_args.entrypoint_args.size(), 2u);
+  EXPECT_EQ(record->spawn_args.entrypoint_args[0], "--future-flag1");
+  EXPECT_EQ(record->spawn_args.entrypoint_args[1], "--future-flag2");
+
+  // Also verify InMemory provider captured args with struct_size >= sizeof
+  auto last_args = provider->GetLastSpawnArgs();
+  ASSERT_TRUE(last_args.has_value());
+  EXPECT_EQ(last_args->engine_id, 777);
+  EXPECT_EQ(last_args->entrypoint, "customForwardEntrypoint");
+  EXPECT_EQ(last_args->initial_route, "/forward_route");
+}
+
+TEST(AndroidEngineGroupTest, RegisterEngineCollisionRejection) {
+  auto provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  auto group = std::make_shared<AndroidEngineGroup>(provider);
+
+  auto handle_a = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x2000);
+  auto handle_b = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x2001);
+  auto handle_c = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x2002);
+
+  AndroidEngineSpawnArgs args;
+  args.entrypoint = "test";
+
+  EXPECT_TRUE(group->RegisterEngine(10, handle_a, args));
+
+  // Reject duplicate engine ID with different handle
+  EXPECT_FALSE(group->RegisterEngine(10, handle_b, args));
+
+  // Reject duplicate handle with different engine ID
+  EXPECT_FALSE(group->RegisterEngine(20, handle_a, args));
+
+  // Accept unique ID and handle
+  EXPECT_TRUE(group->RegisterEngine(20, handle_c, args));
+  EXPECT_EQ(group->GetActiveEngineCount(), 2u);
+}
+
+TEST(AndroidEngineGroupTest, CleanerCallbackObservationAndTelemetry) {
+  auto provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  auto group = std::make_shared<AndroidEngineGroup>(provider);
+  auto root_handle =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x3000);
+  group->SetPrimaryEngine(root_handle, 1);
+
+  AndroidEngineSpawnArgs args;
+  args.engine_id = 999;
+  args.entrypoint = "gcTest";
+  auto spawned = group->SpawnEngine(root_handle, args);
+  ASSERT_NE(spawned, nullptr);
+
+  auto initial_record = group->GetEngineRecord(999);
+  ASSERT_TRUE(initial_record.has_value());
+  EXPECT_TRUE(initial_record->is_running);
+  EXPECT_FALSE(initial_record->is_garbage_collected);
+  EXPECT_GT(initial_record->spawned_time_nanos, 0);
+
+  // Trigger cleaner callback
+  EXPECT_TRUE(group->OnEngineGarbageCollected(999));
+  EXPECT_FALSE(group->IsEngineActive(999));
+
+  // Retired record must be observable via GetEngineRecord with
+  // is_garbage_collected == true
+  auto retired_record = group->GetEngineRecord(999);
+  ASSERT_TRUE(retired_record.has_value());
+  EXPECT_FALSE(retired_record->is_running);
+  EXPECT_TRUE(retired_record->is_garbage_collected);
+  EXPECT_EQ(retired_record->engine_id, 999);
+  EXPECT_GT(retired_record->spawned_time_nanos, 0);
+}
+
+TEST(AndroidEngineGroupTest, ConcurrentGetConfigAndInitializeGroup) {
+  auto provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  auto group = std::make_shared<AndroidEngineGroup>(provider);
+
+  std::atomic<bool> running{true};
+  constexpr int kReaders = 4;
+  std::vector<std::thread> readers;
+  readers.reserve(kReaders);
+
+  for (int r = 0; r < kReaders; ++r) {
+    readers.emplace_back([&group, &running]() {
+      while (running.load(std::memory_order_relaxed)) {
+        AndroidEngineGroupConfig cfg = group->GetConfig();
+        for (const auto& arg : cfg.dart_vm_args) {
+          EXPECT_FALSE(arg.empty());
+        }
+      }
+    });
+  }
+
+  for (int i = 0; i < 200; ++i) {
+    AndroidEngineGroupConfig cfg;
+    cfg.dart_vm_args = {"--arg1=" + std::to_string(i),
+                        "--arg2=" + std::to_string(i * 2)};
+    EXPECT_TRUE(group->InitializeGroup(cfg));
+  }
+
+  running.store(false, std::memory_order_relaxed);
+  for (auto& r : readers) {
+    r.join();
+  }
 }
 
 }  // namespace testing

@@ -8,6 +8,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 
 namespace flutter {
 namespace android {
@@ -65,6 +66,11 @@ void AndroidSemanticsMapper::PutStringAttributesIntoBuffer(
         } else {
           string_attribute_args.push_back({});
         }
+        break;
+      default:
+        FML_LOG(WARNING) << "Unknown FlutterStringAttributeType: "
+                         << attribute->type;
+        buffer[(*position)++] = kEmptyStringIndex;
         break;
     }
   }
@@ -232,6 +238,10 @@ EncodedSemanticsUpdate AndroidSemanticsMapper::MapNodes(
   if (!nodes || count == 0) {
     return result;
   }
+  if (count > kMaxSemanticsNodes) {
+    FML_LOG(ERROR) << "Semantics node count exceeds ceiling: " << count;
+    return result;
+  }
 
   size_t num_bytes = 0;
   for (size_t i = 0; i < count; ++i) {
@@ -239,36 +249,67 @@ EncodedSemanticsUpdate AndroidSemanticsMapper::MapNodes(
     if (!node) {
       continue;
     }
-    num_bytes += kBytesPerNode;
+    if (node->struct_size < kMinSemanticsNode2Size) {
+      FML_LOG(ERROR) << "Invalid FlutterSemanticsNode2 struct size: "
+                     << node->struct_size;
+      return {};
+    }
+    if (node->child_count > kMaxSemanticsChildren) {
+      FML_LOG(ERROR) << "Semantics child count exceeds ceiling: "
+                     << node->child_count;
+      return {};
+    }
+    if (node->custom_accessibility_actions_count > kMaxSemanticsActions) {
+      FML_LOG(ERROR) << "Semantics custom actions count exceeds ceiling: "
+                     << node->custom_accessibility_actions_count;
+      return {};
+    }
+    if (node->label_attribute_count > kMaxStringAttributes ||
+        node->value_attribute_count > kMaxStringAttributes ||
+        node->increased_value_attribute_count > kMaxStringAttributes ||
+        node->decreased_value_attribute_count > kMaxStringAttributes ||
+        node->hint_attribute_count > kMaxStringAttributes) {
+      FML_LOG(ERROR) << "Semantics string attribute count exceeds ceiling";
+      return {};
+    }
+
+    size_t node_bytes = kBytesPerNode;
     if (node->children_in_traversal_order && node->child_count > 0) {
-      num_bytes += node->child_count * kBytesPerChild;
+      node_bytes += node->child_count * kBytesPerChild;
     }
     if (node->children_in_hit_test_order && node->child_count > 0) {
-      num_bytes += node->child_count * kBytesPerChild;
+      node_bytes += node->child_count * kBytesPerChild;
     }
     if (node->custom_accessibility_actions &&
         node->custom_accessibility_actions_count > 0) {
-      num_bytes +=
+      node_bytes +=
           node->custom_accessibility_actions_count * kBytesPerCustomAction;
     }
     if (node->label_attributes && node->label_attribute_count > 0) {
-      num_bytes += node->label_attribute_count * kBytesPerStringAttribute;
+      node_bytes += node->label_attribute_count * kBytesPerStringAttribute;
     }
     if (node->value_attributes && node->value_attribute_count > 0) {
-      num_bytes += node->value_attribute_count * kBytesPerStringAttribute;
+      node_bytes += node->value_attribute_count * kBytesPerStringAttribute;
     }
     if (node->increased_value_attributes &&
         node->increased_value_attribute_count > 0) {
-      num_bytes +=
+      node_bytes +=
           node->increased_value_attribute_count * kBytesPerStringAttribute;
     }
     if (node->decreased_value_attributes &&
         node->decreased_value_attribute_count > 0) {
-      num_bytes +=
+      node_bytes +=
           node->decreased_value_attribute_count * kBytesPerStringAttribute;
     }
     if (node->hint_attributes && node->hint_attribute_count > 0) {
-      num_bytes += node->hint_attribute_count * kBytesPerStringAttribute;
+      node_bytes += node->hint_attribute_count * kBytesPerStringAttribute;
+    }
+
+    num_bytes += node_bytes;
+    if (num_bytes > kMaxSemanticsBufferBytes) {
+      FML_LOG(ERROR) << "Semantics buffer exceeds maximum allowed bytes: "
+                     << num_bytes;
+      return {};
     }
   }
 
@@ -291,22 +332,35 @@ EncodedSemanticsUpdate AndroidSemanticsMapper::MapNodes(
     std::memcpy(&buffer_int32[position], &flags, sizeof(int64_t));
     position += 2;
     buffer_int32[position++] = node->actions;
-    buffer_int32[position++] = node->max_value_length;
-    buffer_int32[position++] =
-        node->current_value_length >= 0
-            ? node->current_value_length
-            : (node->value ? static_cast<int32_t>(std::strlen(node->value))
-                           : -1);
+    buffer_int32[position++] = SAFE_ACCESS(node, max_value_length, 0);
+    int32_t current_val_len = SAFE_ACCESS(node, current_value_length, 0);
+    if (current_val_len == 0 && node->value && node->value[0] != '\0') {
+      current_val_len = static_cast<int32_t>(std::strlen(node->value));
+    }
+    buffer_int32[position++] = current_val_len;
     buffer_int32[position++] = node->text_selection_base;
     buffer_int32[position++] = node->text_selection_extent;
     buffer_int32[position++] = static_cast<int32_t>(node->platform_view_id);
     buffer_int32[position++] = node->scroll_child_count;
     buffer_int32[position++] = node->scroll_index;
-    buffer_int32[position++] = node->traversal_parent;
+    int32_t traversal_parent = SAFE_ACCESS(node, traversal_parent, -1);
+    if (traversal_parent == 0 &&
+        SAFE_ACCESS(node, min_value, nullptr) == nullptr) {
+      traversal_parent = -1;
+    }
+    buffer_int32[position++] = traversal_parent;
     buffer_float32[position++] = static_cast<float>(node->scroll_position);
     buffer_float32[position++] = static_cast<float>(node->scroll_extent_max);
     buffer_float32[position++] = static_cast<float>(node->scroll_extent_min);
-    buffer_int32[position++] = static_cast<int32_t>(node->role);
+    FlutterSemanticsRole role =
+        SAFE_ACCESS(node, role, kFlutterSemanticsRoleNone);
+    if (static_cast<int32_t>(role) <
+            static_cast<int32_t>(kFlutterSemanticsRoleNone) ||
+        static_cast<int32_t>(role) >
+            static_cast<int32_t>(kFlutterSemanticsRoleRegion)) {
+      role = kFlutterSemanticsRoleNone;
+    }
+    buffer_int32[position++] = static_cast<int32_t>(role);
 
     PutStringIntoBuffer(node->identifier, buffer_int32, &position,
                         result.strings);
@@ -339,13 +393,14 @@ EncodedSemanticsUpdate AndroidSemanticsMapper::MapNodes(
                                   &position, result.string_attribute_args);
 
     PutStringIntoBuffer(node->tooltip, buffer_int32, &position, result.strings);
-    PutStringIntoBuffer(node->link_url, buffer_int32, &position,
-                        result.strings);
-    PutStringIntoBuffer(node->locale, buffer_int32, &position, result.strings);
-    PutStringIntoBuffer(node->min_value, buffer_int32, &position,
-                        result.strings);
-    PutStringIntoBuffer(node->max_value, buffer_int32, &position,
-                        result.strings);
+    PutStringIntoBuffer(SAFE_ACCESS(node, link_url, nullptr), buffer_int32,
+                        &position, result.strings);
+    PutStringIntoBuffer(SAFE_ACCESS(node, locale, nullptr), buffer_int32,
+                        &position, result.strings);
+    PutStringIntoBuffer(SAFE_ACCESS(node, min_value, nullptr), buffer_int32,
+                        &position, result.strings);
+    PutStringIntoBuffer(SAFE_ACCESS(node, max_value, nullptr), buffer_int32,
+                        &position, result.strings);
 
     buffer_int32[position++] = node->heading_level;
     buffer_int32[position++] = static_cast<int32_t>(node->text_direction);
@@ -356,7 +411,17 @@ EncodedSemanticsUpdate AndroidSemanticsMapper::MapNodes(
 
     EncodeTransformation(node->transform, &buffer_float32[position]);
     position += 16;
-    EncodeTransformation(node->hit_test_transform, &buffer_float32[position]);
+    FlutterTransformation hit_test_transform =
+        SAFE_ACCESS(node, hit_test_transform, node->transform);
+    const bool hit_test_is_zero =
+        hit_test_transform.scaleX == 0.0 && hit_test_transform.skewX == 0.0 &&
+        hit_test_transform.transX == 0.0 && hit_test_transform.skewY == 0.0 &&
+        hit_test_transform.scaleY == 0.0 && hit_test_transform.transY == 0.0 &&
+        hit_test_transform.pers0 == 0.0 && hit_test_transform.pers1 == 0.0 &&
+        hit_test_transform.pers2 == 0.0;
+    EncodeTransformation(
+        hit_test_is_zero ? node->transform : hit_test_transform,
+        &buffer_float32[position]);
     position += 16;
 
     if (node->children_in_traversal_order && node->child_count > 0) {
@@ -389,6 +454,10 @@ EncodedSemanticsUpdate AndroidSemanticsMapper::MapNodes(
     }
   }
 
+  FML_CHECK(position * sizeof(int32_t) == result.buffer.size())
+      << "Buffer write position mismatch: wrote " << position * sizeof(int32_t)
+      << " bytes, allocated " << result.buffer.size() << " bytes";
+
   return result;
 }
 
@@ -398,6 +467,10 @@ EncodedCustomAccessibilityActions AndroidSemanticsMapper::MapCustomActions(
   TRACE_EVENT0("flutter", "AndroidSemanticsMapper::MapCustomActions");
   EncodedCustomAccessibilityActions result;
   if (!actions || count == 0) {
+    return result;
+  }
+  if (count > kMaxSemanticsActions) {
+    FML_LOG(ERROR) << "Custom actions count exceeds ceiling: " << count;
     return result;
   }
 
@@ -412,6 +485,11 @@ EncodedCustomAccessibilityActions AndroidSemanticsMapper::MapCustomActions(
     if (!action) {
       continue;
     }
+    if (action->struct_size < sizeof(FlutterSemanticsCustomAction2)) {
+      FML_LOG(ERROR) << "Invalid FlutterSemanticsCustomAction2 struct size: "
+                     << action->struct_size;
+      continue;
+    }
     actions_buffer_int32[actions_position++] = action->id;
     actions_buffer_int32[actions_position++] =
         static_cast<int32_t>(action->override_action);
@@ -421,6 +499,7 @@ EncodedCustomAccessibilityActions AndroidSemanticsMapper::MapCustomActions(
                         result.strings);
   }
 
+  result.buffer.resize(actions_position * sizeof(int32_t));
   return result;
 }
 
@@ -428,6 +507,11 @@ EncodedSemanticsBatch AndroidSemanticsMapper::MapSemanticsUpdate(
     const FlutterSemanticsUpdate2& update) {
   TRACE_EVENT0("flutter", "AndroidSemanticsMapper::MapSemanticsUpdate");
   EncodedSemanticsBatch batch;
+  if (update.struct_size < sizeof(FlutterSemanticsUpdate2)) {
+    FML_LOG(ERROR) << "Invalid FlutterSemanticsUpdate2 struct size: "
+                   << update.struct_size;
+    return batch;
+  }
   batch.view_id = update.view_id;
   if (update.nodes && update.node_count > 0) {
     batch.nodes =

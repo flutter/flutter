@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -105,6 +106,37 @@ struct AndroidDisplayMetrics {
   }
 };
 
+/// @brief Serialized binary payload matching Java
+/// FlutterJNI::onViewportMetrics.
+struct PackedViewportMetrics {
+  int64_t view_id;
+  double width;
+  double height;
+  double device_pixel_ratio;
+
+  bool operator==(const PackedViewportMetrics& other) const {
+    return view_id == other.view_id && width == other.width &&
+           height == other.height &&
+           device_pixel_ratio == other.device_pixel_ratio;
+  }
+} __attribute__((packed));
+
+/// @brief Serialized binary payload matching Java FlutterJNI::onDisplayMetrics.
+struct PackedDisplayMetrics {
+  int64_t display_id;
+  double refresh_rate;
+  double width;
+  double height;
+  double device_pixel_ratio;
+
+  bool operator==(const PackedDisplayMetrics& other) const {
+    return display_id == other.display_id &&
+           refresh_rate == other.refresh_rate && width == other.width &&
+           height == other.height &&
+           device_pixel_ratio == other.device_pixel_ratio;
+  }
+} __attribute__((packed));
+
 /// @brief Decoupled cutout insets parsed from display features and view
 /// metrics.
 struct AndroidCutoutInsets {
@@ -145,18 +177,29 @@ class AndroidWindowMetricsMapper {
       double screen_width,
       double screen_height);
 
-  /// @brief Computes combined physical view insets from padding, insets, and
-  /// cutouts.
-  static AndroidCutoutInsets ComputeEffectiveInsets(
-      const AndroidViewportMetrics& metrics);
-
   FML_DISALLOW_IMPLICIT_CONSTRUCTORS(AndroidWindowMetricsMapper);
 };
 
 /// @brief Abstract provider interface for window and display metrics routing.
 class WindowMetricsProvider {
  public:
+  using MetricsCallback = std::function<bool(const AndroidViewportMetrics&)>;
+  using DisplayUpdateCallback =
+      std::function<bool(const AndroidDisplayMetrics&)>;
+
   virtual ~WindowMetricsProvider() = default;
+
+  /// @brief Sets callback to receive viewport metrics events when dispatched.
+  virtual void SetMetricsCallback(MetricsCallback callback) {
+    auto unused = std::move(callback);
+    (void)unused;
+  }
+
+  /// @brief Sets callback to receive display updates when dispatched.
+  virtual void SetDisplayUpdateCallback(DisplayUpdateCallback callback) {
+    auto unused = std::move(callback);
+    (void)unused;
+  }
 
   /// @brief Sends viewport metrics event.
   virtual bool SendViewportMetrics(const AndroidViewportMetrics& metrics) = 0;
@@ -180,6 +223,9 @@ class DefaultWindowMetricsProvider : public WindowMetricsProvider {
       std::shared_ptr<JvmInvoker> jvm_invoker = nullptr);
   ~DefaultWindowMetricsProvider() override;
 
+  void SetMetricsCallback(MetricsCallback callback) override;
+  void SetDisplayUpdateCallback(DisplayUpdateCallback callback) override;
+
   bool SendViewportMetrics(const AndroidViewportMetrics& metrics) override;
   bool UpdateDisplayMetrics(const AndroidDisplayMetrics& metrics) override;
 
@@ -191,6 +237,8 @@ class DefaultWindowMetricsProvider : public WindowMetricsProvider {
  private:
   std::shared_ptr<JvmInvoker> jvm_invoker_;
   mutable std::mutex mutex_;
+  MetricsCallback metrics_callback_;
+  DisplayUpdateCallback display_update_callback_;
   std::map<int64_t, AndroidViewportMetrics> viewport_metrics_map_;
   std::map<uint64_t, AndroidDisplayMetrics> display_metrics_map_;
 

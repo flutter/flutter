@@ -92,7 +92,14 @@ struct AndroidHardwareBufferDesc {
       uint64_t usage = AndroidHardwareBufferUsage::kGpuSampledImage |
                        AndroidHardwareBufferUsage::kGpuColorOutput);
 
-  bool IsValid() const { return width > 0 && height > 0 && layers > 0; }
+  static constexpr uint32_t kMaxBufferDimension = 65536;
+  static constexpr uint32_t kMaxBufferLayers = 2048;
+
+  bool IsValid() const {
+    return width > 0 && width <= kMaxBufferDimension && height > 0 &&
+           height <= kMaxBufferDimension && layers > 0 &&
+           layers <= kMaxBufferLayers;
+  }
 
   bool operator==(const AndroidHardwareBufferDesc& other) const {
     return width == other.width && height == other.height &&
@@ -104,6 +111,9 @@ struct AndroidHardwareBufferDesc {
     return !(*this == other);
   }
 };
+
+static_assert(sizeof(AndroidHardwareBufferDesc) == 40,
+              "AndroidHardwareBufferDesc must match AHardwareBuffer_Desc size");
 
 /// @brief Rectangle used for buffer locking.
 struct AndroidHardwareBufferRect {
@@ -122,18 +132,8 @@ struct AndroidHardwareBufferRect {
   }
 };
 
-/// @brief Single image plane descriptor for multi-plane formats.
-struct AndroidHardwareBufferPlane {
-  void* data = nullptr;
-  uint32_t pixel_stride = 0;
-  uint32_t row_stride = 0;
-};
-
-/// @brief Multi-plane descriptor matching AHardwareBuffer_Planes.
-struct AndroidHardwareBufferPlanes {
-  uint32_t plane_count = 0;
-  AndroidHardwareBufferPlane planes[4];
-};
+static_assert(sizeof(AndroidHardwareBufferRect) == 16,
+              "AndroidHardwareBufferRect must match ARect size");
 
 class DefaultAndroidHardwareBufferProvider;
 class InMemoryAndroidHardwareBufferProvider;

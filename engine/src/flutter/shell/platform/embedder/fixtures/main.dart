@@ -429,15 +429,14 @@ void platform_messages_response() {
 @pragma('vm:entry-point')
 // ignore: non_constant_identifier_names
 void platform_messages_no_response() {
-  PlatformDispatcher
-      .instance
-      .onPlatformMessage = (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
-    final Uint8List list = data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-    signalNativeMessage(utf8.decode(list));
-    // This does nothing because no one is listening on the other side. But complete the loop anyway
-    // to make sure all null checking on response handles in the engine is in place.
-    callback!(data);
-  };
+  PlatformDispatcher.instance.onPlatformMessage =
+      (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+        final Uint8List list = data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        signalNativeMessage(utf8.decode(list));
+        // This does nothing because no one is listening on the other side. But complete the loop anyway
+        // to make sure all null checking on response handles in the engine is in place.
+        callback!(data);
+      };
   signalNativeTest();
 }
 
@@ -1703,6 +1702,23 @@ void render_impeller_platform_view() {
   };
   signalNativeTest(); // Signal 1
   PlatformDispatcher.instance.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
+void reportViewportMetricsDetails() {
+  PlatformDispatcher.instance.onMetricsChanged = () {
+    final FlutterView view = PlatformDispatcher.instance.views.first;
+    final features = StringBuffer();
+    for (final DisplayFeature feature in view.displayFeatures) {
+      features.write(' ${feature.type}/${feature.state}');
+    }
+    notifyStringValue(
+      'touchSlop=${view.gestureSettings.physicalTouchSlop} '
+      'padding=${view.viewPadding.left},${view.viewPadding.top} '
+      'features=${view.displayFeatures.length}$features',
+    );
+  };
+  signalNativeTest();
 }
 
 @pragma('vm:entry-point')

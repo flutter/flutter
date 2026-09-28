@@ -80,14 +80,6 @@ class EmbedderConfigBuilder {
 
   void SetRenderTaskRunner(const FlutterTaskRunnerDescription* runner);
 
-  void SetThreadPrioritySetter(FlutterThreadPrioritySetter setter);
-
-  void SetThreadPrioritySetterWithUserData(
-      FlutterThreadPrioritySetterWithUserData setter,
-      void* user_data);
-
-  FlutterCustomTaskRunners& GetCustomTaskRunners();
-
   void SetPlatformMessageCallback(
       const std::function<void(const FlutterPlatformMessage*)>& callback);
 

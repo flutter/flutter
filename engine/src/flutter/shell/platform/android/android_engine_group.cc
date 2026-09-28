@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/android/android_engine_group.h"
 
+#include <chrono>
 #include <utility>
 
 #include "flutter/fml/logging.h"
@@ -123,7 +124,8 @@ FlutterEngineResult DefaultAndroidEngineGroupProvider::SpawnEngine(
     const FlutterEngineSpawnConfig* config,
     FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
   TRACE_EVENT0("flutter", "DefaultAndroidEngineGroupProvider::SpawnEngine");
-  if (!parent_engine || !config || !engine_out) {
+  if (!parent_engine || !config || !engine_out ||
+      config->struct_size < sizeof(FlutterEngineSpawnConfig)) {
     return kInvalidArguments;
   }
   const auto& procs = GetEngineProcTable();
@@ -153,7 +155,8 @@ FlutterEngineResult DefaultAndroidEngineGroupProvider::InitializeEngine(
     FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
   TRACE_EVENT0("flutter",
                "DefaultAndroidEngineGroupProvider::InitializeEngine");
-  if (!config || !args || !engine_out) {
+  if (!config || !args || !engine_out ||
+      args->struct_size < sizeof(FlutterProjectArgs)) {
     return kInvalidArguments;
   }
   const auto& procs = GetEngineProcTable();
@@ -296,10 +299,8 @@ FlutterEngineResult InMemoryAndroidEngineGroupProvider::SpawnEngine(
   std::scoped_lock lock(mutex_);
   spawn_call_count_++;
 
-  if (parent_engine == nullptr || config == nullptr || engine_out == nullptr) {
-    return kInvalidArguments;
-  }
-  if (config->struct_size != sizeof(FlutterEngineSpawnConfig)) {
+  if (parent_engine == nullptr || config == nullptr || engine_out == nullptr ||
+      config->struct_size < sizeof(FlutterEngineSpawnConfig)) {
     return kInvalidArguments;
   }
 
@@ -309,7 +310,7 @@ FlutterEngineResult InMemoryAndroidEngineGroupProvider::SpawnEngine(
 
   AndroidEngineSpawnArgs recorded_args;
   if (config->custom_args &&
-      config->custom_args->struct_size == sizeof(FlutterProjectArgs)) {
+      config->custom_args->struct_size >= sizeof(FlutterProjectArgs)) {
     if (config->custom_args->custom_dart_entrypoint) {
       recorded_args.entrypoint = config->custom_args->custom_dart_entrypoint;
     }
@@ -441,7 +442,7 @@ bool AndroidEngineGroup::IsInitialized() const {
   return initialized_;
 }
 
-const AndroidEngineGroupConfig& AndroidEngineGroup::GetConfig() const {
+AndroidEngineGroupConfig AndroidEngineGroup::GetConfig() const {
   std::scoped_lock lock(mutex_);
   return config_;
 }
@@ -452,6 +453,9 @@ void AndroidEngineGroup::SetPrimaryEngine(FLUTTER_API_SYMBOL(FlutterEngine)
   TRACE_EVENT1("flutter", "AndroidEngineGroup::SetPrimaryEngine", "engine_id",
                std::to_string(engine_id).c_str());
   std::scoped_lock lock(mutex_);
+  if (engine != nullptr && engine_id == 0) {
+    engine_id = next_auto_engine_id_++;
+  }
   primary_engine_ = engine;
   primary_engine_id_ = engine_id;
   if (engine != nullptr && engine_id != 0) {
@@ -460,6 +464,10 @@ void AndroidEngineGroup::SetPrimaryEngine(FLUTTER_API_SYMBOL(FlutterEngine)
     record.engine_handle = engine;
     record.is_running = true;
     record.is_garbage_collected = false;
+    record.spawned_time_nanos =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now().time_since_epoch())
+            .count();
     active_engines_[engine_id] = record;
     handle_to_id_[engine] = engine_id;
   }
@@ -511,8 +519,13 @@ AndroidEngineGroup::SpawnEngine(FLUTTER_API_SYMBOL(FlutterEngine) parent_engine,
   int64_t assigned_engine_id = args.engine_id;
   {
     std::scoped_lock lock(mutex_);
-    if (assigned_engine_id == 0) {
+    if (assigned_engine_id == 0 ||
+        active_engines_.find(assigned_engine_id) != active_engines_.end()) {
       assigned_engine_id = next_auto_engine_id_++;
+      while (active_engines_.find(assigned_engine_id) !=
+             active_engines_.end()) {
+        assigned_engine_id = next_auto_engine_id_++;
+      }
     }
 
     AndroidEngineRecord record;
@@ -522,6 +535,10 @@ AndroidEngineGroup::SpawnEngine(FLUTTER_API_SYMBOL(FlutterEngine) parent_engine,
     record.spawn_args.engine_id = assigned_engine_id;
     record.is_running = true;
     record.is_garbage_collected = false;
+    record.spawned_time_nanos =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now().time_since_epoch())
+            .count();
 
     active_engines_[assigned_engine_id] = record;
     handle_to_id_[spawned_handle] = assigned_engine_id;
@@ -571,7 +588,8 @@ AndroidEngineGroup::SpawnEngineWithConfig(
     int64_t engine_id) {
   TRACE_EVENT1("flutter", "AndroidEngineGroup::SpawnEngineWithConfig",
                "engine_id", std::to_string(engine_id).c_str());
-  if (parent_engine == nullptr || config == nullptr) {
+  if (parent_engine == nullptr || config == nullptr ||
+      config->struct_size < sizeof(FlutterEngineSpawnConfig)) {
     FML_LOG(ERROR) << "Cannot spawn engine: invalid parent or config pointer.";
     return nullptr;
   }
@@ -602,10 +620,16 @@ AndroidEngineGroup::SpawnEngineWithConfig(
     std::scoped_lock lock(mutex_);
     if (assigned_engine_id == 0) {
       if (config->custom_args &&
-          config->custom_args->struct_size == sizeof(FlutterProjectArgs) &&
+          config->custom_args->struct_size >= sizeof(FlutterProjectArgs) &&
           config->custom_args->engine_id != 0) {
         assigned_engine_id = config->custom_args->engine_id;
-      } else {
+      }
+    }
+    if (assigned_engine_id == 0 ||
+        active_engines_.find(assigned_engine_id) != active_engines_.end()) {
+      assigned_engine_id = next_auto_engine_id_++;
+      while (active_engines_.find(assigned_engine_id) !=
+             active_engines_.end()) {
         assigned_engine_id = next_auto_engine_id_++;
       }
     }
@@ -615,9 +639,13 @@ AndroidEngineGroup::SpawnEngineWithConfig(
     record.engine_handle = spawned_handle;
     record.is_running = true;
     record.is_garbage_collected = false;
+    record.spawned_time_nanos =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now().time_since_epoch())
+            .count();
 
     if (config->custom_args &&
-        config->custom_args->struct_size == sizeof(FlutterProjectArgs)) {
+        config->custom_args->struct_size >= sizeof(FlutterProjectArgs)) {
       if (config->custom_args->custom_dart_entrypoint) {
         record.spawn_args.entrypoint =
             config->custom_args->custom_dart_entrypoint;
@@ -667,10 +695,12 @@ bool AndroidEngineGroup::ShutdownEngine(int64_t engine_id) {
       return false;
     }
     it->second.is_running = false;
+    it->second.is_garbage_collected = false;
     handle_to_shutdown = it->second.engine_handle;
     if (handle_to_shutdown) {
       handle_to_id_.erase(handle_to_shutdown);
     }
+    retired_engines_[engine_id] = it->second;
     active_engines_.erase(it);
     if (primary_engine_id_ == engine_id) {
       primary_engine_id_ = 0;
@@ -750,10 +780,12 @@ bool AndroidEngineGroup::OnEngineGarbageCollected(int64_t engine_id) {
       return false;
     }
     it->second.is_running = false;
+    it->second.is_garbage_collected = true;
     handle_to_shutdown = it->second.engine_handle;
     if (handle_to_shutdown) {
       handle_to_id_.erase(handle_to_shutdown);
     }
+    retired_engines_[engine_id] = it->second;
     active_engines_.erase(it);
     if (primary_engine_id_ == engine_id) {
       primary_engine_id_ = 0;
@@ -786,6 +818,12 @@ bool AndroidEngineGroup::RegisterEngine(int64_t engine_id,
     return false;
   }
   std::scoped_lock lock(mutex_);
+  if (active_engines_.find(engine_id) != active_engines_.end() ||
+      handle_to_id_.find(engine_handle) != handle_to_id_.end()) {
+    FML_LOG(ERROR)
+        << "Cannot register engine: ID or handle already registered.";
+    return false;
+  }
   AndroidEngineRecord record;
   record.engine_id = engine_id;
   record.engine_handle = engine_handle;
@@ -793,6 +831,10 @@ bool AndroidEngineGroup::RegisterEngine(int64_t engine_id,
   record.spawn_args.engine_id = engine_id;
   record.is_running = true;
   record.is_garbage_collected = false;
+  record.spawned_time_nanos =
+      std::chrono::duration_cast<std::chrono::nanoseconds>(
+          std::chrono::steady_clock::now().time_since_epoch())
+          .count();
 
   active_engines_[engine_id] = record;
   handle_to_id_[engine_handle] = engine_id;
@@ -911,6 +953,10 @@ std::optional<AndroidEngineRecord> AndroidEngineGroup::GetEngineRecord(
   auto it = active_engines_.find(engine_id);
   if (it != active_engines_.end()) {
     return it->second;
+  }
+  auto ret_it = retired_engines_.find(engine_id);
+  if (ret_it != retired_engines_.end()) {
+    return ret_it->second;
   }
   return std::nullopt;
 }

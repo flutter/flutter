@@ -297,7 +297,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           // The platform view is displayed using a PlatformViewLayer.
           final FlutterMutatorView parentView = platformViewParent.get(viewId);
           if (parentView != null) {
-            parentView.setTouchProcessor(null);
             parentView.removeAllViews();
             parentView.unsetOnDescendantFocusChangeListener();
 
@@ -496,6 +495,25 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         public void synchronizeToNativeViewHierarchy(boolean yes) {
           synchronizeToNativeViewHierarchy = yes;
         }
+
+        @Override
+        public void onRejectGesture(int viewId, long gestureId) {
+          final MotionEvent event =
+              motionEventTracker.peek(MotionEventTracker.MotionEventId.from(gestureId));
+          if (event == null) {
+            return;
+          }
+          final long downTime = event.getDownTime();
+          final FlutterMutatorView parentView = platformViewParent.get(viewId);
+          if (parentView != null) {
+            parentView.onFlutterWonGesture(downTime);
+            return;
+          }
+          final PlatformViewWrapper viewWrapper = viewWrappers.get(viewId);
+          if (viewWrapper != null) {
+            viewWrapper.onFlutterWonGesture(downTime);
+          }
+        }
       };
 
   private void ensureValidRequest(@NonNull PlatformViewCreationRequest request) {
@@ -512,6 +530,16 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   /** Returns the platform views channel. */
   public PlatformViewsChannel getPlatformViewsChannel() {
     return platformViewsChannel;
+  }
+
+  @VisibleForTesting
+  FlutterMutatorView getPlatformViewParent(int viewId) {
+    return platformViewParent.get(viewId);
+  }
+
+  @VisibleForTesting
+  PlatformViewWrapper getViewWrapper(int viewId) {
+    return viewWrappers.get(viewId);
   }
 
   // Creates a platform view based on `request`, performs configuration that's common to
@@ -1206,14 +1234,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   public void attachToFlutterRenderer(@NonNull FlutterRenderer flutterRenderer) {
     androidTouchProcessor = new AndroidTouchProcessor(flutterRenderer, /*trackMotionEvents=*/ true);
-    for (int index = 0; index < viewWrappers.size(); index++) {
-      final PlatformViewWrapper view = viewWrappers.valueAt(index);
-      view.setTouchProcessor(androidTouchProcessor);
-    }
-    for (int index = 0; index < platformViewParent.size(); index++) {
-      final FlutterMutatorView view = platformViewParent.valueAt(index);
-      view.setTouchProcessor(androidTouchProcessor);
-    }
   }
 
   /**
@@ -1439,5 +1459,13 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   @VisibleForTesting
   public SparseArray<PlatformOverlayView> getOverlayLayerViews() {
     return overlayLayerViews;
+  }
+
+  /**
+   * Sets whether the FlutterView render surface should be converted to an ImageView when adding
+   * platform views using Hybrid Composition.
+   */
+  public void synchronizeToNativeViewHierarchy(boolean yes) {
+    this.synchronizeToNativeViewHierarchy = yes;
   }
 }

@@ -8,16 +8,14 @@ package com.example.android_engine_test.extensions
 
 import android.app.Activity
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.os.SystemClock
 import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
 import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.embedding.engine.renderer.FlutterRenderer
+import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -29,20 +27,58 @@ class NativeDriverSupportPlugin :
     private val tag = "NativeDriverSupportPlugin"
     private lateinit var channel: MethodChannel
     private var activity: Activity? = null
+    private var flutterRenderer: FlutterRenderer? = null
+    private var isFlutterUiDisplayed = false
+    private val pendingDisplayResults = mutableListOf<MethodChannel.Result>()
+
+    private val displayListener =
+        object : FlutterUiDisplayListener {
+            override fun onFlutterUiDisplayed() {
+                isFlutterUiDisplayed = true
+                val pending = pendingDisplayResults.toList()
+                pendingDisplayResults.clear()
+                for (result in pending) {
+                    result.success(null)
+                }
+            }
+
+            override fun onFlutterUiNoLongerDisplayed() {
+                isFlutterUiDisplayed = false
+            }
+        }
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(binding.binaryMessenger, "native_driver")
         channel.setMethodCallHandler(this)
+        flutterRenderer = binding.flutterEngine.renderer
+        flutterRenderer?.addIsDisplayingFlutterUiListener(displayListener)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        flutterRenderer?.removeIsDisplayingFlutterUiListener(displayListener)
+        flutterRenderer = null
+        isFlutterUiDisplayed = false
+        for (result in pendingDisplayResults) {
+            result.error("DETACHED", "Engine detached before frame was displayed", null)
+        }
+        pendingDisplayResults.clear()
     }
 
     override fun onMethodCall(
         call: MethodCall,
         result: MethodChannel.Result
     ) {
+        if (call.method == "wait_for_first_frame_displayed") {
+            if (isFlutterUiDisplayed || (flutterRenderer?.isDisplayingFlutterUi == true)) {
+                isFlutterUiDisplayed = true
+                result.success(null)
+            } else {
+                pendingDisplayResults.add(result)
+            }
+            return
+        }
+
         val activity = this.activity
         if (activity == null) {
             Log.w(tag, "Received method channel, but no current activity")
@@ -72,7 +108,7 @@ class NativeDriverSupportPlugin :
             "tap_view" -> {
                 // Decode the selector.
                 val kind = call.argument<String>("kind")
-                val selector: NativeSelector
+                lateinit var selector: NativeSelector
                 when (kind) {
                     "byNativeAccessibilityLabel" -> {
                         selector = NativeSelector.ByContentDescription(call.argument("label")!!)
@@ -87,67 +123,31 @@ class NativeDriverSupportPlugin :
                     }
                 }
 
-                val handler = Handler(Looper.getMainLooper())
-                val startTime = SystemClock.uptimeMillis()
-                val timeoutMs = 5000L
-
-                fun tryFindAndTap() {
-                    val currentActivity = this.activity
-                    if (currentActivity == null) {
-                        result.error("NO_ACTIVITY", "Activity is null", null)
-                        return
-                    }
-                    val root = currentActivity.window.decorView.rootView
-                    val found = selector.find(root)
-                    if (found != null) {
-                        // Send tap event.
-                        val x = found.x + found.width / 2
-                        val y = found.y + found.height / 2
-                        val downTime = SystemClock.uptimeMillis()
-
-                        val pressDown = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, x, y, 0)
-                        found.dispatchTouchEvent(pressDown)
-                        pressDown.recycle()
-
-                        val pressUp = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_UP, x, y, 0)
-                        found.dispatchTouchEvent(pressUp)
-                        pressUp.recycle()
-                        result.success(null)
-                    } else if (SystemClock.uptimeMillis() - startTime < timeoutMs) {
-                        handler.postDelayed(::tryFindAndTap, 50)
-                    } else {
-                        Log.w(
-                            tag,
-                            "View not found for selector $selector in root $root.\nHierarchy:\n${dumpViewHierarchy(root)}"
-                        )
-                        result.error("VIEW_NOT_FOUND", "No view was found", call.arguments())
-                    }
+                // Fail if not found.
+                val found = selector.find(activity.window.decorView.rootView)
+                if (found == null) {
+                    result.error("VIEW_NOT_FOUND", "No view was found", call.arguments())
+                    return
                 }
 
-                tryFindAndTap()
+                // Send tap event.
+                val x = found.x + found.width / 2
+                val y = found.y + found.height / 2
+                val downTime = SystemClock.uptimeMillis()
+
+                val pressDown = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, x, y, 0)
+                found.dispatchTouchEvent(pressDown)
+                pressDown.recycle()
+
+                val pressUp = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_UP, x, y, 0)
+                found.dispatchTouchEvent(pressUp)
+                pressUp.recycle()
+                result.success(null)
             }
             else -> {
                 result.notImplemented()
             }
         }
-    }
-
-    private fun dumpViewHierarchy(
-        view: View,
-        depth: Int = 0,
-        sb: StringBuilder = StringBuilder()
-    ): String {
-        val indent = "  ".repeat(depth)
-        val desc = view.contentDescription ?: "null"
-        val count = if (view is ViewGroup) view.childCount else 0
-        sb.append("$indent${view.javaClass.name} (id=${view.id}, desc='$desc', vis=${view.visibility}, childCount=$count)\n")
-        if (view is ViewGroup) {
-            for (i in 0 until view.childCount) {
-                val child = view.getChildAt(i) ?: continue
-                dumpViewHierarchy(child, depth + 1, sb)
-            }
-        }
-        return sb.toString()
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {

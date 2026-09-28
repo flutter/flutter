@@ -20,12 +20,51 @@ using ::testing::_;
 using ::testing::Eq;
 using ::testing::Return;
 
-class MockJvmInvokerForVMInit : public JvmInvoker {
+class MockJvmInvoker : public JvmInvoker {
  public:
   MOCK_METHOD(bool, EnsureAttachedToThread, (), (override));
   MOCK_METHOD(void, DetachFromThread, (), (override));
   MOCK_METHOD(bool, HasPendingException, (), (const, override));
   MOCK_METHOD(void, ClearPendingException, (), (override));
+
+  MOCK_METHOD(bool,
+              HandlePlatformMessage,
+              (const std::string& channel,
+               const uint8_t* message,
+               size_t message_size,
+               int32_t response_id,
+               int64_t message_data),
+              (override));
+
+  MOCK_METHOD(bool,
+              HandlePlatformMessageResponse,
+              (int32_t response_id, const uint8_t* data, size_t data_size),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateSemantics,
+              (const std::vector<uint8_t>& buffer,
+               const std::vector<std::string>& strings,
+               const std::vector<std::vector<uint8_t>>& string_attribute_args),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateCustomAccessibilityActions,
+              (const std::vector<uint8_t>& actions_buffer,
+               const std::vector<std::string>& action_strings),
+              (override));
+
+  MOCK_METHOD(bool, SetSemanticsTreeEnabled, (bool enabled), (override));
+  MOCK_METHOD(bool,
+              SetApplicationLocale,
+              (const std::string& locale),
+              (override));
+  MOCK_METHOD(bool, OnFirstFrame, (), (override));
+  MOCK_METHOD(bool, OnPreEngineRestart, (), (override));
+  MOCK_METHOD(bool,
+              RequestDartDeferredLibrary,
+              (int loading_unit_id),
+              (override));
 
   MOCK_METHOD(bool,
               InvokeVoidMethod,
@@ -70,6 +109,23 @@ class MockJvmInvokerForVMInit : public JvmInvoker {
               (override));
 
   MOCK_METHOD(bool, PostJvmTask, (std::function<void()> task), (override));
+
+  MOCK_METHOD(bool,
+              DecodeImage,
+              (const uint8_t* data, size_t size, int64_t generator_handle),
+              (override));
+
+  MOCK_METHOD(bool,
+              PushPlatformViewMutators,
+              (int64_t view_id,
+               int32_t x,
+               int32_t y,
+               int32_t width,
+               int32_t height,
+               int32_t view_width,
+               int32_t view_height,
+               const std::vector<uint8_t>& payload),
+              (override));
 };
 
 // ---------------------------------------------------------------------------
@@ -150,14 +206,39 @@ TEST(AndroidVMInitTest, InMemoryFontCollectionProviderOperations) {
 }
 
 TEST(AndroidVMInitTest, DefaultFontCollectionProviderOperations) {
-  DefaultFontCollectionProvider provider;
+  // 1. Dynamic resolution with mock library loader
+  auto mock_loader = std::make_shared<MockOSLibraryLoader>();
+  static bool prefetch_invoked = false;
+  prefetch_invoked = false;
+  auto mock_prefetch_fn = []() { prefetch_invoked = true; };
+  mock_loader->SetSymbol(OSLibraryLoader::kProcessGlobalScope,
+                         "FlutterPlatformPrefetchDefaultFontManager",
+                         reinterpret_cast<void*>(+mock_prefetch_fn));
 
-  EXPECT_FALSE(provider.IsPrefetched());
-  EXPECT_EQ(provider.GetPrefetchCount(), 0u);
+  DefaultFontCollectionProvider mock_provider(mock_loader);
+  EXPECT_FALSE(mock_provider.IsPrefetched());
+  EXPECT_EQ(mock_provider.GetPrefetchCount(), 0u);
+  EXPECT_FALSE(prefetch_invoked);
 
-  EXPECT_TRUE(provider.PrefetchDefaultFontManager());
-  EXPECT_TRUE(provider.IsPrefetched());
-  EXPECT_EQ(provider.GetPrefetchCount(), 1u);
+  EXPECT_TRUE(mock_provider.PrefetchDefaultFontManager());
+  EXPECT_TRUE(mock_provider.IsPrefetched());
+  EXPECT_EQ(mock_provider.GetPrefetchCount(), 1u);
+  EXPECT_TRUE(prefetch_invoked);
+
+  // 2. Fallback when symbol is absent
+  auto empty_loader = std::make_shared<MockOSLibraryLoader>();
+  DefaultFontCollectionProvider fallback_provider(empty_loader);
+  EXPECT_FALSE(fallback_provider.IsPrefetched());
+  EXPECT_TRUE(fallback_provider.PrefetchDefaultFontManager());
+  EXPECT_TRUE(fallback_provider.IsPrefetched());
+  EXPECT_EQ(fallback_provider.GetPrefetchCount(), 1u);
+
+  // 3. Default constructor with process global scope
+  DefaultFontCollectionProvider default_provider;
+  EXPECT_FALSE(default_provider.IsPrefetched());
+  EXPECT_TRUE(default_provider.PrefetchDefaultFontManager());
+  EXPECT_TRUE(default_provider.IsPrefetched());
+  EXPECT_EQ(default_provider.GetPrefetchCount(), 1u);
 }
 
 // ---------------------------------------------------------------------------
@@ -189,7 +270,7 @@ TEST(AndroidVMInitTest, InMemoryAOTProviderOperations) {
   EXPECT_EQ(provider.CreateAOTData(&source, &fail_data), kInvalidArguments);
 
   EXPECT_EQ(provider.CreateAOTData(nullptr, &fail_data), kInvalidArguments);
-  EXPECT_EQ(provider.CollectAOTData(nullptr), kInvalidArguments);
+  EXPECT_EQ(provider.CollectAOTData(nullptr), kSuccess);
 }
 
 TEST(AndroidVMInitTest, DefaultAOTProviderArgumentValidation) {
@@ -198,7 +279,7 @@ TEST(AndroidVMInitTest, DefaultAOTProviderArgumentValidation) {
 
   EXPECT_EQ(provider.CreateAOTData(nullptr, &out_data), kInvalidArguments);
   EXPECT_EQ(provider.CreateAOTData(nullptr, nullptr), kInvalidArguments);
-  EXPECT_EQ(provider.CollectAOTData(nullptr), kInvalidArguments);
+  EXPECT_EQ(provider.CollectAOTData(nullptr), kSuccess);
 }
 
 // ---------------------------------------------------------------------------
@@ -211,6 +292,7 @@ TEST(AndroidVMInitTest, AndroidProjectArgsHolderPopulation) {
   AndroidVMArgs vm_args;
   vm_args.command_line_args = {"--enable-checked-mode",
                                "--verify-entry-points"};
+  vm_args.assets_path = "/data/app/assets/flutter_assets";
   vm_args.icu_data_path = "/data/flutter/icudtl.dat";
   vm_args.engine_caches_path = "/data/user/0/com.example/cache";
   vm_args.is_persistent_cache_read_only = true;
@@ -239,6 +321,7 @@ TEST(AndroidVMInitTest, AndroidProjectArgsHolderPopulation) {
   EXPECT_STREQ(args->command_line_argv[2], "--verify-entry-points");
 
   // Verify paths and config
+  EXPECT_STREQ(args->assets_path, "/data/app/assets/flutter_assets");
   EXPECT_STREQ(args->icu_data_path, "/data/flutter/icudtl.dat");
   EXPECT_STREQ(args->persistent_cache_path, "/data/user/0/com.example/cache");
   EXPECT_TRUE(args->is_persistent_cache_read_only);
@@ -261,8 +344,24 @@ TEST(AndroidVMInitTest, AndroidProjectArgsHolderPopulation) {
 // AndroidVMInitTests
 // ---------------------------------------------------------------------------
 
+TEST(AndroidVMInitTest, AndroidVMInitIdempotency) {
+  auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  AndroidVMInit vm_init(nullptr, nullptr, aot_provider);
+
+  AndroidVMArgs args;
+  args.aot_library_path = "/data/app/lib/arm64/libapp.so";
+  EXPECT_TRUE(vm_init.Init(args));
+  EXPECT_EQ(aot_provider->GetCreateCount(), 1u);
+  EXPECT_EQ(aot_provider->GetCollectCount(), 0u);
+
+  // Calling Init again should be a safe idempotent no-op.
+  EXPECT_TRUE(vm_init.Init(args));
+  EXPECT_EQ(aot_provider->GetCreateCount(), 1u);
+  EXPECT_EQ(aot_provider->GetCollectCount(), 0u);
+}
+
 TEST(AndroidVMInitTest, AndroidVMInitLifecycleAndDispatch) {
-  auto mock_invoker = std::make_shared<MockJvmInvokerForVMInit>();
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
   auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
 
@@ -366,6 +465,175 @@ TEST(AndroidVMInitTest, MultithreadedConcurrentVMInitOperations) {
 
   EXPECT_EQ(font_provider->GetPrefetchCount(),
             kThreadCount * kIterationsPerThread);
+}
+
+TEST(AndroidVMInitTest, ParseHcppFlagMatrix) {
+  // Test all affirmative flag variations enabling HCPP / SurfaceControl.
+  const std::vector<std::string> affirmative_flags = {
+      "--enable-surface-control",
+      "--enable-surface-control=true",
+      "--enable-surface-control=1",
+      "--enable-hcpp-and-surface-control",
+      "--enable-hcpp-and-surface-control=true",
+      "--enable-hcpp-and-surface-control=1",
+      "--enable-hcpp",
+      "--enable-hcpp=true",
+      "--enable-hcpp=1",
+  };
+  for (const auto& flag : affirmative_flags) {
+    auto result = ParseHcppFlag(flag);
+    ASSERT_TRUE(result.has_value()) << "Expected flag to be parsed: " << flag;
+    EXPECT_TRUE(*result) << "Expected flag to enable HCPP: " << flag;
+  }
+
+  // Test all negative flag variations disabling HCPP / SurfaceControl.
+  const std::vector<std::string> negative_flags = {
+      "--enable-surface-control=false",
+      "--enable-surface-control=0",
+      "--enable-hcpp-and-surface-control=false",
+      "--enable-hcpp-and-surface-control=0",
+      "--enable-hcpp=false",
+      "--enable-hcpp=0",
+      "--no-enable-surface-control",
+      "--no-enable-hcpp-and-surface-control",
+      "--no-enable-hcpp",
+  };
+  for (const auto& flag : negative_flags) {
+    auto result = ParseHcppFlag(flag);
+    ASSERT_TRUE(result.has_value()) << "Expected flag to be parsed: " << flag;
+    EXPECT_FALSE(*result) << "Expected flag to disable HCPP: " << flag;
+  }
+
+  // Test unrelated or non-matching flags.
+  const std::vector<std::string> unrelated_flags = {
+      "",
+      "--enable-impeller",
+      "--enable-impeller=true",
+      "--enable-surface-control-invalid",
+      "--enable-hcpp-suffix",
+      "--no-enable-hcpp-other",
+      "enable-surface-control",
+  };
+  for (const auto& flag : unrelated_flags) {
+    auto result = ParseHcppFlag(flag);
+    EXPECT_FALSE(result.has_value())
+        << "Expected flag to return nullopt: " << flag;
+  }
+}
+
+TEST(AndroidVMInitTest, ParseMergedPlatformUIThreadFlagMatrix) {
+  // Test all affirmative flag variations enabling merged platform and UI
+  // thread.
+  const std::vector<std::string> affirmative_flags = {
+      "--merged-platform-ui-thread",
+      "--merged-platform-ui-thread=true",
+      "--merged-platform-ui-thread=1",
+      "--merged-platform-ui-thread=enabled",
+      "--enable-merged-platform-ui-thread",
+  };
+  for (const auto& flag : affirmative_flags) {
+    auto result = ParseMergedPlatformUIThreadFlag(flag);
+    ASSERT_TRUE(result.has_value()) << "Expected flag to be parsed: " << flag;
+    EXPECT_TRUE(*result)
+        << "Expected flag to enable merged platform UI thread: " << flag;
+  }
+
+  // Test all negative flag variations disabling merged platform and UI thread.
+  const std::vector<std::string> negative_flags = {
+      "--merged-platform-ui-thread=false",
+      "--merged-platform-ui-thread=0",
+      "--merged-platform-ui-thread=disabled",
+      "--no-merged-platform-ui-thread",
+      "--disable-merged-platform-ui-thread",
+      "--no-enable-merged-platform-ui-thread",
+  };
+  for (const auto& flag : negative_flags) {
+    auto result = ParseMergedPlatformUIThreadFlag(flag);
+    ASSERT_TRUE(result.has_value()) << "Expected flag to be parsed: " << flag;
+    EXPECT_FALSE(*result)
+        << "Expected flag to disable merged platform UI thread: " << flag;
+  }
+
+  // Test unrelated or non-matching flags.
+  const std::vector<std::string> unrelated_flags = {
+      "",
+      "--enable-impeller",
+      "--enable-impeller=true",
+      "--merged-platform-ui-thread-invalid",
+      "--merged-platform-ui-thread-suffix",
+      "--no-merged-platform-ui-thread-other",
+      "merged-platform-ui-thread",
+  };
+  for (const auto& flag : unrelated_flags) {
+    auto result = ParseMergedPlatformUIThreadFlag(flag);
+    EXPECT_FALSE(result.has_value())
+        << "Expected flag to return nullopt: " << flag;
+  }
+}
+
+TEST(AndroidVMInitTest,
+     SelectRenderingAPIHonorsRequestedBackendUnderSlimpeller) {
+  AndroidVMArgs gles_args;
+  gles_args.enable_impeller = true;
+  gles_args.requested_rendering_backend = "opengles";
+  gles_args.api_level = 35;
+  EXPECT_EQ(SelectRenderingAPI(gles_args, false),
+            AndroidRenderingAPI::kImpellerOpenGLES);
+
+  AndroidVMArgs vulkan_args;
+  vulkan_args.enable_impeller = true;
+  vulkan_args.requested_rendering_backend = "vulkan";
+  vulkan_args.api_level = 35;
+  EXPECT_EQ(SelectRenderingAPI(vulkan_args, false),
+            AndroidRenderingAPI::kImpellerVulkan);
+}
+
+TEST(AndroidVMInitTest, ShouldEnableSurfaceControlRequiresVulkanAndApi34) {
+  // 1. Vulkan on API 35 with enable_surface_control = true -> enabled.
+  AndroidVMArgs vulkan_35;
+  vulkan_35.enable_surface_control = true;
+  vulkan_35.enable_impeller = true;
+  vulkan_35.api_level = 35;
+  vulkan_35.requested_rendering_backend = "vulkan";
+  EXPECT_TRUE(ShouldEnableSurfaceControl(vulkan_35,
+                                         SelectRenderingAPI(vulkan_35, false)));
+
+  // 2. Autoselect on API 34 with enable_surface_control = true -> enabled.
+  AndroidVMArgs autoselect_34;
+  autoselect_34.enable_surface_control = true;
+  autoselect_34.enable_impeller = true;
+  autoselect_34.api_level = 34;
+  EXPECT_TRUE(ShouldEnableSurfaceControl(
+      autoselect_34, SelectRenderingAPI(autoselect_34, false)));
+
+  // 3. OpenGLES on API 35 with enable_surface_control = true -> disabled.
+  AndroidVMArgs gles_35;
+  gles_35.enable_surface_control = true;
+  gles_35.enable_impeller = true;
+  gles_35.api_level = 35;
+  gles_35.requested_rendering_backend = "opengles";
+  EXPECT_FALSE(
+      ShouldEnableSurfaceControl(gles_35, SelectRenderingAPI(gles_35, false)));
+  EXPECT_FALSE(ShouldEnableSurfaceControl(
+      gles_35, AndroidRenderingAPI::kImpellerAutoselect));
+
+  // 4. Vulkan on API 33 (below API 34 threshold) -> disabled.
+  AndroidVMArgs vulkan_33 = vulkan_35;
+  vulkan_33.api_level = 33;
+  EXPECT_FALSE(ShouldEnableSurfaceControl(
+      vulkan_33, AndroidRenderingAPI::kImpellerVulkan));
+
+  // 5. Impeller disabled -> disabled.
+  AndroidVMArgs impeller_off = vulkan_35;
+  impeller_off.enable_impeller = false;
+  EXPECT_FALSE(ShouldEnableSurfaceControl(
+      impeller_off, AndroidRenderingAPI::kImpellerVulkan));
+
+  // 6. SurfaceControl flag disabled -> disabled.
+  AndroidVMArgs sc_off = vulkan_35;
+  sc_off.enable_surface_control = false;
+  EXPECT_FALSE(
+      ShouldEnableSurfaceControl(sc_off, AndroidRenderingAPI::kImpellerVulkan));
 }
 
 }  // namespace testing

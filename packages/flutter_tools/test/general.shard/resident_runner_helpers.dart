@@ -382,15 +382,13 @@ class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator 
 
 class FakeDevice extends Fake implements Device {
   FakeDevice({
-    String sdkNameAndVersion = 'Android',
-    TargetPlatform targetPlatform = TargetPlatform.android_arm,
-    bool isLocalEmulator = false,
+    this._sdkNameAndVersion = 'Android',
+    this._targetPlatform = TargetPlatform.android_arm,
+    this._isLocalEmulator = false,
     this.supportsHotRestart = true,
     this.supportsScreenshot = true,
     this.supportsFlutterExit = true,
-  }) : _isLocalEmulator = isLocalEmulator,
-       _targetPlatform = targetPlatform,
-       _sdkNameAndVersion = sdkNameAndVersion;
+  });
 
   final bool _isLocalEmulator;
   final TargetPlatform _targetPlatform;

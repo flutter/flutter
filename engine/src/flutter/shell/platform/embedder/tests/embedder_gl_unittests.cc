@@ -2580,6 +2580,11 @@ TEST_P(EmbedderTestMultiBackend, PlatformViewMutatorsAreValid) {
                 FML_CHECK(false)
                     << "There should be no transformation in the test.";
                 break;
+              case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+              case kFlutterPlatformViewMutationTypeClipPath:
+                FML_CHECK(false) << "There should be no path or superellipse "
+                                    "clip in the test.";
+                break;
             }
 
             ASSERT_EQ(*platform_view.mutations[i], mutation);
@@ -2690,6 +2695,11 @@ TEST_F(EmbedderTest, PlatformViewMutatorsAreValidWithPixelRatio) {
                 mutation.type = kFlutterPlatformViewMutationTypeTransformation;
                 mutation.transformation = FlutterTransformationMake(
                     DlMatrix::MakeScale({2.0, 2.0, 1}));
+                break;
+              case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+              case kFlutterPlatformViewMutationTypeClipPath:
+                FML_CHECK(false) << "There should be no path or superellipse "
+                                    "clip in the test.";
                 break;
             }
 
@@ -2809,6 +2819,11 @@ TEST_F(EmbedderTest,
                 mutation.transformation =
                     FlutterTransformationMake(root_surface_transformation);
 
+                break;
+              case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+              case kFlutterPlatformViewMutationTypeClipPath:
+                FML_CHECK(false) << "There should be no path or superellipse "
+                                    "clip in the test.";
                 break;
             }
 
@@ -5342,40 +5357,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneToOpenGLSurfaces) {
 
   // There should no present calls on the root surface.
   ASSERT_EQ(context.GetSurfacePresentCount(), 0u);
-}
-
-TEST_F(EmbedderTest, CanRegisterAndResolveHardwareBufferExternalTextureGL) {
-  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
-  fml::AutoResetWaitableEvent latch;
-  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
-
-  context.GetRendererConfig()
-      .open_gl.hardware_buffer_external_texture_frame_callback =
-      [](void* user_data, int64_t texture_id, size_t width, size_t height,
-         FlutterHardwareBufferExternalTexture* texture) -> bool {
-    texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
-    texture->width = width;
-    texture->height = height;
-    texture->format = 1;
-    texture->buffer = reinterpret_cast<FlutterHardwareBufferHandle>(0x9999);
-    texture->user_data = nullptr;
-    texture->destruction_callback = [](void* data) {};
-    return true;
-  };
-
-  EmbedderConfigBuilder builder(context);
-  builder.SetSurface(DlISize(800, 600));
-  auto engine = builder.LaunchEngine();
-  ASSERT_TRUE(engine.is_valid());
-  latch.Wait();
-
-  constexpr int64_t texture_id = 99;
-  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
-  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
-  ASSERT_TRUE(embedder_engine->MarkTextureFrameAvailable(texture_id));
-  ASSERT_TRUE(embedder_engine->UnregisterTexture(texture_id));
-
-  engine.reset();
 }
 
 INSTANTIATE_TEST_SUITE_P(

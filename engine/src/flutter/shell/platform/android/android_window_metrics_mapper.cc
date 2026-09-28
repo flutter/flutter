@@ -6,47 +6,84 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 
 #include "flutter/fml/trace_event.h"
 
 namespace flutter {
 namespace android {
 
+namespace {
+
+constexpr size_t kMaxDisplayFeatures = 256;
+constexpr double kMaxSafeDimension = 65536.0;
+
+inline double SafeDimension(double value) {
+  if (!std::isfinite(value) || value <= 0.0) {
+    return 0.0;
+  }
+  return std::min(value, kMaxSafeDimension);
+}
+
+inline double SafePixelRatio(double value) {
+  return (std::isfinite(value) && value > 0.0) ? value : 1.0;
+}
+
+inline double SafeRefreshRate(double value) {
+  return (std::isfinite(value) && value > 0.0) ? value : 60.0;
+}
+
+inline bool FloatEquals(double a, double b) {
+  if (std::isnan(a) && std::isnan(b)) {
+    return true;
+  }
+  return a == b;
+}
+
+}  // namespace
+
 bool AndroidViewportMetrics::operator==(
     const AndroidViewportMetrics& other) const {
   return view_id == other.view_id &&
-         device_pixel_ratio == other.device_pixel_ratio &&
-         physical_width == other.physical_width &&
-         physical_height == other.physical_height &&
-         physical_padding_top == other.physical_padding_top &&
-         physical_padding_right == other.physical_padding_right &&
-         physical_padding_bottom == other.physical_padding_bottom &&
-         physical_padding_left == other.physical_padding_left &&
-         physical_view_inset_top == other.physical_view_inset_top &&
-         physical_view_inset_right == other.physical_view_inset_right &&
-         physical_view_inset_bottom == other.physical_view_inset_bottom &&
-         physical_view_inset_left == other.physical_view_inset_left &&
-         system_gesture_inset_top == other.system_gesture_inset_top &&
-         system_gesture_inset_right == other.system_gesture_inset_right &&
-         system_gesture_inset_bottom == other.system_gesture_inset_bottom &&
-         system_gesture_inset_left == other.system_gesture_inset_left &&
-         physical_touch_slop == other.physical_touch_slop &&
+         FloatEquals(device_pixel_ratio, other.device_pixel_ratio) &&
+         FloatEquals(physical_width, other.physical_width) &&
+         FloatEquals(physical_height, other.physical_height) &&
+         FloatEquals(physical_padding_top, other.physical_padding_top) &&
+         FloatEquals(physical_padding_right, other.physical_padding_right) &&
+         FloatEquals(physical_padding_bottom, other.physical_padding_bottom) &&
+         FloatEquals(physical_padding_left, other.physical_padding_left) &&
+         FloatEquals(physical_view_inset_top, other.physical_view_inset_top) &&
+         FloatEquals(physical_view_inset_right,
+                     other.physical_view_inset_right) &&
+         FloatEquals(physical_view_inset_bottom,
+                     other.physical_view_inset_bottom) &&
+         FloatEquals(physical_view_inset_left,
+                     other.physical_view_inset_left) &&
+         FloatEquals(system_gesture_inset_top,
+                     other.system_gesture_inset_top) &&
+         FloatEquals(system_gesture_inset_right,
+                     other.system_gesture_inset_right) &&
+         FloatEquals(system_gesture_inset_bottom,
+                     other.system_gesture_inset_bottom) &&
+         FloatEquals(system_gesture_inset_left,
+                     other.system_gesture_inset_left) &&
+         FloatEquals(physical_touch_slop, other.physical_touch_slop) &&
          display_features_bounds == other.display_features_bounds &&
          display_features_type == other.display_features_type &&
          display_features_state == other.display_features_state &&
-         physical_min_width == other.physical_min_width &&
-         physical_max_width == other.physical_max_width &&
-         physical_min_height == other.physical_min_height &&
-         physical_max_height == other.physical_max_height &&
+         FloatEquals(physical_min_width, other.physical_min_width) &&
+         FloatEquals(physical_max_width, other.physical_max_width) &&
+         FloatEquals(physical_min_height, other.physical_min_height) &&
+         FloatEquals(physical_max_height, other.physical_max_height) &&
          display_id == other.display_id &&
-         physical_display_corner_radius_top_left ==
-             other.physical_display_corner_radius_top_left &&
-         physical_display_corner_radius_top_right ==
-             other.physical_display_corner_radius_top_right &&
-         physical_display_corner_radius_bottom_right ==
-             other.physical_display_corner_radius_bottom_right &&
-         physical_display_corner_radius_bottom_left ==
-             other.physical_display_corner_radius_bottom_left;
+         FloatEquals(physical_display_corner_radius_top_left,
+                     other.physical_display_corner_radius_top_left) &&
+         FloatEquals(physical_display_corner_radius_top_right,
+                     other.physical_display_corner_radius_top_right) &&
+         FloatEquals(physical_display_corner_radius_bottom_right,
+                     other.physical_display_corner_radius_bottom_right) &&
+         FloatEquals(physical_display_corner_radius_bottom_left,
+                     other.physical_display_corner_radius_bottom_left);
 }
 
 FlutterWindowMetricsEvent
@@ -56,18 +93,17 @@ AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(
                "AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent");
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(FlutterWindowMetricsEvent);
-  event.width = static_cast<size_t>(std::max(0.0, metrics.physical_width));
-  event.height = static_cast<size_t>(std::max(0.0, metrics.physical_height));
-  event.pixel_ratio =
-      metrics.device_pixel_ratio > 0.0 ? metrics.device_pixel_ratio : 1.0;
+  event.width = static_cast<size_t>(SafeDimension(metrics.physical_width));
+  event.height = static_cast<size_t>(SafeDimension(metrics.physical_height));
+  event.pixel_ratio = SafePixelRatio(metrics.device_pixel_ratio);
   event.left = 0;
   event.top = 0;
 
   // View insets: bounded within physical dimensions.
-  double inset_top = std::max(0.0, metrics.physical_view_inset_top);
-  double inset_right = std::max(0.0, metrics.physical_view_inset_right);
-  double inset_bottom = std::max(0.0, metrics.physical_view_inset_bottom);
-  double inset_left = std::max(0.0, metrics.physical_view_inset_left);
+  double inset_top = SafeDimension(metrics.physical_view_inset_top);
+  double inset_right = SafeDimension(metrics.physical_view_inset_right);
+  double inset_bottom = SafeDimension(metrics.physical_view_inset_bottom);
+  double inset_left = SafeDimension(metrics.physical_view_inset_left);
 
   event.physical_view_inset_top =
       std::min(inset_top, static_cast<double>(event.height));
@@ -81,17 +117,103 @@ AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(
   event.display_id = metrics.display_id;
   event.view_id = metrics.view_id;
 
-  event.physical_padding_top = metrics.physical_padding_top;
-  event.physical_padding_right = metrics.physical_padding_right;
-  event.physical_padding_bottom = metrics.physical_padding_bottom;
-  event.physical_padding_left = metrics.physical_padding_left;
-  event.physical_system_gesture_inset_top = metrics.system_gesture_inset_top;
+  bool has_explicit_constraints = (std::isfinite(metrics.physical_min_width) &&
+                                   metrics.physical_min_width > 0.0) ||
+                                  (std::isfinite(metrics.physical_max_width) &&
+                                   metrics.physical_max_width > 0.0) ||
+                                  (std::isfinite(metrics.physical_min_height) &&
+                                   metrics.physical_min_height > 0.0) ||
+                                  (std::isfinite(metrics.physical_max_height) &&
+                                   metrics.physical_max_height > 0.0);
+
+  if (has_explicit_constraints) {
+    event.has_constraints = true;
+    size_t min_w =
+        static_cast<size_t>(SafeDimension(metrics.physical_min_width));
+    size_t max_w =
+        static_cast<size_t>(SafeDimension(metrics.physical_max_width));
+    size_t min_h =
+        static_cast<size_t>(SafeDimension(metrics.physical_min_height));
+    size_t max_h =
+        static_cast<size_t>(SafeDimension(metrics.physical_max_height));
+
+    if (max_w == 0 || max_w < event.width) {
+      max_w = event.width;
+    }
+    if (min_w > event.width) {
+      min_w = event.width;
+    }
+    if (max_w < min_w) {
+      max_w = min_w;
+    }
+
+    if (max_h == 0 || max_h < event.height) {
+      max_h = event.height;
+    }
+    if (min_h > event.height) {
+      min_h = event.height;
+    }
+    if (max_h < min_h) {
+      max_h = min_h;
+    }
+
+    event.min_width_constraint = min_w;
+    event.max_width_constraint = max_w;
+    event.min_height_constraint = min_h;
+    event.max_height_constraint = max_h;
+  } else {
+    event.min_width_constraint = event.width;
+    event.max_width_constraint = event.width;
+    event.min_height_constraint = event.height;
+    event.max_height_constraint = event.height;
+  }
+
+  // Populate extended metrics and display features.
+  event.has_extended_metrics = true;
+  event.physical_padding_top = SafeDimension(metrics.physical_padding_top);
+  event.physical_padding_right = SafeDimension(metrics.physical_padding_right);
+  event.physical_padding_bottom =
+      SafeDimension(metrics.physical_padding_bottom);
+  event.physical_padding_left = SafeDimension(metrics.physical_padding_left);
+
+  double gesture_inset_top = SafeDimension(metrics.system_gesture_inset_top);
+  double gesture_inset_right =
+      SafeDimension(metrics.system_gesture_inset_right);
+  double gesture_inset_bottom =
+      SafeDimension(metrics.system_gesture_inset_bottom);
+  double gesture_inset_left = SafeDimension(metrics.system_gesture_inset_left);
+
+  event.physical_system_gesture_inset_top = std::max(0.0, gesture_inset_top);
   event.physical_system_gesture_inset_right =
-      metrics.system_gesture_inset_right;
+      std::max(0.0, gesture_inset_right);
   event.physical_system_gesture_inset_bottom =
-      metrics.system_gesture_inset_bottom;
-  event.physical_system_gesture_inset_left = metrics.system_gesture_inset_left;
+      std::max(0.0, gesture_inset_bottom);
+  event.physical_system_gesture_inset_left = std::max(0.0, gesture_inset_left);
+
   event.physical_touch_slop = metrics.physical_touch_slop;
+
+  // Each display feature requires 4 bounds coordinates (left, top, right,
+  // bottom).
+  constexpr size_t kCoordinatesPerFeature = 4;
+  size_t feature_count = std::min({
+      metrics.display_features_bounds.size() / kCoordinatesPerFeature,
+      metrics.display_features_type.size(),
+      metrics.display_features_state.size(),
+      kMaxDisplayFeatures,
+  });
+
+  if (feature_count > 0) {
+    event.display_features_count = feature_count;
+    event.display_features_bounds = metrics.display_features_bounds.data();
+    event.display_features_type = metrics.display_features_type.data();
+    event.display_features_state = metrics.display_features_state.data();
+  } else {
+    event.display_features_count = 0;
+    event.display_features_bounds = nullptr;
+    event.display_features_type = nullptr;
+    event.display_features_state = nullptr;
+  }
+
   event.physical_display_corner_radius_top_left =
       metrics.physical_display_corner_radius_top_left;
   event.physical_display_corner_radius_top_right =
@@ -100,78 +222,6 @@ AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(
       metrics.physical_display_corner_radius_bottom_right;
   event.physical_display_corner_radius_bottom_left =
       metrics.physical_display_corner_radius_bottom_left;
-
-  if (!metrics.display_features_type.empty() &&
-      metrics.display_features_bounds.size() ==
-          4 * metrics.display_features_type.size() &&
-      metrics.display_features_state.size() ==
-          metrics.display_features_type.size()) {
-    event.display_features_count = metrics.display_features_type.size();
-    event.display_features_bounds = metrics.display_features_bounds.data();
-    event.display_features_type =
-        reinterpret_cast<const int32_t*>(metrics.display_features_type.data());
-    event.display_features_state =
-        reinterpret_cast<const int32_t*>(metrics.display_features_state.data());
-  } else {
-    event.display_features_count = 0;
-    event.display_features_bounds = nullptr;
-    event.display_features_type = nullptr;
-    event.display_features_state = nullptr;
-  }
-
-  bool has_explicit_constraints =
-      metrics.physical_min_width > 0.0 || metrics.physical_max_width > 0.0 ||
-      metrics.physical_min_height > 0.0 || metrics.physical_max_height > 0.0;
-
-  if (has_explicit_constraints) {
-    event.has_constraints = true;
-    size_t min_w =
-        static_cast<size_t>(std::max(0.0, metrics.physical_min_width));
-    size_t max_w =
-        static_cast<size_t>(std::max(0.0, metrics.physical_max_width));
-    size_t min_h =
-        static_cast<size_t>(std::max(0.0, metrics.physical_min_height));
-    size_t max_h =
-        static_cast<size_t>(std::max(0.0, metrics.physical_max_height));
-
-    if (min_w == 0) {
-      min_w = event.width;
-    }
-    if (max_w == 0 || max_w < event.width) {
-      max_w = event.width;
-    }
-    if (min_h == 0) {
-      min_h = event.height;
-    }
-    if (max_h == 0 || max_h < event.height) {
-      max_h = event.height;
-    }
-
-    // Invariants: min <= width <= max
-    if (min_w > event.width) {
-      min_w = event.width;
-    }
-    if (min_h > event.height) {
-      min_h = event.height;
-    }
-    if (max_w < event.width) {
-      max_w = event.width;
-    }
-    if (max_h < event.height) {
-      max_h = event.height;
-    }
-
-    event.min_width_constraint = min_w;
-    event.max_width_constraint = max_w;
-    event.min_height_constraint = min_h;
-    event.max_height_constraint = max_h;
-  } else {
-    event.has_constraints = false;
-    event.min_width_constraint = event.width;
-    event.max_width_constraint = event.width;
-    event.min_height_constraint = event.height;
-    event.max_height_constraint = event.height;
-  }
 
   return event;
 }
@@ -183,12 +233,10 @@ FlutterEngineDisplay AndroidWindowMetricsMapper::ToFlutterEngineDisplay(
   display.struct_size = sizeof(FlutterEngineDisplay);
   display.display_id = metrics.display_id;
   display.single_display = metrics.single_display;
-  display.refresh_rate =
-      metrics.refresh_rate > 0.0 ? metrics.refresh_rate : 60.0;
-  display.width = static_cast<size_t>(std::max(0.0, metrics.width));
-  display.height = static_cast<size_t>(std::max(0.0, metrics.height));
-  display.device_pixel_ratio =
-      metrics.device_pixel_ratio > 0.0 ? metrics.device_pixel_ratio : 1.0;
+  display.refresh_rate = SafeRefreshRate(metrics.refresh_rate);
+  display.width = static_cast<size_t>(SafeDimension(metrics.width));
+  display.height = static_cast<size_t>(SafeDimension(metrics.height));
+  display.device_pixel_ratio = SafePixelRatio(metrics.device_pixel_ratio);
   return display;
 }
 
@@ -199,14 +247,14 @@ AndroidWindowMetricsMapper::ParseDisplayFeatures(
     const std::vector<int32_t>& states) {
   TRACE_EVENT0("flutter", "AndroidWindowMetricsMapper::ParseDisplayFeatures");
   std::vector<AndroidDisplayFeature> features;
-  size_t count = bounds.size() / 4;
+  size_t count = std::min(bounds.size() / 4, kMaxDisplayFeatures);
   features.reserve(count);
   for (size_t i = 0; i < count; ++i) {
     AndroidDisplayFeature feature;
-    feature.left = bounds[i * 4];
-    feature.top = bounds[i * 4 + 1];
-    feature.right = bounds[i * 4 + 2];
-    feature.bottom = bounds[i * 4 + 3];
+    feature.left = std::isfinite(bounds[i * 4]) ? bounds[i * 4] : 0.0;
+    feature.top = std::isfinite(bounds[i * 4 + 1]) ? bounds[i * 4 + 1] : 0.0;
+    feature.right = std::isfinite(bounds[i * 4 + 2]) ? bounds[i * 4 + 2] : 0.0;
+    feature.bottom = std::isfinite(bounds[i * 4 + 3]) ? bounds[i * 4 + 3] : 0.0;
 
     int32_t type_val = (i < types.size()) ? types[i] : 0;
     switch (type_val) {
@@ -248,15 +296,17 @@ AndroidCutoutInsets AndroidWindowMetricsMapper::ExtractCutoutInsets(
     double screen_height) {
   TRACE_EVENT0("flutter", "AndroidWindowMetricsMapper::ExtractCutoutInsets");
   AndroidCutoutInsets insets;
-  size_t count = display_features_bounds.size() / 4;
+  if (!std::isfinite(screen_width) || !std::isfinite(screen_height) ||
+      screen_width <= 0.0 || screen_height <= 0.0) {
+    return insets;
+  }
+  size_t count = std::min({display_features_bounds.size() / 4,
+                           display_features_type.size(), kMaxDisplayFeatures});
   for (size_t i = 0; i < count; ++i) {
-    if (i < display_features_type.size()) {
-      int32_t type = display_features_type[i];
-      // Only extract cutout insets for display features of type Cutout (type
-      // 3).
-      if (type != static_cast<int32_t>(AndroidDisplayFeatureType::kCutout)) {
-        continue;
-      }
+    int32_t type = display_features_type[i];
+    // Only extract cutout insets for display features of type Cutout (type 3).
+    if (type != static_cast<int32_t>(AndroidDisplayFeatureType::kCutout)) {
+      continue;
     }
 
     // Cutout or display feature bounds
@@ -265,46 +315,60 @@ AndroidCutoutInsets AndroidWindowMetricsMapper::ExtractCutoutInsets(
     double right = display_features_bounds[i * 4 + 2];
     double bottom = display_features_bounds[i * 4 + 3];
 
-    // Top cutout: touches top edge (top <= 1.0)
-    if (top <= 1.0 && bottom > 0.0) {
+    if (!std::isfinite(left) || !std::isfinite(top) || !std::isfinite(right) ||
+        !std::isfinite(bottom)) {
+      continue;
+    }
+    if (left > right || top > bottom) {
+      continue;
+    }
+
+    double cutout_w = right - left;
+    double cutout_h = bottom - top;
+    if (cutout_w <= 0.0 || cutout_h <= 0.0) {
+      continue;
+    }
+
+    bool touches_top = (top <= 1.0);
+    bool touches_bottom = (bottom >= screen_height - 1.0);
+    bool touches_left = (left <= 1.0);
+    bool touches_right = (right >= screen_width - 1.0);
+
+    if (touches_top && touches_left) {
+      if (cutout_h >= cutout_w) {
+        insets.top = std::max(insets.top, bottom);
+      } else {
+        insets.left = std::max(insets.left, right);
+      }
+    } else if (touches_top && touches_right) {
+      if (cutout_h >= cutout_w) {
+        insets.top = std::max(insets.top, bottom);
+      } else {
+        insets.right = std::max(insets.right, screen_width - left);
+      }
+    } else if (touches_bottom && touches_left) {
+      if (cutout_h >= cutout_w) {
+        insets.bottom = std::max(insets.bottom, screen_height - top);
+      } else {
+        insets.left = std::max(insets.left, right);
+      }
+    } else if (touches_bottom && touches_right) {
+      if (cutout_h >= cutout_w) {
+        insets.bottom = std::max(insets.bottom, screen_height - top);
+      } else {
+        insets.right = std::max(insets.right, screen_width - left);
+      }
+    } else if (touches_top) {
       insets.top = std::max(insets.top, bottom);
-    }
-    // Bottom cutout: touches bottom edge (bottom >= screen_height - 1.0)
-    if (screen_height > 0.0 && bottom >= screen_height - 1.0 &&
-        top < screen_height) {
+    } else if (touches_bottom) {
       insets.bottom = std::max(insets.bottom, screen_height - top);
-    }
-    // Left cutout: touches left edge (left <= 1.0)
-    if (left <= 1.0 && right > 0.0) {
+    } else if (touches_left) {
       insets.left = std::max(insets.left, right);
-    }
-    // Right cutout: touches right edge (right >= screen_width - 1.0)
-    if (screen_width > 0.0 && right >= screen_width - 1.0 &&
-        left < screen_width) {
+    } else if (touches_right) {
       insets.right = std::max(insets.right, screen_width - left);
     }
   }
   return insets;
-}
-
-AndroidCutoutInsets AndroidWindowMetricsMapper::ComputeEffectiveInsets(
-    const AndroidViewportMetrics& metrics) {
-  TRACE_EVENT0("flutter", "AndroidWindowMetricsMapper::ComputeEffectiveInsets");
-  AndroidCutoutInsets cutout = ExtractCutoutInsets(
-      metrics.display_features_bounds, metrics.display_features_type,
-      metrics.physical_width, metrics.physical_height);
-
-  AndroidCutoutInsets effective;
-  effective.top = std::max({metrics.physical_padding_top,
-                            metrics.physical_view_inset_top, cutout.top});
-  effective.right = std::max({metrics.physical_padding_right,
-                              metrics.physical_view_inset_right, cutout.right});
-  effective.bottom =
-      std::max({metrics.physical_padding_bottom,
-                metrics.physical_view_inset_bottom, cutout.bottom});
-  effective.left = std::max({metrics.physical_padding_left,
-                             metrics.physical_view_inset_left, cutout.left});
-  return effective;
 }
 
 DefaultWindowMetricsProvider::DefaultWindowMetricsProvider(
@@ -319,20 +383,82 @@ DefaultWindowMetricsProvider::~DefaultWindowMetricsProvider() {
                "DefaultWindowMetricsProvider::~DefaultWindowMetricsProvider");
 }
 
+void DefaultWindowMetricsProvider::SetMetricsCallback(
+    MetricsCallback callback) {
+  std::scoped_lock lock(mutex_);
+  metrics_callback_ = std::move(callback);
+}
+
+void DefaultWindowMetricsProvider::SetDisplayUpdateCallback(
+    DisplayUpdateCallback callback) {
+  std::scoped_lock lock(mutex_);
+  display_update_callback_ = std::move(callback);
+}
+
 bool DefaultWindowMetricsProvider::SendViewportMetrics(
     const AndroidViewportMetrics& metrics) {
   TRACE_EVENT0("flutter", "DefaultWindowMetricsProvider::SendViewportMetrics");
-  std::scoped_lock lock(mutex_);
-  viewport_metrics_map_[metrics.view_id] = metrics;
-  return true;
+  MetricsCallback callback;
+  {
+    std::scoped_lock lock(mutex_);
+    viewport_metrics_map_[metrics.view_id] = metrics;
+    callback = metrics_callback_;
+  }
+  bool engine_result = true;
+  if (callback) {
+    engine_result = callback(metrics);
+  }
+  if (!jvm_invoker_) {
+    return engine_result;
+  }
+  PackedViewportMetrics payload_data = {
+      metrics.view_id,
+      metrics.physical_width,
+      metrics.physical_height,
+      metrics.device_pixel_ratio,
+  };
+  std::vector<uint8_t> payload(sizeof(PackedViewportMetrics));
+  std::memcpy(payload.data(), &payload_data, sizeof(PackedViewportMetrics));
+  bool jvm_result =
+      jvm_invoker_->InvokeVoidMethod("onViewportMetrics", "(JDDD)V", payload);
+  return engine_result && jvm_result;
 }
 
 bool DefaultWindowMetricsProvider::UpdateDisplayMetrics(
     const AndroidDisplayMetrics& metrics) {
   TRACE_EVENT0("flutter", "DefaultWindowMetricsProvider::UpdateDisplayMetrics");
-  std::scoped_lock lock(mutex_);
-  display_metrics_map_[metrics.display_id] = metrics;
-  return true;
+  AndroidDisplayMetrics updated_metrics = metrics;
+  DisplayUpdateCallback callback;
+  {
+    std::scoped_lock lock(mutex_);
+    display_metrics_map_[metrics.display_id] = metrics;
+    if (display_metrics_map_.size() > 1) {
+      updated_metrics.single_display = false;
+      for (auto& [id, m] : display_metrics_map_) {
+        m.single_display = false;
+      }
+    }
+    callback = display_update_callback_;
+  }
+  bool engine_result = true;
+  if (callback) {
+    engine_result = callback(updated_metrics);
+  }
+  if (!jvm_invoker_) {
+    return engine_result;
+  }
+  PackedDisplayMetrics payload_data = {
+      static_cast<int64_t>(updated_metrics.display_id),
+      updated_metrics.refresh_rate,
+      updated_metrics.width,
+      updated_metrics.height,
+      updated_metrics.device_pixel_ratio,
+  };
+  std::vector<uint8_t> payload(sizeof(PackedDisplayMetrics));
+  std::memcpy(payload.data(), &payload_data, sizeof(PackedDisplayMetrics));
+  bool jvm_result =
+      jvm_invoker_->InvokeVoidMethod("onDisplayMetrics", "(JDDDD)V", payload);
+  return engine_result && jvm_result;
 }
 
 std::optional<AndroidViewportMetrics>

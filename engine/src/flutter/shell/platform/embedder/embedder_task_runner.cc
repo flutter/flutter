@@ -6,7 +6,6 @@
 
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/message_loop_task_queues.h"
-#include "flutter/fml/trace_event.h"
 
 namespace flutter {
 
@@ -21,7 +20,6 @@ EmbedderTaskRunner::EmbedderTaskRunner(DispatchTable table,
       placeholder_id_(fml::TaskQueueId(fml::TaskQueueId::kInvalid)),
       unique_id_(next_unique_id_++),
       priority_(priority) {
-  TRACE_EVENT0("flutter", "EmbedderTaskRunner::EmbedderTaskRunner");
   FML_DCHECK(dispatch_table_.post_task_callback);
   FML_DCHECK(dispatch_table_.runs_task_on_current_thread_callback);
   FML_DCHECK(dispatch_table_.destruction_callback);
@@ -36,10 +34,18 @@ size_t EmbedderTaskRunner::GetEmbedderIdentifier() const {
 }
 
 void EmbedderTaskRunner::SetThreadPriority(FlutterThreadPriority priority) {
-  TRACE_EVENT0("flutter", "EmbedderTaskRunner::SetThreadPriority");
-  priority_ = priority;
-  if (dispatch_table_.thread_priority_setter) {
+  priority_.store(priority);
+  if (!dispatch_table_.thread_priority_setter) {
+    return;
+  }
+  if (RunsTasksOnCurrentThread()) {
     dispatch_table_.thread_priority_setter(priority);
+  } else {
+    PostTask([this, priority]() {
+      if (dispatch_table_.thread_priority_setter) {
+        dispatch_table_.thread_priority_setter(priority);
+      }
+    });
   }
 }
 
@@ -49,7 +55,6 @@ void EmbedderTaskRunner::PostTask(const fml::closure& task) {
 
 void EmbedderTaskRunner::PostTaskForTime(const fml::closure& task,
                                          fml::TimePoint target_time) {
-  TRACE_EVENT0("flutter", "EmbedderTaskRunner::PostTaskForTime");
   if (!task) {
     return;
   }
@@ -72,12 +77,10 @@ void EmbedderTaskRunner::PostDelayedTask(const fml::closure& task,
 }
 
 bool EmbedderTaskRunner::RunsTasksOnCurrentThread() {
-  TRACE_EVENT0("flutter", "EmbedderTaskRunner::RunsTasksOnCurrentThread");
   return dispatch_table_.runs_task_on_current_thread_callback();
 }
 
 bool EmbedderTaskRunner::PostTask(uint64_t baton) {
-  TRACE_EVENT0("flutter", "EmbedderTaskRunner::PostTask");
   fml::closure task;
 
   {
@@ -90,7 +93,7 @@ bool EmbedderTaskRunner::PostTask(uint64_t baton) {
     task = found->second;
     pending_tasks_.erase(found);
 
-    // Let go of the tasks mutex before executing the task.
+    // Let go of the tasks mutex befor executing the task.
   }
 
   FML_DCHECK(task);

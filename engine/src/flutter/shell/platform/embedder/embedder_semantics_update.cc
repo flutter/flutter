@@ -356,14 +356,15 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       flags_.back().get(),
       node.headingLevel,
       node.identifier.c_str(),
-      static_cast<FlutterSemanticsRole>(node.role),
-      node.linkUrl.empty() ? nullptr : node.linkUrl.c_str(),
-      node.locale.empty() ? nullptr : node.locale.c_str(),
-      node.minValue.empty() ? nullptr : node.minValue.c_str(),
-      node.maxValue.empty() ? nullptr : node.maxValue.c_str(),
       node.maxValueLength,
       node.currentValueLength,
       node.traversalParent,
+      node.minValue.c_str(),
+      node.maxValue.c_str(),
+      node.linkUrl.c_str(),
+      static_cast<FlutterSemanticsRole>(node.role),
+      static_cast<FlutterSemanticsValidationResult>(node.validationResult),
+      node.locale.c_str(),
       flutter_hit_test_transform,
   });
 }
@@ -420,7 +421,7 @@ EmbedderSemanticsUpdate2::CreateStringAttributes(
         // All spell out attributes are identical and share a lazily created
         // instance.
         if (!spell_out_attribute_) {
-          auto spell_out_attribute_ =
+          spell_out_attribute_ =
               std::make_unique<FlutterSpellOutStringAttribute>();
           spell_out_attribute_->struct_size =
               sizeof(FlutterSpellOutStringAttribute);

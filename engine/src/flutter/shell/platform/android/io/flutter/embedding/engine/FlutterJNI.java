@@ -1349,6 +1349,15 @@ public class FlutterJNI {
 
   @SuppressWarnings("unused")
   @UiThread
+  public void synchronizeToNativeViewHierarchy(boolean yes) {
+    ensureRunningOnMainThread();
+    if (platformViewsController != null) {
+      platformViewsController.synchronizeToNativeViewHierarchy(yes);
+    }
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
   public void maybeResizeSurfaceView(int width, int height) {
     for (FlutterUiResizeListener listener : flutterUiResizeListeners) {
       listener.resizeEngineView(width, height);
@@ -1358,9 +1367,9 @@ public class FlutterJNI {
 
   // ----- New Platform Views ----------
 
+  // Called from the raster thread for AHB swapchain presentation.
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
-  @UiThread
   public SurfaceControl.Transaction createTransaction() {
     if (platformViewsController2 == null) {
       throw new RuntimeException("");
@@ -1376,16 +1385,6 @@ public class FlutterJNI {
       throw new RuntimeException("");
     }
     platformViewsController2.swapTransactions();
-  }
-
-  @SuppressWarnings("unused")
-  @SuppressLint("NewApi")
-  @UiThread
-  public void applyTransactions() {
-    if (platformViewsController2 == null) {
-      throw new RuntimeException("");
-    }
-    platformViewsController2.applyTransactions();
   }
 
   @SuppressWarnings("unused")
@@ -1459,6 +1458,13 @@ public class FlutterJNI {
     if (platformViewsController2 == null) {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to position a platform view");
+    }
+    if (platformViewsController2.getPlatformViewById(viewId) == null
+        && platformViewsController != null
+        && platformViewsController.getPlatformViewById(viewId) != null) {
+      platformViewsController.onDisplayPlatformView(
+          viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
+      return;
     }
     platformViewsController2.onDisplayPlatformView(
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
@@ -1664,6 +1670,7 @@ public class FlutterJNI {
 
   // @SuppressWarnings("unused")
   @UiThread
+  @SuppressLint("NewApi")
   public void onDisplayPlatformView(
       int viewId,
       int x,
@@ -1677,6 +1684,14 @@ public class FlutterJNI {
     if (platformViewsController == null) {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to position a platform view");
+    }
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34
+        && platformViewsController.getPlatformViewById(viewId) == null
+        && platformViewsController2 != null
+        && platformViewsController2.getPlatformViewById(viewId) != null) {
+      platformViewsController2.onDisplayPlatformView(
+          viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
+      return;
     }
     platformViewsController.onDisplayPlatformView(
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);

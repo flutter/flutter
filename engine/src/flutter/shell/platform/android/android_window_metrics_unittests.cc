@@ -38,6 +38,45 @@ class MockJvmInvokerForMetrics : public JvmInvoker {
   MOCK_METHOD(void, ClearPendingException, (), (override));
 
   MOCK_METHOD(bool,
+              HandlePlatformMessage,
+              (const std::string& channel,
+               const uint8_t* message,
+               size_t message_size,
+               int32_t response_id,
+               int64_t message_data),
+              (override));
+
+  MOCK_METHOD(bool,
+              HandlePlatformMessageResponse,
+              (int32_t response_id, const uint8_t* data, size_t data_size),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateSemantics,
+              (const std::vector<uint8_t>& buffer,
+               const std::vector<std::string>& strings,
+               const std::vector<std::vector<uint8_t>>& string_attribute_args),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateCustomAccessibilityActions,
+              (const std::vector<uint8_t>& actions_buffer,
+               const std::vector<std::string>& action_strings),
+              (override));
+
+  MOCK_METHOD(bool, SetSemanticsTreeEnabled, (bool enabled), (override));
+  MOCK_METHOD(bool,
+              SetApplicationLocale,
+              (const std::string& locale),
+              (override));
+  MOCK_METHOD(bool, OnFirstFrame, (), (override));
+  MOCK_METHOD(bool, OnPreEngineRestart, (), (override));
+  MOCK_METHOD(bool,
+              RequestDartDeferredLibrary,
+              (int loading_unit_id),
+              (override));
+
+  MOCK_METHOD(bool,
               InvokeVoidMethod,
               (const std::string& method_name,
                const std::string& signature,
@@ -80,6 +119,23 @@ class MockJvmInvokerForMetrics : public JvmInvoker {
               (override));
 
   MOCK_METHOD(bool, PostJvmTask, (std::function<void()> task), (override));
+
+  MOCK_METHOD(bool,
+              DecodeImage,
+              (const uint8_t* data, size_t size, int64_t generator_handle),
+              (override));
+
+  MOCK_METHOD(bool,
+              PushPlatformViewMutators,
+              (int64_t view_id,
+               int32_t x,
+               int32_t y,
+               int32_t width,
+               int32_t height,
+               int32_t view_width,
+               int32_t view_height,
+               const std::vector<uint8_t>& payload),
+              (override));
 };
 
 class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
@@ -87,25 +143,30 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
   MOCK_METHOD(bool,
               HandlePlatformMessage,
               (const std::string& channel,
-               const std::vector<uint8_t>& message,
-               int32_t response_id),
+               const uint8_t* message,
+               size_t message_size,
+               int32_t response_id,
+               int64_t message_data),
               (override));
+
   MOCK_METHOD(bool,
               HandlePlatformMessageResponse,
-              (int32_t response_id,
-               const std::vector<uint8_t>& data,
-               bool has_data),
+              (int32_t response_id, const uint8_t* data, size_t data_size),
               (override));
+
   MOCK_METHOD(bool,
               SetApplicationLocale,
               (const std::string& locale),
               (override));
+
   MOCK_METHOD(bool, OnFirstFrame, (), (override));
   MOCK_METHOD(bool, OnPreEngineRestart, (), (override));
+
   MOCK_METHOD(bool,
               RequestDartDeferredLibrary,
-              (int64_t loading_unit_id),
+              (int loading_unit_id),
               (override));
+
   MOCK_METHOD(bool, InitVM, (const AndroidVMArgs& args), (override));
   MOCK_METHOD(bool, PrefetchDefaultFontManager, (), (override));
   MOCK_METHOD(bool, SetVmServiceUri, (const std::string& uri), (override));
@@ -134,22 +195,11 @@ TEST(AndroidWindowMetricsMapperTest, BasicViewportMetricsTranslation) {
   metrics.physical_width = 1080.0;
   metrics.physical_height = 2400.0;
   metrics.physical_padding_top = 72.0;
-  metrics.physical_padding_right = 16.0;
   metrics.physical_padding_bottom = 48.0;
-  metrics.physical_padding_left = 16.0;
   metrics.physical_view_inset_top = 0.0;
   metrics.physical_view_inset_bottom = 200.0;
   metrics.physical_view_inset_left = 0.0;
   metrics.physical_view_inset_right = 0.0;
-  metrics.system_gesture_inset_top = 10.0;
-  metrics.system_gesture_inset_right = 20.0;
-  metrics.system_gesture_inset_bottom = 30.0;
-  metrics.system_gesture_inset_left = 40.0;
-  metrics.physical_touch_slop = 8.0;
-  metrics.physical_display_corner_radius_top_left = 12.0;
-  metrics.physical_display_corner_radius_top_right = 14.0;
-  metrics.physical_display_corner_radius_bottom_right = 16.0;
-  metrics.physical_display_corner_radius_bottom_left = 18.0;
 
   FlutterWindowMetricsEvent event =
       AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(metrics);
@@ -164,53 +214,11 @@ TEST(AndroidWindowMetricsMapperTest, BasicViewportMetricsTranslation) {
   EXPECT_DOUBLE_EQ(event.physical_view_inset_bottom, 200.0);
   EXPECT_DOUBLE_EQ(event.physical_view_inset_left, 0.0);
   EXPECT_DOUBLE_EQ(event.physical_view_inset_right, 0.0);
-  EXPECT_DOUBLE_EQ(event.physical_padding_top, 72.0);
-  EXPECT_DOUBLE_EQ(event.physical_padding_right, 16.0);
-  EXPECT_DOUBLE_EQ(event.physical_padding_bottom, 48.0);
-  EXPECT_DOUBLE_EQ(event.physical_padding_left, 16.0);
-  EXPECT_DOUBLE_EQ(event.physical_system_gesture_inset_top, 10.0);
-  EXPECT_DOUBLE_EQ(event.physical_system_gesture_inset_right, 20.0);
-  EXPECT_DOUBLE_EQ(event.physical_system_gesture_inset_bottom, 30.0);
-  EXPECT_DOUBLE_EQ(event.physical_system_gesture_inset_left, 40.0);
-  EXPECT_DOUBLE_EQ(event.physical_touch_slop, 8.0);
-  EXPECT_DOUBLE_EQ(event.physical_display_corner_radius_top_left, 12.0);
-  EXPECT_DOUBLE_EQ(event.physical_display_corner_radius_top_right, 14.0);
-  EXPECT_DOUBLE_EQ(event.physical_display_corner_radius_bottom_right, 16.0);
-  EXPECT_DOUBLE_EQ(event.physical_display_corner_radius_bottom_left, 18.0);
-  EXPECT_EQ(event.display_features_count, 0u);
-  EXPECT_EQ(event.display_features_bounds, nullptr);
-  EXPECT_EQ(event.display_features_type, nullptr);
-  EXPECT_EQ(event.display_features_state, nullptr);
   EXPECT_FALSE(event.has_constraints);
   EXPECT_EQ(event.min_width_constraint, 1080u);
   EXPECT_EQ(event.max_width_constraint, 1080u);
   EXPECT_EQ(event.min_height_constraint, 2400u);
   EXPECT_EQ(event.max_height_constraint, 2400u);
-}
-
-TEST(AndroidWindowMetricsMapperTest,
-     DisplayFeaturesMappingToFlutterWindowMetricsEvent) {
-  AndroidViewportMetrics metrics;
-  metrics.view_id = 0;
-  metrics.physical_width = 1080.0;
-  metrics.physical_height = 2400.0;
-  metrics.display_features_bounds = {0.0, 1000.0, 1080.0, 1050.0};
-  metrics.display_features_type = {1};
-  metrics.display_features_state = {2};
-
-  FlutterWindowMetricsEvent event =
-      AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(metrics);
-
-  EXPECT_EQ(event.display_features_count, 1u);
-  ASSERT_NE(event.display_features_bounds, nullptr);
-  ASSERT_NE(event.display_features_type, nullptr);
-  ASSERT_NE(event.display_features_state, nullptr);
-  EXPECT_DOUBLE_EQ(event.display_features_bounds[0], 0.0);
-  EXPECT_DOUBLE_EQ(event.display_features_bounds[1], 1000.0);
-  EXPECT_DOUBLE_EQ(event.display_features_bounds[2], 1080.0);
-  EXPECT_DOUBLE_EQ(event.display_features_bounds[3], 1050.0);
-  EXPECT_EQ(event.display_features_type[0], 1);
-  EXPECT_EQ(event.display_features_state[0], 2);
 }
 
 TEST(AndroidWindowMetricsMapperTest, ConstrainedViewportMetricsTranslation) {
@@ -310,23 +318,69 @@ TEST(AndroidWindowMetricsMapperTest,
   EXPECT_DOUBLE_EQ(cutout.right, 0.0);
 }
 
-TEST(AndroidWindowMetricsMapperTest, EffectiveInsetsComputation) {
+TEST(AndroidWindowMetricsMapperTest, CutoutInsetsCornerAndMalformedBounds) {
+  // Corner top-left cutout (height 80 > width 40 -> insets.top selected)
+  std::vector<double> corner_tl = {0.0, 0.0, 40.0, 80.0};
+  std::vector<int32_t> types = {3};
+  AndroidCutoutInsets cutout = AndroidWindowMetricsMapper::ExtractCutoutInsets(
+      corner_tl, types, 1080.0, 2400.0);
+  EXPECT_DOUBLE_EQ(cutout.top, 80.0);
+  EXPECT_DOUBLE_EQ(cutout.left, 0.0);
+
+  // Inverted bounds (left > right or top > bottom) -> rejected
+  std::vector<double> malformed = {100.0, 0.0, 50.0, 80.0};
+  AndroidCutoutInsets malformed_cutout =
+      AndroidWindowMetricsMapper::ExtractCutoutInsets(malformed, types, 1080.0,
+                                                      2400.0);
+  EXPECT_DOUBLE_EQ(malformed_cutout.top, 0.0);
+  EXPECT_DOUBLE_EQ(malformed_cutout.left, 0.0);
+
+  // Non-cutout display feature (fold = type 1) -> ignored for cutout insets
+  std::vector<int32_t> fold_type = {1};
+  AndroidCutoutInsets fold_cutout =
+      AndroidWindowMetricsMapper::ExtractCutoutInsets(corner_tl, fold_type,
+                                                      1080.0, 2400.0);
+  EXPECT_DOUBLE_EQ(fold_cutout.top, 0.0);
+  EXPECT_DOUBLE_EQ(fold_cutout.left, 0.0);
+}
+
+TEST(AndroidWindowMetricsMapperTest, SafeDimensionLargeValueClamping) {
   AndroidViewportMetrics metrics;
-  metrics.physical_width = 1080.0;
-  metrics.physical_height = 2400.0;
-  metrics.physical_padding_top = 60.0;
-  metrics.physical_view_inset_bottom = 300.0;
-  metrics.display_features_bounds = {480.0, 0.0, 600.0, 90.0};
-  metrics.display_features_type = {3};
-  metrics.display_features_state = {0};
+  metrics.physical_width = 1e300;
+  metrics.physical_height = 1e20;
+  metrics.physical_min_width = 1e300;
+  metrics.physical_max_width = 1e300;
+  metrics.physical_min_height = 1e300;
+  metrics.physical_max_height = 1e300;
 
-  AndroidCutoutInsets effective =
-      AndroidWindowMetricsMapper::ComputeEffectiveInsets(metrics);
+  FlutterWindowMetricsEvent event =
+      AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(metrics);
+  EXPECT_EQ(event.width, 65536u);
+  EXPECT_EQ(event.height, 65536u);
+  EXPECT_EQ(event.min_width_constraint, 65536u);
+  EXPECT_EQ(event.max_width_constraint, 65536u);
+  EXPECT_EQ(event.min_height_constraint, 65536u);
+  EXPECT_EQ(event.max_height_constraint, 65536u);
+}
 
-  EXPECT_DOUBLE_EQ(effective.top, 90.0);
-  EXPECT_DOUBLE_EQ(effective.bottom, 300.0);
-  EXPECT_DOUBLE_EQ(effective.left, 0.0);
-  EXPECT_DOUBLE_EQ(effective.right, 0.0);
+TEST(AndroidWindowMetricsMapperTest, UnconstrainedMinConstraintPreserved) {
+  AndroidViewportMetrics metrics;
+  metrics.physical_width = 800.0;
+  metrics.physical_height = 600.0;
+  metrics.physical_min_width = 0.0;
+  metrics.physical_max_width = 1200.0;
+  metrics.physical_min_height = 0.0;
+  metrics.physical_max_height = 900.0;
+
+  FlutterWindowMetricsEvent event =
+      AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(metrics);
+  EXPECT_TRUE(event.has_constraints);
+  EXPECT_EQ(event.width, 800u);
+  EXPECT_EQ(event.height, 600u);
+  EXPECT_EQ(event.min_width_constraint, 0u);
+  EXPECT_EQ(event.max_width_constraint, 1200u);
+  EXPECT_EQ(event.min_height_constraint, 0u);
+  EXPECT_EQ(event.max_height_constraint, 900u);
 }
 
 // ---------------------------------------------------------------------------
@@ -389,8 +443,9 @@ TEST(InMemoryWindowMetricsProviderTest, ResultOverrides) {
 // 3. DefaultWindowMetricsProvider Tests
 // ---------------------------------------------------------------------------
 
-TEST(DefaultWindowMetricsProviderTest, RecordsAndCachesMetrics) {
-  DefaultWindowMetricsProvider provider;
+TEST(DefaultWindowMetricsProviderTest, InvokesJvmMethods) {
+  auto mock_invoker = std::make_shared<MockJvmInvokerForMetrics>();
+  DefaultWindowMetricsProvider provider(mock_invoker);
 
   AndroidViewportMetrics viewport;
   viewport.view_id = 0;
@@ -405,8 +460,53 @@ TEST(DefaultWindowMetricsProviderTest, RecordsAndCachesMetrics) {
   display.height = 1920.0;
   display.device_pixel_ratio = 2.5;
 
+  PackedViewportMetrics expected_vp_payload = {
+      viewport.view_id,
+      viewport.physical_width,
+      viewport.physical_height,
+      viewport.device_pixel_ratio,
+  };
+  std::vector<uint8_t> expected_vp_bytes(sizeof(PackedViewportMetrics));
+  std::memcpy(expected_vp_bytes.data(), &expected_vp_payload,
+              sizeof(PackedViewportMetrics));
+
+  PackedDisplayMetrics expected_disp_payload = {
+      static_cast<int64_t>(display.display_id),
+      display.refresh_rate,
+      display.width,
+      display.height,
+      display.device_pixel_ratio,
+  };
+  std::vector<uint8_t> expected_disp_bytes(sizeof(PackedDisplayMetrics));
+  std::memcpy(expected_disp_bytes.data(), &expected_disp_payload,
+              sizeof(PackedDisplayMetrics));
+
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onViewportMetrics", "(JDDD)V",
+                                              expected_vp_bytes))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onDisplayMetrics", "(JDDDD)V",
+                                              expected_disp_bytes))
+      .WillOnce(Return(true));
+
+  bool vp_callback_called = false;
+  provider.SetMetricsCallback([&](const AndroidViewportMetrics& m) {
+    vp_callback_called = true;
+    EXPECT_EQ(m.view_id, 0);
+    return true;
+  });
+
+  bool disp_callback_called = false;
+  provider.SetDisplayUpdateCallback([&](const AndroidDisplayMetrics& d) {
+    disp_callback_called = true;
+    EXPECT_EQ(d.display_id, 0u);
+    return true;
+  });
+
   EXPECT_TRUE(provider.SendViewportMetrics(viewport));
   EXPECT_TRUE(provider.UpdateDisplayMetrics(display));
+
+  EXPECT_TRUE(vp_callback_called);
+  EXPECT_TRUE(disp_callback_called);
 
   auto cached_vp = provider.GetViewportMetrics(0);
   ASSERT_TRUE(cached_vp.has_value());
@@ -421,6 +521,57 @@ TEST(DefaultWindowMetricsProviderTest, RecordsAndCachesMetrics) {
   }
 }
 
+TEST(JniDelegateWindowMetricsTest, ConcurrentProviderReplacement) {
+  auto mock_invoker = std::make_shared<MockJvmInvokerForMetrics>();
+  auto delegate = std::make_shared<JniDelegate>(mock_invoker, nullptr, nullptr,
+                                                nullptr, nullptr, nullptr);
+
+  std::atomic<bool> running{true};
+  std::vector<std::thread> threads;
+
+  // Thread 1 & 2: Sending metrics
+  for (int i = 0; i < 2; ++i) {
+    threads.emplace_back([&]() {
+      AndroidViewportMetrics vp;
+      vp.view_id = 42;
+      vp.physical_width = 1080.0;
+      vp.physical_height = 1920.0;
+      vp.device_pixel_ratio = 2.0;
+
+      AndroidDisplayMetrics disp;
+      disp.display_id = 0;
+      disp.width = 1080.0;
+      disp.height = 1920.0;
+
+      while (running.load()) {
+        delegate->SetViewportMetrics(vp);
+        delegate->UpdateDisplayMetrics(disp);
+        delegate->GetViewportMetrics(42);
+        delegate->GetDisplayMetrics(0);
+      }
+    });
+  }
+
+  // Thread 3: Swapping providers
+  threads.emplace_back([&]() {
+    for (int i = 0; i < 200; ++i) {
+      if (i % 2 == 0) {
+        delegate->SetWindowMetricsProvider(
+            std::make_shared<InMemoryWindowMetricsProvider>());
+      } else {
+        delegate->SetWindowMetricsProvider(
+            std::make_shared<DefaultWindowMetricsProvider>(mock_invoker));
+      }
+      std::this_thread::yield();
+    }
+    running.store(false);
+  });
+
+  for (auto& t : threads) {
+    t.join();
+  }
+}
+
 // ---------------------------------------------------------------------------
 // 4. JniDelegate Window Metrics Tests
 // ---------------------------------------------------------------------------
@@ -428,8 +579,8 @@ TEST(DefaultWindowMetricsProviderTest, RecordsAndCachesMetrics) {
 TEST(JniDelegateWindowMetricsTest, RoutesThroughWindowMetricsProvider) {
   auto mock_invoker = std::make_shared<MockJvmInvokerForMetrics>();
   auto in_memory_provider = std::make_shared<InMemoryWindowMetricsProvider>();
-  auto delegate = std::make_shared<JniDelegate>(mock_invoker, nullptr, nullptr,
-                                                nullptr, in_memory_provider);
+  auto delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, in_memory_provider);
 
   AndroidViewportMetrics vp;
   vp.view_id = 10;
@@ -461,14 +612,14 @@ TEST(JniDelegateWindowMetricsTest, RoutesThroughWindowMetricsProvider) {
 }
 
 // ---------------------------------------------------------------------------
-// 5. JniRouter Routing Flip Tests
+// 5. JniRouter Routing Tests
 // ---------------------------------------------------------------------------
 
-TEST(JniRouterWindowMetricsTest, DirectWindowMetricsRouting) {
+TEST(JniRouterWindowMetricsTest, DirectRoutingWindowMetricsBypassesLegacy) {
   auto mock_invoker = std::make_shared<MockJvmInvokerForMetrics>();
   auto in_memory_provider = std::make_shared<InMemoryWindowMetricsProvider>();
   auto embedder_delegate = std::make_shared<JniDelegate>(
-      mock_invoker, nullptr, nullptr, nullptr, in_memory_provider);
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, in_memory_provider);
   auto legacy_delegate =
       std::make_shared<StrictMock<MockLegacyJniDelegateForMetrics>>();
 
@@ -487,10 +638,10 @@ TEST(JniRouterWindowMetricsTest, DirectWindowMetricsRouting) {
   disp.height = 2400.0;
   disp.device_pixel_ratio = 2.75;
 
-  // Across both flag states (false and true), window & display metrics route
-  // directly to embedder_delegate
-  for (bool embedder_flag : {false, true}) {
-    JniRouter::SetEmbedderEnabled(embedder_flag);
+  // Across both flag states, window metrics route directly to embedder_delegate
+  // and never touch legacy_delegate.
+  for (bool flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(flag);
 
     EXPECT_TRUE(router.RouteSetViewportMetrics(vp));
     EXPECT_TRUE(router.RouteUpdateDisplayMetrics(disp));
@@ -501,6 +652,14 @@ TEST(JniRouterWindowMetricsTest, DirectWindowMetricsRouting) {
 
   EXPECT_EQ(in_memory_provider->GetSendCount(), 4u);
   EXPECT_EQ(in_memory_provider->GetUpdateCount(), 4u);
+
+  // Verify graceful handling when embedder_delegate is null
+  JniRouter null_router(nullptr, legacy_delegate);
+  EXPECT_FALSE(null_router.RouteSetViewportMetrics(vp));
+  EXPECT_FALSE(null_router.RouteUpdateDisplayMetrics(disp));
+  EXPECT_FALSE(
+      null_router.RouteUpdateDisplayMetrics(1, 120.0, 1080.0, 2400.0, 2.75));
+  EXPECT_FALSE(null_router.RouteViewportMetrics(1, 1080.0, 2400.0, 2.75));
 
   JniRouter::SetEmbedderEnabled(true);
 }
@@ -556,7 +715,7 @@ TEST(FlutterEmbedderNativeWindowMetricsTest, FullSubsystemIntegration) {
             kInvalidArguments);
   EXPECT_EQ(native.NotifyDisplayUpdate(nullptr, disp), kInvalidArguments);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 // ---------------------------------------------------------------------------
@@ -604,6 +763,59 @@ TEST(FlutterEmbedderNativeWindowMetricsTest, MultithreadedConcurrentMetrics) {
             kThreadCount * kIterationsPerThread);
   EXPECT_EQ(in_memory_provider->GetUpdateCount(),
             kThreadCount * kIterationsPerThread);
+}
+
+TEST(AndroidWindowMetricsMapperTest, NaNAndInfiniteValuesHandledSafely) {
+  AndroidViewportMetrics vp;
+  vp.physical_width = std::numeric_limits<double>::quiet_NaN();
+  vp.physical_height = std::numeric_limits<double>::infinity();
+  vp.device_pixel_ratio = -2.0;
+  vp.physical_view_inset_top = std::numeric_limits<double>::quiet_NaN();
+  vp.physical_min_width = std::numeric_limits<double>::quiet_NaN();
+
+  FlutterWindowMetricsEvent event =
+      AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(vp);
+  EXPECT_EQ(event.width, 0u);
+  EXPECT_EQ(event.height, 0u);
+  EXPECT_DOUBLE_EQ(event.pixel_ratio, 1.0);
+  EXPECT_DOUBLE_EQ(event.physical_view_inset_top, 0.0);
+  EXPECT_FALSE(event.has_constraints);
+
+  AndroidDisplayMetrics disp;
+  disp.refresh_rate = std::numeric_limits<double>::quiet_NaN();
+  disp.width = std::numeric_limits<double>::quiet_NaN();
+  disp.height = -100.0;
+  disp.device_pixel_ratio = std::numeric_limits<double>::infinity();
+
+  FlutterEngineDisplay engine_disp =
+      AndroidWindowMetricsMapper::ToFlutterEngineDisplay(disp);
+  EXPECT_DOUBLE_EQ(engine_disp.refresh_rate, 60.0);
+  EXPECT_EQ(engine_disp.width, 0u);
+  EXPECT_EQ(engine_disp.height, 0u);
+  EXPECT_DOUBLE_EQ(engine_disp.device_pixel_ratio, 1.0);
+}
+
+TEST(AndroidWindowMetricsMapperTest, OperatorEqualsWithNaN) {
+  AndroidViewportMetrics vp1;
+  vp1.physical_width = std::numeric_limits<double>::quiet_NaN();
+  AndroidViewportMetrics vp2;
+  vp2.physical_width = std::numeric_limits<double>::quiet_NaN();
+
+  EXPECT_TRUE(vp1 == vp2);
+  EXPECT_TRUE(vp1 == vp1);
+
+  vp2.physical_width = 100.0;
+  EXPECT_FALSE(vp1 == vp2);
+}
+
+TEST(AndroidWindowMetricsMapperTest, ParseDisplayFeaturesCeiling) {
+  std::vector<double> bounds(2000, 10.0);  // 500 features > 256 ceiling
+  std::vector<int32_t> types(500, 1);
+  std::vector<int32_t> states(500, 1);
+
+  auto features =
+      AndroidWindowMetricsMapper::ParseDisplayFeatures(bounds, types, states);
+  EXPECT_EQ(features.size(), 256u);
 }
 
 }  // namespace testing

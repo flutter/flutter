@@ -13,6 +13,7 @@ import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/template.dart';
@@ -161,10 +162,11 @@ Future<Plugin?> _pluginFromPackage(
 /// If [throwOnError] is `true`, an empty package configuration is an error.
 Future<List<Plugin>> findPlugins(
   FlutterProject project, {
-  bool throwOnError = true,
-  PubspecCache? pubspecCache,
-  PackageGraph? packageGraph,
+  required Logger logger,
   PackageConfig? packageConfig,
+  PackageGraph? packageGraph,
+  PubspecCache? pubspecCache,
+  bool throwOnError = true,
 }) async {
   final plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
@@ -183,7 +185,7 @@ Future<List<Plugin>> findPlugins(
     final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
     resolvedPackageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
-      logger: globals.logger,
+      logger: logger,
       throwOnError: throwOnError,
     );
   }
@@ -199,7 +201,7 @@ Future<List<Plugin>> findPlugins(
       if (throwOnError) {
         throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`');
       } else {
-        globals.logger.printTrace('Could not locate package:$packageName');
+        logger.printTrace('Could not locate package:$packageName');
         continue;
       }
     }
@@ -1303,6 +1305,7 @@ Future<void> refreshPluginsList(
 }) async {
   final List<Plugin> plugins = await findPlugins(
     project,
+    logger: globals.logger,
     pubspecCache: pubspecCache,
     packageGraph: packageGraph,
     packageConfig: packageConfig,
@@ -1361,7 +1364,7 @@ Future<void> injectBuildTimePluginFilesForWebPlatform(
   FlutterProject project, {
   required Directory destination,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project, logger: globals.logger);
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
     plugins,
     pluginResolutionType: _PluginResolutionType.nativeOrDart,
@@ -1400,6 +1403,7 @@ Future<void> injectPlugins(
 }) async {
   final List<Plugin> plugins = await findPlugins(
     project,
+    logger: globals.logger,
     pubspecCache: pubspecCache,
     packageGraph: packageGraph,
     packageConfig: packageConfig,
@@ -1938,7 +1942,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   PackageConfig packageConfig,
   File mainFile,
 ) async {
-  final List<Plugin> plugins = await findPlugins(rootProject);
+  final List<Plugin> plugins = await findPlugins(rootProject, logger: globals.logger);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
     selectDartPluginsOnly: true,

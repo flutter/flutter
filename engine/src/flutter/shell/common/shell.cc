@@ -300,13 +300,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
        shell = shell.get()]() {
         TRACE_EVENT0("flutter", "ShellSetupGPUSubsystem");
         std::unique_ptr<Rasterizer> rasterizer(on_create_rasterizer(*shell));
-        if (rasterizer) {
-          rasterizer->SetImpellerContext(impeller_context_future);
-          snapshot_delegate_promise.set_value(
-              rasterizer->GetSnapshotDelegate());
-        } else {
-          snapshot_delegate_promise.set_value({});
-        }
+        rasterizer->SetImpellerContext(impeller_context_future);
+        snapshot_delegate_promise.set_value(rasterizer->GetSnapshotDelegate());
         rasterizer_promise.set_value(std::move(rasterizer));
       });
 
@@ -440,35 +435,11 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                              runtime_stage_future));
       }));
 
-  auto engine = engine_future.get();
-  auto rasterizer = rasterizer_future.get();
-  auto io_manager = io_manager_future.get();
-
   if (!shell->Setup(std::move(platform_view),  //
-                    std::move(engine),         //
-                    std::move(rasterizer),     //
-                    io_manager)                //
+                    engine_future.get(),       //
+                    rasterizer_future.get(),   //
+                    io_manager_future.get())   //
   ) {
-    if (engine) {
-      fml::TaskRunner::RunNowOrPostTask(
-          task_runners.GetUITaskRunner(),
-          fml::MakeCopyable(
-              [engine = std::move(engine)]() mutable { engine.reset(); }));
-    }
-    if (rasterizer) {
-      fml::TaskRunner::RunNowOrPostTask(
-          task_runners.GetRasterTaskRunner(),
-          fml::MakeCopyable([rasterizer = std::move(rasterizer)]() mutable {
-            rasterizer.reset();
-          }));
-    }
-    if (io_manager) {
-      fml::TaskRunner::RunNowOrPostTask(
-          task_runners.GetIOTaskRunner(),
-          fml::MakeCopyable([io_manager = std::move(io_manager)]() mutable {
-            io_manager.reset();
-          }));
-    }
     return nullptr;
   }
 
@@ -655,9 +626,7 @@ Shell::~Shell() {
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetPlatformTaskRunner(),
       fml::MakeCopyable([this, &platiso_latch]() mutable {
-        if (engine_) {
-          engine_->ShutdownPlatformIsolates();
-        }
+        engine_->ShutdownPlatformIsolates();
         platiso_latch.Signal();
       }));
   platiso_latch.Wait();
@@ -899,19 +868,6 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   }
 
   if (!platform_view || !engine || !rasterizer || !io_manager) {
-    if (engine) {
-      fml::TaskRunner::RunNowOrPostTask(
-          task_runners_.GetUITaskRunner(),
-          fml::MakeCopyable(
-              [engine = std::move(engine)]() mutable { engine.reset(); }));
-    }
-    if (rasterizer) {
-      fml::TaskRunner::RunNowOrPostTask(
-          task_runners_.GetRasterTaskRunner(),
-          fml::MakeCopyable([rasterizer = std::move(rasterizer)]() mutable {
-            rasterizer.reset();
-          }));
-    }
     return false;
   }
 
@@ -1181,6 +1137,11 @@ void Shell::OnPlatformViewScheduleFrame() {
   fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
                                     [engine = engine_->GetWeakPtr()]() {
                                       if (engine) {
+                                        // This is an engine requested repaint
+                                        // so force all views to redraw.
+                                        // Without this only views with dirty
+                                        // render objects would get repainted.
+                                        engine->MarkAllViewsNeedRender();
                                         engine->ScheduleFrame();
                                       }
                                     });
@@ -1399,13 +1360,19 @@ void Shell::OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) {
         texture->MarkNewFrameAvailable();
       });
 
-  // Schedule a new frame without having to rebuild the layer tree.
-  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
-                                    [engine = engine_->GetWeakPtr()]() {
-                                      if (engine) {
-                                        engine->ScheduleFrame(false);
-                                      }
-                                    });
+  // Notify the framework that a texture has new content available.
+  // This marks the texture render object as needing paint, ensuring the view
+  // containing the texture is recomposited even if no other render objects
+  // are dirty. Also schedule a new frame without having to rebuild the layer
+  // tree.
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
+      [engine = engine_->GetWeakPtr(), texture_id]() {
+        if (engine) {
+          engine->NotifyTextureFrameAvailable(texture_id);
+          engine->ScheduleFrame(/*regenerate_layer_trees=*/false);
+        }
+      });
 }
 
 // |PlatformView::Delegate|
@@ -1768,7 +1735,7 @@ void Shell::UpdateAssetResolverByType(
       fml::MakeCopyable(
           [engine = weak_engine_, type,
            asset_resolver = std::move(updated_asset_resolver)]() mutable {
-            if (engine) {
+            if (engine && engine->GetAssetManager()) {
               engine->GetAssetManager()->UpdateResolverByType(
                   std::move(asset_resolver), type);
             }

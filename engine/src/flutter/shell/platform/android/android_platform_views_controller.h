@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_PLATFORM_VIEWS_CONTROLLER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_PLATFORM_VIEWS_CONTROLLER_H_
 
+#include <atomic>
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -94,7 +95,7 @@ struct PlatformViewPointerCoords {
 /// @brief Touch event dispatched to a platform view.
 struct PlatformViewTouch {
   int64_t view_id = 0;
-  int32_t motion_event_id = 0;
+  int64_t motion_event_id = 0;
   int32_t action = 0;
   int32_t pointer_count = 0;
   std::vector<PlatformViewPointerCoords> pointers;
@@ -239,6 +240,9 @@ class PlatformViewsProvider {
 
   /// @brief Sets whether HC++ presentation is supported and enabled.
   virtual void SetHcppEnabled(bool enabled) {}
+
+  /// @brief Returns native window for overlay surface id if available.
+  virtual ANativeWindow* GetOverlayWindow(int32_t id) { return nullptr; }
 };
 
 /// @brief Default JNI/JVM backed PlatformViewsProvider.
@@ -272,12 +276,13 @@ class DefaultPlatformViewsProvider : public PlatformViewsProvider {
   bool SwapTransactions() override;
   bool ApplyTransactions() override;
   bool IsHcppEnabled() const override;
+  ANativeWindow* GetOverlayWindow(int32_t id) override;
 
   void SetHcppEnabled(bool enabled) override;
 
  private:
   std::shared_ptr<JvmInvoker> jvm_invoker_;
-  bool hcpp_enabled_ = false;
+  std::atomic<bool> hcpp_enabled_{false};
 
   FML_DISALLOW_COPY_AND_ASSIGN(DefaultPlatformViewsProvider);
 };
@@ -312,9 +317,11 @@ class InMemoryPlatformViewsProvider : public PlatformViewsProvider {
   bool SwapTransactions() override;
   bool ApplyTransactions() override;
   bool IsHcppEnabled() const override;
+  ANativeWindow* GetOverlayWindow(int32_t id) override;
 
   void SetHcppEnabled(bool enabled) override;
   void SetNextTextureId(int64_t texture_id);
+  void SetOverlayWindowForTesting(int32_t id, ANativeWindow* window);
   void Clear();
 
   size_t GetCreatedViewsCount() const;
@@ -328,19 +335,19 @@ class InMemoryPlatformViewsProvider : public PlatformViewsProvider {
   std::optional<std::pair<double, double>> GetOffsets(int64_t view_id) const;
   std::optional<int32_t> GetDirection(int64_t view_id) const;
   size_t GetFocusClearedCount(int64_t view_id) const;
-  const std::vector<PlatformViewTouch>& GetDispatchedTouches() const;
+  std::vector<PlatformViewTouch> GetDispatchedTouches() const;
   std::optional<PlatformViewGeometry> GetLastGeometry(int64_t view_id) const;
   bool IsViewHidden(int64_t view_id) const;
   bool GetSynchronizeToNativeViewHierarchy() const;
   bool IsInFrame() const;
   size_t GetOverlaySurfacesCount() const;
-  const std::map<int32_t, PlatformViewOverlay>& GetDisplayedOverlays() const;
+  std::map<int32_t, PlatformViewOverlay> GetDisplayedOverlays() const;
   bool IsOverlayVisible(int32_t surface_id) const;
   size_t GetTransactionCount() const;
 
  private:
   mutable std::mutex mutex_;
-  bool hcpp_enabled_ = false;
+  std::atomic<bool> hcpp_enabled_{false};
   int64_t next_texture_id_ = 100;
   int32_t next_overlay_id_ = 1;
   bool in_frame_ = false;
@@ -360,6 +367,7 @@ class InMemoryPlatformViewsProvider : public PlatformViewsProvider {
   std::set<int32_t> overlay_surfaces_;
   std::map<int32_t, PlatformViewOverlay> displayed_overlays_;
   std::set<int32_t> visible_overlays_;
+  std::map<int32_t, ANativeWindow*> overlay_windows_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(InMemoryPlatformViewsProvider);
 };
@@ -412,11 +420,28 @@ class AndroidPlatformViewsController {
                                 int32_t height,
                                 const AndroidMutatorsStack& mutators_stack);
 
+  bool PushPlatformViewMutators(int64_t view_id,
+                                int32_t x,
+                                int32_t y,
+                                int32_t width,
+                                int32_t height,
+                                int32_t view_width,
+                                int32_t view_height,
+                                const AndroidMutatorsStack& mutators_stack);
+
   bool PushPlatformViewMutators(const FlutterPlatformView& platform_view,
                                 int32_t x,
                                 int32_t y,
                                 int32_t width,
                                 int32_t height);
+
+  bool PushPlatformViewMutators(const FlutterPlatformView& platform_view,
+                                int32_t x,
+                                int32_t y,
+                                int32_t width,
+                                int32_t height,
+                                int32_t view_width,
+                                int32_t view_height);
 
   bool SynchronizeToNativeViewHierarchy(bool synchronize);
   bool OnBeginFrame();
@@ -434,6 +459,8 @@ class AndroidPlatformViewsController {
   bool SwapTransactions();
   bool ApplyTransactions();
   bool IsHcppEnabled() const;
+  void SetHcppEnabled(bool enabled);
+  ANativeWindow* GetOverlayWindow(int32_t id) const;
 
   size_t GetActiveViewsCount() const;
   bool HasPlatformView(int64_t view_id) const;

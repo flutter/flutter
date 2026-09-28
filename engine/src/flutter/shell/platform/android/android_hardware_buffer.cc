@@ -9,7 +9,6 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/platform/android/flutter_embedder_native.h"
 
 namespace flutter {
 namespace android {
@@ -41,19 +40,19 @@ size_t AndroidHardwareBufferBytesPerPixel(uint32_t format) {
     case AndroidHardwareBufferFormat::kD24UnormS8Uint:
     case AndroidHardwareBufferFormat::kD32Float:
     case AndroidHardwareBufferFormat::kR16G16Uint:
-    case AndroidHardwareBufferFormat::kR10G10B10A10Unorm:
       return 4;
     case AndroidHardwareBufferFormat::kR8G8B8Unorm:
+    case AndroidHardwareBufferFormat::kD24Unorm:
       return 3;
     case AndroidHardwareBufferFormat::kR5G6B5Unorm:
     case AndroidHardwareBufferFormat::kD16Unorm:
-    case AndroidHardwareBufferFormat::kD24Unorm:
     case AndroidHardwareBufferFormat::kR16Uint:
     case AndroidHardwareBufferFormat::kYCbCrP010:
     case AndroidHardwareBufferFormat::kYCbCrP210:
       return 2;
     case AndroidHardwareBufferFormat::kR16G16B16A16Float:
     case AndroidHardwareBufferFormat::kD32FloatS8Uint:
+    case AndroidHardwareBufferFormat::kR10G10B10A10Unorm:
       return 8;
     case AndroidHardwareBufferFormat::kR8Unorm:
     case AndroidHardwareBufferFormat::kS8Uint:
@@ -179,6 +178,7 @@ DefaultAndroidHardwareBuffer::ToExternalTexture(
   ext_texture.width = desc_.width;
   ext_texture.height = desc_.height;
   ext_texture.format = desc_.format;
+  ext_texture.fence_fd = -1;
   ext_texture.buffer = ToHandle();
   ext_texture.user_data = user_data;
   ext_texture.destruction_callback = destruction_callback;
@@ -198,7 +198,7 @@ DefaultAndroidHardwareBufferProvider::DefaultAndroidHardwareBufferProvider(
     std::shared_ptr<OSLibraryLoader> library_loader)
     : library_loader_(library_loader
                           ? std::move(library_loader)
-                          : FlutterEmbedderNative::GetDefaultLibraryLoader()) {
+                          : OSLibraryLoader::GetDefaultLibraryLoader()) {
   TRACE_EVENT0("flutter",
                "DefaultAndroidHardwareBufferProvider::"
                "DefaultAndroidHardwareBufferProvider");
@@ -217,7 +217,7 @@ void DefaultAndroidHardwareBufferProvider::EnsureLoaded() const {
     return;
   }
   if (!library_loader_) {
-    library_loader_ = FlutterEmbedderNative::GetDefaultLibraryLoader();
+    library_loader_ = OSLibraryLoader::GetDefaultLibraryLoader();
   }
   if (!library_loader_) {
     loaded_ = true;
@@ -307,7 +307,8 @@ DefaultAndroidHardwareBufferProvider::Allocate(
   }
 
   return std::make_unique<DefaultAndroidHardwareBuffer>(
-      actual_desc, native_buffer, id, /*owns_handle=*/true, shared_from_this());
+      actual_desc, native_buffer, id, /*owns_handle=*/true,
+      weak_from_this().lock());
 }
 
 std::unique_ptr<AndroidHardwareBuffer>
@@ -334,7 +335,7 @@ DefaultAndroidHardwareBufferProvider::CreateFromNativeHandle(
   }
 
   return std::make_unique<DefaultAndroidHardwareBuffer>(
-      desc, handle, id, take_ownership, shared_from_this());
+      desc, handle, id, take_ownership, weak_from_this().lock());
 }
 
 std::unique_ptr<AndroidHardwareBuffer>
@@ -359,7 +360,12 @@ DefaultAndroidHardwareBufferProvider::CreateFromJavaHardwareBuffer(
   // Acquire reference since Java owns the original reference
   Acquire(native_buffer);
 
-  return CreateFromNativeHandle(native_buffer, /*take_ownership=*/true);
+  auto buffer = CreateFromNativeHandle(native_buffer, /*take_ownership=*/true);
+  if (!buffer) {
+    Release(native_buffer);
+    return nullptr;
+  }
+  return buffer;
 }
 
 void* DefaultAndroidHardwareBufferProvider::ToJavaHardwareBuffer(void* env,
@@ -511,17 +517,45 @@ int InMemoryAndroidHardwareBuffer::Lock(uint64_t usage,
   if (!out_address) {
     return -1;
   }
+  if (provider_) {
+    int res = provider_->Lock(GetHandle(), usage, fence, rect, out_address);
+    if (res == 0) {
+      lock_count_++;
+    }
+    return res;
+  }
+  if (rect) {
+    if (rect->left < 0 || rect->top < 0 ||
+        rect->right > static_cast<int32_t>(desc_.width) ||
+        rect->bottom > static_cast<int32_t>(desc_.height) ||
+        rect->left >= rect->right || rect->top >= rect->bottom) {
+      return -1;
+    }
+  }
+  size_t offset = 0;
+  if (rect) {
+    size_t bpp = AndroidHardwareBufferBytesPerPixel(desc_.format);
+    offset = (static_cast<size_t>(rect->top) * desc_.stride + rect->left) * bpp;
+  }
   lock_count_++;
-  *out_address = backing_data_.data();
+  *out_address = backing_data_.data() + offset;
   return 0;
 }
 
 int InMemoryAndroidHardwareBuffer::Unlock(int32_t* fence) {
   TRACE_EVENT0("flutter", "InMemoryAndroidHardwareBuffer::Unlock");
   std::lock_guard<std::mutex> lock(mutex_);
-  if (lock_count_ > 0) {
-    lock_count_--;
+  if (provider_) {
+    int res = provider_->Unlock(GetHandle(), fence);
+    if (res == 0 && lock_count_ > 0) {
+      lock_count_--;
+    }
+    return res;
   }
+  if (lock_count_ <= 0) {
+    return -1;
+  }
+  lock_count_--;
   if (fence) {
     *fence = -1;
   }
@@ -532,6 +566,9 @@ void InMemoryAndroidHardwareBuffer::Acquire() {
   TRACE_EVENT0("flutter", "InMemoryAndroidHardwareBuffer::Acquire");
   std::lock_guard<std::mutex> lock(mutex_);
   ref_count_++;
+  if (provider_) {
+    provider_->Acquire(GetHandle());
+  }
 }
 
 void InMemoryAndroidHardwareBuffer::Release() {
@@ -539,6 +576,9 @@ void InMemoryAndroidHardwareBuffer::Release() {
   std::lock_guard<std::mutex> lock(mutex_);
   if (ref_count_ > 0) {
     ref_count_--;
+    if (provider_) {
+      provider_->Release(GetHandle());
+    }
   }
 }
 
@@ -552,6 +592,7 @@ InMemoryAndroidHardwareBuffer::ToExternalTexture(
   ext_texture.width = desc_.width;
   ext_texture.height = desc_.height;
   ext_texture.format = desc_.format;
+  ext_texture.fence_fd = -1;
   ext_texture.buffer = ToHandle();
   ext_texture.user_data = user_data;
   ext_texture.destruction_callback = destruction_callback;
@@ -630,7 +671,7 @@ InMemoryAndroidHardwareBufferProvider::Allocate(
   allocation_count_++;
 
   auto buffer = std::make_unique<InMemoryAndroidHardwareBuffer>(
-      desc, id, nullptr, true, shared_from_this());
+      desc, id, nullptr, true, weak_from_this().lock());
   void* handle = buffer->GetHandle();
 
   MockEntry entry;
@@ -655,12 +696,9 @@ InMemoryAndroidHardwareBufferProvider::CreateFromNativeHandle(
 
   auto it = mock_entries_.find(handle);
   if (it != mock_entries_.end()) {
-    if (!take_ownership) {
-      it->second.ref_count++;
-    }
     return std::make_unique<InMemoryAndroidHardwareBuffer>(
         it->second.desc, it->second.id, handle, take_ownership,
-        shared_from_this());
+        weak_from_this().lock());
   }
 
   // If handle not recognized, create a default mock entry
@@ -674,7 +712,7 @@ InMemoryAndroidHardwareBufferProvider::CreateFromNativeHandle(
   mock_entries_[handle] = std::move(entry);
 
   return std::make_unique<InMemoryAndroidHardwareBuffer>(
-      desc, id, handle, take_ownership, shared_from_this());
+      desc, id, handle, take_ownership, weak_from_this().lock());
 }
 
 std::unique_ptr<AndroidHardwareBuffer>
@@ -687,7 +725,14 @@ InMemoryAndroidHardwareBufferProvider::CreateFromJavaHardwareBuffer(
   if (!env || !java_hardware_buffer) {
     return nullptr;
   }
-  return CreateFromNativeHandle(java_hardware_buffer, /*take_ownership=*/false);
+  Acquire(java_hardware_buffer);
+  auto buffer =
+      CreateFromNativeHandle(java_hardware_buffer, /*take_ownership=*/true);
+  if (!buffer) {
+    Release(java_hardware_buffer);
+    return nullptr;
+  }
+  return buffer;
 }
 
 void* InMemoryAndroidHardwareBufferProvider::ToJavaHardwareBuffer(
@@ -721,9 +766,21 @@ bool InMemoryAndroidHardwareBufferProvider::Describe(
 void InMemoryAndroidHardwareBufferProvider::Acquire(void* handle) {
   TRACE_EVENT0("flutter", "InMemoryAndroidHardwareBufferProvider::Acquire");
   std::lock_guard<std::mutex> lock(mutex_);
+  if (!handle) {
+    return;
+  }
   auto it = mock_entries_.find(handle);
   if (it != mock_entries_.end()) {
     it->second.ref_count++;
+  } else {
+    AndroidHardwareBufferDesc desc =
+        AndroidHardwareBufferDesc::MakeRGBA8(100, 100);
+    uint64_t id = next_id_++;
+    MockEntry entry;
+    entry.desc = desc;
+    entry.id = id;
+    entry.ref_count = 2;  // 1 for external Java owner, 1 for native Acquire
+    mock_entries_[handle] = std::move(entry);
   }
 }
 
@@ -753,6 +810,14 @@ int InMemoryAndroidHardwareBufferProvider::Lock(
   }
   auto it = mock_entries_.find(handle);
   if (it != mock_entries_.end()) {
+    if (rect) {
+      if (rect->left < 0 || rect->top < 0 ||
+          rect->right > static_cast<int32_t>(it->second.desc.width) ||
+          rect->bottom > static_cast<int32_t>(it->second.desc.height) ||
+          rect->left >= rect->right || rect->top >= rect->bottom) {
+        return -1;
+      }
+    }
     if (it->second.data.empty()) {
       size_t bpp = AndroidHardwareBufferBytesPerPixel(it->second.desc.format);
       size_t size = static_cast<size_t>(it->second.desc.stride) *
@@ -762,8 +827,15 @@ int InMemoryAndroidHardwareBufferProvider::Lock(
       }
       it->second.data.resize(size, 0);
     }
+    size_t offset = 0;
+    if (rect) {
+      size_t bpp = AndroidHardwareBufferBytesPerPixel(it->second.desc.format);
+      offset = (static_cast<size_t>(rect->top) * it->second.desc.stride +
+                rect->left) *
+               bpp;
+    }
     it->second.lock_count++;
-    *out_address = it->second.data.data();
+    *out_address = it->second.data.data() + offset;
     return 0;
   }
   return -1;
@@ -778,9 +850,10 @@ int InMemoryAndroidHardwareBufferProvider::Unlock(void* handle,
   }
   auto it = mock_entries_.find(handle);
   if (it != mock_entries_.end()) {
-    if (it->second.lock_count > 0) {
-      it->second.lock_count--;
+    if (it->second.lock_count <= 0) {
+      return -1;
     }
+    it->second.lock_count--;
     if (fence) {
       *fence = -1;
     }

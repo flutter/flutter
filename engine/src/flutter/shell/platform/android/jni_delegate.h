@@ -6,8 +6,11 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_DELEGATE_H_
 
 #include <cstdint>
+#include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
+#include <shared_mutex>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -64,6 +67,45 @@ class CallbackCacheProvider {
       int64_t handle) = 0;
 };
 
+/// @brief Default C-API backed callback cache provider that calls
+/// FlutterEngineGetCallbackInformation.
+class DefaultCallbackCacheProvider : public CallbackCacheProvider {
+ public:
+  DefaultCallbackCacheProvider();
+  ~DefaultCallbackCacheProvider() override;
+
+  std::optional<DartCallbackInfo> GetCallbackInformation(
+      int64_t handle) override;
+};
+
+/// @brief In-memory mock callback cache provider for unit testing without
+/// Dart VM or disk cache dependencies.
+class InMemoryCallbackCacheProvider : public CallbackCacheProvider {
+ public:
+  InMemoryCallbackCacheProvider();
+  ~InMemoryCallbackCacheProvider() override;
+
+  void AddCallback(int64_t handle,
+                   const std::string& name,
+                   const std::string& class_name,
+                   const std::string& library_path);
+
+  void RemoveCallback(int64_t handle);
+
+  void Clear();
+
+  size_t GetSize() const;
+
+  std::optional<DartCallbackInfo> GetCallbackInformation(
+      int64_t handle) override;
+
+ private:
+  mutable std::shared_mutex mutex_;
+  std::map<int64_t, DartCallbackInfo> cache_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(InMemoryCallbackCacheProvider);
+};
+
 /// @brief Abstract provider interface for platform/custom image decoding.
 class ImageDecoderProvider {
  public:
@@ -82,6 +124,9 @@ class ImageDecoderProvider {
   /// @brief Returns the decoded image header info for a generator handle.
   virtual std::optional<ImageHeaderInfo> GetImageHeader(
       int64_t generator_handle) = 0;
+
+  /// @brief Removes image header info for a generator handle to prevent leaks.
+  virtual void RemoveImageHeader(int64_t generator_handle) = 0;
 };
 
 /// @brief Delegate that adapts Flutter Embedder C-API operations to the JVM.
@@ -95,6 +140,8 @@ class JniDelegate {
       std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr,
       std::shared_ptr<ImageDecoderProvider> image_decoder = nullptr,
       std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr,
+      std::shared_ptr<AndroidPlatformViewsController>
+          platform_views_controller = nullptr,
       std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr,
       std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr,
       std::shared_ptr<AndroidVMInit> vm_init = nullptr,
@@ -111,25 +158,36 @@ class JniDelegate {
 
   /// @brief Handles an incoming platform message dispatch to the JVM.
   virtual bool HandlePlatformMessage(const std::string& channel,
+                                     const uint8_t* message,
+                                     size_t message_size,
+                                     int32_t response_id,
+                                     int64_t message_data = 0);
+
+  virtual bool HandlePlatformMessage(const std::string& channel,
                                      const std::vector<uint8_t>& message,
                                      int32_t response_id,
-                                     bool has_data = true);
+                                     int64_t message_data = 0);
 
   /// @brief Handles a platform message response back to the JVM.
   virtual bool HandlePlatformMessageResponse(int32_t response_id,
-                                             const std::vector<uint8_t>& data,
-                                             bool has_data = true);
+                                             const uint8_t* data,
+                                             size_t data_size);
+
+  virtual bool HandlePlatformMessageResponse(int32_t response_id,
+                                             const std::vector<uint8_t>& data);
 
   /// @brief Updates accessibility semantics tree in the JVM.
-  virtual bool UpdateSemantics(const std::vector<uint8_t>& buffer,
-                               const std::vector<std::string>& strings);
-
   /// @brief Updates accessibility semantics tree with string attributes in the
   /// JVM.
   virtual bool UpdateSemantics(
       const std::vector<uint8_t>& buffer,
       const std::vector<std::string>& strings,
       const std::vector<std::vector<uint8_t>>& string_attribute_args);
+
+  virtual bool UpdateSemantics(const std::vector<uint8_t>& buffer,
+                               const std::vector<std::string>& strings) {
+    return UpdateSemantics(buffer, strings, {});
+  }
 
   /// @brief Updates custom accessibility actions in the JVM.
   virtual bool UpdateCustomAccessibilityActions(
@@ -141,16 +199,11 @@ class JniDelegate {
   virtual bool UpdateSemantics(const FlutterSemanticsUpdate2& update);
 
   /// @brief Enables or disables accessibility semantics tree in the JVM.
-  virtual bool SetSemanticsEnabled(bool enabled);
+  virtual bool SetSemanticsTreeEnabled(bool enabled);
 
-  /// @brief Dispatches a semantics action to a node in the JVM.
-  virtual bool DispatchSemanticsAction(int32_t node_id,
-                                       FlutterSemanticsAction action,
-                                       const std::vector<uint8_t>& data = {},
-                                       int64_t view_id = 0);
-
-  /// @brief Sets accessibility features bitmask in the JVM.
-  virtual bool SetAccessibilityFeatures(int32_t flags);
+  virtual bool SetSemanticsEnabled(bool enabled) {
+    return SetSemanticsTreeEnabled(enabled);
+  }
 
   /// @brief Sets application locale in the JVM.
   virtual bool SetApplicationLocale(const std::string& locale);
@@ -167,7 +220,6 @@ class JniDelegate {
 
   /// @brief Asynchronously requests a VSync signal for the given baton.
   virtual bool AsyncWaitForVsync(intptr_t baton);
-
   /// @brief Sends full viewport metrics.
   virtual bool SetViewportMetrics(const AndroidViewportMetrics& metrics);
 
@@ -194,16 +246,8 @@ class JniDelegate {
                                        double width,
                                        double height,
                                        double pixel_ratio);
-
   /// @brief Requests loading of a Dart deferred library component.
-  virtual bool RequestDartDeferredLibrary(int64_t loading_unit_id);
-
-  /// @brief Notifies the JVM that the asset manager / bundle has changed.
-  virtual bool OnAssetManagerChanged();
-
-  /// @brief Computes scaled font size for nonlinear font scaling.
-  virtual double GetScaledFontSize(double unscaled_font_size,
-                                   int configuration_id) const;
+  virtual bool RequestDartDeferredLibrary(int loading_unit_id);
 
   /// @brief Looks up Dart callback information for a given handle.
   virtual std::optional<DartCallbackInfo> LookupCallbackInformation(
@@ -222,6 +266,9 @@ class JniDelegate {
   /// @brief Gets parsed image header info for a generator handle.
   virtual std::optional<ImageHeaderInfo> GetImageHeader(
       int64_t generator_handle);
+
+  /// @brief Removes parsed image header info for a generator handle.
+  virtual void RemoveImageHeader(int64_t generator_handle);
 
   /// @brief Creates a platform view in the JVM.
   virtual int64_t CreatePlatformView(
@@ -300,8 +347,19 @@ class JniDelegate {
   /// @brief Applies pending SurfaceControl transactions for HC++.
   virtual bool ApplyPlatformViewTransactions();
 
+  /// @brief Sets the native window pointer for root SurfaceControl creation.
+  void SetNativeWindow(void* window);
+
+  /// @brief Returns the native window pointer.
+  void* GetNativeWindow() const;
+
   /// @brief Creates a native SurfaceControl node.
   virtual bool CreateSurfaceControl(int64_t surface_id,
+                                    const std::string& debug_name = "");
+
+  /// @brief Creates a native SurfaceControl node with explicit parent ID.
+  virtual bool CreateSurfaceControl(int64_t surface_id,
+                                    int64_t parent_surface_id,
                                     const std::string& debug_name = "");
 
   /// @brief Destroys a native SurfaceControl node.
@@ -370,6 +428,16 @@ class JniDelegate {
       int32_t height,
       const AndroidMutatorsStack& mutators_stack);
 
+  virtual bool PushPlatformViewMutators(
+      int64_t view_id,
+      int32_t x,
+      int32_t y,
+      int32_t width,
+      int32_t height,
+      int32_t view_width,
+      int32_t view_height,
+      const AndroidMutatorsStack& mutators_stack);
+
   /// @brief Dispatches platform view mutator stack derived from a
   /// FlutterPlatformView.
   virtual bool PushPlatformViewMutators(
@@ -378,6 +446,15 @@ class JniDelegate {
       int32_t y,
       int32_t width,
       int32_t height);
+
+  virtual bool PushPlatformViewMutators(
+      const FlutterPlatformView& platform_view,
+      int32_t x,
+      int32_t y,
+      int32_t width,
+      int32_t height,
+      int32_t view_width,
+      int32_t view_height);
 
   /// @brief Sets or replaces the CallbackCacheProvider used for lookups.
   void SetCallbackCache(std::shared_ptr<CallbackCacheProvider> provider);
@@ -542,21 +619,21 @@ class JniDelegate {
 
  private:
   std::shared_ptr<JvmInvoker> jvm_invoker_;
+  mutable std::mutex callback_cache_mutex_;
   std::shared_ptr<CallbackCacheProvider> callback_cache_;
+  mutable std::mutex image_decoder_mutex_;
   std::shared_ptr<ImageDecoderProvider> image_decoder_;
   std::shared_ptr<PlatformViewsProvider> platform_views_provider_;
-  std::shared_ptr<WindowMetricsProvider> window_metrics_provider_;
-  std::shared_ptr<AndroidVsyncWaiter> vsync_waiter_;
-  std::shared_ptr<AndroidVMInit> vm_init_;
-  std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider_;
-  std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider_;
-  std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider_;
-  std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider_;
-  std::shared_ptr<AndroidEngineGroup> engine_group_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
-  bool hcpp_enabled_ = false;
+  mutable std::mutex window_metrics_provider_mutex_;
+  std::shared_ptr<WindowMetricsProvider> window_metrics_provider_;
+  mutable std::mutex vsync_waiter_mutex_;
+  std::shared_ptr<AndroidVsyncWaiter> vsync_waiter_;
+  mutable std::mutex vm_init_mutex_;
+  std::shared_ptr<AndroidVMInit> vm_init_;
 
   mutable std::mutex hardware_buffer_mutex_;
+  std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider_;
   std::unordered_set<int64_t> registered_hardware_textures_;
   std::map<int64_t, FlutterHardwareBufferExternalTexture>
       hardware_buffer_frames_;
@@ -564,16 +641,26 @@ class JniDelegate {
       hardware_buffer_objects_;
 
   mutable std::mutex vulkan_texture_mutex_;
+  std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider_;
   std::unordered_set<int64_t> registered_vulkan_textures_;
   std::map<int64_t, FlutterVulkanExternalTexture> vulkan_texture_frames_;
   std::map<int64_t, std::shared_ptr<AndroidVulkanExternalTexture>>
       vulkan_texture_objects_;
-  std::map<int64_t, FlutterVulkanYcbcrConversionInfo> vulkan_ycbcr_conversions_;
 
   mutable std::mutex surface_control_mutex_;
+  std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider_;
   std::map<int64_t, std::shared_ptr<AndroidSurfaceControl>> surface_controls_;
   std::map<int64_t, AndroidSurfaceControlState> surface_control_states_;
+  std::map<int64_t, AndroidSurfaceControlState>
+      committed_surface_control_states_;
   std::shared_ptr<AndroidSurfaceTransaction> active_transaction_;
+  std::vector<std::shared_ptr<AndroidSurfaceTransaction>> pending_transactions_;
+  void* native_window_ = nullptr;
+  int64_t root_surface_id_ = 0;
+  bool hcpp_enabled_ = false;
+  mutable std::mutex engine_group_mutex_;
+  std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider_;
+  std::shared_ptr<AndroidEngineGroup> engine_group_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniDelegate);
 };

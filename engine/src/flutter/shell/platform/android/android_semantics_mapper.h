@@ -59,6 +59,29 @@ class AndroidSemanticsMapper {
   static constexpr size_t kBytesPerStringAttribute = 4 * sizeof(int32_t);
   static constexpr int32_t kEmptyStringIndex = -1;
 
+  // Maximum upper bounds to prevent integer overflow and runaway allocations.
+  static constexpr size_t kMaxSemanticsNodes = 65536;
+  static constexpr size_t kMaxSemanticsChildren = 65536;
+  static constexpr size_t kMaxSemanticsActions = 65536;
+  static constexpr size_t kMaxStringAttributes = 65536;
+  static constexpr size_t kMaxSemanticsBufferBytes = 64 * 1024 * 1024;  // 64 MB
+  static constexpr size_t kMinSemanticsNode2Size =
+      offsetof(FlutterSemanticsNode2, identifier) + sizeof(const char*);
+
+  /// NOTE on Embedder C-API Parity:
+  /// The `FlutterSemanticsNode2` C-API struct defines `role` which is mapped
+  /// using SAFE_ACCESS (falling back to kFlutterSemanticsRoleNone for older
+  /// nodes). Fields for `linkUrl`, `locale`, `minValue`, `maxValue`, or a
+  /// distinct `hitTestTransform` are not yet defined in
+  /// `FlutterSemanticsNode2`. To preserve binary byte alignment with Java's
+  /// `AccessibilityBridge.java`:
+  /// - `role` is encoded from `node->role` (or 0 if omitted in older structs).
+  /// - `linkUrl`, `locale`, `minValue`, and `maxValue` are encoded as
+  ///   `kEmptyStringIndex` (-1).
+  /// - `hitTestTransform` falls back to `node->transform`.
+  /// A future extension of the C-API (e.g. `FlutterSemanticsNode3`) can provide
+  /// full fidelity for the remaining fields.
+
   /// @brief Maps a complete FlutterSemanticsUpdate2 batch into encoded buffers.
   static EncodedSemanticsBatch MapSemanticsUpdate(
       const FlutterSemanticsUpdate2& update);

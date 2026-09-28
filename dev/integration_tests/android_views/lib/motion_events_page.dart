@@ -65,10 +65,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        // Expanded ensures that the platform view expands dynamically to fit all
-        // recorded touch coordinates regardless of device pixel ratio or screen dimensions.
-        Expanded(
-          flex: 3,
+        SizedBox(
+          height: 300.0,
           child: AndroidView(
             key: const ValueKey<String>('PlatformView'),
             viewType: 'simple_view',
@@ -148,17 +146,6 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         await channel.invokeMethod<void>('synthesizeEvent', event);
       }
 
-      // Allow in-flight asynchronous touch events to drain before stopping event pipes.
-      // 5 seconds timeout provides ample time for asynchronous platform channel dispatch.
-      const drainTimeout = Duration(seconds: 5);
-      // Poll interval between checking the count of received events.
-      const pollInterval = Duration(milliseconds: 50);
-      final stopwatch = Stopwatch()..start();
-      while (embeddedViewEvents.length < flutterViewEvents.length &&
-          stopwatch.elapsed < drainTimeout) {
-        await Future<void>.delayed(pollInterval);
-      }
-
       await channel.invokeMethod<void>('stopFlutterViewEvents');
       await viewChannel?.invokeMethod<void>('stopTouchEvents');
 
@@ -214,9 +201,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   }
 
   void showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message), duration: const Duration(seconds: 3)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message), duration: const Duration(seconds: 3)));
   }
 
   void onPlatformViewCreated(int id) {

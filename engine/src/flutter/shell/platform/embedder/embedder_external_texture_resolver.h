@@ -9,8 +9,6 @@
 
 #include "flutter/common/graphics/texture.h"
 
-#include "flutter/shell/platform/embedder/embedder_external_texture_hb.h"
-
 #ifdef SHELL_ENABLE_GL
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 #endif
@@ -42,12 +40,8 @@ class EmbedderExternalTextureResolver {
 
 #ifdef SHELL_ENABLE_VULKAN
   explicit EmbedderExternalTextureResolver(
-      EmbedderExternalTextureVK::ExternalTextureCallback vulkan_callback);
+      EmbedderExternalTextureVK::ExternalTextureCallback vk_callback);
 #endif
-
-  explicit EmbedderExternalTextureResolver(
-      EmbedderExternalTextureHB::ExternalTextureCallback
-          hardware_buffer_callback);
 
   std::unique_ptr<Texture> ResolveExternalTexture(int64_t texture_id);
 
@@ -63,10 +57,8 @@ class EmbedderExternalTextureResolver {
 #endif
 
 #ifdef SHELL_ENABLE_VULKAN
-  EmbedderExternalTextureVK::ExternalTextureCallback vulkan_callback_;
+  EmbedderExternalTextureVK::ExternalTextureCallback vk_callback_;
 #endif
-
-  EmbedderExternalTextureHB::ExternalTextureCallback hardware_buffer_callback_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureResolver);
 };
