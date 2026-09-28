@@ -345,32 +345,12 @@ bool _isUnconstrainedError(Object error) {
       message.contains('unbounded width') ||
       message.contains('incoming height constraints are unbounded') ||
       message.contains('incoming width constraints are unbounded') ||
+      message.contains('was given an infinite size during layout') ||
       message.contains('BoxConstraints(unconstrained)');
 }
 
-bool _isUnconstrainedPreviewError(FlutterErrorDetails details) {
-  final exceptionStr = details.exceptionAsString();
-  if (_isUnconstrainedError(exceptionStr)) {
-    return true;
-  }
-  final contextDesc = details.context?.toDescription() ?? '';
-  if (contextDesc.contains('layout')) {
-    final collector = details.informationCollector;
-    if (collector != null) {
-      for (final node in collector()) {
-        final desc = node.toDescription();
-        if (desc.contains('BoxConstraints(unconstrained)') ||
-            desc.contains('BoxConstraints(w=Infinity') ||
-            desc.contains('BoxConstraints(h=Infinity') ||
-            desc.contains('additionalConstraints: BoxConstraints(w=Infinity') ||
-            desc.contains('additionalConstraints: BoxConstraints(h=Infinity')) {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
-}
+bool _isUnconstrainedPreviewError(FlutterErrorDetails details) =>
+    _isUnconstrainedError(details.exceptionAsString());
 
 FlutterErrorDetails _createUnconstrainedPreviewErrorDetails(
   FlutterErrorDetails details,
@@ -389,6 +369,7 @@ FlutterErrorDetails _createUnconstrainedPreviewErrorDetails(
         '  @Preview(size: Size(width, height))\n'
         'or wrap the widget in a widget with explicit dimensions (such as SizedBox or Container).',
       ),
+      ErrorDescription('Original error: ${details.exceptionAsString()}'),
     ]),
     stack: details.stack,
     library: 'widget_preview_scaffold',
@@ -431,14 +412,20 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
     if (_layoutError != null) {
       return;
     }
+    // Assign synchronously outside setState (which cannot be called during
+    // layout) so subsequent errors in the same frame are deduplicated.
+    _layoutError = error;
+    _layoutStackTrace = stackTrace;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        setState(() {
-          _layoutError = error;
-          _layoutStackTrace = stackTrace;
-        });
+        setState(() {});
       }
     });
+  }
+
+  void _clearLayoutError() {
+    _layoutError = null;
+    _layoutStackTrace = null;
   }
 
   /// Returns the last size of the previewed widget.
@@ -446,11 +433,16 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       (key.currentContext!.findRenderObject() as RenderBox).size;
 
   @override
+  void reassemble() {
+    super.reassemble();
+    _clearLayoutError();
+  }
+
+  @override
   void didUpdateWidget(WidgetPreviewWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.preview != widget.preview) {
-      _layoutError = null;
-      _layoutStackTrace = null;
+      _clearLayoutError();
     }
 
     final previousBrightness = oldWidget.preview.brightness;
@@ -1080,6 +1072,10 @@ class _WidgetPreviewWrapper extends SingleChildRenderObjectWidget {
   }
 }
 
+/// Fallback size used when a widget preview fails layout and the previewer
+/// surface constraints are unbounded.
+const _kFallbackPreviewSize = Size(400, 400);
+
 /// Custom render box that forces constraints onto unconstrained widgets.
 class _WidgetPreviewWrapperBox extends RenderShiftedBox {
   _WidgetPreviewWrapperBox({
@@ -1087,6 +1083,20 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
     required this._previewerConstraints,
     this.onLayoutError,
   }) : super(child);
+
+  /// Whether a [_WidgetPreviewWrapperBox] is actively executing [performLayout].
+  ///
+  /// Used by [_WidgetPreviewScaffoldState._handleFlutterError] to scope layout
+  /// error interception to preview subtrees.
+  static bool isPerformingPreviewLayout = false;
+
+  /// The first error reported to [FlutterError.onError] during the active
+  /// [performLayout] pass.
+  ///
+  /// Subsequent cascading layout errors (such as ancestor `RenderBox was not
+  /// laid out` assertions) within the same preview layout pass are suppressed,
+  /// and this error is forwarded to [onLayoutError] to populate the error card.
+  static Object? reportedPreviewLayoutError;
 
   void Function(Object error, StackTrace stackTrace)? onLayoutError;
 
@@ -1133,25 +1143,35 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
       return;
     }
     final updatedConstraints = _constraintOverride.enforce(constraints);
+    isPerformingPreviewLayout = true;
     try {
       child.layout(updatedConstraints, parentUsesSize: true);
       size = constraints.constrain(child.size);
     } catch (error, stackTrace) {
-      final isUnconstrained =
-          (!updatedConstraints.hasBoundedWidth ||
-              !updatedConstraints.hasBoundedHeight) ||
-          _isUnconstrainedError(error);
-      final layoutError = isUnconstrained
-          ? const UnconstrainedWidgetPreviewException()
-          : error;
+      final layoutError =
+          reportedPreviewLayoutError ??
+          (_isUnconstrainedError(error)
+              ? const UnconstrainedWidgetPreviewException()
+              : error);
       size = constraints.constrain(
         _previewerConstraints.hasBoundedWidth &&
                 _previewerConstraints.hasBoundedHeight
             ? _previewerConstraints.biggest
-            : const Size(400, 400),
+            : _kFallbackPreviewSize,
       );
       onLayoutError?.call(layoutError, stackTrace);
+    } finally {
+      isPerformingPreviewLayout = false;
+      reportedPreviewLayoutError = null;
     }
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    if (child != null && child!.hasSize) {
+      return super.hitTestChildren(result, position: position);
+    }
+    return false;
   }
 
   @override
@@ -1294,10 +1314,18 @@ class _WidgetPreviewScaffoldState extends State<WidgetPreviewScaffold> {
   }
 
   void _handleFlutterError(FlutterErrorDetails details) {
-    if (_isUnconstrainedPreviewError(details)) {
-      final customDetails = _createUnconstrainedPreviewErrorDetails(details);
-      (_originalOnError ?? FlutterError.presentError)(customDetails);
-      return;
+    if (_WidgetPreviewWrapperBox.isPerformingPreviewLayout) {
+      if (_WidgetPreviewWrapperBox.reportedPreviewLayoutError != null) {
+        return;
+      }
+      if (_isUnconstrainedPreviewError(details)) {
+        _WidgetPreviewWrapperBox.reportedPreviewLayoutError =
+            const UnconstrainedWidgetPreviewException();
+        final customDetails = _createUnconstrainedPreviewErrorDetails(details);
+        (_originalOnError ?? FlutterError.presentError)(customDetails);
+        return;
+      }
+      _WidgetPreviewWrapperBox.reportedPreviewLayoutError = details.exception;
     }
     (_originalOnError ?? FlutterError.presentError)(details);
   }
