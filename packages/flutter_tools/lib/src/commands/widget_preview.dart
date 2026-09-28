@@ -709,6 +709,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
     // If _widgetPreviewApp is null --no-launch-previewer was provided so return success.
     if (_widgetPreviewApp == null) {
+      _appFinished = true;
       return 0;
     }
     final int exitCode = await _widgetPreviewApp!.waitForAppToFinish();
