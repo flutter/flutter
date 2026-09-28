@@ -174,7 +174,7 @@ class ResidentWebRunner extends ResidentRunner {
   /// browser). In that case [ChromiumLauncher.connectedInstance] never
   /// completes, so nothing may wait on it.
   late final bool _toolLaunchesChromium =
-      flutterDevice!.device is ChromiumDevice && platformArgs['no-launch-chrome'] != true;
+      flutterDevice?.device is ChromiumDevice && platformArgs['no-launch-chrome'] != true;
 
   /// Chrome-based DWDS debugging requires a DevTools protocol connection to a
   /// browser launched by the tool. Otherwise, use the DWDS WebSocket
