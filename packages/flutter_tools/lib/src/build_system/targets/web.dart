@@ -246,6 +246,20 @@ abstract class Dart2WebTarget extends Target {
       }
     }
   }
+
+  void _checkNoDeferredParts(Directory dir, RegExp partRegex) {
+    final bool hasDeferredParts = dir.listSync().whereType<File>().any(
+      (File file) => partRegex.hasMatch(file.basename),
+    );
+    if (hasDeferredParts) {
+      throwToolExit(
+        '"--web-content-hash" does not yet support deferred imports: '
+        'deferred part files keep unhashed names and can be served stale '
+        'from the browser cache alongside a new entrypoint. Remove the '
+        'deferred imports or build without "--web-content-hash".',
+      );
+    }
+  }
 }
 
 /// Compiles a web entry point with dart2js.
@@ -352,17 +366,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     }
     var finalOutputFile = outputJSFile;
     if (compilerConfig.webContentHash) {
-      final bool hasDeferredParts = environment.buildDir.listSync().whereType<File>().any(
-        (File file) => _partFileRegex.hasMatch(file.basename),
-      );
-      if (hasDeferredParts) {
-        throwToolExit(
-          '"--web-content-hash" does not yet support deferred imports: '
-          'deferred part files keep unhashed names and can be served stale '
-          'from the browser cache alongside a new entrypoint. Remove the '
-          'deferred imports or build without "--web-content-hash".',
-        );
-      }
+      _checkNoDeferredParts(environment.buildDir, _partFileRegex);
       final String newBasename = _hashAndRenameWebOutput(
         file: outputJSFile,
         sourceMapFile: compilerConfig.sourceMaps
@@ -525,6 +529,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
         _mainWasmMapRegex,
         _mainMjsRegex,
         _mainMjsMapRegex,
+        _partWasmRegex,
+        _partWasmMapRegex,
       ]);
     }
     final Artifacts artifacts = environment.artifacts;
@@ -575,6 +581,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       _checkForLegacyWebImports(environment, runResult.stdout, runResult.stderr);
       throwToolExit('Failed to compile application for the Web.');
     } else if (compilerConfig.webContentHash) {
+      _checkNoDeferredParts(environment.buildDir, _partWasmRegex);
       final String newWasmBasename = _hashAndRenameWebOutput(
         file: outputWasmFile,
         sourceMapFile: compilerConfig.sourceMaps
@@ -1031,16 +1038,27 @@ class WebReleaseBundle extends Target {
   Iterable<String> get buildPatternStems =>
       compileTargets.expand((Dart2WebTarget target) => target.buildPatternStems);
 
+  bool get _hasWebContentHash =>
+      compileTargets.any((Dart2WebTarget t) => t.compilerConfig.webContentHash);
+
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     const Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file')),
+    if (_hasWebContentHash) ...<Source>[
+      const Source.pattern('{OUTPUT_DIR}/index.html', optional: true),
+      const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js', optional: true),
+    ],
   ];
 
   @override
   List<Source> get outputs => <Source>[
     ...buildPatternStems.map((String file) => Source.pattern('{OUTPUT_DIR}/$file')),
+    if (_hasWebContentHash) ...<Source>[
+      const Source.pattern('{OUTPUT_DIR}/index.html'),
+      const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js'),
+    ],
   ];
 
   @override
@@ -1108,7 +1126,8 @@ class WebReleaseBundle extends Target {
       (Dart2WebTarget t) => t.compilerConfig.webContentHash,
     );
     if (webContentHash) {
-      final Map<String, File> renamedOutputs = hashWebAssets(outputDirectory);
+      final WebAssetHashResult hashResult = hashWebAssets(outputDirectory);
+      final Map<String, File> renamedOutputs = hashResult.renamedFiles;
       final List<File> updatedOutputs = bundledDepfile.outputs.map((File f) {
         final String normalizedPath = environment.fileSystem.path.normalize(f.path);
         return renamedOutputs[normalizedPath] ?? renamedOutputs[f.path] ?? f;
@@ -1117,6 +1136,7 @@ class WebReleaseBundle extends Target {
         Depfile(bundledDepfile.inputs, updatedOutputs),
         environment.buildDir.childFile('flutter_assets.d'),
       );
+      injectManifestBuildConfig(environment.outputDir, hashResult);
     } else {
       depfileService.writeToFile(
         bundledDepfile,
