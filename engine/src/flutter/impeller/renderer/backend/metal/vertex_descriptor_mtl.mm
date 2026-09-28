@@ -105,7 +105,7 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
       return MTLVertexFormatUInt3;
     case VertexAttributeFormat::kUInt32x4:
       return MTLVertexFormatUInt4;
-    case VertexAttributeFormat::kUNorm10_10_10_2:
+    case VertexAttributeFormat::kUNormR10G10B10A2:
       return MTLVertexFormatUInt1010102Normalized;
     case VertexAttributeFormat::kInvalid:
       return MTLVertexFormatInvalid;

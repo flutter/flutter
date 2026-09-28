@@ -104,7 +104,7 @@ vk::Format ToVertexDescriptorFormat(VertexAttributeFormat format) {
       return vk::Format::eR32G32B32Uint;
     case VertexAttributeFormat::kUInt32x4:
       return vk::Format::eR32G32B32A32Uint;
-    case VertexAttributeFormat::kUNorm10_10_10_2:
+    case VertexAttributeFormat::kUNormR10G10B10A2:
       return vk::Format::eA2B10G10R10UnormPack32;
     case VertexAttributeFormat::kInvalid:
       return vk::Format::eUndefined;
