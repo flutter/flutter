@@ -515,14 +515,15 @@ class _NoOverscrollDrivenScrollActivity extends DrivenScrollActivity {
   @override
   bool applyMoveTo(double value) {
     var done = false;
+    var newValue = value;
     if (velocity >= 0.0 && value > _position.maxScrollExtent) {
-      value = _position.maxScrollExtent;
+      newValue = _position.maxScrollExtent;
       done = true;
     } else if (velocity <= 0.0 && value < _position.minScrollExtent) {
-      value = _position.minScrollExtent;
+      newValue = _position.minScrollExtent;
       done = true;
     }
-    if (!super.applyMoveTo(value)) {
+    if (!super.applyMoveTo(newValue)) {
       return false;
     }
     return !done;

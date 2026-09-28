@@ -1035,11 +1035,12 @@ void main() {
     void handleReorder(int fromIndex, int toIndex) {
       onReorderCallCount += 1;
 
-      if (fromIndex < toIndex) {
-        toIndex -= 1;
-      }
+      final int newToIndex = switch (fromIndex < toIndex) {
+        true => toIndex - 1,
+        false => toIndex,
+      };
 
-      items.insert(toIndex, items.removeAt(fromIndex));
+      items.insert(newToIndex, items.removeAt(fromIndex));
     }
 
     await tester.pumpWidget(
@@ -1183,11 +1184,12 @@ void main() {
     void handleReorder(int fromIndex, int toIndex) {
       onReorderCallCount += 1;
 
-      if (fromIndex < toIndex) {
-        toIndex -= 1;
-      }
+      final int newToIndex = switch (fromIndex < toIndex) {
+        true => toIndex - 1,
+        false => toIndex,
+      };
 
-      items.insert(toIndex, items.removeAt(fromIndex));
+      items.insert(newToIndex, items.removeAt(fromIndex));
     }
 
     await tester.pumpWidget(
