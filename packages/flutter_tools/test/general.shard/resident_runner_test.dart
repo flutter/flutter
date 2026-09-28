@@ -108,13 +108,13 @@ HotRunner createHotRunner(
   if (reassembleHelper != null) {
     return HotRunner(
       flutterDevices,
+      analytics: analytics ?? const NoOpAnalytics(),
       buildSystem: buildSystem,
       buildTargets: buildTargets ?? const BuildTargetsImpl(),
       debuggingOptions: debuggingOptions,
       target: target,
       toolContext: toolContext,
       xcode: xcode,
-      analytics: analytics,
       applicationBinary: applicationBinary,
       benchmarkMode: benchmarkMode,
       commandHelp: commandHelp,
@@ -134,13 +134,13 @@ HotRunner createHotRunner(
   }
   return HotRunner(
     flutterDevices,
+    analytics: analytics ?? const NoOpAnalytics(),
     buildSystem: buildSystem,
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
     debuggingOptions: debuggingOptions,
     target: target,
     toolContext: toolContext,
     xcode: xcode,
-    analytics: analytics,
     applicationBinary: applicationBinary,
     benchmarkMode: benchmarkMode,
     commandHelp: commandHelp,
@@ -203,6 +203,7 @@ ColdRunner createColdRunner(
 
   return ColdRunner(
     flutterDevices,
+    analytics: analytics ?? const NoOpAnalytics(),
     buildSystem:
         buildSystem ??
         FlutterBuildSystem(
@@ -215,7 +216,6 @@ ColdRunner createColdRunner(
     target: target,
     toolContext: toolContext,
     xcode: xcode,
-    analytics: analytics,
     applicationBinary: applicationBinary,
     awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
     commandHelp: commandHelp,

@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../base/common.dart';
@@ -17,11 +18,11 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
-import '../project.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
 import '../web/web_runner.dart';
@@ -29,13 +30,21 @@ import 'drive_service.dart';
 
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
-  WebDriverService({required this._dartSdkPath, required ToolContext toolContext})
-    : _processUtils = ProcessUtils(
-        processManager: toolContext.processManager,
-        logger: toolContext.logger,
-      ),
-      _toolContext = toolContext;
+  WebDriverService({
+    required this._analytics,
+    required this._buildSystem,
+    required this._buildTargets,
+    required this._dartSdkPath,
+    required ToolContext toolContext,
+  }) : _processUtils = ProcessUtils(
+         processManager: toolContext.processManager,
+         logger: toolContext.logger,
+       ),
+       _toolContext = toolContext;
 
+  final Analytics _analytics;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
   final ToolContext _toolContext;
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
@@ -92,10 +101,10 @@ class WebDriverService extends DriverService {
       platformArgs: platformArgs,
       stayResident: true,
       webDefines: webDefines,
-      flutterProject: FlutterProject.current(),
-      analytics: globals.analytics,
-      buildSystem: globals.buildSystem,
-      buildTargets: globals.buildTargets,
+      flutterProject: _toolContext.projectFactory.fromDirectory(_toolContext.fs.currentDirectory),
+      analytics: _analytics,
+      buildSystem: _buildSystem,
+      buildTargets: _buildTargets,
       toolContext: _toolContext,
     );
     final appStartedCompleter = Completer<void>.sync();
@@ -314,10 +323,10 @@ enum Browser implements CliEnum {
 Map<String, dynamic> getDesiredCapabilities(
   Browser browser,
   bool? headless, {
-  Platform platform = const LocalPlatform(),
-  List<String> webBrowserFlags = const <String>[],
+  required Platform platform,
   String? chromeBinary,
   Map<String, dynamic>? mobileEmulation,
+  List<String> webBrowserFlags = const <String>[],
 }) => switch (browser) {
   Browser.chrome => <String, dynamic>{
     'acceptInsecureCerts': true,

@@ -82,6 +82,7 @@ ColdRunner createColdRunner(
 
   return ColdRunner(
     flutterDevices,
+    analytics: analytics ?? const NoOpAnalytics(),
     buildSystem:
         buildSystem ??
         FlutterBuildSystem(
@@ -94,7 +95,6 @@ ColdRunner createColdRunner(
     target: target,
     toolContext: toolContext,
     xcode: xcode,
-    analytics: analytics,
     applicationBinary: applicationBinary,
     awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
     commandHelp: commandHelp,

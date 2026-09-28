@@ -2337,6 +2337,7 @@ class DaemonCapturingRunCommand extends RunCommand {
 class CapturingAppDomain extends AppDomain {
   CapturingAppDomain(super.daemon)
     : super(
+        analytics: const analytics.NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
         toolContext: DelegatingToolContext(),
