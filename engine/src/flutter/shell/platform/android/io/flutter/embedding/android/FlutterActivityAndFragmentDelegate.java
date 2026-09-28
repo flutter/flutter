@@ -1341,6 +1341,7 @@ import java.util.List;
     boolean getBackCallbackState();
   }
 
+  /** Checks if {@link #getFlutterShellArgs()} has been overridden by the host. */
   static boolean isGetFlutterShellArgsOverridden(@NonNull Class<?> baseClass, @NonNull Host host) {
     try {
       if (host.getClass().getMethod("getFlutterShellArgs").getDeclaringClass() != baseClass) {
