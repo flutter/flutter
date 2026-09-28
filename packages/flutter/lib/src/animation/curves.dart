@@ -136,8 +136,7 @@ class SawTooth extends Curve {
 
   @override
   double transformInternal(double t) {
-    t *= count;
-    return t - t.truncateToDouble();
+    return (t * count) % 1.0;
   }
 
   @override
