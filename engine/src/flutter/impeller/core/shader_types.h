@@ -267,6 +267,104 @@ enum class VertexAttributeFormat {
   kUNorm10_10_10_2,
 };
 
+/// @brief  Whether a shader input declared as `type` can read an attribute
+///         stored as `format`.
+///
+///         Float, normalized, and packed formats feed float inputs. Integer
+///         formats feed integer inputs of the same signedness at any width,
+///         since the vertex fetch widens them.
+constexpr bool IsVertexFormatReadableAs(VertexAttributeFormat format,
+                                        ShaderType type) {
+  enum class ScalarClass { kNone, kFloat, kSigned, kUnsigned };
+  ScalarClass format_class = ScalarClass::kNone;
+  switch (format) {
+    case VertexAttributeFormat::kInvalid:
+      return false;
+    case VertexAttributeFormat::kFloat32:
+    case VertexAttributeFormat::kFloat32x2:
+    case VertexAttributeFormat::kFloat32x3:
+    case VertexAttributeFormat::kFloat32x4:
+    case VertexAttributeFormat::kFloat16:
+    case VertexAttributeFormat::kFloat16x2:
+    case VertexAttributeFormat::kFloat16x3:
+    case VertexAttributeFormat::kFloat16x4:
+    case VertexAttributeFormat::kSNorm8:
+    case VertexAttributeFormat::kSNorm8x2:
+    case VertexAttributeFormat::kSNorm8x4:
+    case VertexAttributeFormat::kUNorm8:
+    case VertexAttributeFormat::kUNorm8x2:
+    case VertexAttributeFormat::kUNorm8x4:
+    case VertexAttributeFormat::kUNorm8x4BGRA:
+    case VertexAttributeFormat::kSNorm16:
+    case VertexAttributeFormat::kSNorm16x2:
+    case VertexAttributeFormat::kSNorm16x4:
+    case VertexAttributeFormat::kUNorm16:
+    case VertexAttributeFormat::kUNorm16x2:
+    case VertexAttributeFormat::kUNorm16x4:
+    case VertexAttributeFormat::kUNorm10_10_10_2:
+      format_class = ScalarClass::kFloat;
+      break;
+    case VertexAttributeFormat::kSInt8:
+    case VertexAttributeFormat::kSInt8x2:
+    case VertexAttributeFormat::kSInt8x3:
+    case VertexAttributeFormat::kSInt8x4:
+    case VertexAttributeFormat::kSInt16:
+    case VertexAttributeFormat::kSInt16x2:
+    case VertexAttributeFormat::kSInt16x3:
+    case VertexAttributeFormat::kSInt16x4:
+    case VertexAttributeFormat::kSInt32:
+    case VertexAttributeFormat::kSInt32x2:
+    case VertexAttributeFormat::kSInt32x3:
+    case VertexAttributeFormat::kSInt32x4:
+      format_class = ScalarClass::kSigned;
+      break;
+    case VertexAttributeFormat::kUInt8:
+    case VertexAttributeFormat::kUInt8x2:
+    case VertexAttributeFormat::kUInt8x3:
+    case VertexAttributeFormat::kUInt8x4:
+    case VertexAttributeFormat::kUInt16:
+    case VertexAttributeFormat::kUInt16x2:
+    case VertexAttributeFormat::kUInt16x3:
+    case VertexAttributeFormat::kUInt16x4:
+    case VertexAttributeFormat::kUInt32:
+    case VertexAttributeFormat::kUInt32x2:
+    case VertexAttributeFormat::kUInt32x3:
+    case VertexAttributeFormat::kUInt32x4:
+      format_class = ScalarClass::kUnsigned;
+      break;
+  }
+  ScalarClass type_class = ScalarClass::kNone;
+  switch (type) {
+    case ShaderType::kFloat:
+    case ShaderType::kHalfFloat:
+      type_class = ScalarClass::kFloat;
+      break;
+    case ShaderType::kSignedByte:
+    case ShaderType::kSignedShort:
+    case ShaderType::kSignedInt:
+      type_class = ScalarClass::kSigned;
+      break;
+    case ShaderType::kUnsignedByte:
+    case ShaderType::kUnsignedShort:
+    case ShaderType::kUnsignedInt:
+      type_class = ScalarClass::kUnsigned;
+      break;
+    case ShaderType::kUnknown:
+    case ShaderType::kVoid:
+    case ShaderType::kBoolean:
+    case ShaderType::kSignedInt64:
+    case ShaderType::kUnsignedInt64:
+    case ShaderType::kAtomicCounter:
+    case ShaderType::kDouble:
+    case ShaderType::kStruct:
+    case ShaderType::kImage:
+    case ShaderType::kSampledImage:
+    case ShaderType::kSampler:
+      return false;
+  }
+  return format_class == type_class;
+}
+
 struct ShaderStageIOSlot {
   const char* name;
   size_t location;
@@ -286,7 +384,9 @@ struct ShaderStageIOSlot {
   ///         Normalized and packed formats are only reachable this way. The
   ///         shader declares a float input and the hardware converts on read,
   ///         so reflection alone cannot tell the two apart. Unset means the
-  ///         format is derived from `type`, `bit_width`, and `vec_size`.
+  ///         format is derived from `type`, `bit_width`, and `vec_size`. A
+  ///         format that `type` cannot read (see `IsVertexFormatReadableAs`)
+  ///         makes the slot invalid.
   std::optional<VertexAttributeFormat> vertex_format = std::nullopt;
 
   constexpr size_t GetHash() const {
@@ -316,11 +416,15 @@ struct ShaderStageIOSlot {
   ///         type, bit width, and component count.
   ///
   ///         Returns `kInvalid` for matrices, component counts outside 1 to 4,
-  ///         mismatched bit widths, and scalar kinds that are not valid vertex
-  ///         inputs (boolean, 64-bit integers, and doubles).
+  ///         mismatched bit widths, scalar kinds that are not valid vertex
+  ///         inputs (boolean, 64-bit integers, and doubles), and an explicit
+  ///         format the declared input cannot read.
   constexpr VertexAttributeFormat GetVertexAttributeFormat() const {
     if (vertex_format.has_value()) {
-      return vertex_format.value();
+      return columns == 1u &&
+                     IsVertexFormatReadableAs(vertex_format.value(), type)
+                 ? vertex_format.value()
+                 : VertexAttributeFormat::kInvalid;
     }
     if (columns != 1u || vec_size < 1u || vec_size > 4u) {
       return VertexAttributeFormat::kInvalid;
