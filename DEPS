@@ -656,7 +656,7 @@ deps = {
      'packages': [
        {
         'package': 'flutter/java/openjdk/${{platform}}',
-        'version': 'version:21'
+        'version': 'version:25.0.2'
        }
      ],
      'condition': 'not (host_os == "linux" and host_cpu == "arm64")',
