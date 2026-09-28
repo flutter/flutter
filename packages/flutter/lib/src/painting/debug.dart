@@ -5,6 +5,7 @@
 /// @docImport 'dart:developer';
 /// @docImport 'dart:ui';
 ///
+/// @docImport 'package:flutter/widgets.dart';
 /// @docImport 'package:flutter_test/flutter_test.dart';
 ///
 /// @docImport 'border_radius.dart';

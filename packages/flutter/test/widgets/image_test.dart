@@ -3366,6 +3366,6 @@ enum _DisableMethod {
   /// Use [TickerMode.enabled].
   tickerMode,
 
-  /// Use [MedaiQueryData.disableAnimations].
+  /// Use [MediaQueryData.disableAnimations].
   mediaQuery,
 }

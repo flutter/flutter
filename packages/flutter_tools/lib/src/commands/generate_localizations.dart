@@ -20,9 +20,8 @@ import '../runner/flutter_command.dart';
 /// For a more comprehensive tutorial on the tool, please see the
 /// [internationalization guide](https://flutter.dev/to/internationalization).
 class GenerateLocalizationsCommand extends FlutterCommand {
-  GenerateLocalizationsCommand({required ToolContext toolContext})
-    : _toolContext = toolContext,
-      super(toolContext: toolContext) {
+  GenerateLocalizationsCommand({required ToolContext super.toolContext})
+    : _toolContext = toolContext {
     argParser.addOption(
       'arb-dir',
       help: 'The directory where the template and translated arb files are located.',
