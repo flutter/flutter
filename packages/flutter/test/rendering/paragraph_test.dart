@@ -348,8 +348,7 @@ void main() {
   test('maxLines', () {
     final paragraph = RenderParagraph(
       const TextSpan(
-        text:
-            "How do you write like you're running out of time? Write day and night like you're running out of time?",
+        text: "How do you write like you're running out of time? Write day and night like you're running out of time?",
         // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
         // 0          1          2       3       4      5     6         7         8    9       10      11     12
         style: TextStyle(fontSize: 10.0),

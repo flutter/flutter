@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/foundation/_features.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -37,17 +36,6 @@ class AccessibilityEvaluationTestBinding extends AutomatedTestWidgetsFlutterBind
 
 void main() {
   AccessibilityEvaluationTestBinding.ensureInitialized();
-
-  late final Set<String> originalFeatureFlags;
-  setUpAll(() {
-    originalFeatureFlags = <String>{...debugEnabledFeatureFlags};
-    debugEnabledFeatureFlags.add('accessibility_evaluations');
-  });
-
-  tearDownAll(() {
-    debugEnabledFeatureFlags.clear();
-    debugEnabledFeatureFlags.addAll(originalFeatureFlags);
-  });
 
   testWidgets(
     'accessibilityEvaluations service extension returns violations for MinimumTapTargetEvaluation',

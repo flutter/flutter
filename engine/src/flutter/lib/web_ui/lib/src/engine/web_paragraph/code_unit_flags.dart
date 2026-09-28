@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+
 import '../text_fragmenter.dart';
 
 class HardcodedUnicodeProperties {

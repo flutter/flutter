@@ -242,24 +242,22 @@ flutter:
     },
   );
 
-  testWithoutContext(
-    'throws ToolExit when flavor from file-level declaration has different flavor from containing folder flavor declaration',
-    () async {
-      final fileSystem = MemoryFileSystem();
-      fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_asset_bundle_test.',
-      );
-      final logger = BufferLogger.test();
-      final platform = FakePlatform();
-      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
-      fileSystem
-          .file(fileSystem.path.join('vanilla', 'actually-strawberry.png'))
-          .createSync(recursive: true);
-      fileSystem.file(fileSystem.path.join('vanilla', 'vanilla.png')).createSync(recursive: true);
+  testWithoutContext('throws ToolExit when flavor from file-level declaration has different flavor from containing folder flavor declaration', () async {
+    final fileSystem = MemoryFileSystem();
+    fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync(
+      'flutter_asset_bundle_test.',
+    );
+    final logger = BufferLogger.test();
+    final platform = FakePlatform();
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+    fileSystem
+        .file(fileSystem.path.join('vanilla', 'actually-strawberry.png'))
+        .createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('vanilla', 'vanilla.png')).createSync(recursive: true);
 
-      fileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
 name: example
 flutter:
   assets:
@@ -270,17 +268,16 @@ flutter:
       flavors:
         - strawberry
 ''');
-      expect(
-        buildBundleWithFlavor(null, logger: logger, fileSystem: fileSystem, platform: platform),
-        throwsToolExit(
-          message:
-              'Multiple assets entries include the file '
-              '"vanilla/actually-strawberry.png", but they specify different lists of flavors.\n'
-              'An entry with the path "vanilla/" specifies the flavor(s): "vanilla".\n'
-              'An entry with the path "vanilla/actually-strawberry.png" '
-              'specifies the flavor(s): "strawberry".',
-        ),
-      );
-    },
-  );
+    expect(
+      buildBundleWithFlavor(null, logger: logger, fileSystem: fileSystem, platform: platform),
+      throwsToolExit(
+        message:
+            'Multiple assets entries include the file '
+            '"vanilla/actually-strawberry.png", but they specify different lists of flavors.\n'
+            'An entry with the path "vanilla/" specifies the flavor(s): "vanilla".\n'
+            'An entry with the path "vanilla/actually-strawberry.png" '
+            'specifies the flavor(s): "strawberry".',
+      ),
+    );
+  });
 }

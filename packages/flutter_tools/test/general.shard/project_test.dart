@@ -1527,15 +1527,12 @@ android {
           expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isFalse);
         });
 
-        testWithMocks(
-          'is false if pbxproj does not contain FlutterGeneratedPluginSwiftPackage in build process',
-          () async {
-            final FlutterProject project = await someProject();
-            project.ios.xcodeProjectInfoFile.createSync(recursive: true);
-            expect(project.ios.xcodeProjectInfoFile.existsSync(), isTrue);
-            expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isFalse);
-          },
-        );
+        testWithMocks('is false if pbxproj does not contain FlutterGeneratedPluginSwiftPackage in build process', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProjectInfoFile.createSync(recursive: true);
+          expect(project.ios.xcodeProjectInfoFile.existsSync(), isTrue);
+          expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isFalse);
+        });
 
         testWithMocks(
           'is true if pbxproj does contain FlutterGeneratedPluginSwiftPackage in build process',
@@ -1708,28 +1705,24 @@ android {
     });
 
     group('Android project file getters', () {
-      _testInMemory(
-        'Project.android.gradleWrapperPropertiesFile resolves to gradle/wrapper/gradle-wrapper.properties',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_test',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+      _testInMemory('Project.android.gradleWrapperPropertiesFile resolves to gradle/wrapper/gradle-wrapper.properties', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_test',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          // Create gradle/wrapper/gradle-wrapper.properties inside the fake android dir
-          final File expected =
-              androidDir
-                  .childDirectory('gradle')
-                  .childDirectory('wrapper')
-                  .childFile('gradle-wrapper.properties')
-                ..createSync(recursive: true);
+        // Create gradle/wrapper/gradle-wrapper.properties inside the fake android dir
+        final File expected =
+            androidDir
+                .childDirectory('gradle')
+                .childDirectory('wrapper')
+                .childFile('gradle-wrapper.properties')
+              ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.gradleWrapperPropertiesFile.path, expected.path);
-        },
-      );
+        expect(project.android.gradleWrapperPropertiesFile.path, expected.path);
+      });
       _testInMemory('Project.android.appGradleFile resolves to app/build.gradle', () async {
         final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
@@ -1806,22 +1799,18 @@ android {
           expect(project.android.hostAppGradleFile.path, expected.path);
         },
       );
-      _testInMemory(
-        'Project.android.hostAppGradleFile prefers android/build.gradle over android/build.gradle.kts',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
-          androidDir.childFile('build.gradle.kts').createSync(recursive: true);
-          final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
+      _testInMemory('Project.android.hostAppGradleFile prefers android/build.gradle over android/build.gradle.kts', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
+        androidDir.childFile('build.gradle.kts').createSync(recursive: true);
+        final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.hostAppGradleFile.path, expected.path);
-        },
-      );
+        expect(project.android.hostAppGradleFile.path, expected.path);
+      });
       _testInMemory(
         'Project.android.settingsGradleFile resolves to android/settings.gradle',
         () async {
@@ -1856,113 +1845,92 @@ android {
           expect(project.android.settingsGradleFile.path, expected.path);
         },
       );
-      _testInMemory(
-        'Project.android.settingsGradleFile prefers android/settings.gradle over android/settings.gradle.kts',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
-          androidDir.childFile('settings.gradle.kts').createSync(recursive: true);
-          final File expected = androidDir.childFile('settings.gradle')
-            ..createSync(recursive: true);
+      _testInMemory('Project.android.settingsGradleFile prefers android/settings.gradle over android/settings.gradle.kts', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
+        androidDir.childFile('settings.gradle.kts').createSync(recursive: true);
+        final File expected = androidDir.childFile('settings.gradle')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.settingsGradleFile.path, expected.path);
-        },
-      );
-      _testInMemory(
-        'Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle exists',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_test',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+        expect(project.android.settingsGradleFile.path, expected.path);
+      });
+      _testInMemory('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle exists', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_test',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          androidDir.childFile('build.gradle').createSync();
+        androidDir.childFile('build.gradle').createSync();
 
-          final File expected =
-              androidDir
-                  .childDirectory('app')
-                  .childDirectory('src')
-                  .childDirectory('main')
-                  .childFile('AndroidManifest.xml')
-                ..createSync(recursive: true);
+        final File expected =
+            androidDir
+                .childDirectory('app')
+                .childDirectory('src')
+                .childDirectory('main')
+                .childFile('AndroidManifest.xml')
+              ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.appManifestFile.path, expected.path);
-        },
-      );
-      _testInMemory(
-        'Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle.kts exists',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_test',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+        expect(project.android.appManifestFile.path, expected.path);
+      });
+      _testInMemory('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle.kts exists', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_test',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          androidDir.childFile('build.gradle.kts').createSync();
+        androidDir.childFile('build.gradle.kts').createSync();
 
-          final File expected =
-              androidDir
-                  .childDirectory('app')
-                  .childDirectory('src')
-                  .childDirectory('main')
-                  .childFile('AndroidManifest.xml')
-                ..createSync(recursive: true);
+        final File expected =
+            androidDir
+                .childDirectory('app')
+                .childDirectory('src')
+                .childDirectory('main')
+                .childFile('AndroidManifest.xml')
+              ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.appManifestFile.path, expected.path);
-        },
-      );
-      _testInMemory(
-        'Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when both build.gradle and build.gradle.kts exists',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_test',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+        expect(project.android.appManifestFile.path, expected.path);
+      });
+      _testInMemory('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when both build.gradle and build.gradle.kts exists', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_test',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          androidDir.childFile('build.gradle').createSync();
-          androidDir.childFile('build.gradle.kts').createSync();
+        androidDir.childFile('build.gradle').createSync();
+        androidDir.childFile('build.gradle.kts').createSync();
 
-          final File expected =
-              androidDir
-                  .childDirectory('app')
-                  .childDirectory('src')
-                  .childDirectory('main')
-                  .childFile('AndroidManifest.xml')
-                ..createSync(recursive: true);
+        final File expected =
+            androidDir
+                .childDirectory('app')
+                .childDirectory('src')
+                .childDirectory('main')
+                .childFile('AndroidManifest.xml')
+              ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.appManifestFile.path, expected.path);
-        },
-      );
-      _testInMemory(
-        'Project.android.appManifestFile resolves to android/AndroidManifest.xml when not using Gradle',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_test',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+        expect(project.android.appManifestFile.path, expected.path);
+      });
+      _testInMemory('Project.android.appManifestFile resolves to android/AndroidManifest.xml when not using Gradle', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_test',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          final File expected = androidDir.childFile('AndroidManifest.xml')
-            ..createSync(recursive: true);
+        final File expected = androidDir.childFile('AndroidManifest.xml')
+          ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.appManifestFile.path, expected.path);
-        },
-      );
+        expect(project.android.appManifestFile.path, expected.path);
+      });
       _testInMemory(
         'Project.android.localPropertiesFile resolves to android/local.properties',
         () async {

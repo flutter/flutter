@@ -78,6 +78,8 @@ void main() {
       expect(dependencies.buildSystem, isNotNull);
       expect(dependencies.buildTargets, isNull);
       expect(dependencies.crashReporter, isNotNull);
+      expect(dependencies.doctor, isNotNull);
+      expect(dependencies.emulatorManager, isNotNull);
       expect(dependencies.featureFlags, isNotNull);
       expect(dependencies.toolContext.cache, isNotNull);
       expect(dependencies.toolContext.config, isNotNull);

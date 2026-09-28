@@ -405,16 +405,13 @@ void main() {
           },
         );
 
-        testWithoutContext(
-          'isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied',
-          () {
-            xcodeProjectInterpreter.isInstalled = true;
-            xcodeProjectInterpreter.version = Version(15, null, null);
+        testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(15, null, null);
 
-            expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
-            expect(fakeProcessManager, hasNoRemainingExpectations);
-          },
-        );
+          expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        });
 
         testWithoutContext(
           'eulaSigned is false when clang output indicates EULA not yet accepted',

@@ -667,27 +667,24 @@ void main() {
     );
   });
 
-  test(
-    'fromImageProvider() propagates TimeoutException or Failed to render image when image cannot be rendered',
-    () async {
-      final blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+  test('fromImageProvider() propagates TimeoutException or Failed to render image when image cannot be rendered', () async {
+    final blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
 
-      // Corrupt the image's bytelist so it cannot be read.
-      final Uint8List corruptImage = blueSquareBytes.sublist(5);
-      final ImageProvider image = MemoryImage(corruptImage);
+    // Corrupt the image's bytelist so it cannot be read.
+    final Uint8List corruptImage = blueSquareBytes.sublist(5);
+    final ImageProvider image = MemoryImage(corruptImage);
 
-      expect(
-        () async => ColorScheme.fromImageProvider(provider: image),
-        throwsA(
-          isA<Exception>().having(
-            (Exception e) => e.toString(),
-            'image',
-            anyOf(contains('Failed to render image'), contains('TimeoutException')),
-          ),
+    expect(
+      () async => ColorScheme.fromImageProvider(provider: image),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'image',
+          anyOf(contains('Failed to render image'), contains('TimeoutException')),
         ),
-      );
-    },
-  );
+      ),
+    );
+  });
 
   testWidgets(
     'generated scheme "on" colors meet a11y contrast guidelines',

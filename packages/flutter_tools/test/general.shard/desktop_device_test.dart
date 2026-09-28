@@ -211,35 +211,32 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables when debugging is disabled',
-    () async {
-      final completer = Completer<void>();
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>['debug'],
-          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
-          completer: completer,
-          environment: const <String, String>{
-            'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-            'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
-            'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
-            'FLUTTER_ENGINE_SWITCHES': '3',
-          },
-        ),
-      ]);
-      final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      final package = FakeApplicationPackage();
-      final LaunchResult result = await device.startApp(
-        package,
-        prebuiltApplication: true,
-        platformArgs: <String, Object>{'trace-startup': true},
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug, traceAllowlist: 'foo,bar'),
-      );
+  testWithoutContext('startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables when debugging is disabled', () async {
+    final completer = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug'],
+        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
+        completer: completer,
+        environment: const <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
+          'FLUTTER_ENGINE_SWITCHES': '3',
+        },
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    final package = FakeApplicationPackage();
+    final LaunchResult result = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      platformArgs: <String, Object>{'trace-startup': true},
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug, traceAllowlist: 'foo,bar'),
+    );
 
-      expect(result.started, true);
-    },
-  );
+    expect(result.started, true);
+  });
 
   testWithoutContext('Port forwarder is a no-op', () async {
     final FakeDesktopDevice device = setUpDesktopDevice();

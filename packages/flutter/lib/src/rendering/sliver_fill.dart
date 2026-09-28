@@ -36,10 +36,9 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   RenderSliverFillViewport({
     required super.childManager,
     double viewportFraction = 1.0,
-    bool allowImplicitScrolling = true,
+    this._allowImplicitScrolling = true,
   }) : assert(viewportFraction > 0.0),
-       _viewportFraction = viewportFraction,
-       _allowImplicitScrolling = allowImplicitScrolling;
+       _viewportFraction = viewportFraction;
 
   @override
   double get itemExtent => constraints.viewportMainAxisExtent * viewportFraction;
