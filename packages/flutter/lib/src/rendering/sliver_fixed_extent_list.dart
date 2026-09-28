@@ -543,6 +543,7 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   final List<double> _itemOffsetCache = <double>[0.0];
   double? _lastViewportMainAxisExtent;
   double? _lastCrossAxisExtent;
+  double? _lastPrecedingScrollExtent;
 
   /// Clears the cached item extents.
   ///
@@ -609,11 +610,13 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
     if (_lastViewportMainAxisExtent != constraints.viewportMainAxisExtent ||
-        _lastCrossAxisExtent != constraints.crossAxisExtent) {
+        _lastCrossAxisExtent != constraints.crossAxisExtent ||
+        _lastPrecedingScrollExtent != constraints.precedingScrollExtent) {
       clearItemExtentCache();
     }
     _lastViewportMainAxisExtent = constraints.viewportMainAxisExtent;
     _lastCrossAxisExtent = constraints.crossAxisExtent;
+    _lastPrecedingScrollExtent = constraints.precedingScrollExtent;
 
     super.performLayout();
 
@@ -725,7 +728,6 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
       extent != null,
       'The itemExtentBuilder must not return null for valid items being laid out.',
     );
-    final double validExtent = extent ?? 0.0;
-    return constraints.asBoxConstraints(minExtent: validExtent, maxExtent: validExtent);
+    return constraints.asBoxConstraints(minExtent: extent!, maxExtent: extent);
   }
 }
