@@ -39,17 +39,21 @@ public final class FlutterEngineFlagsProviderImpl implements FlutterEngineFlagsP
       return;
     }
     Bundle extras = intent.getExtras();
-    for (String key : extras.keySet()) {
-      FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagFromIntentKey(key);
-      if (flag != null) {
-        Log.w(
-            TAG,
-            "Engine flag "
-                + flag.engineArgument
-                + " was specified via Intent extras. Setting engine flags via Intent is not supported in release mode and will be ignored. "
-                + "To set engine flags, specify them on the command line or see https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-flags-release-mode for alternative methods.");
-        break;
+    try {
+      for (String key : extras.keySet()) {
+        FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagFromIntentKey(key);
+        if (flag != null) {
+          Log.w(
+              TAG,
+              "Engine flag "
+                  + flag.engineArgument
+                  + " was specified via Intent extras. Setting engine flags via Intent is not supported in release mode and will be ignored. "
+                  + "To set engine flags, specify them on the command line or see https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-flags-release-mode for alternative methods.");
+          break;
+        }
       }
+    } catch (Exception e) {
+      Log.e(TAG, "Failed to parse intent extras.", e);
     }
   }
 }

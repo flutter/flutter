@@ -1862,6 +1862,13 @@ public class FlutterActivityAndFragmentDelegateTest {
       }
     }
     assertTrue(hasFragmentWarning);
+
+    // Mockito mocks generate synthetic subclasses that override all public methods.
+    // Ensure that mocks do not count as overriding getFlutterShellArgs.
+    FlutterActivity mockActivity = mock(FlutterActivity.class);
+    assertFalse(
+        FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+            FlutterActivity.class, mockActivity));
   }
 
   static class HostWithoutOverride extends FlutterActivity {}

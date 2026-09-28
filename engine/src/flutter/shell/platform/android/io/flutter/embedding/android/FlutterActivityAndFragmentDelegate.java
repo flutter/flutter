@@ -1344,7 +1344,16 @@ import java.util.List;
   /** Checks if {@link #getFlutterShellArgs()} has been overridden by the host. */
   static boolean isGetFlutterShellArgsOverridden(@NonNull Class<?> baseClass, @NonNull Host host) {
     try {
-      if (host.getClass().getMethod("getFlutterShellArgs").getDeclaringClass() != baseClass) {
+      Class<?> declaringClass =
+          host.getClass().getMethod("getFlutterShellArgs").getDeclaringClass();
+      if (declaringClass != baseClass) {
+        String className = declaringClass.getName();
+        if (className.contains("Mockito")
+            || className.contains("ByteBuddy")
+            || className.contains("$Proxy")
+            || declaringClass.isSynthetic()) {
+          return false;
+        }
         Log.w(
             baseClass.getSimpleName(),
             "FlutterShellArgs is deprecated and will be removed in the next stable release. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-flags-release-mode for details.");
