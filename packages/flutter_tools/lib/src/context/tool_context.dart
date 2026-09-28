@@ -27,7 +27,20 @@ import '../project.dart';
 import '../runner/local_engine.dart';
 import '../version.dart';
 
-/// Holds core, platform-independent dependencies.
+/// Holds the core, platform-independent services used throughout the tool.
+///
+/// This includes host I/O and environment wrappers (such as [FileSystem],
+/// [Logger], [Platform], [ProcessManager], [Stdio], [AnsiTerminal], [Signals],
+/// and [SystemClock]) and SDK configuration and state (such as [Artifacts],
+/// [Cache], [Config], [FlutterVersion], and [FlutterProjectFactory]).
+///
+/// [ToolContext] is the lowest layer of the dependency graph and is what most
+/// code should depend on: commands, builders, compilers, and test runners take
+/// a [ToolContext] rather than `ToolDependencies`. It deliberately excludes the
+/// platform toolchains (`AndroidContext`, `AppleContext`) and the higher-level
+/// services built on top of it (such as `BuildSystem` and `Doctor`), so
+/// consumers stay decoupled from platform SDKs and unit tests can use a
+/// lightweight fake without constructing the full object graph.
 class ToolContext {
   ToolContext({
     required this.artifacts,
