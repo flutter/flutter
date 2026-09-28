@@ -15,7 +15,7 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
-  'skia_revision': '8eedeed98e7933382974fe68d5e14f1c6cf8bd8f',
+  'skia_revision': 'f441ca223b2b17b83542ae41d492d0fc76ec1dcb',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
@@ -594,7 +594,7 @@ deps = {
       {
         # See tools/gradle/README.md for update instructions.
         # Version here means the CIPD tag.
-        'version': 'version:9.3.1',
+        'version': 'version:9.5.0',
         'package': 'flutter/gradle'
       }
     ],
@@ -830,7 +830,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'EbPpoJW-Lnsu-8dyZrLVYGqXpiJMw3h3jIf0tXVEZosC'
+        'version': 'ukukV5lEkKabtOATkSbVa6yIaU7g4nfmCcVvWNxfMQMC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
