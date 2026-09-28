@@ -556,11 +556,8 @@ TEST_F(WindowsTest, PostPlatformThreadTaskNotCancelledWhenRun) {
       },
       &captures);
 
-  // The cancel callback must not be called before the task runs.
   EXPECT_FALSE(captures.cancel_called);
 
-  // Pump the Win32 message loop, which runs platform thread tasks, until the
-  // callback has been called.
   while (!captures.callback_called) {
     PumpMessage();
   }
