@@ -167,7 +167,8 @@ class DartProject {
   // Sets the folder in which the engine keeps the GPU programs it compiles,
   // so that later launches load them instead of compiling them again. An
   // empty path turns this off. By default the engine uses a folder under
-  // the user's local application data folder.
+  // the user's local application data folder. The engines of a process
+  // share one cache, so give every engine the same setting.
   void set_program_cache_path(const std::wstring& path) {
     program_cache_path_ = path;
   }

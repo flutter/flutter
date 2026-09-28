@@ -43,9 +43,12 @@ namespace egl {
 // replaces the entry in one step. A truncated, corrupted or mismatched file
 // reads as a miss and is deleted.
 //
-// Entries live in a folder named after the engine version. Folders that
-// earlier engine versions left behind are removed. The total size is bounded:
-// when an entry would exceed it, the entries used least recently are removed.
+// Entries live in a folder named after the engine version, so builds on
+// different engine versions can run side by side. The first write of a
+// process removes the folders of other versions that have not been used for
+// 30 days. The total size of a version's entries is bounded: when an entry
+// would exceed it, the entries used least recently are removed. A folder
+// deleted while the process runs is created again by the next write.
 class ProgramCache {
  public:
   static constexpr size_t kDefaultMaxTotalBytes = 32 * 1024 * 1024;
@@ -143,8 +146,9 @@ class ProgramCache {
   // thread, or in Set when writing synchronously.
   void WriteEntry(const std::string& key, const std::vector<uint8_t>& value);
 
-  // Indexes this version's entries and removes what earlier runs left
-  // behind: other versions' folders and stale temporary files.
+  // Creates this version's folder, indexes its entries and removes what
+  // earlier runs left behind: the folders of versions unused for 30 days and
+  // stale temporary files.
   void PrepareDirectory();
 
   // Removes the entries used least recently until the total fits.

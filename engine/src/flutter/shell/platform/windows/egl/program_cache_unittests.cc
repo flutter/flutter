@@ -285,18 +285,55 @@ TEST(ProgramCacheTest, HitRefreshesTheTimeOfAnOldEntry) {
 TEST(ProgramCacheTest, VersionsHaveSeparateFolders) {
   TemporaryFolder directory;
   const std::filesystem::path root = PathOf(directory);
-  std::filesystem::path old_folder;
   {
     ProgramCache cache(MakeOptions(root, "engine-a"));
     Store(cache, MakeKey('a'), MakeValue(100, 11));
-    old_folder = cache.version_directory();
   }
-  ProgramCache cache(MakeOptions(root, "engine-b"));
-  EXPECT_NE(cache.version_directory().wstring(), old_folder.wstring());
-  EXPECT_EQ(Load(cache, MakeKey('a')), std::nullopt);
-  // The first write removes the other version's folder.
-  Store(cache, MakeKey('b'), MakeValue(100, 11));
-  EXPECT_FALSE(std::filesystem::exists(old_folder));
+  {
+    ProgramCache cache(MakeOptions(root, "engine-b"));
+    EXPECT_EQ(Load(cache, MakeKey('a')), std::nullopt);
+    Store(cache, MakeKey('b'), MakeValue(100, 11));
+  }
+  // Builds on the two versions run side by side: neither version's writes
+  // remove the other's entries.
+  ProgramCache a(MakeOptions(root, "engine-a"));
+  EXPECT_EQ(Load(a, MakeKey('a')), MakeValue(100, 11));
+  EXPECT_EQ(Load(a, MakeKey('b')), std::nullopt);
+  Store(a, MakeKey('c'), MakeValue(100, 11));
+  ProgramCache b(MakeOptions(root, "engine-b"));
+  EXPECT_NE(a.version_directory().wstring(), b.version_directory().wstring());
+  EXPECT_EQ(Load(b, MakeKey('b')), MakeValue(100, 11));
+}
+
+TEST(ProgramCacheTest, RemovesVersionsUnusedFor30Days) {
+  TemporaryFolder directory;
+  const std::filesystem::path root = PathOf(directory);
+  const std::filesystem::path unused =
+      root / fml::Utf8ToWideString(ProgramCache::VersionDirectoryName("x"));
+  const std::filesystem::path recent =
+      root / fml::Utf8ToWideString(ProgramCache::VersionDirectoryName("y"));
+  const std::filesystem::path writing =
+      root / fml::Utf8ToWideString(ProgramCache::VersionDirectoryName("z"));
+  for (const auto& folder : {unused, recent, writing}) {
+    std::filesystem::create_directories(folder);
+    WriteFile(folder / L"0a.bin", "entry");
+    SetLastWriteTime(folder / L"0a.bin", Now() - 40 * kTicksPerDay);
+  }
+  WriteFile(unused / L"0b.bin", "entry");
+  SetLastWriteTime(unused / L"0b.bin", Now() - 31 * kTicksPerDay);
+  WriteFile(recent / L"0b.bin", "entry");
+  SetLastWriteTime(recent / L"0b.bin", Now() - 29 * kTicksPerDay);
+  WriteFile(writing / L"0b.bin.12-3.tmp", "temporary");
+
+  ProgramCache cache(MakeOptions(root, "engine-a"));
+  Store(cache, MakeKey('a'), MakeValue(100, 14));
+  EXPECT_FALSE(std::filesystem::exists(unused));
+  // The newest file decides for the whole folder, and a write in progress
+  // counts as use.
+  EXPECT_TRUE(std::filesystem::exists(recent / L"0a.bin"));
+  EXPECT_TRUE(std::filesystem::exists(recent / L"0b.bin"));
+  EXPECT_TRUE(std::filesystem::exists(writing / L"0a.bin"));
+  EXPECT_TRUE(std::filesystem::exists(writing / L"0b.bin.12-3.tmp"));
 }
 
 TEST(ProgramCacheTest, CleanupOnlyRemovesFilesThisCacheWrites) {
@@ -311,6 +348,8 @@ TEST(ProgramCacheTest, CleanupOnlyRemovesFilesThisCacheWrites) {
     std::filesystem::create_directories(folder);
     WriteFile(folder / L"0a1b.bin", "entry");
     WriteFile(folder / L"0a1b.bin.12-3.tmp", "temporary");
+    SetLastWriteTime(folder / L"0a1b.bin", Now() - 40 * kTicksPerDay);
+    SetLastWriteTime(folder / L"0a1b.bin.12-3.tmp", Now() - 40 * kTicksPerDay);
   }
   WriteFile(shared / L"notes.txt", "keep");
 
@@ -339,6 +378,20 @@ TEST(ProgramCacheTest, RemovesStaleTemporaryFiles) {
   Store(cache, MakeKey('a'), MakeValue(100, 13));
   EXPECT_FALSE(std::filesystem::exists(folder / L"0a.bin.1-1.tmp"));
   EXPECT_TRUE(std::filesystem::exists(folder / L"0b.bin.1-2.tmp"));
+}
+
+TEST(ProgramCacheTest, RecreatesAFolderDeletedWhileRunning) {
+  TemporaryFolder directory;
+  const std::filesystem::path root = PathOf(directory);
+  ProgramCache cache(MakeOptions(root));
+  Store(cache, MakeKey('a'), MakeValue(100, 15));
+  // As when an app clears its cache folder while it runs.
+  std::filesystem::remove_all(root);
+
+  Store(cache, MakeKey('b'), MakeValue(100, 15));
+  ProgramCache reopened(MakeOptions(root));
+  EXPECT_EQ(Load(reopened, MakeKey('a')), std::nullopt);
+  EXPECT_EQ(Load(reopened, MakeKey('b')), MakeValue(100, 15));
 }
 
 TEST(ProgramCacheTest, ThreadsCanStoreAndLoadAtTheSameTime) {

@@ -139,7 +139,9 @@ typedef struct {
   // If null, the engine uses a folder under the user's local application
   // data folder, named after the executable's company and product names.
   // If empty, compiled programs are not kept. A relative path is taken as
-  // relative to the local application data folder.
+  // relative to the local application data folder. The engines of a process
+  // share one cache, in the folder of the first engine that keeps one, so
+  // give every engine the same setting.
   const wchar_t* program_cache_path;
 } FlutterDesktopEngineProperties;
 

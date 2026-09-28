@@ -51,6 +51,10 @@ constexpr uint64_t kStaleTemporaryFileTicks = 10 * 60 * kTicksPerSecond;
 // A hit refreshes the time of an entry older than this, which orders
 // evictions by use without writing on every hit.
 constexpr uint64_t kLastUsedGranularityTicks = 24 * 60 * 60 * kTicksPerSecond;
+// Another engine version's folder is removed only once all of its files are
+// older than this, so that builds on different engine versions can run side
+// by side.
+constexpr uint64_t kUnusedVersionTicks = 30 * kLastUsedGranularityTicks;
 
 constexpr uint64_t kFnvOffset = 14695981039346656037ull;
 
@@ -146,6 +150,12 @@ void ForEachItem(const std::filesystem::path& directory, Visit visit) {
     }
   } while (::FindNextFileW(find, &data));
   ::FindClose(find);
+}
+
+// Creates |path| for writing. Fails if it exists.
+HANDLE CreateNewFile(const std::filesystem::path& path) {
+  return ::CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW,
+                       FILE_ATTRIBUTE_NORMAL, nullptr);
 }
 
 bool WriteAll(HANDLE file, const void* data, size_t size) {
@@ -505,11 +515,19 @@ void ProgramCache::WriteEntry(const std::string& key,
   header.value_size = static_cast<uint32_t>(value.size());
   header.checksum = Checksum(key, value.data(), value.size());
 
+  HANDLE handle = CreateNewFile(temporary);
+  if (handle == INVALID_HANDLE_VALUE &&
+      ::GetLastError() == ERROR_PATH_NOT_FOUND) {
+    // The folder was deleted while the process ran, for example by the app
+    // clearing its cache folder. Its entries are gone, so start again.
+    index_.clear();
+    total_bytes_ = 0;
+    PrepareDirectory();
+    handle = CreateNewFile(temporary);
+  }
   bool written = false;
   {
-    ScopedHandle file(::CreateFileW(temporary.c_str(), GENERIC_WRITE, 0,
-                                    nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL,
-                                    nullptr));
+    ScopedHandle file(handle);
     if (!file.is_valid()) {
       return;
     }
@@ -538,9 +556,12 @@ void ProgramCache::PrepareDirectory() {
   std::error_code error;
   std::filesystem::create_directories(version_directory_, error);
 
-  // Folders that other engine versions left behind. Only files this cache
-  // writes are deleted, and a folder only once it is empty, so a folder that
-  // holds anything else is kept.
+  // Folders of other engine versions. A folder with a recent file belongs to
+  // a build that is still in use: a hit refreshes an entry at most daily, and
+  // a temporary file is a write in progress. Otherwise only the files this
+  // cache writes are deleted, and the folder only once it is empty, so a
+  // folder that holds anything else is kept.
+  const uint64_t now = NowTicks();
   const std::wstring own_name = version_directory_.filename().wstring();
   ForEachItem(options_.directory, [&](const WIN32_FIND_DATAW& item) {
     const std::wstring_view name = item.cFileName;
@@ -549,18 +570,26 @@ void ProgramCache::PrepareDirectory() {
         name == own_name || !IsVersionDirectoryName(name)) {
       return;
     }
-    const std::filesystem::path old_directory = options_.directory / name;
-    ForEachItem(old_directory, [&](const WIN32_FIND_DATAW& file) {
+    const std::filesystem::path other_directory = options_.directory / name;
+    std::vector<std::wstring> cache_files;
+    uint64_t newest = 0;
+    ForEachItem(other_directory, [&](const WIN32_FIND_DATAW& file) {
       if ((file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 &&
           (IsEntryFileName(file.cFileName) ||
            IsTemporaryFileName(file.cFileName))) {
-        ::DeleteFileW((old_directory / file.cFileName).c_str());
+        cache_files.emplace_back(file.cFileName);
+        newest = std::max(newest, ToTicks(file.ftLastWriteTime));
       }
     });
-    ::RemoveDirectoryW(old_directory.c_str());
+    if (newest > now || now - newest <= kUnusedVersionTicks) {
+      return;
+    }
+    for (const std::wstring& file : cache_files) {
+      ::DeleteFileW((other_directory / file).c_str());
+    }
+    ::RemoveDirectoryW(other_directory.c_str());
   });
 
-  const uint64_t now = NowTicks();
   ForEachItem(version_directory_, [&](const WIN32_FIND_DATAW& file) {
     if ((file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) {
       return;
