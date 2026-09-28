@@ -3171,7 +3171,6 @@ targets:
 
   - name: Linux_android_emu android_intent_security_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
