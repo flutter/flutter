@@ -209,7 +209,9 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
+      await fakeTextChannel.incoming!(
+        const MethodCall('TextInputClient.requestExistingInputState'),
+      );
 
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -230,7 +232,9 @@ void main() {
           MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
         ]);
 
-        fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
+        await fakeTextChannel.incoming!(
+          const MethodCall('TextInputClient.requestExistingInputState'),
+        );
 
         expect(fakeTextChannel.outgoingCalls.length, 3);
         fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -1216,9 +1220,9 @@ void main() {
 
       <FakeScribbleElement>[...targetElements, ...otherElements].forEach(unregisterElements);
 
-      final List<List<dynamic>> responses =
-          (const JSONMessageCodec().decodeMessage(responseBytes) as List<dynamic>)
-              .cast<List<dynamic>>();
+      final List<List<dynamic>> responses = (const JSONMessageCodec().decodeMessage(
+        responseBytes,
+      ) as List<dynamic>).cast<List<dynamic>>();
       expect(responses.first.length, 2);
       expect(
         responses.first.first,

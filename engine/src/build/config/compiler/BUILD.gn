@@ -637,9 +637,12 @@ config("runtime_library") {
       "-I" + _libcxxabi_include,
     ]
 
-    # Unwind seemes to be in these libraries in Linux.
-    if (!is_linux) {
-      ldflags += [ "-nostdlib++" ]
+    ldflags += [ "-nostdlib++" ]
+
+    if (is_linux) {
+      # Our custom libcxx doesn't include the unwinder, which is included in
+      # libc++.a. Link the libunwind directly.
+      ldflags += [ "--unwindlib=libunwind" ]
     }
   }
 

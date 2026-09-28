@@ -134,12 +134,10 @@ class ShoppingCartSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle smallAmountStyle = Theme.of(
-      context,
-    ).textTheme.bodyMedium!.copyWith(color: shrineBrown600);
-    final TextStyle largeAmountStyle = Theme.of(
-      context,
-    ).textTheme.headlineMedium!.copyWith(letterSpacing: letterSpacingOrNone(mediumLetterSpacing));
+    final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyMedium!
+        .copyWith(color: shrineBrown600);
+    final TextStyle largeAmountStyle = Theme.of(context).textTheme.headlineMedium!
+        .copyWith(letterSpacing: letterSpacingOrNone(mediumLetterSpacing));
     final formatter = NumberFormat.simpleCurrency(
       decimalDigits: 2,
       locale: Localizations.localeOf(context).toString(),

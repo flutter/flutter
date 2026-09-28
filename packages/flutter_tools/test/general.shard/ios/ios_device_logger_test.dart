@@ -207,65 +207,60 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       );
     });
 
-    testWithoutContext(
-      'IOSDeviceLogReader ignores VM Service logs when attached to and received flutter logs from debugger',
-      () async {
-        final stdoutEvent = Event(
-          kind: 'Stdout',
-          timestamp: 0,
-          bytes: base64.encode(utf8.encode('  This is a message ')),
-        );
-        final stderrEvent = Event(
-          kind: 'Stderr',
-          timestamp: 0,
-          bytes: base64.encode(utf8.encode('  And this is an error ')),
-        );
-        final FlutterVmService vmService = FakeVmServiceHost(
-          requests: <VmServiceExpectation>[
-            const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{'streamId': 'Debug'},
-            ),
-            const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{'streamId': 'Stdout'},
-            ),
-            const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{'streamId': 'Stderr'},
-            ),
-            FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
-            FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
-          ],
-        ).vmService;
-        final logReader = IOSDeviceLogReader.test(
-          useSyslog: false,
-          iMobileDevice: IMobileDevice(
-            artifacts: artifacts,
-            processManager: processManager,
-            cache: fakeCache,
-            logger: logger,
+    testWithoutContext('IOSDeviceLogReader ignores VM Service logs when attached to and received flutter logs from debugger', () async {
+      final stdoutEvent = Event(
+        kind: 'Stdout',
+        timestamp: 0,
+        bytes: base64.encode(utf8.encode('  This is a message ')),
+      );
+      final stderrEvent = Event(
+        kind: 'Stderr',
+        timestamp: 0,
+        bytes: base64.encode(utf8.encode('  And this is an error ')),
+      );
+      final FlutterVmService vmService = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Debug'},
           ),
-          xcode: FakeXcode(),
-        );
-        await logReader.provideVmService(vmService);
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Stdout'},
+          ),
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Stderr'},
+          ),
+          FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+          FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+        ],
+      ).vmService;
+      final logReader = IOSDeviceLogReader.test(
+        useSyslog: false,
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        xcode: FakeXcode(),
+      );
+      await logReader.provideVmService(vmService);
 
-        final iosDeployDebugger = FakeIOSDeployDebugger();
-        iosDeployDebugger.debuggerAttached = true;
+      final iosDeployDebugger = FakeIOSDeployDebugger();
+      iosDeployDebugger.debuggerAttached = true;
 
-        final debuggingLogs = Stream<String>.fromIterable(<String>[
-          'flutter: Message from debugger',
-        ]);
-        iosDeployDebugger.logLines = debuggingLogs;
-        logReader.debuggerStream = iosDeployDebugger;
+      final debuggingLogs = Stream<String>.fromIterable(<String>['flutter: Message from debugger']);
+      iosDeployDebugger.logLines = debuggingLogs;
+      logReader.debuggerStream = iosDeployDebugger;
 
-        // Wait for stream listeners to fire.
-        await expectLater(
-          logReader.logLines,
-          emitsInAnyOrder(<Matcher>[equals('flutter: Message from debugger')]),
-        );
-      },
-    );
+      // Wait for stream listeners to fire.
+      await expectLater(
+        logReader.logLines,
+        emitsInAnyOrder(<Matcher>[equals('flutter: Message from debugger')]),
+      );
+    });
   });
 
   group('debugger stream', () {
@@ -993,69 +988,57 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         );
       });
 
-      testWithoutContext(
-        'primary messages are not added if fallback already added them, otherwise duplicates are allowed',
-        () async {
-          final logReader = IOSDeviceLogReader.test(
-            iMobileDevice: IMobileDevice(
-              artifacts: artifacts,
-              processManager: FakeProcessManager.any(),
-              cache: fakeCache,
-              logger: logger,
-            ),
-            xcode: FakeXcode(),
-            usingCISystem: true,
-            majorSdkVersion: 16,
-          );
+      testWithoutContext('primary messages are not added if fallback already added them, otherwise duplicates are allowed', () async {
+        final logReader = IOSDeviceLogReader.test(
+          iMobileDevice: IMobileDevice(
+            artifacts: artifacts,
+            processManager: FakeProcessManager.any(),
+            cache: fakeCache,
+            logger: logger,
+          ),
+          xcode: FakeXcode(),
+          usingCISystem: true,
+          majorSdkVersion: 16,
+        );
 
-          expect(logReader.useSyslogLogging, isTrue);
-          expect(logReader.useIOSDeployLogging, isTrue);
-          expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
-          expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
+        expect(logReader.useSyslogLogging, isTrue);
+        expect(logReader.useIOSDeployLogging, isTrue);
+        expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
+        expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
 
-          final Future<List<String>> logLines = logReader.logLines.toList();
+        final Future<List<String>> logLines = logReader.logLines.toList();
 
-          logReader.addToLinesController(
-            'flutter: A flutter message',
-            IOSDeviceLogSource.idevicesyslog,
-          );
-          logReader.addToLinesController(
-            'flutter: A flutter message',
-            IOSDeviceLogSource.idevicesyslog,
-          );
-          logReader.addToLinesController('A non-flutter message', IOSDeviceLogSource.iosDeploy);
-          logReader.addToLinesController('A non-flutter message', IOSDeviceLogSource.iosDeploy);
-          // Will be excluded because was already added by fallback.
-          logReader.addToLinesController(
-            'flutter: A flutter message',
-            IOSDeviceLogSource.iosDeploy,
-          );
-          // Will be excluded because was already added by fallback.
-          logReader.addToLinesController(
-            'flutter: A flutter message',
-            IOSDeviceLogSource.iosDeploy,
-          );
-          // Will be included because, although the message is the same, the
-          // fallback only added it twice so this third one is considered new.
-          logReader.addToLinesController(
-            'flutter: A flutter message',
-            IOSDeviceLogSource.iosDeploy,
-          );
+        logReader.addToLinesController(
+          'flutter: A flutter message',
+          IOSDeviceLogSource.idevicesyslog,
+        );
+        logReader.addToLinesController(
+          'flutter: A flutter message',
+          IOSDeviceLogSource.idevicesyslog,
+        );
+        logReader.addToLinesController('A non-flutter message', IOSDeviceLogSource.iosDeploy);
+        logReader.addToLinesController('A non-flutter message', IOSDeviceLogSource.iosDeploy);
+        // Will be excluded because was already added by fallback.
+        logReader.addToLinesController('flutter: A flutter message', IOSDeviceLogSource.iosDeploy);
+        // Will be excluded because was already added by fallback.
+        logReader.addToLinesController('flutter: A flutter message', IOSDeviceLogSource.iosDeploy);
+        // Will be included because, although the message is the same, the
+        // fallback only added it twice so this third one is considered new.
+        logReader.addToLinesController('flutter: A flutter message', IOSDeviceLogSource.iosDeploy);
 
-          final List<String> lines = await logLines;
+        final List<String> lines = await logLines;
 
-          expect(
-            lines,
-            containsAllInOrder(<String>[
-              'flutter: A flutter message', // from idevicesyslog
-              'flutter: A flutter message', // from idevicesyslog
-              'A non-flutter message', // from iosDeploy
-              'A non-flutter message', // from iosDeploy
-              'flutter: A flutter message', // from iosDeploy
-            ]),
-          );
-        },
-      );
+        expect(
+          lines,
+          containsAllInOrder(<String>[
+            'flutter: A flutter message', // from idevicesyslog
+            'flutter: A flutter message', // from idevicesyslog
+            'A non-flutter message', // from iosDeploy
+            'A non-flutter message', // from iosDeploy
+            'flutter: A flutter message', // from iosDeploy
+          ]),
+        );
+      });
 
       testWithoutContext(
         'flutter fallback messages are included until a primary flutter message is received',

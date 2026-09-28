@@ -23,9 +23,9 @@ void main() {
           ' "selectionIsDirectional": false,'
           ' "composingBase": -1,'
           ' "composingExtent": -1}';
-      final delta =
-          TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>)
-              as TextEditingDeltaInsertion;
+      final delta = TextEditingDelta.fromJSON(
+        jsonDecode(jsonInsertionDelta) as Map<String, dynamic>,
+      ) as TextEditingDeltaInsertion;
       const TextRange expectedComposing = TextRange.empty;
       const expectedInsertionOffset = 0;
       const expectedSelection = TextSelection.collapsed(offset: 17);
@@ -51,9 +51,9 @@ void main() {
           ' "composingBase": 6,'
           ' "composingExtent": 11}';
 
-      final delta =
-          TextEditingDelta.fromJSON(jsonDecode(jsonInsertionDelta) as Map<String, dynamic>)
-              as TextEditingDeltaInsertion;
+      final delta = TextEditingDelta.fromJSON(
+        jsonDecode(jsonInsertionDelta) as Map<String, dynamic>,
+      ) as TextEditingDeltaInsertion;
       const expectedComposing = TextRange(start: 6, end: 11);
       const expectedInsertionOffset = 10;
       const expectedSelection = TextSelection.collapsed(offset: 11);
@@ -121,9 +121,9 @@ void main() {
           ' "composingBase": -1,'
           ' "composingExtent": -1}';
 
-      final delta =
-          TextEditingDelta.fromJSON(jsonDecode(jsonDeletionDelta) as Map<String, dynamic>)
-              as TextEditingDeltaDeletion;
+      final delta = TextEditingDelta.fromJSON(
+        jsonDecode(jsonDeletionDelta) as Map<String, dynamic>,
+      ) as TextEditingDeltaDeletion;
       const TextRange expectedComposing = TextRange.empty;
       const expectedDeletedRange = TextRange(start: 1, end: 2);
       const expectedSelection = TextSelection.collapsed(offset: 1);
@@ -149,9 +149,9 @@ void main() {
           ' "composingBase": 6,'
           ' "composingExtent": 10}';
 
-      final delta =
-          TextEditingDelta.fromJSON(jsonDecode(jsonDeletionDelta) as Map<String, dynamic>)
-              as TextEditingDeltaDeletion;
+      final delta = TextEditingDelta.fromJSON(
+        jsonDecode(jsonDeletionDelta) as Map<String, dynamic>,
+      ) as TextEditingDeltaDeletion;
       const expectedComposing = TextRange(start: 6, end: 10);
       const expectedDeletedRange = TextRange(start: 10, end: 11);
       const expectedSelection = TextSelection.collapsed(offset: 10);
@@ -217,9 +217,9 @@ void main() {
           ' "composingBase": 6,'
           ' "composingExtent": 13}';
 
-      final delta =
-          TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>)
-              as TextEditingDeltaReplacement;
+      final delta = TextEditingDelta.fromJSON(
+        jsonDecode(jsonReplacementDelta) as Map<String, dynamic>,
+      ) as TextEditingDeltaReplacement;
       const expectedComposing = TextRange(start: 6, end: 13);
       const expectedReplacedRange = TextRange(start: 6, end: 11);
       const expectedSelection = TextSelection.collapsed(offset: 13);
@@ -246,9 +246,9 @@ void main() {
           ' "composingBase": 6,'
           ' "composingExtent": 7}';
 
-      final delta =
-          TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>)
-              as TextEditingDeltaReplacement;
+      final delta = TextEditingDelta.fromJSON(
+        jsonDecode(jsonReplacementDelta) as Map<String, dynamic>,
+      ) as TextEditingDeltaReplacement;
       const expectedComposing = TextRange(start: 6, end: 7);
       const expectedReplacedRange = TextRange(start: 6, end: 11);
       const expectedSelection = TextSelection.collapsed(offset: 7);
@@ -275,9 +275,9 @@ void main() {
           ' "composingBase": 6,'
           ' "composingExtent": 11}';
 
-      final delta =
-          TextEditingDelta.fromJSON(jsonDecode(jsonReplacementDelta) as Map<String, dynamic>)
-              as TextEditingDeltaReplacement;
+      final delta = TextEditingDelta.fromJSON(
+        jsonDecode(jsonReplacementDelta) as Map<String, dynamic>,
+      ) as TextEditingDeltaReplacement;
       const expectedComposing = TextRange(start: 6, end: 11);
       const expectedReplacedRange = TextRange(start: 6, end: 11);
       const expectedSelection = TextSelection.collapsed(offset: 11);
@@ -347,9 +347,9 @@ void main() {
           ' "composingBase": 6,'
           ' "composingExtent": 11}';
 
-      final delta =
-          TextEditingDelta.fromJSON(jsonDecode(jsonNonTextUpdateDelta) as Map<String, dynamic>)
-              as TextEditingDeltaNonTextUpdate;
+      final delta = TextEditingDelta.fromJSON(
+        jsonDecode(jsonNonTextUpdateDelta) as Map<String, dynamic>,
+      ) as TextEditingDeltaNonTextUpdate;
       const expectedComposing = TextRange(start: 6, end: 11);
       const expectedSelection = TextSelection.collapsed(offset: 10);
 
