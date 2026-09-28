@@ -3,86 +3,42 @@
 // found in the LICENSE file.
 
 import 'package:code_assets/code_assets.dart';
-import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
 import '../native_assets.dart';
+import '../native_assets_manifest.dart';
 import 'native_assets_host.dart';
 
 // TODO(dcharkes): Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
 const targetMacOSVersion = 13;
 
-/// Extract the [Architecture] from a [DarwinArch].
-Architecture getNativeMacOSArchitecture(DarwinArch darwinArch) {
-  return switch (darwinArch) {
-    DarwinArch.arm64 => Architecture.arm64,
-    DarwinArch.x86_64 => Architecture.x64,
-    DarwinArch.armv7 => throw Exception('Unknown DarwinArch: $darwinArch.'),
+/// Extract the [Architecture] from a [CpuArch].
+Architecture getNativeMacOSArchitecture(CpuArch cpuArch) {
+  return switch (cpuArch) {
+    CpuArch.arm64 => Architecture.arm64,
+    CpuArch.x64 => Architecture.x64,
+    CpuArch.armv7 ||
+    CpuArch.x86 ||
+    CpuArch.riscv64 ||
+    CpuArch.unknown => throw Exception('Unknown macOS CPU arch: $cpuArch.'),
   };
 }
 
 /// Groups native assets by their target framework path for macOS
 /// multi-architecture bundling.
-Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocationsMacOS(
+Map<Uri, List<FlutterCodeAsset>> fatAssetTargetLocationsMacOS(
   List<FlutterCodeAsset> nativeAssets,
   Uri? absolutePath,
 ) {
-  return fatAssetTargetLocations(
-    nativeAssets,
-    (FlutterCodeAsset asset, Set<String> alreadyTakenNames) =>
-        _targetLocationMacOS(asset, absolutePath, alreadyTakenNames),
-  );
+  return fatAssetTargetLocations(assetTargetLocationsMacOS(nativeAssets, absolutePath));
 }
 
-Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsMacOS(
+Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsMacOS(
   List<FlutterCodeAsset> nativeAssets,
   Uri? absolutePath,
 ) {
-  final alreadyTakenNames = <String>{};
-  final idToPath = <String, KernelAssetPath>{};
-  final result = <FlutterCodeAsset, KernelAsset>{};
-  for (final asset in nativeAssets) {
-    final String assetId = asset.codeAsset.id;
-    final KernelAssetPath path =
-        idToPath[assetId] ?? _targetLocationMacOS(asset, absolutePath, alreadyTakenNames).path;
-    idToPath[assetId] = path;
-    result[asset] = KernelAsset(id: assetId, target: asset.target, path: path);
-  }
-  return result;
-}
-
-KernelAsset _targetLocationMacOS(
-  FlutterCodeAsset asset,
-  Uri? absolutePath,
-  Set<String> alreadyTakenNames,
-) {
-  final LinkMode linkMode = asset.codeAsset.linkMode;
-  final KernelAssetPath kernelAssetPath;
-  switch (linkMode) {
-    case DynamicLoadingSystem _:
-      kernelAssetPath = KernelAssetSystemPath(linkMode.uri);
-    case LookupInExecutable _:
-      kernelAssetPath = KernelAssetInExecutable();
-    case LookupInProcess _:
-      kernelAssetPath = KernelAssetInProcess();
-    case DynamicLoadingBundled _:
-      final String fileName = asset.codeAsset.file!.pathSegments.last;
-      Uri uri;
-      if (absolutePath != null) {
-        // Flutter tester needs full host paths.
-        uri = absolutePath.resolve(fileName);
-      } else {
-        // Flutter Desktop needs "absolute" paths inside the app.
-        // "relative" in the context of native assets would be relative to the
-        // kernel or aot snapshot.
-        uri = frameworkUri(fileName, alreadyTakenNames);
-      }
-      kernelAssetPath = KernelAssetAbsolutePath(uri);
-    default:
-      throw Exception('Unsupported asset link mode $linkMode in asset $asset');
-  }
-  return KernelAsset(id: asset.codeAsset.id, target: asset.target, path: kernelAssetPath);
+  return assetTargetLocationsApple(nativeAssets, absolutePath: absolutePath);
 }
 
 /// Copies native assets into a framework per dynamic library.
@@ -102,7 +58,7 @@ KernelAsset _targetLocationMacOS(
 /// in macos_assemble.sh.
 Future<List<File>> copyNativeCodeAssetsMacOS(
   Uri targetUri,
-  Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
+  Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
   FileSystem fileSystem,
@@ -112,9 +68,8 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
   final oldToNewInstallNames = <String, String>{};
   final dylibs = <(File, String, Directory)>[];
 
-  for (final MapEntry<KernelAssetPath, List<FlutterCodeAsset>> assetMapping
-      in assetTargetLocations.entries) {
-    final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
+  for (final MapEntry<Uri, List<FlutterCodeAsset>> assetMapping in assetTargetLocations.entries) {
+    final Uri target = assetMapping.key;
     final sources = <File>[
       for (final FlutterCodeAsset source in assetMapping.value)
         fileSystem.file(source.codeAsset.file),
@@ -169,8 +124,7 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
       ),
     );
 
-    final String dylibFileName = dylibFile.basename;
-    final newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
+    final String newInstallName = frameworkInstallName(target);
     final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;
@@ -206,7 +160,7 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
 /// Code signing is also done here.
 Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
   Uri targetUri,
-  Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
+  Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
   FileSystem fileSystem,
@@ -216,9 +170,8 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
   final oldToNewInstallNames = <String, String>{};
   final dylibs = <(File, String)>[];
 
-  for (final MapEntry<KernelAssetPath, List<FlutterCodeAsset>> assetMapping
-      in assetTargetLocations.entries) {
-    final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
+  for (final MapEntry<Uri, List<FlutterCodeAsset>> assetMapping in assetTargetLocations.entries) {
+    final Uri target = assetMapping.key;
     final sources = <File>[
       for (final FlutterCodeAsset source in assetMapping.value)
         fileSystem.file(source.codeAsset.file),

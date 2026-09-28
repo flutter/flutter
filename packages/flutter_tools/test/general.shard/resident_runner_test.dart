@@ -1935,12 +1935,15 @@ flutter:
                 ddsUri: Uri.parse('http://localhost/existingDdsInField'),
               );
             };
-        final flutterDevice = TestFlutterDevice(device, vmServiceUris: Stream<Uri>.value(testUri));
+        final flutterDevice = TestFlutterDevice(device, vmServiceUri: Future<Uri>.value(testUri));
         final done = Completer<void>();
         unawaited(
           runZonedGuarded(
             () => flutterDevice
-                .connect(debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug))
+                .connect(
+                  vmServiceUri: testUri,
+                  debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+                )
                 .then((_) => done.complete()),
             (_, _) => done.complete(),
           ),
@@ -2009,8 +2012,9 @@ flutter:
               done.complete();
               return FakeDartDevelopmentServiceLauncher(uri: remoteVmServiceUri);
             };
-        final flutterDevice = TestFlutterDevice(device, vmServiceUris: Stream<Uri>.value(testUri));
+        final flutterDevice = TestFlutterDevice(device, vmServiceUri: Future<Uri>.value(testUri));
         await flutterDevice.connect(
+          vmServiceUri: testUri,
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
             disableServiceAuthCodes: true,
@@ -2275,6 +2279,20 @@ flutter:
     },
   );
 
+  testUsingContext(
+    'ResidentRunner delays on connection failure to allow logs to flush',
+    () => testbed.run(() async {
+      flutterDevice.connectError = Exception('Failed to connect');
+      flutterDevice.logFlushDelay = const Duration(milliseconds: 100);
+
+      final stopwatch = Stopwatch()..start();
+      final int result = await residentRunner.attach();
+      stopwatch.stop();
+
+      expect(result, 2);
+      expect(stopwatch.elapsedMilliseconds, greaterThanOrEqualTo(100));
+    }),
+  );
   group('ResidentRunner cached Initial Dill Compilation', () {
     late TestBed testbed;
     late FakeFlutterDevice flutterDevice;

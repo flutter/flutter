@@ -249,6 +249,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         processManager: globals.processManager,
         xcode: globals.xcode!,
+        operatingSystemUtils: globals.os,
       ),
       IOSWorkflow: () => IOSWorkflow(
         featureFlags: featureFlags,
@@ -347,7 +348,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
         xcode: globals.xcode!,
         iproxy: IProxy(
-          iproxyPath: globals.artifacts!.getHostArtifact(HostArtifact.iproxy).path,
+          artifacts: globals.artifacts!,
           logger: globals.logger,
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,

@@ -182,9 +182,7 @@ abstract class Recorder {
 /// }
 /// ```
 abstract class RawRecorder extends Recorder {
-  RawRecorder({required String name, bool useCustomWarmUp = false})
-    : _useCustomWarmUp = useCustomWarmUp,
-      super._(name, false);
+  RawRecorder({required String name, this._useCustomWarmUp = false}) : super._(name, false);
 
   /// Whether to delimit warm-up frames in a custom way.
   final bool _useCustomWarmUp;
@@ -1236,6 +1234,13 @@ class _RecordingWidgetsBinding extends BindingBase
     }
     try {
       _recorder?.frameWillDraw();
+      // Flutter will not render views that don't need compositing,
+      // but this recorder expect preroll/applyFrame for every frame,
+      // even if the views don't change otherwise it stalls.
+      // See https://github.com/flutter/flutter/issues/191251
+      for (final RenderView renderView in renderViews) {
+        renderView.markNeedsCompositeFrame();
+      }
       super.handleDrawFrame();
       _recorder?.frameDidDraw();
     } catch (error, stackTrace) {

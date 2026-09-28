@@ -2,13 +2,50 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/ui.dart' as ui;
+import 'dart:math' as math;
 
+import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
+
+import '../browser_detection.dart';
 import '../dom.dart';
 import '../platform_dispatcher.dart';
 import '../text_editing/input_type.dart';
 import '../text_editing/text_editing.dart';
 import 'semantics.dart';
+
+/// The smallest font size that does not make iOS zoom the page.
+///
+/// iOS zooms when it focuses an editable element whose font size is below this,
+/// and leaves the page zoomed afterwards.
+///
+/// See: https://github.com/flutter/flutter/issues/192327
+const double _iosMinimumEditableFontSize = 16.0;
+
+/// Raises [element]'s font size to [_iosMinimumEditableFontSize] on iOS when
+/// [frameworkFontSize] is smaller than that, or absent.
+///
+/// iOS zooms the whole page when it focuses an editable element below the
+/// threshold, and leaves it zoomed. The element is invisible, so enlarging a
+/// small size changes nothing the user sees, and a larger framework size is kept
+/// as it is.
+///
+/// Called from two places. At element creation there is no framework style yet
+/// and the element would fall back to the browser default, 11px on iOS. After
+/// each style sync the framework size has just been written by
+/// [EditableTextStyle.applyToDomElement] and may be below the threshold again.
+///
+/// Assigning `font-size` as a longhand after that inline `font` shorthand
+/// overrides only the size and leaves the rest of the shorthand alone. It also
+/// has to be set on the element rather than in the global stylesheet, because an
+/// inline declaration outranks any stylesheet rule.
+void _applyIosMinimumFontSize(DomHTMLElement element, double? frameworkFontSize) {
+  if (!isIosSafari) {
+    return;
+  }
+  final double effectiveFontSize = math.max(_iosMinimumEditableFontSize, frameworkFontSize ?? 0.0);
+  element.style.fontSize = '${effectiveFontSize}px';
+}
 
 /// Text editing used by accesibility mode.
 ///
@@ -47,6 +84,13 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   /// Current input configuration supplied by the "flutter/textinput" channel.
   InputConfiguration? inputConfig;
 
+  /// Whether an autofill form has been woken up for the active field.
+  ///
+  /// Tracked locally because the base strategy's `_appendedToForm` is private
+  /// to its library, and [SemanticsTextEditingStrategy] fully overrides
+  /// [disable] (it never calls `super.disable()`).
+  bool _formIsActive = false;
+
   /// The semantics implementation does not operate on DOM nodes, but only
   /// remembers the config and callbacks. This is because the DOM nodes are
   /// supplied in the semantics update and enabled by [activate].
@@ -82,8 +126,11 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 
     activeTextField = textField;
     domElement = textField.editableElement;
-    _syncStyle();
+    // Enable before syncing the style.
+    // [DefaultTextEditingStrategy.updateElementStyle] only writes to the element
+    // once editing is enabled, so syncing first drops the style silently.
     super.enable(inputConfig!, onChange: onChange!, onAction: onAction!);
+    _syncStyle();
   }
 
   /// Detaches the DOM element owned by [textField] from this text editing
@@ -114,6 +161,24 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     }
     subscriptions.clear();
     lastEditingState = null;
+
+    // The focused field is linked to the autofill form by the `form`
+    // attribute. On blur, detach it and leave a synthetic placeholder holding
+    // its value, then keep the form dormant in the DOM so the autofill context
+    // can still be submitted (credential save via
+    // `TextInput.finishAutofillContext`) and the group stays complete when
+    // another field is focused.
+    if (_formIsActive && inputConfiguration.autofillGroup != null) {
+      final EngineAutofillForm group = inputConfiguration.autofillGroup!;
+      if (inputConfiguration.autofill != null) {
+        group.demoteFocusedToSynthetic(activeDomElement, inputConfiguration.autofill!);
+      }
+      if (group.formElement != null) {
+        group.goDormant();
+      }
+      _formIsActive = false;
+    }
+
     EnginePlatformDispatcher.instance.viewManager.safeBlur(activeDomElement);
     domElement = null;
     activeTextField = null;
@@ -146,8 +211,25 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     OnActionCallback? onAction,
   }) {
     isEnabled = true;
-    inputConfiguration = inputConfig;
-    applyConfiguration(inputConfig);
+    final EngineAutofillForm? autofillGroup = inputConfig.autofillGroup;
+    inputConfiguration = autofillGroup == null
+        ? inputConfig
+        : inputConfig.copyWith(
+            autofillGroup: autofillGroup.copyWith(associateFocusedElementByAttribute: true),
+          );
+    applyConfiguration(inputConfiguration);
+
+    // Build the autofill form here, before [addEventHandlers] runs (it runs
+    // later in the same [enable] call). [addEventHandlers] subscribes to the
+    // `input` events of the synthetic group fields, so those fields must exist
+    // by then or non-focused fields would never propagate autofilled values.
+    //
+    // Note [placeElement]/[placeForm] are never reached via the normal
+    // placement path in semantics mode ([initializeElementPlacement] is a
+    // no-op), so the form must be set up explicitly here.
+    if (hasAutofillGroup) {
+      placeForm();
+    }
   }
 
   @override
@@ -165,7 +247,27 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   }
 
   @override
-  void placeForm() {}
+  void placeForm() {
+    // Safari autofills grouped credential fields by heuristic without needing a
+    // form. The attribute-linked form regresses that: a non-focused field's real
+    // input is left outside the form and stops being filled
+    // (flutter/flutter#180652). Skip the form on Safari and let its native
+    // heuristic fill the whole group. `_formIsActive` stays false, so [disable]
+    // skips the demote/dormant cleanup too.
+    //
+    // Other WebKit browsers (Chrome, Firefox on iOS) do not fill by heuristic
+    // and need the form path, so they are not skipped here.
+    if (ui_web.browser.isSafari) {
+      return;
+    }
+
+    // The focused element is the real semantics-owned `<input>`. It must not be
+    // moved into the form (that regressed a11y tab traversal, see
+    // flutter/flutter#180652). Link it to the form via the `form` attribute
+    // instead. See [EngineAutofillForm.wakeUp].
+    inputConfiguration.autofillGroup!.wakeUp(activeDomElement, inputConfiguration.autofill!);
+    _formIsActive = true;
+  }
 
   @override
   void updateElementPlacement(EditableTextGeometry textGeometry) {
@@ -190,6 +292,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
       return;
     }
     super.updateElementStyle(_queuedStyle!);
+    _applyIosMinimumFontSize(activeDomElement, _queuedStyle!.fontSize);
   }
 }
 
@@ -282,6 +385,12 @@ class SemanticTextField extends SemanticRole {
       ..left = '0'
       ..width = '${semanticsObject.rect!.width}px'
       ..height = '${semanticsObject.rect!.height}px';
+
+    // No framework style has arrived yet, so the element falls back to the
+    // browser default, which is under the threshold. Seed the floor so a focus
+    // landing before the first style cannot zoom the page.
+    _applyIosMinimumFontSize(editableElement, null);
+
     append(editableElement);
 
     editableElement.addEventListener(
@@ -364,6 +473,17 @@ class SemanticTextField extends SemanticRole {
     (editableElement as DomElementWithDisabledProperty).disabled = !semanticsObject.isEnabled;
   }
 
+  /// Whether an autofill group owns the autofill-related attributes of this
+  /// field.
+  ///
+  /// When the field participates in an autofill group, [AutofillInfo.applyToDomElement]
+  /// sets the element's `name` (and `id`/`autocomplete`) to the autofill hint.
+  /// A plain semantic input never has a `name`, so a non-empty `name` is a
+  /// reliable, order-independent signal that [_updateInputType] must not
+  /// overwrite `autocomplete`, otherwise grouped autofill silently breaks on
+  /// the next semantics update (flutter/flutter#180652).
+  bool get _isAutofillOwned => editableElement.getAttribute('name')?.isNotEmpty ?? false;
+
   void _updateInputType() {
     if (semanticsObject.flags.isMultiline) {
       // text area can't be annotated with input type
@@ -379,7 +499,9 @@ class SemanticTextField extends SemanticRole {
       // proper selection/cursor operations.
       input.removeAttribute('inputmode');
       input.removeAttribute('autocapitalize');
-      input.autocomplete = 'off';
+      if (!_isAutofillOwned) {
+        input.autocomplete = 'off';
+      }
       input.type = 'text';
 
       switch (semanticsObject.inputType) {
@@ -392,7 +514,9 @@ class SemanticTextField extends SemanticRole {
         case ui.SemanticsInputType.email:
           input.setAttribute('inputmode', 'email');
           input.setAttribute('autocapitalize', 'none');
-          input.autocomplete = 'email';
+          if (!_isAutofillOwned) {
+            input.autocomplete = 'email';
+          }
         default:
       }
     }

@@ -12,12 +12,14 @@
 #include "flutter/shell/common/vsync_waiter.h"
 
 @class FlutterVSyncClient;
+@class FlutterDisplayLinkManager;
 
 namespace flutter {
 
 class VsyncWaiterIOS final : public VsyncWaiter, public VariableRefreshRateReporter {
  public:
-  explicit VsyncWaiterIOS(const flutter::TaskRunners& task_runners);
+  VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
+                 FlutterDisplayLinkManager* display_link_manager);
 
   ~VsyncWaiterIOS() override;
 
@@ -35,13 +37,16 @@ class VsyncWaiterIOS final : public VsyncWaiter, public VariableRefreshRateRepor
   // Visible for testing.
   static CFTimeInterval SnapDuration(CFTimeInterval duration, double max_refresh_rate);
 
- private:
   // |VsyncWaiter|
   // Made public for testing.
   void AwaitVSync() override;
 
+  // Visible for testing.
+  double GetMaxRefreshRateForTesting() const { return max_refresh_rate_; }
+
  private:
   FlutterVSyncClient* client_;
+  FlutterDisplayLinkManager* display_link_manager_;
   double max_refresh_rate_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterIOS);

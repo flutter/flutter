@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 const Color _debugRowDecorationColor = Color(0xFF00FF00);
 

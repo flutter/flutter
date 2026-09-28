@@ -66,7 +66,7 @@ public class PlatformChannelTest {
     MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
     fakePlatformChannel.parsingMethodCallHandler.onMethodCall(methodCall, mockResult);
 
-    assertEquals(valueCapture.getValue(), expectedContent);
+    assertEquals(expectedContent, valueCapture.getValue());
     verify(mockResult).success(null);
   }
 }

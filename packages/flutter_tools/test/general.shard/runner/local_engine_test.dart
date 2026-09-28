@@ -176,8 +176,7 @@ void main() {
     await expectLater(
       localEngineLocator.findEnginePath(localEngine: localEngine.path),
       throwsToolExit(
-        message:
-            'You are using a locally built engine (--local-engine) but have not specified --local-engine-host',
+        message: 'You are using a locally built engine (--local-engine) but have not specified --local-engine-host',
       ),
     );
   });

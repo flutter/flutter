@@ -37,7 +37,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     registerHotRestartListener(dispose);
     _appLifecycleState.addListener(_setAppLifecycleState);
     _viewFocusBinding.init();
-    domDocument.body?.prepend(accessibilityPlaceholder);
     _onViewDisposedListener = viewManager.onViewDisposed.listen((_) {
       // Send a metrics changed event to the framework when a view is disposed.
       // View creation/resize is handled by the `_didResize` handler in the
@@ -58,13 +57,36 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   final Arena frameArena = Arena();
 
+  /// The number of renders requested by the first frame that have not settled
+  /// yet.
+  ///
+  /// A multi-view app renders one scene per view, so the first frame is not
+  /// settled until all of them are. A render whose scene is superseded by a
+  /// newer one counts as settled, because the view will display the newer scene
+  /// instead.
+  int _pendingFirstFrameRenders = 0;
+
+  /// Whether the first frame is still being built, and can therefore still
+  /// request renders.
+  ///
+  /// This is false for the rest of the app's lifetime once the first frame ends,
+  /// so renders requested by later frames are not counted, even while the first
+  /// frame's own renders are still in flight.
+  bool _isBuildingFirstFrame = true;
+
+  /// Completes once every render the first frame requested has settled, and is
+  /// then set to null to stop tracking renders for the rest of the app's
+  /// lifetime.
+  ///
+  /// The framework reports its first frame from a post-frame callback, while web
+  /// renderers may still be rasterizing that frame asynchronously. The browser
+  /// event waits on this so it is not sent while the first frame is still
+  /// rasterizing.
+  Completer<void>? _firstFrameCompleter = Completer<void>();
+
   /// The [EnginePlatformDispatcher] singleton.
   static EnginePlatformDispatcher get instance => _instance;
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
-
-  @visibleForTesting
-  DomElement get accessibilityPlaceholder =>
-      EngineSemantics.instance.semanticsHelper.accessibilityPlaceholder;
 
   PlatformConfiguration configuration = PlatformConfiguration(
     locales: parseBrowserLanguages(),
@@ -87,7 +109,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _removeLocaleChangedListener();
     _appLifecycleState.removeListener(_setAppLifecycleState);
     _viewFocusBinding.dispose();
-    accessibilityPlaceholder.remove();
     _onViewDisposedListener.cancel();
     viewManager.dispose();
   }
@@ -274,6 +295,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     invoke(_onDrawFrame, _onDrawFrameZone);
     _viewsRenderedInCurrentFrame = null;
     frameArena.collect();
+    if (_isBuildingFirstFrame) {
+      // The first frame has requested every render it is ever going to request.
+      // A frame that rendered nothing is still a first frame, so there may be
+      // nothing left to wait for.
+      _isBuildingFirstFrame = false;
+      _completeFirstFrameIfRendered();
+    }
   }
 
   /// A callback that is invoked when pointer data is available.
@@ -366,6 +394,36 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Otherwise zones won't work properly.
   void invokeOnReportTimings(List<ui.FrameTiming> timings) {
     invoke1<List<ui.FrameTiming>>(_onReportTimings, _onReportTimingsZone, timings);
+  }
+
+  /// A callback invoked when a new frame is available for a texture.
+  @override
+  ui.TextureFrameAvailableCallback? get onTextureFrameAvailable => _onTextureFrameAvailable;
+  ui.TextureFrameAvailableCallback? _onTextureFrameAvailable;
+  Zone _onTextureFrameAvailableZone = Zone.root;
+  @override
+  set onTextureFrameAvailable(ui.TextureFrameAvailableCallback? callback) {
+    _onTextureFrameAvailable = callback;
+    _onTextureFrameAvailableZone = Zone.current;
+  }
+
+  void invokeOnTextureFrameAvailable(int textureId) {
+    invoke1<int>(_onTextureFrameAvailable, _onTextureFrameAvailableZone, textureId);
+  }
+
+  /// A callback that is invoked when the application should re-render.
+  @override
+  ui.MarkAllViewsNeedRenderCallback? get onMarkAllViewsNeedRender => _onMarkAllViewsNeedRender;
+  ui.MarkAllViewsNeedRenderCallback? _onMarkAllViewsNeedRender;
+  Zone _onMarkAllViewsNeedRenderZone = Zone.root;
+  @override
+  set onMarkAllViewsNeedRender(ui.MarkAllViewsNeedRenderCallback? callback) {
+    _onMarkAllViewsNeedRender = callback;
+    _onMarkAllViewsNeedRenderZone = Zone.current;
+  }
+
+  void markAllViewsNeedRender() {
+    invoke(_onMarkAllViewsNeedRender, _onMarkAllViewsNeedRenderZone);
   }
 
   @override
@@ -563,7 +621,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       // Dispatched by the bindings to delay service worker initialization.
       case 'flutter/service_worker':
-        domWindow.dispatchEvent(createDomEvent('Event', 'flutter-first-frame'));
+        unawaited(_dispatchFirstFrameEventAfterRender());
         return;
 
       case 'flutter/textinput':
@@ -589,10 +647,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         final arguments = decoded.arguments as Map<dynamic, dynamic>;
         switch (decoded.method) {
           case 'activateSystemCursor':
-            // TODO(mdebbar): Once the framework starts sending us a viewId, we
-            //                should use it to grab the correct view.
-            //                https://github.com/flutter/flutter/issues/140226
-            views.firstOrNull?.mouseCursor.activateSystemCursor(arguments.tryString('kind'));
+            final String? kind = arguments.tryString('kind');
+            for (final EngineFlutterView view in views) {
+              view.mouseCursor.activateSystemCursor(kind);
+            }
         }
         return;
 
@@ -756,8 +814,44 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // view hasn't been rendered already in this scope.
     final bool shouldRender = _viewsRenderedInCurrentFrame?.add(target) ?? false;
     if (shouldRender) {
-      await renderer.renderScene(scene, target);
+      final Future<void> sceneRender = renderer.renderScene(scene, target);
+      // The first frame ends while this render is still in flight, so remember
+      // whether it belongs to it instead of asking again below.
+      final bool isFirstFrameRender = _isBuildingFirstFrame;
+      if (isFirstFrameRender) {
+        _pendingFirstFrameRenders++;
+      }
+      try {
+        await sceneRender;
+      } finally {
+        if (isFirstFrameRender) {
+          _pendingFirstFrameRenders--;
+          _completeFirstFrameIfRendered();
+        }
+      }
     }
+  }
+
+  /// Completes [_firstFrameCompleter] once the first frame is done building and
+  /// every render it requested has settled.
+  ///
+  /// A render that failed counts as settled: [render] reports the failure to
+  /// its caller, and withholding the browser event would leave an app that hides
+  /// its loading screen on that event stuck on it forever.
+  void _completeFirstFrameIfRendered() {
+    if (_isBuildingFirstFrame || _pendingFirstFrameRenders > 0) {
+      return;
+    }
+    _firstFrameCompleter?.complete();
+    // Null it out to completely disable tracking for all future frames.
+    _firstFrameCompleter = null;
+  }
+
+  Future<void> _dispatchFirstFrameEventAfterRender() async {
+    await _firstFrameCompleter?.future;
+    domWindow.requestAnimationFrame((_) {
+      domWindow.dispatchEvent(createDomEvent('Event', 'flutter-first-frame'));
+    });
   }
 
   @override
@@ -954,17 +1048,23 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
     final locales = <ui.Locale>[];
     for (final String language in languages) {
-      final domLocale = DomLocale(language);
-      locales.add(
-        ui.Locale.fromSubtags(
-          languageCode: domLocale.language,
-          scriptCode: domLocale.script,
-          countryCode: domLocale.region,
-        ),
-      );
+      try {
+        final domLocale = DomLocale(language);
+        locales.add(
+          ui.Locale.fromSubtags(
+            languageCode: domLocale.language,
+            scriptCode: domLocale.script,
+            countryCode: domLocale.region,
+          ),
+        );
+      } catch (_) {
+        // Skip tags Intl.Locale rejects (e.g. en-US@posix on Linux).
+      }
     }
 
-    assert(locales.isNotEmpty);
+    if (locales.isEmpty) {
+      return const <ui.Locale>[_defaultLocale];
+    }
     return locales;
   }
 
@@ -1812,10 +1912,7 @@ class ViewConfiguration {
     this.view,
     this.devicePixelRatio = 1.0,
     this.visible = false,
-    this.viewInsets = ui.ViewPadding.zero as ViewPadding,
-    this.viewPadding = ui.ViewPadding.zero as ViewPadding,
     this.systemGestureInsets = ui.ViewPadding.zero as ViewPadding,
-    this.padding = ui.ViewPadding.zero as ViewPadding,
     this.gestureSettings = const ui.GestureSettings(),
     this.displayFeatures = const <ui.DisplayFeature>[],
     this.displayCornerRadii,
@@ -1825,10 +1922,7 @@ class ViewConfiguration {
     EngineFlutterView? view,
     double? devicePixelRatio,
     bool? visible,
-    ViewPadding? viewInsets,
-    ViewPadding? viewPadding,
     ViewPadding? systemGestureInsets,
-    ViewPadding? padding,
     ui.GestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
     ui.DisplayCornerRadii? displayCornerRadii,
@@ -1837,10 +1931,7 @@ class ViewConfiguration {
       view: view ?? this.view,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       visible: visible ?? this.visible,
-      viewInsets: viewInsets ?? this.viewInsets,
-      viewPadding: viewPadding ?? this.viewPadding,
       systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
-      padding: padding ?? this.padding,
       gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
       displayCornerRadii: displayCornerRadii ?? this.displayCornerRadii,
@@ -1850,10 +1941,7 @@ class ViewConfiguration {
   final EngineFlutterView? view;
   final double devicePixelRatio;
   final bool visible;
-  final ViewPadding viewInsets;
-  final ViewPadding viewPadding;
   final ViewPadding systemGestureInsets;
-  final ViewPadding padding;
   final ui.GestureSettings gestureSettings;
   final List<ui.DisplayFeature> displayFeatures;
   final ui.DisplayCornerRadii? displayCornerRadii;

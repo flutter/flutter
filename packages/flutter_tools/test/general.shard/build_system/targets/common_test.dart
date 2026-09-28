@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -101,7 +102,7 @@ void main() {
           '--target=flutter',
           '--no-print-incremental-dependencies',
           ...buildModeOptions(BuildMode.profile, <String>[]),
-          '--track-widget-creation',
+          '--track-creation-locations',
           '--aot',
           '--tfa',
           '--target-os',
@@ -113,6 +114,7 @@ void main() {
           '--depfile',
           '$build/kernel_snapshot_program.d',
           '--verbosity=error',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         exitCode: 1,
@@ -143,7 +145,7 @@ void main() {
           '--target=flutter',
           '--no-print-incremental-dependencies',
           ...buildModeOptions(BuildMode.profile, <String>[]),
-          '--track-widget-creation',
+          '--track-creation-locations',
           '--aot',
           '--tfa',
           '--target-os',
@@ -155,9 +157,13 @@ void main() {
           '--depfile',
           '$build/kernel_snapshot_program.d',
           '--verbosity=error',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        onRun: (_) {
+          fileSystem.file('$build/recorded_uses.json').createSync();
+        },
       ),
     ]);
 
@@ -188,7 +194,7 @@ void main() {
             '--target=flutter',
             '--no-print-incremental-dependencies',
             ...buildModeOptions(BuildMode.profile, <String>[]),
-            '--track-widget-creation',
+            '--track-creation-locations',
             '--aot',
             '--tfa',
             '--target-os',
@@ -200,9 +206,13 @@ void main() {
             '--depfile',
             '$build/kernel_snapshot_program.d',
             '--verbosity=error',
+            '--recorded-uses=$build/recorded_uses.json',
             'file:///lib/main.dart',
           ],
           stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+          onRun: (_) {
+            fileSystem.file('$build/recorded_uses.json').createSync();
+          },
         ),
       ]);
 
@@ -233,7 +243,7 @@ void main() {
           '--target=flutter',
           '--no-print-incremental-dependencies',
           ...buildModeOptions(BuildMode.profile, <String>[]),
-          '--track-widget-creation',
+          '--track-creation-locations',
           '--aot',
           '--tfa',
           '--target-os',
@@ -245,9 +255,13 @@ void main() {
           '--depfile',
           '$build/kernel_snapshot_program.d',
           '--verbosity=error',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        onRun: (_) {
+          fileSystem.file('$build/recorded_uses.json').createSync();
+        },
       ),
     ]);
 
@@ -279,7 +293,7 @@ void main() {
           '--target=flutter',
           '--no-print-incremental-dependencies',
           ...buildModeOptions(BuildMode.profile, <String>[]),
-          '--track-widget-creation',
+          '--track-creation-locations',
           '--aot',
           '--tfa',
           '--target-os',
@@ -293,9 +307,13 @@ void main() {
           '--verbosity=error',
           'foo',
           'bar',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        onRun: (_) {
+          fileSystem.file('$build/recorded_uses.json').createSync();
+        },
       ),
     ]);
 
@@ -402,47 +420,44 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'KernelSnapshot sets flavor in dartDefines if found in environment variable for non ios/darwin app',
-    () async {
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-      final String build = androidEnvironment.buildDir.path;
-      final String flutterPatchedSdkPath = artifacts.getArtifactPath(
-        Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.android,
-        mode: BuildMode.debug,
-      );
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(
-          command: <String>[
-            artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
-            artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
-            '--sdk-root',
-            '$flutterPatchedSdkPath/',
-            '--target=flutter',
-            '--no-print-incremental-dependencies',
-            '-D$kAppFlavor=strawberry',
-            ...buildModeOptions(BuildMode.debug, <String>[]),
-            '--no-link-platform',
-            '--packages',
-            '/.dart_tool/package_config.json',
-            '--output-dill',
-            '$build/app.dill',
-            '--depfile',
-            '$build/kernel_snapshot_program.d',
-            '--incremental',
-            '--initialize-from-dill',
-            '$build/app.dill',
-            '--verbosity=error',
-            'file:///lib/main.dart',
-          ],
-          stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
-        ),
-      ]);
-    },
-  );
+  testUsingContext('KernelSnapshot sets flavor in dartDefines if found in environment variable for non ios/darwin app', () async {
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android,
+      mode: BuildMode.debug,
+    );
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
+          artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+          '--sdk-root',
+          '$flutterPatchedSdkPath/',
+          '--target=flutter',
+          '--no-print-incremental-dependencies',
+          '-D$kAppFlavor=strawberry',
+          ...buildModeOptions(BuildMode.debug, <String>[]),
+          '--no-link-platform',
+          '--packages',
+          '/.dart_tool/package_config.json',
+          '--output-dill',
+          '$build/app.dill',
+          '--depfile',
+          '$build/kernel_snapshot_program.d',
+          '--incremental',
+          '--initialize-from-dill',
+          '$build/app.dill',
+          '--verbosity=error',
+          'file:///lib/main.dart',
+        ],
+        stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+      ),
+    ]);
+  });
 
   testUsingContext(
     'KernelSnapshot sets flavor in dartDefines from Xcode build configuration if ios app',
@@ -497,6 +512,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
+      Config: () => Config.test(directory: fileSystem.currentDirectory),
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
@@ -554,6 +570,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
+      Config: () => Config.test(directory: fileSystem.currentDirectory),
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
@@ -631,6 +648,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
     );
+    testEnvironment.buildDir.createSync(recursive: true);
     final String build = testEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -647,7 +665,7 @@ void main() {
           '--target=flutter',
           '--no-print-incremental-dependencies',
           ...buildModeOptions(BuildMode.debug, <String>[]),
-          '--track-widget-creation',
+          '--track-creation-locations',
           '--no-link-platform',
           '--packages',
           '/.dart_tool/package_config.json',
@@ -684,7 +702,6 @@ void main() {
           '--deterministic',
           kElfAot,
           '--elf=$build/app.so',
-          '--no-sim-use-hardfp',
           '--no-use-integer-division',
           '$build/app.dill',
         ],
@@ -714,7 +731,6 @@ void main() {
           '--trace-precompiler-to=code_size_1/trace.android-arm.json',
           kElfAot,
           '--elf=$build/app.so',
-          '--no-sim-use-hardfp',
           '--no-use-integer-division',
           '$build/app.dill',
         ],
@@ -876,7 +892,6 @@ void main() {
           'baz=2',
           kElfAot,
           '--elf=$build/app.so',
-          '--no-sim-use-hardfp',
           '--no-use-integer-division',
           '$build/app.dill',
         ],

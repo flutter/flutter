@@ -6,8 +6,8 @@ to communicate with the app. For instance, you won't have access to
 the view controller or engine instances from within the test code.
 
 For this reason, the test code typically uses **launch arguments** to configure
-the app (for example, use [launchArgsMap](../Scenarios/AppDelegate.m) to inform
-the app which `Scenario` to load), and use UIKit UI components to collect test
+the app (for example, use [scenarioArguments](../Scenarios/SceneDelegate.m) to
+inform the app which `Scenario` to load), and use UIKit UI components to collect test
 results (for example, every messsage received on the `display_data` channel adds
 a new `UITextField` to the app, which will be visible to the test code. See [touches_scenario.dart](../../../lib/src/touches_scenario.dart) for an example).
 

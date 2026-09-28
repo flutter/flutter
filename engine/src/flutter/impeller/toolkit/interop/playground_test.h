@@ -48,6 +48,10 @@ class PlaygroundTest : public ::impeller::PlaygroundTest {
       std::string asset_name) const;
 
  private:
+  struct UserData {
+    Playground::VKProcAddressResolver resolver;
+  };
+  mutable std::unique_ptr<UserData> user_data_;
   ScopedObject<Context> interop_context_;
 };
 

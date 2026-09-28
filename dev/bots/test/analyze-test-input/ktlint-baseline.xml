@@ -33,7 +33,7 @@
     <file name="dev/tracing_tests/android/app/src/main/kotlin/com/example/tracing_tests/MainActivity.kt">
         <error line="1" column="9" source="standard:package-name" />
     </file>
-    <file name="examples/api/android/app/src/main/kotlin/dev/flutter/flutter_api_samples/MainActivity.kt">
+    <file name="packages/flutter/examples/api/android/app/src/main/kotlin/dev/flutter/flutter_api_samples/MainActivity.kt">
         <error line="1" column="9" source="standard:package-name" />
     </file>
 </baseline>

@@ -65,8 +65,9 @@ abstract class _ActionButton extends IconButton {
 
 typedef _ActionIconBuilderCallback = WidgetBuilder? Function(ActionIconThemeData? actionIconTheme);
 typedef _ActionIconDataCallback = IconData Function(BuildContext context);
-typedef _AndroidSemanticsLabelCallback =
-    String Function(MaterialLocalizations materialLocalization);
+typedef _AndroidSemanticsLabelCallback = String Function(
+  MaterialLocalizations materialLocalization,
+);
 
 class _ActionIcon extends StatelessWidget {
   const _ActionIcon({

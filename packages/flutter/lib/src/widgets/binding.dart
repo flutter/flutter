@@ -4,6 +4,7 @@
 
 /// @docImport 'dart:ui';
 /// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
 /// @docImport 'package:flutter_test/flutter_test.dart';
 ///
@@ -38,6 +39,7 @@ import 'package:flutter/services.dart';
 import '../foundation/_features.dart';
 import '_accessibility_evaluations.dart';
 import '_window.dart';
+import 'accessibility_inspector.dart';
 import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -807,7 +809,7 @@ mixin WidgetsBinding
           return _forceRebuild();
         },
       );
-
+      AccessibilityInspector.instance.initServiceExtensions(registerServiceExtension);
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;
@@ -895,6 +897,9 @@ mixin WidgetsBinding
   Future<AppExitResponse> handleRequestAppExit() async {
     var didCancel = false;
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (!_observers.contains(observer)) {
+        continue;
+      }
       try {
         if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
           didCancel = true;
@@ -1129,16 +1134,18 @@ mixin WidgetsBinding
         );
       }
     }
-    SystemNavigator.pop().catchError((Object exception, StackTrace stack) {
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets library',
-          context: ErrorDescription('while popping route'),
-        ),
-      );
-    });
+    unawaited(
+      SystemNavigator.pop().catchError((Object exception, StackTrace stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription('while popping route'),
+          ),
+        );
+      }),
+    );
     return false;
   }
 

@@ -29,6 +29,10 @@ flutter/flutter repository. It is based on the more comprehensive official
 - **Search for counter-examples**: Identify scenarios or edge cases that the proposed code does not handle. If a counter-example is found, propose a test case to demonstrate the gap.
 - **Suggest simplification and refactoring**: Assess whether the code can be made simpler or refactored to enhance readability and maintainability.
 
+### What Not to Report
+
+- **Do not report syntax errors**: Leave the detection of syntax errors to the analyzer. The review agent should focus on higher-level concerns such as logic, design, and maintainability rather than issues that automated tooling already catches.
+
 ## General Philosophy
 
 - **Optimize for readability**: Code is read more often than it is written.

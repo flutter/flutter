@@ -11,7 +11,7 @@ import Foundation
 /// schedules the task in both common run loop mode and a private run loop mode,
 /// which allows it to run in a mode where it only processes Flutter messages
 /// (`pollFlutterMessagesOnce()`).
-@objc public final class FlutterRunLoop: NSObject {
+@objc final class FlutterRunLoop: NSObject {
   private static let flutterRunLoopMode = CFRunLoopMode("FlutterRunLoopMode" as CFString)
 
   private static var _mainRunLoop: FlutterRunLoop?
@@ -91,15 +91,15 @@ import Foundation
 
   // Ensures that the `FlutterRunLoop` for main thread is initialized. Only
   // needs to be called once and must be called on the main thread.
-  @objc public static func ensureMainLoopInitialized() {
-    assert(Thread.isMainThread, "Must be called on the main thread.")
+  @objc static func ensureMainLoopInitialized() {
+    precondition(Thread.isMainThread, "Must be called on the main thread.")
     if _mainRunLoop == nil {
       _mainRunLoop = FlutterRunLoop()
     }
   }
 
   // The `FlutterRunLoop` for the main thread.
-  @objc public static var mainRunLoop: FlutterRunLoop {
+  @objc static var mainRunLoop: FlutterRunLoop {
     assert(
       _mainRunLoop != nil,
       "Main run loop has not been initialized. Call ensureMainLoopInitialized() first."
@@ -108,7 +108,7 @@ import Foundation
   }
 
   // Schedules a block to be executed on the main thread.
-  @objc public func perform(afterDelay delay: TimeInterval, block: @escaping () -> Void) {
+  @objc func perform(afterDelay delay: TimeInterval, block: @escaping () -> Void) {
     tasksLock.lock()
     defer { tasksLock.unlock() }
 
@@ -123,7 +123,7 @@ import Foundation
 
   // Schedules a block to be executed on the main thread after a delay.
   @objc(performBlock:)
-  public func perform(_ block: @escaping () -> Void) {
+  func perform(_ block: @escaping () -> Void) {
     perform(afterDelay: 0, block: block)
   }
 
@@ -158,7 +158,7 @@ import Foundation
 
   /// Executes single iteration of the run loop in the mode where only Flutter
   /// messages are processed.
-  @objc public func pollFlutterMessagesOnce() {
+  @objc func pollFlutterMessagesOnce() {
     CFRunLoopRunInMode(Self.flutterRunLoopMode, 0.1, true)
   }
 }

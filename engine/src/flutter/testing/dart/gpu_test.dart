@@ -73,12 +73,32 @@ Future<gpu.RenderPipeline> createUnlitRenderPipeline() async {
   return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
 }
 
+Future<gpu.RenderPipeline> createOptimizedOutSamplerRenderPipeline() async {
+  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+  assert(library != null);
+  final gpu.Shader? vertex = library!['UnlitVertex'];
+  assert(vertex != null);
+  final gpu.Shader? fragment = library['OptimizedOutSamplerFragment'];
+  assert(fragment != null);
+  return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
+}
+
 Future<gpu.RenderPipeline> createTextureRenderPipeline() async {
   final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
   assert(library != null);
   final gpu.Shader? vertex = library!['TextureVertex'];
   assert(vertex != null);
   final gpu.Shader? fragment = library['TextureFragment'];
+  assert(fragment != null);
+  return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
+}
+
+Future<gpu.RenderPipeline> createArrayTextureRenderPipeline() async {
+  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+  assert(library != null);
+  final gpu.Shader? vertex = library!['TextureVertex'];
+  assert(vertex != null);
+  final gpu.Shader? fragment = library['ArrayTextureFragment'];
   assert(fragment != null);
   return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
 }
@@ -755,9 +775,8 @@ void main() async {
 
   test('CommandBuffer.copyTextureToBuffer appends successfully', () async {
     final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 4, 4);
-    final ByteData pixels = Uint8List.fromList(
-      List<int>.filled(4 * 4 * 4, 0xFF),
-    ).buffer.asByteData();
+    final ByteData pixels = Uint8List.fromList(List<int>.filled(4 * 4 * 4, 0xFF)).buffer
+        .asByteData();
     texture.overwrite(pixels);
 
     final gpu.DeviceBuffer destination = gpu.gpuContext.createDeviceBuffer(
@@ -1198,6 +1217,35 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('Binding a dead-code-eliminated sampler does not crash', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = await createOptimizedOutSamplerRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[-0.5, -0.5, 0.5, -0.5, 0.0, 0.5]),
+    );
+    state.renderPass.bindVertexBuffer(vertices);
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+
+    // `tex` is optimized out. Binding it used to crash; now it either binds or
+    // is skipped, and either way the pass must draw.
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 1, 1);
+    try {
+      state.renderPass.bindTexture(pipeline.fragmentShader.getUniformSlot('tex'), texture);
+    } on Exception {
+      // Optimized out; binding it is a no-op.
+    }
+
+    state.renderPass.draw(3);
+    state.commandBuffer.submit();
+    expect(state.renderTexture.asImage(), isNotNull);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('RenderPass.bindTexture throws for deviceTransient Textures', () async {
     final RenderPassState state = createSimpleRenderPass();
 
@@ -1410,6 +1458,34 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('Shader.getUniformSlot returns the same slot for repeat lookups', () async {
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    final gpu.UniformSlot first = pipeline.vertexShader.getUniformSlot('VertInfo');
+    final gpu.UniformSlot second = pipeline.vertexShader.getUniformSlot('VertInfo');
+    expect(identical(first, second), isTrue);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass.bindUniform throws for an unknown uniform name', () async {
+    final RenderPassState state = createSimpleRenderPass();
+
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    final gpu.DeviceBuffer uniformBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
+      float32(<double>[1, 2, 3, 4]),
+    );
+    final uniformBufferView = gpu.BufferView(
+      uniformBuffer,
+      offsetInBytes: 0,
+      lengthInBytes: uniformBuffer.sizeInBytes,
+    );
+    final gpu.UniformSlot unknownSlot = pipeline.vertexShader.getUniformSlot('DoesNotExist');
+    try {
+      state.renderPass.bindUniform(unknownSlot, uniformBufferView);
+      fail('Exception not thrown for an unknown uniform name.');
+    } catch (e) {
+      expect(e.toString(), contains('Failed to bind uniform'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   // Renders a green triangle pointing downwards.
   test('Can render triangle', () async {
     final RenderPassState state = createSimpleRenderPass();
@@ -1529,6 +1605,121 @@ void main() async {
 
     final ui.Image image = state.renderTexture.asImage();
     await comparer.addGoldenImage(image, 'flutter_gpu_test_manually_mipped_texture.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('2D array textures can be created and uploaded per layer', () async {
+    if (!gpu.gpuContext.doesSupportTextureArrays) {
+      // Creating an array texture on a backend that does not support them
+      // fails fast at creation instead of later at upload.
+      expect(
+        () => gpu.gpuContext.createTexture(
+          gpu.StorageMode.hostVisible,
+          4,
+          4,
+          textureType: gpu.TextureType.texture2DArray,
+          layerCount: 2,
+        ),
+        throwsArgumentError,
+      );
+      return;
+    }
+
+    // More than 6 layers, to cover slices beyond the cubemap face range.
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      4,
+      4,
+      textureType: gpu.TextureType.texture2DArray,
+      layerCount: 8,
+    );
+    expect(texture.textureType, gpu.TextureType.texture2DArray);
+    expect(texture.layerCount, 8);
+    expect(texture.sliceCount, 8);
+
+    final layer = Uint8List(4 * 4 * 4);
+    for (var slice = 0; slice < texture.sliceCount; slice++) {
+      layer.fillRange(0, layer.length, 0x10 * (slice + 1));
+      texture.overwrite(layer.buffer.asByteData(), slice: slice);
+    }
+
+    // Out-of-range slices and layer counts are rejected.
+    expect(() => texture.overwrite(layer.buffer.asByteData(), slice: 8), throwsException);
+    expect(
+      () => gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        4,
+        4,
+        textureType: gpu.TextureType.texture2DArray,
+        layerCount: 0,
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 4, 4, layerCount: 2),
+      throwsArgumentError,
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('sampling a 2D array texture reads the selected layer', () async {
+    if (!gpu.gpuContext.doesSupportTextureArrays) {
+      return;
+    }
+
+    // Each layer is a solid gray with a distinct, ascending intensity so the
+    // check below is independent of RGBA/BGRA channel order.
+    const layerValues = <int>[0x28, 0x78, 0xDC];
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      4,
+      4,
+      textureType: gpu.TextureType.texture2DArray,
+      layerCount: layerValues.length,
+    );
+    final layer = Uint8List(4 * 4 * 4);
+    for (var slice = 0; slice < layerValues.length; slice++) {
+      layer.fillRange(0, layer.length, layerValues[slice]);
+      texture.overwrite(layer.buffer.asByteData(), slice: slice);
+    }
+
+    final gpu.RenderPipeline pipeline = await createArrayTextureRenderPipeline();
+    for (var slice = 0; slice < layerValues.length; slice++) {
+      final RenderPassState state = createSimpleRenderPass();
+      state.renderPass.bindPipeline(pipeline);
+
+      // A fullscreen quad with white vertex colors, so the sampled layer value
+      // passes through unmodified.
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      final gpu.BufferView vertices = transients.emplace(
+        float32(<double>[
+          -1, -1, 0, 0, 0, 1, 1, 1, 1, //
+          1, -1, 0, 1, 0, 1, 1, 1, 1, //
+          1, 1, 0, 1, 1, 1, 1, 1, 1, //
+          -1, -1, 0, 0, 0, 1, 1, 1, 1, //
+          1, 1, 0, 1, 1, 1, 1, 1, 1, //
+          -1, 1, 0, 0, 1, 1, 1, 1, 1, //
+        ]),
+      );
+      state.renderPass.bindVertexBuffer(vertices);
+      state.renderPass.bindUniform(
+        pipeline.vertexShader.getUniformSlot('VertInfo'),
+        transients.emplace(mvpUBO(Matrix4.identity())),
+      );
+      state.renderPass.bindUniform(
+        pipeline.fragmentShader.getUniformSlot('FragInfo'),
+        transients.emplace(float32(<double>[slice.toDouble()])),
+      );
+      state.renderPass.bindTexture(pipeline.fragmentShader.getUniformSlot('tex'), texture);
+      state.renderPass.draw(6);
+      state.commandBuffer.submit();
+
+      final ByteData pixels = await readTextureBytes(state.renderTexture);
+      final int value = pixels.getUint8(0);
+      expect(
+        (value - layerValues[slice]).abs(),
+        lessThanOrEqualTo(1),
+        reason: 'Expected layer $slice value ${layerValues[slice]}, got $value',
+      );
+    }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('drawIndexed throws when no index buffer is bound', () async {

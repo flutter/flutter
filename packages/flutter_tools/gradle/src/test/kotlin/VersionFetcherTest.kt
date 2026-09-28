@@ -6,7 +6,6 @@ package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.flutter.gradle.testing.setAgpKotlinVersionToNull
 import io.mockk.every
 import io.mockk.mockk
 import org.gradle.api.Project
@@ -47,7 +46,6 @@ class VersionFetcherTest {
     fun `getKGPVersion returns version when kotlin_version is set`() {
         val kgpVersion = Version(1, 9, 20)
         val project = mockk<Project>()
-        setAgpKotlinVersionToNull(project)
         every { project.hasProperty(eq("kotlin_version")) } returns true
         every { project.properties["kotlin_version"] } returns kgpVersion.toString()
         val result = VersionFetcher.getKGPVersion(project)
@@ -58,7 +56,6 @@ class VersionFetcherTest {
     fun `getKGPVersion returns version from KotlinAndroidPluginWrapper`() {
         val kgpVersion = Version(1, 9, 20)
         val project = mockk<Project>()
-        setAgpKotlinVersionToNull(project)
         every { project.hasProperty(eq("kotlin_version")) } returns false
         every { project.plugins.findPlugin(KotlinAndroidPluginWrapper::class.java) } returns
             mockk<KotlinAndroidPluginWrapper> {
@@ -66,5 +63,27 @@ class VersionFetcherTest {
             }
         val result = VersionFetcher.getKGPVersion(project)
         assertEquals(kgpVersion, result!!)
+    }
+
+    @Test
+    fun `getKGPVersion returns null when the Kotlin Gradle plugin is absent`() {
+        // Expected under AGP's built-in Kotlin support, where no standalone KGP is applied.
+        val project = mockk<Project>()
+        every { project.hasProperty(eq("kotlin_version")) } returns false
+        every { project.plugins.findPlugin(KotlinAndroidPluginWrapper::class.java) } returns null
+        val result = VersionFetcher.getKGPVersion(project)
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getKGPVersion returns null when pluginVersion is unknown and reflection is unknown`() {
+        val project = mockk<Project>()
+        every { project.hasProperty(eq("kotlin_version")) } returns false
+        every { project.plugins.findPlugin(KotlinAndroidPluginWrapper::class.java) } returns
+            mockk<KotlinAndroidPluginWrapper> {
+                every { pluginVersion } returns "unknown"
+            }
+        val result = VersionFetcher.getKGPVersion(project)
+        assertEquals(null, result)
     }
 }

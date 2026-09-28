@@ -9,7 +9,7 @@ import UIKit
 /// UIEvent or UIPress directly.
 @available(iOS 13.4, *)
 @objc(FlutterUIPressProxy)
-public class UIPressProxy: NSObject {
+class UIPressProxy: NSObject {
   private var press: UIPress?
   private var event: UIEvent?
 
@@ -18,7 +18,7 @@ public class UIPressProxy: NSObject {
    * - Parameter press: The UIPress object to wrap.
    * - Parameter event: The UIEvent object to wrap.
    */
-  @objc public init(press: UIPress, event: UIEvent) {
+  @objc init(press: UIPress, event: UIEvent) {
     self.press = press
     self.event = event
     super.init()  // Call superclass initializer
@@ -29,7 +29,7 @@ public class UIPressProxy: NSObject {
    * Subclasses using this MUST override the properties below as needed,
    * as the internal press/event objects will be nil.
    */
-  @objc override public init() {
+  @objc override init() {
     self.press = nil
     self.event = nil
     super.init()
@@ -40,7 +40,7 @@ public class UIPressProxy: NSObject {
   }
 
   /// The phase of the press event.
-  @objc public var phase: UIPress.Phase {
+  @objc var phase: UIPress.Phase {
     guard let press = press else {
       fatalError("nil UIPress")
     }
@@ -49,12 +49,12 @@ public class UIPressProxy: NSObject {
 
   /// The key associated with the press event, if any.
   /// Note: In Swift, `UIPress.key` is optional.
-  @objc public var key: UIKey? {
+  @objc var key: UIKey? {
     return press?.key
   }
 
   /// The type of the event.
-  @objc public var type: UIEvent.EventType {
+  @objc var type: UIEvent.EventType {
     guard let event = event else {
       fatalError("nil UIEvent")
     }
@@ -63,7 +63,7 @@ public class UIPressProxy: NSObject {
 
   /// The time at which the event occurred.
   /// NSTimeInterval is typealiased to TimeInterval in Swift.
-  @objc public var timestamp: TimeInterval {
+  @objc var timestamp: TimeInterval {
     guard let event = event else {
       fatalError("nil UIEvent")
     }

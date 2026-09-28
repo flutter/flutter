@@ -49,9 +49,8 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 
   Iterable<Map<String, dynamic>> getServiceExtensionStateChangedEvents(String extensionName) {
-    return getEventsDispatched(
-      'Flutter.ServiceExtensionStateChanged',
-    ).where((Map<String, dynamic> event) => event['extension'] == extensionName);
+    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
+        .where((Map<String, dynamic> event) => event['extension'] == extensionName);
   }
 
   Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
@@ -105,9 +104,11 @@ late TestServiceExtensionsBinding binding;
 
 Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingResult) async {
   var completed = false;
-  pendingResult.whenComplete(() {
-    completed = true;
-  });
+  unawaited(
+    pendingResult.whenComplete(() {
+      completed = true;
+    }),
+  );
   expect(binding.frameScheduled, isFalse);
   await binding.flushMicrotasks();
   expect(binding.frameScheduled, isTrue);
@@ -194,6 +195,14 @@ void main() {
       hasLength(widgetInspectorExtensionCount),
     );
 
+    // See accessibility_inspector_test.dart for tests of the ext.flutter.accessibility
+    // service extensions included in this count.
+    const accessibilityExtensionCount = 3;
+    expect(
+      binding.extensions.keys.where((String name) => name.startsWith('accessibility.')),
+      hasLength(accessibilityExtensionCount),
+    );
+
     // The following service extensions are disabled in web:
     // 1. exit
     // 2. showPerformanceOverlay
@@ -202,7 +211,8 @@ void main() {
     // The expected number of registered service extensions in the Flutter
     // framework, excluding any that are for the widget inspector (see
     // widget_inspector_test.dart for tests of the ext.flutter.inspector service
-    // extensions). Any test counted here must be tested in this file!
+    // extensions) or accessibility inspector (see accessibility_inspector_test.dart).
+    // Any test counted here must be tested in this file!
     const serviceExtensionCount = 31;
 
     // The tests are in the widgets/accessibility_evaluations_service_extension_test.dart
@@ -211,7 +221,10 @@ void main() {
 
     expect(
       binding.extensions.length,
-      serviceExtensionCount + widgetInspectorExtensionCount - disabledExtensions,
+      serviceExtensionCount +
+          widgetInspectorExtensionCount +
+          accessibilityExtensionCount -
+          disabledExtensions,
     );
     expect(testedExtensions, hasLength(serviceExtensionCount));
 
@@ -412,9 +425,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isTrue);
@@ -483,9 +498,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isTrue);
@@ -545,9 +562,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isTrue);
@@ -1017,9 +1036,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(completed, true);
     expect(binding.frameScheduled, isFalse);
@@ -1038,9 +1059,11 @@ void main() {
       <String, String>{'enabled': 'false'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(completed, isTrue);
     expect(binding.frameScheduled, isTrue);
@@ -1081,9 +1104,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isTrue);
@@ -1142,9 +1167,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isTrue);
@@ -1203,9 +1230,11 @@ void main() {
       <String, String>{'enabled': 'true'},
     );
     completed = false;
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isTrue);
@@ -1256,9 +1285,11 @@ void main() {
       FoundationServiceExtensions.reassemble.name,
       <String, String>{},
     );
-    pendingResult.whenComplete(() {
-      completed = true;
-    });
+    unawaited(
+      pendingResult.whenComplete(() {
+        completed = true;
+      }),
+    );
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, false);

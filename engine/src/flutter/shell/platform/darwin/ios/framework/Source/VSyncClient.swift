@@ -7,7 +7,7 @@ import QuartzCore
 import UIKit
 
 @objc(FlutterVSyncClient)
-public class VSyncClient: NSObject {
+class VSyncClient: NSObject {
   private static let defaultRefreshRate: Double = 60.0
 
   private let taskRunner: TaskRunner
@@ -16,7 +16,7 @@ public class VSyncClient: NSObject {
 
   /// The display link used to coordinate vsync callbacks.
   @objc
-  internal private(set) var displayLink: CADisplayLink?
+  private(set) var displayLink: CADisplayLink?
 
   private var _refreshRate: Double = defaultRefreshRate
 
@@ -29,7 +29,7 @@ public class VSyncClient: NSObject {
   /// If the current refresh rate is unknown or invalid (e.g., during startup or a paused transition),
   /// this property falls back to `defaultRefreshRate` (60Hz).
   @objc
-  public var refreshRate: Double {
+  var refreshRate: Double {
     return _refreshRate > 0.0 ? _refreshRate : VSyncClient.defaultRefreshRate
   }
 
@@ -37,7 +37,7 @@ public class VSyncClient: NSObject {
   /// signal. Setting this property to `false` can avoid this and vsync client will trigger vsync
   /// callback continuously.
   @objc
-  public var allowPauseAfterVsync: Bool = true
+  var allowPauseAfterVsync: Bool = true
 
   /// Initializes the vsync client.
   ///
@@ -47,7 +47,7 @@ public class VSyncClient: NSObject {
   ///   - maxRefreshRate: The maximum refresh rate to configure the display link with.
   ///   - callback: The callback to invoke when a vsync signal is received.
   @objc
-  public init(
+  init(
     taskRunner: TaskRunner,
     isVariableRefreshRateEnabled: Bool,
     maxRefreshRate: Double,
@@ -86,7 +86,7 @@ public class VSyncClient: NSObject {
   ///
   /// - Parameter requestedRate: The target maximum refresh rate in Hertz.
   @objc
-  public func setMaxRefreshRate(_ requestedRate: Double) {
+  func setMaxRefreshRate(_ requestedRate: Double) {
     guard isVariableRefreshRateEnabled else { return }
     guard let link = displayLink else { return }
 
@@ -109,7 +109,7 @@ public class VSyncClient: NSObject {
   /// Calling this method unpauses the underlying `CADisplayLink`, allowing it to trigger
   /// `onDisplayLink(_:)` on the next vsync event.
   @objc
-  public func await() {
+  func await() {
     displayLink?.isPaused = false
   }
 
@@ -118,7 +118,7 @@ public class VSyncClient: NSObject {
   /// Calling this method pauses the underlying `CADisplayLink`, preventing it from triggering
   /// any subsequent vsync events until `await()` is called.
   @objc
-  public func pause() {
+  func pause() {
     displayLink?.isPaused = true
   }
 
@@ -127,7 +127,7 @@ public class VSyncClient: NSObject {
   /// This method must be called before releasing the `VSyncClient` instance to prevent memory leaks
   /// caused by the `CADisplayLink` retaining its target.
   @objc
-  public func invalidate() {
+  func invalidate() {
     guard let link = displayLink else { return }
     displayLink = nil
 
@@ -152,7 +152,7 @@ public class VSyncClient: NSObject {
   ///
   /// - Parameter link: The display link triggering this event.
   @objc
-  internal func onDisplayLink(_ link: CADisplayLink) {
+  func onDisplayLink(_ link: CADisplayLink) {
     // CADisplayLink timestamps use the CACurrentMediaTime() monotonic clock (seconds since boot).
     // CACurrentMediaTime() is based on mach_absolute_time, whereas the core engine uses
     // fml::TimePoint, which is implemented with std::chrono::steady_clock, which uses

@@ -9,6 +9,14 @@ analyzer:
     - linux/**
 include: ../analysis_options.yaml
 
+plugins:
+  flutter_analyzer_plugin:
+    path: ../../dev/flutter_analyzer_plugin
+    diagnostics:
+      avoid_future_catch_error: true
+  dependency_overrides:
+    analysis_server_plugin: ^0.3.22
+
 linter:
   rules:
     avoid_catches_without_on_clauses: true
@@ -21,3 +29,4 @@ linter:
     public_member_api_docs: false # Tool does not have any public API.
     unawaited_futures: true
     unintended_html_in_doc_comment: true
+    use_null_aware_elements: true

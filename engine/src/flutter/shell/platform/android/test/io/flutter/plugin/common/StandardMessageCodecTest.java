@@ -120,7 +120,7 @@ public class StandardMessageCodecTest {
     message.flip();
 
     String value = (String) codec.decodeMessage(message);
-    assertEquals(value, "hello world");
+    assertEquals("hello world", value);
   }
 
   private static class NotEncodable {

@@ -47,7 +47,8 @@ class ReusableFragmentShader : public Shader {
   // |Shader|
   std::shared_ptr<DlColorSource> shader(DlImageSampling) override;
 
-  std::shared_ptr<DlImageFilter> as_image_filter() const;
+  std::shared_ptr<DlImageFilter> as_image_filter(
+      DlImageSampling input_sampling) const;
 
  private:
   ReusableFragmentShader(fml::RefPtr<FragmentProgram> program,

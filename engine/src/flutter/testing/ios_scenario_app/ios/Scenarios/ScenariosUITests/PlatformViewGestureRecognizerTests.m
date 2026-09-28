@@ -18,7 +18,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
 - (void)testRejectPolicyUtilTouchesEnded {
   XCUIApplication* app = [[XCUIApplication alloc] init];
-  app.launchArguments = @[ @"--gesture-reject-after-touches-ended" ];
+  app.launchArguments = @[ @"--platform-view-gesture-reject-after-touches-ended" ];
   [app launch];
 
   NSPredicate* predicateToFindPlatformView =
@@ -50,7 +50,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
 - (void)testRejectPolicyEager {
   XCUIApplication* app = [[XCUIApplication alloc] init];
-  app.launchArguments = @[ @"--gesture-reject-eager" ];
+  app.launchArguments = @[ @"--platform-view-gesture-reject-eager" ];
   [app launch];
 
   NSPredicate* predicateToFindPlatformView =
@@ -86,7 +86,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
 - (void)testAccept {
   XCUIApplication* app = [[XCUIApplication alloc] init];
-  app.launchArguments = @[ @"--gesture-accept" ];
+  app.launchArguments = @[ @"--platform-view-gesture-accept" ];
   [app launch];
 
   NSPredicate* predicateToFindPlatformView =
@@ -121,7 +121,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
 - (void)testGestureWithMaskViewBlockingPlatformView {
   XCUIApplication* app = [[XCUIApplication alloc] init];
-  app.launchArguments = @[ @"--gesture-accept", @"--maskview-blocking" ];
+  app.launchArguments = @[ @"--platform-view-gesture-accept", @"--maskview-blocking" ];
   [app launch];
 
   NSPredicate* predicateToFindPlatformView =
@@ -166,7 +166,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
 - (void)testGestureWithOverlappingPlatformViews {
   XCUIApplication* app = [[XCUIApplication alloc] init];
-  app.launchArguments = @[ @"--gesture-accept-with-overlapping-platform-views" ];
+  app.launchArguments = @[ @"--platform-view-gesture-accept-with-overlapping-platform-views" ];
   [app launch];
 
   XCUIElement* foreground = app.otherElements[@"platform_view[0]"];

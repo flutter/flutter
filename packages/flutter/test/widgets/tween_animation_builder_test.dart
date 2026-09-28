@@ -5,8 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 void main() {
   testWidgets('Animates forward when built', (WidgetTester tester) async {
     final values = <int>[];

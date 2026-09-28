@@ -75,6 +75,10 @@ void FlutterWindowsEngineBuilder::SetImpellerSwitch(
   properties_.impeller_switch = impeller_switch;
 }
 
+void FlutterWindowsEngineBuilder::SetEnableFlutterGpu(bool enable_flutter_gpu) {
+  properties_.enable_flutter_gpu = enable_flutter_gpu;
+}
+
 void FlutterWindowsEngineBuilder::SetCreateKeyboardHandlerCallbacks(
     KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state,
     KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan) {

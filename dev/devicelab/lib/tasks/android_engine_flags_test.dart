@@ -19,8 +19,8 @@ TaskFunction androidEngineFlagsTest(String buildMode) {
   final isReleaseMode = buildMode == 'release';
   final List<TaskFunction> tests = [
     _testInvalidFlag(buildMode),
+    _testCommandLineFlagPrecedence(buildMode),
     if (isReleaseMode) _testIllegalFlagInReleaseMode(),
-    if (!isReleaseMode) _testCommandLineFlagPrecedence(),
   ];
 
   return () async {
@@ -186,7 +186,7 @@ TaskFunction _testIllegalFlagInReleaseMode() {
   };
 }
 
-TaskFunction _testCommandLineFlagPrecedence() {
+TaskFunction _testCommandLineFlagPrecedence(String buildMode) {
   return () async {
     final Directory tempDir = Directory.systemTemp.createTempSync(
       'android_flutter_shell_args_test.',
@@ -207,7 +207,10 @@ TaskFunction _testCommandLineFlagPrecedence() {
       late Process run;
 
       await inDirectory(testProjectPath, () async {
-        run = await startFlutter('run', options: <String>['--test-flag', '--verbose']);
+        run = await startFlutter(
+          'run',
+          options: <String>['--$buildMode', '--test-flag', '--verbose'],
+        );
       });
 
       final StreamSubscription<void> stdoutSubscription = run.stdout

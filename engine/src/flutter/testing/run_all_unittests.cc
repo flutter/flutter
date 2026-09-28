@@ -14,6 +14,10 @@
 #include "flutter/testing/test_timeout_listener.h"
 #include "gtest/gtest.h"
 
+#ifdef IMPELLER_UNITTEST_SUITE
+#include "flutter/impeller/testing/impeller_unittest_suite.h"
+#endif  // IMPELLER_UNITTEST_SUITE
+
 #ifdef FML_OS_IOS
 #include <asl.h>
 #endif  // FML_OS_IOS
@@ -64,6 +68,10 @@ int main(int argc, char** argv) {
     FML_LOG(INFO) << "Debugger is attached. Suspending test timeouts.";
     return RUN_ALL_TESTS();
   }
+
+#ifdef IMPELLER_UNITTEST_SUITE
+  impeller::testing::ImpellerUnittestSetup();
+#endif  // IMPELLER_UNITTEST_SUITE
 
   auto timeout_listener =
       new flutter::testing::TestTimeoutListener(timeout.value());

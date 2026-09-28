@@ -102,8 +102,7 @@ environement:
           Event.flutterBuildInfo(
             label: 'web-compile',
             buildType: 'web',
-            settings:
-                'dryRun: false; optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+            settings: 'dryRun: false; optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
           ),
         ]),
       );
@@ -150,7 +149,7 @@ environement:
         'target',
         BuildInfo.debug,
         ServiceWorkerStrategy.offlineFirst,
-        compilerConfigs: <WebCompilerConfig>[],
+        compilerConfigs: const <WebCompilerConfig>[],
       );
 
       expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -194,8 +193,8 @@ environement:
         flutterProject,
         'target',
         BuildInfo.debug,
-        null, // serviceWorkerStrategy is omitted
-        compilerConfigs: <WebCompilerConfig>[],
+        null,
+        compilerConfigs: const <WebCompilerConfig>[],
       );
 
       expect(logger.statusText, contains('Compiling target for the Web...'));

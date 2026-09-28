@@ -13,7 +13,7 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart' show registerHotRestartListener;
-import 'browser_detection.dart' show isIosSafari;
+import 'browser_detection.dart' show isIosSafari, isMacOS;
 import 'dom.dart';
 import 'platform_dispatcher.dart';
 import 'pointer_binding/event_position_helper.dart';
@@ -482,6 +482,20 @@ class ClickDebouncer {
     EnginePlatformDispatcher.instance.invokeOnPointerDataPacket(packet);
   }
 
+  /// Flushes any in-progress debounce, then forwards [data] to the framework.
+  ///
+  /// For synthetic events that must not be queued or dropped by an in-progress
+  /// debounce, such as cancels that repair a pointer the browser abandoned.
+  /// Flushing first keeps the stream ordered: a queued `pointerdown` has to
+  /// reach the framework before the cancel that closes it out, otherwise the
+  /// framework is left holding a down it can never match.
+  void flushAndSend(List<ui.PointerData> data) {
+    if (isDebouncing) {
+      _flush();
+    }
+    _sendToFramework(null, data);
+  }
+
   /// Cancels any pending debounce process and forgets anything that happened so
   /// far.
   ///
@@ -729,6 +743,24 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     // to pixels.
     double deltaX = event.deltaX;
     double deltaY = event.deltaY;
+
+    // When mouse input is received while shift is pressed (regardless of
+    // any other pressed keys), Mac automatically flips the axis. Other
+    // platforms do not do this, so we flip it back to normalize the input
+    // received by the framework. The keyboard+mouse-scroll mechanism is exposed
+    // in the ScrollBehavior of the framework so developers can customize the
+    // behavior.
+    // At time of change, Apple does not expose any other type of API or signal
+    // that the X/Y axes have been flipped.
+    //
+    // The same conversion happens on the native side, see:
+    // https://github.com/flutter/flutter/commit/be9ae4793d1e6aff6ad108200c4319fb1c82db96
+    if (isMacOS && kind == ui.PointerDeviceKind.mouse && event.getModifierState('Shift')) {
+      final temp = deltaX;
+      deltaX = deltaY;
+      deltaY = temp;
+    }
+
     switch (event.deltaMode.toInt()) {
       case domDeltaLine:
         _defaultScrollLineHeight ??= _computeDefaultScrollLineHeight();
@@ -738,7 +770,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         deltaX *= _view.physicalSize.width;
         deltaY *= _view.physicalSize.height;
       case domDeltaPixel:
-        if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
+        if (isMacOS) {
           // Safari and Firefox seem to report delta in logical pixels while
           // Chrome uses physical pixels.
           deltaX *= _view.devicePixelRatio;
@@ -751,7 +783,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     final data = <ui.PointerData>[];
     final ui.Offset offset = computeEventOffsetToTarget(event, _view);
     var ignoreCtrlKey = false;
-    if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
+    if (isMacOS) {
       ignoreCtrlKey =
           (_keyboardConverter?.keyIsPressed(kPhysicalControlLeft) ?? false) ||
           (_keyboardConverter?.keyIsPressed(kPhysicalControlRight) ?? false);
@@ -1007,6 +1039,13 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
 
   final Map<int, _ButtonSanitizer> _sanitizers = <int, _ButtonSanitizer>{};
 
+  /// Touch devices that went down and have not been released yet.
+  ///
+  /// A device leaves this set when the browser reports `pointerup` or
+  /// `pointercancel`, or when [_cancelAbandonedTouches] gives up on it. It is
+  /// what that method reconciles against the touches actually on the surface.
+  final Set<int> _downTouchDevices = <int>{};
+
   @visibleForTesting
   Iterable<int> debugTrackedDevices() => _sanitizers.keys;
 
@@ -1025,7 +1064,9 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
 
   void _removePointerIfUnhoverable(DomPointerEvent event) {
     if (event.pointerType == 'touch') {
-      _sanitizers.remove(event.pointerId);
+      final int device = _getPointerId(event);
+      _sanitizers.remove(device);
+      _downTouchDevices.remove(device);
     }
   }
 
@@ -1071,6 +1112,9 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         buttons: event.buttons!.toInt(),
       );
       _convertEventsToPointerData(data: pointerData, event: event, details: down);
+      if (event.pointerType == 'touch') {
+        _downTouchDevices.add(device);
+      }
       _callback(event, pointerData);
 
       if (event.target == _viewTarget) {
@@ -1151,9 +1195,8 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       final int device = _getPointerId(event);
       if (_hasSanitizer(device)) {
         final pointerData = <ui.PointerData>[];
-        final _SanitizedDetails? details = _getSanitizer(
-          device,
-        ).sanitizeUpEvent(buttons: event.buttons?.toInt());
+        final _SanitizedDetails? details = _getSanitizer(device)
+            .sanitizeUpEvent(buttons: event.buttons?.toInt());
         _removePointerIfUnhoverable(event);
         if (details != null) {
           _convertEventsToPointerData(data: pointerData, event: event, details: details);
@@ -1177,9 +1220,78 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       }
     }, checkModifiers: false);
 
+    // Safety net for touches the browser abandons without a `pointerup` or a
+    // `pointercancel`. See [_cancelAbandonedTouches].
+    addEventListener(_globalTarget, 'touchend', (DomEvent event) {
+      _cancelAbandonedTouches(event as DomTouchEvent);
+    });
+    addEventListener(_globalTarget, 'touchcancel', (DomEvent event) {
+      _cancelAbandonedTouches(event as DomTouchEvent);
+    });
+
     _addWheelEventListener((DomEvent event) {
       _handleWheelEvent(event);
     });
+  }
+
+  /// Cancels touch pointers that the browser stopped reporting mid-gesture.
+  ///
+  /// iOS WebKit stops dispatching pointer events for a touch once it promotes
+  /// that touch to a native gesture, such as dragging the caret inside a text
+  /// field. It delivers neither `pointerup` nor `pointercancel`, so the
+  /// framework is left with a pointer that never lifts, and any gesture
+  /// recognizer tracking it is wedged forever.
+  ///
+  /// Observed on iOS 27; iOS 26 does not do it. Gated to iOS because the
+  /// reconciliation below relies on WebKit behavior that other engines do not
+  /// guarantee, in particular that a `Touch.identifier` equals its pointer
+  /// event's `pointerId`. Despite its name, [isIosSafari] means WebKit on iOS,
+  /// so the gate covers every browser on iOS, not just Safari.
+  /// See: https://github.com/flutter/flutter/issues/188781
+  ///
+  /// On iOS WebKit, `touches` still reports the truth throughout: it lists the
+  /// touches in contact with the surface, and drops an abandoned one once the
+  /// finger leaves. Only the pointer events go missing. So any touch this class
+  /// believes is down, but which the browser does not report as being on the
+  /// surface, has been abandoned and must be cancelled.
+  ///
+  /// The cancel does not join the click debouncer's queue: it repairs an older
+  /// pointer and must not be dropped by debouncing of a concurrent tap. Any
+  /// queued events are flushed ahead of it, so the framework still sees the
+  /// abandoned pointer's `down` before its `cancel`.
+  void _cancelAbandonedTouches(DomTouchEvent event) {
+    if (!isIosSafari || _downTouchDevices.isEmpty) {
+      return;
+    }
+
+    final onSurface = <int>{
+      for (final DomTouch touch in event.touches)
+        if (touch.identifier?.toInt() case final int device) device,
+    };
+    final Set<int> stale = _downTouchDevices.difference(onSurface);
+    if (stale.isEmpty) {
+      return;
+    }
+
+    final pointerData = <ui.PointerData>[];
+    final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
+    for (final device in stale) {
+      _sanitizers.remove(device);
+      // `convert` defaults `change` to `PointerChange.cancel`. It also replaces
+      // a cancel's coordinates with the pointer's last known location, so no
+      // position is supplied here.
+      _pointerDataConverter.convert(
+        pointerData,
+        viewId: _view.viewId,
+        timeStamp: timeStamp,
+        signalKind: ui.PointerSignalKind.none,
+        device: device,
+        pressureMax: 1.0,
+      );
+    }
+    _downTouchDevices.removeAll(stale);
+
+    PointerBinding.clickDebouncer.flushAndSend(pointerData);
   }
 
   // For each event that is de-coalesced from `event` and described in

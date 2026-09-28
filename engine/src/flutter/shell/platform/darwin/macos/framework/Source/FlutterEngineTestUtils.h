@@ -25,6 +25,7 @@ class FlutterEngineTest : public AutoreleasePoolTest {
   void TearDown() override;
 
   void AddNativeCallback(const char* name, Dart_NativeFunction function);
+  void AddFfiNativeCallback(const char* name, void* function);
 
   static void IsolateCreateCallback(void* user_data);
 

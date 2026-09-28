@@ -22,9 +22,8 @@ Future<void> testMain() async {
 
   test('empty paragraph', () {
     const fontSize = 10.0;
-    final ui.Paragraph paragraph = ui.ParagraphBuilder(
-      ui.ParagraphStyle(fontSize: fontSize),
-    ).build();
+    final ui.Paragraph paragraph = ui.ParagraphBuilder(ui.ParagraphStyle(fontSize: fontSize))
+        .build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     expect(paragraph.getLineMetricsAt(0), isNull);

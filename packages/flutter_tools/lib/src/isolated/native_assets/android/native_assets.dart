@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:code_assets/code_assets.dart';
-import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../android/android_sdk.dart';
 import '../../../android/gradle_utils.dart';
@@ -11,6 +10,7 @@ import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
 import '../native_assets.dart';
+import '../native_assets_manifest.dart';
 
 int targetAndroidNdkApi(Map<String, String> environmentDefines) {
   return int.parse(environmentDefines[kMinSdkVersion] ?? minSdkVersion);
@@ -18,23 +18,25 @@ int targetAndroidNdkApi(Map<String, String> environmentDefines) {
 
 Future<List<File>> copyNativeCodeAssetsAndroid(
   Uri targetUri,
-  Map<FlutterCodeAsset, KernelAsset> assetTargetLocations,
+  Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocations,
   FileSystem fileSystem,
 ) async {
   assert(assetTargetLocations.isNotEmpty);
   final installedFiles = <File>[];
   final jniArchDirs = <String>[
-    for (final AndroidArch androidArch in AndroidArch.values) androidArch.archName,
+    for (final CpuArch cpuArch in <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64])
+      cpuArch.androidArchName,
   ];
   for (final jniArchDir in jniArchDirs) {
     final Uri archUri = targetUri.resolve('jniLibs/lib/$jniArchDir/');
     await fileSystem.directory(archUri).create(recursive: true);
   }
-  for (final MapEntry<FlutterCodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
+  for (final MapEntry<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetMapping
+      in assetTargetLocations.entries) {
     final Uri source = assetMapping.key.codeAsset.file!;
-    final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
-    final AndroidArch androidArch = _getAndroidArch(assetMapping.value.target.architecture);
-    final String jniArchDir = androidArch.archName;
+    final Uri target = assetMapping.value.bundlePath!;
+    final CpuArch cpuArch = _getAndroidArch(assetMapping.key.architecture);
+    final String jniArchDir = cpuArch.androidArchName;
     final Uri archUri = targetUri.resolve('jniLibs/lib/$jniArchDir/');
     final Uri assetTargetUri = archUri.resolveUri(target);
     final String targetFullPath = assetTargetUri.toFilePath();
@@ -44,53 +46,43 @@ Future<List<File>> copyNativeCodeAssetsAndroid(
   return installedFiles;
 }
 
-/// Get the [Architecture] for [androidArch].
-Architecture getNativeAndroidArchitecture(AndroidArch androidArch) {
-  return switch (androidArch) {
-    AndroidArch.armeabi_v7a => Architecture.arm,
-    AndroidArch.arm64_v8a => Architecture.arm64,
-    AndroidArch.x86_64 => Architecture.x64,
+/// Get the [Architecture] for [cpuArch].
+Architecture getNativeAndroidArchitecture(CpuArch cpuArch) {
+  return switch (cpuArch) {
+    CpuArch.armv7 => Architecture.arm,
+    CpuArch.arm64 => Architecture.arm64,
+    CpuArch.x64 => Architecture.x64,
+    CpuArch.x86 ||
+    CpuArch.riscv64 ||
+    CpuArch.unknown => throwToolExit('Invalid Android arch: $cpuArch.'),
   };
 }
 
-/// Get the [AndroidArch] for [architecture].
-AndroidArch _getAndroidArch(Architecture architecture) {
+/// Get the [CpuArch] for [architecture].
+CpuArch _getAndroidArch(Architecture architecture) {
   return switch (architecture) {
-    Architecture.arm => AndroidArch.armeabi_v7a,
-    Architecture.arm64 => AndroidArch.arm64_v8a,
-    Architecture.x64 => AndroidArch.x86_64,
+    Architecture.arm => CpuArch.armv7,
+    Architecture.arm64 => CpuArch.arm64,
+    Architecture.x64 => CpuArch.x64,
     Architecture.riscv64 => throwToolExit('Android RISC-V not yet supported.'),
     _ => throwToolExit('Invalid architecture: $architecture.'),
   };
 }
 
-Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsAndroid(
+Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsAndroid(
   List<FlutterCodeAsset> nativeAssets,
 ) {
-  return <FlutterCodeAsset, KernelAsset>{
-    for (final FlutterCodeAsset asset in nativeAssets) asset: _targetLocationAndroid(asset),
+  return <FlutterCodeAsset, FlutterCodeAssetTargetLocation>{
+    for (final FlutterCodeAsset asset in nativeAssets)
+      asset: targetLocationForCodeAsset(asset, (FlutterCodeAsset asset) {
+        final String fileName = asset.codeAsset.file!.pathSegments.last;
+        final uri = Uri(path: fileName);
+        return FlutterCodeAssetTargetLocation(
+          runtimePath: NativeAssetAbsolutePath(fileName),
+          bundlePath: uri,
+        );
+      }),
   };
-}
-
-/// Converts the `path` of [asset] as output from a `build.dart` invocation to
-/// the path used inside the Flutter app bundle.
-KernelAsset _targetLocationAndroid(FlutterCodeAsset asset) {
-  final LinkMode linkMode = asset.codeAsset.linkMode;
-  final KernelAssetPath kernelAssetPath;
-  switch (linkMode) {
-    case DynamicLoadingSystem _:
-      kernelAssetPath = KernelAssetSystemPath(linkMode.uri);
-    case LookupInExecutable _:
-      kernelAssetPath = KernelAssetInExecutable();
-    case LookupInProcess _:
-      kernelAssetPath = KernelAssetInProcess();
-    case DynamicLoadingBundled _:
-      final String fileName = asset.codeAsset.file!.pathSegments.last;
-      kernelAssetPath = KernelAssetAbsolutePath(Uri(path: fileName));
-    default:
-      throw Exception('Unsupported asset link mode $linkMode in asset $asset');
-  }
-  return KernelAsset(id: asset.codeAsset.id, target: asset.target, path: kernelAssetPath);
 }
 
 /// Looks the NDK clang compiler tools.

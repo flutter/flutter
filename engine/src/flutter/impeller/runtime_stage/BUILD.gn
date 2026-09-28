@@ -53,6 +53,6 @@ impeller_component("runtime_stage_unittests") {
   deps = [
     ":runtime_stage",
     "../playground:playground_test",
-    "//flutter/testing",
+    "//flutter/testing:testing_lib",
   ]
 }

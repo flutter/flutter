@@ -25,9 +25,10 @@ abstract class DeferredComponentsValidator {
     this.platform, {
     this.exitOnFail = true,
     String? title,
-  }) : outputDir = projectDir
-           .childDirectory('build')
-           .childDirectory(kDeferredComponentsTempDirectory),
+    Directory? outputDir,
+  }) : outputDir =
+           outputDir ??
+           projectDir.childDirectory('build').childDirectory(kDeferredComponentsTempDirectory),
        inputs = <File>[],
        outputs = <File>[],
        title = title ?? 'Deferred components setup verification',

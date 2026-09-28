@@ -145,8 +145,27 @@ public class FlutterJNI {
     if (FlutterJNI.loadLibraryCalled) {
       Log.w(TAG, "FlutterJNI.loadLibrary called more than once");
     }
-    ReLinker.log(msg -> Log.d(TAG, msg)).loadLibrary(context, "flutter");
+    // ReLinker's fallback path works around older loader bugs by copying the library out of the
+    // APK and modifying its file permissions. That is incompatible with the safer dynamic code
+    // loading requirements introduced in Android 17 (API 37), which require libraries loaded via
+    // System.load() to be read-only. On API 37+ the platform loader is used directly and ReLinker
+    // is not needed. See https://github.com/flutter/flutter/issues/184861.
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
+      loadFlutterLibraryWithSystemLinker();
+    } else {
+      loadFlutterLibraryWithReLinker(context);
+    }
     FlutterJNI.loadLibraryCalled = true;
+  }
+
+  @VisibleForTesting
+  void loadFlutterLibraryWithReLinker(@NonNull Context context) {
+    ReLinker.log(msg -> Log.d(TAG, msg)).loadLibrary(context, "flutter");
+  }
+
+  @VisibleForTesting
+  void loadFlutterLibraryWithSystemLinker() {
+    System.loadLibrary("flutter");
   }
 
   private static boolean loadLibraryCalled = false;
@@ -1339,9 +1358,9 @@ public class FlutterJNI {
 
   // ----- New Platform Views ----------
 
+  // Called from the raster thread for AHB swapchain presentation.
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
-  @UiThread
   public SurfaceControl.Transaction createTransaction() {
     if (platformViewsController2 == null) {
       throw new RuntimeException("");
@@ -1357,16 +1376,6 @@ public class FlutterJNI {
       throw new RuntimeException("");
     }
     platformViewsController2.swapTransactions();
-  }
-
-  @SuppressWarnings("unused")
-  @SuppressLint("NewApi")
-  @UiThread
-  public void applyTransactions() {
-    if (platformViewsController2 == null) {
-      throw new RuntimeException("");
-    }
-    platformViewsController2.applyTransactions();
   }
 
   @SuppressWarnings("unused")

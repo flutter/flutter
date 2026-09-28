@@ -18,7 +18,10 @@ const _swiftPackageTemplate = '''
 
 import PackageDescription
 
-{{#hasSwiftCodeBefore}}\n{{swiftCodeBefore}}\n\n{{/hasSwiftCodeBefore}}
+{{#hasSwiftCodeBefore}}
+{{swiftCodeBefore}}
+
+{{/hasSwiftCodeBefore}}
 let package = Package(
     name: "{{packageName}}",
     {{#platforms}}
@@ -56,22 +59,15 @@ const _doubleIndent = '$_singleIndent$_singleIndent';
 /// for more information about Swift Packages and Package.swift.
 class SwiftPackage {
   SwiftPackage({
-    required File manifest,
-    required String name,
-    required List<SwiftPackageSupportedPlatform> platforms,
-    required List<SwiftPackageProduct> products,
-    required List<SwiftPackagePackageDependency> dependencies,
-    required List<SwiftPackageTarget> targets,
-    required TemplateRenderer templateRenderer,
-    String? swiftCodeBeforePackageDefinition,
-  }) : _manifest = manifest,
-       _name = name,
-       _platforms = platforms,
-       _products = products,
-       _dependencies = dependencies,
-       _targets = targets,
-       _templateRenderer = templateRenderer,
-       _swiftCodeBeforePackageDefinition = swiftCodeBeforePackageDefinition;
+    required this._manifest,
+    required this._name,
+    required this._platforms,
+    required this._products,
+    required this._dependencies,
+    required this._targets,
+    required this._templateRenderer,
+    this._swiftCodeBeforePackageDefinition,
+  });
 
   /// [File] for Package.swift.
   final File _manifest;
@@ -120,11 +116,17 @@ class SwiftPackage {
       final Directory targetDirectory = _manifest.parent
           .childDirectory('Sources')
           .childDirectory(target.name);
-      if (generateEmptySources &&
-          (!targetDirectory.existsSync() || targetDirectory.listSync().isEmpty)) {
+      if (generateEmptySources) {
         final File requiredSwiftFile = targetDirectory.childFile('${target.name}.swift');
-        requiredSwiftFile.createSync(recursive: true);
-        requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);
+        // Skip creating placeholder sources if sources already exist in the
+        // target directory to avoid unnecessary file writes during build.
+        final bool hasSources =
+            requiredSwiftFile.existsSync() ||
+            (targetDirectory.existsSync() && targetDirectory.listSync().isNotEmpty);
+        if (!hasSources) {
+          requiredSwiftFile.createSync(recursive: true);
+          requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);
+        }
       }
     }
 
@@ -132,8 +134,24 @@ class SwiftPackage {
       _swiftPackageTemplate,
       _templateContext,
     );
-    _manifest.createSync(recursive: true);
-    _manifest.writeAsStringSync(renderedTemplate);
+
+    // Skip writing Package.swift if the existing file content is identical to
+    // renderedTemplate. Preserving file modification time (mtime) prevents
+    // Xcode and Swift Package Manager from invalidating caches and re-resolving
+    // dependencies during parallel builds.
+    var shouldWrite = true;
+    try {
+      if (_manifest.existsSync() && _manifest.readAsStringSync() == renderedTemplate) {
+        shouldWrite = false;
+      }
+    } on FileSystemException {
+      // If reading fails, write it anyway.
+    }
+
+    if (shouldWrite) {
+      _manifest.createSync(recursive: true);
+      _manifest.writeAsStringSync(renderedTemplate);
+    }
   }
 
   String? _formatPlatforms() {
@@ -306,7 +324,8 @@ class SwiftPackagePackageDependency {
     // dependencies: [
     //     .package(name: "image_picker_ios", path: "/path/to/packages/image_picker/image_picker_ios/ios/image_picker_ios"),
     // ],
-    return '.package(name: "$name", path: "$path")';
+    final String posixPath = path.replaceAll(r'\', '/');
+    return '.package(name: "$name", path: "$posixPath")';
   }
 }
 

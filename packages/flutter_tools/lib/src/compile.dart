@@ -23,6 +23,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart';
 import 'convert.dart';
+import 'dart/package_map.dart';
 
 /// Opt-in changes to the dart compilers.
 const kDartCompilerExperiments = <String>[];
@@ -97,9 +98,7 @@ enum StdoutState { CollectDiagnostic, CollectDependencies }
 
 /// Handles stdin/stdout communication with the frontend server.
 class StdoutHandler {
-  StdoutHandler({required Logger logger, required FileSystem fileSystem})
-    : _logger = logger,
-      _fileSystem = fileSystem {
+  StdoutHandler({required this._logger, required this._fileSystem}) {
     reset();
   }
 
@@ -234,17 +233,13 @@ class KernelCompiler {
   KernelCompiler({
     required FileSystem fileSystem,
     required Logger logger,
-    required ProcessManager processManager,
-    required Artifacts artifacts,
-    required List<String> fileSystemRoots,
-    String? fileSystemScheme,
+    required this._processManager,
+    required this._artifacts,
+    required this._fileSystemRoots,
+    this._fileSystemScheme,
     @visibleForTesting StdoutHandler? stdoutHandler,
   }) : _logger = logger,
        _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _processManager = processManager,
-       _fileSystemScheme = fileSystemScheme,
-       _fileSystemRoots = fileSystemRoots,
        _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem);
 
   final FileSystem _fileSystem;
@@ -291,7 +286,7 @@ class KernelCompiler {
       final File mainFile = _fileSystem.file(mainPath);
       final Uri mainFileUri = mainFile.uri;
       if (packagesPath != null) {
-        mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
+        mainUri = packageConfig.toPackageUriForWorkspace(mainFileUri)?.toString();
       }
       mainUri ??= toMultiRootPath(
         mainFileUri,
@@ -314,7 +309,7 @@ class KernelCompiler {
     if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
       final Uri dartPluginRegistrantFileUri = dartPluginRegistrant.uri;
       dartPluginRegistrantUri =
-          packageConfig.toPackageUri(dartPluginRegistrantFileUri)?.toString() ??
+          packageConfig.toPackageUriForWorkspace(dartPluginRegistrantFileUri)?.toString() ??
           toMultiRootPath(
             dartPluginRegistrantFileUri,
             _fileSystemScheme,
@@ -359,7 +354,7 @@ class KernelCompiler {
           '--no-print-incremental-dependencies',
           for (final Object dartDefine in dartDefines) '-D$dartDefine',
           ...buildModeOptions(buildMode, dartDefines),
-          if (trackWidgetCreation) '--track-widget-creation',
+          if (trackWidgetCreation) '--track-creation-locations',
           if (!linkPlatformKernelIn) '--no-link-platform',
           if (aot) ...<String>[
             '--aot',
@@ -714,11 +709,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String sdkRoot, {
     required BuildInfo buildInfo,
     required Logger logger,
-    required ProcessManager processManager,
+    required this._processManager,
     required this.artifacts,
-    required Platform platform,
+    required this._platform,
     required FileSystem fileSystem,
-    required ShutdownHooks shutdownHooks,
+    required this._shutdownHooks,
     required Config config,
     this.testCompilation = false,
     this.targetModel = TargetModel.flutter,
@@ -744,10 +739,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
        assumeInitializeFromDillUpToDate = buildInfo.assumeInitializeFromDillUpToDate,
        frontendServerStarterPath = buildInfo.frontendServerStarterPath,
        _logger = logger,
-       _processManager = processManager,
-       _shutdownHooks = shutdownHooks,
        _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
-       _platform = platform,
        dartDefines = buildInfo.dartDefines,
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',
@@ -853,13 +845,15 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _stdoutHandler._suppressCompilerMessages = request.suppressErrors;
 
     final String mainUri =
-        request.packageConfig.toPackageUri(request.mainUri)?.toString() ??
+        request.packageConfig.toPackageUriForWorkspace(request.mainUri)?.toString() ??
         toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
 
     String? additionalSourceUri;
     if (request.additionalSourceUri != null) {
       additionalSourceUri =
-          request.packageConfig.toPackageUri(request.additionalSourceUri!)?.toString() ??
+          request.packageConfig
+              .toPackageUriForWorkspace(request.additionalSourceUri!)
+              ?.toString() ??
           toMultiRootPath(
             request.additionalSourceUri!,
             fileSystemScheme,
@@ -898,7 +892,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           message = fileUri.toString();
         } else {
           message =
-              request.packageConfig.toPackageUri(fileUri)?.toString() ??
+              request.packageConfig.toPackageUriForWorkspace(fileUri)?.toString() ??
               toMultiRootPath(fileUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
         }
         server.stdin.writeln(message);
@@ -974,7 +968,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ],
       if (packagesPath != null) ...<String>['--packages', packagesPath!],
       ...buildModeOptions(buildMode, dartDefines),
-      if (trackWidgetCreation) '--track-widget-creation',
+      if (trackWidgetCreation) '--track-creation-locations',
       if (includeUnsupportedPlatformLibraryStubs) '--include-unsupported-platform-library-stubs',
       for (final String root in fileSystemRoots) ...<String>['--filesystem-root', root],
       if (fileSystemScheme != null) ...<String>['--filesystem-scheme', fileSystemScheme!],
@@ -1079,25 +1073,25 @@ class DefaultResidentCompiler implements ResidentCompiler {
       return null;
     }
 
-    final String inputKey = const Uuid().v4();
     server.stdin
-      ..writeln('compile-expression $inputKey')
-      ..writeln(request.expression);
-    request.definitions?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.definitionTypes?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.typeDefinitions?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.typeBounds?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.typeDefaults?.forEach(server.stdin.writeln);
-    server.stdin
-      ..writeln(inputKey)
-      ..writeln(request.libraryUri ?? '')
-      ..writeln(request.klass ?? '')
-      ..writeln(request.method ?? '')
-      ..writeln(request.isStatic);
+      ..writeln('JSON_INPUT')
+      ..writeln(
+        json.encode(<String, Object?>{
+          'type': 'COMPILE_EXPRESSION',
+          'data': <String, Object?>{
+            'expression': request.expression,
+            'definitions': request.definitions ?? <String>[],
+            'definitionTypes': request.definitionTypes ?? <String>[],
+            'typeDefinitions': request.typeDefinitions ?? <String>[],
+            'typeBounds': request.typeBounds ?? <String>[],
+            'typeDefaults': request.typeDefaults ?? <String>[],
+            'libraryUri': request.libraryUri ?? '',
+            'class': request.klass,
+            'method': request.method,
+            'static': request.isStatic,
+          },
+        }),
+      );
 
     return _stdoutHandler.compilerOutput?.future;
   }

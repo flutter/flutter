@@ -13,7 +13,7 @@
 #include "gmock/gmock.h"
 #include "impeller/core/runtime_types.h"
 
-// CREATE_NATIVE_ENTRY is leaky by design
+// CREATE_FFI_LAMBDA is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 namespace flutter {
@@ -303,7 +303,8 @@ TEST_F(EngineAnimatorTest, AnimatorAcceptsMultipleRenders) {
       });
 
   native_latch.Reset();
-  AddNativeCallback("NotifyNative", [](auto args) { native_latch.Signal(); });
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([]() { native_latch.Signal(); }));
 
   std::unique_ptr<Animator> animator;
   PostSync(task_runners_.GetUITaskRunner(),
@@ -395,8 +396,7 @@ TEST_F(EngineAnimatorTest, IgnoresDuplicateRenders) {
   std::unique_ptr<EngineContext> engine_context;
 
   std::vector<std::shared_ptr<Layer>> benchmark_layers;
-  auto capture_root_layer = [&benchmark_layers](Dart_NativeArguments args) {
-    auto handle = Dart_GetNativeArgument(args, 0);
+  auto capture_root_layer = [&benchmark_layers](Dart_Handle handle) {
     intptr_t peer = 0;
     Dart_Handle result = Dart_GetNativeInstanceField(
         handle, tonic::DartWrappable::kPeerIndex, &peer);
@@ -438,8 +438,8 @@ TEST_F(EngineAnimatorTest, IgnoresDuplicateRenders) {
         });
       });
 
-  AddNativeCallback("CaptureRootLayer",
-                    CREATE_NATIVE_ENTRY(capture_root_layer));
+  AddFfiNativeCallback("CaptureRootLayer",
+                       CREATE_FFI_LAMBDA(capture_root_layer));
 
   std::unique_ptr<Animator> animator;
   PostSync(task_runners_.GetUITaskRunner(),
@@ -506,11 +506,11 @@ TEST_F(EngineAnimatorTest, AnimatorSubmitsImplicitViewBeforeDrawFrameEnds) {
 
   native_latch.Reset();
   // The native_latch is signaled at the end of handleDrawFrame.
-  AddNativeCallback("NotifyNative",
-                    CREATE_NATIVE_ENTRY([&rasterization_started](auto args) {
-                      EXPECT_EQ(rasterization_started, true);
-                      native_latch.Signal();
-                    }));
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&rasterization_started]() {
+                         EXPECT_EQ(rasterization_started, true);
+                         native_latch.Signal();
+                       }));
 
   engine_context = EngineContext::Create(delegate_, settings_, task_runners_,
                                          std::move(animator));

@@ -182,6 +182,17 @@ Future<void> main(List<String> args) async {
         .replaceAll('x86_64', 'x64');
     expect(dartTargetArch, equals(unameArch));
   });
+
+  testWithoutContext('verify the dart binary arch matches the host arch', () async {
+    final HostPlatform dartArch = _identifyMacBinaryArch(_dartBinary.path);
+    final os = OperatingSystemUtils(
+      processManager: processManager,
+      fileSystem: fileSystem,
+      platform: platform,
+      logger: BufferLogger.test(),
+    );
+    expect(dartArch, os.hostPlatform);
+  }, skip: !platform.isMacOS); // [intended] Calls macOS-specific commands
 }
 
 class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
@@ -221,3 +232,34 @@ class FakeVersionlessArtifact extends CachedArtifact {
     OperatingSystemUtils operatingSystemUtils,
   ) async {}
 }
+
+// Call `file` on the path and parse the output.
+HostPlatform _identifyMacBinaryArch(String path) {
+  // Expect STDOUT like:
+  //   bin/cache/dart-sdk/bin/dart: Mach-O 64-bit executable x86_64
+  final pattern = RegExp(r'Mach-O 64-bit executable (\w+)');
+  final ProcessResult result = processManager.runSync(<String>['file', path]);
+  expect(result, ProcessResultMatcher(stdoutPattern: '$path: Mach-O 64-bit executable'));
+  final RegExpMatch? match = pattern.firstMatch(result.stdout as String);
+  if (match == null) {
+    fail('Unrecognized STDOUT from `file`: "${result.stdout}"');
+  }
+  switch (match.group(1)) {
+    case 'x86_64':
+      return HostPlatform.darwin_x64;
+    case 'arm64':
+      return HostPlatform.darwin_arm64;
+    default:
+      fail('Unexpected architecture ${match.group(1)}');
+  }
+}
+
+final String _flutterRootPath = getFlutterRoot();
+final Directory _flutterRoot = fileSystem.directory(_flutterRootPath);
+final File _dartBinary = _flutterRoot
+    .childDirectory('bin')
+    .childDirectory('cache')
+    .childDirectory('dart-sdk')
+    .childDirectory('bin')
+    .childFile('dart')
+    .absolute;

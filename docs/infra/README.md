@@ -18,4 +18,5 @@ This is an index of team-facing documentation for topics relating to Engineering
 - [Labeling PRs](../contributing/Labeling-PRs.md)
 - [New Android Version](../platforms/android/New-Android-version.md)
 - [Rolling the Dart SDK](Rolling-Dart.md)
+- [Scheduled Recurring Tasks](Scheduled-Recurring-Tasks.md)
 - [Updating dependencies in Flutter](Updating-dependencies-in-Flutter.md)

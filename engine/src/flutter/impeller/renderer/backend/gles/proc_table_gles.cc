@@ -72,6 +72,20 @@ ProcTableGLES::Resolver WrappedResolver(
   };
 }
 
+// Resolves `gl_name` and installs it as `proc`'s implementation. Used to alias
+// extension entry points that share a core proc's signature under a different
+// name (e.g. the *NV-suffixed GL_NV_texture_array procs).
+template <typename Proc, typename Resolver, typename ErrorFn>
+static void BindProcAlias(Proc& proc,
+                          const Resolver& resolver,
+                          const ErrorFn& error_fn,
+                          const char* gl_name) {
+  if (auto fn_ptr = resolver(gl_name)) {
+    proc.function = reinterpret_cast<decltype(proc.function)>(fn_ptr);
+    proc.error_fn = error_fn;
+  }
+}
+
 ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
     Resolver resolver) {
   // The reason this constructor has anywhere near enough code to tip off
@@ -122,8 +136,26 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
     proc_ivar.error_fn = error_fn;                              \
   }
 
-  if (description_->GetGlVersion().IsAtLeast(Version(3))) {
+  const bool supports_gl3 = description_->GetGlVersion().IsAtLeast(Version(3));
+  if (supports_gl3) {
     FOR_EACH_IMPELLER_GLES3_PROC(IMPELLER_PROC);
+  }
+
+  // 2D array textures need the 3D texture entry points. They are core on
+  // GL/GLES 3.0, exposed on desktop GL 2.x through GL_EXT_texture_array (which
+  // uses the same entry-point names), and on OpenGL ES 2.0 through
+  // GL_NV_texture_array (which suffixes them with NV). The NV entry points
+  // share the core signatures, so they are resolved as aliases into the core
+  // procs and the rest of the backend can call them without branching.
+  if (supports_gl3 || description_->HasExtension("GL_EXT_texture_array")) {
+    FOR_EACH_IMPELLER_TEXTURE_ARRAY_PROC(IMPELLER_PROC);
+  } else if (description_->HasExtension("GL_NV_texture_array")) {
+    BindProcAlias(TexImage3D, resolver, error_fn, "glTexImage3DNV");
+    BindProcAlias(TexSubImage3D, resolver, error_fn, "glTexSubImage3DNV");
+    BindProcAlias(CompressedTexImage3D, resolver, error_fn,
+                  "glCompressedTexImage3DNV");
+    BindProcAlias(CompressedTexSubImage3D, resolver, error_fn,
+                  "glCompressedTexSubImage3DNV");
   }
 
   FOR_EACH_IMPELLER_EXT_PROC(IMPELLER_PROC);

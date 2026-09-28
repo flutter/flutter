@@ -6,6 +6,7 @@
 #define FLUTTER_LIB_UI_SNAPSHOT_DELEGATE_H_
 
 #include <functional>
+#include <memory>
 #include <string>
 
 #include "flutter/common/graphics/texture.h"
@@ -19,6 +20,7 @@
 namespace impeller {
 class Texture;
 class RuntimeStage;
+class AiksContext;
 }  // namespace impeller
 
 namespace flutter {
@@ -82,6 +84,8 @@ class SnapshotDelegate {
   virtual std::shared_ptr<TextureRegistry> GetTextureRegistry() = 0;
 
   virtual GrDirectContext* GetGrContext() = 0;
+
+  virtual std::shared_ptr<impeller::AiksContext> GetAiksContext() const = 0;
 
   virtual void MakeSkiaSnapshot(sk_sp<DisplayList> display_list,
                                 DlISize picture_size,

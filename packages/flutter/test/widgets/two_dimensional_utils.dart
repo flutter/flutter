@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart' show CacheExtentStyle, ViewportOffset;
 import 'package:flutter/widgets.dart';
-
-import 'widgets_app_tester.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const Color _kAmber100 = Color(0xFFFFF8E1);
 const Color _kBlueAccent100 = Color(0xFF82B1FF);
@@ -342,14 +341,14 @@ class SimpleListTableView extends TwoDimensionalScrollView {
     super.mainAxis = Axis.vertical,
     super.verticalDetails = const ScrollableDetails.vertical(),
     super.horizontalDetails = const ScrollableDetails.horizontal(),
-    required TwoDimensionalChildListDelegate delegate,
+    required super.delegate,
     super.cacheExtent,
     super.cacheExtentStyle,
     super.diagonalDragBehavior = DiagonalDragBehavior.none,
     super.dragStartBehavior = DragStartBehavior.start,
     super.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     super.clipBehavior = Clip.hardEdge,
-  }) : super(delegate: delegate);
+  });
 
   @override
   Widget buildViewport(

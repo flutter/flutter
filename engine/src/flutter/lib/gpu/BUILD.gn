@@ -89,6 +89,7 @@ if (enable_unittests && !is_fuchsia) {
     sources = [
       "command_buffer_unittests.cc",
       "render_pass_unittests.cc",
+      "render_pipeline_unittests.cc",
       "shader_library_unittests.cc",
     ]
 

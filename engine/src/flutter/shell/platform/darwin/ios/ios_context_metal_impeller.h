@@ -26,8 +26,6 @@ class IOSContextMetalImpeller final : public IOSContext {
 
   ~IOSContextMetalImpeller();
 
-  IOSRenderingBackend GetBackend() const override;
-
  private:
   FlutterDarwinContextMetalImpeller* darwin_context_metal_impeller_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;

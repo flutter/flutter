@@ -65,8 +65,10 @@ source_set("InternalFlutterSwift") {
     "framework/Source/AccessibilityFeatures.swift",
     "framework/Source/ConnectionCollection.swift",
     "framework/Source/DisplayLinkManager.swift",
+    "framework/Source/KeyboardInsetManager.swift",
     "framework/Source/LaunchEngine.swift",
     "framework/Source/SplashScreenManager.swift",
+    "framework/Source/TranslateViewController.swift",
     "framework/Source/UIPressProxy.swift",
     "framework/Source/VSyncClient.swift",
   ]
@@ -108,8 +110,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterHeadlessDartRunner.mm",
     "framework/Source/FlutterKeyPrimaryResponder.h",
     "framework/Source/FlutterKeySecondaryResponder.h",
-    "framework/Source/FlutterKeyboardInsetManager.h",
-    "framework/Source/FlutterKeyboardInsetManager.mm",
     "framework/Source/FlutterKeyboardManager.h",
     "framework/Source/FlutterKeyboardManager.mm",
     "framework/Source/FlutterMetalLayer.h",
@@ -170,8 +170,6 @@ source_set("flutter_framework_source") {
     "ios_context.mm",
     "ios_context_metal_impeller.h",
     "ios_context_metal_impeller.mm",
-    "ios_context_noop.h",
-    "ios_context_noop.mm",
     "ios_external_texture_metal.h",
     "ios_external_texture_metal.mm",
     "ios_external_view_embedder.h",
@@ -180,8 +178,6 @@ source_set("flutter_framework_source") {
     "ios_surface.mm",
     "ios_surface_metal_impeller.h",
     "ios_surface_metal_impeller.mm",
-    "ios_surface_noop.h",
-    "ios_surface_noop.mm",
     "platform_message_handler_ios.h",
     "platform_message_handler_ios.mm",
     "platform_view_ios.h",
@@ -256,12 +252,13 @@ if (enable_ios_unittests) {
     bridge_header = "FlutterTests-Bridging-Header.h"
     sources = [
       "framework/Source/AccessibilityFeaturesTests.swift",
-      "framework/Source/ConnectionCollectionTest.swift",
+      "framework/Source/ConnectionCollectionTests.swift",
+      "framework/Source/DisplayLinkManagerTests.swift",
       "framework/Source/FakeUIPressProxy.swift",
-      "framework/Source/LaunchEngineTest.swift",
+      "framework/Source/LaunchEngineTests.swift",
       "framework/Source/SplashScreenManagerTests.swift",
       "framework/Source/TaskRunnerTests.swift",
-      "framework/Source/VSyncClientTest.swift",
+      "framework/Source/VSyncClientTests.swift",
     ]
     frameworks = [ "Testing.framework" ]
     deps = [
@@ -328,8 +325,6 @@ if (enable_ios_unittests) {
       "framework/Source/VsyncWaiterIOSTest.mm",
       "framework/Source/accessibility_bridge_test.mm",
       "framework/Source/availability_version_check_test.mm",
-      "ios_context_noop_unittests.mm",
-      "ios_surface_noop_unittests.mm",
       "platform_message_handler_ios_test.mm",
       "platform_view_ios_test.mm",
     ]
@@ -417,7 +412,7 @@ copy("copy_asan_runtime_dylib") {
   # TODO(cbracken): https://github.com/flutter/flutter/issues/186668
   # Eliminate clang toolchain hardcoding.
   _libclang_base_path =
-      "$buildtools_path/mac-${host_cpu}/clang/lib/clang/23/lib/darwin/"
+      "$buildtools_path/mac-${host_cpu}/clang/lib/clang/24/lib/darwin/"
 
   if (defined(use_ios_simulator) && use_ios_simulator) {
     _dylib_name = "libclang_rt.asan_iossim_dynamic.dylib"

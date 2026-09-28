@@ -264,9 +264,13 @@ File _createDartpadSourceFile(
   Directory flutterRoot, {
   bool linked = false,
 }) {
-  final File linkedFile = filesystem.file(path.join(flutterRoot.absolute.path, 'linked_file.dart'))
-    ..createSync(recursive: true)
-    ..writeAsStringSync('''
+  final Directory flutterPackageDir = filesystem.directory(
+    path.join(flutterRoot.absolute.path, 'packages', 'flutter'),
+  );
+  final File linkedFile =
+      filesystem.file(path.join(flutterPackageDir.absolute.path, 'linked_file.dart'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
 // Copyright
 
 import 'foo.dart';
@@ -280,7 +284,7 @@ void DocumentedClassSample() {
 
   final source = linked
       ? '''
-/// ** See code in ${path.relative(linkedFile.path, from: flutterRoot.absolute.path)} **'''
+/// ** See code in ${path.relative(linkedFile.path, from: flutterPackageDir.absolute.path)} **'''
       : '''
 /// ```dart
 /// void DocumentedClassSample() {

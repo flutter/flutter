@@ -76,13 +76,23 @@ Future<Stream<String>> startWidgetPreview({
   });
 
   final controller = StreamController<String>.broadcast();
-  process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
-    // ignore: avoid_print
-    print('[stdout] $msg');
-    if (!controller.isClosed) {
-      controller.add(msg);
-    }
-  });
+  process.stdout
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .listen(
+        (String msg) {
+          // ignore: avoid_print
+          print('[stdout] $msg');
+          if (!controller.isClosed) {
+            controller.add(msg);
+          }
+        },
+        onDone: () {
+          if (!controller.isClosed) {
+            controller.close();
+          }
+        },
+      );
 
   process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
     // ignore: avoid_print
@@ -91,9 +101,8 @@ Future<Stream<String>> startWidgetPreview({
 
   unawaited(
     process.exitCode.then((int exitCode) {
-      if (!controller.isClosed) {
-        controller.close();
-      }
+      // ignore: avoid_print
+      print('widget-preview process exited with code $exitCode');
     }),
   );
 

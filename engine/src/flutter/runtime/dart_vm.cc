@@ -43,16 +43,6 @@ static const char* kDartAllConfigsArgs[] = {
 
 static const char* kDartPrecompilationArgs[] = {"--precompilation"};
 
-static const char* kSerialGCArgs[] = {
-    // clang-format off
-    "--concurrent_mark=false",
-    "--concurrent_sweep=false",
-    "--compactor_tasks=1",
-    "--scavenger_tasks=0",
-    "--marker_tasks=0",
-    // clang-format on
-};
-
 [[maybe_unused]]
 static const char* kDartWriteProtectCodeArgs[] = {
     "--no_write_protect_code",
@@ -89,7 +79,7 @@ static std::string DartFileRecorderArgs(const std::string& path) {
 
 // "Microtask" is included in all argument strings below, but "Microtask" stream
 // events will only be recorded by the VM's timeline recorders when
-// |Switch::ProfileMicrotasks| is set.
+// |Switch::kProfileMicrotasks| is set.
 
 [[maybe_unused]]
 static const char* kDartDefaultTraceStreamsArgs[]{
@@ -365,13 +355,6 @@ DartVM::DartVM(const std::shared_ptr<const DartVMData>& vm_data,
 
   if (enable_asserts) {
     PushBackAll(&args, kDartAssertArgs, std::size(kDartAssertArgs));
-  }
-
-  // On low power devices with lesser number of cores, using concurrent
-  // marking or sweeping causes contention for the UI thread leading to
-  // Jank, this option can be used to turn off all concurrent GC activities.
-  if (settings_.enable_serial_gc) {
-    PushBackAll(&args, kSerialGCArgs, std::size(kSerialGCArgs));
   }
 
   if (settings_.start_paused) {

@@ -22,8 +22,7 @@ void main() {
     const homeMac = '/Users/me';
 
     const macStudioInfoPlist3_3 = <String, Object>{
-      'CFBundleGetInfoString':
-          'Android Studio 3.3, build AI-182.5107.16.33.5199772. Copyright JetBrains s.r.o., (c) 2000-2018',
+      'CFBundleGetInfoString': 'Android Studio 3.3, build AI-182.5107.16.33.5199772. Copyright JetBrains s.r.o., (c) 2000-2018',
       'CFBundleShortVersionString': '3.3',
       'CFBundleVersion': 'AI-182.5107.16.33.5199772',
       'JVMOptions': <String, Object>{
@@ -35,8 +34,7 @@ void main() {
     };
 
     const macStudioInfoPlist4_1 = <String, Object>{
-      'CFBundleGetInfoString':
-          'Android Studio 4.1, build AI-201.8743.12.41.6858069. Copyright JetBrains s.r.o., (c) 2000-2020',
+      'CFBundleGetInfoString': 'Android Studio 4.1, build AI-201.8743.12.41.6858069. Copyright JetBrains s.r.o., (c) 2000-2020',
       'CFBundleShortVersionString': '4.1',
       'CFBundleVersion': 'AI-201.8743.12.41.6858069',
       'JVMOptions': <String, Object>{
@@ -49,8 +47,7 @@ void main() {
     };
 
     const macStudioInfoPlist2020_3 = <String, Object>{
-      'CFBundleGetInfoString':
-          'Android Studio 2020.3, build AI-203.7717.56.2031.7583922. Copyright JetBrains s.r.o., (c) 2000-2021',
+      'CFBundleGetInfoString': 'Android Studio 2020.3, build AI-203.7717.56.2031.7583922. Copyright JetBrains s.r.o., (c) 2000-2021',
       'CFBundleShortVersionString': '2020.3',
       'CFBundleVersion': 'AI-203.7717.56.2031.7583922',
       'JVMOptions': <String, Object>{
@@ -63,8 +60,7 @@ void main() {
     };
 
     const macStudioInfoPlist2022_1 = <String, Object>{
-      'CFBundleGetInfoString':
-          'Android Studio 2022.1, build AI-221.6008.13.2211.9477386. Copyright JetBrains s.r.o., (c) 2000-2023',
+      'CFBundleGetInfoString': 'Android Studio 2022.1, build AI-221.6008.13.2211.9477386. Copyright JetBrains s.r.o., (c) 2000-2023',
       'CFBundleShortVersionString': '2022.1',
       'CFBundleVersion': 'AI-221.6008.13.2211.9477386',
       'JVMOptions': <String, Object>{
@@ -77,8 +73,7 @@ void main() {
     };
 
     const macStudioInfoPlistEap_2022_3_1_11 = <String, Object>{
-      'CFBundleGetInfoString':
-          'Android Studio EAP AI-223.8836.35.2231.9848316, build AI-223.8836.35.2231.9848316. Copyright JetBrains s.r.o., (c) 2000-2023',
+      'CFBundleGetInfoString': 'Android Studio EAP AI-223.8836.35.2231.9848316, build AI-223.8836.35.2231.9848316. Copyright JetBrains s.r.o., (c) 2000-2023',
       'CFBundleShortVersionString': 'EAP AI-223.8836.35.2231.9848316',
       'CFBundleVersion': 'AI-223.8836.35.2231.9848316',
       'JVMOptions': <String, Object>{
@@ -478,10 +473,7 @@ void main() {
         // Spotlight finds the one known and two random installations.
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
-            command: const <String>[
-              'mdfind',
-              'kMDItemCFBundleIdentifier="com.google.android.studio*"',
-            ],
+            command: const <String>['sh', '-c', kSpotlightMdfindCommand],
             stdout: '$randomLocation1\n$randomLocation2\n$studioInApplication',
           ),
           FakeCommand(
@@ -514,6 +506,25 @@ void main() {
         ProcessManager: () => processManager,
         // Custom home paths are not supported on macOS nor Windows yet,
         // so we force the platform to fake Linux here.
+        Platform: () => platform,
+        PlistParser: () => plistUtils,
+      },
+    );
+
+    testUsingContext(
+      'installation detection on MacOS gracefully handles unresponsive Spotlight query (issue #189177)',
+      () {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(command: <String>['sh', '-c', kSpotlightMdfindCommand], exitCode: 137),
+        ]);
+
+        expect(AndroidStudio.allInstalled(), isEmpty);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        FileSystemUtils: () => fsUtils,
+        ProcessManager: () => processManager,
         Platform: () => platform,
         PlistParser: () => plistUtils,
       },
@@ -828,10 +839,7 @@ void main() {
 
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
-            command: const <String>[
-              'mdfind',
-              'kMDItemCFBundleIdentifier="com.google.android.studio*"',
-            ],
+            command: const <String>['sh', '-c', kSpotlightMdfindCommand],
             stdout: extractedDownloadZip,
           ),
           FakeCommand(command: <String>[studioInApplicationJavaBinary, '-version']),

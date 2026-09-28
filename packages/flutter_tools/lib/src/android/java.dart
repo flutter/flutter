@@ -38,14 +38,11 @@ class Java {
     required this.binaryPath,
     required this.javaSource,
     required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils os,
-    required Platform platform,
+    required this._fileSystem,
+    required this._os,
+    required this._platform,
     required ProcessManager processManager,
   }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _os = os,
-       _platform = platform,
        _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 

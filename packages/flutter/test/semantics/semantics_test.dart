@@ -405,53 +405,50 @@ void main() {
       }
     });
 
-    test(
-      'after markNeedsSemanticsUpdate() all render objects between two semantic boundaries are asked for annotations',
-      () {
-        final SemanticsHandle handle = TestRenderingFlutterBinding.instance.ensureSemantics();
-        addTearDown(handle.dispose);
+    test('after markNeedsSemanticsUpdate() all render objects between two semantic boundaries are asked for annotations', () {
+      final SemanticsHandle handle = TestRenderingFlutterBinding.instance.ensureSemantics();
+      addTearDown(handle.dispose);
 
-        TestRender middle;
-        final root = TestRender(
-          hasTapAction: true,
-          isSemanticBoundary: true,
-          child: TestRender(
-            hasLongPressAction: true,
-            child: middle = TestRender(
-              hasScrollLeftAction: true,
-              child: TestRender(
-                hasScrollRightAction: true,
-                child: TestRender(hasScrollUpAction: true, isSemanticBoundary: true),
-              ),
+      TestRender middle;
+      final root = TestRender(
+        hasTapAction: true,
+        isSemanticBoundary: true,
+        child: TestRender(
+          hasLongPressAction: true,
+          child: middle = TestRender(
+            hasScrollLeftAction: true,
+            child: TestRender(
+              hasScrollRightAction: true,
+              child: TestRender(hasScrollUpAction: true, isSemanticBoundary: true),
             ),
           ),
-        );
+        ),
+      );
 
-        layout(root);
-        pumpFrame(phase: EnginePhase.flushSemantics);
+      layout(root);
+      pumpFrame(phase: EnginePhase.flushSemantics);
 
-        int expectedActions =
-            SemanticsAction.tap.index |
-            SemanticsAction.longPress.index |
-            SemanticsAction.scrollLeft.index |
-            SemanticsAction.scrollRight.index;
-        expect(root.debugSemantics!.getSemanticsData().actions, expectedActions);
+      int expectedActions =
+          SemanticsAction.tap.index |
+          SemanticsAction.longPress.index |
+          SemanticsAction.scrollLeft.index |
+          SemanticsAction.scrollRight.index;
+      expect(root.debugSemantics!.getSemanticsData().actions, expectedActions);
 
-        middle
-          ..hasScrollLeftAction = false
-          ..hasScrollDownAction = true;
-        middle.markNeedsSemanticsUpdate();
+      middle
+        ..hasScrollLeftAction = false
+        ..hasScrollDownAction = true;
+      middle.markNeedsSemanticsUpdate();
 
-        pumpFrame(phase: EnginePhase.flushSemantics);
+      pumpFrame(phase: EnginePhase.flushSemantics);
 
-        expectedActions =
-            SemanticsAction.tap.index |
-            SemanticsAction.longPress.index |
-            SemanticsAction.scrollDown.index |
-            SemanticsAction.scrollRight.index;
-        expect(root.debugSemantics!.getSemanticsData().actions, expectedActions);
-      },
-    );
+      expectedActions =
+          SemanticsAction.tap.index |
+          SemanticsAction.longPress.index |
+          SemanticsAction.scrollDown.index |
+          SemanticsAction.scrollRight.index;
+      expect(root.debugSemantics!.getSemanticsData().actions, expectedActions);
+    });
 
     test('updateWith marks node as dirty when role changes', () {
       final node = SemanticsNode();
@@ -1064,6 +1061,20 @@ void main() {
     expect(config.customSemanticsActions[customAction], same(onCustomAction));
   });
 
+  test('SemanticsConfiguration accessibilityFocusBlockType does not mark hasBeenAnnotated when unchanged', () {
+    final config = SemanticsConfiguration();
+    expect(config.accessibilityFocusBlockType, AccessibilityFocusBlockType.none);
+    expect(config.hasBeenAnnotated, isFalse);
+
+    config.accessibilityFocusBlockType = AccessibilityFocusBlockType.none;
+    expect(config.accessibilityFocusBlockType, AccessibilityFocusBlockType.none);
+    expect(config.hasBeenAnnotated, isFalse);
+
+    config.accessibilityFocusBlockType = AccessibilityFocusBlockType.blockSubtree;
+    expect(config.accessibilityFocusBlockType, AccessibilityFocusBlockType.blockSubtree);
+    expect(config.hasBeenAnnotated, isTrue);
+  });
+
   test('SemanticsConfiguration.copy() preserves hitTestBehavior', () {
     final config = SemanticsConfiguration()
       ..isSemanticBoundary = true
@@ -1341,6 +1352,47 @@ void main() {
       final String label = builder.build();
       expect(label, 'Emoji: 😀🎉 Math: ∑∆π Currency: €£¥');
     });
+  });
+
+  test('SemanticsData.toJson and SemanticsNode.toJson generate expected maps', () {
+    final node = SemanticsNode()
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0)
+      ..updateWith(
+        config: SemanticsConfiguration()
+          ..label = 'Test Label'
+          ..textDirection = TextDirection.ltr
+          ..value = 'Test Value'
+          ..hint = 'Test Hint'
+          ..isButton = true,
+      );
+
+    final SemanticsData data = node.getSemanticsData();
+    final Map<String, Object?> dataJsonMap = data.toJson();
+    expect(dataJsonMap['label'], 'Test Label');
+    expect(dataJsonMap['value'], 'Test Value');
+    expect(dataJsonMap['hint'], 'Test Hint');
+    expect(dataJsonMap['flags'], contains('isButton'));
+    expect(dataJsonMap['rect'], <String, double>{
+      'left': 0.0,
+      'top': 0.0,
+      'width': 100.0,
+      'height': 50.0,
+    });
+
+    final Map<String, Object?> nodeJsonMap = node.toJson();
+    expect(nodeJsonMap['id'], node.id);
+    expect(nodeJsonMap['label'], 'Test Label');
+    expect(nodeJsonMap['value'], 'Test Value');
+    expect(nodeJsonMap['hint'], 'Test Hint');
+    expect(nodeJsonMap['flags'], contains('isButton'));
+    expect(nodeJsonMap['rect'], <String, double>{
+      'left': 0.0,
+      'top': 0.0,
+      'width': 100.0,
+      'height': 50.0,
+    });
+    expect(nodeJsonMap['childrenInTraversalOrder'], isEmpty);
+    expect(nodeJsonMap['childrenInHitTestOrder'], isEmpty);
   });
 }
 

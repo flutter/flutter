@@ -83,13 +83,6 @@ class TextFrame {
   ///             property.
   GlyphAtlas::Type GetAtlasType() const;
 
-  /// @brief If this text frame contains a single glyph (such as for an Icon),
-  ///        then return it, otherwise std::nullopt.
-  std::optional<Glyph> AsSingleGlyph() const;
-
-  /// @brief Return the font of the first glyph run.
-  const Font& GetFont() const;
-
   fml::StatusOr<flutter::DlPath> GetPath() const;
 
   /// @brief Toggle the platform-specific contrast and gamma correction in the

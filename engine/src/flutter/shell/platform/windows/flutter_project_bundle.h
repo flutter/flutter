@@ -97,6 +97,9 @@ class FlutterProjectBundle {
   // Returns the Impeller enablement switch.
   FlutterImpellerSwitch impeller_switch() const { return impeller_switch_; }
 
+  // Returns whether the Flutter GPU API is enabled.
+  bool enable_flutter_gpu() const { return enable_flutter_gpu_; }
+
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
@@ -124,6 +127,9 @@ class FlutterProjectBundle {
 
   // The Impeller enablement switch.
   FlutterImpellerSwitch impeller_switch_ = FlutterImpellerSwitch::Default;
+
+  // Whether the Flutter GPU API is enabled.
+  bool enable_flutter_gpu_ = false;
 };
 
 }  // namespace flutter

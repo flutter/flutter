@@ -5,8 +5,8 @@
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 
-import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'models.dart';
 
@@ -19,9 +19,8 @@ class DialogWindowContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
-    return Overlay.wrap(
-      alwaysSizeToContent: true,
-      child: FocusScope(
+    return MaterialApp(
+      home: FocusScope(
         autofocus: true,
         child: IntrinsicWidth(
           child: Material(

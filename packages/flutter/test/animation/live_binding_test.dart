@@ -10,8 +10,6 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/widgets_app_tester.dart';
-
 void main() {
   /*
    * Here lies golden tests for packages/flutter_test/lib/src/binding.dart

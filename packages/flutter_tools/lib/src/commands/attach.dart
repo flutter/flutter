@@ -21,6 +21,7 @@ import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../features.dart';
 import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -64,21 +65,14 @@ class AttachCommand extends FlutterCommand {
   AttachCommand({
     bool verboseHelp = false,
     HotRunnerFactory? hotRunnerFactory,
-    required Stdio stdio,
-    required Logger logger,
-    required Terminal terminal,
-    required Signals signals,
-    required Platform platform,
-    required ProcessInfo processInfo,
-    required FileSystem fileSystem,
-  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
-       _stdio = stdio,
-       _logger = logger,
-       _terminal = terminal,
-       _signals = signals,
-       _platform = platform,
-       _processInfo = processInfo,
-       _fileSystem = fileSystem {
+    required this._stdio,
+    required this._logger,
+    required this._terminal,
+    required this._signals,
+    required this._platform,
+    required this._processInfo,
+    required this._fileSystem,
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -139,6 +133,7 @@ class AttachCommand extends FlutterCommand {
     addDevToolsOptions(verboseHelp: verboseHelp);
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
+    usesAdbLogFilteringOption(hide: !verboseHelp);
   }
 
   final HotRunnerFactory _hotRunnerFactory;
@@ -320,6 +315,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           ? _logger
           : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
       logToStdout: true,
+      featureFlags: featureFlags,
     );
 
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
@@ -350,7 +346,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
-    final Stream<Uri> vmServiceUri = _discoverVmService(device: device);
+    final Future<Uri> vmServiceUri = _discoverVmService(device: device);
+    vmServiceUri.ignore();
 
     final BuildInfo buildInfo = await getBuildInfo();
 
@@ -362,7 +359,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       userIdentifier: userIdentifier,
       platform: _platform,
     );
-    flutterDevice.vmServiceUris = vmServiceUri;
+    flutterDevice.vmServiceUri = vmServiceUri;
     final flutterDevices = <FlutterDevice>[flutterDevice];
     final debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
@@ -374,6 +371,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
       ipv6: ipv6!,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
+      adbLogFiltering:
+          argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering'),
     );
 
     return buildInfo.isDebug
@@ -397,7 +396,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           );
   }
 
-  Stream<Uri> _discoverVmService({required Device device}) {
+  Future<Uri> _discoverVmService({required Device device}) async {
     final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
@@ -405,14 +404,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final bool isWirelessIOSDevice = (device is IOSDevice) && device.isWirelesslyConnected;
 
     if (!isWirelessIOSDevice && (debugPort != null || debugUri != null)) {
-      return Stream<Uri>.fromFuture(
-        buildVMServiceUri(
-          device,
-          debugUri?.host ?? hostname,
-          debugPort ?? debugUri!.port,
-          hostVmservicePort,
-          debugUri?.path,
-        ),
+      return buildVMServiceUri(
+        device,
+        debugUri?.host ?? hostname,
+        debugPort ?? debugUri!.port,
+        hostVmservicePort,
+        debugUri?.path,
       );
     }
 
@@ -457,8 +454,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       warningColor: TerminalColor.cyan,
     );
 
-    // Stop the timer once we receive the first uri.
-    return streamWithCallbackOnFirstItem(vmServiceDiscovery.uris, discoveryStatus.stop);
+    try {
+      return await vmServiceDiscovery.firstValidUri();
+    } finally {
+      discoveryStatus.stop();
+    }
   }
 
   bool _isIOSDevice(Device device) {

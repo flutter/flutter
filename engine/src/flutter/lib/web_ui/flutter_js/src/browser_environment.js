@@ -53,13 +53,27 @@ const hasTextCluster = () => {
   return (typeof window.TextCluster !== "undefined");
 }
 
-const supportsWasmGC = () => {
-  // This attempts to instantiate a wasm module that only will validate if the
-  // final WasmGC spec is implemented in the browser.
-  //
-  // Copied from https://github.com/GoogleChromeLabs/wasm-feature-detect/blob/main/src/detectors/gc/index.js
-  const bytes = [0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 95, 1, 120, 0];
-  return WebAssembly.validate(new Uint8Array(bytes));
+const getFirefoxVersion = () => {
+  const match = navigator.userAgent.match(/firefox\/(\d+)/i);
+  return match ? parseInt(match[1], 10) : -1;
+}
+
+const supportsDart2Wasm = () => {
+  // Firefox < 147 has a SpiderMonkey Ion WasmGC compilation bug that breaks dart2wasm builds.
+  // See: https://github.com/flutter/flutter/issues/186619
+  //      https://bugzilla.mozilla.org/show_bug.cgi?id=2006811
+  if (browserEngine === "gecko" && getFirefoxVersion() < 147) return false;
+
+  // The `<app>.support.js` expression emitted by 
+  // ```
+  //   % dart compile wasm \
+  //          --extra-compiler-option=--require-js-string-builtin \
+  //          -o hello.wasm \
+  //          hello.dart
+  //   % cat hello.support.js
+  // ```
+  // It checks support for Wasm GC, SIMD, `js-string` builtins, and `try_table`.
+  return (WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,95,1,120,0]))&&WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,10,1,8,0,65,0,253,15,253,98,11]))&&!WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,2,23,1,14,119,97,115,109,58,106,115,45,115,116,114,105,110,103,4,99,97,115,116,0,0]),{"builtins":["js-string"]})&&WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,3,2,1,0,10,13,1,11,0,2,64,31,64,1,2,0,11,11,11])));
 }
 
 const detectWebGLVersion = () => {
@@ -88,7 +102,9 @@ export const browserEnvironment = {
   hasImageCodecs: hasImageCodecs(),
   hasChromiumBreakIterators: hasChromiumBreakIterators(),
   hasTextCluster: hasTextCluster(),
-  supportsWasmGC: supportsWasmGC(),
+  get supportsDart2Wasm() {
+    return supportsDart2Wasm();
+  },
   crossOriginIsolated: window.crossOriginIsolated,
   webGLVersion: detectWebGLVersion(),
   isChromeExtension: isChromeExtension(),

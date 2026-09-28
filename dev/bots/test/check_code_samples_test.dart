@@ -20,13 +20,28 @@ void main() {
   late Directory dartUIPath;
   late Directory flutterRoot;
 
+  Directory exampleBase() => examples.parent.parent;
+
   String getRelativePath(File file, [Directory? from]) {
     from ??= flutterRoot;
-    return path.relative(file.absolute.path, from: flutterRoot.absolute.path);
+    return path.relative(file.absolute.path, from: from.absolute.path);
   }
 
-  void writeLink({required File source, required File example, String? alternateLink}) {
-    final String link = alternateLink ?? ' ** See code in ${getRelativePath(example)} **';
+  void writeLink({
+    required File source,
+    required File example,
+    required bool useStandardStyle,
+    String? alternateLink,
+    // "region" refers to the "#body" segment at the end of standard style links.
+    String? region,
+  }) {
+    final String relativePath = getRelativePath(example, exampleBase());
+    final regionStr = region == null ? '' : '#$region';
+    final String link =
+        alternateLink ??
+        (useStandardStyle
+            ? '{@example /$relativePath$regionStr}'
+            : ' ** See code in $relativePath **');
     source
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -44,9 +59,18 @@ void main() {
     bool missingLinks = false,
     bool missingTests = false,
     bool malformedLinks = false,
+    // Legacy style: "See code in <path>"
+    // Standard style: "{@example /<path>}"
+    bool useStandardStyle = false,
   }) {
-    final Directory examplesLib = examples.childDirectory('lib').childDirectory('layer')
-      ..createSync(recursive: true);
+    final Directory examplesLib =
+        packages
+            .childDirectory('flutter')
+            .childDirectory('examples')
+            .childDirectory('api')
+            .childDirectory('lib')
+            .childDirectory('layer')
+          ..createSync(recursive: true);
     final File fooExample = examplesLib.childFile('foo_example.0.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('// Example for foo');
@@ -58,8 +82,14 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('// Example that is not linked');
     }
-    final Directory examplesTests = examples.childDirectory('test').childDirectory('layer')
-      ..createSync(recursive: true);
+    final Directory examplesTests =
+        packages
+            .childDirectory('flutter')
+            .childDirectory('examples')
+            .childDirectory('api')
+            .childDirectory('test')
+            .childDirectory('layer')
+          ..createSync(recursive: true);
     examplesTests.childFile('foo_example.0_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('// test for foo example');
@@ -80,21 +110,28 @@ void main() {
       writeLink(
         source: flutterPackage.childDirectory('layer').childFile('foo.dart'),
         example: fooExample,
-        alternateLink: '*See Code *',
+        alternateLink: useStandardStyle ? '{@example}' : '*See Code *',
+        useStandardStyle: useStandardStyle,
       );
       writeLink(
         source: flutterPackage.childDirectory('layer').childFile('bar.dart'),
         example: barExample,
-        alternateLink: ' ** See code examples/api/lib/layer/bar_example.0.dart **',
+        alternateLink: useStandardStyle
+            ? '{@example examples/api/lib/layer/bar_example.0.dart}'
+            : ' ** See code examples/api/lib/layer/bar_example.0.dart **',
+        useStandardStyle: useStandardStyle,
       );
     } else {
       writeLink(
         source: flutterPackage.childDirectory('layer').childFile('foo.dart'),
         example: fooExample,
+        useStandardStyle: useStandardStyle,
       );
       writeLink(
         source: flutterPackage.childDirectory('layer').childFile('bar.dart'),
         example: barExample,
+        useStandardStyle: useStandardStyle,
+        region: 'body',
       );
     }
   }
@@ -109,8 +146,13 @@ void main() {
       path.join(path.rootPrefix(fs.currentDirectory.absolute.path), 'flutter sdk'),
     )..createSync(recursive: true);
     fs.currentDirectory = flutterRoot;
-    examples = flutterRoot.childDirectory('examples').childDirectory('api')
-      ..createSync(recursive: true);
+    examples =
+        flutterRoot
+            .childDirectory('packages')
+            .childDirectory('flutter')
+            .childDirectory('examples')
+            .childDirectory('api')
+          ..createSync(recursive: true);
     packages = flutterRoot.childDirectory('packages')..createSync(recursive: true);
     dartUIPath =
         flutterRoot
@@ -129,91 +171,105 @@ void main() {
     );
   });
 
-  test('check_code_samples.dart - checkCodeSamples catches missing links', () async {
-    buildTestFiles(missingLinks: true);
-    bool? success;
-    final String result = await capture(() async {
-      success = checker.checkCodeSamples();
-    }, shouldHaveErrors: true);
-    final String lines =
-        <String>[
-              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-              '║ The following examples are not linked from any source file API doc comments:',
-              '║   examples/api/lib/layer/missing_example.0.dart',
-              '║ Either link them to a source file API doc comment, or remove them.',
-              '╚═══════════════════════════════════════════════════════════════════════════════',
-            ]
-            .map((String line) {
-              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
-            })
-            .join('\n');
-    expect(result, equals('$lines\n'));
-    expect(success, equals(false));
-  });
+  for (final useStandardStyle in [false, true]) {
+    group(useStandardStyle ? 'Standard style:' : 'Legacy style:', () {
+      test('check_code_samples.dart - checkCodeSamples catches missing links', () async {
+        buildTestFiles(missingLinks: true, useStandardStyle: useStandardStyle);
+        bool? success;
+        final String result = await capture(() async {
+          success = checker.checkCodeSamples();
+        }, shouldHaveErrors: true);
+        final String lines =
+            <String>[
+                  '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+                  '║ The following examples are not linked from any source file API doc comments:',
+                  '║   examples/api/lib/layer/missing_example.0.dart',
+                  '║ Either link them to a source file API doc comment, or remove them.',
+                  '╚═══════════════════════════════════════════════════════════════════════════════',
+                ]
+                .map((String line) {
+                  return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
+                })
+                .join('\n');
+        expect(result, equals('$lines\n'));
+        expect(success, equals(false));
+      });
 
-  test('check_code_samples.dart - checkCodeSamples catches malformed links', () async {
-    buildTestFiles(malformedLinks: true);
-    bool? success;
-    final String result = await capture(() async {
-      success = checker.checkCodeSamples();
-    }, shouldHaveErrors: true);
-    final bool isWindows = Platform.isWindows;
-    final String lines = <String>[
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-      '║ The following examples are not linked from any source file API doc comments:',
-      if (!isWindows) '║   examples/api/lib/layer/foo_example.0.dart',
-      if (!isWindows) '║   examples/api/lib/layer/bar_example.0.dart',
-      if (isWindows) r'║   examples\api\lib\layer\foo_example.0.dart',
-      if (isWindows) r'║   examples\api\lib\layer\bar_example.0.dart',
-      '║ Either link them to a source file API doc comment, or remove them.',
-      '╚═══════════════════════════════════════════════════════════════════════════════',
-      '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
-      '║ The following malformed links were found in API doc comments:',
-      if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/layer/foo.dart:6: ///*See Code *',
-      if (!isWindows)
-        '║   /flutter sdk/packages/flutter/lib/src/layer/bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
-      if (isWindows)
-        r'║   C:\flutter sdk\packages\flutter\lib\src\layer\foo.dart:6: ///*See Code *',
-      if (isWindows)
-        r'║   C:\flutter sdk\packages\flutter\lib\src\layer\bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
-      '║ Correct the formatting of these links so that they match the exact pattern:',
-      r"║   r'\*\* See code in (?<path>.+) \*\*'",
-      '╚═══════════════════════════════════════════════════════════════════════════════',
-    ].join('\n');
-    expect(result, equals('$lines\n'));
-    expect(success, equals(false));
-  });
+      test('check_code_samples.dart - checkCodeSamples catches malformed links', () async {
+        buildTestFiles(malformedLinks: true, useStandardStyle: useStandardStyle);
+        bool? success;
+        final String result = await capture(() async {
+          success = checker.checkCodeSamples();
+        }, shouldHaveErrors: true);
+        final bool isWindows = Platform.isWindows;
+        final String lines = <String>[
+          '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+          '║ The following examples are not linked from any source file API doc comments:',
+          if (!isWindows) '║   examples/api/lib/layer/foo_example.0.dart',
+          if (!isWindows) '║   examples/api/lib/layer/bar_example.0.dart',
+          if (isWindows) r'║   examples\api\lib\layer\foo_example.0.dart',
+          if (isWindows) r'║   examples\api\lib\layer\bar_example.0.dart',
+          '║ Either link them to a source file API doc comment, or remove them.',
+          '╚═══════════════════════════════════════════════════════════════════════════════',
+          '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
+          '║ The following malformed links were found in API doc comments:',
+          if (!useStandardStyle) ...<String>[
+            if (!isWindows)
+              '║   /flutter sdk/packages/flutter/lib/src/layer/foo.dart:6: ///*See Code *',
+            if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/layer/bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
+            if (isWindows)
+              r'║   C:\flutter sdk\packages\flutter\lib\src\layer\foo.dart:6: ///*See Code *',
+            if (isWindows) r'║   C:\flutter sdk\packages\flutter\lib\src\layer\bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
+            '║ Correct the formatting of these links so that they match the exact pattern:',
+            r"║   '\*\* See code in (?<path>.+) \*\*'",
+          ] else ...<String>[
+            if (!isWindows)
+              '║   /flutter sdk/packages/flutter/lib/src/layer/foo.dart:6: ///{@example}',
+            if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/layer/bar.dart:6: ///{@example examples/api/lib/layer/bar_example.0.dart}',
+            if (isWindows)
+              r'║   C:\flutter sdk\packages\flutter\lib\src\layer\foo.dart:6: ///{@example}',
+            if (isWindows) r'║   C:\flutter sdk\packages\flutter\lib\src\layer\bar.dart:6: ///{@example examples/api/lib/layer/bar_example.0.dart}',
+            '║ Correct the formatting of these links so that they match the exact pattern:',
+            "║   '{@example /<path>}' or '{@example /<path>#<region>}'",
+          ],
+          '╚═══════════════════════════════════════════════════════════════════════════════',
+        ].join('\n');
+        expect(result, equals('$lines\n'));
+        expect(success, equals(false));
+      });
 
-  test('check_code_samples.dart - checkCodeSamples catches missing tests', () async {
-    buildTestFiles(missingTests: true);
-    bool? success;
-    final String result = await capture(() async {
-      success = checker.checkCodeSamples();
-    }, shouldHaveErrors: true);
-    final String lines =
-        <String>[
-              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-              '║ The following example test files are missing:',
-              '║   examples/api/test/layer/bar_example.0_test.dart',
-              '╚═══════════════════════════════════════════════════════════════════════════════',
-            ]
-            .map((String line) {
-              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
-            })
-            .join('\n');
-    expect(result, equals('$lines\n'));
-    expect(success, equals(false));
-  });
+      test('check_code_samples.dart - checkCodeSamples catches missing tests', () async {
+        buildTestFiles(missingTests: true, useStandardStyle: useStandardStyle);
+        bool? success;
+        final String result = await capture(() async {
+          success = checker.checkCodeSamples();
+        }, shouldHaveErrors: true);
+        final String lines =
+            <String>[
+                  '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+                  '║ The following example test files are missing:',
+                  '║   packages/flutter/examples/api/test/layer/bar_example.0_test.dart',
+                  '╚═══════════════════════════════════════════════════════════════════════════════',
+                ]
+                .map((String line) {
+                  return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
+                })
+                .join('\n');
+        expect(result, equals('$lines\n'));
+        expect(success, equals(false));
+      });
 
-  test('check_code_samples.dart - checkCodeSamples succeeds', () async {
-    buildTestFiles();
-    bool? success;
-    final String result = await capture(() async {
-      success = checker.checkCodeSamples();
+      test('check_code_samples.dart - checkCodeSamples succeeds', () async {
+        buildTestFiles(useStandardStyle: useStandardStyle);
+        bool? success;
+        final String result = await capture(() async {
+          success = checker.checkCodeSamples();
+        });
+        expect(result, isEmpty);
+        expect(success, equals(true));
+      });
     });
-    expect(result, isEmpty);
-    expect(success, equals(true));
-  });
+  }
 }
 
 typedef AsyncVoidCallback = Future<void> Function();

@@ -126,3 +126,10 @@ const kPlatformViewHybridCompositionTest = '${platformViewPrefix}HybridCompositi
 /// Scenario name for embedding a native platform view using Hybrid Composition++.
 const kPlatformViewHybridCompositionPlusPlusTest =
     '${platformViewPrefix}HybridCompositionPlusPlusTest';
+
+// =============================================================================
+// 3. Error Substrings
+// =============================================================================
+
+/// Substring used to identify blank/empty screenshot errors in exceptions.
+const String errorBlankScreenshot = 'blank/empty';

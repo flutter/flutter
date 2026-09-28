@@ -11,6 +11,18 @@ config("gles_config") {
   include_dirs = [ "//flutter/third_party/angle/include" ]
 }
 
+impeller_component("mock_gles") {
+  testonly = true
+  sources = [
+    "test/mock_gles.cc",
+    "test/mock_gles.h",
+  ]
+  public_deps = [
+    ":gles",
+    "//flutter/testing:testing_lib",
+  ]
+}
+
 impeller_component("gles_unittests") {
   testonly = true
   sources = [
@@ -22,9 +34,8 @@ impeller_component("gles_unittests") {
     "test/capabilities_unittests.cc",
     "test/formats_gles_unittests.cc",
     "test/gpu_tracer_gles_unittests.cc",
-    "test/mock_gles.cc",
-    "test/mock_gles.h",
     "test/mock_gles_unittests.cc",
+    "test/pipeline_compile_queue_gles_unittests.cc",
     "test/pipeline_library_gles_unittests.cc",
     "test/proc_table_gles_unittests.cc",
     "test/reactor_unittests.cc",
@@ -35,6 +46,8 @@ impeller_component("gles_unittests") {
   ]
   deps = [
     ":gles",
+    ":mock_gles",
+    "//flutter/fml",
     "//flutter/impeller/playground:playground_test",
     "//flutter/testing:testing_lib",
   ]
@@ -69,6 +82,8 @@ impeller_component("gles") {
     "gpu_tracer_gles.h",
     "handle_gles.cc",
     "handle_gles.h",
+    "pipeline_compile_queue_gles.cc",
+    "pipeline_compile_queue_gles.h",
     "pipeline_gles.cc",
     "pipeline_gles.h",
     "pipeline_library_gles.cc",

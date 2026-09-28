@@ -10,7 +10,6 @@ import 'button_tester.dart';
 import 'checkbox_tester.dart';
 import 'editable_text_tester.dart';
 import 'slider_tester.dart';
-import 'widgets_app_tester.dart';
 
 const Color _green = Color(0xFF4CAF50);
 const Color _amber = Color(0xFFFFC107);
@@ -563,6 +562,17 @@ void main() {
     );
     expect(tester.binding.semanticsEnabled, isTrue);
   }, semanticsEnabled: false);
+
+  testWidgets('SemanticsDebugger does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(child: SemanticsDebugger(child: Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SemanticsDebugger)), Size.zero);
+  });
 }
 
 String _getMessageShownInSemanticsDebugger({
@@ -576,9 +586,8 @@ String _getMessageShownInSemanticsDebugger({
   );
   // ignore: avoid_dynamic_calls
   return semanticsDebuggerPainter.getMessage(
-        tester.renderObject(find.byKey(widgetKey)).debugSemantics,
-      )
-      as String;
+    tester.renderObject(find.byKey(widgetKey)).debugSemantics,
+  ) as String;
 }
 
 dynamic _getSemanticsDebuggerPainter({required Key debuggerKey, required WidgetTester tester}) {

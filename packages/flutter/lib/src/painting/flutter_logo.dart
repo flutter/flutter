@@ -45,9 +45,9 @@ class FlutterLogoDecoration extends Decoration {
     this.textColor = const Color(0xFF757575),
     this.style = FlutterLogoStyle.markOnly,
     this.margin = EdgeInsets.zero,
-  }) : _position = identical(style, FlutterLogoStyle.markOnly)
+  }) : _position = style == FlutterLogoStyle.markOnly
            ? 0.0
-           : identical(style, FlutterLogoStyle.horizontal)
+           : style == FlutterLogoStyle.horizontal
            ? 1.0
            : -1.0,
        _opacity = 1.0;
@@ -239,10 +239,7 @@ class _FlutterLogoPainter extends BoxPainter {
         style: TextStyle(
           color: _config.textColor,
           fontFamily: 'Roboto',
-          fontSize:
-              100.0 *
-              350.0 /
-              247.0, // 247 is the height of the F when the fontSize is 350, assuming device pixel ratio 1.0
+          fontSize: 100.0 * 350.0 / 247.0, // 247 is the height of the F when the fontSize is 350, assuming device pixel ratio 1.0
           fontWeight: FontWeight.w300,
           textBaseline: TextBaseline.alphabetic,
         ),
@@ -388,10 +385,8 @@ class _FlutterLogoPainter extends BoxPainter {
         final double fontSize = 2.0 / 3.0 * logoSquare.height * (1 - (10.4 * 2.0) / 202.0);
         final double scale = fontSize / 100.0;
         final double finalLeftTextPosition = // position of text in rest position
-            (256.4 / 820.0) *
-                rect.width - // 256.4 is the distance from the left edge to the left of the F when the whole logo is 820.0 wide
-            (32.0 / 350.0) *
-                fontSize; // 32 is the distance from the text bounding box edge to the left edge of the F when the font size is 350
+            (256.4 / 820.0) * rect.width - // 256.4 is the distance from the left edge to the left of the F when the whole logo is 820.0 wide
+            (32.0 / 350.0) * fontSize; // 32 is the distance from the text bounding box edge to the left edge of the F when the font size is 350
         final double initialLeftTextPosition = // position of text when just starting the animation
             rect.width / 2.0 - _textBoundingRect.width * scale;
         final textOffset = Offset(
