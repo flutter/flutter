@@ -1060,6 +1060,7 @@ void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
 void FlutterWindowsEngine::OnPreEngineRestart() {
   // Reset the keyboard's state on hot restart.
   InitializeKeyboard();
+  window_manager_->OnPreEngineRestart();
 }
 
 std::string FlutterWindowsEngine::GetExecutableName() const {
