@@ -339,14 +339,18 @@ class GLFWKeyHelper implements KeyHelper {
     required int keyCode,
     required bool isDown,
   }) {
-    modifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
+    final int newModifiers = _mergeModifiers(
+      modifiers: modifiers,
+      keyCode: keyCode,
+      isDown: isDown,
+    );
     return switch (key) {
-      ModifierKey.controlModifier => modifiers & modifierControl != 0,
-      ModifierKey.shiftModifier => modifiers & modifierShift != 0,
-      ModifierKey.altModifier => modifiers & modifierAlt != 0,
-      ModifierKey.metaModifier => modifiers & modifierMeta != 0,
-      ModifierKey.capsLockModifier => modifiers & modifierCapsLock != 0,
-      ModifierKey.numLockModifier => modifiers & modifierNumericPad != 0,
+      ModifierKey.controlModifier => newModifiers & modifierControl != 0,
+      ModifierKey.shiftModifier => newModifiers & modifierShift != 0,
+      ModifierKey.altModifier => newModifiers & modifierAlt != 0,
+      ModifierKey.metaModifier => newModifiers & modifierMeta != 0,
+      ModifierKey.capsLockModifier => newModifiers & modifierCapsLock != 0,
+      ModifierKey.numLockModifier => newModifiers & modifierNumericPad != 0,
       // These are not used in GLFW keyboards.
       ModifierKey.functionModifier => false,
       ModifierKey.symbolModifier => false,
@@ -470,14 +474,18 @@ class GtkKeyHelper implements KeyHelper {
     required int keyCode,
     required bool isDown,
   }) {
-    modifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
+    final int newModifiers = _mergeModifiers(
+      modifiers: modifiers,
+      keyCode: keyCode,
+      isDown: isDown,
+    );
     return switch (key) {
-      ModifierKey.controlModifier => modifiers & modifierControl != 0,
-      ModifierKey.shiftModifier => modifiers & modifierShift != 0,
-      ModifierKey.altModifier => modifiers & modifierMod1 != 0,
-      ModifierKey.metaModifier => modifiers & modifierMeta != 0,
-      ModifierKey.capsLockModifier => modifiers & modifierCapsLock != 0,
-      ModifierKey.numLockModifier => modifiers & modifierMod2 != 0,
+      ModifierKey.controlModifier => newModifiers & modifierControl != 0,
+      ModifierKey.shiftModifier => newModifiers & modifierShift != 0,
+      ModifierKey.altModifier => newModifiers & modifierMod1 != 0,
+      ModifierKey.metaModifier => newModifiers & modifierMeta != 0,
+      ModifierKey.capsLockModifier => newModifiers & modifierCapsLock != 0,
+      ModifierKey.numLockModifier => newModifiers & modifierMod2 != 0,
       // These are not used in GTK keyboards.
       ModifierKey.functionModifier => false,
       ModifierKey.symbolModifier => false,
