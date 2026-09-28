@@ -91,7 +91,7 @@ dependencies:
   _fe_analyzer_shared: 107.0.0
   boolean_selector: 2.1.2
   browser_launcher: 1.2.0
-  built_collection: 5.1.1
+  built_collection: 5.1.2
   built_value: 8.13.0
   cli_config: 0.2.0
   clock: 1.1.3
@@ -139,4 +139,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 7nbmh4
+# PUBSPEC CHECKSUM: fdcerc

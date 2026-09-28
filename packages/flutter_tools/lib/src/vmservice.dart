@@ -44,6 +44,11 @@ const kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
 /// The error response code from an unrecoverable compilation failure.
 const kIsolateReloadBarred = 1005;
 
+/// Used to build RegExp instances which can detect the VM service message.
+final kVMServiceMessageRegExp = RegExp(
+  r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
+);
+
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [io.WebSocket]s (used by tests).
 typedef WebSocketConnector = Future<io.WebSocket> Function(
