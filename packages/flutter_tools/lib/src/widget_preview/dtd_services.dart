@@ -41,6 +41,7 @@ class WidgetPreviewDtdServices {
     required this.previewAnalytics,
     required this.project,
     required this.shutdownHooks,
+    @visibleForTesting this._dtd,
     this.onClearSyntheticPreviews,
     this.onHotReloadPreviewerRequest,
     this.onRegisterSyntheticPreview,
@@ -410,11 +411,19 @@ class WidgetPreviewDtdServices {
   }
 
   Future<Map<String, Object?>> _registerSyntheticPreview(Parameters params) async {
-    final SyntheticPreviewDetails details = SyntheticPreviewDetails.fromJson(
-      params.asMap.cast<String, Object?>(),
+    final Parameter wrappersParam = params[SyntheticPreviewDetails.kWrappers];
+    final details = SyntheticPreviewDetails(
+      constructorExpression: params[SyntheticPreviewDetails.kConstructorExpression].asString,
+      filePath: params[SyntheticPreviewDetails.kFilePath].asString,
+      previewId: params[SyntheticPreviewDetails.kPreviewId].asString,
+      widgetName: params[SyntheticPreviewDetails.kWidgetName].asString,
+      wrappers: <String>[
+        if (wrappersParam.valueOr(null) != null)
+          for (var i = 0; i < wrappersParam.asList.length; i++) wrappersParam[i].asString,
+      ],
     );
     final bool success =
-        onRegisterSyntheticPreview == null || await onRegisterSyntheticPreview!(details);
+        onRegisterSyntheticPreview != null && await onRegisterSyntheticPreview!(details);
     if (success) {
       await postSyntheticPreviewStateChangedEvent(previewId: details.previewId, registered: true);
     }
@@ -424,7 +433,7 @@ class WidgetPreviewDtdServices {
   Future<Map<String, Object?>> _unregisterSyntheticPreview(Parameters params) async {
     final String previewId = params[SyntheticPreviewDetails.kPreviewId].asString;
     final bool success =
-        onUnregisterSyntheticPreview == null || await onUnregisterSyntheticPreview!(previewId);
+        onUnregisterSyntheticPreview != null && await onUnregisterSyntheticPreview!(previewId);
     if (success) {
       await postSyntheticPreviewStateChangedEvent(previewId: previewId, registered: false);
     }
@@ -438,8 +447,8 @@ class WidgetPreviewDtdServices {
 
   /// Posts a [kLayoutExceptionEvent] to the widget preview stream.
   Future<void> postLayoutExceptionEvent({
-    required String previewId,
     required Map<String, Object?> diagnostic,
+    required String previewId,
   }) async {
     final DartToolingDaemon? dtd = _dtd;
     if (dtd == null) {
@@ -472,11 +481,7 @@ class WidgetPreviewDtdServices {
     await dtd.postEvent(
       widgetPreviewScaffoldStream,
       success ? kCompilationSucceededEvent : kCompilationFailedEvent,
-      <String, Object?>{
-        kSuccess: success,
-        if (durationMs != null) kDurationMs: durationMs,
-        if (error != null) kError: error,
-      },
+      <String, Object?>{kSuccess: success, kDurationMs: ?durationMs, kError: ?error},
     );
   }
 

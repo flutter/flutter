@@ -445,7 +445,7 @@ class PreviewServiceInfo {
       kDtdUri: dtdUri,
       kServiceName: serviceName,
       kVersion: version,
-      if (webPreviewUrl != null) kWebPreviewUrl: webPreviewUrl,
+      kWebPreviewUrl: ?webPreviewUrl,
     };
   }
 

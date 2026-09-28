@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
+import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -22,6 +23,18 @@ import '../../../src/common.dart';
 class FakeDtdLauncher extends Fake implements DtdLauncher {
   @override
   Future<void> dispose() async {}
+}
+
+class FakeDartToolingDaemon extends Fake implements DartToolingDaemon {
+  final postedEvents = <({String streamId, String eventKind, Map<String, Object?> eventData})>[];
+
+  @override
+  Future<void> postEvent(String streamId, String eventKind, Map<String, Object?> eventData) async {
+    postedEvents.add((streamId: streamId, eventKind: eventKind, eventData: eventData));
+  }
+
+  @override
+  Future<void> close() async {}
 }
 
 void main() {
@@ -246,9 +259,11 @@ void main() {
       SyntheticPreviewDetails? registeredDetails;
       String? unregisteredId;
       var clearCount = 0;
+      final fakeDtd = FakeDartToolingDaemon();
 
       final services = WidgetPreviewDtdServices(
         addUuidToServiceName: false,
+        dtd: fakeDtd,
         dtdLauncher: FakeDtdLauncher(),
         fs: fs,
         logger: logger,
@@ -284,8 +299,30 @@ void main() {
         }),
       );
       expect(registerResponse['value'], isTrue);
-      expect(registeredDetails?.previewId, 'my_card_id');
-      expect(registeredDetails?.widgetName, 'MyCard');
+      expect(
+        registeredDetails,
+        equals(
+          const SyntheticPreviewDetails(
+            constructorExpression: 'MyCard()',
+            filePath: '/project/lib/card.dart',
+            previewId: 'my_card_id',
+            widgetName: 'MyCard',
+            wrappers: <String>['Material'],
+          ),
+        ),
+      );
+      expect(fakeDtd.postedEvents, hasLength(1));
+      expect(
+        fakeDtd.postedEvents[0].eventKind,
+        WidgetPreviewDtdServices.kSyntheticPreviewStateChangedEvent,
+      );
+      expect(
+        fakeDtd.postedEvents[0].eventData,
+        equals(<String, Object?>{
+          WidgetPreviewDtdServices.kPreviewId: 'my_card_id',
+          WidgetPreviewDtdServices.kRegistered: true,
+        }),
+      );
 
       // Unregister synthetic preview.
       final DTDServiceCallback unregisterCallback = services.services
@@ -298,6 +335,18 @@ void main() {
       );
       expect(unregisterResponse['value'], isTrue);
       expect(unregisteredId, 'my_card_id');
+      expect(fakeDtd.postedEvents, hasLength(2));
+      expect(
+        fakeDtd.postedEvents[1].eventKind,
+        WidgetPreviewDtdServices.kSyntheticPreviewStateChangedEvent,
+      );
+      expect(
+        fakeDtd.postedEvents[1].eventData,
+        equals(<String, Object?>{
+          WidgetPreviewDtdServices.kPreviewId: 'my_card_id',
+          WidgetPreviewDtdServices.kRegistered: false,
+        }),
+      );
 
       // Clear synthetic previews.
       final DTDServiceCallback clearCallback = services.services
@@ -307,6 +356,195 @@ void main() {
         Parameters('clearSyntheticPreviews', <String, Object?>{}),
       );
       expect(clearResponse['clearedCount'], 3);
+    });
+
+    test('Returns false for registerSyntheticPreview and unregisterSyntheticPreview when callbacks are null', () async {
+      final fakeDtd = FakeDartToolingDaemon();
+      final services = WidgetPreviewDtdServices(
+        addUuidToServiceName: false,
+        dtd: fakeDtd,
+        dtdLauncher: FakeDtdLauncher(),
+        fs: fs,
+        logger: logger,
+        onHotRestartPreviewerRequest: () {},
+        previewAnalytics: analytics,
+        project: project,
+        shutdownHooks: shutdownHooks,
+      );
+
+      final DTDServiceCallback registerCallback = services.services
+          .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kRegisterSyntheticPreview)
+          .$2;
+      final Map<String, Object?> registerResponse = await registerCallback(
+        Parameters('registerSyntheticPreview', <String, Object?>{
+          'constructorExpression': 'MyCard()',
+          'filePath': '/project/lib/card.dart',
+          'previewId': 'my_card_id',
+          'widgetName': 'MyCard',
+        }),
+      );
+      expect(registerResponse['value'], isFalse);
+      expect(fakeDtd.postedEvents, isEmpty);
+
+      final DTDServiceCallback unregisterCallback = services.services
+          .firstWhere(
+            (DtdService s) => s.$1 == WidgetPreviewDtdServices.kUnregisterSyntheticPreview,
+          )
+          .$2;
+      final Map<String, Object?> unregisterResponse = await unregisterCallback(
+        Parameters('unregisterSyntheticPreview', <String, Object?>{'previewId': 'my_card_id'}),
+      );
+      expect(unregisterResponse['value'], isFalse);
+      expect(fakeDtd.postedEvents, isEmpty);
+    });
+
+    test('Throws RpcException.invalidParams when registerSyntheticPreview has missing or malformed params', () async {
+      final services = WidgetPreviewDtdServices(
+        addUuidToServiceName: false,
+        dtdLauncher: FakeDtdLauncher(),
+        fs: fs,
+        logger: logger,
+        onHotRestartPreviewerRequest: () {},
+        previewAnalytics: analytics,
+        project: project,
+        shutdownHooks: shutdownHooks,
+      );
+
+      final DTDServiceCallback registerCallback = services.services
+          .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kRegisterSyntheticPreview)
+          .$2;
+
+      await expectLater(
+        registerCallback(
+          Parameters('registerSyntheticPreview', <String, Object?>{'previewId': 'my_card_id'}),
+        ),
+        throwsA(
+          isA<RpcException>().having((RpcException e) => e.code, 'code', error_code.INVALID_PARAMS),
+        ),
+      );
+
+      await expectLater(
+        registerCallback(
+          Parameters('registerSyntheticPreview', <String, Object?>{
+            'constructorExpression': 'MyCard()',
+            'filePath': '/project/lib/card.dart',
+            'previewId': 'my_card_id',
+            'widgetName': 'MyCard',
+            'wrappers': <Object?>[42],
+          }),
+        ),
+        throwsA(
+          isA<RpcException>().having((RpcException e) => e.code, 'code', error_code.INVALID_PARAMS),
+        ),
+      );
+    });
+
+    test('Event-posting helpers emit expected events on widgetPreviewScaffoldStream', () async {
+      final fakeDtd = FakeDartToolingDaemon();
+      final services = WidgetPreviewDtdServices(
+        addUuidToServiceName: false,
+        dtd: fakeDtd,
+        dtdLauncher: FakeDtdLauncher(),
+        fs: fs,
+        logger: logger,
+        onHotRestartPreviewerRequest: () {},
+        previewAnalytics: analytics,
+        project: project,
+        shutdownHooks: shutdownHooks,
+      );
+
+      await services.postLayoutExceptionEvent(
+        diagnostic: <String, Object?>{'message': 'RenderFlex overflowed by 42 pixels'},
+        previewId: 'preview_1',
+      );
+      await services.postPreviewsUpdatedEvent(
+        previews: <Map<String, Object?>>[
+          <String, Object?>{'functionName': 'myPreview'},
+        ],
+      );
+      await services.postCompilationEvent(success: true, durationMs: 125);
+      await services.postCompilationEvent(success: false, error: 'Compilation failed');
+      await services.postSyntheticPreviewStateChangedEvent(
+        previewId: 'synthetic_1',
+        registered: true,
+      );
+
+      expect(fakeDtd.postedEvents, hasLength(5));
+
+      expect(
+        fakeDtd.postedEvents[0].streamId,
+        WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot,
+      );
+      expect(fakeDtd.postedEvents[0].eventKind, WidgetPreviewDtdServices.kLayoutExceptionEvent);
+      expect(
+        fakeDtd.postedEvents[0].eventData,
+        equals(<String, Object?>{
+          WidgetPreviewDtdServices.kPreviewId: 'preview_1',
+          WidgetPreviewDtdServices.kDiagnostic: <String, Object?>{
+            'message': 'RenderFlex overflowed by 42 pixels',
+          },
+        }),
+      );
+
+      expect(
+        fakeDtd.postedEvents[1].streamId,
+        WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot,
+      );
+      expect(fakeDtd.postedEvents[1].eventKind, WidgetPreviewDtdServices.kPreviewsUpdatedEvent);
+      expect(
+        fakeDtd.postedEvents[1].eventData,
+        equals(<String, Object?>{
+          WidgetPreviewDtdServices.kCount: 1,
+          WidgetPreviewDtdServices.kPreviews: <Map<String, Object?>>[
+            <String, Object?>{'functionName': 'myPreview'},
+          ],
+        }),
+      );
+
+      expect(
+        fakeDtd.postedEvents[2].streamId,
+        WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot,
+      );
+      expect(
+        fakeDtd.postedEvents[2].eventKind,
+        WidgetPreviewDtdServices.kCompilationSucceededEvent,
+      );
+      expect(
+        fakeDtd.postedEvents[2].eventData,
+        equals(<String, Object?>{
+          WidgetPreviewDtdServices.kSuccess: true,
+          WidgetPreviewDtdServices.kDurationMs: 125,
+        }),
+      );
+
+      expect(
+        fakeDtd.postedEvents[3].streamId,
+        WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot,
+      );
+      expect(fakeDtd.postedEvents[3].eventKind, WidgetPreviewDtdServices.kCompilationFailedEvent);
+      expect(
+        fakeDtd.postedEvents[3].eventData,
+        equals(<String, Object?>{
+          WidgetPreviewDtdServices.kSuccess: false,
+          WidgetPreviewDtdServices.kError: 'Compilation failed',
+        }),
+      );
+
+      expect(
+        fakeDtd.postedEvents[4].streamId,
+        WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot,
+      );
+      expect(
+        fakeDtd.postedEvents[4].eventKind,
+        WidgetPreviewDtdServices.kSyntheticPreviewStateChangedEvent,
+      );
+      expect(
+        fakeDtd.postedEvents[4].eventData,
+        equals(<String, Object?>{
+          WidgetPreviewDtdServices.kPreviewId: 'synthetic_1',
+          WidgetPreviewDtdServices.kRegistered: true,
+        }),
+      );
     });
   });
 }

@@ -35,7 +35,8 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   static const kCompilationSucceededEvent = 'CompilationSucceeded';
   static const kCompilationFailedEvent = 'CompilationFailed';
   static const kPreviewsUpdatedEvent = 'PreviewsUpdated';
-  static const kSyntheticPreviewStateChangedEvent = 'SyntheticPreviewStateChanged';
+  static const kSyntheticPreviewStateChangedEvent =
+      'SyntheticPreviewStateChanged';
 
   /// Protocol version for agent widget preview services.
   static const kProtocolVersion = '1.0.0';
@@ -53,7 +54,13 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   Future<void> connect({Uri? dtdUri}) async {
     final Uri dtdWsUri = dtdUri ?? Uri.parse(kWidgetPreviewDtdUri);
     dtd = await DartToolingDaemon.connect(dtdWsUri);
-    unawaited(dtd.postEvent(kWidgetPreviewScaffoldStream, 'Connected', const <String, Object?>{}));
+    unawaited(
+      dtd.postEvent(
+        kWidgetPreviewScaffoldStream,
+        kWidgetPreviewConnectedEvent,
+        const <String, Object?>{},
+      ),
+    );
     await _determineIfWindows();
     await initializeEditorService(this);
   }
@@ -65,14 +72,18 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
     await dtd.close();
   }
 
-  Future<DTDResponse?> _call(String methodName, {Map<String, Object?>? params}) =>
-      dtd.safeCall(kWidgetPreviewService, methodName, params: params);
+  Future<DTDResponse?> _call(
+    String methodName, {
+    Map<String, Object?>? params,
+  }) => dtd.safeCall(kWidgetPreviewService, methodName, params: params);
 
   /// Returns `true` if the operating system is Windows.
   late final bool isWindows;
 
   Future<void> _determineIfWindows() async {
-    isWindows = (BoolResponse.fromDTDResponse((await _call(kIsWindows))!)).value!;
+    isWindows = (BoolResponse.fromDTDResponse(
+      (await _call(kIsWindows))!,
+    )).value!;
   }
 
   /// Trigger a hot restart of the widget preview scaffold.
@@ -144,7 +155,9 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
 
   /// Retrieves the DevTools URI for the previewer instance.
   Future<Uri> getDevToolsUri() async {
-    final result = StringResponse.fromDTDResponse((await _call(kGetDevToolsUri))!);
+    final result = StringResponse.fromDTDResponse(
+      (await _call(kGetDevToolsUri))!,
+    );
     return Uri.parse(result.value!);
   }
 
