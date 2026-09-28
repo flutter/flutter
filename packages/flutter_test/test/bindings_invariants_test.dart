@@ -7,6 +7,20 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// Registers a tear down that calls [TestWidgetsFlutterBinding.postTest] if a
+// test that drives the binding directly fails before calling it. Otherwise the
+// binding would stay in a test and every later test in the file would fail.
+//
+// Call this before registering tear downs that reset state, so that (since tear
+// downs run in reverse order) the state is reset before `postTest` runs.
+void _addPostTestTearDown(TestWidgetsFlutterBinding binding) {
+  addTearDown(() {
+    if (binding.inTest) {
+      binding.postTest();
+    }
+  });
+}
+
 // Generates test cases for a debug variable or test setting.
 //
 // The `name` argument is the identifier of the variable or setting being tested.
@@ -34,7 +48,7 @@ void _testDebugVariable({
     // [TestWidgetsFlutterBinding.postTest] catches the invariant failure, reports
     // it via [reportTestException] with [expectedErrorMessage], and finishes
     // cleaning up the binding state without throwing.
-    test('direct runTest with unreset it reports exception in postTest', () async {
+    test('direct runTest reports exception in postTest when not reset', () async {
       FlutterErrorDetails? reportedError;
       final TestExceptionReporter oldReporter = reportTestException;
       reportTestException = (FlutterErrorDetails details, String testDescription) {
@@ -45,7 +59,10 @@ void _testDebugVariable({
       });
 
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-      late final VoidCallback reset;
+      _addPostTestTearDown(binding);
+      VoidCallback? reset;
+      addTearDown(() => reset?.call());
+
       await binding.runTest(() async {
         reset = mutateAndGetReset(binding);
       }, () {});
@@ -54,7 +71,6 @@ void _testDebugVariable({
       expect(reportedError, isNotNull);
       expect((reportedError!.exception as FlutterError).message, expectedErrorMessage);
       expect(binding.inTest, isFalse);
-      reset();
     });
   });
 }
@@ -145,6 +161,10 @@ void main() {
     addTearDown(() {
       reportTestException = oldReporter;
     });
+    _addPostTestTearDown(binding);
+    addTearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     await binding.runTest(() async {
       debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
@@ -158,7 +178,6 @@ void main() {
     // The widget tree from the test is preserved for inspection rather than
     // being unmounted and replaced with _postTestMessage.
     expect(find.byType(Placeholder), findsOneWidget);
-    debugDefaultTargetPlatformOverride = null;
   });
 
   // Verifies that asynchronous operations executed in [addTearDown] callbacks
@@ -190,10 +209,13 @@ void main() {
     });
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    _addPostTestTearDown(binding);
     // A Ticker reschedules its frame callback on every tick, so it survives the
     // frames pumped while unmounting the tree. A one-shot frame callback would
     // be consumed by those frames instead.
-    late final Ticker ticker;
+    Ticker? ticker;
+    addTearDown(() => ticker?.dispose());
+
     await binding.runTest(
       () async {
         ticker = Ticker((Duration _) {})..start();
@@ -210,7 +232,5 @@ void main() {
     );
     expect(reportedDescription, 'leaking ticker test');
     expect(binding.inTest, isFalse);
-
-    ticker.dispose();
   });
 }
