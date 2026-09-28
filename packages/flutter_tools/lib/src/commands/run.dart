@@ -44,7 +44,13 @@ import 'daemon.dart';
 
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  RunCommandBase({required bool verboseHelp, super.outputPreferences, super.toolContext}) {
+  RunCommandBase({
+    required this.buildSystem,
+    required this.buildTargets,
+    required ToolContext super.toolContext,
+    required super.verboseHelp,
+    super.outputPreferences,
+  }) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
     usesWebDefineOption();
@@ -100,6 +106,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addTestFlag(verboseHelp: verboseHelp);
     usesAdbLogFilteringOption(hide: !verboseHelp);
   }
+
+  final BuildSystem buildSystem;
+  final BuildTargets buildTargets;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   bool get traceStartup => getValue(DebuggingOptionDescriptors.traceStartup);
   bool get traceSystrace => getValue(DebuggingOptionDescriptors.traceSystrace);
@@ -267,13 +279,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     }
   }
 
-  Future<WebDevServerConfig> webDevServerConfigCore({
-    FileSystem? fileSystem,
-    Logger? logger,
-  }) async {
+  Future<WebDevServerConfig> webDevServerConfigCore() async {
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
-      fileSystem: fileSystem ?? toolContext!.fs,
-      logger: logger ?? toolContext!.logger,
+      fileSystem: fs,
+      logger: logger,
     );
 
     final int? webPort = getValue(WebOptions.webPort);
@@ -305,16 +315,15 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
 class RunCommand extends RunCommandBase {
   RunCommand({
-    required AppleContext appleContext,
-    required this._buildSystem,
-    required this._buildTargets,
-    required ToolContext toolContext,
+    required this.appleContext,
+    required super.buildSystem,
+    required super.buildTargets,
+    required super.toolContext,
     this._androidContext,
     this._androidWorkflow,
-    this._deviceManager,
+    this.deviceManager,
     super.verboseHelp = false,
-  }) : _injectedAppleContext = appleContext,
-       _injectedToolContext = toolContext {
+  }) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
@@ -393,18 +402,8 @@ class RunCommand extends RunCommandBase {
 
   final AndroidContext? _androidContext;
   final AndroidWorkflow? _androidWorkflow;
-  final BuildSystem _buildSystem;
-  final BuildTargets _buildTargets;
-  final DeviceManager? _deviceManager;
-  final AppleContext _injectedAppleContext;
-  final ToolContext _injectedToolContext;
-
-  AppleContext get appleContext => _injectedAppleContext;
-
-  @override
-  ToolContext get toolContext => _injectedToolContext;
-
-  DeviceManager? get deviceManager => _deviceManager;
+  final AppleContext appleContext;
+  final DeviceManager? deviceManager;
 
   @override
   final name = 'run';
@@ -520,9 +519,10 @@ class RunCommand extends RunCommandBase {
 
     String? androidEmbeddingVersion;
     final hostLanguage = <String>[];
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     if (anyAndroidDevices) {
-      final AndroidProject androidProject = toolContext.projectFactory
-          .fromDirectory(toolContext.fs.currentDirectory)
+      final AndroidProject androidProject = projectFactory
+          .fromDirectory(fs.currentDirectory)
           .android;
       if (androidProject.existsSync()) {
         hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
@@ -530,11 +530,8 @@ class RunCommand extends RunCommandBase {
       }
     }
     if (anyIOSDevices) {
-      final IosProject iosProject = toolContext.projectFactory
-          .fromDirectory(toolContext.fs.currentDirectory)
-          .ios;
+      final IosProject iosProject = projectFactory.fromDirectory(fs.currentDirectory).ios;
       if (iosProject.exists) {
-        final FileSystem fs = toolContext.fs;
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)
             .whereType<File>()
@@ -677,8 +674,8 @@ class RunCommand extends RunCommandBase {
     if (hotMode && !webMode) {
       return HotRunner(
         flutterDevices,
-        buildSystem: _buildSystem,
-        buildTargets: _buildTargets,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         debuggingOptions: debuggingOptions,
         target: targetFile,
         toolContext: toolContext,
@@ -698,8 +695,8 @@ class RunCommand extends RunCommandBase {
       return webRunnerFactory!.createWebRunner(
         flutterDevices.single,
         analytics: analytics,
-        buildSystem: _buildSystem,
-        buildTargets: _buildTargets,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         debuggingOptions: debuggingOptions,
         flutterProject: flutterProject,
         stayResident: stayResident,
@@ -710,8 +707,8 @@ class RunCommand extends RunCommandBase {
     }
     return ColdRunner(
       flutterDevices,
-      buildSystem: _buildSystem,
-      buildTargets: _buildTargets,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
       debuggingOptions: debuggingOptions,
       target: targetFile,
       toolContext: toolContext,
@@ -735,8 +732,8 @@ class RunCommand extends RunCommandBase {
       :Stdio stdio,
     ) = toolContext;
     return Daemon.createMachineDaemon(
-      buildSystem: _buildSystem,
-      buildTargets: _buildTargets,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
       featureFlags: featureFlags,
       logger: logger,
       stdio: stdio,
@@ -745,7 +742,7 @@ class RunCommand extends RunCommandBase {
       analytics: analytics,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,
-      deviceManager: _deviceManager,
+      deviceManager: deviceManager,
       fileSystem: fs,
       java: _androidContext?.java,
       processManager: processManager,

@@ -30,7 +30,6 @@ import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
 import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
-import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -327,6 +326,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
+      analytics: analytics,
       buildSystem: _buildSystem,
       buildTargets: _buildTargets,
       toolContext: toolContext,
@@ -404,10 +404,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             target: targetFile,
             toolContext: toolContext,
             xcode: _xcode,
-            packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
             projectRootPath: stringArg('project-root'),
             dillOutputPath: stringArg('output-dill'),
-            flutterProject: FlutterProject.current(),
             hotRunnerConfig: hotRunnerConfig,
             nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
             projectFileInvalidator: projectFileInvalidator,
@@ -415,6 +413,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           )
         : ColdRunner(
             flutterDevices,
+            analytics: analytics,
             buildSystem: _buildSystem,
             buildTargets: _buildTargets,
             debuggingOptions: debuggingOptions,
@@ -509,16 +508,15 @@ class HotRunnerFactory {
     File? applicationBinary,
     bool benchmarkMode = false,
     String? dillOutputPath,
-    FlutterProject? flutterProject,
     bool hostIsIde = false,
     HotRunnerConfig? hotRunnerConfig,
     String? nativeAssetsYamlFile,
-    String? packagesFilePath,
     ProjectFileInvalidator? projectFileInvalidator,
     String? projectRootPath,
     bool stayResident = true,
   }) => HotRunner(
     devices,
+    analytics: analytics,
     buildSystem: buildSystem,
     buildTargets: buildTargets,
     debuggingOptions: debuggingOptions,
@@ -534,7 +532,6 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
-    analytics: analytics,
     dartBuilder: hookRunner,
   );
 }
