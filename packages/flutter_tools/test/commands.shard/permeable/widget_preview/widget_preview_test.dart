@@ -147,8 +147,10 @@ class FakeCustomBrowserDevice extends Fake implements ChromiumDevice {
 }
 
 class FakeResidentRunner extends Fake implements ResidentRunner {
+  FakeResidentRunner({this.onRestart});
+
   final restartCalls = <bool>[];
-  OperationResult Function(bool fullRestart)? onRestart;
+  final OperationResult Function(bool fullRestart)? onRestart;
 
   @override
   Future<OperationResult> restart({
@@ -157,10 +159,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
     String? reason,
   }) async {
     restartCalls.add(fullRestart);
-    if (onRestart != null) {
-      return onRestart!(fullRestart);
-    }
-    return OperationResult.ok;
+    return onRestart?.call(fullRestart) ?? OperationResult.ok;
   }
 }
 
@@ -1066,21 +1065,24 @@ List<_i1.WidgetPreview> previews() => [
       },
     );
 
-    testUsingContext(
-      'triggers hot restart if hot reload is rejected',
-      () async {
-        final command = WidgetPreviewCommand(
-          toolContext: FakeToolContext(
-            fs: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            platform: platform,
-            artifacts: Artifacts.test(),
-          ),
-        );
-        final startCommand = command.subcommands['start']! as WidgetPreviewStartCommand;
-        final fakeResidentRunner = FakeResidentRunner();
-        fakeResidentRunner.onRestart = (bool fullRestart) {
+    WidgetPreviewStartCommand createStartCommand(FakeResidentRunner runner) {
+      final command = WidgetPreviewCommand(
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          platform: platform,
+          artifacts: Artifacts.test(),
+        ),
+        dtdServicesOverride: fakeDtdServices,
+      );
+      return (command.subcommands['start']! as WidgetPreviewStartCommand)
+        ..widgetPreviewApp = runner;
+    }
+
+    testWithoutContext('triggers hot restart if hot reload is rejected', () async {
+      final fakeResidentRunner = FakeResidentRunner(
+        onRestart: (bool fullRestart) {
           if (!fullRestart) {
             return OperationResult(
               1,
@@ -1088,70 +1090,92 @@ List<_i1.WidgetPreview> previews() => [
               updateFSReport: UpdateFSReport(hotReloadRejected: true),
             );
           }
+          expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isTrue);
           return OperationResult.ok;
-        };
-        startCommand.dtdService = fakeDtdServices;
-        startCommand.widgetPreviewApp = fakeResidentRunner;
+        },
+      );
+      final WidgetPreviewStartCommand startCommand = createStartCommand(fakeResidentRunner);
+
+      final OperationResult? result = await startCommand.handleReload();
+
+      final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
+      expect(fakeResidentRunner.restartCalls, <bool>[false, true]);
+      expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isTrue);
+      expect(result?.isOk, isTrue);
+      expect(
+        bufferLogger.statusText,
+        contains(WidgetPreviewStartCommand.kHotReloadRejectedMessage),
+      );
+    });
+
+    testWithoutContext(
+      'clears hotReloadRejectedTriggerEvent if fallback hot restart fails',
+      () async {
+        final fakeResidentRunner = FakeResidentRunner(
+          onRestart: (bool fullRestart) {
+            return OperationResult(
+              1,
+              'Failed to recompile application.',
+              updateFSReport: fullRestart ? null : UpdateFSReport(hotReloadRejected: true),
+            );
+          },
+        );
+        final WidgetPreviewStartCommand startCommand = createStartCommand(fakeResidentRunner);
 
         final OperationResult? result = await startCommand.handleReload();
 
         final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
         expect(fakeResidentRunner.restartCalls, <bool>[false, true]);
-        expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isTrue);
-        expect(result?.isOk, isTrue);
+        expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isFalse);
+        expect(result?.isOk, isFalse);
         expect(
           bufferLogger.statusText,
-          contains(
-            'Hot reload rejected due to unsupported changes. Performing hot restart instead.',
-          ),
+          contains(WidgetPreviewStartCommand.kHotReloadRejectedMessage),
         );
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        FileSystem: () => fs,
-        Logger: () => logger,
-        ProcessManager: () => loggingProcessManager,
       },
     );
 
-    testUsingContext(
-      'does not trigger hot restart if hot reload succeeds',
+    testWithoutContext(
+      'does not trigger hot restart if hot reload fails for other reasons',
       () async {
-        final command = WidgetPreviewCommand(
-          toolContext: FakeToolContext(
-            fs: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            platform: platform,
-            artifacts: Artifacts.test(),
-          ),
+        final fakeResidentRunner = FakeResidentRunner(
+          onRestart: (bool fullRestart) {
+            return OperationResult(
+              1,
+              'Failed to recompile application.',
+              updateFSReport: UpdateFSReport(),
+            );
+          },
         );
-        final startCommand = command.subcommands['start']! as WidgetPreviewStartCommand;
-        final fakeResidentRunner = FakeResidentRunner();
-        startCommand.dtdService = fakeDtdServices;
-        startCommand.widgetPreviewApp = fakeResidentRunner;
+        final WidgetPreviewStartCommand startCommand = createStartCommand(fakeResidentRunner);
 
         final OperationResult? result = await startCommand.handleReload();
 
         final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
         expect(fakeResidentRunner.restartCalls, <bool>[false]);
         expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isFalse);
-        expect(result?.isOk, isTrue);
+        expect(result?.isOk, isFalse);
         expect(
           bufferLogger.statusText,
-          isNot(
-            contains(
-              'Hot reload rejected due to unsupported changes. Performing hot restart instead.',
-            ),
-          ),
+          isNot(contains(WidgetPreviewStartCommand.kHotReloadRejectedMessage)),
         );
       },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        FileSystem: () => fs,
-        Logger: () => logger,
-        ProcessManager: () => loggingProcessManager,
-      },
     );
+
+    testWithoutContext('does not trigger hot restart if hot reload succeeds', () async {
+      final fakeResidentRunner = FakeResidentRunner();
+      final WidgetPreviewStartCommand startCommand = createStartCommand(fakeResidentRunner);
+
+      final OperationResult? result = await startCommand.handleReload();
+
+      final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
+      expect(fakeResidentRunner.restartCalls, <bool>[false]);
+      expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isFalse);
+      expect(result?.isOk, isTrue);
+      expect(
+        bufferLogger.statusText,
+        isNot(contains(WidgetPreviewStartCommand.kHotReloadRejectedMessage)),
+      );
+    });
   });
 }

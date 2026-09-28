@@ -144,6 +144,12 @@ class WidgetPreviewDtdServices {
   bool get lspServiceAvailable => _lspServiceAvailable;
   bool _lspServiceAvailable = false;
 
+  /// Set to `true` when a hot reload is rejected due to unsupported changes and an automatic
+  /// hot restart is performed instead.
+  ///
+  /// Consumed and reset when [kCheckForHotRestartTriggerEvent] is invoked by the scaffold.
+  bool hotReloadRejectedTriggerEvent = false;
+
   /// Starts DTD in a child process before invoking [connect] with a [Uri] pointing to the new
   /// DTD instance.
   Future<void> launchAndConnect({required AnalysisServer analysisServer}) async {
@@ -331,12 +337,6 @@ class WidgetPreviewDtdServices {
       _ => throw UnimplementedError('Unexpected preference value: ${value.runtimeType}'),
     };
   }
-
-  /// Set to `true` when a hot reload is rejected due to unsupported changes and an automatic
-  /// hot restart is performed instead.
-  ///
-  /// Consumed and reset when [kCheckForHotRestartTriggerEvent] is invoked by the scaffold.
-  bool hotReloadRejectedTriggerEvent = false;
 
   Future<Map<String, Object?>> _getDevToolsUri(Parameters _) async {
     return StringResponse((await _devToolsServerAddress.future).toString()).toJson();

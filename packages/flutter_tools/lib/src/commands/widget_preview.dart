@@ -190,6 +190,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       'Failed to locate browser. Make sure you are using an up-to-date Chrome or Edge. '
       'Otherwise, consider running with --$kWebServer instead.';
 
+  @visibleForTesting
+  static const kHotReloadRejectedMessage =
+      'Hot reload rejected due to unsupported changes. Performing hot restart instead.';
+
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     // Ensure the Flutter Web SDK is installed.
@@ -285,10 +289,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   /// The currently running instance of the widget preview scaffold.
   @visibleForTesting
-  ResidentRunner? get widgetPreviewApp => _widgetPreviewApp;
-  @visibleForTesting
-  set widgetPreviewApp(ResidentRunner? app) => _widgetPreviewApp = app;
-  ResidentRunner? _widgetPreviewApp;
+  ResidentRunner? widgetPreviewApp;
 
   /// The location of the widget_preview_scaffold for the current execution of the command.
   ///
@@ -383,7 +384,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final bool legacyDetection = boolArg('legacy-preview-detection');
 
     shutdownHooks.addShutdownHook(() async {
-      await _widgetPreviewApp?.exitApp();
+      await widgetPreviewApp?.exitApp();
       if (legacyDetection) {
         await _previewDetector.dispose();
       } else {
@@ -452,23 +453,19 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
   }
 
-  @visibleForTesting
-  WidgetPreviewDtdServices get dtdService => _dtdService;
-  @visibleForTesting
-  set dtdService(WidgetPreviewDtdServices service) => _dtdService = service;
-
+  /// Hot reloads the previewer, falling back to a hot restart if the reload is
+  /// rejected due to unsupported changes.
   @visibleForTesting
   Future<OperationResult?> handleReload() async {
-    final OperationResult? result = await _widgetPreviewApp?.restart();
-    if (result case OperationResult(
-      isOk: false,
-      updateFSReport: UpdateFSReport(hotReloadRejected: true),
-    )) {
-      logger.printStatus(
-        'Hot reload rejected due to unsupported changes. Performing hot restart instead.',
-      );
+    final OperationResult? result = await widgetPreviewApp?.restart();
+    if (result case OperationResult(updateFSReport: UpdateFSReport(hotReloadRejected: true))) {
+      logger.printStatus(kHotReloadRejectedMessage);
       _dtdService.hotReloadRejectedTriggerEvent = true;
-      return _widgetPreviewApp?.restart(fullRestart: true);
+      final OperationResult? restartResult = await widgetPreviewApp?.restart(fullRestart: true);
+      if (restartResult == null || !restartResult.isOk) {
+        _dtdService.hotReloadRejectedTriggerEvent = false;
+      }
+      return restartResult;
     }
     return result;
   }
@@ -481,7 +478,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   void onHotRestartRequest() {
     logger.printStatus('Triggering restart based on request from preview environment.');
-    _widgetPreviewApp?.restart(fullRestart: true);
+    widgetPreviewApp?.restart(fullRestart: true);
   }
 
   Future<void> _onPubspecChangeDetected(String path) async {
@@ -490,7 +487,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       rootProject: project,
       updatedPubspecPath: path,
     );
-    await _widgetPreviewApp?.restart(fullRestart: true);
+    await widgetPreviewApp?.restart(fullRestart: true);
   }
 
   void onChangeDetected(FlutterWidgetPreviews update) {
@@ -608,7 +605,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       if (boolArg(kLaunchPreviewer)) {
         final appStarted = Completer<void>();
         final connectionInfo = Completer<DebugConnectionInfo>();
-        _widgetPreviewApp = ResidentWebRunner(
+        widgetPreviewApp = ResidentWebRunner(
           flutterDevice,
           target: target,
           debuggingOptions: debuggingOptions,
@@ -631,7 +628,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
         );
         unawaited(
-          _widgetPreviewApp!.run(
+          widgetPreviewApp!.run(
             appStartedCompleter: appStarted,
             connectionInfoCompleter: connectionInfo,
           ),
@@ -658,8 +655,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     // Send an analytics event reporting how long it took for the widget previewer to start.
     previewAnalytics.reportLaunchTiming();
 
-    // If _widgetPreviewApp is null --no-launch-previewer was provided so return success.
-    return _widgetPreviewApp?.waitForAppToFinish() ?? 0;
+    // If widgetPreviewApp is null --no-launch-previewer was provided so return success.
+    return widgetPreviewApp?.waitForAppToFinish() ?? 0;
   }
 }
 

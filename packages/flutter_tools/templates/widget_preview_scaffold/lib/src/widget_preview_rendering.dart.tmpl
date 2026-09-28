@@ -481,7 +481,9 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
 
     preview = WidgetPreviewLocalizations(
       localizationsData: widget.preview.localizations,
-      child: preview,
+      child: ScaffoldMessenger(
+        child: ScrollNotificationObserver(child: preview),
+      ),
     );
 
     // Override the asset resolution behavior to automatically insert
@@ -1113,6 +1115,10 @@ class WidgetPreviewScaffold extends StatefulWidget {
     this.enableWebView = true,
   });
 
+  @visibleForTesting
+  static const kHotReloadRejectedMessage =
+      'Hot reload rejected due to unsupported changes. Performed a hot restart instead.';
+
   final WidgetPreviewScaffoldController controller;
   final IdeTheme ideTheme;
   final bool enableWebView;
@@ -1132,39 +1138,18 @@ class _WidgetPreviewScaffoldState extends State<WidgetPreviewScaffold> {
       _webViewController = WebViewController()
         ..loadRequest(widget.controller.devToolsUri);
     }
-    widget.controller.hotReloadRejectedRestartedListenable.addListener(
-      _onHotReloadRejectedRestarted,
-    );
-    _onHotReloadRejectedRestarted();
-  }
-
-  @override
-  void dispose() {
-    widget.controller.hotReloadRejectedRestartedListenable.removeListener(
-      _onHotReloadRejectedRestarted,
-    );
-    super.dispose();
-  }
-
-  void _onHotReloadRejectedRestarted() {
-    if (!widget.controller.hotReloadRejectedRestartedListenable.value) {
-      return;
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      widget.controller.consumeHotReloadRejectedRestarted();
-      _scaffoldMessengerKey.currentState
-        ?..hideCurrentSnackBar()
-        ..showSnackBar(
+    if (widget.controller.consumeHotReloadRejectedTriggerEvent()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        _scaffoldMessengerKey.currentState?.showSnackBar(
           const SnackBar(
-            content: Text(
-              'Hot reload rejected due to unsupported changes. Performed a hot restart instead.',
-            ),
+            content: Text(WidgetPreviewScaffold.kHotReloadRejectedMessage),
           ),
         );
-    });
+      });
+    }
   }
 
   @override
