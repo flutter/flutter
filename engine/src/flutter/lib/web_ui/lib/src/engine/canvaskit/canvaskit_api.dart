@@ -2425,9 +2425,8 @@ List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
 }
 
 Iterable<String> get _canvasKitJsUrls {
-  return getCanvasKitJsFileNames(
-    configuration.canvasKitVariant,
-  ).map((String filename) => '$_canvasKitBaseUrl$filename');
+  return getCanvasKitJsFileNames(configuration.canvasKitVariant)
+      .map((String filename) => '$_canvasKitBaseUrl$filename');
 }
 
 @visibleForTesting

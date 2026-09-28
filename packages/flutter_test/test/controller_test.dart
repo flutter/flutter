@@ -1037,9 +1037,8 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to end where the slider is, inclusive.
-        final Iterable<Matcher> expectedMatchers = <Matcher>[
-          ...fullTraversalMatchers,
-        ].getRange(0, 9);
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]
+            .getRange(0, 9);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(end: find.byType(Slider)),
@@ -1108,9 +1107,8 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to start at the text field and end at the slider.
-        final Iterable<Matcher> expectedMatchers = <Matcher>[
-          ...fullTraversalMatchers,
-        ].getRange(1, 9);
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]
+            .getRange(1, 9);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(
@@ -1269,8 +1267,7 @@ void main() {
         expect(
           find.semantics.scrollable(),
           isSemantics(hasScrollLeftAction: true, hasScrollRightAction: true),
-          reason:
-              'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
+          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
         );
 
         // This will scroll the listview until it's completely scrolled to the right.
@@ -1292,8 +1289,7 @@ void main() {
         expect(
           find.semantics.scrollable(),
           isSemantics(hasScrollLeftAction: true, hasScrollRightAction: true),
-          reason:
-              'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
+          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
         );
       });
 
@@ -1323,8 +1319,7 @@ void main() {
         expect(
           find.semantics.scrollable(),
           isSemantics(hasScrollUpAction: true, hasScrollDownAction: true),
-          reason:
-              'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
+          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
         );
 
         // This will scroll the listview until it's completely scrolled to the right.
@@ -1346,8 +1341,7 @@ void main() {
         expect(
           find.semantics.scrollable(),
           isSemantics(hasScrollUpAction: true, hasScrollDownAction: true),
-          reason:
-              'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
+          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
         );
       });
 

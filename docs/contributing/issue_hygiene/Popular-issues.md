@@ -56,7 +56,7 @@ If anyone would be interested in implementing an official homebrew installation 
 
 This feature is one that is recognized as important. There are some prerequisites, like improving Flutter's deep linking and accessibility features, which we have to deal with first. There are also other issues, like those around performance, plugins, and embedding, that are currently higher on the list for people who are currently contributing to Flutter's web support.
 
-Fixing this issue is non-trivial, as Flutter's architecture is one that is fundamentally different than what the web usually expects. If you are interested in contributing, the best place to begin would be to discuss potential approaches on our #hackers-web [Chat](../Chat.md) channel, followed by writing up a design doc (the process for which is also on the [Chat](../Chat.md) page).
+Fixing this issue is non-trivial, as Flutter's architecture is one that is fundamentally different than what the web usually expects. If you are interested in contributing, the best place to begin would be to discuss potential approaches on our #hackers-web [Chat](../Chat.md) channel, followed by proposing an RFC or design doc (see [Design Documents](../Design-Documents.md) and [flutter/rfc](https://github.com/flutter/rfc)).
 
 ## [Apple CarPlay / Android Auto support?](https://github.com/flutter/flutter/issues/26801) (#26801)
 

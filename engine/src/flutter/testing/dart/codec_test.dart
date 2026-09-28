@@ -166,9 +166,8 @@ void main() {
     final fileName = impellerEnabled
         ? 'impeller_four_frame_with_reuse_end.png'
         : 'four_frame_with_reuse_end.png';
-    final Uint8List goldenData = File(
-      path.join('flutter', 'lib', 'ui', 'fixtures', fileName),
-    ).readAsBytesSync();
+    final Uint8List goldenData = File(path.join('flutter', 'lib', 'ui', 'fixtures', fileName))
+        .readAsBytesSync();
 
     expect(imageData.buffer.asUint8List(), goldenData);
   });
@@ -176,9 +175,8 @@ void main() {
   test('Animated webp can reuse across multiple frames', () async {
     // Regression test for https://github.com/flutter/flutter/issues/61150#issuecomment-679055858
 
-    final Uint8List data = File(
-      path.join('flutter', 'lib', 'ui', 'fixtures', 'heart.webp'),
-    ).readAsBytesSync();
+    final Uint8List data = File(path.join('flutter', 'lib', 'ui', 'fixtures', 'heart.webp'))
+        .readAsBytesSync();
     final ui.Codec codec = await ui.instantiateImageCodec(data);
 
     // Capture the final frame of animation. If we have not composited
@@ -194,9 +192,8 @@ void main() {
 
     final fileName = impellerEnabled ? 'impeller_heart_end.png' : 'heart_end.png';
 
-    final Uint8List goldenData = File(
-      path.join('flutter', 'lib', 'ui', 'fixtures', fileName),
-    ).readAsBytesSync();
+    final Uint8List goldenData = File(path.join('flutter', 'lib', 'ui', 'fixtures', fileName))
+        .readAsBytesSync();
 
     expect(imageData.buffer.asUint8List(), goldenData);
   });
@@ -221,9 +218,8 @@ void main() {
             ? 'impeller_2_dispose_op_restore_previous.apng.$i.png'
             : '2_dispose_op_restore_previous.apng.$i.png';
 
-        final Uint8List goldenData = File(
-          path.join('flutter', 'lib', 'ui', 'fixtures', fileName),
-        ).readAsBytesSync();
+        final Uint8List goldenData = File(path.join('flutter', 'lib', 'ui', 'fixtures', fileName))
+            .readAsBytesSync();
 
         expect(imageData.buffer.asUint8List(), goldenData);
       }
@@ -273,9 +269,8 @@ void main() {
   });
 
   test('Animated apng frame decode does not crash with invalid destination region', () async {
-    final Uint8List data = File(
-      path.join('flutter', 'lib', 'ui', 'fixtures', 'out_of_bounds.apng'),
-    ).readAsBytesSync();
+    final Uint8List data = File(path.join('flutter', 'lib', 'ui', 'fixtures', 'out_of_bounds.apng'))
+        .readAsBytesSync();
 
     final ui.Codec codec = await ui.instantiateImageCodec(data);
     try {

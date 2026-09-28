@@ -74,12 +74,11 @@ For more information, please visit:
 
 class IMobileDevice {
   IMobileDevice({
-    required Artifacts artifacts,
+    required this._artifacts,
     required Cache cache,
     required ProcessManager processManager,
     required Logger logger,
-  }) : _artifacts = artifacts,
-       _dyLdLibEntry = cache.dyLdLibEntry,
+  }) : _dyLdLibEntry = cache.dyLdLibEntry,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   /// Create an [IMobileDevice] for testing.
@@ -153,7 +152,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       hostPlatform: globals.platform,
       operatingSystemUtils: globals.os,
       flutterVersion: globals.flutterVersion,
-      reportCrashes: !await globals.isRunningOnBot
+      reportCrashes: !await globals.isRunningOnBot,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),

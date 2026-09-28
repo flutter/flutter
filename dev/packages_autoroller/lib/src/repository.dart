@@ -19,7 +19,7 @@ enum RemoteName { upstream, mirror }
 
 /// Git remote locations.
 final class Remote {
-  const Remote._({required RemoteName name, required this.url}) : _name = name, assert(url != '');
+  const Remote._({required this._name, required this.url}) : assert(url != '');
 
   const Remote.mirror(String url) : this._(name: RemoteName.mirror, url: url);
   const Remote.upstream(String url) : this._(name: RemoteName.upstream, url: url);
@@ -80,10 +80,9 @@ abstract class Repository {
     required this.fileSystem,
     required this.parentDirectory,
     this.initialRef,
-    String? previousCheckoutLocation,
+    this._previousCheckoutLocation,
     required this.mirrorRemote,
-  }) : _previousCheckoutLocation = previousCheckoutLocation,
-       git = Git(processManager),
+  }) : git = Git(processManager),
        assert(upstreamRemote.url.isNotEmpty);
 
   final String name;

@@ -614,16 +614,16 @@ resolution: workspace
     );
 
     const samplePreviewFile = '''
-import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:material_ui/material_ui.dart';
 
 @Preview(name: 'preview')
 Widget preview() => Text('Foo');''';
 
     const expectedGeneratedFileContents = '''
 // ignore_for_file: implementation_imports
-
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'widget_preview.dart' as _i1;
 import 'utils.dart' as _i2;
 import 'package:flutter_project/foo.dart' as _i3;

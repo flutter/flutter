@@ -68,6 +68,7 @@ source_set("InternalFlutterSwift") {
     "framework/Source/KeyboardInsetManager.swift",
     "framework/Source/LaunchEngine.swift",
     "framework/Source/SplashScreenManager.swift",
+    "framework/Source/TranslateViewController.swift",
     "framework/Source/UIPressProxy.swift",
     "framework/Source/VSyncClient.swift",
   ]
@@ -411,7 +412,7 @@ copy("copy_asan_runtime_dylib") {
   # TODO(cbracken): https://github.com/flutter/flutter/issues/186668
   # Eliminate clang toolchain hardcoding.
   _libclang_base_path =
-      "$buildtools_path/mac-${host_cpu}/clang/lib/clang/23/lib/darwin/"
+      "$buildtools_path/mac-${host_cpu}/clang/lib/clang/24/lib/darwin/"
 
   if (defined(use_ios_simulator) && use_ios_simulator) {
     _dylib_name = "libclang_rt.asan_iossim_dynamic.dylib"
