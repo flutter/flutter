@@ -346,8 +346,10 @@ TEST(ProgramCacheTest, ThreadsCanStoreAndLoadAtTheSameTime) {
   ProgramCache::Options options = MakeOptions(PathOf(directory));
   options.write_in_background = true;
   ProgramCache cache(options);
+  constexpr int kThreads = 4;
   std::vector<std::thread> threads;
-  for (int t = 0; t < 4; t++) {
+  threads.reserve(kThreads);
+  for (int t = 0; t < kThreads; t++) {
     threads.emplace_back([&cache, t] {
       for (int i = 0; i < 50; i++) {
         std::string key = MakeKey('a');
@@ -364,7 +366,7 @@ TEST(ProgramCacheTest, ThreadsCanStoreAndLoadAtTheSameTime) {
   }
   cache.Flush();
   ProgramCache reopened(MakeOptions(PathOf(directory)));
-  for (int t = 0; t < 4; t++) {
+  for (int t = 0; t < kThreads; t++) {
     for (int i = 0; i < 50; i++) {
       std::string key = MakeKey('a');
       key[0] = static_cast<char>(t);

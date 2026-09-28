@@ -80,7 +80,7 @@ std::wstring Hex(const void* data, size_t size) {
 
 std::wstring Hex64(uint64_t value) {
   wchar_t text[17];
-  swprintf_s(text, L"%016llx", static_cast<unsigned long long>(value));
+  swprintf_s(text, L"%016llx", value);
   return text;
 }
 
