@@ -108,7 +108,9 @@ class ToolDependencies {
   static Future<ToolDependencies> bootstrap({
     Analytics? analytics,
     AndroidSdk? androidSdk,
+    AndroidSdk? Function()? androidSdkBuilder,
     AndroidStudio? androidStudio,
+    AndroidStudio? Function()? androidStudioBuilder,
     BotDetector? botDetector,
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
@@ -127,6 +129,7 @@ class ToolDependencies {
     IOSSimulatorUtils? iosSimulatorUtils,
     IOSWorkflow? iosWorkflow,
     Java? java,
+    Java? Function()? javaBuilder,
     LocalEngineLocator? localEngineLocator,
     Logger? logger,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
@@ -148,6 +151,19 @@ class ToolDependencies {
     Xcode? xcode,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
   }) async {
+    assert(
+      androidSdk == null || androidSdkBuilder == null,
+      'Cannot provide both androidSdk and androidSdkBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      androidStudio == null || androidStudioBuilder == null,
+      'Cannot provide both androidStudio and androidStudioBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      java == null || javaBuilder == null,
+      'Cannot provide both java and javaBuilder to ToolDependencies.bootstrap.',
+    );
+
     // 1. Core Platform Inputs
     final Platform finalPlatform = platform ?? const LocalPlatform();
     final SystemClock finalSystemClock = systemClock ?? const SystemClock();
@@ -428,29 +444,43 @@ class ToolDependencies {
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
     // 12. AndroidContext Dependencies
-    final AndroidStudio? finalAndroidStudio = androidStudio ?? AndroidStudio.latestValid();
+    final AndroidSdk? Function() finalAndroidSdkBuilder =
+        androidSdkBuilder ?? (androidSdk != null ? () => androidSdk : AndroidSdk.locateAndroidSdk);
 
-    final AndroidSdk? finalAndroidSdk = androidSdk ?? AndroidSdk.locateAndroidSdk();
+    final AndroidStudio? Function() finalAndroidStudioBuilder =
+        androidStudioBuilder ??
+        (androidStudio != null ? () => androidStudio : AndroidStudio.latestValid);
 
-    final Java? finalJava =
-        java ??
-        Java.find(
-          config: finalConfig,
-          androidStudio: finalAndroidStudio,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-        );
+    late final AndroidContext finalAndroidContext;
 
-    final GradleUtils finalGradleUtils =
-        gradleUtils ??
-        GradleUtils(
-          platform: finalPlatform,
-          logger: finalLogger,
-          cache: finalCache,
-          operatingSystemUtils: finalOS,
-        );
+    final Java? Function() finalJavaBuilder =
+        javaBuilder ??
+        (java != null
+            ? () => java
+            : () => Java.find(
+                androidStudioBuilder: () => finalAndroidContext.androidStudio,
+                config: finalConfig,
+                fileSystem: finalFS,
+                logger: finalLogger,
+                platform: finalPlatform,
+                processManager: finalProcessManager,
+              ));
+
+    final GradleUtils Function() gradleUtilsBuilder = gradleUtils != null
+        ? () => gradleUtils
+        : () => GradleUtils(
+            platform: finalPlatform,
+            logger: finalLogger,
+            cache: finalCache,
+            operatingSystemUtils: finalOS,
+          );
+
+    finalAndroidContext = AndroidContext(
+      androidSdkBuilder: finalAndroidSdkBuilder,
+      androidStudioBuilder: finalAndroidStudioBuilder,
+      gradleUtilsBuilder: gradleUtilsBuilder,
+      javaBuilder: finalJavaBuilder,
+    );
 
     // 13. Doctor and EmulatorManager Dependencies
     final Doctor finalDoctor =
@@ -459,25 +489,20 @@ class ToolDependencies {
     final EmulatorManager finalEmulatorManager =
         emulatorManager ??
         EmulatorManager(
+          androidSdkBuilder: () => finalAndroidContext.androidSdk,
           androidWorkflow: AndroidWorkflow(
-            androidSdk: finalAndroidSdk,
+            androidSdkBuilder: () => finalAndroidContext.androidSdk,
             featureFlags: finalFeatureFlags,
           ),
           fileSystem: finalFS,
-          java: finalJava,
+          javaBuilder: () => finalAndroidContext.java,
           logger: finalLogger,
           processManager: finalProcessManager,
-          androidSdk: finalAndroidSdk,
         );
 
     return ToolDependencies(
       analytics: finalAnalytics,
-      androidContext: AndroidContext(
-        androidSdk: finalAndroidSdk,
-        androidStudio: finalAndroidStudio,
-        gradleUtils: finalGradleUtils,
-        java: finalJava,
-      ),
+      androidContext: finalAndroidContext,
       appleContext: AppleContext(
         cocoaPods: finalCocoaPods,
         cocoapodsValidator: finalCocoapodsValidator,

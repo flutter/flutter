@@ -40,7 +40,7 @@ void main() {
   });
 
   testWithoutContext('AndroidWorkflow handles a null AndroidSDK', () {
-    final androidWorkflow = AndroidWorkflow(featureFlags: TestFeatureFlags(), androidSdk: null);
+    final androidWorkflow = AndroidWorkflow(featureFlags: TestFeatureFlags());
 
     expect(androidWorkflow.canLaunchDevices, false);
     expect(androidWorkflow.canListDevices, false);
