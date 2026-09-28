@@ -3590,6 +3590,83 @@ void main() {
     );
     expect(tester.getSize(find.byType(NestedScrollView)), Size.zero);
   });
+
+  testWidgets('NestedScrollView nested inside another does not stack overflow on tab switch', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123590.
+    //
+    // A NestedScrollView nested inside another NestedScrollView's body,
+    // reached via a PrimaryScrollController-driven TabBarView switch, used
+    // to recurse infinitely: _NestedScrollPosition.setParent detached the
+    // old parent before reassigning _parent, so the reentrant
+    // setParent(null) call from _NestedScrollController.detach saw the
+    // same still-set _parent and detached it again, forever.
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: _NestedTabView())));
+
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsOneWidget);
+
+    // Switching to the tab containing the nested NestedScrollView used to
+    // throw a stack overflow while finalizing the widget tree.
+    await tester.tap(find.text('Tab 2'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+}
+
+class _NestedTabView extends StatefulWidget {
+  const _NestedTabView({this.nested = true});
+
+  final bool nested;
+
+  @override
+  State<_NestedTabView> createState() => _NestedTabViewState();
+}
+
+class _NestedTabViewState extends State<_NestedTabView> with SingleTickerProviderStateMixin {
+  late final TabController _controller = TabController(length: 2, vsync: this);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NestedScrollView(
+      headerSliverBuilder: (context, innerBoxIsScrolled) {
+        return <Widget>[
+          SliverToBoxAdapter(
+            child: TabBar(
+              controller: _controller,
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+              ],
+            ),
+          ),
+        ];
+      },
+      body: TabBarView(
+        controller: _controller,
+        children: <Widget>[
+          const SizedBox(),
+          // Only the inner instance is itself a NestedScrollView, matching
+          // the minimized repro from the issue -- an outer TabView whose
+          // second pane is another TabView (also a NestedScrollView). The
+          // nested instance is at index 1 here (switching into it) rather
+          // than index 0 as in the original repro (switching away from
+          // it); the recursion triggers either way, since it's caused by
+          // setParent running again while the position's _parent is
+          // already non-null, regardless of attach/detach direction.
+          if (widget.nested) const _NestedTabView(nested: false) else const SizedBox(),
+        ],
+      ),
+    );
+  }
 }
 
 double appBarHeight(WidgetTester tester) =>
