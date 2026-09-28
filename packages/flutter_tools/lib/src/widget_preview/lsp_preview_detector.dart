@@ -117,20 +117,15 @@ class LspPreviewDetector {
       // file watcher finished initializing.
       project.reloadManifest(logger: logger, fs: fs);
 
-      if (!dtd.lspServiceAvailable) {
+      if (dtd.dtdUri == null) {
         logger.printStatus('Launching analysis server...');
         _analysisServer = analysisServerFactory != null
             ? await analysisServerFactory!()
             : await launchAnalysisServer();
         await _analysisServer!.start();
 
-        final Uri? dtdUri = dtd.dtdUri;
-        if (dtdUri != null) {
-          await _analysisServer!.connectToDtd(dtdUri: dtdUri);
-        } else {
-          logger.printTrace('Launching a fresh DTD instance...');
-          await dtd.launchAndConnect(analysisServer: _analysisServer!);
-        }
+        logger.printTrace('Launching a fresh DTD instance...');
+        await dtd.launchAndConnect(analysisServer: _analysisServer!);
       }
     });
   }

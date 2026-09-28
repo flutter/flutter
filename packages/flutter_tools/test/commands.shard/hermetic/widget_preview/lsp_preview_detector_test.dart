@@ -201,45 +201,42 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'waits for analysis over DTD when connected to a pre-existing analysis server',
-      () async {
-        await detector.dispose();
+    testWithoutContext('does not launch analysis server and waits for analysis over DTD when connected to an existing DTD instance', () async {
+      await detector.dispose();
 
-        fakeDtd.lspServiceAvailable = true;
-        detector = LspPreviewDetector(
-          platform: platform,
-          previewAnalytics: previewAnalytics,
-          project: project,
-          fs: fs,
-          logger: logger,
-          onChangeDetected: detectedChanges.add,
-          onPubspecChangeDetected: detectedPubspecChanges.add,
-          dtd: fakeDtd,
-          processManager: FakeProcessManager.any(),
-          terminal: Terminal.test(),
-          suppressAnalytics: false,
-          artifacts: Artifacts.test(),
-          shutdownHooks: shutdownHooks,
-          watcherBuilder: (_) => fakeWatcher,
-          analysisServerFactory: () async => fakeAnalysisServer,
-        );
-        await detector.initialize();
+      fakeDtd = FakeWidgetPreviewDtdServices()..dtdUri = Uri.parse('ws://127.0.0.1:12345');
+      detector = LspPreviewDetector(
+        platform: platform,
+        previewAnalytics: previewAnalytics,
+        project: project,
+        fs: fs,
+        logger: logger,
+        onChangeDetected: detectedChanges.add,
+        onPubspecChangeDetected: detectedPubspecChanges.add,
+        dtd: fakeDtd,
+        processManager: FakeProcessManager.any(),
+        terminal: Terminal.test(),
+        suppressAnalytics: false,
+        artifacts: Artifacts.test(),
+        shutdownHooks: shutdownHooks,
+        watcherBuilder: (_) => fakeWatcher,
+        analysisServerFactory: () async => fakeAnalysisServer,
+      );
+      await detector.initialize();
 
-        expect(detector.analysisServer, isNull);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-        expect(fakeDtd.waitForAnalysisCallCount, 0);
+      expect(detector.analysisServer, isNull);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+      expect(fakeDtd.waitForAnalysisCallCount, 0);
 
-        await detector.waitForAnalysis();
-        expect(fakeDtd.waitForAnalysisCallCount, 1);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+      await detector.waitForAnalysis();
+      expect(fakeDtd.waitForAnalysisCallCount, 1);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
 
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
-        expect(detectedChanges, hasLength(1));
-        expect(fakeDtd.waitForAnalysisCallCount, 2);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-      },
-    );
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
+      expect(detectedChanges, hasLength(1));
+      expect(fakeDtd.waitForAnalysisCallCount, 2);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
   });
 }
 
@@ -294,14 +291,16 @@ class FakeAnalysisServer extends Fake implements AnalysisServer {
 
 class FakeWidgetPreviewDtdServices extends Fake implements WidgetPreviewDtdServices {
   @override
-  bool lspServiceAvailable = false;
-
-  @override
-  Uri get dtdUri => Uri.parse('ws://127.0.0.1:12345');
+  Uri? dtdUri;
 
   int waitForAnalysisCallCount = 0;
   bool shouldThrow = false;
   FlutterWidgetPreviews? nextUpdate;
+
+  @override
+  Future<void> launchAndConnect({required AnalysisServer analysisServer}) async {
+    dtdUri = Uri.parse('ws://127.0.0.1:12345');
+  }
 
   @override
   Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {

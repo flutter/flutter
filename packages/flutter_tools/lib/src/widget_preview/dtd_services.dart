@@ -161,9 +161,6 @@ class WidgetPreviewDtdServices {
   Uri? get dtdUri => _dtdUri;
   Uri? _dtdUri;
 
-  /// Returns true if the LSP service is registered with the connected DTD instance.
-  bool get lspServiceAvailable => _lspServiceAvailable;
-  bool _lspServiceAvailable = false;
   bool _allLspServicesRegistered = false;
 
   /// Starts DTD in a child process before invoking [connect] with a [Uri] pointing to the new
@@ -182,12 +179,8 @@ class WidgetPreviewDtdServices {
     _dtdUri = dtdWsUri;
     _dtd = await DartToolingDaemon.connect(dtdWsUri);
 
-    _lspServiceAvailable = false;
     _allLspServicesRegistered = false;
     final RegisteredServicesResponse registeredServices = await _dtd!.getRegisteredServices();
-    _lspServiceAvailable =
-        registeredServices.dtdServices.contains(kLspStream) ||
-        registeredServices.clientServices.any((service) => service.name == kLspStream);
     _allLspServicesRegistered = _areRequiredLspServicesRegistered(registeredServices);
 
     await _registerServices();
@@ -258,7 +251,6 @@ class WidgetPreviewDtdServices {
         return;
       }
       if (event.kind == kLspInitializedEvent) {
-        _lspServiceAvailable = true;
         _allLspServicesRegistered = true;
         lspInitializedCompleter.complete();
       }
@@ -267,7 +259,6 @@ class WidgetPreviewDtdServices {
       await _dtd!.safeStreamListen(kLspStream);
       final RegisteredServicesResponse registeredServices = await _dtd!.getRegisteredServices();
       if (_areRequiredLspServicesRegistered(registeredServices)) {
-        _lspServiceAvailable = true;
         _allLspServicesRegistered = true;
         if (!lspInitializedCompleter.isCompleted) {
           lspInitializedCompleter.complete();

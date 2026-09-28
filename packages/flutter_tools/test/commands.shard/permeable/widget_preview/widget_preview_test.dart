@@ -41,16 +41,15 @@ import '../utils/project_testing_utils.dart';
 
 class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreviewDtdServices {
   @override
-  Future<void> connect({required Uri dtdWsUri}) async {}
+  Future<void> connect({required Uri dtdWsUri}) async {
+    dtdUri = dtdWsUri;
+  }
 
   @override
   DtdLauncher get dtdLauncher => throw UnimplementedError();
 
   @override
-  Uri? get dtdUri => Uri.parse('ws://localhost:1234');
-
-  @override
-  bool get lspServiceAvailable => false;
+  Uri? dtdUri;
 
   @override
   final String widgetPreviewService = WidgetPreviewDtdServices.kWidgetPreviewServiceRoot;
@@ -60,7 +59,9 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
       WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot;
 
   @override
-  Future<void> launchAndConnect({required AnalysisServer analysisServer}) async {}
+  Future<void> launchAndConnect({required AnalysisServer analysisServer}) async {
+    dtdUri = Uri.parse('ws://localhost:1234');
+  }
 
   @override
   Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {}
