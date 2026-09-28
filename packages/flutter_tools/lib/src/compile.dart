@@ -575,7 +575,11 @@ class ResidentCompilerFactory {
           ...buildInfo.extraFrontEndOptions,
           if (buildInfo.webEnableHotReload)
           // These flags are only valid to be passed when compiling with DDC.
-          ...<String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
+          ...<String>[
+            '--dartdevc-canary',
+            '--dartdevc-module-format=ddc',
+            '--no-js-strongly-connected-components',
+          ],
         ],
       );
     } else {

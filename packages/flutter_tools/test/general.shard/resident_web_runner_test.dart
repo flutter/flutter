@@ -92,7 +92,11 @@ const kStartPausedAndAttachExpectations = <VmServiceExpectation>[
   ...kAttachIsolateExpectations,
 ];
 
-const kDdcLibraryBundleFlags = <String>['--dartdevc-module-format=ddc', '--dartdevc-canary'];
+const kDdcLibraryBundleFlags = <String>[
+  '--dartdevc-module-format=ddc',
+  '--dartdevc-canary',
+  '--no-js-strongly-connected-components',
+];
 
 void main() {
   late FakeDebugConnection debugConnection;

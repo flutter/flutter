@@ -352,4 +352,38 @@ void main() {
       await completer.future.timeout(const Duration(seconds: 5));
     },
   );
+
+  testWithoutContext(
+    'ResidentCompilerFactory configures DDC library bundle flags when webEnableHotReload is enabled',
+    () {
+      final compiler =
+          const ResidentCompilerFactory().create(
+                targetPlatform: .web_javascript,
+                buildInfo: const BuildInfo(
+                  BuildMode.debug,
+                  null,
+                  treeShakeIcons: false,
+                  packageConfigPath: '.dart_tool/package_config.json',
+                  webEnableHotReload: true,
+                ),
+                logger: BufferLogger.test(),
+                processManager: FakeProcessManager.any(),
+                artifacts: Artifacts.test(),
+                platform: FakePlatform(),
+                fileSystem: MemoryFileSystem.test(),
+                shutdownHooks: FakeShutdownHooks(),
+                config: Config.test(),
+              )
+              as DefaultResidentCompiler;
+
+      expect(
+        compiler.extraFrontEndOptions,
+        containsAll(<String>[
+          '--dartdevc-canary',
+          '--dartdevc-module-format=ddc',
+          '--no-js-strongly-connected-components',
+        ]),
+      );
+    },
+  );
 }
