@@ -1238,6 +1238,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   ScrollController? _parent;
 
   void setParent(ScrollController? value) {
+    if (_parent == value) {
+      return;
+    }
     // Null out _parent before calling its detach(), not after: detach()
     // reenters this method with value == null (see
     // _NestedScrollController.detach below), and if _parent were still set
