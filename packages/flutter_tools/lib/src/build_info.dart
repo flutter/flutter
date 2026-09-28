@@ -64,6 +64,7 @@ class BuildInfo {
        dartExperiments = dartExperiments ?? const <String>[];
 
   BuildInfo copyWith({
+    String? flavor,
     String? fileSystemScheme,
     List<String>? fileSystemRoots,
     List<String>? extraFrontEndOptions,
@@ -75,7 +76,7 @@ class BuildInfo {
   }) {
     return BuildInfo(
       mode,
-      flavor,
+      flavor ?? this.flavor,
       trackWidgetCreation: trackWidgetCreation,
       frontendServerStarterPath: frontendServerStarterPath,
       extraFrontEndOptions: extraFrontEndOptions ?? this.extraFrontEndOptions,

@@ -145,6 +145,222 @@ void main() {
       },
     );
   });
+
+  group('app flavor auto-detection', () {
+    testUsingContext('detects and applies flavor when cli flavor is null', () async {
+      final fakeCompiler = _FakeResidentCompiler();
+      final fakeVmService = _FakeFlutterVmService(flavor: 'dev');
+      final fakeFlutterDevice = _FakeHotCompatibleFlutterDevice(
+        FakeDevice(),
+        buildInfo: BuildInfo.debug,
+        generator: fakeCompiler,
+        vmService: fakeVmService,
+      );
+      final debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug);
+      final runner = HotRunner(
+        <FlutterDevice>[fakeFlutterDevice],
+        target: 'main.dart',
+        debuggingOptions: debuggingOptions,
+        analytics: _FakeAnalytics(),
+      );
+
+      await runner.detectAndApplyAppFlavor();
+
+      expect(fakeFlutterDevice.buildInfo.flavor, 'dev');
+      expect(fakeFlutterDevice.buildInfo.dartDefines, contains('$kAppFlavor=dev'));
+      expect(debuggingOptions.buildInfo.flavor, 'dev');
+      expect(debuggingOptions.buildInfo.dartDefines, contains('$kAppFlavor=dev'));
+      expect(fakeCompiler.dartDefines, contains('$kAppFlavor=dev'));
+      expect(testLogger.statusText, contains('Automatically detected app flavor: "dev".'));
+    });
+
+    testUsingContext('preserves existing dartDefines when applying detected flavor', () async {
+      final fakeCompiler = _FakeResidentCompiler(dartDefines: <String>['EXISTING_DEF=true']);
+      final fakeVmService = _FakeFlutterVmService(flavor: 'dev');
+      final BuildInfo initialBuildInfo = BuildInfo.debug.copyWith(
+        dartDefines: <String>['EXISTING_DEF=true'],
+      );
+      final fakeFlutterDevice = _FakeHotCompatibleFlutterDevice(
+        FakeDevice(),
+        buildInfo: initialBuildInfo,
+        generator: fakeCompiler,
+        vmService: fakeVmService,
+      );
+      final debuggingOptions = DebuggingOptions.enabled(initialBuildInfo);
+      final runner = HotRunner(
+        <FlutterDevice>[fakeFlutterDevice],
+        target: 'main.dart',
+        debuggingOptions: debuggingOptions,
+        analytics: _FakeAnalytics(),
+      );
+
+      await runner.detectAndApplyAppFlavor();
+
+      expect(fakeFlutterDevice.buildInfo.flavor, 'dev');
+      expect(fakeFlutterDevice.buildInfo.dartDefines, contains('EXISTING_DEF=true'));
+      expect(fakeFlutterDevice.buildInfo.dartDefines, contains('$kAppFlavor=dev'));
+      expect(fakeCompiler.dartDefines, contains('EXISTING_DEF=true'));
+      expect(fakeCompiler.dartDefines, contains('$kAppFlavor=dev'));
+    });
+
+    testUsingContext('works when compiler dartDefines was unmodifiable', () async {
+      final fakeCompiler = _FakeResidentCompiler(dartDefines: const <String>[]);
+      final fakeVmService = _FakeFlutterVmService(flavor: 'dev');
+      final fakeFlutterDevice = _FakeHotCompatibleFlutterDevice(
+        FakeDevice(),
+        buildInfo: BuildInfo.debug,
+        generator: fakeCompiler,
+        vmService: fakeVmService,
+      );
+      final debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug);
+      final runner = HotRunner(
+        <FlutterDevice>[fakeFlutterDevice],
+        target: 'main.dart',
+        debuggingOptions: debuggingOptions,
+        analytics: _FakeAnalytics(),
+      );
+
+      await runner.detectAndApplyAppFlavor();
+
+      expect(fakeCompiler.dartDefines, contains('$kAppFlavor=dev'));
+    });
+
+    testUsingContext('handles null vmService or generator gracefully', () async {
+      final fakeFlutterDeviceWithoutVmService = _FakeHotCompatibleFlutterDevice(
+        FakeDevice(),
+        buildInfo: BuildInfo.debug,
+      );
+      final debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug);
+      final runner = HotRunner(
+        <FlutterDevice>[fakeFlutterDeviceWithoutVmService],
+        target: 'main.dart',
+        debuggingOptions: debuggingOptions,
+        analytics: _FakeAnalytics(),
+      );
+
+      await runner.detectAndApplyAppFlavor();
+
+      expect(fakeFlutterDeviceWithoutVmService.buildInfo.flavor, isNull);
+    });
+
+    testUsingContext('warns when cli flavor does not match detected flavor', () async {
+      final fakeCompiler = _FakeResidentCompiler();
+      final fakeVmService = _FakeFlutterVmService(flavor: 'dev');
+      final BuildInfo cliBuildInfo = BuildInfo.debug.copyWith(
+        flavor: 'prod',
+        dartDefines: <String>['$kAppFlavor=prod'],
+      );
+      final fakeFlutterDevice = _FakeHotCompatibleFlutterDevice(
+        FakeDevice(),
+        buildInfo: cliBuildInfo,
+        generator: fakeCompiler,
+        vmService: fakeVmService,
+      );
+      final debuggingOptions = DebuggingOptions.enabled(cliBuildInfo);
+      final runner = HotRunner(
+        <FlutterDevice>[fakeFlutterDevice],
+        target: 'main.dart',
+        debuggingOptions: debuggingOptions,
+        analytics: _FakeAnalytics(),
+      );
+
+      await runner.detectAndApplyAppFlavor();
+
+      expect(fakeFlutterDevice.buildInfo.flavor, 'prod');
+      expect(
+        testLogger.warningText,
+        contains(
+          'Warning: The app on the device was built with flavor "dev", but --flavor was set to "prod".',
+        ),
+      );
+    });
+
+    testUsingContext('does not warn or modify when cli flavor matches detected flavor', () async {
+      final fakeCompiler = _FakeResidentCompiler();
+      final fakeVmService = _FakeFlutterVmService(flavor: 'prod');
+      final BuildInfo cliBuildInfo = BuildInfo.debug.copyWith(
+        flavor: 'prod',
+        dartDefines: <String>['$kAppFlavor=prod'],
+      );
+      final fakeFlutterDevice = _FakeHotCompatibleFlutterDevice(
+        FakeDevice(),
+        buildInfo: cliBuildInfo,
+        generator: fakeCompiler,
+        vmService: fakeVmService,
+      );
+      final debuggingOptions = DebuggingOptions.enabled(cliBuildInfo);
+      final runner = HotRunner(
+        <FlutterDevice>[fakeFlutterDevice],
+        target: 'main.dart',
+        debuggingOptions: debuggingOptions,
+        analytics: _FakeAnalytics(),
+      );
+
+      await runner.detectAndApplyAppFlavor();
+
+      expect(fakeFlutterDevice.buildInfo.flavor, 'prod');
+      expect(testLogger.warningText, isEmpty);
+      expect(testLogger.statusText, isNot(contains('Automatically detected app flavor')));
+    });
+
+    testUsingContext(
+      'does not warn or modify when both cli flavor and detected flavor are null',
+      () async {
+        final fakeCompiler = _FakeResidentCompiler();
+        final fakeVmService = _FakeFlutterVmService();
+        final fakeFlutterDevice = _FakeHotCompatibleFlutterDevice(
+          FakeDevice(),
+          buildInfo: BuildInfo.debug,
+          generator: fakeCompiler,
+          vmService: fakeVmService,
+        );
+        final debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug);
+        final runner = HotRunner(
+          <FlutterDevice>[fakeFlutterDevice],
+          target: 'main.dart',
+          debuggingOptions: debuggingOptions,
+          analytics: _FakeAnalytics(),
+        );
+
+        await runner.detectAndApplyAppFlavor();
+
+        expect(fakeFlutterDevice.buildInfo.flavor, isNull);
+        expect(testLogger.warningText, isEmpty);
+        expect(testLogger.statusText, isNot(contains('Automatically detected app flavor')));
+      },
+    );
+
+    testUsingContext(
+      'does not modify when cli flavor is set but detected flavor is null',
+      () async {
+        final fakeCompiler = _FakeResidentCompiler();
+        final fakeVmService = _FakeFlutterVmService();
+        final BuildInfo cliBuildInfo = BuildInfo.debug.copyWith(
+          flavor: 'prod',
+          dartDefines: <String>['$kAppFlavor=prod'],
+        );
+        final fakeFlutterDevice = _FakeHotCompatibleFlutterDevice(
+          FakeDevice(),
+          buildInfo: cliBuildInfo,
+          generator: fakeCompiler,
+          vmService: fakeVmService,
+        );
+        final debuggingOptions = DebuggingOptions.enabled(cliBuildInfo);
+        final runner = HotRunner(
+          <FlutterDevice>[fakeFlutterDevice],
+          target: 'main.dart',
+          debuggingOptions: debuggingOptions,
+          analytics: _FakeAnalytics(),
+        );
+
+        await runner.detectAndApplyAppFlavor();
+
+        expect(fakeFlutterDevice.buildInfo.flavor, 'prod');
+        expect(testLogger.warningText, isEmpty);
+        expect(testLogger.statusText, isNot(contains('Automatically detected app flavor')));
+      },
+    );
+  });
 }
 
 class _FakeAnalytics extends Fake implements Analytics {
@@ -173,17 +389,35 @@ class _FakeFlutterDevice extends Fake implements FlutterDevice {
   final FlutterVmService? vmService = _FakeFlutterVmService();
 }
 
+class _FakeResidentCompiler extends Fake implements ResidentCompiler {
+  _FakeResidentCompiler({List<String>? dartDefines}) : dartDefines = dartDefines ?? <String>[];
+
+  @override
+  List<String> dartDefines;
+}
+
 class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
-  _FakeHotCompatibleFlutterDevice(this.device);
+  _FakeHotCompatibleFlutterDevice(
+    this.device, {
+    BuildInfo? buildInfo,
+    this.generator,
+    this.vmService,
+  }) : buildInfo = buildInfo ?? BuildInfo.debug;
 
   @override
   final Device device;
 
   @override
+  BuildInfo buildInfo;
+
+  @override
   DevFS? devFS = _FakeDevFS();
 
   @override
-  ResidentCompiler? get generator => null;
+  final ResidentCompiler? generator;
+
+  @override
+  final FlutterVmService? vmService;
 
   @override
   Future<int> runHot({required HotRunner hotRunner, String? route}) async {
@@ -202,6 +436,13 @@ class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
+  _FakeFlutterVmService({this.flavor});
+
+  final String? flavor;
+
+  @override
+  Future<String?> getAppFlavor() async => flavor;
+
   @override
   final vm_service.VmService service = _FakeVmService();
 }

@@ -20,6 +20,7 @@ import 'package:flutter/scheduler.dart';
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
 import 'debug.dart';
+import 'flavor.dart';
 import 'hardware_keyboard.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
@@ -259,6 +260,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     }());
 
     if (!kReleaseMode) {
+      registerServiceExtension(
+        name: ServicesServiceExtensions.appFlavor.name,
+        callback: (Map<String, String> parameters) async => <String, Object?>{'flavor': appFlavor},
+      );
       registerBoolServiceExtension(
         name: ServicesServiceExtensions.profilePlatformChannels.name,
         getter: () async => debugProfilePlatformChannels,

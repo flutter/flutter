@@ -111,6 +111,12 @@ final listViews = FakeVmServiceRequest(
   },
 );
 
+const appFlavor = FakeVmServiceRequest(
+  method: kAppFlavorMethod,
+  args: <String, Object?>{'isolateId': '1'},
+  jsonResponse: <String, Object?>{kAppFlavorResponseKey: null},
+);
+
 const setAssetBundlePath = FakeVmServiceRequest(
   method: '_flutter.setAssetBundlePath',
   args: <String, Object>{'viewId': 'a', 'assetDirectory': 'build/flutter_assets', 'isolateId': '1'},
@@ -207,6 +213,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Duration logFlushDelay = Duration.zero;
+
+  @override
+  BuildInfo buildInfo = BuildInfo.debug;
 
   @override
   ResidentCompiler? generator;

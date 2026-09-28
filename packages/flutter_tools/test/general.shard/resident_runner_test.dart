@@ -81,7 +81,9 @@ void main() {
   testUsingContext(
     'ResidentRunner can attach to device successfully',
     () => testbed.run(() async {
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listViews, listViews, appFlavor, listViews],
+      );
       final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       final Future<int?> result = residentRunner.attach(
@@ -219,7 +221,7 @@ void main() {
     'ResidentRunner can handle an RPC exception from hot reload',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[listViews, listViews, listViews],
+        requests: <VmServiceExpectation>[listViews, listViews, appFlavor, listViews, listViews],
       );
       final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
@@ -254,7 +256,9 @@ void main() {
   testUsingContext(
     'ResidentRunner fails its operation if the device initialization is not complete',
     () => testbed.run(() async {
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listViews, listViews, appFlavor, listViews],
+      );
       final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
@@ -278,7 +282,7 @@ void main() {
     'ResidentRunner can handle an reload-barred exception from hot reload',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[listViews, listViews, listViews],
+        requests: <VmServiceExpectation>[listViews, listViews, appFlavor, listViews, listViews],
       );
       final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
@@ -323,7 +327,7 @@ void main() {
     'ResidentRunner reports hot reload event with null safety analytics',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[listViews, listViews, listViews],
+        requests: <VmServiceExpectation>[listViews, listViews, appFlavor, listViews, listViews],
       );
       residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
@@ -379,6 +383,8 @@ void main() {
         requests: <VmServiceExpectation>[
           listViews,
           listViews,
+          appFlavor,
+          listViews,
           listViews,
           FakeVmServiceRequest(
             method: 'getIsolatePauseEvent',
@@ -422,6 +428,8 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           listViews,
+          listViews,
+          appFlavor,
           listViews,
           listViews,
           getVm([fakeUnpausedIsolate]),
@@ -475,6 +483,8 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           listViews,
+          listViews,
+          appFlavor,
           listViews,
           listViews,
           getVm([fakeUnpausedIsolate]),
@@ -536,6 +546,8 @@ void main() {
         requests: <VmServiceExpectation>[
           listViews,
           listViews,
+          appFlavor,
+          listViews,
           listViews,
           getVm([fakeUnpausedIsolate]),
           const FakeVmServiceRequest(
@@ -590,6 +602,8 @@ void main() {
         fakeVmServiceHost = FakeVmServiceHost(
           requests: <VmServiceExpectation>[
             listViews,
+            listViews,
+            appFlavor,
             listViews,
             listViews,
             FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
@@ -670,6 +684,8 @@ void main() {
         requests: <VmServiceExpectation>[
           listViews,
           listViews,
+          appFlavor,
+          listViews,
           listViews,
           FakeVmServiceRequest(
             method: 'getIsolate',
@@ -712,6 +728,7 @@ void main() {
           connectionInfoCompleter: futureConnectionInfo,
         ),
       );
+      await futureAppStart.future;
 
       final OperationResult result = await residentRunner.restart(fullRestart: true);
       expect(result.fatal, false);
@@ -735,6 +752,8 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           listViews,
+          listViews,
+          appFlavor,
           listViews,
           listViews,
           FakeVmServiceRequest(
@@ -789,6 +808,7 @@ void main() {
           connectionInfoCompleter: futureConnectionInfo,
         ),
       );
+      await futureAppStart.future;
 
       final OperationResult result = await residentRunner.restart(fullRestart: true);
 
@@ -803,6 +823,8 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           listViews,
+          listViews,
+          appFlavor,
           listViews,
           listViews,
           FakeVmServiceRequest(
@@ -910,6 +932,7 @@ void main() {
           connectionInfoCompleter: futureConnectionInfo,
         ),
       );
+      await futureAppStart.future;
 
       await residentRunner.restart(fullRestart: true);
       await residentRunner.restart(fullRestart: true);
@@ -922,7 +945,9 @@ void main() {
   testUsingContext(
     'ResidentRunner Can handle an RPC exception from hot restart',
     () => testbed.run(() async {
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listViews, listViews, appFlavor, listViews],
+      );
       final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       unawaited(
