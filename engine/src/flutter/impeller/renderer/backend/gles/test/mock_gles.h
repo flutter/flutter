@@ -169,6 +169,22 @@ class IMockGLESImpl {
                          GLboolean green,
                          GLboolean blue,
                          GLboolean alpha) {}
+  virtual void BlendFuncSeparate(GLenum sfactorRGB,
+                                 GLenum dfactorRGB,
+                                 GLenum sfactorAlpha,
+                                 GLenum dfactorAlpha) {}
+  virtual void BlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha) {}
+  virtual void DepthFunc(GLenum func) {}
+  virtual void DepthMask(GLboolean flag) {}
+  virtual void StencilFuncSeparate(GLenum face,
+                                   GLenum func,
+                                   GLint ref,
+                                   GLuint mask) {}
+  virtual void StencilOpSeparate(GLenum face,
+                                 GLenum sfail,
+                                 GLenum dpfail,
+                                 GLenum dppass) {}
+  virtual void StencilMaskSeparate(GLenum face, GLuint mask) {}
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -409,6 +425,31 @@ class MockGLESImpl : public IMockGLESImpl {
   MOCK_METHOD(void,
               ColorMask,
               (GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha),
+              (override));
+  MOCK_METHOD(void,
+              BlendFuncSeparate,
+              (GLenum sfactorRGB,
+               GLenum dfactorRGB,
+               GLenum sfactorAlpha,
+               GLenum dfactorAlpha),
+              (override));
+  MOCK_METHOD(void,
+              BlendEquationSeparate,
+              (GLenum modeRGB, GLenum modeAlpha),
+              (override));
+  MOCK_METHOD(void, DepthFunc, (GLenum func), (override));
+  MOCK_METHOD(void, DepthMask, (GLboolean flag), (override));
+  MOCK_METHOD(void,
+              StencilFuncSeparate,
+              (GLenum face, GLenum func, GLint ref, GLuint mask),
+              (override));
+  MOCK_METHOD(void,
+              StencilOpSeparate,
+              (GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass),
+              (override));
+  MOCK_METHOD(void,
+              StencilMaskSeparate,
+              (GLenum face, GLuint mask),
               (override));
 };
 

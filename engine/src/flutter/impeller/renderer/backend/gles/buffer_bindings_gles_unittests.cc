@@ -535,6 +535,29 @@ TEST(BufferBindingsGLESTest, SkipsRedundantSamplerConfigurationOnSameTexture) {
   EXPECT_TRUE(bindings.BindUniformData(
       fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
       Range{0, fixture.bound_textures.size()}, Range{0, 0}));
+
+  // Wrapped external textures must bypass the sampler parameter cache and
+  // re-emit TexParameteri on every bind (5 calls per bind = 10 calls for 2
+  // consecutive binds with the same sampler descriptor).
+  TextureDescriptor wrapped_desc;
+  wrapped_desc.storage_mode = StorageMode::kDevicePrivate;
+  wrapped_desc.type = TextureType::kTexture2D;
+  wrapped_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  wrapped_desc.size = {1, 1};
+  wrapped_desc.mip_count = 1u;
+  wrapped_desc.usage = TextureUsage::kShaderRead;
+  auto wrapped_texture = TextureGLES::WrapTexture(
+      fixture.reactor, wrapped_desc,
+      fixture.reactor->CreateHandle(HandleType::kTexture, 99u));
+  fixture.bound_textures[0].texture =
+      TextureResource(fixture.metadata[0].get(), std::move(wrapped_texture));
+  EXPECT_CALL(*raw_impl, TexParameteri(GL_TEXTURE_2D, _, _)).Times(10);
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
 }
 
 }  // namespace testing

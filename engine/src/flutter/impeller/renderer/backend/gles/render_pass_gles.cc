@@ -437,7 +437,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
   bool depth_test_enabled = false;
   std::optional<CompareFunction> current_depth_compare;
   bool current_depth_write_enabled = true;
-  const PipelineGLES* current_pipeline = nullptr;
+  std::optional<HandleGLES> current_program;
   CullMode current_cull_mode = CullMode::kNone;
   WindingOrder current_winding_order = WindingOrder::kClockwise;
   // Inverted to keep front-facing consistent under the vertex y-flip.
@@ -586,7 +586,9 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Bind the pipeline program.
     ///
-    if (current_pipeline != &pipeline) {
+    const HandleGLES& program_handle = pipeline.GetProgramHandle();
+    if (!current_program.has_value() ||
+        !HandleGLES::Equal{}(*current_program, program_handle)) {
       if (!pipeline.BindProgram()) {
         return false;
       }
@@ -598,7 +600,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
         gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);
       }
 
-      current_pipeline = &pipeline;
+      current_program = program_handle;
     }
 
     //--------------------------------------------------------------------------
