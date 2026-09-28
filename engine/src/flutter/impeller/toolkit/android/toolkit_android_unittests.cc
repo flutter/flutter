@@ -91,6 +91,33 @@ TEST(ToolkitAndroidTest, CanApplySurfaceTransaction) {
   event.Wait();
 }
 
+TEST(ToolkitAndroidTest,
+     BorrowedSurfaceTransactionInvokesSubmitCallbackAndFiresOnComplete) {
+  if (!SurfaceTransaction::IsAvailableOnPlatform()) {
+    GTEST_SKIP() << "Surface controls are not supported on this platform.";
+  }
+  ASurfaceTransaction* raw_tx = GetProcTable().ASurfaceTransaction_create();
+  ASSERT_NE(raw_tx, nullptr);
+
+  bool submitted = false;
+  SurfaceTransaction borrowed_tx(raw_tx, [&]() {
+    // Native wrapper must release its reference before handing the transaction
+    // back to Java for application/closing.
+    EXPECT_FALSE(borrowed_tx.IsValid());
+    submitted = true;
+    GetProcTable().ASurfaceTransaction_apply(raw_tx);
+    GetProcTable().ASurfaceTransaction_delete(raw_tx);
+  });
+  ASSERT_TRUE(borrowed_tx.IsValid());
+  EXPECT_FALSE(submitted);
+
+  fml::AutoResetWaitableEvent on_complete;
+  ASSERT_TRUE(
+      borrowed_tx.Apply([&on_complete](auto) { on_complete.Signal(); }));
+  EXPECT_TRUE(submitted);
+  on_complete.Wait();
+}
+
 TEST(ToolkitAndroidTest, SurfacControlsAreAvailable) {
   if (!SurfaceControl::IsAvailableOnPlatform()) {
     GTEST_SKIP() << "Surface controls are not supported on this platform.";

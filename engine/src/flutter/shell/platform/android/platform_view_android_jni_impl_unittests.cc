@@ -13,6 +13,7 @@
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
+#include "impeller/toolkit/android/proc_table.h"
 
 namespace flutter {
 namespace testing {
@@ -104,6 +105,78 @@ TEST_F(PlatformViewAndroidJNIImplTest, ImageGetHardwareBufferException) {
   fml::jni::ScopedJavaLocalRef<jobject> image(&mock_env,
                                               reinterpret_cast<jobject>(123));
   android_jni.ImageGetHardwareBuffer(image);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       CreateTransactionWithSubmitCallbackRetainsGlobalRefUntilSubmitted) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+
+  const jobject kFlutterJniObj = reinterpret_cast<jobject>(0x1001);
+  const jobject kJavaTxObj = reinterpret_cast<jobject>(0x2002);
+  ASurfaceTransaction* const kNativeTx =
+      reinterpret_cast<ASurfaceTransaction*>(0x3003);
+
+  // Stub the NDK call so the fake Java object is never dereferenced. This is
+  // the same cast GetMutableProcTable() performs; that accessor is only
+  // declared for TESTING builds, which this target is not.
+  auto& from_java_proc = const_cast<impeller::android::ProcTable&>(
+                             impeller::android::GetProcTable())
+                             .ASurfaceTransaction_fromJava;
+  auto* real_from_java = from_java_proc.proc;
+  from_java_proc.proc = [](JNIEnv*, jobject) -> ASurfaceTransaction* {
+    return reinterpret_cast<ASurfaceTransaction*>(0x3003);
+  };
+  struct RestoreProc {
+    decltype(from_java_proc.proc)* slot;
+    decltype(from_java_proc.proc) prev;
+    ~RestoreProc() { *slot = prev; }
+  } restore{&from_java_proc.proc, real_from_java};
+
+  EXPECT_CALL(mock_env, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteLocalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, NewWeakGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteWeakGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+  EXPECT_CALL(mock_env, CallObjectMethodV(kFlutterJniObj, _, _))
+      .WillOnce(Return(kJavaTxObj));
+
+  bool global_ref_alive = false;
+  EXPECT_CALL(mock_env, NewGlobalRef(kJavaTxObj))
+      .WillOnce([&](jobject obj) -> jobject {
+        global_ref_alive = true;
+        return obj;
+      });
+  EXPECT_CALL(mock_env, DeleteGlobalRef(kJavaTxObj)).WillOnce([&](jobject) {
+    global_ref_alive = false;
+  });
+
+  bool submit_called = false;
+  EXPECT_CALL(mock_env, CallVoidMethodV(kFlutterJniObj, _, _))
+      .WillOnce([&](jobject, jmethodID, va_list args) {
+        // submitTransaction must receive the same transaction, while the
+        // global ref is still keeping it alive.
+        EXPECT_EQ(va_arg(args, jobject), kJavaTxObj);
+        EXPECT_TRUE(global_ref_alive);
+        submit_called = true;
+      });
+
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
+
+  std::function<void()> submit_cb;
+  ASurfaceTransaction* tx =
+      android_jni.createTransactionWithSubmitCallback(&submit_cb);
+  EXPECT_EQ(tx, kNativeTx);
+  ASSERT_NE(submit_cb, nullptr);
+  EXPECT_TRUE(global_ref_alive);
+  EXPECT_FALSE(submit_called);
+
+  submit_cb();
+  EXPECT_TRUE(submit_called);
+  EXPECT_FALSE(global_ref_alive);
 }
 
 TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
