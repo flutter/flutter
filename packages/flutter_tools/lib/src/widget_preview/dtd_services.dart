@@ -263,9 +263,8 @@ class WidgetPreviewDtdServices {
         lspInitializedCompleter.complete();
       }
     });
-    await _dtd!.safeStreamListen(kLspStream);
-
     try {
+      await _dtd!.safeStreamListen(kLspStream);
       final RegisteredServicesResponse registeredServices = await _dtd!.getRegisteredServices();
       if (_areRequiredLspServicesRegistered(registeredServices)) {
         _lspServiceAvailable = true;

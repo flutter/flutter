@@ -40,10 +40,16 @@ class FakeDartToolingDaemon extends Fake implements DartToolingDaemon {
     clientServices: [],
     dtdServices: <String>[],
   );
+  RpcException? streamListenError;
+
+  bool hasListener(String streamId) => _eventControllers[streamId]?.hasListener ?? false;
 
   @override
   Future<void> streamListen(String streamId) async {
     streamListenCallCount++;
+    if (streamListenError case final RpcException error) {
+      throw error;
+    }
     if (subscribedStreams.contains(streamId)) {
       throw RpcException(RpcErrorCodes.kStreamAlreadySubscribed, 'Stream already subscribed');
     }
@@ -165,7 +171,8 @@ void main() {
     },
   );
 
-  testUsingContext('mixed concurrent calls to getFlutterWidgetPreviews and getFlutterWidgetPreviewsForFile do not throw', () async {
+  testUsingContext('mixed concurrent calls to getFlutterWidgetPreviews and '
+      'getFlutterWidgetPreviewsForFile do not throw', () async {
     final Future<FlutterWidgetPreviews> future1 = dtdServices.getFlutterWidgetPreviews();
     final Future<FlutterWidgetPreviews> future2 = dtdServices.getFlutterWidgetPreviewsForFile(
       filePath: fs.path.join('lib', 'main.dart'),
@@ -285,4 +292,20 @@ void main() {
       expect(fakeDtd.getRegisteredServicesCallCount, 1);
     },
   );
+
+  testUsingContext('cancels the Lsp event subscription when streamListen fails', () async {
+    fakeDtd.streamListenError = RpcErrorCodes.buildRpcException(RpcErrorCodes.kConnectionFailed);
+
+    await expectLater(
+      dtdServices.getFlutterWidgetPreviews(),
+      throwsA(
+        isA<RpcException>().having(
+          (RpcException e) => e.code,
+          'code',
+          RpcErrorCodes.kConnectionFailed,
+        ),
+      ),
+    );
+    expect(fakeDtd.hasListener(WidgetPreviewDtdServices.kLspStream), isFalse);
+  });
 }
