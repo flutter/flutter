@@ -91,7 +91,7 @@ mixin RendererBinding
   }
 
   /// Dispatches a texture-frame-available notification to every registered
-  /// [TextureFrameAvailableCallback].
+  /// [ui.TextureFrameAvailableCallback].
   ///
   /// This is invoked automatically by the binding when the engine reports a
   /// new texture frame. It is also exposed so tests can simulate that
