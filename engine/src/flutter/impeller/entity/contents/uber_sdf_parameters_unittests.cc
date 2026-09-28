@@ -137,14 +137,15 @@ TEST(UberSDFParametersTest, MakeRoundedSuperellipse) {
   auto round_superellipse = RoundSuperellipse::MakeRectRadii(rect, radii);
   auto round_superellipse_params =
       RoundSuperellipseParam::MakeBoundsRadii(rect, radii);
-  auto maybe_params = UberSDFParameters::MakeRoundedSuperellipse(
-      /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
-      /*stroke=*/std::nullopt);
+  std::optional<UberSDFParameters> maybe_params =
+      UberSDFParameters::MakeRoundedSuperellipse(
+          /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
+          /*stroke=*/std::nullopt);
 
   ASSERT_TRUE(maybe_params.has_value());
 
   if (maybe_params.has_value()) {
-    auto params = maybe_params.value();
+    const UberSDFParameters& params = maybe_params.value();
 
     EXPECT_EQ(params.type,
               UberSDFParameters::Type::kRoundedSuperellipseSymmetric);
@@ -169,10 +170,6 @@ TEST(UberSDFParametersTest, MakeRoundedSuperellipse) {
         params.angle_span.y,
         round_superellipse_params.top_right.right.circle_max_angle.radians);
 
-    EXPECT_EQ(params.octant_offset_c,
-              round_superellipse_params.top_right.top.se_a -
-                  round_superellipse_params.top_right.right.se_a);
-
     EXPECT_EQ(params.circle_center_top,
               round_superellipse_params.top_right.top.circle_center);
     EXPECT_EQ(params.circle_center_right,
@@ -189,14 +186,15 @@ TEST(UberSDFParametersTest, MakeRectangularRoundedSuperellipse) {
       .bottom_right = Size(10.0f, 10.0f),
   };
   auto round_superellipse = RoundSuperellipse::MakeRectRadii(rect, radii);
-  auto maybe_params = UberSDFParameters::MakeRoundedSuperellipse(
-      /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
-      /*stroke=*/std::nullopt);
+  std::optional<UberSDFParameters> maybe_params =
+      UberSDFParameters::MakeRoundedSuperellipse(
+          /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
+          /*stroke=*/std::nullopt);
 
   ASSERT_TRUE(maybe_params.has_value());
 
   if (maybe_params.has_value()) {
-    auto params = maybe_params.value();
+    const UberSDFParameters& params = maybe_params.value();
 
     EXPECT_EQ(params.type,
               UberSDFParameters::Type::kRoundedSuperellipseSymmetric);
@@ -204,8 +202,6 @@ TEST(UberSDFParametersTest, MakeRectangularRoundedSuperellipse) {
     EXPECT_EQ(params.center, Point(60, 120));
     EXPECT_EQ(params.size, Point(50, 100));
     EXPECT_FALSE(params.stroke.has_value());
-
-    EXPECT_EQ(params.octant_offset_c, -50.0f);
   }
 }
 
@@ -218,9 +214,10 @@ TEST(UberSDFParametersTest, MakeRoundedSuperellipseRejectsNonSymmetric) {
       .bottom_right = Size(10.0f, 10.0f),
   };
   auto round_superellipse = RoundSuperellipse::MakeRectRadii(rect, radii);
-  auto params = UberSDFParameters::MakeRoundedSuperellipse(
-      /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
-      /*stroke=*/std::nullopt);
+  std::optional<UberSDFParameters> params =
+      UberSDFParameters::MakeRoundedSuperellipse(
+          /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
+          /*stroke=*/std::nullopt);
 
   EXPECT_FALSE(params.has_value());
 }
@@ -234,9 +231,10 @@ TEST(UberSDFParametersTest, MakeRoundedSuperellipseRejectsNonCircular) {
       .bottom_right = Size(9.0f, 10.0f),
   };
   auto round_superellipse = RoundSuperellipse::MakeRectRadii(rect, radii);
-  auto params = UberSDFParameters::MakeRoundedSuperellipse(
-      /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
-      /*stroke=*/std::nullopt);
+  std::optional<UberSDFParameters> params =
+      UberSDFParameters::MakeRoundedSuperellipse(
+          /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
+          /*stroke=*/std::nullopt);
 
   EXPECT_FALSE(params.has_value());
 }

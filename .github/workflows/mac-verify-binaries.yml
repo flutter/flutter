@@ -46,7 +46,8 @@ jobs:
         uses: ./.github/actions/wait-for-engine-build
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          check-name: 'Mac mac_host_engine,Mac mac_ios_engine,Linux linux_host_engine'
+          # Even though we're verifying "mac" binaries, we need a few more builders to complete for the tool to now fail while downloading.
+          check-name: 'Mac mac_host_engine,Mac mac_ios_engine,Linux linux_host_engine,Linux mac_android_aot_engine,Linux linux_android_debug_engine'
 
       - uses: ./.github/actions/composite-flutter-setup
 

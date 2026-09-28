@@ -20,21 +20,19 @@ enum MyFlutterErrorCode {
 }
 
 @main
-@objc class AppDelegate: FlutterAppDelegate, FlutterStreamHandler, FlutterPluginRegistrant {
+@objc class AppDelegate: FlutterAppDelegate, FlutterStreamHandler, FlutterImplicitEngineDelegate {
   private var eventSink: FlutterEventSink?
 
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-    pluginRegistrant = self
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  func register(with registry: FlutterPluginRegistry) {
-    GeneratedPluginRegistrant.register(with: registry)
-    let registrar = registry.registrar(forPlugin: "battery")
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     let batteryChannel = FlutterMethodChannel(name: ChannelName.battery,
-                                              binaryMessenger: registrar!.messenger())
+                                              binaryMessenger: engineBridge.applicationRegistrar.messenger())
     batteryChannel.setMethodCallHandler({
       [weak self] (call: FlutterMethodCall, result: FlutterResult) -> Void in
       guard call.method == "getBatteryLevel" else {
@@ -45,7 +43,7 @@ enum MyFlutterErrorCode {
     })
 
     let chargingChannel = FlutterEventChannel(name: ChannelName.charging,
-                                              binaryMessenger: registrar!.messenger())
+                                              binaryMessenger: engineBridge.applicationRegistrar.messenger())
     chargingChannel.setStreamHandler(self)
   }
 
@@ -53,9 +51,13 @@ enum MyFlutterErrorCode {
     let device = UIDevice.current
     device.isBatteryMonitoringEnabled = true
     guard device.batteryState != .unknown  else {
+#if targetEnvironment(simulator)
+      result(100)
+#else
       result(FlutterError(code: MyFlutterErrorCode.unavailable,
                           message: "Battery info unavailable",
                           details: nil))
+#endif
       return
     }
     result(Int(device.batteryLevel * 100))
@@ -91,9 +93,13 @@ enum MyFlutterErrorCode {
     case .unplugged:
       eventSink(BatteryState.discharging)
     default:
+#if targetEnvironment(simulator)
+      eventSink(BatteryState.charging)
+#else
       eventSink(FlutterError(code: MyFlutterErrorCode.unavailable,
                              message: "Charging status unavailable",
                              details: nil))
+#endif
     }
   }
 

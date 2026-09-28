@@ -56,6 +56,7 @@ class MockGtk {
                gint* dest_x,
                gint* dest_y));
   MOCK_METHOD(GtkWidget*, gtk_widget_get_toplevel, (GtkWidget * widget));
+  MOCK_METHOD(GdkWindow*, gtk_widget_get_window, (GtkWidget * widget));
   MOCK_METHOD(void,
               gtk_im_context_set_client_window,
               (GtkIMContext * context, GdkWindow* window));

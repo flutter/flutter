@@ -13,18 +13,16 @@ import 'proxy_sliver.dart';
 class RenderDecoratedSliver extends RenderProxySliver {
   /// Creates a decorated sliver.
   ///
-  /// The [decoration], [position], and [configuration] arguments must not be
+  /// The [_decoration], [_position], and [_configuration] arguments must not be
   /// null. By default the decoration paints behind the child.
   ///
   /// The [ImageConfiguration] will be passed to the decoration (with the size
   /// filled in) to let it resolve images.
   RenderDecoratedSliver({
-    required Decoration decoration,
-    DecorationPosition position = DecorationPosition.background,
-    ImageConfiguration configuration = ImageConfiguration.empty,
-  }) : _decoration = decoration,
-       _position = position,
-       _configuration = configuration;
+    required this._decoration,
+    this._position = DecorationPosition.background,
+    this._configuration = ImageConfiguration.empty,
+  });
 
   /// What decoration to paint.
   ///

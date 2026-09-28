@@ -499,6 +499,52 @@ class ScrollPhysics {
   /// Whether a viewport is allowed to change the scroll position as the result of user input.
   bool get allowUserScrolling => true;
 
+  /// Whether a viewport may scroll to reveal more content when a selection
+  /// gesture extends past the visible area, i.e. the viewport's edge.
+  ///
+  /// Paged scrollables that want to prevent selection gestures from revealing an
+  /// adjacent page should override this to false in their [ScrollPhysics],
+  /// similar to [PageScrollPhysics] used by [PageView].
+  ///
+  /// Defaults to true, or to the value of the [parent] physics when there is one.
+  bool get allowSelectionEdgeScrolling => parent?.allowSelectionEdgeScrolling ?? true;
+
+  /// Called whenever a [Scrollable] is rebuilt with a new [ScrollPhysics]
+  /// of the same [runtimeType].
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
+  ///
+  /// If this method returns true, the [Scrollable] will update its
+  /// [ScrollPosition] with the new [ScrollPhysics]. If this method returns
+  /// false, the physics update on the existing [ScrollPosition] is skipped,
+  /// though the position may still be recreated if other properties on
+  /// [Scrollable] force a reset.
+  ///
+  /// Subclasses that contain configuration parameters should override this
+  /// method to return true when those parameters change, and should call
+  /// `super.shouldUpdate(old)` to also update when the [parent] changes.
+  ///
+  /// The base class implementation returns false if `this` and [old] are
+  /// [identical], and returns true if the [runtimeType] or [parent] changes.
+  @mustCallSuper
+  bool shouldUpdate(covariant ScrollPhysics old) {
+    if (identical(this, old)) {
+      return false;
+    }
+    if (old.runtimeType != runtimeType) {
+      return true;
+    }
+    if (parent?.runtimeType != old.parent?.runtimeType) {
+      return true;
+    }
+    if (parent != null) {
+      return parent!.shouldUpdate(old.parent!);
+    }
+    return false;
+  }
+
   @override
   String toString() {
     if (parent == null) {
@@ -685,9 +731,58 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// Used to determine parameters for friction simulations.
   final ScrollDecelerationRate decelerationRate;
 
+  // Approximation of iOS native rubber band decay rate.
+  static const double _rubberBandHalfLifeSeconds = 0.07;
+
+  // Decay constant (lambda) for rubber band spring simulation.
+  static final double _rubberBandLambda = math.log(2) / _rubberBandHalfLifeSeconds;
+
+  /// Spring used to animate overscroll bounce from a stationary release in iOS
+  /// native style.
+  ///
+  /// Used in [createBallisticSimulation] depending on the conditions.
+  ///
+  /// Research indicates that iOS employs a distinct decay function when a
+  /// scrollable area is released in an overscroll and stationary state (zero
+  /// initial velocity), conforming to an exponential decay model.
+  //
+  // ## Mathematical derivation
+  //
+  // A standard spring-damper system follows the second-order differential equation:
+  // m*x'' + c*x' + k*x = 0
+  //
+  // To force this second-order system to behave like a first-order exponential
+  // decay x(t) = C * e^(-lambda * t), we configure it as an overdamped spring
+  // with two explicitly defined roots (r1 and r2) for its characteristic
+  // equation:
+  //
+  // * r1 = -lambda (the primary root driving the visible exponential decay)
+  // * r2 = -100000 * lambda (an extremely large negative root)
+  //
+  // Because r2 is massive and negative, its corresponding term in the exact
+  // mathematical solution (C2 * e^(r2 * t)) decays to zero almost
+  // instantaneously. The system movement becomes dominated by r1.
+  //
+  // Using Vieta's formulas for the characteristic equation r^2 + (c/m)r + (k/m) = 0:
+  // * r1 + r2 = -c/m => damping (c) = -(r1 + r2) * m
+  // * r1 * r2 = k/m  => stiffness (k) = (r1 * r2) * m
+  static final SpringDescription rubberBandSpring = SpringDescription(
+    mass: 1.0,
+    stiffness: 1e5 * _rubberBandLambda * _rubberBandLambda,
+    damping: (1e5 + 1) * _rubberBandLambda,
+  );
+
   @override
   BouncingScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return BouncingScrollPhysics(parent: buildParent(ancestor), decelerationRate: decelerationRate);
+  }
+
+  @override
+  bool shouldUpdate(covariant BouncingScrollPhysics old) {
+    if (decelerationRate != old.decelerationRate) {
+      return true;
+    }
+    return super.shouldUpdate(old);
   }
 
   /// The multiple applied to overscroll to make it appear that scrolling past
@@ -756,9 +851,12 @@ class BouncingScrollPhysics extends ScrollPhysics {
   @override
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = toleranceFor(position);
-    if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
+    final bool isStationary = velocity.abs() < tolerance.velocity;
+    final bool isRubberBand = isStationary && position.outOfRange;
+
+    if (!isStationary || position.outOfRange) {
       return BouncingScrollSimulation(
-        spring: spring,
+        spring: isRubberBand ? rubberBandSpring : spring,
         position: position.pixels,
         velocity: velocity,
         leadingExtent: position.minScrollExtent,

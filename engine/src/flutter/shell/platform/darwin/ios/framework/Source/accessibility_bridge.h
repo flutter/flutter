@@ -27,8 +27,9 @@ namespace flutter {
 class PlatformViewIOS;
 
 /**
- * An accessibility instance is bound to one `FlutterViewController` and
- * `FlutterView` instance.
+ * An accessibility instance is bound to the `FlutterEngine` through
+ * `PlatformViewIOS` and can be rebound to one `FlutterViewController` at a
+ * time.
  *
  * It helps populate the UIView's accessibilityElements property from Flutter's
  * semantics nodes.
@@ -53,8 +54,14 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
                       std::unique_ptr<IosDelegate> ios_delegate = nullptr);
   ~AccessibilityBridge();
 
+  // Rebinds the cached semantics tree from `previousView` to `viewController` without recreating
+  // the bridge. A non-nil new view controller must belong to the same engine because the platform
+  // views controller is fixed for the lifetime of the bridge.
+  void SetViewController(FlutterViewController* viewController, FlutterView* previousView);
   void UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
                        const flutter::CustomAccessibilityActionUpdates& actions);
+  // Returns true when a root semantics object is cached in the bridge.
+  bool HasSemantics() const;
   void HandleEvent(NSDictionary<NSString*, id>* annotatedEvent);
   void DispatchSemanticsAction(int32_t id, flutter::SemanticsAction action) override;
   void DispatchSemanticsAction(int32_t id,
@@ -68,6 +75,12 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
   UIView* view() const override { return view_controller_.view; }
 
+  UIView* ViewIfLoaded() const override { return view_controller_.viewIfLoaded; }
+
+  UIView* AccessibilityElementInitializationContainer() const override {
+    return ViewIfLoaded() ?: accessibility_element_init_container_;
+  }
+
   bool isVoiceOverRunning() const override { return view_controller_.isVoiceOverRunning; }
 
   fml::WeakPtr<AccessibilityBridge> GetWeakPtr();
@@ -79,6 +92,10 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   void clearState();
 
  private:
+  bool AccessibilityElementsWereInstalledByBridge(NSArray* elements) const;
+  void ClearAccessibilityElementsIfOwnedByBridge(UIView* view);
+  void UpdateAccessibilityElementsForCurrentView();
+  void NotifySemanticsObjectsViewChanged();
   SemanticsObject* GetOrCreateObject(int32_t id, flutter::SemanticsNodeUpdates& updates);
   SemanticsObject* FindNextFocusableIfNecessary();
   // Finds the first focusable SemanticsObject rooted at the parent. This includes the parent itself
@@ -90,6 +107,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
                                         NSMutableArray<NSNumber*>* doomed_uids);
 
   __weak FlutterViewController* view_controller_;
+  UIView* accessibility_element_init_container_;
   PlatformViewIOS* platform_view_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
 

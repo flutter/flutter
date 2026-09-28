@@ -330,25 +330,43 @@ final class BuildRunner extends Runner {
       return false;
     }
 
+    // Generate the build files.
     if (runGn) {
       if (!await _runGn(eventHandler)) {
         return false;
       }
+    }
+
+    // Invoke the build.
+    //
+    // Ninja regenerates the build files first, build.ninja.stamp is stale.
+    // We don't return immediately on failure, since the post-gn steps below
+    // should run either way.
+    var ninjaOk = true;
+    if (runNinja) {
+      ninjaOk = await _runNinja(eventHandler);
+    }
+
+    // Update the compilation databases.
+    //
+    // Runs after ninja because it rewrites compile_commands.json in place, and
+    // ninja's regeneration would otherwise overwrite that.
+    if (runGn || runNinja) {
       await _postGn();
     }
 
-    if (runNinja) {
-      if (!await _runNinja(eventHandler)) {
-        return false;
-      }
+    if (!ninjaOk) {
+      return false;
     }
 
+    // Run generator scripts such as `felt`.
     if (runGenerators) {
       if (!await _runGenerators(eventHandler)) {
         return false;
       }
     }
 
+    // Run the build's tests.
     if (runTests) {
       if (!await _runTests(eventHandler)) {
         return false;
@@ -383,14 +401,19 @@ final class BuildRunner extends Runner {
     return result.ok;
   }
 
-  /// Generates and returns the ninja compilation database for the build.
+  /// Generates and returns the ninja compilation database for Swift targets.
   ///
-  /// GN's default compile_commands.json generator only exports C and C++
-  /// targets and omits custom wrapper rules like `swiftc.py`. This invokes
-  /// `ninja -t compdb` to retrieve all compilation targets in the build graph
-  /// and falls back to reading `compile_commands.json` from disk if the command
-  /// fails or returns empty.
-  Future<String?> _getCompilationDatabase() async {
+  /// GN's `--export-compile-commands` doesn't emit the `swiftc` invocations
+  /// needed for SourceKit LSP.
+  ///
+  /// We intentionally limit to the `swift` rule here, since otherwise, `ninja
+  /// -t compdb` includes every edge in the build graph, including link, copy,
+  /// and phony edges, which can result in duplicate mappings for some files and
+  /// LSPs selecting the wrong one.
+  ///
+  /// Returns the empty string if the command fails or the build has no Swift
+  /// targets.
+  Future<String> _getSwiftCompilationDatabase() async {
     final String ninjaPath = p.join(
       engineSrcDir.parent.parent.path,
       'third_party',
@@ -399,41 +422,53 @@ final class BuildRunner extends Runner {
     );
     final String outDir = p.join(engineSrcDir.path, 'out', build.ninja.config);
     final ProcessRunnerResult result = await processRunner.runProcess(
-      <String>[ninjaPath, '-t', 'compdb'],
+      <String>[ninjaPath, '-t', 'compdb', 'swift'],
       workingDirectory: io.Directory(outDir),
       failOk: true,
     );
-    if (result.exitCode == 0 && result.stdout.isNotEmpty) {
-      return result.stdout;
-    }
-    final commandsFile = io.File(p.join(outDir, 'compile_commands.json'));
-    if (commandsFile.existsSync()) {
-      return commandsFile.readAsString();
-    }
-    return null;
+    return result.exitCode == 0 ? result.stdout : '';
   }
 
   /// Performs post-GN build steps.
   ///
-  /// Retrieves the full compilation database from Ninja and processes it to
-  /// strip compiler wrapper prefixes and expand Swift compilation rules for IDE
-  /// language server compatibility.
+  /// Performs two main functions:
+  /// * Rewrites compile-commands.json in-place to strip RBE wrappers.
+  /// * Generates a separate lsp/compile-commands.json for LSPs, which includes
+  ///   the Swift compile.
   Future<void> _postGn() async {
     if (dryRun) {
       return;
     }
 
-    final String? rawContents = await _getCompilationDatabase();
-    if (rawContents == null) {
+    final String outDir = p.join(engineSrcDir.path, 'out', build.ninja.config);
+    final commandsFile = io.File(p.join(outDir, 'compile_commands.json'));
+    if (!commandsFile.existsSync()) {
       return;
     }
 
-    final String updated = updateCompilationDatabase(rawContents);
-    final commandsFile = io.File(
-      p.join(engineSrcDir.path, 'out', build.ninja.config, 'compile_commands.json'),
+    // Strip wrappers in-place in GN's database.
+    //
+    // `clang_tidy` and `clangd_check` read that file directly and and don't
+    // understand rewrapper.
+    final String contents = await commandsFile.readAsString();
+    final String stripped = stripCompilerWrappers(contents);
+    if (contents != stripped) {
+      await commandsFile.writeAsString(stripped);
+    }
+
+    // Emit a compilation database for LSPs.
+    //
+    // GN rewrites compile_commands.json whenever the build files are
+    // regenerated, by et or by anything else that runs ninja. Keep the LSP
+    // database separate so it doesn't constantly get stomped.
+    final String updated = updateCompilationDatabase(
+      stripped,
+      await _getSwiftCompilationDatabase(),
     );
-    if (rawContents != updated || !commandsFile.existsSync()) {
-      await commandsFile.writeAsString(updated);
+    final lspFile = io.File(p.join(outDir, 'lsp', 'compile_commands.json'));
+    await lspFile.parent.create(recursive: true);
+    if (!lspFile.existsSync() || await lspFile.readAsString() != updated) {
+      await lspFile.writeAsString(updated);
     }
   }
 
