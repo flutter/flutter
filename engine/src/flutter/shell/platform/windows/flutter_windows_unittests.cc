@@ -562,6 +562,8 @@ TEST_F(WindowsTest, PostPlatformThreadTaskNotCancelledWhenRun) {
     PumpMessage();
   }
 
+  // Ensures that the cancel callback is not called,
+  // in case the engine was shut down after running the task.
   engine.reset();
 
   EXPECT_TRUE(captures.callback_called);
