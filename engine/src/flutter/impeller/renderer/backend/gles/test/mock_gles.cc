@@ -472,6 +472,74 @@ void mockVertexAttribDivisor(GLuint index, GLuint divisor) {
 static_assert(CheckSameSignature<decltype(mockVertexAttribDivisor),  //
                                  decltype(glVertexAttribDivisor)>::value);
 
+GLuint mockCreateShader(GLenum type) {
+  return CallMockMethod(&IMockGLESImpl::CreateShader, type);
+}
+
+static_assert(CheckSameSignature<decltype(mockCreateShader),  //
+                                 decltype(glCreateShader)>::value);
+
+GLuint mockCreateProgram() {
+  return CallMockMethod(&IMockGLESImpl::CreateProgram);
+}
+
+static_assert(CheckSameSignature<decltype(mockCreateProgram),  //
+                                 decltype(glCreateProgram)>::value);
+
+void mockGetShaderiv(GLuint shader, GLenum pname, GLint* params) {
+  CallMockMethod(&IMockGLESImpl::GetShaderiv, shader, pname, params);
+}
+
+static_assert(CheckSameSignature<decltype(mockGetShaderiv),  //
+                                 decltype(glGetShaderiv)>::value);
+
+void mockFramebufferTexture2D(GLenum target,
+                              GLenum attachment,
+                              GLenum textarget,
+                              GLuint texture,
+                              GLint level) {
+  CallMockMethod(&IMockGLESImpl::FramebufferTexture2D, target, attachment,
+                 textarget, texture, level);
+}
+
+static_assert(CheckSameSignature<decltype(mockFramebufferTexture2D),  //
+                                 decltype(glFramebufferTexture2D)>::value);
+
+void mockActiveTexture(GLenum texture) {
+  CallMockMethod(&IMockGLESImpl::ActiveTexture, texture);
+}
+
+static_assert(CheckSameSignature<decltype(mockActiveTexture),  //
+                                 decltype(glActiveTexture)>::value);
+
+void mockUniform1i(GLint location, GLint v0) {
+  CallMockMethod(&IMockGLESImpl::Uniform1i, location, v0);
+}
+
+static_assert(CheckSameSignature<decltype(mockUniform1i),  //
+                                 decltype(glUniform1i)>::value);
+
+void mockGetActiveUniform(GLuint program,
+                          GLuint index,
+                          GLsizei bufSize,
+                          GLsizei* length,
+                          GLint* size,
+                          GLenum* type,
+                          GLchar* name) {
+  CallMockMethod(&IMockGLESImpl::GetActiveUniform, program, index, bufSize,
+                 length, size, type, name);
+}
+
+static_assert(CheckSameSignature<decltype(mockGetActiveUniform),  //
+                                 decltype(glGetActiveUniform)>::value);
+
+GLint mockGetUniformLocation(GLuint program, const GLchar* name) {
+  return CallMockMethod(&IMockGLESImpl::GetUniformLocation, program, name);
+}
+
+static_assert(CheckSameSignature<decltype(mockGetUniformLocation),  //
+                                 decltype(glGetUniformLocation)>::value);
+
 // static
 IPLR_NO_THREAD_SAFETY_ANALYSIS std::shared_ptr<MockGLES> MockGLES::Init(
     std::unique_ptr<MockGLESImpl> impl,
@@ -612,6 +680,22 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockGetActiveUniformBlockName);
   } else if (strcmp(name, "glGetUniformBlockIndex") == 0) {
     return reinterpret_cast<void*>(mockGetUniformBlockIndex);
+  } else if (strcmp(name, "glCreateShader") == 0) {
+    return reinterpret_cast<void*>(mockCreateShader);
+  } else if (strcmp(name, "glCreateProgram") == 0) {
+    return reinterpret_cast<void*>(mockCreateProgram);
+  } else if (strcmp(name, "glGetShaderiv") == 0) {
+    return reinterpret_cast<void*>(mockGetShaderiv);
+  } else if (strcmp(name, "glFramebufferTexture2D") == 0) {
+    return reinterpret_cast<void*>(mockFramebufferTexture2D);
+  } else if (strcmp(name, "glActiveTexture") == 0) {
+    return reinterpret_cast<void*>(mockActiveTexture);
+  } else if (strcmp(name, "glUniform1i") == 0) {
+    return reinterpret_cast<void*>(mockUniform1i);
+  } else if (strcmp(name, "glGetActiveUniform") == 0) {
+    return reinterpret_cast<void*>(mockGetActiveUniform);
+  } else if (strcmp(name, "glGetUniformLocation") == 0) {
+    return reinterpret_cast<void*>(mockGetUniformLocation);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }
