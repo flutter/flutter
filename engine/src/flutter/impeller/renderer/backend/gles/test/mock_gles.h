@@ -160,6 +160,15 @@ class IMockGLESImpl {
   virtual GLint GetUniformLocation(GLuint program, const GLchar* name) {
     return -1;
   }
+  virtual void TexParameteri(GLenum target, GLenum pname, GLint param) {}
+  virtual void UseProgram(GLuint program) {}
+  virtual void Enable(GLenum cap) {}
+  virtual void Disable(GLenum cap) {}
+  virtual void Scissor(GLint x, GLint y, GLsizei width, GLsizei height) {}
+  virtual void ColorMask(GLboolean red,
+                         GLboolean green,
+                         GLboolean blue,
+                         GLboolean alpha) {}
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -385,6 +394,21 @@ class MockGLESImpl : public IMockGLESImpl {
   MOCK_METHOD(GLint,
               GetUniformLocation,
               (GLuint program, const GLchar* name),
+              (override));
+  MOCK_METHOD(void,
+              TexParameteri,
+              (GLenum target, GLenum pname, GLint param),
+              (override));
+  MOCK_METHOD(void, UseProgram, (GLuint program), (override));
+  MOCK_METHOD(void, Enable, (GLenum cap), (override));
+  MOCK_METHOD(void, Disable, (GLenum cap), (override));
+  MOCK_METHOD(void,
+              Scissor,
+              (GLint x, GLint y, GLsizei width, GLsizei height),
+              (override));
+  MOCK_METHOD(void,
+              ColorMask,
+              (GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha),
               (override));
 };
 

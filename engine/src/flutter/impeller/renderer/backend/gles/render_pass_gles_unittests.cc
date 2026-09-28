@@ -545,5 +545,41 @@ TEST_F(RenderPassGLESCommandTest, ZeroInstanceCountIssuesNoDraw) {
   EXPECT_TRUE(reactor->React());
 }
 
+TEST_F(RenderPassGLESCommandTest,
+       DeduplicatesPipelineAndScissorStateAcrossCommands) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  for (int i = 0; i < 3; ++i) {
+    render_pass->SetPipeline(PipelineRef(pipeline));
+    render_pass->SetScissor(IRect32::MakeXYWH(10, 10, 40, 40));
+    render_pass->SetElementCount(3);
+    render_pass->SetIndexBuffer({}, IndexType::kNone);
+    EXPECT_TRUE(render_pass->Draw().ok());
+  }
+
+  // Three draws with identical pipeline and scissor should bind the program
+  // once, enable/set the scissor once, and not re-emit ResetGLState defaults
+  // (ColorMask, Disable(GL_BLEND/GL_DEPTH_TEST/GL_STENCIL_TEST)) per command.
+  EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, 0, 3)).Times(3);
+  EXPECT_CALL(mock_gl_impl_ref, UseProgram(_)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Enable(GL_SCISSOR_TEST)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Scissor(10, 10, 40, 40)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_SCISSOR_TEST)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_DEPTH_TEST)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_STENCIL_TEST)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_CULL_FACE)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_BLEND)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_DITHER)).Times(1);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
 }  // namespace testing
 }  // namespace impeller
