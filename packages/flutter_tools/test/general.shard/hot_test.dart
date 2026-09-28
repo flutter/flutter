@@ -93,13 +93,13 @@ HotRunner createHotRunner(
   if (reassembleHelper != null) {
     return HotRunner(
       flutterDevices,
+      analytics: analytics ?? const NoOpAnalytics(),
       buildSystem: buildSystem,
       buildTargets: buildTargets ?? const BuildTargetsImpl(),
       debuggingOptions: debuggingOptions,
       target: target,
       toolContext: toolContext,
       xcode: xcode,
-      analytics: analytics,
       applicationBinary: applicationBinary,
       benchmarkMode: benchmarkMode,
       commandHelp: commandHelp,
@@ -119,13 +119,13 @@ HotRunner createHotRunner(
   }
   return HotRunner(
     flutterDevices,
+    analytics: analytics ?? const NoOpAnalytics(),
     buildSystem: buildSystem,
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
     debuggingOptions: debuggingOptions,
     target: target,
     toolContext: toolContext,
     xcode: xcode,
-    analytics: analytics,
     applicationBinary: applicationBinary,
     benchmarkMode: benchmarkMode,
     commandHelp: commandHelp,
@@ -145,7 +145,7 @@ HotRunner createHotRunner(
 
 void main() {
   group('validateReloadReport', () {
-    testUsingContext('invalid', () async {
+    testWithoutContext('invalid', () {
       expect(
         HotRunner.validateReloadReport(
           vm_service.ReloadReport.parse(<String, dynamic>{

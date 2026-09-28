@@ -155,7 +155,8 @@ class FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
   }) async {
-    final Logger logger = _toolContext.logger;
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        _toolContext;
     this.vmServiceUri ??= Future<Uri>.value(vmServiceUri);
     // FYI, this message is used as a sentinel in tests.
     logger.printTrace('Connecting to service protocol: $vmServiceUri');
@@ -216,7 +217,7 @@ class FlutterDevice {
             debuggingOptions: debuggingOptions,
             appName:
                 'Kind: Flutter - Device: ${device!.displayName} - '
-                'Package: ${FlutterProject.current().manifest.appName}',
+                'Package: ${projectFactory.fromDirectory(fs.currentDirectory).manifest.appName}',
           );
           break;
         } on DartDevelopmentServiceException catch (e) {
@@ -265,7 +266,7 @@ class FlutterDevice {
           reloadSources: reloadSources,
           restart: restart,
           compileExpression: compileExpression,
-          flutterProject: FlutterProject.current(),
+          flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
           printStructuredErrorLogMethod: printStructuredErrorLogMethod,
           device: device,
           logger: logger,
@@ -355,7 +356,8 @@ class FlutterDevice {
   }
 
   Future<int> runHot({required HotRunner hotRunner, String? route}) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        _toolContext;
     final prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.mode.friendlyName;
     logger.printStatus(
@@ -373,7 +375,11 @@ class FlutterDevice {
 
     if (applicationPackage == null) {
       var message = 'No application found for $targetPlatform.';
-      final String? hint = await getMissingPackageHintForPlatform(targetPlatform, fileSystem: fs);
+      final String? hint = await getMissingPackageHintForPlatform(
+        targetPlatform,
+        fileSystem: fs,
+        projectFactory: projectFactory,
+      );
       if (hint != null) {
         message += '\n$hint';
       }
@@ -411,7 +417,8 @@ class FlutterDevice {
   }
 
   Future<int> runCold({required ColdRunner coldRunner, String? route}) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        _toolContext;
     final TargetPlatform targetPlatform = await device!.targetPlatform;
     package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
       targetPlatform,
@@ -422,7 +429,11 @@ class FlutterDevice {
 
     if (applicationPackage == null) {
       var message = 'No application found for $targetPlatform.';
-      final String? hint = await getMissingPackageHintForPlatform(targetPlatform, fileSystem: fs);
+      final String? hint = await getMissingPackageHintForPlatform(
+        targetPlatform,
+        fileSystem: fs,
+        projectFactory: projectFactory,
+      );
       if (hint != null) {
         message += '\n$hint';
       }
@@ -477,7 +488,8 @@ class FlutterDevice {
     required List<Uri> invalidatedFiles,
     required PackageConfig packageConfig,
   }) async {
-    final Logger logger = _toolContext.logger;
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        _toolContext;
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device!.displayName}...',
       progressId: 'devFS.update',
@@ -499,7 +511,9 @@ class FlutterDevice {
         packageConfig: packageConfig,
         devFSWriter: devFSWriter,
         shaderCompiler: developmentShaderCompiler,
-        dartPluginRegistrant: FlutterProject.current().dartPluginRegistrant,
+        dartPluginRegistrant: projectFactory
+            .fromDirectory(fs.currentDirectory)
+            .dartPluginRegistrant,
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -938,13 +952,13 @@ abstract class ResidentHandlers {
 abstract class ResidentRunner extends ResidentHandlers {
   ResidentRunner(
     this.flutterDevices, {
+    required this.analytics,
     required this.buildSystem,
     required this.buildTargets,
     required this.debuggingOptions,
     required this.target,
     required this.toolContext,
     required this.xcode,
-    Analytics? analytics,
     CommandHelp? commandHelp,
     this.dartBuilder,
     String? dillOutputPath,
@@ -952,8 +966,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.machine = false,
     String? projectRootPath,
     this.stayResident = true,
-  }) : analytics = analytics ?? const NoOpAnalytics(),
-       _dillOutputPath = dillOutputPath,
+  }) : _dillOutputPath = dillOutputPath,
        mainPath = toolContext.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? toolContext.fs.currentDirectory.path,
@@ -1645,12 +1658,13 @@ class OperationResultExtraTiming {
 Future<String?> getMissingPackageHintForPlatform(
   TargetPlatform platform, {
   required FileSystem fileSystem,
+  required FlutterProjectFactory projectFactory,
 }) async {
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-      final FlutterProject project = FlutterProject.current();
+      final FlutterProject project = projectFactory.fromDirectory(fileSystem.currentDirectory);
       final String manifestPath = fileSystem.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:

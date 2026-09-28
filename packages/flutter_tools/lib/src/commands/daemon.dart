@@ -18,8 +18,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
-import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -116,6 +114,7 @@ class DaemonCommand extends FlutterCommand {
       }
 
       await DaemonServer(
+        analytics: analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
         featureFlags: featureFlags,
@@ -126,7 +125,6 @@ class DaemonCommand extends FlutterCommand {
         ),
         toolContext: toolContext,
         xcode: _xcode,
-        analytics: analytics,
         androidSdk: _androidSdk,
         androidWorkflow: _androidWorkflow,
         deviceManager: _deviceManager,
@@ -143,12 +141,12 @@ class DaemonCommand extends FlutterCommand {
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
+      analytics: analytics,
       buildSystem: _buildSystem,
       buildTargets: _buildTargets,
       featureFlags: featureFlags,
       toolContext: toolContext,
       xcode: _xcode,
-      analytics: analytics,
       androidSdk: _androidSdk,
       androidWorkflow: _androidWorkflow,
       deviceManager: _deviceManager,
@@ -171,13 +169,13 @@ class DaemonCommand extends FlutterCommand {
 @visibleForTesting
 class DaemonServer {
   DaemonServer({
+    required this.analytics,
     required this.buildSystem,
     required this.buildTargets,
     required this.featureFlags,
     required this.logger,
     required this.toolContext,
     required this.xcode,
-    this.analytics,
     this.androidSdk,
     this.androidWorkflow,
     @visibleForTesting this._bind = ServerSocket.bind,
@@ -204,7 +202,7 @@ class DaemonServer {
 
   final FileSystem? fileSystem;
   final ProcessManager? processManager;
-  final Analytics? analytics;
+  final Analytics analytics;
   final DeviceManager? deviceManager;
   final Java? java;
   final AndroidSdk? androidSdk;
@@ -244,6 +242,7 @@ class DaemonServer {
           daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
           logger: logger,
         ),
+        analytics: analytics,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: toolContext,
@@ -252,7 +251,6 @@ class DaemonServer {
         fileSystem: fileSystem,
         processManager: processManager,
         logger: logger,
-        analytics: analytics,
         deviceManager: deviceManager,
         java: java,
         androidSdk: androidSdk,
@@ -278,12 +276,12 @@ typedef CommandHandlerWithBinary = Future<Object?> Function(
 class Daemon {
   Daemon(
     this.connection, {
+    required Analytics analytics,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required FeatureFlags featureFlags,
     required ToolContext toolContext,
     required Xcode? xcode,
-    Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
@@ -295,12 +293,9 @@ class Daemon {
     this.notifyingLogger,
     ProcessManager? processManager,
     this._stdio,
-  }) : _logger = logger ?? BufferLogger.test(),
-       _fs =
-           fileSystem ??
-           LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks()) {
-    final ProcessManager pm = processManager ?? const LocalProcessManager();
-    final Analytics an = analytics ?? const NoOpAnalytics();
+  }) : _logger = logger ?? toolContext.logger,
+       _fs = fileSystem ?? toolContext.fs {
+    final ProcessManager pm = processManager ?? toolContext.processManager;
     final AndroidWorkflow workflow =
         androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: featureFlags);
 
@@ -311,23 +306,30 @@ class Daemon {
         featureFlags: featureFlags,
         fileSystem: _fs,
         logger: _logger,
+        projectFactory: toolContext.projectFactory,
         stdio: _stdio,
       ),
     );
     registerDomain(
       appDomain = AppDomain(
         this,
+        analytics: analytics,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: toolContext,
         xcode: xcode,
-        analytics: an,
         fileSystem: _fs,
         logger: _logger,
       ),
     );
     registerDomain(
-      deviceDomain = DeviceDomain(this, logger: _logger, deviceManager: deviceManager),
+      deviceDomain = DeviceDomain(
+        this,
+        fileSystem: _fs,
+        logger: _logger,
+        projectFactory: toolContext.projectFactory,
+        deviceManager: deviceManager,
+      ),
     );
     registerDomain(
       emulatorDomain = EmulatorDomain(
@@ -358,6 +360,7 @@ class Daemon {
   }
 
   factory Daemon.createMachineDaemon({
+    required Analytics analytics,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required FeatureFlags featureFlags,
@@ -365,7 +368,6 @@ class Daemon {
     required Stdio stdio,
     required ToolContext toolContext,
     required Xcode? xcode,
-    Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
@@ -378,6 +380,7 @@ class Daemon {
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
+      analytics: analytics,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
       toolContext: toolContext,
@@ -390,7 +393,6 @@ class Daemon {
       logger: logger,
       fileSystem: fileSystem,
       processManager: processManager,
-      analytics: analytics,
       deviceManager: deviceManager,
       java: java,
       androidSdk: androidSdk,
@@ -578,6 +580,7 @@ class DaemonDomain extends Domain {
     required this._featureFlags,
     required FileSystem fileSystem,
     required this._logger,
+    required this._projectFactory,
     this._stdio,
   }) : _fs = fileSystem,
        super(daemon, 'daemon') {
@@ -625,6 +628,7 @@ class DaemonDomain extends Domain {
   final FileSystem _fs;
   final FeatureFlags _featureFlags;
   final Logger _logger;
+  final FlutterProjectFactory _projectFactory;
   final Stdio? _stdio;
 
   StreamSubscription<LogMessage>? _subscription;
@@ -672,7 +676,7 @@ class DaemonDomain extends Domain {
     final platformTypes = <String>[];
     final platformTypesMap = <String, Object>{};
     try {
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      final FlutterProject flutterProject = _projectFactory.fromDirectory(
         _fs.directory(projectRoot),
       );
       final Set<SupportedPlatform> supportedPlatforms = flutterProject
@@ -858,15 +862,14 @@ typedef RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
+    required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
     required this._toolContext,
     required this._xcode,
-    Analytics? analytics,
     FileSystem? fileSystem,
     Logger? logger,
   }) : _fs = fileSystem ?? daemon._fs,
-       _analytics = analytics ?? const NoOpAnalytics(),
        _logger = logger ?? daemon._logger,
        super(daemon, 'app') {
     registerHandler('restart', restart);
@@ -918,7 +921,9 @@ class AppDomain extends Domain {
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = _fs.currentDirectory;
     _fs.currentDirectory = _fs.directory(projectDirectory);
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(_fs.currentDirectory);
+    final FlutterProject flutterProject = _toolContext.projectFactory.fromDirectory(
+      _fs.currentDirectory,
+    );
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
@@ -948,6 +953,7 @@ class AppDomain extends Domain {
     } else if (enableHotReload) {
       runner = HotRunner(
         <FlutterDevice>[flutterDevice],
+        analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
         debuggingOptions: options,
@@ -959,11 +965,11 @@ class AppDomain extends Domain {
         dillOutputPath: dillOutputPath,
         hostIsIde: true,
         machine: machine,
-        analytics: _analytics,
       );
     } else {
       runner = ColdRunner(
         <FlutterDevice>[flutterDevice],
+        analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
         debuggingOptions: options,
@@ -1267,8 +1273,14 @@ typedef _DeviceEventHandler = void Function(Device device);
 /// It exports a `getDevices()` call, as well as firing `device.added` and
 /// `device.removed` events.
 class DeviceDomain extends Domain {
-  DeviceDomain(Daemon daemon, {required this._logger, this._deviceManager})
-    : super(daemon, 'device') {
+  DeviceDomain(
+    Daemon daemon, {
+    required FileSystem fileSystem,
+    required this._logger,
+    required this._projectFactory,
+    this._deviceManager,
+  }) : _fs = fileSystem,
+       super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
     registerHandler('discoverDevices', discoverDevices);
     registerHandler('enable', enable);
@@ -1294,7 +1306,9 @@ class DeviceDomain extends Domain {
   }
 
   final DeviceManager? _deviceManager;
+  final FileSystem _fs;
   final Logger _logger;
+  final FlutterProjectFactory _projectFactory;
 
   /// An incrementing number used to generate unique ids.
   var _id = 0;
@@ -1547,8 +1561,8 @@ class DeviceDomain extends Domain {
 
     FlutterProject? project;
     try {
-      project = FlutterProject.current();
-    } on ToolExit catch (_) {
+      project = _projectFactory.fromDirectory(_fs.currentDirectory);
+    } on ToolExit {
       // In daemon mode the cwd may not be a Flutter project, so we just ignore
       // these errors and use 'Unknown' as the package name below.
     }

@@ -31,6 +31,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -101,6 +102,7 @@ void main() {
     testUsingContext('daemon.version command should succeed', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -123,6 +125,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -238,6 +241,7 @@ void main() {
     testUsingContext('printError should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -264,6 +268,7 @@ void main() {
     testUsingContext('printWarning should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -291,6 +296,7 @@ void main() {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -311,6 +317,7 @@ void main() {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -332,6 +339,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -365,6 +373,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -392,6 +401,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -421,6 +431,7 @@ void main() {
       final toolContext = FakeToolContext(fs: toolContextFs);
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: toolContext,
@@ -432,6 +443,7 @@ void main() {
       );
       final appDomain = RunnerCapturingAppDomain(
         daemon,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: toolContext,
@@ -461,6 +473,7 @@ void main() {
     testUsingContext('daemon.shutdown command should stop daemon', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -481,6 +494,7 @@ void main() {
     testUsingContext('app.restart without an appId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -501,6 +515,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -526,6 +541,7 @@ void main() {
     testUsingContext('app.stop without appId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -544,6 +560,7 @@ void main() {
     testUsingContext('device.getDevices should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -563,6 +580,7 @@ void main() {
     testUsingContext('device.getDevices reports available devices', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -589,6 +607,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -652,6 +671,7 @@ void main() {
     testUsingContext('device.discoverDevices should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -671,6 +691,7 @@ void main() {
     testUsingContext('device.discoverDevices reports available devices', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -696,6 +717,7 @@ void main() {
     testUsingContext('device.supportsRuntimeMode returns correct value', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -725,6 +747,7 @@ void main() {
     testUsingContext('device.logReader.start and .stop starts and stops log reader', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -784,6 +807,7 @@ void main() {
       testUsingContext('device.startApp and .stopApp starts and stops an app', () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -865,6 +889,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -940,6 +965,7 @@ void main() {
     testUsingContext('device.getDiagnostics returns correct value', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -970,6 +996,7 @@ void main() {
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -990,6 +1017,7 @@ void main() {
     testUsingContext('emulator.launch coldboot parameter must be boolean', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -1010,6 +1038,7 @@ void main() {
     testUsingContext('emulator.getEmulators should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -1032,6 +1061,7 @@ void main() {
 
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -1065,6 +1095,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -1094,6 +1125,7 @@ void main() {
     testUsingContext('devtools.serve command should return null fields if null returned', () async {
       daemon = Daemon(
         daemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
@@ -1134,6 +1166,7 @@ void main() {
 
           daemon = Daemon(
             daemonConnection,
+            analytics: const NoOpAnalytics(),
             buildSystem: buildSystem,
             buildTargets: buildTargets,
             toolContext: DelegatingToolContext(),
@@ -1222,6 +1255,7 @@ void main() {
 
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -1256,6 +1290,7 @@ void main() {
 
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -1286,6 +1321,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -1334,6 +1370,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -1398,6 +1435,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -1460,6 +1498,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -1518,6 +1557,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
@@ -2015,6 +2055,7 @@ class FakeSocket extends Fake implements io.Socket {
 class RunnerCapturingAppDomain extends AppDomain {
   RunnerCapturingAppDomain(
     super.daemon, {
+    required super.analytics,
     required super.buildSystem,
     required super.buildTargets,
     required super.toolContext,
