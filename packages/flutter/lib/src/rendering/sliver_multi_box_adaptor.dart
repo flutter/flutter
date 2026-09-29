@@ -591,10 +591,10 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         _destroyOrCacheChild(firstChild!);
         newLeadingGarbage -= 1;
       }
-      var newtrailingGarbage = trailingGarbage;
-      while (newtrailingGarbage > 0) {
+      var newTrailingGarbage = trailingGarbage;
+      while (newTrailingGarbage > 0) {
         _destroyOrCacheChild(lastChild!);
-        newtrailingGarbage -= 1;
+        newTrailingGarbage -= 1;
       }
       // Ask the child manager to remove the children that are no longer being
       // kept alive. (This should cause _keepAliveBucket to change, so we have
