@@ -94,6 +94,7 @@ void main() {
     testUsingContext('daemon.version command should succeed', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -112,6 +113,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -223,6 +225,7 @@ void main() {
     testUsingContext('printError should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -245,6 +248,7 @@ void main() {
     testUsingContext('printWarning should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -268,6 +272,7 @@ void main() {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           logToStdout: true,
           featureFlags: featureFlags,
@@ -284,6 +289,7 @@ void main() {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           logToStdout: true,
           featureFlags: featureFlags,
@@ -301,6 +307,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -330,6 +337,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -353,6 +361,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -374,6 +383,7 @@ void main() {
     testUsingContext('daemon.shutdown command should stop daemon', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -390,6 +400,7 @@ void main() {
     testUsingContext('app.restart without an appId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -406,6 +417,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -427,6 +439,7 @@ void main() {
     testUsingContext('app.stop without appId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -441,6 +454,7 @@ void main() {
     testUsingContext('device.getDevices should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -456,6 +470,7 @@ void main() {
     testUsingContext('device.getDevices reports available devices', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -478,6 +493,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -537,6 +553,7 @@ void main() {
     testUsingContext('device.discoverDevices should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -552,6 +569,7 @@ void main() {
     testUsingContext('device.discoverDevices reports available devices', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -573,6 +591,7 @@ void main() {
     testUsingContext('device.supportsRuntimeMode returns correct value', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -598,6 +617,7 @@ void main() {
     testUsingContext('device.logReader.start and .stop starts and stops log reader', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -653,6 +673,7 @@ void main() {
       testUsingContext('device.startApp and .stopApp starts and stops an app', () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -730,6 +751,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -801,6 +823,7 @@ void main() {
     testUsingContext('device.getDiagnostics returns correct value', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -827,6 +850,7 @@ void main() {
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -843,6 +867,7 @@ void main() {
     testUsingContext('emulator.launch coldboot parameter must be boolean', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -859,6 +884,7 @@ void main() {
     testUsingContext('emulator.getEmulators should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -877,6 +903,7 @@ void main() {
 
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -906,6 +933,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -931,6 +959,7 @@ void main() {
     testUsingContext('devtools.serve command should return null fields if null returned', () async {
       daemon = Daemon(
         daemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -967,6 +996,7 @@ void main() {
 
           daemon = Daemon(
             daemonConnection,
+            toolContext: DelegatingToolContext(),
             notifyingLogger: notifyingLogger,
             featureFlags: featureFlags,
             fileSystem: globals.fs,
@@ -1051,6 +1081,7 @@ void main() {
 
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1081,6 +1112,7 @@ void main() {
 
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1107,6 +1139,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1151,6 +1184,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1211,6 +1245,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1269,6 +1304,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1323,6 +1359,7 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,

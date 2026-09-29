@@ -4,9 +4,18 @@
 
 import '../../build_info.dart';
 import '../flutter_command.dart';
+import '../flutter_command_runner.dart';
 
 /// Common typed option descriptors across flutter commands.
 abstract final class CommonOptions {
+  static const ci = FlagOptionDescriptor(
+    name: FlutterGlobalOptions.kContinuousIntegrationFlag,
+    negatable: false,
+    scope: OptionScope.global,
+    verboseOnly: true,
+    help: 'Enable a set of CI-specific test debug settings.',
+  );
+
   static const treeShakeIcons = FlagOptionDescriptor(
     name: 'tree-shake-icons',
     defaultsTo: true,
@@ -259,6 +268,15 @@ abstract final class BuildInfoOptions {
     help: 'Whether to code-sign XCFrameworks.',
   );
 
+  static const codesignIdentity = StringOptionDescriptor(
+    name: FlutterOptions.kCodesignIdentity,
+    help:
+        'The identity to use for code-signing XCFrameworks. If an identity is not provided and '
+        '"${FlutterOptions.kCodesign}" is enabled, a code signing identity will be selected '
+        "automatically from the Flutter app's Xcode project settings or Flutter config. To see "
+        'a list of valid identities run "security find-identity -p codesigning -v".',
+  );
+
   static const frontendServerStarterPath = StringOptionDescriptor(
     name: FlutterOptions.kFrontendServerStarterPath,
     verboseOnly: true,
@@ -423,6 +441,70 @@ class AndroidBuildOptionsBundle extends OptionBundle {
   ];
 }
 
+/// A bundle encapsulating general options for Apple (iOS and macOS) builds.
+class AppleBuildOptionsBundle extends OptionBundle {
+  const AppleBuildOptionsBundle();
+
+  static const configOnly = FlagOptionDescriptor(
+    name: 'config-only',
+    help:
+        'Update the project configuration without performing a build. '
+        'This can be used in CI/CD process that create an archive to avoid '
+        'performing duplicate work.',
+  );
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    BuildInfoOptions.flavor,
+    BuildInfoOptions.splitDebugInfo,
+    BuildInfoOptions.obfuscate,
+    BuildInfoOptions.extraFrontEndOptions,
+    BuildInfoOptions.extraGenSnapshotOptions,
+    BuildInfoOptions.performanceMeasurementFile,
+    BuildInfoOptions.analyzeSize,
+    BuildInfoOptions.codeSizeDirectory,
+  ];
+}
+
+/// A bundle encapsulating Darwin XCFramework code-signing options (`--codesign` and `--codesign-identity`).
+class DarwinCodeSignXCFrameworksOptionsBundle extends OptionBundle {
+  const DarwinCodeSignXCFrameworksOptionsBundle();
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    BuildInfoOptions.codesign,
+    BuildInfoOptions.codesignIdentity,
+  ];
+}
+
+/// A bundle encapsulating shared options for Darwin Add-to-App builds (`build ios-framework`, `build macos-framework`, and `build swift-package`).
+class DarwinAddToAppOptionsBundle extends OptionBundle {
+  const DarwinAddToAppOptionsBundle();
+
+  @override
+  void onRegister(FlutterCommand command) {
+    command.enableUsesTargetOption();
+    command.enableUsesPubOption();
+  }
+
+  @override
+  List<OptionBundle> get subBundles => const [
+    DartCompileOptionsBundle(),
+    DarwinCodeSignXCFrameworksOptionsBundle(),
+  ];
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    CommonOptions.treeShakeIcons,
+    CommonOptions.target,
+    CommonOptions.pub,
+    BuildInfoOptions.splitDebugInfo,
+    BuildInfoOptions.obfuscate,
+    BuildInfoOptions.extraFrontEndOptions,
+    BuildInfoOptions.extraGenSnapshotOptions,
+  ];
+}
+
 /// Typed option descriptors specific to `DebuggingOptions` and resident runners (`run`, `drive`, `test`).
 abstract final class DebuggingOptionDescriptors {
   static const enableImpeller = NullableFlagOptionDescriptor(
@@ -507,6 +589,28 @@ abstract final class DebuggingOptionDescriptors {
         'bound to the provided port.\n'
         'Specifying port 0 (the default) will find a random free port.',
   );
+
+  static const publishPort = FlagOptionDescriptor(
+    name: 'publish-port',
+    defaultsTo: true,
+    verboseOnly: true,
+    help:
+        'Publish the VM service port over mDNS. Disable to prevent the '
+        'local network permission app dialog in debug and profile build modes (iOS devices only).',
+  );
+
+  static FlagOptionDescriptor publishPortOption({bool enabledByDefault = true}) {
+    if (enabledByDefault) {
+      return publishPort;
+    }
+    return const FlagOptionDescriptor(
+      name: 'publish-port',
+      verboseOnly: true,
+      help:
+          'Publish the VM service port over mDNS. Disable to prevent the '
+          'local network permission app dialog in debug and profile build modes (iOS devices only).',
+    );
+  }
 
   static const disableDds = FlagOptionDescriptor(
     name: 'disable-dds',
