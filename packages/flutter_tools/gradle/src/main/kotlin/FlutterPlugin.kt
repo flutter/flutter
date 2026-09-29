@@ -330,12 +330,14 @@ class FlutterPlugin : Plugin<Project> {
             // `libraryVariants` callback in [addFlutterDepsForModule] until that path migrates
             // (https://github.com/flutter/flutter/issues/166550).
             if (isApplicationProject && shouldCompileFlutterForVariant(projectToAddTasksTo, variant)) {
-                registerFlutterAssetTasks(
-                    projectToAddTasksTo,
-                    variant,
-                    flutterGradlePlugin,
-                    targetPlatforms
-                )
+                val compileTaskProvider =
+                    registerFlutterCompileTask(
+                        projectToAddTasksTo,
+                        variant,
+                        flutterGradlePlugin,
+                        targetPlatforms
+                    )
+                registerFlutterAssetTasks(projectToAddTasksTo, variant, compileTaskProvider)
             }
             registerFlutterJniLibsTask(projectToAddTasksTo, variant, targetPlatforms)
         }
@@ -597,8 +599,12 @@ class FlutterPlugin : Plugin<Project> {
             )
 
         /**
-         * Registers the tasks that produce Flutter's assets for [variant], and declares the
+         * Registers the tasks that stage Flutter's assets for [variant], and declares the
          * directory they stage into as a generated assets source directory.
+         *
+         * The assets are produced by [compileTaskProvider], the `flutter assemble` task registered
+         * by [registerFlutterCompileTask]. That task also produces the Dart code and native
+         * libraries, so it is registered by the caller rather than here.
          *
          * AGP then merges and packages that directory like any other assets source, which is what
          * puts `flutter_assets` into the APK.
@@ -606,21 +612,17 @@ class FlutterPlugin : Plugin<Project> {
         private fun registerFlutterAssetTasks(
             project: Project,
             variant: Variant,
-            flutterGradlePlugin: FlutterPlugin,
-            targetPlatforms: List<String>
+            compileTaskProvider: TaskProvider<FlutterTask>
         ) {
-            val compileTaskProvider =
-                registerFlutterCompileTask(project, variant, flutterGradlePlugin, targetPlatforms)
             val copyFlutterAssetsTaskProvider: TaskProvider<CopyFlutterAssetsTask> =
                 project.tasks.register(
                     "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",
                     CopyFlutterAssetsTask::class.java
                 ) {
-                    // The compile task registered just above always sets an output directory,
-                    // so this is an invariant rather than a tolerated absence. Letting the
-                    // provider go absent instead would stage an empty directory and produce an
-                    // APK with no flutter_assets, which fails at runtime rather than at build
-                    // time.
+                    // registerFlutterCompileTask always sets an output directory, so this is an
+                    // invariant rather than a tolerated absence. Letting the provider go absent
+                    // instead would stage an empty directory and produce an APK with no
+                    // flutter_assets, which fails at runtime rather than at build time.
                     intermediateDir.set(
                         project.layout.dir(
                             compileTaskProvider.map { requireNotNull(it.outputDirectory) }
