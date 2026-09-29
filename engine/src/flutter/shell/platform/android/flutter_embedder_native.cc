@@ -345,8 +345,16 @@ class FlutterEmbedderNative::CompositorDelegate
     }
   }
 
+  bool RequiresOnscreenClearanceWhenNoBackgroundLayer() const override {
+    std::scoped_lock lock(mutex_);
+    if (owner_ != nullptr) {
+      return owner_->RequiresOnscreenClearanceWhenNoBackgroundLayer();
+    }
+    return false;
+  }
+
  private:
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   FlutterEmbedderNative* owner_ = nullptr;
 };
 
@@ -1490,6 +1498,7 @@ void FlutterEmbedderNative::SetNativeWindow(ANativeWindow* window) {
 void FlutterEmbedderNative::NotifySurfaceCreated(ANativeWindow* window,
                                                  bool is_fake_window) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::NotifySurfaceCreated");
+  is_image_view_surface_active_.store(false);
   SetNativeWindow(window);
   if (is_fake_window && surface_manager_ && window) {
     surface_manager_->SetNativeWindow(window, true);
@@ -1515,6 +1524,7 @@ void FlutterEmbedderNative::NotifySurfaceCreated(ANativeWindow* window,
 void FlutterEmbedderNative::NotifySurfaceWindowChanged(ANativeWindow* window,
                                                        bool is_fake_window) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::NotifySurfaceWindowChanged");
+  is_image_view_surface_active_.store(window != nullptr);
   SetNativeWindow(window);
   if (is_fake_window && surface_manager_ && window) {
     surface_manager_->SetNativeWindow(window, true);
@@ -1544,6 +1554,7 @@ void FlutterEmbedderNative::NotifySurfaceChanged(int32_t width,
 
 void FlutterEmbedderNative::NotifySurfaceDestroyed() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::NotifySurfaceDestroyed");
+  is_image_view_surface_active_.store(false);
   auto engine = GetEngine();
   if (engine && surface_attached_.exchange(false) && !initialize_engine_fn_) {
     static FlutterEngineProcTable s_procs = []() {
@@ -2330,6 +2341,17 @@ bool FlutterEmbedderNative::IsHcppEnabled() const {
     return false;
   }
   return jni_router_->RouteIsHcppEnabled();
+}
+
+bool FlutterEmbedderNative::RequiresOnscreenClearanceWhenNoBackgroundLayer()
+    const {
+  TRACE_EVENT0(
+      "flutter",
+      "FlutterEmbedderNative::RequiresOnscreenClearanceWhenNoBackgroundLayer");
+  if (IsHcppEnabled()) {
+    return false;
+  }
+  return is_image_view_surface_active_.load();
 }
 
 bool FlutterEmbedderNative::CreatePlatformViewTransaction() const {

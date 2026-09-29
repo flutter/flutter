@@ -191,6 +191,11 @@ class AndroidSurfaceManager {
   void* GetInstanceProcAddress(FlutterVulkanInstanceHandle instance,
                                const char* name);
 
+  /// Returns the image usage flags configured on the active Vulkan swapchain.
+  VkImageUsageFlags GetVulkanSwapchainUsage() const {
+    return vk_swapchain_usage_;
+  }
+
   // ---------------------------------------------------------------------------
   // Embedder C-API Configuration Helpers
   // ---------------------------------------------------------------------------
@@ -267,6 +272,7 @@ class AndroidSurfaceManager {
   VkSwapchainKHR vk_swapchain_ = VK_NULL_HANDLE;
   VkSurfaceFormatKHR vk_surface_format_ = {};
   VkExtent2D vk_swapchain_extent_ = {0, 0};
+  VkImageUsageFlags vk_swapchain_usage_ = 0;
   std::vector<VkImage> vk_swapchain_images_;
   std::vector<VkCommandBuffer> vk_command_buffers_;
   VkCommandPool vk_command_pool_ = VK_NULL_HANDLE;

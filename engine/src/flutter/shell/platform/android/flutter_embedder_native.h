@@ -485,6 +485,11 @@ class FlutterEmbedderNative {
   /// @brief Checks whether HC++ presentation is supported and enabled.
   bool IsHcppEnabled() const;
 
+  /// @brief Checks whether the onscreen surface requires an empty frame
+  /// presentation
+  ///        when no background layer is drawn.
+  bool RequiresOnscreenClearanceWhenNoBackgroundLayer() const;
+
   /// @brief Creates a SurfaceControl transaction for HC++.
   bool CreatePlatformViewTransaction() const;
 
@@ -1255,6 +1260,7 @@ class FlutterEmbedderNative {
   FlutterEngineAOTData aot_data_ = nullptr;
   std::atomic<bool> surface_attached_{false};
   std::atomic<bool> first_frame_presented_{false};
+  std::atomic<bool> is_image_view_surface_active_{false};
 
   mutable std::mutex decoder_registration_mutex_;
   FLUTTER_API_SYMBOL(FlutterEngine) registered_engine_ = nullptr;

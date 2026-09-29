@@ -1127,6 +1127,15 @@ bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked() {
 
   VkSwapchainKHR old_swapchain = vk_swapchain_;
 
+  VkImageUsageFlags image_usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+  if (caps.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_SRC_BIT) {
+    image_usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+  }
+  if (caps.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT) {
+    image_usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  }
+  vk_swapchain_usage_ = image_usage;
+
   VkSwapchainCreateInfoKHR swapchain_info = {
       .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
       .pNext = nullptr,
@@ -1137,9 +1146,7 @@ bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked() {
       .imageColorSpace = vk_surface_format_.colorSpace,
       .imageExtent = vk_swapchain_extent_,
       .imageArrayLayers = 1,
-      .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                    VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-                    VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+      .imageUsage = image_usage,
       .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
       .queueFamilyIndexCount = 0,
       .pQueueFamilyIndices = nullptr,
@@ -1179,6 +1186,7 @@ bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked() {
 
   DestroyVulkanSwapchainLocked();
   vk_swapchain_ = new_swapchain;
+  vk_swapchain_usage_ = image_usage;
 
   uint32_t actual_image_count = 0;
   vk_get_swapchain_images_khr_fn_(vk_device_, vk_swapchain_,
@@ -1257,6 +1265,7 @@ void AndroidSurfaceManager::DestroyVulkanSwapchainLocked() {
   }
   current_image_index_ = 0;
   has_acquired_image_ = false;
+  vk_swapchain_usage_ = 0;
 }
 
 void AndroidSurfaceManager::DestroyVulkanSurfaceLocked() {
@@ -2229,7 +2238,8 @@ bool AndroidSurfaceManager::ClearAndPresentOnscreenSurface() {
         .layerCount = 1,
     };
 
-    if (vk_cmd_clear_color_image_fn_ != nullptr) {
+    if (vk_cmd_clear_color_image_fn_ != nullptr &&
+        (vk_swapchain_usage_ & VK_IMAGE_USAGE_TRANSFER_DST_BIT)) {
       VkImageMemoryBarrier barrier_to_clear = {
           .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
           .pNext = nullptr,
