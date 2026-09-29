@@ -832,6 +832,7 @@ bool AndroidSurfaceManager::InitializeVulkan() {
   LOAD_VK_INST_PROC(vk_end_command_buffer, vkEndCommandBuffer);
   LOAD_VK_INST_PROC(vk_reset_command_buffer, vkResetCommandBuffer);
   LOAD_VK_INST_PROC(vk_cmd_pipeline_barrier, vkCmdPipelineBarrier);
+  LOAD_VK_INST_PROC(vk_cmd_clear_color_image, vkCmdClearColorImage);
   LOAD_VK_INST_PROC(vk_queue_submit, vkQueueSubmit);
   LOAD_VK_INST_PROC(vk_create_fence, vkCreateFence);
   LOAD_VK_INST_PROC(vk_destroy_fence, vkDestroyFence);
@@ -1255,6 +1256,7 @@ void AndroidSurfaceManager::DestroyVulkanSwapchainLocked() {
     vk_swapchain_ = VK_NULL_HANDLE;
   }
   current_image_index_ = 0;
+  has_acquired_image_ = false;
 }
 
 void AndroidSurfaceManager::DestroyVulkanSurfaceLocked() {
@@ -1605,6 +1607,7 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextImage(
                          kFenceTimeoutNanoseconds);
 
   current_image_index_ = image_index;
+  has_acquired_image_ = true;
   image.image = VkImageToHandle(vk_swapchain_images_[image_index]);
   image.format = static_cast<uint32_t>(vk_surface_format_.format);
   return image;
@@ -1709,6 +1712,7 @@ bool AndroidSurfaceManager::PresentImage(const FlutterVulkanImage* image) {
   };
 
   VkResult res = vk_queue_present_khr_fn_(vk_queue_, &present_info);
+  has_acquired_image_ = false;
   if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
     CreateOrUpdateVulkanSurfaceLocked();
   } else if (res == VK_ERROR_SURFACE_LOST_KHR) {
@@ -2140,11 +2144,172 @@ bool AndroidSurfaceManager::ClearAndPresentOnscreenSurface() {
   if (rendering_api_ == AndroidRenderingAPI::kImpellerVulkan ||
       (rendering_api_ == AndroidRenderingAPI::kImpellerAutoselect &&
        IsVulkanInitialized())) {
-    FlutterVulkanImage img = GetNextImage(nullptr);
-    if (img.image == 0) {
+    std::lock_guard<std::mutex> lock(window_mutex_);
+    if (vk_swapchain_ == VK_NULL_HANDLE || vk_swapchain_images_.empty()) {
       return false;
     }
-    return PresentImage(&img);
+    if (!has_acquired_image_) {
+      if (vk_acquire_fence_ == VK_NULL_HANDLE) {
+        return false;
+      }
+      vk_reset_fences_fn_(vk_device_, 1, &vk_acquire_fence_);
+      uint32_t acquired_index = 0;
+      VkResult res = vk_acquire_next_image_khr_fn_(
+          vk_device_, vk_swapchain_, UINT64_MAX, VK_NULL_HANDLE,
+          vk_acquire_fence_, &acquired_index);
+      if (res == VK_ERROR_OUT_OF_DATE_KHR) {
+        CreateOrUpdateVulkanSurfaceLocked();
+        if (vk_swapchain_ == VK_NULL_HANDLE || vk_swapchain_images_.empty() ||
+            vk_acquire_fence_ == VK_NULL_HANDLE) {
+          return false;
+        }
+        vk_reset_fences_fn_(vk_device_, 1, &vk_acquire_fence_);
+        res = vk_acquire_next_image_khr_fn_(vk_device_, vk_swapchain_,
+                                            UINT64_MAX, VK_NULL_HANDLE,
+                                            vk_acquire_fence_, &acquired_index);
+      }
+      if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) {
+        return false;
+      }
+      // 1-second timeout (1,000,000,000 ns) to ensure image is available
+      constexpr uint64_t kFenceTimeoutNanoseconds = 1000000000ULL;
+      vk_wait_for_fences_fn_(vk_device_, 1, &vk_acquire_fence_, VK_TRUE,
+                             kFenceTimeoutNanoseconds);
+      current_image_index_ = acquired_index;
+      has_acquired_image_ = true;
+    }
+
+    if (current_image_index_ >= vk_swapchain_images_.size() ||
+        current_image_index_ >= vk_command_buffers_.size()) {
+      return false;
+    }
+
+    uint32_t image_index = current_image_index_;
+    VkImage vk_img = vk_swapchain_images_[image_index];
+    VkCommandBuffer cmd = vk_command_buffers_[image_index];
+
+    vk_reset_command_buffer_fn_(cmd, 0);
+
+    VkCommandBufferBeginInfo begin_info = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .pNext = nullptr,
+        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+        .pInheritanceInfo = nullptr,
+    };
+    vk_begin_command_buffer_fn_(cmd, &begin_info);
+
+    VkImageSubresourceRange range = {
+        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .baseMipLevel = 0,
+        .levelCount = 1,
+        .baseArrayLayer = 0,
+        .layerCount = 1,
+    };
+
+    if (vk_cmd_clear_color_image_fn_ != nullptr) {
+      VkImageMemoryBarrier barrier_to_clear = {
+          .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+          .pNext = nullptr,
+          .srcAccessMask = 0,
+          .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+          .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+          .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+          .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+          .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+          .image = vk_img,
+          .subresourceRange = range,
+      };
+      vk_cmd_pipeline_barrier_fn_(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                                  VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr,
+                                  0, nullptr, 1, &barrier_to_clear);
+
+      VkClearColorValue clear_color = {};
+      clear_color.float32[0] = 0.0f;
+      clear_color.float32[1] = 0.0f;
+      clear_color.float32[2] = 0.0f;
+      clear_color.float32[3] = 0.0f;
+      vk_cmd_clear_color_image_fn_(cmd, vk_img,
+                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                   &clear_color, 1, &range);
+
+      VkImageMemoryBarrier barrier_to_present = {
+          .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+          .pNext = nullptr,
+          .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+          .dstAccessMask = 0,
+          .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+          .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+          .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+          .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+          .image = vk_img,
+          .subresourceRange = range,
+      };
+      vk_cmd_pipeline_barrier_fn_(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                  VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0,
+                                  nullptr, 0, nullptr, 1, &barrier_to_present);
+    } else {
+      VkImageMemoryBarrier barrier = {
+          .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+          .pNext = nullptr,
+          .srcAccessMask = 0,
+          .dstAccessMask = 0,
+          .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+          .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+          .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+          .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+          .image = vk_img,
+          .subresourceRange = range,
+      };
+      vk_cmd_pipeline_barrier_fn_(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                                  VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0,
+                                  nullptr, 0, nullptr, 1, &barrier);
+    }
+
+    vk_end_command_buffer_fn_(cmd);
+
+    VkSubmitInfo submit_info = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .pNext = nullptr,
+        .waitSemaphoreCount = 0,
+        .pWaitSemaphores = nullptr,
+        .pWaitDstStageMask = nullptr,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &cmd,
+        .signalSemaphoreCount = 0,
+        .pSignalSemaphores = nullptr,
+    };
+    vk_queue_submit_fn_(vk_queue_, 1, &submit_info, VK_NULL_HANDLE);
+
+    if (vk_queue_wait_idle_fn_ != nullptr) {
+      vk_queue_wait_idle_fn_(vk_queue_);
+    }
+
+    VkPresentInfoKHR present_info = {
+        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        .pNext = nullptr,
+        .waitSemaphoreCount = 0,
+        .pWaitSemaphores = nullptr,
+        .swapchainCount = 1,
+        .pSwapchains = &vk_swapchain_,
+        .pImageIndices = &image_index,
+        .pResults = nullptr,
+    };
+
+    VkResult res = vk_queue_present_khr_fn_(vk_queue_, &present_info);
+    has_acquired_image_ = false;
+
+    if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
+      CreateOrUpdateVulkanSurfaceLocked();
+    } else if (res == VK_ERROR_SURFACE_LOST_KHR) {
+      FML_LOG(WARNING)
+          << "vkQueuePresentKHR returned VK_ERROR_SURFACE_LOST_KHR (" << res
+          << "); recreating Vulkan surface.";
+      DestroyVulkanSurfaceLocked();
+      if (native_window_ != nullptr) {
+        CreateOrUpdateVulkanSurfaceLocked();
+      }
+    }
+    return res == VK_SUCCESS || res == VK_SUBOPTIMAL_KHR;
   }
   if (!MakeCurrent()) {
     return false;
