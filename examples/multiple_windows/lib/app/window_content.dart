@@ -69,9 +69,7 @@ class _WindowContentState extends State<WindowContent> {
                     Column(
                       mainAxisSize: .min,
                       children: [
-                        _WindowCreationButtons(
-                          windowController: widget.windowController,
-                        ),
+                        _WindowCreationButtons(windowController: widget.windowController),
                         const SizedBox(height: 20),
                         TooltipButton(parentController: widget.windowController),
                         const SizedBox(height: 20),
@@ -125,8 +123,7 @@ class _WindowCreationButtons extends StatelessWidget {
 
             entry = WindowEntry(
               controller: controller,
-              builder: (BuildContext context) =>
-                  WindowContent(windowController: controller),
+              builder: (BuildContext context) => WindowContent(windowController: controller),
             );
             windowRegistry.register(entry);
           },

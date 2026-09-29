@@ -19,8 +19,23 @@ class MockEpoxy {
   ~MockEpoxy();
 
   MOCK_METHOD(bool, epoxy_has_gl_extension, (const char* extension));
+  MOCK_METHOD(bool,
+              epoxy_has_egl_extension,
+              (EGLDisplay dpy, const char* extension));
   MOCK_METHOD(bool, epoxy_is_desktop_gl, ());
   MOCK_METHOD(int, epoxy_gl_version, ());
+  MOCK_METHOD(EGLSyncKHR,
+              eglCreateSyncKHR,
+              (EGLDisplay dpy, EGLenum type, const EGLint* attrib_list));
+  MOCK_METHOD(EGLBoolean, eglDestroySyncKHR, (EGLDisplay dpy, EGLSyncKHR sync));
+  MOCK_METHOD(
+      EGLint,
+      eglClientWaitSyncKHR,
+      (EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout));
+  MOCK_METHOD(EGLint,
+              eglWaitSyncKHR,
+              (EGLDisplay dpy, EGLSyncKHR sync, EGLint flags));
+  MOCK_METHOD(void, glClear, (GLbitfield mask));
   MOCK_METHOD(void, glClearColor, (GLfloat r, GLfloat g, GLfloat b, GLfloat a));
   MOCK_METHOD(void,
               glBlitFramebuffer,
@@ -66,6 +81,7 @@ class MockEpoxy {
                GLuint texture,
                GLint level,
                GLsizei samples));
+  MOCK_METHOD(void, glGetFloatv, (GLenum pname, GLfloat* data));
   MOCK_METHOD(void, glGetIntegerv, (GLenum pname, GLint* data));
   MOCK_METHOD(const GLubyte*, glGetString, (GLenum pname));
   MOCK_METHOD(void,
@@ -106,6 +122,15 @@ class MockEpoxy {
                GLenum format,
                GLenum type,
                const void* pixels));
+  MOCK_METHOD(void,
+              glViewport,
+              (GLint x, GLint y, GLsizei width, GLsizei height));
+  MOCK_METHOD(void, eglSwapBuffers, ());
+
+  // The size reported for EGL surfaces. Zero by default, so anything drawing
+  // to a mock surface sees a size change on its first frame.
+  EGLint egl_surface_width = 0;
+  EGLint egl_surface_height = 0;
 };
 
 }  // namespace testing
