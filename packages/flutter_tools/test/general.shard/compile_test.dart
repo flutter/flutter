@@ -350,7 +350,7 @@ void main() {
     await completer.future.timeout(const Duration(seconds: 5));
   });
 
-  testWithoutContext('ResidentCompilerFactory configures DDC library bundle flags when webEnableHotReload is enabled', () {
+  testWithoutContext('ResidentCompilerFactory configures DDC library bundle flags', () {
     final compiler = const ResidentCompilerFactory().create(
       targetPlatform: .web_javascript,
       buildInfo: const BuildInfo(
@@ -369,13 +369,6 @@ void main() {
       config: Config.test(),
     ) as DefaultResidentCompiler;
 
-    expect(
-      compiler.extraFrontEndOptions,
-      containsAll(<String>[
-        '--dartdevc-canary',
-        '--dartdevc-module-format=ddc',
-        '--no-js-strongly-connected-components',
-      ]),
-    );
+    expect(compiler.extraFrontEndOptions, containsAll(kDdcLibraryBundleFlags));
   });
 }
