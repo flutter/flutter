@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 
+#include <algorithm>
+
 #include "flutter/common/constants.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -276,6 +278,14 @@ UniqueEngine EmbedderConfigBuilder::SetupEngine(bool run) const {
 
   for (const auto& arg : command_line_arguments_) {
     args.push_back(arg.c_str());
+  }
+  // The renderer is a property of the backend under test, so a test written
+  // once for Vulkan runs under Impeller without naming the flag itself.
+  if (context_.GetContextType() ==
+          EmbedderTestContextType::kVulkanImpellerContext &&
+      std::find(command_line_arguments_.begin(), command_line_arguments_.end(),
+                "--enable-impeller") == command_line_arguments_.end()) {
+    args.push_back("--enable-impeller");
   }
 
   if (!args.empty()) {

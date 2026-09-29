@@ -118,7 +118,10 @@ bool EmbedderSurfaceVulkanImpeller::IsValid() const {
 
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceVulkanImpeller::CreateGPUSurface() {
-  return std::make_unique<GPUSurfaceVulkanImpeller>(this, context_);
+  // The compositor presents when one is supplied; see GPUSurfaceVulkanImpeller.
+  const bool render_to_surface = !external_view_embedder_;
+  return std::make_unique<GPUSurfaceVulkanImpeller>(this, context_,
+                                                    render_to_surface);
 }
 
 // |EmbedderSurface|

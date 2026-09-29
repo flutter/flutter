@@ -53,6 +53,10 @@ enum class EmbedderTestContextType {
   kOpenGLContext,
   kMetalContext,
   kVulkanContext,
+  /// The Vulkan context, rendered with Impeller rather than Skia. Selecting it
+  /// yields the same `EmbedderTestContextVulkan`; the config builder adds
+  /// `--enable-impeller` for it.
+  kVulkanImpellerContext,
 };
 
 class EmbedderTestContext {

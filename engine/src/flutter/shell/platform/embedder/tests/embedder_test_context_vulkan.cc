@@ -29,6 +29,14 @@ EmbedderTestContextVulkan::EmbedderTestContextVulkan(std::string assets_path)
       .device = vulkan_context_->device_->GetHandle(),
       .queue_family_index = vulkan_context_->device_->GetGraphicsQueueIndex(),
       .queue = vulkan_context_->device_->GetQueueHandle(),
+      .enabled_instance_extension_count =
+          vulkan_context_->GetEnabledInstanceExtensions().size(),
+      .enabled_instance_extensions = const_cast<const char**>(
+          vulkan_context_->GetEnabledInstanceExtensions().data()),
+      .enabled_device_extension_count =
+          vulkan_context_->GetEnabledDeviceExtensions().size(),
+      .enabled_device_extensions = const_cast<const char**>(
+          vulkan_context_->GetEnabledDeviceExtensions().data()),
       .get_instance_proc_address_callback =
           EmbedderTestContextVulkan::InstanceProcAddr,
       .get_next_image_callback =
@@ -55,7 +63,8 @@ EmbedderTestContextVulkan::EmbedderTestContextVulkan(std::string assets_path)
 EmbedderTestContextVulkan::~EmbedderTestContextVulkan() {}
 
 EmbedderTestContextType EmbedderTestContextVulkan::GetContextType() const {
-  return EmbedderTestContextType::kVulkanContext;
+  return enable_impeller_ ? EmbedderTestContextType::kVulkanImpellerContext
+                          : EmbedderTestContextType::kVulkanContext;
 }
 
 void EmbedderTestContextVulkan::SetVulkanInstanceProcAddressCallback(
