@@ -131,13 +131,14 @@ static std::optional<Entity> AdvancedBlend(
     }
   }
 
-  // The subpass render target has an integral size, so it only covers this
-  // much of |subpass_coverage|. The texture coordinates must describe the same
-  // rect as the quad, which spans the render target: if they describe the
-  // full, fractional coverage instead, the contents are scaled by the ratio
-  // between the two, and that ratio changes from frame to frame for animated
-  // content. Both the allocation and the sampled rect use this one size.
-  const Size render_target_size = subpass_coverage.GetSize().Floor();
+  // The subpass render target has an integral size, rounded up so that it keeps
+  // any partially covered edge pixels of |subpass_coverage|. The texture
+  // coordinates must describe the same rect as the quad, which spans the render
+  // target: if they describe the fractional coverage instead, the contents are
+  // scaled by the ratio between the two, and that ratio changes from frame to
+  // frame for animated content. Both the allocation and the sampled rect use
+  // this one size.
+  const Size render_target_size = subpass_coverage.GetSize().Ceil();
   const Rect render_target_coverage =
       Rect::MakeOriginSize(subpass_coverage.GetOrigin(), render_target_size);
   if (render_target_coverage.IsEmpty()) {

@@ -653,14 +653,43 @@ TEST_P(DlGoldenTest, SubpixelScaledTranslated) {
   EXPECT_EQ(intensity[4].x - intensity[0].x, 1);
 }
 
+namespace {
+// Returns capabilities that forward to |capabilities| but report no
+// framebuffer fetch, which forces advanced blends into an offscreen subpass.
+std::shared_ptr<impeller::testing::MockCapabilities>
+MakeCapabilitiesWithoutFramebufferFetch(
+    const std::shared_ptr<const impeller::Capabilities>& capabilities) {
+  auto mock_capabilities =
+      std::make_shared<impeller::testing::MockCapabilities>();
+  EXPECT_CALL(*mock_capabilities, SupportsFramebufferFetch())
+      .Times(::testing::AnyNumber())
+      .WillRepeatedly(::testing::Return(false));
+  FLT_FORWARD(mock_capabilities, capabilities, GetDefaultColorFormat);
+  FLT_FORWARD(mock_capabilities, capabilities, GetDefaultStencilFormat);
+  FLT_FORWARD(mock_capabilities, capabilities, GetDefaultDepthStencilFormat);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsOffscreenMSAA);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsImplicitResolvingMSAA);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsReadFromResolve);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsSSBO);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsCompute);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsTextureToTextureBlits);
+  FLT_FORWARD(mock_capabilities, capabilities, GetDefaultGlyphAtlasFormat);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsTriangleFan);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsDecalSamplerAddressMode);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsPrimitiveRestart);
+  FLT_FORWARD(mock_capabilities, capabilities, GetMinimumUniformAlignment);
+  return mock_capabilities;
+}
+}  // namespace
+
 // Advanced blends on devices without framebuffer fetch are rendered in an
 // offscreen subpass whose render target has an integral size. The texture
 // coordinates used to sample the inputs must describe exactly the rect that
-// render target covers; if they describe the full, fractional coverage instead,
-// the contents are scaled by trunc(w)/w on every blend. Stacking blends makes
-// that error accumulate into a visible drift, which is what this test checks.
-// Lighten is idempotent, so any number of stacked blends must produce the same
-// image as a single one.
+// render target covers; if they describe the fractional coverage instead, the
+// contents are rescaled on every blend. Stacking blends makes that error
+// accumulate into a visible drift, which is what this test checks. Lighten is
+// idempotent, so any number of stacked blends must produce the same image as a
+// single one.
 //
 // Regression test for https://github.com/flutter/flutter/issues/192980.
 TEST_P(DlGoldenTest, StackedOffscreenAdvancedBlendsDoNotResample) {
@@ -671,30 +700,9 @@ TEST_P(DlGoldenTest, StackedOffscreenAdvancedBlendsDoNotResample) {
 
   std::shared_ptr<const impeller::Capabilities> old_capabilities =
       GetContext()->GetCapabilities();
-  auto mock_capabilities =
-      std::make_shared<impeller::testing::MockCapabilities>();
-  EXPECT_CALL(*mock_capabilities, SupportsFramebufferFetch())
-      .Times(::testing::AnyNumber())
-      .WillRepeatedly(::testing::Return(false));
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultColorFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultStencilFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              GetDefaultDepthStencilFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsOffscreenMSAA);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              SupportsImplicitResolvingMSAA);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsReadFromResolve);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsSSBO);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsCompute);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              SupportsTextureToTextureBlits);
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultGlyphAtlasFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsTriangleFan);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              SupportsDecalSamplerAddressMode);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsPrimitiveRestart);
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetMinimumUniformAlignment);
-  ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
+  ASSERT_TRUE(
+      SetCapabilities(MakeCapabilitiesWithoutFramebufferFetch(old_capabilities))
+          .ok());
   // The playground context is shared across tests, so the mocked capabilities
   // have to be undone however this test exits.
   fml::ScopedCleanupClosure restore_capabilities([&]() {
@@ -709,9 +717,9 @@ TEST_P(DlGoldenTest, StackedOffscreenAdvancedBlendsDoNotResample) {
     // the coverage is only fractional through floating point error in the
     // transform. A 0.4x scale (which the ColorFilterAdvancedBlendNoFbFetch
     // golden also uses) does not round trip exactly through its inverse and
-    // leaves a 2048 pixel pass at 2047.99988, which the ISize conversion
-    // truncates. A pure scale keeps the origin at exactly zero, isolating the
-    // size mismatch from compositing at a fractional origin.
+    // leaves a 2048 pixel pass at 2047.99988. A pure scale keeps the origin at
+    // exactly zero, isolating the size mismatch from compositing at a
+    // fractional origin.
     canvas->Scale(0.4f, 0.4f);
 
     // A backdrop with a hard vertical edge for the blends to resample.
@@ -744,6 +752,66 @@ TEST_P(DlGoldenTest, StackedOffscreenAdvancedBlendsDoNotResample) {
   // Without the fix the thirty stacked blends drift the backdrop edge by
   // several pixels and the RMSE is about 5.75; with it the images are equal.
   EXPECT_LT(rmse, 1.0) << "rmse: " << rmse;
+}
+
+// The offscreen subpass of an advanced blend must cover every pixel its
+// fractional coverage touches. Rounding the render target size down drops the
+// last column and row, so a blend that reaches the edge of the pass loses them.
+// Framebuffer fetch blends in place without a subpass, so its output is the
+// reference the offscreen path has to match.
+TEST_P(DlGoldenTest, OffscreenAdvancedBlendKeepsFractionalEdge) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
+    GTEST_SKIP()
+        << "This backend doesn't yet support setting device capabilities.";
+  }
+
+  std::shared_ptr<const impeller::Capabilities> old_capabilities =
+      GetContext()->GetCapabilities();
+  if (!old_capabilities->SupportsFramebufferFetch()) {
+    GTEST_SKIP() << "The reference image needs framebuffer fetch.";
+  }
+
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor(0xFF404040), DlBlendMode::kSrcOver);
+  // As in StackedOffscreenAdvancedBlendsDoNotResample, the 0.4x scale leaves
+  // the 2048 pixel pass with a coverage of 2047.99988.
+  builder.Scale(0.4f, 0.4f);
+  DlPaint backdrop;
+  backdrop.setColor(DlColor(0xFFA0A0A0));
+  builder.DrawRect(DlRect::MakeLTRB(750, 0, 5120, 3840), backdrop);
+  // A blend that reaches the right and bottom edges of the pass.
+  DlPaint blend;
+  blend.setColor(DlColor(0xFF20C020));
+  blend.setBlendMode(DlBlendMode::kLighten);
+  builder.DrawRect(DlRect::MakeLTRB(250, 250, 5118.7f, 3838.6f), blend);
+  sk_sp<DisplayList> display_list = builder.Build();
+
+  std::unique_ptr<impeller::testing::Screenshot> reference =
+      MakeScreenshot(display_list);
+  if (!reference) {
+    GTEST_SKIP() << "making screenshots not supported.";
+  }
+
+  ASSERT_TRUE(
+      SetCapabilities(MakeCapabilitiesWithoutFramebufferFetch(old_capabilities))
+          .ok());
+  // The playground context is shared across tests, so the mocked capabilities
+  // have to be undone however this test exits.
+  fml::ScopedCleanupClosure restore_capabilities([&]() {
+    EXPECT_TRUE(SetCapabilities(std::const_pointer_cast<impeller::Capabilities>(
+                                    old_capabilities))
+                    .ok());
+  });
+
+  std::unique_ptr<impeller::testing::Screenshot> offscreen =
+      MakeScreenshot(display_list);
+  ASSERT_TRUE(offscreen);
+
+  double rmse = RMSE(reference.get(), offscreen.get());
+  // Rounding the render target down to 2047x1535 leaves the last column and
+  // row unblended and the RMSE is about 0.72; rounding it up matches the
+  // reference exactly.
+  EXPECT_LT(rmse, 0.1) << "rmse: " << rmse;
 }
 
 }  // namespace testing
