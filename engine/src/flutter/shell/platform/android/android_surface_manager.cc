@@ -1533,6 +1533,7 @@ void AndroidSurfaceManager::DestroyOverlayVulkanSurfaceLocked(
     entry.surface = VK_NULL_HANDLE;
   }
   entry.current_image_index = 0;
+  entry.has_acquired_image = false;
 }
 
 void* AndroidSurfaceManager::GetInstanceProcAddress(
@@ -1639,6 +1640,16 @@ bool AndroidSurfaceManager::PresentImage(const FlutterVulkanImage* image) {
         << reinterpret_cast<uint64_t>(vk_swapchain_)
         << "). Surface window may have changed during frame rendering; "
            "discarding presentation.";
+    return false;
+  }
+
+  if (!has_acquired_image_ || image_index != current_image_index_) {
+    FML_LOG(WARNING) << "PresentImage: image " << std::hex << image->image
+                     << " (index=" << image_index
+                     << ") is not currently acquired ("
+                     << "current_image_index_=" << current_image_index_
+                     << ", has_acquired_image_=" << has_acquired_image_
+                     << "); discarding presentation.";
     return false;
   }
 
@@ -1785,6 +1796,7 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextOverlayImage(
                          kFenceTimeoutNanoseconds);
 
   entry.current_image_index = image_index;
+  entry.has_acquired_image = true;
   image.image = VkImageToHandle(entry.images[image_index]);
   image.format = static_cast<uint32_t>(entry.format.format);
   return image;
@@ -1821,6 +1833,16 @@ bool AndroidSurfaceManager::PresentOverlayImage(
     FML_LOG(WARNING)
         << "PresentOverlayImage: provided image " << std::hex << image->image
         << " does not belong to overlay swapchain; discarding presentation.";
+    return false;
+  }
+
+  if (!entry.has_acquired_image || image_index != entry.current_image_index) {
+    FML_LOG(WARNING) << "PresentOverlayImage: image " << std::hex
+                     << image->image << " (index=" << image_index
+                     << ") is not currently acquired ("
+                     << "current_image_index=" << entry.current_image_index
+                     << ", has_acquired_image=" << entry.has_acquired_image
+                     << "); discarding presentation.";
     return false;
   }
 
@@ -1894,6 +1916,7 @@ bool AndroidSurfaceManager::PresentOverlayImage(
   };
 
   VkResult res = vk_queue_present_khr_fn_(vk_queue_, &present_info);
+  entry.has_acquired_image = false;
   if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
     CreateOrUpdateOverlayVulkanSurfaceLocked(overlay_window, entry);
   } else if (res == VK_ERROR_SURFACE_LOST_KHR) {
