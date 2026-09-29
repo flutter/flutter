@@ -12,10 +12,7 @@ import 'framework.dart';
 
 /// The buttons that can appear in a context menu by default.
 ///
-/// This enum is deprecated because adding a value to a Dart enum is a breaking
-/// change for any code that switches on it exhaustively. Use
-/// [ContextMenuButtonKind] instead, which can gain new values without breaking
-/// existing code.
+/// Deprecated in favor of [ContextMenuButtonKind].
 ///
 /// See also:
 ///
@@ -64,23 +61,8 @@ enum ContextMenuButtonType {
 
 /// The kinds of buttons that can appear in a context menu by default.
 ///
-/// This is an enum-like class rather than a Dart `enum` so that new kinds can
-/// be added without breaking code that switches on it. Switches on
-/// [ContextMenuButtonKind] can't be exhaustive, so they must include a
-/// wildcard (`_`) case that handles kinds added in the future.
-///
-/// {@tool snippet}
-///
-/// ```dart
-/// String describe(ContextMenuButtonItem item) {
-///   return switch (item.kind) {
-///     ContextMenuButtonKind.copy => 'Copy',
-///     ContextMenuButtonKind.paste => 'Paste',
-///     _ => item.label ?? '',
-///   };
-/// }
-/// ```
-/// {@end-tool}
+/// New kinds may be added in the future, so switches on this class should
+/// include a wildcard (`_`) case.
 ///
 /// See also:
 ///
@@ -157,9 +139,6 @@ final class ContextMenuButtonKind {
   );
 
   /// A button that launches a translation popup for the current text selection.
-  ///
-  /// This kind has no equivalent [ContextMenuButtonType], so
-  /// [ContextMenuButtonItem.type] reports it as [ContextMenuButtonType.custom].
   static const ContextMenuButtonKind translate = ContextMenuButtonKind._(
     'translate',
     ContextMenuButtonType.custom,
