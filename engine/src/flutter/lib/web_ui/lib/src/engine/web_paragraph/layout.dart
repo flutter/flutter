@@ -848,11 +848,36 @@ class TextLayout {
     return ui.TextRange(start: start, end: end);
   }
 
-  ui.TextRange getLineBoundary(int codepointPosition) {
-    for (final TextLine line in lines) {
-      if (line.allLineTextRange.start <= codepointPosition &&
-          line.allLineTextRange.end > codepointPosition) {
-        return ui.TextRange(start: line.allLineTextRange.start, end: line.allLineTextRange.end);
+  ui.TextRange getLineBoundary(ui.TextPosition position) {
+    if (lines.isEmpty) {
+      return ui.TextRange.empty;
+    }
+    final int offset = position.offset;
+
+    for (var i = 0; i < lines.length; i++) {
+      final TextLine line = lines[i];
+      if (offset >= line.allLineTextRange.start && offset <= line.allLineTextRange.end) {
+        final lineRange = ui.TextRange(
+          start: line.allLineTextRange.start,
+          end: line.allLineTextRange.end,
+        );
+
+        if (offset == lineRange.end && i + 1 < lines.length) {
+          final TextLine nextLine = lines[i + 1];
+          final nextLineRange = ui.TextRange(
+            start: nextLine.allLineTextRange.start,
+            end: nextLine.allLineTextRange.end,
+          );
+
+          if (lineRange != nextLineRange &&
+              offset == lineRange.end &&
+              lineRange.end == nextLineRange.start) {
+            if (position.affinity == ui.TextAffinity.downstream) {
+              return nextLineRange;
+            }
+          }
+        }
+        return lineRange;
       }
     }
     return ui.TextRange.empty;

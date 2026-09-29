@@ -148,6 +148,12 @@ Future<void> testMain() async {
       ),
       const ui.TextRange(start: 12, end: 17),
     );
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 17 /* affinity: ui.TextAffinity.downstream */),
+      ),
+      const ui.TextRange(start: 12, end: 17),
+    );
 
     expect(
       paragraph.getLineBoundary(
@@ -161,6 +167,54 @@ Future<void> testMain() async {
         ui.TextPosition(offset: paragraph.text.length + 1, affinity: ui.TextAffinity.upstream),
       ),
       ui.TextRange.empty,
+    );
+  });
+
+  test('Paragraph getLineBoundary at the last character position', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('hello world');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 11)),
+      const ui.TextRange(start: 0, end: 11),
+    );
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 11, affinity: ui.TextAffinity.upstream),
+      ),
+      const ui.TextRange(start: 0, end: 11),
+    );
+  });
+
+  test('Paragraph getLineBoundary with soft line breaks respects affinity', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('hello world');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 80));
+    expect(paragraph.numberOfLines, 2);
+
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 6, affinity: ui.TextAffinity.upstream),
+      ),
+      const ui.TextRange(start: 0, end: 6),
+    );
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 6 /* affinity: ui.TextAffinity.downstream */),
+      ),
+      const ui.TextRange(start: 6, end: 11),
+    );
+
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 11)),
+      const ui.TextRange(start: 6, end: 11),
     );
   });
 
