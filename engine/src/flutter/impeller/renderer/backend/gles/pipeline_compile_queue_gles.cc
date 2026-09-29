@@ -15,7 +15,8 @@ namespace impeller {
 
 namespace {
 // The queue whose job this thread runs right now. Two engines in one process
-// have a queue each, so the queue is part of the answer.
+// have a queue each. With a flag instead of the queue, a job of one queue
+// would make IsRunningJobOnCurrentThread return true for the other queue.
 thread_local const PipelineCompileQueueGLES* tls_running_queue = nullptr;
 }  // namespace
 

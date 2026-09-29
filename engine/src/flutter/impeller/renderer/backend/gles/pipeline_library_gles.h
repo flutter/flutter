@@ -185,8 +185,8 @@ class PipelineLibraryGLES final
 
   //----------------------------------------------------------------------------
   /// @brief      Sets the promise of every pending pipeline whose link has
-  ///             completed, so the limit is reached less often. The
-  ///             GL_COMPLETION_STATUS_KHR query does not wait for the link.
+  ///             completed, so the limit is reached less often. It does not
+  ///             block on a link that is still running.
   ///
   void FinishCompletedPipelines(const ReactorGLES& reactor);
 

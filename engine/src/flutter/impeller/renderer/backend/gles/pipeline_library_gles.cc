@@ -24,7 +24,8 @@ namespace impeller {
 static const constexpr char* kParallelShaderCompileExt =
     "GL_KHR_parallel_shader_compile";
 
-// How many links may be pending before the library waits for them. Every link
+// At this many pending links the library checks all of them in one batch,
+// and the queue processes no other pipeline until the batch ends. Every link
 // occupies a thread of the driver, so starting all of them at once takes the
 // cores that the Dart isolate needs while it starts. This is the bound that
 // ContextVK::ChooseThreadCountForWorkers uses for the same reason, see
@@ -324,6 +325,8 @@ static bool IsProgramLinked(const ReactorGLES& reactor,
   return link_status == GL_TRUE;
 }
 
+// GL_COMPLETION_STATUS_KHR returns at once, while GL_LINK_STATUS waits for
+// the link to finish
 static bool IsLinkCompleted(const ReactorGLES& reactor,
                             const PipelineGLES& pipeline) {
   auto program = reactor.GetGLHandle(pipeline.GetProgramHandle());
@@ -669,10 +672,12 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
   // The queue owns this job while it waits, so a strong reference here would
   // keep the queue alive through the job it holds. A task runner that drops
   // its tasks would then leak both and leave the promise unset.
-  std::weak_ptr<PipelineCompileQueueGLES> weak_compile_queue =
-      async && supports_parallel_shader_compile_
-          ? compile_queue_
-          : std::shared_ptr<PipelineCompileQueueGLES>();
+  std::weak_ptr<PipelineCompileQueueGLES> weak_compile_queue;
+  if (async && supports_parallel_shader_compile_) {
+    weak_compile_queue = compile_queue_;
+  } else {
+    weak_compile_queue = std::shared_ptr<PipelineCompileQueueGLES>();
+  }
   auto generation_task = [promise, weak_this, descriptor, vert_function,
                           frag_function, threadsafe, reactor,
                           weak_compile_queue]() {
