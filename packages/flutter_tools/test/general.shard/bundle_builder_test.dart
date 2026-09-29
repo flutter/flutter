@@ -136,7 +136,7 @@ void main() {
     },
   );
 
-  testWithoutContext('writeBundle passes target plaform to asset transformers', () async {
+  testWithoutContext('writeBundle passes target platform to asset transformers', () async {
     for (final TargetPlatform targetPlatform in TargetPlatform.values) {
       final fileSystem = MemoryFileSystem.test();
       final File asset = fileSystem.file('my-asset.txt')
