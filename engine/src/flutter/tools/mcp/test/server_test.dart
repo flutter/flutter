@@ -42,7 +42,7 @@ void main() {
     expect(json['result']['tools'], isNotEmpty, reason: outputString);
 
     await inputController.close();
-    server.shutdown();
+    await server.shutdown();
   });
 
   test('build', () async {
@@ -90,7 +90,7 @@ void main() {
     expect(json['result']['content'][0]['text'], equals('Build succeeded.'), reason: outputString);
 
     await inputController.close();
-    server.shutdown();
+    await server.shutdown();
   });
 
   test('list targets', () async {
@@ -136,6 +136,6 @@ void main() {
     expect(json['result']['content'][0]['text'], equals('//foo\n//bar\n'), reason: outputString);
 
     await inputController.close();
-    server.shutdown();
+    await server.shutdown();
   });
 }
