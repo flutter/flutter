@@ -12,6 +12,7 @@
 #include <new>
 
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 
 namespace flutter {
 
@@ -36,7 +37,8 @@ bool AndroidCompositor::CreateBackingStore(
   if (config == nullptr || backing_store_out == nullptr) {
     return false;
   }
-  if (config->struct_size < sizeof(FlutterBackingStoreConfig)) {
+  if (config->struct_size <
+      offsetof(FlutterBackingStoreConfig, view_id) + sizeof(FlutterViewId)) {
     return false;
   }
   if (config->size.width <= 0.0 || config->size.height <= 0.0 ||
@@ -46,6 +48,8 @@ bool AndroidCompositor::CreateBackingStore(
   if (!surface_manager_ || !surface_manager_->IsValid()) {
     return false;
   }
+
+  bool is_overlay = SAFE_ACCESS(config, is_overlay, false);
 
   std::memset(backing_store_out, 0, sizeof(FlutterBackingStore));
   backing_store_out->struct_size = sizeof(FlutterBackingStore);
@@ -79,7 +83,7 @@ bool AndroidCompositor::CreateBackingStore(
     case AndroidRenderingAPI::kImpellerAutoselect: {
       if (surface_manager_->IsVulkanInitialized() ||
           surface_manager_->IsFakeWindow()) {
-        if (backing_stores_created_in_frame_ == 0) {
+        if (!is_overlay && backing_stores_created_in_frame_ == 0) {
           bool expected = false;
           if (!has_active_onscreen_vulkan_backing_store_
                    .compare_exchange_strong(expected, true)) {
@@ -121,7 +125,7 @@ bool AndroidCompositor::CreateBackingStore(
             return false;
           }
 
-          size_t overlay_index = backing_stores_created_in_frame_ - 1;
+          size_t overlay_index = overlay_backing_stores_created_in_frame_++;
           ANativeWindow* overlay_window =
               delegate->GetOverlayWindow(overlay_index);
           if (overlay_window == nullptr && !surface_manager_->IsFakeWindow()) {
@@ -173,7 +177,8 @@ bool AndroidCompositor::CreateBackingStore(
 #if FML_OS_ANDROID
       has_current_egl_context = (eglGetCurrentContext() != EGL_NO_CONTEXT);
 #endif
-      if (backing_stores_created_in_frame_ == 0 && !has_current_egl_context) {
+      if (!is_overlay && backing_stores_created_in_frame_ == 0 &&
+          !has_current_egl_context) {
         backing_store_out->user_data = nullptr;
         backing_store_out->open_gl.framebuffer.name =
             surface_manager_->GetFBO();
@@ -215,6 +220,10 @@ bool AndroidCompositor::CollectBackingStore(
         static_cast<VulkanBackingStoreTracker*>(renderer->user_data);
     if (tracker->is_onscreen) {
       has_active_onscreen_vulkan_backing_store_ = false;
+    } else {
+      if (overlay_backing_stores_created_in_frame_ > 0) {
+        overlay_backing_stores_created_in_frame_--;
+      }
     }
     delete tracker;
   }
@@ -247,6 +256,7 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
   size_t platform_views_count = 0;
   size_t overlays_count = 0;
   backing_stores_created_in_frame_ = 0;
+  overlay_backing_stores_created_in_frame_ = 0;
   has_active_onscreen_vulkan_backing_store_ = false;
   const FlutterLayer* root_backing_store_layer = nullptr;
 
@@ -259,17 +269,20 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
     if (layer->type == kFlutterLayerContentTypeBackingStore) {
       if (layer->backing_store != nullptr) {
         bool is_root = false;
-        if (root_backing_store_layer == nullptr) {
+        // A backing store can ONLY be the root onscreen layer if NO platform
+        // view has been encountered yet in Z-order. Any backing store appearing
+        // after a platform view is an overlay layer.
+        if (root_backing_store_layer == nullptr && platform_views_count == 0) {
           if (layer->backing_store->type == kFlutterBackingStoreTypeVulkan) {
             if (layer->backing_store->user_data != nullptr) {
               auto* tracker = static_cast<VulkanBackingStoreTracker*>(
                   layer->backing_store->user_data);
               is_root = tracker->is_onscreen;
             } else {
-              is_root = (platform_views_count == 0);
+              is_root = true;
             }
           } else {
-            is_root = (platform_views_count == 0);
+            is_root = true;
           }
         }
 

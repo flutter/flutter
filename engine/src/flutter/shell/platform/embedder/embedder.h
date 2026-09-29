@@ -2632,6 +2632,10 @@ typedef struct {
   /// The identifier for the view that the engine will use this backing store to
   /// render into.
   FlutterViewId view_id;
+  /// True if this backing store represents an overlay layer positioned above a
+  /// platform view. False if this backing store represents the base/onscreen
+  /// layer beneath any platform views.
+  bool is_overlay;
 } FlutterBackingStoreConfig;
 
 typedef enum {
