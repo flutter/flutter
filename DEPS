@@ -594,7 +594,7 @@ deps = {
       {
         # See tools/gradle/README.md for update instructions.
         # Version here means the CIPD tag.
-        'version': 'version:9.3.1',
+        'version': 'version:9.5.0',
         'package': 'flutter/gradle'
       }
     ],
@@ -830,7 +830,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'ukukV5lEkKabtOATkSbVa6yIaU7g4nfmCcVvWNxfMQMC'
+        'version': 'QdgqP02_cYpRQQQNNuRjshiknJeDe5ZKXyqGq2YkqKkC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
