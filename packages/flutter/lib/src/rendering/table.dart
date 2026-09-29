@@ -1708,7 +1708,16 @@ class RenderTable extends RenderBox {
       rowHeight = math.max(rowHeight, pendingHeightForThisRow);
       remainingRowSpanHeights[y] = 0.0; // Reset after use.
 
+      if (haveBaseline) {
+        if (y == 0) {
+          _baselineDistance = beforeBaselineDistance;
+        }
+        rowHeight = math.max(rowHeight, beforeBaselineDistance + afterBaselineDistance);
+      }
+
       // Adjust pending heights for future rows by subtracting the current height.
+      // This has to use the final row height, including the height that
+      // baseline-aligned cells give the row.
       for (int futureY = y + 1; futureY < rows; futureY++) {
         if (remainingRowSpanHeights[futureY] > 0) {
           // For cells spanning multiple rows, reduce the pending height by the
@@ -1719,13 +1728,6 @@ class RenderTable extends RenderBox {
             remainingRowSpanHeights[futureY] - rowHeight,
           );
         }
-      }
-
-      if (haveBaseline) {
-        if (y == 0) {
-          _baselineDistance = beforeBaselineDistance;
-        }
-        rowHeight = math.max(rowHeight, beforeBaselineDistance + afterBaselineDistance);
       }
       rowHeights[y] = rowHeight;
       beforeBaselineDistances[y] = beforeBaselineDistance;

@@ -805,6 +805,44 @@ void main() {
         final boxData = boxCell.parentData! as TableCellParentData;
         expect(boxData.offset.dy, 0.0);
       });
+
+      test('Baseline: a row sized by baseline cells counts toward a rowSpan', () {
+        // A rowSpan cell only adds the height that the rows it covers do not
+        // already provide. A row whose height comes from baseline-aligned cells
+        // must count toward that too, or the last row of the span grows by the
+        // height of the baseline row.
+        final table = RenderTable(
+          textDirection: TextDirection.ltr,
+          columns: 2,
+          rows: 2,
+          defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+        );
+
+        final RenderBox spanningCell = sizedBox(50.0, 100.0);
+        spanningCell.parentData = TableCellParentData()
+          ..rowSpan = 2
+          ..verticalAlignment = TableCellVerticalAlignment.top;
+        table.setChild(0, 0, spanningCell);
+
+        // In the test font, a 20 pixel line is 20 pixels tall.
+        RenderBox textCell() {
+          return RenderParagraph(
+            const TextSpan(text: 'Text', style: TextStyle(fontSize: 20.0)),
+            textDirection: TextDirection.ltr,
+          );
+        }
+
+        table.setChild(1, 0, textCell());
+        table.setChild(1, 1, textCell());
+
+        layout(table, constraints: const BoxConstraints.tightFor(width: 200.0));
+
+        expect(table.getRowBox(0).height, 20.0);
+        expect(table.getRowBox(1).height, 80.0);
+        expect(table.size.height, 100.0);
+        expect(table.getMinIntrinsicHeight(200.0), table.size.height);
+      });
     });
   });
 
