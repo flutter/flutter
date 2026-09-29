@@ -2151,5 +2151,170 @@ void main() {
         });
       });
     });
+
+    group('spanning cells', () {
+      // Row 0: | A (colSpan: 2)       | B (rowSpan: 2) |
+      // Row 1: | C        | D         |                |
+      Widget spanningTable({
+        required TextDirection textDirection,
+        required Widget a,
+        required Widget b,
+        required Widget c,
+        required Widget d,
+      }) {
+        return Directionality(
+          textDirection: textDirection,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Table(
+              defaultColumnWidth: const FixedColumnWidth(100.0),
+              children: <TableRow>[
+                TableRow(
+                  children: <Widget>[
+                    TableCell(colSpan: 2, child: a),
+                    TableCell.none,
+                    TableCell(rowSpan: 2, child: b),
+                  ],
+                ),
+                TableRow(children: <Widget>[c, d, TableCell.none]),
+              ],
+            ),
+          ),
+        );
+      }
+
+      testWidgets('are laid out from the right in RTL', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          spanningTable(
+            textDirection: TextDirection.rtl,
+            a: const SizedBox(key: ValueKey<String>('A'), height: 20.0),
+            b: const SizedBox(key: ValueKey<String>('B'), height: 40.0),
+            c: const SizedBox(key: ValueKey<String>('C'), height: 20.0),
+            d: const SizedBox(key: ValueKey<String>('D'), height: 20.0),
+          ),
+        );
+
+        // Column 0 is the rightmost column, so the colSpan extends to the left
+        // and the rowSpan cell in the last column is at the left edge.
+        Rect rectOf(String key) => tester.getRect(find.byKey(ValueKey<String>(key)));
+        expect(rectOf('A'), const Rect.fromLTWH(100.0, 0.0, 200.0, 20.0));
+        expect(rectOf('B'), const Rect.fromLTWH(0.0, 0.0, 100.0, 40.0));
+        expect(rectOf('C'), const Rect.fromLTWH(200.0, 20.0, 100.0, 20.0));
+        expect(rectOf('D'), const Rect.fromLTWH(100.0, 20.0, 100.0, 20.0));
+      });
+
+      testWidgets('are hit across their whole span', (WidgetTester tester) async {
+        final tapped = <String>[];
+        Widget tappable(String label, double height) {
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => tapped.add(label),
+            child: SizedBox(height: height),
+          );
+        }
+
+        for (final TextDirection textDirection in TextDirection.values) {
+          tapped.clear();
+          await tester.pumpWidget(
+            spanningTable(
+              textDirection: textDirection,
+              a: tappable('A', 20.0),
+              b: tappable('B', 40.0),
+              c: tappable('C', 20.0),
+              d: tappable('D', 20.0),
+            ),
+          );
+
+          // Tap the slot that A covers in row 0 and the slot that B covers in
+          // row 1, then D as a regular cell. Only B's column moves in RTL.
+          final bColumnCenter = textDirection == TextDirection.rtl ? 50.0 : 250.0;
+          await tester.tapAt(const Offset(150.0, 10.0));
+          await tester.tapAt(Offset(bColumnCenter, 30.0));
+          await tester.tapAt(const Offset(150.0, 30.0));
+          expect(tapped, <String>['A', 'B', 'D'], reason: '$textDirection');
+        }
+      });
+
+      testWidgets('can switch a slot between a cell and a placeholder', (
+        WidgetTester tester,
+      ) async {
+        // When a cell turns into TableCell.none and back, its element is
+        // reused, so the render object in that slot is kept while it is not
+        // laid out.
+        final tapped = <String>[];
+        Widget buildTable({required bool spanned}) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                children: <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      TableCell(
+                        colSpan: spanned ? 2 : 1,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => tapped.add('A'),
+                          child: const SizedBox(height: 20.0),
+                        ),
+                      ),
+                      if (spanned)
+                        TableCell.none
+                      else
+                        TableCell(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => tapped.add('B'),
+                            child: const SizedBox(height: 20.0),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildTable(spanned: false));
+        await tester.tapAt(const Offset(150.0, 10.0));
+
+        await tester.pumpWidget(buildTable(spanned: true));
+        expect(tester.takeException(), isNull);
+        await tester.tapAt(const Offset(150.0, 10.0));
+
+        await tester.pumpWidget(buildTable(spanned: false));
+        expect(tester.takeException(), isNull);
+        await tester.tapAt(const Offset(150.0, 10.0));
+
+        expect(tapped, <String>['B', 'A', 'B']);
+      });
+
+      testWidgets('have semantics nodes that cover their span', (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          spanningTable(
+            textDirection: TextDirection.ltr,
+            a: const SizedBox(height: 20.0, child: Text('A')),
+            b: const SizedBox(height: 40.0, child: Text('B')),
+            c: const SizedBox(height: 20.0, child: Text('C')),
+            d: const SizedBox(height: 20.0, child: Text('D')),
+          ),
+        );
+
+        final SemanticsNode a = tester.getSemantics(find.text('A'));
+        final SemanticsNode b = tester.getSemantics(find.text('B'));
+        expect(a.rect.size, const Size(200.0, 20.0));
+        expect(b.rect.size, const Size(100.0, 40.0));
+        // Placeholders add no cells, and B keeps the index of its column.
+        expect(a.parent!.childrenCount, 2);
+        expect(a.indexInParent, 0);
+        expect(b.indexInParent, 2);
+
+        handle.dispose();
+      });
+    });
   });
 }
