@@ -641,7 +641,8 @@ InferVulkanPlatformViewCreationCallback(
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
     bool enable_impeller,
-    impeller::Flags impeller_flags) {
+    impeller::Flags impeller_flags,
+    bool enable_vulkan_validation = false) {
   if (config->type != kVulkan) {
     return nullptr;
   }
@@ -705,7 +706,7 @@ InferVulkanPlatformViewCreationCallback(
             static_cast<VkDevice>(config->vulkan.device),
             config->vulkan.queue_family_index,
             static_cast<VkQueue>(config->vulkan.queue), vulkan_dispatch_table,
-            view_embedder, impeller_flags);
+            view_embedder, impeller_flags, enable_vulkan_validation);
 
     return fml::MakeCopyable(
         [embedder_surface = std::move(embedder_surface),
@@ -842,7 +843,8 @@ InferPlatformViewCreationCallback(
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
     bool enable_impeller,
-    impeller::Flags impeller_flags) {
+    impeller::Flags impeller_flags,
+    bool enable_vulkan_validation = false) {
   if (config == nullptr) {
     return nullptr;
   }
@@ -863,7 +865,8 @@ InferPlatformViewCreationCallback(
     case kVulkan:
       return InferVulkanPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder), enable_impeller, impeller_flags);
+          std::move(external_view_embedder), enable_impeller, impeller_flags,
+          enable_vulkan_validation);
     default:
       return nullptr;
   }
@@ -2709,7 +2712,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
       std::move(external_view_embedder_result.value()),
-      settings.enable_impeller, impeller_flags);
+      settings.enable_impeller, impeller_flags,
+      settings.enable_vulkan_validation);
 
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(
@@ -2856,6 +2860,10 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   if (SAFE_ACCESS(args, engine_id, 0) != 0) {
     run_configuration.SetEngineId(args->engine_id);
+  }
+
+  if (SAFE_ACCESS(args, initial_route, nullptr) != nullptr) {
+    run_configuration.SetInitialRoute(args->initial_route);
   }
 
   std::vector<flutter::ImageGeneratorFactoryRegistration> image_generators;
@@ -3486,13 +3494,20 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
   }
 
   std::unique_ptr<flutter::PlatformMessage> message;
-  if (message_size == 0) {
+  if (message_size == 0 && message_data == nullptr) {
     message = std::make_unique<flutter::PlatformMessage>(
         flutter_message->channel, response);
   } else {
+    auto make_mapping = [&]() -> fml::MallocMapping {
+      if (message_size == 0) {
+        // Allocate 1 byte so mapping.GetMapping() is non-null, with size 0.
+        return fml::MallocMapping(reinterpret_cast<uint8_t*>(malloc(1)), 0);
+      }
+      return fml::MallocMapping::Copy(message_data, message_size);
+    };
+    fml::MallocMapping mapping = make_mapping();
     message = std::make_unique<flutter::PlatformMessage>(
-        flutter_message->channel,
-        fml::MallocMapping::Copy(message_data, message_size), response);
+        flutter_message->channel, std::move(mapping), response);
   }
 
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)
@@ -3567,11 +3582,11 @@ FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
   auto response = handle->message->response();
 
   if (response) {
-    if (data_length == 0) {
+    if (data_length == 0 && data == nullptr) {
       response->CompleteEmpty();
     } else {
       response->Complete(std::make_unique<fml::DataMapping>(
-          std::vector<uint8_t>({data, data + data_length})));
+          std::vector<uint8_t>(data, data + data_length)));
     }
   }
 
@@ -4324,7 +4339,8 @@ FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine) engine,
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       renderer_config, user_data, platform_dispatch_table,
       std::move(external_view_embedder_result.value()),
-      parent_settings.enable_impeller, impeller_flags);
+      parent_settings.enable_impeller, impeller_flags,
+      parent_settings.enable_vulkan_validation);
 
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(
@@ -4455,6 +4471,15 @@ FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine) engine,
     run_configuration.SetEngineId(spawned_engine_id);
   }
 
+  const char* initial_route_arg = SAFE_ACCESS(config, initial_route, nullptr);
+  if ((initial_route_arg == nullptr || initial_route_arg[0] == '\0') &&
+      args != nullptr) {
+    initial_route_arg = SAFE_ACCESS(args, initial_route, nullptr);
+  }
+  if (initial_route_arg != nullptr && initial_route_arg[0] != '\0') {
+    run_configuration.SetInitialRoute(initial_route_arg);
+  }
+
   bool has_custom_image_generators = false;
   if (args != nullptr) {
     has_custom_image_generators =
@@ -4490,14 +4515,14 @@ FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine) engine,
         "Could not infer the Flutter project to run for spawned engine.");
   }
 
-  std::string initial_route = "/";
-  if (SAFE_ACCESS(config, initial_route, nullptr) != nullptr) {
-    initial_route = config->initial_route;
+  std::string spawn_initial_route = "/";
+  if (initial_route_arg != nullptr && initial_route_arg[0] != '\0') {
+    spawn_initial_route = initial_route_arg;
   }
 
   auto spawned_engine = parent_engine->Spawn(
-      thread_host, task_runners, std::move(run_configuration), initial_route,
-      on_create_platform_view, on_create_rasterizer,
+      thread_host, task_runners, std::move(run_configuration),
+      spawn_initial_route, on_create_platform_view, on_create_rasterizer,
       std::move(external_texture_resolver));
 
   if (!spawned_engine) {

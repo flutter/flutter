@@ -18,6 +18,8 @@
 
 #include "unicode/uchar.h"
 
+#include "rapidjson/document.h"
+
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
@@ -611,7 +613,9 @@ void FlutterEmbedderNative::PopulateRendererConfig(
     return;
   }
   std::memset(config, 0, sizeof(FlutterRendererConfig));
-  AndroidRenderingAPI rendering_api = GetSelectedRenderingAPI();
+  AndroidRenderingAPI rendering_api = surface_manager_
+                                          ? surface_manager_->GetRenderingAPI()
+                                          : GetSelectedRenderingAPI();
   if (IsHcppEnabled() &&
       rendering_api != AndroidRenderingAPI::kImpellerVulkan &&
       rendering_api != AndroidRenderingAPI::kImpellerAutoselect) {
@@ -631,11 +635,43 @@ void FlutterEmbedderNative::PopulateRendererConfig(
                                                           height);
       };
       break;
+#endif
+    case AndroidRenderingAPI::kImpellerVulkan:
+    case AndroidRenderingAPI::kImpellerAutoselect:
+      if (surface_manager_ && surface_manager_->IsVulkanInitialized()) {
+        config->type = kVulkan;
+        surface_manager_->PopulateVulkanRendererConfig(&config->vulkan);
+        config->vulkan.get_instance_proc_address_callback =
+            [](void* user_data, FlutterVulkanInstanceHandle instance,
+               const char* name) -> void* {
+          auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+          return self && self->GetSurfaceManager()
+                     ? self->GetSurfaceManager()->GetInstanceProcAddress(
+                           instance, name)
+                     : nullptr;
+        };
+        config->vulkan.get_next_image_callback =
+            [](void* user_data,
+               const FlutterFrameInfo* frame_info) -> FlutterVulkanImage {
+          auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+          return self && self->GetSurfaceManager()
+                     ? self->GetSurfaceManager()->GetNextImage(frame_info)
+                     : FlutterVulkanImage{};
+        };
+        config->vulkan.present_image_callback =
+            [](void* user_data, const FlutterVulkanImage* image) -> bool {
+          auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+          return self && self->GetSurfaceManager()
+                     ? self->GetSurfaceManager()->PresentImage(image)
+                     : false;
+        };
+        break;
+      }
+      [[fallthrough]];
+#if !SLIMPELLER
     case AndroidRenderingAPI::kSkiaOpenGLES:
 #endif
-    case AndroidRenderingAPI::kImpellerAutoselect:
     case AndroidRenderingAPI::kImpellerOpenGLES:
-    case AndroidRenderingAPI::kImpellerVulkan:
       config->type = kOpenGL;
       config->open_gl.struct_size = sizeof(FlutterOpenGLRendererConfig);
       config->open_gl.make_current = [](void* user_data) -> bool {
@@ -3465,6 +3501,11 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
     CreateAOTData(&source, &aot_data_);
   }
   project_args_.aot_data = aot_data_;
+  {
+    std::lock_guard<std::mutex> lock(pending_messages_mutex_);
+    project_args_.initial_route =
+        initial_route_.empty() ? nullptr : initial_route_.c_str();
+  }
 
   project_args_.custom_task_runners =
       &android_task_runners_->GetCustomTaskRunners();
@@ -3599,6 +3640,9 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::SpawnChild(
       &FlutterEmbedderNative::OnPlatformMessageCallback;
   child->project_args_.update_semantics_callback2 =
       &FlutterEmbedderNative::OnUpdateSemantics2;
+  child->initial_route_ = spawn_args.initial_route;
+  child->project_args_.initial_route =
+      child->initial_route_.empty() ? nullptr : child->initial_route_.c_str();
 
   auto parent_engine = GetEngine();
   if (parent_engine) {
@@ -3608,6 +3652,7 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::SpawnChild(
     spawn_config.library_uri = child->custom_library_url_storage_.empty()
                                    ? nullptr
                                    : child->custom_library_url_storage_.c_str();
+    spawn_config.initial_route = child->project_args_.initial_route;
     spawn_config.entrypoint_argc = child->project_args_.dart_entrypoint_argc;
     spawn_config.entrypoint_argv = child->project_args_.dart_entrypoint_argv;
     spawn_config.engine_id = spawn_args.engine_id;
@@ -3858,10 +3903,29 @@ FlutterEngineResult FlutterEmbedderNative::SendPlatformMessage(
   TRACE_EVENT1("flutter", "FlutterEmbedderNative::SendPlatformMessage",
                "channel", channel.c_str());
 
+  if (channel == "flutter/navigation" && message && size > 0) {
+    rapidjson::Document document;
+    document.Parse(reinterpret_cast<const char*>(message), size);
+    if (!document.HasParseError() && document.IsObject()) {
+      auto root = document.GetObj();
+      auto method = root.FindMember("method");
+      if (method != root.MemberEnd() && method->value.IsString() &&
+          method->value == "setInitialRoute") {
+        auto route = root.FindMember("args");
+        if (route != root.MemberEnd() && route->value.IsString()) {
+          std::lock_guard<std::mutex> lock(pending_messages_mutex_);
+          const_cast<FlutterEmbedderNative*>(this)->initial_route_ =
+              route->value.GetString();
+        }
+      }
+    }
+  }
+
   auto engine = GetEngine();
   if (!engine) {
     PendingPlatformMessage pending;
     pending.channel = channel;
+    pending.has_data = (message != nullptr);
     if (message && size > 0) {
       pending.message.assign(message, message + size);
     }
@@ -4005,10 +4069,12 @@ void FlutterEmbedderNative::FlushPendingPlatformMessages() {
     std::lock_guard<std::mutex> lock(pending_messages_mutex_);
     messages_to_flush.swap(pending_platform_messages_);
   }
+  static const uint8_t kEmptyByte = 0;
   for (const auto& msg : messages_to_flush) {
-    SendPlatformMessage(msg.channel,
-                        msg.message.empty() ? nullptr : msg.message.data(),
-                        msg.message.size(), msg.response_id);
+    const uint8_t* data =
+        msg.has_data ? (msg.message.empty() ? &kEmptyByte : msg.message.data())
+                     : nullptr;
+    SendPlatformMessage(msg.channel, data, msg.message.size(), msg.response_id);
   }
 }
 
@@ -5055,21 +5121,35 @@ static void FlutterJNI_DispatchPlatformMessage(JNIEnv* env,
   }
   std::string str_channel =
       channel ? fml::jni::JavaStringToString(env, channel) : "";
+  static const uint8_t kEmptyByte = 0;
+  const uint8_t* message_data = nullptr;
+  size_t message_size = 0;
   std::vector<uint8_t> data;
-  if (message != nullptr && position > 0) {
-    jlong capacity = env->GetDirectBufferCapacity(message);
-    if (capacity >= 0 && position <= capacity) {
-      const uint8_t* buffer =
-          static_cast<const uint8_t*>(env->GetDirectBufferAddress(message));
-      if (buffer != nullptr) {
-        data.assign(buffer, buffer + position);
+  if (message != nullptr) {
+    if (position > 0) {
+      jlong capacity = env->GetDirectBufferCapacity(message);
+      if (capacity >= 0 && position <= capacity) {
+        const uint8_t* buffer =
+            static_cast<const uint8_t*>(env->GetDirectBufferAddress(message));
+        if (buffer != nullptr) {
+          data.assign(buffer, buffer + position);
+          message_data = data.data();
+          message_size = data.size();
+        }
+      } else {
+        FML_LOG(ERROR) << "DispatchPlatformMessage: position " << position
+                       << " exceeds direct buffer capacity " << capacity;
       }
+    } else if (position == 0) {
+      message_data = &kEmptyByte;
+      message_size = 0;
     } else {
-      FML_LOG(ERROR) << "DispatchPlatformMessage: position " << position
-                     << " exceeds direct buffer capacity " << capacity;
+      FML_LOG(ERROR) << "DispatchPlatformMessage: invalid negative position: "
+                     << position;
+      return;
     }
   }
-  native_instance->SendPlatformMessage(str_channel, data.data(), data.size(),
+  native_instance->SendPlatformMessage(str_channel, message_data, message_size,
                                        responseId);
 }
 
@@ -5088,23 +5168,38 @@ static void FlutterJNI_InvokePlatformMessageResponseCallback(
   if (!native_instance) {
     return;
   }
+  static const uint8_t kEmptyByte = 0;
+  const uint8_t* message_data = nullptr;
+  size_t message_size = 0;
   std::vector<uint8_t> data;
-  if (message != nullptr && position > 0) {
-    jlong capacity = env->GetDirectBufferCapacity(message);
-    if (capacity >= 0 && position <= capacity) {
-      const uint8_t* buffer =
-          static_cast<const uint8_t*>(env->GetDirectBufferAddress(message));
-      if (buffer != nullptr) {
-        data.assign(buffer, buffer + position);
+  if (message != nullptr) {
+    if (position > 0) {
+      jlong capacity = env->GetDirectBufferCapacity(message);
+      if (capacity >= 0 && position <= capacity) {
+        const uint8_t* buffer =
+            static_cast<const uint8_t*>(env->GetDirectBufferAddress(message));
+        if (buffer != nullptr) {
+          data.assign(buffer, buffer + position);
+          message_data = data.data();
+          message_size = data.size();
+        }
+      } else {
+        FML_LOG(ERROR) << "InvokePlatformMessageResponseCallback: position "
+                       << position << " exceeds direct buffer capacity "
+                       << capacity;
       }
+    } else if (position == 0) {
+      message_data = &kEmptyByte;
+      message_size = 0;
     } else {
-      FML_LOG(ERROR) << "InvokePlatformMessageResponseCallback: position "
-                     << position << " exceeds direct buffer capacity "
-                     << capacity;
+      FML_LOG(ERROR) << "InvokePlatformMessageResponseCallback: invalid "
+                        "negative position: "
+                     << position;
+      return;
     }
   }
-  native_instance->SendPlatformMessageResponse(responseId, data.data(),
-                                               data.size());
+  native_instance->SendPlatformMessageResponse(responseId, message_data,
+                                               message_size);
 }
 
 static void FlutterJNI_InvokePlatformMessageEmptyResponseCallback(
