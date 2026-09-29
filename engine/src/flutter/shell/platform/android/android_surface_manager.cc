@@ -727,11 +727,14 @@ bool AndroidSurfaceManager::InitializeVulkan() {
   }
 
   enabled_instance_extensions_ptrs_.clear();
+  enabled_instance_extensions_ptrs_.reserve(
+      enabled_instance_extensions_.size());
   for (const auto& ext : enabled_instance_extensions_) {
     enabled_instance_extensions_ptrs_.push_back(ext.c_str());
   }
 
   std::vector<const char*> enabled_layers_ptrs;
+  enabled_layers_ptrs.reserve(enabled_layers.size());
   for (const auto& layer : enabled_layers) {
     enabled_layers_ptrs.push_back(layer.c_str());
   }
@@ -923,6 +926,7 @@ bool AndroidSurfaceManager::InitializeVulkan() {
   }
 
   enabled_device_extensions_ptrs_.clear();
+  enabled_device_extensions_ptrs_.reserve(enabled_device_extensions_.size());
   for (const auto& ext : enabled_device_extensions_) {
     enabled_device_extensions_ptrs_.push_back(ext.c_str());
   }
@@ -1287,7 +1291,12 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextImage(
                                                UINT64_MAX, VK_NULL_HANDLE,
                                                vk_acquire_fence_, &image_index);
 
-  if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
+  // Only recreate the swapchain on VK_ERROR_OUT_OF_DATE_KHR where no image was
+  // acquired. When vk_acquire_next_image_khr_fn_ returns VK_SUBOPTIMAL_KHR, the
+  // image was acquired successfully and must be presented before recreating the
+  // swapchain; tearing down the swapchain while an acquired buffer is in flight
+  // leaves the buffer queue in an inconsistent ACQUIRED state on Android.
+  if (res == VK_ERROR_OUT_OF_DATE_KHR) {
     CreateOrUpdateVulkanSurfaceLocked();
     if (vk_swapchain_ == VK_NULL_HANDLE || vk_swapchain_images_.empty() ||
         vk_acquire_fence_ == VK_NULL_HANDLE) {

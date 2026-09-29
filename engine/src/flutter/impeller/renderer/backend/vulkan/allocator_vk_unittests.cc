@@ -145,8 +145,8 @@ TEST(AllocatorVKTest, LargeHostVisibleBufferUsesDedicatedMemory) {
   ASSERT_TRUE(small_buffer);
   EXPECT_NE(small_buffer->OnGetContents(), nullptr);
 
-  // 4 MB buffer (e.g. initial 4096x1024 A8 glyph atlas bitmap) exceeds
-  // the 1 MB staging pool threshold and must use dedicated memory.
+  // 4 MB buffer (e.g. initial 4096x1024 A8 glyph atlas bitmap) suballocates
+  // cleanly from the 16 MB staging buffer pool.
   constexpr size_t kFourMegaBytes = 4 * 1024 * 1024;
   auto large_buffer = allocator->CreateBuffer(DeviceBufferDescriptor{
       .storage_mode = StorageMode::kHostVisible,
@@ -170,6 +170,18 @@ TEST(AllocatorVKTest, LargeHostVisibleBufferUsesDedicatedMemory) {
   EXPECT_EQ(contents[kFourMegaBytes / 2], 0xAB);
   EXPECT_EQ(contents[kFourMegaBytes - 16], 0xAB);
   EXPECT_EQ(contents[kFourMegaBytes - 1], 0xAB);
+
+  // 16 MB buffer exceeds the 8 MB staging pool threshold and routes to
+  // dedicated device memory with aliasing enabled.
+  constexpr size_t kSixteenMegaBytes = 16 * 1024 * 1024;
+  auto dedicated_buffer = allocator->CreateBuffer(DeviceBufferDescriptor{
+      .storage_mode = StorageMode::kHostVisible,
+      .size = kSixteenMegaBytes,
+  });
+  ASSERT_TRUE(dedicated_buffer);
+  EXPECT_EQ(dedicated_buffer->GetDeviceBufferDescriptor().size,
+            kSixteenMegaBytes);
+  EXPECT_NE(dedicated_buffer->OnGetContents(), nullptr);
 }
 
 #ifdef IMPELLER_DEBUG

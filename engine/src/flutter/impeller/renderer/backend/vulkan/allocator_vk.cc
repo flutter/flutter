@@ -88,6 +88,10 @@ static PoolVMA CreateBufferPool(VmaAllocator allocator) {
   VmaPoolCreateInfo pool_create_info = {};
   pool_create_info.memoryTypeIndex = memTypeIndex;
   pool_create_info.flags = VMA_POOL_CREATE_IGNORE_BUFFER_IMAGE_GRANULARITY_BIT;
+  // An explicit 16 MB block size ensures custom staging pool blocks have
+  // sufficient capacity for transient host-visible allocations (including the
+  // 4 MB glyph atlas upload) regardless of small-heap heuristics on emulators.
+  pool_create_info.blockSize = 16 * 1024 * 1024;  // 16 MB
   pool_create_info.minBlockCount = 1;
 
   VmaPool pool = {};
@@ -608,14 +612,13 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
       ToVKBufferMemoryPropertyFlags(desc.storage_mode));
   allocation_info.flags =
       ToVmaAllocationBufferCreateFlags(desc.storage_mode, desc.readback);
-  // The staging buffer pool is intended for small, high-frequency transient
-  // allocations (<= 1MB), matching the chunk size used by HostBuffer. Large
-  // host-visible buffers (such as the initial 4MB glyph atlas bitmap or
-  // oversized image uploads) should not be suballocated from the staging pool
-  // because doing so can lead to pool block boundary overshoots or excessive
-  // pool fragmentation. Instead, route them to dedicated device memory
-  // allocations.
-  constexpr size_t kMaxStagingPoolBufferSize = 1024 * 1024;  // 1 MB
+  // The staging buffer pool uses an explicit 16 MB block size, which provides
+  // ample capacity for transient host-visible allocations up to 8 MB (including
+  // the initial 4 MB glyph atlas upload and oversized transfer buffers) while
+  // guaranteeing they suballocate cleanly without block boundary overshoots.
+  // Buffers exceeding 8 MB bypass the staging pool and are routed to dedicated
+  // device memory allocations with aliasing enabled.
+  constexpr size_t kMaxStagingPoolBufferSize = 8 * 1024 * 1024;  // 8 MB
   if (desc.storage_mode == StorageMode::kHostVisible) {
     if (created_buffer_pool_ && !desc.readback &&
         desc.size <= kMaxStagingPoolBufferSize) {
