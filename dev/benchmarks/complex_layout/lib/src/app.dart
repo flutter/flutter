@@ -538,9 +538,8 @@ class ItemGalleryBox extends StatelessWidget {
                                 child: Center(
                                   child: Text(
                                     tabName,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.headlineSmall!.copyWith(color: Colors.white),
+                                    style: Theme.of(context).textTheme.headlineSmall!
+                                        .copyWith(color: Colors.white),
                                   ),
                                 ),
                               ),

@@ -466,9 +466,10 @@ Future<ProcessResult> _resultOfGradleTask({
   );
   print('┌── $gradle');
   print(
-    File(
-      path.join(workingDirectory, gradle),
-    ).readAsLinesSync().map((String line) => '| $line').join('\n'),
+    File(path.join(workingDirectory, gradle))
+        .readAsLinesSync()
+        .map((String line) => '| $line')
+        .join('\n'),
   );
   print('└─────────────────────────────────────────────────────────────────────────────────────');
   print(

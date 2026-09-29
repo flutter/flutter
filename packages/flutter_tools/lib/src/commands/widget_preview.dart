@@ -155,8 +155,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       )
       ..addOption(
         kDtdUrl,
-        help:
-            'The address of an existing Dart Tooling Daemon instance to be used by the Flutter CLI.',
+        help: 'The address of an existing Dart Tooling Daemon instance to be used by the Flutter CLI.',
         hide: !verbose,
       )
       ..addFlag(
@@ -637,9 +636,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       final String target = bundle.defaultMainPath;
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
-        target: target,
+        toolContext: toolContext,
         buildInfo: debuggingOptions.buildInfo,
-        platform: platform,
+        target: target,
       );
 
       if (boolArg(kLaunchPreviewer)) {
@@ -747,9 +746,9 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
   WidgetPreviewMachineAwareLogger(
     super.delegate, {
     required this.machine,
-    required Stdio stdio,
+    required this._stdio,
     required this.verbose,
-  }) : _stdio = stdio;
+  });
 
   final bool machine;
   final bool verbose;

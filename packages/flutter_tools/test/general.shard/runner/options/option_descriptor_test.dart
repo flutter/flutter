@@ -273,6 +273,80 @@ void main() {
     });
   });
 
+  group('IntOptionDescriptor', () {
+    test('returns null when omitted without default', () {
+      const descriptor = IntOptionDescriptor(name: 'port', help: 'Port number');
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>[]);
+      expect(descriptor.wasProvided(results), isFalse);
+      expect(descriptor.getValue(results), isNull);
+    });
+
+    test('parses valid integer string', () {
+      const descriptor = IntOptionDescriptor(name: 'port', help: 'Port number');
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--port=8080']);
+      expect(descriptor.wasProvided(results), isTrue);
+      expect(descriptor.getValue(results), 8080);
+    });
+
+    test('throws FormatException on invalid integer string', () {
+      const descriptor = IntOptionDescriptor(name: 'port', help: 'Port number');
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--port=not-an-int']);
+      expect(() => descriptor.getValue(results), throwsA(isA<FormatException>()));
+    });
+  });
+
+  group('DefaultedIntOptionDescriptor', () {
+    test('returns default value when omitted', () {
+      const descriptor = DefaultedIntOptionDescriptor(
+        name: 'timeout',
+        defaultsTo: 30,
+        help: 'Timeout in seconds',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>[]);
+      expect(descriptor.wasProvided(results), isFalse);
+      expect(descriptor.getValue(results), 30);
+    });
+
+    test('returns parsed integer when provided', () {
+      const descriptor = DefaultedIntOptionDescriptor(
+        name: 'timeout',
+        defaultsTo: 30,
+        help: 'Timeout in seconds',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--timeout=60']);
+      expect(descriptor.wasProvided(results), isTrue);
+      expect(descriptor.getValue(results), 60);
+    });
+
+    test('throws FormatException on invalid integer string', () {
+      const descriptor = DefaultedIntOptionDescriptor(
+        name: 'timeout',
+        defaultsTo: 30,
+        help: 'Timeout in seconds',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--timeout=abc']);
+      expect(() => descriptor.getValue(results), throwsA(isA<FormatException>()));
+    });
+  });
+
   group('EnumOptionDescriptor', () {
     test('derives allowed from enum values and returns null when omitted', () {
       const descriptor = EnumOptionDescriptor<_TestEnum>(
@@ -434,6 +508,24 @@ void main() {
       expect(command.wasProvided(stringOpt), isTrue);
     });
 
+    testUsingContext('converts FormatException from IntOptionDescriptor into ToolExit', () async {
+      const intOpt = IntOptionDescriptor(name: 'port', help: 'Server port');
+      const bundle = _SimpleBundle(descriptors: <OptionDescriptor<Object?>>[intOpt]);
+      final command = _FakeCommand(
+        name: 'serve',
+        description: 'Serve command',
+        bundles: const <OptionBundle>[bundle],
+      );
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['serve', '--port=not-a-number']);
+
+      expect(
+        () => command.getValue(intOpt),
+        throwsToolExit(message: 'Invalid integer value "not-a-number" for "--port".'),
+      );
+    });
+
     testUsingContext('renders section separator titles in command usage', () {
       const bundle = _TitledBundle();
       final command = _FakeCommand(
@@ -484,6 +576,166 @@ void main() {
       expect(verboseCommand.usage, contains('internal-flag'));
       expect(verboseCommand.usage, contains('public-flag'));
     });
+
+    testUsingContext('AndroidGradleOptionsBundle registers Gradle options with verbose hiding', () {
+      final normalCommand = _FakeCommand(
+        name: 'apk',
+        description: 'Build APK',
+        bundles: const <OptionBundle>[AndroidGradleOptionsBundle()],
+      );
+      createTestCommandRunner(normalCommand);
+
+      for (final name in const <String>[
+        FlutterOptions.kAndroidGradleDaemon,
+        FlutterOptions.kAndroidSkipBuildDependencyValidation,
+        FlutterOptions.kAndroidProjectArgs,
+        FlutterOptions.kAndroidGradleProjectCacheDir,
+      ]) {
+        expect(normalCommand.argParser.options.containsKey(name), isTrue);
+        expect(normalCommand.argParser.options[name]!.hide, isTrue);
+      }
+
+      final verboseCommand = _FakeCommand(
+        name: 'apk',
+        description: 'Build APK',
+        verboseHelp: true,
+        bundles: const <OptionBundle>[AndroidGradleOptionsBundle()],
+      );
+      createTestCommandRunner(verboseCommand);
+
+      for (final name in const <String>[
+        FlutterOptions.kAndroidGradleDaemon,
+        FlutterOptions.kAndroidSkipBuildDependencyValidation,
+        FlutterOptions.kAndroidProjectArgs,
+        FlutterOptions.kAndroidGradleProjectCacheDir,
+      ]) {
+        expect(verboseCommand.argParser.options[name]!.hide, isFalse);
+      }
+    });
+
+    testUsingContext('AndroidBuildOptionsBundle registers Android and Gradle options', () {
+      final command = _FakeCommand(
+        name: 'apk',
+        description: 'Build APK',
+        bundles: const <OptionBundle>[AndroidBuildOptionsBundle()],
+      );
+      createTestCommandRunner(command);
+
+      const allOptions = <OptionDescriptor<Object?>>[
+        BuildInfoOptions.shrink,
+        BuildInfoOptions.flavor,
+        BuildInfoOptions.ignoreDeprecation,
+        BuildInfoOptions.splitDebugInfo,
+        BuildInfoOptions.obfuscate,
+        BuildInfoOptions.extraFrontEndOptions,
+        BuildInfoOptions.extraGenSnapshotOptions,
+        BuildInfoOptions.performanceMeasurementFile,
+        BuildInfoOptions.analyzeSize,
+        BuildInfoOptions.codeSizeDirectory,
+        BuildInfoOptions.trackWidgetCreation,
+        DebuggingOptionDescriptors.enableHcpp,
+        BuildInfoOptions.androidGradleDaemon,
+        BuildInfoOptions.androidSkipBuildDependencyValidation,
+        BuildInfoOptions.androidProjectArg,
+        BuildInfoOptions.androidProjectCacheDir,
+      ];
+
+      for (final descriptor in allOptions) {
+        expect(
+          command.argParser.options.containsKey(descriptor.name),
+          isTrue,
+          reason: 'Option ${descriptor.name} should be registered',
+        );
+      }
+    });
+
+    testUsingContext('AppleBuildOptionsBundle registers Apple build options', () {
+      final command = _FakeCommand(
+        name: 'ios',
+        description: 'Build iOS',
+        bundles: const <OptionBundle>[AppleBuildOptionsBundle()],
+      );
+      createTestCommandRunner(command);
+
+      const allOptions = <OptionDescriptor<Object?>>[
+        BuildInfoOptions.flavor,
+        BuildInfoOptions.splitDebugInfo,
+        BuildInfoOptions.obfuscate,
+        BuildInfoOptions.extraFrontEndOptions,
+        BuildInfoOptions.extraGenSnapshotOptions,
+        BuildInfoOptions.performanceMeasurementFile,
+        BuildInfoOptions.analyzeSize,
+        BuildInfoOptions.codeSizeDirectory,
+      ];
+
+      for (final descriptor in allOptions) {
+        expect(
+          command.argParser.options.containsKey(descriptor.name),
+          isTrue,
+          reason: 'Option ${descriptor.name} should be registered',
+        );
+      }
+    });
+
+    testUsingContext(
+      'DarwinCodeSignXCFrameworksOptionsBundle registers codesign and codesign-identity',
+      () {
+        final command = _FakeCommand(
+          name: 'ios-framework',
+          description: 'Build iOS Framework',
+          bundles: const <OptionBundle>[DarwinCodeSignXCFrameworksOptionsBundle()],
+        );
+        createTestCommandRunner(command);
+
+        const allOptions = <OptionDescriptor<Object?>>[
+          BuildInfoOptions.codesign,
+          BuildInfoOptions.codesignIdentity,
+        ];
+
+        for (final descriptor in allOptions) {
+          expect(
+            command.argParser.options.containsKey(descriptor.name),
+            isTrue,
+            reason: 'Option ${descriptor.name} should be registered',
+          );
+        }
+      },
+    );
+
+    testUsingContext(
+      'DarwinAddToAppOptionsBundle registers shared Darwin Add-to-App options and subBundles',
+      () {
+        final command = _FakeCommand(
+          name: 'ios-framework',
+          description: 'Build iOS Framework',
+          bundles: const <OptionBundle>[DarwinAddToAppOptionsBundle()],
+        );
+        createTestCommandRunner(command);
+
+        const allOptions = <OptionDescriptor<Object?>>[
+          CommonOptions.treeShakeIcons,
+          CommonOptions.target,
+          CommonOptions.pub,
+          BuildInfoOptions.splitDebugInfo,
+          BuildInfoOptions.obfuscate,
+          BuildInfoOptions.extraFrontEndOptions,
+          BuildInfoOptions.extraGenSnapshotOptions,
+          CommonOptions.dartDefines,
+          CommonOptions.dartDefineFromFile,
+          CommonOptions.enableExperiment,
+          BuildInfoOptions.codesign,
+          BuildInfoOptions.codesignIdentity,
+        ];
+
+        for (final descriptor in allOptions) {
+          expect(
+            command.argParser.options.containsKey(descriptor.name),
+            isTrue,
+            reason: 'Option ${descriptor.name} should be registered',
+          );
+        }
+      },
+    );
   });
 }
 

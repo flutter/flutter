@@ -132,8 +132,7 @@ void main() {
           ),
           Barrier('Application finished.'),
         ],
-        logging:
-            false, // we ignore leading log lines to avoid making this test sensitive to e.g. the help message text
+        logging: false, // we ignore leading log lines to avoid making this test sensitive to e.g. the help message text
       );
       // We check the output from the app (all starts with "called ...") and the output from the tool
       // (everything else) separately, because their relative timing isn't guaranteed. Their rough timing
@@ -227,8 +226,7 @@ void main() {
           ),
           Barrier('Application finished.'),
         ],
-        logging:
-            false, // we ignore leading log lines to avoid making this test sensitive to e.g. the help message text
+        logging: false, // we ignore leading log lines to avoid making this test sensitive to e.g. the help message text
       );
       // We check the output from the app (all starts with "called ...") and the output from the tool
       // (everything else) separately, because their relative timing isn't guaranteed. Their rough timing

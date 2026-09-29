@@ -104,15 +104,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addMultiOption(
         'tags',
         abbr: 't',
-        help:
-            'Run only tests associated with the specified tags. See: https://pub.dev/packages/test#tagging-tests',
+        help: 'Run only tests associated with the specified tags. See: https://pub.dev/packages/test#tagging-tests',
         splitCommas: false,
       )
       ..addMultiOption(
         'exclude-tags',
         abbr: 'x',
-        help:
-            'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
+        help: 'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
         splitCommas: false,
       )
       ..addMultiOption(
@@ -259,16 +257,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption(
         'reporter',
         abbr: 'r',
-        help:
-            'Set how to print test results. If unset, value will default to either compact or expanded.',
+        help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
         allowed: <String>['compact', 'expanded', 'failures-only', 'github', 'json', 'silent'],
         allowedHelp: <String, String>{
           'compact': 'A single line, updated continuously (the default).',
-          'expanded':
-              'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
+          'expanded': 'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
           'failures-only': 'A separate line for failing tests, with no output for passing tests.',
-          'github':
-              'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
+          'github': 'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
           'json': 'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
           'silent':
               'A reporter with no output. May be useful when only the exit code is meaningful.',
@@ -611,12 +606,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         buildInfo.packageConfig,
       );
       collector = CoverageCollector(
-        verbose: !outputMachineFormat,
+        branchCoverage: boolArg('branch-coverage'),
         libraryNames: packagesToInclude,
         packagesPath: buildInfo.packageConfigPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
         testTimeRecorder: testTimeRecorder,
-        branchCoverage: boolArg('branch-coverage'),
+        toolContext: toolContext!,
+        verbose: !outputMachineFormat,
       );
     }
 
@@ -799,7 +795,16 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     filePart = globals.fs.path.absolute(filePart);
     filePart = globals.fs.path.normalize(filePart);
 
-    return Uri.file(filePart).replace(query: queryPart.isEmpty ? null : queryPart);
+    try {
+      return Uri.file(
+        filePart,
+        windows: globals.platform.isWindows,
+      ).replace(query: queryPart.isEmpty ? null : queryPart);
+    } on ArgumentError catch (e) {
+      throwToolExit('Invalid test path "$arg": ${e.message}');
+    } on FormatException catch (e) {
+      throwToolExit('Invalid test path "$arg": ${e.message}');
+    }
   }
 
   Future<void> _buildTestAsset({
