@@ -149,8 +149,10 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
   allocator_info.physicalDevice = physical_device;
   allocator_info.device = device_holder->GetDevice();
   allocator_info.instance = instance;
-  // 4 MB, matching the default used by Skia Vulkan.
-  allocator_info.preferredLargeHeapBlockSize = 4 * 1024 * 1024;
+  // 16 MB preferred large heap block size provides sufficient headroom for
+  // large transient host-visible allocations (e.g. 4 MB glyph atlases) and
+  // aligns with standard Vulkan memory allocator block sizing.
+  allocator_info.preferredLargeHeapBlockSize = 16 * 1024 * 1024;
   allocator_info.pVulkanFunctions = &proc_table;
 
   VmaAllocator allocator = {};
@@ -619,7 +621,13 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
         desc.size <= kMaxStagingPoolBufferSize) {
       allocation_info.pool = staging_buffer_pool_.get().pool;
     } else if (desc.size > kMaxStagingPoolBufferSize) {
-      allocation_info.flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+      // Set VMA_ALLOCATION_CREATE_CAN_ALIAS_BIT alongside
+      // VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT so VMA creates an isolated
+      // dedicated allocation without appending VkMemoryDedicatedAllocateInfoKHR
+      // to pNext, which is rejected by Android emulator (goldfish-opengl)
+      // drivers.
+      allocation_info.flags |= (VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT |
+                                VMA_ALLOCATION_CREATE_CAN_ALIAS_BIT);
     }
   }
   VkBuffer buffer = {};

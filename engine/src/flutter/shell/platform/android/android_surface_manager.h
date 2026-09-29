@@ -272,52 +272,53 @@ class AndroidSurfaceManager {
   std::vector<const char*> enabled_device_extensions_ptrs_;
 
   // Vulkan function pointers
-  PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr_fn_ = nullptr;
-  PFN_vkCreateInstance vkCreateInstance_fn_ = nullptr;
-  PFN_vkDestroyInstance vkDestroyInstance_fn_ = nullptr;
+  PFN_vkGetInstanceProcAddr vk_get_instance_proc_addr_fn_ = nullptr;
+  PFN_vkCreateInstance vk_create_instance_fn_ = nullptr;
+  PFN_vkDestroyInstance vk_destroy_instance_fn_ = nullptr;
   PFN_vkEnumerateInstanceExtensionProperties
-      vkEnumerateInstanceExtensionProperties_fn_ = nullptr;
+      vk_enumerate_instance_extension_properties_fn_ = nullptr;
   PFN_vkEnumerateInstanceLayerProperties
-      vkEnumerateInstanceLayerProperties_fn_ = nullptr;
-  PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices_fn_ = nullptr;
-  PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties_fn_ = nullptr;
+      vk_enumerate_instance_layer_properties_fn_ = nullptr;
+  PFN_vkEnumeratePhysicalDevices vk_enumerate_physical_devices_fn_ = nullptr;
+  PFN_vkGetPhysicalDeviceProperties vk_get_physical_device_properties_fn_ =
+      nullptr;
   PFN_vkGetPhysicalDeviceQueueFamilyProperties
-      vkGetPhysicalDeviceQueueFamilyProperties_fn_ = nullptr;
+      vk_get_physical_device_queue_family_properties_fn_ = nullptr;
   PFN_vkEnumerateDeviceExtensionProperties
-      vkEnumerateDeviceExtensionProperties_fn_ = nullptr;
-  PFN_vkCreateDevice vkCreateDevice_fn_ = nullptr;
-  PFN_vkDestroyDevice vkDestroyDevice_fn_ = nullptr;
-  PFN_vkGetDeviceQueue vkGetDeviceQueue_fn_ = nullptr;
-  PFN_vkDeviceWaitIdle vkDeviceWaitIdle_fn_ = nullptr;
-  PFN_vkQueueWaitIdle vkQueueWaitIdle_fn_ = nullptr;
-  PFN_vkCreateAndroidSurfaceKHR vkCreateAndroidSurfaceKHR_fn_ = nullptr;
-  PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR_fn_ = nullptr;
+      vk_enumerate_device_extension_properties_fn_ = nullptr;
+  PFN_vkCreateDevice vk_create_device_fn_ = nullptr;
+  PFN_vkDestroyDevice vk_destroy_device_fn_ = nullptr;
+  PFN_vkGetDeviceQueue vk_get_device_queue_fn_ = nullptr;
+  PFN_vkDeviceWaitIdle vk_device_wait_idle_fn_ = nullptr;
+  PFN_vkQueueWaitIdle vk_queue_wait_idle_fn_ = nullptr;
+  PFN_vkCreateAndroidSurfaceKHR vk_create_android_surface_khr_fn_ = nullptr;
+  PFN_vkDestroySurfaceKHR vk_destroy_surface_khr_fn_ = nullptr;
   PFN_vkGetPhysicalDeviceSurfaceSupportKHR
-      vkGetPhysicalDeviceSurfaceSupportKHR_fn_ = nullptr;
+      vk_get_physical_device_surface_support_khr_fn_ = nullptr;
   PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR
-      vkGetPhysicalDeviceSurfaceCapabilitiesKHR_fn_ = nullptr;
+      vk_get_physical_device_surface_capabilities_khr_fn_ = nullptr;
   PFN_vkGetPhysicalDeviceSurfaceFormatsKHR
-      vkGetPhysicalDeviceSurfaceFormatsKHR_fn_ = nullptr;
+      vk_get_physical_device_surface_formats_khr_fn_ = nullptr;
   PFN_vkGetPhysicalDeviceSurfacePresentModesKHR
-      vkGetPhysicalDeviceSurfacePresentModesKHR_fn_ = nullptr;
-  PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR_fn_ = nullptr;
-  PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR_fn_ = nullptr;
-  PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR_fn_ = nullptr;
-  PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR_fn_ = nullptr;
-  PFN_vkQueuePresentKHR vkQueuePresentKHR_fn_ = nullptr;
-  PFN_vkCreateCommandPool vkCreateCommandPool_fn_ = nullptr;
-  PFN_vkDestroyCommandPool vkDestroyCommandPool_fn_ = nullptr;
-  PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers_fn_ = nullptr;
-  PFN_vkFreeCommandBuffers vkFreeCommandBuffers_fn_ = nullptr;
-  PFN_vkBeginCommandBuffer vkBeginCommandBuffer_fn_ = nullptr;
-  PFN_vkEndCommandBuffer vkEndCommandBuffer_fn_ = nullptr;
-  PFN_vkResetCommandBuffer vkResetCommandBuffer_fn_ = nullptr;
-  PFN_vkCmdPipelineBarrier vkCmdPipelineBarrier_fn_ = nullptr;
-  PFN_vkQueueSubmit vkQueueSubmit_fn_ = nullptr;
-  PFN_vkCreateFence vkCreateFence_fn_ = nullptr;
-  PFN_vkDestroyFence vkDestroyFence_fn_ = nullptr;
-  PFN_vkWaitForFences vkWaitForFences_fn_ = nullptr;
-  PFN_vkResetFences vkResetFences_fn_ = nullptr;
+      vk_get_physical_device_surface_present_modes_khr_fn_ = nullptr;
+  PFN_vkCreateSwapchainKHR vk_create_swapchain_khr_fn_ = nullptr;
+  PFN_vkDestroySwapchainKHR vk_destroy_swapchain_khr_fn_ = nullptr;
+  PFN_vkGetSwapchainImagesKHR vk_get_swapchain_images_khr_fn_ = nullptr;
+  PFN_vkAcquireNextImageKHR vk_acquire_next_image_khr_fn_ = nullptr;
+  PFN_vkQueuePresentKHR vk_queue_present_khr_fn_ = nullptr;
+  PFN_vkCreateCommandPool vk_create_command_pool_fn_ = nullptr;
+  PFN_vkDestroyCommandPool vk_destroy_command_pool_fn_ = nullptr;
+  PFN_vkAllocateCommandBuffers vk_allocate_command_buffers_fn_ = nullptr;
+  PFN_vkFreeCommandBuffers vk_free_command_buffers_fn_ = nullptr;
+  PFN_vkBeginCommandBuffer vk_begin_command_buffer_fn_ = nullptr;
+  PFN_vkEndCommandBuffer vk_end_command_buffer_fn_ = nullptr;
+  PFN_vkResetCommandBuffer vk_reset_command_buffer_fn_ = nullptr;
+  PFN_vkCmdPipelineBarrier vk_cmd_pipeline_barrier_fn_ = nullptr;
+  PFN_vkQueueSubmit vk_queue_submit_fn_ = nullptr;
+  PFN_vkCreateFence vk_create_fence_fn_ = nullptr;
+  PFN_vkDestroyFence vk_destroy_fence_fn_ = nullptr;
+  PFN_vkWaitForFences vk_wait_for_fences_fn_ = nullptr;
+  PFN_vkResetFences vk_reset_fences_fn_ = nullptr;
 
   bool InitializeEGL();
   void TeardownEGL();
