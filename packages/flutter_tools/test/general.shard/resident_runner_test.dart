@@ -26,6 +26,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -1911,6 +1912,24 @@ flutter:
     },
   );
 
+  testUsingContext('FlutterDevice passes target plaform to DevFS', () async {
+    final fileSystem = MemoryFileSystem.test();
+
+    for (final TargetPlatform targetPlatform in TargetPlatform.values) {
+      final device = TestFlutterDevice(
+        FakeDevice(),
+        targetPlatform: targetPlatform,
+        vmService: _FakeFlutterVmService(),
+      );
+
+      await device.setupDevFS('', fileSystem.systemTempDirectory);
+
+      expect(device.devFS, isA<DevFS>());
+      expect(device.targetPlatform, targetPlatform);
+      expect(device.devFS?.assetTransformer.targetPlatform, targetPlatform);
+    }
+  });
+
   testUsingContext(
     'Uses existing DDS URI from exception field',
     () => testbed.run(
@@ -2403,5 +2422,15 @@ class TestHotRunner extends HotRunner {
 
   void testCacheInitialDillCompilation() {
     cacheInitialDillCompilation();
+  }
+}
+
+class _FakeFlutterVmService extends Fake implements FlutterVmService {
+  @override
+  Uri? get httpAddress => Uri.parse('http://localhost/');
+
+  @override
+  Future<vm_service.Response> createDevFS(String fsName) {
+    return Future.value(vm_service.Response.parse({'uri': 'http://localhost/'}));
   }
 }

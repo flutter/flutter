@@ -26,6 +26,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/test_build_system.dart';
 
 // Tests for BundleBuilder.
@@ -134,6 +135,70 @@ void main() {
       expect(outputAssetFile.readAsBytesSync(), orderedEquals(<int>[2, 3, 4]));
     },
   );
+
+  testWithoutContext('writeBundle passes target plaform to asset transformers', () async {
+    for (final TargetPlatform targetPlatform in TargetPlatform.values) {
+      final fileSystem = MemoryFileSystem.test();
+      final File asset = fileSystem.file('my-asset.txt')
+        ..createSync()
+        ..writeAsBytesSync(<int>[1, 2, 3]);
+      final artifacts = Artifacts.test();
+
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            artifacts.getArtifactPath(Artifact.engineDartBinary),
+            'run',
+            'my_asset_transformer',
+            '--input=/.tmp_rand0/rand0/my-asset.txt-transformOutput0.txt',
+            '--output=/.tmp_rand0/rand0/my-asset.txt-transformOutput1.txt',
+          ],
+          onRun: (List<String> command) {
+            final ArgResults argParseResults =
+                (ArgParser()
+                      ..addOption('input', mandatory: true)
+                      ..addOption('output', mandatory: true))
+                    .parse(command);
+
+            final File inputFile = fileSystem.file(argParseResults['input']);
+
+            expect(inputFile, exists);
+            fileSystem.file(argParseResults['input']).copySync(argParseResults['output'] as String);
+          },
+        ),
+      ]);
+
+      final bundle = FakeAssetBundle()
+        ..entries['my-asset.txt'] = AssetBundleEntry(
+          DevFSFileContent(asset),
+          kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[
+            AssetTransformerEntry(package: 'my_asset_transformer', args: <String>[]),
+          ],
+        );
+
+      final Directory bundleDir = fileSystem.directory(
+        getAssetBuildDirectory(Config.test(), fileSystem),
+      );
+
+      await writeBundle(
+        bundleDir,
+        bundle.entries,
+        targetPlatform: targetPlatform,
+        impellerStatus: ImpellerStatus.platformDefault,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        logger: BufferLogger.test(),
+        projectDir: fileSystem.currentDirectory,
+        buildMode: BuildMode.debug,
+      );
+
+      final File outputAssetFile = fileSystem.file('build/flutter_assets/my-asset.txt');
+      expect(outputAssetFile, exists);
+      expect(processManager, hasNoRemainingExpectations);
+    }
+  });
 
   testUsingContext(
     'Handles build system failure',
