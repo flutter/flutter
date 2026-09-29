@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <dlfcn.h>
 #include <future>
 #include <thread>
 #include <vector>
@@ -8682,6 +8683,110 @@ TEST(FlutterEmbedderNativeHcppGatingTest,
   EXPECT_TRUE(mutators_pushed_on_platform_thread.load());
 
   native.NotifySurfaceDestroyed();
+}
+
+TEST(FlutterEmbedderNativeTest, RequiresOnscreenClearanceLifecycle) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  bool hcpp_enabled = false;
+  ON_CALL(*mock_invoker, InvokeVoidMethod(Eq("setHcppEnabled"), _, _))
+      .WillByDefault([&hcpp_enabled](const std::string&, const std::string&,
+                                     const std::vector<uint8_t>& payload) {
+        if (!payload.empty()) {
+          hcpp_enabled = (payload[0] != 0);
+        }
+        return true;
+      });
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(Eq("isHcppEnabled"), _, _))
+      .WillByDefault([&hcpp_enabled](const std::string&, const std::string&,
+                                     const std::vector<uint8_t>&) {
+        return hcpp_enabled;
+      });
+
+  FlutterEmbedderNative native(mock_invoker);
+
+  // Initial state: HCPP disabled, no surface attached -> clearance not
+  // required.
+  EXPECT_TRUE(native.SetHcppEnabled(false));
+  EXPECT_FALSE(native.IsHcppEnabled());
+  EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+  // NotifySurfaceCreated sets is_image_view_surface_active_ to false
+  // (SurfaceView state).
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+  EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+  // NotifySurfaceWindowChanged with nullptr keeps clearance disabled.
+  native.NotifySurfaceWindowChanged(nullptr, /*is_fake_window=*/true);
+  EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+#if FML_OS_ANDROID
+  void* mediandk = dlopen("libmediandk.so", RTLD_NOW);
+  if (mediandk) {
+    typedef struct AImageReader AImageReader;
+    typedef int32_t (*AImageReader_newWithUsage_fn)(
+        int32_t width, int32_t height, int32_t format, uint64_t usage,
+        int32_t maxImages, AImageReader** reader);
+    typedef int32_t (*AImageReader_getWindow_fn)(AImageReader* reader,
+                                                 ANativeWindow** window);
+    typedef void (*AImageReader_delete_fn)(AImageReader* reader);
+
+    auto newWithUsage = reinterpret_cast<AImageReader_newWithUsage_fn>(
+        dlsym(mediandk, "AImageReader_newWithUsage"));
+    auto getWindow = reinterpret_cast<AImageReader_getWindow_fn>(
+        dlsym(mediandk, "AImageReader_getWindow"));
+    auto deleteReader = reinterpret_cast<AImageReader_delete_fn>(
+        dlsym(mediandk, "AImageReader_delete"));
+
+    if (newWithUsage && getWindow && deleteReader) {
+      // (1ULL << 8) is AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE
+      // (1ULL << 9) is AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT
+      constexpr uint64_t kUsage = (1ULL << 8) | (1ULL << 9);
+      AImageReader* reader = nullptr;
+      // 640 and 480 are test buffer dimensions.
+      // 1 is AIMAGE_FORMAT_RGBA_8888.
+      // 3 is maxImages buffer queue depth.
+      constexpr int32_t kWidth = 640;
+      constexpr int32_t kHeight = 480;
+      constexpr int32_t kFormatRgba8888 = 1;
+      constexpr int32_t kMaxImages = 3;
+      int32_t status = newWithUsage(kWidth, kHeight, kFormatRgba8888, kUsage,
+                                    kMaxImages, &reader);
+      if (status == 0 && reader != nullptr) {
+        ANativeWindow* window = nullptr;
+        if (getWindow(reader, &window) == 0 && window != nullptr) {
+          // WindowChanged with valid window activates clearance
+          // (FlutterImageView state).
+          native.NotifySurfaceWindowChanged(window, /*is_fake_window=*/false);
+          EXPECT_TRUE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+          // When HCPP is enabled, onscreen clearance is bypassed even with
+          // active FlutterImageView.
+          EXPECT_TRUE(native.SetHcppEnabled(true));
+          EXPECT_TRUE(native.IsHcppEnabled());
+          EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+          // Disabling HCPP restores clearance requirement.
+          EXPECT_TRUE(native.SetHcppEnabled(false));
+          EXPECT_FALSE(native.IsHcppEnabled());
+          EXPECT_TRUE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+          // WindowChanged with nullptr resets clearance.
+          native.NotifySurfaceWindowChanged(nullptr, /*is_fake_window=*/false);
+          EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+          // Re-attach window and then destroy surface.
+          native.NotifySurfaceWindowChanged(window, /*is_fake_window=*/false);
+          EXPECT_TRUE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+          native.NotifySurfaceDestroyed();
+          EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+        }
+        deleteReader(reader);
+      }
+    }
+    dlclose(mediandk);
+  }
+#endif
 }
 
 }  // namespace testing

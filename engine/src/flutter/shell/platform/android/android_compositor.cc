@@ -367,11 +367,15 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
     }
   } else if (platform_views_count > 0 && surface_manager_->GetRenderingAPI() !=
                                              AndroidRenderingAPI::kSoftware) {
-    // When a frame contains platform views (and optionally overlays) but no
-    // background Flutter layer, we still need to swap a transparent frame to
-    // the onscreen surface (which has been converted to FlutterImageView) so
-    // that FlutterView.acquireLatestImageViewFrame() succeeds in onEndFrame().
-    surface_manager_->ClearAndPresentOnscreenSurface();
+    if (delegate != nullptr &&
+        delegate->RequiresOnscreenClearanceWhenNoBackgroundLayer()) {
+      // When a frame contains platform views (and optionally overlays) but no
+      // background Flutter layer, we still need to swap a transparent frame to
+      // the onscreen surface (which has been converted to FlutterImageView) so
+      // that FlutterView.acquireLatestImageViewFrame() succeeds in
+      // onEndFrame().
+      surface_manager_->ClearAndPresentOnscreenSurface();
+    }
   }
 
   if (delegate != nullptr) {

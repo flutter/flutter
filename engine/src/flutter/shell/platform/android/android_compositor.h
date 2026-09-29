@@ -48,6 +48,13 @@ class AndroidCompositorPlatformViewDelegate {
 
   /// Invoked after all layers in a frame have been presented.
   virtual void OnFramePresented() = 0;
+
+  /// Returns true if the onscreen surface requires an empty frame presentation
+  /// when no background layer is drawn (i.e. FlutterView was converted to
+  /// FlutterImageView in legacy Hybrid Composition).
+  virtual bool RequiresOnscreenClearanceWhenNoBackgroundLayer() const {
+    return false;
+  }
 };
 
 /// @brief Implements the Flutter Embedder C-API compositor interface for
