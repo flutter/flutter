@@ -1369,8 +1369,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   BOOL success = [super becomeFirstResponder];
   if (success && _textInputClient != 0 && _clientWithClosedConnection == _textInputClient) {
     // iOS takes first responder away from this view while system UI that handles
-    // text itself is up -- most notably the AutoFill sheets ("Hide My Email",
-    // password AutoFill) -- and gives it back once that UI is dismissed, at
+    // text itself is up and gives it back once that UI is dismissed, at
     // which point it inserts the text the user picked.
     //
     // The resignation was reported to the framework as a closed connection,
