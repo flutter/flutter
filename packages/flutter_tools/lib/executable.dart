@@ -111,12 +111,19 @@ Future<void> main(List<String> args) async {
     userMessages: UserMessages(),
   );
 
+  late final ExtensionManager extensionManager;
+
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
-      final ExtensionManager manager = globals.extensionManager!;
+      extensionManager = ExtensionManager(
+        hostPlatform: toolDependencies.toolContext.os.hostPlatform,
+        logger: toolDependencies.toolContext.logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: toolDependencies.featureFlags,
+      );
       final templateManager = ExtensionTemplateManager(
-        extensionManager: manager,
+        extensionManager: extensionManager,
         fileSystem: toolDependencies.toolContext.fs,
         logger: toolDependencies.toolContext.logger,
         featureFlags: featureFlags,
@@ -125,7 +132,7 @@ Future<void> main(List<String> args) async {
         toolDependencies: toolDependencies,
         verboseHelp: verboseHelp,
         verbose: verbose,
-        extensionManager: manager,
+        extensionManager: extensionManager,
         extensionTemplateManager: templateManager,
       );
     },
@@ -133,12 +140,7 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: muteCommandLogging,
     verboseHelp: verboseHelp,
     overrides: <Type, Generator>{
-      ExtensionManager: () => ExtensionManager(
-        hostPlatform: globals.os.hostPlatform,
-        logger: globals.logger,
-        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-        featureFlags: featureFlags,
-      ),
+      ExtensionManager: () => extensionManager,
       FlutterHookRunner: () => FlutterHookRunnerNative(),
       // The web runner is not supported in google3 because it depends
       // on dwds.
