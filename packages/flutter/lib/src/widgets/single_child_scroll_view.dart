@@ -344,8 +344,6 @@ class _SingleChildViewportElement extends SingleChildRenderObjectElement
   _SingleChildViewportElement(_SingleChildViewport super.widget);
 }
 
-typedef _ScrollExtents = ({double min, double max});
-
 class _RenderSingleChildViewport extends RenderBox
     with RenderObjectWithChildMixin<RenderBox>
     implements RenderAbstractViewport {
@@ -384,7 +382,7 @@ class _RenderSingleChildViewport extends RenderBox
       _offset.addListener(_hasScrolled);
     }
     // The new offset has not been reconciled against the extents yet.
-    _reconciledExtents = null;
+    _reconciledMaxScrollExtent = null;
     markNeedsLayout();
   }
 
@@ -402,12 +400,6 @@ class _RenderSingleChildViewport extends RenderBox
   }
 
   void _hasScrolled() {
-    // The physics carries an overscroll across a change of extents by comparing against the
-    // metrics of the latest layout. While the offset is past an edge, every scroll lays the
-    // viewport out, the way a sliver viewport lays out on any scroll, so those metrics stay current.
-    if (_overscrolled) {
-      markNeedsLayout();
-    }
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -460,18 +452,8 @@ class _RenderSingleChildViewport extends RenderBox
     });
   }
 
-  // The scroll extents the offset was last reconciled against.
-  _ScrollExtents? _reconciledExtents;
-
-  // Whether the offset is past an edge of the extents it was last reconciled against. It got there
-  // through the physics, and keeping it there or bringing it back is up to the physics.
-  bool get _overscrolled {
-    final _ScrollExtents? extents = _reconciledExtents;
-    if (extents == null || !offset.hasPixels) {
-      return false;
-    }
-    return offset.pixels < extents.min || offset.pixels > extents.max;
-  }
+  // The max scroll extent the offset was last reconciled against.
+  double? _reconciledMaxScrollExtent;
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     return switch (axis) {
@@ -524,29 +506,36 @@ class _RenderSingleChildViewport extends RenderBox
       size = constraints.constrain(child!.size);
     }
 
-    final _ScrollExtents extents = (min: _minScrollExtent, max: _maxScrollExtent);
+    final double minScrollExtent = _minScrollExtent;
+    final double maxScrollExtent = _maxScrollExtent;
 
     if (offset.hasPixels) {
-      // The layout pulls the offset back only when the range moved out from under it: on the first
+      final double pixels = offset.pixels;
+      final double? previousMaxScrollExtent = _reconciledMaxScrollExtent;
+      // An offset past an edge of the extents it was reconciled against got there through the
+      // physics, which also carries it across a change of extents in applyContentDimensions. The
+      // layout pulls the offset back only when the range moved out from under it: on the first
       // layout of this offset, and when the new extents leave out an offset the previous ones held.
-      // An overscrolled offset is carried across the change by the physics in
-      // applyContentDimensions.
-      if (!_overscrolled) {
-        final double pixels = offset.pixels;
-        if (pixels > extents.max) {
-          offset.correctBy(extents.max - pixels);
-        } else if (pixels < extents.min) {
-          offset.correctBy(extents.min - pixels);
-        }
+      if (previousMaxScrollExtent != null &&
+          (pixels < minScrollExtent || pixels > previousMaxScrollExtent)) {
+        // The physics compares the new extents against the metrics of the previous
+        // applyContentDimensions, and this viewport does not lay out on scroll, so those metrics
+        // predate the scroll that took the offset past the edge. Applying the unchanged extents
+        // once more brings them up to the current offset.
+        offset.applyContentDimensions(minScrollExtent, previousMaxScrollExtent);
+      } else if (pixels > maxScrollExtent) {
+        offset.correctBy(maxScrollExtent - pixels);
+      } else if (pixels < minScrollExtent) {
+        offset.correctBy(minScrollExtent - pixels);
       }
-      _reconciledExtents = extents;
+      _reconciledMaxScrollExtent = maxScrollExtent;
     }
 
     offset.applyViewportDimension(_viewportExtent);
-    if (!offset.applyContentDimensions(extents.min, extents.max)) {
+    if (!offset.applyContentDimensions(minScrollExtent, maxScrollExtent)) {
       // The physics corrected the offset for the new extents. The child's layout does not depend
       // on the offset, so the corrected offset only has to be accepted.
-      offset.applyContentDimensions(extents.min, extents.max);
+      offset.applyContentDimensions(minScrollExtent, maxScrollExtent);
     }
   }
 

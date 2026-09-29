@@ -1196,8 +1196,14 @@ void main() {
       await tester.pump();
 
       final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
+      expect(controller.position.pixels, greaterThan(maxScrollExtent + 20.0));
+
+      // Scrolling further past the edge only repaints the viewport.
+      final RenderObject viewport = tester.renderObject(find.byType(Column)).parent!;
+      await gesture.moveBy(const Offset(0.0, -20.0));
+      expect(viewport.debugNeedsLayout, isFalse);
+      await tester.pump();
       final double overscrolled = controller.position.pixels;
-      expect(overscrolled, greaterThan(maxScrollExtent + 20.0));
 
       await relayoutContent(tester);
       expect(controller.position.pixels, overscrolled);
@@ -1205,46 +1211,6 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expect(controller.position.pixels, maxScrollExtent);
-    });
-
-    testWidgets('while the ballistic simulation carries it back', (WidgetTester tester) async {
-      final ScrollController controller = await pumpOverscrollable(tester);
-
-      final TestGesture gesture = await dragBy(tester, const Offset(0.0, 100.0));
-      await gesture.up();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 20));
-      final double settling = controller.position.pixels;
-      expect(settling, lessThan(-20.0));
-
-      await relayoutContent(tester);
-      expect(controller.position.pixels, settling);
-
-      await tester.pumpAndSettle();
-      expect(controller.position.pixels, 0.0);
-    });
-
-    testWidgets('while the position is held', (WidgetTester tester) async {
-      final ScrollController controller = await pumpOverscrollable(tester);
-
-      final TestGesture gesture = await dragBy(tester, const Offset(0.0, 100.0));
-      await gesture.up();
-      await tester.pump();
-
-      // A pointer landing on a settling scrollable holds it: the activity stops scrolling while
-      // the offset stays past the edge.
-      final ScrollHoldController hold = controller.position.hold(() {});
-      addTearDown(hold.cancel);
-      await tester.pump();
-      final double held = controller.position.pixels;
-      expect(held, lessThan(-20.0));
-
-      await relayoutContent(tester);
-      expect(controller.position.pixels, held);
-
-      hold.cancel();
-      await tester.pumpAndSettle();
-      expect(controller.position.pixels, 0.0);
     });
 
     testWidgets(
@@ -1320,6 +1286,61 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expect(controller.position.pixels, 0.0);
+    });
+
+    testWidgets(
+      'while the ballistic simulation carries it back and the content shrinks at that edge',
+      (WidgetTester tester) async {
+        final ScrollController controller = await pumpOverscrollable(tester);
+        final double maxScrollExtent = controller.position.maxScrollExtent;
+        controller.jumpTo(maxScrollExtent);
+        await tester.pump();
+
+        final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
+        await gesture.up();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 20));
+        final double settling = controller.position.pixels;
+        expect(settling, greaterThan(maxScrollExtent + 20.0));
+
+        // A moving offset is left where it is, as RangeMaintainingScrollPhysics leaves an animating
+        // position of a sliver viewport; the simulation carries it to the new edge.
+        await shrinkContent(tester, rows: 5);
+        expect(controller.position.maxScrollExtent, maxScrollExtent - 5 * 32.0);
+        expect(controller.position.pixels, settling);
+
+        await tester.pumpAndSettle();
+        expect(controller.position.pixels, maxScrollExtent - 5 * 32.0);
+      },
+    );
+
+    testWidgets('while the position is held and the content shrinks at that edge', (
+      WidgetTester tester,
+    ) async {
+      final ScrollController controller = await pumpOverscrollable(tester);
+      final double maxScrollExtent = controller.position.maxScrollExtent;
+      controller.jumpTo(maxScrollExtent);
+      await tester.pump();
+
+      final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
+      await gesture.up();
+      await tester.pump();
+
+      // A pointer landing on a settling scrollable holds it: the activity stops scrolling while
+      // the offset stays past the edge.
+      final ScrollHoldController hold = controller.position.hold(() {});
+      addTearDown(hold.cancel);
+      await tester.pump();
+      final double overscroll = controller.position.pixels - maxScrollExtent;
+      expect(overscroll, greaterThan(20.0));
+
+      await shrinkContent(tester, rows: 5);
+      expect(controller.position.maxScrollExtent, maxScrollExtent - 5 * 32.0);
+      expect(controller.position.pixels, maxScrollExtent - 5 * 32.0 + overscroll);
+
+      hold.cancel();
+      await tester.pumpAndSettle();
+      expect(controller.position.pixels, maxScrollExtent - 5 * 32.0);
     });
   });
 }
