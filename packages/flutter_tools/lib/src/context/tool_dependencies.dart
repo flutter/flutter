@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport '../../executable.dart';
+library;
+
 import 'dart:async';
 
 import 'package:process/process.dart';
@@ -71,7 +74,7 @@ import 'tool_context.dart';
 /// Like [ToolContext], it only holds instances that live for the whole tool
 /// invocation; the two differ in what they expose, not in lifetime.
 /// [ToolDependencies] holds [ToolContext] (not the reverse) and is only used at
-/// the composition root: `generateCommands` unpacks it and passes each command
+/// the composition root: [generateCommands] unpacks it and passes each command
 /// only the contexts and services that command needs. Passing
 /// [ToolDependencies] itself into commands or services would expose the whole
 /// graph to every component and turn it into a service locator.
