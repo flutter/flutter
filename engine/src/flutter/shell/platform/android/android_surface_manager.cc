@@ -163,10 +163,14 @@ bool AndroidSurfaceManager::SetNativeWindow(ANativeWindow* window,
 #if FML_OS_ANDROID
   if (native_window_ != nullptr && !is_fake_window_) {
     ANativeWindow_acquire(native_window_);
-    if (rendering_api_ == AndroidRenderingAPI::kSoftware ||
-        IsVulkanInitialized()) {
+    if (rendering_api_ == AndroidRenderingAPI::kSoftware) {
       ANativeWindow_setBuffersGeometry(native_window_, 0, 0,
                                        WINDOW_FORMAT_RGBA_8888);
+    } else if (IsVulkanInitialized()) {
+      // Vulkan manages swapchain buffer geometry and formats exclusively via
+      // VkSwapchainCreateInfoKHR. Calling ANativeWindow_setBuffersGeometry on
+      // Vulkan native windows (such as ImageReader surfaces) resets buffer
+      // dimensions to 0x0 and disrupts driver buffer queues.
     } else if (egl_display_ != EGL_NO_DISPLAY && egl_config_ != nullptr) {
       EGLint format = 0;
       if (eglGetConfigAttrib(egl_display_, egl_config_, EGL_NATIVE_VISUAL_ID,
@@ -1067,12 +1071,14 @@ bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked() {
   } else {
     int32_t w = ANativeWindow_getWidth(native_window_);
     int32_t h = ANativeWindow_getHeight(native_window_);
-    vk_swapchain_extent_.width =
-        std::clamp(static_cast<uint32_t>(w), caps.minImageExtent.width,
-                   caps.maxImageExtent.width);
-    vk_swapchain_extent_.height =
-        std::clamp(static_cast<uint32_t>(h), caps.minImageExtent.height,
-                   caps.maxImageExtent.height);
+    uint32_t target_w =
+        (w > 0) ? static_cast<uint32_t>(w) : caps.minImageExtent.width;
+    uint32_t target_h =
+        (h > 0) ? static_cast<uint32_t>(h) : caps.minImageExtent.height;
+    vk_swapchain_extent_.width = std::clamp(target_w, caps.minImageExtent.width,
+                                            caps.maxImageExtent.width);
+    vk_swapchain_extent_.height = std::clamp(
+        target_h, caps.minImageExtent.height, caps.maxImageExtent.height);
   }
 
   uint32_t format_count = 0;
@@ -1310,9 +1316,12 @@ bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
     int32_t w = 100;
     int32_t h = 100;
 #endif
-    // 1u is minimum dimension fallback when native window size is uninitialized
-    uint32_t target_w = (w > 0) ? static_cast<uint32_t>(w) : 1u;
-    uint32_t target_h = (h > 0) ? static_cast<uint32_t>(h) : 1u;
+    uint32_t fallback_w =
+        (caps.minImageExtent.width > 0) ? caps.minImageExtent.width : 1u;
+    uint32_t fallback_h =
+        (caps.minImageExtent.height > 0) ? caps.minImageExtent.height : 1u;
+    uint32_t target_w = (w > 0) ? static_cast<uint32_t>(w) : fallback_w;
+    uint32_t target_h = (h > 0) ? static_cast<uint32_t>(h) : fallback_h;
     extent.width = std::clamp(target_w, caps.minImageExtent.width,
                               caps.maxImageExtent.width);
     extent.height = std::clamp(target_h, caps.minImageExtent.height,
@@ -1882,6 +1891,11 @@ bool AndroidSurfaceManager::PresentOverlayImage(
 
   VkResult res = vk_queue_present_khr_fn_(vk_queue_, &present_info);
   if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
+    CreateOrUpdateOverlayVulkanSurfaceLocked(overlay_window, entry);
+  } else if (res == VK_ERROR_SURFACE_LOST_KHR) {
+    FML_LOG(WARNING) << "vkQueuePresentKHR returned VK_ERROR_SURFACE_LOST_KHR ("
+                     << res << ") for overlay; recreating Vulkan surface.";
+    DestroyOverlayVulkanSurfaceLocked(entry);
     CreateOrUpdateOverlayVulkanSurfaceLocked(overlay_window, entry);
   }
   return res == VK_SUCCESS || res == VK_SUBOPTIMAL_KHR;
