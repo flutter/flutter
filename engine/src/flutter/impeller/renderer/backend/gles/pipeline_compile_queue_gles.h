@@ -87,7 +87,8 @@ class PipelineCompileQueueGLES : public PipelineCompileQueue {
   ///             PipelineLibraryGLES checks the links it started from this
   ///             callback, so the driver gets the programs still queued before
   ///             the first status query waits for one. The library also checks
-  ///             them earlier when its limit of pending links is reached.
+  ///             them earlier when its limit of pending links is reached, and
+  ///             checks completed links in every job.
   ///
   void SetOnDrained(fml::closure on_drained);
 

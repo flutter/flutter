@@ -41,6 +41,11 @@ class PipelineLibraryGLES final
 
   PipelineLibraryGLES& operator=(const PipelineLibraryGLES&) = delete;
 
+  /// Default limit is hardware_concurrency / 2 clamped to 1..4, so without this
+  /// a test that keeps pipelines pending until the queue drains depends on the
+  /// core count of the bot
+  void SetMaxPendingLinksForTesting(size_t count);
+
  private:
   friend ContextGLES;
   FML_FRIEND_TEST(testing::PipelineLibraryGLESDeferredTest,
@@ -122,7 +127,7 @@ class PipelineLibraryGLES final
   ProgramMap programs_ IPLR_GUARDED_BY(programs_mutex_);
   std::shared_ptr<PipelineCompileQueueGLES> compile_queue_;
   const bool supports_parallel_shader_compile_;
-  const size_t max_pending_links_;
+  size_t max_pending_links_;
   Mutex pending_mutex_;
   std::vector<PendingPipeline> pending_pipelines_
       IPLR_GUARDED_BY(pending_mutex_);
@@ -158,8 +163,9 @@ class PipelineLibraryGLES final
   /// @brief      Creates a pipeline and links its program.
   ///
   ///             With a deferred_promise, this starts the link and returns
-  ///             before it finishes. FinishPendingPipelines checks the link
-  ///             later and sets deferred_promise. That requires
+  ///             before it finishes. FinishCompletedPipelines or
+  ///             FinishPendingPipelines checks the link later and sets
+  ///             deferred_promise. That requires
   ///             GL_KHR_parallel_shader_compile and a thread that runs a
   ///             PipelineCompileQueueGLES job.
   ///
@@ -176,6 +182,13 @@ class PipelineLibraryGLES final
   ///             promise. A status query here waits for the link.
   ///
   void FinishPendingPipelines(const ReactorGLES& reactor);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Sets the promise of every pending pipeline whose link has
+  ///             completed, so the limit is reached less often. The
+  ///             GL_COMPLETION_STATUS_KHR query does not wait for the link.
+  ///
+  void FinishCompletedPipelines(const ReactorGLES& reactor);
 
   /// Sets the promise of every pending pipeline to null, so nothing waits for
   /// a link that no thread will check, and removes the programs those

@@ -9,7 +9,6 @@
 #include <future>
 #include <memory>
 #include <optional>
-#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -116,34 +115,6 @@ TEST_P(PipelineLibraryGLESTest, ClearingPipelineWillAlsoClearProgramHandle) {
   HandleGLES handle_2 = pipeline_gles_2.GetProgramHandle();
 
   EXPECT_FALSE(HandleGLES::Equal{}(handle, handle_2));
-}
-
-// Async requests may start the link of a program and check it later, which
-// GL_KHR_parallel_shader_compile allows. More requests than links may run at
-// the same time, and some of them share a program that is still linking.
-TEST_P(PipelineLibraryGLESTest, AsyncPipelinesAreValid) {
-  using VS = SpecConstantVertexShader;
-  using FS = SpecConstantFragmentShader;
-  std::shared_ptr<Context> context = GetContext();
-  ASSERT_TRUE(context);
-
-  std::vector<PipelineFuture<PipelineDescriptor>> futures;
-  for (Scalar constant : {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f}) {
-    for (SampleCount samples : {SampleCount::kCount1, SampleCount::kCount4}) {
-      std::optional<PipelineDescriptor> desc =
-          PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
-      ASSERT_TRUE(desc.has_value());
-      desc->SetSpecializationConstants({constant});
-      desc->SetSampleCount(samples);
-      futures.push_back(
-          context->GetPipelineLibrary()->GetPipeline(desc.value()));
-    }
-  }
-
-  for (PipelineFuture<PipelineDescriptor>& future : futures) {
-    std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline = future.Get();
-    ASSERT_TRUE(pipeline && pipeline->IsValid());
-  }
 }
 
 TEST_P(PipelineLibraryGLESTest, SynchronousPipelineIsValid) {
@@ -265,12 +236,15 @@ struct DeferredLinkState {
   int links = 0;
   int compile_queries = 0;
   int link_queries = 0;
+  int completion_queries = 0;
   int detached = 0;
   int deleted_shaders = 0;
   bool fail_compile = false;
   bool fail_link = false;
+  bool completion_supported = true;
   std::unordered_map<GLuint, bool> shaders;
   std::unordered_map<GLuint, bool> linked;
+  std::unordered_map<GLuint, bool> completed;
 };
 
 DeferredLinkState* deferred_links = nullptr;
@@ -302,6 +276,14 @@ void GL_APIENTRY DeferredGetShaderiv(GLuint shader,
 void GL_APIENTRY DeferredGetProgramiv(GLuint program,
                                       GLenum pname,
                                       GLint* value) {
+  if (pname == GL_COMPLETION_STATUS_KHR) {
+    deferred_links->completion_queries++;
+    // A driver that rejects the query leaves the value unchanged
+    if (deferred_links->completion_supported) {
+      *value = deferred_links->completed[program] ? GL_TRUE : GL_FALSE;
+    }
+    return;
+  }
   *value = 0;
   if (pname == GL_LINK_STATUS) {
     deferred_links->link_queries++;
@@ -368,80 +350,116 @@ void* DeferredLinkResolver(const char* name) {
   return kMockResolverGLES(name);
 }
 
+/// Holds a MockGLES context with an ANGLE version and
+/// GL_KHR_parallel_shader_compile, so async requests take the deferred path.
+/// Jobs run only in RunOne or RunAll, so a test can check state between 2 jobs.
+struct DeferredLinkHarness {
+  DeferredLinkState state;
+  fml::ScopedCleanupClosure reset_deferred_links{
+      []() { deferred_links = nullptr; }};
+  std::shared_ptr<MockGLES> mock_gles;
+  std::shared_ptr<DeferredLinkRunner> runner;
+  std::shared_ptr<ContextGLES> context;
+  std::shared_ptr<ToggleWorker> worker;
+  std::shared_ptr<PipelineLibrary> library;
+  PipelineDescriptor desc;
+
+  explicit DeferredLinkHarness(size_t max_pending_links) {
+    deferred_links = &state;
+    mock_gles = MockGLES::Init(
+        std::vector<const char*>{"GL_KHR_parallel_shader_compile"},
+        "OpenGL ES 3.0 (ANGLE 2.1.0)", DeferredLinkResolver);
+    runner = std::make_shared<DeferredLinkRunner>();
+    context = ContextGLES::Create(
+        Flags{}, std::make_unique<ProcTableGLES>(DeferredLinkResolver),
+        std::vector<std::shared_ptr<fml::Mapping>>{},
+        /*enable_gpu_tracing=*/false, runner);
+    FML_CHECK(context);
+    worker = std::make_shared<ToggleWorker>(true);
+    context->AddReactorWorker(worker);
+    auto base_context = std::static_pointer_cast<Context>(context);
+    auto shader_library = base_context->GetShaderLibrary();
+    for (auto stage : {ShaderStage::kVertex, ShaderStage::kFragment}) {
+      // ComputeShaderWithDefines inserts specialization constants after the
+      // first line and rejects a source without a newline, so the source has
+      // the #version first line that impellerc emits
+      shader_library->RegisterFunction(
+          "deferred", stage,
+          std::make_shared<fml::DataMapping>(
+              std::string("#version 100\nvoid main() {}")),
+          [](bool result) { EXPECT_TRUE(result); });
+    }
+    desc.SetVertexDescriptor(std::make_shared<VertexDescriptor>());
+    desc.AddStageEntrypoint(
+        shader_library->GetFunction("deferred", ShaderStage::kVertex));
+    desc.AddStageEntrypoint(
+        shader_library->GetFunction("deferred", ShaderStage::kFragment));
+    library = base_context->GetPipelineLibrary();
+    PipelineLibraryGLES::Cast(*library).SetMaxPendingLinksForTesting(
+        max_pending_links);
+  }
+};
+
+bool IsReady(const PipelineFuture<PipelineDescriptor>& future) {
+  return future.future.wait_for(std::chrono::seconds(0)) ==
+         std::future_status::ready;
+}
+
+/// A status query waits for the link, so a job must not make a blocking one
+/// for a link it started. A variant that reuses a linking program must get
+/// the result of that link, and a failed link must not stay in the cache.
 void RunDeferredLink(bool fail_compile,
                      bool fail_link,
                      bool abandon_before_check = false) {
-  if (std::thread::hardware_concurrency() < 4) {
-    GTEST_SKIP() << "The pending limit must allow at least 2 pipelines";
-  }
-  DeferredLinkState state;
+  // Limit is above 2 and the mock reports no completed link, so both requests
+  // stay pending until the queue drains
+  DeferredLinkHarness harness(/*max_pending_links=*/4);
+  DeferredLinkState& state = harness.state;
   state.fail_compile = fail_compile;
   state.fail_link = fail_link;
-  deferred_links = &state;
-  fml::ScopedCleanupClosure reset_deferred_links(
-      []() { deferred_links = nullptr; });
-  auto mock_gles =
-      MockGLES::Init(std::vector<const char*>{"GL_KHR_parallel_shader_compile"},
-                     "OpenGL ES 3.0 (ANGLE 2.1.0)", DeferredLinkResolver);
-  auto runner = std::make_shared<DeferredLinkRunner>();
-  auto context = ContextGLES::Create(
-      Flags{}, std::make_unique<ProcTableGLES>(DeferredLinkResolver),
-      std::vector<std::shared_ptr<fml::Mapping>>{},
-      /*enable_gpu_tracing=*/false, runner);
-  ASSERT_NE(context, nullptr);
-  auto worker = std::make_shared<ToggleWorker>(true);
-  context->AddReactorWorker(worker);
-  auto base_context = std::static_pointer_cast<Context>(context);
-  auto shader_library = base_context->GetShaderLibrary();
-  for (auto stage : {ShaderStage::kVertex, ShaderStage::kFragment}) {
-    shader_library->RegisterFunction(
-        "deferred", stage,
-        std::make_shared<fml::DataMapping>(std::string("void main() {}")),
-        [](bool result) { EXPECT_TRUE(result); });
-  }
-  PipelineDescriptor desc;
-  desc.SetVertexDescriptor(std::make_shared<VertexDescriptor>());
-  desc.AddStageEntrypoint(
-      shader_library->GetFunction("deferred", ShaderStage::kVertex));
-  desc.AddStageEntrypoint(
-      shader_library->GetFunction("deferred", ShaderStage::kFragment));
-  auto library = base_context->GetPipelineLibrary();
+  PipelineDescriptor desc = harness.desc;
+  auto& library = harness.library;
   auto first = library->GetPipeline(desc, true, true);
   desc.SetSampleCount(SampleCount::kCount4);
   auto second = library->GetPipeline(desc, true, true);
-  ASSERT_FALSE(runner->tasks.empty());
-  runner->RunOne();
+  ASSERT_FALSE(harness.runner->tasks.empty());
+  // Job of second is still queued, so the queue has not drained and the link
+  // of first must stay unchecked
+  harness.runner->RunOne();
   EXPECT_EQ(state.links, 1);
   EXPECT_EQ(state.compile_queries, 0);
   EXPECT_EQ(state.link_queries, 0);
-  EXPECT_EQ(first.future.wait_for(std::chrono::seconds(0)),
-            std::future_status::timeout);
-  EXPECT_EQ(second.future.wait_for(std::chrono::seconds(0)),
-            std::future_status::timeout);
+  EXPECT_FALSE(IsReady(first));
+  EXPECT_FALSE(IsReady(second));
   if (abandon_before_check) {
-    worker->SetAllowed(false);
-    runner->RunAll();
-    EXPECT_TRUE(first.future.wait_for(std::chrono::seconds(0)) ==
-                    std::future_status::ready ||
-                second.future.wait_for(std::chrono::seconds(0)) ==
-                    std::future_status::ready);
-    worker->SetAllowed(true);
+    // Reactor cannot react here, so the drain check cannot run and first must
+    // fail instead of leaving its promise unset. Operation that creates second
+    // stays in the reactor.
+    harness.worker->SetAllowed(false);
+    harness.runner->RunAll();
+    EXPECT_TRUE(IsReady(first));
+    EXPECT_FALSE(IsReady(second));
+    harness.worker->SetAllowed(true);
     state.fail_compile = false;
     state.fail_link = false;
     desc.SetSampleCount(SampleCount::kCount1);
     desc.SetColorAttachmentDescriptor(0, ColorAttachmentDescriptor{});
+    // Next reaction on this thread creates second outside of a queue job, so
+    // it links synchronously. The abandoned program left the cache, so second
+    // links a new one, and retry reuses it.
     auto retry = library->GetPipeline(desc, false, true);
-    ASSERT_EQ(retry.future.wait_for(std::chrono::seconds(0)),
-              std::future_status::ready);
-    EXPECT_NE(retry.Get(), nullptr);
+    ASSERT_TRUE(IsReady(retry));
+    ASSERT_TRUE(IsReady(second));
+    ASSERT_NE(retry.Get(), nullptr);
+    ASSERT_NE(second.Get(), nullptr);
+    EXPECT_EQ(PipelineGLES::Cast(*second.Get()).GetSharedHandle(),
+              PipelineGLES::Cast(*retry.Get()).GetSharedHandle());
     EXPECT_EQ(state.programs, 2);
     return;
   }
-  runner->RunAll();
-  ASSERT_EQ(first.future.wait_for(std::chrono::seconds(0)),
-            std::future_status::ready);
-  ASSERT_EQ(second.future.wait_for(std::chrono::seconds(0)),
-            std::future_status::ready);
+  harness.runner->RunAll();
+  ASSERT_TRUE(IsReady(first));
+  ASSERT_TRUE(IsReady(second));
   EXPECT_EQ(state.programs, 1);
   EXPECT_EQ(state.links, 1);
   EXPECT_EQ(state.compile_queries, 2);
@@ -460,12 +478,89 @@ void RunDeferredLink(bool fail_compile,
     desc.SetSampleCount(SampleCount::kCount1);
     desc.SetColorAttachmentDescriptor(0, ColorAttachmentDescriptor{});
     auto retry = library->GetPipeline(desc, true, true);
-    runner->RunAll();
-    ASSERT_EQ(retry.future.wait_for(std::chrono::seconds(0)),
-              std::future_status::ready);
+    harness.runner->RunAll();
+    ASSERT_TRUE(IsReady(retry));
     ASSERT_NE(retry.Get(), nullptr);
     EXPECT_EQ(state.programs, 2);
   }
+}
+
+// Async requests may start the link of a program and check it later, which
+// GL_KHR_parallel_shader_compile allows. More requests than links may run at
+// the same time, and some of them share a program that is still linking.
+TEST(PipelineLibraryGLESDeferredTest, AsyncPipelinesAreValid) {
+  DeferredLinkHarness harness(/*max_pending_links=*/4);
+  std::vector<PipelineFuture<PipelineDescriptor>> futures;
+  for (Scalar constant : {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f}) {
+    for (SampleCount samples : {SampleCount::kCount1, SampleCount::kCount4}) {
+      PipelineDescriptor desc = harness.desc;
+      desc.SetSpecializationConstants({constant});
+      desc.SetSampleCount(samples);
+      futures.push_back(harness.library->GetPipeline(desc, true, true));
+    }
+  }
+  // 4th job reaches the limit, so it checks 4 pending pipelines before the
+  // queue drains
+  for (int i = 0; i < 4; i++) {
+    harness.runner->RunOne();
+  }
+  for (int i = 0; i < 4; i++) {
+    EXPECT_TRUE(IsReady(futures[i])) << i;
+  }
+  EXPECT_FALSE(IsReady(futures[4]));
+
+  harness.runner->RunAll();
+  for (size_t i = 0; i < futures.size(); i++) {
+    ASSERT_TRUE(IsReady(futures[i])) << i;
+    ASSERT_NE(futures[i].Get(), nullptr) << i;
+  }
+  for (size_t i = 0; i < futures.size(); i += 2) {
+    EXPECT_EQ(PipelineGLES::Cast(*futures[i].Get()).GetSharedHandle(),
+              PipelineGLES::Cast(*futures[i + 1].Get()).GetSharedHandle());
+  }
+  EXPECT_EQ(harness.state.programs, 6);
+  EXPECT_EQ(harness.state.links, 6);
+}
+
+/// A link that completes early must not wait for the limit or the drain, so
+/// the next job finishes it. A driver that rejects the query leaves the value
+/// unchanged, and the link must then stay pending until the drain.
+void RunCompletedLink(bool completion_supported) {
+  DeferredLinkHarness harness(/*max_pending_links=*/4);
+  harness.state.completion_supported = completion_supported;
+  std::vector<PipelineFuture<PipelineDescriptor>> futures;
+  for (Scalar constant : {1.0f, 2.0f, 3.0f}) {
+    PipelineDescriptor desc = harness.desc;
+    desc.SetSpecializationConstants({constant});
+    futures.push_back(harness.library->GetPipeline(desc, true, true));
+  }
+  harness.runner->RunOne();
+  ASSERT_EQ(harness.state.linked.size(), 1u);
+  harness.state.completed[harness.state.linked.begin()->first] = true;
+
+  harness.runner->RunOne();
+  EXPECT_GT(harness.state.completion_queries, 0);
+  EXPECT_EQ(IsReady(futures[0]), completion_supported);
+  EXPECT_EQ(harness.state.link_queries, completion_supported ? 1 : 0);
+  EXPECT_FALSE(IsReady(futures[1]));
+  EXPECT_FALSE(IsReady(futures[2]));
+
+  harness.runner->RunAll();
+  for (size_t i = 0; i < futures.size(); i++) {
+    ASSERT_TRUE(IsReady(futures[i])) << i;
+    ASSERT_NE(futures[i].Get(), nullptr) << i;
+  }
+  EXPECT_EQ(harness.state.programs, 3);
+  EXPECT_EQ(harness.state.link_queries, 3);
+}
+
+TEST(PipelineLibraryGLESDeferredTest, FinishesCompletedLinkBeforeLimit) {
+  RunCompletedLink(/*completion_supported=*/true);
+}
+
+TEST(PipelineLibraryGLESDeferredTest,
+     KeepsLinkPendingWhenCompletionQueryFails) {
+  RunCompletedLink(/*completion_supported=*/false);
 }
 
 TEST(PipelineLibraryGLESDeferredTest, DefersStatusAndSharesPendingProgram) {

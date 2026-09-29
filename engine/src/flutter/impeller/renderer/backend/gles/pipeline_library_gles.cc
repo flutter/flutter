@@ -24,7 +24,7 @@ namespace impeller {
 static const constexpr char* kParallelShaderCompileExt =
     "GL_KHR_parallel_shader_compile";
 
-// How many links may be started before the library checks them. Every link
+// How many links may be pending before the library waits for them. Every link
 // occupies a thread of the driver, so starting all of them at once takes the
 // cores that the Dart isolate needs while it starts. This is the bound that
 // ContextVK::ChooseThreadCountForWorkers uses for the same reason, see
@@ -54,6 +54,10 @@ PipelineLibraryGLES::PipelineLibraryGLES(
           PipelineCompileQueueGLES::Create(std::move(io_task_runner))),
       supports_parallel_shader_compile_(HasParallelShaderCompile(reactor_)),
       max_pending_links_(MaxPendingLinks()) {}
+
+void PipelineLibraryGLES::SetMaxPendingLinksForTesting(size_t count) {
+  max_pending_links_ = count;
+}
 
 static std::string GetShaderInfoLog(const ProcTableGLES& gl, GLuint shader) {
   GLint log_length = 0;
@@ -151,7 +155,7 @@ struct ProgramShaders {
 // Compiles both shaders and starts the program link.
 //
 // With GL_KHR_parallel_shader_compile, a status query waits for the compiler,
-// so a deferred link leaves every status query to FinishProgramLink. A
+// so a deferred link leaves each blocking status query to FinishProgramLink. A
 // deferred link also flags the shaders for deletion right away. GL frees them
 // when they are detached or when the program is deleted, so they do not leak
 // if FinishProgramLink never runs.
@@ -320,6 +324,20 @@ static bool IsProgramLinked(const ReactorGLES& reactor,
   return link_status == GL_TRUE;
 }
 
+static bool IsLinkCompleted(const ReactorGLES& reactor,
+                            const PipelineGLES& pipeline) {
+  auto program = reactor.GetGLHandle(pipeline.GetProgramHandle());
+  if (!program.has_value()) {
+    return false;
+  }
+  // A query that fails leaves the value unchanged, so the link stays pending
+  // until FinishPendingPipelines checks it
+  GLint completed = GL_FALSE;
+  reactor.GetProcTable().GetProgramiv(*program, GL_COMPLETION_STATUS_KHR,
+                                      &completed);
+  return completed == GL_TRUE;
+}
+
 // |PipelineLibrary|
 bool PipelineLibraryGLES::IsValid() const {
   return reactor_ != nullptr;
@@ -391,6 +409,7 @@ std::shared_ptr<PipelineGLES> PipelineLibraryGLES::CreatePipeline(
       library.SetProgramForKey(program_key, pipeline->GetSharedHandle());
     }
     library.WatchQueueForDrain();
+    library.FinishCompletedPipelines(*reactor);
     size_t pending_count = 0;
     {
       Lock lock(library.pending_mutex_);
@@ -513,6 +532,48 @@ void PipelineLibraryGLES::FinishPendingPipelines(const ReactorGLES& reactor) {
   }
 
   for (auto& item : pending) {
+    item.promise->set_value(FinishPipeline(reactor, item));
+  }
+}
+
+void PipelineLibraryGLES::FinishCompletedPipelines(const ReactorGLES& reactor) {
+  TRACE_EVENT0("impeller", __FUNCTION__);
+  FML_DCHECK(!compile_queue_ || compile_queue_->RunningJobCount() <= 1);
+
+  std::vector<std::shared_ptr<PipelineGLES>> pipelines;
+  {
+    Lock lock(pending_mutex_);
+    for (const PendingPipeline& item : pending_pipelines_) {
+      pipelines.push_back(item.pipeline);
+    }
+  }
+
+  std::vector<const PipelineGLES*> completed;
+  for (const std::shared_ptr<PipelineGLES>& pipeline : pipelines) {
+    if (pipeline && IsLinkCompleted(reactor, *pipeline)) {
+      completed.push_back(pipeline.get());
+    }
+  }
+  if (completed.empty()) {
+    return;
+  }
+
+  std::vector<PendingPipeline> finished;
+  {
+    Lock lock(pending_mutex_);
+    auto it = pending_pipelines_.begin();
+    while (it != pending_pipelines_.end()) {
+      if (std::find(completed.begin(), completed.end(), it->pipeline.get()) !=
+          completed.end()) {
+        finished.push_back(std::move(*it));
+        it = pending_pipelines_.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
+
+  for (auto& item : finished) {
     item.promise->set_value(FinishPipeline(reactor, item));
   }
 }
