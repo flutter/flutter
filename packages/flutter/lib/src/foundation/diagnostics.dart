@@ -1007,7 +1007,8 @@ class _PrefixedStringBuilder {
   }
 
   void _writeLine(String line, {required bool includeLineBreak, required bool firstLine}) {
-    _buffer.write('${_getCurrentPrefix(firstLine)}$line'.trimRight());
+    line = '${_getCurrentPrefix(firstLine)}$line';
+    _buffer.write(line.trimRight());
     if (includeLineBreak) {
       _buffer.write('\n');
     }
