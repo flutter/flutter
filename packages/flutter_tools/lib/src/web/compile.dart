@@ -43,18 +43,13 @@ const kWebDefinePrefix = 'webDefine:';
 
 class WebBuilder {
   WebBuilder({
-    required Logger logger,
-    required ProcessManager processManager,
-    required BuildSystem buildSystem,
-    required Analytics analytics,
-    required FlutterVersion flutterVersion,
-    required FileSystem fileSystem,
-  }) : _logger = logger,
-       _processManager = processManager,
-       _buildSystem = buildSystem,
-       _analytics = analytics,
-       _flutterVersion = flutterVersion,
-       _fileSystem = fileSystem;
+    required this._logger,
+    required this._processManager,
+    required this._buildSystem,
+    required this._analytics,
+    required this._flutterVersion,
+    required this._fileSystem,
+  });
 
   final Logger _logger;
   final ProcessManager _processManager;
@@ -85,6 +80,7 @@ class WebBuilder {
 
     final bool hasWebPlugins = (await findPlugins(
       flutterProject,
+      logger: _logger,
     )).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
         ? _fileSystem.directory(
@@ -233,28 +229,24 @@ enum WebRendererMode {
   }
 }
 
-/// The correct precompiled artifact to use for each build and render mode for DDC with AMD modules.
-// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-const kAmdDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdk,
+/// The correct precompiled artifact to use for each build and render mode for stable DDC.
+const kDDCStableSdkArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCStableSdk,
 };
 
-/// The correct source map artifact to use for each build and render mode for DDC with AMD modules.
-// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-const kAmdDartSdkJsMapArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps,
+/// The correct source map artifact to use for each build and render mode for stable DDC.
+const kDDCStableSdkSourcemapsArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCStableSdkSourcemaps,
 };
 
-/// The correct precompiled artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format.
-const kDdcLibraryBundleDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
+/// The correct precompiled artifact to use for each build and render mode for canary DDC.
+const kDDCCanarySdkArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCCanarySdk,
 };
 
-/// The correct source map artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format.
-const kDdcLibraryBundleDartSdkJsMapArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps,
+/// The correct source map artifact to use for each build and render mode for canary DDC.
+const kDDCCanarySdkSourcemapsArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCCanarySdkSourcemaps,
 };
 
 String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) {
