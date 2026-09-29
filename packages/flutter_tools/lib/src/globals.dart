@@ -35,6 +35,7 @@ import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
+import 'experimental/extension_manager.dart';
 import 'git.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
@@ -297,3 +298,5 @@ Java? get java => context.get<Java>();
 
 TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder =>
     context.get<TestCompilerNativeAssetsBuilder>();
+
+ExtensionManager? get extensionManager => context.get<ExtensionManager>();

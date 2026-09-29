@@ -13,7 +13,10 @@ enum Category {
   desktop._('desktop'),
 
   /// Mobile device or simulator target workflow.
-  mobile._('mobile');
+  mobile._('mobile'),
+
+  /// Other device target workflow (such as smart TVs or custom embedders).
+  other._('other');
 
   const Category._(this.value);
 
@@ -25,7 +28,12 @@ enum Category {
 
   /// Parses a [Category] from its serialized [category] string representation.
   static Category? fromString(String category) {
-    return const <String, Category>{'web': web, 'desktop': desktop, 'mobile': mobile}[category];
+    return const <String, Category>{
+      'web': web,
+      'desktop': desktop,
+      'mobile': mobile,
+      'other': other,
+    }[category];
   }
 }
 

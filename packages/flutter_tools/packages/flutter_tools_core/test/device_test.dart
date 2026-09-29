@@ -11,8 +11,10 @@ void main() {
       expect(Category.fromString('web'), Category.web);
       expect(Category.fromString('desktop'), Category.desktop);
       expect(Category.fromString('mobile'), Category.mobile);
+      expect(Category.fromString('other'), Category.other);
       expect(Category.fromString('unknown'), isNull);
       expect(Category.desktop.toString(), 'desktop');
+      expect(Category.other.toString(), 'other');
     });
   });
 
