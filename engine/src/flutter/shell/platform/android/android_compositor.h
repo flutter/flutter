@@ -102,6 +102,7 @@ class AndroidCompositor {
     AndroidSurfaceManager::OffscreenFBO fbo;
   };
   std::atomic<size_t> backing_stores_created_in_frame_{0};
+  std::atomic<bool> has_active_onscreen_vulkan_backing_store_{false};
 
   const std::shared_ptr<AndroidSurfaceManager> surface_manager_;
   std::shared_ptr<AndroidCompositorPlatformViewDelegate>

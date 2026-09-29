@@ -79,8 +79,19 @@ bool AndroidCompositor::CreateBackingStore(
     case AndroidRenderingAPI::kImpellerAutoselect: {
       if (surface_manager_->IsVulkanInitialized() ||
           surface_manager_->IsFakeWindow()) {
+        bool expected = false;
+        if (!has_active_onscreen_vulkan_backing_store_.compare_exchange_strong(
+                expected, true)) {
+          FML_LOG(WARNING)
+              << "AndroidCompositor: multiple Vulkan backing stores requested "
+                 "while an onscreen swapchain backing store is already active. "
+                 "Secondary Vulkan overlay backing stores are currently "
+                 "unsupported.";
+          return false;
+        }
         FlutterVulkanImage img = surface_manager_->GetNextImage(nullptr);
         if (img.image == 0 && !surface_manager_->IsFakeWindow()) {
+          has_active_onscreen_vulkan_backing_store_ = false;
           return false;
         }
         auto* image_holder = new FlutterVulkanImage(img);
@@ -135,6 +146,9 @@ bool AndroidCompositor::CollectBackingStore(
   if (renderer == nullptr) {
     return false;
   }
+  if (backing_stores_created_in_frame_ > 0) {
+    backing_stores_created_in_frame_--;
+  }
   if (renderer->type == kFlutterBackingStoreTypeSoftware &&
       renderer->user_data != nullptr) {
     delete[] static_cast<const uint8_t*>(renderer->user_data);
@@ -147,6 +161,7 @@ bool AndroidCompositor::CollectBackingStore(
              renderer->user_data != nullptr) {
     auto* image_holder = static_cast<FlutterVulkanImage*>(renderer->user_data);
     delete image_holder;
+    has_active_onscreen_vulkan_backing_store_ = false;
   }
   return true;
 }
@@ -177,6 +192,7 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
   size_t platform_views_count = 0;
   size_t overlays_count = 0;
   backing_stores_created_in_frame_ = 0;
+  has_active_onscreen_vulkan_backing_store_ = false;
   const FlutterLayer* root_backing_store_layer = nullptr;
 
   for (size_t i = 0; i < layers_count; ++i) {
@@ -187,7 +203,9 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
 
     if (layer->type == kFlutterLayerContentTypeBackingStore) {
       if (layer->backing_store != nullptr) {
-        if (platform_views_count == 0) {
+        if (platform_views_count == 0 ||
+            (root_backing_store_layer == nullptr &&
+             layer->backing_store->type == kFlutterBackingStoreTypeVulkan)) {
           root_backing_store_layer = layer;
         } else {
           if (layer->backing_store->type == kFlutterBackingStoreTypeOpenGL) {
