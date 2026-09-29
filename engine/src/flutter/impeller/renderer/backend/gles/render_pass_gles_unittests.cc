@@ -579,16 +579,33 @@ TEST_F(RenderPassGLESCommandTest,
     EXPECT_TRUE(render_pass->Draw().ok());
   }
 
-  // Three draws with identical pipeline and scissor should bind the program
-  // once, enable/set the scissor once, and not re-emit ResetGLState defaults
-  // (ColorMask, Disable(GL_BLEND/GL_DEPTH_TEST/GL_STENCIL_TEST)) per command.
-  EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, 0, 3)).Times(3);
+  // Draw 4: unscissored command must disable GL_SCISSOR_TEST and clear cached
+  // scissor state.
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(3);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  // Draw 5: re-applying the scissor after an unscissored draw must re-enable
+  // GL_SCISSOR_TEST and re-apply glScissor.
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetScissor(IRect32::MakeXYWH(10, 10, 40, 40));
+  render_pass->SetElementCount(3);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  // Five draws: identical pipeline binds program once; first 3 scissored draws
+  // enable/set scissor once; Draw 4 disables GL_SCISSOR_TEST (second call
+  // alongside ResetGLState); Draw 5 re-enables/sets scissor; ResetGLState
+  // defaults (ColorMask, Disable(GL_BLEND/GL_DEPTH_TEST/GL_STENCIL_TEST)) are
+  // not re-emitted per command.
+  EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, 0, 3)).Times(5);
   EXPECT_CALL(mock_gl_impl_ref, UseProgram(_)).Times(1);
-  EXPECT_CALL(mock_gl_impl_ref, Enable(GL_SCISSOR_TEST)).Times(1);
-  EXPECT_CALL(mock_gl_impl_ref, Scissor(10, 10, 40, 40)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Enable(GL_SCISSOR_TEST)).Times(2);
+  EXPECT_CALL(mock_gl_impl_ref, Scissor(10, 10, 40, 40)).Times(2);
   EXPECT_CALL(mock_gl_impl_ref, ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE))
       .Times(1);
-  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_SCISSOR_TEST)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_SCISSOR_TEST)).Times(2);
   EXPECT_CALL(mock_gl_impl_ref, Disable(GL_DEPTH_TEST)).Times(1);
   EXPECT_CALL(mock_gl_impl_ref, Disable(GL_STENCIL_TEST)).Times(1);
   EXPECT_CALL(mock_gl_impl_ref, Disable(GL_CULL_FACE)).Times(1);

@@ -512,19 +512,24 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Setup the scissor rect.
     ///
-    if (command.scissor.has_value() && current_scissor != command.scissor) {
-      const auto& scissor = command.scissor.value();
-      if (!current_scissor.has_value()) {
-        gl.Enable(GL_SCISSOR_TEST);
+    if (command.scissor.has_value()) {
+      if (current_scissor != command.scissor) {
+        const auto& scissor = command.scissor.value();
+        if (!current_scissor.has_value()) {
+          gl.Enable(GL_SCISSOR_TEST);
+        }
+        // Same flip handling as the viewport above.
+        const auto scissor_y_gl =
+            flip_y ? scissor.GetY()
+                   : target_size.height - scissor.GetY() - scissor.GetHeight();
+        gl.Scissor(scissor.GetX(),  // x
+                   scissor_y_gl,    // y
+                   scissor.GetWidth(), scissor.GetHeight());
+        current_scissor = scissor;
       }
-      // Same flip handling as the viewport above.
-      const auto scissor_y_gl =
-          flip_y ? scissor.GetY()
-                 : target_size.height - scissor.GetY() - scissor.GetHeight();
-      gl.Scissor(scissor.GetX(),  // x
-                 scissor_y_gl,    // y
-                 scissor.GetWidth(), scissor.GetHeight());
-      current_scissor = scissor;
+    } else if (current_scissor.has_value()) {
+      gl.Disable(GL_SCISSOR_TEST);
+      current_scissor = std::nullopt;
     }
 
     //--------------------------------------------------------------------------
