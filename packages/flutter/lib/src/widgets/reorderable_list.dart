@@ -1307,6 +1307,12 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     super.deactivate();
   }
 
+  @override
+  void activate() {
+    super.activate();
+    _listState._registerItem(this);
+  }
+
   Offset get offset {
     if (_offsetAnimation != null) {
       final double animValue = Curves.easeInOut.transform(_offsetAnimation!.value);
