@@ -2411,7 +2411,7 @@ void main() {
     }
   });
 
-  group('FocusNode.canRequestFocus regression tests', () {
+  group('FocusNode.canRequestFocus - ', () {
     // Reproduces https://github.com/flutter/flutter/issues/185076:
     testWidgets('disabling all siblings in the same build does not leave '
         'primary focus on an unfocusable node', (WidgetTester tester) async {
@@ -2472,7 +2472,8 @@ void main() {
         expect(
           node!.hasPrimaryFocus,
           isFalse,
-          reason: '${node.debugLabel} should not have primary focus after all '
+          reason:
+              '${node.debugLabel} should not have primary focus after all '
               'siblings were disabled in the same build',
         );
       }
