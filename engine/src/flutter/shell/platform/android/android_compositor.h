@@ -101,6 +101,11 @@ class AndroidCompositor {
   struct OffscreenTracker {
     AndroidSurfaceManager::OffscreenFBO fbo;
   };
+  struct VulkanBackingStoreTracker {
+    FlutterVulkanImage image;
+    bool is_onscreen = false;
+    ANativeWindow* overlay_window = nullptr;
+  };
   std::atomic<size_t> backing_stores_created_in_frame_{0};
   std::atomic<bool> has_active_onscreen_vulkan_backing_store_{false};
 

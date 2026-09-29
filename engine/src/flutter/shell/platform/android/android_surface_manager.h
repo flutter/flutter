@@ -180,6 +180,13 @@ class AndroidSurfaceManager {
   /// Presents the rendered image to the swapchain.
   virtual bool PresentImage(const FlutterVulkanImage* image);
 
+  /// Acquires the next swapchain image for an overlay surface.
+  virtual FlutterVulkanImage GetNextOverlayImage(ANativeWindow* overlay_window);
+
+  /// Presents the rendered image to the overlay swapchain.
+  virtual bool PresentOverlayImage(ANativeWindow* overlay_window,
+                                   const FlutterVulkanImage* image);
+
   /// Resolves Vulkan function pointers dynamically.
   void* GetInstanceProcAddress(FlutterVulkanInstanceHandle instance,
                                const char* name);
@@ -327,6 +334,25 @@ class AndroidSurfaceManager {
   bool CreateOrUpdateVulkanSurfaceLocked();
   void DestroyVulkanSurfaceLocked();
   void DestroyVulkanSwapchainLocked();
+
+  struct VulkanOverlaySurface {
+    VkSurfaceKHR surface = VK_NULL_HANDLE;
+    VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+    VkSurfaceFormatKHR format = {};
+    VkExtent2D extent = {0, 0};
+    std::vector<VkImage> images;
+    std::vector<VkCommandBuffer> command_buffers;
+    VkCommandPool command_pool = VK_NULL_HANDLE;
+    VkFence acquire_fence = VK_NULL_HANDLE;
+    uint32_t current_image_index = 0;
+  };
+
+  bool CreateOrUpdateOverlayVulkanSurfaceLocked(ANativeWindow* window,
+                                                VulkanOverlaySurface& entry);
+  void DestroyOverlayVulkanSurfaceLocked(VulkanOverlaySurface& entry);
+
+  std::unordered_map<ANativeWindow*, VulkanOverlaySurface>
+      overlay_vulkan_surfaces_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceManager);
 };

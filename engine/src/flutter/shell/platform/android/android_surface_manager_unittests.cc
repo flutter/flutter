@@ -418,13 +418,41 @@ TEST(AndroidSurfaceManagerTest, PresentImageValidatesSwapchainImages) {
   FlutterVulkanImage stale_image = {};
   stale_image.struct_size = sizeof(FlutterVulkanImage);
   stale_image.image = 0xdeadbeef;
-  // 44 is VK_FORMAT_R8G8B8A8_UNORM
-  stale_image.format = 44;
+  // 37 is VK_FORMAT_R8G8B8A8_UNORM
+  stale_image.format = 37;
   EXPECT_FALSE(manager->PresentImage(&stale_image));
 
   // With a fake window, PresentImage returns true for testing stubs.
   EXPECT_TRUE(manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
   EXPECT_TRUE(manager->PresentImage(&stale_image));
+  manager->ClearNativeWindow();
+}
+
+TEST(AndroidSurfaceManagerTest, VulkanOverlaySurfaceLifecycle) {
+  auto manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerVulkan);
+  ASSERT_NE(manager, nullptr);
+
+  // Without a window or fake window, GetNextOverlayImage returns empty image.
+  FlutterVulkanImage img = manager->GetNextOverlayImage(nullptr);
+  EXPECT_EQ(img.image, 0u);
+
+  // PresentOverlayImage with nullptr returns false safely.
+  EXPECT_FALSE(manager->PresentOverlayImage(nullptr, nullptr));
+
+  // With a fake window, GetNextOverlayImage returns mock image (0x2000)
+  // and PresentOverlayImage returns true.
+  EXPECT_TRUE(manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+  FlutterVulkanImage overlay_img = manager->GetNextOverlayImage(nullptr);
+  // 0x2000 is mock overlay image handle for unit tests without Vulkan hardware
+  EXPECT_EQ(overlay_img.image, 0x2000u);
+  // 37 is VK_FORMAT_R8G8B8A8_UNORM
+  EXPECT_EQ(overlay_img.format, 37u);
+
+  EXPECT_TRUE(manager->PresentOverlayImage(nullptr, &overlay_img));
+
+  // DestroyOverlaySurfaces cleans up overlay resources safely.
+  manager->DestroyOverlaySurfaces();
   manager->ClearNativeWindow();
 }
 
