@@ -272,6 +272,7 @@ class AndroidSurfaceManager {
   VkCommandPool vk_command_pool_ = VK_NULL_HANDLE;
   VkFence vk_acquire_fence_ = VK_NULL_HANDLE;
   uint32_t current_image_index_ = 0;
+  bool has_acquired_image_ = false;
 
   std::vector<std::string> enabled_instance_extensions_;
   std::vector<const char*> enabled_instance_extensions_ptrs_;
@@ -321,6 +322,7 @@ class AndroidSurfaceManager {
   PFN_vkEndCommandBuffer vk_end_command_buffer_fn_ = nullptr;
   PFN_vkResetCommandBuffer vk_reset_command_buffer_fn_ = nullptr;
   PFN_vkCmdPipelineBarrier vk_cmd_pipeline_barrier_fn_ = nullptr;
+  PFN_vkCmdClearColorImage vk_cmd_clear_color_image_fn_ = nullptr;
   PFN_vkQueueSubmit vk_queue_submit_fn_ = nullptr;
   PFN_vkCreateFence vk_create_fence_fn_ = nullptr;
   PFN_vkDestroyFence vk_destroy_fence_fn_ = nullptr;

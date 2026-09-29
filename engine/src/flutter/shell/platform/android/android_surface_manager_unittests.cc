@@ -456,6 +456,15 @@ TEST(AndroidSurfaceManagerTest, VulkanOverlaySurfaceLifecycle) {
   manager->ClearNativeWindow();
 }
 
+TEST(AndroidSurfaceManagerTest, ClearAndPresentOnscreenSurfaceFakeWindow) {
+  auto manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerVulkan);
+  ASSERT_NE(manager, nullptr);
+  EXPECT_TRUE(manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+  EXPECT_TRUE(manager->ClearAndPresentOnscreenSurface());
+  manager->ClearNativeWindow();
+}
+
 INSTANTIATE_TEST_SUITE_P(
     Matrix,
     AndroidSurfaceManagerMultiBackendMatrixTest,

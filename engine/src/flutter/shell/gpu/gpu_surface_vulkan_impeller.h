@@ -24,7 +24,8 @@ FML_TEST_CLASS(GPUSurfaceVulkanImpeller,
 class GPUSurfaceVulkanImpeller final : public Surface {
  public:
   explicit GPUSurfaceVulkanImpeller(GPUSurfaceVulkanDelegate* delegate,
-                                    std::shared_ptr<impeller::Context> context);
+                                    std::shared_ptr<impeller::Context> context,
+                                    bool render_to_surface = true);
 
   // |Surface|
   ~GPUSurfaceVulkanImpeller() override;
@@ -43,6 +44,7 @@ class GPUSurfaceVulkanImpeller final : public Surface {
   /// The size of the textures in [transients_]
   impeller::ISize transients_size_ = {};
   bool is_valid_ = false;
+  bool render_to_surface_ = true;
 
   // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) override;
