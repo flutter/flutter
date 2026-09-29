@@ -6636,9 +6636,7 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
-  /// Whether to render a hyphen glyph for soft hyphens (U+00AD) at line breaks.
-  ///
-  /// Defaults to [Hyphens.manual].
+  /// {@macro flutter.painting.textPainter.hyphens}
   final ui.Hyphens hyphens;
 
   /// The [SelectionRegistrar] this rich text is subscribed to.

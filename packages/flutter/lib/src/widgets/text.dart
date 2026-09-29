@@ -706,9 +706,7 @@ class Text extends StatelessWidget {
 
   /// {@macro flutter.painting.textPainter.hyphens}
   ///
-  /// If null, resolves to [Hyphens.manual] (via [DefaultTextStyle] once that
-  /// gains a `hyphens` field), matching the other paragraph-level properties
-  /// on this widget.
+  /// If null, [Hyphens.manual] is used.
   final ui.Hyphens? hyphens;
 
   /// The color to use when painting the selection.
