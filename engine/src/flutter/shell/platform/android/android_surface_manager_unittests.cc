@@ -404,6 +404,30 @@ TEST(AndroidSurfaceManagerTest, GlProcResolverResolvesViaDlsym) {
   EXPECT_NE(proc, nullptr);
 }
 
+TEST(AndroidSurfaceManagerTest, PresentImageValidatesSwapchainImages) {
+  auto manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerVulkan);
+  ASSERT_NE(manager, nullptr);
+
+  // PresentImage with nullptr image should return false safely without
+  // crashing.
+  EXPECT_FALSE(manager->PresentImage(nullptr));
+
+  // Without a valid swapchain, PresentImage with a stale image should return
+  // false.
+  FlutterVulkanImage stale_image = {};
+  stale_image.struct_size = sizeof(FlutterVulkanImage);
+  stale_image.image = 0xdeadbeef;
+  // 44 is VK_FORMAT_R8G8B8A8_UNORM
+  stale_image.format = 44;
+  EXPECT_FALSE(manager->PresentImage(&stale_image));
+
+  // With a fake window, PresentImage returns true for testing stubs.
+  EXPECT_TRUE(manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+  EXPECT_TRUE(manager->PresentImage(&stale_image));
+  manager->ClearNativeWindow();
+}
+
 INSTANTIATE_TEST_SUITE_P(
     Matrix,
     AndroidSurfaceManagerMultiBackendMatrixTest,
