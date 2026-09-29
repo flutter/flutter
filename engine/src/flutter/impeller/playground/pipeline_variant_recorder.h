@@ -16,6 +16,7 @@
 
 #include "impeller/base/thread.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/pipeline_variant_recording.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline_descriptor.h"
@@ -29,10 +30,9 @@ namespace impeller {
 ///             the life of a test process.
 ///
 ///             Each `ContentContext` reports the variants it created (see
-///             `ContentContext::SetPipelineVariantObserver`) as it is
-///             destroyed. Draw counts come from the `PipelineLibrary` of the
-///             context it rendered with, which counts every pipeline bound to a
-///             render pass.
+///             `SetPipelineVariantObserver`) as it is destroyed. Draw counts
+///             come from the `PipelineLibrary` of the context it rendered with,
+///             which counts every pipeline bound to a render pass.
 ///
 ///             The interesting output is the variants warmed during
 ///             `ContentContext` construction that nothing ever drew with, and
@@ -105,7 +105,7 @@ class PipelineVariantRecorder {
   ///             mistaken for a new library allocated at the same address.
   ///
   void Harvest(const Context& context,
-               const std::vector<ContentContext::RecordedVariant>& variants);
+               const std::vector<RecordedPipelineVariant>& variants);
 
   //----------------------------------------------------------------------------
   /// @brief      Writes a human readable summary of what was warmed and what

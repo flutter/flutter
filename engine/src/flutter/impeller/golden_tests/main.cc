@@ -9,7 +9,7 @@
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/logging.h"
 #include "flutter/impeller/base/validation.h"
-#include "flutter/impeller/entity/contents/content_context.h"
+#include "flutter/impeller/entity/contents/pipeline_variant_recording.h"
 #include "flutter/impeller/golden_tests/golden_digest.h"
 #include "flutter/impeller/golden_tests/working_directory.h"
 #include "flutter/impeller/playground/pipeline_variant_recorder.h"
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
   if (shader_report || fail_on_unused_shaders) {
     // Failing here, rather than quietly reporting nothing, keeps a check that
     // was asked for from passing without having run.
-    if (!impeller::ContentContext::IsPipelineVariantRecordingSupported()) {
+    if (!IMPELLER_PIPELINE_VARIANT_RECORDER_IS_SUPPORTED()) {
       std::cout << "--" << kShaderReportFlag << " and --"
                 << kFailOnUnusedShadersFlag
                 << " need pipeline variant recording, which is only compiled "

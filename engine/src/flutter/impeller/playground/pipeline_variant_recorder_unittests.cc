@@ -8,6 +8,7 @@
 
 #include "flutter/testing/testing.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/pipeline_variant_recording.h"
 #include "impeller/renderer/testing/mocks.h"
 
 namespace impeller {
@@ -19,8 +20,6 @@ using ::testing::HasSubstr;
 using ::testing::NiceMock;
 using ::testing::Not;
 using ::testing::Return;
-
-using RecordedVariant = ContentContext::RecordedVariant;
 
 /// A context that reports the given backend and hands out the given library.
 std::shared_ptr<NiceMock<MockImpellerContext>> MakeContext(
@@ -46,16 +45,16 @@ ContentContextOptions MakeOptions(uint8_t seed) {
   return options;
 }
 
-RecordedVariant Warmed(const std::string& label, uint8_t seed = 0) {
-  return RecordedVariant{.descriptor = MakeDescriptor(label),
-                         .options = MakeOptions(seed),
-                         .warmed = true};
+RecordedPipelineVariant Warmed(const std::string& label, uint8_t seed = 0) {
+  return RecordedPipelineVariant{.descriptor = MakeDescriptor(label),
+                                 .options = MakeOptions(seed),
+                                 .warmed = true};
 }
 
-RecordedVariant Lazy(const std::string& label, uint8_t seed = 0) {
-  return RecordedVariant{.descriptor = MakeDescriptor(label),
-                         .options = MakeOptions(seed),
-                         .warmed = false};
+RecordedPipelineVariant Lazy(const std::string& label, uint8_t seed = 0) {
+  return RecordedPipelineVariant{.descriptor = MakeDescriptor(label),
+                                 .options = MakeOptions(seed),
+                                 .warmed = false};
 }
 
 class PipelineVariantRecorderTest : public ::testing::Test {
@@ -63,7 +62,7 @@ class PipelineVariantRecorderTest : public ::testing::Test {
   void SetUp() override {
     // Variant recording, and with it a report that can be trusted, only exists
     // in debug builds.
-    if (!ContentContext::IsPipelineVariantRecordingSupported()) {
+    if (!IMPELLER_PIPELINE_VARIANT_RECORDER_IS_SUPPORTED()) {
       GTEST_SKIP() << "Pipeline variant recording is only in debug builds.";
     }
   }
@@ -227,10 +226,10 @@ TEST_F(PipelineVariantRecorderTest, FormatsOptions) {
 
   PipelineVariantRecorder recorder;
   recorder.Enable();
-  recorder.Harvest(*context,
-                   {RecordedVariant{.descriptor = MakeDescriptor("Formatted"),
-                                    .options = options,
-                                    .warmed = true}});
+  recorder.Harvest(*context, {RecordedPipelineVariant{
+                                 .descriptor = MakeDescriptor("Formatted"),
+                                 .options = options,
+                                 .warmed = true}});
 
   const std::string report = Report(recorder);
   EXPECT_THAT(report, HasSubstr("blend=Plus"));
@@ -399,12 +398,13 @@ TEST_F(PipelineVariantRecorderTest, ExplainsWhyWarmedVariantsWentUnused) {
   recorder.Enable();
   recorder.Harvest(
       *context,
-      {RecordedVariant{.descriptor = MakeDescriptor("Fill Pipeline"),
-                       .options = warmed_options,
-                       .warmed = true},
-       RecordedVariant{.descriptor = MakeDescriptor("Fill Pipeline V#1"),
-                       .options = drawn_options,
-                       .warmed = false}});
+      {RecordedPipelineVariant{.descriptor = MakeDescriptor("Fill Pipeline"),
+                               .options = warmed_options,
+                               .warmed = true},
+       RecordedPipelineVariant{
+           .descriptor = MakeDescriptor("Fill Pipeline V#1"),
+           .options = drawn_options,
+           .warmed = false}});
 
   const std::string report = Report(recorder);
   EXPECT_THAT(report, HasSubstr("Likely cause: 1 of 1 were drawn, but only "
@@ -438,7 +438,7 @@ TEST_F(PipelineVariantRecorderTest, OrdersTheReportDeterministically) {
     library->LogPipelineUsage(MakeDescriptor("B Pipeline"));
     library->LogPipelineUsage(MakeDescriptor("A Pipeline"));
     auto context = MakeContext(library, Context::BackendType::kMetal);
-    std::vector<RecordedVariant> variants = {
+    std::vector<RecordedPipelineVariant> variants = {
         Warmed("Z Pipeline", 1), Warmed("Y Pipeline", 1), Lazy("B Pipeline", 2),
         Lazy("A Pipeline", 2)};
     if (reversed) {
@@ -512,9 +512,9 @@ TEST_F(PipelineVariantRecorderTest, TellsSpecializationsOfAShaderApart) {
   recorder.Enable();
   recorder.Harvest(
       *context,
-      {RecordedVariant{
+      {RecordedPipelineVariant{
            .descriptor = drawn, .options = MakeOptions(0), .warmed = true},
-       RecordedVariant{
+       RecordedPipelineVariant{
            .descriptor = idle, .options = MakeOptions(0), .warmed = true}});
 
   const std::vector<PipelineVariantRecorder::UnusedShader> expected = {

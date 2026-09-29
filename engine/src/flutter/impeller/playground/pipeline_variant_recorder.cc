@@ -287,16 +287,16 @@ PipelineVariantRecorder& PipelineVariantRecorder::GetInstance() {
 }
 
 void PipelineVariantRecorder::InstallForProcess() {
-  if (!ContentContext::IsPipelineVariantRecordingSupported()) {
+  if (!IMPELLER_PIPELINE_VARIANT_RECORDER_IS_SUPPORTED()) {
     FML_LOG(ERROR) << "A pipeline variant report was requested but pipeline "
                       "variant recording is only compiled into debug builds. "
                       "The report will be empty.";
     return;
   }
   GetInstance().Enable();
-  ContentContext::SetPipelineVariantObserver(
+  SetPipelineVariantObserver(
       [](const Context& context,
-         const std::vector<ContentContext::RecordedVariant>& variants) {
+         const std::vector<RecordedPipelineVariant>& variants) {
         GetInstance().Harvest(context, variants);
       });
 }
@@ -341,7 +341,7 @@ PipelineVariantRecorder::Entry& PipelineVariantRecorder::GetEntry(
 
 void PipelineVariantRecorder::Harvest(
     const Context& context,
-    const std::vector<ContentContext::RecordedVariant>& variants) {
+    const std::vector<RecordedPipelineVariant>& variants) {
   if (!IsEnabled()) {
     return;
   }
@@ -366,7 +366,7 @@ void PipelineVariantRecorder::Harvest(
   }
 
   BackendEntries& entries = backends_[backend];
-  for (const ContentContext::RecordedVariant& variant : variants) {
+  for (const RecordedPipelineVariant& variant : variants) {
     KnownVariant& known = record.known[variant.descriptor];
     known.options = variant.options;
     known.warmed = known.warmed || variant.warmed;
@@ -607,7 +607,7 @@ void PipelineVariantRecorder::PrintReport(std::ostream& out,
   out << "  Note: draws are only recorded in the debug and profile runtime "
          "modes.\n";
 #endif
-  if (!ContentContext::IsPipelineVariantRecordingSupported()) {
+  if (!IMPELLER_PIPELINE_VARIANT_RECORDER_IS_SUPPORTED()) {
     out << "  Note: pipeline variant recording is only compiled into debug "
            "builds.\n";
   }
