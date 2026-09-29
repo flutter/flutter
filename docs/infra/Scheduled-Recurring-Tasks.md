@@ -15,6 +15,7 @@ You can find active or closed automated task issues using the following GitHub i
 - [All open automated tasks](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22automated+task%22) (`is:issue is:open label:"automated task"`)
 - [Localization tasks](https://github.com/flutter/flutter/issues?q=is%3Aissue+label%3A%22automated+task%22+label%3A%22a%3A+internationalization%22) (`is:issue label:"automated task" label:"a: internationalization"`)
 - [goldctl tasks](https://github.com/flutter/flutter/issues?q=is%3Aissue+label%3A%22automated+task%22+label%3A%22infra%3A+flutter+gold%22) (`is:issue label:"automated task" label:"infra: flutter gold"`)
+- [Dart SDK constraint bump tasks](https://github.com/flutter/flutter/issues?q=is%3Aissue+label%3A%22automated+task%22+label%3A%22team-framework%22+%22Quarterly+Dart+SDK+constraint+bump%22) (`is:issue label:"automated task" label:"team-framework" "Quarterly Dart SDK constraint bump"`)
 
 ---
 
@@ -96,3 +97,4 @@ For more details on GitHub Action issue creation, see [GitHub's Schedule Issue C
 | :--- | :--- | :--- | :--- |
 | **Localization Update** | [quarterly-scheduled-tasks.yml](../../.github/workflows/quarterly-scheduled-tasks.yml) | Prompts team to check for new upstream strings, pull translations from internal console, update `flutter_localizations`, Material, and Cupertino localizations, run tests, submit PR, and file follow-up issues if stable roll is required. | `automated task`, `a: internationalization`, `team-framework` |
 | **Goldctl Version Update** | [quarterly-scheduled-tasks.yml](../../.github/workflows/quarterly-scheduled-tasks.yml) | Prompts team to find the latest `goldctl` git revision, update `goldctl` dependencies in `.ci.yaml` across `flutter/flutter` and `flutter/packages`, verify golden file tests, and open PRs. | `automated task`, `team-ecosystem`, `infra: flutter gold` |
+| **Dart SDK Constraint Bump** | [quarterly-scheduled-tasks.yml](../../.github/workflows/quarterly-scheduled-tasks.yml) | Prompts team to bump the minimum Dart SDK version constraint across `flutter/flutter` to align with the current stable release, update package checksums, and run static analysis and tests. | `automated task`, `team-framework` |
