@@ -64,11 +64,6 @@ class ViewRenderingFlutterBinding extends RenderingFlutterBinding {
       onSemanticsOwnerDisposed: () {
         renderView.clearSemantics();
       },
-      onFlushedPaint: (bool isDirty) {
-        if (isDirty) {
-          renderView.markNeedsCompositeFrame();
-        }
-      },
     );
   }
 }
