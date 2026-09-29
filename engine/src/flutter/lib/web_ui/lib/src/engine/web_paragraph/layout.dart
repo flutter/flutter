@@ -848,49 +848,33 @@ class TextLayout {
     return ui.TextRange(start: start, end: end);
   }
 
-  /// Returns the text range of the line containing the given [position].
+  /// Returns the text range of the line containing [position], or
+  /// [ui.TextRange.empty] if the offset is outside of the text.
   ///
-  /// If [position.offset] falls on a soft line wrap boundary between two lines,
-  /// [position.affinity] is used to disambiguate: [ui.TextAffinity.downstream]
-  /// selects the following line, while [ui.TextAffinity.upstream] stays on the
-  /// preceding line.
+  /// An offset shared by two adjacent lines (the end of one line is the start
+  /// of the next) is resolved by [ui.TextPosition.affinity]: downstream selects
+  /// the next line, upstream stays on the current one.
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    if (lines.isEmpty) {
-      return ui.TextRange.empty;
-    }
     final int offset = position.offset;
-
     for (var i = 0; i < lines.length; i++) {
-      final TextLine line = lines[i];
-      // Include offset == lineRange.end so offsets at the end of a line
-      // (such as cursor positions after the last character) match the line.
-      if (offset >= line.allLineTextRange.start && offset <= line.allLineTextRange.end) {
-        final lineRange = ui.TextRange(
-          start: line.allLineTextRange.start,
-          end: line.allLineTextRange.end,
-        );
-
-        // When the offset is exactly at the boundary between two adjacent lines
-        // (i.e. at a soft line wrap where lineRange.end == nextLineRange.start),
-        // use TextAffinity to disambiguate: downstream affinity selects the next
-        // line, whereas upstream affinity stays on the current line.
-        if (offset == lineRange.end && i + 1 < lines.length) {
-          final TextLine nextLine = lines[i + 1];
-          final nextLineRange = ui.TextRange(
-            start: nextLine.allLineTextRange.start,
-            end: nextLine.allLineTextRange.end,
-          );
-
-          if (lineRange != nextLineRange &&
-              offset == lineRange.end &&
-              lineRange.end == nextLineRange.start) {
-            if (position.affinity == ui.TextAffinity.downstream) {
-              return nextLineRange;
-            }
-          }
-        }
-        return lineRange;
+      final ui.TextRange range = lines[i].allLineTextRange;
+      // The end is inclusive so that the position after the last character
+      // of a line (e.g. the end of the text) still belongs to that line.
+      if (offset < range.start || offset > range.end) {
+        continue;
       }
+      // The offset is at the boundary shared with the next line (e.g. a soft
+      // wrap). Downstream affinity means the caret belongs to the next line.
+      // The start check guards against non-contiguous line ranges.
+      if (offset == range.end &&
+          position.affinity == ui.TextAffinity.downstream &&
+          i + 1 < lines.length &&
+          lines[i + 1].allLineTextRange.start == offset) {
+        return lines[i + 1].allLineTextRange;
+      }
+      // Either strictly inside the line, or at its end with upstream affinity,
+      // or at the end of the last line.
+      return range;
     }
     return ui.TextRange.empty;
   }
