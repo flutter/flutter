@@ -6,9 +6,8 @@ import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/access_debug_members_only_in_asserts.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class AccessDebugMembersOnlyInAssertsTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -177,8 +176,7 @@ void testConstructors() {
 }
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_debug_only_access() async {
+  Future<void> testDebugOnlyAccess() async {
     await assertDiagnostics(debugOnlyAccessSource, <ExpectedDiagnostic>[
       lint(628, 19, messageContains: 'debugGlobalVariable accessed outside of an assert.'),
       lint(661, 19, messageContains: 'debugGlobalFunction accessed outside of an assert.'),
@@ -214,8 +212,7 @@ void testConstructors() {
     ]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_debug_only_constructors() async {
+  Future<void> testDebugOnlyConstructors() async {
     await assertDiagnostics(debugOnlyConstructorsSource, <ExpectedDiagnostic>[
       lint(337, 16, messageContains: 'debugConstructor accessed outside of an assert.'),
       lint(573, 14, messageContains: 'debugOnlyField accessed outside of an assert.'),
@@ -229,7 +226,15 @@ void testConstructors() {
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(AccessDebugMembersOnlyInAssertsTest);
+  late AccessDebugMembersOnlyInAssertsTest testSuite;
+
+  setUp(() {
+    testSuite = AccessDebugMembersOnlyInAssertsTest();
+    testSuite.setUp();
   });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('debug only access', () => testSuite.testDebugOnlyAccess());
+  test('debug only constructors', () => testSuite.testDebugOnlyConstructors());
 }
