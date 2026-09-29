@@ -128,7 +128,8 @@ DlCanvas* EmbedderExternalViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
 
 static FlutterBackingStoreConfig MakeBackingStoreConfig(
     int64_t view_id,
-    const DlISize& backing_store_size) {
+    const DlISize& backing_store_size,
+    bool is_overlay) {
   FlutterBackingStoreConfig config = {};
 
   config.struct_size = sizeof(config);
@@ -136,6 +137,7 @@ static FlutterBackingStoreConfig MakeBackingStoreConfig(
   config.size.width = backing_store_size.width;
   config.size.height = backing_store_size.height;
   config.view_id = view_id;
+  config.is_overlay = is_overlay;
 
   return config;
 }
@@ -405,9 +407,8 @@ class Layer {
 /// Implements https://flutter.dev/go/optimized-platform-view-layers
 class LayerBuilder {
  public:
-  using RenderTargetProvider =
-      std::function<std::unique_ptr<EmbedderRenderTarget>(
-          const DlISize& frame_size)>;
+  using RenderTargetProvider = std::function<std::unique_ptr<
+      EmbedderRenderTarget>(const DlISize& frame_size, bool is_overlay)>;
 
   explicit LayerBuilder(DlISize frame_size) : frame_size_(frame_size) {
     layers_.push_back(Layer());
@@ -430,9 +431,14 @@ class LayerBuilder {
 
   /// Prepares the render targets for all layers that have Flutter contents.
   void PrepareBackingStore(const RenderTargetProvider& target_provider) {
+    bool has_encountered_platform_view = false;
     for (auto& layer : layers_) {
+      if (!layer.platform_views().empty()) {
+        has_encountered_platform_view = true;
+      }
       if (layer.has_flutter_contents()) {
-        layer.SetRenderTarget(target_provider(frame_size_));
+        bool is_overlay = has_encountered_platform_view;
+        layer.SetRenderTarget(target_provider(frame_size_, is_overlay));
       }
     }
   }
@@ -563,7 +569,7 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
     builder.AddExternalView(view.get());
   }
 
-  builder.PrepareBackingStore([&](const DlISize& frame_size) {
+  builder.PrepareBackingStore([&](const DlISize& frame_size, bool is_overlay) {
     if (!avoid_backing_store_cache_) {
       std::unique_ptr<EmbedderRenderTarget> target =
           render_target_cache.GetRenderTarget(
@@ -572,7 +578,8 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
         return target;
       }
     }
-    auto config = MakeBackingStoreConfig(flutter_view_id, frame_size);
+    auto config =
+        MakeBackingStoreConfig(flutter_view_id, frame_size, is_overlay);
     return create_render_target_callback_(context, aiks_context, config);
   });
 

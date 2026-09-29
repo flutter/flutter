@@ -347,6 +347,7 @@ class AndroidSurfaceManager {
     VkCommandPool command_pool = VK_NULL_HANDLE;
     VkFence acquire_fence = VK_NULL_HANDLE;
     uint32_t current_image_index = 0;
+    bool has_acquired_image = false;
   };
 
   bool CreateOrUpdateOverlayVulkanSurfaceLocked(ANativeWindow* window,
