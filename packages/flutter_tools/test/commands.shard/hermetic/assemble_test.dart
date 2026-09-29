@@ -410,6 +410,54 @@ void main() {
   );
 
   testWithoutContext(
+    'flutter assemble propagates local-engine flags to environment when passed via CLI with DeferredArtifacts',
+    () async {
+      fileSystem
+          .directory('engine')
+          .childDirectory('src')
+          .childDirectory('out')
+          .childDirectory('host_debug')
+          .createSync(recursive: true);
+      final deferredArtifacts = DeferredArtifacts(artifacts);
+      final localToolContext = FakeToolContext(
+        artifacts: deferredArtifacts,
+        cache: cache,
+        fs: fileSystem,
+        logger: logger,
+        processManager: FakeProcessManager.any(),
+      );
+      var buildInvoked = false;
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(
+          featureFlags: TestFeatureFlags(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            buildInvoked = true;
+            expect(environment.artifacts.usesLocalArtifacts, isTrue);
+            expect(
+              environment.artifacts.localEngineInfo?.targetOutPath,
+              endsWith(fileSystem.path.join('engine', 'src', 'out', 'host_debug')),
+            );
+            expect(environment.engineVersion, isNull);
+          }),
+          toolContext: localToolContext,
+        ),
+      );
+      await commandRunner.run(<String>[
+        '--local-engine=host_debug',
+        '--local-engine-host=host_debug',
+        '--local-engine-src-path=./engine/src',
+        'assemble',
+        '-o Output',
+        'debug_macos_bundle_flutter_assets',
+      ]);
+      expect(buildInvoked, isTrue);
+    },
+  );
+
+  testWithoutContext(
     'flutter assemble only writes input and output files when the values change',
     () async {
       final BuildSystem buildSystem = TestBuildSystem.list(<BuildResult>[
