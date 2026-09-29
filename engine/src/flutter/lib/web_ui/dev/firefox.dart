@@ -250,6 +250,9 @@ user_pref("security.sandbox.content.level", 0);
   }
 
   static Future<void> _stopLinuxDisplay() async {
+    if (_virtualDisplayFuture != null) {
+      await _virtualDisplayFuture;
+    }
     final Process? process = _xvfbProcess;
     _xvfbProcess = null;
     _virtualDisplayFuture = null;
