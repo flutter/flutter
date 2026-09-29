@@ -1912,7 +1912,7 @@ flutter:
     },
   );
 
-  testUsingContext('FlutterDevice passes target plaform to DevFS', () async {
+  testUsingContext('FlutterDevice passes target platform to DevFS', () async {
     final fileSystem = MemoryFileSystem.test();
 
     for (final TargetPlatform targetPlatform in TargetPlatform.values) {
