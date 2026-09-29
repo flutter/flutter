@@ -606,9 +606,21 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
       ToVKBufferMemoryPropertyFlags(desc.storage_mode));
   allocation_info.flags =
       ToVmaAllocationBufferCreateFlags(desc.storage_mode, desc.readback);
-  if (created_buffer_pool_ && desc.storage_mode == StorageMode::kHostVisible &&
-      !desc.readback) {
-    allocation_info.pool = staging_buffer_pool_.get().pool;
+  // The staging buffer pool is intended for small, high-frequency transient
+  // allocations (<= 1MB), matching the chunk size used by HostBuffer. Large
+  // host-visible buffers (such as the initial 4MB glyph atlas bitmap or
+  // oversized image uploads) should not be suballocated from the staging pool
+  // because doing so can lead to pool block boundary overshoots or excessive
+  // pool fragmentation. Instead, route them to dedicated device memory
+  // allocations.
+  constexpr size_t kMaxStagingPoolBufferSize = 1024 * 1024;  // 1 MB
+  if (desc.storage_mode == StorageMode::kHostVisible) {
+    if (created_buffer_pool_ && !desc.readback &&
+        desc.size <= kMaxStagingPoolBufferSize) {
+      allocation_info.pool = staging_buffer_pool_.get().pool;
+    } else if (desc.size > kMaxStagingPoolBufferSize) {
+      allocation_info.flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+    }
   }
   VkBuffer buffer = {};
   VmaAllocation buffer_allocation = {};
