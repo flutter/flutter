@@ -2651,14 +2651,15 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     }
     final Map<String, Object?> json = {
       ...super.toJsonMap(delegate),
-      'defaultLevel': _defaultLevel.name,
       'properties': ?properties,
+      if (defaultValue != kNoDefaultValue) 'defaultValue': defaultValue.toString(),
       'ifEmpty': ?ifEmpty,
       'ifNull': ?ifNull,
       'tooltip': ?tooltip,
       'missingIfNull': missingIfNull,
       if (exception != null) 'exception': exception.toString(),
       'propertyType': propertyType.toString,
+      'defaultLevel': _defaultLevel.name,
       if (value is Diagnosticable || value is DiagnosticsNode) 'isDiagnosticableValue': true,
       if (v is num)
         // TODO(jacob314): Workaround, since JSON.stringify replaces infinity and NaN with null,
