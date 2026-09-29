@@ -763,6 +763,70 @@ void main() {
         });
       });
     });
+
+    testUsingContext(
+      'sets kSdkRoot to the macOS SDK path',
+      () async {
+        final Directory projectDir = memoryFileSystem.directory('project')..createSync();
+        projectDir.childDirectory('macos').createSync();
+        projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+        projectDir.childDirectory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            '{"configVersion": 2, "packages": [{"name": "project", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
+          );
+        projectDir
+            .childDirectory('.dart_tool')
+            .childFile('package_graph.json')
+            .writeAsStringSync(
+              '{"configVersion": 1, "packages": [{"name": "project", "rootUri": "..", "packageUri": "lib/", "dependencies": []}]}',
+            );
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('name: project');
+        projectDir.childFile('.metadata').createSync();
+        memoryFileSystem.currentDirectory = projectDir;
+
+        // Mock engine artifacts. _TestArtifacts uses a string like this for getArtifactPath.
+        memoryFileSystem
+            .directory('Artifact.flutterMacOSXcframework.TargetPlatform.darwin.release')
+            .createSync(recursive: true);
+
+        Map<String, String>? defines;
+        final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+          artifacts: Artifacts.test(fileSystem: memoryFileSystem),
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          // Fail the build once the defines are captured, to stop before
+          // XCFramework creation.
+          buildSystem: TestBuildSystem.all(BuildResult(success: false), (
+            Target target,
+            Environment environment,
+          ) {
+            defines = environment.defines;
+          }),
+          platform: fakePlatform,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
+
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        await expectLater(
+          () => runner.run(<String>[
+            'macos-framework',
+            '--no-pub',
+            '--no-plugins',
+            '--no-debug',
+            '--no-profile',
+          ]),
+          throwsToolExit(message: 'The App.xcframework build failed.'),
+        );
+        expect(defines, isNotNull);
+        expect(defines![kSdkRoot], '/fake/macos/sdk/path');
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
+      },
+    );
   });
 
   group('XCFrameworks', () {

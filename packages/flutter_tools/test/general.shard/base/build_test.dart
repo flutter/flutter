@@ -171,6 +171,24 @@ void main() {
       );
     });
 
+    testWithoutContext('throws if sdkRoot is missing for macOS', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+
+      await expectLater(
+        snapshotter.build(
+          platform: TargetPlatform.darwin,
+          cpuArch: CpuArch.arm64,
+          buildMode: BuildMode.release,
+          mainPath: 'main.dill',
+          outputPath: outputPath,
+          dartObfuscation: false,
+          quiet: true,
+        ),
+        throwsArgumentError,
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
     testWithoutContext('builds iOS snapshot with dwarfStackTraces', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String debugPath = fileSystem.path.join('foo', 'app.ios-arm64.symbols');
