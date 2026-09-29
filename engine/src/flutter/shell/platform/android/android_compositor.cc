@@ -132,15 +132,6 @@ bool AndroidCompositor::CreateBackingStore(
                 << " but no overlay native window is available.";
             return false;
           }
-#if FML_OS_ANDROID
-          if (overlay_window != nullptr && config->size.width > 0.0 &&
-              config->size.height > 0.0) {
-            ANativeWindow_setBuffersGeometry(
-                overlay_window,
-                static_cast<int32_t>(std::round(config->size.width)),
-                static_cast<int32_t>(std::round(config->size.height)), 0);
-          }
-#endif
           FlutterVulkanImage img =
               surface_manager_->GetNextOverlayImage(overlay_window);
           if (img.image == 0 && !surface_manager_->IsFakeWindow()) {
@@ -299,11 +290,12 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
             }
           } else if (layer->backing_store->type ==
                      kFlutterBackingStoreTypeVulkan) {
-            if (overlay_window == nullptr &&
-                layer->backing_store->user_data != nullptr) {
+            if (layer->backing_store->user_data != nullptr) {
               auto* tracker = static_cast<VulkanBackingStoreTracker*>(
                   layer->backing_store->user_data);
-              overlay_window = tracker->overlay_window;
+              if (tracker->overlay_window != nullptr) {
+                overlay_window = tracker->overlay_window;
+              }
             }
             if (overlay_window != nullptr || surface_manager_->IsFakeWindow()) {
               surface_manager_->PresentOverlayImage(
