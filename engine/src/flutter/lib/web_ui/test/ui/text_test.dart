@@ -66,14 +66,19 @@ void testMain() {
         final recorder = ui.PictureRecorder();
         final canvas = ui.Canvas(recorder, bounds);
         final ui.Paragraph paragraph = makeSimpleText(text);
-
-        canvas.drawParagraph(paragraph, ui.Offset.zero);
-        paragraph.dispose();
-        final ui.Picture picture = recorder.endRecording();
-        final ui.Image image = await picture.toImage(100, 100);
-        picture.dispose();
-        addTearDown(image.dispose);
-        return image;
+        try {
+          canvas.drawParagraph(paragraph, ui.Offset.zero);
+          final ui.Picture picture = recorder.endRecording();
+          try {
+            final ui.Image image = await picture.toImage(100, 100);
+            addTearDown(image.dispose);
+            return image;
+          } finally {
+            picture.dispose();
+          }
+        } finally {
+          paragraph.dispose();
+        }
       }
 
       // The backspace character, \b, and unassigned codepoint \u0378 do not
