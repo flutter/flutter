@@ -1156,7 +1156,7 @@ public class FlutterRenderer implements TextureRegistry {
 
     if (onlySwap) {
       // In the swap case we are just swapping the surface that we render to.
-      flutterJNI.onSurfaceWindowChanged(surface);
+      flutterJNI.onSurfaceWindowChanged(surface, false);
     } else {
       // In the non-swap case we are creating a new surface to render to.
       flutterJNI.onSurfaceCreated(surface);
@@ -1172,7 +1172,7 @@ public class FlutterRenderer implements TextureRegistry {
    */
   public void swapSurface(@NonNull Surface surface) {
     this.surface = surface;
-    flutterJNI.onSurfaceWindowChanged(surface);
+    flutterJNI.onSurfaceWindowChanged(surface, true);
   }
 
   /**
