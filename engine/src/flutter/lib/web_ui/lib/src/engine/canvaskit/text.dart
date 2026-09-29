@@ -82,7 +82,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
   // Neither Hyphens.manual nor Hyphens.hidden takes effect on CanvasKit until a
   // renderSoftHyphens setter is exposed on the CanvasKit ParagraphStyle binding
   // (the native engine wires this via SkParagraph::setRenderSoftHyphens).
-  // https://github.com/flutter/flutter/issues/18443
+  // https://github.com/flutter/flutter/issues/193506
   // Customizing the hyphen string is separate future work:
   // https://github.com/flutter/flutter/issues/189617
   final ui.Hyphens? _hyphens;

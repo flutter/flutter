@@ -63,7 +63,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
 
   // TODO(dbebawy): honor hyphens in the pure-Dart line-breaker/painter (no
   // soft-hyphen glyph emitted at a break yet). Accepted and stored for now.
-  // https://github.com/flutter/flutter/issues/18443
+  // https://github.com/flutter/flutter/issues/193506
   final ui.Hyphens? hyphens;
 
   WebStrutStyle? get strutStyle => _strutStyle;
