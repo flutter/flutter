@@ -331,13 +331,13 @@ class SelectableRegion extends StatefulWidget {
     // known. A button's position in the menu can slightly affect its
     // appearance.
     return <ContextMenuButtonItem>[
-      if (canCopy) ContextMenuButtonItem(onPressed: onCopy, type: ContextMenuButtonType.copy),
+      if (canCopy) ContextMenuButtonItem(onPressed: onCopy, kind: ContextMenuButtonKind.copy),
       if (canShare && showShareBeforeSelectAll)
-        ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+        ContextMenuButtonItem(onPressed: onShare, kind: ContextMenuButtonKind.share),
       if (canSelectAll)
-        ContextMenuButtonItem(onPressed: onSelectAll, type: ContextMenuButtonType.selectAll),
+        ContextMenuButtonItem(onPressed: onSelectAll, kind: ContextMenuButtonKind.selectAll),
       if (canShare && !showShareBeforeSelectAll)
-        ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+        ContextMenuButtonItem(onPressed: onShare, kind: ContextMenuButtonKind.share),
     ];
   }
 
