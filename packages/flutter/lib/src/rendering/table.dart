@@ -639,16 +639,22 @@ class RenderTable extends RenderBox {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    // Skip hidden cells as they are not laid out and should not appear in the
-    // semantics tree.
     for (final RenderBox? child in _children) {
-      if (child != null && child.hasSize) {
-        final cellParentData = child.parentData! as TableCellParentData;
-        if (cellParentData._isVisible) {
-          visitor(child);
-        }
+      if (child != null && _isLaidOutCell(child)) {
+        visitor(child);
       }
     }
+  }
+
+  // Whether `child` took part in the last layout, and so is painted, hit tested
+  // and included in the semantics tree.
+  //
+  // Placeholders (TableCell.none) are never laid out. hasSize alone does not
+  // exclude them, because a cell that turns into a placeholder keeps the size
+  // and offset from its last layout: its element, and with it its render
+  // object, is reused.
+  bool _isLaidOutCell(RenderBox child) {
+    return child.hasSize && (child.parentData! as TableCellParentData)._isVisible;
   }
 
   final Map<int, _Index> _idToIndexMap = <int, _Index>{};
@@ -1818,7 +1824,7 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox? child = _children[index];
-      if (child != null && child.hasSize) {
+      if (child != null && _isLaidOutCell(child)) {
         final childParentData = child.parentData! as BoxParentData;
         final bool isHit = result.addWithPaintOffset(
           offset: childParentData.offset,
@@ -1871,7 +1877,7 @@ class RenderTable extends RenderBox {
     }
     for (var index = 0; index < _children.length; index += 1) {
       final RenderBox? child = _children[index];
-      if (child != null && child.hasSize) {
+      if (child != null && _isLaidOutCell(child)) {
         final childParentData = child.parentData! as BoxParentData;
         context.paintChild(child, childParentData.offset + offset);
       }

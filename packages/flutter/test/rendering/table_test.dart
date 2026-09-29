@@ -558,6 +558,44 @@ void main() {
       expect(spanningCell.size.height, equals(200.0));
     });
 
+    test('a cell that turns into a placeholder is neither painted nor hit tested', () {
+      // Placeholders are never laid out, so a cell that turns into one keeps
+      // the size and offset from its last layout. Paint and hit testing must
+      // still skip it.
+      const leadColor = Color(0xFF00FF00);
+      const coveredColor = Color(0xFFFF0000);
+      RenderBox coloredCell(Color color) {
+        return RenderDecoratedBox(
+          decoration: BoxDecoration(color: color),
+          child: constrainedBox(const BoxConstraints.tightFor(height: 50.0)),
+        );
+      }
+
+      final table = RenderTable(textDirection: TextDirection.ltr, columns: 2, rows: 1);
+      final RenderBox lead = coloredCell(leadColor);
+      final RenderBox covered = coloredCell(coveredColor);
+      table.setChild(0, 0, lead);
+      table.setChild(1, 0, covered);
+      layout(table, constraints: const BoxConstraints.tightFor(width: 200.0));
+
+      // The lead cell now spans both columns, which turns the second cell into
+      // a placeholder.
+      (lead.parentData! as TableCellParentData).colSpan = 2;
+      (covered.parentData! as TableCellParentData)
+        ..colSpan = 0
+        ..rowSpan = 0;
+      table.markNeedsLayout();
+      pumpFrame();
+      expect(covered.hasSize, isTrue);
+
+      final result = BoxHitTestResult();
+      table.hitTest(result, position: const Offset(150.0, 25.0));
+      expect(result.path.first.target, same(lead));
+
+      expect(table, paints..rect(color: leadColor));
+      expect(table, isNot(paints..rect(color: coveredColor)));
+    });
+
     group('TableCellVerticalAlignment works correctly with colSpan and rowSpan', () {
       const spannedCellHeight = 50.0;
       const regularCellHeight = 80.0;
