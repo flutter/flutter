@@ -143,6 +143,8 @@ if (is_android) {
     deps = [
       "//flutter/shell/platform/embedder:embedder_as_internal_library",
       "//flutter/third_party/icu",
+      "//flutter/third_party/rapidjson",
+      "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
     ]
 
     public_configs = [

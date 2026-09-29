@@ -75,10 +75,29 @@ bool AndroidCompositor::CreateBackingStore(
       backing_store_out->software.destruction_callback = nullptr;
       return true;
     }
+    case AndroidRenderingAPI::kImpellerVulkan:
+    case AndroidRenderingAPI::kImpellerAutoselect: {
+      if (surface_manager_->IsVulkanInitialized() ||
+          surface_manager_->IsFakeWindow()) {
+        FlutterVulkanImage img = surface_manager_->GetNextImage(nullptr);
+        if (img.image == 0 && !surface_manager_->IsFakeWindow()) {
+          return false;
+        }
+        auto* image_holder = new FlutterVulkanImage(img);
+        backing_store_out->type = kFlutterBackingStoreTypeVulkan;
+        backing_store_out->user_data = image_holder;
+        backing_store_out->vulkan.struct_size =
+            sizeof(FlutterVulkanBackingStore);
+        backing_store_out->vulkan.image = image_holder;
+        backing_store_out->vulkan.user_data = image_holder;
+        backing_store_out->vulkan.destruction_callback = nullptr;
+        backing_stores_created_in_frame_++;
+        return true;
+      }
+      [[fallthrough]];
+    }
     case AndroidRenderingAPI::kSkiaOpenGLES:
-    case AndroidRenderingAPI::kImpellerOpenGLES:
-    case AndroidRenderingAPI::kImpellerAutoselect:
-    case AndroidRenderingAPI::kImpellerVulkan: {
+    case AndroidRenderingAPI::kImpellerOpenGLES: {
       backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
       backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
       // 0x8058 is GL_RGBA8, required by embedder.cc format conversion.
@@ -124,6 +143,10 @@ bool AndroidCompositor::CollectBackingStore(
     auto* tracker = static_cast<OffscreenTracker*>(renderer->user_data);
     surface_manager_->ReleaseOffscreenFBO(tracker->fbo);
     delete tracker;
+  } else if (renderer->type == kFlutterBackingStoreTypeVulkan &&
+             renderer->user_data != nullptr) {
+    auto* image_holder = static_cast<FlutterVulkanImage*>(renderer->user_data);
+    delete image_holder;
   }
   return true;
 }
@@ -221,6 +244,11 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
       } else {
         res = surface_manager_->Present();
       }
+      if (!res && !surface_manager_->IsFakeWindow()) {
+        present_success = false;
+      }
+    } else if (bs->type == kFlutterBackingStoreTypeVulkan) {
+      bool res = surface_manager_->PresentImage(bs->vulkan.image);
       if (!res && !surface_manager_->IsFakeWindow()) {
         present_success = false;
       }

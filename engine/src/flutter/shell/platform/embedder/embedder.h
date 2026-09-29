@@ -3819,6 +3819,10 @@ typedef struct {
   /// The callback invoked by the engine to compute scaled font size for
   /// nonlinear font scaling.
   FlutterGetScaledFontSizeCallback get_scaled_font_size_callback;
+
+  /// The initial route for the engine. Optional; specifying null or empty
+  /// defaults to "/".
+  const char* initial_route;
 } FlutterProjectArgs;
 
 typedef struct {
