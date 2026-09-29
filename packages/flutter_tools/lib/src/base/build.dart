@@ -186,10 +186,10 @@ class AOTSnapshotter {
           ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
           : FlutterDarwinPlatform.macos.deploymentTarget().toString();
 
-      // The iOS targets always pass the SDK root (the SDKROOT Xcode build
-      // setting), which lets xcrun resolve the exact device or simulator SDK
-      // being built against. The macOS targets do not plumb SDKROOT through,
-      // so fall back to the default macOS SDK there.
+      // sdkRoot is the SDK being built against (Xcode's SDKROOT for app
+      // builds), so xcrun reports that exact SDK's version. It is null only for
+      // macOS builds that run without Xcode (`flutter build macos-framework`
+      // and `flutter build swift-package`), which use the default macOS SDK.
       final String sdkVersion = await _xcode.sdkVersion(sdkRoot ?? XcodeSdk.MacOSX.platformName);
 
       genSnapshotArgs.addAll(<String>[
