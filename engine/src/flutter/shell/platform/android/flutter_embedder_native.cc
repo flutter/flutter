@@ -522,7 +522,7 @@ ANativeWindow* FlutterEmbedderNative::GetOverlayWindow(size_t overlay_index) {
           maybe_id = jni_router_->RouteCreateOverlaySurface();
         } else {
           bool was_surface_attached = surface_attached_.load();
-          if (surface_manager_) {
+          if (surface_manager_ && !surface_manager_->IsVulkanInitialized()) {
             surface_manager_->BindOffscreenPbufferIfCurrent();
           }
           struct OverlayAllocLatchState {
@@ -548,7 +548,7 @@ ANativeWindow* FlutterEmbedderNative::GetOverlayWindow(size_t overlay_index) {
               break;
             }
           }
-          if (surface_manager_) {
+          if (surface_manager_ && !surface_manager_->IsVulkanInitialized()) {
             surface_manager_->MakeCurrent();
           }
           maybe_id = latch_state->id;

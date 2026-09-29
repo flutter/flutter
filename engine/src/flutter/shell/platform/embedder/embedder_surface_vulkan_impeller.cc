@@ -126,7 +126,8 @@ bool EmbedderSurfaceVulkanImpeller::IsValid() const {
 
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceVulkanImpeller::CreateGPUSurface() {
-  return std::make_unique<GPUSurfaceVulkanImpeller>(this, context_);
+  return std::make_unique<GPUSurfaceVulkanImpeller>(this, context_,
+                                                    !external_view_embedder_);
 }
 
 // |EmbedderSurface|

@@ -110,5 +110,21 @@ TEST(GPUSurfaceVulkanImpeller, RecreatesTransientsWhenFrameSizeChanges) {
   EXPECT_EQ(surface->transients_size_, impeller::ISize(200, 100));
 }
 
+TEST(GPUSurfaceVulkanImpeller, RenderToSurfaceFalseDoesNotAcquireFromDelegate) {
+  impeller::ContextVK::Settings context_settings;
+  context_settings.proc_address_callback = vkGetInstanceProcAddr;
+  context_settings.shader_libraries_data = ShaderLibraryMappings();
+  auto context = impeller::ContextVK::Create(std::move(context_settings));
+
+  TestGPUSurfaceVulkanDelegate delegate;
+
+  std::unique_ptr<Surface> surface = std::make_unique<GPUSurfaceVulkanImpeller>(
+      &delegate, context, /*render_to_surface=*/false);
+
+  auto frame = surface->AcquireFrame(DlISize(100, 100));
+  ASSERT_NE(frame, nullptr);
+  EXPECT_TRUE(frame->Submit());
+}
+
 }  // namespace testing
 }  // namespace flutter
