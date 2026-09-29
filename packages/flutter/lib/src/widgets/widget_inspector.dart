@@ -4517,12 +4517,13 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
 
   @override
   List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
+    var newNodes = nodes;
     if (maxDescendantsTruncatableNode >= 0 &&
         owner!.allowTruncate &&
         nodes.length > maxDescendantsTruncatableNode) {
-      nodes = service._truncateNodes(nodes, maxDescendantsTruncatableNode);
+      newNodes = service._truncateNodes(nodes, maxDescendantsTruncatableNode);
     }
-    return nodes;
+    return newNodes;
   }
 
   @override

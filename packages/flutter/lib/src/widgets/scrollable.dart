@@ -386,8 +386,7 @@ class Scrollable extends StatefulWidget {
         originalContext.dependOnInheritedElement(element);
         return scrollable;
       }
-      context = scrollable.context;
-      element = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
+      element = scrollable.context.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
     }
     return null;
   }
@@ -475,8 +474,7 @@ class Scrollable extends StatefulWidget {
       if (axis == null || axisDirectionToAxis(widget.scrollable.axisDirection) == axis) {
         return widget.position.recommendDeferredLoading(context);
       }
-      context = widget.scrollable.context;
-      widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
+      widget = widget.scrollable.context.getInheritedWidgetOfExactType<_ScrollableScope>();
     }
     return false;
   }
