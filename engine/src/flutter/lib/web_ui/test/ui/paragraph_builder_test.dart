@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 import 'package:ui/ui.dart';
 
 import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -109,4 +110,36 @@ Future<void> testMain() async {
     // The height should be much smaller than fontSize * 10.
     expect(paragraph.height, lessThan(2 * fontSize));
   });
+
+  // TODO(dbebawy): Enable on CanvasKit, https://github.com/flutter/flutter/issues/193506.
+  group('hyphens', () {
+    const text = 'abcd\u00ADe';
+
+    Paragraph layoutParagraph(Hyphens? hyphens, double width) {
+      final builder = ParagraphBuilder(
+        ParagraphStyle(fontSize: 10, fontFamily: 'FlutterTest', hyphens: hyphens),
+      );
+      builder.addText(text);
+      return builder.build()..layout(ParagraphConstraints(width: width));
+    }
+
+    // Just narrower than the unbroken text, so the line breaks at the soft hyphen.
+    double breakingWidth() => layoutParagraph(null, double.infinity).longestLine - 1;
+
+    test('manual renders a hyphen at a soft hyphen line break', () {
+      final Paragraph manual = layoutParagraph(Hyphens.manual, breakingWidth());
+      final Paragraph hidden = layoutParagraph(Hyphens.hidden, breakingWidth());
+
+      expect(manual.numberOfLines, 2);
+      expect(hidden.numberOfLines, 2);
+      expect(manual.longestLine, greaterThan(hidden.longestLine));
+    });
+
+    test('unspecified behaves like manual', () {
+      final Paragraph unspecified = layoutParagraph(null, breakingWidth());
+      final Paragraph manual = layoutParagraph(Hyphens.manual, breakingWidth());
+
+      expect(unspecified.longestLine, manual.longestLine);
+    });
+  }, skip: isCanvasKit);
 }
