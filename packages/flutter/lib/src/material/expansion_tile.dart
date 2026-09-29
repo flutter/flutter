@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'circle_avatar.dart';
+/// @docImport 'ink_well.dart';
 /// @docImport 'text_theme.dart';
 library;
 
