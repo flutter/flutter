@@ -470,11 +470,13 @@ class Scrollable extends StatefulWidget {
   /// method returns false.
   static bool recommendDeferredLoadingForContext(BuildContext context, {Axis? axis}) {
     _ScrollableScope? widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
+    var updatedContext = context;
     while (widget != null) {
       if (axis == null || axisDirectionToAxis(widget.scrollable.axisDirection) == axis) {
-        return widget.position.recommendDeferredLoading(context);
+        return widget.position.recommendDeferredLoading(updatedContext);
       }
-      widget = widget.scrollable.context.getInheritedWidgetOfExactType<_ScrollableScope>();
+      updatedContext = widget.scrollable.context;
+      widget = updatedContext.getInheritedWidgetOfExactType<_ScrollableScope>();
     }
     return false;
   }
