@@ -474,7 +474,11 @@ class GtkKeyHelper implements KeyHelper {
     required int keyCode,
     required bool isDown,
   }) {
-    final int newModifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
+    final int newModifiers = _mergeModifiers(
+      modifiers: modifiers,
+      keyCode: keyCode,
+      isDown: isDown,
+    );
     return switch (key) {
       ModifierKey.controlModifier => newModifiers & modifierControl != 0,
       ModifierKey.shiftModifier => newModifiers & modifierShift != 0,
