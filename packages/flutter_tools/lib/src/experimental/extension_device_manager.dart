@@ -20,7 +20,7 @@ import 'extension_manager.dart';
 /// A host-side [DeviceService] client adapter delegating RPC queries to an [ExtensionConnection].
 final class ExtensionDeviceClient extends DeviceService {
   /// Creates an [ExtensionDeviceClient] wrapping the host [connection].
-  ExtensionDeviceClient(this.connection, {required Logger logger}) : _logger = logger;
+  ExtensionDeviceClient(this.connection, {required this._logger});
 
   /// The active extension isolate connection.
   final ExtensionConnection connection;
@@ -50,14 +50,8 @@ final class ExtensionDeviceClient extends DeviceService {
 /// A host-side [DeviceDiscovery] mechanism that discovers devices registered by active extensions.
 class ExtensionDevices extends PollingDeviceDiscovery {
   /// Creates an [ExtensionDevices] instance.
-  ExtensionDevices({
-    required ExtensionManager extensionManager,
-    required Logger logger,
-    FileSystem? fileSystem,
-  }) : _extensionManager = extensionManager,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       super('tool_extension');
+  ExtensionDevices({required this._extensionManager, required this._logger, this._fileSystem})
+    : super('tool_extension');
 
   final ExtensionManager _extensionManager;
   final FileSystem? _fileSystem;

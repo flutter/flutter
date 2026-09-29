@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools_core/flutter_tools_core.dart' show Category;
+import 'package:flutter_tools_core/flutter_tools_core.dart' as tools_core;
 import 'package:meta/meta.dart';
 
 import 'application_package.dart';
@@ -22,9 +22,10 @@ import 'vmservice.dart';
 import 'web/compile.dart';
 import 'web/devfs_config.dart';
 
-export 'package:flutter_tools_core/flutter_tools_core.dart' show Category;
-
 DeviceManager? get deviceManager => context.get<DeviceManager>();
+
+/// The user-visible category of a [Device].
+typedef Category = tools_core.Category;
 
 /// The platform sub-folder that a device type supports.
 enum PlatformType {
