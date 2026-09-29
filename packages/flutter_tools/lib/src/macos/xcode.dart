@@ -250,11 +250,20 @@ class Xcode {
     return _processUtils.run(<String>[...xcrunCommand(), command, ...args], throwOnError: true);
   }
 
-  Future<String> sdkLocation(EnvironmentType environmentType) async {
+  Future<String> sdkLocation(EnvironmentType environmentType) =>
+      _sdkPath(getSDKNameForIOSEnvironmentType(environmentType));
+
+  /// Returns the path to the default macOS SDK.
+  ///
+  /// Used as the SDK root by commands that build macOS without Xcode, which
+  /// otherwise provides it as the `SDKROOT` build setting.
+  Future<String> macOSSdkLocation() => _sdkPath(XcodeSdk.MacOSX.platformName);
+
+  Future<String> _sdkPath(String sdk) async {
     final RunResult runResult = await _processUtils.run(<String>[
       ...xcrunCommand(),
       '--sdk',
-      getSDKNameForIOSEnvironmentType(environmentType),
+      sdk,
       '--show-sdk-path',
     ]);
     if (runResult.exitCode != 0) {

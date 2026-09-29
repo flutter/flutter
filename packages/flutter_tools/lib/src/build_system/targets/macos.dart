@@ -281,10 +281,10 @@ class CompileMacOSFramework extends Target {
     final String buildOutputPath = environment.buildDir.path;
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
-    // Xcode's SDKROOT, passed by xcode_backend.dart for app builds. Commands
-    // that build without Xcode (`flutter build macos-framework` and
-    // `flutter build swift-package`) don't set it.
     final String? sdkRoot = environment.defines[kSdkRoot];
+    if (sdkRoot == null) {
+      throw MissingDefineException(kSdkRoot, 'compile_macos_framework');
+    }
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(
       environment.defines,

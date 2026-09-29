@@ -476,6 +476,20 @@ void main() {
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });
 
+          testWithoutContext('--show-sdk-path macosx', () async {
+            const macosSdkroot =
+                'Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk';
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>['xcrun', '--sdk', 'macosx', '--show-sdk-path'],
+                stdout: '$macosSdkroot\n',
+              ),
+            );
+
+            expect(await xcode.macOSSdkLocation(), macosSdkroot);
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+
           testWithoutContext('--show-sdk-path fails', () async {
             fakeProcessManager.addCommand(
               const FakeCommand(
