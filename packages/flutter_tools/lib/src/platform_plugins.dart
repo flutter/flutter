@@ -115,9 +115,8 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     this.dartFileName,
     bool? ffiPlugin,
     this.defaultPackage,
-    required FileSystem fileSystem,
-  }) : _fileSystem = fileSystem,
-       ffiPlugin = ffiPlugin ?? false;
+    required this._fileSystem,
+  }) : ffiPlugin = ffiPlugin ?? false;
 
   factory AndroidPlugin.fromYaml(
     String name,
@@ -125,7 +124,9 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     String pluginPath,
     FileSystem fileSystem,
   ) {
-    assert(validate(yaml));
+    if (!validate(yaml)) {
+      throwToolExit('Invalid "android" plugin specification for plugin "$name".');
+    }
 
     final dartPluginClass = yaml[kDartPluginClass] as String?;
     final dartFileName = yaml[kDartFileName] as String?;
@@ -318,7 +319,9 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
        sharedDarwinSource = sharedDarwinSource ?? false;
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml)); // TODO(zanderso): https://github.com/flutter/flutter/issues/67241
+    if (!validate(yaml)) {
+      throwToolExit('Invalid "ios" plugin specification for plugin "$name".');
+    }
 
     final dartPluginClass = yaml[kDartPluginClass] as String?;
     final dartFileName = yaml[kDartFileName] as String?;
@@ -431,7 +434,9 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
        sharedDarwinSource = sharedDarwinSource ?? false;
 
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml));
+    if (!validate(yaml)) {
+      throwToolExit('Invalid "macos" plugin specification for plugin "$name".');
+    }
 
     final dartPluginClass = yaml[kDartPluginClass] as String?;
     final dartFileName = yaml[kDartFileName] as String?;
@@ -541,7 +546,9 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
        );
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml));
+    if (!validate(yaml)) {
+      throwToolExit('Invalid "windows" plugin specification for plugin "$name".');
+    }
     final pluginClass = yaml[kPluginClass] as String?;
     final variants = <PluginPlatformVariant>{};
     final variantList = yaml[kSupportedVariants] as YamlList?;
@@ -664,7 +671,9 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
        );
 
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml));
+    if (!validate(yaml)) {
+      throwToolExit('Invalid "linux" plugin specification for plugin "$name".');
+    }
 
     final dartPluginClass = yaml[kDartPluginClass] as String?;
     final dartFileName = yaml[kDartFileName] as String?;

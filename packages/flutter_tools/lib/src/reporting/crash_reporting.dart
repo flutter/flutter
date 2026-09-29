@@ -56,12 +56,10 @@ class CrashDetails {
 /// Reports information about the crash to the user.
 class CrashReporter {
   CrashReporter({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required FlutterProjectFactory flutterProjectFactory,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _flutterProjectFactory = flutterProjectFactory;
+    required this._fileSystem,
+    required this._logger,
+    required this._flutterProjectFactory,
+  });
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -116,15 +114,11 @@ class CrashReporter {
 class CrashReportSender {
   CrashReportSender({
     http.Client? client,
-    required Platform platform,
-    required Logger logger,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Analytics analytics,
-  }) : _client = client ?? http.Client(),
-       _platform = platform,
-       _logger = logger,
-       _operatingSystemUtils = operatingSystemUtils,
-       _analytics = analytics;
+    required this._platform,
+    required this._logger,
+    required this._operatingSystemUtils,
+    required this._analytics,
+  }) : _client = client ?? http.Client();
 
   final http.Client _client;
   final Platform _platform;
@@ -146,11 +140,15 @@ class CrashReportSender {
   /// Sends one crash report.
   ///
   /// The report is populated from data in [error] and [stackTrace].
+  ///
+  /// If [typeId] is provided, it will be used as the type of the crash, otherwise will default to
+  /// being a Dart error ([_kDartTypeId]).
   Future<void> sendReport({
     required Object error,
     required StackTrace stackTrace,
     required String Function() getFlutterVersion,
     required String command,
+    String? typeId,
   }) async {
     // Only send one crash report per run.
     if (_crashReportSent) {
@@ -176,7 +174,7 @@ class CrashReportSender {
       req.fields['version'] = flutterVersion;
       req.fields['osName'] = _platform.operatingSystem;
       req.fields['osVersion'] = _operatingSystemUtils.name; // this actually includes version
-      req.fields['type'] = _kDartTypeId;
+      req.fields['type'] = typeId ?? _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
       req.fields['error_message'] = '$error';
       req.fields['comments'] = command;

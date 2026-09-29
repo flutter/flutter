@@ -91,7 +91,7 @@ void main() {
         fixture.gitRemove();
       }
     },
-    // TODO(goderbauer): Re-enable after the formatting changes have landed.
+    // [intended] TODO(goderbauer): Re-enable after the formatting changes have landed.
     skip: true,
   );
 
@@ -113,7 +113,8 @@ void main() {
       } finally {
         fixture.gitRemove();
       }
-    }, // TODO(goderbauer): Re-enable after the formatting changes have landed.
+    },
+    // [intended] TODO(goderbauer): Re-enable after the formatting changes have landed.
     skip: true,
   );
 }

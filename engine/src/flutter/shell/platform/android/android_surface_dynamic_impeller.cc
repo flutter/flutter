@@ -46,13 +46,13 @@ std::unique_ptr<Surface> AndroidSurfaceDynamicImpeller::CreateGPUSurface(
 }
 
 void AndroidSurfaceDynamicImpeller::SetupImpellerSurface() {
-  AndroidRenderingAPI api = android_context_->RenderingApi();
-  if (api == AndroidRenderingAPI::kImpellerVulkan) {
-    vulkan_surface_ = std::make_unique<AndroidSurfaceVKImpeller>(
-        android_context_->GetVKContext());
-  } else if (api == AndroidRenderingAPI::kImpellerOpenGLES) {
-    gl_surface_ = std::make_unique<AndroidSurfaceGLImpeller>(
-        android_context_->GetGLContext());
+  // This runs on the raster thread as part of |SetupImpellerContext|, so the
+  // contexts are read directly instead of going through |RenderingApi|, which
+  // blocks until that very setup completes.
+  if (auto vk_context = android_context_->GetVKContext()) {
+    vulkan_surface_ = std::make_unique<AndroidSurfaceVKImpeller>(vk_context);
+  } else if (auto gl_context = android_context_->GetGLContext()) {
+    gl_surface_ = std::make_unique<AndroidSurfaceGLImpeller>(gl_context);
   } else {
     FML_UNREACHABLE();
   }

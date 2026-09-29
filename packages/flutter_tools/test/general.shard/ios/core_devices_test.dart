@@ -92,6 +92,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -119,6 +120,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
         );
 
         final bool result = await launcher.launchAppWithoutDebugger(
@@ -148,6 +150,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
         );
 
         final bool result = await launcher.launchAppWithoutDebugger(
@@ -173,6 +176,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
         );
 
         final bool result = await launcher.launchAppWithoutDebugger(
@@ -221,6 +225,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -273,6 +278,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
         final shutdownHooks = FakeShutdownHooks();
@@ -335,6 +341,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
         final shutdownHooks = FakeShutdownHooks();
@@ -402,6 +409,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -456,6 +464,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -503,6 +512,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -556,6 +566,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -603,6 +614,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -652,6 +664,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -703,6 +716,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -741,6 +755,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -775,6 +790,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -809,6 +825,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -843,6 +860,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -876,6 +894,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -906,6 +925,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -935,6 +955,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -963,6 +984,7 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
 
@@ -1019,7 +1041,7 @@ void main() {
     });
   });
 
-  group('Xcode prior to Core Device Control/Xcode 15', () {
+  group('Xcode when devicectl is not installed', () {
     late BufferLogger logger;
     late FakeProcessManager fakeProcessManager;
     late Xcode xcode;
@@ -1028,14 +1050,7 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      final xcodeProjectInterpreter = XcodeProjectInterpreter.test(
-        processManager: fakeProcessManager,
-        version: Version(14, 0, 0),
-      );
-      xcode = Xcode.test(
-        processManager: fakeProcessManager,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
-      );
+      xcode = FakeXcodeNotInstalled();
       deviceControl = IOSCoreDeviceControl(
         logger: logger,
         processManager: fakeProcessManager,
@@ -1669,6 +1684,7 @@ invalid JSON
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--json-output',
               tempFile.path,
               bundleId,
@@ -1759,6 +1775,7 @@ invalid JSON
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--json-output',
               tempFile.path,
               bundleId,
@@ -1834,6 +1851,7 @@ invalid JSON
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--json-output',
               tempFile.path,
               bundleId,
@@ -1911,6 +1929,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--json-output',
               tempFile.path,
               bundleId,
@@ -1952,6 +1971,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--json-output',
               tempFile.path,
               bundleId,
@@ -1991,6 +2011,7 @@ invalid JSON
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--json-output',
               tempFile.path,
               bundleId,
@@ -2030,6 +2051,7 @@ invalid JSON
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--start-stopped',
               '--console',
               '--environment-variables',
@@ -2073,6 +2095,7 @@ Waiting for the application to terminate...
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--start-stopped',
               '--console',
               '--environment-variables',
@@ -2118,6 +2141,7 @@ Waiting for the application to terminate...
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--start-stopped',
               '--console',
               '--environment-variables',
@@ -2191,6 +2215,7 @@ Waiting for the application to terminate...
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--start-stopped',
               '--console',
               '--environment-variables',
@@ -4457,4 +4482,9 @@ IOSDeviceSupport createDeviceSupport({
     cpuArchitectureString: cpuArchitectureString,
     deviceId: deviceId,
   );
+}
+
+class FakeXcodeNotInstalled extends Fake implements Xcode {
+  @override
+  bool get isDevicectlInstalled => false;
 }

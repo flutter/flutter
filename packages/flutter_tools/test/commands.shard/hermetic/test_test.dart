@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -54,6 +55,7 @@ void main() {
   late LoggingLogger logger;
 
   setUp(() {
+    Cache.flutterRoot = getFlutterRoot();
     fs = MemoryFileSystem.test(
       style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
@@ -716,7 +718,7 @@ resolution: workspace
           final Map<String, dynamic> myApp = packages.cast<Map<String, dynamic>>().firstWhere(
             (Map<String, dynamic> p) => p['name'] == 'my_app',
           );
-          expect(myApp['rootUri'], fs.directory('/package').absolute.uri.toString());
+          expect(myApp['rootUri'], fs.currentDirectory.uri.toString());
         },
       );
       expect(caughtToolExit, true);
@@ -1610,6 +1612,40 @@ dev_dependencies:
     );
 
     testUsingContext(
+      'forwards an explicit --[no-]enable-hcpp as a launch override',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+
+        final testCommand = TestCommand(testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>['test', '--no-pub', '--no-enable-hcpp']);
+        expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'sends no hcpp launch override when --enable-hcpp was not passed',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+
+        final testCommand = TestCommand(testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>['test', '--no-pub']);
+        expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isNull);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
       'uninstallApp defaults to true',
       () async {
         final testRunner = FakeFlutterTestRunner(0);
@@ -1757,6 +1793,60 @@ resolution: workspace
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
+
+  testUsingContext(
+    'passes regular expression lookahead in --name argument to test runner',
+    () async {
+      final testRunner = FakeFlutterTestRunner(0);
+
+      final testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>['test', '--name', r'^(?!Golden).+', '--no-pub']);
+
+      expect(testRunner.lastNames, <String>[r'^(?!Golden).+']);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'throws ToolExit when test argument contains Windows reserved characters',
+    () async {
+      final Directory package = globals.fs.directory('package');
+      package.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_pubspecContents);
+      writePackageConfigFiles(
+        directory: package,
+        packages: <String, String>{
+          'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+          'integration_test': 'file:///path/to/flutter/packages/integration_test',
+        },
+        mainLibName: 'my_app',
+        devDependencies: <String>['test_api', 'integration_test'],
+      );
+      globals.fs.currentDirectory = package.path;
+
+      final fakePackageTest = FakePackageTest();
+      final testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await expectLater(
+        () => commandRunner.run(const <String>['test', '--no-pub', r'test\foo*bar_test.dart']),
+        throwsToolExit(
+          message: r'Invalid test path "test\foo*bar_test.dart": Illegal character in path',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+    },
+  );
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
@@ -1771,6 +1861,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   int? lastConcurrency;
   TestWatcher? lastTestWatcher;
   FakeVmServiceHost? fakeVmServiceHost;
+  List<String> lastNames = const <String>[];
+  List<String> lastPlainNames = const <String>[];
 
   @override
   Future<int> runTests(
@@ -1817,6 +1909,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     lastReporterOption = reporter;
     lastConcurrency = concurrency;
     lastTestWatcher = watcher;
+    lastNames = names;
+    lastPlainNames = plainNames;
 
     if (leastRunTime != null) {
       await Future<void>.delayed(leastRunTime!);

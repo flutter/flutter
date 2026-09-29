@@ -77,9 +77,11 @@ String? getEnabledFeatures(Config config) {
 /// Function to safely grab the max rss from [ProcessInfo].
 int? getMaxRss(ProcessInfo processInfo) {
   try {
-    return globals.processInfo.maxRss;
+    return processInfo.maxRss;
   } on Exception catch (error) {
     globals.printTrace('Querying maxRss failed with error: $error');
+  } on UnsupportedError {
+    // maxRss is unsupported on this platform.
   }
   return null;
 }

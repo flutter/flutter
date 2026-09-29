@@ -82,7 +82,7 @@ class Chrome {
     // If the Chrome process quits before it was asked to quit, notify the
     // error listener.
     _chromeProcess.exitCode.then((int exitCode) {
-      if (!_isStopped) {
+      if (!_isStopped && exitCode != 0) {
         _onError('Chrome process exited prematurely with exit code $exitCode');
       }
     });
@@ -92,7 +92,7 @@ class Chrome {
   ///
   /// The [onError] callback is called with an error message when the Chrome
   /// process encounters an error. In particular, [onError] is called when the
-  /// Chrome process exits prematurely, i.e. before [stop] is called.
+  /// Chrome process exits prematurely, i.e. before [stop] or [disconnect] is called.
   static Future<Chrome> launch(
     ChromeOptions options, {
     String? workingDirectory,
@@ -167,7 +167,7 @@ class Chrome {
   ///
   /// The [onError] callback is called with an error message when the Chrome
   /// process encounters an error. In particular, [onError] is called when the
-  /// Chrome process exits prematurely, i.e. before [stop] is called.
+  /// Chrome process exits prematurely, i.e. before [stop] or [disconnect] is called.
   static Future<Chrome> connect(
     io.Process chromeProcess,
     ChromeOptions options, {
@@ -246,7 +246,10 @@ class Chrome {
       //   provides tracing data from the GPU data
       //   disabled due to https://bugs.chromium.org/p/chromium/issues/detail?id=1068259
       // TODO(yjbanov): extract useful GPU data
-      'categories': 'blink,blink.user_timing',
+      'traceConfig': <String, dynamic>{
+        'includedCategories': <String>['blink', 'blink.user_timing'],
+        'enableThreadCpuTime': true,
+      },
       'transferMode': 'SendAsStream',
     });
   }
@@ -267,10 +270,15 @@ class Chrome {
     await _debugConnection?.page.reload(ignoreCache: ignoreCache);
   }
 
-  /// Stops the Chrome process.
-  void stop() {
+  /// Disconnects from the Chrome process without killing it.
+  void disconnect() {
     _isStopped = true;
     _tracingSubscription?.cancel();
+  }
+
+  /// Stops the Chrome process.
+  void stop() {
+    disconnect();
     _chromeProcess.kill();
   }
 }
@@ -481,10 +489,11 @@ Duration _computeAverageDuration(List<BlinkTraceEvent> events) {
     double previousValue,
     BlinkTraceEvent event,
   ) {
-    if (event.tdur == null) {
-      throw FormatException('Trace event lacks "tdur" field: $event');
+    final int? duration = event.tdur ?? event.dur;
+    if (duration == null) {
+      throw FormatException('Trace event lacks "tdur" and "dur" fields: $event');
     }
-    return previousValue + event.tdur!;
+    return previousValue + duration;
   });
   final int sampleCount = math.min(events.length, _kMeasuredSampleCount);
   return Duration(microseconds: sum ~/ sampleCount);
@@ -528,7 +537,8 @@ class BlinkTraceEvent {
       tid = _readInt(json, 'tid'),
       ts = _readInt(json, 'ts'),
       tts = _readInt(json, 'tts'),
-      tdur = _readInt(json, 'tdur');
+      tdur = _readInt(json, 'tdur'),
+      dur = _readInt(json, 'dur');
 
   /// Event-specific data.
   final Map<String, dynamic> args;
@@ -556,6 +566,9 @@ class BlinkTraceEvent {
 
   /// Event duration in microseconds.
   final int? tdur;
+
+  /// Wall-clock event duration in microseconds.
+  final int? dur;
 
   /// A "begin frame" event contains all of the scripting time of an animation
   /// frame (JavaScript, WebAssembly), plus a negligible amount of internal

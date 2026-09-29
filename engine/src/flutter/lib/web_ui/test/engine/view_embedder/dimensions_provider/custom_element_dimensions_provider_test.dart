@@ -30,6 +30,7 @@ void doTests() {
     tearDown(() {
       provider.close(); // cleanup
       sizeSource.remove();
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
     });
 
     test('returns physical size of element (width * dpr)', () {
@@ -43,6 +44,86 @@ void doTests() {
         ..style.height = '${logicalHeight}px';
 
       const expected = ui.Size(logicalWidth * dpr, logicalHeight * dpr);
+
+      final ui.Size computed = provider.computePhysicalSize();
+
+      expect(computed, expected);
+    });
+
+    test('limits physical height of element', () {
+      const double logicalWidth = 50;
+      const double logicalHeight = 20000;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+
+      sizeSource
+        ..style.width = '${logicalWidth}px'
+        ..style.height = '${logicalHeight}px';
+
+      const expected = ui.Size(logicalWidth, 16384);
+
+      final ui.Size computed = provider.computePhysicalSize();
+
+      expect(computed, expected);
+    });
+
+    test('limits physical width of element', () {
+      const double logicalWidth = 20000;
+      const double logicalHeight = 50;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+
+      sizeSource
+        ..style.width = '${logicalWidth}px'
+        ..style.height = '${logicalHeight}px';
+
+      const expected = ui.Size(16384, logicalHeight);
+
+      final ui.Size computed = provider.computePhysicalSize();
+
+      expect(computed, expected);
+    });
+
+    test('limits physical size of element', () {
+      const double logicalWidth = 20000;
+      const double logicalHeight = 20000;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+
+      sizeSource
+        ..style.width = '${logicalWidth}px'
+        ..style.height = '${logicalHeight}px';
+
+      const expected = ui.Size(16384, 16384);
+
+      final ui.Size computed = provider.computePhysicalSize();
+
+      expect(computed, expected);
+    });
+
+    test('limits physical width of element given custom dpr', () {
+      const double logicalWidth = 10000;
+      const double logicalHeight = 5000;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
+
+      sizeSource
+        ..style.width = '${logicalWidth}px'
+        ..style.height = '${logicalHeight}px';
+
+      const expected = ui.Size(16384, 10000);
+
+      final ui.Size computed = provider.computePhysicalSize();
+
+      expect(computed, expected);
+    });
+
+    test('limits physical height of element given custom dpr', () {
+      const double logicalWidth = 5000;
+      const double logicalHeight = 10000;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
+
+      sizeSource
+        ..style.width = '${logicalWidth}px'
+        ..style.height = '${logicalHeight}px';
+
+      const expected = ui.Size(10000, 16384);
 
       final ui.Size computed = provider.computePhysicalSize();
 
@@ -79,6 +160,47 @@ void doTests() {
       expect(computed.right, 0);
       expect(computed.bottom, 0);
       expect(computed.left, 0);
+    });
+  });
+
+  group('computeSafeAreaInsets', () {
+    late CustomElementDimensionsProvider provider;
+    DomElement? viewportMeta;
+
+    setUp(() {
+      domDocument.body!.append(sizeSource);
+      provider = CustomElementDimensionsProvider(sizeSource);
+    });
+
+    tearDown(() {
+      provider.close(); // cleanup
+      sizeSource.remove();
+      viewportMeta?.remove();
+      viewportMeta = null;
+    });
+
+    test('always zero, even when the page opted into a full-bleed layout', () {
+      // An embedded view is positioned by the host application, so the engine
+      // deliberately reports no safe area for it, even when the page as a whole
+      // has one.
+      viewportMeta = createDomHTMLMetaElement()
+        ..setAttribute('flt-viewport', '')
+        ..name = 'viewport'
+        ..content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover';
+      domDocument.head!.append(viewportMeta!);
+
+      final ViewPadding computed = provider.computeSafeAreaInsets();
+
+      expect(computed.top, 0);
+      expect(computed.right, 0);
+      expect(computed.bottom, 0);
+      expect(computed.left, 0);
+    });
+
+    test('does not add any element to the page', () {
+      provider.computeSafeAreaInsets();
+
+      expect(domDocument.querySelector('[flt-safe-area-probe]'), isNull);
     });
   });
 

@@ -31,13 +31,15 @@ import 'ticker_provider.dart';
 
 /// The signature of the widget builder callback used in
 /// [OverlayPortal.overlayChildLayoutBuilder].
-typedef OverlayChildLayoutBuilder =
-    Widget Function(BuildContext context, OverlayChildLayoutInfo info);
+typedef OverlayChildLayoutBuilder = Widget Function(
+  BuildContext context,
+  OverlayChildLayoutInfo info,
+);
 
 /// The additional layout information available to the
 /// [OverlayPortal.overlayChildLayoutBuilder] callback.
 extension type OverlayChildLayoutInfo._(
-  (Size childSize, Matrix4 childPaintTransform, Size overlaySize) _info
+  (Size childSize, Matrix4 childPaintTransform, Size overlaySize) _info,
 ) {
   /// The size of [OverlayPortal.child] in its own coordinates.
   Size get childSize => _info.$1;
@@ -114,11 +116,10 @@ class OverlayEntry implements Listenable {
   /// call [remove] on the overlay entry itself.
   OverlayEntry({
     required this.builder,
-    bool opaque = false,
-    bool maintainState = false,
+    this._opaque = false,
+    this._maintainState = false,
     this.canSizeOverlay = false,
-  }) : _opaque = opaque,
-       _maintainState = maintainState {
+  }) {
     assert(debugMaybeDispatchCreated('widgets', 'OverlayEntry', this));
   }
 
@@ -595,7 +596,7 @@ class Overlay extends StatefulWidget {
             '${debugRequiredFor?.runtimeType ?? 'Some'} widgets require an Overlay widget ancestor for correct operation.',
           ),
           ErrorHint(
-            'The most common way to add an Overlay to an application is to include a MaterialApp, CupertinoApp or Navigator widget in the runApp() call.',
+            'The most common way to add an Overlay to an application is to include a WidgetsApp or Navigator widget in the runApp() call.',
           ),
           if (debugRequiredFor != null)
             DiagnosticsProperty<Widget>(
@@ -1195,15 +1196,12 @@ class _RenderTheater extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheaterMixin {
   _RenderTheater({
     List<RenderBox>? children,
-    required TextDirection textDirection,
+    required this._textDirection,
     int skipCount = 0,
-    Clip clipBehavior = Clip.hardEdge,
-    required bool alwaysSizeToContent,
+    this._clipBehavior = Clip.hardEdge,
+    required this._alwaysSizeToContent,
   }) : assert(skipCount >= 0),
-       _textDirection = textDirection,
-       _skipCount = skipCount,
-       _clipBehavior = clipBehavior,
-       _alwaysSizeToContent = alwaysSizeToContent {
+       _skipCount = skipCount {
     addAll(children);
   }
 
@@ -1685,7 +1683,7 @@ class _RenderTheater extends RenderBox
 class OverlayPortalController {
   /// Creates an [OverlayPortalController], optionally with a String identifier
   /// `debugLabel`.
-  OverlayPortalController({String? debugLabel}) : _debugLabel = debugLabel;
+  OverlayPortalController({this._debugLabel});
 
   _OverlayPortalState? _attachTarget;
 
@@ -1790,6 +1788,8 @@ enum OverlayChildLocation {
 }
 
 /// A widget that renders its overlay child on an [Overlay].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=S0Ylpa44OAQ}
 ///
 /// The overlay child is initially hidden until [OverlayPortalController.show]
 /// is called on the associated [controller]. The [OverlayPortal] uses
@@ -2318,7 +2318,7 @@ class _RenderTheaterMarker extends InheritedWidget {
       ErrorHint(
         'To introduce an Overlay widget, you can either directly '
         'include one, or use a widget that contains an Overlay itself, '
-        'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
+        'such as a Navigator or WidgetsApp.',
       ),
       ...context.describeMissingAncestor(expectedAncestorType: Overlay),
     ]);
