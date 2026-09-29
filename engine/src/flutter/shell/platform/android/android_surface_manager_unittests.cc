@@ -465,6 +465,82 @@ TEST(AndroidSurfaceManagerTest, ClearAndPresentOnscreenSurfaceFakeWindow) {
   manager->ClearNativeWindow();
 }
 
+TEST(AndroidSurfaceManagerTest, VulkanSwapchainUsageInitialAndReset) {
+  auto manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerVulkan);
+  ASSERT_NE(manager, nullptr);
+  // Default swapchain usage flags are uninitialized (0) before surface
+  // creation.
+  EXPECT_EQ(manager->GetVulkanSwapchainUsage(),
+            static_cast<VkImageUsageFlags>(0));
+
+  EXPECT_TRUE(manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+  // In fake window mode without a native window, no real swapchain is created,
+  // so usage remains 0.
+  EXPECT_EQ(manager->GetVulkanSwapchainUsage(),
+            static_cast<VkImageUsageFlags>(0));
+
+  manager->ClearNativeWindow();
+  // ClearNativeWindow calls DestroyVulkanSurfaceLocked, ensuring usage resets
+  // to 0.
+  EXPECT_EQ(manager->GetVulkanSwapchainUsage(),
+            static_cast<VkImageUsageFlags>(0));
+
+#if FML_OS_ANDROID
+  void* mediandk = dlopen("libmediandk.so", RTLD_NOW);
+  if (mediandk) {
+    typedef struct AImageReader AImageReader;
+    typedef int32_t (*AImageReader_newWithUsage_fn)(
+        int32_t width, int32_t height, int32_t format, uint64_t usage,
+        int32_t maxImages, AImageReader** reader);
+    typedef int32_t (*AImageReader_getWindow_fn)(AImageReader* reader,
+                                                 ANativeWindow** window);
+    typedef void (*AImageReader_delete_fn)(AImageReader* reader);
+
+    auto newWithUsage = reinterpret_cast<AImageReader_newWithUsage_fn>(
+        dlsym(mediandk, "AImageReader_newWithUsage"));
+    auto getWindow = reinterpret_cast<AImageReader_getWindow_fn>(
+        dlsym(mediandk, "AImageReader_getWindow"));
+    auto deleteReader = reinterpret_cast<AImageReader_delete_fn>(
+        dlsym(mediandk, "AImageReader_delete"));
+
+    if (newWithUsage && getWindow && deleteReader) {
+      // (1ULL << 8) is AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE
+      // (1ULL << 9) is AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT
+      constexpr uint64_t kUsage = (1ULL << 8) | (1ULL << 9);
+      AImageReader* reader = nullptr;
+      // 640 and 480 are test buffer dimensions.
+      // 1 is AIMAGE_FORMAT_RGBA_8888.
+      // 3 is maxImages buffer queue depth.
+      constexpr int32_t kWidth = 640;
+      constexpr int32_t kHeight = 480;
+      constexpr int32_t kFormatRgba8888 = 1;
+      constexpr int32_t kMaxImages = 3;
+      int32_t status = newWithUsage(kWidth, kHeight, kFormatRgba8888, kUsage,
+                                    kMaxImages, &reader);
+      if (status == 0 && reader != nullptr) {
+        ANativeWindow* window = nullptr;
+        if (getWindow(reader, &window) == 0 && window != nullptr) {
+          if (manager->IsVulkanInitialized() &&
+              manager->SetNativeWindow(window, /*is_fake_window=*/false)) {
+            // When a real Vulkan swapchain is established, COLOR_ATTACHMENT
+            // must be set.
+            EXPECT_NE(manager->GetVulkanSwapchainUsage() &
+                          VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                      0u);
+          }
+          manager->ClearNativeWindow();
+          EXPECT_EQ(manager->GetVulkanSwapchainUsage(),
+                    static_cast<VkImageUsageFlags>(0));
+        }
+        deleteReader(reader);
+      }
+    }
+    dlclose(mediandk);
+  }
+#endif
+}
+
 INSTANTIATE_TEST_SUITE_P(
     Matrix,
     AndroidSurfaceManagerMultiBackendMatrixTest,
