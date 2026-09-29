@@ -519,9 +519,7 @@ void ProgramCache::WriteEntry(const std::string& key,
   if (handle == INVALID_HANDLE_VALUE &&
       ::GetLastError() == ERROR_PATH_NOT_FOUND) {
     // The folder was deleted while the process ran, for example by the app
-    // clearing its cache folder. Its entries are gone, so start again.
-    index_.clear();
-    total_bytes_ = 0;
+    // clearing its cache folder. Start again.
     PrepareDirectory();
     handle = CreateNewFile(temporary);
   }
@@ -543,12 +541,6 @@ void ProgramCache::WriteEntry(const std::string& key,
     return;
   }
 
-  const uint64_t size = sizeof(header) + key.size() + value.size();
-  if (auto existing = index_.find(name); existing != index_.end()) {
-    total_bytes_ -= existing->second.size;
-  }
-  index_[name] = Entry{size, NowTicks()};
-  total_bytes_ += size;
   EvictIfNeeded();
 }
 
@@ -602,26 +594,39 @@ void ProgramCache::PrepareDirectory() {
       }
       return;
     }
-    if (!IsEntryFileName(name)) {
-      return;
-    }
-    const uint64_t size =
-        (static_cast<uint64_t>(file.nFileSizeHigh) << 32) | file.nFileSizeLow;
-    index_[name] = Entry{size, modified};
-    total_bytes_ += size;
   });
   EvictIfNeeded();
 }
 
 void ProgramCache::EvictIfNeeded() {
-  while (total_bytes_ > options_.max_total_bytes && !index_.empty()) {
-    auto oldest = std::min_element(
-        index_.begin(), index_.end(), [](const auto& a, const auto& b) {
-          return a.second.last_used < b.second.last_used;
-        });
-    ::DeleteFileW((version_directory_ / oldest->first).c_str());
-    total_bytes_ -= oldest->second.size;
-    index_.erase(oldest);
+  // Other processes can add entries and readers can refresh their times after
+  // our first write. Use the current directory instead of a stale local index.
+  std::vector<Entry> entries;
+  uint64_t total_bytes = 0;
+  ForEachItem(version_directory_, [&](const WIN32_FIND_DATAW& file) {
+    if ((file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 ||
+        !IsEntryFileName(file.cFileName)) {
+      return;
+    }
+    const uint64_t size =
+        (static_cast<uint64_t>(file.nFileSizeHigh) << 32) | file.nFileSizeLow;
+    entries.push_back(
+        Entry{file.cFileName, size, ToTicks(file.ftLastWriteTime)});
+    total_bytes += size;
+  });
+  if (total_bytes <= options_.max_total_bytes) {
+    return;
+  }
+  std::sort(entries.begin(), entries.end(), [](const Entry& a, const Entry& b) {
+    return a.last_used < b.last_used;
+  });
+  for (const auto& entry : entries) {
+    if (total_bytes <= options_.max_total_bytes) {
+      break;
+    }
+    if (::DeleteFileW((version_directory_ / entry.name).c_str())) {
+      total_bytes -= entry.size;
+    }
   }
 }
 

@@ -125,6 +125,7 @@ class ProgramCache {
 
  private:
   struct Entry {
+    std::wstring name;
     uint64_t size = 0;
     // When the entry was written or last refreshed by a hit, in FILETIME
     // units.
@@ -142,11 +143,11 @@ class ProgramCache {
   // checks.
   std::optional<std::vector<uint8_t>> ReadEntry(const std::string& key) const;
 
-  // Writes the entry file for |key| and updates the index. Runs on the writer
+  // Writes the entry file for |key| and trims the folder. Runs on the writer
   // thread, or in Set when writing synchronously.
   void WriteEntry(const std::string& key, const std::vector<uint8_t>& value);
 
-  // Creates this version's folder, indexes its entries and removes what
+  // Creates this version's folder and removes what
   // earlier runs left behind: the folders of versions unused for 30 days and
   // stale temporary files.
   void PrepareDirectory();
@@ -175,10 +176,8 @@ class ProgramCache {
   std::optional<std::vector<uint8_t>> last_read_value_;
 
   // Owned by whichever thread writes: the writer thread, or Set's caller when
-  // writing synchronously under |mutex_|. Keyed by entry file name.
+  // writing synchronously under |mutex_|.
   bool prepared_ = false;
-  std::unordered_map<std::wstring, Entry> index_;
-  uint64_t total_bytes_ = 0;
   uint64_t temporary_file_counter_ = 0;
 
   std::thread writer_;

@@ -11,6 +11,7 @@
 #include <thread>
 #include <vector>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/platform/win/wstring_conversion.h"
 #include "gtest/gtest.h"
@@ -262,6 +263,73 @@ TEST(ProgramCacheTest, EvictsTheEntriesUsedLeastRecently) {
   EXPECT_EQ(Load(cache, MakeKey('a')), std::nullopt);
   EXPECT_TRUE(Load(cache, MakeKey('b')).has_value());
   EXPECT_TRUE(Load(cache, MakeKey('c')).has_value());
+}
+
+uint64_t StoredEntryBytes(const ProgramCache& cache) {
+  uint64_t bytes = 0;
+  for (const auto& file :
+       std::filesystem::directory_iterator(cache.version_directory())) {
+    if (file.is_regular_file() && file.path().extension() == L".bin") {
+      bytes += file.file_size();
+    }
+  }
+  return bytes;
+}
+
+TEST(ProgramCacheTest, EvictionAccountsForOtherCacheInstances) {
+  TemporaryFolder directory;
+  auto options = MakeOptions(PathOf(directory));
+  options.max_total_bytes = 300;
+  ProgramCache first(options);
+  ProgramCache second(options);
+  Store(first, MakeKey('a'), MakeValue(100, 1));
+  Store(second, MakeKey('b'), MakeValue(100, 2));
+  Store(first, MakeKey('c'), MakeValue(100, 3));
+  EXPECT_LE(StoredEntryBytes(first), options.max_total_bytes);
+}
+
+TEST(ProgramCacheTest, EvictionHonorsHitsAfterTheFirstWrite) {
+  TemporaryFolder directory;
+  auto options = MakeOptions(PathOf(directory));
+  options.max_total_bytes = 400;
+  {
+    ProgramCache seed(options);
+    Store(seed, MakeKey('a'), MakeValue(100, 1));
+    Store(seed, MakeKey('b'), MakeValue(100, 2));
+    SetLastWriteTime(EntryPath(seed, MakeKey('a')), Now() - 3 * kTicksPerDay);
+    SetLastWriteTime(EntryPath(seed, MakeKey('b')), Now() - 2 * kTicksPerDay);
+  }
+  ProgramCache cache(options);
+  Store(cache, MakeKey('c'), MakeValue(50, 3));
+  ASSERT_TRUE(Load(cache, MakeKey('a')).has_value());
+  Store(cache, MakeKey('d'), MakeValue(50, 4));
+  EXPECT_TRUE(std::filesystem::exists(EntryPath(cache, MakeKey('a'))));
+  EXPECT_FALSE(std::filesystem::exists(EntryPath(cache, MakeKey('b'))));
+  EXPECT_LE(StoredEntryBytes(cache), options.max_total_bytes);
+}
+
+TEST(ProgramCacheTest, FailedDeletionDoesNotCountAsFreedSpace) {
+  TemporaryFolder directory;
+  auto options = MakeOptions(PathOf(directory));
+  options.max_total_bytes = 300;
+  {
+    ProgramCache seed(options);
+    Store(seed, MakeKey('a'), MakeValue(100, 1));
+    Store(seed, MakeKey('b'), MakeValue(100, 2));
+    SetLastWriteTime(EntryPath(seed, MakeKey('a')), Now() - 3 * kTicksPerDay);
+    SetLastWriteTime(EntryPath(seed, MakeKey('b')), Now() - 2 * kTicksPerDay);
+  }
+  ProgramCache cache(options);
+  HANDLE locked =
+      ::CreateFileW(EntryPath(cache, MakeKey('a')).c_str(), GENERIC_READ,
+                    FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING,
+                    FILE_ATTRIBUTE_NORMAL, nullptr);
+  ASSERT_NE(locked, INVALID_HANDLE_VALUE);
+  fml::ScopedCleanupClosure close([locked]() { ::CloseHandle(locked); });
+  Store(cache, MakeKey('c'), MakeValue(100, 3));
+  EXPECT_TRUE(std::filesystem::exists(EntryPath(cache, MakeKey('a'))));
+  EXPECT_FALSE(std::filesystem::exists(EntryPath(cache, MakeKey('b'))));
+  EXPECT_LE(StoredEntryBytes(cache), options.max_total_bytes);
 }
 
 TEST(ProgramCacheTest, HitRefreshesTheTimeOfAnOldEntry) {
