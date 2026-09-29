@@ -1251,6 +1251,7 @@ class FlutterEmbedderNative {
   std::string icu_data_path_storage_;
   std::string persistent_cache_path_storage_;
   std::string log_tag_storage_;
+  std::string initial_route_;
   FlutterEngineAOTData aot_data_ = nullptr;
   std::atomic<bool> surface_attached_{false};
   std::atomic<bool> first_frame_presented_{false};
@@ -1306,6 +1307,7 @@ class FlutterEmbedderNative {
     std::string channel;
     std::vector<uint8_t> message;
     int32_t response_id = 0;
+    bool has_data = false;
   };
 
   mutable std::mutex pending_messages_mutex_;

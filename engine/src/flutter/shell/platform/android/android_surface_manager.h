@@ -45,6 +45,26 @@ struct ANativeWindow;
 #endif
 #endif  // FML_OS_ANDROID
 
+#include <vulkan/vulkan.h>
+#if !defined(VK_USE_PLATFORM_ANDROID_KHR)
+typedef VkFlags VkAndroidSurfaceCreateFlagsKHR;
+typedef struct VkAndroidSurfaceCreateInfoKHR {
+  VkStructureType sType;
+  const void* pNext;
+  VkAndroidSurfaceCreateFlagsKHR flags;
+  struct ANativeWindow* window;
+} VkAndroidSurfaceCreateInfoKHR;
+typedef VkResult(VKAPI_PTR* PFN_vkCreateAndroidSurfaceKHR)(
+    VkInstance instance,
+    const VkAndroidSurfaceCreateInfoKHR* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkSurfaceKHR* pSurface);
+#ifndef VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR
+#define VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR \
+  ((VkStructureType)1000008000)
+#endif
+#endif
+
 namespace flutter {
 
 struct AndroidSurfaceDimensions {
@@ -136,6 +156,35 @@ class AndroidSurfaceManager {
   bool PresentSoftware(const void* allocation, size_t row_bytes, size_t height);
 
   // ---------------------------------------------------------------------------
+  // Vulkan Lifecycle Methods
+  // ---------------------------------------------------------------------------
+
+  /// Returns true if the Vulkan subsystem was initialized successfully.
+  bool InitializeVulkan();
+
+  /// Returns true if the Vulkan instance and device were initialized.
+  bool IsVulkanInitialized() const { return vk_instance_ != VK_NULL_HANDLE; }
+
+  /// Returns the native VkInstance handle.
+  VkInstance GetVulkanInstance() const { return vk_instance_; }
+
+  /// Tears down the Vulkan instance and device resources.
+  void TeardownVulkan();
+
+  /// Populates the Vulkan renderer config struct for engine startup.
+  void PopulateVulkanRendererConfig(FlutterVulkanRendererConfig* config);
+
+  /// Acquires the next swapchain image for rendering.
+  FlutterVulkanImage GetNextImage(const FlutterFrameInfo* frame_info);
+
+  /// Presents the rendered image to the swapchain.
+  bool PresentImage(const FlutterVulkanImage* image);
+
+  /// Resolves Vulkan function pointers dynamically.
+  void* GetInstanceProcAddress(FlutterVulkanInstanceHandle instance,
+                               const char* name);
+
+  // ---------------------------------------------------------------------------
   // Embedder C-API Configuration Helpers
   // ---------------------------------------------------------------------------
 
@@ -199,10 +248,84 @@ class AndroidSurfaceManager {
   std::unordered_map<ANativeWindow*, EGLSurface> overlay_egl_surfaces_;
 #endif
 
+  // Vulkan state
+  void* vulkan_lib_handle_ = nullptr;
+  uint32_t vk_version_ = VK_API_VERSION_1_1;
+  VkInstance vk_instance_ = VK_NULL_HANDLE;
+  VkPhysicalDevice vk_physical_device_ = VK_NULL_HANDLE;
+  VkDevice vk_device_ = VK_NULL_HANDLE;
+  uint32_t vk_graphics_queue_family_index_ = 0;
+  VkQueue vk_queue_ = VK_NULL_HANDLE;
+  VkSurfaceKHR vk_surface_ = VK_NULL_HANDLE;
+  VkSwapchainKHR vk_swapchain_ = VK_NULL_HANDLE;
+  VkSurfaceFormatKHR vk_surface_format_ = {};
+  VkExtent2D vk_swapchain_extent_ = {0, 0};
+  std::vector<VkImage> vk_swapchain_images_;
+  std::vector<VkCommandBuffer> vk_command_buffers_;
+  VkCommandPool vk_command_pool_ = VK_NULL_HANDLE;
+  VkFence vk_acquire_fence_ = VK_NULL_HANDLE;
+  uint32_t current_image_index_ = 0;
+
+  std::vector<std::string> enabled_instance_extensions_;
+  std::vector<const char*> enabled_instance_extensions_ptrs_;
+  std::vector<std::string> enabled_device_extensions_;
+  std::vector<const char*> enabled_device_extensions_ptrs_;
+
+  // Vulkan function pointers
+  PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr_fn_ = nullptr;
+  PFN_vkCreateInstance vkCreateInstance_fn_ = nullptr;
+  PFN_vkDestroyInstance vkDestroyInstance_fn_ = nullptr;
+  PFN_vkEnumerateInstanceExtensionProperties
+      vkEnumerateInstanceExtensionProperties_fn_ = nullptr;
+  PFN_vkEnumerateInstanceLayerProperties
+      vkEnumerateInstanceLayerProperties_fn_ = nullptr;
+  PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices_fn_ = nullptr;
+  PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties_fn_ = nullptr;
+  PFN_vkGetPhysicalDeviceQueueFamilyProperties
+      vkGetPhysicalDeviceQueueFamilyProperties_fn_ = nullptr;
+  PFN_vkEnumerateDeviceExtensionProperties
+      vkEnumerateDeviceExtensionProperties_fn_ = nullptr;
+  PFN_vkCreateDevice vkCreateDevice_fn_ = nullptr;
+  PFN_vkDestroyDevice vkDestroyDevice_fn_ = nullptr;
+  PFN_vkGetDeviceQueue vkGetDeviceQueue_fn_ = nullptr;
+  PFN_vkDeviceWaitIdle vkDeviceWaitIdle_fn_ = nullptr;
+  PFN_vkQueueWaitIdle vkQueueWaitIdle_fn_ = nullptr;
+  PFN_vkCreateAndroidSurfaceKHR vkCreateAndroidSurfaceKHR_fn_ = nullptr;
+  PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR_fn_ = nullptr;
+  PFN_vkGetPhysicalDeviceSurfaceSupportKHR
+      vkGetPhysicalDeviceSurfaceSupportKHR_fn_ = nullptr;
+  PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR
+      vkGetPhysicalDeviceSurfaceCapabilitiesKHR_fn_ = nullptr;
+  PFN_vkGetPhysicalDeviceSurfaceFormatsKHR
+      vkGetPhysicalDeviceSurfaceFormatsKHR_fn_ = nullptr;
+  PFN_vkGetPhysicalDeviceSurfacePresentModesKHR
+      vkGetPhysicalDeviceSurfacePresentModesKHR_fn_ = nullptr;
+  PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR_fn_ = nullptr;
+  PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR_fn_ = nullptr;
+  PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR_fn_ = nullptr;
+  PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR_fn_ = nullptr;
+  PFN_vkQueuePresentKHR vkQueuePresentKHR_fn_ = nullptr;
+  PFN_vkCreateCommandPool vkCreateCommandPool_fn_ = nullptr;
+  PFN_vkDestroyCommandPool vkDestroyCommandPool_fn_ = nullptr;
+  PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers_fn_ = nullptr;
+  PFN_vkFreeCommandBuffers vkFreeCommandBuffers_fn_ = nullptr;
+  PFN_vkBeginCommandBuffer vkBeginCommandBuffer_fn_ = nullptr;
+  PFN_vkEndCommandBuffer vkEndCommandBuffer_fn_ = nullptr;
+  PFN_vkResetCommandBuffer vkResetCommandBuffer_fn_ = nullptr;
+  PFN_vkCmdPipelineBarrier vkCmdPipelineBarrier_fn_ = nullptr;
+  PFN_vkQueueSubmit vkQueueSubmit_fn_ = nullptr;
+  PFN_vkCreateFence vkCreateFence_fn_ = nullptr;
+  PFN_vkDestroyFence vkDestroyFence_fn_ = nullptr;
+  PFN_vkWaitForFences vkWaitForFences_fn_ = nullptr;
+  PFN_vkResetFences vkResetFences_fn_ = nullptr;
+
   bool InitializeEGL();
   void TeardownEGL();
   bool CreateOrUpdateOnscreenSurfaceLocked();
   void DestroyOnscreenSurfaceLocked();
+  bool CreateOrUpdateVulkanSurfaceLocked();
+  void DestroyVulkanSurfaceLocked();
+  void DestroyVulkanSwapchainLocked();
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceManager);
 };

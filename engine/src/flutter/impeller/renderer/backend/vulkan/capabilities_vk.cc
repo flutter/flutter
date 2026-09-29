@@ -54,6 +54,15 @@ CapabilitiesVK::CapabilitiesVK(bool enable_validations,
     for (const auto& ext : embedder_instance_extensions_) {
       exts_[kInstanceLayer].insert(ext);
     }
+    if (enable_validations) {
+      auto layers = vk::enumerateInstanceLayerProperties();
+      if (layers.result == vk::Result::eSuccess) {
+        for (const auto& layer : layers.value) {
+          const std::string layer_name = layer.layerName;
+          exts_[layer_name].insert(layer_name);
+        }
+      }
+    }
   }
 
   validations_enabled_ =
