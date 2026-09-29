@@ -6327,6 +6327,12 @@ class InheritedElement extends ProxyElement {
   /// so that they can selectively rebuild dependents in [notifyDependent].
   ///
   /// This method is typically only called in overrides of [updateDependencies].
+  /// For example, [InheritedModelElement.updateDependencies] calls this method
+  /// to register the initial dependency value for a [dependent], or to replace
+  /// it with an unconditional dependency, and otherwise mutates the existing
+  /// [Set] returned by [getDependencies] in-place without calling this method
+  /// again if the same [dependent] has already been registered by a previous
+  /// call to [updateDependencies].
   ///
   /// See also:
   ///
@@ -6340,9 +6346,6 @@ class InheritedElement extends ProxyElement {
   ///    to manage dependency values.
   @protected
   void setDependencies(Element dependent, Object? value) {
-    // Note: InheritedModelElement.updateDependencies mutates the existing Set
-    // returned by getDependencies in-place without calling setDependencies when
-    // adding subsequent aspects.
     _dependents[dependent] = value;
   }
 

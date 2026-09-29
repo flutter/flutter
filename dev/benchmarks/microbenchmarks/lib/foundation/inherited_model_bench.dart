@@ -19,11 +19,15 @@ Future<void> execute() async {
     final modelElement = InheritedModelElement<int>(
       const _BenchmarkInheritedModel(child: SizedBox.shrink()),
     );
-    final dependent = SingleChildRenderObjectElement(const SizedBox.shrink());
+    final dependents = List<Element>.generate(
+      iteration,
+      (_) => SingleChildRenderObjectElement(const SizedBox.shrink()),
+      growable: false,
+    );
 
     final watch = Stopwatch()..start();
     for (var i = 0; i < iteration; i += 1) {
-      modelElement.updateDependencies(dependent, null);
+      modelElement.updateDependencies(dependents[i], null);
     }
     watch.stop();
 
@@ -33,32 +37,6 @@ Future<void> execute() async {
         value: (watch.elapsedMicroseconds / iteration) * _kScale,
         unit: 'ns per iteration',
         name: 'inherited_model_update_dependencies_null_aspect',
-      );
-    }
-  }
-
-  void runInitialAspectBenchmark(int iteration, {bool addResult = true}) {
-    final modelElement = InheritedModelElement<int>(
-      const _BenchmarkInheritedModel(child: SizedBox.shrink()),
-    );
-    final dependents = List<Element>.generate(
-      iteration,
-      (_) => SingleChildRenderObjectElement(const SizedBox.shrink()),
-      growable: false,
-    );
-
-    final watch = Stopwatch()..start();
-    for (var i = 0; i < iteration; i += 1) {
-      modelElement.updateDependencies(dependents[i], 0);
-    }
-    watch.stop();
-
-    if (addResult) {
-      printer.addResult(
-        description: 'InheritedModelElement.updateDependencies (initial aspect)',
-        value: (watch.elapsedMicroseconds / iteration) * _kScale,
-        unit: 'ns per iteration',
-        name: 'inherited_model_update_dependencies_initial_aspect',
       );
     }
   }
@@ -88,9 +66,6 @@ Future<void> execute() async {
 
   runNullAspectBenchmark(_kNumWarmUp, addResult: false);
   runNullAspectBenchmark(_kNumIterations);
-
-  runInitialAspectBenchmark(_kNumWarmUp, addResult: false);
-  runInitialAspectBenchmark(_kNumIterations);
 
   runExistingAspectSetBenchmark(_kNumWarmUp, addResult: false);
   runExistingAspectSetBenchmark(_kNumIterations);
