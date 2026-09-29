@@ -998,6 +998,8 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
+    // Delegates to the text layout implementation with the full [position]
+    // including text affinity.
     final ui.TextRange result = _layout.getLineBoundary(position);
     WebParagraphDebug.apiTrace('getLineBoundary($position): $result');
     return result;

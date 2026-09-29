@@ -148,6 +148,8 @@ Future<void> testMain() async {
       ),
       const ui.TextRange(start: 12, end: 17),
     );
+    // Offset 17 is at the end of the last line "12345" (range 12..17),
+    // verifying that the boundary includes the end offset.
     expect(
       paragraph.getLineBoundary(
         const ui.TextPosition(offset: 17 /* affinity: ui.TextAffinity.downstream */),
@@ -170,6 +172,8 @@ Future<void> testMain() async {
     );
   });
 
+  // Verifies that getLineBoundary at the end of the text (offset == text.length)
+  // correctly returns the line range instead of empty for both affinities.
   test('Paragraph getLineBoundary at the last character position', () {
     final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
@@ -190,6 +194,8 @@ Future<void> testMain() async {
     );
   });
 
+  // Verifies that at a soft line wrap point, TextAffinity is respected:
+  // upstream affinity maps to the first line, downstream affinity to the second line.
   test('Paragraph getLineBoundary with soft line breaks respects affinity', () {
     final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 

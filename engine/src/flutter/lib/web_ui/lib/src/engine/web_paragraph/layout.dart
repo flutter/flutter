@@ -848,6 +848,12 @@ class TextLayout {
     return ui.TextRange(start: start, end: end);
   }
 
+  /// Returns the text range of the line containing the given [position].
+  ///
+  /// If [position.offset] falls on a soft line wrap boundary between two lines,
+  /// [position.affinity] is used to disambiguate: [ui.TextAffinity.downstream]
+  /// selects the following line, while [ui.TextAffinity.upstream] stays on the
+  /// preceding line.
   ui.TextRange getLineBoundary(ui.TextPosition position) {
     if (lines.isEmpty) {
       return ui.TextRange.empty;
@@ -856,12 +862,18 @@ class TextLayout {
 
     for (var i = 0; i < lines.length; i++) {
       final TextLine line = lines[i];
+      // Include offset == lineRange.end so offsets at the end of a line
+      // (such as cursor positions after the last character) match the line.
       if (offset >= line.allLineTextRange.start && offset <= line.allLineTextRange.end) {
         final lineRange = ui.TextRange(
           start: line.allLineTextRange.start,
           end: line.allLineTextRange.end,
         );
 
+        // When the offset is exactly at the boundary between two adjacent lines
+        // (i.e. at a soft line wrap where lineRange.end == nextLineRange.start),
+        // use TextAffinity to disambiguate: downstream affinity selects the next
+        // line, whereas upstream affinity stays on the current line.
         if (offset == lineRange.end && i + 1 < lines.length) {
           final TextLine nextLine = lines[i + 1];
           final nextLineRange = ui.TextRange(
