@@ -2649,6 +2649,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
         delegate,
       );
     }
+
     final Map<String, Object?> json = {
       ...super.toJsonMap(delegate),
       'properties': ?properties,
@@ -2658,14 +2659,15 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       'tooltip': ?tooltip,
       'missingIfNull': missingIfNull,
       if (exception != null) 'exception': exception.toString(),
-      'propertyType': propertyType.toString,
+      'propertyType': propertyType.toString(),
       'defaultLevel': _defaultLevel.name,
       if (value is Diagnosticable || value is DiagnosticsNode) 'isDiagnosticableValue': true,
       if (v is num)
         // TODO(jacob314): Workaround, since JSON.stringify replaces infinity and NaN with null,
         // https://github.com/flutter/flutter/issues/39937#issuecomment-529558033)
         'value': v.isFinite ? v : v.toString(),
-      if (value case (String() || bool() || null)) 'value': value,
+
+      if (value case String() || bool() || null) 'value': value,
     };
 
     return json;
