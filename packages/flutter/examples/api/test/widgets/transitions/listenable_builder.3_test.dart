@@ -18,20 +18,18 @@ void main() {
     expect(find.text('Current values:'), findsOneWidget);
     expect(find.byIcon(Icons.add), findsOneWidget);
     expect(
-      (tester.widget(listContent) as example.ListBody)
-          .listNotifier
-          .values
-          .isEmpty,
+      (tester.widget(
+        listContent,
+      ) as example.ListBody).listNotifier.values.isEmpty,
       isTrue,
     );
 
     await tester.tap(find.byType(FloatingActionButton).first);
     await tester.pumpAndSettle();
     expect(
-      (tester.widget(listContent) as example.ListBody)
-          .listNotifier
-          .values
-          .isEmpty,
+      (tester.widget(
+        listContent,
+      ) as example.ListBody).listNotifier.values.isEmpty,
       isFalse,
     );
     expect(

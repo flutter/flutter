@@ -110,17 +110,13 @@ class ResidentWebRunner extends ResidentRunner {
     required Terminal terminal,
     required Platform platform,
     required OutputPreferences outputPreferences,
-    required SystemClock systemClock,
-    required Analytics analytics,
-    UrlTunneller? urlTunneller,
-    Map<String, String> webDefines = const <String, String>{},
+    required this._systemClock,
+    required this._analytics,
+    this._urlTunneller,
+    this._webDefines = const <String, String>{},
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
-       _systemClock = systemClock,
-       _analytics = analytics,
-       _urlTunneller = urlTunneller,
-       _webDefines = webDefines,
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
@@ -349,6 +345,12 @@ class ResidentWebRunner extends ResidentRunner {
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
             analytics: globals.analytics,
+            artifacts: globals.artifacts!,
+            buildTargets: globals.buildTargets,
+            cache: globals.cache,
+            config: globals.config,
+            platform: _platform,
+            terminal: globals.terminal,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -429,11 +431,7 @@ class ResidentWebRunner extends ResidentRunner {
 
   WebCompilerConfig get _compilerConfig {
     if (debuggingOptions.webUseWasm) {
-      return WasmCompilerConfig(
-        optimizationLevel: 0,
-        stripWasm: false,
-        renderer: debuggingOptions.webRenderer,
-      );
+      return WasmCompilerConfig(renderer: debuggingOptions.webRenderer);
     }
     return JsCompilerConfig.run(
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,
@@ -510,6 +508,12 @@ class ResidentWebRunner extends ResidentRunner {
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
           analytics: globals.analytics,
+          artifacts: globals.artifacts!,
+          buildTargets: globals.buildTargets,
+          cache: globals.cache,
+          config: globals.config,
+          platform: _platform,
+          terminal: globals.terminal,
         );
         await webBuilder.buildWeb(
           flutterProject,
