@@ -88,7 +88,6 @@ enum ContextMenuButtonType {
 ///    context menu.
 @immutable
 final class ContextMenuButtonKind {
-  // ignore: deprecated_member_use_from_same_package
   const ContextMenuButtonKind._(this.name, this._legacyType);
 
   /// A name for this kind, useful for debugging.
@@ -97,11 +96,9 @@ final class ContextMenuButtonKind {
   // The closest ContextMenuButtonType for this kind, used to keep the
   // deprecated ContextMenuButtonItem.type working. Kinds with no matching
   // ContextMenuButtonType map to ContextMenuButtonType.custom.
-  // ignore: deprecated_member_use_from_same_package
   final ContextMenuButtonType _legacyType;
 
   /// A button that cuts the current text selection.
-  // ignore: deprecated_member_use_from_same_package
   static const ContextMenuButtonKind cut = ContextMenuButtonKind._(
     'cut',
     ContextMenuButtonType.cut,
@@ -110,49 +107,42 @@ final class ContextMenuButtonKind {
   /// A button that copies the current text selection.
   static const ContextMenuButtonKind copy = ContextMenuButtonKind._(
     'copy',
-    // ignore: deprecated_member_use_from_same_package
     ContextMenuButtonType.copy,
   );
 
   /// A button that pastes the clipboard contents into the focused text field.
   static const ContextMenuButtonKind paste = ContextMenuButtonKind._(
     'paste',
-    // ignore: deprecated_member_use_from_same_package
     ContextMenuButtonType.paste,
   );
 
   /// A button that selects all the contents of the focused text field.
   static const ContextMenuButtonKind selectAll = ContextMenuButtonKind._(
     'selectAll',
-    // ignore: deprecated_member_use_from_same_package
     ContextMenuButtonType.selectAll,
   );
 
   /// A button that deletes the current text selection.
   static const ContextMenuButtonKind delete = ContextMenuButtonKind._(
     'delete',
-    // ignore: deprecated_member_use_from_same_package
     ContextMenuButtonType.delete,
   );
 
   /// A button that looks up the current text selection.
   static const ContextMenuButtonKind lookUp = ContextMenuButtonKind._(
     'lookUp',
-    // ignore: deprecated_member_use_from_same_package
     ContextMenuButtonType.lookUp,
   );
 
   /// A button that launches a web search for the current text selection.
   static const ContextMenuButtonKind searchWeb = ContextMenuButtonKind._(
     'searchWeb',
-    // ignore: deprecated_member_use_from_same_package
     ContextMenuButtonType.searchWeb,
   );
 
   /// A button that displays the share screen for the current text selection.
   static const ContextMenuButtonKind share = ContextMenuButtonKind._(
     'share',
-    // ignore: deprecated_member_use_from_same_package
     ContextMenuButtonType.share,
   );
 
@@ -163,7 +153,6 @@ final class ContextMenuButtonKind {
   ///  * [LiveTextInputStatusNotifier], where the status of Live Text can be listened to.
   static const ContextMenuButtonKind liveTextInput = ContextMenuButtonKind._(
     'liveTextInput',
-    // ignore: deprecated_member_use_from_same_package
     ContextMenuButtonType.liveTextInput,
   );
 
@@ -173,14 +162,12 @@ final class ContextMenuButtonKind {
   /// [ContextMenuButtonItem.type] reports it as [ContextMenuButtonType.custom].
   static const ContextMenuButtonKind translate = ContextMenuButtonKind._(
     'translate',
-    // ignore: deprecated_member_use_from_same_package
     ContextMenuButtonType.custom,
   );
 
   /// Anything other than the default button kinds.
   static const ContextMenuButtonKind custom = ContextMenuButtonKind._(
     'custom',
-    // ignore: deprecated_member_use_from_same_package
     ContextMenuButtonType.custom,
   );
 
@@ -202,28 +189,17 @@ final class ContextMenuButtonKind {
   ];
 
   // Returns the kind that corresponds to a deprecated ContextMenuButtonType.
-  // ignore: deprecated_member_use_from_same_package
   static ContextMenuButtonKind _fromLegacyType(ContextMenuButtonType type) {
     return switch (type) {
-      // ignore: deprecated_member_use_from_same_package
       ContextMenuButtonType.cut => cut,
-      // ignore: deprecated_member_use_from_same_package
       ContextMenuButtonType.copy => copy,
-      // ignore: deprecated_member_use_from_same_package
       ContextMenuButtonType.paste => paste,
-      // ignore: deprecated_member_use_from_same_package
       ContextMenuButtonType.selectAll => selectAll,
-      // ignore: deprecated_member_use_from_same_package
       ContextMenuButtonType.delete => delete,
-      // ignore: deprecated_member_use_from_same_package
       ContextMenuButtonType.lookUp => lookUp,
-      // ignore: deprecated_member_use_from_same_package
       ContextMenuButtonType.searchWeb => searchWeb,
-      // ignore: deprecated_member_use_from_same_package
       ContextMenuButtonType.share => share,
-      // ignore: deprecated_member_use_from_same_package
       ContextMenuButtonType.liveTextInput => liveTextInput,
-      // ignore: deprecated_member_use_from_same_package
       ContextMenuButtonType.custom => custom,
     };
   }
@@ -254,7 +230,6 @@ class ContextMenuButtonItem {
       'ContextMenuButtonType cannot gain new values without breaking exhaustive switches. '
       'This feature was deprecated after v3.49.0-1.0.pre.',
     )
-    // ignore: deprecated_member_use_from_same_package
     ContextMenuButtonType? type,
     ContextMenuButtonKind? kind,
     this.label,
@@ -265,7 +240,6 @@ class ContextMenuButtonItem {
   /// The callback to be called when the button is pressed.
   final VoidCallback? onPressed;
 
-  // ignore: deprecated_member_use_from_same_package
   final ContextMenuButtonType? _type;
   final ContextMenuButtonKind? _kind;
 
@@ -290,7 +264,6 @@ class ContextMenuButtonItem {
     'ContextMenuButtonType cannot gain new values without breaking exhaustive switches. '
     'This feature was deprecated after v3.49.0-1.0.pre.',
   )
-  // ignore: deprecated_member_use_from_same_package
   ContextMenuButtonType get type => _type ?? kind._legacyType;
 
   /// The label to display on the button.
@@ -309,7 +282,6 @@ class ContextMenuButtonItem {
       'ContextMenuButtonType cannot gain new values without breaking exhaustive switches. '
       'This feature was deprecated after v3.49.0-1.0.pre.',
     )
-    // ignore: deprecated_member_use_from_same_package
     ContextMenuButtonType? type,
     ContextMenuButtonKind? kind,
     String? label,
