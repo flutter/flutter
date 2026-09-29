@@ -780,6 +780,7 @@ targets:
       # it is available in Firebase Test Lab.
       physical_devices: >-
         [
+          "--device", "model=cubs,version=37",
           "--device", "model=shiba,version=34",
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
