@@ -6340,6 +6340,9 @@ class InheritedElement extends ProxyElement {
   ///    to manage dependency values.
   @protected
   void setDependencies(Element dependent, Object? value) {
+    // Note: InheritedModelElement.updateDependencies mutates the existing Set
+    // returned by getDependencies in-place without calling setDependencies when
+    // adding subsequent aspects.
     _dependents[dependent] = value;
   }
 
