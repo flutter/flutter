@@ -13,8 +13,11 @@ typedef KeyDataCallback = bool Function(KeyData data);
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 typedef HitTestCallback = HitTestResponse Function(HitTestRequest request);
 typedef PlatformMessageResponseCallback = void Function(ByteData? data);
-typedef PlatformMessageCallback =
-    void Function(String name, ByteData? data, PlatformMessageResponseCallback? callback);
+typedef PlatformMessageCallback = void Function(
+  String name,
+  ByteData? data,
+  PlatformMessageResponseCallback? callback,
+);
 typedef ErrorCallback = bool Function(Object exception, StackTrace stackTrace);
 
 /// A token that represents a root isolate.

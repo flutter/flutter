@@ -4,6 +4,7 @@
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+
 import '../../gallery_localizations.dart';
 
 // BEGIN openContainerTransformDemo
@@ -323,9 +324,8 @@ class _DetailsCard extends StatelessWidget {
             child: Text(
               'Lorem ipsum dolor sit amet, consectetur '
               'adipiscing elit, sed do eiusmod tempor.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium!.copyWith(color: Colors.black54, inherit: false),
+              style: Theme.of(context).textTheme.bodyMedium!
+                  .copyWith(color: Colors.black54, inherit: false),
             ),
           ),
         ],

@@ -13,8 +13,8 @@
     "builds": [
         {
             "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-15.7",
+                "device_os=ignore_phone|none",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -60,8 +60,8 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-15.7",
+                "device_os=ignore_phone|none",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -109,8 +109,8 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-15.7",
+                "device_os=ignore_phone|none",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -156,8 +156,8 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-15.7",
+                "device_os=ignore_phone|none",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -203,8 +203,8 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-15.7",
+                "device_os=ignore_phone|none",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -250,8 +250,8 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-15.7",
+                "device_os=ignore_phone|none",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -299,8 +299,8 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-15.7",
+                "device_os=ignore_phone|none",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -350,8 +350,8 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-15.7",
+                "device_os=ignore_phone|none",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -399,8 +399,8 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-15.7",
+                "device_os=ignore_phone|none",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -448,8 +448,8 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-15.7",
+                "device_os=ignore_phone|none",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {

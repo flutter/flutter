@@ -70,7 +70,7 @@ class _TestPageRoute<T> extends MaterialPageRoute<T> {
 }
 
 class _TestPage extends Page<dynamic> {
-  _TestPage({required this.builder, required LocalKey key}) : _key = GlobalKey(), super(key: key);
+  _TestPage({required this.builder, required super.key}) : _key = GlobalKey();
 
   final WidgetBuilder builder;
   final GlobalKey<dynamic> _key;

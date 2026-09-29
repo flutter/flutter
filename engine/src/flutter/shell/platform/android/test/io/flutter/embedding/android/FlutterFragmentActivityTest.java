@@ -4,15 +4,18 @@
 
 package io.flutter.embedding.android;
 
-import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterFragment.ARG_CACHED_ENGINE_ID;
 import static io.flutter.embedding.android.FlutterFragment.ARG_DESTROY_ENGINE_WITH_FRAGMENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,11 +42,14 @@ import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.plugins.GeneratedPluginRegistrant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
@@ -237,7 +243,7 @@ public class FlutterFragmentActivityTest {
         Robolectric.buildActivity(FlutterFragmentActivityWithProvidedEngine.class).get();
     assertTrue(GeneratedPluginRegistrant.getRegisteredEngines().isEmpty());
     Bundle bundle = new Bundle();
-    bundle.putBoolean(HANDLE_DEEPLINKING_META_DATA_KEY, true);
+    bundle.putBoolean(FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY, true);
     FlutterFragmentActivity spyFlutterActivity = spy(activity);
     when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
     assertTrue(spyFlutterActivity.shouldHandleDeeplinking());
@@ -250,7 +256,7 @@ public class FlutterFragmentActivityTest {
         Robolectric.buildActivity(FlutterFragmentActivityWithProvidedEngine.class).get();
     assertTrue(GeneratedPluginRegistrant.getRegisteredEngines().isEmpty());
     Bundle bundle = new Bundle();
-    bundle.putBoolean(HANDLE_DEEPLINKING_META_DATA_KEY, false);
+    bundle.putBoolean(FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY, false);
     FlutterFragmentActivity spyFlutterActivity = spy(activity);
     when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
     assertFalse(spyFlutterActivity.shouldHandleDeeplinking());
@@ -450,6 +456,256 @@ public class FlutterFragmentActivityTest {
 
     // Clean up.
     flutterActivityScenario.close();
+  }
+
+  @Test
+  public void getCachedEngineId_returnsIdWhenSelfSent() {
+    Intent intent = FlutterFragmentActivity.withCachedEngine("my_cached_engine").build(ctx);
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID)))
+          .thenReturn("my_cached_engine");
+      assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
+    }
+  }
+
+  @Test
+  public void getCachedEngineId_returnsNullWhenNotSelfSent() {
+    Intent intent = FlutterFragmentActivity.withCachedEngine("my_cached_engine").build(ctx);
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID)))
+          .thenReturn(null);
+      assertNull(flutterActivity.getCachedEngineId());
+    }
+  }
+
+  @Test
+  public void getCachedEngineGroupId_returnsIdWhenSelfSent() {
+    Intent intent =
+        FlutterFragmentActivity.withNewEngineInGroup("my_cached_engine_group")
+            .dartEntrypoint("main")
+            .build(ctx);
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_GROUP_ID)))
+          .thenReturn("my_cached_engine_group");
+      assertEquals("my_cached_engine_group", flutterActivity.getCachedEngineGroupId());
+    }
+  }
+
+  @Test
+  public void getCachedEngineGroupId_returnsNullWhenNotSelfSent() {
+    Intent intent =
+        FlutterFragmentActivity.withNewEngineInGroup("my_cached_engine_group")
+            .dartEntrypoint("main")
+            .build(ctx);
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_GROUP_ID)))
+          .thenReturn(null);
+      assertNull(flutterActivity.getCachedEngineGroupId());
+    }
+  }
+
+  @Test
+  public void getDartEntrypointFunctionName_returnsNameWhenSelfSent() {
+    Intent intent =
+        FlutterFragmentActivity.withNewEngine()
+            .build(ctx)
+            .putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT)))
+          .thenReturn("custom_entrypoint");
+      assertEquals("custom_entrypoint", flutterActivity.getDartEntrypointFunctionName());
+    }
+  }
+
+  @Test
+  public void getDartEntrypointFunctionName_returnsDefaultWhenNotSelfSent() {
+    Intent intent =
+        FlutterFragmentActivity.withNewEngine()
+            .build(ctx)
+            .putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT)))
+          .thenReturn(null);
+      assertEquals("main", flutterActivity.getDartEntrypointFunctionName());
+    }
+  }
+
+  @Test
+  public void getDartEntrypointArgs_returnsArgsWhenSelfSent() {
+    Intent intent =
+        FlutterFragmentActivity.withNewEngine()
+            .dartEntrypointArgs(new ArrayList<String>(Arrays.asList("foo", "bar")))
+            .build(ctx);
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetSerializableExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT_ARGS)))
+          .thenReturn(new ArrayList<String>(Arrays.asList("foo", "bar")));
+      assertEquals(Arrays.asList("foo", "bar"), flutterActivity.getDartEntrypointArgs());
+    }
+  }
+
+  @Test
+  public void getDartEntrypointArgs_returnsNullWhenNotSelfSent() {
+    Intent intent =
+        FlutterFragmentActivity.withNewEngine()
+            .dartEntrypointArgs(new ArrayList<String>(Arrays.asList("foo", "bar")))
+            .build(ctx);
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetSerializableExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT_ARGS)))
+          .thenReturn(null);
+      assertNull(flutterActivity.getDartEntrypointArgs());
+    }
+  }
+
+  @Test
+  public void getInitialRoute_returnsRouteWhenSelfSent() {
+    Intent intent =
+        FlutterFragmentActivity.withNewEngine().initialRoute("/custom/route").build(ctx);
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE)))
+          .thenReturn("/custom/route");
+      assertEquals("/custom/route", flutterActivity.getInitialRoute());
+    }
+  }
+
+  @Test
+  public void getInitialRoute_returnsNullWhenNotSelfSent() {
+    Intent intent =
+        FlutterFragmentActivity.withNewEngine().initialRoute("/custom/route").build(ctx);
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE)))
+          .thenReturn(null);
+      assertNull(flutterActivity.getInitialRoute());
+    }
+  }
+
+  @Test
+  public void getInitialRoute_returnsRouteFromMetaDataWhenNotSelfSent()
+      throws PackageManager.NameNotFoundException {
+    Intent intent =
+        FlutterFragmentActivity.withNewEngine().initialRoute("/custom/route").build(ctx);
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = spy(activityController.get());
+
+    Bundle bundle = new Bundle();
+    bundle.putString(FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY, "/meta/route");
+    when(flutterActivity.getMetaData()).thenReturn(bundle);
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE)))
+          .thenReturn(null);
+      assertEquals("/meta/route", flutterActivity.getInitialRoute());
+    }
+  }
+
+  @Test
+  public void getDartEntrypointFunctionName_returnsNameFromMetaDataWhenNotSelfSent()
+      throws PackageManager.NameNotFoundException {
+    Intent intent =
+        FlutterFragmentActivity.withNewEngine()
+            .build(ctx)
+            .putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = spy(activityController.get());
+
+    Bundle bundle = new Bundle();
+    bundle.putString(FlutterActivityLaunchConfigs.DART_ENTRYPOINT_META_DATA_KEY, "meta_entrypoint");
+    when(flutterActivity.getMetaData()).thenReturn(bundle);
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT)))
+          .thenReturn(null);
+      assertEquals("meta_entrypoint", flutterActivity.getDartEntrypointFunctionName());
+    }
   }
 
   static class FlutterFragmentActivityWithProvidedEngine extends FlutterFragmentActivity {
