@@ -1463,7 +1463,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
   final UserMessages? _userMessages;
 
   @override
-  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
+  Artifacts get artifacts => _artifacts ?? globals.artifacts ?? Artifacts.test();
 
   @override
   BotDetector get botDetector => _botDetector ?? globals.botDetector;
