@@ -236,11 +236,33 @@ class AndroidSurfaceManager {
   void DestroyOverlaySurfaces();
 
  private:
-  const AndroidRenderingAPI rendering_api_;
+  struct VulkanOverlaySurface {
+    VkSurfaceKHR surface = VK_NULL_HANDLE;
+    VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+    VkSurfaceFormatKHR format = {};
+    VkExtent2D extent = {0, 0};
+    std::vector<VkImage> images;
+    std::vector<VkCommandBuffer> command_buffers;
+    VkCommandPool command_pool = VK_NULL_HANDLE;
+    VkFence acquire_fence = VK_NULL_HANDLE;
+    uint32_t current_image_index = 0;
+    bool has_acquired_image = false;
+  };
+
+  bool InitializeEGL();
+  void TeardownEGL();
+  bool CreateOrUpdateOnscreenSurfaceLocked();
+  void DestroyOnscreenSurfaceLocked();
+  bool CreateOrUpdateVulkanSurfaceLocked();
+  void DestroyVulkanSurfaceLocked();
+  void DestroyVulkanSwapchainLocked();
+  bool CreateOrUpdateOverlayVulkanSurfaceLocked(ANativeWindow* window,
+                                                VulkanOverlaySurface& entry);
+  void DestroyOverlayVulkanSurfaceLocked(VulkanOverlaySurface& entry);
+
+  // 8-byte aligned members (mutexes, maps, vectors, pointers, 64-bit handles)
   mutable std::mutex window_mutex_;
   ANativeWindow* native_window_ = nullptr;
-  bool is_fake_window_ = false;
-  bool is_valid_ = false;
 
   // EGL state
   EGLDisplay egl_display_ = EGL_NO_DISPLAY;
@@ -250,7 +272,6 @@ class AndroidSurfaceManager {
   EGLSurface egl_onscreen_surface_ = EGL_NO_SURFACE;
   EGLSurface egl_onscreen_pbuffer_surface_ = EGL_NO_SURFACE;
   EGLSurface egl_resource_pbuffer_surface_ = EGL_NO_SURFACE;
-  bool has_surfaceless_context_ = false;
 
   mutable std::mutex offscreen_fbo_mutex_;
   std::vector<OffscreenFBO> offscreen_fbo_pool_;
@@ -262,23 +283,16 @@ class AndroidSurfaceManager {
 
   // Vulkan state
   void* vulkan_lib_handle_ = nullptr;
-  uint32_t vk_version_ = VK_API_VERSION_1_1;
   VkInstance vk_instance_ = VK_NULL_HANDLE;
   VkPhysicalDevice vk_physical_device_ = VK_NULL_HANDLE;
   VkDevice vk_device_ = VK_NULL_HANDLE;
-  uint32_t vk_graphics_queue_family_index_ = 0;
   VkQueue vk_queue_ = VK_NULL_HANDLE;
   VkSurfaceKHR vk_surface_ = VK_NULL_HANDLE;
   VkSwapchainKHR vk_swapchain_ = VK_NULL_HANDLE;
-  VkSurfaceFormatKHR vk_surface_format_ = {};
-  VkExtent2D vk_swapchain_extent_ = {0, 0};
-  VkImageUsageFlags vk_swapchain_usage_ = 0;
   std::vector<VkImage> vk_swapchain_images_;
   std::vector<VkCommandBuffer> vk_command_buffers_;
   VkCommandPool vk_command_pool_ = VK_NULL_HANDLE;
   VkFence vk_acquire_fence_ = VK_NULL_HANDLE;
-  uint32_t current_image_index_ = 0;
-  bool has_acquired_image_ = false;
 
   std::vector<std::string> enabled_instance_extensions_;
   std::vector<const char*> enabled_instance_extensions_ptrs_;
@@ -335,33 +349,23 @@ class AndroidSurfaceManager {
   PFN_vkWaitForFences vk_wait_for_fences_fn_ = nullptr;
   PFN_vkResetFences vk_reset_fences_fn_ = nullptr;
 
-  bool InitializeEGL();
-  void TeardownEGL();
-  bool CreateOrUpdateOnscreenSurfaceLocked();
-  void DestroyOnscreenSurfaceLocked();
-  bool CreateOrUpdateVulkanSurfaceLocked();
-  void DestroyVulkanSurfaceLocked();
-  void DestroyVulkanSwapchainLocked();
-
-  struct VulkanOverlaySurface {
-    VkSurfaceKHR surface = VK_NULL_HANDLE;
-    VkSwapchainKHR swapchain = VK_NULL_HANDLE;
-    VkSurfaceFormatKHR format = {};
-    VkExtent2D extent = {0, 0};
-    std::vector<VkImage> images;
-    std::vector<VkCommandBuffer> command_buffers;
-    VkCommandPool command_pool = VK_NULL_HANDLE;
-    VkFence acquire_fence = VK_NULL_HANDLE;
-    uint32_t current_image_index = 0;
-    bool has_acquired_image = false;
-  };
-
-  bool CreateOrUpdateOverlayVulkanSurfaceLocked(ANativeWindow* window,
-                                                VulkanOverlaySurface& entry);
-  void DestroyOverlayVulkanSurfaceLocked(VulkanOverlaySurface& entry);
-
   std::unordered_map<ANativeWindow*, VulkanOverlaySurface>
       overlay_vulkan_surfaces_;
+
+  // 4-byte aligned members (36 bytes total)
+  const AndroidRenderingAPI rendering_api_;
+  uint32_t vk_version_ = VK_API_VERSION_1_1;
+  uint32_t vk_graphics_queue_family_index_ = 0;
+  VkImageUsageFlags vk_swapchain_usage_ = 0;
+  uint32_t current_image_index_ = 0;
+  VkSurfaceFormatKHR vk_surface_format_ = {};
+  VkExtent2D vk_swapchain_extent_ = {0, 0};
+
+  // 1-byte aligned booleans (4 bytes total: 36 + 4 = 40, aligned to 8)
+  bool is_fake_window_ = false;
+  bool is_valid_ = false;
+  bool has_surfaceless_context_ = false;
+  bool has_acquired_image_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceManager);
 };

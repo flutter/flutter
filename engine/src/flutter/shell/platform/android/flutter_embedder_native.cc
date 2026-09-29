@@ -1522,9 +1522,10 @@ void FlutterEmbedderNative::NotifySurfaceCreated(ANativeWindow* window,
 }
 
 void FlutterEmbedderNative::NotifySurfaceWindowChanged(ANativeWindow* window,
-                                                       bool is_fake_window) {
+                                                       bool is_fake_window,
+                                                       bool is_image_view) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::NotifySurfaceWindowChanged");
-  is_image_view_surface_active_.store(window != nullptr);
+  is_image_view_surface_active_.store(is_image_view && (window != nullptr));
   SetNativeWindow(window);
   if (is_fake_window && surface_manager_ && window) {
     surface_manager_->SetNativeWindow(window, true);
@@ -5360,7 +5361,8 @@ static void FlutterJNI_SurfaceCreated(JNIEnv* env,
 static void FlutterJNI_SurfaceWindowChanged(JNIEnv* env,
                                             jobject jcaller,
                                             jlong native_handle,
-                                            jobject jsurface) {
+                                            jobject jsurface,
+                                            jboolean is_image_view) {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterJNI_SurfaceWindowChanged");
   fml::jni::ScopedJavaLocalFrame scoped_local_frame(env);
@@ -5373,7 +5375,8 @@ static void FlutterJNI_SurfaceWindowChanged(JNIEnv* env,
   if (jsurface != nullptr) {
     window = ANativeWindow_fromSurface(env, jsurface);
   }
-  native_instance->NotifySurfaceWindowChanged(window);
+  native_instance->NotifySurfaceWindowChanged(window, /*is_fake_window=*/false,
+                                              is_image_view == JNI_TRUE);
   if (window) {
     ANativeWindow_release(window);
   }
@@ -6035,7 +6038,7 @@ bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
       },
       {
           .name = "nativeSurfaceWindowChanged",
-          .signature = "(JLandroid/view/Surface;)V",
+          .signature = "(JLandroid/view/Surface;Z)V",
           .fnPtr = reinterpret_cast<void*>(&FlutterJNI_SurfaceWindowChanged),
       },
       {

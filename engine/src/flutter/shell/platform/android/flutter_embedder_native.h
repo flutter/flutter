@@ -1136,7 +1136,8 @@ class FlutterEmbedderNative {
   /// @brief Notifies the surface manager and running engine that the surface
   /// window changed.
   void NotifySurfaceWindowChanged(ANativeWindow* window,
-                                  bool is_fake_window = false);
+                                  bool is_fake_window = false,
+                                  bool is_image_view = false);
 
   /// @brief Notifies the running engine that the surface dimensions changed.
   void NotifySurfaceChanged(int32_t width, int32_t height);

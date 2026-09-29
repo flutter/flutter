@@ -7536,7 +7536,8 @@ TEST_F(Phase61JniRegistrationCutoverTest,
   using IsVariationSelectorFn = jboolean (*)(JNIEnv*, jobject, jint);
   using IsRegionalIndicatorFn = jboolean (*)(JNIEnv*, jobject, jint);
   using SurfaceCreatedFn = void (*)(JNIEnv*, jobject, jlong, jobject);
-  using SurfaceWindowChangedFn = void (*)(JNIEnv*, jobject, jlong, jobject);
+  using SurfaceWindowChangedFn =
+      void (*)(JNIEnv*, jobject, jlong, jobject, jboolean);
   using SurfaceChangedFn = void (*)(JNIEnv*, jobject, jlong, jint, jint);
   using SurfaceDestroyedFn = void (*)(JNIEnv*, jobject, jlong);
   using ScheduleFrameFn = void (*)(JNIEnv*, jobject, jlong);
@@ -7708,8 +7709,8 @@ TEST_F(Phase61JniRegistrationCutoverTest,
   // Surface lifecycle calls with nullptr surfaces (safe for unit tests without
   // a real Android Surface)
   surface_created_fn(&mock_env_, flutter_jni_obj, native_handle, nullptr);
-  surface_window_changed_fn(&mock_env_, flutter_jni_obj, native_handle,
-                            nullptr);
+  surface_window_changed_fn(&mock_env_, flutter_jni_obj, native_handle, nullptr,
+                            /*is_image_view=*/JNI_FALSE);
   surface_changed_fn(&mock_env_, flutter_jni_obj, native_handle, 1080, 1920);
   schedule_frame_fn(&mock_env_, flutter_jni_obj, native_handle);
   dispatch_pointer_data_packet_fn(&mock_env_, flutter_jni_obj, native_handle,
@@ -8754,9 +8755,15 @@ TEST(FlutterEmbedderNativeTest, RequiresOnscreenClearanceLifecycle) {
       if (status == 0 && reader != nullptr) {
         ANativeWindow* window = nullptr;
         if (getWindow(reader, &window) == 0 && window != nullptr) {
-          // WindowChanged with valid window activates clearance
+          // WindowChanged with is_image_view=false does not activate clearance.
+          native.NotifySurfaceWindowChanged(window, /*is_fake_window=*/false,
+                                            /*is_image_view=*/false);
+          EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+          // WindowChanged with is_image_view=true activates clearance
           // (FlutterImageView state).
-          native.NotifySurfaceWindowChanged(window, /*is_fake_window=*/false);
+          native.NotifySurfaceWindowChanged(window, /*is_fake_window=*/false,
+                                            /*is_image_view=*/true);
           EXPECT_TRUE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
 
           // When HCPP is enabled, onscreen clearance is bypassed even with
@@ -8770,12 +8777,15 @@ TEST(FlutterEmbedderNativeTest, RequiresOnscreenClearanceLifecycle) {
           EXPECT_FALSE(native.IsHcppEnabled());
           EXPECT_TRUE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
 
-          // WindowChanged with nullptr resets clearance.
-          native.NotifySurfaceWindowChanged(nullptr, /*is_fake_window=*/false);
+          // WindowChanged with nullptr resets clearance even with
+          // is_image_view=true.
+          native.NotifySurfaceWindowChanged(nullptr, /*is_fake_window=*/false,
+                                            /*is_image_view=*/true);
           EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
 
-          // Re-attach window and then destroy surface.
-          native.NotifySurfaceWindowChanged(window, /*is_fake_window=*/false);
+          // Re-attach window with is_image_view=true and then destroy surface.
+          native.NotifySurfaceWindowChanged(window, /*is_fake_window=*/false,
+                                            /*is_image_view=*/true);
           EXPECT_TRUE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
 
           native.NotifySurfaceDestroyed();
