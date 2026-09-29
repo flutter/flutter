@@ -141,6 +141,8 @@ class WindowManager {
                                        WPARAM wparam,
                                        LPARAM lparam);
 
+  void OnPreEngineRestart();
+
   void OnEngineShutdown();
 
  private:
