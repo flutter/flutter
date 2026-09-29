@@ -3111,10 +3111,27 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   OCMVerify(times(1), [engine flutterTextInputView:inputView
                           didReopenFirstResponderWithTextInputClient:123]);
 
-  // Losing and regaining focus again without a new resign report must not
+  // Becoming first responder again without an intervening resign must not
   // reopen a connection the framework never closed.
-  [inputView resignFirstResponder];
-  [inputView becomeFirstResponder];
+  XCTAssertTrue([inputView becomeFirstResponder]);
+  OCMVerify(times(1), [engine flutterTextInputView:inputView
+                          didReopenFirstResponderWithTextInputClient:123]);
+
+  [inputView removeFromSuperview];
+}
+
+// A second AutoFill sheet in the same editing session has to reopen the
+// connection again, because first responder was resigned again in between.
+- (void)testASecondResignAndRegainReopensAgain {
+  FlutterTextInputView* inputView = [self focusedInputViewWithClient:123];
+
+  XCTAssertTrue([inputView resignFirstResponder]);
+  XCTAssertTrue([inputView becomeFirstResponder]);
+  OCMVerify(times(1), [engine flutterTextInputView:inputView
+                          didReopenFirstResponderWithTextInputClient:123]);
+
+  XCTAssertTrue([inputView resignFirstResponder]);
+  XCTAssertTrue([inputView becomeFirstResponder]);
   OCMVerify(times(2), [engine flutterTextInputView:inputView
                           didReopenFirstResponderWithTextInputClient:123]);
 
