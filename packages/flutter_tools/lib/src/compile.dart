@@ -574,8 +574,7 @@ class ResidentCompilerFactory {
         fileSystemScheme: 'org-dartlang-app',
         extraFrontEndOptions: [
           ...buildInfo.extraFrontEndOptions,
-          if (buildInfo.webEnableHotReload)
-          ...kDdcLibraryBundleFlags
+          if (buildInfo.webEnableHotReload) ...kDdcLibraryBundleFlags,
         ],
       );
     } else {
