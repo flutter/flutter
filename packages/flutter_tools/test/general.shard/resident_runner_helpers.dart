@@ -174,14 +174,18 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 }
 
 class TestFlutterDevice extends FlutterDevice {
-  TestFlutterDevice(super.device, {Future<Uri>? vmServiceUri})
-    : super(
-        toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
-        generator: FakeResidentCompiler(),
-        targetPlatform: .unsupported,
-        buildInfo: BuildInfo.debug,
-        developmentShaderCompiler: const FakeShaderCompiler(),
-      ) {
+  TestFlutterDevice(
+    super.device, {
+    super.targetPlatform = .unsupported,
+    FlutterVmService? vmService,
+    Future<Uri>? vmServiceUri,
+  }) : super(
+         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+         generator: FakeResidentCompiler(),
+         buildInfo: BuildInfo.debug,
+         developmentShaderCompiler: const FakeShaderCompiler(),
+       ) {
+    this.vmService = vmService;
     this.vmServiceUri = vmServiceUri;
   }
 }
