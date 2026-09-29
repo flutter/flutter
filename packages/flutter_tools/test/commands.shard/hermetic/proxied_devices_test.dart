@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -73,6 +74,7 @@ void main() {
     testUsingContext('can list devices', () async {
       daemon = Daemon(
         serverDaemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
         toolContext: DelegatingToolContext(),
@@ -100,6 +102,7 @@ void main() {
     testUsingContext('calls supportsRuntimeMode', () async {
       daemon = Daemon(
         serverDaemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
         toolContext: DelegatingToolContext(),
@@ -126,6 +129,7 @@ void main() {
     testUsingContext('redirects logs', () async {
       daemon = Daemon(
         serverDaemonConnection,
+        analytics: const NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
         toolContext: DelegatingToolContext(),
@@ -164,6 +168,7 @@ void main() {
       () async {
         daemon = Daemon(
           serverDaemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           buildTargets: const BuildTargetsImpl(),
           toolContext: DelegatingToolContext(),
@@ -230,6 +235,7 @@ void main() {
       () async {
         daemon = Daemon(
           serverDaemonConnection,
+          analytics: const NoOpAnalytics(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           buildTargets: const BuildTargetsImpl(),
           toolContext: DelegatingToolContext(),
