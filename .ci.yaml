@@ -1149,6 +1149,33 @@ targets:
       - engine/**
       - DEPS
 
+  # Gradle 8.4 cannot run on Java 25, so the pre-AGP 8.3 module test is pinned
+  # to Java 17 instead of the default JDK.
+  - name: Linux android_java17_build_android_host_app_with_module_aar
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.13-rc-1-bin:8.14-bin:9.3.1-bin:9.3.1-all"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: android_java17_build_android_host_app_with_module_aar
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
   - name: Linux build_android_host_app_with_module_source
     recipe: devicelab/devicelab_drone
     timeout: 60
