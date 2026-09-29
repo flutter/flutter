@@ -250,6 +250,15 @@ void fl_engine_set_platform_message_handler(
     GDestroyNotify destroy_notify);
 
 /**
+ * fl_engine_schedule_frame:
+ * @engine: an #FlEngine.
+ *
+ * Asks the engine to render another frame. Used when a view needs the current
+ * frame again, e.g. because it wasn't able to use the last one.
+ */
+void fl_engine_schedule_frame(FlEngine* engine);
+
+/**
  * fl_engine_send_window_metrics_event:
  * @engine: an #FlEngine.
  * @display_id: the display this view is rendering on.

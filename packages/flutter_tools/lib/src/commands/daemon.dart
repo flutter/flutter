@@ -109,6 +109,7 @@ class DaemonCommand extends FlutterCommand {
       }
 
       await DaemonServer(
+        toolContext: toolContext,
         logger: StdoutLogger(
           terminal: terminal,
           stdio: stdio,
@@ -136,6 +137,7 @@ class DaemonCommand extends FlutterCommand {
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
+      toolContext: toolContext,
       analytics: analytics,
       androidSdk: _androidSdk,
       androidWorkflow: _androidWorkflow,
@@ -164,6 +166,7 @@ class DaemonCommand extends FlutterCommand {
 @visibleForTesting
 class DaemonServer {
   DaemonServer({
+    required this.toolContext,
     required this.logger,
     this.analytics,
     this.androidSdk,
@@ -184,6 +187,7 @@ class DaemonServer {
   });
 
   final int? port;
+  final ToolContext toolContext;
 
   /// Stdout logger used to print general server-related errors.
   final Logger logger;
@@ -237,6 +241,7 @@ class DaemonServer {
           daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
           logger: logger,
         ),
+        toolContext: toolContext,
         notifyingLogger: notifyingLogger,
         fileSystem: fileSystem,
         platform: platform,
@@ -258,7 +263,6 @@ class DaemonServer {
     });
 
     // Wait indefinitely until the server closes.
-    await subscription.asFuture<void>();
     await subscription.cancel();
   }
 }
@@ -272,6 +276,7 @@ typedef CommandHandlerWithBinary = Future<Object?> Function(
 class Daemon {
   Daemon(
     this.connection, {
+    required ToolContext toolContext,
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
@@ -316,6 +321,7 @@ class Daemon {
     registerDomain(
       appDomain = AppDomain(
         this,
+        toolContext: toolContext,
         analytics: an,
         fileSystem: _fs,
         logger: _logger,
@@ -357,13 +363,14 @@ class Daemon {
   }
 
   factory Daemon.createMachineDaemon({
+    required ToolContext toolContext,
+    required FeatureFlags featureFlags,
     required Logger logger,
     required Stdio stdio,
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
-    required FeatureFlags featureFlags,
     FileSystem? fileSystem,
     Java? java,
     OutputPreferences? outputPreferences,
@@ -377,6 +384,7 @@ class Daemon {
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
+      toolContext: toolContext,
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
@@ -857,6 +865,7 @@ typedef RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
+    required this._toolContext,
     Analytics? analytics,
     FileSystem? fileSystem,
     Logger? logger,
@@ -889,6 +898,7 @@ class AppDomain extends Domain {
   final SystemClock _systemClock;
   final Logger _logger;
   final AnsiTerminal _terminal;
+  final ToolContext _toolContext;
   final OutputPreferences _outputPreferences;
 
   static const _uuidGenerator = Uuid();
@@ -930,9 +940,9 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      target: target,
+      toolContext: _toolContext,
       buildInfo: options.buildInfo,
-      platform: _platform,
+      target: target,
       userIdentifier: userIdentifier,
     );
 
