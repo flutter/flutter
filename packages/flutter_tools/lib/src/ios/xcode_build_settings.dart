@@ -12,15 +12,6 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import 'xcodeproj.dart';
 
-String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem, Artifacts artifacts) {
-  final String flutterMacOSFramework = artifacts.getArtifactPath(
-    Artifact.flutterMacOSFramework,
-    platform: TargetPlatform.darwin,
-    mode: mode,
-  );
-  return fileSystem.path.normalize(fileSystem.path.dirname(flutterMacOSFramework));
-}
-
 /// Writes or rewrites Xcode property files with the specified information.
 ///
 /// useMacOSConfig: Optional parameter that controls whether we use the macOS

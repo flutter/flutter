@@ -874,7 +874,11 @@ void main() {
           'chmod',
           '-R',
           'u+w',
-          outputDir.childDirectory('Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical').path,
+          outputDir
+              .childDirectory(
+                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+              )
+              .path,
         ],
       );
 
@@ -890,7 +894,6 @@ void main() {
           outputDir.path,
         ],
       );
-
 
       copyPhysicalFrameworkDsymCommandFailure = FakeCommand(
         command: <String>[
@@ -928,7 +931,11 @@ void main() {
           'chmod',
           '-R',
           'u+w',
-          outputDir.childDirectory('Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator').path,
+          outputDir
+              .childDirectory(
+                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+              )
+              .path,
         ],
       );
     });

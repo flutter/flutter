@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -32,6 +33,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:flutter_tools/src/web/compiler_config.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:package_config/package_config.dart';
@@ -263,6 +265,26 @@ name: my_app
       expect(logger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
       expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
       expect(debugConnectionInfo.dtdUri.toString(), 'ws://127.0.0.1/efgh/');
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'ResidentWebRunner marks WebDevFS as ready before starting app',
+    () async {
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+
+      expect(webDevFS.wasMarkedReady, true);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -2318,6 +2340,108 @@ flutter:
       },
     );
   });
+
+  group('WasmCompilerConfig defaults', () {
+    WebCompilerConfig? capturedConfig;
+
+    testUsingContext(
+      'ResidentWebRunner passes WasmCompilerConfig with dynamic cache-equivalent defaults in release mode',
+      () async {
+        capturedConfig = null;
+        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+        setupMocks();
+
+        final residentWebRunner = ResidentWebRunner(
+          flutterDevice,
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.release, webUseWasm: true),
+          stayResident: false,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          terminal: Terminal.test(),
+          platform: FakePlatform(),
+          outputPreferences: OutputPreferences.test(),
+          analytics: globals.analytics,
+          systemClock: globals.systemClock,
+        );
+
+        expect(await residentWebRunner.run(), 0);
+        expect(capturedConfig, isA<WasmCompilerConfig>());
+        final wasmConfig = capturedConfig! as WasmCompilerConfig;
+
+        // Relies on `WasmCompilerConfig` native defaults to maintain cache key parity with `flutter build`.
+        expect(wasmConfig.optimizationLevel, isNull);
+        expect(wasmConfig.stripWasm, isTrue);
+
+        // Validates the underlying `toCommandOptions` correctly resolves for release mode.
+        final List<String> commandOptions = wasmConfig.toCommandOptions(BuildMode.release);
+        expect(commandOptions, contains('-O2'));
+        expect(commandOptions, contains('--strip-wasm'));
+      },
+      overrides: <Type, Generator>{
+        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          if (target is WebServiceWorker) {
+            capturedConfig = target.compileConfigs.first;
+          }
+        }),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
+
+    testUsingContext(
+      'ResidentWebRunner passes WasmCompilerConfig with dynamic cache-equivalent defaults in debug mode',
+      () async {
+        capturedConfig = null;
+        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+        setupMocks();
+
+        final residentWebRunner = ResidentWebRunner(
+          flutterDevice,
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, webUseWasm: true),
+          stayResident: false,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          terminal: Terminal.test(),
+          platform: FakePlatform(),
+          outputPreferences: OutputPreferences.test(),
+          analytics: globals.analytics,
+          systemClock: globals.systemClock,
+        );
+
+        expect(await residentWebRunner.run(), 0);
+        expect(capturedConfig, isA<WasmCompilerConfig>());
+        final wasmConfig = capturedConfig! as WasmCompilerConfig;
+
+        // Relies on `WasmCompilerConfig` native defaults to maintain cache key parity with `flutter build`.
+        expect(wasmConfig.optimizationLevel, isNull);
+        expect(wasmConfig.stripWasm, isTrue);
+
+        // Validates the underlying `toCommandOptions` correctly resolves for debug mode.
+        final List<String> commandOptions = wasmConfig.toCommandOptions(BuildMode.debug);
+        expect(commandOptions, contains('-O0'));
+        expect(commandOptions, contains('--no-strip-wasm'));
+      },
+      overrides: <Type, Generator>{
+        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          if (target is WebServiceWorker) {
+            capturedConfig = target.compileConfigs.first;
+          }
+        }),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
+  });
 }
 
 ResidentRunner setUpResidentRunner(
@@ -2477,6 +2601,12 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   late UpdateFSReport report;
 
   Uri? mainUri;
+  bool wasMarkedReady = false;
+
+  @override
+  void markReady() {
+    wasMarkedReady = true;
+  }
 
   @override
   List<Uri> sources = <Uri>[];
@@ -2563,7 +2693,7 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
 }
 
 class FakeChromeTab extends Fake implements ChromeTab {
-  FakeChromeTab(this.url, {Exception? connectException}) : _connectException = connectException;
+  FakeChromeTab(this.url, {this._connectException});
 
   @override
   final String url;

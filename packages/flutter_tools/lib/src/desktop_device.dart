@@ -29,13 +29,10 @@ abstract class DesktopDevice extends Device {
     required PlatformType super.platformType,
     required super.ephemeral,
     required super.logger,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required this._processManager,
+    required this._fileSystem,
+    required this._operatingSystemUtils,
   }) : _logger = logger,
-       _processManager = processManager,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils,
        super(category: Category.desktop);
 
   final Logger _logger;
@@ -403,7 +400,7 @@ class SingleLaunchLogReader extends DeviceLogReader {
     // Ignore how `scope` completed — only that it did — so an error from it
     // (e.g. an unexpected failure reading `process.exitCode`) can't escape
     // as an unhandled Future error.
-    scope.catchError((Object _, StackTrace _) {}).whenComplete(() {
+    scope.then<void>((_) {}, onError: (Object _, StackTrace _) {}).whenComplete(() {
       unawaited(_subscription.cancel());
       unawaited(_controller.close());
     });

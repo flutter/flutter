@@ -143,6 +143,7 @@ Future<void> main(List<String> args) async {
           runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
       'android_engine_opengles_tests': () =>
           runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
+      'android_engine_hcpp_tests': runAndroidEngineHcppTests,
       'android_hardware_smoke_vulkan_tests': () =>
           runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan),
       'android_hardware_smoke_opengles_tests': () =>
@@ -160,8 +161,7 @@ Future<void> main(List<String> args) async {
       'docs': docsRunner,
       'verify_binaries_codesigned': verifyCodesignedTestRunner,
       'verify_binaries_pre_codesigned': verifyPreCodesignedTestRunner,
-      kTestHarnessShardName:
-          testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
+      kTestHarnessShardName: testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
     foundError(<String>[
@@ -195,9 +195,10 @@ Future<void> _runGeneralToolTests() async {
 }
 
 Future<void> _runCommandsToolTests() async {
-  final List<File> allFiles = Directory(
-    path.join(_toolsPath, 'test', 'commands.shard'),
-  ).listSync(recursive: true).whereType<File>().toList();
+  final List<File> allFiles = Directory(path.join(_toolsPath, 'test', 'commands.shard'))
+      .listSync(recursive: true)
+      .whereType<File>()
+      .toList();
   final allTests = <String>[];
   for (final file in allFiles) {
     if (file.path.endsWith('_test.dart')) {
@@ -213,9 +214,10 @@ Future<void> _runCommandsToolTests() async {
 }
 
 Future<void> _runWebToolTests() async {
-  final List<File> allFiles = Directory(
-    path.join(_toolsPath, 'test', 'web.shard'),
-  ).listSync(recursive: true).whereType<File>().toList();
+  final List<File> allFiles = Directory(path.join(_toolsPath, 'test', 'web.shard'))
+      .listSync(recursive: true)
+      .whereType<File>()
+      .toList();
   final allTests = <String>[];
   for (final file in allFiles) {
     if (file.path.endsWith('_test.dart')) {

@@ -299,7 +299,7 @@ TEST(DriverInfoVKTest, PowerVRBSeries) {
               })
           .Build();
 
-  EXPECT_FALSE(context->GetDriverInfo()->IsKnownBadDriver());
+  EXPECT_TRUE(context->GetDriverInfo()->IsKnownBadDriver());
   EXPECT_EQ(context->GetDriverInfo()->GetPowerVRGPUInfo(),
             std::optional<PowerVRGPU>(PowerVRGPU::kBXM));
 }

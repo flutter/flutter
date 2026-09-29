@@ -620,12 +620,10 @@ abstract class BuildSystem {
 
 class FlutterBuildSystem extends BuildSystem {
   const FlutterBuildSystem({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _logger = logger;
+    required this._fileSystem,
+    required this._platform,
+    required this._logger,
+  });
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -1077,26 +1075,6 @@ void checkCycles(Target initial) {
   }
 
   checkInternal(initial, <Target>{}, <Target>{});
-}
-
-/// Verifies that all files exist and are in a subdirectory of [Environment.buildDir].
-void verifyOutputDirectories(List<File> outputs, Environment environment, Target target) {
-  final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
-  final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
-  final missingOutputs = <File>[];
-  for (final sourceFile in outputs) {
-    if (!sourceFile.existsSync()) {
-      missingOutputs.add(sourceFile);
-      continue;
-    }
-    final String path = sourceFile.path;
-    if (!path.startsWith(buildDirectory) && !path.startsWith(projectDirectory)) {
-      throw MisplacedOutputException(path, target.name);
-    }
-  }
-  if (missingOutputs.isNotEmpty) {
-    throw MissingOutputException(missingOutputs, target.name);
-  }
 }
 
 /// A node in the build graph.

@@ -22,6 +22,7 @@ import 'src/base/process.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
+import 'src/emulator.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
@@ -60,25 +61,49 @@ Future<int> run(
       analytics: globals.analytics,
       androidSdk: globals.androidSdk,
       androidStudio: globals.androidStudio,
+      artifacts: globals.artifacts,
       botDetector: globals.botDetector,
       buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
       cache: globals.cache,
+      cocoaPods: globals.cocoaPods,
+      cocoapodsValidator: globals.cocoapodsValidator,
       config: globals.config,
       crashReporter: globals.crashReporter,
+      customDevicesConfig: globals.customDevicesConfig,
+      doctor: globals.doctor,
+      emulatorManager: emulatorManager,
+      featureFlags: featureFlags,
       flutterVersion: globals.flutterVersion,
       fs: globals.fs,
       git: globals.git,
+      gradleUtils: globals.gradleUtils,
+      iosSimulatorUtils: globals.iosSimulatorUtils,
+      iosWorkflow: globals.iosWorkflow,
+      java: globals.java,
+      localEngineLocator: globals.localEngineLocator,
       logger: globals.logger,
       nativeAssetsBuilder: globals.nativeAssetsBuilder,
+      outputPreferences: globals.outputPreferences,
       persistentToolState: globals.persistentToolState,
       platform: globals.platform,
+      plistParser: globals.plistParser,
+      preRunValidator: globals.preRunValidator,
+      processInfo: globals.processInfo,
       processManager: globals.processManager,
+      projectFactory: globals.projectFactory,
       shutdownHooks: shutdownHooks,
+      stdio: globals.stdio,
+      systemClock: globals.systemClock,
       terminal: globals.terminal,
       userMessages: globals.userMessages,
+      xcdevice: globals.xcdevice,
+      xcode: globals.xcode,
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
     );
     final runner = FlutterCommandRunner(
       analytics: toolDeps.analytics,
+      featureFlags: featureFlags,
       toolContext: toolDeps.toolContext,
       verboseHelp: verboseHelp,
     );

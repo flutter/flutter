@@ -411,8 +411,7 @@ class BuildInfo {
     return <String, String>{
       if (dartDefines.isNotEmpty) 'DART_DEFINES': encodeDartDefines(dartDefines),
       'DART_OBFUSCATION': dartObfuscation.toString(),
-      if (frontendServerStarterPath != null)
-        'FRONTEND_SERVER_STARTER_PATH': frontendServerStarterPath!,
+      'FRONTEND_SERVER_STARTER_PATH': ?frontendServerStarterPath,
       if (extraFrontEndOptions.isNotEmpty)
         'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
@@ -422,8 +421,7 @@ class BuildInfo {
       'SPLIT_DEBUG_INFO': ?splitDebugInfoPath,
       'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
       'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
-      if (performanceMeasurementFile != null)
-        'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
+      'PERFORMANCE_MEASUREMENT_FILE': ?performanceMeasurementFile,
       'PACKAGE_CONFIG': packageConfigPath,
       'CODE_SIZE_DIRECTORY': ?codeSizeDirectory,
       'FLAVOR': ?flavor,
@@ -931,7 +929,7 @@ String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
 
   final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
   if (localFilesystem.path.isAbsolute(buildDir)) {
-    throw Exception('build-dir config setting in ${globals.config.configPath} must be relative');
+    throw Exception('build-dir config setting in ${localConfig.configPath} must be relative');
   }
   return buildDir;
 }
@@ -940,11 +938,6 @@ String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
 String getAndroidBuildDirectory() {
   // TODO(cbracken): move to android subdir.
   return getBuildDirectory();
-}
-
-/// Returns the AOT build output directory.
-String getAotBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'aot');
 }
 
 /// Returns the asset build output directory.
@@ -1004,11 +997,6 @@ String getWindowsBuildDirectory(TargetPlatform targetPlatform, [String? flavor])
       ? globals.fs.path.join('windows', arch, flavor)
       : globals.fs.path.join('windows', arch);
   return globals.fs.path.join(getBuildDirectory(), subDirs);
-}
-
-/// Returns the Fuchsia build output directory.
-String getFuchsiaBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'fuchsia');
 }
 
 /// Defines specified via the `--dart-define` command-line option.
@@ -1158,25 +1146,12 @@ const kBuildNumber = 'BuildNumber';
 const kXcodeAction = 'Action';
 
 // The define of the Xcode Build Script.
-/// This may be [kXcodeBuildScriptValuePrepare], [kXcodeBuildScriptValueBuild], or [kXcodeBuildScriptValueEmbed].
+/// This may be [kXcodeBuildScriptValuePrepare].
 const kXcodeBuildScript = 'XcodeBuildScript';
 
 /// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
 /// by a scheme pre-action.
 const kXcodeBuildScriptValuePrepare = 'prepare';
-
-/// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
-/// by the first Run Script in the Xcode build process that happens before compiling.
-const kXcodeBuildScriptValueBuild = 'build';
-
-/// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
-/// by the second Run Script in the Xcode build process that happens after compiling, linking, and
-/// embedding.
-const kXcodeBuildScriptValueEmbed = 'embed';
-
-/// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
-/// by a Run Script in the Xcode build process in a native app (add-to-app).
-const kXcodeBuildScriptValueAddToAppBuild = 'build-add-to-app';
 
 /// Whether the build is originating from the `flutter build swift-package` command.
 ///
@@ -1254,16 +1229,4 @@ String? _uncapitalize(String? s) {
     return s;
   }
   return s.substring(0, 1).toLowerCase() + s.substring(1);
-}
-
-// flutter_ignore: deprecation_syntax (see analyze.dart)
-@Deprecated('Use TargetPlatform.getName() instead')
-String getNameForTargetPlatform(TargetPlatform platform, {CpuArch? cpuArch}) {
-  return platform.getName(cpuArch: cpuArch);
-}
-
-// flutter_ignore: deprecation_syntax (see analyze.dart)
-@Deprecated('Use TargetPlatform.fromName() instead')
-TargetPlatform getTargetPlatformForName(String platform) {
-  return TargetPlatform.fromName(platform);
 }

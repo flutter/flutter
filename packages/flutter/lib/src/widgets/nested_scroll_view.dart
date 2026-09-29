@@ -36,8 +36,10 @@ import 'viewport.dart';
 /// [SliverAppBar.forceElevated] property to ensure that the app bar shows a
 /// shadow, since it would otherwise not necessarily be aware that it had
 /// content ostensibly below it.
-typedef NestedScrollViewHeaderSliversBuilder =
-    List<Widget> Function(BuildContext context, bool innerBoxIsScrolled);
+typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(
+  BuildContext context,
+  bool innerBoxIsScrolled,
+);
 
 /// A scrolling view inside of which can be nested other scrolling views, with
 /// their scroll positions being intrinsically linked.
@@ -797,6 +799,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     double pixels, minRange, maxRange, correctionOffset;
     var extra = 0.0;
     if (innerPosition.pixels == innerPosition.minScrollExtent) {
+      // minRange/maxRange here always span the outer position's full range,
+      // so it can't degenerate the way it can in the `else` branch; see
+      // correctPixelsIfOutOfRange for why that branch needs the correction
+      // and this one doesn't.
       pixels = clampDouble(
         _outerPosition!.pixels,
         _outerPosition!.minScrollExtent,
@@ -808,6 +814,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       correctionOffset = 0.0;
     } else {
       assert(innerPosition.pixels != innerPosition.minScrollExtent);
+      // The `extra` computations below assume the outer position is within
+      // its own range; see correctPixelsIfOutOfRange for why that can
+      // transiently be false, and why it must be corrected here.
+      _outerPosition!.correctPixelsIfOutOfRange();
       if (innerPosition.pixels < innerPosition.minScrollExtent) {
         pixels =
             innerPosition.pixels - innerPosition.minScrollExtent + _outerPosition!.minScrollExtent;
@@ -1461,6 +1471,27 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     }
   }
 
+  /// Corrects [pixels] back within `[minScrollExtent, maxScrollExtent]` if
+  /// it is currently outside that range.
+  ///
+  /// A header sliver's extent (e.g. a [SliverAppBar]'s `expandedHeight`) can
+  /// change mid-fling, leaving this position transiently out of range for
+  /// one frame until the next layout catches up.
+  /// `RangeMaintainingScrollPhysics` intentionally skips its usual
+  /// correction while a ballistic activity is in flight, so nothing else
+  /// corrects it in that window. The coordinator calls this before computing
+  /// ballistic metrics so it never operates on a stale out-of-range value.
+  void correctPixelsIfOutOfRange() {
+    // Not haveDimensions: this can run before that bookkeeping flag is set,
+    // e.g. via ScrollPosition.restoreOffset -> jumpTo -> goBallistic during
+    // state restoration, even though pixels/minScrollExtent/maxScrollExtent
+    // already hold valid values by then.
+    assert(hasPixels && hasContentDimensions);
+    if (pixels < minScrollExtent || pixels > maxScrollExtent) {
+      correctPixels(clampDouble(pixels, minScrollExtent, maxScrollExtent));
+    }
+  }
+
   @override
   void applyNewDimensions() {
     super.applyNewDimensions();
@@ -1725,8 +1756,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver
   /// [SliverOverlapAbsorberHandle].
   ///
   /// The [sliver] must be a [RenderSliver].
-  RenderSliverOverlapAbsorber({required SliverOverlapAbsorberHandle handle, RenderSliver? sliver})
-    : _handle = handle {
+  RenderSliverOverlapAbsorber({required this._handle, RenderSliver? sliver}) {
     child = sliver;
   }
 
@@ -1869,8 +1899,8 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
 /// that it will always be laid out before the [RenderSliverOverlapInjector]
 /// during a particular frame.
 class RenderSliverOverlapInjector extends RenderSliver {
-  /// Creates a sliver that is as tall as the value of the given [handle]'s extent.
-  RenderSliverOverlapInjector({required SliverOverlapAbsorberHandle handle}) : _handle = handle;
+  /// Creates a sliver that is as tall as the value of the given [_handle]'s extent.
+  RenderSliverOverlapInjector({required this._handle});
 
   double? _currentLayoutExtent;
   double? _currentMaxExtent;
@@ -2052,9 +2082,9 @@ class RenderNestedScrollViewViewport extends RenderViewport {
     super.anchor,
     super.children,
     super.center,
-    required SliverOverlapAbsorberHandle handle,
+    required this._handle,
     super.clipBehavior,
-  }) : _handle = handle;
+  });
 
   /// The object to notify when [markNeedsLayout] is called.
   SliverOverlapAbsorberHandle get handle => _handle;

@@ -236,11 +236,10 @@ void main() {
         String name,
         int age,
         bool isStudent,
-      ) = const JsonObject(<String, Object?>{'name': 'Alice', 'age': 42, 'isStudent': true}).map((
-        JsonObject json,
-      ) {
-        return (json.string('name'), json.integer('age'), json.boolean('isStudent'));
-      });
+      ) = const JsonObject(<String, Object?>{'name': 'Alice', 'age': 42, 'isStudent': true})
+          .map((JsonObject json) {
+            return (json.string('name'), json.integer('age'), json.boolean('isStudent'));
+          });
 
       expect(name, 'Alice');
       expect(age, 42);
@@ -265,11 +264,10 @@ void main() {
 
     test('throws due to wrong types', () {
       try {
-        const JsonObject(<String, Object?>{'name': 42, 'age': '42', 'isStudent': false}).map((
-          JsonObject json,
-        ) {
-          return (json.string('name'), json.integer('age'), json.boolean('isStudent'));
-        });
+        const JsonObject(<String, Object?>{'name': 42, 'age': '42', 'isStudent': false})
+            .map((JsonObject json) {
+              return (json.string('name'), json.integer('age'), json.boolean('isStudent'));
+            });
         fail('Expected JsonMapException');
       } on JsonMapException catch (e) {
         expect(
@@ -320,11 +318,10 @@ void main() {
 
     test('disallows a return type of Future<*>', () {
       expect(() {
-        const JsonObject(<String, Object?>{'name': 'Alice', 'age': 42, 'isStudent': true}).map((
-          JsonObject json,
-        ) async {
-          return (json.string('name'), json.integer('age'), json.boolean('isStudent'));
-        });
+        const JsonObject(<String, Object?>{'name': 'Alice', 'age': 42, 'isStudent': true})
+            .map((JsonObject json) async {
+              return (json.string('name'), json.integer('age'), json.boolean('isStudent'));
+            });
       }, throwsA(const isInstanceOf<ArgumentError>()));
     });
   });

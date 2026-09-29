@@ -18,7 +18,8 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 - [ ] I read and followed the [Flutter Style Guide], including [Features we expect every widget to implement].
 - [ ] I signed the [CLA].
 - [ ] I listed at least one issue that this PR fixes in the description above.
-- [ ] I updated/added relevant documentation (doc comments with `///`).
+- [ ] I updated/added relevant in-code documentation (doc comments with `///`).
+- [ ] If this PR introduces a new feature or capability, I created and linked a website documentation issue or PR in [flutter/website] (or verified none is needed).
 - [ ] I added new tests to check the change I am making, or this PR is [test-exempt].
 - [ ] I followed the [breaking change policy] and added [Data Driven Fixes] where supported.
 - [ ] All existing and new tests are passing.
@@ -38,6 +39,7 @@ If this change needs to override an active code freeze, provide a comment explai
 [Features we expect every widget to implement]: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#features-we-expect-every-widget-to-implement
 [CLA]: https://cla.developers.google.com/
 [flutter/tests]: https://github.com/flutter/tests
+[flutter/website]: https://github.com/flutter/website
 [breaking change policy]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes
 [Discord]: https://github.com/flutter/flutter/blob/main/docs/contributing/Chat.md
 [Data Driven Fixes]: https://github.com/flutter/flutter/blob/main/docs/contributing/Data-driven-Fixes.md

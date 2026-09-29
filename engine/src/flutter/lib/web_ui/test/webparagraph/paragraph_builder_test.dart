@@ -218,58 +218,51 @@ Future<void> testMain() async {
     expect(spans[2].end, 9);
   });
 
-  test(
-    'Build paragraph with inherited styles (font name, font size, font weight, font style) [1[2[3]]]',
-    () {
-      final paragraphStyle = WebParagraphStyle(fontSize: 32);
-      final textStyle1 = WebTextStyle(fontFamily: 'Roboto');
-      final textStyle2 = WebTextStyle(fontSize: 42, fontWeight: FontWeight.bold);
-      final textStyle3 = WebTextStyle(
-        fontSize: 52,
-        fontStyle: FontStyle.italic,
-        fontFamily: 'Arial',
-      );
+  test('Build paragraph with inherited styles (font name, font size, font weight, font style) [1[2[3]]]', () {
+    final paragraphStyle = WebParagraphStyle(fontSize: 32);
+    final textStyle1 = WebTextStyle(fontFamily: 'Roboto');
+    final textStyle2 = WebTextStyle(fontSize: 42, fontWeight: FontWeight.bold);
+    final textStyle3 = WebTextStyle(fontSize: 52, fontStyle: FontStyle.italic, fontFamily: 'Arial');
 
-      final builder = WebParagraphBuilder(paragraphStyle);
-      builder.pushStyle(textStyle1);
-      builder.addText('[1');
-      builder.pushStyle(textStyle2);
-      builder.addText('[2');
-      builder.pushStyle(textStyle3);
-      builder.addText('[3');
-      builder.pop();
-      builder.addText(']]]');
-      final WebParagraph paragraph = builder.build();
-      final WebTextStyle merged1 = paragraph.paragraphStyle.textStyle
-          .mergeWith(textStyle1)
-          .mergeWith(defaultBackground);
-      final WebTextStyle merged12 = merged1.mergeWith(textStyle2);
-      final WebTextStyle merged123 = merged12.mergeWith(textStyle3);
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(textStyle1);
+    builder.addText('[1');
+    builder.pushStyle(textStyle2);
+    builder.addText('[2');
+    builder.pushStyle(textStyle3);
+    builder.addText('[3');
+    builder.pop();
+    builder.addText(']]]');
+    final WebParagraph paragraph = builder.build();
+    final WebTextStyle merged1 = paragraph.paragraphStyle.textStyle
+        .mergeWith(textStyle1)
+        .mergeWith(defaultBackground);
+    final WebTextStyle merged12 = merged1.mergeWith(textStyle2);
+    final WebTextStyle merged123 = merged12.mergeWith(textStyle3);
 
-      expect(paragraph.text, '[1[2[3]]]');
-      expect(paragraph.paragraphStyle, paragraphStyle);
-      expect(paragraph.spans, hasLength(4));
+    expect(paragraph.text, '[1[2[3]]]');
+    expect(paragraph.paragraphStyle, paragraphStyle);
+    expect(paragraph.spans, hasLength(4));
 
-      final List<TextSpan> spans = paragraph.spans.cast<TextSpan>();
-      expect(spans[0].text, '[1');
-      expect(spans[1].text, '[2');
-      expect(spans[2].text, '[3');
-      expect(spans[3].text, ']]]');
-      expect(spans[0].style, merged1);
-      expect(spans[1].style, merged12);
-      expect(spans[2].style, merged123);
-      expect(spans[3].style, merged12); // back to `12` since `3` was popped.
+    final List<TextSpan> spans = paragraph.spans.cast<TextSpan>();
+    expect(spans[0].text, '[1');
+    expect(spans[1].text, '[2');
+    expect(spans[2].text, '[3');
+    expect(spans[3].text, ']]]');
+    expect(spans[0].style, merged1);
+    expect(spans[1].style, merged12);
+    expect(spans[2].style, merged123);
+    expect(spans[3].style, merged12); // back to `12` since `3` was popped.
 
-      expect(spans[0].start, 0);
-      expect(spans[0].end, 2);
-      expect(spans[1].start, 2);
-      expect(spans[1].end, 4);
-      expect(spans[2].start, 4);
-      expect(spans[2].end, 6);
-      expect(spans[3].start, 6);
-      expect(spans[3].end, 9);
-    },
-  );
+    expect(spans[0].start, 0);
+    expect(spans[0].end, 2);
+    expect(spans[1].start, 2);
+    expect(spans[1].end, 4);
+    expect(spans[2].start, 4);
+    expect(spans[2].end, 6);
+    expect(spans[3].start, 6);
+    expect(spans[3].end, 9);
+  });
 
   test('Build paragraph with inherited styles (foreground, background) [1[2[3]]]', () {
     final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 24.0);

@@ -5,6 +5,7 @@
 precision mediump float;
 
 #include <impeller/color.glsl>
+#include <impeller/gradient.glsl>
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
@@ -25,12 +26,8 @@ highp in vec2 v_position;
 out vec4 frag_color;
 
 void main() {
-  float len = length(v_position - frag_info.center);
-  float t = len / frag_info.radius;
-  frag_color = IPSampleLinearWithTileMode(texture_sampler,       //
-                                          vec2(t, 0.5),          //
-                                          frag_info.half_texel,  //
-                                          frag_info.tile_mode,   //
-                                          frag_info.decal_border_color);
+  frag_color = IPSampleRadialGradient(
+      texture_sampler, frag_info.center, frag_info.radius, v_position,
+      frag_info.half_texel, frag_info.tile_mode, frag_info.decal_border_color);
   frag_color = IPPremultiply(frag_color) * frag_info.alpha;
 }
