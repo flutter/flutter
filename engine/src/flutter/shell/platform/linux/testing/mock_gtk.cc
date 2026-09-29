@@ -159,8 +159,16 @@ void gdk_gl_context_realize(GdkGLContext* context) {
   check_thread();
 }
 
+static GdkGLContext* current_gl_context = nullptr;
+
+GdkGLContext* gdk_gl_context_get_current() {
+  check_thread();
+  return current_gl_context;
+}
+
 void gdk_gl_context_clear_current() {
   check_thread();
+  current_gl_context = nullptr;
   if (mock != nullptr) {
     mock->gdk_gl_context_clear_current();
   }
@@ -168,6 +176,7 @@ void gdk_gl_context_clear_current() {
 
 void gdk_gl_context_make_current(GdkGLContext* context) {
   check_thread();
+  current_gl_context = context;
 }
 
 void gdk_cairo_draw_from_gl(cairo_t* cr,
