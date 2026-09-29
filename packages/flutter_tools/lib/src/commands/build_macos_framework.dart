@@ -24,8 +24,7 @@ import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
-import '../runner/flutter_command.dart'
-    show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
+import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'build_ios_framework.dart';
 import 'darwin_add_to_app.dart';
@@ -80,7 +79,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     ) = toolContext;
 
     final String outputArgument =
-        stringArg('output') ??
+        getValue(BuildFrameworkCommand.output) ??
         fs.path.join(fs.currentDirectory.path, getBuildDirectory(config, fs), 'macos', 'framework');
 
     if (outputArgument.isEmpty) {
@@ -97,11 +96,9 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
     final List<BuildInfo> buildInfos = await getBuildInfos();
 
-    final String? codesignIdentity = await codesign.getCodesignIdentity(
+    final String? codesignIdentity = await getCodesignIdentity(
       buildInfo: buildInfos.first,
-      codesignEnabled: boolArg(FlutterOptions.kCodesign),
-      codesignIdentityOption: stringArg(FlutterOptions.kCodesignIdentity),
-      identityFile: outputDirectory.childFile('.codesign_identity'),
+      outputDirectory: outputDirectory,
       xcodeProject: project.macos,
     );
 
@@ -126,8 +123,12 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         modeDirectory.deleteSync(recursive: true);
       }
 
-      if (boolArg('cocoapods')) {
-        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
+      if (getValue(BuildFrameworkCommand.cocoapods)) {
+        produceFlutterPodspec(
+          buildInfo.mode,
+          modeDirectory,
+          force: getValue(BuildFrameworkCommand.force),
+        );
       } else {
         await _produceFlutterFramework(buildInfo, modeDirectory, codesignIdentity);
       }
@@ -138,7 +139,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       await _produceAppFramework(buildInfo, modeDirectory, buildOutput, codesignIdentity);
 
       // Build and copy plugins.
-      if (boolArg('plugins')) {
+      if (getValue(BuildFrameworkCommand.plugins)) {
         await processPodsIfNeeded(
           project.macos,
           getMacOSBuildDirectory(config: config, fileSystem: fs),
@@ -407,7 +408,7 @@ end
         'SYMROOT=${buildOutput.path}',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
-        if (boolArg('static')) 'MACH_O_TYPE=staticlib',
+        if (getValue(BuildFrameworkCommand.staticFrameworks)) 'MACH_O_TYPE=staticlib',
       ];
 
       final RunResult buildPluginsResult = await processUtils.run(
