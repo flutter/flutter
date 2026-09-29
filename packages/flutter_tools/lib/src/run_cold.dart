@@ -16,13 +16,13 @@ const kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     super.flutterDevices, {
+    required super.analytics,
     required super.buildSystem,
     required super.buildTargets,
     required super.debuggingOptions,
     required super.target,
     required super.toolContext,
     required super.xcode,
-    super.analytics,
     this.applicationBinary,
     this.awaitFirstFrameWhenTracing = true,
     super.commandHelp,

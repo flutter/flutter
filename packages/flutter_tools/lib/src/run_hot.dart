@@ -20,7 +20,6 @@ import 'compile.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
-import 'project.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
@@ -67,13 +66,13 @@ class DeviceReloadReport {
 class HotRunner extends ResidentRunner {
   HotRunner(
     super.flutterDevices, {
+    required super.analytics,
     required super.buildSystem,
     required super.buildTargets,
     required super.debuggingOptions,
     required super.target,
     required super.toolContext,
     required super.xcode,
-    super.analytics,
     this.applicationBinary,
     this.benchmarkMode = false,
     super.commandHelp,
@@ -405,7 +404,9 @@ class HotRunner extends ResidentRunner {
                 // should only be displayed once.
                 suppressErrors: applicationBinary == null,
                 checkDartPluginRegistry: true,
-                dartPluginRegistrant: FlutterProject.current().dartPluginRegistrant,
+                dartPluginRegistrant: toolContext.projectFactory
+                    .fromDirectory(fileSystem.directory(projectRootPath))
+                    .dartPluginRegistrant,
                 outputPath: dillOutputPath,
                 packageConfig: debuggingOptions.buildInfo.packageConfig,
                 projectRootPath: fileSystem.directory(projectRootPath).absolute.path,
@@ -747,19 +748,18 @@ class HotRunner extends ResidentRunner {
     bool printErrors = true,
     Logger? logger,
   }) {
-    final Logger effectiveLogger = logger ?? BufferLogger.test();
     if (reloadReport == null) {
       if (printErrors) {
-        effectiveLogger.printError('Hot reload did not receive reload report.');
+        logger?.printError('Hot reload did not receive reload report.');
       }
       return false;
     }
     final contents = ReloadReportContents.fromReloadReport(reloadReport);
     if (!reloadReport.success!) {
       if (printErrors) {
-        effectiveLogger.printError('Hot reload was rejected:');
+        logger?.printError('Hot reload was rejected:');
         for (final ReasonForCancelling reason in contents.notices) {
-          effectiveLogger.printError(reason.toString());
+          logger?.printError(reason.toString());
         }
       }
       return false;
