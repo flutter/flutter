@@ -22,6 +22,17 @@
 #endif
 
 namespace flutter {
+namespace {
+inline uint64_t VkImageToHandle(VkImage img) {
+#if (defined(VK_USE_64_BIT_PTR_DEFINES) && VK_USE_64_BIT_PTR_DEFINES == 1) || \
+    defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__) ||         \
+    defined(_M_ARM64)
+  return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(img));
+#else
+  return static_cast<uint64_t>(img);
+#endif
+}
+}  // namespace
 
 std::unique_ptr<AndroidSurfaceManager> AndroidSurfaceManager::Create(
     AndroidRenderingAPI rendering_api) {
@@ -1318,7 +1329,7 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextImage(
                          kFenceTimeoutNanoseconds);
 
   current_image_index_ = image_index;
-  image.image = reinterpret_cast<uint64_t>(vk_swapchain_images_[image_index]);
+  image.image = VkImageToHandle(vk_swapchain_images_[image_index]);
   image.format = static_cast<uint32_t>(vk_surface_format_.format);
   return image;
 }
@@ -1328,12 +1339,31 @@ bool AndroidSurfaceManager::PresentImage(const FlutterVulkanImage* image) {
   if (is_fake_window_) {
     return true;
   }
-  if (vk_swapchain_ == VK_NULL_HANDLE ||
-      current_image_index_ >= vk_swapchain_images_.size()) {
+  if (image == nullptr || vk_swapchain_ == VK_NULL_HANDLE ||
+      vk_swapchain_images_.empty()) {
     return false;
   }
 
-  uint32_t image_index = current_image_index_;
+  // Find the swapchain image index matching the presented image.
+  uint32_t image_index = UINT32_MAX;
+  for (uint32_t i = 0; i < vk_swapchain_images_.size(); ++i) {
+    if (VkImageToHandle(vk_swapchain_images_[i]) == image->image) {
+      image_index = i;
+      break;
+    }
+  }
+
+  if (image_index == UINT32_MAX) {
+    FML_LOG(WARNING)
+        << "PresentImage: provided image " << std::hex << image->image
+        << " does not belong to the current swapchain ("
+        << reinterpret_cast<uint64_t>(vk_swapchain_)
+        << "). Surface window may have changed during frame rendering; "
+           "discarding presentation.";
+    return false;
+  }
+
+  current_image_index_ = image_index;
   VkImage vk_img = vk_swapchain_images_[image_index];
   VkCommandBuffer cmd = vk_command_buffers_[image_index];
 
@@ -1405,6 +1435,13 @@ bool AndroidSurfaceManager::PresentImage(const FlutterVulkanImage* image) {
   VkResult res = vk_queue_present_khr_fn_(vk_queue_, &present_info);
   if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
     CreateOrUpdateVulkanSurfaceLocked();
+  } else if (res == VK_ERROR_SURFACE_LOST_KHR) {
+    FML_LOG(WARNING) << "vkQueuePresentKHR returned VK_ERROR_SURFACE_LOST_KHR ("
+                     << res << "); recreating Vulkan surface.";
+    DestroyVulkanSurfaceLocked();
+    if (native_window_ != nullptr) {
+      CreateOrUpdateVulkanSurfaceLocked();
+    }
   }
   return res == VK_SUCCESS || res == VK_SUBOPTIMAL_KHR;
 }
@@ -1644,6 +1681,15 @@ bool AndroidSurfaceManager::ClearAndPresentOnscreenSurface() {
 #if FML_OS_ANDROID
   if (is_fake_window_) {
     return Present();
+  }
+  if (rendering_api_ == AndroidRenderingAPI::kImpellerVulkan ||
+      (rendering_api_ == AndroidRenderingAPI::kImpellerAutoselect &&
+       IsVulkanInitialized())) {
+    FlutterVulkanImage img = GetNextImage(nullptr);
+    if (img.image == 0) {
+      return false;
+    }
+    return PresentImage(&img);
   }
   if (!MakeCurrent()) {
     return false;

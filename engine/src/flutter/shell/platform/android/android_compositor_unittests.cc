@@ -542,6 +542,13 @@ class OrderRecordingSurfaceManager : public AndroidSurfaceManager {
     return AndroidSurfaceManager::Present();
   }
 
+  bool PresentImage(const FlutterVulkanImage* image) override {
+    if (events_) {
+      events_->push_back("PresentImage");
+    }
+    return AndroidSurfaceManager::PresentImage(image);
+  }
+
  private:
   std::shared_ptr<std::vector<std::string>> events_;
 };
@@ -733,6 +740,99 @@ TEST(AndroidCompositorTest,
 
   EXPECT_TRUE(compositor->CollectBackingStore(&root_bs));
   EXPECT_TRUE(compositor->CollectBackingStore(&overlay_bs));
+}
+
+TEST(AndroidCompositorTest, VulkanMultipleBackingStoresGuardedInSingleFrame) {
+  std::shared_ptr<AndroidSurfaceManager> surface_manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerVulkan);
+  ASSERT_NE(surface_manager, nullptr);
+  surface_manager->SetNativeWindow(nullptr, /*is_fake_window=*/true);
+
+  auto compositor = std::make_unique<AndroidCompositor>(surface_manager);
+  ASSERT_NE(compositor, nullptr);
+
+  FlutterBackingStoreConfig config = {};
+  config.struct_size = sizeof(FlutterBackingStoreConfig);
+  config.size = FlutterSize{100.0, 100.0};
+  config.view_id = 0;
+
+  // The first backing store in a frame succeeds.
+  FlutterBackingStore root_bs = {};
+  EXPECT_TRUE(compositor->CreateBackingStore(&config, &root_bs));
+  EXPECT_EQ(root_bs.type, kFlutterBackingStoreTypeVulkan);
+  EXPECT_NE(root_bs.vulkan.image, nullptr);
+
+  // A secondary backing store in the same frame must fail to prevent multiple
+  // acquires from the onscreen swapchain.
+  FlutterBackingStore secondary_bs = {};
+  EXPECT_FALSE(compositor->CreateBackingStore(&config, &secondary_bs));
+
+  EXPECT_TRUE(compositor->CollectBackingStore(&root_bs));
+
+  // After collecting root_bs (simulating a dropped frame without
+  // PresentLayers), creating a backing store on the next frame must succeed
+  // without wedging.
+  FlutterBackingStore next_frame_bs = {};
+  EXPECT_TRUE(compositor->CreateBackingStore(&config, &next_frame_bs));
+  EXPECT_TRUE(compositor->CollectBackingStore(&next_frame_bs));
+}
+
+TEST(AndroidCompositorTest,
+     PlatformViewPrecedingBackingStorePresentsRootLayer) {
+  auto events = std::make_shared<std::vector<std::string>>();
+  auto surface_manager = std::make_shared<OrderRecordingSurfaceManager>(
+      AndroidRenderingAPI::kImpellerVulkan, events);
+  EXPECT_TRUE(
+      surface_manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+
+  auto delegate = std::make_shared<OrderRecordingPlatformViewDelegate>(events);
+  auto compositor =
+      std::make_unique<AndroidCompositor>(surface_manager, delegate);
+
+  FlutterBackingStoreConfig config = {};
+  config.struct_size = sizeof(FlutterBackingStoreConfig);
+  config.size = FlutterSize{150.0, 150.0};
+  config.view_id = 0;
+
+  FlutterBackingStore root_bs = {};
+  EXPECT_TRUE(compositor->CreateBackingStore(&config, &root_bs));
+  EXPECT_EQ(root_bs.type, kFlutterBackingStoreTypeVulkan);
+
+  FlutterPlatformView platform_view = {};
+  platform_view.struct_size = sizeof(FlutterPlatformView);
+  platform_view.identifier = 42;
+  platform_view.mutations_count = 0;
+  platform_view.mutations = nullptr;
+
+  FlutterLayer pv_layer = {};
+  pv_layer.struct_size = sizeof(FlutterLayer);
+  pv_layer.type = kFlutterLayerContentTypePlatformView;
+  pv_layer.platform_view = &platform_view;
+  pv_layer.offset = FlutterPoint{10.0, 10.0};
+  pv_layer.size = FlutterSize{100.0, 100.0};
+
+  FlutterLayer root_layer = {};
+  root_layer.struct_size = sizeof(FlutterLayer);
+  root_layer.type = kFlutterLayerContentTypeBackingStore;
+  root_layer.backing_store = &root_bs;
+  root_layer.offset = FlutterPoint{0.0, 0.0};
+  root_layer.size = FlutterSize{150.0, 150.0};
+
+  // Platform view layer comes before the root backing store layer.
+  const FlutterLayer* layers[] = {&pv_layer, &root_layer};
+  constexpr size_t kLayerCount = 2;
+
+  EXPECT_TRUE(compositor->PresentLayers(layers, kLayerCount));
+
+  const std::vector<std::string> expected_events = {
+      "OnBeginFrame",
+      "OnPlatformViewPresented:42",
+      "PresentImage",
+      "OnFramePresented",
+  };
+  EXPECT_EQ(*events, expected_events);
+
+  EXPECT_TRUE(compositor->CollectBackingStore(&root_bs));
 }
 
 }  // namespace testing

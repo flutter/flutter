@@ -178,7 +178,7 @@ class AndroidSurfaceManager {
   FlutterVulkanImage GetNextImage(const FlutterFrameInfo* frame_info);
 
   /// Presents the rendered image to the swapchain.
-  bool PresentImage(const FlutterVulkanImage* image);
+  virtual bool PresentImage(const FlutterVulkanImage* image);
 
   /// Resolves Vulkan function pointers dynamically.
   void* GetInstanceProcAddress(FlutterVulkanInstanceHandle instance,
