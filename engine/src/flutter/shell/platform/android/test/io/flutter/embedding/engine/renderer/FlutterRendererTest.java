@@ -461,20 +461,24 @@ public class FlutterRendererTest {
     // Install initial rendering surface.
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
     verify(fakeFlutterJNI, times(1)).onSurfaceCreated(eq(fakeSurface));
-    verify(fakeFlutterJNI, times(0)).onSurfaceWindowChanged(eq(fakeSurface));
+    verify(fakeFlutterJNI, times(0)).onSurfaceWindowChanged(eq(fakeSurface), eq(false));
 
     // Install the image view.
     flutterRenderer.startRenderingToSurface(fakeSurface2, true);
     verify(fakeFlutterJNI, times(1)).onSurfaceCreated(eq(fakeSurface));
-    verify(fakeFlutterJNI, times(0)).onSurfaceWindowChanged(eq(fakeSurface));
+    verify(fakeFlutterJNI, times(0)).onSurfaceWindowChanged(eq(fakeSurface), eq(false));
     verify(fakeFlutterJNI, times(0)).onSurfaceCreated(eq(fakeSurface2));
-    verify(fakeFlutterJNI, times(1)).onSurfaceWindowChanged(eq(fakeSurface2));
+    verify(fakeFlutterJNI, times(1)).onSurfaceWindowChanged(eq(fakeSurface2), eq(false));
 
     flutterRenderer.startRenderingToSurface(fakeSurface, true);
     verify(fakeFlutterJNI, times(1)).onSurfaceCreated(eq(fakeSurface));
-    verify(fakeFlutterJNI, times(1)).onSurfaceWindowChanged(eq(fakeSurface));
+    verify(fakeFlutterJNI, times(1)).onSurfaceWindowChanged(eq(fakeSurface), eq(false));
     verify(fakeFlutterJNI, times(0)).onSurfaceCreated(eq(fakeSurface2));
-    verify(fakeFlutterJNI, times(1)).onSurfaceWindowChanged(eq(fakeSurface2));
+    verify(fakeFlutterJNI, times(1)).onSurfaceWindowChanged(eq(fakeSurface2), eq(false));
+
+    // Swap surface from FlutterImageView.
+    flutterRenderer.swapSurface(fakeSurface2);
+    verify(fakeFlutterJNI, times(1)).onSurfaceWindowChanged(eq(fakeSurface2), eq(true));
   }
 
   @Test

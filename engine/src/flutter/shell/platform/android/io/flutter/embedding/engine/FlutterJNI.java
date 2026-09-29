@@ -649,13 +649,24 @@ public class FlutterJNI {
    */
   @UiThread
   public void onSurfaceWindowChanged(@NonNull Surface surface) {
+    onSurfaceWindowChanged(surface, false);
+  }
+
+  /**
+   * In hybrid composition, call this method when the {@link Surface} has changed.
+   *
+   * @param surface The surface to render to.
+   * @param isImageView Whether this surface is an ImageReader backing a FlutterImageView.
+   */
+  @UiThread
+  public void onSurfaceWindowChanged(@NonNull Surface surface, boolean isImageView) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
-    nativeSurfaceWindowChanged(nativeShellHolderId, surface);
+    nativeSurfaceWindowChanged(nativeShellHolderId, surface, isImageView);
   }
 
   private native void nativeSurfaceWindowChanged(
-      long nativeShellHolderId, @NonNull Surface surface);
+      long nativeShellHolderId, @NonNull Surface surface, boolean isImageView);
 
   /**
    * Call this method when the {@link Surface} changes that was previously registered with {@link
