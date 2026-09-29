@@ -254,7 +254,7 @@ void fl_engine_set_platform_message_handler(
  * @engine: an #FlEngine.
  *
  * Asks the engine to render another frame. Used when a view needs the current
- * frame again, e.g. because the surface it was presented to has been replaced.
+ * frame again, e.g. because it wasn't able to use the last one.
  */
 void fl_engine_schedule_frame(FlEngine* engine);
 
