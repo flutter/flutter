@@ -6,6 +6,7 @@
 
 #include "flutter/shell/platform/common/isolate_scope.h"
 #include "flutter/shell/platform/linux/fl_view_monitor.h"
+#include "flutter/shell/platform/linux/fl_view_private.h"
 
 struct _FlViewMonitor {
   GObject parent_instance;
@@ -29,9 +30,26 @@ static void first_frame_cb(FlViewMonitor* self) {
   }
 }
 
+static gboolean destroy_toplevel_cb(gpointer user_data) {
+  GtkWidget* toplevel = GTK_WIDGET(user_data);
+  gtk_widget_destroy(toplevel);
+  return G_SOURCE_REMOVE;
+}
+
 static void fl_view_monitor_dispose(GObject* object) {
   FlViewMonitor* self = FL_VIEW_MONITOR(object);
 
+  if (self->view != nullptr) {
+    GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(self->view));
+    if (GTK_IS_WINDOW(toplevel)) {
+      // Defer gtk_widget_destroy to the main loop so it never frees the
+      // GtkWindow/GdkWindow while a synchronous GtkWidget::draw ->
+      // wait_for_frame -> fl_task_runner_wait stack frame is active.
+      g_idle_add_full(G_PRIORITY_HIGH, destroy_toplevel_cb,
+                      g_object_ref(toplevel), g_object_unref);
+    }
+    fl_view_begin_destroy(self->view);
+  }
   g_clear_object(&self->view);
 
   G_OBJECT_CLASS(fl_view_monitor_parent_class)->dispose(object);
