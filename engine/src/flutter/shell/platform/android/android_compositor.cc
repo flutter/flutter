@@ -79,31 +79,92 @@ bool AndroidCompositor::CreateBackingStore(
     case AndroidRenderingAPI::kImpellerAutoselect: {
       if (surface_manager_->IsVulkanInitialized() ||
           surface_manager_->IsFakeWindow()) {
-        bool expected = false;
-        if (!has_active_onscreen_vulkan_backing_store_.compare_exchange_strong(
-                expected, true)) {
-          FML_LOG(WARNING)
-              << "AndroidCompositor: multiple Vulkan backing stores requested "
-                 "while an onscreen swapchain backing store is already active. "
-                 "Secondary Vulkan overlay backing stores are currently "
-                 "unsupported.";
-          return false;
+        if (backing_stores_created_in_frame_ == 0) {
+          bool expected = false;
+          if (!has_active_onscreen_vulkan_backing_store_
+                   .compare_exchange_strong(expected, true)) {
+            FML_LOG(WARNING)
+                << "AndroidCompositor: multiple onscreen Vulkan backing stores "
+                   "requested in a single frame.";
+            return false;
+          }
+          FlutterVulkanImage img = surface_manager_->GetNextImage(nullptr);
+          if (img.image == 0 && !surface_manager_->IsFakeWindow()) {
+            has_active_onscreen_vulkan_backing_store_ = false;
+            return false;
+          }
+          auto* tracker = new VulkanBackingStoreTracker{
+              .image = img,
+              .is_onscreen = true,
+              .overlay_window = nullptr,
+          };
+          backing_store_out->type = kFlutterBackingStoreTypeVulkan;
+          backing_store_out->user_data = tracker;
+          backing_store_out->vulkan.struct_size =
+              sizeof(FlutterVulkanBackingStore);
+          backing_store_out->vulkan.image = &tracker->image;
+          backing_store_out->vulkan.user_data = tracker;
+          backing_store_out->vulkan.destruction_callback = nullptr;
+          backing_stores_created_in_frame_++;
+          return true;
+        } else {
+          // Secondary / overlay backing store.
+          std::shared_ptr<AndroidCompositorPlatformViewDelegate> delegate;
+          {
+            std::lock_guard<std::mutex> lock(present_mutex_);
+            delegate = platform_view_delegate_;
+          }
+          if (delegate == nullptr) {
+            FML_LOG(WARNING) << "AndroidCompositor: secondary Vulkan backing "
+                                "store requested "
+                                "without a platform view delegate.";
+            return false;
+          }
+
+          size_t overlay_index = backing_stores_created_in_frame_ - 1;
+          ANativeWindow* overlay_window =
+              delegate->GetOverlayWindow(overlay_index);
+          if (overlay_window == nullptr && !surface_manager_->IsFakeWindow()) {
+            FML_LOG(WARNING)
+                << "AndroidCompositor: overlay Vulkan backing store requested "
+                   "for overlay_index="
+                << overlay_index
+                << " but no overlay native window is available.";
+            return false;
+          }
+#if FML_OS_ANDROID
+          if (overlay_window != nullptr && config->size.width > 0.0 &&
+              config->size.height > 0.0) {
+            ANativeWindow_setBuffersGeometry(
+                overlay_window,
+                static_cast<int32_t>(std::round(config->size.width)),
+                static_cast<int32_t>(std::round(config->size.height)), 0);
+          }
+#endif
+          FlutterVulkanImage img =
+              surface_manager_->GetNextOverlayImage(overlay_window);
+          if (img.image == 0 && !surface_manager_->IsFakeWindow()) {
+            FML_LOG(WARNING)
+                << "AndroidCompositor: failed to acquire overlay Vulkan image "
+                   "for overlay_index="
+                << overlay_index;
+            return false;
+          }
+          auto* tracker = new VulkanBackingStoreTracker{
+              .image = img,
+              .is_onscreen = false,
+              .overlay_window = overlay_window,
+          };
+          backing_store_out->type = kFlutterBackingStoreTypeVulkan;
+          backing_store_out->user_data = tracker;
+          backing_store_out->vulkan.struct_size =
+              sizeof(FlutterVulkanBackingStore);
+          backing_store_out->vulkan.image = &tracker->image;
+          backing_store_out->vulkan.user_data = tracker;
+          backing_store_out->vulkan.destruction_callback = nullptr;
+          backing_stores_created_in_frame_++;
+          return true;
         }
-        FlutterVulkanImage img = surface_manager_->GetNextImage(nullptr);
-        if (img.image == 0 && !surface_manager_->IsFakeWindow()) {
-          has_active_onscreen_vulkan_backing_store_ = false;
-          return false;
-        }
-        auto* image_holder = new FlutterVulkanImage(img);
-        backing_store_out->type = kFlutterBackingStoreTypeVulkan;
-        backing_store_out->user_data = image_holder;
-        backing_store_out->vulkan.struct_size =
-            sizeof(FlutterVulkanBackingStore);
-        backing_store_out->vulkan.image = image_holder;
-        backing_store_out->vulkan.user_data = image_holder;
-        backing_store_out->vulkan.destruction_callback = nullptr;
-        backing_stores_created_in_frame_++;
-        return true;
       }
       [[fallthrough]];
     }
@@ -159,9 +220,12 @@ bool AndroidCompositor::CollectBackingStore(
     delete tracker;
   } else if (renderer->type == kFlutterBackingStoreTypeVulkan &&
              renderer->user_data != nullptr) {
-    auto* image_holder = static_cast<FlutterVulkanImage*>(renderer->user_data);
-    delete image_holder;
-    has_active_onscreen_vulkan_backing_store_ = false;
+    auto* tracker =
+        static_cast<VulkanBackingStoreTracker*>(renderer->user_data);
+    if (tracker->is_onscreen) {
+      has_active_onscreen_vulkan_backing_store_ = false;
+    }
+    delete tracker;
   }
   return true;
 }
@@ -203,22 +267,47 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
 
     if (layer->type == kFlutterLayerContentTypeBackingStore) {
       if (layer->backing_store != nullptr) {
-        if (platform_views_count == 0 ||
-            (root_backing_store_layer == nullptr &&
-             layer->backing_store->type == kFlutterBackingStoreTypeVulkan)) {
+        bool is_root = false;
+        if (root_backing_store_layer == nullptr) {
+          if (layer->backing_store->type == kFlutterBackingStoreTypeVulkan) {
+            if (layer->backing_store->user_data != nullptr) {
+              auto* tracker = static_cast<VulkanBackingStoreTracker*>(
+                  layer->backing_store->user_data);
+              is_root = tracker->is_onscreen;
+            } else {
+              is_root = (platform_views_count == 0);
+            }
+          } else {
+            is_root = (platform_views_count == 0);
+          }
+        }
+
+        if (is_root) {
           root_backing_store_layer = layer;
         } else {
+          ANativeWindow* overlay_window = nullptr;
+          if (delegate != nullptr) {
+            overlay_window = delegate->GetOverlayWindow(overlays_count);
+          }
           if (layer->backing_store->type == kFlutterBackingStoreTypeOpenGL) {
-            ANativeWindow* overlay_window = nullptr;
-            if (delegate != nullptr) {
-              overlay_window = delegate->GetOverlayWindow(overlays_count);
-            }
             if (overlay_window != nullptr) {
               surface_manager_->BlitAndSwapOverlaySurface(
                   overlay_window,
                   layer->backing_store->open_gl.framebuffer.name,
                   static_cast<size_t>(std::round(layer->size.width)),
                   static_cast<size_t>(std::round(layer->size.height)));
+            }
+          } else if (layer->backing_store->type ==
+                     kFlutterBackingStoreTypeVulkan) {
+            if (overlay_window == nullptr &&
+                layer->backing_store->user_data != nullptr) {
+              auto* tracker = static_cast<VulkanBackingStoreTracker*>(
+                  layer->backing_store->user_data);
+              overlay_window = tracker->overlay_window;
+            }
+            if (overlay_window != nullptr || surface_manager_->IsFakeWindow()) {
+              surface_manager_->PresentOverlayImage(
+                  overlay_window, layer->backing_store->vulkan.image);
             }
           }
           if (delegate != nullptr) {

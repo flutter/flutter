@@ -549,6 +549,14 @@ class OrderRecordingSurfaceManager : public AndroidSurfaceManager {
     return AndroidSurfaceManager::PresentImage(image);
   }
 
+  bool PresentOverlayImage(ANativeWindow* overlay_window,
+                           const FlutterVulkanImage* image) override {
+    if (events_) {
+      events_->push_back("PresentOverlayImage");
+    }
+    return AndroidSurfaceManager::PresentOverlayImage(overlay_window, image);
+  }
+
  private:
   std::shared_ptr<std::vector<std::string>> events_;
 };
@@ -833,6 +841,108 @@ TEST(AndroidCompositorTest,
   EXPECT_EQ(*events, expected_events);
 
   EXPECT_TRUE(compositor->CollectBackingStore(&root_bs));
+}
+
+TEST(AndroidCompositorTest, VulkanOverlayBackingStoreWithDelegateSucceeds) {
+  auto events = std::make_shared<std::vector<std::string>>();
+  auto surface_manager = std::make_shared<OrderRecordingSurfaceManager>(
+      AndroidRenderingAPI::kImpellerVulkan, events);
+  EXPECT_TRUE(
+      surface_manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+
+  auto delegate = std::make_shared<OrderRecordingPlatformViewDelegate>(events);
+  auto compositor =
+      std::make_unique<AndroidCompositor>(surface_manager, delegate);
+
+  FlutterBackingStoreConfig config = {};
+  config.struct_size = sizeof(FlutterBackingStoreConfig);
+  config.size = FlutterSize{100.0, 100.0};
+  config.view_id = 0;
+
+  // The first backing store in a frame is the onscreen root layer.
+  FlutterBackingStore root_bs = {};
+  EXPECT_TRUE(compositor->CreateBackingStore(&config, &root_bs));
+  EXPECT_EQ(root_bs.type, kFlutterBackingStoreTypeVulkan);
+  EXPECT_NE(root_bs.vulkan.image, nullptr);
+
+  // With a delegate, secondary backing stores succeed as overlay surfaces.
+  FlutterBackingStore overlay_bs = {};
+  EXPECT_TRUE(compositor->CreateBackingStore(&config, &overlay_bs));
+  EXPECT_EQ(overlay_bs.type, kFlutterBackingStoreTypeVulkan);
+  EXPECT_NE(overlay_bs.vulkan.image, nullptr);
+
+  EXPECT_TRUE(compositor->CollectBackingStore(&root_bs));
+  EXPECT_TRUE(compositor->CollectBackingStore(&overlay_bs));
+}
+
+TEST(AndroidCompositorTest,
+     RootBackingStorePresentedAfterPlatformViewAndOverlayVulkan) {
+  auto events = std::make_shared<std::vector<std::string>>();
+  auto surface_manager = std::make_shared<OrderRecordingSurfaceManager>(
+      AndroidRenderingAPI::kImpellerVulkan, events);
+  EXPECT_TRUE(
+      surface_manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+
+  auto delegate = std::make_shared<OrderRecordingPlatformViewDelegate>(events);
+  auto compositor =
+      std::make_unique<AndroidCompositor>(surface_manager, delegate);
+
+  FlutterBackingStoreConfig config = {};
+  config.struct_size = sizeof(FlutterBackingStoreConfig);
+  config.size = FlutterSize{150.0, 150.0};
+  config.view_id = 0;
+
+  // Root backing store (Layer 0: Flutter UI background)
+  FlutterBackingStore root_bs = {};
+  EXPECT_TRUE(compositor->CreateBackingStore(&config, &root_bs));
+  EXPECT_EQ(root_bs.type, kFlutterBackingStoreTypeVulkan);
+
+  // Overlay backing store (Layer 2: Flutter UI overlay above platform view)
+  FlutterBackingStore overlay_bs = {};
+  EXPECT_TRUE(compositor->CreateBackingStore(&config, &overlay_bs));
+  EXPECT_EQ(overlay_bs.type, kFlutterBackingStoreTypeVulkan);
+
+  FlutterLayer root_layer = {};
+  root_layer.struct_size = sizeof(FlutterLayer);
+  root_layer.type = kFlutterLayerContentTypeBackingStore;
+  root_layer.backing_store = &root_bs;
+  root_layer.offset = FlutterPoint{0.0, 0.0};
+  root_layer.size = FlutterSize{150.0, 150.0};
+
+  FlutterPlatformView platform_view = {};
+  platform_view.struct_size = sizeof(FlutterPlatformView);
+  platform_view.identifier = 1;
+  platform_view.mutations_count = 0;
+  platform_view.mutations = nullptr;
+
+  FlutterLayer pv_layer = {};
+  pv_layer.struct_size = sizeof(FlutterLayer);
+  pv_layer.type = kFlutterLayerContentTypePlatformView;
+  pv_layer.platform_view = &platform_view;
+  pv_layer.offset = FlutterPoint{0.0, 0.0};
+  pv_layer.size = FlutterSize{150.0, 150.0};
+
+  FlutterLayer overlay_layer = {};
+  overlay_layer.struct_size = sizeof(FlutterLayer);
+  overlay_layer.type = kFlutterLayerContentTypeBackingStore;
+  overlay_layer.backing_store = &overlay_bs;
+  overlay_layer.offset = FlutterPoint{0.0, 0.0};
+  overlay_layer.size = FlutterSize{150.0, 150.0};
+
+  const FlutterLayer* layers[] = {&root_layer, &pv_layer, &overlay_layer};
+  constexpr size_t kLayerCount = 3;
+
+  EXPECT_TRUE(compositor->PresentLayers(layers, kLayerCount));
+
+  const std::vector<std::string> expected_events = {
+      "GetOverlayWindow:0", "OnBeginFrame",        "OnPlatformViewPresented:1",
+      "GetOverlayWindow:0", "PresentOverlayImage", "OnOverlayPresented:0",
+      "PresentImage",       "OnFramePresented",
+  };
+  EXPECT_EQ(*events, expected_events);
+
+  EXPECT_TRUE(compositor->CollectBackingStore(&root_bs));
+  EXPECT_TRUE(compositor->CollectBackingStore(&overlay_bs));
 }
 
 }  // namespace testing

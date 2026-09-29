@@ -982,6 +982,10 @@ bool AndroidSurfaceManager::InitializeVulkan() {
 
 void AndroidSurfaceManager::TeardownVulkan() {
   std::lock_guard<std::mutex> lock(window_mutex_);
+  for (auto& [window, entry] : overlay_vulkan_surfaces_) {
+    DestroyOverlayVulkanSurfaceLocked(entry);
+  }
+  overlay_vulkan_surfaces_.clear();
   DestroyVulkanSurfaceLocked();
   if (vk_device_ != VK_NULL_HANDLE) {
     if (vk_destroy_device_fn_ != nullptr) {
@@ -1257,6 +1261,269 @@ void AndroidSurfaceManager::DestroyVulkanSurfaceLocked() {
   }
 }
 
+bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
+    ANativeWindow* window,
+    VulkanOverlaySurface& entry) {
+  if (is_fake_window_) {
+    return true;
+  }
+  if (window == nullptr || vk_instance_ == VK_NULL_HANDLE ||
+      vk_device_ == VK_NULL_HANDLE) {
+    return false;
+  }
+
+  if (entry.surface == VK_NULL_HANDLE) {
+    VkAndroidSurfaceCreateInfoKHR surface_info = {
+        .sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
+        .pNext = nullptr,
+        .flags = 0,
+        .window = window,
+    };
+    VkResult res = vk_create_android_surface_khr_fn_(
+        vk_instance_, &surface_info, nullptr, &entry.surface);
+    if (res != VK_SUCCESS || entry.surface == VK_NULL_HANDLE) {
+      FML_LOG(ERROR) << "vkCreateAndroidSurfaceKHR for overlay failed: " << res;
+      return false;
+    }
+  }
+
+  VkSurfaceCapabilitiesKHR caps = {};
+  VkResult res = vk_get_physical_device_surface_capabilities_khr_fn_(
+      vk_physical_device_, entry.surface, &caps);
+  if (res != VK_SUCCESS) {
+    FML_LOG(ERROR)
+        << "vkGetPhysicalDeviceSurfaceCapabilitiesKHR for overlay failed: "
+        << res;
+    return false;
+  }
+
+  // 0xFFFFFFFF indicates the surface size will be determined by the swapchain
+  constexpr uint32_t kUndefinedExtentDimension = 0xFFFFFFFF;
+  VkExtent2D extent = {0, 0};
+  if (caps.currentExtent.width != kUndefinedExtentDimension) {
+    extent = caps.currentExtent;
+  } else {
+#if FML_OS_ANDROID
+    int32_t w = ANativeWindow_getWidth(window);
+    int32_t h = ANativeWindow_getHeight(window);
+#else
+    int32_t w = 100;
+    int32_t h = 100;
+#endif
+    // 1u is minimum dimension fallback when native window size is uninitialized
+    uint32_t target_w = (w > 0) ? static_cast<uint32_t>(w) : 1u;
+    uint32_t target_h = (h > 0) ? static_cast<uint32_t>(h) : 1u;
+    extent.width = std::clamp(target_w, caps.minImageExtent.width,
+                              caps.maxImageExtent.width);
+    extent.height = std::clamp(target_h, caps.minImageExtent.height,
+                               caps.maxImageExtent.height);
+  }
+
+  if (entry.swapchain != VK_NULL_HANDLE && entry.extent.width == extent.width &&
+      entry.extent.height == extent.height) {
+    return true;
+  }
+
+  uint32_t format_count = 0;
+  vk_get_physical_device_surface_formats_khr_fn_(
+      vk_physical_device_, entry.surface, &format_count, nullptr);
+  std::vector<VkSurfaceFormatKHR> formats(format_count);
+  if (format_count > 0) {
+    vk_get_physical_device_surface_formats_khr_fn_(
+        vk_physical_device_, entry.surface, &format_count, formats.data());
+  }
+  if (formats.empty()) {
+    FML_LOG(ERROR) << "No surface formats found for overlay surface.";
+    return false;
+  }
+
+  entry.format = formats[0];
+  for (const auto& fmt : formats) {
+    if (fmt.format == VK_FORMAT_R8G8B8A8_UNORM &&
+        fmt.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+      entry.format = fmt;
+      break;
+    }
+  }
+
+  // Double/triple buffering: minImageCount + 1
+  uint32_t image_count = caps.minImageCount + 1;
+  if (caps.maxImageCount > 0 && image_count > caps.maxImageCount) {
+    image_count = caps.maxImageCount;
+  }
+
+  VkCompositeAlphaFlagBitsKHR composite_alpha =
+      VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
+  if (!(caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)) {
+    composite_alpha = (caps.supportedCompositeAlpha &
+                       VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR)
+                          ? VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR
+                          : ((caps.supportedCompositeAlpha &
+                              VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
+                                 ? VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR
+                                 : VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR);
+  }
+
+  if (vk_device_wait_idle_fn_ != nullptr) {
+    vk_device_wait_idle_fn_(vk_device_);
+  }
+
+  if (entry.acquire_fence != VK_NULL_HANDLE) {
+    if (vk_destroy_fence_fn_ != nullptr) {
+      vk_destroy_fence_fn_(vk_device_, entry.acquire_fence, nullptr);
+    }
+    entry.acquire_fence = VK_NULL_HANDLE;
+  }
+  if (entry.command_pool != VK_NULL_HANDLE) {
+    if (!entry.command_buffers.empty() &&
+        vk_free_command_buffers_fn_ != nullptr) {
+      vk_free_command_buffers_fn_(
+          vk_device_, entry.command_pool,
+          static_cast<uint32_t>(entry.command_buffers.size()),
+          entry.command_buffers.data());
+    }
+    if (vk_destroy_command_pool_fn_ != nullptr) {
+      vk_destroy_command_pool_fn_(vk_device_, entry.command_pool, nullptr);
+    }
+    entry.command_pool = VK_NULL_HANDLE;
+  }
+  entry.command_buffers.clear();
+  entry.images.clear();
+
+  VkSwapchainKHR old_swapchain = entry.swapchain;
+  entry.swapchain = VK_NULL_HANDLE;
+
+  VkImageUsageFlags image_usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+  if (caps.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_SRC_BIT) {
+    image_usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+  }
+  if (caps.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT) {
+    image_usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  }
+
+  VkSwapchainCreateInfoKHR swapchain_info = {
+      .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+      .pNext = nullptr,
+      .flags = 0,
+      .surface = entry.surface,
+      .minImageCount = image_count,
+      .imageFormat = entry.format.format,
+      .imageColorSpace = entry.format.colorSpace,
+      .imageExtent = extent,
+      .imageArrayLayers = 1,
+      .imageUsage = image_usage,
+      .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
+      .queueFamilyIndexCount = 0,
+      .pQueueFamilyIndices = nullptr,
+      .preTransform = caps.currentTransform,
+      .compositeAlpha = composite_alpha,
+      .presentMode = VK_PRESENT_MODE_FIFO_KHR,
+      .clipped = VK_TRUE,
+      .oldSwapchain = old_swapchain,
+  };
+
+  res = vk_create_swapchain_khr_fn_(vk_device_, &swapchain_info, nullptr,
+                                    &entry.swapchain);
+  if (res != VK_SUCCESS && old_swapchain != VK_NULL_HANDLE) {
+    if (vk_destroy_swapchain_khr_fn_ != nullptr) {
+      vk_destroy_swapchain_khr_fn_(vk_device_, old_swapchain, nullptr);
+    }
+    old_swapchain = VK_NULL_HANDLE;
+    swapchain_info.oldSwapchain = VK_NULL_HANDLE;
+    res = vk_create_swapchain_khr_fn_(vk_device_, &swapchain_info, nullptr,
+                                      &entry.swapchain);
+  }
+  if (old_swapchain != VK_NULL_HANDLE &&
+      vk_destroy_swapchain_khr_fn_ != nullptr) {
+    vk_destroy_swapchain_khr_fn_(vk_device_, old_swapchain, nullptr);
+  }
+  if (res != VK_SUCCESS || entry.swapchain == VK_NULL_HANDLE) {
+    FML_LOG(ERROR) << "vkCreateSwapchainKHR for overlay failed: " << res;
+    return false;
+  }
+
+  entry.extent = extent;
+
+  uint32_t actual_image_count = 0;
+  vk_get_swapchain_images_khr_fn_(vk_device_, entry.swapchain,
+                                  &actual_image_count, nullptr);
+  entry.images.resize(actual_image_count);
+  vk_get_swapchain_images_khr_fn_(vk_device_, entry.swapchain,
+                                  &actual_image_count, entry.images.data());
+
+  VkCommandPoolCreateInfo pool_info = {
+      .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+      .pNext = nullptr,
+      .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+      .queueFamilyIndex = vk_graphics_queue_family_index_,
+  };
+  vk_create_command_pool_fn_(vk_device_, &pool_info, nullptr,
+                             &entry.command_pool);
+
+  entry.command_buffers.resize(actual_image_count);
+  VkCommandBufferAllocateInfo alloc_info = {
+      .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+      .pNext = nullptr,
+      .commandPool = entry.command_pool,
+      .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+      .commandBufferCount = actual_image_count,
+  };
+  vk_allocate_command_buffers_fn_(vk_device_, &alloc_info,
+                                  entry.command_buffers.data());
+
+  if (vk_create_fence_fn_ != nullptr) {
+    VkFenceCreateInfo fence_info = {
+        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+    };
+    vk_create_fence_fn_(vk_device_, &fence_info, nullptr, &entry.acquire_fence);
+  }
+  entry.current_image_index = 0;
+  return true;
+}
+
+void AndroidSurfaceManager::DestroyOverlayVulkanSurfaceLocked(
+    VulkanOverlaySurface& entry) {
+  if (is_fake_window_) {
+    return;
+  }
+  if (vk_device_ != VK_NULL_HANDLE && vk_device_wait_idle_fn_ != nullptr) {
+    vk_device_wait_idle_fn_(vk_device_);
+  }
+  if (entry.acquire_fence != VK_NULL_HANDLE &&
+      vk_destroy_fence_fn_ != nullptr) {
+    vk_destroy_fence_fn_(vk_device_, entry.acquire_fence, nullptr);
+    entry.acquire_fence = VK_NULL_HANDLE;
+  }
+  if (entry.command_pool != VK_NULL_HANDLE) {
+    if (!entry.command_buffers.empty() &&
+        vk_free_command_buffers_fn_ != nullptr) {
+      vk_free_command_buffers_fn_(
+          vk_device_, entry.command_pool,
+          static_cast<uint32_t>(entry.command_buffers.size()),
+          entry.command_buffers.data());
+    }
+    if (vk_destroy_command_pool_fn_ != nullptr) {
+      vk_destroy_command_pool_fn_(vk_device_, entry.command_pool, nullptr);
+    }
+    entry.command_pool = VK_NULL_HANDLE;
+  }
+  entry.command_buffers.clear();
+  entry.images.clear();
+  if (entry.swapchain != VK_NULL_HANDLE &&
+      vk_destroy_swapchain_khr_fn_ != nullptr) {
+    vk_destroy_swapchain_khr_fn_(vk_device_, entry.swapchain, nullptr);
+    entry.swapchain = VK_NULL_HANDLE;
+  }
+  if (entry.surface != VK_NULL_HANDLE &&
+      vk_destroy_surface_khr_fn_ != nullptr) {
+    vk_destroy_surface_khr_fn_(vk_instance_, entry.surface, nullptr);
+    entry.surface = VK_NULL_HANDLE;
+  }
+  entry.current_image_index = 0;
+}
+
 void* AndroidSurfaceManager::GetInstanceProcAddress(
     FlutterVulkanInstanceHandle instance,
     const char* name) {
@@ -1442,6 +1709,180 @@ bool AndroidSurfaceManager::PresentImage(const FlutterVulkanImage* image) {
     if (native_window_ != nullptr) {
       CreateOrUpdateVulkanSurfaceLocked();
     }
+  }
+  return res == VK_SUCCESS || res == VK_SUBOPTIMAL_KHR;
+}
+
+FlutterVulkanImage AndroidSurfaceManager::GetNextOverlayImage(
+    ANativeWindow* overlay_window) {
+  std::lock_guard<std::mutex> lock(window_mutex_);
+  FlutterVulkanImage image = {};
+  image.struct_size = sizeof(FlutterVulkanImage);
+
+  if (is_fake_window_) {
+    // 0x2000 is mock overlay image handle for unit tests without Vulkan
+    // hardware
+    image.image = 0x2000;
+    image.format = static_cast<uint32_t>(VK_FORMAT_R8G8B8A8_UNORM);
+    return image;
+  }
+
+  if (overlay_window == nullptr || vk_device_ == VK_NULL_HANDLE) {
+    return image;
+  }
+
+  auto& entry = overlay_vulkan_surfaces_[overlay_window];
+  if (!CreateOrUpdateOverlayVulkanSurfaceLocked(overlay_window, entry)) {
+    return image;
+  }
+
+  if (entry.swapchain == VK_NULL_HANDLE || entry.images.empty() ||
+      entry.acquire_fence == VK_NULL_HANDLE) {
+    return image;
+  }
+
+  vk_reset_fences_fn_(vk_device_, 1, &entry.acquire_fence);
+
+  uint32_t image_index = 0;
+  VkResult res = vk_acquire_next_image_khr_fn_(
+      vk_device_, entry.swapchain, UINT64_MAX, VK_NULL_HANDLE,
+      entry.acquire_fence, &image_index);
+
+  if (res == VK_ERROR_OUT_OF_DATE_KHR) {
+    if (!CreateOrUpdateOverlayVulkanSurfaceLocked(overlay_window, entry)) {
+      return image;
+    }
+    if (entry.swapchain == VK_NULL_HANDLE || entry.images.empty() ||
+        entry.acquire_fence == VK_NULL_HANDLE) {
+      return image;
+    }
+    vk_reset_fences_fn_(vk_device_, 1, &entry.acquire_fence);
+    res = vk_acquire_next_image_khr_fn_(vk_device_, entry.swapchain, UINT64_MAX,
+                                        VK_NULL_HANDLE, entry.acquire_fence,
+                                        &image_index);
+  }
+
+  if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) {
+    return image;
+  }
+
+  // 1-second timeout (1,000,000,000 ns) to ensure image is available
+  constexpr uint64_t kFenceTimeoutNanoseconds = 1000000000ULL;
+  vk_wait_for_fences_fn_(vk_device_, 1, &entry.acquire_fence, VK_TRUE,
+                         kFenceTimeoutNanoseconds);
+
+  entry.current_image_index = image_index;
+  image.image = VkImageToHandle(entry.images[image_index]);
+  image.format = static_cast<uint32_t>(entry.format.format);
+  return image;
+}
+
+bool AndroidSurfaceManager::PresentOverlayImage(
+    ANativeWindow* overlay_window,
+    const FlutterVulkanImage* image) {
+  std::lock_guard<std::mutex> lock(window_mutex_);
+  if (is_fake_window_) {
+    return true;
+  }
+  if (overlay_window == nullptr || image == nullptr) {
+    return false;
+  }
+
+  auto it = overlay_vulkan_surfaces_.find(overlay_window);
+  if (it == overlay_vulkan_surfaces_.end()) {
+    return false;
+  }
+  auto& entry = it->second;
+  if (entry.swapchain == VK_NULL_HANDLE || entry.images.empty()) {
+    return false;
+  }
+
+  uint32_t image_index = UINT32_MAX;
+  for (uint32_t i = 0; i < entry.images.size(); ++i) {
+    if (VkImageToHandle(entry.images[i]) == image->image) {
+      image_index = i;
+      break;
+    }
+  }
+  if (image_index == UINT32_MAX) {
+    FML_LOG(WARNING)
+        << "PresentOverlayImage: provided image " << std::hex << image->image
+        << " does not belong to overlay swapchain; discarding presentation.";
+    return false;
+  }
+
+  entry.current_image_index = image_index;
+  VkImage vk_img = entry.images[image_index];
+  VkCommandBuffer cmd = entry.command_buffers[image_index];
+
+  vk_reset_command_buffer_fn_(cmd, 0);
+
+  VkCommandBufferBeginInfo begin_info = {
+      .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+      .pNext = nullptr,
+      .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+      .pInheritanceInfo = nullptr,
+  };
+  vk_begin_command_buffer_fn_(cmd, &begin_info);
+
+  VkImageMemoryBarrier barrier = {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+      .pNext = nullptr,
+      .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+      .dstAccessMask = 0,
+      .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+      .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .image = vk_img,
+      .subresourceRange =
+          {
+              .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+              .baseMipLevel = 0,
+              .levelCount = 1,
+              .baseArrayLayer = 0,
+              .layerCount = 1,
+          },
+  };
+
+  vk_cmd_pipeline_barrier_fn_(cmd,
+                              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                              VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0,
+                              nullptr, 0, nullptr, 1, &barrier);
+
+  vk_end_command_buffer_fn_(cmd);
+
+  VkSubmitInfo submit_info = {
+      .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+      .pNext = nullptr,
+      .waitSemaphoreCount = 0,
+      .pWaitSemaphores = nullptr,
+      .pWaitDstStageMask = nullptr,
+      .commandBufferCount = 1,
+      .pCommandBuffers = &cmd,
+      .signalSemaphoreCount = 0,
+      .pSignalSemaphores = nullptr,
+  };
+  vk_queue_submit_fn_(vk_queue_, 1, &submit_info, VK_NULL_HANDLE);
+
+  if (vk_queue_wait_idle_fn_ != nullptr) {
+    vk_queue_wait_idle_fn_(vk_queue_);
+  }
+
+  VkPresentInfoKHR present_info = {
+      .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+      .pNext = nullptr,
+      .waitSemaphoreCount = 0,
+      .pWaitSemaphores = nullptr,
+      .swapchainCount = 1,
+      .pSwapchains = &entry.swapchain,
+      .pImageIndices = &image_index,
+      .pResults = nullptr,
+  };
+
+  VkResult res = vk_queue_present_khr_fn_(vk_queue_, &present_info);
+  if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
+    CreateOrUpdateOverlayVulkanSurfaceLocked(overlay_window, entry);
   }
   return res == VK_SUCCESS || res == VK_SUBOPTIMAL_KHR;
 }
@@ -1812,6 +2253,11 @@ void AndroidSurfaceManager::DestroyOverlaySurfaces() {
   }
   overlay_egl_surfaces_.clear();
 #endif
+  std::lock_guard<std::mutex> vk_lock(window_mutex_);
+  for (auto& [window, entry] : overlay_vulkan_surfaces_) {
+    DestroyOverlayVulkanSurfaceLocked(entry);
+  }
+  overlay_vulkan_surfaces_.clear();
 }
 
 }  // namespace flutter
