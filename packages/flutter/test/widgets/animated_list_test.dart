@@ -1421,6 +1421,39 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(SliverAnimatedList), findsNothing);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192533
+  testWidgets('AnimatedList removeItem in the frame that completes insertItem', (
+    WidgetTester tester,
+  ) async {
+    final listKey = GlobalKey<AnimatedListState>();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList(key: listKey, itemBuilder: (_, _, _) => const SizedBox(height: 40)),
+      ),
+    );
+
+    listKey.currentState!.insertItem(0, duration: const Duration(milliseconds: 100));
+    await tester.pump();
+
+    // The insert animation completes in the next frame, and the item is
+    // removed in a post-frame callback before the insert's .then runs.
+    await tester.binding.delayed(const Duration(milliseconds: 150));
+    tester.binding.addPostFrameCallback((_) {
+      listKey.currentState!.removeItem(
+        0,
+        (_, Animation<double> animation) =>
+            SizeTransition(sizeFactor: animation, child: const SizedBox(height: 40)),
+      );
+    });
+    await _pumpWebStyleFrame(tester);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SizedBox), findsNothing);
+  });
 }
 
 // Pumps one frame the way the web engine does: handleBeginFrame and

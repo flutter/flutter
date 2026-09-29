@@ -1404,7 +1404,8 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
       if (!mounted) {
         return;
       }
-      _removeActiveItemAt(_incomingItems, incomingItem.itemIndex)!.controller!.dispose();
+      // removeItem may have already taken this item and its controller.
+      _removeActiveItemAt(_incomingItems, incomingItem.itemIndex)?.controller!.dispose();
     });
   }
 
@@ -1454,7 +1455,11 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
       if (!mounted) {
         return;
       }
-      _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex)!.controller!.dispose();
+      final _ActiveItem? removedItem = _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex);
+      if (removedItem == null) {
+        return;
+      }
+      removedItem.controller!.dispose();
 
       // Decrement the incoming and outgoing item indices to account
       // for the removal.
