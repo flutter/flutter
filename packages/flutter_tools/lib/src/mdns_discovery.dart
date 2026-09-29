@@ -12,10 +12,13 @@ import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
-import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
+import 'globals.dart' as globals;
+
+// macOS error code for EADDRINUSE.
+const _kMacOSAddressAlreadyInUseErrno = 48;
 
 String _missingLocalNetworkPermissionsInstructions(String err) =>
     '''
@@ -28,6 +31,18 @@ You can grant this permission in System Settings > Privacy & Security > Local Ne
 $err
 ''';
 
+String _portAlreadyInUseInstructions(String err) =>
+    '''
+Flutter could not start mDNS discovery because UDP port 5353 is already in use.
+
+This can happen if another process on your machine is exclusively using port 5353, or if multiple network interfaces share the same IPv4 subnet.
+
+You can check which processes are using port 5353 by running:
+  sudo lsof -i :5353
+
+$err
+''';
+
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
   /// Creates a new [MDnsVmServiceDiscovery] object.
@@ -36,7 +51,6 @@ class MDnsVmServiceDiscovery {
   MDnsVmServiceDiscovery({
     required this._analytics,
     required this._logger,
-    required this._platform,
     MDnsClient? mdnsClient,
     MDnsClient? preliminaryMDnsClient,
   }) : _client = mdnsClient ?? MDnsClient(),
@@ -48,7 +62,6 @@ class MDnsVmServiceDiscovery {
   // check for already running services so that results are not cached in _client.
   final MDnsClient? _preliminaryClient;
 
-  final Platform _platform;
   final Logger _logger;
   final Analytics _analytics;
 
@@ -230,10 +243,6 @@ class MDnsVmServiceDiscovery {
     bool throwOnError = true,
     bool useDeviceIPAsHost = false,
   }) async {
-    if (!_platform.isMacOS) {
-      throw UnsupportedError('mDNS discovery is only supported on macOS.');
-    }
-
     // macOS blocks mDNS unless the app has Local Network permissions.
     // Since the mDNS client does not handle errors from the socket's stream,
     // socket exceptions are routed to the current zone. Create an error zone to
@@ -269,9 +278,16 @@ class MDnsVmServiceDiscovery {
     try {
       return await completer.future;
     } on SocketException catch (e, stackTrace) {
+      if (!globals.platform.isMacOS) {
+        rethrow;
+      }
       _logger.printTrace('mDNS discovery failed: $e\n$stackTrace');
       if (throwOnError) {
-        throwToolExit(_missingLocalNetworkPermissionsInstructions(e.toString()));
+        final String message = switch (e.osError?.errorCode) {
+          _kMacOSAddressAlreadyInUseErrno => _portAlreadyInUseInstructions(e.toString()),
+          _ => _missingLocalNetworkPermissionsInstructions(e.toString()),
+        };
+        throwToolExit(message);
       } else {
         return <MDnsVmServiceDiscoveryResult>[];
       }
