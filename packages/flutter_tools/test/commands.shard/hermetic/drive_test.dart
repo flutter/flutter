@@ -851,14 +851,7 @@ void main() {}
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
       fakeDeviceManager.attachedDevices = <Device>[FakeIosDevice()];
-      final command = TestDriveCommandThatOnlyValidates(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        signals: signals,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-      );
+      final command = TestDriveCommandThatOnlyValidates(toolContext: createToolContext());
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -884,14 +877,7 @@ void main() {}
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
       fakeDeviceManager.attachedDevices = <Device>[FakeWindowsDevice()];
-      final command = TestDriveCommandThatOnlyValidates(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        signals: signals,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-      );
+      final command = TestDriveCommandThatOnlyValidates(toolContext: createToolContext());
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -917,14 +903,7 @@ void main() {}
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
       fakeDeviceManager.attachedDevices = <Device>[FakeMacosDevice()];
-      final command = TestDriveCommandThatOnlyValidates(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        signals: signals,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-      );
+      final command = TestDriveCommandThatOnlyValidates(toolContext: createToolContext());
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -951,14 +930,7 @@ void main() {}
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
         fakeDeviceManager.attachedDevices = <Device>[ScreenshotDevice()];
-        final command = DriveCommand(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          signals: signals,
-          terminal: terminal,
-          outputPreferences: outputPreferences,
-        );
+        final command = DriveCommand(toolContext: createToolContext());
         final CommandRunner<void> runner = createTestCommandRunner(command);
         final String flagArg = switch (flag) {
           AndroidEngineCliFlags.route => '--route=/',
@@ -1325,14 +1297,7 @@ class FakeMacosDevice extends Fake implements Device {
 }
 
 class TestDriveCommandThatOnlyValidates extends DriveCommand {
-  TestDriveCommandThatOnlyValidates({
-    required super.fileSystem,
-    required super.logger,
-    required super.platform,
-    required super.signals,
-    required super.terminal,
-    required super.outputPreferences,
-  });
+  TestDriveCommandThatOnlyValidates({required super.toolContext});
 
   @override
   Future<FlutterCommandResult> runCommand() async {
