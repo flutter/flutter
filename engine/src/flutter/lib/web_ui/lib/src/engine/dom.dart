@@ -831,6 +831,8 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
 
   external String getPropertyValue(String property);
 
+  external String getPropertyPriority(String property);
+
   @JS('setProperty')
   external void _setProperty(String propertyName, String value, String priority);
   void setProperty(String propertyName, String value, [String? priority]) {

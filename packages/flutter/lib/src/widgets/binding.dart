@@ -4,6 +4,7 @@
 
 /// @docImport 'dart:ui';
 /// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
 /// @docImport 'package:flutter_test/flutter_test.dart';
 ///
@@ -1133,16 +1134,18 @@ mixin WidgetsBinding
         );
       }
     }
-    SystemNavigator.pop().catchError((Object exception, StackTrace stack) {
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets library',
-          context: ErrorDescription('while popping route'),
-        ),
-      );
-    });
+    unawaited(
+      SystemNavigator.pop().catchError((Object exception, StackTrace stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription('while popping route'),
+          ),
+        );
+      }),
+    );
     return false;
   }
 

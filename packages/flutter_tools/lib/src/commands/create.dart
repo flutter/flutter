@@ -861,7 +861,12 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         _printWarningDisabledPlatform(platformsToWarn, logger: logger);
       }
       final template = generateMethodChannelsPlugin ? 'plugin' : 'plugin_ffi';
-      _printPluginAddPlatformMessage(relativePluginPath, template, logger: logger);
+      _printPluginAddPlatformMessage(
+        relativePluginPath,
+        template,
+        logger: logger,
+        usesPigeon: generateMethodChannelsPlugin,
+      );
     } else {
       // Tell the user the next steps.
       final FlutterProject project = projectFactory.fromDirectory(fs.directory(projectDirPath));
@@ -968,6 +973,8 @@ Your $application code is in $relativeAppMain.
         templateContext[platform] = false;
       }
     }
+    templateContext['iosOrMacOS'] =
+        (templateContext['ios'] as bool? ?? false) || (templateContext['macos'] as bool? ?? false);
     final List<String> platformsToAdd = _getSupportedPlatformsFromTemplateContext(templateContext);
 
     final List<String> existingPlatforms = _getSupportedPlatformsInPlugin(
@@ -1346,9 +1353,15 @@ You've created a plugin project that doesn't yet support any platforms.
 ''');
 }
 
-void _printPluginAddPlatformMessage(String pluginPath, String template, {required Logger logger}) {
+void _printPluginAddPlatformMessage(
+  String pluginPath,
+  String template, {
+  required Logger logger,
+  required bool usesPigeon,
+}) {
   logger.printStatus('''
-To add platforms, run `flutter create -t $template --platforms <platforms> .` under $pluginPath.
+To add platforms, run `flutter create -t $template --platforms <platforms> .` under $pluginPath,
+then update ${usesPigeon ? 'pigeon/messages.dart and ' : ''}pubspec.yaml to include the new platforms.
 For more information, see https://flutter.dev/to/pubspec-plugin-platforms.
 
 ''');

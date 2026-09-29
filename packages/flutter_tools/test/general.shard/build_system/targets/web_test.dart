@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:file_testing/file_testing.dart';
@@ -19,8 +20,10 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/content_hash.dart';
 import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 import 'package:flutter_tools/src/web_template.dart';
+import 'package:standard_message_codec/standard_message_codec.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
@@ -2119,7 +2122,64 @@ _flutter.loader.load();
 
       await expectLater(
         Dart2JSTarget(const JsCompilerConfig(webContentHash: true)).build(environment),
-        throwsToolExit(message: 'deferred'),
+        throwsToolExit(
+          message:
+              '"--web-content-hash" does not yet support deferred imports: '
+              'deferred part files keep unhashed names',
+        ),
+      );
+    }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
+  );
+
+  test(
+    'Dart2WasmTarget build with webContentHash tool-exits when deferred part files are present',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      final File depFile = environment.buildDir.childFile('dart2wasm.d');
+      final File wasmFile = environment.buildDir.childFile('main.dart.wasm');
+      final File mjsFile = environment.buildDir.childFile('main.dart.mjs');
+      final wasmBytes = <int>[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00];
+      const mjsContent = 'export function main() {}\n';
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            ..._kDart2WasmLinuxArgs,
+            '-Ddart.vm.profile=false',
+            '-Ddart.vm.product=true',
+            '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+            '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+            '--extra-compiler-option=--import-shared-memory',
+            '--extra-compiler-option=--shared-memory-max-pages=32768',
+            '-DFLUTTER_WEB_USE_SKIA=false',
+            '-DFLUTTER_WEB_USE_SKWASM=true',
+            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+            '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+            '--recorded-uses=${environment.buildDir.childFile('recorded_uses_wasm.json').absolute.path}',
+            '-O2',
+            '--strip-wasm',
+            '--minify',
+            '-o',
+            wasmFile.absolute.path,
+            environment.buildDir.childFile('main.dart').absolute.path,
+          ],
+          onRun: (_) {
+            wasmFile.writeAsBytesSync(wasmBytes);
+            mjsFile.writeAsStringSync(mjsContent);
+            environment.buildDir.childFile('main.dart_module1.wasm').writeAsBytesSync(wasmBytes);
+          },
+        ),
+      );
+
+      await expectLater(
+        Dart2WasmTarget(
+          const WasmCompilerConfig(webContentHash: true),
+          const NoOpAnalytics(),
+        ).build(environment),
+        throwsToolExit(
+          message:
+              '"--web-content-hash" does not yet support deferred imports: '
+              'deferred part files keep unhashed names',
+        ),
       );
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
@@ -2208,6 +2268,9 @@ _flutter.loader.load();
         ..createSync(recursive: true);
       final File unrelated = environment.outputDir.childFile('flutter.js')
         ..createSync(recursive: true);
+      environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('_flutter.buildConfig = {"engineRevision":"abc","builds":[]};\n');
 
       await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig(webContentHash: true),
@@ -2329,6 +2392,243 @@ console.log(mapName);
     }),
   );
 
+  test(
+    'WebReleaseBundle hashes all physical assets, shaders, NOTICES, and manifests and injects manifest filenames into buildConfig when webContentHash is true',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      environment.projectDir.childDirectory('web').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync(recursive: true);
+      environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('_flutter.buildConfig = {"engineRevision":"abc","builds":[]};\n');
+      environment.outputDir.childFile('index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          '<script>_flutter.buildConfig = {"engineRevision":"abc","builds":[]};</script>\n',
+        );
+
+      // Create a pubspec.yaml with assets, variants, shaders, fonts, and notices.
+      environment.projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+flutter:
+  assets:
+    - images/logo.png
+    - images/2.0x/logo.png
+    - NOTICES
+    - nested/NOTICES
+    - shaders/ink_sparkle.frag
+    - custom/blur.FRAG
+    - fonts/my_font.ttf
+    - images/100%_deal.png
+  fonts:
+    - family: MyFont
+      fonts:
+        - asset: fonts/my_font.ttf
+''');
+
+      final File logo = environment.projectDir.childDirectory('images').childFile('logo.png')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+      environment.projectDir.childDirectory('images').childDirectory('2.0x').childFile('logo.png')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
+      environment.projectDir.childFile('NOTICES')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('Root license notices');
+      environment.projectDir.childDirectory('nested').childFile('NOTICES')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('Nested notices');
+      environment.projectDir.childDirectory('shaders').childFile('ink_sparkle.frag')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('void main() {}');
+      environment.projectDir.childDirectory('custom').childFile('blur.FRAG')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('void main() {}');
+      environment.projectDir.childDirectory('fonts').childFile('my_font.ttf')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[10, 20, 30]);
+      environment.projectDir.childDirectory('images').childFile('100%_deal.png')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[99, 100]);
+
+      const logoHash = '9f64a747'; // sha256 of [1,2,3,4]
+      const logo2xHash = '74f81fe1'; // sha256 of [1,2,3,4,5]
+      const fontHash = '6951bbd9'; // sha256 of [10,20,30]
+      const dealHash = '21e721c3'; // sha256 of [99,100]
+      const nestedNoticesHash = '642c7c36'; // sha256 of 'Nested notices'
+      final String shaderHash = crypto.sha256
+          .convert('void main() {}'.codeUnits)
+          .toString()
+          .substring(0, 8);
+
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(webContentHash: true),
+      ], const NoOpAnalytics()).build(environment);
+
+      final Directory assetsDir = environment.outputDir.childDirectory('assets');
+
+      // Hashed assets (including shaders and NOTICES)
+      expect(assetsDir.childDirectory('images').childFile('logo.$logoHash.png').existsSync(), true);
+      expect(assetsDir.childDirectory('images').childFile('logo.png').existsSync(), false);
+      expect(
+        assetsDir
+            .childDirectory('images')
+            .childDirectory('2.0x')
+            .childFile('logo.$logo2xHash.png')
+            .existsSync(),
+        true,
+      );
+      expect(
+        assetsDir.childDirectory('fonts').childFile('my_font.$fontHash.ttf').existsSync(),
+        true,
+      );
+      expect(
+        assetsDir.childDirectory('images').childFile('100%25_deal.$dealHash.png').existsSync(),
+        true,
+      );
+      expect(
+        assetsDir.childDirectory('nested').childFile('NOTICES.$nestedNoticesHash').existsSync(),
+        true,
+      );
+      expect(
+        assetsDir.childDirectory('shaders').childFile('ink_sparkle.$shaderHash.frag').existsSync(),
+        true,
+      );
+      expect(assetsDir.childDirectory('shaders').childFile('ink_sparkle.frag').existsSync(), false);
+      expect(
+        assetsDir.childDirectory('custom').childFile('blur.$shaderHash.FRAG').existsSync(),
+        true,
+      );
+      expect(assetsDir.childDirectory('custom').childFile('blur.FRAG').existsSync(), false);
+      expect(assetsDir.childFile('NOTICES').existsSync(), false);
+      expect(assetsDir.childFile('NOTICES.Z').existsSync(), false);
+
+      // Un-hashed manifest files must be removed and replaced by content-hashed manifest files
+      expect(assetsDir.childFile('AssetManifest.bin').existsSync(), false);
+      expect(assetsDir.childFile('AssetManifest.bin.json').existsSync(), false);
+      expect(assetsDir.childFile('FontManifest.json').existsSync(), false);
+
+      final List<File> rootAssetFiles = assetsDir.listSync().whereType<File>().toList();
+      final File assetManifestBin = rootAssetFiles.singleWhere(
+        (File f) => RegExp(r'^AssetManifest\.[0-9a-f]{8}\.bin$').hasMatch(f.basename),
+      );
+      final File assetManifestBinJson = rootAssetFiles.singleWhere(
+        (File f) => RegExp(r'^AssetManifest\.bin\.[0-9a-f]{8}\.json$').hasMatch(f.basename),
+      );
+      final File fontManifest = rootAssetFiles.singleWhere(
+        (File f) => RegExp(r'^FontManifest\.[0-9a-f]{8}\.json$').hasMatch(f.basename),
+      );
+
+      // Verify _flutter.buildConfig in flutter_bootstrap.js and index.html received the hashed manifest filenames and extraAssets
+      final String bootstrapContent = environment.outputDir
+          .childFile('flutter_bootstrap.js')
+          .readAsStringSync();
+      expect(bootstrapContent, contains('"assetManifest":"${assetManifestBinJson.basename}"'));
+      expect(bootstrapContent, contains('"fontManifest":"${fontManifest.basename}"'));
+      expect(bootstrapContent, contains('"extraAssets":{'));
+      expect(bootstrapContent, contains('"AssetManifest.bin":"${assetManifestBin.basename}"'));
+      expect(bootstrapContent, contains('"FontManifest.json":"${fontManifest.basename}"'));
+      final String indexHtmlContent = environment.outputDir
+          .childFile('index.html')
+          .readAsStringSync();
+      expect(indexHtmlContent, contains('"assetManifest":"${assetManifestBinJson.basename}"'));
+      expect(indexHtmlContent, contains('"fontManifest":"${fontManifest.basename}"'));
+
+      // Decode AssetManifest.bin and verify variant mappings (stored as Uri.decodeFull paths,
+      // without non-manifest SDK files like FontManifest.json or AssetManifest.bin)
+      final Uint8List rawBytes = assetManifestBin.readAsBytesSync();
+      final decodedManifest =
+          const StandardMessageCodec().decodeMessage(ByteData.sublistView(rawBytes))!
+              as Map<Object?, Object?>;
+      expect(decodedManifest.containsKey('FontManifest.json'), isFalse);
+      expect(decodedManifest.containsKey('AssetManifest.bin'), isFalse);
+      expect(decodedManifest.containsKey('NOTICES.Z'), isFalse);
+      final List<Map<Object?, Object?>> logoVariants =
+          (decodedManifest['images/logo.png']! as List<Object?>).cast<Map<Object?, Object?>>();
+      expect(logoVariants, hasLength(2));
+      expect(logoVariants[0]['asset'], 'images/logo.$logoHash.png');
+      expect(logoVariants[1]['asset'], 'images/2.0x/logo.$logo2xHash.png');
+      expect(logoVariants[1]['dpr'], 2.0);
+      final List<Map<Object?, Object?>> dealVariants =
+          (decodedManifest['images/100%_deal.png']! as List<Object?>).cast<Map<Object?, Object?>>();
+      expect(dealVariants[0]['asset'], 'images/100%_deal.$dealHash.png');
+
+      // Verify AssetManifest.bin.json decodes to the exact same clean manifest
+      final Object? binJsonDecoded = json.decode(assetManifestBinJson.readAsStringSync());
+      final binJsonBytes = ByteData.sublistView(base64.decode(binJsonDecoded! as String));
+      final manifestFromBinJson =
+          const StandardMessageCodec().decodeMessage(binJsonBytes)! as Map<Object?, Object?>;
+      expect(manifestFromBinJson.containsKey('FontManifest.json'), isFalse);
+      expect(manifestFromBinJson.containsKey('AssetManifest.bin'), isFalse);
+      expect(manifestFromBinJson.containsKey('NOTICES.Z'), isFalse);
+      final List<Map<Object?, Object?>> logoVariantsFromBinJson =
+          (manifestFromBinJson['images/logo.png']! as List<Object?>).cast<Map<Object?, Object?>>();
+      expect(logoVariantsFromBinJson[0]['asset'], 'images/logo.$logoHash.png');
+
+      // Verify FontManifest.json rewriting
+      final decodedFonts = json.decode(fontManifest.readAsStringSync()) as List<dynamic>;
+      expect(decodedFonts, hasLength(1));
+      final fontMap = decodedFonts.first as Map<String, dynamic>;
+      expect(fontMap['family'], 'MyFont');
+      final List<Map<String, dynamic>> fontEntries = (fontMap['fonts'] as List<dynamic>)
+          .cast<Map<String, dynamic>>();
+      expect(fontEntries[0]['asset'], 'fonts/my_font.$fontHash.ttf');
+
+      // Verify flutter_assets.d references the hashed paths
+      final File depfile = environment.buildDir.childFile('flutter_assets.d');
+      expect(depfile.existsSync(), true);
+      expect(depfile.readAsStringSync(), contains('logo.$logoHash.png'));
+      expect(depfile.readAsStringSync(), contains('logo.$logo2xHash.png'));
+      expect(depfile.readAsStringSync(), contains('my_font.$fontHash.ttf'));
+      expect(depfile.readAsStringSync(), contains(assetManifestBinJson.basename));
+      expect(depfile.readAsStringSync(), contains(fontManifest.basename));
+
+      // Test stale asset cleanup on rebuild: modify logo content
+      logo.writeAsBytesSync(<int>[5, 6, 7, 8]);
+      const newLogoHash = '55e5509f'; // sha256 of [5,6,7,8]
+
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(webContentHash: true),
+      ], const NoOpAnalytics()).build(environment);
+
+      expect(
+        assetsDir.childDirectory('images').childFile('logo.$newLogoHash.png').existsSync(),
+        true,
+      );
+      expect(
+        assetsDir.childDirectory('images').childFile('logo.$logoHash.png').existsSync(),
+        false,
+      );
+    }),
+  );
+
+  test(
+    'WebReleaseBundle leaves assets and manifests unhashed when webContentHash is false',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      environment.projectDir.childDirectory('web').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync(recursive: true);
+
+      environment.projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+flutter:
+  assets:
+    - images/logo.png
+''');
+
+      environment.projectDir.childDirectory('images').childFile('logo.png')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
+
+      final Directory assetsDir = environment.outputDir.childDirectory('assets');
+      expect(assetsDir.childDirectory('images').childFile('logo.png').existsSync(), true);
+      expect(assetsDir.childDirectory('images').childFile('logo.9f64a747.png').existsSync(), false);
+    }),
+  );
   test(
     'WebTemplatedFiles populates wasmHashes from compileTargets on clean builds before outputDir is copied',
     () => testbed.run(() async {
@@ -2488,6 +2788,406 @@ console.log(mapName);
 
       final String configString = target.buildConfigString(customEnv);
       expect(configString, contains('"main.dart.89abcdef.wasm":'));
+    }),
+  );
+
+  test(
+    'WebServiceWorker emits precache_manifest.json and excludes non-runtime bloat when webContentHash is true',
+    () => testbed.run(() async {
+      final File fileGenerators =
+          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators).isEmpty
+          ? environment.fileSystem.file('flutter_service_worker.js')
+          : environment.fileSystem.file(
+              environment.fileSystem.path.join(
+                environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
+                'js',
+                'flutter_service_worker.js',
+              ),
+            );
+      fileGenerators
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// service worker stub');
+
+      const indexBytes = <int>[1, 2, 3, 4];
+      const bootstrapBytes = <int>[5, 6, 7, 8, 9];
+      const mainJsBytes = <int>[10, 20, 30, 40, 50, 60];
+      const logoBytes = <int>[70, 80, 90];
+      const manifestBinBytes = <int>[11, 22, 33];
+      const extensionlessAssetBytes = <int>[44, 55, 66];
+
+      final String indexHash = crypto.sha256.convert(indexBytes).toString().substring(0, 8);
+      final String bootstrapHash = crypto.sha256.convert(bootstrapBytes).toString().substring(0, 8);
+      final String mainJsHash = crypto.sha256.convert(mainJsBytes).toString().substring(0, 8);
+      final String logoHash = crypto.sha256.convert(logoBytes).toString().substring(0, 8);
+      final String manifestBinHash = crypto.sha256
+          .convert(manifestBinBytes)
+          .toString()
+          .substring(0, 8);
+      final String extensionlessHash = crypto.sha256
+          .convert(extensionlessAssetBytes)
+          .toString()
+          .substring(0, 8);
+
+      environment.outputDir.childFile('index.html')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(indexBytes);
+      environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(bootstrapBytes);
+      environment.outputDir.childFile('main.dart.$mainJsHash.js')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(mainJsBytes);
+      environment.outputDir.childFile('assets/images/logo.$logoHash.png')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(logoBytes);
+      environment.outputDir.childFile('assets/AssetManifest.bin')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(manifestBinBytes);
+      environment.outputDir.childFile('assets/RAW_DATA.$extensionlessHash')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(extensionlessAssetBytes);
+
+      // Non-runtime files that must be excluded from precache_manifest.json:
+      environment.outputDir.childFile('main.dart.$mainJsHash.js.map')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{}');
+      environment.outputDir.childFile('main.dart.wasm.symbols')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('symbols');
+      environment.outputDir.childFile('main.dart.js.info.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{}');
+      environment.outputDir.childFile('.last_build_id')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('build-id');
+      environment.outputDir.childFile('canvaskit/canvaskit.wasm')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[0, 97, 115, 109]);
+
+      final target = WebServiceWorker(environment.fileSystem, const <WebCompilerConfig>[
+        JsCompilerConfig(webContentHash: true),
+      ], const NoOpAnalytics());
+      await target.build(environment);
+
+      final File manifestFile = environment.outputDir.childFile('precache_manifest.json');
+      expect(manifestFile, exists);
+
+      final decoded = jsonDecode(manifestFile.readAsStringSync()) as Map<String, Object?>;
+      expect(decoded['version'], 1);
+
+      final entries = decoded['entries']! as List<Object?>;
+      expect(entries, <Map<String, Object>>[
+        <String, Object>{
+          'url': 'assets/AssetManifest.bin',
+          'hash': manifestBinHash,
+          'size': manifestBinBytes.length,
+          'urlHashed': false,
+        },
+        <String, Object>{
+          'url': 'assets/RAW_DATA.$extensionlessHash',
+          'hash': extensionlessHash,
+          'size': extensionlessAssetBytes.length,
+          'urlHashed': true,
+        },
+        <String, Object>{
+          'url': 'assets/images/logo.$logoHash.png',
+          'hash': logoHash,
+          'size': logoBytes.length,
+          'urlHashed': true,
+        },
+        <String, Object>{
+          'url': 'flutter_bootstrap.js',
+          'hash': bootstrapHash,
+          'size': bootstrapBytes.length,
+          'urlHashed': false,
+        },
+        <String, Object>{
+          'url': 'index.html',
+          'hash': indexHash,
+          'size': indexBytes.length,
+          'urlHashed': false,
+        },
+        <String, Object>{
+          'url': 'main.dart.$mainJsHash.js',
+          'hash': mainJsHash,
+          'size': mainJsBytes.length,
+          'urlHashed': true,
+        },
+      ]);
+
+      final File serviceWorkerDepfile = environment.buildDir.childFile('service_worker.d');
+      expect(serviceWorkerDepfile, exists);
+      expect(serviceWorkerDepfile.readAsStringSync(), contains('precache_manifest.json:'));
+    }),
+  );
+
+  test(
+    'WebServiceWorker includes canvaskit in precache_manifest.json when kUseLocalCanvasKitFlag is true',
+    () => testbed.run(() async {
+      environment.defines[kUseLocalCanvasKitFlag] = 'true';
+      final File fileGenerators = environment.fileSystem.file(
+        environment.fileSystem.path.join(
+          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
+          'js',
+          'flutter_service_worker.js',
+        ),
+      );
+      fileGenerators
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// service worker stub');
+
+      const wasmBytes = <int>[0, 97, 115, 109];
+      final String wasmHash = crypto.sha256.convert(wasmBytes).toString().substring(0, 8);
+      environment.outputDir.childFile('canvaskit/canvaskit.wasm')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(wasmBytes);
+
+      final target = WebServiceWorker(environment.fileSystem, const <WebCompilerConfig>[
+        JsCompilerConfig(webContentHash: true),
+      ], const NoOpAnalytics());
+      await target.build(environment);
+
+      final File manifestFile = environment.outputDir.childFile('precache_manifest.json');
+      final decoded = jsonDecode(manifestFile.readAsStringSync()) as Map<String, Object?>;
+      expect(decoded['entries'], <Map<String, Object>>[
+        <String, Object>{
+          'url': 'canvaskit/canvaskit.wasm',
+          'hash': wasmHash,
+          'size': wasmBytes.length,
+          'urlHashed': false,
+        },
+      ]);
+    }),
+  );
+
+  test(
+    'WebServiceWorker deletes stale precache_manifest.json when webContentHash is false',
+    () => testbed.run(() async {
+      final File fileGenerators = environment.fileSystem.file(
+        environment.fileSystem.path.join(
+          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
+          'js',
+          'flutter_service_worker.js',
+        ),
+      );
+      fileGenerators
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// service worker stub');
+
+      final File staleManifest = environment.outputDir.childFile('precache_manifest.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"version":1,"entries":[]}');
+
+      final target = WebServiceWorker(environment.fileSystem, const <WebCompilerConfig>[
+        JsCompilerConfig(),
+      ], const NoOpAnalytics());
+      await target.build(environment);
+
+      expect(staleManifest, isNot(exists));
+    }),
+  );
+
+  test(
+    'injectManifestBuildConfig handles custom _flutter.buildConfig without trailing semicolon or with }; inside string literals',
+    () => testbed.run(() async {
+      final File bootstrapFile = environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+_flutter.buildConfig = {
+  "engineRevision": "abc",
+  "customLiteral": "value with }; inside string",
+  "builds": [
+    {
+      "compileTarget": "dart2js",
+      "mainJsPath": "main.dart.12345678.js"
+    }
+  ]
+}
+_flutter.loader.load({
+  onEntrypointLoaded: async function(engineInitializer) {
+    const appRunner = await engineInitializer.initializeEngine();
+    await appRunner.runApp();
+  }
+});
+''');
+
+      injectManifestBuildConfig(
+        environment.outputDir,
+        const WebAssetHashResult(
+          renamedFiles: <String, File>{},
+          assetManifestBinJson: 'AssetManifest.bin.deadbeef.json',
+          fontManifestJson: 'FontManifest.cafebabe.json',
+        ),
+      );
+
+      final String updated = bootstrapFile.readAsStringSync();
+      expect(updated, contains('"assetManifest":"AssetManifest.bin.deadbeef.json"'));
+      expect(updated, contains('"fontManifest":"FontManifest.cafebabe.json"'));
+      expect(updated, contains('"customLiteral":"value with }; inside string"'));
+      expect(updated, contains('_flutter.loader.load({'));
+    }),
+  );
+
+  test(
+    'WebReleaseBundle includes templated index.html and flutter_bootstrap.js in inputs and outputs only when webContentHash is true',
+    () => testbed.run(() async {
+      final hashedBundle = WebReleaseBundle(const <WebCompilerConfig>[
+        JsCompilerConfig(webContentHash: true),
+      ], const NoOpAnalytics());
+      final unhashedBundle = WebReleaseBundle(const <WebCompilerConfig>[
+        JsCompilerConfig(),
+      ], const NoOpAnalytics());
+
+      final File indexHtml = environment.outputDir.childFile('index.html')
+        ..createSync(recursive: true);
+      final File bootstrapJs = environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true);
+
+      final Set<String> hashedInputPaths = hashedBundle
+          .resolveInputs(environment)
+          .sources
+          .map((File f) => f.path)
+          .toSet();
+      final Set<String> hashedOutputPaths = hashedBundle
+          .resolveOutputs(environment)
+          .sources
+          .map((File f) => f.path)
+          .toSet();
+      expect(hashedInputPaths, containsAll(<String>[indexHtml.path, bootstrapJs.path]));
+      expect(hashedOutputPaths, containsAll(<String>[indexHtml.path, bootstrapJs.path]));
+
+      final Set<String> unhashedInputBasenames = unhashedBundle
+          .resolveInputs(environment)
+          .sources
+          .map((File f) => f.basename)
+          .toSet();
+      final Set<String> unhashedOutputBasenames = unhashedBundle
+          .resolveOutputs(environment)
+          .sources
+          .map((File f) => f.basename)
+          .toSet();
+      expect(unhashedInputBasenames, isNot(contains('index.html')));
+      expect(unhashedInputBasenames, isNot(contains('flutter_bootstrap.js')));
+      expect(unhashedOutputBasenames, isNot(contains('index.html')));
+      expect(unhashedOutputBasenames, isNot(contains('flutter_bootstrap.js')));
+    }),
+  );
+
+  test(
+    'hashWebAssets produces identical manifest hashes regardless of file creation order',
+    () => testbed.run(() {
+      final ByteData? initialBin = const StandardMessageCodec().encodeMessage(<Object?, Object?>{
+        'assets/logo.png': <Object?>[
+          <Object?, Object?>{'asset': 'assets/logo.png'},
+        ],
+      });
+      final Uint8List initialBinBytes = initialBin!.buffer.asUint8List(
+        initialBin.offsetInBytes,
+        initialBin.lengthInBytes,
+      );
+
+      final Directory dirA = environment.outputDir.childDirectory('dirA/assets')
+        ..createSync(recursive: true);
+      dirA.childFile('logo.png')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('logo');
+      dirA.childFile('shaders/stretch_effect.frag')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('stretch');
+      dirA.childFile('shaders/ink_sparkle.frag')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('sparkle');
+      dirA.childFile('AssetManifest.bin').writeAsBytesSync(initialBinBytes);
+      dirA.childFile('AssetManifest.bin.json').writeAsStringSync('""');
+
+      final Directory dirB = environment.outputDir.childDirectory('dirB/assets')
+        ..createSync(recursive: true);
+      dirB.childFile('logo.png')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('logo');
+      dirB.childFile('shaders/ink_sparkle.frag')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('sparkle');
+      dirB.childFile('shaders/stretch_effect.frag')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('stretch');
+      dirB.childFile('AssetManifest.bin').writeAsBytesSync(initialBinBytes);
+      dirB.childFile('AssetManifest.bin.json').writeAsStringSync('""');
+
+      final WebAssetHashResult resultA = hashWebAssets(dirA);
+      final WebAssetHashResult resultB = hashWebAssets(dirB);
+
+      expect(resultA.assetManifestBinJson, equals(resultB.assetManifestBinJson));
+      expect(
+        dirA.childFile(resultA.assetManifestBinJson!).readAsStringSync(),
+        equals(dirB.childFile(resultB.assetManifestBinJson!).readAsStringSync()),
+      );
+      expect(resultA.extraAssets, equals(resultB.extraAssets));
+    }),
+  );
+
+  test(
+    'injectManifestBuildConfig throws ToolExit when _flutter.buildConfig is malformed JSON or missing from flutter_bootstrap.js',
+    () => testbed.run(() {
+      const hashResult = WebAssetHashResult(
+        renamedFiles: <String, File>{},
+        assetManifestBinJson: 'AssetManifest.bin.deadbeef.json',
+      );
+
+      // 1. Missing _flutter.buildConfig in flutter_bootstrap.js
+      final File bootstrapFile = environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('_flutter.loader.load();\n');
+      expect(
+        () => injectManifestBuildConfig(environment.outputDir, hashResult),
+        throwsToolExit(message: 'Failed to inject content-hashed "assetManifest"'),
+      );
+
+      // 2. Malformed _flutter.buildConfig (non-JSON JS expression)
+      bootstrapFile.writeAsStringSync(
+        '_flutter.buildConfig = { engineRevision: "unquotedKey" };\n',
+      );
+      expect(
+        () => injectManifestBuildConfig(environment.outputDir, hashResult),
+        throwsToolExit(message: '"_flutter.buildConfig" is not valid JSON'),
+      );
+
+      // 2b. Single-quoted and backtick string literals containing '{' inside
+      // _flutter.buildConfig should be skipped by brace matching so the outer
+      // closing '}' is matched and JSON decoding throws "is not valid JSON"
+      // rather than "could not find matching closing brace".
+      bootstrapFile.writeAsStringSync(
+        '_flutter.buildConfig = { \'note\': \'unmatched { in single quotes\', "builds": [] };\n',
+      );
+      expect(
+        () => injectManifestBuildConfig(environment.outputDir, hashResult),
+        throwsToolExit(message: '"_flutter.buildConfig" is not valid JSON'),
+      );
+      bootstrapFile.writeAsStringSync(
+        '_flutter.buildConfig = { `note`: `unmatched { in backticks`, "builds": [] };\n',
+      );
+      expect(
+        () => injectManifestBuildConfig(environment.outputDir, hashResult),
+        throwsToolExit(message: '"_flutter.buildConfig" is not valid JSON'),
+      );
+
+      // 3. HTML/JS comments mentioning _flutter.buildConfig in index.html and
+      // flutter_bootstrap.js do not cause false-positive ToolExit
+      environment.outputDir.childFile('index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          '<!-- Note: _flutter.buildConfig is configured in flutter_bootstrap.js -->\n'
+          '<script src="flutter_bootstrap.js" async></script>\n',
+        );
+      bootstrapFile.writeAsStringSync(
+        '// Example: _flutter.buildConfig = { invalid: json };\n'
+        '_flutter.buildConfig = {"engineRevision":"abc","builds":[]};\n',
+      );
+      injectManifestBuildConfig(environment.outputDir, hashResult);
+      expect(
+        bootstrapFile.readAsStringSync(),
+        contains('"assetManifest":"AssetManifest.bin.deadbeef.json"'),
+      );
     }),
   );
 }
