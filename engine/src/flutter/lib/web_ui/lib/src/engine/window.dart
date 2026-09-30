@@ -225,13 +225,6 @@ class EngineFlutterView implements ui.FlutterView {
         newHostElement.appendChild(dom.rootElement);
       }
 
-      // generate a new DomManager by reusing the existing root element
-      _dom[newDomDocument] = DomManager(
-        devicePixelRatio: devicePixelRatio,
-        document: newDomDocument,
-        existingRootElement: dom.rootElement,
-      );
-
       FrameService.instance.unregisterWindow(viewDomWindow);
       viewDomWindow = newDomWindow;
       viewDomDocument = newDomDocument;
@@ -282,11 +275,7 @@ class EngineFlutterView implements ui.FlutterView {
 
   late final ContextMenu contextMenu = ContextMenu(dom.rootElement);
 
-  final Map<DomDocument, DomManager> _dom = {};
-  DomManager get dom => _dom.putIfAbsent(
-    viewDomDocument,
-    () => DomManager(devicePixelRatio: devicePixelRatio, document: viewDomDocument),
-  );
+  late final DomManager dom = DomManager(devicePixelRatio: devicePixelRatio);
 
   late PointerBinding pointerBinding;
 

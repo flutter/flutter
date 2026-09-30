@@ -46,33 +46,13 @@ import 'style_manager.dart';
 /// lives in the document body instead of the view. See `SemanticsHelper`.
 ///
 class DomManager {
-  factory DomManager({
-    required double devicePixelRatio,
-    required DomDocument document,
-    DomElement? existingRootElement,
-  }) {
-    final DomElement rootElement =
-        existingRootElement ?? document.createElement(DomManager.flutterViewTagName);
-    final DomElement platformViewsHost = document.createElement(DomManager.glassPaneTagName);
+  factory DomManager({required double devicePixelRatio}) {
+    final DomElement rootElement = domDocument.createElement(DomManager.flutterViewTagName);
+    final DomElement platformViewsHost = domDocument.createElement(DomManager.glassPaneTagName);
     final DomShadowRoot renderingHost = _attachShadowRoot(platformViewsHost);
-    final DomElement sceneHost = document.createElement(DomManager.sceneHostTagName);
-    final DomElement textEditingHost = document.createElement(DomManager.textEditingHostTagName);
-    final DomElement semanticsHost = document.createElement(DomManager.semanticsHostTagName);
-
-    // remove old roots
-    for (final String tag in [
-      DomManager.glassPaneTagName,
-      DomManager.sceneHostTagName,
-      DomManager.textEditingHostTagName,
-      DomManager.semanticsHostTagName,
-    ]) {
-      final DomNode? node = rootElement.children
-          .where((c) => c.tagName.toLowerCase() == tag.toLowerCase())
-          .firstOrNull;
-      if (node != null) {
-        rootElement.removeChild(node);
-      }
-    }
+    final DomElement sceneHost = domDocument.createElement(DomManager.sceneHostTagName);
+    final DomElement textEditingHost = domDocument.createElement(DomManager.textEditingHostTagName);
+    final DomElement semanticsHost = domDocument.createElement(DomManager.semanticsHostTagName);
 
     // Root element children.
     rootElement.appendChild(platformViewsHost);
