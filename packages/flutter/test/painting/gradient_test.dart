@@ -338,14 +338,19 @@ void main() {
       end: Alignment.topCenter,
       colors: <Color>[Color(0xFFFFFFFF), Color(0xAF777777), Color(0x44444444)],
     );
+
     final LinearGradient actual = testGradient.withOpacity(0.5);
 
     expect(
       actual,
-      const LinearGradient(
+      LinearGradient(
         begin: Alignment.bottomRight,
         end: Alignment.topCenter,
-        colors: <Color>[Color(0x80FFFFFF), Color(0x80777777), Color(0x80444444)],
+        colors: <Color>[
+          const Color(0xFFFFFFFF).withValues(alpha: 0.5),
+          const Color(0xAF777777).withValues(alpha: 0.5),
+          const Color(0x44444444).withValues(alpha: 0.5),
+        ],
       ),
     );
   });
@@ -361,11 +366,15 @@ void main() {
 
     expect(
       actual,
-      const LinearGradient(
+      LinearGradient(
         begin: Alignment.bottomRight,
         end: Alignment.topCenter,
-        colors: <Color>[Color(0x80FFFFFF), Color(0x80777777), Color(0x80444444)],
-        transform: GradientRotation(1),
+        colors: <Color>[
+          const Color(0x80FFFFFF).withValues(alpha: 0.5),
+          const Color(0x80777777).withValues(alpha: 0.5),
+          const Color(0x80444444).withValues(alpha: 0.5),
+        ],
+        transform: const GradientRotation(1),
       ),
     );
   });
