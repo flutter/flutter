@@ -754,12 +754,14 @@ TEST_P(DlGoldenTest, StackedOffscreenAdvancedBlendsDoNotResample) {
   EXPECT_LT(rmse, 1.0) << "rmse: " << rmse;
 }
 
-// The offscreen subpass of an advanced blend must cover every pixel its
-// fractional coverage touches. Rounding the render target size down drops the
-// last column and row, so a blend that reaches the edge of the pass loses them.
-// Framebuffer fetch blends in place without a subpass, so its output is the
-// reference the offscreen path has to match.
-TEST_P(DlGoldenTest, OffscreenAdvancedBlendKeepsFractionalEdge) {
+// The offscreen subpass of an advanced blend must cover exactly the pixels its
+// coverage touches. The backdrop's coverage goes through the transform and its
+// inverse, so for a 2048x1536 pass it lands slightly below or slightly above
+// the integral size depending on the scale. Rounding the render target down
+// drops the last column and row when it lands below, and rounding it up adds
+// one when it lands above. Framebuffer fetch blends in place without a
+// subpass, so its output is the reference the offscreen path has to match.
+TEST_P(DlGoldenTest, OffscreenAdvancedBlendMatchesFramebufferFetch) {
   if (GetParam() != PlaygroundBackend::kMetal) {
     GTEST_SKIP()
         << "This backend doesn't yet support setting device capabilities.";
@@ -770,31 +772,8 @@ TEST_P(DlGoldenTest, OffscreenAdvancedBlendKeepsFractionalEdge) {
   if (!old_capabilities->SupportsFramebufferFetch()) {
     GTEST_SKIP() << "The reference image needs framebuffer fetch.";
   }
-
-  DisplayListBuilder builder;
-  builder.DrawColor(DlColor(0xFF404040), DlBlendMode::kSrcOver);
-  // As in StackedOffscreenAdvancedBlendsDoNotResample, the 0.4x scale leaves
-  // the 2048 pixel pass with a coverage of 2047.99988.
-  builder.Scale(0.4f, 0.4f);
-  DlPaint backdrop;
-  backdrop.setColor(DlColor(0xFFA0A0A0));
-  builder.DrawRect(DlRect::MakeLTRB(750, 0, 5120, 3840), backdrop);
-  // A blend that reaches the right and bottom edges of the pass.
-  DlPaint blend;
-  blend.setColor(DlColor(0xFF20C020));
-  blend.setBlendMode(DlBlendMode::kLighten);
-  builder.DrawRect(DlRect::MakeLTRB(250, 250, 5118.7f, 3838.6f), blend);
-  sk_sp<DisplayList> display_list = builder.Build();
-
-  std::unique_ptr<impeller::testing::Screenshot> reference =
-      MakeScreenshot(display_list);
-  if (!reference) {
-    GTEST_SKIP() << "making screenshots not supported.";
-  }
-
-  ASSERT_TRUE(
-      SetCapabilities(MakeCapabilitiesWithoutFramebufferFetch(old_capabilities))
-          .ok());
+  std::shared_ptr<impeller::Capabilities> no_fb_fetch_capabilities =
+      MakeCapabilitiesWithoutFramebufferFetch(old_capabilities);
   // The playground context is shared across tests, so the mocked capabilities
   // have to be undone however this test exits.
   fml::ScopedCleanupClosure restore_capabilities([&]() {
@@ -803,15 +782,43 @@ TEST_P(DlGoldenTest, OffscreenAdvancedBlendKeepsFractionalEdge) {
                     .ok());
   });
 
-  std::unique_ptr<impeller::testing::Screenshot> offscreen =
-      MakeScreenshot(display_list);
-  ASSERT_TRUE(offscreen);
+  // A 0.4x scale leaves the pass coverage at 2047.99988x1535.99988 and a 0.43x
+  // scale at 2048.00024x1536.00024.
+  for (Scalar scale : {0.4f, 0.43f}) {
+    SCOPED_TRACE(scale);
+    DisplayListBuilder builder;
+    builder.DrawColor(DlColor(0xFF404040), DlBlendMode::kSrcOver);
+    builder.Scale(scale, scale);
+    DlPaint backdrop;
+    backdrop.setColor(DlColor(0xFFA0A0A0));
+    builder.DrawRect(
+        DlRect::MakeLTRB(300 / scale, 0, 2048 / scale, 1536 / scale), backdrop);
+    // A blend that reaches into the last column and row of the pass.
+    DlPaint blend;
+    blend.setColor(DlColor(0xFF20C020));
+    blend.setBlendMode(DlBlendMode::kLighten);
+    builder.DrawRect(DlRect::MakeLTRB(100 / scale, 100 / scale, 2047.5f / scale,
+                                      1535.5f / scale),
+                     blend);
+    sk_sp<DisplayList> display_list = builder.Build();
 
-  double rmse = RMSE(reference.get(), offscreen.get());
-  // Rounding the render target down to 2047x1535 leaves the last column and
-  // row unblended and the RMSE is about 0.72; rounding it up matches the
-  // reference exactly.
-  EXPECT_LT(rmse, 0.1) << "rmse: " << rmse;
+    ASSERT_TRUE(SetCapabilities(std::const_pointer_cast<impeller::Capabilities>(
+                                    old_capabilities))
+                    .ok());
+    std::unique_ptr<impeller::testing::Screenshot> reference =
+        MakeScreenshot(display_list);
+    if (!reference) {
+      GTEST_SKIP() << "making screenshots not supported.";
+    }
+
+    ASSERT_TRUE(SetCapabilities(no_fb_fetch_capabilities).ok());
+    std::unique_ptr<impeller::testing::Screenshot> offscreen =
+        MakeScreenshot(display_list);
+    ASSERT_TRUE(offscreen);
+
+    double rmse = RMSE(reference.get(), offscreen.get());
+    EXPECT_LT(rmse, 0.1) << "rmse: " << rmse;
+  }
 }
 
 }  // namespace testing

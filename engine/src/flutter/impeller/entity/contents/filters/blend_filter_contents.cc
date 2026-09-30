@@ -5,6 +5,7 @@
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
 
 #include <array>
+#include <cmath>
 #include <memory>
 #include <optional>
 
@@ -25,6 +26,7 @@
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/constants.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/snapshot.h"
 
@@ -132,13 +134,19 @@ static std::optional<Entity> AdvancedBlend(
   }
 
   // The subpass render target has an integral size, rounded up so that it keeps
-  // any partially covered edge pixels of |subpass_coverage|. The texture
-  // coordinates must describe the same rect as the quad, which spans the render
-  // target: if they describe the fractional coverage instead, the contents are
-  // scaled by the ratio between the two, and that ratio changes from frame to
-  // frame for animated content. Both the allocation and the sampled rect use
-  // this one size.
-  const Size render_target_size = subpass_coverage.GetSize().Ceil();
+  // any partially covered edge pixels of |subpass_coverage|. A size that is
+  // meant to be integral can land slightly above or below it after floating
+  // point math (the backdrop's coverage goes through the transform and its
+  // inverse), so values within kEhCloseEnough of an integer snap to it instead
+  // of gaining a pixel. The texture coordinates must describe the same rect as
+  // the quad, which spans the render target: if they describe the fractional
+  // coverage instead, the contents are scaled by the ratio between the two,
+  // and that ratio changes from frame to frame for animated content. Both the
+  // allocation and the sampled rect use this one size.
+  const Size coverage_size = subpass_coverage.GetSize();
+  const Size render_target_size(
+      std::ceil(coverage_size.width - kEhCloseEnough),
+      std::ceil(coverage_size.height - kEhCloseEnough));
   const Rect render_target_coverage =
       Rect::MakeOriginSize(subpass_coverage.GetOrigin(), render_target_size);
   if (render_target_coverage.IsEmpty()) {
