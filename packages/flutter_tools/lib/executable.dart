@@ -319,7 +319,12 @@ List<FlutterCommand> generateCommands({
     extensionManager: extensionManager,
   ),
   DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
-  DriveCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
+  DriveCommand(
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: const BuildTargetsImpl(),
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
+  ),
   EmulatorsCommand(
     doctor: toolDependencies.doctor,
     emulatorManager: toolDependencies.emulatorManager,
