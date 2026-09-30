@@ -1024,7 +1024,16 @@ bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked() {
   if (is_fake_window_) {
     return true;
   }
-  if (vk_instance_ == VK_NULL_HANDLE || vk_device_ == VK_NULL_HANDLE) {
+  if (vk_instance_ == VK_NULL_HANDLE || vk_device_ == VK_NULL_HANDLE ||
+      vk_create_android_surface_khr_fn_ == nullptr ||
+      vk_get_physical_device_surface_support_khr_fn_ == nullptr ||
+      vk_get_physical_device_surface_capabilities_khr_fn_ == nullptr ||
+      vk_get_physical_device_surface_formats_khr_fn_ == nullptr ||
+      vk_create_swapchain_khr_fn_ == nullptr ||
+      vk_get_swapchain_images_khr_fn_ == nullptr ||
+      vk_create_command_pool_fn_ == nullptr ||
+      vk_allocate_command_buffers_fn_ == nullptr ||
+      vk_create_fence_fn_ == nullptr) {
     return false;
   }
 
@@ -1298,7 +1307,14 @@ bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
     return true;
   }
   if (window == nullptr || vk_instance_ == VK_NULL_HANDLE ||
-      vk_device_ == VK_NULL_HANDLE) {
+      vk_device_ == VK_NULL_HANDLE ||
+      vk_create_android_surface_khr_fn_ == nullptr ||
+      vk_get_physical_device_surface_capabilities_khr_fn_ == nullptr ||
+      vk_get_physical_device_surface_formats_khr_fn_ == nullptr ||
+      vk_create_swapchain_khr_fn_ == nullptr ||
+      vk_get_swapchain_images_khr_fn_ == nullptr ||
+      vk_create_command_pool_fn_ == nullptr ||
+      vk_allocate_command_buffers_fn_ == nullptr) {
     return false;
   }
 

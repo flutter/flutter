@@ -67,6 +67,10 @@ typedef VkResult(VKAPI_PTR* PFN_vkCreateAndroidSurfaceKHR)(
 
 namespace flutter {
 
+namespace testing {
+class AndroidSurfaceManagerTest;
+}  // namespace testing
+
 struct AndroidSurfaceDimensions {
   int32_t width = 0;
   int32_t height = 0;
@@ -236,6 +240,8 @@ class AndroidSurfaceManager {
   void DestroyOverlaySurfaces();
 
  private:
+  friend class testing::AndroidSurfaceManagerTest;
+
   struct VulkanOverlaySurface {
     VkSurfaceKHR surface = VK_NULL_HANDLE;
     VkSwapchainKHR swapchain = VK_NULL_HANDLE;
