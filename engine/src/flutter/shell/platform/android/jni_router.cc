@@ -81,8 +81,10 @@ bool JniRouter::RoutePlatformMessage(const std::string& channel,
                                      const std::vector<uint8_t>& message,
                                      int32_t response_id,
                                      int64_t message_data) {
-  return RoutePlatformMessage(channel, message.data(), message.size(),
-                              response_id, message_data);
+  static const uint8_t kEmptyByte = 0;
+  const uint8_t* data = message.empty() ? &kEmptyByte : message.data();
+  return RoutePlatformMessage(channel, data, message.size(), response_id,
+                              message_data);
 }
 
 bool JniRouter::RoutePlatformMessageResponse(int32_t response_id,
@@ -98,7 +100,9 @@ bool JniRouter::RoutePlatformMessageResponse(int32_t response_id,
 
 bool JniRouter::RoutePlatformMessageResponse(int32_t response_id,
                                              const std::vector<uint8_t>& data) {
-  return RoutePlatformMessageResponse(response_id, data.data(), data.size());
+  static const uint8_t kEmptyByte = 0;
+  const uint8_t* resp_data = data.empty() ? &kEmptyByte : data.data();
+  return RoutePlatformMessageResponse(response_id, resp_data, data.size());
 }
 
 bool JniRouter::RouteSemanticsUpdate(

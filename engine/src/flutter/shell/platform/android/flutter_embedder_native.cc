@@ -3132,9 +3132,12 @@ void FlutterEmbedderNative::OnPlatformMessageCallback(
     return;
   }
   auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
-  std::vector<uint8_t> data;
-  if (message->message && message->message_size > 0) {
-    data.assign(message->message, message->message + message->message_size);
+  static const uint8_t kEmptyByte = 0;
+  const uint8_t* message_data = nullptr;
+  size_t message_size = 0;
+  if (message->message != nullptr) {
+    message_data = message->message_size > 0 ? message->message : &kEmptyByte;
+    message_size = message->message_size;
   }
   int32_t response_id = 0;
   if (message->response_handle != nullptr) {
@@ -3142,7 +3145,8 @@ void FlutterEmbedderNative::OnPlatformMessageCallback(
   }
   if (native->GetRouter()) {
     native->GetRouter()->RoutePlatformMessage(
-        message->channel ? message->channel : "", data, response_id);
+        message->channel ? message->channel : "", message_data, message_size,
+        response_id);
   }
 }
 
@@ -4037,11 +4041,12 @@ FlutterEngineResult FlutterEmbedderNative::SendPlatformMessageResponse(
   auto engine = GetEngine();
   if (!engine) {
     if (jni_router_) {
-      std::vector<uint8_t> vec;
-      if (data && data_length > 0) {
-        vec.assign(data, data + data_length);
-      }
-      jni_router_->RoutePlatformMessageResponse(response_id, vec);
+      static const uint8_t kEmptyByte = 0;
+      const uint8_t* resp_data =
+          data ? (data_length > 0 ? data : &kEmptyByte) : nullptr;
+      size_t resp_length = data ? data_length : 0;
+      jni_router_->RoutePlatformMessageResponse(response_id, resp_data,
+                                                resp_length);
     }
     return kSuccess;
   }

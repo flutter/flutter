@@ -160,8 +160,10 @@ bool JniDelegate::HandlePlatformMessage(const std::string& channel,
                                         const std::vector<uint8_t>& message,
                                         int32_t response_id,
                                         int64_t message_data) {
-  return HandlePlatformMessage(channel, message.data(), message.size(),
-                               response_id, message_data);
+  static const uint8_t kEmptyByte = 0;
+  const uint8_t* data = message.empty() ? &kEmptyByte : message.data();
+  return HandlePlatformMessage(channel, data, message.size(), response_id,
+                               message_data);
 }
 
 bool JniDelegate::HandlePlatformMessageResponse(int32_t response_id,
@@ -178,7 +180,9 @@ bool JniDelegate::HandlePlatformMessageResponse(int32_t response_id,
 bool JniDelegate::HandlePlatformMessageResponse(
     int32_t response_id,
     const std::vector<uint8_t>& data) {
-  return HandlePlatformMessageResponse(response_id, data.data(), data.size());
+  static const uint8_t kEmptyByte = 0;
+  const uint8_t* resp_data = data.empty() ? &kEmptyByte : data.data();
+  return HandlePlatformMessageResponse(response_id, resp_data, data.size());
 }
 
 bool JniDelegate::UpdateSemantics(
