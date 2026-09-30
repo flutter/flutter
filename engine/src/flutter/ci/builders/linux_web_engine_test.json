@@ -205,8 +205,7 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false,
-        "download_jdk": false
+        "download_android_deps": false
       },
       "dependencies": [
         "web_tests/test_bundles/dart2js-canvaskit-webparagraph",
@@ -407,13 +406,14 @@
         "os=Linux"
       ],
       "gclient_variables": {
-        "download_android_deps": false,
-        "download_jdk": false
+        "download_android_deps": false
       },
       "dependencies": [
         "web_tests/test_bundles/dart2js-canvaskit-engine",
         "web_tests/test_bundles/dart2js-canvaskit-canvaskit",
         "web_tests/test_bundles/dart2js-canvaskit-ui",
+        "web_tests/test_bundles/dart2wasm-skwasm-ui",
+        "web_tests/test_bundles/dart2wasm-skwasm-skwasm",
         "web_tests/test_bundles/dart2wasm-canvaskit-engine",
         "web_tests/test_bundles/fallbacks"
       ],
@@ -436,6 +436,9 @@
             "--suite=firefox-dart2js-canvaskit-engine",
             "--suite=firefox-dart2js-canvaskit-canvaskit",
             "--suite=firefox-dart2js-canvaskit-ui",
+            "--suite=firefox-dart2wasm-skwasm-ui",
+            "--suite=firefox-coi-dart2wasm-skwasm-ui",
+            "--suite=firefox-coi-dart2wasm-skwasm-skwasm",
             "--suite=firefox-dart2wasm-canvaskit-engine",
             "--suite=firefox-fallbacks"
           ],
@@ -469,6 +472,33 @@
           "script": "flutter/lib/web_ui/dev/felt"
         },
         {
+          "name": "run suite firefox-dart2wasm-skwasm-ui",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=firefox-dart2wasm-skwasm-ui"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        },
+        {
+          "name": "run suite firefox-coi-dart2wasm-skwasm-ui",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=firefox-coi-dart2wasm-skwasm-ui"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        },
+        {
+          "name": "run suite firefox-coi-dart2wasm-skwasm-skwasm",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=firefox-coi-dart2wasm-skwasm-skwasm"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        },
+        {
           "name": "run suite firefox-dart2wasm-canvaskit-engine",
           "parameters": [
             "test",
@@ -497,8 +527,7 @@
         "cpu=arm64"
       ],
       "gclient_variables": {
-        "download_android_deps": false,
-        "download_jdk": false
+        "download_android_deps": false
       },
       "dependencies": [
         "web_tests/test_bundles/dart2js-canvaskit-engine",
