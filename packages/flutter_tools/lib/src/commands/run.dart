@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
@@ -725,27 +724,17 @@ class RunCommand extends RunCommandBase {
   @visibleForTesting
   Daemon createMachineDaemon() {
     final Analytics analytics = this.analytics;
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :ProcessManager processManager,
-      :Stdio stdio,
-    ) = toolContext;
     return Daemon.createMachineDaemon(
       buildSystem: buildSystem,
       buildTargets: buildTargets,
       featureFlags: featureFlags,
-      logger: logger,
-      stdio: stdio,
       toolContext: toolContext,
       xcode: appleContext.xcode,
       analytics: analytics,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,
       deviceManager: deviceManager,
-      fileSystem: fs,
       java: _androidContext?.java,
-      processManager: processManager,
     );
   }
 
