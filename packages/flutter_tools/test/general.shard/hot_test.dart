@@ -4,18 +4,14 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/command_help.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
-import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -24,7 +20,6 @@ import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -42,48 +37,25 @@ HotRunner createHotRunner(
   required String target,
   Analytics? analytics,
   File? applicationBinary,
-  Artifacts? artifacts,
   bool benchmarkMode = false,
   BuildSystem? buildSystem,
   BuildTargets? buildTargets,
-  Cache? cache,
-  CommandHelp? commandHelp,
-  Config? config,
   FlutterHookRunner? dartBuilder,
   String? dillOutputPath,
-  FileSystem? fileSystem,
-  FlutterVersion? flutterVersion,
   bool hostIsIde = false,
   HotRunnerConfig? hotRunnerConfig,
-  Logger? logger,
   bool machine = false,
   String? nativeAssetsYamlFile,
-  OperatingSystemUtils? osUtils,
-  OutputPreferences? outputPreferences,
-  Platform? platform,
-  ProcessManager? processManager,
   ProjectFileInvalidator? projectFileInvalidator,
   String? projectRootPath,
   ReassembleHelper? reassembleHelper,
   ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
   bool stayResident = true,
   StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  Terminal? terminal,
+  ToolContext? toolContext,
   Xcode? xcode,
 }) {
-  final toolContext = DelegatingToolContext(
-    artifacts: artifacts,
-    cache: cache,
-    config: config,
-    flutterVersion: flutterVersion,
-    fs: fileSystem,
-    logger: logger,
-    os: osUtils,
-    outputPreferences: outputPreferences,
-    platform: platform,
-    processManager: processManager,
-    terminal: terminal as AnsiTerminal?,
-  );
+  toolContext ??= DelegatingToolContext();
   buildSystem ??= FlutterBuildSystem(
     fileSystem: toolContext.fs,
     logger: toolContext.logger,
@@ -102,7 +74,6 @@ HotRunner createHotRunner(
       xcode: xcode,
       applicationBinary: applicationBinary,
       benchmarkMode: benchmarkMode,
-      commandHelp: commandHelp,
       dartBuilder: dartBuilder,
       dillOutputPath: dillOutputPath,
       hostIsIde: hostIsIde,
@@ -128,7 +99,6 @@ HotRunner createHotRunner(
     xcode: xcode,
     applicationBinary: applicationBinary,
     benchmarkMode: benchmarkMode,
-    commandHelp: commandHelp,
     dartBuilder: dartBuilder,
     dillOutputPath: dillOutputPath,
     hostIsIde: hostIsIde,

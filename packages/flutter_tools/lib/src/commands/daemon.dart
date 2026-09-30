@@ -101,8 +101,6 @@ class DaemonCommand extends FlutterCommand {
       :Stdio stdio,
       :AnsiTerminal terminal,
       :OutputPreferences outputPreferences,
-      :FileSystem fs,
-      :ProcessManager processManager,
     ) = toolContext;
 
     if (argResults!['listen-on-tcp-port'] != null) {
@@ -128,11 +126,9 @@ class DaemonCommand extends FlutterCommand {
         androidSdk: _androidSdk,
         androidWorkflow: _androidWorkflow,
         deviceManager: _deviceManager,
-        fileSystem: fs,
         java: _java,
         notifyingLogger: asLogger<NotifyingLogger>(logger),
         port: port,
-        processManager: processManager,
       ).run();
       return FlutterCommandResult.success();
     }
@@ -150,12 +146,8 @@ class DaemonCommand extends FlutterCommand {
       androidSdk: _androidSdk,
       androidWorkflow: _androidWorkflow,
       deviceManager: _deviceManager,
-      fileSystem: fs,
       java: _java,
-      logger: logger,
       notifyingLogger: asLogger<NotifyingLogger>(logger),
-      processManager: processManager,
-      stdio: stdio,
     );
     logger.printStatus('Device daemon started.');
     final int code = await daemon.onExit;
@@ -180,12 +172,9 @@ class DaemonServer {
     this.androidWorkflow,
     @visibleForTesting this._bind = ServerSocket.bind,
     this.deviceManager,
-    this.fileSystem,
     this.java,
     this.notifyingLogger,
     this.port,
-    this.processManager,
-    this.stdio,
   });
 
   final int? port;
@@ -200,15 +189,12 @@ class DaemonServer {
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
 
-  final FileSystem? fileSystem;
-  final ProcessManager? processManager;
   final Analytics analytics;
   final DeviceManager? deviceManager;
   final Java? java;
   final AndroidSdk? androidSdk;
   final FeatureFlags featureFlags;
   final AndroidWorkflow? androidWorkflow;
-  final Stdio? stdio;
 
   final Future<ServerSocket> Function(InternetAddress address, int port) _bind;
 
@@ -248,15 +234,11 @@ class DaemonServer {
         toolContext: toolContext,
         xcode: xcode,
         notifyingLogger: notifyingLogger,
-        fileSystem: fileSystem,
-        processManager: processManager,
-        logger: logger,
         deviceManager: deviceManager,
         java: java,
         androidSdk: androidSdk,
         featureFlags: featureFlags,
         androidWorkflow: androidWorkflow,
-        stdio: stdio,
       );
       await daemon.onExit;
       await socketDone;
@@ -285,17 +267,15 @@ class Daemon {
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
-    FileSystem? fileSystem,
     FileTransfer fileTransfer = const FileTransfer(),
     Java? java,
     this.logToStdout = false,
-    Logger? logger,
     this.notifyingLogger,
-    ProcessManager? processManager,
-    this._stdio,
-  }) : _logger = logger ?? toolContext.logger,
-       _fs = fileSystem ?? toolContext.fs {
-    final ProcessManager pm = processManager ?? toolContext.processManager;
+  }) : _logger = toolContext.logger,
+       _fs = toolContext.fs,
+       _stdio = toolContext.stdio {
+    final ToolContext(:ProcessManager processManager, :FlutterProjectFactory projectFactory) =
+        toolContext;
     final AndroidWorkflow workflow =
         androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: featureFlags);
 
@@ -306,7 +286,7 @@ class Daemon {
         featureFlags: featureFlags,
         fileSystem: _fs,
         logger: _logger,
-        projectFactory: toolContext.projectFactory,
+        projectFactory: projectFactory,
         stdio: _stdio,
       ),
     );
@@ -318,8 +298,6 @@ class Daemon {
         buildTargets: buildTargets,
         toolContext: toolContext,
         xcode: xcode,
-        fileSystem: _fs,
-        logger: _logger,
       ),
     );
     registerDomain(
@@ -327,7 +305,7 @@ class Daemon {
         this,
         fileSystem: _fs,
         logger: _logger,
-        projectFactory: toolContext.projectFactory,
+        projectFactory: projectFactory,
         deviceManager: deviceManager,
       ),
     );
@@ -337,7 +315,7 @@ class Daemon {
         androidWorkflow: workflow,
         fileSystem: _fs,
         logger: _logger,
-        processManager: pm,
+        processManager: processManager,
         androidSdk: androidSdk,
         java: java,
       ),
@@ -364,17 +342,14 @@ class Daemon {
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required FeatureFlags featureFlags,
-    required Logger logger,
-    required Stdio stdio,
     required ToolContext toolContext,
     required Xcode? xcode,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
-    FileSystem? fileSystem,
     Java? java,
-    ProcessManager? processManager,
   }) {
+    final ToolContext(:Logger logger, :Stdio stdio) = toolContext;
     final daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
@@ -389,10 +364,6 @@ class Daemon {
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       logToStdout: true,
-      stdio: stdio,
-      logger: logger,
-      fileSystem: fileSystem,
-      processManager: processManager,
       deviceManager: deviceManager,
       java: java,
       androidSdk: androidSdk,
@@ -403,7 +374,7 @@ class Daemon {
   }
 
   final DaemonConnection connection;
-  final Stdio? _stdio;
+  final Stdio _stdio;
   final Logger _logger;
   final FileSystem _fs;
 
@@ -435,11 +406,7 @@ class Daemon {
     final Object? id = request.data['id'];
 
     if (id == null) {
-      if (_stdio != null) {
-        _stdio.stderrWrite('no id for request: $request\n');
-      } else {
-        _logger.printError('no id for request: $request');
-      }
+      _stdio.stderrWrite('no id for request: $request\n');
       return;
     }
 
@@ -581,7 +548,7 @@ class DaemonDomain extends Domain {
     required FileSystem fileSystem,
     required this._logger,
     required this._projectFactory,
-    this._stdio,
+    required this._stdio,
   }) : _fs = fileSystem,
        super(daemon, 'daemon') {
     registerHandler('version', version);
@@ -599,13 +566,9 @@ class DaemonDomain extends Domain {
           // ignore: avoid_print
           print(message.message);
         } else if (message.level == 'error' || message.level == 'warning') {
-          if (_stdio != null) {
-            _stdio.stderrWrite('${message.message}\n');
-            if (message.stackTrace != null) {
-              _stdio.stderrWrite('${message.stackTrace.toString().trimRight()}\n');
-            }
-          } else {
-            _logger.printError(message.message, stackTrace: message.stackTrace);
+          _stdio.stderrWrite('${message.message}\n');
+          if (message.stackTrace != null) {
+            _stdio.stderrWrite('${message.stackTrace.toString().trimRight()}\n');
           }
         }
       } else {
@@ -629,7 +592,7 @@ class DaemonDomain extends Domain {
   final FeatureFlags _featureFlags;
   final Logger _logger;
   final FlutterProjectFactory _projectFactory;
-  final Stdio? _stdio;
+  final Stdio _stdio;
 
   StreamSubscription<LogMessage>? _subscription;
 
@@ -867,10 +830,8 @@ class AppDomain extends Domain {
     required this._buildTargets,
     required this._toolContext,
     required this._xcode,
-    FileSystem? fileSystem,
-    Logger? logger,
-  }) : _fs = fileSystem ?? daemon._fs,
-       _logger = logger ?? daemon._logger,
+  }) : _fs = _toolContext.fs,
+       _logger = _toolContext.logger,
        super(daemon, 'app') {
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);

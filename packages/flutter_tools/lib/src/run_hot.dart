@@ -75,7 +75,6 @@ class HotRunner extends ResidentRunner {
     required super.xcode,
     this.applicationBinary,
     this.benchmarkMode = false,
-    super.commandHelp,
     super.dartBuilder,
     super.dillOutputPath,
     this.hostIsIde = false,

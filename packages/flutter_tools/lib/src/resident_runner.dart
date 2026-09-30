@@ -964,7 +964,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     required this.target,
     required this.toolContext,
     required this.xcode,
-    CommandHelp? commandHelp,
     this.dartBuilder,
     String? dillOutputPath,
     this.hotMode = true,
@@ -979,14 +978,12 @@ abstract class ResidentRunner extends ResidentHandlers {
            ? toolContext.fs.systemTempDirectory.createTempSync('flutter_tool.')
            : toolContext.fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle(),
-       commandHelp =
-           commandHelp ??
-           CommandHelp(
-             logger: toolContext.logger,
-             terminal: toolContext.terminal,
-             platform: toolContext.platform,
-             outputPreferences: toolContext.outputPreferences,
-           ) {
+       commandHelp = CommandHelp(
+         logger: toolContext.logger,
+         terminal: toolContext.terminal,
+         platform: toolContext.platform,
+         outputPreferences: toolContext.outputPreferences,
+       ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
