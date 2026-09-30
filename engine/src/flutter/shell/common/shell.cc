@@ -769,6 +769,15 @@ void Shell::NotifyLowMemoryWarning() const {
   // to purge them.
 }
 
+void Shell::ClearRenderTargetCache() const {
+  task_runners_.GetRasterTaskRunner()->PostTask(
+      [rasterizer = rasterizer_->GetWeakPtr()]() {
+        if (rasterizer) {
+          rasterizer->ClearRenderTargetCache();
+        }
+      });
+}
+
 void Shell::FlushMicrotaskQueue() const {
   if (engine_) {
     engine_->FlushMicrotaskQueue();
@@ -1746,6 +1755,11 @@ double Shell::GetScaledFontSize(double unscaled_font_size,
                                 int configuration_id) const {
   return platform_view_->GetScaledFontSize(unscaled_font_size,
                                            configuration_id);
+}
+
+// |Engine::Delegate|
+void Shell::OnEngineClearRenderTargetCache() {
+  ClearRenderTargetCache();
 }
 
 void Shell::RequestViewFocusChange(const ViewFocusChangeRequest& request) {

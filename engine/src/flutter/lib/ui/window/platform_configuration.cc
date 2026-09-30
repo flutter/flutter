@@ -573,6 +573,14 @@ void PlatformConfigurationNativeApi::SetNeedsReportTimings(bool value) {
       ->SetNeedsReportTimings(value);
 }
 
+void PlatformConfigurationNativeApi::ClearRenderTargetCache() {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  UIDartState::Current()
+      ->platform_configuration()
+      ->client()
+      ->ClearRenderTargetCache();
+}
+
 namespace {
 Dart_Handle HandlePlatformMessage(
     UIDartState* dart_state,

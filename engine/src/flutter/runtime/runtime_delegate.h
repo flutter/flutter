@@ -71,6 +71,8 @@ class RuntimeDelegate {
   virtual void RequestViewFocusChange(
       const ViewFocusChangeRequest& request) = 0;
 
+  virtual void ClearRenderTargetCache() = 0;
+
  protected:
   virtual ~RuntimeDelegate();
 };

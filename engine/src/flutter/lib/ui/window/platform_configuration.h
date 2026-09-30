@@ -190,6 +190,11 @@ class PlatformConfigurationClient {
   virtual void SetNeedsReportTimings(bool value) = 0;
 
   //--------------------------------------------------------------------------
+  /// @brief      Clears any cached render targets and textures on the
+  /// rasterizer.
+  virtual void ClearRenderTargetCache() = 0;
+
+  //--------------------------------------------------------------------------
   /// @brief      The embedder can specify data that the isolate can request
   ///             synchronously on launch. This accessor fetches that data.
   ///
@@ -662,6 +667,8 @@ class PlatformConfigurationNativeApi {
   static void SetSemanticsTreeEnabled(bool enabled);
 
   static void SetNeedsReportTimings(bool value);
+
+  static void ClearRenderTargetCache();
 
   static Dart_Handle GetPersistentIsolateData();
 

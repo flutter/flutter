@@ -43,6 +43,12 @@ class AiksContext {
 
   ContentContext& GetContentContext() const;
 
+  /// @brief Clear all cached render targets from the content context.
+  void ClearRenderTargetCache() const;
+
+  /// @brief Clear all cached DL image textures from the content context.
+  void ClearCachedTextures() const;
+
  private:
   std::shared_ptr<Context> context_;
   std::unique_ptr<ContentContext> content_context_;

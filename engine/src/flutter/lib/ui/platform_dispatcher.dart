@@ -641,6 +641,16 @@ class PlatformDispatcher {
   @Native<Void Function(Bool)>(symbol: 'PlatformConfigurationNativeApi::SetNeedsReportTimings')
   external static void __nativeSetNeedsReportTimings(bool value);
 
+  /// Clears any cached render targets and textures maintained by the rasterizer.
+  ///
+  /// This is primarily used by the Flutter test framework between test cases
+  /// to ensure test isolation and prevent cached offscreen render targets
+  /// from leaking across consecutive tests.
+  void clearRenderTargetCache() => _clearRenderTargetCache();
+
+  @Native<Void Function()>(symbol: 'PlatformConfigurationNativeApi::ClearRenderTargetCache')
+  external static void _clearRenderTargetCache();
+
   // Called from the engine, via hooks.dart
   void _reportTimings(List<int> timings) {
     assert(timings.length % FrameTiming._dataLength == 0);

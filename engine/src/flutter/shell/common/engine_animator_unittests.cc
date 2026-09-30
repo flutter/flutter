@@ -91,6 +91,7 @@ class MockDelegate : public Engine::Delegate {
               RequestViewFocusChange,
               (const ViewFocusChangeRequest&),
               (override));
+  MOCK_METHOD(void, OnEngineClearRenderTargetCache, (), (override));
 };
 
 class MockAnimatorDelegate : public Animator::Delegate {

@@ -354,6 +354,11 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     /// @param[in]  request  The request to change the focus state of the view.
     virtual void RequestViewFocusChange(
         const ViewFocusChangeRequest& request) = 0;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Notifies the shell to clear any cached render targets and
+    ///             textures on the rasterizer.
+    virtual void OnEngineClearRenderTargetCache() = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -897,6 +902,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
 
   // |RuntimeDelegate|
   FontCollection& GetFontCollection() override;
+
+  // |RuntimeDelegate|
+  void ClearRenderTargetCache() override;
 
   // |RuntimeDelegate|
   std::shared_ptr<AssetManager> GetAssetManager() override;

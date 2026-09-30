@@ -306,6 +306,11 @@ class Shell final : public PlatformView::Delegate,
   void NotifyLowMemoryWarning() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Clears any cached render targets and textures on the
+  /// rasterizer.
+  void ClearRenderTargetCache() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Used by embedders to flush the microtask queue. Required
   ///             when running with merged platform and UI threads, in which
   ///             case the embedder is responsible for flushing the microtask
@@ -751,6 +756,9 @@ class Shell final : public PlatformView::Delegate,
 
   // |Engine::Delegate|
   void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
+
+  // |Engine::Delegate|
+  void OnEngineClearRenderTargetCache() override;
 
   // |Rasterizer::Delegate|
   void OnFrameRasterized(const FrameTiming&) override;

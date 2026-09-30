@@ -702,6 +702,12 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _platformDispatcher.scheduleFrame();
   }
 
+  /// Clears any cached render targets and textures maintained by the rasterizer.
+  @override
+  void clearRenderTargetCache() {
+    _platformDispatcher.clearRenderTargetCache();
+  }
+
   @override
   bool get semanticsEnabled => _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
   bool? _semanticsEnabledTestValue;
