@@ -81,7 +81,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: TestFeatureFlags(),
-        fileSystem: MemoryFileSystem.test(),
       );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
@@ -109,7 +108,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: TestFeatureFlags(),
-        fileSystem: MemoryFileSystem.test(),
       );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
@@ -136,7 +134,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: TestFeatureFlags(),
-        fileSystem: MemoryFileSystem.test(),
       );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
@@ -175,7 +172,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: TestFeatureFlags(),
-          fileSystem: MemoryFileSystem.test(),
         );
         fakeDevice = FakeAndroidDevice();
         final discoverer = FakePollingDeviceDiscovery();
@@ -242,7 +238,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: TestFeatureFlags(),
-          fileSystem: MemoryFileSystem.test(),
         );
         fakeDevice = FakeAndroidDevice();
         final discoverer = FakePollingDeviceDiscovery();
