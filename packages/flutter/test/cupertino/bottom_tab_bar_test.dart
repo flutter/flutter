@@ -200,9 +200,15 @@ Future<void> main() async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(icon: Icon(CupertinoIcons.circle), label: 'Tab 1'),
-            BottomNavigationBarItem(icon: Icon(CupertinoIcons.circle), label: 'Tab 2'),
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              label: 'Tab 1',
+            ),
+            BottomNavigationBarItem(
+              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              label: 'Tab 2',
+            ),
           ],
           currentIndex: 1,
         ),
@@ -223,9 +229,15 @@ Future<void> main() async {
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoTabBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(icon: Icon(CupertinoIcons.circle), label: 'Tab 1'),
-            BottomNavigationBarItem(icon: Icon(CupertinoIcons.circle), label: 'Tab 2'),
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              label: 'Tab 1',
+            ),
+            BottomNavigationBarItem(
+              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              label: 'Tab 2',
+            ),
           ],
           currentIndex: 1,
         ),
