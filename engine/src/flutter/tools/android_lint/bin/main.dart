@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -156,8 +157,8 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
     lintArgs,
     environment: <String, String>{'JAVA_HOME': javahome},
   );
-  lintProcess.stdout.pipe(stdout);
-  lintProcess.stderr.pipe(stderr);
+  unawaited(lintProcess.stdout.pipe(stdout));
+  unawaited(lintProcess.stderr.pipe(stderr));
   return lintProcess.exitCode;
 }
 

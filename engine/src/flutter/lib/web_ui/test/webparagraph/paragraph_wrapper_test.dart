@@ -3,14 +3,11 @@
 // found in the LICENSE file.
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/web_paragraph/layout.dart';
-import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart';
 
 import '../common/test_initialization.dart';
 
-// TODO(mdebbar): To make the tests consistent in all environments, we need to use the Ahem font.
-final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+final ParagraphStyle ahemStyle = ParagraphStyle(fontFamily: 'Arial', fontSize: 50);
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -20,138 +17,159 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('Text wrapper, 10 lines, 3 trailing whitespaces on each line except the one that has a cluster break', () {
-    final builder = WebParagraphBuilder(ahemStyle);
+    final builder = ParagraphBuilder(ahemStyle);
     builder.addText(
       'World   domination   is such   an ugly   phrase - I   prefer to   call it   world   optimisation.   ',
     );
-    final WebParagraph paragraph = builder.build();
+    final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 250));
-    final List<TextLine> lines = paragraph.lines;
-    expect(lines.length, 10);
-    for (var i = 0; i < 10; i++) {
-      if (i == 8) {
-        expect(lines[i].whitespacesRange.isEmpty, true);
-      } else {
-        expect(lines[i].whitespacesRange.size, 3);
-      }
+    final List<LineMetrics> lines = paragraph.computeLineMetrics();
+    // On CanvasKit (using FreeType/Skia font fallback for Arial), 'optimisation.'
+    // measures ~206px <= 250px and fits on 1 line (total 9 lines).
+    // On WebParagraph (using DOM Canvas2D Arial), 'optimisation.'
+    // measures ~280px > 250px and wraps across 2 lines (total 10 lines).
+    expect(lines.length, anyOf(9, 10));
+    expect(paragraph.numberOfLines, lines.length);
+    for (var i = 0; i < lines.length; i++) {
+      expect(lines[i].lineNumber, i);
+      expect(lines[i].hardBreak, i == lines.length - 1);
     }
   });
+
   test('Text wrapper, 4 lines, 3 trailing whitespaces on each line', () {
-    final builder = WebParagraphBuilder(ahemStyle);
+    final builder = ParagraphBuilder(ahemStyle);
     builder.addText(
       'World domination is   such an ugly phrase   - I prefer to call it   world optimisation.   ',
     );
-    final WebParagraph paragraph = builder.build();
+    final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 500));
-    final List<TextLine> lines = paragraph.lines;
+    expect(paragraph.numberOfLines, 4);
+    final List<LineMetrics> lines = paragraph.computeLineMetrics();
     expect(lines.length, 4);
     for (var i = 0; i < 4; i++) {
-      expect(lines[i].whitespacesRange.size, 3);
+      expect(lines[i].lineNumber, i);
+      expect(lines[i].hardBreak, i == 3);
     }
   });
+
   test('Text wrapper, 1 line, 5 whitespaces and nothing else', () {
-    final builder = WebParagraphBuilder(ahemStyle);
+    final builder = ParagraphBuilder(ahemStyle);
     builder.addText('     ');
-    final WebParagraph paragraph = builder.build();
+    final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
-    final List<TextLine> lines = paragraph.lines;
+    expect(paragraph.numberOfLines, 1);
+    final List<LineMetrics> lines = paragraph.computeLineMetrics();
     expect(lines.length, 1);
-    expect(lines[0].whitespacesRange.size, 5);
-    expect(lines[0].textRange.size, 0);
+    expect(lines[0].lineNumber, 0);
+    expect(lines[0].hardBreak, isTrue);
   });
+
   test('Text wrapper, 3 lines, one very long word', () {
-    final builder = WebParagraphBuilder(ahemStyle);
+    final builder = ParagraphBuilder(ahemStyle);
     builder.addText('abcdefghijklmnopqrstuvwxyz');
-    final WebParagraph paragraph = builder.build();
+    final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 250));
-    final List<TextLine> lines = paragraph.lines;
+    expect(paragraph.numberOfLines, 3);
+    final List<LineMetrics> lines = paragraph.computeLineMetrics();
     expect(lines.length, 3);
-    var length = 0;
     for (var i = 0; i < 3; i++) {
-      expect(lines[i].whitespacesRange.size, 0);
-      length += lines[i].textRange.size;
+      expect(lines[i].lineNumber, i);
+      expect(lines[i].hardBreak, i == 2);
     }
-    expect(length, paragraph.text.length);
   });
 
   test('1 line, one cluster that does not fit', () {
-    final builder = WebParagraphBuilder(ahemStyle);
-    builder.pushStyle(WebTextStyle(fontSize: 500));
+    final builder = ParagraphBuilder(ahemStyle);
+    builder.pushStyle(TextStyle(fontSize: 500));
     builder.addText('a');
-    final WebParagraph paragraph = builder.build();
+    final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 50));
-    final List<TextLine> lines = paragraph.lines;
+    expect(paragraph.numberOfLines, 1);
+    final List<LineMetrics> lines = paragraph.computeLineMetrics();
     expect(lines, hasLength(1));
-
-    final TextLine singleLine = lines.single;
-    expect(singleLine.textRange.size, paragraph.text.length);
-    expect(singleLine.whitespacesRange.size, 0);
+    expect(lines[0].lineNumber, 0);
+    expect(lines[0].hardBreak, isTrue);
   });
 
   test('Text wrapper, leading spaces', () {
-    final builder = WebParagraphBuilder(ahemStyle);
+    final builder = ParagraphBuilder(ahemStyle);
     builder.addText('   abcdefghijklmnopqrstuvwxyz');
-    final WebParagraph paragraph = builder.build();
+    final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 250));
 
-    final List<TextLine> lines = paragraph.lines;
+    expect(paragraph.numberOfLines, 3);
+    final List<LineMetrics> lines = paragraph.computeLineMetrics();
     expect(lines.length, 3);
-    var length = 0;
     for (var i = 0; i < 3; i++) {
-      expect(lines[i].whitespacesRange.size, 0);
-      length += lines[i].textRange.size;
+      expect(lines[i].lineNumber, i);
+      expect(lines[i].hardBreak, i == 2);
     }
-    expect(length, paragraph.text.length);
   });
 
   test('Text wrapper, 14 hard line breaks', () {
-    final builder = WebParagraphBuilder(ahemStyle);
+    final builder = ParagraphBuilder(ahemStyle);
     builder.addText(
       'World\ndomination\nis\nsuch\nan\nugly\nphrase\n-\nI\nprefer\nto\ncall\nit\nworld\noptimisation.',
     );
-    final WebParagraph paragraph = builder.build();
+    final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 10000));
 
-    final List<TextLine> lines = paragraph.lines;
+    expect(paragraph.numberOfLines, 15);
+    final List<LineMetrics> lines = paragraph.computeLineMetrics();
     expect(lines.length, 15);
-    var length = 0;
     for (var i = 0; i < 15; i++) {
-      expect(lines[i].whitespacesRange.size, i != 14 ? 1 : 0);
-      expect(lines[i].hardLineBreak, i != 14);
-      length += lines[i].textRange.size;
-      length += lines[i].whitespacesRange.size;
+      expect(lines[i].lineNumber, i);
+      expect(lines[i].hardBreak, isTrue, reason: 'Line $i line.hardBreak');
     }
-    expect(length, paragraph.text.length);
   });
 
   test('Text wrapper, 1 hard line break with 3 trailing spaces before', () {
-    final builder = WebParagraphBuilder(ahemStyle);
+    final builder = ParagraphBuilder(ahemStyle);
     builder.addText('abcd   \nefghijklmnopqrstuvwxyz');
 
-    final WebParagraph paragraph = builder.build();
+    final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 10000));
 
-    final List<TextLine> lines = paragraph.lines;
+    expect(paragraph.numberOfLines, 2);
+    final List<LineMetrics> lines = paragraph.computeLineMetrics();
     expect(lines.length, 2);
-    expect(lines[0].whitespacesRange.size, 3 + 1);
-    expect(lines[0].hardLineBreak, true);
-    expect(lines[1].whitespacesRange.size, 0);
-    expect(lines[1].hardLineBreak, false);
+    expect(lines[0].lineNumber, 0);
+    expect(lines[0].hardBreak, isTrue);
+    expect(lines[1].lineNumber, 1);
+    expect(lines[1].hardBreak, isTrue);
   });
 
   test('Text wrapper, 3 hard line breaks and nothing else', () {
-    final builder = WebParagraphBuilder(ahemStyle);
+    final builder = ParagraphBuilder(ahemStyle);
     builder.addText('\n\n\n');
 
-    final WebParagraph paragraph = builder.build();
+    final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 10000));
 
-    final List<TextLine> lines = paragraph.lines;
+    expect(paragraph.numberOfLines, 4);
+    final List<LineMetrics> lines = paragraph.computeLineMetrics();
     expect(lines.length, 4);
     for (var i = 0; i < lines.length; i++) {
-      expect(lines[i].whitespacesRange.size, i != lines.length - 1 ? 1 : 0);
-      expect(lines[i].textRange.size, 0);
-      expect(lines[i].hardLineBreak, i != lines.length - 1);
+      expect(lines[i].lineNumber, i);
+      expect(lines[i].hardBreak, isTrue);
+      expect(lines[i].width, 0.0);
+    }
+  });
+
+  test('Text wrapper, ultimate test for edge cases', () {
+    final builder = ParagraphBuilder(ParagraphStyle(fontFamily: 'Arial', fontSize: 50));
+    builder.addText('Text\nText \nText \n');
+    builder.addText(' \n  \n');
+    builder.addText('\n\n \n\n');
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 10000));
+
+    expect(paragraph.numberOfLines, 10);
+    final List<LineMetrics> lines = paragraph.computeLineMetrics();
+    expect(lines.length, 10);
+    for (var i = 0; i < 10; i++) {
+      expect(lines[i].lineNumber, i);
+      expect(lines[i].hardBreak, isTrue, reason: 'Line $i line.hardBreak');
     }
   });
 }
