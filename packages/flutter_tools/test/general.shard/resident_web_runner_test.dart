@@ -2453,7 +2453,7 @@ ResidentRunner setUpResidentRunner(
   FlutterDevice flutterDevice, {
   BuildSystem? buildSystem,
   DebuggingOptions? debuggingOptions,
-  ToolContext? toolContext,
+  ToolContext toolContext = const test_fakes.DelegatingToolContext(),
 }) {
   return ResidentWebRunner(
     flutterDevice,
@@ -2468,9 +2468,7 @@ ResidentRunner setUpResidentRunner(
           logger: BufferLogger.test(),
         ),
     buildTargets: const BuildTargetsImpl(),
-    toolContext:
-        toolContext ??
-        test_fakes.FakeToolContext(fs: globals.fs, systemClock: SystemClock.fixed(DateTime.now())),
+    toolContext: toolContext,
   );
 }
 
