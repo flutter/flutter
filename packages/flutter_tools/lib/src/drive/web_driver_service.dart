@@ -32,8 +32,8 @@ import 'drive_service.dart';
 class WebDriverService extends DriverService {
   WebDriverService({
     required this._analytics,
-    required this._buildSystem,
-    required this._buildTargets,
+    required this.buildSystem,
+    required this.buildTargets,
     required this._dartSdkPath,
     required ToolContext toolContext,
   }) : _processUtils = ProcessUtils(
@@ -43,8 +43,8 @@ class WebDriverService extends DriverService {
        _toolContext = toolContext;
 
   final Analytics _analytics;
-  final BuildSystem _buildSystem;
-  final BuildTargets _buildTargets;
+  final BuildSystem buildSystem;
+  final BuildTargets buildTargets;
   final ToolContext _toolContext;
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
@@ -103,8 +103,8 @@ class WebDriverService extends DriverService {
       webDefines: webDefines,
       flutterProject: _toolContext.projectFactory.fromDirectory(_toolContext.fs.currentDirectory),
       analytics: _analytics,
-      buildSystem: _buildSystem,
-      buildTargets: _buildTargets,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
       toolContext: _toolContext,
     );
     final appStartedCompleter = Completer<void>.sync();
