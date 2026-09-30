@@ -66,6 +66,14 @@ class FlutterPlugin : Plugin<Project> {
             throw GradleException("flutter.sdk must point to the Flutter SDK directory")
         }
 
+        // Fail fast on an Android Gradle Plugin major version that Flutter does not support yet.
+        // This must run before any other AGP API usage in apply() so that projects using an
+        // unsupported AGP version (for example, a newer major version that removed APIs
+        // used below) get an actionable error instead of an unrelated crash.
+        // The remaining dependency version checks run later in apply(); see the call to
+        // DependencyVersionChecker.checkDependencyVersions below.
+        runDependencyCheck(project, DependencyVersionChecker::checkUnsupportedAGPMajorVersion)
+
         engineVersion =
             if (FlutterPluginUtils.shouldProjectUseLocalEngine(project)) {
                 "+" // Match any version since there's only one.
@@ -166,31 +174,11 @@ class FlutterPlugin : Plugin<Project> {
 
         // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
         // supported range.
-        val shouldSkipDependencyChecks: Boolean =
-            project.hasProperty("skipDependencyChecks") &&
-                (
-                    project.properties["skipDependencyChecks"].toString().toBoolean()
-                )
-        if (!shouldSkipDependencyChecks) {
-            try {
-                DependencyVersionChecker.checkDependencyVersions(project)
-            } catch (e: Exception) {
-                if (!project.hasProperty("usesUnsupportedDependencyVersions") ||
-                    !(project.properties["usesUnsupportedDependencyVersions"] as Boolean)
-                ) {
-                    // Possible bug in dependency checking code - warn and do not block build.
-                    project.logger.error(
-                        "Warning: Flutter was unable to detect project Gradle, Java, " +
-                            "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
-                            e
-                    )
-                } else {
-                    // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
-                    // in the dependency version checker plugin so re-throw it here.
-                    throw e
-                }
-            }
-        }
+        // This must run after addFlutterTasks(): for AGP < 9 projects that do not apply the
+        // Kotlin Gradle Plugin themselves, addFlutterTasks() applies it (see
+        // FlutterPluginUtils.detectApplyingKotlinGradlePlugin), and the KGP version can only be
+        // detected once the plugin is applied.
+        runDependencyCheck(project, DependencyVersionChecker::checkDependencyVersions)
 
         BaseApplicationNameHandler.setBaseName(project)
         val flutterProguardRules =
@@ -248,6 +236,46 @@ class FlutterPlugin : Plugin<Project> {
         }
         FlutterPluginUtils.getAndroidExtension(project).buildTypes.all {
             addFlutterDependencies(this)
+        }
+    }
+
+    /**
+     * Runs a [DependencyVersionChecker] check unless the user opted out with
+     * `--android-skip-build-dependency-validation` (the `skipDependencyChecks` property).
+     *
+     * Errors thrown by the checker for out-of-support versions are re-thrown to fail the build.
+     * Any other error is treated as a possible bug in the checking code: it is logged and the
+     * build continues.
+     */
+    private fun runDependencyCheck(
+        project: Project,
+        check: (Project) -> Unit
+    ) {
+        val shouldSkipDependencyChecks: Boolean =
+            project.hasProperty("skipDependencyChecks") &&
+                (
+                    project.properties["skipDependencyChecks"].toString().toBoolean()
+                )
+        if (shouldSkipDependencyChecks) {
+            return
+        }
+        try {
+            check(project)
+        } catch (e: Exception) {
+            if (!project.hasProperty("usesUnsupportedDependencyVersions") ||
+                !(project.properties["usesUnsupportedDependencyVersions"] as Boolean)
+            ) {
+                // Possible bug in dependency checking code - warn and do not block build.
+                project.logger.error(
+                    "Warning: Flutter was unable to detect project Gradle, Java, " +
+                        "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
+                        e
+                )
+            } else {
+                // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
+                // in the dependency version checker plugin so re-throw it here.
+                throw e
+            }
         }
     }
 
