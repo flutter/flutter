@@ -15,8 +15,8 @@
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 #include "flutter/lib/ui/painting/image_decoder_no_gl_unittests.h"
 #include "flutter/lib/ui/painting/image_decoder_skia.h"
-#include "flutter/lib/ui/painting/multi_frame_codec.h"
 #include "flutter/lib/ui/painting/image_generator_registry_test.h"
+#include "flutter/lib/ui/painting/multi_frame_codec.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/testing/dart_isolate_runner.h"
@@ -798,7 +798,8 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
       ASSERT_TRUE(data);
       ASSERT_GE(data->size(), 0u);
 
-      std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
+      std::shared_ptr<ImageGenerator> generator =
+          CreateTestImageGenerator(data);
       ASSERT_TRUE(generator);
 
       auto descriptor = fml::MakeRefCounted<ImageDescriptor>(

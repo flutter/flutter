@@ -113,8 +113,8 @@ class ImageGeneratorRegistry {
       std::shared_ptr<const std::vector<PrioritizedFactory>> factories,
       size_t index,
       sk_sp<SkData> buffer,
-      std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
-      fml::RefPtr<fml::TaskRunner> ui_task_runner,
+      const std::shared_ptr<fml::ConcurrentTaskRunner>& concurrent_task_runner,
+      const fml::RefPtr<fml::TaskRunner>& ui_task_runner,
       std::function<void(std::shared_ptr<ImageGenerator>)> callback);
 
   using FactorySet = std::set<PrioritizedFactory, Compare>;

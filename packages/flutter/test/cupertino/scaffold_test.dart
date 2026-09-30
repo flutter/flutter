@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../image_data.dart';
 
 /// Integration tests testing both [CupertinoPageScaffold] and [CupertinoTabScaffold].
 void main() {
@@ -212,15 +208,9 @@ void main() {
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
             backgroundColor: CupertinoColors.white,
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                label: 'Tab 1',
-              ),
-              BottomNavigationBarItem(
-                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                label: 'Tab 2',
-              ),
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(icon: Icon(CupertinoIcons.circle), label: 'Tab 1'),
+              BottomNavigationBarItem(icon: Icon(CupertinoIcons.circle), label: 'Tab 2'),
             ],
           ),
           tabBuilder: (BuildContext context, int index) {
@@ -252,15 +242,9 @@ void main() {
           data: const MediaQueryData(padding: EdgeInsets.symmetric(vertical: 20.0)),
           child: CupertinoTabScaffold(
             tabBar: CupertinoTabBar(
-              items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                  label: 'Tab 1',
-                ),
-                BottomNavigationBarItem(
-                  icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                  label: 'Tab 2',
-                ),
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(CupertinoIcons.circle), label: 'Tab 1'),
+                BottomNavigationBarItem(icon: Icon(CupertinoIcons.circle), label: 'Tab 2'),
               ],
             ),
             tabBuilder: (BuildContext context, int index) {
@@ -300,15 +284,9 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                label: 'Tab 1',
-              ),
-              BottomNavigationBarItem(
-                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                label: 'Tab 2',
-              ),
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(icon: Icon(CupertinoIcons.circle), label: 'Tab 1'),
+              BottomNavigationBarItem(icon: Icon(CupertinoIcons.circle), label: 'Tab 2'),
             ],
           ),
           tabBuilder: (BuildContext context, int index) {
