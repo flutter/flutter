@@ -297,7 +297,7 @@ List<FlutterCommand> generateCommands({
     androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,
     buildSystem: toolDependencies.buildSystem,
-    buildTargets: toolDependencies.buildTargets,
+    buildTargets: const BuildTargetsImpl(),
     deviceManager: globals.deviceManager,
     hidden: !verboseHelp,
     toolContext: toolDependencies.toolContext,
