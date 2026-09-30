@@ -31,7 +31,6 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 @synthesize markedTextStyle = _markedTextStyle;
 @synthesize selectedTextRange = _selectedTextRange;
 @synthesize tokenizer = _tokenizer;
-@synthesize secureTextEntry = _secureTextEntry;
 
 - (BOOL)hasText {
   return self.text.length > 0;
