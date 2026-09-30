@@ -1396,7 +1396,7 @@ abstract class _AndroidViewControllerInternals {
   Future<void> rejectGesture({required int viewId, int? gestureId}) {
     return SystemChannels.platform_views.invokeMethod<void>('rejectGesture', <String, dynamic>{
       'id': viewId,
-      if (gestureId != null) 'gestureId': gestureId,
+      'gestureId': ?gestureId,
     });
   }
 }
@@ -1558,7 +1558,7 @@ class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInter
   Future<void> rejectGesture({required int viewId, int? gestureId}) {
     return SystemChannels.platform_views_2.invokeMethod<void>('rejectGesture', <String, dynamic>{
       'id': viewId,
-      if (gestureId != null) 'gestureId': gestureId,
+      'gestureId': ?gestureId,
     });
   }
 }

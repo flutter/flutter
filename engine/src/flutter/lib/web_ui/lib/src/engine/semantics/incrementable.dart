@@ -20,9 +20,11 @@ import 'semantics.dart';
 /// events. This is to prevent the browser from taking over drag gestures. Drag
 /// gestures must be interpreted by the Flutter framework.
 class SemanticIncrementable extends SemanticRole {
-  SemanticIncrementable(SemanticsObject semanticsObject)
-    : _focusManager = AccessibilityFocusManager(semanticsObject.owner),
-      super.blank(EngineSemanticsRole.incrementable, semanticsObject) {
+  SemanticIncrementable(
+    SemanticsObject semanticsObject, [
+    EngineSemanticsRole kind = EngineSemanticsRole.incrementable,
+  ]) : _focusManager = AccessibilityFocusManager(semanticsObject.owner),
+       super.blank(kind, semanticsObject) {
     // The following generic roles can coexist with incrementables. Generic focus
     // management is not used by this role because the root DOM element is not
     // the one being focused on, but the internal `<input>` element.
