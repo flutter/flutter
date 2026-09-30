@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_UBER_SDF_CONTENTS_H_
 
 #include <memory>
+#include <optional>
 
 #include "flutter/impeller/entity/contents/color_source_contents.h"
 #include "flutter/impeller/entity/contents/contents.h"
@@ -42,6 +43,16 @@ class UberSDFContents : public ColorSourceContents {
  private:
   explicit UberSDFContents(const UberSDFParameters& params,
                            std::unique_ptr<Geometry> geometry);
+
+  /// Renders using a pre-baked gradient ramp texture.
+  bool RenderTexture(const ContentContext& renderer,
+                     const Entity& entity,
+                     RenderPass& pass) const;
+
+  /// Renders using a storage buffer of gradient stops.
+  bool RenderSSBO(const ContentContext& renderer,
+                  const Entity& entity,
+                  RenderPass& pass) const;
 
   UberSDFParameters params_;
   std::unique_ptr<Geometry> geometry_;

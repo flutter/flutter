@@ -21,8 +21,7 @@ mixin ARenderBoxMixin on RenderBox {
 
   @override
   void computeMinIntrinsicHeight() {
-    final void Function() f =
-        computeMaxIntrinsicWidth; // ERROR: f = computeMaxIntrinsicWidth. Consider calling getMaxIntrinsicWidth instead.
+    final void Function() f = computeMaxIntrinsicWidth; // ERROR: f = computeMaxIntrinsicWidth. Consider calling getMaxIntrinsicWidth instead.
     f();
   }
 }

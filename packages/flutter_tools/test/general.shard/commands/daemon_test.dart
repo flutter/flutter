@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart' show FakeToolContext, TestFeatureFlags;
 
 void main() {
   testWithoutContext('binds on ipv4 normally', () async {
@@ -21,8 +22,10 @@ void main() {
     final bindPorts = <int>[];
 
     final server = DaemonServer(
+      toolContext: FakeToolContext(),
       port: 123,
       logger: logger,
+      featureFlags: TestFeatureFlags(),
       bind: (Object? address, int port) async {
         bindCalledTimes++;
         bindAddresses.add(address);
@@ -45,8 +48,10 @@ void main() {
     final bindPorts = <int>[];
 
     final server = DaemonServer(
+      toolContext: FakeToolContext(),
       port: 123,
       logger: logger,
+      featureFlags: TestFeatureFlags(),
       bind: (Object? address, int port) async {
         bindCalledTimes++;
         bindAddresses.add(address);

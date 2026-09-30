@@ -77,8 +77,10 @@ typedef TaskCallback<T> = FutureOr<T> Function();
 /// See also:
 ///
 ///  * [defaultSchedulingStrategy], the default [SchedulingStrategy] for [SchedulerBinding.schedulingStrategy].
-typedef SchedulingStrategy =
-    bool Function({required int priority, required SchedulerBinding scheduler});
+typedef SchedulingStrategy = bool Function({
+  required int priority,
+  required SchedulerBinding scheduler,
+});
 
 class _TaskEntry<T> {
   _TaskEntry(this.task, this.priority, this.debugLabel, this.flow) {
@@ -746,9 +748,10 @@ mixin SchedulerBinding on BindingBase {
         debugPrint('When the current transient callback was registered, this was the stack:');
         debugPrint(
           FlutterError.defaultStackFilter(
-            FlutterError.demangleStackTrace(
-              _FrameCallbackEntry.debugCurrentCallbackStack!,
-            ).toString().trimRight().split('\n'),
+            FlutterError.demangleStackTrace(_FrameCallbackEntry.debugCurrentCallbackStack!)
+                .toString()
+                .trimRight()
+                .split('\n'),
           ).join('\n'),
         );
       } else {

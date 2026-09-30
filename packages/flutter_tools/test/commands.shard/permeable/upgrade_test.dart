@@ -27,6 +27,7 @@ void main() {
   setUpAll(() {
     Cache.disableLocking();
     Cache.flutterRoot = getFlutterRoot();
+    Cache.disableLocking();
   });
   group('UpgradeCommandRunner', () {
     final jan12026 = DateTime.utc(2026);
@@ -46,17 +47,17 @@ void main() {
     );
 
     setUp(() {
-      fakeCommandRunner = FakeUpgradeCommandRunner()..clock = SystemClock.fixed(jan12026);
-      realCommandRunner = UpgradeCommandRunner()
-        ..workingDirectory = getFlutterRoot()
-        ..clock = SystemClock.fixed(jan12026);
-      processManager = FakeProcessManager.empty();
-      fakeCommandRunner.willHaveUncommittedChanges = false;
       fakePlatform = FakePlatform()
         ..environment = Map<String, String>.unmodifiable(<String, String>{
           'ENV1': 'irrelevant',
           'ENV2': 'irrelevant',
         });
+      processManager = FakeProcessManager.empty();
+      final toolContext = DelegatingToolContext(systemClock: SystemClock.fixed(jan12026));
+      fakeCommandRunner = FakeUpgradeCommandRunner(toolContext: toolContext);
+      realCommandRunner = UpgradeCommandRunner(toolContext: toolContext)
+        ..workingDirectory = getFlutterRoot();
+      fakeCommandRunner.willHaveUncommittedChanges = false;
     });
 
     testUsingContext('throws on unknown tag, official branch,  noforce', () async {
@@ -208,8 +209,9 @@ void main() {
         );
 
         final DateTime now = DateTime.now().subtract(const Duration(minutes: 25));
-        fakeCommandRunner.remoteVersion = latestVersion;
-        fakeCommandRunner.clock = SystemClock.fixed(now);
+        fakeCommandRunner = FakeUpgradeCommandRunner(
+          toolContext: DelegatingToolContext(systemClock: SystemClock.fixed(now)),
+        )..remoteVersion = latestVersion;
 
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
@@ -262,11 +264,11 @@ void main() {
           frameworkVersion: upstreamVersion,
         );
 
-        fakeCommandRunner.remoteVersion = latestVersion;
-
         final now = DateTime.now();
         final DateTime before = now.subtract(const Duration(minutes: 25));
-        fakeCommandRunner.clock = SystemClock.fixed(now);
+        fakeCommandRunner = FakeUpgradeCommandRunner(
+          toolContext: DelegatingToolContext(systemClock: SystemClock.fixed(now)),
+        )..remoteVersion = latestVersion;
 
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
@@ -633,7 +635,11 @@ void main() {
         );
 
         final CommandRunner<void> runner = createTestCommandRunner(
-          UpgradeCommand(verboseHelp: false, commandRunner: fakeCommandRunner),
+          UpgradeCommand(
+            toolContext: DelegatingToolContext(),
+            verboseHelp: false,
+            commandRunner: fakeCommandRunner,
+          ),
         );
 
         fakeCommandRunner.alreadyUpToDate = false;
@@ -736,7 +742,12 @@ void main() {
             },
           ),
         );
-        await precacheArtifacts();
+        await precacheArtifacts(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          platform: fakePlatform,
+          processUtils: globals.processUtils,
+        );
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
@@ -858,9 +869,16 @@ void main() {
           'upgrade continue prints welcome message',
           () async {
             fakeProcessManager = FakeProcessManager.any();
+            final toolContext = FakeToolContext(
+              fs: fs,
+              persistentToolState: PersistentToolState.test(directory: tempDir, logger: testLogger),
+              processManager: fakeProcessManager,
+            );
+            final fakeRunner = FakeUpgradeCommandRunner(toolContext: toolContext);
             final upgradeCommand = UpgradeCommand(
+              toolContext: toolContext,
               verboseHelp: false,
-              commandRunner: fakeCommandRunner,
+              commandRunner: fakeRunner,
             );
 
             await createTestCommandRunner(upgradeCommand).run(<String>[
@@ -889,6 +907,8 @@ void main() {
 }
 
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
+  FakeUpgradeCommandRunner({required super.toolContext});
+
   bool willHaveUncommittedChanges = false;
   bool alreadyUpToDate = false;
 

@@ -382,9 +382,9 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     final double textScaleFactor =
-        MediaQuery.textScalerOf(
-          context,
-        ).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(_fontSizeToScale) /
+        MediaQuery.textScalerOf(context)
+            .clamp(maxScaleFactor: _kMaxTextScaleFactor)
+            .scale(_fontSizeToScale) /
         _fontSizeToScale;
 
     // Conform to M3 spec in portrait mode (landscape mode is not specified).
