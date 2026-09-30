@@ -79,6 +79,22 @@ void main() {
     );
   });
 
+  testUsingContext('Exits if application package is null for target platform', () {
+    final DriverService driverService = setUpDriverService(
+      applicationPackageFactory: FakeApplicationPackageFactory(),
+    );
+    final Device device = FakeDevice(LaunchResult.succeeded());
+
+    expect(
+      () => driverService.start(
+        BuildInfo.profile,
+        device,
+        DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
+      ),
+      throwsToolExit(message: 'No application found for TargetPlatform.android_arm.'),
+    );
+  });
+
   testWithoutContext('Retries application launch if it fails the first time', () async {
     final fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[getVM]);
     final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -451,15 +467,17 @@ void main() {
 }
 
 FlutterDriverService setUpDriverService({
+  ApplicationPackageFactory? applicationPackageFactory,
+  DevtoolsLauncher? devtoolsLauncher,
   Logger? logger,
   Platform? platform,
   ProcessManager? processManager,
   FlutterVmService? vmService,
-  DevtoolsLauncher? devtoolsLauncher,
 }) {
   logger ??= BufferLogger.test();
   return FlutterDriverService(
-    applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
+    applicationPackageFactory:
+        applicationPackageFactory ?? FakeApplicationPackageFactory(FakeApplicationPackage()),
     logger: logger,
     platform: platform ?? FakePlatform(),
     processUtils: ProcessUtils(
@@ -492,12 +510,12 @@ FlutterDriverService setUpDriverService({
 }
 
 class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeApplicationPackageFactory(this.applicationPackage);
+  FakeApplicationPackageFactory([this.applicationPackage]);
 
-  ApplicationPackage applicationPackage;
+  ApplicationPackage? applicationPackage;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(
+  Future<ApplicationPackage?> getPackageForPlatform(
     TargetPlatform platform, {
     BuildInfo? buildInfo,
     File? applicationBinary,
