@@ -1278,7 +1278,7 @@ void AndroidSurfaceManager::DestroyVulkanSwapchainLocked() {
   current_image_index_ = 0;
   has_acquired_image_ = false;
   vk_swapchain_usage_ = 0;
-  vk_surface_transform_ = static_cast<VkSurfaceTransformFlagBitsKHR>(0);
+  vk_surface_transform_ = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 }
 
 void AndroidSurfaceManager::DestroyVulkanSurfaceLocked() {
@@ -1403,30 +1403,8 @@ bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
     vk_device_wait_idle_fn_(vk_device_);
   }
 
-  if (entry.acquire_fence != VK_NULL_HANDLE) {
-    if (vk_destroy_fence_fn_ != nullptr) {
-      vk_destroy_fence_fn_(vk_device_, entry.acquire_fence, nullptr);
-    }
-    entry.acquire_fence = VK_NULL_HANDLE;
-  }
-  if (entry.command_pool != VK_NULL_HANDLE) {
-    if (!entry.command_buffers.empty() &&
-        vk_free_command_buffers_fn_ != nullptr) {
-      vk_free_command_buffers_fn_(
-          vk_device_, entry.command_pool,
-          static_cast<uint32_t>(entry.command_buffers.size()),
-          entry.command_buffers.data());
-    }
-    if (vk_destroy_command_pool_fn_ != nullptr) {
-      vk_destroy_command_pool_fn_(vk_device_, entry.command_pool, nullptr);
-    }
-    entry.command_pool = VK_NULL_HANDLE;
-  }
-  entry.command_buffers.clear();
-  entry.images.clear();
-
   VkSwapchainKHR old_swapchain = entry.swapchain;
-  entry.swapchain = VK_NULL_HANDLE;
+  VkSwapchainKHR new_swapchain = VK_NULL_HANDLE;
 
   VkImageUsageFlags image_usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
   if (caps.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_SRC_BIT) {
@@ -1458,25 +1436,22 @@ bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
   };
 
   res = vk_create_swapchain_khr_fn_(vk_device_, &swapchain_info, nullptr,
-                                    &entry.swapchain);
+                                    &new_swapchain);
   if (res != VK_SUCCESS && old_swapchain != VK_NULL_HANDLE) {
-    if (vk_destroy_swapchain_khr_fn_ != nullptr) {
-      vk_destroy_swapchain_khr_fn_(vk_device_, old_swapchain, nullptr);
-    }
+    DestroyOverlayVulkanSwapchainLocked(entry);
     old_swapchain = VK_NULL_HANDLE;
     swapchain_info.oldSwapchain = VK_NULL_HANDLE;
     res = vk_create_swapchain_khr_fn_(vk_device_, &swapchain_info, nullptr,
-                                      &entry.swapchain);
+                                      &new_swapchain);
   }
-  if (old_swapchain != VK_NULL_HANDLE &&
-      vk_destroy_swapchain_khr_fn_ != nullptr) {
-    vk_destroy_swapchain_khr_fn_(vk_device_, old_swapchain, nullptr);
-  }
-  if (res != VK_SUCCESS || entry.swapchain == VK_NULL_HANDLE) {
+  if (res != VK_SUCCESS || new_swapchain == VK_NULL_HANDLE) {
     FML_LOG(ERROR) << "vkCreateSwapchainKHR for overlay failed: " << res;
+    DestroyOverlayVulkanSwapchainLocked(entry);
     return false;
   }
 
+  DestroyOverlayVulkanSwapchainLocked(entry);
+  entry.swapchain = new_swapchain;
   entry.extent = extent;
   entry.transform = caps.currentTransform;
   entry.swapchain_out_of_date = false;
@@ -1520,7 +1495,7 @@ bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
   return true;
 }
 
-void AndroidSurfaceManager::DestroyOverlayVulkanSurfaceLocked(
+void AndroidSurfaceManager::DestroyOverlayVulkanSwapchainLocked(
     VulkanOverlaySurface& entry) {
   if (is_fake_window_) {
     return;
@@ -1553,14 +1528,22 @@ void AndroidSurfaceManager::DestroyOverlayVulkanSurfaceLocked(
     vk_destroy_swapchain_khr_fn_(vk_device_, entry.swapchain, nullptr);
     entry.swapchain = VK_NULL_HANDLE;
   }
+  entry.current_image_index = 0;
+  entry.has_acquired_image = false;
+  entry.transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+}
+
+void AndroidSurfaceManager::DestroyOverlayVulkanSurfaceLocked(
+    VulkanOverlaySurface& entry) {
+  if (is_fake_window_) {
+    return;
+  }
+  DestroyOverlayVulkanSwapchainLocked(entry);
   if (entry.surface != VK_NULL_HANDLE &&
       vk_destroy_surface_khr_fn_ != nullptr) {
     vk_destroy_surface_khr_fn_(vk_instance_, entry.surface, nullptr);
     entry.surface = VK_NULL_HANDLE;
   }
-  entry.current_image_index = 0;
-  entry.has_acquired_image = false;
-  entry.transform = static_cast<VkSurfaceTransformFlagBitsKHR>(0);
 }
 
 void* AndroidSurfaceManager::GetInstanceProcAddress(
@@ -1819,6 +1802,34 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextOverlayImage(
   if (entry.surface_lost) {
     entry.surface_lost = false;
     DestroyOverlayVulkanSurfaceLocked(entry);
+  }
+
+  if (entry.swapchain != VK_NULL_HANDLE && !entry.swapchain_out_of_date &&
+      vk_get_physical_device_surface_capabilities_khr_fn_ != nullptr) {
+    VkSurfaceCapabilitiesKHR caps = {};
+    if (vk_get_physical_device_surface_capabilities_khr_fn_(
+            vk_physical_device_, entry.surface, &caps) == VK_SUCCESS) {
+      if (caps.currentTransform != entry.transform) {
+        entry.swapchain_out_of_date = true;
+      }
+      constexpr uint32_t kUndefinedExtentDimension = 0xFFFFFFFF;
+      if (caps.currentExtent.width != kUndefinedExtentDimension) {
+        if (caps.currentExtent.width != entry.extent.width ||
+            caps.currentExtent.height != entry.extent.height) {
+          entry.swapchain_out_of_date = true;
+        }
+      } else {
+#if FML_OS_ANDROID
+        int32_t current_w = ANativeWindow_getWidth(overlay_window);
+        int32_t current_h = ANativeWindow_getHeight(overlay_window);
+        if (current_w > 0 && current_h > 0 &&
+            (static_cast<uint32_t>(current_w) != entry.extent.width ||
+             static_cast<uint32_t>(current_h) != entry.extent.height)) {
+          entry.swapchain_out_of_date = true;
+        }
+#endif
+      }
+    }
   }
 
   if (entry.swapchain_out_of_date || entry.swapchain == VK_NULL_HANDLE) {
