@@ -864,7 +864,21 @@ class ScrollableState extends State<Scrollable>
   void _handleDragDown(DragDownDetails details) {
     assert(_drag == null);
     assert(_hold == null);
-    _hold = position.hold(_disposeHold);
+    // Beginning the hold activity ends whatever activity was running, which can
+    // synchronously run user code: a ScrollEndNotification listener, or an
+    // isScrollingNotifier listener. If that code starts another activity, for
+    // example by calling jumpTo, the hold is disposed and _disposeHold runs
+    // before hold() returns. Assigning the returned hold here would put a
+    // disposed hold back into _hold, where nothing will clear it again, and the
+    // next _handleDragCancel would fail its `_hold == null` assertion.
+    var disposed = false;
+    final ScrollHoldController hold = position.hold(() {
+      disposed = true;
+      _disposeHold();
+    });
+    if (!disposed) {
+      _hold = hold;
+    }
   }
 
   void _handleDragStart(DragStartDetails details) {

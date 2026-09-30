@@ -1831,6 +1831,61 @@ void main() {
 
     expect(identical(initialPhysics, currentPhysics), isTrue);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/172174
+  testWidgets('drag cancel does not assert when user code replaced the hold activity', (
+    WidgetTester tester,
+  ) async {
+    final inner = ScrollController();
+    addTearDown(inner.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          children: <Widget>[
+            ListView.builder(
+              controller: inner,
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) => const SizedBox(height: 60.0),
+            ),
+            const SizedBox.shrink(),
+          ],
+        ),
+      ),
+    );
+
+    // User code that snaps the list whenever it stops scrolling. This runs
+    // synchronously from within beginActivity, including the beginActivity
+    // that starts the hold below.
+    var jumps = 0;
+    inner.position.isScrollingNotifier.addListener(() {
+      if (!inner.position.isScrollingNotifier.value && jumps < 5) {
+        jumps += 1;
+        inner.jumpTo(inner.offset.roundToDouble() + 1.0);
+      }
+    });
+
+    inner.animateTo(600.0, duration: const Duration(milliseconds: 400), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Touching down mid-animation begins a hold on the list, which stops the
+    // animation and so runs the listener above; its jumpTo disposes that hold.
+    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 300.0));
+    await tester.pump();
+
+    // Dragging horizontally hands the gesture to the PageView, so the list's
+    // vertical recognizer is rejected and the list gets a drag cancel.
+    await gesture.moveBy(const Offset(-80.0, 0.0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(-80.0, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
 }
 
 // ignore: must_be_immutable
