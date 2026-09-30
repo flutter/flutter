@@ -15,7 +15,7 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
-  'skia_revision': 'f441ca223b2b17b83542ae41d492d0fc76ec1dcb',
+  'skia_revision': '01524014dff53abd6985aec5f9983f3f796b99fe',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
@@ -86,9 +86,6 @@ vars = {
 
   # Checkout Android dependencies only on platforms where we build for Android targets.
   'download_android_deps': 'host_os == "mac" or (host_os == "linux" and host_cpu == "x64")',
-
-  # Checkout Java dependencies only on platforms that do not have java installed on path.
-  'download_jdk': True,
 
   # Checkout Windows dependencies only if we are building on Windows.
   'download_windows_deps' : 'host_os == "win"',
@@ -830,7 +827,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'ukukV5lEkKabtOATkSbVa6yIaU7g4nfmCcVvWNxfMQMC'
+        'version': 'QdgqP02_cYpRQQQNNuRjshiknJeDe5ZKXyqGq2YkqKkC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
