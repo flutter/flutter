@@ -652,7 +652,7 @@ class _FakePub extends Fake implements Pub {
   Map<String, List<Pubspec>> pubspecs = <String, List<Pubspec>>{};
 
   /// The `offline` argument of every [get] call, in call order.
-  final offlineArgs = <bool>[];
+  final List<bool> offlineArgs = <bool>[];
 
   @override
   Future<void> interactively(
