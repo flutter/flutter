@@ -604,7 +604,7 @@ void renderWarmUpView1and2() {
 void testSemanticsActions() {
   PlatformDispatcher.instance.onSemanticsActionEvent = (SemanticsActionEvent action) async {
     await null;
-    Future<void>.value().then((_) {
+    await Future<void>.value().then((_) {
       notifyNative();
     });
   };
@@ -614,7 +614,7 @@ void testSemanticsActions() {
 void testPointerActions() {
   PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket pointer) async {
     await null;
-    Future<void>.value().then((_) {
+    await Future<void>.value().then((_) {
       notifyNative();
     });
   };

@@ -574,9 +574,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       final String target = bundle.defaultMainPath;
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
-        target: target,
+        toolContext: toolContext,
         buildInfo: debuggingOptions.buildInfo,
-        platform: platform,
+        target: target,
       );
 
       if (boolArg(kLaunchPreviewer)) {

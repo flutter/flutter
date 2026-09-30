@@ -337,7 +337,7 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     _lastHookResult = flutterHookResult ?? FlutterHookResult.empty();
-    if (flutterManifest.isEmpty) {
+    if (flutterManifest.isEmpty && (flutterHookResult?.dataAssets.isEmpty ?? true)) {
       final ByteData emptyAssetManifest = const StandardMessageCodec().encodeMessage(
         <dynamic, dynamic>{},
       )!;
@@ -415,10 +415,9 @@ class ManifestAssetBundle implements AssetBundle {
     // dependencies.
     // To avoid bundling assets from dev_dependencies and other pub workspace
     // packages, we compute the set of transitive dependencies.
-    final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
-      flutterProject,
-      packageConfig,
-    );
+    final List<Dependency> transitiveDependencies = flutterManifest.isEmpty
+        ? <Dependency>[]
+        : computeTransitiveDependencies(flutterProject, packageConfig);
     final additionalLicenseFiles = <String, List<File>>{};
     for (final dependency in transitiveDependencies) {
       if (!includeAssetsFromDevDependencies && dependency.isExclusiveDevDependency) {
