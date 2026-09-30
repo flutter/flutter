@@ -56,15 +56,19 @@ abstract class TickerProvider {
 ///
 /// To obtain a ticker, consider [TickerProvider].
 ///
-/// When created, a ticker is initially disabled. Call [start] to
-/// enable the ticker.
+/// When created, a ticker is initially inactive. Call [start] to
+/// start the ticker's clock.
 ///
 /// A [Ticker] can be silenced by setting [muted] to true. While silenced, time
 /// still elapses, and [start] and [stop] can still be called, but no callbacks
 /// are called.
 ///
-/// By convention, the [start] and [stop] methods are used by the ticker's
-/// consumer (for example, an [AnimationController]), and the [muted] property
+/// The ticker's consumer can also silence callbacks by setting [enabled] to
+/// false. This is independent of [muted], so a consumer cannot override the
+/// decision of its [TickerProvider] to silence the ticker.
+///
+/// By convention, [enabled] and the [start] and [stop] methods are used by the
+/// ticker's consumer (for example, an [AnimationController]), and the [muted] property
 /// is controlled by the [TickerProvider] that created the ticker (for example,
 /// a [State] that uses [TickerProviderStateMixin] to silence the ticker when
 /// the state's subtree is disabled as defined by [TickerMode]).
@@ -99,6 +103,31 @@ class Ticker {
   /// used sparingly as it can increase battery usage.
   bool forceFrames = false;
 
+  /// Whether the ticker's consumer allows callbacks to be scheduled.
+  ///
+  /// Defaults to true. Setting this to false silences callbacks without stopping
+  /// the ticker's clock or completing the [TickerFuture] returned by [start].
+  /// Like [muted], time continues to elapse while callbacks are silenced. When
+  /// callbacks resume, their elapsed time includes the time spent silenced.
+  ///
+  /// By convention, this property is controlled by the ticker's consumer, while
+  /// [muted] is controlled by its [TickerProvider]. Callbacks are only scheduled
+  /// when this is true and [muted] is false.
+  bool get enabled => _enabled;
+  bool _enabled = true;
+
+  set enabled(bool value) {
+    if (value == _enabled) {
+      return;
+    }
+    _enabled = value;
+    if (!value) {
+      unscheduleTick();
+    } else if (shouldScheduleTick) {
+      scheduleTick();
+    }
+  }
+
   /// Whether this ticker has been silenced.
   ///
   /// While silenced, a ticker's clock can still run, but the callback will not
@@ -131,8 +160,8 @@ class Ticker {
   /// Whether this [Ticker] has scheduled a call to call its callback
   /// on the next frame.
   ///
-  /// A ticker that is [muted] can be active (see [isActive]) yet not be
-  /// ticking. In that case, the ticker will not call its callback, and
+  /// A ticker that is [muted] or not [enabled] can be active (see [isActive]) yet
+  /// not be ticking. In that case, the ticker will not call its callback, and
   /// [isTicking] will be false, but time will still be progressing.
   ///
   /// This will return false if the [SchedulerBinding.lifecycleState] is one
@@ -142,7 +171,7 @@ class Ticker {
     if (_future == null) {
       return false;
     }
-    if (muted) {
+    if (muted || !enabled) {
       return false;
     }
     if (SchedulerBinding.instance.framesEnabled) {
@@ -166,8 +195,9 @@ class Ticker {
   /// as reported by [SchedulerBinding.currentFrameTimeStamp].
   Duration? _startTime;
 
-  /// Starts the clock for this [Ticker]. If the ticker is not [muted], then this
-  /// also starts calling the ticker's callback once per animation frame.
+  /// Starts the clock for this [Ticker]. If the ticker is [enabled] and not
+  /// [muted], then this also starts calling the ticker's callback once per
+  /// animation frame.
   ///
   /// The returned future resolves once the ticker [stop]s ticking. If the
   /// ticker is disposed, the future does not resolve. A derivative future is
@@ -265,9 +295,10 @@ class Ticker {
   ///
   /// * A tick has already been scheduled for the coming frame.
   /// * The ticker is not active ([start] has not been called).
-  /// * The ticker is not ticking, e.g. because it is [muted] (see [isTicking]).
+  /// * The ticker is not ticking, e.g. because it is [muted] or not [enabled]
+  ///   (see [isTicking]).
   @protected
-  bool get shouldScheduleTick => !muted && isActive && !scheduled;
+  bool get shouldScheduleTick => enabled && !muted && isActive && !scheduled;
 
   void _tick(Duration timeStamp) {
     assert(isTicking);
@@ -325,6 +356,8 @@ class Ticker {
   /// [TickerProvider] but needs to maintain continuity. In particular, this
   /// maintains the identity of the [TickerFuture] returned by the [start]
   /// function of the original [Ticker] if the original ticker is active.
+  /// The [enabled] setting is also transferred. The [muted] setting is retained
+  /// from this ticker's [TickerProvider].
   ///
   /// This ticker must not be active when this method is called.
   void absorbTicker(Ticker originalTicker) {
@@ -336,6 +369,7 @@ class Ticker {
       (originalTicker._future != null) || (originalTicker._startTime == null),
       'Cannot absorb Ticker after it has been disposed.',
     );
+    _enabled = originalTicker._enabled;
     if (originalTicker._future != null) {
       _future = originalTicker._future;
       _startTime = originalTicker._startTime;
