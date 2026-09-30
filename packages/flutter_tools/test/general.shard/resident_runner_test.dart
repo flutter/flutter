@@ -68,10 +68,9 @@ HotRunner createHotRunner(
   ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
   bool stayResident = true,
   StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  ToolContext? toolContext,
+  ToolContext toolContext = const DelegatingToolContext(),
   Xcode? xcode,
 }) {
-  toolContext ??= DelegatingToolContext();
   buildSystem ??= FlutterBuildSystem(
     fileSystem: toolContext.fs,
     logger: toolContext.logger,
@@ -143,12 +142,10 @@ ColdRunner createColdRunner(
   bool machine = false,
   String? projectRootPath,
   bool stayResident = true,
-  ToolContext? toolContext,
+  ToolContext toolContext = const DelegatingToolContext(),
   bool traceStartup = false,
   Xcode? xcode,
 }) {
-  toolContext ??= DelegatingToolContext();
-
   return ColdRunner(
     flutterDevices,
     analytics: analytics ?? const NoOpAnalytics(),
@@ -1824,7 +1821,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: DelegatingToolContext(),
+                toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1876,7 +1873,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: DelegatingToolContext(),
+                toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1929,7 +1926,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: DelegatingToolContext(),
+                toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1962,7 +1959,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: DelegatingToolContext(),
+                toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1994,7 +1991,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: DelegatingToolContext(),
+                toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -2025,7 +2022,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: DelegatingToolContext(),
+                toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -2445,7 +2442,7 @@ flutter:
             stayResident: false,
             debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
             target: 'main.dart',
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
             xcode: null,
             analytics: fakeAnalytics,
           );
