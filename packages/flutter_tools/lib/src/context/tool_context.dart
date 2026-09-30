@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport '../build_system/build_system.dart';
+/// @docImport '../doctor.dart';
+/// @docImport 'android_context.dart';
+/// @docImport 'apple_context.dart';
+/// @docImport 'tool_dependencies.dart';
+library;
+
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -36,9 +43,9 @@ import '../version.dart';
 ///
 /// [ToolContext] is the lowest layer of the dependency graph and is what most
 /// code should depend on: commands, builders, compilers, and test runners take
-/// a [ToolContext] rather than `ToolDependencies`. It deliberately excludes the
-/// platform toolchains (`AndroidContext`, `AppleContext`) and the higher-level
-/// services built on top of it (such as `BuildSystem` and `Doctor`), so
+/// a [ToolContext] rather than [ToolDependencies]. It deliberately excludes the
+/// platform toolchains ([AndroidContext], [AppleContext]) and the higher-level
+/// services built on top of it (such as [BuildSystem] and [Doctor]), so
 /// consumers stay decoupled from platform SDKs and unit tests can use a
 /// lightweight fake without constructing the full object graph.
 class ToolContext {
