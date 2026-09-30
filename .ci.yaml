@@ -1153,7 +1153,6 @@ targets:
   # to Java 17 instead of the default JDK.
   - name: Linux android_java17_build_android_host_app_with_module_aar
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
