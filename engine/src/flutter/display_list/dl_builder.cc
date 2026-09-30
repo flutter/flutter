@@ -708,9 +708,20 @@ void DisplayListBuilder::RestoreLayer() {
 
   if (layer_op->options.bounds_from_caller()) {
     DlRect user_bounds = layer_op->rect;
-    if (!content_bounds.IsEmpty() && !user_bounds.Contains(content_bounds)) {
-      layer_op->options = layer_op->options.with_content_is_clipped();
-      content_bounds = content_bounds.IntersectionOrEmpty(user_bounds);
+    if (!content_bounds.IsEmpty()) {
+      DlIRect unused;
+      if (current_layer().filter &&
+          current_layer().filter->get_input_device_bounds(
+              DlIRect::RoundOut(content_bounds), DlMatrix(), unused) ==
+              nullptr) {
+        if (!user_bounds.Contains(content_bounds)) {
+          layer_op->options = layer_op->options.with_content_is_clipped();
+        }
+        content_bounds = user_bounds;
+      } else if (!user_bounds.Contains(content_bounds)) {
+        layer_op->options = layer_op->options.with_content_is_clipped();
+        content_bounds = content_bounds.IntersectionOrEmpty(user_bounds);
+      }
     }
     if (layer_op->type == DisplayListOpType::kSaveLayerBackdrop) {
       content_bounds = content_bounds.Union(user_bounds);
@@ -794,6 +805,19 @@ void DisplayListBuilder::TransferLayerBounds(const DlRect& content_bounds) {
   const DlRect clip = parent_info().global_state.GetDeviceCullCoverage();
   const DlMatrix matrix = parent_info().global_state.matrix();
 
+  DlIRect unused;
+  const bool filter_has_unbounded_input =
+      !content_bounds.IsEmpty() &&
+      filter->get_input_device_bounds(DlIRect::RoundOut(content_bounds), matrix,
+                                      unused) == nullptr;
+  DlRect layer_clip = clip;
+  if (filter_has_unbounded_input) {
+    if (!parent_info().global_state.mapAndClipRect(content_bounds,
+                                                   &layer_clip)) {
+      layer_clip = DlRect();
+    }
+  }
+
   if (rtree_data_.has_value()) {
     // Neither current or parent layer should have any global bounds in
     // their accumulator
@@ -811,12 +835,16 @@ void DisplayListBuilder::TransferLayerBounds(const DlRect& content_bounds) {
     // (indicated by rtree_rects_start_index) and expand them by the filter.
 
     // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-    if (AdjustRTreeRects(rtree_data_.value(), *filter, matrix, clip,
-                         current_layer().rtree_rects_start_index)) {
+    if (AdjustRTreeRects(rtree_data_.value(), *filter, matrix, layer_clip,
+                         current_layer().rtree_rects_start_index,
+                         filter_has_unbounded_input)) {
       parent_is_flooded = true;
     }
   } else {
     DlRect global_bounds = current_layer().global_space_accumulator.GetBounds();
+    if (!global_bounds.IsEmpty() && filter_has_unbounded_input) {
+      global_bounds = layer_clip;
+    }
     if (!global_bounds.IsEmpty()) {
       DlIRect global_ibounds = DlIRect::RoundOut(global_bounds);
       if (!filter->map_device_bounds(global_ibounds, matrix, global_ibounds)) {
@@ -871,7 +899,8 @@ bool DisplayListBuilder::AdjustRTreeRects(RTreeData& data,
                                           const DlImageFilter& filter,
                                           const DlMatrix& matrix,
                                           const DlRect& clip,
-                                          size_t rect_start_index) {
+                                          size_t rect_start_index,
+                                          bool filter_has_unbounded_input) {
   auto& rects = data.rects;
   auto& indices = data.indices;
   FML_DCHECK(rects.size() == indices.size());
@@ -881,7 +910,7 @@ bool DisplayListBuilder::AdjustRTreeRects(RTreeData& data,
     DlRect bounds = rects[i];
     DlIRect ibounds = DlIRect::RoundOut(bounds);
     if (filter.map_device_bounds(ibounds, matrix, ibounds)) {
-      bounds = DlRect::Make(ibounds);
+      bounds = filter_has_unbounded_input ? clip : DlRect::Make(ibounds);
     } else {
       bounds = clip;
       ret = true;

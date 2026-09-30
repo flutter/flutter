@@ -717,7 +717,8 @@ class DisplayListBuilder final : public virtual DlCanvas,
                         const DlImageFilter& filter,
                         const DlMatrix& matrix,
                         const DlRect& clip,
-                        size_t rect_index);
+                        size_t rect_index,
+                        bool filter_has_unbounded_input);
 
   // This flag indicates whether or not the current rendering attributes
   // are compatible with rendering ops applying an inherited opacity.
