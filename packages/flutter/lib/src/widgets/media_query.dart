@@ -579,6 +579,12 @@ class MediaQueryData {
 
   /// Whether to use 24-hour format when formatting time.
   ///
+  /// When true, time is formatted in a 24-hour format. When false, the app's
+  /// `MaterialLocalizations` determines the format, which is not necessarily
+  /// 12-hour. `DefaultMaterialLocalizations` uses a 12-hour format, while
+  /// `GlobalMaterialLocalizations` from `flutter_localizations` uses the
+  /// locale's format, which can be 24-hour.
+  ///
   /// The behavior of this flag is different across platforms:
   ///
   /// - On Android this flag is reported directly from the user settings called
