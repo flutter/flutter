@@ -356,6 +356,28 @@ TEST(PipelineLibraryGLESDeferredTest,
   RunDeferredLink(false, true, true);
 }
 
+/// A synchronous request links through LinkProgram, so its status decides the
+/// pipeline. A failed compile or link must resolve the future to null, and a
+/// failed compile stops before glLinkProgram.
+void RunSynchronousLinkFailure(bool fail_compile) {
+  DeferredLinkHarness harness(/*max_pending_links=*/4);
+  harness.state.fail_compile = fail_compile;
+  harness.state.fail_link = !fail_compile;
+  PipelineFuture<PipelineDescriptor> future =
+      harness.library->GetPipeline(harness.desc, /*async=*/false, true);
+  ASSERT_TRUE(IsReady(future));
+  EXPECT_EQ(future.Get(), nullptr);
+  EXPECT_EQ(harness.state.links, fail_compile ? 0 : 1);
+}
+
+TEST(PipelineLibraryGLESDeferredTest, SynchronousFailedCompileReturnsNull) {
+  RunSynchronousLinkFailure(true);
+}
+
+TEST(PipelineLibraryGLESDeferredTest, SynchronousFailedLinkReturnsNull) {
+  RunSynchronousLinkFailure(false);
+}
+
 TEST(PipelineLibraryGLESDeferredTest,
      ResolvesUnstartedPipelinesWhenTheRunnerDiscardsJobs) {
   std::shared_ptr<MockGLES> mock_gles =
