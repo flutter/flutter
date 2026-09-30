@@ -5,6 +5,7 @@
 package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.flutter.gradle.DependencyVersionChecker.AGP_NAME
@@ -594,6 +595,8 @@ private object MockProjectFactory {
         val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>()
         every { mockProject.extensions.findByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
         every { mockAndroidComponentsExtension.pluginVersion } returns agpVersion
+        // A Flutter app project (not add-to-app).
+        every { mockProject.extensions.findByType(ApplicationExtension::class.java) } returns mockk()
 
         // KGP
         every { mockProject.hasProperty(eq("kotlin_version")) } returns true
