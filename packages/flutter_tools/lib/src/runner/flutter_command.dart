@@ -193,24 +193,22 @@ abstract class FlutterCommand extends Command<void> {
   /// The [ToolContext] providing explicit dependency injection for this command.
   ToolContext? get toolContext => _explicitToolContext ?? runner?.toolContext;
 
-  SystemClock get _clock => _explicitToolContext?.systemClock ?? globals.systemClock;
-  Logger get _logger => _explicitToolContext?.logger ?? globals.logger;
-  Signals get _signals => _explicitToolContext?.signals ?? globals.signals;
-  UserMessages get _userMessages => _explicitToolContext?.userMessages ?? globals.userMessages;
-  PreRunValidator get _preRunValidator =>
-      _explicitToolContext?.preRunValidator ?? globals.preRunValidator;
-  OperatingSystemUtils get _os => _explicitToolContext?.os ?? globals.os;
+  SystemClock get _clock => toolContext?.systemClock ?? globals.systemClock;
+  Logger get _logger => toolContext?.logger ?? globals.logger;
+  Signals get _signals => toolContext?.signals ?? globals.signals;
+  UserMessages get _userMessages => toolContext?.userMessages ?? globals.userMessages;
+  PreRunValidator get _preRunValidator => toolContext?.preRunValidator ?? globals.preRunValidator;
+  OperatingSystemUtils get _os => toolContext?.os ?? globals.os;
   PersistentToolState? get _persistentToolState =>
-      _explicitToolContext?.persistentToolState ?? globals.persistentToolState;
-  Platform get _platform => _explicitToolContext?.platform ?? globals.platform;
-  FileSystem get _fs => _explicitToolContext?.fs ?? globals.fs;
+      toolContext?.persistentToolState ?? globals.persistentToolState;
+  Platform get _platform => toolContext?.platform ?? globals.platform;
+  FileSystem get _fs => toolContext?.fs ?? globals.fs;
   FlutterProjectFactory get _projectFactory =>
-      _explicitToolContext?.projectFactory ?? globals.projectFactory;
+      toolContext?.projectFactory ?? globals.projectFactory;
   Analytics get _analytics => runner?.analytics ?? globals.analytics;
-  Cache get _cache => _explicitToolContext?.cache ?? globals.cache;
-  FlutterVersion get _flutterVersion =>
-      _explicitToolContext?.flutterVersion ?? globals.flutterVersion;
-  FileSystemUtils get _fsUtils => _explicitToolContext?.fileSystemUtils ?? globals.fsUtils;
+  Cache get _cache => toolContext?.cache ?? globals.cache;
+  FlutterVersion get _flutterVersion => toolContext?.flutterVersion ?? globals.flutterVersion;
+  FileSystemUtils get _fsUtils => toolContext?.fileSystemUtils ?? globals.fsUtils;
 
   /// The currently executing command (or sub-command).
 

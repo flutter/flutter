@@ -15,7 +15,7 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
-  'skia_revision': '8eedeed98e7933382974fe68d5e14f1c6cf8bd8f',
+  'skia_revision': 'af1e8b356dd1227e053eddeda691ae7cd907ad05',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
@@ -86,9 +86,6 @@ vars = {
 
   # Checkout Android dependencies only on platforms where we build for Android targets.
   'download_android_deps': 'host_os == "mac" or (host_os == "linux" and host_cpu == "x64")',
-
-  # Checkout Java dependencies only on platforms that do not have java installed on path.
-  'download_jdk': True,
 
   # Checkout Windows dependencies only if we are building on Windows.
   'download_windows_deps' : 'host_os == "win"',
@@ -594,7 +591,7 @@ deps = {
       {
         # See tools/gradle/README.md for update instructions.
         # Version here means the CIPD tag.
-        'version': 'version:9.3.1',
+        'version': 'version:9.5.0',
         'package': 'flutter/gradle'
       }
     ],
@@ -830,7 +827,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'ukukV5lEkKabtOATkSbVa6yIaU7g4nfmCcVvWNxfMQMC'
+        'version': 'QdgqP02_cYpRQQQNNuRjshiknJeDe5ZKXyqGq2YkqKkC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
