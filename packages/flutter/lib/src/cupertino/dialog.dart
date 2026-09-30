@@ -2404,8 +2404,7 @@ class _CupertinoDialogActionState extends State<CupertinoDialogAction> implement
 // and divider widgets in an alternating sequence. Therefore, the list must have
 // an odd length.
 class _AlertDialogActionsLayout extends MultiChildRenderObjectWidget {
-  const _AlertDialogActionsLayout({required double dividerThickness, required super.children})
-    : _dividerThickness = dividerThickness;
+  const _AlertDialogActionsLayout({required this._dividerThickness, required super.children});
 
   final double _dividerThickness;
 
@@ -2428,10 +2427,9 @@ class _AlertDialogActionsLayout extends MultiChildRenderObjectWidget {
 class _RenderAlertDialogActionsLayout extends RenderFlex {
   _RenderAlertDialogActionsLayout({
     List<RenderBox>? children,
-    required double dividerThickness,
+    required this._dividerThickness,
     super.textDirection,
-  }) : _dividerThickness = dividerThickness,
-       super(
+  }) : super(
          direction: Axis.vertical,
          mainAxisSize: MainAxisSize.min,
          crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2643,9 +2641,8 @@ class _PriorityColumn extends MultiChildRenderObjectWidget {
 }
 
 class _RenderPriorityColumn extends RenderFlex {
-  _RenderPriorityColumn({List<RenderBox>? children, required double bottomMinHeight})
-    : _bottomMinHeight = bottomMinHeight,
-      super(
+  _RenderPriorityColumn({List<RenderBox>? children, required this._bottomMinHeight})
+    : super(
         direction: Axis.vertical,
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

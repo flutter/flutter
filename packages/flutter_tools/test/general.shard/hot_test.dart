@@ -210,14 +210,12 @@ name: my_app
             devices,
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
-            reassembleHelper:
-                (
-                  List<FlutterDevice?> flutterDevices,
-                  Map<FlutterDevice?, List<FlutterView>> viewCache,
-                  void Function(String message)? onSlow,
-                  String reloadMessage,
-                ) async =>
-                    ReassembleResult(<FlutterView?, FlutterVmService?>{null: null}, false, true),
+            reassembleHelper: (
+              List<FlutterDevice?> flutterDevices,
+              Map<FlutterDevice?, List<FlutterView>> viewCache,
+              void Function(String message)? onSlow,
+              String reloadMessage,
+            ) async => ReassembleResult(<FlutterView?, FlutterVmService?>{null: null}, false, true),
             analytics: fakeAnalytics,
           ).restart();
           expect(result.isOk, false);
@@ -250,6 +248,7 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
+              toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
               targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,
@@ -281,6 +280,7 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
+              toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
               targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,
@@ -432,14 +432,12 @@ name: my_app
                   firstReloadDetails['receivedProceduresCount'] = 5;
                   return OperationResult.ok;
                 },
-            reassembleHelper:
-                (
-                  List<FlutterDevice?> flutterDevices,
-                  Map<FlutterDevice?, List<FlutterView>> viewCache,
-                  void Function(String message)? onSlow,
-                  String reloadMessage,
-                ) async =>
-                    ReassembleResult(<FlutterView?, FlutterVmService?>{null: null}, false, true),
+            reassembleHelper: (
+              List<FlutterDevice?> flutterDevices,
+              Map<FlutterDevice?, List<FlutterView>> viewCache,
+              void Function(String message)? onSlow,
+              String reloadMessage,
+            ) async => ReassembleResult(<FlutterView?, FlutterVmService?>{null: null}, false, true),
           ).restart();
 
           expect(result.isOk, true);

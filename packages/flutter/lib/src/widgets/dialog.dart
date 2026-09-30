@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
@@ -67,12 +70,11 @@ Future<T?> showRawDialog<T>({
   final Route<T> route =
       routeBuilder?.call(context, builder) ??
       RawDialogRoute<T>(
-        pageBuilder:
-            (
-              BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-            ) => builder(context),
+        pageBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) => builder(context),
         settings: routeSettings,
         fullscreenDialog: fullscreenDialog,
       );

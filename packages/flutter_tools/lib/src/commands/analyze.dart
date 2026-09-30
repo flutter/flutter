@@ -24,13 +24,12 @@ import 'validate_project.dart';
 
 class AnalyzeCommand extends FlutterCommand {
   AnalyzeCommand({
-    required List<ProjectValidator> allProjectValidators,
-    required bool suppressAnalytics,
+    required this._allProjectValidators,
+    required this._suppressAnalytics,
     required super.toolContext,
     bool verboseHelp = false,
     this.workingDirectory,
-  }) : _allProjectValidators = allProjectValidators,
-       _suppressAnalytics = suppressAnalytics {
+  }) {
     argParser.addFlag(
       'flutter-repo',
       negatable: false,

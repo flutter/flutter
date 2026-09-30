@@ -297,9 +297,8 @@ void main() {
       createCoreMockProjectFiles();
 
       expect(
-        createTestCommandRunner(
-          command,
-        ).run(const <String>['build', 'ios', '--no-pub', '--debug', '--analyze-size']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub', '--debug', '--analyze-size']),
         throwsToolExit(message: '--analyze-size" can only be used on release builds'),
       );
     },
@@ -441,9 +440,8 @@ void main() {
       final BuildCommand command = createBuildCommand();
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ios', '--no-pub', '--no-publish-port', '--ci']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--no-pub', '--no-publish-port', '--ci']);
       expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
     },
     overrides: <Type, Generator>{
@@ -472,9 +470,8 @@ void main() {
       final BuildCommand command = createBuildCommand();
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ios', '--no-pub', '--no-publish-port']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--no-pub', '--no-publish-port']);
       expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
     },
     overrides: <Type, Generator>{
@@ -585,9 +582,8 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ios', '--no-pub', '--device-id', '1234']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--no-pub', '--device-id', '1234']);
       expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
     },
     overrides: <Type, Generator>{
@@ -617,9 +613,8 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ios', '--simulator', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--simulator', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -696,9 +691,8 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ios', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--no-pub', '--analyze-size']);
 
       expect(logger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
       expect(logger.statusText, contains('dart devtools --appSizeBase='));
@@ -1406,9 +1400,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         createMinimalMockProjectFiles();
 
         await expectLater(
-          createTestCommandRunner(
-            command,
-          ).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(),
         );
 
@@ -1444,9 +1437,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         createMinimalMockProjectFiles();
 
         await expectLater(
-          createTestCommandRunner(
-            command,
-          ).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(),
         );
 
@@ -1487,9 +1479,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         createMinimalMockProjectFiles();
 
         await expectLater(
-          createTestCommandRunner(
-            command,
-          ).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(),
         );
 
@@ -1531,9 +1522,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         createMinimalMockProjectFiles();
 
         await expectLater(
-          createTestCommandRunner(
-            command,
-          ).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(),
         );
 
