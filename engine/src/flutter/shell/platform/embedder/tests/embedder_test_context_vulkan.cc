@@ -20,25 +20,6 @@ namespace flutter::testing {
 EmbedderTestContextVulkan::EmbedderTestContextVulkan(std::string assets_path)
     : EmbedderTestContext(std::move(assets_path)), surface_() {
   vulkan_context_ = fml::MakeRefCounted<TestVulkanContext>();
-
-  static const char* kInstanceExtensions[] = {
-      "VK_KHR_surface",
-#if defined(FML_OS_LINUX)
-      "VK_KHR_xcb_surface",
-#endif  // OS_LINUX
-#if defined(FML_OS_WIN)
-      "VK_KHR_win32_surface",
-#endif  // OS_WIN
-  };
-  constexpr size_t kInstanceExtensionCount =
-      sizeof(kInstanceExtensions) / sizeof(kInstanceExtensions[0]);
-
-  static const char* kDeviceExtensions[] = {
-      "VK_KHR_swapchain",
-  };
-  constexpr size_t kDeviceExtensionCount =
-      sizeof(kDeviceExtensions) / sizeof(kDeviceExtensions[0]);
-
   renderer_config_.type = FlutterRendererType::kVulkan;
   renderer_config_.vulkan = {
       .struct_size = sizeof(FlutterVulkanRendererConfig),
