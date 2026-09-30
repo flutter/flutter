@@ -68,7 +68,7 @@ class CustomElementEmbeddingStrategy implements EmbeddingStrategy {
 
   @override
   void updateHostElement(DomElement newHostElement, DomElement newRootElement) {
-    hostElement.setAttribute('flt-embedding', '');
+    hostElement.removeAttribute('flt-embedding');
     newHostElement.setAttribute('flt-embedding', 'custom-element');
     hostElement = newHostElement;
     attachViewRoot(newRootElement);

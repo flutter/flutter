@@ -115,7 +115,11 @@ class _BrowserAppLifecycleState extends AppLifecycleState {
 
   void _attachView(EngineFlutterView view) {
     assert(!_trackers.containsKey(view.viewId), 'View ${view.viewId} is already being tracked.');
-    final tracker = _ViewLifecycleTracker(view: view, onStateChanged: _updateAggregateState);
+    final tracker = _ViewLifecycleTracker(
+      domDocument: view.viewDomDocument,
+      domWindow: view.viewDomWindow,
+      onStateChanged: _updateAggregateState,
+    );
     _trackers[view.viewId] = tracker;
     _updateAggregateState();
   }
@@ -150,20 +154,27 @@ class _BrowserAppLifecycleState extends AppLifecycleState {
 
 /// Tracks the lifecycle-relevant state of a single [EngineFlutterView].
 class _ViewLifecycleTracker {
-  _ViewLifecycleTracker({required this.view, required this.onStateChanged}) {
-    view.viewDomDocument.addEventListener('visibilitychange', _visibilityChangeListener);
-    view.viewDomWindow.addEventListener('focus', _focusListener);
-    view.viewDomWindow.addEventListener('blur', _blurListener);
+  _ViewLifecycleTracker({
+    required this.domDocument,
+    required this.domWindow,
+    required this.onStateChanged,
+  }) : state = domDocument.visibilityState == 'hidden'
+           ? ui.AppLifecycleState.hidden
+           : ui.AppLifecycleState.resumed {
+    domDocument.addEventListener('visibilitychange', _visibilityChangeListener);
+    domWindow.addEventListener('focus', _focusListener);
+    domWindow.addEventListener('blur', _blurListener);
   }
 
-  final EngineFlutterView view;
+  DomHTMLDocument domDocument;
+  DomWindow domWindow;
   final ui.VoidCallback onStateChanged;
-  ui.AppLifecycleState state = ui.AppLifecycleState.resumed;
+  ui.AppLifecycleState state;
 
   late final DomEventListener _visibilityChangeListener = createDomEventListener((DomEvent event) {
-    if (view.viewDomDocument.visibilityState == 'visible') {
+    if (domDocument.visibilityState == 'visible') {
       state = ui.AppLifecycleState.resumed;
-    } else if (view.viewDomDocument.visibilityState == 'hidden') {
+    } else if (domDocument.visibilityState == 'hidden') {
       state = ui.AppLifecycleState.hidden;
     }
     onStateChanged();
@@ -178,8 +189,8 @@ class _ViewLifecycleTracker {
   });
 
   void dispose() {
-    view.viewDomDocument.removeEventListener('visibilitychange', _visibilityChangeListener);
-    view.viewDomDocument.removeEventListener('focus', _focusListener);
-    view.viewDomDocument.removeEventListener('blur', _blurListener);
+    domDocument.removeEventListener('visibilitychange', _visibilityChangeListener);
+    domWindow.removeEventListener('focus', _focusListener);
+    domWindow.removeEventListener('blur', _blurListener);
   }
 }

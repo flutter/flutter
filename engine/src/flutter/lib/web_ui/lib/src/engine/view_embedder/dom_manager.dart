@@ -66,7 +66,9 @@ class DomManager {
       DomManager.textEditingHostTagName,
       DomManager.semanticsHostTagName,
     ]) {
-      final DomNode? node = rootElement.children.where((c) => c.tagName == tag).firstOrNull;
+      final DomNode? node = rootElement.children
+          .where((c) => c.tagName.toLowerCase() == tag.toLowerCase())
+          .firstOrNull;
       if (node != null) {
         rootElement.removeChild(node);
       }

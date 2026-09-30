@@ -206,7 +206,8 @@ class FrameService {
   /// when no windows are registered.
   DomWindow _pickWindowForFrame() {
     for (final DomWindow window in _registeredWindows) {
-      if ((window.document as DomHTMLDocument).visibilityState == 'visible') {
+      final document = window.document as DomHTMLDocument?;
+      if (document != null && document.visibilityState == 'visible') {
         return window;
       }
     }
