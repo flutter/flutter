@@ -299,8 +299,16 @@ Future<Process> startProcess(
   newEnvironment['LANG'] = 'en_US.UTF-8';
   print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');
 
+  var finalExecutable = executable;
+  // Only resolve relative paths containing directory separators against
+  // working directory; bare commands (e.g. 'git') rely on system PATH lookup.
+  if (!path.isAbsolute(finalExecutable) &&
+      (finalExecutable.contains('/') || finalExecutable.contains(r'\'))) {
+    finalExecutable = path.normalize(path.join(finalWorkingDirectory, finalExecutable));
+  }
+
   final Process process = await _processManager.start(
-    <String>[executable, ...?arguments],
+    <String>[finalExecutable, ...?arguments],
     environment: newEnvironment,
     workingDirectory: finalWorkingDirectory,
   );
