@@ -25,7 +25,6 @@ class ColdRunner extends ResidentRunner {
     required super.xcode,
     this.applicationBinary,
     this.awaitFirstFrameWhenTracing = true,
-    super.commandHelp,
     super.dartBuilder,
     super.dillOutputPath,
     super.machine,
