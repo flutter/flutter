@@ -2516,7 +2516,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
 
-  // The window must be attached to the connected scene to have a screen. without which the
+  // The window must be attached to the connected scene to have a screen, without which the
   // viewport metrics stay empty and the surface is never updated.
   UIWindowScene* windowScene =
       (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
@@ -3199,7 +3199,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   }
 }
 
-- (void)testStateIsActiveAndBackgroundWhenApplicationStateIsActive {
+- (void)testStatePropertiesWhenApplicationStateIsActive {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -3209,10 +3209,11 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([mockApplication applicationState]).andReturn(UIApplicationStateActive);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
   XCTAssertTrue(viewController.stateIsActive);
+  XCTAssertTrue(viewController.stateIsForeground);
   XCTAssertFalse(viewController.stateIsBackground);
 }
 
-- (void)testStateIsActiveAndBackgroundWhenApplicationStateIsBackground {
+- (void)testStatePropertiesWhenApplicationStateIsBackground {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -3222,10 +3223,11 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([mockApplication applicationState]).andReturn(UIApplicationStateBackground);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
   XCTAssertFalse(viewController.stateIsActive);
+  XCTAssertFalse(viewController.stateIsForeground);
   XCTAssertTrue(viewController.stateIsBackground);
 }
 
-- (void)testStateIsActiveAndBackgroundWhenApplicationStateIsInactive {
+- (void)testStatePropertiesWhenApplicationStateIsInactive {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -3235,10 +3237,11 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([mockApplication applicationState]).andReturn(UIApplicationStateInactive);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
   XCTAssertFalse(viewController.stateIsActive);
+  XCTAssertTrue(viewController.stateIsForeground);
   XCTAssertFalse(viewController.stateIsBackground);
 }
 
-- (void)testStateIsActiveAndBackgroundWhenSceneStateIsActive {
+- (void)testStatePropertiesWhenSceneStateIsActive {
   id mockBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
     @"NSExtensionPointIdentifier" : @"com.apple.share-services"
@@ -3251,13 +3254,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id mockVC = OCMPartialMock(viewController);
   OCMStub([mockVC activationState]).andReturn(UISceneActivationStateForegroundActive);
   XCTAssertTrue(viewController.stateIsActive);
+  XCTAssertTrue(viewController.stateIsForeground);
   XCTAssertFalse(viewController.stateIsBackground);
 
   [mockBundle stopMocking];
   [mockVC stopMocking];
 }
 
-- (void)testStateIsActiveAndBackgroundWhenSceneStateIsBackground {
+- (void)testStatePropertiesWhenSceneStateIsBackground {
   id mockBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
     @"NSExtensionPointIdentifier" : @"com.apple.share-services"
@@ -3270,13 +3274,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id mockVC = OCMPartialMock(viewController);
   OCMStub([mockVC activationState]).andReturn(UISceneActivationStateBackground);
   XCTAssertFalse(viewController.stateIsActive);
+  XCTAssertFalse(viewController.stateIsForeground);
   XCTAssertTrue(viewController.stateIsBackground);
 
   [mockBundle stopMocking];
   [mockVC stopMocking];
 }
 
-- (void)testStateIsActiveAndBackgroundWhenSceneStateIsInactive {
+- (void)testStatePropertiesWhenSceneStateIsInactive {
   id mockBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
     @"NSExtensionPointIdentifier" : @"com.apple.share-services"
@@ -3289,6 +3294,27 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id mockVC = OCMPartialMock(viewController);
   OCMStub([mockVC activationState]).andReturn(UISceneActivationStateForegroundInactive);
   XCTAssertFalse(viewController.stateIsActive);
+  XCTAssertTrue(viewController.stateIsForeground);
+  XCTAssertFalse(viewController.stateIsBackground);
+
+  [mockBundle stopMocking];
+  [mockVC stopMocking];
+}
+
+- (void)testStatePropertiesWhenSceneStateIsUnattached {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id mockVC = OCMPartialMock(viewController);
+  OCMStub([mockVC activationState]).andReturn(UISceneActivationStateUnattached);
+  XCTAssertFalse(viewController.stateIsActive);
+  XCTAssertFalse(viewController.stateIsForeground);
   XCTAssertFalse(viewController.stateIsBackground);
 
   [mockBundle stopMocking];
