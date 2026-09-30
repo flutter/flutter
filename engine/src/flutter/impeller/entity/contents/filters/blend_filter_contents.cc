@@ -248,10 +248,7 @@ static std::optional<Entity> AdvancedBlend(
     auto blend_uniform = data_host_buffer.EmplaceUniform(blend_info);
     FS::BindBlendInfo(pass, blend_uniform);
 
-    frame_info.mvp =
-        pass.GetOrthographicTransform() *
-        Matrix::MakeTranslation(render_target_coverage.GetOrigin() -
-                                subpass_coverage.GetOrigin());
+    frame_info.mvp = pass.GetOrthographicTransform();
 
     auto uniform_view = data_host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(pass, uniform_view);
