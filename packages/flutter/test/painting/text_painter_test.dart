@@ -1275,6 +1275,38 @@ void main() {
     painter.dispose();
   });
 
+  // "abc" + soft hyphen + "de" is 50 wide unbroken, so a max width of 49 breaks
+  // it at the soft hyphen. The first line is then 30 wide, or 40 with a hyphen.
+  TextPainter softHyphenPainter(Hyphens hyphens) {
+    return TextPainter()
+      ..textDirection = TextDirection.ltr
+      ..textWidthBasis = TextWidthBasis.longestLine
+      ..hyphens = hyphens
+      ..text = const TextSpan(text: 'abc\u00ADde', style: TextStyle(fontSize: 10.0));
+  }
+
+  test('TextPainter renders a hyphen at a soft hyphen line break', () {
+    final TextPainter manual = softHyphenPainter(Hyphens.manual)..layout(maxWidth: 49);
+    final TextPainter hidden = softHyphenPainter(Hyphens.hidden)..layout(maxWidth: 49);
+
+    expect(manual.computeLineMetrics(), hasLength(2));
+    expect(hidden.computeLineMetrics(), hasLength(2));
+    expect(manual.width, 40);
+    expect(hidden.width, 30);
+    manual.dispose();
+    hidden.dispose();
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/193506
+
+  test('Changing TextPainter.hyphens after layout changes the width', () {
+    final TextPainter painter = softHyphenPainter(Hyphens.hidden)..layout(maxWidth: 49);
+    expect(painter.width, 30);
+
+    painter.hyphens = Hyphens.manual;
+    painter.layout(maxWidth: 49);
+    expect(painter.width, 40);
+    painter.dispose();
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/193506
+
   test('TextPainter line metrics', () {
     final painter = TextPainter()..textDirection = TextDirection.ltr;
 
