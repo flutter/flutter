@@ -13,11 +13,9 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
 import '../daemon.dart';
@@ -27,7 +25,6 @@ import '../features.dart';
 import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
-import '../isolated/build_targets.dart';
 import '../macos/macos_ipad_device.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
@@ -307,18 +304,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attachDaemon({required Device device}) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform, :Stdio stdio) =
-        toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :Stdio stdio) = toolContext;
     final daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
       analytics: analytics,
-      buildSystem: FlutterBuildSystem(fileSystem: fs, logger: logger, platform: platform),
-      buildTargets: const BuildTargetsImpl(),
       toolContext: toolContext,
-      xcode: null,
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),

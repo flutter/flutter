@@ -296,12 +296,9 @@ List<FlutterCommand> generateCommands({
   DaemonCommand(
     androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,
-    buildSystem: toolDependencies.buildSystem,
-    buildTargets: const BuildTargetsImpl(),
     deviceManager: globals.deviceManager,
     hidden: !verboseHelp,
     toolContext: toolDependencies.toolContext,
-    xcode: toolDependencies.appleContext.xcode,
   ),
   DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(

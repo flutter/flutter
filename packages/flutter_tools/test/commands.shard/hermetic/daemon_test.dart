@@ -16,14 +16,12 @@ import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
-import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -35,7 +33,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
-import '../../src/test_build_system.dart';
 
 /// Runs a callback using FakeAsync.run while continually pumping the
 /// microtask queue. This avoids a deadlock when tests `await` a Future
@@ -77,8 +74,6 @@ class FakeDaemonStreams implements DaemonStreams {
 void main() {
   late Daemon daemon;
   late NotifyingLogger notifyingLogger;
-  final buildSystem = TestBuildSystem.all(BuildResult(success: true));
-  const buildTargets = BuildTargetsImpl();
 
   group('daemon', () {
     late FakeDaemonStreams daemonStreams;
@@ -101,10 +96,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -123,10 +115,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -238,10 +227,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -264,10 +250,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -291,10 +274,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           logToStdout: true,
           featureFlags: featureFlags,
@@ -311,10 +291,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           logToStdout: true,
           featureFlags: featureFlags,
@@ -332,10 +309,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -365,10 +339,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -392,10 +363,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -417,10 +385,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -437,10 +402,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -457,10 +419,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -482,10 +441,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -500,10 +456,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -519,10 +472,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -545,10 +495,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -608,10 +555,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -627,10 +571,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -652,10 +593,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -681,10 +619,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -740,10 +675,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -821,10 +753,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -896,10 +825,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -926,10 +852,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -946,10 +869,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -966,10 +886,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -988,10 +905,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -1021,10 +935,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -1050,10 +961,7 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: const DelegatingToolContext(),
-        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
       );
@@ -1090,10 +998,7 @@ void main() {
           daemon = Daemon(
             daemonConnection,
             analytics: const NoOpAnalytics(),
-            buildSystem: buildSystem,
-            buildTargets: buildTargets,
             toolContext: const DelegatingToolContext(),
-            xcode: null,
             notifyingLogger: notifyingLogger,
             featureFlags: featureFlags,
           );
@@ -1178,10 +1083,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -1212,10 +1114,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -1242,10 +1141,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -1290,10 +1186,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -1354,10 +1247,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -1416,10 +1306,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -1474,10 +1361,7 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
           toolContext: const DelegatingToolContext(),
-          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
         );
@@ -1676,10 +1560,7 @@ void main() {
     testWithoutContext('has correct properties', () {
       final command = DaemonCommand(
         androidContext: FakeAndroidContext(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: FakeToolContext(),
-        xcode: null,
       );
 
       expect(command.name, 'daemon');
@@ -1688,10 +1569,7 @@ void main() {
 
       final hiddenCommand = DaemonCommand(
         androidContext: FakeAndroidContext(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
         toolContext: FakeToolContext(),
-        xcode: null,
         hidden: true,
       );
       expect(hiddenCommand.hidden, true);
