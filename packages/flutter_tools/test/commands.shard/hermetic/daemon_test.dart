@@ -109,7 +109,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'daemon.version'}),
@@ -132,7 +131,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         // Use the flutter_gallery project which has a known set of supported platforms.
         final String projectPath = globals.fs.path.join(
@@ -248,7 +246,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       globals.printError('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
@@ -275,7 +272,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       globals.printWarning('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
@@ -304,7 +300,6 @@ void main() {
           notifyingLogger: notifyingLogger,
           logToStdout: true,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         globals.printStatus('daemon.logMessage test');
         return Future<void>.value();
@@ -325,7 +320,6 @@ void main() {
           notifyingLogger: notifyingLogger,
           logToStdout: true,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         globals.printBox('This is the box message', title: 'Sample title');
         return Future<void>.value();
@@ -346,7 +340,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         notifyingLogger.notifyVerbose = false;
         globals.printTrace('daemon.logMessage test 1');
@@ -380,7 +373,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         expect(notifyingLogger.notifyVerbose, false);
 
@@ -408,7 +400,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         notifyingLogger.notifyVerbose = false;
 
@@ -426,9 +417,11 @@ void main() {
 
     testUsingContext('app.start creates a runner using the injected ToolContext', () async {
       final toolContextFs = MemoryFileSystem.test();
-      final daemonFs = MemoryFileSystem.test();
-      final Directory projectDirectory = daemonFs.directory('/project')..createSync();
-      final toolContext = FakeToolContext(fs: toolContextFs);
+      final Directory projectDirectory = toolContextFs.directory('/project')..createSync();
+      final toolContext = FakeToolContext(
+        fs: toolContextFs,
+        logger: MachineOutputLogger(parent: notifyingLogger),
+      );
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
@@ -436,10 +429,8 @@ void main() {
         buildTargets: buildTargets,
         toolContext: toolContext,
         xcode: null,
-        logger: MachineOutputLogger(parent: notifyingLogger),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: daemonFs,
       );
       final appDomain = RunnerCapturingAppDomain(
         daemon,
@@ -480,7 +471,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'daemon.shutdown'}),
@@ -501,7 +491,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
 
       daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'app.restart'}));
@@ -522,7 +511,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
 
         daemonStreams.inputs.add(
@@ -548,7 +536,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
 
       daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'app.stop'}));
@@ -567,7 +554,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.getDevices'}),
@@ -587,7 +573,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -614,7 +599,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
 
         final discoverer = FakePollingDeviceDiscovery();
@@ -678,7 +662,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.discoverDevices'}),
@@ -698,7 +681,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -724,7 +706,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -754,7 +735,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -814,7 +794,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -896,7 +875,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -972,7 +950,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       final discoverer1 = FakePollingDeviceDiscovery();
       discoverer1.diagnostics = <String>['fake diagnostic 1', 'fake diagnostic 2'];
@@ -1003,7 +980,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
 
       daemonStreams.inputs.add(
@@ -1024,7 +1000,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       final params = <String, Object?>{'emulatorId': 'device', 'coldBoot': 1};
       daemonStreams.inputs.add(
@@ -1045,7 +1020,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.getEmulators'}),
@@ -1068,7 +1042,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
 
       // Respond to any requests from the daemon to expose a URL.
@@ -1102,7 +1075,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
 
         daemonStreams.inputs.add(
@@ -1132,7 +1104,6 @@ void main() {
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
 
       daemonStreams.inputs.add(
@@ -1173,7 +1144,6 @@ void main() {
             xcode: null,
             notifyingLogger: notifyingLogger,
             featureFlags: featureFlags,
-            fileSystem: globals.fs,
           );
           daemonStreams.inputs.add(
             DaemonMessage(<String, Object?>{
@@ -1262,7 +1232,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         daemonStreams.inputs.add(
           DaemonMessage(<String, Object?>{
@@ -1297,7 +1266,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         daemonStreams.inputs.add(
           DaemonMessage(<String, Object?>{
@@ -1328,7 +1296,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final ResidentRunner runner = FakeResidentRunner();
         final Device device = FakeAndroidDevice();
@@ -1377,7 +1344,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final runner = FakeRestartableResidentRunner();
         final startApp = Completer<void>();
@@ -1442,7 +1408,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final runner = FakeRestartableResidentRunner();
         final exitApp = Completer<void>();
@@ -1505,7 +1470,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final runner = FakeRestartableResidentRunner();
         final failStartup = Completer<void>();
@@ -1564,7 +1528,6 @@ void main() {
           xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final exitApp = Completer<void>();
         var listenerFired = false;

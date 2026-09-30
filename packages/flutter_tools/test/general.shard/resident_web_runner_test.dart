@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -239,7 +240,10 @@ name: my_app
     'Can successfully run and connect to vmservice',
     () async {
       final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
+      );
       fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
       setupMocks();
 
@@ -284,7 +288,10 @@ name: my_app
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/178151
       final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
+      );
       fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
       setupMocks();
       webDevFS.exception = DartDevelopmentServiceException.failedToStart();
@@ -303,7 +310,10 @@ name: my_app
     'Does not crash if DDS fails to upgrade WebSocket during startup',
     () async {
       final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
+      );
       fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
       setupMocks();
       const errorMessage =
@@ -534,7 +544,10 @@ name: my_app
     'Listens to stdout and stderr streams before running main',
     () async {
       final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
+      );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           ...kAttachLogExpectations,
@@ -577,7 +590,7 @@ name: my_app
     () async {
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        logger: testLogger,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: testLogger),
       );
       final requests = <VmServiceExpectation>[
         ...kAttachExpectations,
@@ -725,7 +738,7 @@ name: my_app
       // Regression test for https://github.com/flutter/flutter/issues/182052
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        logger: testLogger,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: testLogger),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, printDtd: true),
       );
       fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
@@ -786,8 +799,11 @@ name: my_app
       final logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        logger: logger,
-        systemClock: SystemClock.fixed(DateTime(2001)),
+        toolContext: test_fakes.FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          systemClock: SystemClock.fixed(DateTime(2001)),
+        ),
         debuggingOptions: DebuggingOptions.enabled(
           const BuildInfo(
             BuildMode.debug,
@@ -893,8 +909,11 @@ name: my_app
       final logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        logger: logger,
-        systemClock: SystemClock.fixed(DateTime(2001)),
+        toolContext: test_fakes.FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          systemClock: SystemClock.fixed(DateTime(2001)),
+        ),
         debuggingOptions: DebuggingOptions.enabled(
           const BuildInfo(
             BuildMode.debug,
@@ -1012,8 +1031,11 @@ name: my_app
       final logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        logger: logger,
-        systemClock: SystemClock.fixed(DateTime(2001)),
+        toolContext: test_fakes.FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          systemClock: SystemClock.fixed(DateTime(2001)),
+        ),
         debuggingOptions: DebuggingOptions.enabled(
           const BuildInfo(
             BuildMode.debug,
@@ -1097,8 +1119,11 @@ name: my_app
       final logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        logger: logger,
-        systemClock: SystemClock.fixed(DateTime(2001)),
+        toolContext: test_fakes.FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          systemClock: SystemClock.fixed(DateTime(2001)),
+        ),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         debuggingOptions: DebuggingOptions.enabled(
           const BuildInfo(
@@ -1188,8 +1213,11 @@ name: my_app
         final logger = BufferLogger.test();
         final ResidentRunner residentWebRunner = setUpResidentRunner(
           flutterDevice,
-          logger: logger,
-          systemClock: SystemClock.fixed(DateTime(2001)),
+          toolContext: test_fakes.FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            systemClock: SystemClock.fixed(DateTime(2001)),
+          ),
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo(
               BuildMode.debug,
@@ -1292,8 +1320,11 @@ name: my_app
       final logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        logger: logger,
-        systemClock: SystemClock.fixed(DateTime(2001)),
+        toolContext: test_fakes.FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          systemClock: SystemClock.fixed(DateTime(2001)),
+        ),
       );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: [
@@ -1338,8 +1369,11 @@ name: my_app
       final logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        logger: logger,
-        systemClock: SystemClock.fixed(DateTime(2001)),
+        toolContext: test_fakes.FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          systemClock: SystemClock.fixed(DateTime(2001)),
+        ),
       );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
@@ -1443,7 +1477,10 @@ name: my_app
     'Faithfully displays stdout messages with leading/trailing spaces',
     () async {
       final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
+      );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           ...kAttachLogExpectations,
@@ -1656,7 +1693,10 @@ name: my_app
     'printHelp without details shows only hot restart help message',
     () async {
       final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
+      );
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       residentWebRunner.printHelp(details: false);
 
@@ -1676,7 +1716,7 @@ name: my_app
       final logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        logger: logger,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         debuggingOptions: DebuggingOptions.enabled(
           const BuildInfo(
             BuildMode.debug,
@@ -1756,7 +1796,10 @@ name: my_app
     'Prints target and device name on run',
     () async {
       final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
+      );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[...kAttachExpectations],
       );
@@ -1989,7 +2032,10 @@ flutter:
     'Successfully turns WebSocketException into ToolExit',
     () async {
       final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
+      );
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       setupMocks();
       webDevFS.exception = const WebSocketException();
@@ -2009,7 +2055,10 @@ flutter:
     'Turns HttpException from ChromeTab::connect into ToolExit',
     () async {
       final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
+      );
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       setupMocks();
       final chromeConnection = FakeChromeConnection();
@@ -2117,7 +2166,10 @@ flutter:
     'Rethrows unknown Error type from dwds tooling',
     () async {
       final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
+      );
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       setupMocks();
       webDevFS.exception = StateError('');
@@ -2136,7 +2188,10 @@ flutter:
     'ResidentWebRunner throws ToolExit when DWDS debug connection times out',
     () async {
       final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
+      );
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       setupMocks();
       webDevFS.exception = TimeoutException('Connection timed out');
@@ -2172,7 +2227,7 @@ flutter:
       );
       ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        logger: logger,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         debuggingOptions: debuggingOptions,
       );
       await expectToolExitLater(residentWebRunner.run(), matches('Invalid port: 65536.*'));
@@ -2183,7 +2238,7 @@ flutter:
       );
       residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        logger: logger,
+        toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         debuggingOptions: debuggingOptions,
       );
       await expectToolExitLater(residentWebRunner.run(), matches('Invalid port: -1.*'));
@@ -2398,8 +2453,7 @@ ResidentRunner setUpResidentRunner(
   FlutterDevice flutterDevice, {
   BuildSystem? buildSystem,
   DebuggingOptions? debuggingOptions,
-  Logger? logger,
-  SystemClock? systemClock,
+  ToolContext? toolContext,
 }) {
   return ResidentWebRunner(
     flutterDevice,
@@ -2414,11 +2468,9 @@ ResidentRunner setUpResidentRunner(
           logger: BufferLogger.test(),
         ),
     buildTargets: const BuildTargetsImpl(),
-    toolContext: test_fakes.FakeToolContext(
-      fs: globals.fs,
-      logger: logger,
-      systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
-    ),
+    toolContext:
+        toolContext ??
+        test_fakes.FakeToolContext(fs: globals.fs, systemClock: SystemClock.fixed(DateTime.now())),
   );
 }
 

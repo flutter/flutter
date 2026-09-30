@@ -692,11 +692,7 @@ class RunCommand extends RunCommandBase {
       buildTargets: globals.buildTargets,
       deviceManager: globals.deviceManager,
       featureFlags: featureFlags,
-      fileSystem: globals.fs,
       java: globals.java,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      stdio: globals.stdio,
       toolContext: toolContext!,
       xcode: globals.xcode,
     );
