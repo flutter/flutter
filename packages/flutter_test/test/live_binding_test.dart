@@ -322,23 +322,54 @@ void main() {
     },
   );
 
-  testWidgets('pan/zoom events use the source of their start event', (WidgetTester tester) async {
-    final dispatcher = _RecordingDispatcher();
-    binding.deviceEventDispatcher = dispatcher;
-    addTearDown(() => binding.deviceEventDispatcher = null);
-
-    const pointer = 24;
-    const position = Offset(10, 10);
-    binding.handlePointerEventForSource(
-      const PointerPanZoomStartEvent(pointer: pointer, position: position),
-      source: TestBindingEventSource.test,
+  testWidgets('route pushed mid-gesture delivers cancel to test-sourced pointer', (
+    WidgetTester tester,
+  ) async {
+    // End-to-end regression test for https://github.com/flutter/flutter/issues/191757.
+    // Exercises the real Navigator._cancelActivePointers -> cancelPointer path
+    // instead of calling cancelPointer directly.
+    var tapCount = 0;
+    var cancelCount = 0;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: GestureDetector(
+          onTapCancel: () => cancelCount++,
+          onTap: () => tapCount++,
+          child: const Text('Target'),
+        ),
+      ),
     );
-    binding.handlePointerEvent(const PointerPanZoomEndEvent(pointer: pointer, position: position));
 
-    expect(dispatcher.events, isEmpty);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Target')));
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          PageRouteBuilder<void>(
+            pageBuilder: (_, _, _) => const Text('Next'),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
+        );
+    // Flushes both the route push (which schedules the cancel in a
+    // microtask outside the test-event scope) and the cancel itself.
+    await tester.pump();
+
+    expect(find.text('Next'), findsOneWidget);
+    expect(cancelCount, 1);
+    expect(tapCount, 0);
+
+    await gesture.up();
+    await tester.pump();
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+
+    await tester.tap(find.text('Target'));
+    expect(tapCount, 1);
   });
 
-  testWidgets('device-origin pointers keep using the device dispatcher', (
+  testWidgets('test-scoped events do not hijack device-origin pointers', (
     WidgetTester tester,
   ) async {
     final dispatcher = _RecordingDispatcher();
@@ -347,21 +378,31 @@ void main() {
 
     const pointer = 25;
     const position = Offset(10, 10);
-    binding.handlePointerEventForSource(
-      const PointerDownEvent(pointer: pointer, position: position),
-      source: TestBindingEventSource.device,
-    );
+    binding.handlePointerEvent(const PointerDownEvent(pointer: pointer, position: position));
+    expect(dispatcher.events, hasLength(1));
+
+    // Device-scoped move for a device-origin pointer still reaches the
+    // device dispatcher.
+    binding.handlePointerEvent(const PointerMoveEvent(pointer: pointer, position: position));
+    expect(dispatcher.events, hasLength(2));
+
+    // Test-scoped events for a device-origin pointer keep their ambient
+    // test source (they reach the framework) and are never forced to the
+    // device dispatcher.
     binding.handlePointerEventForSource(
       const PointerMoveEvent(pointer: pointer, position: position),
       source: TestBindingEventSource.test,
     );
-    binding.handlePointerEventForSource(
-      const PointerRemovedEvent(pointer: pointer, position: position),
-      source: TestBindingEventSource.test,
-    );
-
     expect(dispatcher.events, hasLength(2));
 
+    binding.handlePointerEventForSource(
+      const PointerUpEvent(pointer: pointer, position: position),
+      source: TestBindingEventSource.test,
+    );
+    expect(dispatcher.events, hasLength(2));
+
+    // After Up the tracking is cleared, so a later test-scoped move is not
+    // affected by stale tracking.
     binding.handlePointerEventForSource(
       const PointerMoveEvent(pointer: pointer, position: position),
       source: TestBindingEventSource.test,

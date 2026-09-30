@@ -1530,8 +1530,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [dispatchEvent].
   ///
   /// When [handlePointerEvent] is called directly, [pointerEventSource]
-  /// is [TestBindingEventSource.device]. During dispatch, this may instead
-  /// temporarily reflect the source that started the pointer's lifecycle.
+  /// is [TestBindingEventSource.device].
+  ///
+  /// [LiveTestWidgetsFlutterBinding] may temporarily restore the source that
+  /// was active when the pointer went down (see
+  /// [LiveTestWidgetsFlutterBinding.handlePointerEvent]). This happens when
+  /// e.g. [GestureBinding.cancelPointer] — called by
+  /// `Navigator._cancelActivePointers` when a route is pushed mid-gesture —
+  /// schedules its synthesized cancel in a microtask, outside the
+  /// `withPointerEventSource(TestBindingEventSource.test, ...)` scope that
+  /// produced the down event.
   ///
   /// This means that pointer events triggered by the [WidgetController] (e.g.
   /// via [WidgetController.tap]) will result in actual interactions with the
@@ -3043,10 +3051,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.test], then
   /// the event is forwarded to [GestureBinding.dispatchEvent] as usual;
-  /// additionally, down pointers are painted on the screen. Events for an
-  /// existing pointer are dispatched using the source that handled its down
-  /// event, even when the current event was scheduled outside that source's
-  /// scope.
+  /// additionally, down pointers are painted on the screen. If a pointer
+  /// started with [TestBindingEventSource.test] but a later event for that
+  /// pointer arrives with [TestBindingEventSource.device] (e.g. the
+  /// [PointerCancelEvent] that [GestureBinding.cancelPointer] schedules in a
+  /// microtask outside the test scope), the event is upgraded back to
+  /// [TestBindingEventSource.test] so it still reaches the framework.
+  /// Test-scoped events for device-origin pointers are never forced to
+  /// [TestBindingEventSource.device]; they keep their ambient source.
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.device], then
   /// the event, after being transformed to the local coordinate system, is
@@ -3072,17 +3084,22 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _pointerEventSourceForPointer[event.pointer] = pointerEventSource;
     }
     final TestBindingEventSource? originSource = _pointerEventSourceForPointer[event.pointer];
+    // Mirror GestureBinding._hitTests lifecycle, which only clears on Up,
+    // Cancel, or PanZoomEnd.
     final bool pointerDisengaged =
-        event is PointerUpEvent ||
-        event is PointerCancelEvent ||
-        event is PointerRemovedEvent ||
-        event is PointerPanZoomEndEvent;
+        event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent;
 
     if (pointerDisengaged) {
       _pointerEventSourceForPointer.remove(event.pointer);
     }
-    if (originSource != null && originSource != pointerEventSource) {
-      withPointerEventSource(originSource, () => _dispatchPointerEvent(event));
+    // Upgrade-only: a test-sourced pointer whose later events arrive with the
+    // ambient device source (e.g. the PointerCancelEvent that
+    // GestureBinding.cancelPointer schedules in a microtask outside the test
+    // scope) is restored to TestBindingEventSource.test. Never downgrade
+    // test-scoped events for device-origin pointers to device.
+    if (originSource == TestBindingEventSource.test &&
+        pointerEventSource == TestBindingEventSource.device) {
+      withPointerEventSource(TestBindingEventSource.test, () => _dispatchPointerEvent(event));
     } else {
       _dispatchPointerEvent(event);
     }
