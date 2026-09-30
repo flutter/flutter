@@ -13,7 +13,69 @@
 namespace flutter {
 namespace testing {
 
-TEST(AndroidSurfaceManagerTest, LifecycleAndInitialState) {
+class AndroidSurfaceManagerTest : public ::testing::Test {
+ public:
+  static void SetMockHandles(AndroidSurfaceManager* manager,
+                             ANativeWindow* window,
+                             VkInstance instance,
+                             VkDevice device) {
+    manager->native_window_ = window;
+    manager->is_fake_window_ = false;
+    manager->vk_instance_ = instance;
+    manager->vk_device_ = device;
+  }
+
+  static void PopulateDummyVulkanProcs(AndroidSurfaceManager* manager) {
+    void* dummy = reinterpret_cast<void*>(0x1);
+    manager->vk_create_android_surface_khr_fn_ =
+        reinterpret_cast<PFN_vkCreateAndroidSurfaceKHR>(dummy);
+    manager->vk_get_physical_device_surface_support_khr_fn_ =
+        reinterpret_cast<PFN_vkGetPhysicalDeviceSurfaceSupportKHR>(dummy);
+    manager->vk_get_physical_device_surface_capabilities_khr_fn_ =
+        reinterpret_cast<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(dummy);
+    manager->vk_get_physical_device_surface_formats_khr_fn_ =
+        reinterpret_cast<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(dummy);
+    manager->vk_create_swapchain_khr_fn_ =
+        reinterpret_cast<PFN_vkCreateSwapchainKHR>(dummy);
+    manager->vk_get_swapchain_images_khr_fn_ =
+        reinterpret_cast<PFN_vkGetSwapchainImagesKHR>(dummy);
+    manager->vk_create_command_pool_fn_ =
+        reinterpret_cast<PFN_vkCreateCommandPool>(dummy);
+    manager->vk_allocate_command_buffers_fn_ =
+        reinterpret_cast<PFN_vkAllocateCommandBuffers>(dummy);
+    manager->vk_create_fence_fn_ = reinterpret_cast<PFN_vkCreateFence>(dummy);
+  }
+
+  static void ClearVulkanCapabilitiesProc(AndroidSurfaceManager* manager) {
+    manager->vk_get_physical_device_surface_capabilities_khr_fn_ = nullptr;
+  }
+
+  static void ClearVulkanSwapchainProc(AndroidSurfaceManager* manager) {
+    manager->vk_create_swapchain_khr_fn_ = nullptr;
+  }
+
+  static bool CallCreateOrUpdateVulkanSurfaceLocked(
+      AndroidSurfaceManager* manager) {
+    std::lock_guard<std::mutex> lock(manager->window_mutex_);
+    return manager->CreateOrUpdateVulkanSurfaceLocked();
+  }
+
+  static bool CallCreateOrUpdateOverlayVulkanSurfaceLocked(
+      AndroidSurfaceManager* manager,
+      ANativeWindow* window) {
+    std::lock_guard<std::mutex> lock(manager->window_mutex_);
+    AndroidSurfaceManager::VulkanOverlaySurface entry;
+    return manager->CreateOrUpdateOverlayVulkanSurfaceLocked(window, entry);
+  }
+
+  static void ResetMockHandles(AndroidSurfaceManager* manager) {
+    manager->native_window_ = nullptr;
+    manager->vk_instance_ = VK_NULL_HANDLE;
+    manager->vk_device_ = VK_NULL_HANDLE;
+  }
+};
+
+TEST_F(AndroidSurfaceManagerTest, LifecycleAndInitialState) {
   auto manager_software =
       AndroidSurfaceManager::Create(AndroidRenderingAPI::kSoftware);
   ASSERT_NE(manager_software, nullptr);
@@ -37,7 +99,7 @@ TEST(AndroidSurfaceManagerTest, LifecycleAndInitialState) {
             AndroidRenderingAPI::kImpellerVulkan);
 }
 
-TEST(AndroidSurfaceManagerTest, SetAndClearNativeWindowFake) {
+TEST_F(AndroidSurfaceManagerTest, SetAndClearNativeWindowFake) {
   auto manager =
       AndroidSurfaceManager::Create(AndroidRenderingAPI::kSkiaOpenGLES);
   ASSERT_NE(manager, nullptr);
@@ -55,7 +117,7 @@ TEST(AndroidSurfaceManagerTest, SetAndClearNativeWindowFake) {
   EXPECT_EQ(manager->GetNativeWindow(), nullptr);
 }
 
-TEST(AndroidSurfaceManagerTest, RealImageReaderNativeWindowTest) {
+TEST_F(AndroidSurfaceManagerTest, RealImageReaderNativeWindowTest) {
 #if FML_OS_ANDROID
   void* mediandk = dlopen("libmediandk.so", RTLD_NOW);
   if (!mediandk) {
@@ -144,7 +206,7 @@ TEST(AndroidSurfaceManagerTest, RealImageReaderNativeWindowTest) {
 #endif
 }
 
-TEST(AndroidSurfaceManagerTest, SoftwarePresentValidation) {
+TEST_F(AndroidSurfaceManagerTest, SoftwarePresentValidation) {
   auto manager = AndroidSurfaceManager::Create(AndroidRenderingAPI::kSoftware);
   ASSERT_NE(manager, nullptr);
 
@@ -157,7 +219,7 @@ TEST(AndroidSurfaceManagerTest, SoftwarePresentValidation) {
   EXPECT_TRUE(manager->PresentSoftware(dummy_pixels, 16, 4));
 }
 
-TEST(AndroidSurfaceManagerTest, PopulateGLRendererConfig) {
+TEST_F(AndroidSurfaceManagerTest, PopulateGLRendererConfig) {
   auto manager =
       AndroidSurfaceManager::Create(AndroidRenderingAPI::kSkiaOpenGLES);
   ASSERT_NE(manager, nullptr);
@@ -183,7 +245,7 @@ TEST(AndroidSurfaceManagerTest, PopulateGLRendererConfig) {
   manager->PopulateGLRendererConfig(nullptr);
 }
 
-TEST(AndroidSurfaceManagerTest, PopulateSoftwareRendererConfig) {
+TEST_F(AndroidSurfaceManagerTest, PopulateSoftwareRendererConfig) {
   auto manager = AndroidSurfaceManager::Create(AndroidRenderingAPI::kSoftware);
   ASSERT_NE(manager, nullptr);
   EXPECT_TRUE(manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
@@ -202,7 +264,7 @@ TEST(AndroidSurfaceManagerTest, PopulateSoftwareRendererConfig) {
   manager->PopulateSoftwareRendererConfig(nullptr);
 }
 
-TEST(AndroidSurfaceManagerTest, ConcurrentThreadSafety) {
+TEST_F(AndroidSurfaceManagerTest, ConcurrentThreadSafety) {
   auto manager =
       AndroidSurfaceManager::Create(AndroidRenderingAPI::kSkiaOpenGLES);
   ASSERT_NE(manager, nullptr);
@@ -345,7 +407,7 @@ TEST_P(AndroidSurfaceManagerMultiBackendMatrixTest, ConcurrentOperations) {
   EXPECT_TRUE(manager->ClearCurrent());
 }
 
-TEST(AndroidSurfaceManagerTest, OffscreenFBOLifecycleAndPool) {
+TEST_F(AndroidSurfaceManagerTest, OffscreenFBOLifecycleAndPool) {
   auto manager =
       AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerOpenGLES);
   ASSERT_NE(manager, nullptr);
@@ -382,8 +444,8 @@ TEST(AndroidSurfaceManagerTest, OffscreenFBOLifecycleAndPool) {
   manager->DestroyOverlaySurfaces();
 }
 
-TEST(AndroidSurfaceManagerTest,
-     BlitAndSwapOverlaySurfaceNullWindowGracefulReturn) {
+TEST_F(AndroidSurfaceManagerTest,
+       BlitAndSwapOverlaySurfaceNullWindowGracefulReturn) {
   auto manager =
       AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerOpenGLES);
   ASSERT_NE(manager, nullptr);
@@ -393,7 +455,7 @@ TEST(AndroidSurfaceManagerTest,
                                                  /*height=*/100));
 }
 
-TEST(AndroidSurfaceManagerTest, GlProcResolverResolvesViaDlsym) {
+TEST_F(AndroidSurfaceManagerTest, GlProcResolverResolvesViaDlsym) {
   auto manager =
       AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerOpenGLES);
   ASSERT_NE(manager, nullptr);
@@ -404,7 +466,7 @@ TEST(AndroidSurfaceManagerTest, GlProcResolverResolvesViaDlsym) {
   EXPECT_NE(proc, nullptr);
 }
 
-TEST(AndroidSurfaceManagerTest, PresentImageValidatesSwapchainImages) {
+TEST_F(AndroidSurfaceManagerTest, PresentImageValidatesSwapchainImages) {
   auto manager =
       AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerVulkan);
   ASSERT_NE(manager, nullptr);
@@ -428,7 +490,7 @@ TEST(AndroidSurfaceManagerTest, PresentImageValidatesSwapchainImages) {
   manager->ClearNativeWindow();
 }
 
-TEST(AndroidSurfaceManagerTest, VulkanOverlaySurfaceLifecycle) {
+TEST_F(AndroidSurfaceManagerTest, VulkanOverlaySurfaceLifecycle) {
   auto manager =
       AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerVulkan);
   ASSERT_NE(manager, nullptr);
@@ -456,7 +518,7 @@ TEST(AndroidSurfaceManagerTest, VulkanOverlaySurfaceLifecycle) {
   manager->ClearNativeWindow();
 }
 
-TEST(AndroidSurfaceManagerTest, ClearAndPresentOnscreenSurfaceFakeWindow) {
+TEST_F(AndroidSurfaceManagerTest, ClearAndPresentOnscreenSurfaceFakeWindow) {
   auto manager =
       AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerVulkan);
   ASSERT_NE(manager, nullptr);
@@ -465,7 +527,7 @@ TEST(AndroidSurfaceManagerTest, ClearAndPresentOnscreenSurfaceFakeWindow) {
   manager->ClearNativeWindow();
 }
 
-TEST(AndroidSurfaceManagerTest, VulkanSwapchainUsageInitialAndReset) {
+TEST_F(AndroidSurfaceManagerTest, VulkanSwapchainUsageInitialAndReset) {
   auto manager =
       AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerVulkan);
   ASSERT_NE(manager, nullptr);
@@ -539,6 +601,38 @@ TEST(AndroidSurfaceManagerTest, VulkanSwapchainUsageInitialAndReset) {
     dlclose(mediandk);
   }
 #endif
+}
+
+TEST_F(AndroidSurfaceManagerTest, VulkanNullFunctionPointersHandledSafely) {
+  auto manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerVulkan);
+  ASSERT_NE(manager, nullptr);
+
+  auto dummy_window = reinterpret_cast<ANativeWindow*>(0x1);
+  auto dummy_instance = reinterpret_cast<VkInstance>(0x1);
+  auto dummy_device = reinterpret_cast<VkDevice>(0x1);
+
+  // Configure non-null mock state so handle and window checks succeed.
+  SetMockHandles(manager.get(), dummy_window, dummy_instance, dummy_device);
+  PopulateDummyVulkanProcs(manager.get());
+
+  // 1. Verify that when capabilities fn is null, surface creation fails
+  // safely.
+  ClearVulkanCapabilitiesProc(manager.get());
+  EXPECT_FALSE(CallCreateOrUpdateVulkanSurfaceLocked(manager.get()));
+  EXPECT_FALSE(CallCreateOrUpdateOverlayVulkanSurfaceLocked(manager.get(),
+                                                            dummy_window));
+
+  // 2. Restore capabilities fn and clear swapchain fn; verify safe failure.
+  PopulateDummyVulkanProcs(manager.get());
+  ClearVulkanSwapchainProc(manager.get());
+  EXPECT_FALSE(CallCreateOrUpdateVulkanSurfaceLocked(manager.get()));
+  EXPECT_FALSE(CallCreateOrUpdateOverlayVulkanSurfaceLocked(manager.get(),
+                                                            dummy_window));
+
+  // Reset handles before manager destruction to avoid attempting real
+  // teardown on dummy handles.
+  ResetMockHandles(manager.get());
 }
 
 INSTANTIATE_TEST_SUITE_P(
