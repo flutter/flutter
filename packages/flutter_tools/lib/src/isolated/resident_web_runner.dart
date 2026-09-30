@@ -173,15 +173,7 @@ class ResidentWebRunner extends ResidentRunner {
   bool get generateDartPluginRegistry => false;
 
   @override
-  bool get reloadIsRestart =>
-      debuggingOptions.webUseWasm ||
-      // Web behavior when not using the DDC library bundle format is to restart
-      // when a reload is issued. We can't use `canHotReload` to signal this
-      // since we still want a reload command to succeed, but to do a hot
-      // restart.
-      debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
-      !debuggingOptions.buildInfo.canaryFeatures;
-
+  bool get reloadIsRestart => debuggingOptions.webUseWasm;
   @override
   bool get supportsDetach => stopAppDuringCleanup;
 
@@ -310,7 +302,6 @@ class ResidentWebRunner extends ResidentRunner {
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-          ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
           canaryFeatures: debuggingOptions.buildInfo.canaryFeatures,
           webRenderer: debuggingOptions.webRenderer,
           isWasm: debuggingOptions.webUseWasm,
@@ -449,13 +440,6 @@ class ResidentWebRunner extends ResidentRunner {
   }) async {
     final DateTime start = _systemClock.now();
     final Status status;
-    if (debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
-        !debuggingOptions.buildInfo.canaryFeatures) {
-      // Triggering hot reload performed hot restart for the old module formats
-      // historically. Keep that behavior and only perform hot reload when the
-      // new module format is used.
-      fullRestart = true;
-    }
     if (fullRestart) {
       status = _logger.startProgress('Performing hot restart...', progressId: 'hot.restart');
     } else {

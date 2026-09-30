@@ -513,6 +513,16 @@ class _RejectRequest extends _CompilationRequest {
 ResidentCompilerFactory get residentCompilerFactory =>
     context.get<ResidentCompilerFactory>() ?? const ResidentCompilerFactory();
 
+/// Flags required for the DDC module format that supports hot reload.
+///
+/// These flags are only valid to be passed when compiling with DDC.
+const kDdcLibraryBundleFlags = <String>[
+  '--dartdevc-module-format=ddc',
+  // TODO(nshahan): Cleanup when the library bundle format no longer requires
+  // canary mode.
+  '--dartdevc-canary',
+];
+
 /// A factory for generating [ResidentCompiler] instances.
 class ResidentCompilerFactory {
   const ResidentCompilerFactory();
@@ -565,12 +575,7 @@ class ResidentCompilerFactory {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
-        extraFrontEndOptions: [
-          ...buildInfo.extraFrontEndOptions,
-          if (buildInfo.webEnableHotReload)
-          // These flags are only valid to be passed when compiling with DDC.
-          ...<String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
-        ],
+        extraFrontEndOptions: [...buildInfo.extraFrontEndOptions, ...kDdcLibraryBundleFlags],
       );
     } else {
       if (targetPlatform case .fuchsia_arm64 || .fuchsia_x64) {
