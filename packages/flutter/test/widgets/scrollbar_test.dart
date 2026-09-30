@@ -4517,4 +4517,74 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
         ..rect(rect: const Rect.fromLTRB(0.0, 594.0, 400.0, 600.0)),
     );
   });
+
+  testWidgets('RawScrollbar keeps tracking its own ScrollView after a sibling scrolls', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/175012
+    // The sibling here can scroll, so it keeps sending notifications after the
+    // first frame. They must not move this scrollbar's thumb.
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    final siblingController = ScrollController();
+    addTearDown(siblingController.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            thumbVisibility: true,
+            controller: scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                SizedBox(
+                  height: 300.0,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    controller: scrollController,
+                    child: const SizedBox(width: 1600.0),
+                  ),
+                ),
+                SizedBox(
+                  height: 300.0,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    controller: siblingController,
+                    child: const SizedBox(width: 3200.0),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Scrolling the ScrollView this scrollbar is attached to moves the thumb.
+    scrollController.jumpTo(100.0);
+    await tester.pumpAndSettle();
+    const trackRect = Rect.fromLTRB(0.0, 594.0, 800.0, 600.0);
+    const thumbRect = Rect.fromLTRB(50.0, 594.0, 450.0, 600.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: trackRect)
+        ..rect(rect: thumbRect),
+    );
+
+    // Scrolling the sibling leaves the thumb where it is.
+    siblingController.jumpTo(800.0);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 100.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: trackRect)
+        ..rect(rect: thumbRect),
+    );
+  });
 }
