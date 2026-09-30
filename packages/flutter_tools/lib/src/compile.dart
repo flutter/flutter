@@ -43,7 +43,7 @@ const kDdcLibraryBundleFlags = <String>[
 /// kernel for DDC must use them to compute the same path as the compiler.
 List<String> ddcFrontEndOptions(BuildInfo buildInfo) => <String>[
   ...buildInfo.extraFrontEndOptions,
-  if (buildInfo.webEnableHotReload) ...kDdcLibraryBundleFlags,
+  ...kDdcLibraryBundleFlags,
   ...deprecatedJsInteropCompilerFlags(buildInfo.deprecatedJsInterop),
 ];
 

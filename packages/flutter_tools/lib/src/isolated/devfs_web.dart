@@ -70,7 +70,6 @@ class WebDevFS implements DevFS {
     required this.expressionCompiler,
     required this.chromiumLauncher,
     required this.nativeNullAssertions,
-    required this.ddcModuleSystem,
     required this.canaryFeatures,
     required this.webDevServerConfig,
     required this.webRenderer,
@@ -84,12 +83,9 @@ class WebDevFS implements DevFS {
     required this.platform,
     this.testMode = false,
     this._webDefines = const <String, String>{},
-  }) {
-    // TODO(srujzs): Remove this assertion when the library bundle format is
-    // supported without canary mode.
-    if (ddcModuleSystem) {
-      assert(canaryFeatures);
-    }
+  }) : // TODO(srujzs): Remove this assertion when the library bundle format is
+       // supported without canary mode.
+       assert(canaryFeatures) {
     _assetTransformer = DevelopmentAssetTransformer(
       transformer: AssetTransformer(
         processManager: globals.processManager,
@@ -112,7 +108,6 @@ class WebDevFS implements DevFS {
   final bool enableDwds;
   final DartDevelopmentServiceConfiguration ddsConfig;
   final bool testMode;
-  final bool ddcModuleSystem;
   final bool canaryFeatures;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
@@ -132,10 +127,6 @@ class WebDevFS implements DevFS {
   late WebAssetServer webAssetServer;
 
   Dwds get dwds => webAssetServer.dwds;
-
-  /// Whether middleware should be enabled for this web development server.
-  /// Middleware is enabled when using Chrome device or DDC module system.
-  bool get shouldEnableMiddleware => chromiumLauncher != null || ddcModuleSystem;
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   @override
@@ -228,7 +219,6 @@ class WebDevFS implements DevFS {
       isWasm: isWasm,
       useLocalCanvasKit: useLocalCanvasKit,
       testMode: testMode,
-      ddcModuleSystem: ddcModuleSystem,
       canaryFeatures: canaryFeatures,
       webDevServerConfig: webDevServerConfig,
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
@@ -236,7 +226,6 @@ class WebDevFS implements DevFS {
       logger: logger,
       platform: platform,
       crossOriginIsolation: webCrossOriginIsolation,
-      shouldEnableMiddleware: shouldEnableMiddleware,
       webDefines: _webDefines,
     );
     return baseUri;
@@ -311,11 +300,7 @@ class WebDevFS implements DevFS {
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = fileSystem.path.basename(mainFile.path);
       webAssetServer.writeBytes(entrypoint, mainFile.readAsBytesSync());
-      if (ddcModuleSystem) {
-        webAssetServer.writeBytes('ddc_module_loader.js', ddcModuleLoaderJS.readAsBytesSync());
-      } else {
-        webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
-      }
+      webAssetServer.writeBytes('ddc_module_loader.js', ddcModuleLoaderJS.readAsBytesSync());
       webAssetServer.writeBytes('flutter.js', flutterJs.readAsBytesSync());
       webAssetServer.writeBytes('stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
@@ -326,38 +311,23 @@ class WebDevFS implements DevFS {
       webAssetServer.writeFile('version.json', FlutterProject.current().getVersionInfo());
       webAssetServer.writeFile(
         'main.dart.js',
-        ddcModuleSystem
-            ? generateDDCLibraryBundleBootstrapScript(
-                entrypoint: entrypoint,
-                ddcModuleLoaderUrl: 'ddc_module_loader.js',
-                mapperUrl: 'stack_trace_mapper.js',
-                generateLoadingIndicator: shouldEnableMiddleware,
-                isWindows: platform.isWindows,
-              )
-            : generateBootstrapScript(
-                requireUrl: 'require.js',
-                mapperUrl: 'stack_trace_mapper.js',
-                generateLoadingIndicator: shouldEnableMiddleware,
-              ),
+        generateDDCLibraryBundleBootstrapScript(
+          ddcModuleLoaderUrl: 'ddc_module_loader.js',
+          mapperUrl: 'stack_trace_mapper.js',
+          generateLoadingIndicator: true,
+          isWindows: platform.isWindows,
+        ),
       );
       const onLoadEndBootstrap = 'on_load_end_bootstrap.js';
-      if (ddcModuleSystem) {
-        webAssetServer.writeFile(onLoadEndBootstrap, generateDDCLibraryBundleOnLoadEndBootstrap());
-      }
+      webAssetServer.writeFile(onLoadEndBootstrap, generateDDCLibraryBundleOnLoadEndBootstrap());
       webAssetServer.writeFile(
         'main_module.bootstrap.js',
-        ddcModuleSystem
-            ? generateDDCLibraryBundleMainModule(
-                entrypoint: entrypoint,
-                nativeNullAssertions: nativeNullAssertions,
-                onLoadEndBootstrap: onLoadEndBootstrap,
-                isCi: platform.environment.containsKey(kLuciEnvName),
-              )
-            : generateMainModule(
-                entrypoint: entrypoint,
-                nativeNullAssertions: nativeNullAssertions,
-                loaderRootDirectory: baseUri.toString(),
-              ),
+        generateDDCLibraryBundleMainModule(
+          entrypoint: entrypoint,
+          nativeNullAssertions: nativeNullAssertions,
+          onLoadEndBootstrap: onLoadEndBootstrap,
+          isCi: platform.environment.containsKey(kLuciEnvName),
+        ),
       );
     }
     var syncedBytes = 0;
@@ -473,7 +443,7 @@ class WebDevFS implements DevFS {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
     webAssetServer.updateModulesAndDigests(modules);
-    if (!bundleFirstUpload && ddcModuleSystem) {
+    if (!bundleFirstUpload) {
       webAssetServer.writeReloadedSources(modules);
     }
     return UpdateFSReport(
@@ -482,20 +452,6 @@ class WebDevFS implements DevFS {
       invalidatedSourcesCount: invalidatedFiles.length,
     );
   }
-
-  @visibleForTesting
-  File get requireJS => fileSystem.file(
-    fileSystem.path.join(
-      globals.artifacts!.getArtifactPath(
-        Artifact.engineDartSdkPath,
-        platform: TargetPlatform.web_javascript,
-      ),
-      'lib',
-      'dev_compiler',
-      'amd',
-      'require.js',
-    ),
-  );
 
   @visibleForTesting
   File get ddcModuleLoaderJS => fileSystem.file(

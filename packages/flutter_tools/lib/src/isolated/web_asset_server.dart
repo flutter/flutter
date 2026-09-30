@@ -73,7 +73,6 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
-    this._ddcModuleSystem,
     this._canaryFeatures, {
     required this.webRenderer,
     required this.useLocalCanvasKit,
@@ -81,13 +80,10 @@ class WebAssetServer implements AssetReader {
     required this.logger,
     this._baseHref,
     this._webDefines = const <String, String>{},
-  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)) {
-    // TODO(srujzs): Remove this assertion when the library bundle format is
-    // supported without canary mode.
-    if (_ddcModuleSystem) {
-      assert(_canaryFeatures);
-    }
-  }
+  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)),
+       // TODO(srujzs): Remove this assertion when the library bundle format is
+       // supported without canary mode.
+       assert(_canaryFeatures);
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -222,7 +218,6 @@ class WebAssetServer implements AssetReader {
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
     // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
-    bool ddcModuleSystem = false,
     bool canaryFeatures = false,
     bool useDwdsWebSocketConnection = false,
     required FileSystem fileSystem,
@@ -239,9 +234,7 @@ class WebAssetServer implements AssetReader {
 
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
-    if (ddcModuleSystem) {
-      assert(canaryFeatures);
-    }
+    assert(canaryFeatures);
     final InternetAddress address;
     if (hostname == webDevAnyHostDefault) {
       address = InternetAddress.anyIPv4;
@@ -292,7 +285,6 @@ class WebAssetServer implements AssetReader {
       address,
       modules,
       digests,
-      ddcModuleSystem,
       canaryFeatures,
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
@@ -369,34 +361,20 @@ class WebAssetServer implements AssetReader {
         return chromium.chromeConnection;
       },
       toolConfiguration: ToolConfiguration(
-        loadStrategy: ddcModuleSystem
-            ? FrontendServerDdcLibraryBundleStrategyProvider(
-                ReloadConfiguration.none,
-                server,
-                PackageUriMapper(packageConfig),
-                digestProvider,
-                BuildSettings(
-                  appEntrypoint: packageConfig.toPackageUriForWorkspace(
-                    fileSystem.file(entrypoint).absolute.uri,
-                  ),
-                  canaryFeatures: canaryFeatures,
-                ),
-                packageConfigPath: buildInfo.packageConfigPath,
-                reloadedSourcesUri: reloadedSourcesUri,
-              ).strategy
-            : FrontendServerRequireStrategyProvider(
-                ReloadConfiguration.none,
-                server,
-                PackageUriMapper(packageConfig),
-                digestProvider,
-                BuildSettings(
-                  appEntrypoint: packageConfig.toPackageUriForWorkspace(
-                    fileSystem.file(entrypoint).absolute.uri,
-                  ),
-                  canaryFeatures: canaryFeatures,
-                ),
-                packageConfigPath: buildInfo.packageConfigPath,
-              ).strategy,
+        loadStrategy: FrontendServerDdcLibraryBundleStrategyProvider(
+          ReloadConfiguration.none,
+          server,
+          PackageUriMapper(packageConfig),
+          digestProvider,
+          BuildSettings(
+            appEntrypoint: packageConfig.toPackageUriForWorkspace(
+              fileSystem.file(entrypoint).absolute.uri,
+            ),
+            canaryFeatures: canaryFeatures,
+          ),
+          packageConfigPath: buildInfo.packageConfigPath,
+          reloadedSourcesUri: reloadedSourcesUri,
+        ).strategy,
         debugSettings: DebugSettings(
           enableDebugExtension: true,
           urlEncoder: urlTunneller,
@@ -434,7 +412,6 @@ class WebAssetServer implements AssetReader {
     return server;
   }
 
-  final bool _ddcModuleSystem;
   final bool _canaryFeatures;
   final Map<String, String> _webDefines;
   final String? _baseHref;

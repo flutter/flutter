@@ -866,8 +866,6 @@ name: my_app
             trackWidgetCreation: true,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
-            // TODO(nshahan): Remove when hot reload can no longer be disabled.
-            webEnableHotReload: true,
             extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
         ),
@@ -973,7 +971,6 @@ name: my_app
             trackWidgetCreation: true,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
-            webEnableHotReload: true,
             extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
         ),
@@ -1092,8 +1089,6 @@ name: my_app
             trackWidgetCreation: true,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
-            // TODO(nshahan): Remove when hot reload can no longer be disabled.
-            webEnableHotReload: true,
             extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
         ),
@@ -1177,8 +1172,6 @@ name: my_app
             trackWidgetCreation: true,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
-            // TODO(nshahan): Remove when hot reload can no longer be disabled.
-            webEnableHotReload: true,
             extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
           webUseWasm: true,
@@ -1242,119 +1235,107 @@ name: my_app
     },
   );
 
-  // Hot restart is available with and without the DDC library bundle format.
-  // Test one extra config where `fullRestart` is false without the DDC library
-  // bundle format - we should do a hot restart in this case because hot reload
-  // is not available.
-  for (final (bool webEnableHotReload, bool fullRestart) in <(bool, bool)>[
-    (true, true),
-    (false, true),
-    (false, false),
-  ]) {
-    testUsingContext(
-      'Can hot restart after attaching with '
-      'webEnableHotReload: $webEnableHotReload fullRestart: $fullRestart',
-      () async {
-        final logger = BufferLogger.test();
-        final ResidentRunner residentWebRunner = setUpResidentRunner(
-          flutterDevice,
-          logger: logger,
-          systemClock: SystemClock.fixed(DateTime(2001)),
-          debuggingOptions: DebuggingOptions.enabled(
-            BuildInfo(
-              BuildMode.debug,
-              null,
-              trackWidgetCreation: true,
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-              extraFrontEndOptions: webEnableHotReload ? kDdcLibraryBundleFlags : const <String>[],
-              webEnableHotReload: webEnableHotReload,
-            ),
+  testUsingContext(
+    'Can hot restart after attaching with fullRestart: true',
+    () async {
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        systemClock: SystemClock.fixed(DateTime(2001)),
+        debuggingOptions: DebuggingOptions.enabled(
+          const BuildInfo(
+            BuildMode.debug,
+            null,
+            trackWidgetCreation: true,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+            extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
-        );
-        fakeVmServiceHost = FakeVmServiceHost(
-          requests: <VmServiceExpectation>[
-            ...kAttachExpectations,
-            const FakeVmServiceRequest(
-              method: kHotRestartServiceName,
-              jsonResponse: <String, Object>{'type': 'Success'},
-            ),
-          ],
-        );
-        setupMocks();
-        final chromiumLauncher = TestChromiumLauncher();
-        final process = FakeProcess();
-        final chrome = Chromium(
-          1,
-          chromeConnection,
-          chromiumLauncher: chromiumLauncher,
-          process: process,
-          logger: logger,
-        );
-        chromiumLauncher.setInstance(chrome);
-
-        flutterDevice.device = GoogleChromeDevice(
-          fileSystem: fileSystem,
-          chromiumLauncher: chromiumLauncher,
-          logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-        );
-        webDevFS.report = UpdateFSReport(success: true);
-
-        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
-        unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
-        await connectionInfoCompleter.future;
-        final OperationResult result = await residentWebRunner.restart(fullRestart: fullRestart);
-
-        // Ensure that generated entrypoint is generated correctly.
-        expect(webDevFS.mainUri, isNotNull);
-        final String entrypointContents = fileSystem.file(webDevFS.mainUri).readAsStringSync();
-        expect(entrypointContents, contains('// Flutter web bootstrap script'));
-        expect(entrypointContents, contains("import 'dart:ui_web' as ui_web;"));
-        expect(entrypointContents, contains('await ui_web.bootstrapEngine('));
-
-        expect(logger.statusText, contains('Restarted application in'));
-        expect(result.code, 0);
-
-        expect(
-          fakeAnalytics.sentEvents,
-          contains(
-            Event.hotRunnerInfo(
-              label: 'restart',
-              targetPlatform: 'web-javascript',
-              sdkName: '',
-              emulator: false,
-              fullRestart: true,
-              overallTimeInMs: 0,
-              syncedBytes: 0,
-              invalidatedSourcesCount: 0,
-              transferTimeInMs: 0,
-              compileTimeInMs: 0,
-              findInvalidatedTimeInMs: 0,
-              scannedSourcesCount: 0,
-            ),
+        ),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ...kAttachExpectations,
+          const FakeVmServiceRequest(
+            method: kHotRestartServiceName,
+            jsonResponse: <String, Object>{'type': 'Success'},
           ),
-        );
-        expect(
-          fakeAnalytics.sentEvents,
-          contains(
-            Event.timing(
-              workflow: 'hot',
-              variableName: 'web-incremental-restart',
-              elapsedMilliseconds: 0,
-            ),
+        ],
+      );
+      setupMocks();
+      final chromiumLauncher = TestChromiumLauncher();
+      final process = FakeProcess();
+      final chrome = Chromium(
+        1,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+      chromiumLauncher.setInstance(chrome);
+
+      flutterDevice.device = GoogleChromeDevice(
+        fileSystem: fileSystem,
+        chromiumLauncher: chromiumLauncher,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        processManager: FakeProcessManager.any(),
+      );
+      webDevFS.report = UpdateFSReport(success: true);
+
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+      final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+      // Ensure that generated entrypoint is generated correctly.
+      expect(webDevFS.mainUri, isNotNull);
+      final String entrypointContents = fileSystem.file(webDevFS.mainUri).readAsStringSync();
+      expect(entrypointContents, contains('// Flutter web bootstrap script'));
+      expect(entrypointContents, contains("import 'dart:ui_web' as ui_web;"));
+      expect(entrypointContents, contains('await ui_web.bootstrapEngine('));
+
+      expect(logger.statusText, contains('Restarted application in'));
+      expect(result.code, 0);
+
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.hotRunnerInfo(
+            label: 'restart',
+            targetPlatform: 'web-javascript',
+            sdkName: '',
+            emulator: false,
+            fullRestart: true,
+            overallTimeInMs: 0,
+            syncedBytes: 0,
+            invalidatedSourcesCount: 0,
+            transferTimeInMs: 0,
+            compileTimeInMs: 0,
+            findInvalidatedTimeInMs: 0,
+            scannedSourcesCount: 0,
           ),
-        );
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        Pub: ThrowingPub.new,
-      },
-    );
-  }
+        ),
+      );
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.timing(
+            workflow: 'hot',
+            variableName: 'web-incremental-restart',
+            elapsedMilliseconds: 0,
+          ),
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      Analytics: () => fakeAnalytics,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
 
   testUsingContext(
     'Can hot restart after attaching with web-server device',
@@ -1697,11 +1678,22 @@ name: my_app
     },
   );
 
-  // TODO(nshahan): Delete this test case when hot reload can no longer be disabled.
   testUsingContext(
-    'Fails non-fatally on vmservice response error for hot restart (legacy default case)',
+    'Fails non-fatally on vmservice response error for hot restart',
     () async {
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        debuggingOptions: DebuggingOptions.enabled(
+          const BuildInfo(
+            BuildMode.debug,
+            null,
+            trackWidgetCreation: true,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+            extraFrontEndOptions: kDdcLibraryBundleFlags,
+          ),
+        ),
+      );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           ...kAttachExpectations,
@@ -1716,9 +1708,7 @@ name: my_app
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
-      // Historically the .restart() would perform a hot restart even without
-      // passing fullRestart: true.
-      final OperationResult result = await residentWebRunner.restart();
+      final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
       expect(result.code, 0);
     },
@@ -1729,11 +1719,22 @@ name: my_app
     },
   );
 
-  // TODO(nshahan): Delete this test case when hot reload can no longer be disabled.
   testUsingContext(
-    'Fails fatally on Vm Service error response (legacy default case)',
+    'Fails fatally on Vm Service error response',
     () async {
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        debuggingOptions: DebuggingOptions.enabled(
+          const BuildInfo(
+            BuildMode.debug,
+            null,
+            trackWidgetCreation: true,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+            extraFrontEndOptions: kDdcLibraryBundleFlags,
+          ),
+        ),
+      );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           ...kAttachExpectations,
@@ -1748,7 +1749,7 @@ name: my_app
       final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
-      final OperationResult result = await residentWebRunner.restart();
+      final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
       expect(result.code, 1);
       expect(result.message, contains(vm_service.RPCErrorKind.kInternalError.code.toString()));
@@ -1760,92 +1761,6 @@ name: my_app
     },
   );
 
-  for (final webEnableHotReload in <bool>[true, false]) {
-    testUsingContext(
-      'Fails non-fatally on vmservice response error for hot restart with webEnableHotReload: $webEnableHotReload',
-      () async {
-        final ResidentRunner residentWebRunner = setUpResidentRunner(
-          flutterDevice,
-          debuggingOptions: DebuggingOptions.enabled(
-            BuildInfo(
-              BuildMode.debug,
-              null,
-              trackWidgetCreation: true,
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-              webEnableHotReload: webEnableHotReload,
-              extraFrontEndOptions: webEnableHotReload ? kDdcLibraryBundleFlags : <String>[],
-            ),
-          ),
-        );
-        fakeVmServiceHost = FakeVmServiceHost(
-          requests: <VmServiceExpectation>[
-            ...kAttachExpectations,
-            const FakeVmServiceRequest(
-              method: kHotRestartServiceName,
-              jsonResponse: <String, Object>{'type': 'Failed'},
-            ),
-          ],
-        );
-        setupMocks();
-        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
-        unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
-        await connectionInfoCompleter.future;
-
-        final OperationResult result = await residentWebRunner.restart(fullRestart: true);
-
-        expect(result.code, 0);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        Pub: ThrowingPub.new,
-      },
-    );
-
-    testUsingContext(
-      'Fails fatally on Vm Service error response with webEnableHotReload: $webEnableHotReload',
-      () async {
-        final ResidentRunner residentWebRunner = setUpResidentRunner(
-          flutterDevice,
-          debuggingOptions: DebuggingOptions.enabled(
-            BuildInfo(
-              BuildMode.debug,
-              null,
-              trackWidgetCreation: true,
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-              webEnableHotReload: webEnableHotReload,
-              extraFrontEndOptions: webEnableHotReload ? kDdcLibraryBundleFlags : <String>[],
-            ),
-          ),
-        );
-        fakeVmServiceHost = FakeVmServiceHost(
-          requests: <VmServiceExpectation>[
-            ...kAttachExpectations,
-            FakeVmServiceRequest(
-              method: kHotRestartServiceName,
-              // Failed response,
-              error: FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
-            ),
-          ],
-        );
-        setupMocks();
-        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
-        unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
-        await connectionInfoCompleter.future;
-        final OperationResult result = await residentWebRunner.restart(fullRestart: true);
-
-        expect(result.code, 1);
-        expect(result.message, contains(vm_service.RPCErrorKind.kInternalError.code.toString()));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        Pub: ThrowingPub.new,
-      },
-    );
-  }
   testUsingContext(
     'printHelp without details shows only hot restart help message',
     () async {
@@ -1878,8 +1793,6 @@ name: my_app
             trackWidgetCreation: true,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
-            // TODO(nshahan): Remove when hot reload can no longer be disabled.
-            webEnableHotReload: true,
             extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
         ),
