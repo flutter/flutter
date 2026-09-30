@@ -92,7 +92,7 @@ void main() {
         );
 
         final runner = FlutterCommandRunner(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: true,
         );
         runner.addCommand(command);
@@ -131,7 +131,7 @@ void main() {
         );
 
         final runner = FlutterCommandRunner(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: true,
         );
         runner.addCommand(command);
@@ -172,7 +172,7 @@ void main() {
           );
 
           final runner = FlutterCommandRunner(
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
             verboseHelp: true,
           );
           runner.addCommand(command);
@@ -232,7 +232,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
-              toolContext: DelegatingToolContext(),
+              toolContext: const DelegatingToolContext(),
               verboseHelp: true,
             );
             runner.addCommand(command);
@@ -291,7 +291,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
-              toolContext: DelegatingToolContext(),
+              toolContext: const DelegatingToolContext(),
               verboseHelp: true,
             );
             runner.addCommand(command);

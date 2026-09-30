@@ -285,7 +285,7 @@ void main() {
       'updates packages - only runs pub get',
       () async {
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command).run(<String>['update-packages']);
@@ -317,7 +317,7 @@ void main() {
         );
 
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
@@ -356,7 +356,7 @@ void main() {
       '--cherry-pick-package',
       () async {
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command)
@@ -383,7 +383,7 @@ void main() {
       '--cherry-pick-package with caret',
       () async {
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command)
@@ -410,7 +410,7 @@ void main() {
       '--cherry-pick-package muliple',
       () async {
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command)
@@ -440,7 +440,7 @@ void main() {
       '--force-upgrade',
       () async {
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
@@ -554,7 +554,7 @@ dependencies:
             .writeAsStringSync(flutterToolsWithWorkspacePubspecYaml);
 
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command)

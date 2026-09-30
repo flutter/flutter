@@ -52,10 +52,9 @@ HotRunner createHotRunner(
   ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
   bool stayResident = true,
   StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  ToolContext? toolContext,
+  ToolContext toolContext = const DelegatingToolContext(),
   Xcode? xcode,
 }) {
-  toolContext ??= DelegatingToolContext();
   buildSystem ??= FlutterBuildSystem(
     fileSystem: toolContext.fs,
     logger: toolContext.logger,

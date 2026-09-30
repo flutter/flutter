@@ -66,7 +66,7 @@ void main() {
           ),
         ),
         target: 'main.dart',
-        toolContext: DelegatingToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         analytics: getInitializedFakeAnalyticsInstance(
           fs: MemoryFileSystem.test(),
