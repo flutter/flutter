@@ -121,7 +121,7 @@ Dart_Handle ImageDescriptor::initEncoded(Dart_Handle descriptor_handle,
       std::make_unique<tonic::DartPersistentValue>(dart_state, callback_handle);
   const sk_sp<SkData> buffer = immutable_buffer->data();
 
-  registry->CreateCompatibleGeneratorAsync(
+  registry->CreateCompatibleGenerator(
       buffer, dart_state->GetConcurrentTaskRunner(), ui_task_runner,
       fml::MakeCopyable([buffer,
                          descriptor_wrapper = std::move(descriptor_wrapper),

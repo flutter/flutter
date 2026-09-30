@@ -16,6 +16,7 @@
 #include "flutter/lib/ui/painting/image_decoder_no_gl_unittests.h"
 #include "flutter/lib/ui/painting/image_decoder_skia.h"
 #include "flutter/lib/ui/painting/multi_frame_codec.h"
+#include "flutter/lib/ui/painting/image_generator_registry_test.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/testing/dart_isolate_runner.h"
@@ -338,9 +339,7 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
     ASSERT_TRUE(data);
     ASSERT_GE(data->size(), 0u);
 
-    ImageGeneratorRegistry registry;
-    std::shared_ptr<ImageGenerator> generator =
-        registry.CreateCompatibleGenerator(data);
+    std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
     ASSERT_TRUE(generator);
 
     auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
@@ -541,9 +540,7 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3Opaque) {
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(100, 100), image->dimensions());
 
-  ImageGeneratorRegistry registry;
-  std::shared_ptr<ImageGenerator> generator =
-      registry.CreateCompatibleGenerator(data);
+  std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
   ASSERT_TRUE(generator);
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
@@ -602,9 +599,7 @@ TEST_F(ImageDecoderFixtureTest, ImpellerNonWideGamut) {
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(600, 200), image->dimensions());
 
-  ImageGeneratorRegistry registry;
-  std::shared_ptr<ImageGenerator> generator =
-      registry.CreateCompatibleGenerator(data);
+  std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
   ASSERT_TRUE(generator);
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
@@ -659,9 +654,7 @@ TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
     ASSERT_TRUE(data);
     ASSERT_GE(data->size(), 0u);
 
-    ImageGeneratorRegistry registry;
-    std::shared_ptr<ImageGenerator> generator =
-        registry.CreateCompatibleGenerator(data);
+    std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
     ASSERT_TRUE(generator);
 
     auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
@@ -726,9 +719,7 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
     ASSERT_TRUE(data);
     ASSERT_GE(data->size(), 0u);
 
-    ImageGeneratorRegistry registry;
-    std::shared_ptr<ImageGenerator> generator =
-        registry.CreateCompatibleGenerator(data);
+    std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
     ASSERT_TRUE(generator);
 
     auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
@@ -807,9 +798,7 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
       ASSERT_TRUE(data);
       ASSERT_GE(data->size(), 0u);
 
-      ImageGeneratorRegistry registry;
-      std::shared_ptr<ImageGenerator> generator =
-          registry.CreateCompatibleGenerator(data);
+      std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
       ASSERT_TRUE(generator);
 
       auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
@@ -855,10 +844,8 @@ TEST(ImageDecoderTest,
   ASSERT_TRUE(gif_mapping);
   ASSERT_TRUE(webp_mapping);
 
-  ImageGeneratorRegistry registry;
-
-  auto gif_generator = registry.CreateCompatibleGenerator(gif_mapping);
-  auto webp_generator = registry.CreateCompatibleGenerator(webp_mapping);
+  auto gif_generator = CreateTestImageGenerator(gif_mapping);
+  auto webp_generator = CreateTestImageGenerator(webp_mapping);
 
   ASSERT_TRUE(gif_generator);
   ASSERT_TRUE(webp_generator);
@@ -877,9 +864,7 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
   EXPECT_EQ(600, image->width());
   EXPECT_EQ(200, image->height());
 
-  ImageGeneratorRegistry registry;
-  std::shared_ptr<ImageGenerator> generator =
-      registry.CreateCompatibleGenerator(data);
+  std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
   ASSERT_TRUE(generator);
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
@@ -941,9 +926,7 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
 TEST(ImageDecoderTest, ImagesWithTransparencyArePremulAlpha) {
   auto data = flutter::testing::OpenFixtureAsSkData("heart_end.png");
   ASSERT_TRUE(data);
-  ImageGeneratorRegistry registry;
-  std::shared_ptr<ImageGenerator> generator =
-      registry.CreateCompatibleGenerator(data);
+  std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
   ASSERT_TRUE(generator);
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
@@ -959,9 +942,7 @@ TEST(ImageDecoderTest, ImagesWithTransparencyArePremulAlpha) {
 TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
   auto data = flutter::testing::OpenFixtureAsSkData("Horizontal.jpg");
 
-  ImageGeneratorRegistry registry;
-  std::shared_ptr<ImageGenerator> generator =
-      registry.CreateCompatibleGenerator(data);
+  std::shared_ptr<ImageGenerator> generator = CreateTestImageGenerator(data);
   ASSERT_TRUE(generator);
   auto descriptor =
       fml::MakeRefCounted<ImageDescriptor>(data, std::move(generator));
@@ -1000,9 +981,8 @@ TEST_F(ImageDecoderFixtureTest,
 
   ASSERT_TRUE(gif_mapping);
 
-  ImageGeneratorRegistry registry;
   std::shared_ptr<ImageGenerator> gif_generator =
-      registry.CreateCompatibleGenerator(gif_mapping);
+      CreateTestImageGenerator(gif_mapping);
   ASSERT_TRUE(gif_generator);
 
   TaskRunners runners(GetCurrentTestName(),         // label

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_api_samples/painting/image_provider/image_provider.0.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +17,19 @@ void main() {
     debugPrint = (String? message, {int? wrapWidth}) {
       log.add('$message');
     };
-    await tester.pumpWidget(const ExampleApp());
+    final imageError = Completer<void>();
+    final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      originalOnError?.call(details);
+      imageError.complete();
+    };
+    try {
+      await tester.pumpWidget(const ExampleApp());
+      await tester.runAsync(() => imageError.future);
+    } finally {
+      FlutterError.onError = originalOnError;
+    }
+
     expect(tester.takeException().toString(), 'Exception: Invalid image data');
     expect(log, <String>['Fetching "$expectedUrl"...']);
     debugPrint = originalDebugPrint;

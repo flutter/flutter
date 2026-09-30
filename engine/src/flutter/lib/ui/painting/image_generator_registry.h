@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 #include <set>
+#include <vector>
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/mapping.h"
@@ -27,9 +28,8 @@ using ImageGeneratorFactory =
 /// @brief  Controls where an image generator factory is invoked when resolving
 ///         a generator asynchronously.
 enum class ImageGeneratorFactoryExecution {
-  /// Invoke the factory on the callback task runner used to resolve the
-  /// registry.
-  kCallbackTaskRunner,
+  /// Invoke the factory on the UI task runner.
+  kUITaskRunner,
 
   /// Invoke the factory on the engine's concurrent task runner.
   kConcurrentTaskRunner,
@@ -55,46 +55,29 @@ class ImageGeneratorRegistry {
   ///                       over the builtin decoders. When multiple decoders
   ///                       are added with the same priority, those which are
   ///                       added earlier take precedent.
-  /// @param[in]  execution  Where the factory is invoked when using
-  ///                        `CreateCompatibleGeneratorAsync`. This setting is
-  ///                        ignored by `CreateCompatibleGenerator`.
-  /// @see        `CreateCompatibleGenerator`, `CreateCompatibleGeneratorAsync`
+  /// @param[in]  execution  Where the factory is invoked.
+  /// @see        `CreateCompatibleGenerator`
   void AddFactory(ImageGeneratorFactory factory,
                   int32_t priority,
                   ImageGeneratorFactoryExecution execution =
-                      ImageGeneratorFactoryExecution::kCallbackTaskRunner);
-
-  /// @brief      Walks the list of image generator builders in descending
-  ///             priority order until a compatible `ImageGenerator` is able to
-  ///             be built. This method invokes every factory synchronously on
-  ///             the calling thread, regardless of its execution setting. Use
-  ///             `CreateCompatibleGeneratorAsync` when calling from the UI
-  ///             thread. The returned `ImageGenerator` can then be used to
-  ///             fully decode the image on e.g. the IO thread.
-  /// @param[in]  buffer  The raw encoded image data.
-  /// @return     An `ImageGenerator` that is compatible with the input buffer.
-  ///             If no compatible `ImageGenerator` type was found, then
-  ///             `std::shared_ptr<ImageGenerator>(nullptr)` is returned.
-  /// @see        `ImageGenerator`
-  std::shared_ptr<ImageGenerator> CreateCompatibleGenerator(
-      const sk_sp<SkData>& buffer);
+                      ImageGeneratorFactoryExecution::kUITaskRunner);
 
   /// @brief      Asynchronously walks the list of image generator factories in
   ///             priority order. Factories registered for concurrent execution
   ///             are invoked on `concurrent_task_runner`; all other factories
-  ///             are invoked on `callback_task_runner`. This method must be
-  ///             called from `callback_task_runner`, where the registry is
+  ///             are invoked on `ui_task_runner`. This method must be
+  ///             called from `ui_task_runner`, where the registry is
   ///             accessed. The callback is always posted to that runner.
   /// @param[in]  buffer                  The raw encoded image data.
   /// @param[in]  concurrent_task_runner  Runner for factories that may perform
   ///                                     expensive compatibility checks.
-  /// @param[in]  callback_task_runner    Runner on which `callback` is invoked.
+  /// @param[in]  ui_task_runner          Runner on which `callback` is invoked.
   /// @param[in]  callback                Receives a compatible generator, or
   ///                                     `nullptr` if none was found.
-  void CreateCompatibleGeneratorAsync(
+  void CreateCompatibleGenerator(
       const sk_sp<SkData>& buffer,
       const std::shared_ptr<fml::ConcurrentTaskRunner>& concurrent_task_runner,
-      const fml::RefPtr<fml::TaskRunner>& callback_task_runner,
+      const fml::RefPtr<fml::TaskRunner>& ui_task_runner,
       std::function<void(std::shared_ptr<ImageGenerator>)> callback);
 
   fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry> GetWeakPtr() const;
@@ -107,7 +90,7 @@ class ImageGeneratorRegistry {
     // Used as a fallback priority comparison when equal.
     size_t ascending_nonce = 0;
     ImageGeneratorFactoryExecution execution =
-        ImageGeneratorFactoryExecution::kCallbackTaskRunner;
+        ImageGeneratorFactoryExecution::kUITaskRunner;
   };
 
   struct Compare {
@@ -122,6 +105,15 @@ class ImageGeneratorRegistry {
       return lhs.priority > rhs.priority;
     }
   };
+
+  // Owns the factory snapshot so queued work can outlive the registry.
+  static void ResolveGenerator(
+      std::shared_ptr<const std::vector<PrioritizedFactory>> factories,
+      size_t index,
+      sk_sp<SkData> buffer,
+      std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
+      fml::RefPtr<fml::TaskRunner> ui_task_runner,
+      std::function<void(std::shared_ptr<ImageGenerator>)> callback);
 
   using FactorySet = std::set<PrioritizedFactory, Compare>;
   FactorySet image_generator_factories_;

@@ -44,103 +44,6 @@ void RegisterSkiaCodecs() {
 }  // namespace
 
 namespace flutter {
-namespace {
-
-struct AsyncImageGeneratorFactory {
-  ImageGeneratorFactory callback;
-  ImageGeneratorFactoryExecution execution;
-};
-
-void LogNoImageDecoders() {
-  FML_LOG(WARNING)
-      << "There are currently no image decoders installed. If you're writing "
-         "your own platform embedding, you can register new image decoders "
-         "via `ImageGeneratorRegistry::AddFactory` on the "
-         "`ImageGeneratorRegistry` provided by the engine. Otherwise, please "
-         "file a bug on https://github.com/flutter/flutter/issues.";
-}
-
-// Resolves an ordered snapshot of factories while returning to the callback
-// task runner after invoking a factory concurrently.
-class AsyncImageGeneratorResolver
-    : public std::enable_shared_from_this<AsyncImageGeneratorResolver> {
- public:
-  static void Resolve(
-      std::vector<AsyncImageGeneratorFactory> factories,
-      sk_sp<SkData> buffer,
-      std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
-      fml::RefPtr<fml::TaskRunner> callback_task_runner,
-      std::function<void(std::shared_ptr<ImageGenerator>)> callback) {
-    auto resolver = std::shared_ptr<AsyncImageGeneratorResolver>(
-        new AsyncImageGeneratorResolver(std::move(factories), std::move(buffer),
-                                        std::move(concurrent_task_runner),
-                                        std::move(callback_task_runner),
-                                        std::move(callback)));
-    resolver->ResolveFrom(0u);
-  }
-
- private:
-  AsyncImageGeneratorResolver(
-      std::vector<AsyncImageGeneratorFactory> factories,
-      sk_sp<SkData> buffer,
-      std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
-      fml::RefPtr<fml::TaskRunner> callback_task_runner,
-      std::function<void(std::shared_ptr<ImageGenerator>)> callback)
-      : factories_(std::move(factories)),
-        buffer_(std::move(buffer)),
-        concurrent_task_runner_(std::move(concurrent_task_runner)),
-        callback_task_runner_(std::move(callback_task_runner)),
-        callback_(std::move(callback)) {}
-
-  void ResolveFrom(size_t index) {
-    while (index < factories_.size()) {
-      const AsyncImageGeneratorFactory& factory = factories_[index];
-      if (factory.execution ==
-          ImageGeneratorFactoryExecution::kConcurrentTaskRunner) {
-        auto self = shared_from_this();
-        concurrent_task_runner_->PostTask([self, index]() {
-          std::shared_ptr<ImageGenerator> result =
-              self->factories_[index].callback(self->buffer_);
-          self->callback_task_runner_->PostTask(
-              [self, index, result = std::move(result)]() mutable {
-                if (result) {
-                  self->Complete(std::move(result));
-                } else {
-                  self->ResolveFrom(index + 1u);
-                }
-              });
-        });
-        return;
-      }
-
-      std::shared_ptr<ImageGenerator> result = factory.callback(buffer_);
-      if (result) {
-        Complete(std::move(result));
-        return;
-      }
-      index++;
-    }
-    Complete(nullptr);
-  }
-
-  void Complete(std::shared_ptr<ImageGenerator> generator) {
-    auto callback = std::move(callback_);
-    callback_task_runner_->PostTask(
-        [callback = std::move(callback),
-         generator = std::move(generator)]() mutable {
-          callback(std::move(generator));
-        });
-  }
-
-  const std::vector<AsyncImageGeneratorFactory> factories_;
-  const sk_sp<SkData> buffer_;
-  const std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner_;
-  const fml::RefPtr<fml::TaskRunner> callback_task_runner_;
-  std::function<void(std::shared_ptr<ImageGenerator>)> callback_;
-};
-
-}  // namespace
-
 ImageGeneratorRegistry::ImageGeneratorRegistry() : weak_factory_(this) {
   AddFactory(
       [](sk_sp<SkData> buffer) {
@@ -190,41 +93,65 @@ void ImageGeneratorRegistry::AddFactory(
       {std::move(factory), priority, ++nonce_, execution});
 }
 
-std::shared_ptr<ImageGenerator>
-ImageGeneratorRegistry::CreateCompatibleGenerator(const sk_sp<SkData>& buffer) {
-  if (image_generator_factories_.empty()) {
-    LogNoImageDecoders();
-  }
-
-  for (auto& factory : image_generator_factories_) {
-    std::shared_ptr<ImageGenerator> result = factory.callback(buffer);
-    if (result) {
-      return result;
-    }
-  }
-  return nullptr;
-}
-
-void ImageGeneratorRegistry::CreateCompatibleGeneratorAsync(
+void ImageGeneratorRegistry::CreateCompatibleGenerator(
     const sk_sp<SkData>& buffer,
     const std::shared_ptr<fml::ConcurrentTaskRunner>& concurrent_task_runner,
-    const fml::RefPtr<fml::TaskRunner>& callback_task_runner,
+    const fml::RefPtr<fml::TaskRunner>& ui_task_runner,
     std::function<void(std::shared_ptr<ImageGenerator>)> callback) {
-  FML_DCHECK(callback_task_runner->RunsTasksOnCurrentThread());
+  FML_DCHECK(ui_task_runner->RunsTasksOnCurrentThread());
 
   if (image_generator_factories_.empty()) {
-    LogNoImageDecoders();
+    FML_LOG(WARNING)
+        << "There are currently no image decoders installed. If you're writing "
+           "your own platform embedding, you can register new image decoders "
+           "via `ImageGeneratorRegistry::AddFactory` on the "
+           "`ImageGeneratorRegistry` provided by the engine. Otherwise, please "
+           "file a bug on https://github.com/flutter/flutter/issues.";
   }
 
-  std::vector<AsyncImageGeneratorFactory> factories;
-  factories.reserve(image_generator_factories_.size());
-  for (const auto& factory : image_generator_factories_) {
-    factories.push_back({factory.callback, factory.execution});
+  ResolveGenerator(
+      std::make_shared<const std::vector<PrioritizedFactory>>(
+          image_generator_factories_.begin(), image_generator_factories_.end()),
+      0u, buffer, concurrent_task_runner, ui_task_runner, std::move(callback));
+}
+
+void ImageGeneratorRegistry::ResolveGenerator(
+    std::shared_ptr<const std::vector<PrioritizedFactory>> factories,
+    size_t index,
+    sk_sp<SkData> buffer,
+    std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
+    fml::RefPtr<fml::TaskRunner> ui_task_runner,
+    std::function<void(std::shared_ptr<ImageGenerator>)> callback) {
+  if (index == factories->size()) {
+    ui_task_runner->PostTask(
+        [callback = std::move(callback)]() { callback(nullptr); });
+    return;
   }
 
-  AsyncImageGeneratorResolver::Resolve(
-      std::move(factories), buffer, concurrent_task_runner,
-      callback_task_runner, std::move(callback));
+  const auto execution = (*factories)[index].execution;
+  auto invoke_factory = [factories = std::move(factories), index,
+                         buffer = std::move(buffer), concurrent_task_runner,
+                         ui_task_runner,
+                         callback = std::move(callback)]() mutable {
+    auto result = (*factories)[index].callback(buffer);
+    ui_task_runner->PostTask(
+        [factories = std::move(factories), index, buffer = std::move(buffer),
+         concurrent_task_runner, ui_task_runner, callback = std::move(callback),
+         result = std::move(result)]() mutable {
+          if (result) {
+            callback(std::move(result));
+          } else {
+            ResolveGenerator(std::move(factories), index + 1u,
+                             std::move(buffer), concurrent_task_runner,
+                             ui_task_runner, std::move(callback));
+          }
+        });
+  };
+  if (execution == ImageGeneratorFactoryExecution::kConcurrentTaskRunner) {
+    concurrent_task_runner->PostTask(std::move(invoke_factory));
+  } else {
+    invoke_factory();
+  }
 }
 
 fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
