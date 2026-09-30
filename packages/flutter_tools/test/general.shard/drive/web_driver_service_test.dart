@@ -505,7 +505,7 @@ WebDriverService setUpDriverService() {
     buildSystem: TestBuildSystem.all(BuildResult(success: true)),
     buildTargets: const BuildTargetsImpl(),
     dartSdkPath: 'dart',
-    toolContext: DelegatingToolContext(),
+    toolContext: const DelegatingToolContext(),
   );
 }
 
