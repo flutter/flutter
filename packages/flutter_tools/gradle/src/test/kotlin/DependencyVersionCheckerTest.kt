@@ -97,8 +97,8 @@ class DependencyVersionCheckerTest {
             dependencyValidationException.message ==
                 getErrorMessage(
                     AGP_NAME,
-                    exampleErrorAgpVersion.toString(),
-                    errorAGPVersion.toString(),
+                    "8.11.0",
+                    formatAGPVersion(errorAGPVersion),
                     getPotentialAGPFix(FAKE_PROJECT_ROOT_DIR)
                 )
         )
@@ -120,8 +120,8 @@ class DependencyVersionCheckerTest {
             mockLogger.error(
                 getWarnMessage(
                     AGP_NAME,
-                    exampleWarnAgpVersion.toString(),
-                    warnAGPVersion.toString(),
+                    "8.11.1",
+                    formatAGPVersion(warnAGPVersion),
                     getPotentialAGPFix(FAKE_PROJECT_ROOT_DIR)
                 )
             )

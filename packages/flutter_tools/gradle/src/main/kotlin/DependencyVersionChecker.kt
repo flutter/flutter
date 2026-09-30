@@ -345,8 +345,8 @@ object DependencyVersionChecker {
             val errorMessage: String =
                 getErrorMessage(
                     AGP_NAME,
-                    androidPluginVersion.toString(),
-                    errorAGPVersion.toString(),
+                    formatAGPVersion(androidPluginVersion),
+                    formatAGPVersion(errorAGPVersion),
                     getPotentialAGPFix(project.rootDir.path)
                 )
             project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
@@ -355,8 +355,8 @@ object DependencyVersionChecker {
             val warnMessage: String =
                 getWarnMessage(
                     AGP_NAME,
-                    androidPluginVersion.toString(),
-                    warnAGPVersion.toString(),
+                    formatAGPVersion(androidPluginVersion),
+                    formatAGPVersion(warnAGPVersion),
                     getPotentialAGPFix(project.rootDir.path)
                 )
             project.logger.error(warnMessage)
