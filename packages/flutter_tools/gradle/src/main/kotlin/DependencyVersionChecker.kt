@@ -104,6 +104,11 @@ object DependencyVersionChecker {
 
     @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 11, 1)
 
+    // The first AGP major version that Flutter does not support yet. Builds using this major
+    // version or newer fail with an error. When Flutter adds support for this major version,
+    // bump this value to the next major version.
+    @VisibleForTesting internal val firstUnsupportedAGPMajorVersion: Int = 10
+
     @VisibleForTesting internal val warnKGPVersion: Version = Version(2, 3, 20)
 
     @VisibleForTesting internal val errorKGPVersion: Version = Version(2, 2, 20)
@@ -131,6 +136,7 @@ object DependencyVersionChecker {
 
         val agpVersion: AndroidPluginVersion? = VersionFetcher.getAGPVersion(project)
         if (agpVersion != null) {
+            checkAGPMaxVersion(agpVersion, project)
             checkAGPVersion(agpVersion, project)
         } else {
             project.logger.error(
@@ -214,6 +220,21 @@ object DependencyVersionChecker {
             "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
             " to bypass this check.\n\nPotential fix: $potentialFix"
 
+    @VisibleForTesting internal fun getUnsupportedMajorVersionErrorMessage(
+        dependencyName: String,
+        versionString: String,
+        unsupportedMajorVersion: Int,
+        potentialFix: String
+    ): String =
+        "Error: Your project's $dependencyName version ($versionString) is not yet " +
+            "supported. Flutter does not support $dependencyName $unsupportedMajorVersion, " +
+            "and support will be added in a future Flutter release. Please downgrade your " +
+            "$dependencyName version to a version below $unsupportedMajorVersion.0.0 to " +
+            "continue." +
+            "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
+            " to bypass this check (unsupported; your build may fail).\n\n" +
+            "Potential fix: $potentialFix"
+
     @VisibleForTesting
     internal fun getFlavorSpecificMessage(
         flavorName: String?,
@@ -269,6 +290,36 @@ object DependencyVersionChecker {
                     POTENTIAL_JAVA_FIX
                 )
             project.logger.error(warnMessage)
+        }
+    }
+
+    /**
+     * Returns [androidPluginVersion] as `major.minor.micro` (for example, `9.3.1`).
+     *
+     * [AndroidPluginVersion.toString] returns "Android Gradle Plugin version 9.3.1", which reads
+     * awkwardly inside messages that already name the dependency.
+     */
+    @VisibleForTesting internal fun formatAGPVersion(androidPluginVersion: AndroidPluginVersion): String =
+        "${androidPluginVersion.major}.${androidPluginVersion.minor}.${androidPluginVersion.micro}"
+
+    /**
+     * Throws a [DependencyValidationException] if [androidPluginVersion] is a major version that
+     * Flutter does not support yet (see [firstUnsupportedAGPMajorVersion]).
+     */
+    @VisibleForTesting internal fun checkAGPMaxVersion(
+        androidPluginVersion: AndroidPluginVersion,
+        project: Project
+    ) {
+        if (androidPluginVersion.major >= firstUnsupportedAGPMajorVersion) {
+            val errorMessage: String =
+                getUnsupportedMajorVersionErrorMessage(
+                    AGP_NAME,
+                    formatAGPVersion(androidPluginVersion),
+                    firstUnsupportedAGPMajorVersion,
+                    getPotentialAGPFix(project.rootDir.path)
+                )
+            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
+            throw DependencyValidationException(errorMessage)
         }
     }
 

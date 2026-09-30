@@ -19,12 +19,15 @@ import com.flutter.gradle.DependencyVersionChecker.errorGradleVersion
 import com.flutter.gradle.DependencyVersionChecker.errorJavaVersion
 import com.flutter.gradle.DependencyVersionChecker.errorKGPVersion
 import com.flutter.gradle.DependencyVersionChecker.errorMinSdkVersion
+import com.flutter.gradle.DependencyVersionChecker.firstUnsupportedAGPMajorVersion
+import com.flutter.gradle.DependencyVersionChecker.formatAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.getErrorMessage
 import com.flutter.gradle.DependencyVersionChecker.getFlavorSpecificMessage
 import com.flutter.gradle.DependencyVersionChecker.getPotentialAGPFix
 import com.flutter.gradle.DependencyVersionChecker.getPotentialGradleFix
 import com.flutter.gradle.DependencyVersionChecker.getPotentialKGPFix
 import com.flutter.gradle.DependencyVersionChecker.getPotentialSDKFix
+import com.flutter.gradle.DependencyVersionChecker.getUnsupportedMajorVersionErrorMessage
 import com.flutter.gradle.DependencyVersionChecker.getWarnMessage
 import com.flutter.gradle.DependencyVersionChecker.warnAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnGradleVersion
@@ -46,6 +49,7 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.internal.extensions.core.extra
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -122,6 +126,69 @@ class DependencyVersionCheckerTest {
                 )
             )
         }
+        verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
+    }
+
+    @Test
+    fun `AGP version with unsupported major version results in DependencyValidationException`() {
+        val exampleUnsupportedAgpVersion = AndroidPluginVersion(firstUnsupportedAGPMajorVersion, 0, 0)
+        val mockProject =
+            MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleUnsupportedAgpVersion)
+
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
+
+        val dependencyValidationException =
+            assertFailsWith<DependencyValidationException> { DependencyVersionChecker.checkDependencyVersions(mockProject) }
+        assertEquals(
+            getUnsupportedMajorVersionErrorMessage(
+                AGP_NAME,
+                "$firstUnsupportedAGPMajorVersion.0.0",
+                firstUnsupportedAGPMajorVersion,
+                getPotentialAGPFix(FAKE_PROJECT_ROOT_DIR)
+            ),
+            dependencyValidationException.message
+        )
+        assertContains(
+            dependencyValidationException.message!!,
+            "Your project's Android Gradle Plugin version ($firstUnsupportedAGPMajorVersion.0.0) is not yet supported."
+        )
+        verify { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
+    }
+
+    @Test
+    fun `formatAGPVersion returns only the version number`() {
+        assertEquals("9.3.1", formatAGPVersion(AndroidPluginVersion(9, 3, 1)))
+    }
+
+    @Test
+    fun `AGP version with newer unsupported major version results in DependencyValidationException`() {
+        val exampleUnsupportedAgpVersion = AndroidPluginVersion(firstUnsupportedAGPMajorVersion + 1, 2, 0)
+        val mockProject =
+            MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleUnsupportedAgpVersion)
+
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
+
+        assertFailsWith<DependencyValidationException> { DependencyVersionChecker.checkDependencyVersions(mockProject) }
+        verify { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
+    }
+
+    @Test
+    fun `Latest AGP version below unsupported major version is considered supported`() {
+        val exampleSupportedAgpVersion = AndroidPluginVersion(firstUnsupportedAGPMajorVersion - 1, 99, 99)
+        val mockProject =
+            MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleSupportedAgpVersion)
+
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
+        val mockLogger = mockProject.logger
+        every { mockLogger.error(any()) } returns Unit
+        every { mockLogger.warn(any()) } returns Unit
+
+        DependencyVersionChecker.checkDependencyVersions(mockProject)
+
+        verify(exactly = 0) { mockLogger.error(any()) }
         verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
 
