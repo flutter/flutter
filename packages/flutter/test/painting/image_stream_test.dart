@@ -591,9 +591,13 @@ void main() {
     );
 
     final emittedImages = <ImageInfo>[];
+    addTearDown(() {
+      for (final ImageInfo image in emittedImages) {
+        image.dispose();
+      }
+    });
     final listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
       emittedImages.add(image);
-      addTearDown(image.dispose);
     });
     imageStream.addListener(listener);
     // Mirrors ImageCache keeping the completer alive with zero listeners.
