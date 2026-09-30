@@ -99,6 +99,11 @@ information known to the tool.
 be marked inline).
 - Update the test cases in [create_test.dart](../../../test/commands.shard/permeable/create_test.dart) that test for a warning for Java/AGP incompatibilities as needed
 (relevant tests should fail if you do not fix them preemptively).
+- When Flutter adds support for a new AGP major version, bump
+`firstUnsupportedAGPMajorVersion` in
+[DependencyVersionChecker.kt](../../../gradle/src/main/kotlin/DependencyVersionChecker.kt)
+to the next major version. Until then, builds that use that major version or
+newer fail with an error asking the developer to downgrade AGP.
 
 For information about the latest version, check https://developer.android.com/studio/releases/gradle-plugin#updating-gradle.
 

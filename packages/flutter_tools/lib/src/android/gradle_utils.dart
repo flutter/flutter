@@ -99,6 +99,10 @@ const maxKnownAndSupportedAgpVersion = '9.4';
 const maxKnownAgpVersionWithFullKotlinSupport = '9.3.1';
 
 // Update this when new versions of AGP come out.
+//
+// Builds using an AGP major version that Flutter does not support yet are
+// rejected by `firstUnsupportedAGPMajorVersion` in
+// packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt.
 const maxKnownAgpVersion = '9.4';
 
 // Supported here means tooling is aware of this versions
