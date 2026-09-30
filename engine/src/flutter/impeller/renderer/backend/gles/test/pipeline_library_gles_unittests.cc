@@ -2,17 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <atomic>
-#include <chrono>
-#include <cstring>
-#include <deque>
 #include <future>
 #include <memory>
 #include <optional>
-#include <unordered_map>
 #include <vector>
 
-#include "flutter/fml/closure.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/task_runner_util.h"
 #include "flutter/fml/thread.h"
@@ -24,10 +18,9 @@
 #include "impeller/renderer/backend/gles/pipeline_gles.h"
 #include "impeller/renderer/backend/gles/pipeline_library_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
+#include "impeller/renderer/backend/gles/test/pipeline_library_gles_test_utils.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
-#include "impeller/renderer/shader_library.h"
-#include "impeller/renderer/vertex_descriptor.h"
 
 namespace impeller::testing {
 
@@ -142,28 +135,6 @@ TEST_P(PipelineLibraryGLESTest, SynchronousPipelineIsValid) {
 }
 // NOLINTEND(bugprone-unchecked-optional-access)
 
-namespace {
-
-/// A worker that answers whether the reactor may react with a value the test
-/// sets.
-class ToggleWorker final : public ReactorGLES::Worker {
- public:
-  explicit ToggleWorker(bool allowed) : allowed_(allowed) {}
-
-  // |ReactorGLES::Worker|
-  bool CanReactorReactOnCurrentThreadNow(
-      const ReactorGLES& reactor) const override {
-    return allowed_.load();
-  }
-
-  void SetAllowed(bool allowed) { allowed_.store(allowed); }
-
- private:
-  std::atomic<bool> allowed_;
-};
-
-}  // namespace
-
 // A pending pipeline whose link nobody can check must fail rather than leave
 // its promise unset, because a caller of WaitAndGet blocks on that promise.
 TEST(PipelineLibraryGLESDeferredTest,
@@ -205,203 +176,6 @@ TEST(PipelineLibraryGLESDeferredTest,
 }
 
 namespace {
-
-class DeferredLinkRunner final : public fml::BasicTaskRunner {
- public:
-  void PostTask(const fml::closure& task) override { tasks.push_back(task); }
-  void RunOne() {
-    fml::closure task = std::move(tasks.front());
-    tasks.pop_front();
-    task();
-  }
-  void RunAll() {
-    while (!tasks.empty()) {
-      RunOne();
-    }
-  }
-  std::deque<fml::closure> tasks;
-};
-
-struct DeferredLinkState {
-  GLuint next = 1;
-  int programs = 0;
-  int links = 0;
-  int compile_queries = 0;
-  int link_queries = 0;
-  int completion_queries = 0;
-  int detached = 0;
-  int deleted_shaders = 0;
-  bool fail_compile = false;
-  bool fail_link = false;
-  bool completion_supported = true;
-  std::unordered_map<GLuint, bool> shaders;
-  std::unordered_map<GLuint, bool> linked;
-  std::unordered_map<GLuint, bool> completed;
-};
-
-DeferredLinkState* g_deferred_links = nullptr;
-
-bool IsSet(const std::unordered_map<GLuint, bool>& values, GLuint id) {
-  std::unordered_map<GLuint, bool>::const_iterator found = values.find(id);
-  return found != values.end() && found->second;
-}
-
-GLuint GL_APIENTRY DeferredCreateShader(GLenum type) {
-  GLuint id = g_deferred_links->next++;
-  g_deferred_links->shaders[id] =
-      !(g_deferred_links->fail_compile && type == GL_VERTEX_SHADER);
-  return id;
-}
-GLuint GL_APIENTRY DeferredCreateProgram() {
-  g_deferred_links->programs++;
-  return g_deferred_links->next++;
-}
-void GL_APIENTRY DeferredLinkProgram(GLuint program) {
-  g_deferred_links->links++;
-  g_deferred_links->linked[program] =
-      !g_deferred_links->fail_compile && !g_deferred_links->fail_link;
-}
-void GL_APIENTRY DeferredGetShaderiv(GLuint shader,
-                                     GLenum pname,
-                                     GLint* value) {
-  *value = 0;
-  if (pname == GL_COMPILE_STATUS) {
-    g_deferred_links->compile_queries++;
-    *value = IsSet(g_deferred_links->shaders, shader) ? GL_TRUE : GL_FALSE;
-  }
-}
-void GL_APIENTRY DeferredGetProgramiv(GLuint program,
-                                      GLenum pname,
-                                      GLint* value) {
-  if (pname == GL_COMPLETION_STATUS_KHR) {
-    g_deferred_links->completion_queries++;
-    // A driver that rejects the query leaves the value unchanged
-    if (g_deferred_links->completion_supported) {
-      *value = IsSet(g_deferred_links->completed, program) ? GL_TRUE : GL_FALSE;
-    }
-    return;
-  }
-  *value = 0;
-  if (pname == GL_LINK_STATUS) {
-    g_deferred_links->link_queries++;
-    *value = IsSet(g_deferred_links->linked, program) ? GL_TRUE : GL_FALSE;
-  }
-}
-void GL_APIENTRY DeferredDetachShader(GLuint program, GLuint shader) {
-  g_deferred_links->detached++;
-}
-void GL_APIENTRY DeferredDeleteShader(GLuint shader) {
-  g_deferred_links->deleted_shaders++;
-}
-GLboolean GL_APIENTRY DeferredIsProgram(GLuint program) {
-  return program != 0 ? GL_TRUE : GL_FALSE;
-}
-GLint GL_APIENTRY DeferredGetUniformLocation(GLuint program,
-                                             const GLchar* name) {
-  return -1;
-}
-void GL_APIENTRY DeferredGetText(GLuint object,
-                                 GLsizei size,
-                                 GLsizei* length,
-                                 GLchar* text) {
-  if (length) {
-    *length = 0;
-  }
-  if (size > 0 && text) {
-    text[0] = '\0';
-  }
-}
-void* DeferredLinkResolver(const char* name) {
-  if (strcmp(name, "glCreateShader") == 0) {
-    return reinterpret_cast<void*>(DeferredCreateShader);
-  }
-  if (strcmp(name, "glCreateProgram") == 0) {
-    return reinterpret_cast<void*>(DeferredCreateProgram);
-  }
-  if (strcmp(name, "glLinkProgram") == 0) {
-    return reinterpret_cast<void*>(DeferredLinkProgram);
-  }
-  if (strcmp(name, "glGetShaderiv") == 0) {
-    return reinterpret_cast<void*>(DeferredGetShaderiv);
-  }
-  if (strcmp(name, "glGetProgramiv") == 0) {
-    return reinterpret_cast<void*>(DeferredGetProgramiv);
-  }
-  if (strcmp(name, "glDetachShader") == 0) {
-    return reinterpret_cast<void*>(DeferredDetachShader);
-  }
-  if (strcmp(name, "glDeleteShader") == 0) {
-    return reinterpret_cast<void*>(DeferredDeleteShader);
-  }
-  if (strcmp(name, "glIsProgram") == 0) {
-    return reinterpret_cast<void*>(DeferredIsProgram);
-  }
-  if (strcmp(name, "glGetUniformLocation") == 0) {
-    return reinterpret_cast<void*>(DeferredGetUniformLocation);
-  }
-  if (strcmp(name, "glGetShaderSource") == 0 ||
-      strcmp(name, "glGetShaderInfoLog") == 0 ||
-      strcmp(name, "glGetProgramInfoLog") == 0) {
-    return reinterpret_cast<void*>(DeferredGetText);
-  }
-  return kMockResolverGLES(name);
-}
-
-/// Holds a MockGLES context with an ANGLE version and
-/// GL_KHR_parallel_shader_compile, so async requests take the deferred path.
-/// Jobs run only in RunOne or RunAll, so a test can check state between 2 jobs.
-struct DeferredLinkHarness {
-  DeferredLinkState state;
-  fml::ScopedCleanupClosure reset_deferred_links{
-      []() { g_deferred_links = nullptr; }};
-  std::shared_ptr<MockGLES> mock_gles;
-  std::shared_ptr<DeferredLinkRunner> runner;
-  std::shared_ptr<ContextGLES> context;
-  std::shared_ptr<ToggleWorker> worker;
-  std::shared_ptr<PipelineLibrary> library;
-  PipelineDescriptor desc;
-
-  explicit DeferredLinkHarness(size_t max_pending_links) {
-    g_deferred_links = &state;
-    mock_gles = MockGLES::Init(
-        std::vector<const char*>{"GL_KHR_parallel_shader_compile"},
-        "OpenGL ES 3.0 (ANGLE 2.1.0)", DeferredLinkResolver);
-    runner = std::make_shared<DeferredLinkRunner>();
-    context = ContextGLES::Create(
-        Flags{}, std::make_unique<ProcTableGLES>(DeferredLinkResolver),
-        std::vector<std::shared_ptr<fml::Mapping>>{},
-        /*enable_gpu_tracing=*/false, runner);
-    FML_CHECK(context);
-    worker = std::make_shared<ToggleWorker>(true);
-    context->AddReactorWorker(worker);
-    auto base_context = std::static_pointer_cast<Context>(context);
-    std::shared_ptr<ShaderLibrary> shader_library =
-        base_context->GetShaderLibrary();
-    for (ShaderStage stage : {ShaderStage::kVertex, ShaderStage::kFragment}) {
-      // ComputeShaderWithDefines inserts specialization constants after the
-      // first line and rejects a source without a newline, so the source has
-      // the #version first line that impellerc emits
-      shader_library->RegisterFunction(
-          "deferred", stage,
-          std::make_shared<fml::DataMapping>(
-              std::string("#version 100\nvoid main() {}")),
-          [](bool result) { EXPECT_TRUE(result); });
-    }
-    desc.SetVertexDescriptor(std::make_shared<VertexDescriptor>());
-    desc.AddStageEntrypoint(
-        shader_library->GetFunction("deferred", ShaderStage::kVertex));
-    desc.AddStageEntrypoint(
-        shader_library->GetFunction("deferred", ShaderStage::kFragment));
-    library = base_context->GetPipelineLibrary();
-    PipelineLibraryGLES::Cast(*library).SetMaxPendingLinksForTesting(
-        max_pending_links);
-  }
-};
-
-bool IsReady(const PipelineFuture<PipelineDescriptor>& future) {
-  return future.future.wait_for(std::chrono::seconds(0)) ==
-         std::future_status::ready;
-}
 
 /// A status query waits for the link, so a job must not make a blocking one
 /// for a link it started. A variant that reuses a linking program must get
@@ -581,14 +355,6 @@ TEST(PipelineLibraryGLESDeferredTest,
      AbandonedFailedLinkDoesNotPoisonProgramCache) {
   RunDeferredLink(false, true, true);
 }
-
-namespace {
-class UnstartedShaderFunction final : public ShaderFunction {
- public:
-  explicit UnstartedShaderFunction(ShaderStage stage)
-      : ShaderFunction(UniqueID{}, "unstarted", stage) {}
-};
-}  // namespace
 
 TEST(PipelineLibraryGLESDeferredTest,
      ResolvesUnstartedPipelinesWhenTheRunnerDiscardsJobs) {

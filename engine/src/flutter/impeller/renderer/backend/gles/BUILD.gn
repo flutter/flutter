@@ -36,6 +36,8 @@ impeller_component("gles_unittests") {
     "test/gpu_tracer_gles_unittests.cc",
     "test/mock_gles_unittests.cc",
     "test/pipeline_compile_queue_gles_unittests.cc",
+    "test/pipeline_library_gles_test_utils.cc",
+    "test/pipeline_library_gles_test_utils.h",
     "test/pipeline_library_gles_unittests.cc",
     "test/proc_table_gles_unittests.cc",
     "test/reactor_unittests.cc",
