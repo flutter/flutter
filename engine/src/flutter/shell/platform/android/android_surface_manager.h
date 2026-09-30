@@ -246,7 +246,7 @@ class AndroidSurfaceManager {
     VkCommandPool command_pool = VK_NULL_HANDLE;
     VkFence acquire_fence = VK_NULL_HANDLE;
     VkSurfaceTransformFlagBitsKHR transform =
-        static_cast<VkSurfaceTransformFlagBitsKHR>(0);
+        VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
     uint32_t current_image_index = 0;
     bool has_acquired_image = false;
     bool swapchain_out_of_date = false;
@@ -268,6 +268,7 @@ class AndroidSurfaceManager {
   bool CreateOrUpdateOverlayVulkanSurfaceLocked(ANativeWindow* window,
                                                 VulkanOverlaySurface& entry);
   void DestroyOverlayVulkanSurfaceLocked(VulkanOverlaySurface& entry);
+  void DestroyOverlayVulkanSwapchainLocked(VulkanOverlaySurface& entry);
 
   // 8-byte aligned members (mutexes, maps, vectors, pointers, 64-bit handles)
   mutable std::mutex window_mutex_;
@@ -370,7 +371,7 @@ class AndroidSurfaceManager {
   VkSurfaceFormatKHR vk_surface_format_ = {};
   VkExtent2D vk_swapchain_extent_ = {0, 0};
   VkSurfaceTransformFlagBitsKHR vk_surface_transform_ =
-      static_cast<VkSurfaceTransformFlagBitsKHR>(0);
+      VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 
   // 1-byte aligned booleans (8 bytes total: 40 + 8 = 48, aligned to 8)
   bool is_fake_window_ = false;
