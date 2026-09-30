@@ -2638,7 +2638,7 @@ class EditableTextState extends State<EditableText>
   bool get _shouldCreateInputConnection =>
       kIsWeb || defaultTargetPlatform == TargetPlatform.macOS || !widget.readOnly;
 
-  // Whether navigation keys are left unhandled for the IME while composing.
+  /// Whether navigation keys are left unhandled for the IME while composing.
   bool get _shouldDeferToComposingIme =>
       (kIsWeb || defaultTargetPlatform == TargetPlatform.iOS) &&
       widget.selectionEnabled &&
@@ -6829,8 +6829,8 @@ class _ComposingDisablingCallbackAction<T extends Intent> extends CallbackAction
   }
 }
 
-// Disabled while composing, except on web, so that it does not consume the
-// arrow keys left for the IME.
+/// Disabled while composing, except on web, so that it does not consume the
+/// arrow keys left for the IME.
 class _ComposingDisablingDirectionalFocusAction extends DirectionalFocusAction {
   _ComposingDisablingDirectionalFocusAction(this.state) : super.forTextField();
 
