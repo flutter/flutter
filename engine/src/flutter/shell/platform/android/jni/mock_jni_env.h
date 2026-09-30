@@ -84,6 +84,8 @@ class MockableJNIEnv : public JNIEnv {
     jni_.RegisterNatives = WrapRegisterNatives;
     jni_.GetArrayLength = WrapGetArrayLength;
     jni_.GetIntArrayRegion = WrapGetIntArrayRegion;
+    jni_.NewString = WrapNewString;
+    jni_.NewDirectByteBuffer = WrapNewDirectByteBuffer;
   }
 
   virtual jclass GetObjectClass(jobject) = 0;
@@ -113,6 +115,8 @@ class MockableJNIEnv : public JNIEnv {
   virtual jsize GetArrayLength(jarray) = 0;
   virtual void GetIntArrayRegion(jintArray, jsize, jsize, jint*) = 0;
   virtual jboolean IsInstanceOf(jobject obj, jclass clazz) = 0;
+  virtual jstring NewString(const jchar* unicode, jsize len) = 0;
+  virtual jobject NewDirectByteBuffer(void* address, jlong capacity) = 0;
 
  private:
   static jclass WrapGetObjectClass(JNIEnv* env, jobject obj) {
@@ -274,6 +278,15 @@ class MockableJNIEnv : public JNIEnv {
     static_cast<MockableJNIEnv*>(env)->GetIntArrayRegion(array, start, len,
                                                          buf);
   }
+  static jstring WrapNewString(JNIEnv* env, const jchar* unicode, jsize len) {
+    return static_cast<MockableJNIEnv*>(env)->NewString(unicode, len);
+  }
+  static jobject WrapNewDirectByteBuffer(JNIEnv* env,
+                                         void* address,
+                                         jlong capacity) {
+    return static_cast<MockableJNIEnv*>(env)->NewDirectByteBuffer(address,
+                                                                  capacity);
+  }
 
   JNINativeInterface jni_ = {};
 };
@@ -301,6 +314,16 @@ class MockJNIEnv : public MockableJNIEnv {
     ON_CALL(*this, GetObjectClass(::testing::_))
         .WillByDefault(
             ::testing::Return(reinterpret_cast<jclass>(kMockDefaultClassRef)));
+    // 0x600 is mock string reference in tests
+    constexpr uintptr_t kMockDefaultStringRef = 0x600;
+    ON_CALL(*this, NewString(::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(
+            reinterpret_cast<jstring>(kMockDefaultStringRef)));
+    // 0x700 is mock direct byte buffer reference in tests
+    constexpr uintptr_t kMockDefaultDirectBufferRef = 0x700;
+    ON_CALL(*this, NewDirectByteBuffer(::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(
+            reinterpret_cast<jobject>(kMockDefaultDirectBufferRef)));
     ON_CALL(*this, CallBooleanMethodV(::testing::_, ::testing::_, ::testing::_))
         .WillByDefault(::testing::Return(JNI_TRUE));
     ON_CALL(*this, CallIntMethodV(::testing::_, ::testing::_, ::testing::_))
@@ -360,6 +383,8 @@ class MockJNIEnv : public MockableJNIEnv {
               GetIntArrayRegion,
               (jintArray, jsize, jsize, jint*),
               (override));
+  MOCK_METHOD(jstring, NewString, (const jchar*, jsize), (override));
+  MOCK_METHOD(jobject, NewDirectByteBuffer, (void*, jlong), (override));
 };
 
 }  // namespace flutter

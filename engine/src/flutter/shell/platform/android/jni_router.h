@@ -37,8 +37,10 @@ class LegacyJniDelegate {
                                      const std::vector<uint8_t>& message,
                                      int32_t response_id,
                                      int64_t message_data = 0) {
-    return HandlePlatformMessage(channel, message.data(), message.size(),
-                                 response_id, message_data);
+    static const uint8_t kEmptyByte = 0;
+    const uint8_t* data = message.empty() ? &kEmptyByte : message.data();
+    return HandlePlatformMessage(channel, data, message.size(), response_id,
+                                 message_data);
   }
 
   virtual bool HandlePlatformMessageResponse(int32_t response_id,
@@ -47,7 +49,9 @@ class LegacyJniDelegate {
 
   virtual bool HandlePlatformMessageResponse(int32_t response_id,
                                              const std::vector<uint8_t>& data) {
-    return HandlePlatformMessageResponse(response_id, data.data(), data.size());
+    static const uint8_t kEmptyByte = 0;
+    const uint8_t* resp_data = data.empty() ? &kEmptyByte : data.data();
+    return HandlePlatformMessageResponse(response_id, resp_data, data.size());
   }
 
   virtual bool SetApplicationLocale(const std::string& locale) = 0;
