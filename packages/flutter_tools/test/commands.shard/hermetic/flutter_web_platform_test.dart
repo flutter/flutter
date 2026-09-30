@@ -90,9 +90,7 @@ void main() {
     operatingSystemUtils = FakeOperatingSystemUtils();
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform_test.');
 
-    for (final artifact in <HostArtifact>[
-      HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
-    ]) {
+    for (final artifact in <HostArtifact>[HostArtifact.webPrecompiledDDCCanarySdk]) {
       final artifactFile = artifacts.getHostArtifact(artifact) as File;
       artifactFile.createSync();
       artifactFile.writeAsStringSync(artifact.name);
@@ -149,7 +147,7 @@ void main() {
         shelf.Request('GET', Uri.parse('http://localhost/dart_sdk.js')),
       );
       final String contents = await response.readAsString();
-      expect(contents, HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk.name);
+      expect(contents, HostArtifact.webPrecompiledDDCCanarySdk.name);
       await webPlatform.close();
     },
     overrides: <Type, Generator>{

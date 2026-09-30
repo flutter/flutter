@@ -289,10 +289,9 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
       assert(buildInfo.canaryFeatures);
     }
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
-        buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
-        ? kDdcLibraryBundleDartSdkJsArtifactMap
-        : kAmdDartSdkJsArtifactMap;
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = buildInfo.canaryFeatures
+        ? kDDCCanarySdkArtifactMap
+        : kDDCStableSdkArtifactMap;
     return _fileSystem.file(_artifacts.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
@@ -302,10 +301,9 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
       assert(buildInfo.canaryFeatures);
     }
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
-        buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
-        ? kDdcLibraryBundleDartSdkJsMapArtifactMap
-        : kAmdDartSdkJsMapArtifactMap;
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = buildInfo.canaryFeatures
+        ? kDDCCanarySdkSourcemapsArtifactMap
+        : kDDCStableSdkSourcemapsArtifactMap;
     return _fileSystem.file(_artifacts.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
