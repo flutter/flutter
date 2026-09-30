@@ -610,7 +610,10 @@ import PluginB
           utils: testUtils,
         );
         final Directory packageDirectory = fs.directory(debugPackagesDirectoryPath);
-        await flutterFrameworkDependency.generateSwiftPackage(packageDirectory);
+        await flutterFrameworkDependency.generateSwiftPackage(
+          packageDirectory,
+          cacheDirectory: fs.directory(cacheDirectoryPath),
+        );
         expect(packageDirectory.existsSync(), isTrue);
         final File manifest = packageDirectory
             .childDirectory('FlutterFramework')
@@ -661,7 +664,8 @@ let package = Package(
         final fs = MemoryFileSystem.test();
         final logger = BufferLogger.test();
         final Directory packageDirectory = fs.directory(debugPackagesDirectoryPath);
-        final Directory tempDir = packageDirectory.childDirectory('temp');
+        final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
+        final Directory tempDir = cacheDirectory.childDirectory('temp_debug');
 
         final processManager = FakeProcessManager.list([
           FakeCommand(
@@ -682,12 +686,19 @@ let package = Package(
         );
         await flutterFrameworkDependency.generateSwiftPackage(
           packageDirectory,
-          buildMode: BuildMode.release,
+          cacheDirectory: cacheDirectory,
+          remote: true,
+        );
+
+        // Run again to verify checksum is cached and not downloaded/computed again
+        await flutterFrameworkDependency.generateSwiftPackage(
+          packageDirectory,
+          cacheDirectory: cacheDirectory,
           remote: true,
         );
         expect(processManager, hasNoRemainingExpectations);
         expect(packageDirectory.existsSync(), isTrue);
-        expect(packageDirectory.childDirectory('temp').existsSync(), isFalse);
+        expect(tempDir.existsSync(), isFalse);
         final File manifest = packageDirectory
             .childDirectory('FlutterFramework')
             .childFile('Package.swift');
@@ -716,7 +727,7 @@ let package = Package(
         ),
         .binaryTarget(
             name: "Flutter",
-            url: "https://storage.googleapis.com/flutter_infra_release/flutter/$_engineVersion/ios-release/artifacts.zip",
+            url: "https://storage.googleapis.com/flutter_infra_release/flutter/$_engineVersion/ios/artifacts.zip",
             checksum: "fake_checksum_12345"
         )
     ]

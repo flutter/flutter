@@ -107,7 +107,7 @@ class BuildSwiftPackage extends BuildSubCommand {
         help: 'Build modes to include.',
       )
       ..addFlag('static', help: 'Build CocoaPods plugins as static frameworks.')
-      ..addFlag('remote', help: 'Uses a remote url for the Flutter framework.');
+      ..addFlag('remote', help: 'Use a remote binary dependency for the Flutter framework.');
   }
 
   @override
@@ -338,6 +338,7 @@ class BuildSwiftPackage extends BuildSubCommand {
         xcodeBuildConfiguration: xcodeBuildConfiguration,
         buildMode: buildInfo.mode,
         xcframeworkOutput: xcframeworkOutput,
+        cacheDirectory: cacheDirectory,
       );
     }
     await flutterNativeIntegrationSwiftPackage.generateSwiftPackages(
@@ -403,6 +404,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required String xcodeBuildConfiguration,
     required BuildMode buildMode,
     required Directory xcframeworkOutput,
+    required Directory cacheDirectory,
   }) async {
     final Status status = logger.startProgress('   ├─Generating swift packages...');
     try {
@@ -413,6 +415,7 @@ class BuildSwiftPackage extends BuildSubCommand {
 
       await flutterFrameworkDependency.generateSwiftPackage(
         packagesForConfiguration,
+        cacheDirectory: cacheDirectory,
         buildMode: buildMode,
         remote: useRemoteFlutterFramework,
       );
@@ -677,6 +680,7 @@ class FlutterFrameworkDependency {
   /// package vends the Flutter xcframework.
   Future<void> generateSwiftPackage(
     Directory packagesForConfiguration, {
+    required Directory cacheDirectory,
     BuildMode buildMode = BuildMode.debug,
     bool remote = false,
   }) async {
@@ -699,7 +703,7 @@ class FlutterFrameworkDependency {
           dependencies: [SwiftPackageTargetDependency.target(name: _targetPlatform.binaryName)],
         ),
         await binaryTarget(
-          packageDirectory: packagesForConfiguration,
+          cacheDirectory: cacheDirectory,
           remote: remote,
           platform: _targetPlatform,
           mode: buildMode,
@@ -734,47 +738,118 @@ class FlutterFrameworkDependency {
     packageName: kFlutterGeneratedFrameworkSwiftPackageTargetName,
   );
 
+  /// Returns the [SwiftPackageTarget] for the Flutter framework.
+  ///
+  /// When [remote] is true, returns a remote binary target with the artifact zip URL and checksum.
+  /// Otherwise, returns a local binary target pointing to the copied XCFramework.
   Future<SwiftPackageTarget> binaryTarget({
     required bool remote,
-    required Directory packageDirectory,
+    required Directory cacheDirectory,
     required FlutterDarwinPlatform platform,
     required BuildMode mode,
   }) async {
     if (remote) {
-      final Uri url = Uri.parse(
-        '${_utils.cache.storageBaseUrl}/flutter_infra_release/flutter/${_utils.cache.engineRevision}/${platform.artifactName(mode)}/${platform.artifactZip}',
+      final (:Uri url, :String checksum) = await _getRemoteArtifactUrlAndChecksum(
+        cacheDirectory: cacheDirectory,
+        platform: platform,
+        mode: mode,
       );
-      final Directory destination = packageDirectory.childDirectory('temp');
-      try {
-        await _utils.cache.downloadFile(
-          'Downloading ${platform.artifactName(mode)} framework for checksum...',
-          url,
-          destination,
-        );
-        final ProcessResult checksumResult = await _utils.processManager.run([
-          'swift',
-          'package',
-          'compute-checksum',
-          platform.artifactZip,
-        ], workingDirectory: destination.path);
-        if (checksumResult.exitCode != 0) {
-          throwToolExit(
-            'Failed to compute checksum for ${platform.artifactZip}: ${checksumResult.stderr}',
-          );
-        }
-        return SwiftPackageTarget.remoteBinaryTarget(
-          name: platform.binaryName,
-          zipUrl: url.toString(),
-          zipChecksum: checksumResult.stdout.toString().trim(),
-        );
-      } finally {
-        ErrorHandlingFileSystem.deleteIfExists(destination, recursive: true);
-      }
+      return SwiftPackageTarget.remoteBinaryTarget(
+        name: platform.binaryName,
+        zipUrl: url.toString(),
+        zipChecksum: checksum,
+      );
     }
     return SwiftPackageTarget.binaryTarget(
       name: platform.binaryName,
       relativePath: '../../$_kFrameworks/${platform.binaryName}.xcframework',
     );
+  }
+
+  /// Returns the remote URL and Swift package checksum for the Flutter framework artifact zip.
+  ///
+  /// Restores the checksum from the cache if the URL has not changed; otherwise, downloads the
+  /// artifact zip, computes the checksum, and caches it for subsequent runs.
+  Future<({Uri url, String checksum})> _getRemoteArtifactUrlAndChecksum({
+    required Directory cacheDirectory,
+    required FlutterDarwinPlatform platform,
+    required BuildMode mode,
+  }) async {
+    final Uri url = Uri.parse(
+      '${_utils.cache.storageBaseUrl}/flutter_infra_release/flutter/${_utils.cache.engineRevision}/${platform.artifactName(mode)}/${platform.artifactZip}',
+    );
+    final File cachedChecksumFile = cacheDirectory
+        .childDirectory(mode.uppercaseName)
+        .childFile('flutter_framework_checksum.json');
+    String? checksum = _restoreChecksumFromCache(cachedChecksumFile: cachedChecksumFile, url: url);
+    if (checksum == null) {
+      checksum = await _downloadAndComputeChecksum(
+        url: url,
+        cacheDirectory: cacheDirectory,
+        platform: platform,
+        mode: mode,
+      );
+      _saveChecksumToCache(cachedChecksumFile: cachedChecksumFile, url: url, checksum: checksum);
+    }
+    return (url: url, checksum: checksum);
+  }
+
+  /// Returns the cached checksum from [cachedChecksumFile] if the file exists and the cached URL
+  /// matches [url]. Otherwise, returns null.
+  String? _restoreChecksumFromCache({required File cachedChecksumFile, required Uri url}) {
+    if (!cachedChecksumFile.existsSync()) {
+      return null;
+    }
+    try {
+      if (json.decode(cachedChecksumFile.readAsStringSync())
+          case {'url': final String cachedUrl, 'checksum': final String cachedChecksum}
+          when cachedUrl == url.toString() && cachedChecksum.isNotEmpty) {
+        return cachedChecksum;
+      }
+    } on Exception catch (e) {
+      _utils.logger.printTrace('Failed to read cached checksum: $e');
+    }
+    return null;
+  }
+
+  /// Downloads the framework artifact zip from [url] to a temporary directory in
+  /// [cacheDirectory] and computes its Swift package checksum.
+  Future<String> _downloadAndComputeChecksum({
+    required Uri url,
+    required Directory cacheDirectory,
+    required FlutterDarwinPlatform platform,
+    required BuildMode mode,
+  }) async {
+    final Directory destination = cacheDirectory.childDirectory('temp_$mode');
+    try {
+      await _utils.cache.downloadFile('Preparing remote Flutter framework...', url, destination);
+      final ProcessResult checksumResult = await _utils.processManager.run([
+        'swift',
+        'package',
+        'compute-checksum',
+        platform.artifactZip,
+      ], workingDirectory: destination.path);
+      if (checksumResult.exitCode != 0) {
+        throwToolExit(
+          'Failed to compute checksum for ${platform.artifactZip}: ${checksumResult.stderr}',
+        );
+      }
+      return checksumResult.stdout.toString().trim();
+    } finally {
+      ErrorHandlingFileSystem.deleteIfExists(destination, recursive: true);
+    }
+  }
+
+  /// Saves the [url] and [checksum] to [cachedChecksumFile] to avoid re-downloading on subsequent
+  /// runs.
+  void _saveChecksumToCache({
+    required File cachedChecksumFile,
+    required Uri url,
+    required String checksum,
+  }) {
+    cachedChecksumFile
+      ..createSync(recursive: true)
+      ..writeAsStringSync(json.encode({'url': url.toString(), 'checksum': checksum}));
   }
 }
 
