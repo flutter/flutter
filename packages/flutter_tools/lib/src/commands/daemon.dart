@@ -271,7 +271,7 @@ class Daemon {
     Java? java,
     this.logToStdout = false,
     this.notifyingLogger,
-  }) : _logger = toolContext.logger,
+  }) : _logger = notifyingLogger ?? toolContext.logger,
        _fs = toolContext.fs,
        _stdio = toolContext.stdio {
     final ToolContext(:ProcessManager processManager, :FlutterProjectFactory projectFactory) =
@@ -826,10 +826,10 @@ class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
     required this._analytics,
-    required this.buildSystem,
-    required this.buildTargets,
+    required this._buildSystem,
+    required this._buildTargets,
     required this._toolContext,
-    required this.xcode,
+    required this._xcode,
   }) : _fs = _toolContext.fs,
        _logger = _toolContext.logger,
        super(daemon, 'app') {
@@ -843,9 +843,9 @@ class AppDomain extends Domain {
   final Analytics _analytics;
   final Logger _logger;
   final ToolContext _toolContext;
-  final BuildSystem buildSystem;
-  final BuildTargets buildTargets;
-  final Xcode? xcode;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
+  final Xcode? _xcode;
 
   static const _uuidGenerator = Uuid();
 
@@ -906,8 +906,8 @@ class AppDomain extends Domain {
         urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
         analytics: _analytics,
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
+        buildSystem: _buildSystem,
+        buildTargets: _buildTargets,
         toolContext: _toolContext,
         webDefines: webDefines,
       );
@@ -915,12 +915,12 @@ class AppDomain extends Domain {
       runner = HotRunner(
         <FlutterDevice>[flutterDevice],
         analytics: _analytics,
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
+        buildSystem: _buildSystem,
+        buildTargets: _buildTargets,
         debuggingOptions: options,
         target: target,
         toolContext: _toolContext,
-        xcode: xcode,
+        xcode: _xcode,
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
         dillOutputPath: dillOutputPath,
@@ -931,12 +931,12 @@ class AppDomain extends Domain {
       runner = ColdRunner(
         <FlutterDevice>[flutterDevice],
         analytics: _analytics,
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
+        buildSystem: _buildSystem,
+        buildTargets: _buildTargets,
         debuggingOptions: options,
         target: target,
         toolContext: _toolContext,
-        xcode: xcode,
+        xcode: _xcode,
         applicationBinary: applicationBinary,
         machine: machine,
       );
