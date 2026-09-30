@@ -32,6 +32,7 @@ enum class ImageGeneratorFactoryExecution {
   kUITaskRunner,
 
   /// Invoke the factory on the engine's concurrent task runner.
+  /// The factory must support concurrent invocations.
   kConcurrentTaskRunner,
 };
 
@@ -84,7 +85,8 @@ class ImageGeneratorRegistry {
 
  private:
   struct PrioritizedFactory {
-    ImageGeneratorFactory callback;
+    // Snapshots share the registered callback, including its captured state.
+    std::shared_ptr<ImageGeneratorFactory> callback;
 
     int32_t priority = 0;
     // Used as a fallback priority comparison when equal.
@@ -117,7 +119,7 @@ class ImageGeneratorRegistry {
 
   using FactorySet = std::set<PrioritizedFactory, Compare>;
   FactorySet image_generator_factories_;
-  size_t nonce_;
+  size_t nonce_ = 0;
   fml::TaskRunnerAffineWeakPtrFactory<ImageGeneratorRegistry> weak_factory_;
 };
 

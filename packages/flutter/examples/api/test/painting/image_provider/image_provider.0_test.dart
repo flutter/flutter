@@ -17,18 +17,20 @@ void main() {
     debugPrint = (String? message, {int? wrapWidth}) {
       log.add('$message');
     };
-    final imageError = Completer<void>();
-    final FlutterExceptionHandler? originalOnError = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      originalOnError?.call(details);
-      imageError.complete();
-    };
-    try {
-      await tester.pumpWidget(const ExampleApp());
-      await tester.runAsync(() => imageError.future);
-    } finally {
-      FlutterError.onError = originalOnError;
-    }
+    await tester.runAsync(() async {
+      final imageError = Completer<void>();
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        originalOnError?.call(details);
+        imageError.complete();
+      };
+      try {
+        await tester.pumpWidget(const ExampleApp());
+        await imageError.future;
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
 
     expect(tester.takeException().toString(), 'Exception: Invalid image data');
     expect(log, <String>['Fetching "$expectedUrl"...']);

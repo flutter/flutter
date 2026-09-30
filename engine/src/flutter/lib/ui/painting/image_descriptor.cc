@@ -115,34 +115,36 @@ Dart_Handle ImageDescriptor::initEncoded(Dart_Handle descriptor_handle,
   }
 
   auto ui_task_runner = dart_state->GetTaskRunners().GetUITaskRunner();
-  auto descriptor_wrapper = std::make_unique<tonic::DartPersistentValue>(
-      dart_state, descriptor_handle);
-  auto callback =
-      std::make_unique<tonic::DartPersistentValue>(dart_state, callback_handle);
   const sk_sp<SkData> buffer = immutable_buffer->data();
 
   registry->CreateCompatibleGenerator(
       buffer, dart_state->GetConcurrentTaskRunner(), ui_task_runner,
       fml::MakeCopyable([buffer,
-                         descriptor_wrapper = std::move(descriptor_wrapper),
-                         callback = std::move(callback)](
+                         descriptor_wrapper = tonic::DartPersistentValue(
+                             dart_state, descriptor_handle),
+                         callback = tonic::DartPersistentValue(
+                             dart_state, callback_handle)](
                             std::shared_ptr<ImageGenerator> generator) mutable {
-        auto dart_state = callback->dart_state().lock();
+        auto dart_state = callback.dart_state().lock();
         if (!dart_state) {
           return;
         }
         tonic::DartState::Scope scope(dart_state);
+        // Release persistent handles on the UI thread, even if the shared
+        // callback is later destroyed on a worker thread.
+        Dart_Handle descriptor_handle = descriptor_wrapper.Release();
+        Dart_Handle callback_handle = callback.Release();
 
         if (!generator) {
-          tonic::DartInvoke(callback->Get(),
+          tonic::DartInvoke(callback_handle,
                             {Dart_Null(), tonic::ToDart("Invalid image data")});
           return;
         }
 
         auto descriptor =
             fml::MakeRefCounted<ImageDescriptor>(buffer, std::move(generator));
-        descriptor->AssociateWithDartWrapper(descriptor_wrapper->Get());
-        tonic::DartInvoke(callback->Get(), {Dart_TypeVoid(), Dart_Null()});
+        descriptor->AssociateWithDartWrapper(descriptor_handle);
+        tonic::DartInvoke(callback_handle, {Dart_TypeVoid(), Dart_Null()});
       }));
 
   return Dart_Null();

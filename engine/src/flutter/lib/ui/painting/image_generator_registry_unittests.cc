@@ -144,6 +144,78 @@ TEST_F(ShellTest, ImageGeneratorsWithSamePriorityCascadeChronologically) {
   ASSERT_EQ(result->GetInfo().width(), 1337);
 }
 
+TEST_F(ShellTest, FactoryStateIsPreservedAcrossRequests) {
+  auto ui_task_runner = CreateNewThread("ui");
+  auto concurrent_loop = fml::ConcurrentMessageLoop::Create(1u);
+  for (auto execution :
+       {ImageGeneratorFactoryExecution::kUITaskRunner,
+        ImageGeneratorFactoryExecution::kConcurrentTaskRunner}) {
+    std::unique_ptr<ImageGeneratorRegistry> registry;
+    PostTaskSync(ui_task_runner, [&]() {
+      registry = std::make_unique<ImageGeneratorRegistry>();
+      registry->AddFactory(
+          [count = 0](const sk_sp<SkData>&) mutable {
+            return std::make_unique<FakeImageGenerator>(++count);
+          },
+          1, execution);
+    });
+
+    for (int expected_width = 1; expected_width <= 3; expected_width++) {
+      fml::AutoResetWaitableEvent latch;
+      PostTaskSync(ui_task_runner, [&]() {
+        registry->CreateCompatibleGenerator(
+            SkData::MakeEmpty(), concurrent_loop->GetTaskRunner(),
+            ui_task_runner, [&](const std::shared_ptr<ImageGenerator>& result) {
+              EXPECT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
+              EXPECT_TRUE(result);
+              if (result) {
+                EXPECT_EQ(result->GetInfo().width(), expected_width);
+              }
+              latch.Signal();
+            });
+      });
+      latch.Wait();
+    }
+    PostTaskSync(ui_task_runner, [&]() { registry.reset(); });
+  }
+}
+
+TEST_F(ShellTest, UIFactoriesResolveWithoutIntermediateTasks) {
+  auto ui_task_runner = CreateNewThread("ui");
+  auto concurrent_loop = fml::ConcurrentMessageLoop::Create(1u);
+  fml::AutoResetWaitableEvent latch;
+  bool callback_called = false;
+  std::vector<int> factory_order;
+  PostTaskSync(ui_task_runner, [&]() {
+    ImageGeneratorRegistry registry;
+    for (int index = 1; index <= 3; index++) {
+      registry.AddFactory(
+          [&, index](const sk_sp<SkData>&) {
+            factory_order.push_back(index);
+            return index == 3 ? std::make_unique<FakeImageGenerator>(3)
+                              : nullptr;
+          },
+          4 - index);
+    }
+    registry.CreateCompatibleGenerator(
+        SkData::MakeEmpty(), concurrent_loop->GetTaskRunner(), ui_task_runner,
+        [&](const std::shared_ptr<ImageGenerator>& result) {
+          callback_called = true;
+          EXPECT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
+          EXPECT_TRUE(result);
+          if (result) {
+            EXPECT_EQ(result->GetInfo().width(), 3);
+          }
+          latch.Signal();
+        });
+
+    EXPECT_EQ(factory_order, (std::vector<int>{1, 2, 3}));
+    EXPECT_FALSE(callback_called);
+  });
+  latch.Wait();
+  EXPECT_TRUE(callback_called);
+}
+
 TEST_F(ShellTest, AsyncResolutionPreservesOrderAcrossTaskRunners) {
   auto ui_task_runner = CreateNewThread("ui");
   auto concurrent_loop = fml::ConcurrentMessageLoop::Create(1u);

@@ -90,7 +90,8 @@ void ImageGeneratorRegistry::AddFactory(
     int32_t priority,
     ImageGeneratorFactoryExecution execution) {
   image_generator_factories_.insert(
-      {std::move(factory), priority, ++nonce_, execution});
+      {std::make_shared<ImageGeneratorFactory>(std::move(factory)), priority,
+       ++nonce_, execution});
 }
 
 void ImageGeneratorRegistry::CreateCompatibleGenerator(
@@ -133,18 +134,24 @@ void ImageGeneratorRegistry::ResolveGenerator(
                          buffer = std::move(buffer), concurrent_task_runner,
                          ui_task_runner,
                          callback = std::move(callback)]() mutable {
-    auto result = (*factories)[index].callback(buffer);
-    ui_task_runner->PostTask(
+    auto& factory = *(*factories)[index].callback;
+    auto result = factory(buffer);
+    if (result) {
+      ui_task_runner->PostTask([callback = std::move(callback),
+                                result = std::move(result)]() mutable {
+        callback(std::move(result));
+      });
+      return;
+    }
+    // Continue immediately when the next attempt is already on the UI runner.
+    fml::TaskRunner::RunNowOrPostTask(
+        ui_task_runner,
         [factories = std::move(factories), index, buffer = std::move(buffer),
-         concurrent_task_runner, ui_task_runner, callback = std::move(callback),
-         result = std::move(result)]() mutable {
-          if (result) {
-            callback(std::move(result));
-          } else {
-            ResolveGenerator(std::move(factories), index + 1u,
-                             std::move(buffer), concurrent_task_runner,
-                             ui_task_runner, std::move(callback));
-          }
+         concurrent_task_runner, ui_task_runner,
+         callback = std::move(callback)]() mutable {
+          ResolveGenerator(std::move(factories), index + 1u, std::move(buffer),
+                           concurrent_task_runner, ui_task_runner,
+                           std::move(callback));
         });
   };
   if (execution == ImageGeneratorFactoryExecution::kConcurrentTaskRunner) {
