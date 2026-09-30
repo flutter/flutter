@@ -147,15 +147,13 @@ NSString* UIKitLocalizedFormat(const char* key) {
   return [format isEqualToString:key_string] ? nil : format;
 }
 
-// Computes the numbers to announce for `object`'s scroll position. Builds no
-// strings, so it is cheap enough to run on every frame of a scroll.
+// Computes the numbers to announce for `object`'s scroll position.
 AccessibilityScrollStatus ComputeScrollStatus(SemanticsObject* object) {
   const flutter::SemanticsNode& node = object.node;
 
   AccessibilityScrollStatus status;
   status.uid = object.uid;
 
-  // "rows x to y of z", when the scrollable reports child indexes.
   if (node.scrollChildren > 0) {
     // Skip off-screen cache extent rows, which the framework marks hidden.
     int64_t visible = 0;
@@ -200,8 +198,6 @@ AccessibilityScrollStatus ComputeScrollStatus(SemanticsObject* object) {
       static_cast<int64_t>(std::ceil((range + viewport) / viewport - kPageTolerance)), 1);
 
   // Map scroll progress onto the pages so the end is always the last page;
-  // `position / viewport` can't reach it unless the content is a whole number
-  // of screens.
   int64_t current_page = 1;
   if (range > 0.0 && total_pages > 1) {
     const double progress = std::clamp((position - extent_min) / range, 0.0, 1.0);
@@ -214,11 +210,8 @@ AccessibilityScrollStatus ComputeScrollStatus(SemanticsObject* object) {
 }
 
 // Renders `status` as the string UIAccessibilityPageScrolledNotification
-// expects, or nil if there is nothing accurate to say.
-//
-// UIKit's strings are formatted with +stringWithValidatedFormat:, which returns
-// nil instead of reading past the arguments if a string's placeholders don't
-// match. The English fallback is used in that case.
+// expects, or nil if there is nothing accurate to say, like if the list is infinite
+// or the viewport is 0.
 NSString* FormatScrollStatus(const AccessibilityScrollStatus& status) {
   switch (status.form) {
     case AccessibilityScrollStatus::Form::kNone:
@@ -394,9 +387,6 @@ void AccessibilityBridge::UpdateSemantics(
   }
 
   if (scrolledObject) {
-    // Not an `else` of `layoutChanged`: a scroll moves its children, which
-    // almost always sets `layoutChanged` too.
-    //
     // A scroll spans many frames, so only announce when the status changes.
     AccessibilityScrollStatus status = ComputeScrollStatus(scrolledObject);
     if (status != last_scroll_status_) {
