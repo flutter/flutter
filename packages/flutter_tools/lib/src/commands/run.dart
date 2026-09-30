@@ -673,13 +673,10 @@ class RunCommand extends RunCommandBase {
       analytics: globals.analytics,
       androidSdk: globals.androidSdk,
       androidWorkflow: android_workflow.androidWorkflow,
-      buildSystem: globals.buildSystem,
-      buildTargets: globals.buildTargets,
       deviceManager: globals.deviceManager,
       featureFlags: featureFlags,
       java: globals.java,
       toolContext: toolContext!,
-      xcode: globals.xcode,
     );
   }
 

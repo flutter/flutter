@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/commands/run.dart';
@@ -26,7 +25,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -41,7 +39,6 @@ import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
-import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -2335,13 +2332,7 @@ class DaemonCapturingRunCommand extends RunCommand {
 
 class CapturingAppDomain extends AppDomain {
   CapturingAppDomain(super.daemon)
-    : super(
-        analytics: const analytics.NoOpAnalytics(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        buildTargets: const BuildTargetsImpl(),
-        toolContext: const DelegatingToolContext(),
-        xcode: null,
-      );
+    : super(analytics: const analytics.NoOpAnalytics(), toolContext: const DelegatingToolContext());
 
   String? userIdentifier;
   bool? enableDevTools;
