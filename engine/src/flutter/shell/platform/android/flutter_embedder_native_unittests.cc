@@ -441,12 +441,30 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->HandlePlatformMessage("flutter/test", msg, 42, 1001L));
 
+  // 1b. HandlePlatformMessage with empty vector preserves non-null pointer
+  // (size 0)
+  std::vector<uint8_t> empty_msg;
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessage("flutter/test", ::testing::Ne(nullptr), 0,
+                                    43, 1002L))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(
+      delegate->HandlePlatformMessage("flutter/test", empty_msg, 43, 1002L));
+
   // 2. HandlePlatformMessageResponse
   std::vector<uint8_t> resp = {'o', 'k'};
   EXPECT_CALL(*mock_invoker,
               HandlePlatformMessageResponse(42, resp.data(), resp.size()))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->HandlePlatformMessageResponse(42, resp));
+
+  // 2b. HandlePlatformMessageResponse with empty vector preserves non-null
+  // pointer (size 0)
+  std::vector<uint8_t> empty_resp;
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessageResponse(43, ::testing::Ne(nullptr), 0))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->HandlePlatformMessageResponse(43, empty_resp));
 
   // 3. UpdateSemantics
   std::vector<uint8_t> semantics_buffer = {0x01, 0x02};
@@ -498,6 +516,26 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
   }
 
   EXPECT_FALSE(delegate->LookupCallbackInformation(999L).has_value());
+}
+
+TEST(FlutterEmbedderNativeTest, JniRouterEmptyVectorDoesNotCollapseToNull) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto delegate = std::make_shared<JniDelegate>(mock_invoker);
+  auto router = std::make_unique<JniRouter>(delegate);
+
+  std::vector<uint8_t> empty_msg;
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessage("flutter/test", ::testing::Ne(nullptr), 0,
+                                    44, 1003L))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(
+      router->RoutePlatformMessage("flutter/test", empty_msg, 44, 1003L));
+
+  std::vector<uint8_t> empty_resp;
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessageResponse(44, ::testing::Ne(nullptr), 0))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RoutePlatformMessageResponse(44, empty_resp));
 }
 
 TEST(FlutterEmbedderNativeTest, TargetFlipDefaultState) {
@@ -588,6 +626,84 @@ TEST(FlutterEmbedderNativeTest, DynamicInstanceRouterWithCustomInvoker) {
   EXPECT_TRUE(native.GetRouter()->RouteFirstFrame());
 
   FlutterEmbedderNative::SetEmbedderEnabled(true);
+}
+
+TEST(FlutterEmbedderNativeTest, OnPlatformMessageCallbackZeroBytePayload) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  FlutterEmbedderNative native(mock_invoker, legacy_delegate);
+
+  uint8_t dummy = 0xAA;
+  FlutterPlatformMessage msg = {};
+  msg.struct_size = sizeof(FlutterPlatformMessage);
+  msg.channel = "binary-msg";
+  msg.message = &dummy;
+  msg.message_size = 0;
+  msg.response_handle = nullptr;
+
+  EXPECT_CALL(*mock_invoker, HandlePlatformMessage(
+                                 "binary-msg", ::testing::Ne(nullptr), 0, 0, 0))
+      .WillOnce(Return(true));
+
+  FlutterEmbedderNative::OnPlatformMessageCallback(&msg, &native);
+}
+
+TEST(FlutterEmbedderNativeTest,
+     OnPlatformMessageCallbackNullPayloadSanitizesSize) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  FlutterEmbedderNative native(mock_invoker, legacy_delegate);
+
+  FlutterPlatformMessage msg = {};
+  msg.struct_size = sizeof(FlutterPlatformMessage);
+  msg.channel = "binary-msg";
+  msg.message = nullptr;
+  msg.message_size = 42;  // dirty size
+  msg.response_handle = nullptr;
+
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessage("binary-msg", ::testing::IsNull(), 0, 0, 0))
+      .WillOnce(Return(true));
+
+  FlutterEmbedderNative::OnPlatformMessageCallback(&msg, &native);
+}
+
+TEST(FlutterEmbedderNativeTest,
+     SendPlatformMessageResponseZeroByteBeforeLaunch) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  FlutterEmbedderNative native(mock_invoker, legacy_delegate);
+
+  const auto* mock_handle =
+      reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(0x1234);
+  int32_t response_id = native.RegisterResponseHandle(mock_handle);
+  ASSERT_NE(response_id, 0);
+
+  uint8_t dummy = 0xBB;
+  EXPECT_CALL(*mock_invoker, HandlePlatformMessageResponse(
+                                 response_id, ::testing::Ne(nullptr), 0))
+      .WillOnce(Return(true));
+
+  EXPECT_EQ(native.SendPlatformMessageResponse(response_id, &dummy, 0),
+            kSuccess);
+}
+
+TEST(FlutterEmbedderNativeTest, SendPlatformMessageResponseNullBeforeLaunch) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  FlutterEmbedderNative native(mock_invoker, legacy_delegate);
+
+  const auto* mock_handle =
+      reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(0x1235);
+  int32_t response_id = native.RegisterResponseHandle(mock_handle);
+  ASSERT_NE(response_id, 0);
+
+  EXPECT_CALL(*mock_invoker, HandlePlatformMessageResponse(
+                                 response_id, ::testing::IsNull(), 0))
+      .WillOnce(Return(true));
+
+  EXPECT_EQ(native.SendPlatformMessageResponse(response_id, nullptr, 42),
+            kSuccess);
 }
 
 TEST(FlutterEmbedderNativeTest, NativeWindowManagement) {
@@ -7896,6 +8012,90 @@ TEST_F(Phase61JniRegistrationCutoverTest,
   EXPECT_EQ(retrieved.physical_width, 800);
   EXPECT_EQ(retrieved.physical_height, 600);
   EXPECT_FLOAT_EQ(retrieved.device_pixel_ratio, 2.5f);
+}
+
+TEST_F(Phase61JniRegistrationCutoverTest,
+       AndroidJvmInvokerZeroByteMessageDirectBufferAndCleanupLifecycle) {
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  const jfieldID kShellHolderField = reinterpret_cast<jfieldID>(200);
+  const jmethodID kJniConstructor = reinterpret_cast<jmethodID>(300);
+  const jmethodID kHandleMessageMethod = reinterpret_cast<jmethodID>(401);
+
+  EXPECT_CALL(mock_env_, FindClass(_))
+      .WillRepeatedly([&](const char* name) -> jclass {
+        if (strcmp(name, "io/flutter/embedding/engine/FlutterJNI") == 0) {
+          return kFlutterJNIClass;
+        }
+        return reinterpret_cast<jclass>(109);
+      });
+
+  EXPECT_CALL(mock_env_, GetFieldID(kFlutterJNIClass, "nativeShellHolderId",
+                                    "Ljava/lang/Long;"))
+      .WillRepeatedly(Return(kShellHolderField));
+  EXPECT_CALL(mock_env_,
+              GetMethodID(kFlutterJNIClass, "handlePlatformMessage",
+                          "(Ljava/lang/String;Ljava/nio/ByteBuffer;IJ)V"))
+      .WillRepeatedly(Return(kHandleMessageMethod));
+  EXPECT_CALL(mock_env_, GetMethodID(_, _, _))
+      .WillRepeatedly(Return(kJniConstructor));
+
+  EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env_, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env_, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  std::vector<JNINativeMethod> registered_methods;
+  EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
+      .WillOnce(
+          [&](jclass clazz, const JNINativeMethod* methods, jint nMethods) {
+            registered_methods.assign(methods, methods + nMethods);
+            return 0;
+          });
+
+  ASSERT_TRUE(FlutterEmbedderNative::RegisterJni(&mock_env_));
+
+  jobject flutter_jni_obj = reinterpret_cast<jobject>(500);
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  native_instance->AttachJavaObject(&mock_env_, flutter_jni_obj);
+
+  auto jvm_invoker = native_instance->GetJvmInvoker();
+  ASSERT_NE(jvm_invoker, nullptr);
+
+  // When HandlePlatformMessage is called with a 0-byte non-null buffer:
+  // 1. AndroidJvmInvoker allocates 1 byte on the heap (malloc(1)).
+  // 2. Calls NewDirectByteBuffer(buffer_copy, 0).
+  // 3. Dispatches to Java FlutterJNI.handlePlatformMessage.
+  // 4. Returns message_data (the heap address).
+  static const uint8_t kEmptyByte = 0;
+  void* allocated_buffer = nullptr;
+  EXPECT_CALL(mock_env_, NewDirectByteBuffer(::testing::Ne(nullptr), 0))
+      .WillOnce([&](void* address, jlong capacity) -> jobject {
+        allocated_buffer = address;
+        return reinterpret_cast<jobject>(0x700);
+      });
+
+  // response_id = 100 (arbitrary non-zero test id)
+  // message_data = 0 (instructs AndroidJvmInvoker to allocate heap buffer)
+  EXPECT_TRUE(
+      jvm_invoker->HandlePlatformMessage("binary-msg", &kEmptyByte, 0, 100, 0));
+  ASSERT_NE(allocated_buffer, nullptr);
+
+  // Find nativeCleanupMessageData in the registered methods and invoke it to
+  // free the buffer.
+  auto it =
+      std::find_if(registered_methods.begin(), registered_methods.end(),
+                   [](const JNINativeMethod& m) {
+                     return strcmp(m.name, "nativeCleanupMessageData") == 0;
+                   });
+  ASSERT_NE(it, registered_methods.end());
+  ASSERT_NE(it->fnPtr, nullptr);
+
+  typedef void (*CleanupMessageDataFn)(JNIEnv*, jobject, jlong);
+  auto cleanup_fn = reinterpret_cast<CleanupMessageDataFn>(it->fnPtr);
+  // Free the buffer allocated by AndroidJvmInvoker.
+  cleanup_fn(&mock_env_, nullptr, reinterpret_cast<jlong>(allocated_buffer));
 }
 
 TEST_F(Phase61JniRegistrationCutoverTest,
