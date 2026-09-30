@@ -681,8 +681,8 @@ class FlutterFrameworkDependency {
   Future<void> generateSwiftPackage(
     Directory packagesForConfiguration, {
     required Directory cacheDirectory,
-    BuildMode buildMode = BuildMode.debug,
-    bool remote = false,
+    required BuildMode buildMode,
+    required bool remote,
   }) async {
     final flutterFrameworkPackage = SwiftPackage(
       manifest: packagesForConfiguration
@@ -775,8 +775,10 @@ class FlutterFrameworkDependency {
     required FlutterDarwinPlatform platform,
     required BuildMode mode,
   }) async {
+    final String zipFileName = platform.artifactZip;
     final Uri url = Uri.parse(
-      '${_utils.cache.storageBaseUrl}/flutter_infra_release/flutter/${_utils.cache.engineRevision}/${platform.artifactName(mode)}/${platform.artifactZip}',
+      '${_utils.cache.storageBaseUrl}/flutter_infra_release/flutter/${_utils.cache.engineRevision}'
+      '/${platform.artifactName(mode)}/$zipFileName',
     );
     final File cachedChecksumFile = cacheDirectory
         .childDirectory(mode.uppercaseName)
@@ -786,7 +788,7 @@ class FlutterFrameworkDependency {
       checksum = await _downloadAndComputeChecksum(
         url: url,
         cacheDirectory: cacheDirectory,
-        platform: platform,
+        artifactZip: zipFileName,
         mode: mode,
       );
       _saveChecksumToCache(cachedChecksumFile: cachedChecksumFile, url: url, checksum: checksum);
@@ -817,7 +819,7 @@ class FlutterFrameworkDependency {
   Future<String> _downloadAndComputeChecksum({
     required Uri url,
     required Directory cacheDirectory,
-    required FlutterDarwinPlatform platform,
+    required String artifactZip,
     required BuildMode mode,
   }) async {
     final Directory destination = cacheDirectory.childDirectory('temp_$mode');
@@ -827,12 +829,10 @@ class FlutterFrameworkDependency {
         'swift',
         'package',
         'compute-checksum',
-        platform.artifactZip,
+        artifactZip,
       ], workingDirectory: destination.path);
       if (checksumResult.exitCode != 0) {
-        throwToolExit(
-          'Failed to compute checksum for ${platform.artifactZip}: ${checksumResult.stderr}',
-        );
+        throwToolExit('Failed to compute checksum for $artifactZip: ${checksumResult.stderr}');
       }
       return checksumResult.stdout.toString().trim();
     } finally {

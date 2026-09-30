@@ -613,6 +613,8 @@ import PluginB
         await flutterFrameworkDependency.generateSwiftPackage(
           packageDirectory,
           cacheDirectory: fs.directory(cacheDirectoryPath),
+          buildMode: BuildMode.debug,
+          remote: false,
         );
         expect(packageDirectory.existsSync(), isTrue);
         final File manifest = packageDirectory
@@ -687,6 +689,7 @@ let package = Package(
         await flutterFrameworkDependency.generateSwiftPackage(
           packageDirectory,
           cacheDirectory: cacheDirectory,
+          buildMode: BuildMode.debug,
           remote: true,
         );
 
@@ -694,6 +697,7 @@ let package = Package(
         await flutterFrameworkDependency.generateSwiftPackage(
           packageDirectory,
           cacheDirectory: cacheDirectory,
+          buildMode: BuildMode.debug,
           remote: true,
         );
         expect(processManager, hasNoRemainingExpectations);
