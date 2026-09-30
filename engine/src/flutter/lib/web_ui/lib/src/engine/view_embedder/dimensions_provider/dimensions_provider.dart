@@ -39,7 +39,6 @@ abstract class DimensionsProvider {
       return CustomElementDimensionsProvider(
         hostElement,
         onDprChange: DisplayDprStream.instance.dprChanged,
-        viewDomWindow: domWindow,
       );
     } else {
       return FullPageDimensionsProvider(viewDomWindow: domWindow, viewDomDocument: domDocument);
