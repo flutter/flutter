@@ -325,7 +325,7 @@ class WebAssetServer implements AssetReader {
         fileSystem: fileSystem,
         platform: platform,
         flutterRoot: Cache.flutterRoot,
-        webBuildDirectory: getWebBuildDirectory(),
+        webBuildDirectory: getWebBuildDirectory(config: globals.config, fileSystem: fileSystem),
         basePath: server.basePath,
         needsCoopCoep: crossOriginIsolation,
       );
