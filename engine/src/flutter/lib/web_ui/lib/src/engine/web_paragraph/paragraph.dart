@@ -7,6 +7,13 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
+
+/// The fonts that are respected when [ui_web.TestEnvironment.forceTestFonts] is
+/// true. The first one is used for all other font families.
+///
+/// Must match the test fonts used by the CanvasKit and Skwasm renderers.
+const List<String> _webParagraphTestFonts = <String>['FlutterTest', 'Ahem'];
 
 @visibleForTesting
 const String kPlaceholderChar = '\uFFFC';
@@ -537,12 +544,23 @@ abstract class SharedTextStyle {
   double? get letterSpacing => null;
   double? get wordSpacing => null;
 
+  String _buildCssFontFamily() {
+    if (ui_web.TestEnvironment.instance.forceTestFonts) {
+      final String? family = fontFamily;
+      final String testFont = _webParagraphTestFonts.contains(family)
+          ? family!
+          : _webParagraphTestFonts.first;
+      return '"$testFont"';
+    }
+    final String cssFontFamily = fontFamily ?? StyleManager.defaultFontFamily;
+    return canonicalizeFontFamily(cssFontFamily, fontFamilyFallback)!;
+  }
+
   String _buildCssFontString() {
     final String cssFontStyle = fontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
     final String cssFontWeight = fontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
     final double cssFontSize = fontSize ?? StyleManager.defaultFontSize;
-    final String cssFontFamily = fontFamily ?? StyleManager.defaultFontFamily;
-    final String fullFontName = canonicalizeFontFamily(cssFontFamily, fontFamilyFallback)!;
+    final String fullFontName = _buildCssFontFamily();
     return '$cssFontStyle $cssFontWeight ${cssFontSize.toStringAsFixed(2)}px $fullFontName';
   }
 
