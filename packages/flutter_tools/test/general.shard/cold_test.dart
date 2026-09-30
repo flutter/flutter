@@ -45,12 +45,10 @@ ColdRunner createColdRunner(
   bool machine = false,
   String? projectRootPath,
   bool stayResident = true,
-  ToolContext? toolContext,
+  ToolContext toolContext = const DelegatingToolContext(),
   bool traceStartup = false,
   Xcode? xcode,
 }) {
-  toolContext ??= DelegatingToolContext();
-
   return ColdRunner(
     flutterDevices,
     analytics: analytics ?? const NoOpAnalytics(),
