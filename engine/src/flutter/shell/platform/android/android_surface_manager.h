@@ -245,8 +245,17 @@ class AndroidSurfaceManager {
     std::vector<VkCommandBuffer> command_buffers;
     VkCommandPool command_pool = VK_NULL_HANDLE;
     VkFence acquire_fence = VK_NULL_HANDLE;
+    VkSurfaceTransformFlagBitsKHR transform =
+        static_cast<VkSurfaceTransformFlagBitsKHR>(0);
     uint32_t current_image_index = 0;
     bool has_acquired_image = false;
+    bool swapchain_out_of_date = false;
+    bool surface_lost = false;
+    bool reserved_bool_1 = false;
+    bool reserved_bool_2 = false;
+    bool reserved_bool_3 = false;
+    bool reserved_bool_4 = false;
+    bool reserved_bool_5 = false;
   };
 
   bool InitializeEGL();
@@ -352,7 +361,7 @@ class AndroidSurfaceManager {
   std::unordered_map<ANativeWindow*, VulkanOverlaySurface>
       overlay_vulkan_surfaces_;
 
-  // 4-byte aligned members (36 bytes total)
+  // 4-byte aligned members (40 bytes total: 10 * 4 bytes, aligned to 8)
   const AndroidRenderingAPI rendering_api_;
   uint32_t vk_version_ = VK_API_VERSION_1_1;
   uint32_t vk_graphics_queue_family_index_ = 0;
@@ -360,12 +369,18 @@ class AndroidSurfaceManager {
   uint32_t current_image_index_ = 0;
   VkSurfaceFormatKHR vk_surface_format_ = {};
   VkExtent2D vk_swapchain_extent_ = {0, 0};
+  VkSurfaceTransformFlagBitsKHR vk_surface_transform_ =
+      static_cast<VkSurfaceTransformFlagBitsKHR>(0);
 
-  // 1-byte aligned booleans (4 bytes total: 36 + 4 = 40, aligned to 8)
+  // 1-byte aligned booleans (8 bytes total: 40 + 8 = 48, aligned to 8)
   bool is_fake_window_ = false;
   bool is_valid_ = false;
   bool has_surfaceless_context_ = false;
   bool has_acquired_image_ = false;
+  bool vk_swapchain_out_of_date_ = false;
+  bool vk_surface_lost_ = false;
+  [[maybe_unused]] bool reserved_bool_1_ = false;
+  [[maybe_unused]] bool reserved_bool_2_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceManager);
 };
