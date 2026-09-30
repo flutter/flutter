@@ -63,21 +63,62 @@ class ImageComparer {
     });
   }
 
-  Future<bool> fuzzyCompareImages(Image golden, Image testImage) async {
+  /// Compares two images pixel by pixel.
+  ///
+  /// If [maxColorDelta] is greater than 0, per-channel differences less than or
+  /// equal to [maxColorDelta] are considered identical.
+  ///
+  /// If [maxDifferentPixelsRate] is greater than 0.0, the comparison passes if
+  /// the ratio of different pixels to total pixels does not exceed this value.
+  Future<bool> fuzzyCompareImages(
+    Image golden,
+    Image testImage, {
+    int maxColorDelta = 0,
+    double maxDifferentPixelsRate = 0.0,
+  }) async {
     if (golden.width != testImage.width || golden.height != testImage.height) {
       return false;
     }
-    int getPixel(ByteData data, int x, int y) => data.getUint32((x + y * golden.width) * 4);
     final ByteData goldenData = (await golden.toByteData())!;
     final ByteData testImageData = (await testImage.toByteData())!;
-    for (var y = 0; y < golden.height; y++) {
-      for (var x = 0; x < golden.width; x++) {
-        if (getPixel(goldenData, x, y) != getPixel(testImageData, x, y)) {
+
+    // Fast path: Exact 32-bit pixel comparison.
+    if (maxColorDelta == 0 && maxDifferentPixelsRate == 0.0) {
+      final int totalPixels = golden.width * golden.height;
+      for (var i = 0; i < totalPixels; i++) {
+        if (goldenData.getUint32(i * 4) != testImageData.getUint32(i * 4)) {
           return false;
         }
       }
+      return true;
     }
-    return true;
+
+    var differentPixels = 0;
+    final int totalPixels = golden.width * golden.height;
+
+    for (var y = 0; y < golden.height; y++) {
+      for (var x = 0; x < golden.width; x++) {
+        final int offset = (x + y * golden.width) * 4;
+        final int rDiff = (goldenData.getUint8(offset) - testImageData.getUint8(offset)).abs();
+        final int gDiff = (goldenData.getUint8(offset + 1) - testImageData.getUint8(offset + 1))
+            .abs();
+        final int bDiff = (goldenData.getUint8(offset + 2) - testImageData.getUint8(offset + 2))
+            .abs();
+        final int aDiff = (goldenData.getUint8(offset + 3) - testImageData.getUint8(offset + 3))
+            .abs();
+
+        if (rDiff > maxColorDelta ||
+            gDiff > maxColorDelta ||
+            bDiff > maxColorDelta ||
+            aDiff > maxColorDelta) {
+          differentPixels++;
+          if (maxDifferentPixelsRate == 0.0) {
+            return false;
+          }
+        }
+      }
+    }
+    return (differentPixels / totalPixels) <= maxDifferentPixelsRate;
   }
 }
 
