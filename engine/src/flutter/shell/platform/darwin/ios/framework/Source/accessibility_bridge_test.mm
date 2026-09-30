@@ -2452,6 +2452,18 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
 
   XCTAssertEqual([accessibility_notifications count], 2ul);
   XCTAssertEqualObjects(accessibility_notifications[1][@"argument"], @"rows 6 to 6 of 50");
+
+  // A new VoiceOver scroll announces its result even if it's unchanged, but
+  // later frames of that scroll are still deduplicated.
+  bridge->DispatchSemanticsAction(1, flutter::SemanticsAction::kScrollUp);
+  for (double position : {101.0, 102.0}) {
+    flutter::SemanticsNodeUpdates frame;
+    scrolled.scrollPosition = position;
+    frame[scrolled.id] = scrolled;
+    bridge->UpdateSemantics(/*nodes=*/frame, /*actions=*/actions);
+  }
+  XCTAssertEqual([accessibility_notifications count], 3ul);
+  XCTAssertEqualObjects(accessibility_notifications[2][@"argument"], @"rows 6 to 6 of 50");
 }
 
 - (void)testAnnouncesIgnoresRouteChangesWhenModal {

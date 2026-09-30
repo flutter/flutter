@@ -108,19 +108,13 @@ void AccessibilityBridge::AccessibilityObjectDidLoseFocus(int32_t id) {
 
 namespace {
 
-// Keys into UIKit's accessibility strings, so scroll announcements match native
+// Uses UIKit's accessibility strings, so scroll announcements match native
 // scroll views in every language iOS supports. The keys are undocumented, so
-// each has an English fallback.
-//
-// TODO(LouiseHsu): Have the framework supply these strings instead, removing
-// the dependency on undocumented keys.
-// https://github.com/flutter/flutter/issues/189285
+// if they change, each has an English fallback.
 constexpr char kUIKitAccessibilityBundleId[] = "com.apple.UIKit.axbundle";
 constexpr char kUIKitAccessibilityTable[] = "Accessibility";
 constexpr char kScrollPageStatusKey[] = "scroll.page.summary";
 constexpr char kScrollRowStatusKey[] = "table.scrollbypage.status";
-constexpr char kScrollPageStatusFallback[] = "page %1$@ of %2$@";
-constexpr char kScrollRowStatusFallback[] = "rows %1$@ to %2$@ of %3$@";
 
 // UIKit's accessibility strings bundle, or nil if not loaded yet. iOS loads it
 // when VoiceOver starts, so only a successful lookup is cached.
@@ -138,45 +132,19 @@ NSString* LocalizedCount(int64_t value) {
                                           numberStyle:NSNumberFormatterDecimalStyle];
 }
 
-// Replaces %1$@, %2$@, ... in `format` with `arguments`, or returns nil if a
-// placeholder is left over. Avoids +stringWithFormat: because `format` comes
-// from a system file and could have more specifiers than arguments.
-NSString* SubstitutePositionalArguments(NSString* format, NSArray<NSString*>* arguments) {
-  NSMutableString* result = [format mutableCopy];
-  for (NSUInteger i = 0; i < arguments.count; ++i) {
-    NSString* token = [NSString stringWithFormat:@"%%%lu$@", static_cast<unsigned long>(i + 1)];
-    [result replaceOccurrencesOfString:token
-                            withString:arguments[i]
-                               options:0
-                                 range:NSMakeRange(0, result.length)];
-  }
-  if ([result rangeOfString:@"$@"].location != NSNotFound ||
-      [result rangeOfString:@"%@"].location != NSNotFound) {
+// Looks up `key` in UIKit's table, or returns nil if the bundle isn't loaded or
+// the key is missing.
+NSString* UIKitLocalizedFormat(const char* key) {
+  NSBundle* bundle = UIKitAccessibilityBundle();
+  if (!bundle) {
     return nil;
   }
-  return result;
-}
-
-// Looks up `key` in UIKit's table and fills in `arguments`, falling back to
-// `fallback_format` if that fails.
-NSString* LocalizedScrollStatus(const char* key,
-                                const char* fallback_format,
-                                NSArray<NSString*>* arguments) {
-  NSString* fallback = @(fallback_format);
-  NSString* format = fallback;
-  if (NSBundle* bundle = UIKitAccessibilityBundle()) {
-    NSString* localized = [bundle localizedStringForKey:@(key)
-                                                  value:fallback
-                                                  table:@(kUIKitAccessibilityTable)];
-    if (localized.length > 0) {
-      format = localized;
-    }
-  }
-  NSString* result = SubstitutePositionalArguments(format, arguments);
-  if (result) {
-    return result;
-  }
-  return SubstitutePositionalArguments(fallback, arguments);
+  NSString* key_string = @(key);
+  NSString* format = [bundle localizedStringForKey:key_string
+                                             value:nil
+                                             table:@(kUIKitAccessibilityTable)];
+  // A missing key returns the key itself.
+  return [format isEqualToString:key_string] ? nil : format;
 }
 
 // Computes the numbers to announce for `object`'s scroll position. Builds no
@@ -247,17 +215,35 @@ AccessibilityScrollStatus ComputeScrollStatus(SemanticsObject* object) {
 
 // Renders `status` as the string UIAccessibilityPageScrolledNotification
 // expects, or nil if there is nothing accurate to say.
+//
+// UIKit's strings are formatted with +stringWithValidatedFormat:, which returns
+// nil instead of reading past the arguments if a string's placeholders don't
+// match. The English fallback is used in that case.
 NSString* FormatScrollStatus(const AccessibilityScrollStatus& status) {
   switch (status.form) {
     case AccessibilityScrollStatus::Form::kNone:
       return nil;
-    case AccessibilityScrollStatus::Form::kRows:
-      return LocalizedScrollStatus(kScrollRowStatusKey, kScrollRowStatusFallback, @[
-        LocalizedCount(status.first), LocalizedCount(status.last), LocalizedCount(status.total)
-      ]);
-    case AccessibilityScrollStatus::Form::kPage:
-      return LocalizedScrollStatus(kScrollPageStatusKey, kScrollPageStatusFallback,
-                                   @[ LocalizedCount(status.first), LocalizedCount(status.total) ]);
+    case AccessibilityScrollStatus::Form::kRows: {
+      NSString* first = LocalizedCount(status.first);
+      NSString* last = LocalizedCount(status.last);
+      NSString* total = LocalizedCount(status.total);
+      NSString* format = UIKitLocalizedFormat(kScrollRowStatusKey);
+      NSString* result = format ? [NSString stringWithValidatedFormat:format
+                                                validFormatSpecifiers:@"%@ %@ %@"
+                                                                error:nil, first, last, total]
+                                : nil;
+      return result ?: [NSString stringWithFormat:@"rows %1$@ to %2$@ of %3$@", first, last, total];
+    }
+    case AccessibilityScrollStatus::Form::kPage: {
+      NSString* current = LocalizedCount(status.first);
+      NSString* total = LocalizedCount(status.total);
+      NSString* format = UIKitLocalizedFormat(kScrollPageStatusKey);
+      NSString* result = format ? [NSString stringWithValidatedFormat:format
+                                                validFormatSpecifiers:@"%@ %@"
+                                                                error:nil, current, total]
+                                : nil;
+      return result ?: [NSString stringWithFormat:@"page %1$@ of %2$@", current, total];
+    }
   }
 }
 
@@ -434,6 +420,14 @@ void AccessibilityBridge::UpdateSemantics(
 
 void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
                                                   flutter::SemanticsAction action) {
+  // Announce the result of every VoiceOver scroll, even if it's unchanged, as
+  // native scroll views do.
+  if (action == flutter::SemanticsAction::kScrollUp ||
+      action == flutter::SemanticsAction::kScrollDown ||
+      action == flutter::SemanticsAction::kScrollLeft ||
+      action == flutter::SemanticsAction::kScrollRight) {
+    last_scroll_status_ = {};
+  }
   // TODO(team-ios): Remove implicit view assumption.
   // https://github.com/flutter/flutter/issues/142845
   platform_view_->DispatchSemanticsAction(kFlutterImplicitViewId, node_uid, action, {});
