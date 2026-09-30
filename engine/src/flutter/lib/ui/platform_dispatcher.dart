@@ -643,9 +643,14 @@ class PlatformDispatcher {
 
   /// Clears any cached render targets and textures maintained by the rasterizer.
   ///
-  /// This is primarily used by the Flutter test framework between test cases
-  /// to ensure test isolation and prevent cached offscreen render targets
-  /// from leaking across consecutive tests.
+  /// This is primarily intended for test harnesses to ensure test isolation
+  /// and prevent cached offscreen render targets from leaking across
+  /// consecutive tests.
+  ///
+  /// Production applications should not invoke this method directly. Doing so
+  /// can cause unnecessary texture reallocation churn and frame hitches.
+  /// Production applications should instead rely on platform low-memory
+  /// notifications, which automatically purge this cache.
   void clearRenderTargetCache() => _clearRenderTargetCache();
 
   @Native<Void Function()>(symbol: 'PlatformConfigurationNativeApi::ClearRenderTargetCache')

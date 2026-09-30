@@ -703,6 +703,10 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   /// Clears any cached render targets and textures maintained by the rasterizer.
+  ///
+  /// This is primarily intended for test harnesses to ensure test isolation
+  /// and prevent cached offscreen render targets from leaking across
+  /// consecutive tests.
   @override
   void clearRenderTargetCache() {
     _platformDispatcher.clearRenderTargetCache();
