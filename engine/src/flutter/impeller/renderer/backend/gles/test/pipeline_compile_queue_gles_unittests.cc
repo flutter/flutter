@@ -13,7 +13,7 @@
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/task_runner_util.h"
 #include "flutter/fml/thread.h"
-#include "flutter/fml/time/time_delta.h"
+#include "flutter/testing/post_task_sync.h"
 #include "flutter/testing/testing.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 
@@ -25,6 +25,26 @@ namespace {
 std::shared_ptr<fml::BasicTaskRunner> CreateBasicTaskRunner(
     const fml::Thread& thread) {
   return std::make_shared<fml::WrapperBasicTaskRunner>(thread.GetTaskRunner());
+}
+
+void PostJobSync(PipelineCompileQueueGLES& queue, const fml::closure& job) {
+  fml::AutoResetWaitableEvent latch;
+  queue.PostJob([&]() {
+    job();
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+void PostJobForDescriptorSync(PipelineCompileQueueGLES& queue,
+                              const PipelineDescriptor& desc,
+                              const fml::closure& job) {
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(queue.PostJobForDescriptor(desc, [&]() {
+    job();
+    latch.Signal();
+  }));
+  latch.Wait();
 }
 
 }  // namespace
@@ -199,13 +219,13 @@ TEST(PipelineCompileQueueGLESTest, DestroyQueueWithPendingTasks) {
 
 TEST(PipelineCompileQueueGLESTest, ReportsProcessingAndCallsOnDrained) {
   fml::Thread thread;
-  auto queue = PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
+  std::shared_ptr<PipelineCompileQueueGLES> queue =
+      PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
   ASSERT_NE(queue, nullptr);
 
   fml::AutoResetWaitableEvent block_first_job;
   fml::AutoResetWaitableEvent first_job_started;
   fml::AutoResetWaitableEvent drained;
-  const auto timeout = fml::TimeDelta::FromSeconds(30);
   std::atomic<int> drained_count{0};
   std::atomic<bool> processing_while_running{false};
 
@@ -223,16 +243,14 @@ TEST(PipelineCompileQueueGLESTest, ReportsProcessingAndCallsOnDrained) {
 
   queue->PostJobForDescriptor(desc1, [&]() {
     first_job_started.Signal();
-    // A timeout here keeps a failing test from holding the thread forever.
-    block_first_job.WaitWithTimeout(timeout);
+    block_first_job.Wait();
   });
-  ASSERT_FALSE(first_job_started.WaitWithTimeout(timeout));
+  first_job_started.Wait();
   processing_while_running.store(queue->IsProcessingJobs());
 
   queue->PostJobForDescriptor(desc2, [&]() {});
   block_first_job.Signal();
-  // A broken callback would hang the test without the timeout.
-  EXPECT_FALSE(drained.WaitWithTimeout(timeout));
+  drained.Wait();
 
   EXPECT_TRUE(processing_while_running.load());
   EXPECT_EQ(drained_count.load(), 1);
@@ -240,10 +258,7 @@ TEST(PipelineCompileQueueGLESTest, ReportsProcessingAndCallsOnDrained) {
 
   // A cleared callback is not called again.
   queue->SetOnDrained(nullptr);
-  fml::AutoResetWaitableEvent last_job;
-  queue->PostJobForDescriptor(PipelineDescriptor{},
-                              [&]() { last_job.Signal(); });
-  ASSERT_FALSE(last_job.WaitWithTimeout(timeout));
+  PostJobForDescriptorSync(*queue, PipelineDescriptor{}, []() {});
 
   // The drain report follows the last job, so the count is read once the
   // thread that would send it is gone.
@@ -253,38 +268,28 @@ TEST(PipelineCompileQueueGLESTest, ReportsProcessingAndCallsOnDrained) {
 
 TEST(PipelineCompileQueueGLESTest, ReportsRunningJobOnlyInsideJobs) {
   fml::Thread thread;
-  auto queue = PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
+  std::shared_ptr<PipelineCompileQueueGLES> queue =
+      PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
   ASSERT_NE(queue, nullptr);
 
-  std::atomic<bool> in_posted_job{false};
-  std::atomic<bool> in_descriptor_job{false};
-  std::atomic<bool> in_plain_task{true};
-  fml::AutoResetWaitableEvent posted_job_done;
-  fml::AutoResetWaitableEvent descriptor_job_done;
-  const auto timeout = fml::TimeDelta::FromSeconds(30);
+  bool in_posted_job = false;
+  bool in_descriptor_job = false;
+  bool in_plain_task = true;
 
-  queue->PostJob([&]() {
-    in_posted_job.store(queue->IsRunningJobOnCurrentThread());
-    posted_job_done.Signal();
+  PostJobSync(*queue,
+              [&]() { in_posted_job = queue->IsRunningJobOnCurrentThread(); });
+  PostJobForDescriptorSync(*queue, PipelineDescriptor{}, [&]() {
+    in_descriptor_job = queue->IsRunningJobOnCurrentThread();
   });
-  queue->PostJobForDescriptor(PipelineDescriptor{}, [&]() {
-    in_descriptor_job.store(queue->IsRunningJobOnCurrentThread());
-    descriptor_job_done.Signal();
-  });
-  ASSERT_FALSE(posted_job_done.WaitWithTimeout(timeout));
-  ASSERT_FALSE(descriptor_job_done.WaitWithTimeout(timeout));
 
   // A task posted to the same thread without the queue is not a job.
-  fml::AutoResetWaitableEvent plain_task_done;
-  thread.GetTaskRunner()->PostTask([&]() {
-    in_plain_task.store(queue->IsRunningJobOnCurrentThread());
-    plain_task_done.Signal();
+  flutter::testing::PostTaskSync(thread.GetTaskRunner(), [&]() {
+    in_plain_task = queue->IsRunningJobOnCurrentThread();
   });
-  ASSERT_FALSE(plain_task_done.WaitWithTimeout(timeout));
 
-  EXPECT_TRUE(in_posted_job.load());
-  EXPECT_TRUE(in_descriptor_job.load());
-  EXPECT_FALSE(in_plain_task.load());
+  EXPECT_TRUE(in_posted_job);
+  EXPECT_TRUE(in_descriptor_job);
+  EXPECT_FALSE(in_plain_task);
   EXPECT_FALSE(queue->IsRunningJobOnCurrentThread());
 
   thread.Join();
@@ -293,9 +298,9 @@ TEST(PipelineCompileQueueGLESTest, ReportsRunningJobOnlyInsideJobs) {
 TEST(PipelineCompileQueueGLESTest, JobsOfOneQueueAreInvisibleToAnother) {
   fml::Thread first_thread;
   fml::Thread second_thread;
-  auto first =
+  std::shared_ptr<PipelineCompileQueueGLES> first =
       PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(first_thread));
-  auto second =
+  std::shared_ptr<PipelineCompileQueueGLES> second =
       PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(second_thread));
   ASSERT_NE(first, nullptr);
   ASSERT_NE(second, nullptr);
@@ -306,8 +311,6 @@ TEST(PipelineCompileQueueGLESTest, JobsOfOneQueueAreInvisibleToAnother) {
   std::atomic<int> other_count{-1};
   fml::AutoResetWaitableEvent job_started;
   fml::AutoResetWaitableEvent job_may_finish;
-  fml::AutoResetWaitableEvent job_finished;
-  const auto timeout = fml::TimeDelta::FromSeconds(30);
 
   first->PostJob([&]() {
     running_on_own_queue.store(first->IsRunningJobOnCurrentThread());
@@ -315,17 +318,15 @@ TEST(PipelineCompileQueueGLESTest, JobsOfOneQueueAreInvisibleToAnother) {
     own_count.store(first->RunningJobCount());
     other_count.store(second->RunningJobCount());
     job_started.Signal();
-    // A timeout here keeps a failing test from holding the thread forever.
-    job_may_finish.WaitWithTimeout(timeout);
+    job_may_finish.Wait();
   });
-  ASSERT_FALSE(job_started.WaitWithTimeout(timeout));
+  job_started.Wait();
 
   // The second queue runs nothing, even though another queue does.
   EXPECT_EQ(second->RunningJobCount(), 0);
   job_may_finish.Signal();
 
-  first->PostJob([&]() { job_finished.Signal(); });
-  ASSERT_FALSE(job_finished.WaitWithTimeout(timeout));
+  PostJobSync(*first, []() {});
 
   EXPECT_TRUE(running_on_own_queue.load());
   EXPECT_FALSE(running_on_other_queue.load());

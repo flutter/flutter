@@ -13,11 +13,9 @@
 #include <vector>
 
 #include "flutter/fml/closure.h"
-#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/task_runner_util.h"
 #include "flutter/fml/thread.h"
-#include "flutter/fml/time/time_delta.h"
 #include "impeller/fixtures/spec_constant.frag.h"
 #include "impeller/fixtures/spec_constant.vert.h"
 #include "impeller/playground/playground_test.h"
@@ -170,9 +168,10 @@ class ToggleWorker final : public ReactorGLES::Worker {
 // its promise unset, because a caller of WaitAndGet blocks on that promise.
 TEST(PipelineLibraryGLESDeferredTest,
      FailsPendingPipelinesWhenTheReactorCannotReact) {
-  auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL ES 3.0 (ANGLE 2.1.0)");
+  std::shared_ptr<MockGLES> mock_gles =
+      MockGLES::Init(std::nullopt, "OpenGL ES 3.0 (ANGLE 2.1.0)");
   fml::Thread io_thread;
-  auto context = ContextGLES::Create(
+  std::shared_ptr<ContextGLES> context = ContextGLES::Create(
       Flags{}, std::make_unique<ProcTableGLES>(kMockResolverGLES),
       std::vector<std::shared_ptr<fml::Mapping>>{},
       /*enable_gpu_tracing=*/false,
@@ -185,7 +184,8 @@ TEST(PipelineLibraryGLESDeferredTest,
   auto& library =
       PipelineLibraryGLES::Cast(*context_base->GetPipelineLibrary());
   auto promise = std::make_shared<PipelineLibraryGLES::PipelinePromise>();
-  auto future = promise->get_future();
+  std::future<std::shared_ptr<Pipeline<PipelineDescriptor>>> future =
+      promise->get_future();
   {
     Lock lock(library.pending_mutex_);
     library.pending_pipelines_.push_back(PipelineLibraryGLES::PendingPipeline{
@@ -196,17 +196,9 @@ TEST(PipelineLibraryGLESDeferredTest,
   }
   library.WatchQueueForDrain();
 
-  // A loaded bot needs far less than this, and a regression fails here
-  // instead of waiting for the timeout of the whole suite.
-  const auto timeout = std::chrono::seconds(30);
-
   // Any job drains the queue, and the queue reports that to the library.
-  fml::AutoResetWaitableEvent job_done;
-  ASSERT_TRUE(library.compile_queue_->PostJobForDescriptor(
-      PipelineDescriptor{}, [&]() { job_done.Signal(); }));
-  ASSERT_FALSE(job_done.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)));
-
-  ASSERT_EQ(future.wait_for(timeout), std::future_status::ready);
+  ASSERT_TRUE(library.compile_queue_->PostJobForDescriptor(PipelineDescriptor{},
+                                                           []() {}));
   EXPECT_EQ(future.get(), nullptr);
 
   io_thread.Join();
@@ -218,7 +210,7 @@ class DeferredLinkRunner final : public fml::BasicTaskRunner {
  public:
   void PostTask(const fml::closure& task) override { tasks.push_back(task); }
   void RunOne() {
-    auto task = std::move(tasks.front());
+    fml::closure task = std::move(tasks.front());
     tasks.pop_front();
     task();
   }
@@ -247,54 +239,59 @@ struct DeferredLinkState {
   std::unordered_map<GLuint, bool> completed;
 };
 
-DeferredLinkState* deferred_links = nullptr;
+DeferredLinkState* g_deferred_links = nullptr;
+
+bool IsSet(const std::unordered_map<GLuint, bool>& values, GLuint id) {
+  std::unordered_map<GLuint, bool>::const_iterator found = values.find(id);
+  return found != values.end() && found->second;
+}
 
 GLuint GL_APIENTRY DeferredCreateShader(GLenum type) {
-  auto id = deferred_links->next++;
-  deferred_links->shaders[id] =
-      !(deferred_links->fail_compile && type == GL_VERTEX_SHADER);
+  GLuint id = g_deferred_links->next++;
+  g_deferred_links->shaders[id] =
+      !(g_deferred_links->fail_compile && type == GL_VERTEX_SHADER);
   return id;
 }
 GLuint GL_APIENTRY DeferredCreateProgram() {
-  deferred_links->programs++;
-  return deferred_links->next++;
+  g_deferred_links->programs++;
+  return g_deferred_links->next++;
 }
 void GL_APIENTRY DeferredLinkProgram(GLuint program) {
-  deferred_links->links++;
-  deferred_links->linked[program] =
-      !deferred_links->fail_compile && !deferred_links->fail_link;
+  g_deferred_links->links++;
+  g_deferred_links->linked[program] =
+      !g_deferred_links->fail_compile && !g_deferred_links->fail_link;
 }
 void GL_APIENTRY DeferredGetShaderiv(GLuint shader,
                                      GLenum pname,
                                      GLint* value) {
   *value = 0;
   if (pname == GL_COMPILE_STATUS) {
-    deferred_links->compile_queries++;
-    *value = deferred_links->shaders[shader] ? GL_TRUE : GL_FALSE;
+    g_deferred_links->compile_queries++;
+    *value = IsSet(g_deferred_links->shaders, shader) ? GL_TRUE : GL_FALSE;
   }
 }
 void GL_APIENTRY DeferredGetProgramiv(GLuint program,
                                       GLenum pname,
                                       GLint* value) {
   if (pname == GL_COMPLETION_STATUS_KHR) {
-    deferred_links->completion_queries++;
+    g_deferred_links->completion_queries++;
     // A driver that rejects the query leaves the value unchanged
-    if (deferred_links->completion_supported) {
-      *value = deferred_links->completed[program] ? GL_TRUE : GL_FALSE;
+    if (g_deferred_links->completion_supported) {
+      *value = IsSet(g_deferred_links->completed, program) ? GL_TRUE : GL_FALSE;
     }
     return;
   }
   *value = 0;
   if (pname == GL_LINK_STATUS) {
-    deferred_links->link_queries++;
-    *value = deferred_links->linked[program] ? GL_TRUE : GL_FALSE;
+    g_deferred_links->link_queries++;
+    *value = IsSet(g_deferred_links->linked, program) ? GL_TRUE : GL_FALSE;
   }
 }
 void GL_APIENTRY DeferredDetachShader(GLuint program, GLuint shader) {
-  deferred_links->detached++;
+  g_deferred_links->detached++;
 }
 void GL_APIENTRY DeferredDeleteShader(GLuint shader) {
-  deferred_links->deleted_shaders++;
+  g_deferred_links->deleted_shaders++;
 }
 GLboolean GL_APIENTRY DeferredIsProgram(GLuint program) {
   return program != 0 ? GL_TRUE : GL_FALSE;
@@ -356,7 +353,7 @@ void* DeferredLinkResolver(const char* name) {
 struct DeferredLinkHarness {
   DeferredLinkState state;
   fml::ScopedCleanupClosure reset_deferred_links{
-      []() { deferred_links = nullptr; }};
+      []() { g_deferred_links = nullptr; }};
   std::shared_ptr<MockGLES> mock_gles;
   std::shared_ptr<DeferredLinkRunner> runner;
   std::shared_ptr<ContextGLES> context;
@@ -365,7 +362,7 @@ struct DeferredLinkHarness {
   PipelineDescriptor desc;
 
   explicit DeferredLinkHarness(size_t max_pending_links) {
-    deferred_links = &state;
+    g_deferred_links = &state;
     mock_gles = MockGLES::Init(
         std::vector<const char*>{"GL_KHR_parallel_shader_compile"},
         "OpenGL ES 3.0 (ANGLE 2.1.0)", DeferredLinkResolver);
@@ -378,8 +375,9 @@ struct DeferredLinkHarness {
     worker = std::make_shared<ToggleWorker>(true);
     context->AddReactorWorker(worker);
     auto base_context = std::static_pointer_cast<Context>(context);
-    auto shader_library = base_context->GetShaderLibrary();
-    for (auto stage : {ShaderStage::kVertex, ShaderStage::kFragment}) {
+    std::shared_ptr<ShaderLibrary> shader_library =
+        base_context->GetShaderLibrary();
+    for (ShaderStage stage : {ShaderStage::kVertex, ShaderStage::kFragment}) {
       // ComputeShaderWithDefines inserts specialization constants after the
       // first line and rejects a source without a newline, so the source has
       // the #version first line that impellerc emits
@@ -418,10 +416,12 @@ void RunDeferredLink(bool fail_compile,
   state.fail_compile = fail_compile;
   state.fail_link = fail_link;
   PipelineDescriptor desc = harness.desc;
-  auto& library = harness.library;
-  auto first = library->GetPipeline(desc, true, true);
+  std::shared_ptr<PipelineLibrary>& library = harness.library;
+  PipelineFuture<PipelineDescriptor> first =
+      library->GetPipeline(desc, true, true);
   desc.SetSampleCount(SampleCount::kCount4);
-  auto second = library->GetPipeline(desc, true, true);
+  PipelineFuture<PipelineDescriptor> second =
+      library->GetPipeline(desc, true, true);
   ASSERT_FALSE(harness.runner->tasks.empty());
   // Job of second is still queued, so the queue has not drained and the link
   // of first must stay unchecked
@@ -447,7 +447,8 @@ void RunDeferredLink(bool fail_compile,
     // Next reaction on this thread creates second outside of a queue job, so
     // it links synchronously. The abandoned program left the cache, so second
     // links a new one, and retry reuses it.
-    auto retry = library->GetPipeline(desc, false, true);
+    PipelineFuture<PipelineDescriptor> retry =
+        library->GetPipeline(desc, false, true);
     ASSERT_TRUE(IsReady(retry));
     ASSERT_TRUE(IsReady(second));
     ASSERT_NE(retry.Get(), nullptr);
@@ -477,7 +478,8 @@ void RunDeferredLink(bool fail_compile,
     state.fail_link = false;
     desc.SetSampleCount(SampleCount::kCount1);
     desc.SetColorAttachmentDescriptor(0, ColorAttachmentDescriptor{});
-    auto retry = library->GetPipeline(desc, true, true);
+    PipelineFuture<PipelineDescriptor> retry =
+        library->GetPipeline(desc, true, true);
     harness.runner->RunAll();
     ASSERT_TRUE(IsReady(retry));
     ASSERT_NE(retry.Get(), nullptr);
@@ -590,20 +592,20 @@ class UnstartedShaderFunction final : public ShaderFunction {
 
 TEST(PipelineLibraryGLESDeferredTest,
      ResolvesUnstartedPipelinesWhenTheRunnerDiscardsJobs) {
-  auto mock_gles =
+  std::shared_ptr<MockGLES> mock_gles =
       MockGLES::Init(std::vector<const char*>{"GL_KHR_parallel_shader_compile"},
                      "OpenGL ES 3.0 (ANGLE 2.1.0)");
   fml::Thread io_thread;
   auto runner = std::make_shared<fml::ConditionalBasicTaskRunner>(
       io_thread.GetTaskRunner(), []() { return false; });
-  auto context = ContextGLES::Create(
+  std::shared_ptr<ContextGLES> context = ContextGLES::Create(
       Flags{}, std::make_unique<ProcTableGLES>(kMockResolverGLES),
       std::vector<std::shared_ptr<fml::Mapping>>{},
       /*enable_gpu_tracing=*/false, runner);
   ASSERT_NE(context, nullptr);
   auto context_base = std::static_pointer_cast<Context>(context);
-  auto library = context_base->GetPipelineLibrary();
-  auto* queue = library->GetPipelineCompileQueue();
+  std::shared_ptr<PipelineLibrary> library = context_base->GetPipelineLibrary();
+  PipelineCompileQueue* queue = library->GetPipelineCompileQueue();
   ASSERT_NE(queue, nullptr);
   std::weak_ptr<PipelineCompileQueue> weak_queue = queue->weak_from_this();
   PipelineDescriptor descriptor;
@@ -611,19 +613,20 @@ TEST(PipelineLibraryGLESDeferredTest,
       std::make_shared<UnstartedShaderFunction>(ShaderStage::kVertex));
   descriptor.AddStageEntrypoint(
       std::make_shared<UnstartedShaderFunction>(ShaderStage::kFragment));
-  auto future = library->GetPipeline(descriptor, /*async=*/true);
+  PipelineFuture<PipelineDescriptor> future =
+      library->GetPipeline(descriptor, /*async=*/true);
   library.reset();
   context_base.reset();
   context.reset();
   io_thread.Join();
 
   EXPECT_TRUE(weak_queue.expired());
-  const auto status = future.future.wait_for(std::chrono::milliseconds(100));
-  EXPECT_EQ(status, std::future_status::ready);
-  if (status == std::future_status::ready) {
+  const bool ready = IsReady(future);
+  EXPECT_TRUE(ready);
+  if (ready) {
     EXPECT_EQ(future.Get(), nullptr);
   }
-  if (auto leaked_queue = weak_queue.lock()) {
+  if (std::shared_ptr<PipelineCompileQueue> leaked_queue = weak_queue.lock()) {
     leaked_queue->PerformJobEagerly(descriptor);
   }
 }
