@@ -16141,6 +16141,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
+skia
+
+Copyright 2016 Google LLC
+
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+--------------------------------------------------------------------------------
 benchmark
 
 Copyright 2016 Ismael Jimenez Martinez. All rights reserved.

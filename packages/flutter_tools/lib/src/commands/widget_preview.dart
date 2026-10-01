@@ -394,19 +394,19 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
       await _lspPreviewDetector.initialize();
 
-      // Wait for the initial analysis to complete to ensure the analysis server
-      // has registered the widget preview RPC methods.
-      await _lspPreviewDetector.analysisServer?.waitForAnalysis();
-
-      _previewCodeGenerator.populateDtdConnectionInfo(
-        dtdUri: _dtdService.dtdUri!,
-        widgetPreviewServiceName: _dtdService.widgetPreviewService,
-        widgetPreviewScaffoldStreamName: _dtdService.widgetPreviewScaffoldStream,
-        projectRootPath: rootProject.directory.absolute.path,
-      );
-
       final FlutterWidgetPreviews originalPreviews;
       try {
+        // Wait for the initial analysis to complete to ensure the analysis server
+        // has registered the widget preview RPC methods.
+        await _lspPreviewDetector.waitForAnalysis();
+
+        _previewCodeGenerator.populateDtdConnectionInfo(
+          dtdUri: _dtdService.dtdUri!,
+          widgetPreviewServiceName: _dtdService.widgetPreviewService,
+          widgetPreviewScaffoldStreamName: _dtdService.widgetPreviewScaffoldStream,
+          projectRootPath: rootProject.directory.absolute.path,
+        );
+
         originalPreviews = await _dtdService.getFlutterWidgetPreviews();
       } on Exception catch (e) {
         throwToolExit(
@@ -574,9 +574,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       final String target = bundle.defaultMainPath;
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
-        target: target,
+        toolContext: toolContext,
         buildInfo: debuggingOptions.buildInfo,
-        platform: platform,
+        target: target,
       );
 
       if (boolArg(kLaunchPreviewer)) {
