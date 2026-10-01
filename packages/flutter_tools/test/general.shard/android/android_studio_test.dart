@@ -7,14 +7,13 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
@@ -88,6 +87,7 @@ void main() {
     late Config config;
     late FileSystem fileSystem;
     late FileSystemUtils fsUtils;
+    late BufferLogger logger;
     late Platform platform;
     late FakePlistUtils plistUtils;
     late FakeProcessManager processManager;
@@ -95,6 +95,7 @@ void main() {
     setUp(() {
       config = Config.test();
       fileSystem = MemoryFileSystem.test();
+      logger = BufferLogger.test();
       plistUtils = FakePlistUtils();
       platform = FakePlatform(
         operatingSystem: 'macos',
@@ -104,767 +105,706 @@ void main() {
       processManager = FakeProcessManager.empty();
     });
 
-    testUsingContext(
-      'discovers Android Studio >=4.1 location',
-      () {
-        final String studioInApplicationPlistFolder = fileSystem.path.join(
-          '/',
-          'Application',
-          'Android Studio.app',
-          'Contents',
-        );
-        fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+    testWithoutContext('discovers Android Studio >=4.1 location', () {
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-        final String plistFilePath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(
-                studioInApplicationPlistFolder,
-                'jre',
-                'jdk',
-                'Contents',
-                'Home',
-                'bin',
-                'java',
-              ),
-              '-version',
-            ],
-            stderr: '123',
-          ),
-        );
-        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        )!;
-
-        expect(studio.version, equals(Version(4, 1, null)));
-        expect(studio, isNotNull);
-        expect(
-          studio.pluginsPath,
-          equals(
+      final String plistFilePath = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
             fileSystem.path.join(
-              homeMac,
-              'Library',
-              'Application Support',
-              'Google',
-              'AndroidStudio4.1',
+              studioInApplicationPlistFolder,
+              'jre',
+              'jdk',
+              'Contents',
+              'Home',
+              'bin',
+              'java',
             ),
+            '-version',
+          ],
+          stderr: '123',
+        ),
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        plistParser: plistUtils,
+        processManager: processManager,
+      )!;
+
+      expect(studio.version, equals(Version(4, 1, null)));
+      expect(studio, isNotNull);
+      expect(
+        studio.pluginsPath,
+        equals(
+          fileSystem.path.join(
+            homeMac,
+            'Library',
+            'Application Support',
+            'Google',
+            'AndroidStudio4.1',
           ),
-        );
-        expect(studio.validationMessages, <String>['Java version 123']);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => processManager,
-        // Custom home paths are not supported on macOS nor Windows yet,
-        // so we force the platform to fake Linux here.
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+        ),
+      );
+      expect(studio.validationMessages, <String>['Java version 123']);
+    });
 
-    testUsingContext(
-      'discovers Android Studio >=2020.3 location',
-      () {
-        final String studioInApplicationPlistFolder = fileSystem.path.join(
-          '/',
-          'Application',
-          'Android Studio.app',
-          'Contents',
-        );
-        fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+    testWithoutContext('discovers Android Studio >=2020.3 location', () {
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-        final String plistFilePath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2020_3;
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(
-                studioInApplicationPlistFolder,
-                'jre',
-                'Contents',
-                'Home',
-                'bin',
-                'java',
-              ),
-              '-version',
-            ],
-            stderr: '123',
-          ),
-        );
-        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        )!;
-
-        expect(studio.version, equals(Version(2020, 3, null)));
-        expect(studio, isNotNull);
-        expect(
-          studio.pluginsPath,
-          equals(
+      final String plistFilePath = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2020_3;
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
             fileSystem.path.join(
-              homeMac,
-              'Library',
-              'Application Support',
-              'Google',
-              'AndroidStudio2020.3',
+              studioInApplicationPlistFolder,
+              'jre',
+              'Contents',
+              'Home',
+              'bin',
+              'java',
             ),
+            '-version',
+          ],
+          stderr: '123',
+        ),
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        plistParser: plistUtils,
+        processManager: processManager,
+      )!;
+
+      expect(studio.version, equals(Version(2020, 3, null)));
+      expect(studio, isNotNull);
+      expect(
+        studio.pluginsPath,
+        equals(
+          fileSystem.path.join(
+            homeMac,
+            'Library',
+            'Application Support',
+            'Google',
+            'AndroidStudio2020.3',
           ),
-        );
-        expect(studio.validationMessages, <String>['Java version 123']);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => processManager,
-        // Custom home paths are not supported on macOS nor Windows yet,
-        // so we force the platform to fake Linux here.
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+        ),
+      );
+      expect(studio.validationMessages, <String>['Java version 123']);
+    });
 
-    testUsingContext(
-      'discovers Android Studio <4.1 location',
-      () {
-        final String studioInApplicationPlistFolder = fileSystem.path.join(
-          '/',
-          'Application',
-          'Android Studio.app',
-          'Contents',
-        );
-        fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+    testWithoutContext('discovers Android Studio <4.1 location', () {
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-        final String plistFilePath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[plistFilePath] = macStudioInfoPlist3_3;
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(
-                studioInApplicationPlistFolder,
-                'jre',
-                'jdk',
-                'Contents',
-                'Home',
-                'bin',
-                'java',
-              ),
-              '-version',
-            ],
-            stderr: '123',
-          ),
-        );
-        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        )!;
-
-        expect(studio.version, equals(Version(3, 3, null)));
-        expect(studio, isNotNull);
-        expect(
-          studio.pluginsPath,
-          equals(
-            fileSystem.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3'),
-          ),
-        );
-        expect(studio.validationMessages, <String>['Java version 123']);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => processManager,
-        // Custom home paths are not supported on macOS nor Windows yet,
-        // so we force the platform to fake Linux here.
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
-
-    testUsingContext(
-      'pluginsPath returns null when version is unknown on macOS',
-      () {
-        const installPath = '/Applications/Android Studio.app/Contents';
-        fileSystem.directory(installPath).createSync(recursive: true);
-        final studio = AndroidStudio(installPath);
-        expect(studio.version, isNull);
-        expect(studio.pluginsPath, isNull);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
-
-    testUsingContext(
-      'discovers Android Studio EAP location',
-      () {
-        final String studioInApplicationPlistFolder = fileSystem.path.join(
-          '/',
-          'Application',
-          'Android Studio with suffix.app',
-          'Contents',
-        );
-        fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
-
-        final String plistFilePath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[plistFilePath] = macStudioInfoPlistEap_2022_3_1_11;
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(
-                studioInApplicationPlistFolder,
-                'jbr',
-                'Contents',
-                'Home',
-                'bin',
-                'java',
-              ),
-              '-version',
-            ],
-            stderr: '123',
-          ),
-        );
-        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        )!;
-
-        expect(studio.version, equals(Version(2022, 3, 1)));
-        expect(studio, isNotNull);
-        expect(
-          studio.pluginsPath,
-          equals(
+      final String plistFilePath = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist3_3;
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
             fileSystem.path.join(
-              homeMac,
-              'Library',
-              'Application Support',
-              'Google',
-              'AndroidStudioPreview2022.3',
+              studioInApplicationPlistFolder,
+              'jre',
+              'jdk',
+              'Contents',
+              'Home',
+              'bin',
+              'java',
             ),
+            '-version',
+          ],
+          stderr: '123',
+        ),
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        plistParser: plistUtils,
+        processManager: processManager,
+      )!;
+
+      expect(studio.version, equals(Version(3, 3, null)));
+      expect(studio, isNotNull);
+      expect(
+        studio.pluginsPath,
+        equals(fileSystem.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3')),
+      );
+      expect(studio.validationMessages, <String>['Java version 123']);
+    });
+
+    testWithoutContext('pluginsPath returns null when version is unknown on macOS', () {
+      const installPath = '/Applications/Android Studio.app/Contents';
+      fileSystem.directory(installPath).createSync(recursive: true);
+      final studio = AndroidStudio(
+        installPath,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      );
+      expect(studio.version, isNull);
+      expect(studio.pluginsPath, isNull);
+    });
+
+    testWithoutContext('discovers Android Studio EAP location', () {
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        '/',
+        'Application',
+        'Android Studio with suffix.app',
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+
+      final String plistFilePath = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlistEap_2022_3_1_11;
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join(
+              studioInApplicationPlistFolder,
+              'jbr',
+              'Contents',
+              'Home',
+              'bin',
+              'java',
+            ),
+            '-version',
+          ],
+          stderr: '123',
+        ),
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        plistParser: plistUtils,
+        processManager: processManager,
+      )!;
+
+      expect(studio.version, equals(Version(2022, 3, 1)));
+      expect(studio, isNotNull);
+      expect(
+        studio.pluginsPath,
+        equals(
+          fileSystem.path.join(
+            homeMac,
+            'Library',
+            'Application Support',
+            'Google',
+            'AndroidStudioPreview2022.3',
           ),
-        );
-        expect(studio.validationMessages, <String>['Java version 123']);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => processManager,
-        // Custom home paths are not supported on macOS nor Windows yet,
-        // so we force the platform to fake Linux here.
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+        ),
+      );
+      expect(studio.validationMessages, <String>['Java version 123']);
+    });
 
-    testUsingContext(
-      'does not discover Android Studio with JetBrainsToolboxApp wrapper',
-      () {
-        final String applicationPlistFolder = fileSystem.path.join(
-          '/',
-          'Applications',
-          'Android Studio.app',
-          'Contents',
-        );
-        fileSystem.directory(applicationPlistFolder).createSync(recursive: true);
+    testWithoutContext('does not discover Android Studio with JetBrainsToolboxApp wrapper', () {
+      final String applicationPlistFolder = fileSystem.path.join(
+        '/',
+        'Applications',
+        'Android Studio.app',
+        'Contents',
+      );
+      fileSystem.directory(applicationPlistFolder).createSync(recursive: true);
 
-        final String applicationsPlistFilePath = fileSystem.path.join(
-          applicationPlistFolder,
-          'Info.plist',
-        );
-        const jetbrainsInfoPlist = <String, Object>{'JetBrainsToolboxApp': 'ignored'};
-        plistUtils.fileContents[applicationsPlistFilePath] = jetbrainsInfoPlist;
+      final String applicationsPlistFilePath = fileSystem.path.join(
+        applicationPlistFolder,
+        'Info.plist',
+      );
+      const jetbrainsInfoPlist = <String, Object>{'JetBrainsToolboxApp': 'ignored'};
+      plistUtils.fileContents[applicationsPlistFilePath] = jetbrainsInfoPlist;
 
-        final String homeDirectoryPlistFolder = fileSystem.path.join(
-          fsUtils.homeDirPath!,
-          'Applications',
-          'Android Studio.app',
-          'Contents',
-        );
-        fileSystem.directory(homeDirectoryPlistFolder).createSync(recursive: true);
+      final String homeDirectoryPlistFolder = fileSystem.path.join(
+        fsUtils.homeDirPath!,
+        'Applications',
+        'Android Studio.app',
+        'Contents',
+      );
+      fileSystem.directory(homeDirectoryPlistFolder).createSync(recursive: true);
 
-        final String homeDirectoryPlistFilePath = fileSystem.path.join(
-          homeDirectoryPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist2020_3;
+      final String homeDirectoryPlistFilePath = fileSystem.path.join(
+        homeDirectoryPlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist2020_3;
 
-        expect(AndroidStudio.allInstalled().length, 1);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => FakeProcessManager.any(),
-        // Custom home paths are not supported on macOS nor Windows yet,
-        // so we force the platform to fake Linux here.
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+      expect(
+        AndroidStudio.allInstalled(
+          config: config,
+          fileSystem: fileSystem,
+          fileSystemUtils: fsUtils,
+          logger: logger,
+          platform: platform,
+          plistParser: plistUtils,
+          processManager: FakeProcessManager.any(),
+        ).length,
+        1,
+      );
+    });
 
-    testUsingContext(
-      'discovers installation from Spotlight query',
-      () {
-        // One in expected location.
-        final String studioInApplication = fileSystem.path.join(
-          '/',
-          'Application',
-          'Android Studio.app',
-        );
-        final String studioInApplicationPlistFolder = fileSystem.path.join(
-          studioInApplication,
-          'Contents',
-        );
-        fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
-        final String plistFilePath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
+    testWithoutContext('discovers installation from Spotlight query', () {
+      // One in expected location.
+      final String studioInApplication = fileSystem.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+      );
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        studioInApplication,
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      final String plistFilePath = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
 
-        // Two in random location only Spotlight knows about.
-        final String randomLocation1 = fileSystem.path.join(
-          '/',
-          'random',
-          'Android Studio Preview.app',
-        );
-        final String randomLocation1PlistFolder = fileSystem.path.join(randomLocation1, 'Contents');
-        fileSystem.directory(randomLocation1PlistFolder).createSync(recursive: true);
-        final String randomLocation1PlistPath = fileSystem.path.join(
-          randomLocation1PlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[randomLocation1PlistPath] = macStudioInfoPlist4_1;
+      // Two in random location only Spotlight knows about.
+      final String randomLocation1 = fileSystem.path.join(
+        '/',
+        'random',
+        'Android Studio Preview.app',
+      );
+      final String randomLocation1PlistFolder = fileSystem.path.join(randomLocation1, 'Contents');
+      fileSystem.directory(randomLocation1PlistFolder).createSync(recursive: true);
+      final String randomLocation1PlistPath = fileSystem.path.join(
+        randomLocation1PlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[randomLocation1PlistPath] = macStudioInfoPlist4_1;
 
-        final String randomLocation2 = fileSystem.path.join(
-          '/',
-          'random',
-          'Android Studio with Blaze.app',
-        );
-        final String randomLocation2PlistFolder = fileSystem.path.join(randomLocation2, 'Contents');
-        fileSystem.directory(randomLocation2PlistFolder).createSync(recursive: true);
-        final String randomLocation2PlistPath = fileSystem.path.join(
-          randomLocation2PlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[randomLocation2PlistPath] = macStudioInfoPlist4_1;
-        final String javaBin = fileSystem.path.join(
-          'jre',
-          'jdk',
-          'Contents',
-          'Home',
-          'bin',
-          'java',
-        );
+      final String randomLocation2 = fileSystem.path.join(
+        '/',
+        'random',
+        'Android Studio with Blaze.app',
+      );
+      final String randomLocation2PlistFolder = fileSystem.path.join(randomLocation2, 'Contents');
+      fileSystem.directory(randomLocation2PlistFolder).createSync(recursive: true);
+      final String randomLocation2PlistPath = fileSystem.path.join(
+        randomLocation2PlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[randomLocation2PlistPath] = macStudioInfoPlist4_1;
+      final String javaBin = fileSystem.path.join('jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
 
-        // Spotlight finds the one known and two random installations.
-        processManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: const <String>['sh', '-c', kSpotlightMdfindCommand],
-            stdout: '$randomLocation1\n$randomLocation2\n$studioInApplication',
-          ),
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(randomLocation1, 'Contents', javaBin),
-              '-version',
-            ],
-          ),
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(randomLocation2, 'Contents', javaBin),
-              '-version',
-            ],
-          ),
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(studioInApplicationPlistFolder, javaBin),
-              '-version',
-            ],
-          ),
-        ]);
+      // Spotlight finds the one known and two random installations.
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['sh', '-c', kSpotlightMdfindCommand],
+          stdout: '$randomLocation1\n$randomLocation2\n$studioInApplication',
+        ),
+        FakeCommand(
+          command: <String>[fileSystem.path.join(randomLocation1, 'Contents', javaBin), '-version'],
+        ),
+        FakeCommand(
+          command: <String>[fileSystem.path.join(randomLocation2, 'Contents', javaBin), '-version'],
+        ),
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join(studioInApplicationPlistFolder, javaBin),
+            '-version',
+          ],
+        ),
+      ]);
 
-        // Results are de-duplicated, only 3 installed.
-        expect(AndroidStudio.allInstalled().length, 3);
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => processManager,
-        // Custom home paths are not supported on macOS nor Windows yet,
-        // so we force the platform to fake Linux here.
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+      // Results are de-duplicated, only 3 installed.
+      expect(
+        AndroidStudio.allInstalled(
+          config: config,
+          fileSystem: fileSystem,
+          fileSystemUtils: fsUtils,
+          logger: logger,
+          platform: platform,
+          plistParser: plistUtils,
+          processManager: processManager,
+        ).length,
+        3,
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext(
-      'installation detection on MacOS gracefully handles unresponsive Spotlight query (issue #189177)',
-      () {
-        processManager.addCommands(<FakeCommand>[
-          const FakeCommand(command: <String>['sh', '-c', kSpotlightMdfindCommand], exitCode: 137),
-        ]);
+    testWithoutContext('installation detection on MacOS gracefully handles unresponsive Spotlight query (issue #189177)', () {
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>['sh', '-c', kSpotlightMdfindCommand], exitCode: 137),
+      ]);
 
-        expect(AndroidStudio.allInstalled(), isEmpty);
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => processManager,
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+      expect(
+        AndroidStudio.allInstalled(
+          config: config,
+          fileSystem: fileSystem,
+          fileSystemUtils: fsUtils,
+          logger: logger,
+          platform: platform,
+          plistParser: plistUtils,
+          processManager: processManager,
+        ),
+        isEmpty,
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext(
-      'finds latest valid install',
-      () {
-        final String applicationPlistFolder = fileSystem.path.join(
-          '/',
-          'Applications',
-          'Android Studio.app',
-          'Contents',
-        );
-        fileSystem.directory(applicationPlistFolder).createSync(recursive: true);
+    testWithoutContext('finds latest valid install', () {
+      final String applicationPlistFolder = fileSystem.path.join(
+        '/',
+        'Applications',
+        'Android Studio.app',
+        'Contents',
+      );
+      fileSystem.directory(applicationPlistFolder).createSync(recursive: true);
 
-        final String applicationsPlistFilePath = fileSystem.path.join(
-          applicationPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[applicationsPlistFilePath] = macStudioInfoPlist3_3;
+      final String applicationsPlistFilePath = fileSystem.path.join(
+        applicationPlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[applicationsPlistFilePath] = macStudioInfoPlist3_3;
 
-        final String homeDirectoryPlistFolder = fileSystem.path.join(
-          fsUtils.homeDirPath!,
-          'Applications',
-          'Android Studio.app',
-          'Contents',
-        );
-        fileSystem.directory(homeDirectoryPlistFolder).createSync(recursive: true);
+      final String homeDirectoryPlistFolder = fileSystem.path.join(
+        fsUtils.homeDirPath!,
+        'Applications',
+        'Android Studio.app',
+        'Contents',
+      );
+      fileSystem.directory(homeDirectoryPlistFolder).createSync(recursive: true);
 
-        final String homeDirectoryPlistFilePath = fileSystem.path.join(
-          homeDirectoryPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist4_1;
+      final String homeDirectoryPlistFilePath = fileSystem.path.join(
+        homeDirectoryPlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist4_1;
 
-        expect(AndroidStudio.allInstalled().length, 2);
-        expect(AndroidStudio.latestValid()!.version, Version(4, 1, 0));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+      expect(
+        AndroidStudio.allInstalled(
+          config: config,
+          fileSystem: fileSystem,
+          fileSystemUtils: fsUtils,
+          logger: logger,
+          platform: platform,
+          plistParser: plistUtils,
+          processManager: FakeProcessManager.any(),
+        ).length,
+        2,
+      );
+      expect(
+        AndroidStudio.latestValid(
+          config: config,
+          fileSystem: fileSystem,
+          fileSystemUtils: fsUtils,
+          logger: logger,
+          platform: platform,
+          plistParser: plistUtils,
+          processManager: FakeProcessManager.any(),
+        )!.version,
+        Version(4, 1, 0),
+      );
+    });
 
-    testUsingContext(
-      'extracts custom paths for directly downloaded Android Studio',
-      () {
-        final String studioInApplicationPlistFolder = fileSystem.path.join(
-          '/',
-          'Application',
-          'Android Studio.app',
-          'Contents',
-        );
-        fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+    testWithoutContext('extracts custom paths for directly downloaded Android Studio', () {
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-        final String plistFilePath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[plistFilePath] = macStudioInfoPlist3_3;
-        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        )!;
-        expect(studio, isNotNull);
-        expect(
-          studio.pluginsPath,
-          equals(
-            fileSystem.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3'),
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => FakeProcessManager.any(),
-        // Custom home paths are not supported on macOS nor Windows yet,
-        // so we force the platform to fake Linux here.
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+      final String plistFilePath = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist3_3;
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        plistParser: plistUtils,
+        processManager: FakeProcessManager.any(),
+      )!;
+      expect(studio, isNotNull);
+      expect(
+        studio.pluginsPath,
+        equals(fileSystem.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3')),
+      );
+    });
 
-    testUsingContext(
-      'finds Android Studio 2020.3 bundled Java version',
-      () {
-        final String studioInApplicationPlistFolder = fileSystem.path.join(
-          '/',
-          'Application',
-          'Android Studio.app',
-          'Contents',
-        );
-        fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+    testWithoutContext('finds Android Studio 2020.3 bundled Java version', () {
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-        final String plistFilePath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2020_3;
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(
-                studioInApplicationPlistFolder,
-                'jre',
-                'Contents',
-                'Home',
-                'bin',
-                'java',
-              ),
-              '-version',
-            ],
-            stderr: '123',
-          ),
-        );
-        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        )!;
+      final String plistFilePath = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2020_3;
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join(
+              studioInApplicationPlistFolder,
+              'jre',
+              'Contents',
+              'Home',
+              'bin',
+              'java',
+            ),
+            '-version',
+          ],
+          stderr: '123',
+        ),
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        plistParser: plistUtils,
+        processManager: processManager,
+      )!;
 
-        expect(
-          studio.javaPath,
-          equals(fileSystem.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home')),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => processManager,
-        // Custom home paths are not supported on macOS nor Windows yet,
-        // so we force the platform to fake Linux here.
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+      expect(
+        studio.javaPath,
+        equals(fileSystem.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home')),
+      );
+    });
 
-    testUsingContext(
-      'finds Android Studio 2022.1 bundled Java version',
-      () {
-        final String studioInApplicationPlistFolder = fileSystem.path.join(
-          '/',
-          'Application',
-          'Android Studio.app',
-          'Contents',
-        );
-        fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+    testWithoutContext('finds Android Studio 2022.1 bundled Java version', () {
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-        final String plistFilePath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2022_1;
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              fileSystem.path.join(
-                studioInApplicationPlistFolder,
-                'jbr',
-                'Contents',
-                'Home',
-                'bin',
-                'java',
-              ),
-              '-version',
-            ],
-            stderr: '123',
-          ),
-        );
-        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        )!;
+      final String plistFilePath = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2022_1;
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join(
+              studioInApplicationPlistFolder,
+              'jbr',
+              'Contents',
+              'Home',
+              'bin',
+              'java',
+            ),
+            '-version',
+          ],
+          stderr: '123',
+        ),
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        plistParser: plistUtils,
+        processManager: processManager,
+      )!;
 
-        expect(
-          studio.javaPath,
-          equals(fileSystem.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home')),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => processManager,
-        // Custom home paths are not supported on macOS nor Windows yet,
-        // so we force the platform to fake Linux here.
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+      expect(
+        studio.javaPath,
+        equals(fileSystem.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home')),
+      );
+    });
 
-    testUsingContext(
-      'finds bundled Java version when Android Studio version is unknown by assuming the latest version',
-      () {
-        final String studioInApplicationPlistFolder = fileSystem.path.join(
-          '/',
-          'Application',
-          'Android Studio.app',
-          'Contents',
-        );
-        fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+    testWithoutContext('finds bundled Java version when Android Studio version is unknown by assuming the latest version', () {
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-        final String plistFilePath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'Info.plist',
-        );
-        final plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
-        plistWithoutVersion['CFBundleShortVersionString'] = '';
-        plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
+      final String plistFilePath = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'Info.plist',
+      );
+      final plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
+      plistWithoutVersion['CFBundleShortVersionString'] = '';
+      plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
 
-        final String jdkPath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'jbr',
-          'Contents',
-          'Home',
-        );
+      final String jdkPath = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'jbr',
+        'Contents',
+        'Home',
+      );
 
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[fileSystem.path.join(jdkPath, 'bin', 'java'), '-version'],
-            stderr: '123',
-          ),
-        );
-        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        )!;
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[fileSystem.path.join(jdkPath, 'bin', 'java'), '-version'],
+          stderr: '123',
+        ),
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        plistParser: plistUtils,
+        processManager: processManager,
+      )!;
 
-        expect(studio.version, null);
-        expect(studio.javaPath, jdkPath);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => processManager,
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+      expect(studio.version, null);
+      expect(studio.javaPath, jdkPath);
+    });
 
-    testUsingContext(
-      'when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version',
-      () {
-        final String studioInApplicationPlistFolder = fileSystem.path.join(
-          '/',
-          'Application',
-          'Android Studio.app',
-          'Contents',
-        );
-        fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+    testWithoutContext('when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version', () {
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-        final String plistFilePath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'Info.plist',
-        );
-        final plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
-        plistWithoutVersion['CFBundleShortVersionString'] = '99999.99.99';
-        plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
+      final String plistFilePath = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'Info.plist',
+      );
+      final plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
+      plistWithoutVersion['CFBundleShortVersionString'] = '99999.99.99';
+      plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
 
-        final String jdkPathFor2022 = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'jbr',
-          'Contents',
-          'Home',
-        );
+      final String jdkPathFor2022 = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'jbr',
+        'Contents',
+        'Home',
+      );
 
-        final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-          fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        )!;
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        plistParser: plistUtils,
+        processManager: FakeProcessManager.any(),
+      )!;
 
-        expect(studio.version, equals(Version(99999, 99, 99)));
-        expect(studio.javaPath, jdkPathFor2022);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+      expect(studio.version, equals(Version(99999, 99, 99)));
+      expect(studio.javaPath, jdkPathFor2022);
+    });
 
-    testUsingContext(
-      'discovers explicitly configured Android Studio',
-      () {
-        final String extractedDownloadZip = fileSystem.path.join(
-          '/',
-          'Users',
-          'Dash',
-          'Desktop',
-          'android-studio',
-        );
-        config.setValue('android-studio-dir', extractedDownloadZip);
-        final String studioInApplicationPlistFolder = fileSystem.path.join(
-          extractedDownloadZip,
-          'Contents',
-        );
-        fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
-        final String plistFilePath = fileSystem.path.join(
-          studioInApplicationPlistFolder,
-          'Info.plist',
-        );
-        plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2022_1;
+    testWithoutContext('discovers explicitly configured Android Studio', () {
+      final String extractedDownloadZip = fileSystem.path.join(
+        '/',
+        'Users',
+        'Dash',
+        'Desktop',
+        'android-studio',
+      );
+      config.setValue('android-studio-dir', extractedDownloadZip);
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        extractedDownloadZip,
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      final String plistFilePath = fileSystem.path.join(
+        studioInApplicationPlistFolder,
+        'Info.plist',
+      );
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2022_1;
 
-        final String studioInApplicationJavaBinary = fileSystem.path.join(
-          extractedDownloadZip,
-          'Contents',
-          'jbr',
-          'Contents',
-          'Home',
-          'bin',
-          'java',
-        );
+      final String studioInApplicationJavaBinary = fileSystem.path.join(
+        extractedDownloadZip,
+        'Contents',
+        'jbr',
+        'Contents',
+        'Home',
+        'bin',
+        'java',
+      );
 
-        processManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: const <String>['sh', '-c', kSpotlightMdfindCommand],
-            stdout: extractedDownloadZip,
-          ),
-          FakeCommand(command: <String>[studioInApplicationJavaBinary, '-version']),
-        ]);
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['sh', '-c', kSpotlightMdfindCommand],
+          stdout: extractedDownloadZip,
+        ),
+        FakeCommand(command: <String>[studioInApplicationJavaBinary, '-version']),
+      ]);
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        plistParser: plistUtils,
+        processManager: processManager,
+      ).single;
 
-        expect(studio.configuredPath, extractedDownloadZip);
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        Config: () => config,
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        ProcessManager: () => processManager,
-        Platform: () => platform,
-        PlistParser: () => plistUtils,
-      },
-    );
+      expect(studio.configuredPath, extractedDownloadZip);
+      expect(processManager, hasNoRemainingExpectations);
+    });
   });
 
   group('installation detection on Windows', () {
     late Config config;
     late Platform platform;
     late FileSystem fileSystem;
+    late BufferLogger logger;
 
     setUp(() {
       config = Config.test();
@@ -873,109 +813,106 @@ void main() {
         environment: <String, String>{'LOCALAPPDATA': r'C:\Users\Dash\AppData\Local'},
       );
       fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      logger = BufferLogger.test();
     });
 
-    testUsingContext(
-      'discovers Android Studio 4.1 location',
-      () {
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-        fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    testWithoutContext('discovers Android Studio 4.1 location', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.version, Version(4, 1, 0));
-        expect(studio.studioAppName, 'Android Studio');
-      },
-      overrides: <Type, Generator>{
-        Platform: () => platform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(studio.version, Version(4, 1, 0));
+      expect(studio.studioAppName, 'Android Studio');
+    });
 
-    testUsingContext(
-      'discovers Android Studio 4.2 location',
-      () {
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-        fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    testWithoutContext('discovers Android Studio 4.2 location', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.version, Version(4, 2, 0));
-        expect(studio.studioAppName, 'Android Studio');
-      },
-      overrides: <Type, Generator>{
-        Platform: () => platform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(studio.version, Version(4, 2, 0));
+      expect(studio.studioAppName, 'Android Studio');
+    });
 
-    testUsingContext(
-      'discovers Android Studio 2020.3 location',
-      () {
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-        fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    testWithoutContext('discovers Android Studio 2020.3 location', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.version, Version(2020, 3, 0));
-        expect(studio.studioAppName, 'Android Studio');
-      },
-      overrides: <Type, Generator>{
-        Platform: () => platform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(studio.version, Version(2020, 3, 0));
+      expect(studio.studioAppName, 'Android Studio');
+    });
 
-    testUsingContext(
-      'does not discover Android Studio 4.1 location if LOCALAPPDATA is null',
-      () {
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-        fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    testWithoutContext('does not discover Android Studio 4.1 location if LOCALAPPDATA is null', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
-        expect(AndroidStudio.allInstalled(), isEmpty);
-      },
-      overrides: <Type, Generator>{
-        Platform: () => FakePlatform(
-          operatingSystem: 'windows',
-          environment: <String, String>{}, // Does not include LOCALAPPDATA
+      expect(
+        AndroidStudio.allInstalled(
+          config: config,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: FakePlatform(
+            operatingSystem: 'windows',
+            environment: <String, String>{}, // Does not include LOCALAPPDATA
+          ),
+          processManager: FakeProcessManager.any(),
         ),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+        isEmpty,
+      );
+    });
 
-    testUsingContext(
-      'does not discover Android Studio 4.2 location if LOCALAPPDATA is null',
-      () {
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-        fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    testWithoutContext('does not discover Android Studio 4.2 location if LOCALAPPDATA is null', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
-        expect(AndroidStudio.allInstalled(), isEmpty);
-      },
-      overrides: <Type, Generator>{
-        Platform: () => FakePlatform(
-          operatingSystem: 'windows',
-          environment: <String, String>{}, // Does not include LOCALAPPDATA
+      expect(
+        AndroidStudio.allInstalled(
+          config: config,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: FakePlatform(
+            operatingSystem: 'windows',
+            environment: <String, String>{}, // Does not include LOCALAPPDATA
+          ),
+          processManager: FakeProcessManager.any(),
         ),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+        isEmpty,
+      );
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'does not discover Android Studio 2020.3 location if LOCALAPPDATA is null',
       () {
         fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
@@ -983,124 +920,117 @@ void main() {
           ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
         fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
-        expect(AndroidStudio.allInstalled(), isEmpty);
-      },
-      overrides: <Type, Generator>{
-        Platform: () => FakePlatform(
-          operatingSystem: 'windows',
-          environment: <String, String>{}, // Does not include LOCALAPPDATA
-        ),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
-
-    testUsingContext(
-      'finds Android Studio 2020.3 bundled Java version',
-      () {
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-        fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
-
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
-
-        expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jre'));
-      },
-      overrides: <Type, Generator>{
-        Platform: () => platform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
+        expect(
+          AndroidStudio.allInstalled(
+            config: config,
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: FakePlatform(
+              operatingSystem: 'windows',
+              environment: <String, String>{}, // Does not include LOCALAPPDATA
+            ),
+            processManager: FakeProcessManager.any(),
+          ),
+          isEmpty,
+        );
       },
     );
 
-    testUsingContext(
-      'finds Android Studio 2022.1 bundled Java version',
-      () {
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2022.1\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-        fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    testWithoutContext('finds Android Studio 2020.3 bundled Java version', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
-      },
-      overrides: <Type, Generator>{
-        Platform: () => platform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jre'));
+    });
 
-    testUsingContext(
-      'finds bundled Java version when Android Studio version is unknown by assuming the latest version',
-      () {
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-        fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    testWithoutContext('finds Android Studio 2022.1 bundled Java version', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2022.1\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
-        fileSystem.file(r'C:\Program Files\AndroidStudio\jbr\bin\java').createSync(recursive: true);
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
+    });
 
-        expect(studio.version, null);
-        expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
-      },
-      overrides: <Type, Generator>{
-        Platform: () => platform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+    testWithoutContext('finds bundled Java version when Android Studio version is unknown by assuming the latest version', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
-    testUsingContext(
-      'when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version',
-      () {
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio99999.99.99\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-        fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+      fileSystem.file(r'C:\Program Files\AndroidStudio\jbr\bin\java').createSync(recursive: true);
 
-        fileSystem.file(r'C:\Program Files\AndroidStudio\jbr\bin\java').createSync(recursive: true);
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      expect(studio.version, null);
+      expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
+    });
 
-        const expectedJdkLocationFor2022 = r'C:\Program Files\AndroidStudio\jbr';
-        expect(studio.version, equals(Version(99999, 99, 99)));
-        expect(studio.javaPath, equals(expectedJdkLocationFor2022));
-      },
-      overrides: <Type, Generator>{
-        Platform: () => platform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+    testWithoutContext('when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio99999.99.99\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
-    testUsingContext(
-      'discovers explicitly configured Android Studio',
-      () {
-        const androidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
-        config.setValue('android-studio-dir', androidStudioDir);
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2022.1\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(androidStudioDir);
-        fileSystem.directory(androidStudioDir).createSync(recursive: true);
+      fileSystem.file(r'C:\Program Files\AndroidStudio\jbr\bin\java').createSync(recursive: true);
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.version, equals(Version(2022, 1, null)));
-        expect(studio.configuredPath, androidStudioDir);
-        expect(studio.javaPath, fileSystem.path.join(androidStudioDir, 'jbr'));
-      },
-      overrides: <Type, Generator>{
-        Config: () => config,
-        Platform: () => platform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      const expectedJdkLocationFor2022 = r'C:\Program Files\AndroidStudio\jbr';
+      expect(studio.version, equals(Version(99999, 99, 99)));
+      expect(studio.javaPath, equals(expectedJdkLocationFor2022));
+    });
+
+    testWithoutContext('discovers explicitly configured Android Studio', () {
+      const androidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
+      config.setValue('android-studio-dir', androidStudioDir);
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2022.1\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(androidStudioDir);
+      fileSystem.directory(androidStudioDir).createSync(recursive: true);
+
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
+
+      expect(studio.version, equals(Version(2022, 1, null)));
+      expect(studio.configuredPath, androidStudioDir);
+      expect(studio.javaPath, fileSystem.path.join(androidStudioDir, 'jbr'));
+    });
   });
 
   group('installation detection on Linux', () {
@@ -1109,6 +1039,7 @@ void main() {
     late Config config;
     late FileSystem fileSystem;
     late FileSystemUtils fsUtils;
+    late BufferLogger logger;
     late Platform platform;
 
     setUp(() {
@@ -1116,288 +1047,268 @@ void main() {
       platform = FakePlatform(environment: <String, String>{'HOME': homeLinux});
       fileSystem = MemoryFileSystem.test();
       fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
+      logger = BufferLogger.test();
     });
 
-    testUsingContext(
-      'discovers Android Studio <4.1',
-      () {
-        const studioHomeFilePath = '$homeLinux/.AndroidStudio4.0/system/.home';
-        const studioInstallPath = '$homeLinux/AndroidStudio';
+    testWithoutContext('discovers Android Studio <4.1', () {
+      const studioHomeFilePath = '$homeLinux/.AndroidStudio4.0/system/.home';
+      const studioInstallPath = '$homeLinux/AndroidStudio';
 
-        fileSystem.file(studioHomeFilePath)
-          ..createSync(recursive: true)
-          ..writeAsStringSync(studioInstallPath);
+      fileSystem.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
 
-        fileSystem.directory(studioInstallPath).createSync();
+      fileSystem.directory(studioInstallPath).createSync();
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.version, Version(4, 0, 0));
-        expect(studio.studioAppName, 'AndroidStudio');
-        expect(studio.pluginsPath, '/home/me/.AndroidStudio4.0/config/plugins');
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(studio.version, Version(4, 0, 0));
+      expect(studio.studioAppName, 'AndroidStudio');
+      expect(studio.pluginsPath, '/home/me/.AndroidStudio4.0/config/plugins');
+    });
 
-    testUsingContext(
-      'discovers Android Studio >=4.1',
-      () {
-        const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
-        const studioInstallPath = '$homeLinux/AndroidStudio';
+    testWithoutContext('discovers Android Studio >=4.1', () {
+      const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
+      const studioInstallPath = '$homeLinux/AndroidStudio';
 
-        fileSystem.file(studioHomeFilePath)
-          ..createSync(recursive: true)
-          ..writeAsStringSync(studioInstallPath);
+      fileSystem.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
 
-        fileSystem.directory(studioInstallPath).createSync();
+      fileSystem.directory(studioInstallPath).createSync();
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.version, Version(4, 1, 0));
-        expect(studio.studioAppName, 'AndroidStudio');
-        expect(studio.pluginsPath, '/home/me/.local/share/Google/AndroidStudio4.1');
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(studio.version, Version(4, 1, 0));
+      expect(studio.studioAppName, 'AndroidStudio');
+      expect(studio.pluginsPath, '/home/me/.local/share/Google/AndroidStudio4.1');
+    });
 
-    testUsingContext(
-      'discovers when installed with Toolbox',
-      () {
-        const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
-        const studioInstallPath =
-            '$homeLinux/.local/share/JetBrains/Toolbox/apps/AndroidStudio/ch-0/201.7042882';
-        const pluginsInstallPath = '$studioInstallPath.plugins';
+    testWithoutContext('discovers when installed with Toolbox', () {
+      const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
+      const studioInstallPath =
+          '$homeLinux/.local/share/JetBrains/Toolbox/apps/AndroidStudio/ch-0/201.7042882';
+      const pluginsInstallPath = '$studioInstallPath.plugins';
 
-        fileSystem.file(studioHomeFilePath)
-          ..createSync(recursive: true)
-          ..writeAsStringSync(studioInstallPath);
+      fileSystem.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
 
-        fileSystem.directory(studioInstallPath).createSync(recursive: true);
-        fileSystem.directory(pluginsInstallPath).createSync();
+      fileSystem.directory(studioInstallPath).createSync(recursive: true);
+      fileSystem.directory(pluginsInstallPath).createSync();
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.version, Version(4, 1, 0));
-        expect(studio.studioAppName, 'AndroidStudio');
-        expect(studio.pluginsPath, pluginsInstallPath);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(studio.version, Version(4, 1, 0));
+      expect(studio.studioAppName, 'AndroidStudio');
+      expect(studio.pluginsPath, pluginsInstallPath);
+    });
 
-    testUsingContext(
-      'finds Android Studio 2020.3 bundled Java version',
-      () {
-        const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2020.3/.home';
-        const studioInstallPath = '$homeLinux/AndroidStudio';
+    testWithoutContext('finds Android Studio 2020.3 bundled Java version', () {
+      const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2020.3/.home';
+      const studioInstallPath = '$homeLinux/AndroidStudio';
 
-        fileSystem.file(studioHomeFilePath)
-          ..createSync(recursive: true)
-          ..writeAsStringSync(studioInstallPath);
+      fileSystem.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
 
-        fileSystem.directory(studioInstallPath).createSync();
+      fileSystem.directory(studioInstallPath).createSync();
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.javaPath, equals('$studioInstallPath/jre'));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(studio.javaPath, equals('$studioInstallPath/jre'));
+    });
 
-    testUsingContext(
-      'finds Android Studio 2022.1 bundled Java version',
-      () {
-        const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2022.1/.home';
-        const studioInstallPath = '$homeLinux/AndroidStudio';
+    testWithoutContext('finds Android Studio 2022.1 bundled Java version', () {
+      const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2022.1/.home';
+      const studioInstallPath = '$homeLinux/AndroidStudio';
 
-        fileSystem.file(studioHomeFilePath)
-          ..createSync(recursive: true)
-          ..writeAsStringSync(studioInstallPath);
+      fileSystem.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
 
-        fileSystem.directory(studioInstallPath).createSync();
+      fileSystem.directory(studioInstallPath).createSync();
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.javaPath, equals('$studioInstallPath/jbr'));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(studio.javaPath, equals('$studioInstallPath/jbr'));
+    });
 
-    testUsingContext(
-      'finds bundled Java version when Android Studio version is unknown by assuming the latest version',
-      () {
-        const configuredStudioInstallPath = '$homeLinux/AndroidStudio';
-        config.setValue('android-studio-dir', configuredStudioInstallPath);
+    testWithoutContext('finds bundled Java version when Android Studio version is unknown by assuming the latest version', () {
+      const configuredStudioInstallPath = '$homeLinux/AndroidStudio';
+      config.setValue('android-studio-dir', configuredStudioInstallPath);
 
-        fileSystem.directory(configuredStudioInstallPath).createSync(recursive: true);
+      fileSystem.directory(configuredStudioInstallPath).createSync(recursive: true);
 
-        fileSystem.directory(configuredStudioInstallPath).createSync();
+      fileSystem.directory(configuredStudioInstallPath).createSync();
 
-        fileSystem
-            .file(fileSystem.path.join(configuredStudioInstallPath, 'jbr', 'bin', 'java'))
-            .createSync(recursive: true);
+      fileSystem
+          .file(fileSystem.path.join(configuredStudioInstallPath, 'jbr', 'bin', 'java'))
+          .createSync(recursive: true);
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.version, null);
-        expect(studio.javaPath, equals('$configuredStudioInstallPath/jbr'));
-      },
-      overrides: <Type, Generator>{
-        Config: () => config,
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(studio.version, null);
+      expect(studio.javaPath, equals('$configuredStudioInstallPath/jbr'));
+    });
 
-    testUsingContext(
-      'when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version',
-      () {
-        const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio99999.99.99/.home';
-        const studioInstallPath = '$homeLinux/AndroidStudio';
+    testWithoutContext('when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version', () {
+      const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio99999.99.99/.home';
+      const studioInstallPath = '$homeLinux/AndroidStudio';
 
-        fileSystem.file(studioHomeFilePath)
-          ..createSync(recursive: true)
-          ..writeAsStringSync(studioInstallPath);
+      fileSystem.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
 
-        fileSystem.directory(studioInstallPath).createSync();
+      fileSystem.directory(studioInstallPath).createSync();
 
-        final String expectedJdkLocationFor2022 = fileSystem.path.join(
-          studioInstallPath,
-          'jbr',
-          'bin',
-          'java',
-        );
-        fileSystem.file(expectedJdkLocationFor2022).createSync(recursive: true);
+      final String expectedJdkLocationFor2022 = fileSystem.path.join(
+        studioInstallPath,
+        'jbr',
+        'bin',
+        'java',
+      );
+      fileSystem.file(expectedJdkLocationFor2022).createSync(recursive: true);
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.version, equals(Version(99999, 99, 99)));
-        expect(studio.javaPath, equals('$studioInstallPath/jbr'));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        FileSystemUtils: () => fsUtils,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(studio.version, equals(Version(99999, 99, 99)));
+      expect(studio.javaPath, equals('$studioInstallPath/jbr'));
+    });
 
-    testUsingContext(
-      'pluginsPath extracts custom paths from home dir',
-      () {
-        const installPath = '/opt/android-studio-with-cheese-5.0';
-        const studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
-        const homeFile = '$studioHome/system/.home';
-        fileSystem.directory(installPath).createSync(recursive: true);
-        fileSystem.file(homeFile).createSync(recursive: true);
-        fileSystem.file(homeFile).writeAsStringSync(installPath);
+    testWithoutContext('pluginsPath extracts custom paths from home dir', () {
+      const installPath = '/opt/android-studio-with-cheese-5.0';
+      const studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
+      const homeFile = '$studioHome/system/.home';
+      fileSystem.directory(installPath).createSync(recursive: true);
+      fileSystem.file(homeFile).createSync(recursive: true);
+      fileSystem.file(homeFile).writeAsStringSync(installPath);
 
-        final AndroidStudio studio = AndroidStudio.fromHomeDot(fileSystem.directory(studioHome))!;
-        expect(studio, isNotNull);
-        expect(studio.pluginsPath, equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        // Custom home paths are not supported on macOS nor Windows yet,
-        // so we force the platform to fake Linux here.
-        Platform: () => platform,
-        FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: platform),
-      },
-    );
+      final AndroidStudio studio = AndroidStudio.fromHomeDot(
+        fileSystem.directory(studioHome),
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      )!;
+      expect(studio, isNotNull);
+      expect(studio.pluginsPath, equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'pluginsPath returns null when version is unknown and no toolbox path (no 0.0 fallback)',
       () {
         const installPath = '/opt/android-studio-unknown';
         fileSystem.directory(installPath).createSync(recursive: true);
-        final studio = AndroidStudio(installPath);
+        final studio = AndroidStudio(
+          installPath,
+          fileSystem: fileSystem,
+          fileSystemUtils: fsUtils,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        );
         expect(studio.version, isNull);
         expect(studio.pluginsPath, isNull);
       },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => platform,
-        FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: platform),
-      },
     );
 
-    testUsingContext(
-      'pluginsPath returns toolbox path when version is unknown on Linux',
-      () {
-        const installPath = '/opt/android-studio-unknown';
-        const toolboxPluginsPath = '$installPath.plugins';
-        fileSystem.directory(installPath).createSync(recursive: true);
-        fileSystem.directory(toolboxPluginsPath).createSync(recursive: true);
-        final studio = AndroidStudio(installPath);
-        expect(studio.version, isNull);
-        expect(studio.pluginsPath, equals(toolboxPluginsPath));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => platform,
-        FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: platform),
-      },
-    );
+    testWithoutContext('pluginsPath returns toolbox path when version is unknown on Linux', () {
+      const installPath = '/opt/android-studio-unknown';
+      const toolboxPluginsPath = '$installPath.plugins';
+      fileSystem.directory(installPath).createSync(recursive: true);
+      fileSystem.directory(toolboxPluginsPath).createSync(recursive: true);
+      final studio = AndroidStudio(
+        installPath,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      );
+      expect(studio.version, isNull);
+      expect(studio.pluginsPath, equals(toolboxPluginsPath));
+    });
 
-    testUsingContext(
-      'discovers explicitly configured Android Studio',
-      () {
-        const androidStudioDir = '/Users/Dash/Desktop/android-studio';
-        config.setValue('android-studio-dir', androidStudioDir);
-        const studioHome = '$homeLinux/.cache/Google/AndroidStudio2022.3/.home';
-        fileSystem.file(studioHome)
-          ..createSync(recursive: true)
-          ..writeAsStringSync(androidStudioDir);
-        fileSystem.directory(androidStudioDir).createSync(recursive: true);
+    testWithoutContext('discovers explicitly configured Android Studio', () {
+      const androidStudioDir = '/Users/Dash/Desktop/android-studio';
+      config.setValue('android-studio-dir', androidStudioDir);
+      const studioHome = '$homeLinux/.cache/Google/AndroidStudio2022.3/.home';
+      fileSystem.file(studioHome)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(androidStudioDir);
+      fileSystem.directory(androidStudioDir).createSync(recursive: true);
 
-        final AndroidStudio studio = AndroidStudio.allInstalled().single;
+      final AndroidStudio studio = AndroidStudio.allInstalled(
+        config: config,
+        fileSystem: fileSystem,
+        fileSystemUtils: fsUtils,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      ).single;
 
-        expect(studio.version, equals(Version(2022, 3, null)));
-        expect(studio.configuredPath, androidStudioDir);
-        expect(studio.javaPath, fileSystem.path.join(androidStudioDir, 'jbr'));
-      },
-      overrides: <Type, Generator>{
-        Config: () => config,
-        Platform: () => platform,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(studio.version, equals(Version(2022, 3, null)));
+      expect(studio.configuredPath, androidStudioDir);
+      expect(studio.javaPath, fileSystem.path.join(androidStudioDir, 'jbr'));
+    });
   });
 
   group('latestValid', () {
     late Config config;
     late Platform platform;
     late FileSystem fileSystem;
+    late BufferLogger logger;
 
     setUp(() {
       config = Config.test();
@@ -1406,33 +1317,44 @@ void main() {
         environment: <String, String>{'LOCALAPPDATA': r'C:\Users\Dash\AppData\Local'},
       );
       fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      logger = BufferLogger.test();
     });
 
-    testUsingContext(
-      'chooses the install with the latest version',
-      () {
-        const versions = <String>['4.0', '2022.0', '3.1'];
+    testWithoutContext('chooses the install with the latest version', () {
+      const versions = <String>['4.0', '2022.0', '3.1'];
 
-        for (final version in versions) {
-          fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
-          fileSystem
-              .directory('C:\\Program Files\\AndroidStudio$version')
-              .createSync(recursive: true);
-        }
+      for (final version in versions) {
+        fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
+        fileSystem
+            .directory('C:\\Program Files\\AndroidStudio$version')
+            .createSync(recursive: true);
+      }
 
-        expect(AndroidStudio.allInstalled().length, 3);
-        expect(AndroidStudio.latestValid()!.version, Version(2022, 0, 0));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(
+        AndroidStudio.allInstalled(
+          config: config,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ).length,
+        3,
+      );
+      expect(
+        AndroidStudio.latestValid(
+          config: config,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        )!.version,
+        Version(2022, 0, 0),
+      );
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'prefers installs with known versions over installs with unknown versions',
       () {
         const versions = <String>['3.0', 'unknown'];
@@ -1446,121 +1368,159 @@ void main() {
               .createSync(recursive: true);
         }
 
-        expect(AndroidStudio.allInstalled().length, 2);
-        expect(AndroidStudio.latestValid()!.version, Version(3, 0, 0));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
-
-    testUsingContext(
-      'chooses install with lexicographically greatest directory if no installs have known versions',
-      () {
-        const versions = <String>['Apple', 'Zucchini', 'Banana'];
-
-        for (final version in versions) {
-          fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
-          fileSystem
-              .directory('C:\\Program Files\\AndroidStudio$version')
-              .createSync(recursive: true);
-        }
-
-        expect(AndroidStudio.allInstalled().length, 3);
-        expect(AndroidStudio.latestValid()!.directory, r'C:\Program Files\AndroidStudioZucchini');
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
-
-    testUsingContext(
-      'chooses install with lexicographically greatest directory if all installs have the same version',
-      () {
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudioPreview4.0\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'C:\Program Files\AndroidStudioPreview4.0');
-        fileSystem
-            .directory(r'C:\Program Files\AndroidStudioPreview4.0')
-            .createSync(recursive: true);
-
-        fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.0\.home')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(r'C:\Program Files\AndroidStudio4.0');
-        fileSystem.directory(r'C:\Program Files\AndroidStudio4.0').createSync(recursive: true);
-
-        expect(AndroidStudio.allInstalled().length, 2);
-        expect(AndroidStudio.latestValid()!.directory, contains('Preview'));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
-
-    testUsingContext(
-      'always chooses the install configured by --android-studio-dir, even if the install is invalid',
-      () {
-        const configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
-        config.setValue('android-studio-dir', configuredAndroidStudioDir);
-
-        // The directory exists, but nothing is inside.
-        fileSystem.directory(configuredAndroidStudioDir).createSync(recursive: true);
-        (globals.processManager as FakeProcessManager).excludedExecutables.add(
-          fileSystem.path.join(configuredAndroidStudioDir, 'jbr', 'bin', 'java'),
+        expect(
+          AndroidStudio.allInstalled(
+            config: config,
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ).length,
+          2,
         );
-
-        const validVersions = <String>['4.0', '2.0', '3.1'];
-
-        for (final version in validVersions) {
-          fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
-          fileSystem
-              .directory('C:\\Program Files\\AndroidStudio$version')
-              .createSync(recursive: true);
-        }
-
-        const validJavaPaths = <String>[
-          r'C:\Program Files\AndroidStudio4.0\jre\bin\java',
-          r'C:\Program Files\AndroidStudio2.0\jre\bin\java',
-          r'C:\Program Files\AndroidStudio3.1\jre\bin\java',
-        ];
-
-        for (final javaPath in validJavaPaths) {
-          (globals.processManager as FakeProcessManager).addCommand(
-            FakeCommand(command: <String>[fileSystem.path.join(javaPath), '-version']),
-          );
-        }
-
-        expect(AndroidStudio.allInstalled().length, 4);
-
-        for (final javaPath in validJavaPaths) {
-          (globals.processManager as FakeProcessManager).addCommand(
-            FakeCommand(command: <String>[fileSystem.path.join(javaPath), '-version']),
-          );
-        }
-
-        final AndroidStudio chosenInstall = AndroidStudio.latestValid()!;
-        expect(chosenInstall.directory, configuredAndroidStudioDir);
-        expect(chosenInstall.isValid, false);
-      },
-      overrides: <Type, Generator>{
-        Config: () => config,
-        FileSystem: () => fileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.empty(),
+        expect(
+          AndroidStudio.latestValid(
+            config: config,
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          )!.version,
+          Version(3, 0, 0),
+        );
       },
     );
 
-    testUsingContext(
+    testWithoutContext('chooses install with lexicographically greatest directory if no installs have known versions', () {
+      const versions = <String>['Apple', 'Zucchini', 'Banana'];
+
+      for (final version in versions) {
+        fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
+        fileSystem
+            .directory('C:\\Program Files\\AndroidStudio$version')
+            .createSync(recursive: true);
+      }
+
+      expect(
+        AndroidStudio.allInstalled(
+          config: config,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ).length,
+        3,
+      );
+      expect(
+        AndroidStudio.latestValid(
+          config: config,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        )!.directory,
+        r'C:\Program Files\AndroidStudioZucchini',
+      );
+    });
+
+    testWithoutContext('chooses install with lexicographically greatest directory if all installs have the same version', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudioPreview4.0\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudioPreview4.0');
+      fileSystem.directory(r'C:\Program Files\AndroidStudioPreview4.0').createSync(recursive: true);
+
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.0\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio4.0');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio4.0').createSync(recursive: true);
+
+      expect(
+        AndroidStudio.allInstalled(
+          config: config,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ).length,
+        2,
+      );
+      expect(
+        AndroidStudio.latestValid(
+          config: config,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        )!.directory,
+        contains('Preview'),
+      );
+    });
+
+    testWithoutContext('always chooses the install configured by --android-studio-dir, even if the install is invalid', () {
+      final processManager = FakeProcessManager.empty();
+      const configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
+      config.setValue('android-studio-dir', configuredAndroidStudioDir);
+
+      // The directory exists, but nothing is inside.
+      fileSystem.directory(configuredAndroidStudioDir).createSync(recursive: true);
+      processManager.excludedExecutables.add(
+        fileSystem.path.join(configuredAndroidStudioDir, 'jbr', 'bin', 'java'),
+      );
+
+      const validVersions = <String>['4.0', '2.0', '3.1'];
+
+      for (final version in validVersions) {
+        fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
+        fileSystem
+            .directory('C:\\Program Files\\AndroidStudio$version')
+            .createSync(recursive: true);
+      }
+
+      const validJavaPaths = <String>[
+        r'C:\Program Files\AndroidStudio4.0\jre\bin\java',
+        r'C:\Program Files\AndroidStudio2.0\jre\bin\java',
+        r'C:\Program Files\AndroidStudio3.1\jre\bin\java',
+      ];
+
+      for (final javaPath in validJavaPaths) {
+        processManager.addCommand(
+          FakeCommand(command: <String>[fileSystem.path.join(javaPath), '-version']),
+        );
+      }
+
+      expect(
+        AndroidStudio.allInstalled(
+          config: config,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ).length,
+        4,
+      );
+
+      for (final javaPath in validJavaPaths) {
+        processManager.addCommand(
+          FakeCommand(command: <String>[fileSystem.path.join(javaPath), '-version']),
+        );
+      }
+
+      final AndroidStudio chosenInstall = AndroidStudio.latestValid(
+        config: config,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      )!;
+      expect(chosenInstall.directory, configuredAndroidStudioDir);
+      expect(chosenInstall.isValid, false);
+    });
+
+    testWithoutContext(
       'throws a ToolExit if --android-studio-dir is configured but the directory does not exist',
       () async {
         const configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
@@ -1568,9 +1528,15 @@ void main() {
 
         expect(fileSystem.directory(configuredAndroidStudioDir).existsSync(), false);
         expect(
-          () => AndroidStudio.latestValid(),
+          () => AndroidStudio.latestValid(
+            config: config,
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
           throwsA(
-            (dynamic e) =>
+            (Object? e) =>
                 e is ToolExit &&
                 e.message!.startsWith(
                   'Could not find the Android Studio installation at the manually configured path',
@@ -1578,35 +1544,26 @@ void main() {
           ),
         );
       },
-      overrides: <Type, Generator>{
-        Config: () => config,
-        FileSystem: () => fileSystem,
-        Platform: () => platform,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
     );
 
-    testUsingContext(
-      'handles file system exception when checking for explicitly configured Android Studio install',
-      () {
-        const androidStudioDir = '/Users/Dash/Desktop/android-studio';
-        config.setValue('android-studio-dir', androidStudioDir);
+    testWithoutContext('handles file system exception when checking for explicitly configured Android Studio install', () {
+      const androidStudioDir = '/Users/Dash/Desktop/android-studio';
+      config.setValue('android-studio-dir', androidStudioDir);
 
-        expect(
-          () => AndroidStudio.latestValid(),
-          throwsToolExit(
-            message: RegExp(r'[.\s\S]*Could not find[.\s\S]*FileSystemException[.\s\S]*'),
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        Config: () => config,
-        Platform: () => platform,
-        FileSystem: () => _FakeFileSystem(),
-        FileSystemUtils: () => _FakeFsUtils(),
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(
+        () => AndroidStudio.latestValid(
+          config: config,
+          fileSystem: _FakeFileSystem(),
+          fileSystemUtils: _FakeFsUtils(),
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
+        throwsToolExit(
+          message: RegExp(r'[.\s\S]*Could not find[.\s\S]*FileSystemException[.\s\S]*'),
+        ),
+      );
+    });
   });
 }
 
@@ -1621,7 +1578,7 @@ class FakePlistUtils extends Fake implements PlistParser {
 
 class _FakeFileSystem extends Fake implements FileSystem {
   @override
-  Directory directory(dynamic path) {
+  Directory directory(Object? path) {
     return _NonExistentDirectory();
   }
 
