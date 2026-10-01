@@ -1634,6 +1634,9 @@ class RenderTable extends RenderBox {
         // Layout the child according to its vertical alignment.
         switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
           case TableCellVerticalAlignment.baseline:
+            // TODO(hm21): Take rowSpan into account for baseline-aligned cells,
+            // which currently add their whole height to the row they start in.
+            // See https://github.com/flutter/flutter/issues/193626.
             assert(
               textBaseline != null,
               'An explicit textBaseline is required when using baseline alignment.',
