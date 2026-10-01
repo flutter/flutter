@@ -588,6 +588,7 @@ class LabelAndValue extends SemanticBehavior {
   void _cleanUpDom() {
     _cleanUpDescriptionOrDescribedBy();
     _representation?.cleanUp();
+    _representation = null;
   }
 
   @override

@@ -6532,12 +6532,48 @@ void _testLoadingSpinner() {
     expect(domDocument.activeElement, textFieldInput);
   });
 
-  test('respects isAccessibilityFocusBlocked on leaf and container nodes (#191484)', () {
+  test('respects isAccessibilityFocusBlocked on leaf and container nodes and restores label on unblock (#191484)', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
     final tester = SemanticsTester(owner());
+    // 1. Start unblocked so leaf text node creates SizedSpanRepresentation (<span>Status ready</span>).
+    tester.updateNode(
+      id: 0,
+      label: 'Blocked container',
+      flags: const ui.SemanticsFlags(isFocused: ui.Tristate.isFalse),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          label: 'Status ready',
+          flags: const ui.SemanticsFlags(isLiveRegion: true),
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+        tester.updateNode(
+          id: 2,
+          label: 'Accessible child',
+          rect: const ui.Rect.fromLTRB(0, 50, 100, 100),
+        ),
+        tester.updateNode(
+          id: 3,
+          label: 'Blocked button',
+          flags: const ui.SemanticsFlags(
+            isButton: true,
+            isFocused: ui.Tristate.isFalse,
+          ),
+          rect: const ui.Rect.fromLTRB(0, 100, 100, 150),
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject blockedContainer = tester.getSemanticsObject(0);
+    final SemanticsObject blockedLeaf = tester.getSemanticsObject(1);
+    final SemanticsObject blockedButton = tester.getSemanticsObject(3);
+    expect(blockedLeaf.element.text, 'Status ready');
+
+    // 2. Block nodes.
     tester.updateNode(
       id: 0,
       label: 'Blocked container',
@@ -6548,7 +6584,7 @@ void _testLoadingSpinner() {
       children: <SemanticsNodeUpdate>[
         tester.updateNode(
           id: 1,
-          label: 'Blocked leaf counter',
+          label: 'Status ready',
           flags: const ui.SemanticsFlags(isAccessibilityFocusBlocked: true, isLiveRegion: true),
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
         ),
@@ -6571,9 +6607,6 @@ void _testLoadingSpinner() {
     );
     tester.apply();
 
-    final SemanticsObject blockedContainer = tester.getSemanticsObject(0);
-    final SemanticsObject blockedLeaf = tester.getSemanticsObject(1);
-    final SemanticsObject blockedButton = tester.getSemanticsObject(3);
     expect(blockedContainer.isFocusable, isFalse);
     expect(blockedContainer.element.getAttribute('role'), 'none');
     expect(blockedContainer.element.getAttribute('aria-label'), isNull);
@@ -6582,6 +6615,45 @@ void _testLoadingSpinner() {
     expect(blockedButton.isFocusable, isFalse);
     expect(blockedButton.element.getAttribute('aria-hidden'), 'true');
     expect(blockedButton.element.getAttribute('tabindex'), isNull);
+
+    // 3. Unblock nodes and verify label and focusability are restored.
+    tester.updateNode(
+      id: 0,
+      label: 'Blocked container',
+      flags: const ui.SemanticsFlags(isFocused: ui.Tristate.isFalse),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          label: 'Status ready',
+          flags: const ui.SemanticsFlags(isLiveRegion: true),
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+        tester.updateNode(
+          id: 2,
+          label: 'Accessible child',
+          rect: const ui.Rect.fromLTRB(0, 50, 100, 100),
+        ),
+        tester.updateNode(
+          id: 3,
+          label: 'Blocked button',
+          flags: const ui.SemanticsFlags(
+            isButton: true,
+            isFocused: ui.Tristate.isFalse,
+          ),
+          rect: const ui.Rect.fromLTRB(0, 100, 100, 150),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expect(blockedContainer.isFocusable, isTrue);
+    expect(blockedContainer.element.getAttribute('role'), 'group');
+    expect(blockedContainer.element.getAttribute('aria-label'), 'Blocked container');
+    expect(blockedLeaf.element.getAttribute('aria-hidden'), isNull);
+    expect(blockedLeaf.element.text, 'Status ready');
+    expect(blockedButton.isFocusable, isTrue);
+    expect(blockedButton.element.getAttribute('aria-hidden'), isNull);
+    expect(blockedButton.element.getAttribute('tabindex'), '0');
   });
 
   semantics().semanticsEnabled = false;
