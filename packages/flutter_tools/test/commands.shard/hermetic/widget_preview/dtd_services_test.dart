@@ -197,38 +197,69 @@ void main() {
         Parameters('getWebPreviewUrl', <String, Object?>{}),
       );
 
+      expect(response[WebPreviewUrlResult.kType], WebPreviewUrlResult.kTypeName);
       expect(response['host'], '127.0.0.1');
       expect(response['port'], 9090);
       expect(response['url'], 'http://127.0.0.1:9090');
     });
 
-    test('Throws RpcException from getWebPreviewUrl when webPreviewUri is null', () async {
-      final services = WidgetPreviewDtdServices(
-        addUuidToServiceName: false,
-        dtdLauncher: FakeDtdLauncher(),
-        fs: fs,
-        logger: logger,
-        onHotRestartPreviewerRequest: () {},
-        previewAnalytics: analytics,
-        project: project,
-        shutdownHooks: shutdownHooks,
-      );
+    test(
+      'Throws RpcException from getWebPreviewUrl when webPreviewUri is null or returns null',
+      () async {
+        final servicesWithoutCallback = WidgetPreviewDtdServices(
+          addUuidToServiceName: false,
+          dtdLauncher: FakeDtdLauncher(),
+          fs: fs,
+          logger: logger,
+          onHotRestartPreviewerRequest: () {},
+          previewAnalytics: analytics,
+          project: project,
+          shutdownHooks: shutdownHooks,
+        );
 
-      final DTDServiceCallback callback = services.services
-          .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kGetWebPreviewUrl)
-          .$2;
+        final DTDServiceCallback callbackWithout = servicesWithoutCallback.services
+            .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kGetWebPreviewUrl)
+            .$2;
 
-      expect(
-        () => callback(Parameters('getWebPreviewUrl', <String, Object?>{})),
-        throwsA(
-          isA<RpcException>().having(
-            (RpcException e) => e.code,
-            'code',
-            WidgetPreviewDtdServices.kNoValueForKey,
+        await expectLater(
+          callbackWithout(Parameters('getWebPreviewUrl', <String, Object?>{})),
+          throwsA(
+            isA<RpcException>().having(
+              (RpcException e) => e.code,
+              'code',
+              WidgetPreviewDtdServices.kNoValueForKey,
+            ),
           ),
-        ),
-      );
-    });
+        );
+
+        final servicesReturningNull = WidgetPreviewDtdServices(
+          addUuidToServiceName: false,
+          dtdLauncher: FakeDtdLauncher(),
+          fs: fs,
+          logger: logger,
+          onHotRestartPreviewerRequest: () {},
+          previewAnalytics: analytics,
+          project: project,
+          shutdownHooks: shutdownHooks,
+          webPreviewUri: () => null,
+        );
+
+        final DTDServiceCallback callbackReturningNull = servicesReturningNull.services
+            .firstWhere((DtdService s) => s.$1 == WidgetPreviewDtdServices.kGetWebPreviewUrl)
+            .$2;
+
+        await expectLater(
+          callbackReturningNull(Parameters('getWebPreviewUrl', <String, Object?>{})),
+          throwsA(
+            isA<RpcException>().having(
+              (RpcException e) => e.code,
+              'code',
+              WidgetPreviewDtdServices.kNoValueForKey,
+            ),
+          ),
+        );
+      },
+    );
 
     test('Returns service info from getServiceInfo', () async {
       final services = WidgetPreviewDtdServices(
@@ -250,6 +281,8 @@ void main() {
         Parameters('getServiceInfo', <String, Object?>{}),
       );
 
+      expect(response[PreviewServiceInfo.kType], PreviewServiceInfo.kTypeName);
+      expect(response['dtdUri'], '');
       expect(response['serviceName'], WidgetPreviewDtdServices.kWidgetPreviewServiceRoot);
       expect(response['version'], WidgetPreviewDtdServices.kProtocolVersion);
       expect(response['webPreviewUrl'], 'http://127.0.0.1:8080');
@@ -298,6 +331,7 @@ void main() {
           'wrappers': <String>['Material'],
         }),
       );
+      expect(registerResponse[WidgetPreviewDtdServices.kType], 'BoolResponse');
       expect(registerResponse['value'], isTrue);
       expect(
         registeredDetails,
@@ -333,6 +367,7 @@ void main() {
       final Map<String, Object?> unregisterResponse = await unregisterCallback(
         Parameters('unregisterSyntheticPreview', <String, Object?>{'previewId': 'my_card_id'}),
       );
+      expect(unregisterResponse[WidgetPreviewDtdServices.kType], 'BoolResponse');
       expect(unregisterResponse['value'], isTrue);
       expect(unregisteredId, 'my_card_id');
       expect(fakeDtd.postedEvents, hasLength(2));
@@ -354,6 +389,10 @@ void main() {
           .$2;
       final Map<String, Object?> clearResponse = await clearCallback(
         Parameters('clearSyntheticPreviews', <String, Object?>{}),
+      );
+      expect(
+        clearResponse[WidgetPreviewDtdServices.kType],
+        WidgetPreviewDtdServices.kClearSyntheticPreviewsResultType,
       );
       expect(clearResponse['clearedCount'], 3);
     });

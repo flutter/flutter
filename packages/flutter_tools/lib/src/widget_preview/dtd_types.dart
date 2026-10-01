@@ -280,6 +280,7 @@ class SyntheticPreviewDetails {
   });
 
   static const kType = 'type';
+  static const kTypeName = 'SyntheticPreviewDetails';
   static const kConstructorExpression = 'constructorExpression';
   static const kFilePath = 'filePath';
   static const kPreviewId = 'previewId';
@@ -323,7 +324,7 @@ class SyntheticPreviewDetails {
 
   Map<String, Object?> toJson() {
     return <String, Object?>{
-      kType: 'SyntheticPreviewDetails',
+      kType: kTypeName,
       kConstructorExpression: constructorExpression,
       kFilePath: filePath,
       kPreviewId: previewId,
@@ -359,6 +360,7 @@ class WebPreviewUrlResult {
   const WebPreviewUrlResult({required this.host, required this.port, required this.url});
 
   static const kType = 'type';
+  static const kTypeName = 'WebPreviewUrlResult';
   static const kHost = 'host';
   static const kPort = 'port';
   static const kUrl = 'url';
@@ -385,7 +387,7 @@ class WebPreviewUrlResult {
   }
 
   Map<String, Object?> toJson() {
-    return <String, Object?>{kType: 'WebPreviewUrlResult', kHost: host, kPort: port, kUrl: url};
+    return <String, Object?>{kType: kTypeName, kHost: host, kPort: port, kUrl: url};
   }
 
   @override
@@ -409,6 +411,7 @@ class PreviewServiceInfo {
   });
 
   static const kType = 'type';
+  static const kTypeName = 'PreviewServiceInfo';
   static const kDtdUri = 'dtdUri';
   static const kServiceName = 'serviceName';
   static const kVersion = 'version';
@@ -441,7 +444,7 @@ class PreviewServiceInfo {
 
   Map<String, Object?> toJson() {
     return <String, Object?>{
-      kType: 'PreviewServiceInfo',
+      kType: kTypeName,
       kDtdUri: dtdUri,
       kServiceName: serviceName,
       kVersion: version,

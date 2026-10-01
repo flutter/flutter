@@ -42,10 +42,13 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   static const kProtocolVersion = '1.0.0';
 
   /// Error code for RpcException thrown when attempting to load a key from
-  /// persistent preferences that doesn't have an entry.
+  /// persistent preferences that doesn't have an entry, or when a requested
+  /// resource (such as the web preview URL) is not available.
   static const kNoValueForKey = 200;
 
   // END KEEP SYNCED
+
+  static const kUrl = 'url';
 
   /// Connects to the Dart Tooling Daemon (DTD) specified by the Flutter tool.
   ///
@@ -94,12 +97,19 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
 
   /// Retrieves the active web preview URL from the Flutter tool daemon.
   Future<Uri?> getWebPreviewUrl() async {
-    final response = await _call(kGetWebPreviewUrl);
-    if (response == null) {
-      return null;
+    try {
+      final response = await _call(kGetWebPreviewUrl);
+      if (response == null) {
+        return null;
+      }
+      final urlString = response.result[kUrl] as String?;
+      return urlString != null ? Uri.parse(urlString) : null;
+    } on RpcException catch (e) {
+      if (e.code == kNoValueForKey) {
+        return null;
+      }
+      rethrow;
     }
-    final urlString = response.result['url'] as String?;
-    return urlString != null ? Uri.parse(urlString) : null;
   }
 
   /// Retrieves metadata describing the active widget preview service.

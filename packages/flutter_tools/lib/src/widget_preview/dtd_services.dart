@@ -113,7 +113,8 @@ class WidgetPreviewDtdServices {
   static const kProtocolVersion = '1.0.0';
 
   /// Error code for RpcException thrown when attempting to load a key from
-  /// persistent preferences that doesn't have an entry.
+  /// persistent preferences that doesn't have an entry, or when a requested
+  /// resource (such as the web preview URL) is not available.
   static const kNoValueForKey = 200;
 
   /// The list of DTD service methods registered by the tool.
@@ -134,6 +135,7 @@ class WidgetPreviewDtdServices {
 
   // END KEEP SYNCED
 
+  static const kClearSyntheticPreviewsResultType = 'ClearSyntheticPreviewsResult';
   static const kClearedCount = 'clearedCount';
   static const kCount = 'count';
   static const kDiagnostic = 'diagnostic';
@@ -143,6 +145,7 @@ class WidgetPreviewDtdServices {
   static const kPreviews = 'previews';
   static const kRegistered = 'registered';
   static const kSuccess = 'success';
+  static const kType = 'type';
 
   @visibleForTesting
   late final preferences = PersistentPreferences(fs: fs);
@@ -170,7 +173,7 @@ class WidgetPreviewDtdServices {
   final Future<int> Function()? onClearSyntheticPreviews;
 
   /// Returns the URI of the running web preview application, if available.
-  final Uri Function()? webPreviewUri;
+  final Uri? Function()? webPreviewUri;
 
   /// The widget_preview_scaffold project.
   final FlutterProject project;
@@ -403,6 +406,7 @@ class WidgetPreviewDtdServices {
   Future<Map<String, Object?>> _getServiceInfo(Parameters _) async {
     final Uri? uri = webPreviewUri?.call();
     return PreviewServiceInfo(
+      // Empty only when invoked in unit tests before connect() has been called.
       dtdUri: _dtdUri?.toString() ?? '',
       serviceName: widgetPreviewService,
       version: kProtocolVersion,
@@ -442,7 +446,7 @@ class WidgetPreviewDtdServices {
 
   Future<Map<String, Object?>> _clearSyntheticPreviews(Parameters _) async {
     final int count = onClearSyntheticPreviews != null ? await onClearSyntheticPreviews!() : 0;
-    return <String, Object?>{kClearedCount: count};
+    return <String, Object?>{kType: kClearSyntheticPreviewsResultType, kClearedCount: count};
   }
 
   /// Posts a [kLayoutExceptionEvent] to the widget preview stream.
