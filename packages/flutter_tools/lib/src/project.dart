@@ -7,21 +7,27 @@ import 'dart:collection';
 import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
+import 'base/config.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/project_migrator.dart';
+import 'base/template.dart';
+import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'base/yaml.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
+import 'cache.dart';
 import 'cmake_project.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
@@ -29,6 +35,10 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'ios/plist_parser.dart';
+import 'ios/xcodeproj.dart';
+import 'macos/cocoapods.dart';
+import 'macos/xcode.dart';
 import 'migrations/analysis_options_migration.dart';
 import 'package_graph.dart';
 import 'platform_plugins.dart';
@@ -75,7 +85,7 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest);
+      return FlutterProject(directory, manifest, exampleManifest, logger: _logger);
     }
     return projects.putIfAbsent(directory.path, () {
       final FlutterManifest manifest = FlutterProject._readManifest(
@@ -88,7 +98,13 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest, projectFactory: this);
+      return FlutterProject(
+        directory,
+        manifest,
+        exampleManifest,
+        logger: _logger,
+        projectFactory: this,
+      );
     });
   }
 
@@ -114,12 +130,53 @@ class FlutterProject {
     FlutterManifest manifest,
     this._exampleManifest, {
     this._buildDirectory,
+    this._cache,
+    this._cocoaPods,
+    this._config,
+    this._featureFlags,
+    this._fileSystemUtils,
+    this._logger,
+    this._platform,
+    this._plistParser,
+    this._processManager,
     this._projectFactory,
+    this._templateRenderer,
+    this._terminal,
+    this._xcode,
+    this._xcodeProjectInterpreter,
   }) {
     _setManifest(manifest);
   }
 
+  final Cache? _cache;
+  final CocoaPods? _cocoaPods;
+  final Config? _config;
+  final FeatureFlags? _featureFlags;
+  final FileSystemUtils? _fileSystemUtils;
+  final Logger? _logger;
+  final Platform? _platform;
+  final PlistParser? _plistParser;
+  final ProcessManager? _processManager;
   final FlutterProjectFactory? _projectFactory;
+  final TemplateRenderer? _templateRenderer;
+  final AnsiTerminal? _terminal;
+  final Xcode? _xcode;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
+
+  Cache get projectCache => _cache ?? globals.cache;
+  CocoaPods? get projectCocoaPods => _cocoaPods ?? globals.cocoaPods;
+  Config get projectConfig => _config ?? globals.config;
+  FeatureFlags get projectFeatureFlags => _featureFlags ?? featureFlags;
+  FileSystemUtils get projectFileSystemUtils => _fileSystemUtils ?? globals.fsUtils;
+  Logger get projectLogger => _logger ?? globals.logger;
+  Platform get projectPlatform => _platform ?? globals.platform;
+  PlistParser get projectPlistParser => _plistParser ?? globals.plistParser;
+  ProcessManager get projectProcessManager => _processManager ?? globals.processManager;
+  TemplateRenderer get projectTemplateRenderer => _templateRenderer ?? globals.templateRenderer;
+  AnsiTerminal get projectTerminal => _terminal ?? globals.terminal;
+  Xcode? get projectXcode => _xcode ?? globals.xcode;
+  XcodeProjectInterpreter? get projectXcodeProjectInterpreter =>
+      _xcodeProjectInterpreter ?? globals.xcodeProjectInterpreter;
 
   FlutterProject? _workspaceRoot;
   bool _searchedForWorkspaceRoot = false;
@@ -212,6 +269,7 @@ class FlutterProject {
       manifest,
       exampleManifest,
       buildDirectory: buildDirectory ?? directory.childDirectory('build'),
+      logger: logger,
     );
   }
 

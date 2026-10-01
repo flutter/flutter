@@ -362,7 +362,11 @@ platform :osx, '12.0'
     }
 
     testWithMocks('skipped if files are missing', () async {
-      final macOSProjectMigration = FlutterApplicationMigration(project, testLogger);
+      final macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+        plistParser: fakePlistParser,
+      );
       await macOSProjectMigration.migrate();
       expect(infoPlistFile.existsSync(), isFalse);
 
@@ -371,7 +375,11 @@ platform :osx, '12.0'
     });
 
     testWithMocks('skipped if no NSPrincipalClass key exists to upgrade', () async {
-      final macOSProjectMigration = FlutterApplicationMigration(project, testLogger);
+      final macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+        plistParser: fakePlistParser,
+      );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       await macOSProjectMigration.migrate();
       expect(
@@ -386,7 +394,11 @@ platform :osx, '12.0'
 
     testWithMocks('skipped if already de-upgraded (or never migrated)', () async {
       fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'NSApplication');
-      final macOSProjectMigration = FlutterApplicationMigration(project, testLogger);
+      final macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+        plistParser: fakePlistParser,
+      );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       await macOSProjectMigration.migrate();
       expect(
@@ -401,7 +413,11 @@ platform :osx, '12.0'
 
     testWithMocks('Info.plist migrated to use NSApplication', () async {
       fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'FlutterApplication');
-      final macOSProjectMigration = FlutterApplicationMigration(project, testLogger);
+      final macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+        plistParser: fakePlistParser,
+      );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       await macOSProjectMigration.migrate();
       expect(
@@ -423,7 +439,11 @@ platform :osx, '12.0'
     testWithMocks('Skip if NSPrincipalClass is not NSApplication', () async {
       const differentApp = 'DIFFERENTApplication';
       fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, differentApp);
-      final macOSProjectMigration = FlutterApplicationMigration(project, testLogger);
+      final macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+        plistParser: fakePlistParser,
+      );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       await macOSProjectMigration.migrate();
       expect(

@@ -9,6 +9,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
@@ -26,11 +27,13 @@ class MacOSDevice extends DesktopDevice {
     required super.operatingSystemUtils,
   }) : _processManager = processManager,
        _logger = logger,
+       _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
        super('macos', platformType: PlatformType.macos, ephemeral: false);
 
   final ProcessManager _processManager;
   final Logger _logger;
+  final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
@@ -68,11 +71,15 @@ class MacOSDevice extends DesktopDevice {
     bool usingCISystem = false,
   }) async {
     await buildMacOS(
-      flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
+      fileSystem: _fileSystem,
+      flutterProject: FlutterProject.current(),
+      logger: _logger,
+      operatingSystemUtils: _operatingSystemUtils,
+      processUtils: ProcessUtils(processManager: _processManager, logger: _logger),
       targetOverride: mainPath,
-      verboseLogging: _logger.isVerbose,
       usingCISystem: usingCISystem,
+      verboseLogging: _logger.isVerbose,
     );
   }
 
