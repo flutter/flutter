@@ -1072,7 +1072,7 @@ mixin _RenderTheaterMixin on RenderBox {
   Iterable<RenderBox> _childrenInPaintOrder();
   Iterable<RenderBox> _childrenInHitTestOrder();
 
-  static bool _hasValidGeometry(RenderBox child) {
+  static bool _hasValidGeometry(RenderObject child) {
     return child is! _RenderDeferredLayoutBox || child._hasValidGeometry;
   }
 
@@ -1590,7 +1590,7 @@ class _RenderTheater extends RenderBox
       final childParentData = child.parentData! as _TheaterParentData;
 
       childParentData.visitOverlayPortalChildrenOnOverlayEntry((RenderObject child) {
-        if (_RenderTheaterMixin._hasValidGeometry(child as RenderBox)) {
+        if (_RenderTheaterMixin._hasValidGeometry(child)) {
           visitor(child);
         }
       });
