@@ -42,8 +42,9 @@ class IOSCoreDeviceLauncher {
     required this._xcodeDebug,
     required this._fileSystem,
     required ProcessUtils processUtils,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
     required Version? deviceVersion,
+    XcodeProjectInterpreter? xcodeProjectInterpreter,
+    Xcode? xcode,
     @visibleForTesting LLDB? lldb,
   }) : _logger = logger,
        _lldb =
@@ -52,6 +53,7 @@ class IOSCoreDeviceLauncher {
              logger: logger,
              processUtils: processUtils,
              xcodeProjectInterpreter: xcodeProjectInterpreter,
+             xcode: xcode,
              deviceVersion: deviceVersion,
            );
 

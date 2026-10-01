@@ -12,6 +12,7 @@ import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -20,7 +21,6 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../ios/core_devices.dart';
 import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
@@ -65,6 +65,16 @@ class XCDevice {
     XcodeDebug? xcodeDebug,
   }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _logger = logger,
+       _fileSystem = fileSystem,
+       _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
+       _operatingSystemUtils = OperatingSystemUtils(
+         fileSystem: fileSystem,
+         logger: logger,
+         platform: platform,
+         processManager: processManager,
+       ),
+       _platform = platform,
+       _shutdownHooks = shutdownHooks,
        _iMobileDevice = IMobileDevice(
          artifacts: artifacts,
          cache: cache,
@@ -118,6 +128,11 @@ class XCDevice {
 
   final ProcessUtils _processUtils;
   final Logger _logger;
+  final FileSystem _fileSystem;
+  final FileSystemUtils _fileSystemUtils;
+  final OperatingSystemUtils _operatingSystemUtils;
+  final Platform _platform;
+  final ShutdownHooks _shutdownHooks;
   final IMobileDevice _iMobileDevice;
   final IOSDeploy _iosDeploy;
   final Xcode _xcode;
@@ -642,10 +657,10 @@ class XCDevice {
           modelCode: modelCode,
           operatingSystemVersion: operatingSystemVersion,
           iProxy: _iProxy,
-          fileSystem: globals.fs,
-          fileSystemUtils: globals.fsUtils,
+          fileSystem: _fileSystem,
+          fileSystemUtils: _fileSystemUtils,
           logger: _logger,
-          analytics: globals.analytics,
+          analytics: _analytics,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
           coreDeviceControl: _coreDeviceControl,
@@ -653,18 +668,20 @@ class XCDevice {
             coreDeviceControl: _coreDeviceControl,
             logger: _logger,
             xcodeDebug: _xcodeDebug,
-            fileSystem: globals.fs,
+            fileSystem: _fileSystem,
             processUtils: _processUtils,
-            xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+            xcode: _xcode,
             deviceVersion: Version.parse(sdkVersionString),
           ),
           xcodeDebug: _xcodeDebug,
           xcode: _xcode,
-          platform: globals.platform,
+          platform: _platform,
           devModeEnabled: devModeEnabled,
           isPaired: isPaired,
           isCoreDevice: coreDevice != null,
           processUtils: _processUtils,
+          shutdownHooks: _shutdownHooks,
+          operatingSystemUtils: _operatingSystemUtils,
         );
       }
     }

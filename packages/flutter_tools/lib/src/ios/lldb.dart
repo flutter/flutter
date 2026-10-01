@@ -14,6 +14,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../macos/xcode.dart';
 import 'device_support.dart';
 import 'xcodeproj.dart';
 
@@ -25,13 +26,15 @@ class LLDB {
   LLDB({
     required this._logger,
     required this._processUtils,
-    required this._xcodeProjectInterpreter,
     required this._deviceVersion,
-  });
+    this._xcodeProjectInterpreter,
+    this._xcode,
+  }) : assert(_xcodeProjectInterpreter != null || _xcode != null);
 
   final Logger _logger;
   final ProcessUtils _processUtils;
-  final XcodeProjectInterpreter _xcodeProjectInterpreter;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
+  final Xcode? _xcode;
   final Version? _deviceVersion;
 
   _LLDBProcess? _lldbProcess;
@@ -220,7 +223,7 @@ if not error.Success():
     try {
       _lldbProcess = _LLDBProcess(
         process: await _processUtils.start(<String>[
-          ..._xcodeProjectInterpreter.xcrunCommand(),
+          ...(_xcode?.xcrunCommand() ?? _xcodeProjectInterpreter!.xcrunCommand()),
           'lldb',
         ]),
         appProcessId: appProcessId,

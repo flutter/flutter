@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
@@ -356,7 +357,14 @@ iOS Simulator       • iOS Simulator • Apple        • android
           ),
         ]);
 
-        const Emulator emulator = IOSEmulator('ios');
+        final Emulator emulator = IOSEmulator(
+          'ios',
+          xcode: xcode,
+          processUtils: ProcessUtils(
+            logger: BufferLogger.test(),
+            processManager: fakeProcessManager,
+          ),
+        );
         await emulator.launch();
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },

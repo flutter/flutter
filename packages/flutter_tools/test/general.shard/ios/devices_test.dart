@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -723,7 +722,7 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: true,
           processUtils: processUtils,
-          xcode: null,
+          xcode: FakeXcode(currentVersion: Version(15, 0, 0)),
         );
 
         expect(device.supportsScreenshot, isFalse);
@@ -732,6 +731,7 @@ void main() {
       testUsingContext(
         'supportsScreenshot is true on CoreDevice with Xcode 27+ and devicectl installed',
         () async {
+          final fakeXcode = FakeXcode(currentVersion: Version(27, 0, 0));
           device = IOSDevice(
             'device-123',
             iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
@@ -754,10 +754,9 @@ void main() {
             devModeEnabled: true,
             isCoreDevice: true,
             processUtils: processUtils,
-            xcode: null,
+            xcode: fakeXcode,
           );
 
-          final fakeXcode = globals.xcode! as FakeXcode;
           fakeXcode.isDevicectlInstalled = true;
           expect(device.supportsScreenshot, isTrue);
 
@@ -790,7 +789,7 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: true,
           processUtils: processUtils,
-          xcode: null,
+          xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
 
         fakeCoreDeviceControl.takeScreenshotSuccess = true;
@@ -823,7 +822,7 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: true,
           processUtils: processUtils,
-          xcode: null,
+          xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
 
         fakeCoreDeviceControl.takeScreenshotException = Exception(
@@ -860,7 +859,7 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: true,
           processUtils: processUtils,
-          xcode: null,
+          xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
         );
 
         expect(

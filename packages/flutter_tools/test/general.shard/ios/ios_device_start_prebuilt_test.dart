@@ -841,7 +841,7 @@ void main() {
         'uses LLDB with Xcode 26+',
         () async {
           final FileSystem fileSystem = MemoryFileSystem.test();
-          final processManager = FakeProcessManager.empty();
+          final processManager = FakeProcessManager.any();
           final Directory bundleLocation = fileSystem.currentDirectory;
           final fakeAnalytics = FakeAnalytics();
           final fakeLauncher = FakeIOSCoreDeviceLauncher();
@@ -851,6 +851,7 @@ void main() {
             isCoreDevice: true,
             coreDeviceLauncher: fakeLauncher,
             analytics: fakeAnalytics,
+            xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
           );
           final IOSApp iosApp = PrebuiltIOSApp(
             projectBundleId: 'app',
@@ -868,7 +869,7 @@ void main() {
           device.setLogReader(iosApp, deviceLogReader);
 
           // Start writing messages to the log reader.
-          Timer.run(() {
+          Timer(const Duration(milliseconds: 50), () {
             fakeLauncher.coreDeviceLogForwarder.addLog('Foo');
             fakeLauncher.coreDeviceLogForwarder.addLog(
               'The Dart VM service is listening on http://127.0.0.1:456',
@@ -968,7 +969,7 @@ void main() {
 
       testUsingContext('uses Xcode if LLDB fails', () async {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final processManager = FakeProcessManager.empty();
+        final processManager = FakeProcessManager.any();
         final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
             .childDirectory('flutter_empty_xcode.rand0');
         final Directory bundleLocation = fileSystem.currentDirectory;
@@ -992,6 +993,7 @@ void main() {
           ),
           coreDeviceLauncher: fakeLauncher,
           analytics: fakeAnalytics,
+          xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
         );
         final IOSApp iosApp = PrebuiltIOSApp(
           projectBundleId: 'app',
@@ -1059,6 +1061,7 @@ void main() {
           ),
           coreDeviceLauncher: fakeLauncher,
           analytics: fakeAnalytics,
+          xcode: FakeXcode(currentVersion: Version(16, 0, 0)),
         );
         final IOSApp iosApp = PrebuiltIOSApp(
           projectBundleId: 'app',
@@ -1673,6 +1676,7 @@ void main() {
               isCoreDevice: true,
               coreDeviceControl: FakeIOSCoreDeviceControl(),
               logger: testLogger,
+              userMessages: OverrideUserMessages(),
               xcodeDebug: FakeXcodeDebug(
                 expectedProject: XcodeDebugProject(
                   scheme: 'Runner',
@@ -1809,6 +1813,7 @@ void main() {
             isCoreDevice: true,
             coreDeviceLauncher: fakeLauncher,
             analytics: fakeAnalytics,
+            xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
           );
           final IOSApp iosApp = PrebuiltIOSApp(
             projectBundleId: 'app',
@@ -1861,7 +1866,7 @@ void main() {
         'launches with LLDB debugger when user explicitly passes --ios-profile-debugger',
         () async {
           final FileSystem fileSystem = MemoryFileSystem.test();
-          final processManager = FakeProcessManager.empty();
+          final processManager = FakeProcessManager.any();
           final Directory bundleLocation = fileSystem.currentDirectory;
           final fakeAnalytics = FakeAnalytics();
           final fakeLauncher = FakeIOSCoreDeviceLauncher();
@@ -1871,6 +1876,7 @@ void main() {
             isCoreDevice: true,
             coreDeviceLauncher: fakeLauncher,
             analytics: fakeAnalytics,
+            xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
           );
           final IOSApp iosApp = PrebuiltIOSApp(
             projectBundleId: 'app',
@@ -1887,7 +1893,7 @@ void main() {
           device.portForwarder = const NoOpDevicePortForwarder();
           device.setLogReader(iosApp, deviceLogReader);
 
-          Timer.run(() {
+          Timer(const Duration(milliseconds: 50), () {
             fakeLauncher.coreDeviceLogForwarder.addLog('Foo');
             fakeLauncher.coreDeviceLogForwarder.addLog(
               'The Dart VM service is listening on http://127.0.0.1:456',
@@ -2012,6 +2018,7 @@ void main() {
             ),
             coreDeviceLauncher: fakeLauncher,
             analytics: fakeAnalytics,
+            xcode: FakeXcode(currentVersion: Version(25, 0, 0)),
           );
           final IOSApp iosApp = PrebuiltIOSApp(
             projectBundleId: 'app',
@@ -2071,6 +2078,7 @@ IOSDevice setUpIOSDevice({
   FakeXcodeDebug? xcodeDebug,
   FakePlatform? platform,
   Xcode? xcode,
+  UserMessages? userMessages,
 }) {
   final artifacts = Artifacts.test();
   final FakePlatform macPlatform =
@@ -2095,6 +2103,7 @@ IOSDevice setUpIOSDevice({
       logger: logger,
     ),
     xcode: xcode,
+    userMessages: userMessages,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     logger: logger,
     iosDeploy:
