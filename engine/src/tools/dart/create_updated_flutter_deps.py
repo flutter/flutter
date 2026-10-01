@@ -282,9 +282,7 @@ def _FetchCompileDartFromGitiles(revision):
       encoded = response.read()
     return base64.b64decode(encoded).decode('utf-8')
   except Exception as exc:  # pylint: disable=broad-except
-    sys.stderr.write(
-        f'Warning: failed to fetch {url} ({exc}); falling back to local checkout.\n'
-    )
+    sys.stderr.write(f'Warning: failed to fetch {url} ({exc}).\n')
     return None
 
 
@@ -300,8 +298,11 @@ def ResolveDartCompileFileContent(args, flutter_vars):
   explicit_rev = getattr(args, 'dart_revision', None)
   if explicit_rev:
     fetched = _FetchCompileDartFromGitiles(explicit_rev)
-    if fetched:
-      return fetched
+    if not fetched:
+      raise RuntimeError(
+          f'Failed to fetch {DART_COMPILE_RELPATH} at Dart revision {explicit_rev}.'
+      )
+    return fetched
 
   # Check sibling of args.dart_deps (e.g., third_party/dart/DEPS or local SDK checkout).
   if getattr(args, 'dart_deps', None):
@@ -341,11 +342,10 @@ def SyncSupportsDart2WasmJs(args, flutter_vars):
 
   compile_dart_content = ResolveDartCompileFileContent(args, flutter_vars)
   if not compile_dart_content:
-    sys.stderr.write(
-        'Warning: could not resolve pkg/dart2wasm/lib/compile.dart; '
-        'skipping supports_dart2wasm.js generation.\n'
+    raise RuntimeError(
+        f'Could not resolve {DART_COMPILE_RELPATH}; '
+        'cannot generate supports_dart2wasm.js.'
     )
-    return False
 
   support_expr = ExtractDart2WasmSupportExpression(compile_dart_content)
   updated_content = FormatSupportsDart2WasmJs(support_expr)

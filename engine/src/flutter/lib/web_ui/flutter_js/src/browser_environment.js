@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import { supportsDart2Wasm } from './supports_dart2wasm.js';
+import { supportsDart2Wasm as defaultSupportsDart2Wasm } from './supports_dart2wasm.js';
 
 /** @type {import("./types").WasmAllowList} */
 export const defaultWasmSupport = {
@@ -55,6 +55,20 @@ const hasTextCluster = () => {
   return (typeof window.TextCluster !== "undefined");
 }
 
+const getFirefoxVersion = () => {
+  const match = navigator.userAgent.match(/firefox\/(\d+)/i);
+  return match ? parseInt(match[1], 10) : -1;
+}
+
+const supportsDart2Wasm = () => {
+  // Firefox < 147 has a SpiderMonkey Ion WasmGC compilation bug that breaks dart2wasm builds.
+  // See: https://github.com/flutter/flutter/issues/186619
+  //      https://bugzilla.mozilla.org/show_bug.cgi?id=2006811
+  if (browserEngine === "gecko" && getFirefoxVersion() < 147) return false;
+
+  return window._flutter?.supportsDart2Wasm ?? defaultSupportsDart2Wasm();
+}
+
 const detectWebGLVersion = () => {
   const canvas = document.createElement('canvas');
   canvas.width = 1;
@@ -81,7 +95,9 @@ export const browserEnvironment = {
   hasImageCodecs: hasImageCodecs(),
   hasChromiumBreakIterators: hasChromiumBreakIterators(),
   hasTextCluster: hasTextCluster(),
-  supportsDart2Wasm: supportsDart2Wasm(),
+  get supportsDart2Wasm() {
+    return supportsDart2Wasm();
+  },
   crossOriginIsolated: window.crossOriginIsolated,
   webGLVersion: detectWebGLVersion(),
   isChromeExtension: isChromeExtension(),

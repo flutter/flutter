@@ -231,9 +231,8 @@ String _generateSupportJs(WasmCompilerOptions options) {
             '(WebAssembly.validate(new Uint8Array([0,97,115,109]))&&!WebAssembly.validate(new Uint8Array([0]),{"builtins":["js-string"]}))',
         )
 
-    def test_ResolveDartCompileFileContent_PrecedenceAndWarning(self):
+    def test_ResolveDartCompileFileContent_PrecedenceAndErrors(self):
         import argparse
-        import io
         import tempfile
         from unittest import mock
         import create_updated_flutter_deps
@@ -265,7 +264,20 @@ String _generateSupportJs(WasmCompilerOptions options) {
                 self.assertEqual(resolved, "// fetched for new_target_rev")
                 mock_fetch.assert_called_once_with("new_target_rev")
 
-            # 2. When no local file exists and --dart_revision is omitted, falls back to flutter_vars['dart_revision'].
+            # 2. When --dart_revision (-r) is passed and gitiles fetch fails, raise RuntimeError instead of falling back to stale local file.
+            with mock.patch(
+                "create_updated_flutter_deps._FetchCompileDartFromGitiles",
+                return_value=None,
+            ):
+                with self.assertRaisesRegex(
+                    RuntimeError,
+                    r"Failed to fetch .* at Dart revision new_target_rev",
+                ):
+                    create_updated_flutter_deps.ResolveDartCompileFileContent(
+                        args_with_rev, {"dart_revision": "old_flutter_rev"}
+                    )
+
+            # 3. When no local file exists and --dart_revision is omitted, falls back to flutter_vars['dart_revision'].
             args_no_local = argparse.Namespace(
                 dart_compile_file=None,
                 dart_revision=None,
@@ -282,7 +294,7 @@ String _generateSupportJs(WasmCompilerOptions options) {
                 self.assertEqual(resolved_fallback, "// fetched for flutter_vars_rev")
                 mock_fetch_fallback.assert_called_once_with("flutter_vars_rev")
 
-            # 3. SyncSupportsDart2WasmJs logs warning to stderr when compile.dart cannot be resolved.
+            # 4. SyncSupportsDart2WasmJs raises RuntimeError when compile.dart cannot be resolved.
             fake_supports_js = os.path.join(tmpdir, "supports_dart2wasm.js")
             args_missing = argparse.Namespace(
                 supports_dart2wasm_js=fake_supports_js,
@@ -291,12 +303,11 @@ String _generateSupportJs(WasmCompilerOptions options) {
                 dart_deps=None,
                 flutter_deps=None,
             )
-            stderr_buf = io.StringIO()
-            with mock.patch("sys.stderr", stderr_buf):
-                self.assertFalse(
-                    create_updated_flutter_deps.SyncSupportsDart2WasmJs(args_missing, {})
-                )
-            self.assertIn("could not resolve pkg/dart2wasm/lib/compile.dart", stderr_buf.getvalue())
+            with self.assertRaisesRegex(
+                RuntimeError,
+                r"Could not resolve pkg/dart2wasm/lib/compile\.dart",
+            ):
+                create_updated_flutter_deps.SyncSupportsDart2WasmJs(args_missing, {})
 
 
 if __name__ == "__main__":
