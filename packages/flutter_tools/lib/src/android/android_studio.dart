@@ -20,6 +20,7 @@ import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../ios/plist_parser.dart';
 
@@ -83,15 +84,20 @@ class AndroidStudio {
     String? presetPluginsPath,
     ProcessManager? processManager,
     String studioAppName = 'AndroidStudio',
+    ToolContext? toolContext,
     Version? version,
   }) {
-    final Platform resolvedPlatform = platform ?? const LocalPlatform();
-    final FileSystem resolvedFileSystem = fileSystem ?? _createDefaultFileSystem(resolvedPlatform);
+    final Platform resolvedPlatform = platform ?? toolContext?.platform ?? const LocalPlatform();
+    final FileSystem resolvedFileSystem =
+        fileSystem ?? toolContext?.fs ?? _createDefaultFileSystem(resolvedPlatform);
     final FileSystemUtils resolvedFileSystemUtils =
         fileSystemUtils ??
+        toolContext?.fileSystemUtils ??
         FileSystemUtils(fileSystem: resolvedFileSystem, platform: resolvedPlatform);
-    final Logger resolvedLogger = logger ?? _createDefaultLogger(resolvedPlatform);
-    final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
+    final Logger resolvedLogger =
+        logger ?? toolContext?.logger ?? _createDefaultLogger(resolvedPlatform);
+    final ProcessManager resolvedProcessManager =
+        processManager ?? toolContext?.processManager ?? const LocalProcessManager();
     return AndroidStudio._(
       directory,
       configuredPath: configuredPath,
@@ -131,14 +137,19 @@ class AndroidStudio {
     Platform? platform,
     PlistParser? plistParser,
     ProcessManager? processManager,
+    ToolContext? toolContext,
   }) {
-    final Platform resolvedPlatform = platform ?? const LocalPlatform();
-    final FileSystem resolvedFileSystem = fileSystem ?? _createDefaultFileSystem(resolvedPlatform);
+    final Platform resolvedPlatform = platform ?? toolContext?.platform ?? const LocalPlatform();
+    final FileSystem resolvedFileSystem =
+        fileSystem ?? toolContext?.fs ?? _createDefaultFileSystem(resolvedPlatform);
     final FileSystemUtils resolvedFileSystemUtils =
         fileSystemUtils ??
+        toolContext?.fileSystemUtils ??
         FileSystemUtils(fileSystem: resolvedFileSystem, platform: resolvedPlatform);
-    final Logger resolvedLogger = logger ?? _createDefaultLogger(resolvedPlatform);
-    final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
+    final Logger resolvedLogger =
+        logger ?? toolContext?.logger ?? _createDefaultLogger(resolvedPlatform);
+    final ProcessManager resolvedProcessManager =
+        processManager ?? toolContext?.processManager ?? const LocalProcessManager();
     final PlistParser resolvedPlistParser =
         plistParser ??
         PlistParser(
@@ -200,6 +211,7 @@ class AndroidStudio {
       platform: resolvedPlatform,
       presetPluginsPath: presetPluginsPath,
       processManager: resolvedProcessManager,
+      toolContext: toolContext,
       version: version,
     );
   }
@@ -211,8 +223,9 @@ class AndroidStudio {
     Logger? logger,
     Platform? platform,
     ProcessManager? processManager,
+    ToolContext? toolContext,
   }) {
-    final FileSystem resolvedFileSystem = fileSystem ?? homeDotDir.fileSystem;
+    final FileSystem resolvedFileSystem = fileSystem ?? toolContext?.fs ?? homeDotDir.fileSystem;
     final Match? versionMatch = _dotHomeStudioVersionMatcher.firstMatch(homeDotDir.basename);
     if (versionMatch?.groupCount != 2) {
       return null;
@@ -254,6 +267,7 @@ class AndroidStudio {
         platform: platform,
         processManager: processManager,
         studioAppName: studioAppName,
+        toolContext: toolContext,
         version: version,
       );
     }
@@ -367,16 +381,22 @@ class AndroidStudio {
     Platform? platform,
     PlistParser? plistParser,
     ProcessManager? processManager,
+    ToolContext? toolContext,
   }) {
-    final Platform resolvedPlatform = platform ?? const LocalPlatform();
-    final FileSystem resolvedFileSystem = fileSystem ?? _createDefaultFileSystem(resolvedPlatform);
+    final Platform resolvedPlatform = platform ?? toolContext?.platform ?? const LocalPlatform();
+    final FileSystem resolvedFileSystem =
+        fileSystem ?? toolContext?.fs ?? _createDefaultFileSystem(resolvedPlatform);
     final FileSystemUtils resolvedFileSystemUtils =
         fileSystemUtils ??
+        toolContext?.fileSystemUtils ??
         FileSystemUtils(fileSystem: resolvedFileSystem, platform: resolvedPlatform);
-    final Logger resolvedLogger = logger ?? _createDefaultLogger(resolvedPlatform);
-    final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
+    final Logger resolvedLogger =
+        logger ?? toolContext?.logger ?? _createDefaultLogger(resolvedPlatform);
+    final ProcessManager resolvedProcessManager =
+        processManager ?? toolContext?.processManager ?? const LocalProcessManager();
     final Config resolvedConfig =
         config ??
+        toolContext?.config ??
         Config(
           Config.kFlutterSettings,
           fileSystem: resolvedFileSystem,
@@ -399,6 +419,7 @@ class AndroidStudio {
         platform: resolvedPlatform,
         plistParser: plistParser,
         processManager: resolvedProcessManager,
+        toolContext: toolContext,
       ),
     ];
     if (studios.isEmpty) {
@@ -454,16 +475,22 @@ class AndroidStudio {
     Platform? platform,
     PlistParser? plistParser,
     ProcessManager? processManager,
+    ToolContext? toolContext,
   }) {
-    final Platform resolvedPlatform = platform ?? const LocalPlatform();
-    final FileSystem resolvedFileSystem = fileSystem ?? _createDefaultFileSystem(resolvedPlatform);
+    final Platform resolvedPlatform = platform ?? toolContext?.platform ?? const LocalPlatform();
+    final FileSystem resolvedFileSystem =
+        fileSystem ?? toolContext?.fs ?? _createDefaultFileSystem(resolvedPlatform);
     final FileSystemUtils resolvedFileSystemUtils =
         fileSystemUtils ??
+        toolContext?.fileSystemUtils ??
         FileSystemUtils(fileSystem: resolvedFileSystem, platform: resolvedPlatform);
-    final Logger resolvedLogger = logger ?? _createDefaultLogger(resolvedPlatform);
-    final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
+    final Logger resolvedLogger =
+        logger ?? toolContext?.logger ?? _createDefaultLogger(resolvedPlatform);
+    final ProcessManager resolvedProcessManager =
+        processManager ?? toolContext?.processManager ?? const LocalProcessManager();
     final Config resolvedConfig =
         config ??
+        toolContext?.config ??
         Config(
           Config.kFlutterSettings,
           fileSystem: resolvedFileSystem,
@@ -480,6 +507,7 @@ class AndroidStudio {
             platform: resolvedPlatform,
             plistParser: plistParser,
             processManager: resolvedProcessManager,
+            toolContext: toolContext,
           )
         : _allLinuxOrWindows(
             config: resolvedConfig,
@@ -488,6 +516,7 @@ class AndroidStudio {
             logger: resolvedLogger,
             platform: resolvedPlatform,
             processManager: resolvedProcessManager,
+            toolContext: toolContext,
           );
   }
 
@@ -499,6 +528,7 @@ class AndroidStudio {
     required Platform platform,
     required ProcessManager processManager,
     PlistParser? plistParser,
+    ToolContext? toolContext,
   }) {
     final PlistParser resolvedPlistParser =
         plistParser ??
@@ -586,6 +616,7 @@ class AndroidStudio {
               platform: platform,
               plistParser: resolvedPlistParser,
               processManager: processManager,
+              toolContext: toolContext,
             );
           }
 
@@ -600,6 +631,7 @@ class AndroidStudio {
             platform: platform,
             plistParser: resolvedPlistParser,
             processManager: processManager,
+            toolContext: toolContext,
           );
         })
         .whereType<AndroidStudio>()
@@ -618,6 +650,7 @@ class AndroidStudio {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
+    ToolContext? toolContext,
   }) {
     final studios = <AndroidStudio>[];
 
@@ -671,6 +704,7 @@ class AndroidStudio {
           logger: logger,
           platform: platform,
           processManager: processManager,
+          toolContext: toolContext,
         );
         if (studio != null && !alreadyFoundStudioAt(studio.directory, newerThan: studio.version)) {
           studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
@@ -710,6 +744,7 @@ class AndroidStudio {
                 platform: platform,
                 processManager: processManager,
                 studioAppName: title,
+                toolContext: toolContext,
                 version: Version.parse(version),
               );
               if (!alreadyFoundStudioAt(studio.directory, newerThan: studio.version)) {
@@ -744,6 +779,7 @@ class AndroidStudio {
             logger: logger,
             platform: platform,
             processManager: processManager,
+            toolContext: toolContext,
             version: matchingAlreadyFoundInstall.version,
           ),
         );
@@ -757,6 +793,7 @@ class AndroidStudio {
             logger: logger,
             platform: platform,
             processManager: processManager,
+            toolContext: toolContext,
           ),
         );
       }
@@ -773,6 +810,7 @@ class AndroidStudio {
               logger: logger,
               platform: platform,
               processManager: processManager,
+              toolContext: toolContext,
             ),
           );
         }

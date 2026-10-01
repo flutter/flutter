@@ -19,6 +19,7 @@ import '../base/process.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/version.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import 'java.dart';
 
@@ -71,12 +72,16 @@ class AndroidSdk {
     Logger? logger,
     Platform? platform,
     ProcessManager? processManager,
+    ToolContext? toolContext,
   }) {
-    final Platform resolvedPlatform = platform ?? const LocalPlatform();
-    final Logger resolvedLogger = logger ?? _createDefaultLogger(resolvedPlatform);
-    final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
+    final Platform resolvedPlatform = platform ?? toolContext?.platform ?? const LocalPlatform();
+    final Logger resolvedLogger =
+        logger ?? toolContext?.logger ?? _createDefaultLogger(resolvedPlatform);
+    final ProcessManager resolvedProcessManager =
+        processManager ?? toolContext?.processManager ?? const LocalProcessManager();
     final Config resolvedConfig =
         config ??
+        toolContext?.config ??
         Config(
           Config.kFlutterSettings,
           fileSystem: directory.fileSystem,
@@ -160,10 +165,12 @@ class AndroidSdk {
     OperatingSystemUtils? operatingSystemUtils,
     Platform? platform,
     ProcessManager? processManager,
+    ToolContext? toolContext,
   }) {
-    final Platform resolvedPlatform = platform ?? const LocalPlatform();
+    final Platform resolvedPlatform = platform ?? toolContext?.platform ?? const LocalPlatform();
     final FileSystem resolvedFileSystem =
         fileSystem ??
+        toolContext?.fs ??
         ErrorHandlingFileSystem(
           delegate: LocalFileSystem(
             LocalSignals.instance,
@@ -174,11 +181,15 @@ class AndroidSdk {
         );
     final FileSystemUtils resolvedFileSystemUtils =
         fileSystemUtils ??
+        toolContext?.fileSystemUtils ??
         FileSystemUtils(fileSystem: resolvedFileSystem, platform: resolvedPlatform);
-    final Logger resolvedLogger = logger ?? _createDefaultLogger(resolvedPlatform);
-    final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
+    final Logger resolvedLogger =
+        logger ?? toolContext?.logger ?? _createDefaultLogger(resolvedPlatform);
+    final ProcessManager resolvedProcessManager =
+        processManager ?? toolContext?.processManager ?? const LocalProcessManager();
     final Config resolvedConfig =
         config ??
+        toolContext?.config ??
         Config(
           Config.kFlutterSettings,
           fileSystem: resolvedFileSystem,
@@ -187,6 +198,7 @@ class AndroidSdk {
         );
     final OperatingSystemUtils resolvedOsUtils =
         operatingSystemUtils ??
+        toolContext?.os ??
         OperatingSystemUtils(
           fileSystem: resolvedFileSystem,
           logger: resolvedLogger,
@@ -277,6 +289,7 @@ class AndroidSdk {
       logger: resolvedLogger,
       platform: resolvedPlatform,
       processManager: resolvedProcessManager,
+      toolContext: toolContext,
     );
   }
 
