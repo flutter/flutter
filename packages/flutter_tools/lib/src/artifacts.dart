@@ -17,6 +17,7 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
+import 'context/tool_context.dart';
 
 //////////////////////////////////////////////////////////////////////
 //                                                                  //
@@ -298,27 +299,30 @@ abstract class Artifacts {
 
   static Artifacts getLocalEngine(
     EngineBuildPaths engineBuildPaths, {
-    required Cache cache,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-    required ProcessManager processManager,
+    required ToolContext toolContext,
   }) {
+    final ToolContext(
+      :Cache cache,
+      :FileSystem fs,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
     Artifacts artifacts = CachedArtifacts(
-      fileSystem: fileSystem,
+      fileSystem: fs,
       platform: platform,
       cache: cache,
-      operatingSystemUtils: operatingSystemUtils,
+      operatingSystemUtils: os,
     );
     if (engineBuildPaths.hostEngine != null && engineBuildPaths.targetEngine != null) {
       artifacts = CachedLocalEngineArtifacts(
         engineBuildPaths.hostEngine!,
         engineOutPath: engineBuildPaths.targetEngine!,
         cache: cache,
-        fileSystem: fileSystem,
+        fileSystem: fs,
         processManager: processManager,
         platform: platform,
-        operatingSystemUtils: operatingSystemUtils,
+        operatingSystemUtils: os,
         parent: artifacts,
       );
     }
@@ -326,9 +330,9 @@ abstract class Artifacts {
       artifacts = CachedLocalWebSdkArtifacts(
         parent: artifacts,
         webSdkPath: engineBuildPaths.webSdk!,
-        fileSystem: fileSystem,
+        fileSystem: fs,
         platform: platform,
-        operatingSystemUtils: operatingSystemUtils,
+        operatingSystemUtils: os,
       );
     }
     return artifacts;
@@ -1485,15 +1489,18 @@ class _TestLocalEngine extends _TestArtifacts {
   final LocalEngineInfo localEngineInfo;
 }
 
-final _localFileSystem = LocalFileSystem(LocalSignals.instance, const [], ShutdownHooks());
-
 String _getFileGeneratorsPath() {
+  final FileSystem localFileSystem = LocalFileSystem(
+    LocalSignals.instance,
+    const [],
+    ShutdownHooks(),
+  );
   final String flutterRoot = Cache.defaultFlutterRoot(
-    fileSystem: _localFileSystem,
+    fileSystem: localFileSystem,
     platform: const LocalPlatform(),
     userMessages: UserMessages(),
   );
-  return _localFileSystem.path.join(
+  return localFileSystem.path.join(
     flutterRoot,
     'packages',
     'flutter_tools',

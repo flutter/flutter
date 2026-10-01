@@ -859,17 +859,30 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
         artifacts: <ArtifactSet>[],
       );
+      final String targetEngine = fileSystem.path.join(
+        fileSystem.currentDirectory.path,
+        'out',
+        'android_debug_unopt',
+      );
+      final String hostEngine = fileSystem.path.join(
+        fileSystem.currentDirectory.path,
+        'out',
+        'host_debug_unopt',
+      );
+      final String webSdk = fileSystem.path.join(
+        fileSystem.currentDirectory.path,
+        'out',
+        'wasm_release',
+      );
       final Artifacts localArtifacts = Artifacts.getLocalEngine(
-        const EngineBuildPaths(
-          targetEngine: '/out/android_debug_unopt',
-          hostEngine: '/out/host_debug_unopt',
-          webSdk: '/out/wasm_release',
+        EngineBuildPaths(targetEngine: targetEngine, hostEngine: hostEngine, webSdk: webSdk),
+        toolContext: FakeToolContext(
+          cache: cache,
+          fs: fileSystem,
+          os: FakeOperatingSystemUtils(),
+          platform: platform,
+          processManager: FakeProcessManager.any(),
         ),
-        cache: cache,
-        fileSystem: fileSystem,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        platform: platform,
-        processManager: FakeProcessManager.any(),
       );
 
       expect(localArtifacts.usesLocalArtifacts, isTrue);
@@ -877,7 +890,7 @@ void main() {
       expect(localArtifacts.localEngineInfo?.localHostName, 'host_debug_unopt');
       expect(
         localArtifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.android_arm64),
-        fileSystem.path.join('/out/android_debug_unopt', 'icudtl.dat'),
+        fileSystem.path.join(targetEngine, 'icudtl.dat'),
       );
     });
   });
