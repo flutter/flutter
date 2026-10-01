@@ -11887,6 +11887,79 @@
       }
     }
   },
+  "flutter/impeller/entity/uber_sdf_ssbo.frag.vkspv": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/uber_sdf_ssbo.frag.vkspv",
+      "has_side_effects": false,
+      "has_uniform_computation": true,
+      "modifies_coverage": false,
+      "reads_color_buffer": false,
+      "type": "Fragment",
+      "uses_late_zs_test": false,
+      "uses_late_zs_update": false,
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 36,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              null
+            ],
+            "longest_path_cycles": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "varying",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt"
+            ],
+            "shortest_path_cycles": [
+              0.296875,
+              0.296875,
+              0.296875,
+              0.125,
+              0.0,
+              0.25,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "arith_total",
+              "arith_fma"
+            ],
+            "total_cycles": [
+              12.3125,
+              12.3125,
+              5.78125,
+              12.125,
+              4.0,
+              0.25,
+              0.0
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 62,
+          "work_registers_used": 32
+        }
+      }
+    }
+  },
   "flutter/impeller/entity/vertices_uber_1.frag.vkspv": {
     "Mali-G78": {
       "core": "Mali-G78",

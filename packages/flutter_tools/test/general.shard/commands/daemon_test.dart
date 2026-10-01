@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/fakes.dart' show TestFeatureFlags;
+import '../../src/fakes.dart' show FakeToolContext, TestFeatureFlags;
 
 void main() {
   testWithoutContext('binds on ipv4 normally', () async {
@@ -22,6 +22,7 @@ void main() {
     final bindPorts = <int>[];
 
     final server = DaemonServer(
+      toolContext: FakeToolContext(),
       port: 123,
       logger: logger,
       featureFlags: TestFeatureFlags(),
@@ -47,6 +48,7 @@ void main() {
     final bindPorts = <int>[];
 
     final server = DaemonServer(
+      toolContext: FakeToolContext(),
       port: 123,
       logger: logger,
       featureFlags: TestFeatureFlags(),
