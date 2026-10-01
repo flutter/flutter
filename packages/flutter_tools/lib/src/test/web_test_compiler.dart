@@ -26,9 +26,9 @@ import 'test_config.dart';
 
 /// A web compiler for the test runner.
 class WebTestCompiler {
-  WebTestCompiler({required this.toolContext});
+  WebTestCompiler({required this._toolContext});
 
-  final ToolContext toolContext;
+  final ToolContext _toolContext;
 
   Future<File> _generateTestEntrypoint({
     required List<String> testFiles,
@@ -36,7 +36,7 @@ class WebTestCompiler {
     required Directory outputDirectory,
     required LanguageVersion languageVersion,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final List<WebTestInfo> testInfos = testFiles.map((String testFilePath) {
       final List<String> relativeTestSegments = fs.path.split(
         fs.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path),
@@ -108,7 +108,7 @@ class WebTestCompiler {
       :Platform platform,
       :ProcessManager processManager,
       :ShutdownHooks shutdownHooks,
-    ) = toolContext;
+    ) = _toolContext;
     final LanguageVersion languageVersion = currentLanguageVersion(fs, cache.flutterRoot);
 
     final Directory outputDirectory = fs.directory(testOutputDir)..createSync(recursive: true);
@@ -179,7 +179,7 @@ class WebTestCompiler {
       :FileSystem fs,
       :Logger logger,
       :ProcessManager processManager,
-    ) = toolContext;
+    ) = _toolContext;
     final Directory outputDirectory = fs.directory(testOutputDir)..createSync(recursive: true);
     final File testFile = await _generateTestEntrypoint(
       testFiles: testFiles,

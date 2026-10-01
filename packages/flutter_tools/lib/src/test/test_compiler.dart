@@ -16,11 +16,11 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../cache.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
 import '../dart/language_version.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import 'test_time_recorder.dart';
 
@@ -245,7 +245,8 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
-    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = _toolContext;
+    final ToolContext(:Cache cache, :FileSystem fs, :Logger logger, :Platform platform) =
+        _toolContext;
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
       logger.printTrace('Compiling ${request.mainUri}');
@@ -263,7 +264,7 @@ class TestCompiler {
         final LanguageVersion languageVersion = determineLanguageVersion(
           mainFile,
           buildInfo.packageConfig.packageOf(request.mainUri),
-          globals.cache.flutterRoot,
+          cache.flutterRoot,
         );
         if (languageVersion != _registrantLanguageVersion) {
           // (Re)generate the registrant. The output is keyed only on the plugin
