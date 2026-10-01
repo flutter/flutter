@@ -19,16 +19,36 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
 
   static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const kHotReloadPreviewer = 'hotReloadPreviewer';
   static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
   static const kGetDevToolsUri = 'getDevToolsUri';
+  static const kGetWebPreviewUrl = 'getWebPreviewUrl';
+  static const kGetServiceInfo = 'getServiceInfo';
+  static const kRegisterSyntheticPreview = 'registerSyntheticPreview';
+  static const kUnregisterSyntheticPreview = 'unregisterSyntheticPreview';
+  static const kClearSyntheticPreviews = 'clearSyntheticPreviews';
+
+  static const kWidgetPreviewConnectedEvent = 'Connected';
+  static const kLayoutExceptionEvent = 'LayoutException';
+  static const kCompilationSucceededEvent = 'CompilationSucceeded';
+  static const kCompilationFailedEvent = 'CompilationFailed';
+  static const kPreviewsUpdatedEvent = 'PreviewsUpdated';
+  static const kSyntheticPreviewStateChangedEvent =
+      'SyntheticPreviewStateChanged';
+
+  /// Protocol version for agent widget preview services.
+  static const kProtocolVersion = '1.0.0';
 
   /// Error code for RpcException thrown when attempting to load a key from
-  /// persistent preferences that doesn't have an entry.
+  /// persistent preferences that doesn't have an entry, or when a requested
+  /// resource (such as the web preview URL) is not available.
   static const kNoValueForKey = 200;
 
   // END KEEP SYNCED
+
+  static const kUrl = 'url';
 
   /// Connects to the Dart Tooling Daemon (DTD) specified by the Flutter tool.
   ///
@@ -40,7 +60,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
     unawaited(
       dtd.postEvent(
         kWidgetPreviewScaffoldStream,
-        'Connected',
+        kWidgetPreviewConnectedEvent,
         const <String, Object?>{},
       ),
     );
@@ -71,6 +91,32 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
 
   /// Trigger a hot restart of the widget preview scaffold.
   Future<void> hotRestartPreviewer() => _call(kHotRestartPreviewer);
+
+  /// Trigger a hot reload of the widget preview scaffold.
+  Future<void> hotReloadPreviewer() => _call(kHotReloadPreviewer);
+
+  /// Retrieves the active web preview URL from the Flutter tool daemon.
+  Future<Uri?> getWebPreviewUrl() async {
+    try {
+      final response = await _call(kGetWebPreviewUrl);
+      if (response == null) {
+        return null;
+      }
+      final urlString = response.result[kUrl] as String?;
+      return urlString != null ? Uri.parse(urlString) : null;
+    } on RpcException catch (e) {
+      if (e.code == kNoValueForKey) {
+        return null;
+      }
+      rethrow;
+    }
+  }
+
+  /// Retrieves metadata describing the active widget preview service.
+  Future<Map<String, Object?>?> getServiceInfo() async {
+    final response = await _call(kGetServiceInfo);
+    return response?.result;
+  }
 
   /// Resolves a package:// URI to a file:// URI using the package_config.
   ///
