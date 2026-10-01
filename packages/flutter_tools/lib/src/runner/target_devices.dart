@@ -6,9 +6,9 @@ import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/user_messages.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
 import '../doctor.dart';
 import '../ios/devices.dart';
@@ -50,47 +50,40 @@ String flutterSpecifiedDeviceUnpaired(String deviceName) =>
 class TargetDevices {
   factory TargetDevices({
     required DeviceManager deviceManager,
-    required Logger logger,
-    required Platform platform,
+    required ToolContext toolContext,
     DeviceConnectionInterface? deviceConnectionInterface,
     Doctor? doctor,
-    AnsiTerminal? terminal,
-    UserMessages? userMessages,
   }) {
-    if (platform.isMacOS) {
+    if (toolContext.platform.isMacOS) {
       return TargetDevicesWithExtendedWirelessDeviceDiscovery(
         deviceManager: deviceManager,
-        logger: logger,
+        toolContext: toolContext,
         deviceConnectionInterface: deviceConnectionInterface,
         doctor: doctor,
-        terminal: terminal,
-        userMessages: userMessages,
       );
     }
     return TargetDevices._private(
       deviceManager: deviceManager,
-      logger: logger,
+      toolContext: toolContext,
       deviceConnectionInterface: deviceConnectionInterface,
       doctor: doctor,
-      terminal: terminal,
-      userMessages: userMessages,
     );
   }
 
   TargetDevices._private({
     required this._deviceManager,
-    required this._logger,
+    required ToolContext toolContext,
     required this.deviceConnectionInterface,
     this._doctor,
-    this._terminal,
-    UserMessages? userMessages,
-  }) : _userMessages = userMessages ?? UserMessages();
+  }) : _logger = toolContext.logger,
+       _terminal = toolContext.terminal,
+       _userMessages = toolContext.userMessages;
 
   final DeviceManager _deviceManager;
   final Logger _logger;
   final DeviceConnectionInterface? deviceConnectionInterface;
   final Doctor? _doctor;
-  final AnsiTerminal? _terminal;
+  final AnsiTerminal _terminal;
   final UserMessages _userMessages;
 
   bool get _includeAttachedDevices =>
@@ -260,7 +253,7 @@ class TargetDevices {
       return <Device>[ephemeralDevice];
     }
 
-    if (canPrompt && (_terminal?.stdinHasTerminal ?? false)) {
+    if (canPrompt && _terminal.stdinHasTerminal) {
       return _selectFromMultipleDevices(attachedDevices, wirelessDevices);
     } else {
       return _printMultipleDevices(attachedDevices, wirelessDevices);
@@ -377,12 +370,11 @@ $platformMessage
   }
 
   Future<String> _readUserInput(int deviceCount) async {
-    final AnsiTerminal terminal = _terminal!;
     if (deviceCount >= 10) {
-      return _readDeviceChoiceLine(deviceCount: deviceCount, logger: _logger, terminal: terminal);
+      return _readDeviceChoiceLine(deviceCount: deviceCount, logger: _logger, terminal: _terminal);
     }
-    terminal.usesTerminalUi = true;
-    final String result = await terminal.promptForCharInput(
+    _terminal.usesTerminalUi = true;
+    final String result = await _terminal.promptForCharInput(
       <String>[for (int i = 0; i < deviceCount; i++) '${i + 1}', 'q', 'Q'],
       displayAcceptedCharacters: false,
       logger: _logger,
@@ -396,11 +388,9 @@ $platformMessage
 class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   TargetDevicesWithExtendedWirelessDeviceDiscovery({
     required super.deviceManager,
-    required super.logger,
+    required super.toolContext,
     super.deviceConnectionInterface,
     super.doctor,
-    super.terminal,
-    super.userMessages,
   }) : super._private();
 
   Future<void>? _wirelessDevicesRefresh;
@@ -657,7 +647,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       return <Device>[ephemeralDevice];
     }
 
-    final bool stdinHasTerminal = _terminal?.stdinHasTerminal ?? false;
+    final bool stdinHasTerminal = _terminal.stdinHasTerminal;
     if (!canPrompt || !stdinHasTerminal || !_logger.supportsColor) {
       _logger.printStatus(_checkingForWirelessDevicesMessage);
       final List<Device> wirelessDevices = await futureWirelessDevices;
@@ -785,7 +775,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   /// Clear [numLinesToClear] lines from terminal. Print message and list of
   /// wireless devices.
   Future<void> _printWirelessDevices(List<Device> wirelessDevices, int numLinesToClear) async {
-    _logger.printStatus(_terminal!.clearLines(numLinesToClear), newline: false);
+    _logger.printStatus(_terminal.clearLines(numLinesToClear), newline: false);
     _logger.printStatus('');
     if (wirelessDevices.isEmpty) {
       _logger.printStatus(_noWirelessDevicesFoundMessage);
@@ -798,11 +788,11 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
 
 @visibleForTesting
 class TargetDeviceSelection {
-  TargetDeviceSelection(this._logger, {this._terminal});
+  TargetDeviceSelection(this._logger, {required this._terminal});
 
   List<Device> devices = <Device>[];
   final Logger _logger;
-  final AnsiTerminal? _terminal;
+  final AnsiTerminal _terminal;
   int invalidAttempts = 0;
 
   /// Prompt user to select a device and wait until they select a valid device.
@@ -832,12 +822,11 @@ class TargetDeviceSelection {
   /// Only allow input of a number or `q`.
   @visibleForTesting
   Future<String> readUserInput() async {
-    final AnsiTerminal terminal = _terminal!;
     if (devices.length >= 10) {
       return _readDeviceChoiceLine(
         deviceCount: devices.length,
         logger: _logger,
-        terminal: terminal,
+        terminal: _terminal,
         onInvalidInput: () {
           invalidAttempts++;
         },
@@ -845,16 +834,16 @@ class TargetDeviceSelection {
     }
     final pattern = RegExp(r'\d+$|q', caseSensitive: false);
     String? choice;
-    terminal.singleCharMode = true;
+    _terminal.singleCharMode = true;
     while (choice == null || choice.length > 1 || !pattern.hasMatch(choice)) {
       _logger.printStatus(_chooseOneMessage, emphasis: true, newline: false);
       // prompt ends with ': '
       _logger.printStatus(': ', emphasis: true, newline: false);
-      choice = (await terminal.keystrokes.first).trim();
+      choice = (await _terminal.keystrokes.first).trim();
       _logger.printStatus(choice);
       invalidAttempts++;
     }
-    terminal.singleCharMode = false;
+    _terminal.singleCharMode = false;
     return choice;
   }
 }

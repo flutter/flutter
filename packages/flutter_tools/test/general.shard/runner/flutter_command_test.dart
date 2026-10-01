@@ -1035,14 +1035,14 @@ void main() {
       final device2 = FakeDevice('device2', 'device2');
 
       testUsingContext('no device found', () async {
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
       });
 
       testUsingContext('finds single device', () async {
         testDeviceManager.addAttachedDevice(device1);
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, device1);
       });
@@ -1051,7 +1051,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
         testDeviceManager.specifiedDeviceId = 'all';
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
         expect(testLogger.statusText, contains(UserMessages().flutterSpecifyDevice));
@@ -1071,7 +1071,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
 
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: DelegatingToolContext());
         final List<Device>? devices = await flutterCommand.findAllTargetDevices();
 
         // Should prompt the user and print prompt options (so status contains "Connected devices")
@@ -1117,7 +1117,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
 
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: DelegatingToolContext());
         final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: false);
 
         // Should NOT prompt the user even if machine mode is false.

@@ -282,7 +282,7 @@ class Doctor {
         // We're generating a summary, so drop the stack trace.
         result = ValidationResult.crash(exception);
       }
-      lineBuffer.write('${result.coloredLeadingBox} ${validator.title}: ');
+      lineBuffer.write('${result.coloredLeadingBox(_logger.terminal)} ${validator.title}: ');
       switch (result.type) {
         case ValidationType.crash:
           lineBuffer.write('the doctor check crashed without a result.');
@@ -447,7 +447,7 @@ class Doctor {
         return ' [$formatted]';
       }();
 
-      final String leadingBox = showColor ? result.coloredLeadingBox : result.leadingBox;
+      final String leadingBox = result.coloredLeadingBox(_logger.terminal);
       if (result.statusInfo != null) {
         _logger.printStatus(
           '$leadingBox ${validator.title} (${result.statusInfo})$executionDuration',
@@ -464,7 +464,7 @@ class Doctor {
         if (!message.isInformation || verbose) {
           var hangingIndent = 2;
           var indent = 4;
-          final String indicator = showColor ? message.coloredIndicator : message.indicator;
+          final String indicator = message.coloredIndicator(_logger.terminal);
           for (final String line
               in '$indicator ${showPii ? message.message : message.piiStrippedMessage}'.split(
                 '\n',

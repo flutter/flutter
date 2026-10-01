@@ -20,6 +20,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart' show FakeToolContext;
 
 void main() {
   testWithoutContext(
@@ -30,9 +31,8 @@ void main() {
       final deviceManager = TestDeviceManager(logger: logger, platform: platform);
 
       final targetDevices = TargetDevices(
-        platform: platform,
         deviceManager: deviceManager,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger, platform: platform),
       );
 
       expect(targetDevices is TargetDevicesWithExtendedWirelessDeviceDiscovery, true);
@@ -45,9 +45,8 @@ void main() {
     final deviceManager = TestDeviceManager(logger: logger, platform: platform);
 
     final targetDevices = TargetDevices(
-      platform: platform,
       deviceManager: deviceManager,
-      logger: logger,
+      toolContext: FakeToolContext(logger: logger, platform: platform),
     );
 
     expect(targetDevices is TargetDevicesWithExtendedWirelessDeviceDiscovery, false);
@@ -110,9 +109,8 @@ void main() {
         deviceManager.androidDiscoverer.deviceList = <Device>[attachedAndroidDevice1];
 
         final targetDevices = TargetDevices(
-          platform: platform,
           deviceManager: deviceManager,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger, platform: platform),
           doctor: doctor,
         );
         final List<Device>? devices = await targetDevices.findAllTargetDevices();
@@ -140,9 +138,8 @@ Unable to locate a development device; please run 'flutter doctor' for informati
       deviceManager.hasSpecifiedAllDevices = true;
 
       final targetDevices = TargetDevices(
-        platform: platform,
         deviceManager: deviceManager,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger, platform: platform),
       );
       final List<Device>? devices = await targetDevices.findAllTargetDevices(
         deviceDiscoveryTimeout: const Duration(seconds: 2),
@@ -164,9 +161,8 @@ Unable to locate a development device; please run 'flutter doctor' for informati
       ];
 
       final targetDevices = TargetDevices(
-        platform: platform,
         deviceManager: deviceManager,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger, platform: platform),
       );
       final List<Device>? devices = await targetDevices.findAllTargetDevices(
         includeDevicesUnsupportedByProject: true,
@@ -188,9 +184,8 @@ Unable to locate a development device; please run 'flutter doctor' for informati
         logger = BufferLogger.test();
         deviceManager = TestDeviceManager(logger: logger, platform: platform);
         targetDevices = TargetDevices(
-          platform: platform,
           deviceManager: deviceManager,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger, platform: platform),
         );
       });
 
@@ -240,9 +235,8 @@ If you would like your app to run on android, consider running `flutter create .
             deviceManager.androidDiscoverer.deviceList = <Device>[attachedAndroidDevice1];
 
             final targetDevices = TargetDevices(
-              platform: platform,
               deviceManager: deviceManager,
-              logger: logger,
+              toolContext: FakeToolContext(logger: logger, platform: platform),
               deviceConnectionInterface: DeviceConnectionInterface.wireless,
             );
             final List<Device>? devices = await targetDevices.findAllTargetDevices();
@@ -263,9 +257,8 @@ No supported devices connected.
             deviceManager.androidDiscoverer.deviceList = <Device>[wirelessAndroidDevice1];
 
             final targetDevices = TargetDevices(
-              platform: platform,
               deviceManager: deviceManager,
-              logger: logger,
+              toolContext: FakeToolContext(logger: logger, platform: platform),
               deviceConnectionInterface: DeviceConnectionInterface.attached,
             );
             final List<Device>? devices = await targetDevices.findAllTargetDevices();
@@ -360,9 +353,8 @@ target-device (mobile) • xxx • android • Android 10 (unsupported)
             ];
 
             final targetDevices = TargetDevices(
-              platform: platform,
               deviceManager: deviceManager,
-              logger: logger,
+              toolContext: FakeToolContext(logger: logger, platform: platform),
               deviceConnectionInterface: DeviceConnectionInterface.wireless,
             );
             final List<Device>? devices = await targetDevices.findAllTargetDevices();
@@ -392,9 +384,8 @@ not-a-match-2 (wireless) (mobile) • xxx • android • Android 10
             ];
 
             final targetDevices = TargetDevices(
-              platform: platform,
               deviceManager: deviceManager,
-              logger: logger,
+              toolContext: FakeToolContext(logger: logger, platform: platform),
               deviceConnectionInterface: DeviceConnectionInterface.attached,
             );
             final List<Device>? devices = await targetDevices.findAllTargetDevices();
@@ -477,9 +468,8 @@ If you would like your app to run on android or fuchsia, consider running `flutt
         logger = BufferLogger.test();
         deviceManager = TestDeviceManager(logger: logger, platform: platform);
         targetDevices = TargetDevices(
-          platform: platform,
           deviceManager: deviceManager,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger, platform: platform),
         );
       });
 
@@ -629,9 +619,8 @@ If you would like your app to run on android or fuchsia, consider running `flutt
         logger = BufferLogger.test();
         deviceManager = TestDeviceManager(logger: logger, platform: platform);
         targetDevices = TargetDevices(
-          platform: platform,
           deviceManager: deviceManager,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger, platform: platform),
         );
       });
 
@@ -642,10 +631,8 @@ If you would like your app to run on android or fuchsia, consider running `flutt
           setUp(() {
             terminal = FakeTerminal();
             targetDevices = TargetDevices(
-              platform: platform,
               deviceManager: deviceManager,
-              logger: logger,
-              terminal: terminal,
+              toolContext: FakeToolContext(logger: logger, platform: platform, terminal: terminal),
             );
           });
 
@@ -797,10 +784,8 @@ To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d
           setUp(() {
             terminal = FakeTerminal(stdinHasTerminal: false);
             targetDevices = TargetDevices(
-              platform: platform,
               deviceManager: deviceManager,
-              logger: logger,
-              terminal: terminal,
+              toolContext: FakeToolContext(logger: logger, platform: platform, terminal: terminal),
             );
           });
 
@@ -895,10 +880,8 @@ target-device-6 (wireless) (mobile) • xxx • android • Android 10
           setUp(() {
             terminal = FakeTerminal();
             targetDevices = TargetDevices(
-              platform: platform,
               deviceManager: deviceManager,
-              logger: logger,
-              terminal: terminal,
+              toolContext: FakeToolContext(logger: logger, platform: platform, terminal: terminal),
             );
           });
 
@@ -1001,10 +984,8 @@ To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d
           setUp(() {
             terminal = FakeTerminal(stdinHasTerminal: false);
             targetDevices = TargetDevices(
-              platform: platform,
               deviceManager: deviceManager,
-              logger: logger,
-              terminal: terminal,
+              toolContext: FakeToolContext(logger: logger, platform: platform, terminal: terminal),
             );
           });
 
@@ -1211,7 +1192,7 @@ target-device-6 (wireless) (mobile) • xxx • android • Android 10
 
         final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
           deviceManager: deviceManager,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger),
           doctor: doctor,
         );
         final List<Device>? devices = await targetDevices.findAllTargetDevices();
@@ -1236,7 +1217,7 @@ Unable to locate a development device; please run 'flutter doctor' for informati
 
       final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
         deviceManager: deviceManager,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
       );
       final List<Device>? devices = await targetDevices.findAllTargetDevices(
         deviceDiscoveryTimeout: const Duration(seconds: 2),
@@ -1256,7 +1237,7 @@ Unable to locate a development device; please run 'flutter doctor' for informati
 
       final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
         deviceManager: deviceManager,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
         deviceConnectionInterface: DeviceConnectionInterface.attached,
       );
       final List<Device>? devices = await targetDevices.findAllTargetDevices();
@@ -1278,7 +1259,7 @@ Unable to locate a development device; please run 'flutter doctor' for informati
 
       final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
         deviceManager: deviceManager,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
       );
       final List<Device>? devices = await targetDevices.findAllTargetDevices(
         includeDevicesUnsupportedByProject: true,
@@ -1299,9 +1280,8 @@ Unable to locate a development device; please run 'flutter doctor' for informati
         logger = BufferLogger.test();
         deviceManager = TestDeviceManager(logger: logger, platform: platform);
         targetDevices = TargetDevices(
-          platform: platform,
           deviceManager: deviceManager,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger, platform: platform),
         );
       });
 
@@ -1393,7 +1373,7 @@ No supported devices connected.
 
             final targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
-              logger: logger,
+              toolContext: FakeToolContext(logger: logger),
               deviceConnectionInterface: DeviceConnectionInterface.wireless,
             );
             final List<Device>? devices = await targetDevices.findAllTargetDevices();
@@ -1608,7 +1588,7 @@ No supported devices found with name or id matching 'target-device'.
 
             final targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
-              logger: logger,
+              toolContext: FakeToolContext(logger: logger),
               deviceConnectionInterface: DeviceConnectionInterface.wireless,
             );
             final List<Device>? devices = await targetDevices.findAllTargetDevices();
@@ -1708,7 +1688,7 @@ If you would like your app to run on fuchsia or ios, consider running `flutter c
         deviceManager = TestDeviceManager(logger: logger, platform: platform);
         targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
           deviceManager: deviceManager,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger),
         );
       });
 
@@ -1770,8 +1750,7 @@ No devices found yet. Checking for wireless devices...
 
             final targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
-              logger: logger,
-              terminal: terminal,
+              toolContext: FakeToolContext(logger: logger, terminal: terminal),
             );
             targetDevices.waitForWirelessBeforeInput = true;
             targetDevices.deviceSelection.input = <String>['1'];
@@ -1809,8 +1788,7 @@ Please choose one (or "q" to quit): To skip this prompt in the future, pass the 
 
             final targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
-              logger: logger,
-              terminal: terminal,
+              toolContext: FakeToolContext(logger: logger, terminal: terminal),
             );
             targetDevices.waitForWirelessBeforeInput = true;
 
@@ -1857,8 +1835,7 @@ Please choose one (or "q" to quit): To skip this prompt in the future, pass the 
             terminal = FakeTerminal(stdinHasTerminal: false);
             targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
-              logger: logger,
-              terminal: terminal,
+              toolContext: FakeToolContext(logger: logger, terminal: terminal),
             );
           });
 
@@ -2139,8 +2116,7 @@ Checking for wireless devices...
             logger = TestBufferLogger.test(terminal: terminal);
             targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
-              logger: logger,
-              terminal: terminal,
+              toolContext: FakeToolContext(logger: logger, terminal: terminal),
             );
           });
 
@@ -2286,8 +2262,7 @@ To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d
               logger = TestBufferLogger.test(terminal: terminal);
               targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
                 deviceManager: deviceManager,
-                logger: logger,
-                terminal: terminal,
+                toolContext: FakeToolContext(logger: logger, terminal: terminal),
               );
             });
 
@@ -2336,8 +2311,7 @@ To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d
               logger = TestBufferLogger.test(terminal: terminal, verbose: true);
               targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
                 deviceManager: deviceManager,
-                logger: logger,
-                terminal: terminal,
+                toolContext: FakeToolContext(logger: logger, terminal: terminal),
               );
             });
 
@@ -2457,8 +2431,7 @@ Please choose one (or "q" to quit): To skip this prompt in the future, pass the 
             terminal = FakeTerminal(stdinHasTerminal: false);
             targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
-              logger: logger,
-              terminal: terminal,
+              toolContext: FakeToolContext(logger: logger, terminal: terminal),
             );
           });
 
@@ -2577,8 +2550,7 @@ target-device-6 (wireless) (mobile) • xxx • ios • iOS 16
             logger = TestBufferLogger.test(terminal: terminal);
             targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
-              logger: logger,
-              terminal: terminal,
+              toolContext: FakeToolContext(logger: logger, terminal: terminal),
             );
           });
 
@@ -2725,8 +2697,7 @@ To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d
             terminal = FakeTerminal(stdinHasTerminal: false);
             targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
-              logger: logger,
-              terminal: terminal,
+              toolContext: FakeToolContext(logger: logger, terminal: terminal),
             );
           });
 
@@ -2860,7 +2831,7 @@ target-device-6 (wireless) (mobile) • xxx • ios • iOS 16
           deviceManager.hasSpecifiedAllDevices = true;
           targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
             deviceManager: deviceManager,
-            logger: logger,
+            toolContext: FakeToolContext(logger: logger),
           );
         });
 
@@ -2946,12 +2917,13 @@ class TestTargetDevicesWithExtendedWirelessDeviceDiscovery
     extends TargetDevicesWithExtendedWirelessDeviceDiscovery {
   TestTargetDevicesWithExtendedWirelessDeviceDiscovery({
     required super.deviceManager,
-    required super.logger,
+    required super.toolContext,
     super.deviceConnectionInterface,
     super.doctor,
-    super.terminal,
-    super.userMessages,
-  }) : _deviceSelection = TestTargetDeviceSelection(logger, terminal: terminal);
+  }) : _deviceSelection = TestTargetDeviceSelection(
+         toolContext.logger,
+         terminal: toolContext.terminal,
+       );
 
   final TestTargetDeviceSelection _deviceSelection;
 
@@ -2960,7 +2932,7 @@ class TestTargetDevicesWithExtendedWirelessDeviceDiscovery
 }
 
 class TestTargetDeviceSelection extends TargetDeviceSelection {
-  TestTargetDeviceSelection(super.logger, {super.terminal});
+  TestTargetDeviceSelection(super.logger, {required super.terminal});
 
   List<String> input = <String>[];
 

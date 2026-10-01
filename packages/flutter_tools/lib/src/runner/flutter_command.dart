@@ -731,12 +731,9 @@ abstract class FlutterCommand extends Command<void> {
 
   late final _targetDevices = TargetDevices(
     deviceManager: globals.deviceManager!,
-    logger: _logger,
-    platform: _platform,
+    toolContext: toolContext!,
     deviceConnectionInterface: deviceConnectionInterface,
     doctor: globals.doctor,
-    terminal: toolContext?.terminal ?? globals.terminal,
-    userMessages: _userMessages,
   );
 
   void addBuildModeFlags({

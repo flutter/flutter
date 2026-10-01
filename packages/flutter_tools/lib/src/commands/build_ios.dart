@@ -511,13 +511,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       ),
     );
 
-    final bool showColor = logger.supportsColor;
     for (final ValidationResult result in validationResults.whereType<ValidationResult>()) {
-      final String leadingBox = showColor ? result.coloredLeadingBox : result.leadingBox;
-      logger.printStatus('\n$leadingBox ${result.statusInfo}');
+      logger.printStatus('\n${result.coloredLeadingBox(terminal)} ${result.statusInfo}');
       for (final ValidationMessage message in result.messages) {
-        final String indicator = showColor ? message.coloredIndicator : message.indicator;
-        logger.printStatus('$indicator ${message.message}', indent: result.leadingBox.length + 1);
+        logger.printStatus(
+          '${message.coloredIndicator(terminal)} ${message.message}',
+          indent: result.leadingBox.length + 1,
+        );
       }
     }
     logger.printStatus(

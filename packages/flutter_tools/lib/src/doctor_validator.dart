@@ -148,13 +148,12 @@ extension ValidationResultFormatting on ValidationResult {
     _ => type.name,
   };
 
-  String get coloredLeadingBox {
-    final TerminalColor color = switch (type) {
+  String coloredLeadingBox(Terminal terminal) {
+    return terminal.color(leadingBox, switch (type) {
       ValidationType.success => TerminalColor.green,
       ValidationType.crash || ValidationType.missing => TerminalColor.red,
       ValidationType.notAvailable || ValidationType.partial => TerminalColor.yellow,
-    };
-    return '${AnsiTerminal.colorCode(color)}$leadingBox${AnsiTerminal.resetColor}';
+    });
   }
 }
 
@@ -167,13 +166,12 @@ extension ValidationMessageFormatting on ValidationMessage {
     ValidationMessageType.information => '•',
   };
 
-  String get coloredIndicator {
-    final TerminalColor color = switch (type) {
+  String coloredIndicator(Terminal terminal) {
+    return terminal.color(indicator, switch (type) {
       ValidationMessageType.error => TerminalColor.red,
       ValidationMessageType.hint => TerminalColor.yellow,
       ValidationMessageType.information => TerminalColor.green,
-    };
-    return '${AnsiTerminal.colorCode(color)}$indicator${AnsiTerminal.resetColor}';
+    });
   }
 }
 
