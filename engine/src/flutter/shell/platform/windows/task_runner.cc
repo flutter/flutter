@@ -93,6 +93,14 @@ void TaskRunner::PostTask(TaskClosure closure) {
   EnqueueTask(std::move(task));
 }
 
+void TaskRunner::PostDelayedTask(TaskClosure closure,
+                                 std::chrono::milliseconds delay) {
+  Task task;
+  task.fire_time = GetCurrentTimeForTask() + delay;
+  task.variant = std::move(closure);
+  EnqueueTask(std::move(task));
+}
+
 void TaskRunner::PollOnce(std::chrono::milliseconds timeout) {
   task_runner_window_->PollOnce(timeout);
 }

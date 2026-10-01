@@ -105,7 +105,6 @@ class TaskRunnerWindow {
   HWND window_handle_;
   std::wstring window_class_name_;
   std::vector<Delegate*> delegates_;
-  DWORD thread_id_ = 0;
   TimerThread timer_thread_;
 
   // Used to prevent posting wake up message when one is already scheduled.
