@@ -20,7 +20,11 @@ void main() {
 external bool get crossOriginIsolated;
 
 @JS('_flutter')
-external JSObject get _flutterObject;
+external _FlutterObject get _flutterObject;
+
+extension type _FlutterObject._(JSObject _) implements JSObject {
+  external JSAny? supportsDart2Wasm;
+}
 
 @JS('_flutter.loader.load')
 external JSPromise<JSAny?> _flutterLoaderLoad(JSAny? options);
@@ -59,6 +63,7 @@ Future<void> testMain() async {
     }
     final String originalUserAgent = domWindow.navigator.userAgent;
     final JSAny? originalBuildConfig = _flutterBuildConfig;
+    final JSAny? originalSupportsDart2Wasm = _flutterObject.supportsDart2Wasm;
     final JSFunction originalValidate = _wasmValidate;
     try {
       _flutterBuildConfig = <String, Object?>{
@@ -88,11 +93,7 @@ Future<void> testMain() async {
           configurable: true,
         ),
       );
-      objectConstructor.defineProperty(
-        _flutterObject,
-        'supportsDart2Wasm',
-        DomPropertyDataDescriptor(value: true, configurable: true, writable: true),
-      );
+      _flutterObject.supportsDart2Wasm = true.toJS;
       var validateCalls = 0;
       _wasmValidate = (() {
         validateCalls++;
@@ -119,11 +120,7 @@ Future<void> testMain() async {
           configurable: true,
         ),
       );
-      objectConstructor.defineProperty(
-        _flutterObject,
-        'supportsDart2Wasm',
-        DomPropertyDataDescriptor(configurable: true, writable: true),
-      );
+      _flutterObject.supportsDart2Wasm = null;
       validateCalls = 0;
       _wasmValidate = (() {
         validateCalls++;
@@ -145,11 +142,7 @@ Future<void> testMain() async {
         'userAgent',
         DomPropertyDataDescriptor(value: originalUserAgent, configurable: true),
       );
-      objectConstructor.defineProperty(
-        _flutterObject,
-        'supportsDart2Wasm',
-        DomPropertyDataDescriptor(configurable: true, writable: true),
-      );
+      _flutterObject.supportsDart2Wasm = originalSupportsDart2Wasm;
       _wasmValidate = originalValidate;
       _flutterBuildConfig = originalBuildConfig;
     }
