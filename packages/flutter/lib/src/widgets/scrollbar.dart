@@ -1062,10 +1062,11 @@ class RawScrollbar extends StatefulWidget {
   /// of this widget needs to manage the ScrollController and either pass it to
   /// a scrollable descendant or use a PrimaryScrollController to share it.
   ///
-  /// Passing a ScrollController also names the scroll view this scrollbar is
-  /// for: the scrollbar then ignores scroll notifications from any other scroll
-  /// view, such as a sibling of the one it wraps. Without a ScrollController,
-  /// the scrollbar follows the notifications of whatever it wraps.
+  /// Passing a ScrollController also identifies the scroll view this scrollbar
+  /// is for: the scrollbar then ignores scroll notifications from any other
+  /// scroll view, such as a sibling of the one it wraps. If [controller] is
+  /// null, notifications from any scroll view in the subtree that satisfy
+  /// [notificationPredicate] are used.
   ///
   /// <callout-box>
   ///
@@ -1983,37 +1984,37 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         scrollController.position.axis == notificationAxis;
   }
 
-  // Whether the notification was sent by the ScrollView this scrollbar is
-  // attached to.
+  // Whether the notification was definitely sent by a ScrollView other than
+  // the one this scrollbar is attached to.
   //
   // Sibling ScrollViews share a scrollbar's notification scope, so without this
   // check the metrics of an unrelated ScrollView can be applied to this
   // scrollbar.
   //
   // This only applies when a controller was explicitly provided, since that
-  // names the scrollable this scrollbar is for. An inherited
+  // identifies the scrollable this scrollbar is for. An inherited
   // PrimaryScrollController carries no such meaning: it may well be attached to
   // some other scroll view, and painting is documented to follow the child's
-  // notifications. Returns true whenever there is not enough information to
+  // notifications. Returns false whenever there is not enough information to
   // tell the scroll views apart, preserving the existing behavior.
-  bool _isOwnNotification(BuildContext? notificationContext) {
+  bool _isFromUnrelatedScrollable(BuildContext? notificationContext) {
     final ScrollController? scrollController = widget.controller;
     if (scrollController == null ||
         !scrollController.hasClients ||
         scrollController.positions.length > 1) {
-      return true;
+      return false;
     }
     final BuildContext? positionContext = scrollController.position.context.notificationContext;
-    return notificationContext == null ||
-        positionContext == null ||
-        notificationContext == positionContext;
+    return notificationContext != null &&
+        positionContext != null &&
+        notificationContext != positionContext;
   }
 
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
     if (!widget.notificationPredicate(notification.asScrollUpdate())) {
       return false;
     }
-    if (!_isOwnNotification(notification.context)) {
+    if (_isFromUnrelatedScrollable(notification.context)) {
       return false;
     }
 
@@ -2044,7 +2045,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (!widget.notificationPredicate(notification)) {
       return false;
     }
-    if (!_isOwnNotification(notification.context)) {
+    if (_isFromUnrelatedScrollable(notification.context)) {
       return false;
     }
 
