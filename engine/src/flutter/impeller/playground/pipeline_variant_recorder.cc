@@ -536,9 +536,11 @@ class PipelineVariantRecorder::ReportPrinter {
   /// Only used on entries created by a `ContentContext`, which have options.
   static bool Before(const Entry* a, const Entry* b) {
     FML_DCHECK(a->options.has_value() && b->options.has_value());
-    return std::make_tuple(a->options->ToKey(), std::cref(a->label),
+    const uint64_t a_key = a->options.has_value() ? a->options->ToKey() : 0u;
+    const uint64_t b_key = b->options.has_value() ? b->options->ToKey() : 0u;
+    return std::make_tuple(a_key, std::cref(a->label),
                            std::cref(a->specialization_constants)) <
-           std::make_tuple(b->options->ToKey(), std::cref(b->label),
+           std::make_tuple(b_key, std::cref(b->label),
                            std::cref(b->specialization_constants));
   }
 
@@ -555,7 +557,10 @@ class PipelineVariantRecorder::ReportPrinter {
   /// The heading of the group `entry` is printed in, showing only the option
   /// fields in `mask`. Only used on entries that have options.
   static std::string Heading(const Entry& entry, uint32_t mask) {
-    FML_DCHECK(entry.options.has_value());
+    if (!entry.options.has_value()) {
+      FML_DCHECK(false);
+      return "";
+    }
     std::string heading = FormatOptions(entry.options.value(), mask);
     return heading.empty() ? "(options shared by every variant)" : heading;
   }
