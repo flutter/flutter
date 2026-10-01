@@ -85,6 +85,9 @@ name: foo
             .file('bin/cache/flutter_web_sdk/flutter_js/flutter.js')
             .createSync(recursive: true);
         globals.fs
+            .file('bin/cache/flutter_web_sdk/flutter_js/flutter.js.map')
+            .createSync(recursive: true);
+        globals.fs
             .file('engine/src/flutter/txt/third_party/fonts/Roboto-Regular.ttf')
             .createSync(recursive: true);
 
@@ -1731,6 +1734,25 @@ _flutter.loader.load();
   );
 
   test(
+    'WebBuiltInAssets declares and copies the Flutter loader source map',
+    () => testbed.run(() async {
+      final File flutterJsMapInput = globals.fs.file(
+        'bin/cache/flutter_web_sdk/flutter_js/flutter.js.map',
+      )..createSync(recursive: true);
+      flutterJsMapInput.writeAsStringSync('source map', flush: true);
+      globals.fs.directory('bin/cache/flutter_web_sdk/canvaskit').createSync(recursive: true);
+
+      final target = WebBuiltInAssets(globals.fs);
+      expect(target.outputs, contains(const Source.pattern('{BUILD_DIR}/flutter.js.map')));
+      await target.build(environment);
+
+      final File flutterJsMapOutput = environment.outputDir.childFile('flutter.js.map');
+      expect(flutterJsMapOutput, exists);
+      expect(flutterJsMapOutput.readAsStringSync(), 'source map');
+    }),
+  );
+
+  test(
     'WebBuiltInAssets copies over canvaskit again if the web sdk changes',
     () => testbed.run(() async {
       final File canvasKitInput = globals.fs.file(
@@ -3187,6 +3209,64 @@ _flutter.loader.load({
       expect(
         bootstrapFile.readAsStringSync(),
         contains('"assetManifest":"AssetManifest.bin.deadbeef.json"'),
+      );
+    }),
+  );
+
+  test(
+    'WebTemplatedFiles emits _flutter.supportsDart2Wasm from main.dart.support.js for dart2wasm builds and remains compatible with injectManifestBuildConfig',
+    () => testbed.run(() {
+      const supportExpression =
+          '(WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,95,1,120,0])))';
+      environment.buildDir.childFile('main.dart.support.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('$supportExpression\n');
+
+      final wasmTarget = Dart2WasmTarget(const WasmCompilerConfig(), const NoOpAnalytics());
+      final templatedWithWasm = WebTemplatedFiles(
+        <Map<String, Object?>>[],
+        compileTargets: <Dart2WebTarget>[wasmTarget],
+      );
+      expect(
+        templatedWithWasm.inputs,
+        contains(const Source.pattern('{BUILD_DIR}/main.dart.support.js', optional: true)),
+      );
+
+      final String wasmConfigString = templatedWithWasm.buildConfigString(environment);
+      expect(wasmConfigString, contains('_flutter.supportsDart2Wasm = $supportExpression;\n'));
+
+      // Verify --web-content-hash manifest injection succeeds alongside _flutter.supportsDart2Wasm.
+      final File bootstrapFile = environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(wasmConfigString);
+      const hashResult = WebAssetHashResult(
+        renamedFiles: <String, File>{},
+        assetManifestBinJson: 'AssetManifest.bin.deadbeef.json',
+      );
+      injectManifestBuildConfig(environment.outputDir, hashResult);
+      final String rewrittenBootstrap = bootstrapFile.readAsStringSync();
+      expect(rewrittenBootstrap, contains('"assetManifest":"AssetManifest.bin.deadbeef.json"'));
+      expect(rewrittenBootstrap, contains('_flutter.supportsDart2Wasm = $supportExpression;'));
+
+      // A dart2js-only build (including one with a dry-run Dart2WasmTarget) must not emit
+      // _flutter.supportsDart2Wasm or track main.dart.support.js in inputs even if a stale
+      // main.dart.support.js exists in buildDir.
+      final jsTarget = Dart2JSTarget(const JsCompilerConfig());
+      final dryRunWasmTarget = Dart2WasmTarget(
+        const WasmCompilerConfig(dryRun: true),
+        const NoOpAnalytics(),
+      );
+      final templatedWithJsOnly = WebTemplatedFiles(
+        <Map<String, Object?>>[],
+        compileTargets: <Dart2WebTarget>[jsTarget, dryRunWasmTarget],
+      );
+      expect(
+        templatedWithJsOnly.inputs,
+        isNot(contains(const Source.pattern('{BUILD_DIR}/main.dart.support.js', optional: true))),
+      );
+      expect(
+        templatedWithJsOnly.buildConfigString(environment),
+        isNot(contains('_flutter.supportsDart2Wasm')),
       );
     }),
   );
