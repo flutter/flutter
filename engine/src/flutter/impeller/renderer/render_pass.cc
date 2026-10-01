@@ -104,6 +104,10 @@ void RenderPass::SetStencilReference(uint32_t value) {
   pending_.stencil_reference = value;
 }
 
+void RenderPass::SetBlendColor(Color color) {
+  pending_.blend_color = color;
+}
+
 void RenderPass::SetBaseVertex(uint64_t value) {
   pending_.base_vertex = value;
 }

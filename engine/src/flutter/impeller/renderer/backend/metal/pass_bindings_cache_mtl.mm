@@ -171,4 +171,18 @@ void PassBindingsCacheMTL::SetStencilRef(uint32_t stencil_ref) {
   stencil_ref_ = stencil_ref;
 }
 
+void PassBindingsCacheMTL::SetBlendColor(const Color& blend_color) {
+  // Exact rather than `Color::operator==`, whose 1e-3 tolerance would drop a
+  // constant that moves in steps smaller than it, forever.
+  if (blend_color_.has_value() &&
+      Color::ExactlyEqual(blend_color_.value(), blend_color)) {
+    return;
+  }
+  [encoder_ setBlendColorRed:blend_color.red
+                       green:blend_color.green
+                        blue:blend_color.blue
+                       alpha:blend_color.alpha];
+  blend_color_ = blend_color;
+}
+
 }  // namespace impeller

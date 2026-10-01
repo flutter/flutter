@@ -28,6 +28,9 @@ class RecordingRenderPass : public RenderPass {
   void SetStencilReference(uint32_t value) override;
 
   // |RenderPass|
+  void SetBlendColor(Color color) override;
+
+  // |RenderPass|
   void SetBaseVertex(uint64_t value) override;
 
   // |RenderPass|

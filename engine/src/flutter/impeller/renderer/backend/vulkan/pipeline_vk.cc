@@ -274,6 +274,7 @@ fml::StatusOr<vk::UniquePipeline> MakePipeline(
       vk::DynamicState::eViewport,
       vk::DynamicState::eScissor,
       vk::DynamicState::eStencilReference,
+      vk::DynamicState::eBlendConstants,
   };
   dynamic_create_state_info.setDynamicStates(dynamic_states);
   pipeline_info.setPDynamicState(&dynamic_create_state_info);

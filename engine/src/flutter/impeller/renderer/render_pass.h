@@ -65,6 +65,23 @@ class RenderPass : public ResourceBinder {
   ///
   virtual void SetStencilReference(uint32_t value);
 
+  //----------------------------------------------------------------------------
+  /// The constant color that `BlendFactor::kBlendColor` and the three factors
+  /// beside it multiply by. Which factors are in use is part of pipeline
+  /// setup and can be read from the pipeline's descriptor; the constant they
+  /// read is set here, for the same reason a stencil reference is.
+  ///
+  /// Unset, the constant is transparent black, which is not the same as the
+  /// term being inert: `kBlendColor` and `kBlendAlpha` then evaluate to zero
+  /// and drop their term, while `kOneMinusBlendColor` and
+  /// `kOneMinusBlendAlpha` evaluate to one and pass theirs through at full
+  /// weight.
+  ///
+  /// @see         `BlendFactor`
+  /// @see         `ColorAttachmentDescriptor`
+  ///
+  virtual void SetBlendColor(Color color);
+
   virtual void SetBaseVertex(uint64_t value);
 
   //----------------------------------------------------------------------------

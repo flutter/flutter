@@ -169,6 +169,19 @@ struct Color {
            ScalarNearlyEqual(blue, c.blue) && ScalarNearlyEqual(alpha, c.alpha);
   }
 
+  //----------------------------------------------------------------------------
+  /// Whether two colours are the same value, as opposed to close enough to
+  /// each other. `operator==` is `ScalarNearlyEqual` with a 1e-3 tolerance,
+  /// which suits comparing a computed colour with an expected one and does
+  /// not suit a cache of what was last handed to a driver: comparing each
+  /// request against the last committed value under a tolerance drops a
+  /// sequence of small steps entirely, and the relation is not transitive.
+  ///
+  static constexpr bool ExactlyEqual(const Color& a, const Color& b) {
+    return a.red == b.red && a.green == b.green && a.blue == b.blue &&
+           a.alpha == b.alpha;
+  }
+
   constexpr inline Color operator+(const Color& c) const {
     return {red + c.red, green + c.green, blue + c.blue, alpha + c.alpha};
   }
