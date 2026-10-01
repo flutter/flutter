@@ -129,28 +129,25 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
     return file.basename;
   }
 
-  // The hash is computed before the sourceMappingURL comment is rewritten
-  // below; deriving the map name from the hashed binary name would otherwise
-  // be circular. The compiler emits the binary and its map from the same
-  // compilation, so identical binaries imply identical maps.
-  final String contentHash = crypto.sha256
-      .convert(file.readAsBytesSync())
-      .toString()
-      .substring(0, 8);
-  final String newBasename = computeHashedBasename(file.basename, contentHash, file.fileSystem);
-
-  // The source map shares the binary's hash so the pair stays discoverable as
-  // '<binary>.map'. A `.wasm` binary embeds its map name in a binary custom
-  // section that cannot be rewritten here, so its map keeps the unhashed name.
+  // Hash and rename the source map first so its hashed filename can be
+  // written into the JS/MJS `sourceMappingURL` comment before hashing the
+  // code file itself. This ensures the code file's final on-disk bytes match
+  // the content hash in its filename. A `.wasm` binary embeds its map name in
+  // a binary custom section that cannot be rewritten here, so its map keeps
+  // the unhashed name.
   final isWasm = file.fileSystem.path.extension(file.path) == '.wasm';
   if (sourceMapFile != null && sourceMapFile.existsSync() && !isWasm) {
     final String oldMapBasename = sourceMapFile.basename;
-    final newMapBasename = '$newBasename.map';
+    final String mapHash = crypto.sha256
+        .convert(sourceMapFile.readAsBytesSync())
+        .toString()
+        .substring(0, 8);
+    final String newMapBasename = computeHashedBasename(oldMapBasename, mapHash, file.fileSystem);
     sourceMapFile.renameSync(sourceMapFile.parent.childFile(newMapBasename).path);
 
     final String content = file.readAsStringSync();
     final mapDirectiveRegex = RegExp(
-      r'//[#@]\s*sourceMappingURL=' + RegExp.escape(oldMapBasename) + r'\s*$',
+      r'//[#@]\s*sourceMappingURL=' + RegExp.escape(oldMapBasename) + r'(?=\s*$)',
       multiLine: true,
     );
     if (mapDirectiveRegex.hasMatch(content)) {
@@ -160,6 +157,11 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
     }
   }
 
+  final String contentHash = crypto.sha256
+      .convert(file.readAsBytesSync())
+      .toString()
+      .substring(0, 8);
+  final String newBasename = computeHashedBasename(file.basename, contentHash, file.fileSystem);
   file.renameSync(file.parent.childFile(newBasename).path);
   return newBasename;
 }
@@ -406,7 +408,9 @@ class Dart2JSTarget extends Dart2WebTarget {
   Iterable<File> buildFiles(Environment environment) {
     final String mainJsName =
         (getBuildConfig(environment)['mainJsPath'] as String?) ?? 'main.dart.js';
-    final mainJsMapName = '$mainJsName.map';
+    final String mainJsMapName = compilerConfig.webContentHash
+        ? _resolveHashedBasename(environment.buildDir, _mainJsMapRegex, 'main.dart.js.map')
+        : '$mainJsName.map';
     return environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
       if (file.basename == mainJsName) {
         return true;
@@ -667,7 +671,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final String mainWasmName = (config['mainWasmPath'] as String?) ?? 'main.dart.wasm';
     final String jsSupportName = (config['jsSupportRuntimePath'] as String?) ?? 'main.dart.mjs';
     const mainWasmMapName = 'main.dart.wasm.map';
-    final jsSupportMapName = '$jsSupportName.map';
+    final String jsSupportMapName = compilerConfig.webContentHash
+        ? _resolveHashedBasename(environment.buildDir, _mainMjsMapRegex, 'main.dart.mjs.map')
+        : '$jsSupportName.map';
 
     return environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
       if (file.basename == mainWasmName || file.basename == jsSupportName) {
