@@ -7,11 +7,14 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
+import '../base/bot_detector.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -32,9 +35,12 @@ import '../ios/application_package.dart';
 import '../ios/code_signing.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../ios/xcodeproj.dart';
+import '../macos/cocoapods.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
+import '../version.dart';
 import 'build.dart';
 
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
@@ -976,14 +982,24 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
       :Artifacts artifacts,
+      :BotDetector botDetector,
+      :Config config,
       fileSystemUtils: FileSystemUtils fsUtils,
+      :FlutterVersion flutterVersion,
       :FileSystem fs,
       :Logger logger,
       :OperatingSystemUtils os,
       :Platform platform,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
       :Terminal terminal,
     ) = _toolContext;
-    final AppleContext(:PlistParser plistParser) = _appleContext;
+    final AppleContext(
+      :CocoaPods cocoaPods,
+      :PlistParser plistParser,
+      :Xcode xcode,
+      :XcodeProjectInterpreter xcodeProjectInterpreter,
+    ) = _appleContext;
 
     defaultBuildMode = environmentType == EnvironmentType.simulator
         ? BuildMode.debug
@@ -1016,7 +1032,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     });
     final String? specifiedDeviceId =
         globalResults?[FlutterGlobalOptions.kDeviceIdOption] as String? ??
-        _toolContext.platform.environment['FLUTTER_DEVICE_ID'];
+        platform.environment['FLUTTER_DEVICE_ID'];
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
@@ -1030,6 +1046,25 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
           usingCISystem &&
           xcodeBuildAction == XcodeBuildAction.build &&
           await disablePortPublication,
+      analytics: analytics,
+      artifacts: artifacts,
+      botDetector: botDetector,
+      cocoaPods: cocoaPods,
+      config: config,
+      fileSystem: fs,
+      fileSystemUtils: fsUtils,
+      flutterVersion: flutterVersion,
+      logger: globalResults?[FlutterGlobalOptions.kVerboseFlag] == true && !logger.isVerbose
+          ? VerboseLogger(logger)
+          : logger,
+      operatingSystemUtils: os,
+      platform: platform,
+      plistParser: plistParser,
+      processManager: processManager,
+      processUtils: processUtils,
+      terminal: terminal,
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
     xcodeBuildResult = result;
 
@@ -1041,6 +1076,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         logger: logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
+        processUtils: processUtils,
+        xcode: xcode,
       );
       final presentParticiple = xcodeBuildAction == XcodeBuildAction.build
           ? 'building'

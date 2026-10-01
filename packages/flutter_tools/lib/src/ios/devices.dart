@@ -550,6 +550,14 @@ class IOSDevice extends Device {
         deviceID: id,
         disablePortPublication:
             debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
+        analytics: _analytics,
+        fileSystem: _fileSystem,
+        fileSystemUtils: _fileSystemUtils,
+        iMobileDevice: _iMobileDevice,
+        logger: _logger,
+        platform: _platform,
+        processUtils: _processUtils,
+        xcode: _xcode,
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
