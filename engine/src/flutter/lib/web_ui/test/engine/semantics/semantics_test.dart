@@ -3470,9 +3470,9 @@ void _testSelectables() {
 <sem role="listbox">
     <sem role="none">
         <sem role="none" style="overflow-y: scroll">
+            <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
             <sem role="option" aria-label="apple" aria-selected="true"></sem>
             <sem role="option" aria-label="banana" aria-selected="false"></sem>
-            <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
         </sem>
     </sem>
 </sem>
