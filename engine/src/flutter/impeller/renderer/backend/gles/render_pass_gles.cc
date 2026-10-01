@@ -308,30 +308,30 @@ struct RenderPassStateCache {
     }
   }
 
+  // Note: RenderPass::SetScissor only populates pending_.scissor for the next
+  // Draw() call (which moves pending_ into commands_ and resets pending_).
+  // Subsequent Draw() calls within the same clip scope have
+  // command_scissor == std::nullopt, meaning the active scissor rect remains
+  // unchanged (matching Metal and Vulkan; see flutter/engine#56494).
   void ConfigureScissor(const ProcTableGLES& gl,
                         const std::optional<IRect32>& command_scissor,
                         const ISize& target_size,
                         bool flip_y) {
-    if (command_scissor.has_value()) {
-      if (scissor != command_scissor) {
-        const auto& new_scissor = command_scissor.value();
-        if (!scissor.has_value()) {
-          gl.Enable(GL_SCISSOR_TEST);
-        }
-        // Same flip handling as the viewport above.
-        const auto scissor_y_gl = flip_y ? new_scissor.GetY()
-                                         : target_size.height -
-                                               new_scissor.GetY() -
-                                               new_scissor.GetHeight();
-        gl.Scissor(new_scissor.GetX(),  // x
-                   scissor_y_gl,        // y
-                   new_scissor.GetWidth(), new_scissor.GetHeight());
-        scissor = new_scissor;
-      }
-    } else if (scissor.has_value()) {
-      gl.Disable(GL_SCISSOR_TEST);
-      scissor = std::nullopt;
+    if (!command_scissor.has_value() || scissor == command_scissor) {
+      return;
     }
+    const auto& new_scissor = command_scissor.value();
+    if (!scissor.has_value()) {
+      gl.Enable(GL_SCISSOR_TEST);
+    }
+    // Same flip handling as the viewport above.
+    const auto scissor_y_gl = flip_y ? new_scissor.GetY()
+                                     : target_size.height - new_scissor.GetY() -
+                                           new_scissor.GetHeight();
+    gl.Scissor(new_scissor.GetX(),  // x
+               scissor_y_gl,        // y
+               new_scissor.GetWidth(), new_scissor.GetHeight());
+    scissor = new_scissor;
   }
 
   void ConfigureCullMode(const ProcTableGLES& gl, CullMode pipeline_cull_mode) {
