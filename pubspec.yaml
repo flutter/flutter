@@ -211,7 +211,7 @@ dependencies:
   webview_flutter: 4.14.1
   webview_flutter_android: 4.14.1
   webview_flutter_platform_interface: 2.15.1
-  webview_flutter_wkwebview: 3.26.2
+  webview_flutter_wkwebview: 3.27.0
   xdg_directories: 1.1.0
   xml: 6.6.1
   yaml: 3.1.4
@@ -226,4 +226,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 4ccg7b
+# PUBSPEC CHECKSUM: 7vbk4a
