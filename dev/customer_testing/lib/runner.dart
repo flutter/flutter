@@ -212,8 +212,6 @@ Future<bool> runTests({
   return true;
 }
 
-final RegExp _spaces = RegExp(r' +');
-
 Future<bool> shell(
   String command,
   Directory directory, {
