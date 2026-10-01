@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
@@ -15,6 +16,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -484,14 +486,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Stdio stdio = _toolContext.stdio;
-    final UserMessages userMessages = _toolContext.userMessages;
-    final LocalEngineLocator localEngineLocator = _toolContext.localEngineLocator;
-    final Platform platform = _toolContext.platform;
-    final Cache cache = _toolContext.cache;
-    final FlutterVersion flutterVersion = _toolContext.flutterVersion;
-    final Logger logger = _toolContext.logger;
-    final SystemClock systemClock = _toolContext.systemClock;
+    final ToolContext(
+      :Cache cache,
+      :FlutterVersion flutterVersion,
+      :FileSystem fs,
+      :LocalEngineLocator localEngineLocator,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessManager processManager,
+      :Stdio stdio,
+      :SystemClock systemClock,
+      :UserMessages userMessages,
+    ) = _toolContext;
 
     final contextOverrides = <Type, Object?>{};
 
@@ -536,9 +543,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       wrapColumn: wrapColumn,
     );
 
-    _updateArgParser(
-      wrapColumn: useWrapping ? (wrapColumn ?? toolContext.stdio.terminalColumns) : null,
-    );
+    _updateArgParser(wrapColumn: useWrapping ? (wrapColumn ?? stdio.terminalColumns) : null);
 
     if (((topLevelResults[FlutterGlobalOptions.kShowTestDeviceFlag] as bool?) ?? false) ||
         topLevelResults[FlutterGlobalOptions.kDeviceIdOption] ==
@@ -560,7 +565,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
       packagePath: topLevelResults[FlutterGlobalOptions.kPackagesOption] as String?,
     );
     if (engineBuildPaths != null) {
-      final Artifacts localArtifacts = Artifacts.getLocalEngine(engineBuildPaths);
+      final Artifacts localArtifacts = Artifacts.getLocalEngine(
+        engineBuildPaths,
+        cache: cache,
+        fileSystem: fs,
+        operatingSystemUtils: os,
+        platform: platform,
+        processManager: processManager,
+      );
       contextOverrides.addAll(<Type, Object?>{Artifacts: localArtifacts});
       // Update the artifacts the commands were created with.
       if (_toolContext.artifacts case final DeferredArtifacts artifacts) {
