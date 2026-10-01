@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -30,8 +31,7 @@ void main() {
   testWithoutContext('No checks passes', () async {
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
-      logger,
-      platform,
+      toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
       title: 'test check',
     );
@@ -43,8 +43,7 @@ void main() {
   testWithoutContext('clearTempDir passes', () async {
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
-      logger,
-      platform,
+      toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
       title: 'test check',
     );
@@ -82,8 +81,7 @@ void main() {
 
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
-      logger,
-      platform,
+      toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
       title: 'test check',
       templatesDir: templatesDir,
@@ -143,8 +141,7 @@ void main() {
 
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
-      logger,
-      platform,
+      toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
       title: 'test check',
       templatesDir: templatesDir,
@@ -200,8 +197,7 @@ void main() {
 
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
-      logger,
-      platform,
+      toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
       title: 'test check',
       templatesDir: templatesDir,
@@ -236,8 +232,7 @@ void main() {
   testWithoutContext('androidStringMapping creates new file', () async {
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
-      logger,
-      platform,
+      toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
       title: 'test check',
     );
@@ -329,8 +324,7 @@ void main() {
   testWithoutContext('androidStringMapping modifies strings file', () async {
     final validator = DeferredComponentsPrebuildValidator(
       projectDir,
-      logger,
-      platform,
+      toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
       exitOnFail: false,
       title: 'test check',
     );

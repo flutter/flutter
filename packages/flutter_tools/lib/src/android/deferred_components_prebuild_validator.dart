@@ -9,6 +9,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/template.dart';
+import '../context/tool_context.dart';
 import '../isolated/mustache_template.dart';
 import '../project.dart';
 import '../template.dart';
@@ -30,18 +31,19 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// methods will exit the tool when this validator detects a recommended
   /// change. This defaults to true.
   DeferredComponentsPrebuildValidator(
-    super.projectDir,
-    super.logger,
-    super.platform, {
+    Directory projectDir, {
+    required ToolContext toolContext,
     super.exitOnFail,
     super.outputDir,
     this._templateRenderer = const MustacheTemplateRenderer(),
     this._templatesDir,
     super.title,
-  });
+  }) : _toolContext = toolContext,
+       super(projectDir, toolContext.logger, toolContext.platform);
 
   final Directory? _templatesDir;
   final TemplateRenderer _templateRenderer;
+  final ToolContext _toolContext;
 
   /// Checks if an android dynamic feature module exists for each deferred
   /// component.
@@ -64,11 +66,11 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
     var changesMade = false;
     for (final component in components) {
       final androidFiles = _DeferredComponentAndroidFiles(
-        logger: logger,
         name: component.name,
         projectDir: projectDir,
         templateRenderer: _templateRenderer,
         templatesDir: _templatesDir,
+        toolContext: _toolContext,
       );
       if (!androidFiles.verifyFilesExist()) {
         // generate into temp directory
@@ -214,19 +216,19 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
 // directory.
 class _DeferredComponentAndroidFiles {
   _DeferredComponentAndroidFiles({
-    required this.logger,
     required this.name,
     required this.projectDir,
     required this.templateRenderer,
+    required this.toolContext,
     this.templatesDir,
   });
 
   // The name of the deferred component.
   final String name;
   final Directory projectDir;
-  final Logger logger;
   final TemplateRenderer templateRenderer;
   final Directory? templatesDir;
+  final ToolContext toolContext;
 
   Directory get androidDir => projectDir.childDirectory('android');
   Directory get componentDir => androidDir.childDirectory(name);
@@ -265,32 +267,30 @@ class _DeferredComponentAndroidFiles {
 
   // generates default build.gradle and AndroidManifest.xml for the deferred component.
   Future<List<File>> _setupComponentFiles(Directory outputDir) async {
-    final FileSystem fileSystem = projectDir.fileSystem;
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        toolContext;
     Template template;
     if (templatesDir != null) {
       final Directory templateComponentDir = templatesDir!.childDirectory(
-        'module${fileSystem.path.separator}android${fileSystem.path.separator}deferred_component',
+        'module${fs.path.separator}android${fs.path.separator}deferred_component',
       );
       template = Template(
         templateComponentDir,
         templateComponentDir,
-        fileSystem: fileSystem,
+        fileSystem: fs,
         logger: logger,
         templateRenderer: templateRenderer,
       );
     } else {
       template = await Template.fromName(
-        'module${fileSystem.path.separator}android${fileSystem.path.separator}deferred_component',
-        fileSystem: fileSystem,
+        'module${fs.path.separator}android${fs.path.separator}deferred_component',
+        fileSystem: fs,
         templateManifest: null,
         logger: logger,
         templateRenderer: templateRenderer,
       );
     }
-    final FlutterProject flutterProject = FlutterProjectFactory(
-      logger: logger,
-      fileSystem: fileSystem,
-    ).fromDirectory(projectDir);
+    final FlutterProject flutterProject = projectFactory.fromDirectory(projectDir);
     final context = <String, Object>{
       'androidIdentifier':
           flutterProject.manifest.androidPackage ??
