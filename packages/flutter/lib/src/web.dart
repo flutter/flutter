@@ -67,7 +67,9 @@ extension type DOMTokenList._(JSObject _) implements JSObject {
 extension type Element._(JSObject _) implements Node, JSObject {
   external DOMTokenList get classList;
   external void append(JSAny nodes);
+  external bool get isConnected;
   external void remove();
+  external void setAttribute(String qualifiedName, String value);
 }
 
 extension type Event._(JSObject _) implements JSObject {}
