@@ -1950,6 +1950,81 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(attemptsLeft, 0);
       expect(memoryFileSystem.file('/file').readAsStringSync(), 'content');
     });
+
+    testWithoutContext(
+      'recovers from ERROR_DIR_NOT_EMPTY on directory deletion during retry loop (sync)',
+      () {
+        attemptsLeft = 3; // Fails 3 times, succeeds on 4th (attempt index 3)
+        final memoryFileSystem = MemoryFileSystem.test(
+          opHandle: (String path, FileSystemOp op) {
+            if (path == '/dir' && op == FileSystemOp.delete) {
+              if (attemptsLeft > 0) {
+                attemptsLeft--;
+                throw const FileSystemException(
+                  '',
+                  '/dir',
+                  OSError('', 145),
+                ); // ERROR_DIR_NOT_EMPTY
+              }
+            }
+          },
+        );
+        fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
+        final Directory directory = fileSystem.directory('/dir')..createSync();
+
+        directory.deleteSync(recursive: true);
+        expect(attemptsLeft, 0);
+        expect(memoryFileSystem.directory('/dir').existsSync(), false);
+      },
+    );
+
+    testWithoutContext('fails after 5 ERROR_DIR_NOT_EMPTY attempts and throws ToolExit (sync)', () {
+      attemptsLeft = 6; // Fails 6 times
+      final memoryFileSystem = MemoryFileSystem.test(
+        opHandle: (String path, FileSystemOp op) {
+          if (path == '/dir' && op == FileSystemOp.delete) {
+            if (attemptsLeft > 0) {
+              attemptsLeft--;
+              throw const FileSystemException('', '/dir', OSError('', 145)); // ERROR_DIR_NOT_EMPTY
+            }
+          }
+        },
+      );
+      fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
+      final Directory directory = fileSystem.directory('/dir')..createSync();
+
+      expect(
+        () => directory.deleteSync(recursive: true),
+        throwsToolExit(message: 'The file is being used by another program'),
+      );
+    });
+
+    testWithoutContext(
+      'recovers from ERROR_DIR_NOT_EMPTY on directory deletion during retry loop (async)',
+      () async {
+        attemptsLeft = 3; // Fails 3 times, succeeds on 4th (attempt index 3)
+        final memoryFileSystem = MemoryFileSystem.test(
+          opHandle: (String path, FileSystemOp op) {
+            if (path == '/dir' && op == FileSystemOp.delete) {
+              if (attemptsLeft > 0) {
+                attemptsLeft--;
+                throw const FileSystemException(
+                  '',
+                  '/dir',
+                  OSError('', 145),
+                ); // ERROR_DIR_NOT_EMPTY
+              }
+            }
+          },
+        );
+        fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
+        final Directory directory = fileSystem.directory('/dir')..createSync();
+
+        await directory.delete(recursive: true);
+        expect(attemptsLeft, 0);
+        expect(memoryFileSystem.directory('/dir').existsSync(), false);
+      },
+    );
   });
 
   group('deleteIfExists with broken symlinks', () {

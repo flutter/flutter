@@ -59,6 +59,9 @@ const int kSystemCodeLockViolation = 33;
 /// On Windows this is error code 1224: ERROR_USER_MAPPED_FILE.
 const int kSystemCodeUserMappedSectionOpened = 1224;
 
+/// On Windows this is error code 145: ERROR_DIR_NOT_EMPTY.
+const int kSystemCodeDirNotEmpty = 145;
+
 /// On Windows this is error code 1314: ERROR_PRIVILEGE_NOT_HELD.
 const int kSystemCodePrivilegeNotHeld = 1314;
 
@@ -1034,7 +1037,8 @@ bool _isWindowsTransientLock(int errorCode) {
   return errorCode == kSystemCodeAccessDenied ||
       errorCode == kSystemCodeSharingViolation ||
       errorCode == kSystemCodeLockViolation ||
-      errorCode == kSystemCodeUserMappedSectionOpened;
+      errorCode == kSystemCodeUserMappedSectionOpened ||
+      errorCode == kSystemCodeDirNotEmpty;
 }
 
 Future<T> _run<T>(
@@ -1458,6 +1462,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kDeviceDoesNotExist = 433;
   const kSystemIntegrityPolicyViolation = 454;
   const kFatalDeviceHardwareError = 483;
+  const kDirNotEmpty = 145;
   const kUserMappedSectionOpened = 1224;
   const kAccessDisabledByPolicy = 1260;
   const kPrivilegeNotHeld = 1314;
@@ -1478,7 +1483,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The target device is full.'
           '\n$e\n'
           'Free up space and try again.',
-    kSharingViolation || kLockViolation || kUserMappedSectionOpened =>
+    kSharingViolation || kLockViolation || kUserMappedSectionOpened || kDirNotEmpty =>
       '$message. The file is being used by another program.'
           '\n$e\n'
           'Do you have an antivirus program running? '
