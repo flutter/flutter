@@ -86,6 +86,10 @@ class MockableJNIEnv : public JNIEnv {
     jni_.GetIntArrayRegion = WrapGetIntArrayRegion;
     jni_.NewString = WrapNewString;
     jni_.NewDirectByteBuffer = WrapNewDirectByteBuffer;
+    jni_.NewObject = WrapNewObject;
+    jni_.NewObjectV = WrapNewObjectV;
+    jni_.NewObjectArray = WrapNewObjectArray;
+    jni_.SetObjectArrayElement = WrapSetObjectArrayElement;
   }
 
   virtual jclass GetObjectClass(jobject) = 0;
@@ -117,6 +121,13 @@ class MockableJNIEnv : public JNIEnv {
   virtual jboolean IsInstanceOf(jobject obj, jclass clazz) = 0;
   virtual jstring NewString(const jchar* unicode, jsize len) = 0;
   virtual jobject NewDirectByteBuffer(void* address, jlong capacity) = 0;
+  virtual jobject NewObjectV(jclass, jmethodID, va_list) = 0;
+  virtual jobjectArray NewObjectArray(jsize length,
+                                      jclass element_class,
+                                      jobject initial_element) = 0;
+  virtual void SetObjectArrayElement(jobjectArray array,
+                                     jsize index,
+                                     jobject val) = 0;
 
  private:
   static jclass WrapGetObjectClass(JNIEnv* env, jobject obj) {
@@ -287,6 +298,35 @@ class MockableJNIEnv : public JNIEnv {
     return static_cast<MockableJNIEnv*>(env)->NewDirectByteBuffer(address,
                                                                   capacity);
   }
+  static jobject WrapNewObject(JNIEnv* env,
+                               jclass clazz,
+                               jmethodID methodID,
+                               ...) {
+    va_list args;
+    va_start(args, methodID);
+    jobject result = WrapNewObjectV(env, clazz, methodID, args);
+    va_end(args);
+    return result;
+  }
+  static jobject WrapNewObjectV(JNIEnv* env,
+                                jclass clazz,
+                                jmethodID methodID,
+                                va_list args) {
+    return static_cast<MockableJNIEnv*>(env)->NewObjectV(clazz, methodID, args);
+  }
+  static jobjectArray WrapNewObjectArray(JNIEnv* env,
+                                         jsize length,
+                                         jclass element_class,
+                                         jobject initial_element) {
+    return static_cast<MockableJNIEnv*>(env)->NewObjectArray(
+        length, element_class, initial_element);
+  }
+  static void WrapSetObjectArrayElement(JNIEnv* env,
+                                        jobjectArray array,
+                                        jsize index,
+                                        jobject val) {
+    static_cast<MockableJNIEnv*>(env)->SetObjectArrayElement(array, index, val);
+  }
 
   JNINativeInterface jni_ = {};
 };
@@ -385,6 +425,15 @@ class MockJNIEnv : public MockableJNIEnv {
               (override));
   MOCK_METHOD(jstring, NewString, (const jchar*, jsize), (override));
   MOCK_METHOD(jobject, NewDirectByteBuffer, (void*, jlong), (override));
+  MOCK_METHOD(jobject, NewObjectV, (jclass, jmethodID, va_list), (override));
+  MOCK_METHOD(jobjectArray,
+              NewObjectArray,
+              (jsize, jclass, jobject),
+              (override));
+  MOCK_METHOD(void,
+              SetObjectArrayElement,
+              (jobjectArray, jsize, jobject),
+              (override));
 };
 
 }  // namespace flutter

@@ -3,10 +3,14 @@
 // found in the LICENSE file.
 
 #include <dlfcn.h>
+#include <array>
+#include <functional>
 #include <future>
+#include <ostream>
 #include <thread>
 #include <vector>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/icu_util.h"
 #include "flutter/fml/paths.h"
@@ -8020,6 +8024,8 @@ TEST_F(Phase61JniRegistrationCutoverTest,
   const jfieldID kShellHolderField = reinterpret_cast<jfieldID>(200);
   const jmethodID kJniConstructor = reinterpret_cast<jmethodID>(300);
   const jmethodID kHandleMessageMethod = reinterpret_cast<jmethodID>(401);
+  // Any non-null handle distinct from the others in this test.
+  const jmethodID kLongValueOfMethod = reinterpret_cast<jmethodID>(301);
 
   EXPECT_CALL(mock_env_, FindClass(_))
       .WillRepeatedly([&](const char* name) -> jclass {
@@ -8032,12 +8038,21 @@ TEST_F(Phase61JniRegistrationCutoverTest,
   EXPECT_CALL(mock_env_, GetFieldID(kFlutterJNIClass, "nativeShellHolderId",
                                     "Ljava/lang/Long;"))
       .WillRepeatedly(Return(kShellHolderField));
-  EXPECT_CALL(mock_env_,
-              GetMethodID(kFlutterJNIClass, "handlePlatformMessage",
-                          "(Ljava/lang/String;Ljava/nio/ByteBuffer;IJ)V"))
-      .WillRepeatedly(Return(kHandleMessageMethod));
+  // gmock matches the newest expectation first, so the catch-all must be
+  // declared before the specific handlePlatformMessage lookup.
   EXPECT_CALL(mock_env_, GetMethodID(_, _, _))
       .WillRepeatedly(Return(kJniConstructor));
+  EXPECT_CALL(
+      mock_env_,
+      GetMethodID(
+          kFlutterJNIClass, ::testing::StrEq("handlePlatformMessage"),
+          ::testing::StrEq("(Ljava/lang/String;Ljava/nio/ByteBuffer;IJ)V")))
+      .WillRepeatedly(Return(kHandleMessageMethod));
+  // RegisterJni fails if the static Long.valueOf(long) lookup returns null.
+  EXPECT_CALL(mock_env_,
+              GetStaticMethodID(_, ::testing::StrEq("valueOf"),
+                                ::testing::StrEq("(J)Ljava/lang/Long;")))
+      .WillRepeatedly(Return(kLongValueOfMethod));
 
   EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
   EXPECT_CALL(mock_env_, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
@@ -8075,6 +8090,7 @@ TEST_F(Phase61JniRegistrationCutoverTest,
         allocated_buffer = address;
         return reinterpret_cast<jobject>(0x700);
       });
+  EXPECT_CALL(mock_env_, CallVoidMethodV(_, kHandleMessageMethod, _)).Times(1);
 
   // response_id = 100 (arbitrary non-zero test id)
   // message_data = 0 (instructs AndroidJvmInvoker to allocate heap buffer)
@@ -8097,6 +8113,334 @@ TEST_F(Phase61JniRegistrationCutoverTest,
   // Free the buffer allocated by AndroidJvmInvoker.
   cleanup_fn(&mock_env_, nullptr, reinterpret_cast<jlong>(allocated_buffer));
 }
+
+// A FlutterJNI method that AndroidJvmInvoker resolves in RegisterJni and
+// dispatches to with CallVoidMethod.
+struct FlutterJniDispatchMethod {
+  const char* name;
+  const char* signature;
+  // The jmethodID the test's GetMethodID stub returns for this method.
+  uintptr_t id;
+};
+
+// Ids 401-408 are arbitrary. Each method gets its own so a test can tell
+// which FlutterJNI method a CallVoidMethodV call targeted.
+constexpr FlutterJniDispatchMethod kHandlePlatformMessageMethod = {
+    "handlePlatformMessage", "(Ljava/lang/String;Ljava/nio/ByteBuffer;IJ)V",
+    401};
+constexpr FlutterJniDispatchMethod kHandlePlatformMessageResponseMethod = {
+    "handlePlatformMessageResponse", "(ILjava/nio/ByteBuffer;)V", 402};
+constexpr FlutterJniDispatchMethod kUpdateSemanticsMethod = {
+    "updateSemantics",
+    "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V", 403};
+constexpr FlutterJniDispatchMethod kUpdateCustomAccessibilityActionsMethod = {
+    "updateCustomAccessibilityActions",
+    "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V", 404};
+constexpr FlutterJniDispatchMethod kSetSemanticsTreeEnabledMethod = {
+    "setSemanticsTreeEnabled", "(Z)V", 405};
+constexpr FlutterJniDispatchMethod kSetApplicationLocaleMethod = {
+    "setApplicationLocale", "(Ljava/lang/String;)V", 406};
+constexpr FlutterJniDispatchMethod kOnFirstFrameMethod = {"onFirstFrame", "()V",
+                                                          407};
+constexpr FlutterJniDispatchMethod kOnPreEngineRestartMethod = {
+    "onPreEngineRestart", "()V", 408};
+
+// All eight are required by AndroidJvmInvoker::RegisterJni.
+constexpr std::array<FlutterJniDispatchMethod, 8> kFlutterJniDispatchMethods = {
+    kHandlePlatformMessageMethod,
+    kHandlePlatformMessageResponseMethod,
+    kUpdateSemanticsMethod,
+    kUpdateCustomAccessibilityActionsMethod,
+    kSetSemanticsTreeEnabledMethod,
+    kSetApplicationLocaleMethod,
+    kOnFirstFrameMethod,
+    kOnPreEngineRestartMethod,
+};
+
+static jmethodID ToMethodId(const FlutterJniDispatchMethod& method) {
+  return reinterpret_cast<jmethodID>(method.id);
+}
+
+struct JvmInvokerDispatchCase {
+  // Used as the gtest parameter name.
+  const char* name;
+  FlutterJniDispatchMethod method;
+  // Calls the AndroidJvmInvoker method under test with representative
+  // arguments and returns its result.
+  std::function<bool(AndroidJvmInvoker&)> invoke;
+};
+
+static void PrintTo(const JvmInvokerDispatchCase& dispatch_case,
+                    std::ostream* os) {
+  *os << dispatch_case.name;
+}
+
+static const std::vector<JvmInvokerDispatchCase>& JvmInvokerDispatchCases() {
+  // Arbitrary payload bytes and response id. The dispatch result doesn't
+  // depend on their values.
+  static const uint8_t kPayload[] = {1, 2, 3};
+  static const uint8_t kResponseData[] = {4, 5};
+  constexpr int32_t kResponseId = 7;
+  static const std::vector<JvmInvokerDispatchCase> cases = {
+      {"HandlePlatformMessageWithPayload", kHandlePlatformMessageMethod,
+       [](AndroidJvmInvoker& invoker) {
+         // A non-zero message_data means the caller owns the buffer, so the
+         // invoker doesn't malloc a copy that this test would have to free.
+         return invoker.HandlePlatformMessage(
+             "test/channel", kPayload, sizeof(kPayload), kResponseId,
+             reinterpret_cast<int64_t>(kPayload));
+       }},
+      {"HandlePlatformMessageWithoutPayload", kHandlePlatformMessageMethod,
+       [](AndroidJvmInvoker& invoker) {
+         return invoker.HandlePlatformMessage("test/channel", nullptr, 0,
+                                              kResponseId, 0);
+       }},
+      {"HandlePlatformMessageResponse", kHandlePlatformMessageResponseMethod,
+       [](AndroidJvmInvoker& invoker) {
+         return invoker.HandlePlatformMessageResponse(
+             kResponseId, kResponseData, sizeof(kResponseData));
+       }},
+      {"UpdateSemantics", kUpdateSemanticsMethod,
+       [](AndroidJvmInvoker& invoker) {
+         return invoker.UpdateSemantics({1, 2, 3, 4}, {"label"}, {{9}});
+       }},
+      {"UpdateCustomAccessibilityActions",
+       kUpdateCustomAccessibilityActionsMethod,
+       [](AndroidJvmInvoker& invoker) {
+         return invoker.UpdateCustomAccessibilityActions({1, 2}, {"action"});
+       }},
+      {"SetSemanticsTreeEnabled", kSetSemanticsTreeEnabledMethod,
+       [](AndroidJvmInvoker& invoker) {
+         return invoker.SetSemanticsTreeEnabled(true);
+       }},
+      {"SetApplicationLocale", kSetApplicationLocaleMethod,
+       [](AndroidJvmInvoker& invoker) {
+         return invoker.SetApplicationLocale("en-US");
+       }},
+      {"OnFirstFrame", kOnFirstFrameMethod,
+       [](AndroidJvmInvoker& invoker) { return invoker.OnFirstFrame(); }},
+      {"OnPreEngineRestart", kOnPreEngineRestartMethod,
+       [](AndroidJvmInvoker& invoker) { return invoker.OnPreEngineRestart(); }},
+  };
+  return cases;
+}
+
+// Runs the real AndroidJvmInvoker against MockJNIEnv. The JNI exception state
+// is a flag owned by the fixture: only the test's own Java call sets it, and
+// ExceptionClear resets it. A sticky ExceptionCheck() == JNI_TRUE would trip
+// the ASSERT_NO_EXCEPTION checks in the jni_util string/array helpers and abort
+// the whole binary.
+class AndroidJvmInvokerDispatchTest
+    : public Phase61JniRegistrationCutoverTest,
+      public ::testing::WithParamInterface<JvmInvokerDispatchCase> {
+ public:
+  void SetUp() override {
+    Phase61JniRegistrationCutoverTest::SetUp();
+    InstallExceptionStateFake();
+    InstallRegistrationStubs();
+    ExpectDispatchMethodIds();
+    // The eight method ids are file-static in jvm_invoker.cc and are only
+    // written by registration.
+    ASSERT_TRUE(FlutterEmbedderNative::RegisterJni(&mock_env_));
+  }
+
+  void TearDown() override {
+    // ReturnsFalseWhenMethodIdUnresolved leaves one id null. Restore all eight
+    // here rather than at the end of that test, so an assertion that bails out
+    // early can't leave a null id behind for later tests in the binary. The
+    // new expectations are the newest, so they take precedence.
+    ExpectDispatchMethodIds();
+    EXPECT_TRUE(AndroidJvmInvoker::RegisterJni(&mock_env_, kFlutterJNIClass));
+    Phase61JniRegistrationCutoverTest::TearDown();
+  }
+
+ protected:
+  std::unique_ptr<AndroidJvmInvoker> MakeAttachedInvoker() {
+    return std::make_unique<AndroidJvmInvoker>(
+        std::make_shared<fml::jni::JavaObjectWeakGlobalRef>(&mock_env_,
+                                                            kFlutterJNIObject),
+        /*platform_task_runner=*/nullptr);
+  }
+
+  void ExpectDispatchMethodIds() {
+    for (const FlutterJniDispatchMethod& method : kFlutterJniDispatchMethods) {
+      EXPECT_CALL(mock_env_,
+                  GetMethodID(kFlutterJNIClass, ::testing::StrEq(method.name),
+                              ::testing::StrEq(method.signature)))
+          .WillRepeatedly(Return(ToMethodId(method)));
+    }
+  }
+
+  // Arbitrary non-null JNI handles. They only need to be distinct from each
+  // other. 100, 0x600 and 0x700 match the FlutterJNI class, string and direct
+  // buffer handles that MockJNIEnv and the rest of this file use.
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  const jclass kOtherClass = reinterpret_cast<jclass>(109);
+  const jfieldID kShellHolderField = reinterpret_cast<jfieldID>(200);
+  const jmethodID kOtherMethod = reinterpret_cast<jmethodID>(300);
+  const jmethodID kLongValueOfMethod = reinterpret_cast<jmethodID>(301);
+  const jobject kFlutterJNIObject = reinterpret_cast<jobject>(500);
+  const jstring kJavaString = reinterpret_cast<jstring>(0x600);
+  const jobject kDirectBuffer = reinterpret_cast<jobject>(0x700);
+  const jobjectArray kObjectArray = reinterpret_cast<jobjectArray>(0x800);
+  const jthrowable kPendingThrowable = reinterpret_cast<jthrowable>(0x900);
+
+  bool exception_pending_ = false;
+
+ private:
+  void InstallExceptionStateFake() {
+    EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly([this]() {
+      return exception_pending_ ? JNI_TRUE : JNI_FALSE;
+    });
+    EXPECT_CALL(mock_env_, ExceptionClear()).WillRepeatedly([this]() {
+      exception_pending_ = false;
+    });
+    EXPECT_CALL(mock_env_, ExceptionDescribe()).WillRepeatedly(Return());
+    // Catch-all first: the ScopedJavaLocalRef destructors (channel string,
+    // buffers, GetJavaExceptionInfo's locals) also call DeleteLocalRef, and
+    // gmock matches the newest expectation first. Tests that count the
+    // throwable's DeleteLocalRef declare that expectation after this one.
+    EXPECT_CALL(mock_env_, DeleteLocalRef(_)).WillRepeatedly(Return());
+    // Java calls that don't throw, including Throwable.printStackTrace from
+    // GetJavaExceptionInfo, which runs with a different method id.
+    EXPECT_CALL(mock_env_, CallVoidMethodV(_, _, _)).WillRepeatedly(Return());
+    // GetJavaExceptionInfo builds its stream objects with NewObject and reads
+    // the trace with CallObjectMethod. A null jstring makes JavaStringToString
+    // return "" before it touches GetStringChars.
+    EXPECT_CALL(mock_env_, NewObjectV(_, _, _)).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(mock_env_, CallObjectMethodV(_, _, _))
+        .WillRepeatedly(Return(nullptr));
+  }
+
+  void InstallRegistrationStubs() {
+    EXPECT_CALL(mock_env_, FindClass(_))
+        .WillRepeatedly([this](const char* name) -> jclass {
+          if (strcmp(name, "io/flutter/embedding/engine/FlutterJNI") == 0) {
+            return kFlutterJNIClass;
+          }
+          return kOtherClass;
+        });
+    EXPECT_CALL(mock_env_, GetFieldID(kFlutterJNIClass,
+                                      ::testing::StrEq("nativeShellHolderId"),
+                                      ::testing::StrEq("Ljava/lang/Long;")))
+        .WillRepeatedly(Return(kShellHolderField));
+    // Declared before the eight specific ids so it doesn't shadow them.
+    EXPECT_CALL(mock_env_, GetMethodID(_, _, _))
+        .WillRepeatedly(Return(kOtherMethod));
+    // FlutterEmbedderNative::RegisterJni fails if Long.valueOf(long) is null.
+    EXPECT_CALL(mock_env_,
+                GetStaticMethodID(_, ::testing::StrEq("valueOf"),
+                                  ::testing::StrEq("(J)Ljava/lang/Long;")))
+        .WillRepeatedly(Return(kLongValueOfMethod));
+    EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
+        .WillRepeatedly(Return(0));
+
+    EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mock_env_, NewWeakGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(mock_env_, DeleteWeakGlobalRef(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mock_env_, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(mock_env_, GetObjectRefType(_))
+        .WillRepeatedly(Return(JNILocalRefType));
+
+    EXPECT_CALL(mock_env_, NewString(_, _)).WillRepeatedly(Return(kJavaString));
+    EXPECT_CALL(mock_env_, NewDirectByteBuffer(_, _))
+        .WillRepeatedly(Return(kDirectBuffer));
+    EXPECT_CALL(mock_env_, NewObjectArray(_, _, _))
+        .WillRepeatedly(Return(kObjectArray));
+    EXPECT_CALL(mock_env_, SetObjectArrayElement(_, _, _))
+        .WillRepeatedly(Return());
+  }
+};
+
+// (a) The Java call returns normally.
+TEST_P(AndroidJvmInvokerDispatchTest, ReturnsTrueWhenJavaCallSucceeds) {
+  const JvmInvokerDispatchCase& dispatch_case = GetParam();
+  auto invoker = MakeAttachedInvoker();
+
+  EXPECT_CALL(mock_env_, ExceptionOccurred()).Times(0);
+  EXPECT_CALL(mock_env_, CallVoidMethodV(_, _, _)).Times(0);
+  EXPECT_CALL(mock_env_, CallVoidMethodV(kFlutterJNIObject,
+                                         ToMethodId(dispatch_case.method), _))
+      .Times(1);
+
+  EXPECT_TRUE(dispatch_case.invoke(*invoker));
+}
+
+// (b) The Java call throws.
+TEST_P(AndroidJvmInvokerDispatchTest,
+       ReturnsFalseAndClearsExceptionWhenJavaCallThrows) {
+  const JvmInvokerDispatchCase& dispatch_case = GetParam();
+  auto invoker = MakeAttachedInvoker();
+
+  EXPECT_CALL(mock_env_, CallVoidMethodV(kFlutterJNIObject,
+                                         ToMethodId(dispatch_case.method), _))
+      .WillOnce(
+          [this](jobject, jmethodID, va_list) { exception_pending_ = true; });
+  EXPECT_CALL(mock_env_, ExceptionOccurred())
+      .WillOnce(Return(kPendingThrowable));
+  EXPECT_CALL(mock_env_, ExceptionClear()).WillOnce([this]() {
+    exception_pending_ = false;
+  });
+  EXPECT_CALL(mock_env_,
+              DeleteLocalRef(static_cast<jobject>(kPendingThrowable)))
+      .Times(1);
+
+  EXPECT_FALSE(dispatch_case.invoke(*invoker));
+  EXPECT_FALSE(exception_pending_);
+}
+
+// (c) The method id wasn't resolved at registration.
+TEST_P(AndroidJvmInvokerDispatchTest, ReturnsFalseWhenMethodIdUnresolved) {
+  const JvmInvokerDispatchCase& dispatch_case = GetParam();
+  EXPECT_CALL(
+      mock_env_,
+      GetMethodID(kFlutterJNIClass, ::testing::StrEq(dispatch_case.method.name),
+                  ::testing::StrEq(dispatch_case.method.signature)))
+      .WillRepeatedly(Return(nullptr));
+  // All eight ids are required, so registration reports the missing one.
+  EXPECT_FALSE(FlutterEmbedderNative::RegisterJni(&mock_env_));
+
+  auto invoker = MakeAttachedInvoker();
+  EXPECT_CALL(mock_env_, CallVoidMethodV(_, _, _)).Times(0);
+
+  EXPECT_FALSE(dispatch_case.invoke(*invoker));
+}
+
+// (d) No Java object is attached, so the call is dropped.
+TEST_P(AndroidJvmInvokerDispatchTest,
+       ReturnsTrueAndDropsCallWithoutJavaObject) {
+  const JvmInvokerDispatchCase& dispatch_case = GetParam();
+  AndroidJvmInvoker invoker(/*java_object=*/nullptr,
+                            /*platform_task_runner=*/nullptr);
+  EXPECT_CALL(mock_env_, CallVoidMethodV(_, _, _)).Times(0);
+
+  EXPECT_TRUE(dispatch_case.invoke(invoker));
+}
+
+// (e) The thread has no JNIEnv, so the call is dropped.
+TEST_P(AndroidJvmInvokerDispatchTest, ReturnsTrueAndDropsCallWithoutJNIEnv) {
+  const JvmInvokerDispatchCase& dispatch_case = GetParam();
+  auto invoker = MakeAttachedInvoker();
+  EXPECT_CALL(mock_env_, CallVoidMethodV(_, _, _)).Times(0);
+
+  jvm_.SetJNIEnv(nullptr);
+  {
+    // The invoker's weak ref is released through the attached env, so the env
+    // has to be back before |invoker| is destroyed.
+    fml::ScopedCleanupClosure restore_env(
+        [this]() { jvm_.SetJNIEnv(&mock_env_); });
+    EXPECT_TRUE(dispatch_case.invoke(*invoker));
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    AllDispatchMethods,
+    AndroidJvmInvokerDispatchTest,
+    ::testing::ValuesIn(JvmInvokerDispatchCases()),
+    [](const ::testing::TestParamInfo<JvmInvokerDispatchCase>& info) {
+      return std::string(info.param.name);
+    });
 
 TEST_F(Phase61JniRegistrationCutoverTest,
        SendPointerDataPacketUnpacksEmbedderId) {
