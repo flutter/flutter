@@ -18,6 +18,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/signals.dart';
@@ -288,6 +289,7 @@ class Daemon {
     this.logToStdout = false,
     Logger? logger,
     this.notifyingLogger,
+    OperatingSystemUtils? operatingSystemUtils,
     OutputPreferences? outputPreferences,
     Platform? platform,
     ProcessManager? processManager,
@@ -301,6 +303,9 @@ class Daemon {
            LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks()) {
     final Platform p = platform ?? const LocalPlatform();
     final ProcessManager pm = processManager ?? const LocalProcessManager();
+    final OperatingSystemUtils os =
+        operatingSystemUtils ??
+        OperatingSystemUtils(fileSystem: _fs, logger: _logger, platform: p, processManager: pm);
     final AnsiTerminal term = terminal ?? AnsiTerminal(stdio: stdio ?? Stdio(), platform: p);
     final OutputPreferences prefs = outputPreferences ?? OutputPreferences.test();
     final Analytics an = analytics ?? const NoOpAnalytics();
@@ -343,6 +348,7 @@ class Daemon {
         processManager: pm,
         androidSdk: androidSdk,
         java: java,
+        operatingSystemUtils: os,
       ),
     );
     registerDomain(devToolsDomain = DevToolsDomain(this));
@@ -1916,6 +1922,7 @@ class EmulatorDomain extends Domain {
     AndroidSdk? androidSdk,
     EmulatorManager? emulatorManager,
     Java? java,
+    required OperatingSystemUtils operatingSystemUtils,
   }) : emulators =
            emulatorManager ??
            EmulatorManager(
@@ -1925,6 +1932,7 @@ class EmulatorDomain extends Domain {
              androidSdk: androidSdk,
              processManager: processManager,
              androidWorkflow: androidWorkflow,
+             operatingSystemUtils: operatingSystemUtils,
            ),
        super(daemon, 'emulator') {
     registerHandler('getEmulators', getEmulators);
