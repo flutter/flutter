@@ -2092,6 +2092,76 @@ void main() {
     // Verify the tooltip overlay is no longer displayed.
     expect(find.text(tooltipText), findsNothing);
   });
+
+  for (final semanticsEnabled in <bool>[false, true]) {
+    testWidgets('Tooltip remains responsive when its hovered list item is parked '
+        'with semantics ${semanticsEnabled ? 'enabled' : 'disabled'}', (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              height: 400.0,
+              child: ListView.builder(
+                controller: controller,
+                itemCount: 20,
+                itemBuilder: (BuildContext context, int index) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Expanded(child: Text('Item $index')),
+                        Tooltip(
+                          message: 'Delete',
+                          child: IconButton(
+                            key: ValueKey<int>(index),
+                            onPressed: () {},
+                            icon: const Icon(Icons.delete),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 202.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      controller.jumpTo(700.0);
+      await tester.pump();
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      // Showing the tooltip makes the hovered item request keep-alive. Moving
+      // it past the trailing cache extent in the same frame parks its layout
+      // surrogate before the new deferred overlay child can be laid out.
+      await gesture.moveTo(tester.getCenter(find.byKey(const ValueKey<int>(3))));
+      controller.jumpTo(0.0);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      // The pending-layout overlay must not block pointer updates. The exit
+      // releases keep-alive and lets the tooltip and list item be removed.
+      await gesture.moveBy(const Offset(0.0, 5.0));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Delete'), findsNothing);
+      expect(find.byKey(const ValueKey<int>(3)), findsNothing);
+
+      // Once the item is laid out again, its tooltip participates normally.
+      controller.jumpTo(700.0);
+      await tester.pump();
+      await gesture.moveTo(tester.getCenter(find.byKey(const ValueKey<int>(3))));
+      await tester.pumpAndSettle();
+      expect(find.text('Delete'), findsOneWidget);
+    }, semanticsEnabled: semanticsEnabled);
+  }
 }
 
 Future<void> _testGestureTap(WidgetTester tester, Finder tooltip) async {
