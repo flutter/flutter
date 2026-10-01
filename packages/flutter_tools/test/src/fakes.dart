@@ -1413,8 +1413,8 @@ class FakeToolContext extends Fake implements ToolContext {
 }
 
 /// A [ToolContext] that dynamically delegates to [globals] for use in [testUsingContext].
-class DelegatingToolContext extends Fake implements ToolContext {
-  DelegatingToolContext({
+class DelegatingToolContext with Fake implements ToolContext {
+  const DelegatingToolContext({
     this._artifacts,
     this._botDetector,
     this._cache,
