@@ -48,6 +48,48 @@ class FreshScrollController extends ScrollController {
   }
 }
 
+class DimensionAligningScrollController extends ScrollController {
+  bool needsAlignment = false;
+  double? alignedViewportDimension;
+
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return DimensionAligningScrollPosition(
+      controller: this,
+      physics: physics,
+      context: context,
+      oldPosition: oldPosition,
+    );
+  }
+}
+
+class DimensionAligningScrollPosition extends ScrollPositionWithSingleContext {
+  DimensionAligningScrollPosition({
+    required this.controller,
+    required super.physics,
+    required super.context,
+    super.oldPosition,
+  });
+
+  final DimensionAligningScrollController controller;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    var accepted = true;
+    if (controller.needsAlignment) {
+      controller.needsAlignment = false;
+      controller.alignedViewportDimension = viewportDimension;
+      correctPixels(maxScrollExtent);
+      accepted = false;
+    }
+    return super.applyContentDimensions(minScrollExtent, maxScrollExtent) && accepted;
+  }
+}
+
 Widget primaryScrollControllerBoilerplate({
   required Widget child,
   required ScrollController controller,
@@ -1116,6 +1158,73 @@ void main() {
         late StateSetter rebuildContent;
         late bool revealed;
         late int extraRows;
+
+        for (final resizeViewport in <bool>[false, true]) {
+          testWidgets(
+            'a custom position receives current dimensions for a pending correction (resize: $resizeViewport)',
+            (WidgetTester tester) async {
+              final controller = DimensionAligningScrollController();
+              addTearDown(controller.dispose);
+              const contentKey = ValueKey<String>('content');
+
+              Widget frame(double viewportExtent, double contentExtent) {
+                return Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Center(
+                    child: SizedBox(
+                      width: axis == Axis.horizontal ? viewportExtent : 300.0,
+                      height: axis == Axis.vertical ? viewportExtent : 300.0,
+                      child: SingleChildScrollView(
+                        controller: controller,
+                        scrollDirection: axis,
+                        reverse: reverse,
+                        physics: const BouncingScrollPhysics(),
+                        child: SizedBox(
+                          key: contentKey,
+                          width: axis == Axis.horizontal ? contentExtent : 300.0,
+                          height: axis == Axis.vertical ? contentExtent : 300.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              await tester.pumpWidget(frame(300.0, 480.0));
+              final RenderObject viewport = tester.renderObject(find.byKey(contentKey)).parent!;
+              final ScrollPosition position = controller.position;
+              final double oldMax = position.maxScrollExtent;
+              controller.jumpTo(oldMax);
+              await tester.pump();
+              final TestGesture gesture = await tester.startGesture(
+                tester.getCenter(find.byType(SingleChildScrollView)),
+              );
+              final distance = reverse ? 100.0 : -100.0;
+              await gesture.moveBy(
+                axis == Axis.horizontal ? Offset(distance, 0.0) : Offset(0.0, distance),
+              );
+              await tester.pump();
+              expect(position.pixels, greaterThan(oldMax + 20.0));
+
+              // A custom position may consume a pending correction on its next dimension call.
+              // It must receive the actual extents and the current viewport dimension, not a
+              // replay of the old extents intended to refresh the physics' metrics.
+              controller.needsAlignment = true;
+              final newViewportExtent = resizeViewport ? 150.0 : 300.0;
+              await tester.pumpWidget(frame(newViewportExtent, resizeViewport ? 480.0 : 960.0));
+              expect(tester.takeException(), isNull);
+              expect(controller.position, same(position));
+              expect(tester.renderObject(find.byKey(contentKey)).parent, same(viewport));
+              expect(position.maxScrollExtent, resizeViewport ? 330.0 : 660.0);
+              expect(position.pixels, position.maxScrollExtent);
+              expect(controller.alignedViewportDimension, newViewportExtent);
+              expect(controller.needsAlignment, isFalse);
+
+              await gesture.up();
+              await tester.pumpAndSettle();
+            },
+          );
+        }
 
         for (final initialOffset in <double>[-100.0, 1000.0]) {
           testWidgets('a replacement offset is reconciled on its first layout ($initialOffset)', (
