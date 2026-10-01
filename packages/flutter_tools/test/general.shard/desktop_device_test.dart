@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/desktop_device.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -654,13 +655,15 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   String get name => 'Example';
 }
 
+class FakeToolContext extends Fake implements ToolContext {}
+
 class FakeMacOSDevice extends MacOSDevice {
   FakeMacOSDevice({
     required super.processManager,
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
-  }) : super(flutterVersion: FakeFlutterVersion());
+  }) : super(toolContext: FakeToolContext());
 
   @override
   String get name => 'dummy';

@@ -88,20 +88,15 @@ final _filteredOutput = RegExp(
 Future<void> buildMacOS({
   required BuildInfo buildInfo,
   required FlutterProject flutterProject,
+  required ToolContext toolContext,
   required bool verboseLogging,
   Analytics analytics = const NoOpAnalytics(),
   CocoaPods? cocoaPods,
   bool configOnly = false,
   FeatureFlags? featureFlags,
-  FileSystem? fileSystem,
-  FlutterVersion? flutterVersion,
-  Logger? logger,
-  OperatingSystemUtils? operatingSystemUtils,
   PlistParser? plistParser,
-  ProcessUtils? processUtils,
   SizeAnalyzer? sizeAnalyzer,
   String? targetOverride,
-  ToolContext? toolContext,
   bool usingCISystem = false,
   Xcode? xcode,
   XcodeProjectInterpreter? xcodeProjectInterpreter,
@@ -115,25 +110,26 @@ Future<void> buildMacOS({
     );
   }
 
-  final UserMessages messages = toolContext?.userMessages ?? UserMessages();
+  final ToolContext(
+    :Config config,
+    :FileSystem fs,
+    :FileSystemUtils fileSystemUtils,
+    :FlutterVersion flutterVersion,
+    :Logger logger,
+    :OperatingSystemUtils os,
+    :Platform platform,
+    :ProcessUtils processUtils,
+    :AnsiTerminal terminal,
+    :UserMessages userMessages,
+  ) = toolContext;
   final XcodeProjectInterpreter? interpreter =
       xcodeProjectInterpreter ?? flutterProject.projectXcodeProjectInterpreter;
   if (interpreter == null || !interpreter.isInstalled) {
-    throwToolExit(messages.xcodeMissing);
+    throwToolExit(userMessages.xcodeMissing);
   }
 
-  final Logger buildLogger = logger ?? toolContext!.logger;
-  final OperatingSystemUtils os = operatingSystemUtils ?? toolContext!.os;
-  final ProcessUtils procUtils = processUtils ?? toolContext!.processUtils;
-  final FlutterVersion version = flutterVersion ?? toolContext!.flutterVersion;
-  final FileSystem fs = fileSystem ?? toolContext?.fs ?? flutterProject.directory.fileSystem;
-  final Platform hostPlatform = toolContext?.platform ?? flutterProject.projectPlatform;
-  final FileSystemUtils fsUtils =
-      toolContext?.fileSystemUtils ?? flutterProject.projectFileSystemUtils;
   final PlistParser parser = plistParser ?? flutterProject.projectPlistParser;
-  final Config appConfig = toolContext?.config ?? flutterProject.projectConfig;
   final FeatureFlags flags = featureFlags ?? flutterProject.projectFeatureFlags;
-  final Terminal ansiTerminal = toolContext?.terminal ?? flutterProject.projectTerminal;
   final CocoaPods? pods = cocoaPods ?? flutterProject.projectCocoaPods;
   final Xcode? projectXcode = xcode ?? flutterProject.projectXcode;
 
@@ -143,31 +139,31 @@ Future<void> buildMacOS({
 
   const FlutterDarwinPlatform darwinPlatform = .macos;
   final migrators = <ProjectMigrator>[
-    RemoveMacOSFrameworkLinkAndEmbeddingMigration(flutterProject.macos, buildLogger, analytics),
-    MacOSDeploymentTargetMigration(flutterProject.macos, buildLogger),
-    XcodeProjectObjectVersionMigration(flutterProject.macos, buildLogger),
-    XcodeScriptBuildPhaseMigration(flutterProject.macos, buildLogger),
-    XcodeThinBinaryBuildPhaseInputPathsMigration(flutterProject.macos, buildLogger),
-    FlutterApplicationMigration(flutterProject.macos, buildLogger, plistParser: parser),
-    NSApplicationMainDeprecationMigration(flutterProject.macos, buildLogger),
-    SecureRestorableStateMigration(flutterProject.macos, buildLogger),
+    RemoveMacOSFrameworkLinkAndEmbeddingMigration(flutterProject.macos, logger, analytics),
+    MacOSDeploymentTargetMigration(flutterProject.macos, logger),
+    XcodeProjectObjectVersionMigration(flutterProject.macos, logger),
+    XcodeScriptBuildPhaseMigration(flutterProject.macos, logger),
+    XcodeThinBinaryBuildPhaseInputPathsMigration(flutterProject.macos, logger),
+    FlutterApplicationMigration(flutterProject.macos, logger, plistParser: parser),
+    NSApplicationMainDeprecationMigration(flutterProject.macos, logger),
+    SecureRestorableStateMigration(flutterProject.macos, logger),
     SwiftPackageManagerIntegrationMigration(
       flutterProject.macos,
       darwinPlatform,
       buildInfo,
       xcodeProjectInterpreter: interpreter,
-      logger: buildLogger,
+      logger: logger,
       fileSystem: fs,
       plistParser: parser,
-      config: appConfig,
+      config: config,
       analytics: analytics,
-      hostPlatform: hostPlatform,
+      hostPlatform: platform,
       operatingSystemUtils: os,
-      flutterVersion: version,
-      reportCrashes: !(await toolContext?.botDetector.isRunningOnBot ?? false),
+      flutterVersion: flutterVersion,
+      reportCrashes: !(await toolContext.botDetector.isRunningOnBot),
     ),
-    SwiftPackageManagerGitignoreMigration(flutterProject, buildLogger),
-    MetalAPIValidationMigrator.macos(flutterProject.macos, buildLogger),
+    SwiftPackageManagerGitignoreMigration(flutterProject, logger),
+    MetalAPIValidationMigrator.macos(flutterProject.macos, logger),
   ];
 
   final migration = ProjectMigration(migrators);
@@ -178,7 +174,7 @@ Future<void> buildMacOS({
     xcodeProject: flutterProject.macos,
     plugins: await flutterProject.macos.getPlugins(),
     fileSystem: fs,
-    logger: buildLogger,
+    logger: logger,
     cocoapods: pods,
     analytics: analytics,
     featureFlags: flags,
@@ -252,7 +248,7 @@ Future<void> buildMacOS({
 
   // Run the Xcode build.
   final sw = Stopwatch()..start();
-  final Status status = buildLogger.startProgress('Building macOS application...');
+  final Status status = logger.startProgress('Building macOS application...');
   int result;
 
   File? disabledSandboxEntitlementFile;
@@ -261,10 +257,10 @@ Future<void> buildMacOS({
       flutterProject.macos,
       configuration,
       fileSystem: fs,
-      logger: buildLogger,
+      logger: logger,
     );
     if (disabledSandboxEntitlementFile != null) {
-      buildLogger.printStatus('Detected macOS app running in CI, turning off sandboxing.');
+      logger.printStatus('Detected macOS app running in CI, turning off sandboxing.');
     }
   }
 
@@ -305,7 +301,7 @@ Future<void> buildMacOS({
     _ => true,
   };
   if (buildInfo.isRelease && binaryContainsX86Slice && allowsArm64Only) {
-    buildLogger.printWarning(
+    logger.printWarning(
       'Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. '
       'To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". '
       'This will become the default behavior in a future Flutter release.',
@@ -329,7 +325,7 @@ Future<void> buildMacOS({
           fs.directory(buildDirectoryPath),
           skipPackageValidation: false,
         );
-    result = await procUtils.stream(
+    result = await processUtils.stream(
       <String>[
         '/usr/bin/env',
         ...xcodebuildCommandArgs,
@@ -354,7 +350,7 @@ Future<void> buildMacOS({
         // Pass EXCLUDED_ARCHS from Xcode project to xcodebuild command
         // This fixes Swift Package Manager not respecting EXCLUDED_ARCHS from the project
         if (excludedArchs != null) 'EXCLUDED_ARCHS=$excludedArchs',
-        ...environmentVariablesAsXcodeBuildSettings(hostPlatform),
+        ...environmentVariablesAsXcodeBuildSettings(platform),
         if (archs != null) 'ARCHS=$archs',
       ],
       trace: true,
@@ -381,7 +377,7 @@ Future<void> buildMacOS({
 
   if (result != 0) {
     if (hasMacOSMinDeploymentTargetIssue) {
-      buildLogger.printError(
+      logger.printError(
         _macOSDeploymentTargetTooLowMessage(macOSMinDeploymentTarget),
         emphasis: true,
       );
@@ -397,8 +393,8 @@ Future<void> buildMacOS({
     final appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
         ? '' // Don't display the size when building a debug variant.
         : ' (${getSizeAsPlatformMB(directorySize)})';
-    buildLogger.printStatus(
-      '${ansiTerminal.successMark} '
+    logger.printStatus(
+      '${terminal.successMark} '
       'Built ${fs.path.relative(outputDirectory.path)}$appSize',
       color: TerminalColor.green,
     );
@@ -423,8 +419,8 @@ Future<void> buildMacOS({
     buildInfo,
     sizeAnalyzer,
     fileSystem: fs,
-    fileSystemUtils: fsUtils,
-    logger: buildLogger,
+    fileSystemUtils: fileSystemUtils,
+    logger: logger,
   );
   final Duration elapsedDuration = sw.elapsed;
   analytics.send(

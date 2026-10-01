@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
@@ -32,7 +33,7 @@ void main() {
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
-      flutterVersion: FakeFlutterVersion(),
+      toolContext: FakeToolContext(),
     );
     final package = FakeMacOSApp();
 
@@ -64,7 +65,7 @@ void main() {
       ]),
       logger: BufferLogger.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
-      flutterVersion: FakeFlutterVersion(),
+      toolContext: FakeToolContext(),
     );
     final package = FakeMacOSApp();
 
@@ -90,11 +91,11 @@ void main() {
         logger: BufferLogger.test(),
         platform: linux,
         operatingSystemUtils: FakeOperatingSystemUtils(),
-        flutterVersion: FakeFlutterVersion(),
         macOSWorkflow: MacOSWorkflow(
           featureFlags: TestFeatureFlags(isMacOSEnabled: true),
           platform: linux,
         ),
+        toolContext: FakeToolContext(),
       ).devices(),
       isEmpty,
     );
@@ -109,8 +110,8 @@ void main() {
         logger: BufferLogger.test(),
         platform: macOS,
         operatingSystemUtils: FakeOperatingSystemUtils(),
-        flutterVersion: FakeFlutterVersion(),
         macOSWorkflow: MacOSWorkflow(featureFlags: TestFeatureFlags(), platform: macOS),
+        toolContext: FakeToolContext(),
       );
 
       expect(await macOSDevices.devices(), isEmpty);
@@ -124,11 +125,11 @@ void main() {
       logger: BufferLogger.test(),
       platform: macOS,
       operatingSystemUtils: FakeOperatingSystemUtils(),
-      flutterVersion: FakeFlutterVersion(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
+      toolContext: FakeToolContext(),
     );
 
     expect(await macOSDevices.devices(), hasLength(1));
@@ -141,11 +142,11 @@ void main() {
       logger: BufferLogger.test(),
       platform: macOS,
       operatingSystemUtils: FakeOperatingSystemUtils(),
-      flutterVersion: FakeFlutterVersion(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
+      toolContext: FakeToolContext(),
     );
 
     expect(macOSDevices.wellKnownIds, <String>['macos']);
@@ -158,11 +159,11 @@ void main() {
       logger: BufferLogger.test(),
       platform: macOS,
       operatingSystemUtils: FakeOperatingSystemUtils(),
-      flutterVersion: FakeFlutterVersion(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
+      toolContext: FakeToolContext(),
     );
 
     // Timeout ignored.
@@ -180,7 +181,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
-      flutterVersion: FakeFlutterVersion(),
+      toolContext: FakeToolContext(),
     );
 
     fileSystem.file('pubspec.yaml').createSync();
@@ -198,7 +199,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: fakeOperatingSystemUtils,
-      flutterVersion: FakeFlutterVersion(),
+      toolContext: FakeToolContext(),
     );
 
     expect(await device.targetPlatformDisplayName, 'darwin-x64');
@@ -212,7 +213,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: fakeOperatingSystemUtils,
-      flutterVersion: FakeFlutterVersion(),
+      toolContext: FakeToolContext(),
     );
 
     expect(await device.targetPlatformDisplayName, 'darwin-arm64');
@@ -225,7 +226,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
-      flutterVersion: FakeFlutterVersion(),
+      toolContext: FakeToolContext(),
     );
     fileSystem.file('pubspec.yaml').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
@@ -240,7 +241,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
-      flutterVersion: FakeFlutterVersion(),
+      toolContext: FakeToolContext(),
     );
     const debugPath = 'debug/executable';
     const profilePath = 'profile/executable';
@@ -251,6 +252,8 @@ void main() {
     expect(device.executablePathForDevice(package, BuildInfo.release), releasePath);
   });
 }
+
+class FakeToolContext extends Fake implements ToolContext {}
 
 FlutterProject setUpFlutterProject(Directory directory) {
   final flutterProjectFactory = FlutterProjectFactory(
