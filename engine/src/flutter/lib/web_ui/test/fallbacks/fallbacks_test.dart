@@ -19,6 +19,9 @@ void main() {
 @JS()
 external bool get crossOriginIsolated;
 
+@JS('_flutter')
+external JSObject get _flutterObject;
+
 @JS('_flutter.loader.load')
 external JSPromise<JSAny?> _flutterLoaderLoad(JSAny? options);
 
@@ -47,6 +50,108 @@ Future<void> testMain() async {
     } else {
       expect(isWasm, isFalse);
       expect(isCanvasKit, isTrue);
+    }
+  });
+
+  test('loader rejects dart2wasm on Firefox < 147 before checking Wasm capabilities', () async {
+    if (ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox) {
+      return;
+    }
+    final String originalUserAgent = domWindow.navigator.userAgent;
+    final JSAny? originalBuildConfig = _flutterBuildConfig;
+    final JSFunction originalValidate = _wasmValidate;
+    try {
+      _flutterBuildConfig = <String, Object?>{
+        'builds': <Map<String, Object?>>[
+          <String, Object?>{
+            'compileTarget': 'dart2wasm',
+            'renderer': 'canvaskit',
+            'mainWasmPath': 'main.dart.wasm',
+            'jsSupportRuntimePath': 'main.dart.mjs',
+          },
+        ],
+      }.jsify();
+
+      final JSAny? optInOptions = <String, Object?>{
+        'config': <String, Object?>{
+          'wasmAllowList': <String, bool>{'gecko': true},
+        },
+      }.jsify();
+
+      // 1. Firefox 146 (< 147) must be rejected before evaluating Wasm capabilities,
+      // even when _flutter.supportsDart2Wasm and WebAssembly.validate are true.
+      objectConstructor.defineProperty(
+        domWindow.navigator,
+        'userAgent',
+        DomPropertyDataDescriptor(
+          value: 'Mozilla/5.0 (X11; Linux x86_64; rv:146.0) Gecko/20100101 Firefox/146.0',
+          configurable: true,
+        ),
+      );
+      objectConstructor.defineProperty(
+        _flutterObject,
+        'supportsDart2Wasm',
+        DomPropertyDataDescriptor(value: true, configurable: true, writable: true),
+      );
+      var validateCalls = 0;
+      _wasmValidate = (() {
+        validateCalls++;
+        return true;
+      }).toJS;
+
+      await expectLater(
+        _flutterLoaderLoad(optInOptions).toDart,
+        throwsA(
+          predicate<Object>(
+            (Object e) => e.toString().contains('FlutterLoader could not find a build compatible'),
+          ),
+        ),
+      );
+      expect(validateCalls, 0);
+
+      // 2. Firefox 147 (>= 147) passes the version gate and proceeds to evaluate
+      // Wasm capabilities.
+      objectConstructor.defineProperty(
+        domWindow.navigator,
+        'userAgent',
+        DomPropertyDataDescriptor(
+          value: 'Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0',
+          configurable: true,
+        ),
+      );
+      objectConstructor.defineProperty(
+        _flutterObject,
+        'supportsDart2Wasm',
+        DomPropertyDataDescriptor(configurable: true, writable: true),
+      );
+      validateCalls = 0;
+      _wasmValidate = (() {
+        validateCalls++;
+        return false;
+      }).toJS;
+
+      await expectLater(
+        _flutterLoaderLoad(optInOptions).toDart,
+        throwsA(
+          predicate<Object>(
+            (Object e) => e.toString().contains('FlutterLoader could not find a build compatible'),
+          ),
+        ),
+      );
+      expect(validateCalls, greaterThan(0));
+    } finally {
+      objectConstructor.defineProperty(
+        domWindow.navigator,
+        'userAgent',
+        DomPropertyDataDescriptor(value: originalUserAgent, configurable: true),
+      );
+      objectConstructor.defineProperty(
+        _flutterObject,
+        'supportsDart2Wasm',
+        DomPropertyDataDescriptor(configurable: true, writable: true),
+      );
+      _wasmValidate = originalValidate;
+      _flutterBuildConfig = originalBuildConfig;
     }
   });
 
