@@ -9,15 +9,12 @@ import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/config.dart';
-import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/signals.dart';
-import '../base/terminal.dart';
 import '../base/version.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -38,19 +35,6 @@ const kAndroidNdkRoot = 'ANDROID_NDK_ROOT';
 final _numberedAndroidPlatformRe = RegExp(r'^android-([0-9]+)$');
 final _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 
-Logger _createDefaultLogger(Platform platform) {
-  final stdio = Stdio();
-  return StdoutLogger(
-    terminal: AnsiTerminal(platform: platform, stdio: stdio),
-    stdio: stdio,
-    outputPreferences: OutputPreferences(
-      wrapText: stdio.hasTerminal,
-      showColor: platform.stdoutSupportsAnsi,
-      stdio: stdio,
-    ),
-  );
-}
-
 // Android SDK layout:
 
 // $ANDROID_HOME/platform-tools/adb
@@ -65,49 +49,34 @@ Logger _createDefaultLogger(Platform platform) {
 // $ANDROID_HOME/platforms/android-23/android.jar
 // $ANDROID_HOME/platforms/android-N/android.jar
 class AndroidSdk {
-  factory AndroidSdk(
-    Directory directory, {
-    Config? config,
-    Java? java,
-    Logger? logger,
-    Platform? platform,
-    ProcessManager? processManager,
-    ToolContext? toolContext,
-  }) {
-    final Platform resolvedPlatform = platform ?? toolContext?.platform ?? const LocalPlatform();
-    final Logger resolvedLogger =
-        logger ?? toolContext?.logger ?? _createDefaultLogger(resolvedPlatform);
-    final ProcessManager resolvedProcessManager =
-        processManager ?? toolContext?.processManager ?? const LocalProcessManager();
-    final Config resolvedConfig =
-        config ??
-        toolContext?.config ??
-        Config(
-          Config.kFlutterSettings,
-          fileSystem: directory.fileSystem,
-          logger: resolvedLogger,
-          platform: resolvedPlatform,
-        );
+  factory AndroidSdk(Directory directory, {required ToolContext toolContext, Java? java}) {
+    final ToolContext(
+      :Config config,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+    ) = toolContext;
     return AndroidSdk._(
       directory,
-      config: resolvedConfig,
+      config: config,
       java: java,
-      logger: resolvedLogger,
-      platform: resolvedPlatform,
-      processManager: resolvedProcessManager,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+      processUtils: processUtils,
     );
   }
 
   AndroidSdk._(
     this.directory, {
     required this._config,
-    required Logger logger,
+    required this._logger,
     required this._platform,
-    required ProcessManager processManager,
+    required this._processManager,
+    required this._processUtils,
     this._java,
-  }) : _logger = logger,
-       _processManager = processManager,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  });
 
   /// The Android SDK root directory.
   final Directory directory;
@@ -157,84 +126,36 @@ class AndroidSdk {
   /// the SDK on demand.
   bool get licensesAvailable => directory.childDirectory('licenses').existsSync();
 
-  static AndroidSdk? locateAndroidSdk({
-    Config? config,
-    FileSystem? fileSystem,
-    FileSystemUtils? fileSystemUtils,
-    Logger? logger,
-    OperatingSystemUtils? operatingSystemUtils,
-    Platform? platform,
-    ProcessManager? processManager,
-    ToolContext? toolContext,
-  }) {
-    final Platform resolvedPlatform = platform ?? toolContext?.platform ?? const LocalPlatform();
-    final FileSystem resolvedFileSystem =
-        fileSystem ??
-        toolContext?.fs ??
-        ErrorHandlingFileSystem(
-          delegate: LocalFileSystem(
-            LocalSignals.instance,
-            Signals.defaultExitSignals,
-            ShutdownHooks(),
-          ),
-          platform: resolvedPlatform,
-        );
-    final FileSystemUtils resolvedFileSystemUtils =
-        fileSystemUtils ??
-        toolContext?.fileSystemUtils ??
-        FileSystemUtils(fileSystem: resolvedFileSystem, platform: resolvedPlatform);
-    final Logger resolvedLogger =
-        logger ?? toolContext?.logger ?? _createDefaultLogger(resolvedPlatform);
-    final ProcessManager resolvedProcessManager =
-        processManager ?? toolContext?.processManager ?? const LocalProcessManager();
-    final Config resolvedConfig =
-        config ??
-        toolContext?.config ??
-        Config(
-          Config.kFlutterSettings,
-          fileSystem: resolvedFileSystem,
-          logger: resolvedLogger,
-          platform: resolvedPlatform,
-        );
-    final OperatingSystemUtils resolvedOsUtils =
-        operatingSystemUtils ??
-        toolContext?.os ??
-        OperatingSystemUtils(
-          fileSystem: resolvedFileSystem,
-          logger: resolvedLogger,
-          platform: resolvedPlatform,
-          processManager: resolvedProcessManager,
-        );
+  static AndroidSdk? locateAndroidSdk({required ToolContext toolContext}) {
+    final ToolContext(
+      :Config config,
+      :FileSystem fs,
+      :FileSystemUtils fileSystemUtils,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+    ) = toolContext;
 
     String? findAndroidHomeDir() {
       String? androidHomeDir;
-      if (resolvedConfig.containsKey('android-sdk')) {
-        androidHomeDir = resolvedConfig.getValue('android-sdk') as String?;
-      } else if (resolvedPlatform.environment.containsKey(kAndroidHome)) {
-        androidHomeDir = resolvedPlatform.environment[kAndroidHome];
-      } else if (resolvedPlatform.environment.containsKey(kAndroidSdkRoot)) {
-        androidHomeDir = resolvedPlatform.environment[kAndroidSdkRoot];
-      } else if (resolvedPlatform.isLinux) {
-        if (resolvedFileSystemUtils.homeDirPath != null) {
-          androidHomeDir = resolvedFileSystem.path.join(
-            resolvedFileSystemUtils.homeDirPath!,
-            'Android',
-            'Sdk',
-          );
+      if (config.containsKey('android-sdk')) {
+        androidHomeDir = config.getValue('android-sdk') as String?;
+      } else if (platform.environment.containsKey(kAndroidHome)) {
+        androidHomeDir = platform.environment[kAndroidHome];
+      } else if (platform.environment.containsKey(kAndroidSdkRoot)) {
+        androidHomeDir = platform.environment[kAndroidSdkRoot];
+      } else if (platform.isLinux) {
+        if (fileSystemUtils.homeDirPath != null) {
+          androidHomeDir = fs.path.join(fileSystemUtils.homeDirPath!, 'Android', 'Sdk');
         }
-      } else if (resolvedPlatform.isMacOS) {
-        if (resolvedFileSystemUtils.homeDirPath != null) {
-          androidHomeDir = resolvedFileSystem.path.join(
-            resolvedFileSystemUtils.homeDirPath!,
-            'Library',
-            'Android',
-            'sdk',
-          );
+      } else if (platform.isMacOS) {
+        if (fileSystemUtils.homeDirPath != null) {
+          androidHomeDir = fs.path.join(fileSystemUtils.homeDirPath!, 'Library', 'Android', 'sdk');
         }
-      } else if (resolvedPlatform.isWindows) {
-        if (resolvedFileSystemUtils.homeDirPath != null) {
-          androidHomeDir = resolvedFileSystem.path.join(
-            resolvedFileSystemUtils.homeDirPath!,
+      } else if (platform.isWindows) {
+        if (fileSystemUtils.homeDirPath != null) {
+          androidHomeDir = fs.path.join(
+            fileSystemUtils.homeDirPath!,
             'AppData',
             'Local',
             'Android',
@@ -244,31 +165,31 @@ class AndroidSdk {
       }
 
       if (androidHomeDir != null) {
-        if (validSdkDirectory(androidHomeDir, fileSystem: resolvedFileSystem)) {
+        if (validSdkDirectory(androidHomeDir, fileSystem: fs)) {
           return androidHomeDir;
         }
-        final String subSdkDir = resolvedFileSystem.path.join(androidHomeDir, 'sdk');
-        if (validSdkDirectory(subSdkDir, fileSystem: resolvedFileSystem)) {
+        final String subSdkDir = fs.path.join(androidHomeDir, 'sdk');
+        if (validSdkDirectory(subSdkDir, fileSystem: fs)) {
           return subSdkDir;
         }
       }
 
       // in build-tools/$version/aapt
-      for (File aaptBin in resolvedOsUtils.whichAll('aapt')) {
+      for (File aaptBin in os.whichAll('aapt')) {
         // Make sure we're using the aapt from the SDK.
-        aaptBin = resolvedFileSystem.file(aaptBin.resolveSymbolicLinksSync());
+        aaptBin = fs.file(aaptBin.resolveSymbolicLinksSync());
         final String dir = aaptBin.parent.parent.parent.path;
-        if (validSdkDirectory(dir, fileSystem: resolvedFileSystem)) {
+        if (validSdkDirectory(dir, fileSystem: fs)) {
           return dir;
         }
       }
 
       // in platform-tools/adb
-      for (File adbBin in resolvedOsUtils.whichAll('adb')) {
+      for (File adbBin in os.whichAll('adb')) {
         // Make sure we're using the adb from the SDK.
-        adbBin = resolvedFileSystem.file(adbBin.resolveSymbolicLinksSync());
+        adbBin = fs.file(adbBin.resolveSymbolicLinksSync());
         final String dir = adbBin.parent.parent.path;
-        if (validSdkDirectory(dir, fileSystem: resolvedFileSystem)) {
+        if (validSdkDirectory(dir, fileSystem: fs)) {
           return dir;
         }
       }
@@ -279,18 +200,11 @@ class AndroidSdk {
     final String? androidHomeDir = findAndroidHomeDir();
     if (androidHomeDir == null) {
       // No dice.
-      resolvedLogger.printTrace('Unable to locate an Android SDK.');
+      logger.printTrace('Unable to locate an Android SDK.');
       return null;
     }
 
-    return AndroidSdk(
-      resolvedFileSystem.directory(androidHomeDir),
-      config: resolvedConfig,
-      logger: resolvedLogger,
-      platform: resolvedPlatform,
-      processManager: resolvedProcessManager,
-      toolContext: toolContext,
-    );
+    return AndroidSdk(fs.directory(androidHomeDir), toolContext: toolContext);
   }
 
   static bool validSdkDirectory(String dir, {FileSystem? fileSystem}) {

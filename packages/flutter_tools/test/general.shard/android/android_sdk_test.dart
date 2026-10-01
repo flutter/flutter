@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -37,10 +38,12 @@ void main() {
 
       try {
         final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            processManager: FakeProcessManager.any(),
+          ),
         )!;
         sdk.latestVersion;
       } on StateError catch (err) {
@@ -53,10 +56,12 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
       expect(sdk.latestVersion, isNotNull);
       expect(sdk.latestVersion!.sdkLevel, 23);
@@ -67,10 +72,12 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
       expect(sdk.latestVersion, isNotNull);
       expect(sdk.latestVersion!.sdkLevel, 24);
@@ -82,11 +89,13 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
       fileSystem
           .file(
@@ -118,11 +127,13 @@ void main() {
         config.setValue('android-sdk', sdkDir.path);
 
         final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         )!;
         final versions = <String>['3.0', '2.1', '1.0'];
         for (final version in versions) {
@@ -156,11 +167,13 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
       fileSystem
           .file(fileSystem.path.join(sdk.directory.path, 'tools/bin/sdkmanager'))
@@ -179,11 +192,13 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
       fileSystem
           .file(fileSystem.path.join(sdk.directory.path, 'tools/bin/foo'))
@@ -201,11 +216,13 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
       final File adbFile = fileSystem.file(
         fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'adb.exe'),
@@ -224,11 +241,13 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
       fileSystem
           .file(
@@ -268,11 +287,13 @@ void main() {
         ),
       );
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       )!;
 
       expect(sdk.sdkManagerVersion, '26.1.1');
@@ -291,11 +312,13 @@ void main() {
       );
       config.setValue('android-sdk', sdkDir.path);
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       )!;
 
       final validationIssues = <String>[...sdk.validateSdkWellFormed()];
@@ -327,11 +350,13 @@ void main() {
 
       final validationIssues = <String>[
         ...AndroidSdk.locateAndroidSdk(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: processManager,
+          ),
         )!.validateSdkWellFormed(),
       ];
       expect(validationIssues.first, contains('Android SDK location currently contains spaces'));
@@ -354,11 +379,13 @@ void main() {
       );
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       )!;
 
       expect(sdk.sdkManagerVersion, isNull);
@@ -376,11 +403,13 @@ void main() {
         '/.tmp_rand0/flutter_mock_android_sdk.rand0/cmdline-tools/latest/bin/sdkmanager',
       );
       final AndroidSdk? sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       );
 
       expect(() => sdk!.sdkManagerVersion, throwsToolExit());
@@ -392,11 +421,13 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
       fileSystem
           .file(
@@ -422,11 +453,13 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
       fileSystem
           .file(
@@ -458,11 +491,13 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
       fileSystem
           .file(fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager'))
@@ -482,11 +517,13 @@ void main() {
         config.setValue('android-sdk', sdkDir.path);
 
         final AndroidSdk sdk = AndroidSdk.locateAndroidSdk(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         )!;
         fileSystem
             .file(fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager.bat'))
@@ -505,9 +542,12 @@ void main() {
         final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
         final sdk = AndroidSdk(
           sdkDir,
-          config: config,
-          logger: logger,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            processManager: FakeProcessManager.any(),
+          ),
         );
 
         // Constructor did not scan build-tools or platforms.
@@ -529,9 +569,12 @@ void main() {
       // Accessing latestVersion triggers initialization.
       final sdk1 = AndroidSdk(
         sdkDir,
-        config: config,
-        logger: logger,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        ),
       );
       expect(sdk1.latestVersion, isNotNull);
       expect(sdk1.latestVersion!.sdkLevel, 23);
@@ -540,9 +583,12 @@ void main() {
       // Accessing sdkVersions triggers initialization independently.
       final sdk2 = AndroidSdk(
         sdkDir,
-        config: config,
-        logger: logger,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        ),
       );
       expect(sdk2.sdkVersions.length, 2);
       expect(sdk2.latestVersion, isNotNull);
@@ -555,9 +601,12 @@ void main() {
         final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
         final sdk = AndroidSdk(
           sdkDir,
-          config: config,
-          logger: logger,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            processManager: FakeProcessManager.any(),
+          ),
         );
 
         expect(sdk.latestVersion!.sdkLevel, 23);
@@ -596,7 +645,10 @@ void main() {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem, platform: platform);
       config.setValue('android-sdk', sdkDir.path);
 
-      final sdk = AndroidSdk(sdkDir);
+      final sdk = AndroidSdk(
+        sdkDir,
+        toolContext: FakeToolContext(config: config, fs: fileSystem, platform: platform),
+      );
       late File clang;
       late File ar;
       late File ld;
@@ -647,7 +699,10 @@ void main() {
         final File ar = binDir.childFile('llvm-ar$extension')..createSync();
         final File ld = binDir.childFile('ld.lld$extension')..createSync();
 
-        final sdk = AndroidSdk(sdkDir);
+        final sdk = AndroidSdk(
+          sdkDir,
+          toolContext: FakeToolContext(config: config, fs: fileSystem, platform: platform),
+        );
         expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
         expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
         expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
@@ -675,7 +730,10 @@ void main() {
       final File ar = binDir.childFile('llvm-ar$extension')..createSync();
       final File ld = binDir.childFile('ld.lld$extension')..createSync();
 
-      final sdk = AndroidSdk(sdkDir);
+      final sdk = AndroidSdk(
+        sdkDir,
+        toolContext: FakeToolContext(config: config, fs: fileSystem, platform: platform),
+      );
       expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
       expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
       expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
@@ -706,7 +764,10 @@ void main() {
         final File ar = binDir.childFile('llvm-ar$extension')..createSync();
         final File ld = binDir.childFile('ld.lld$extension')..createSync();
 
-        final sdk = AndroidSdk(sdkDir);
+        final sdk = AndroidSdk(
+          sdkDir,
+          toolContext: FakeToolContext(config: config, fs: fileSystem, platform: platform),
+        );
         expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
         expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
         expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);

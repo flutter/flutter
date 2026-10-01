@@ -457,28 +457,42 @@ class ToolDependencies {
         plistParser ??
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
+    final finalToolContext = ToolContext(
+      artifacts: finalArtifacts,
+      botDetector: finalBotDetector,
+      cache: finalCache,
+      config: finalConfig,
+      customDevicesConfig: finalCustomDevicesConfig,
+      flutterVersion: finalFlutterVersion,
+      fs: finalFS,
+      git: finalGit,
+      localEngineLocator: finalLocalEngineLocator,
+      logger: finalLogger,
+      nativeAssetsBuilder: finalNativeAssetsBuilder,
+      os: finalOS,
+      outputPreferences: finalOutputPreferences,
+      persistentToolState: finalPersistentToolState,
+      platform: finalPlatform,
+      preRunValidator: finalPreRunValidator,
+      processInfo: finalProcessInfo,
+      processManager: finalProcessManager,
+      processUtils: finalProcessUtils,
+      projectFactory: finalProjectFactory,
+      shutdownHooks: finalShutdownHooks,
+      signals: LocalSignals.instance,
+      stdio: finalStdio,
+      systemClock: finalSystemClock,
+      terminal: finalTerminal,
+      userMessages: finalUserMessages,
+    );
+
     // 12. AndroidContext Dependencies
     final AndroidStudio? finalAndroidStudio =
         androidStudio ??
-        AndroidStudio.latestValid(
-          config: finalConfig,
-          fileSystem: finalFS,
-          logger: finalLogger,
-          platform: finalPlatform,
-          plistParser: finalPlistParser,
-          processManager: finalProcessManager,
-        );
+        AndroidStudio.latestValid(plistParser: finalPlistParser, toolContext: finalToolContext);
 
     final AndroidSdk? finalAndroidSdk =
-        androidSdk ??
-        AndroidSdk.locateAndroidSdk(
-          config: finalConfig,
-          fileSystem: finalFS,
-          logger: finalLogger,
-          operatingSystemUtils: finalOS,
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-        );
+        androidSdk ?? AndroidSdk.locateAndroidSdk(toolContext: finalToolContext);
 
     final Java? finalJava =
         java ??
@@ -541,34 +555,7 @@ class ToolDependencies {
       doctor: finalDoctor,
       emulatorManager: finalEmulatorManager,
       featureFlags: finalFeatureFlags,
-      toolContext: ToolContext(
-        artifacts: finalArtifacts,
-        botDetector: finalBotDetector,
-        cache: finalCache,
-        config: finalConfig,
-        customDevicesConfig: finalCustomDevicesConfig,
-        flutterVersion: finalFlutterVersion,
-        fs: finalFS,
-        git: finalGit,
-        localEngineLocator: finalLocalEngineLocator,
-        logger: finalLogger,
-        nativeAssetsBuilder: finalNativeAssetsBuilder,
-        os: finalOS,
-        outputPreferences: finalOutputPreferences,
-        persistentToolState: finalPersistentToolState,
-        platform: finalPlatform,
-        preRunValidator: finalPreRunValidator,
-        processInfo: finalProcessInfo,
-        processManager: finalProcessManager,
-        processUtils: finalProcessUtils,
-        projectFactory: finalProjectFactory,
-        shutdownHooks: finalShutdownHooks,
-        signals: LocalSignals.instance,
-        stdio: finalStdio,
-        systemClock: finalSystemClock,
-        terminal: finalTerminal,
-        userMessages: finalUserMessages,
-      ),
+      toolContext: finalToolContext,
       buildTargets: finalBuildTargets,
     );
   }

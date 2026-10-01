@@ -15,6 +15,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('installation detection on MacOS', () {
@@ -86,7 +87,6 @@ void main() {
 
     late Config config;
     late FileSystem fileSystem;
-    late FileSystemUtils fsUtils;
     late BufferLogger logger;
     late Platform platform;
     late FakePlistUtils plistUtils;
@@ -101,7 +101,6 @@ void main() {
         operatingSystem: 'macos',
         environment: <String, String>{'HOME': homeMac},
       );
-      fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
       processManager = FakeProcessManager.empty();
     });
 
@@ -138,12 +137,13 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
         plistParser: plistUtils,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       )!;
 
       expect(studio.version, equals(Version(4, 1, null)));
@@ -195,12 +195,13 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
         plistParser: plistUtils,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       )!;
 
       expect(studio.version, equals(Version(2020, 3, null)));
@@ -253,12 +254,13 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
         plistParser: plistUtils,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       )!;
 
       expect(studio.version, equals(Version(3, 3, null)));
@@ -275,11 +277,12 @@ void main() {
       fileSystem.directory(installPath).createSync(recursive: true);
       final studio = AndroidStudio(
         installPath,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       );
       expect(studio.version, isNull);
       expect(studio.pluginsPath, isNull);
@@ -317,12 +320,13 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
         plistParser: plistUtils,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       )!;
 
       expect(studio.version, equals(Version(2022, 3, 1)));
@@ -359,7 +363,7 @@ void main() {
       plistUtils.fileContents[applicationsPlistFilePath] = jetbrainsInfoPlist;
 
       final String homeDirectoryPlistFolder = fileSystem.path.join(
-        fsUtils.homeDirPath!,
+        homeMac,
         'Applications',
         'Android Studio.app',
         'Contents',
@@ -374,13 +378,14 @@ void main() {
 
       expect(
         AndroidStudio.allInstalled(
-          config: config,
-          fileSystem: fileSystem,
-          fileSystemUtils: fsUtils,
-          logger: logger,
-          platform: platform,
           plistParser: plistUtils,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         ).length,
         1,
       );
@@ -455,13 +460,14 @@ void main() {
       // Results are de-duplicated, only 3 installed.
       expect(
         AndroidStudio.allInstalled(
-          config: config,
-          fileSystem: fileSystem,
-          fileSystemUtils: fsUtils,
-          logger: logger,
-          platform: platform,
           plistParser: plistUtils,
-          processManager: processManager,
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: processManager,
+          ),
         ).length,
         3,
       );
@@ -475,13 +481,14 @@ void main() {
 
       expect(
         AndroidStudio.allInstalled(
-          config: config,
-          fileSystem: fileSystem,
-          fileSystemUtils: fsUtils,
-          logger: logger,
-          platform: platform,
           plistParser: plistUtils,
-          processManager: processManager,
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: processManager,
+          ),
         ),
         isEmpty,
       );
@@ -504,7 +511,7 @@ void main() {
       plistUtils.fileContents[applicationsPlistFilePath] = macStudioInfoPlist3_3;
 
       final String homeDirectoryPlistFolder = fileSystem.path.join(
-        fsUtils.homeDirPath!,
+        homeMac,
         'Applications',
         'Android Studio.app',
         'Contents',
@@ -519,25 +526,27 @@ void main() {
 
       expect(
         AndroidStudio.allInstalled(
-          config: config,
-          fileSystem: fileSystem,
-          fileSystemUtils: fsUtils,
-          logger: logger,
-          platform: platform,
           plistParser: plistUtils,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         ).length,
         2,
       );
       expect(
         AndroidStudio.latestValid(
-          config: config,
-          fileSystem: fileSystem,
-          fileSystemUtils: fsUtils,
-          logger: logger,
-          platform: platform,
           plistParser: plistUtils,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         )!.version,
         Version(4, 1, 0),
       );
@@ -559,12 +568,13 @@ void main() {
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist3_3;
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
         plistParser: plistUtils,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
       expect(studio, isNotNull);
       expect(
@@ -605,12 +615,13 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
         plistParser: plistUtils,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       )!;
 
       expect(
@@ -651,12 +662,13 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
         plistParser: plistUtils,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       )!;
 
       expect(
@@ -697,12 +709,13 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
         plistParser: plistUtils,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       )!;
 
       expect(studio.version, null);
@@ -735,12 +748,13 @@ void main() {
 
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
         plistParser: plistUtils,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
 
       expect(studio.version, equals(Version(99999, 99, 99)));
@@ -786,13 +800,14 @@ void main() {
       ]);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
         plistParser: plistUtils,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       ).single;
 
       expect(studio.configuredPath, extractedDownloadZip);
@@ -823,11 +838,13 @@ void main() {
       fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.version, Version(4, 1, 0));
@@ -841,11 +858,13 @@ void main() {
       fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.version, Version(4, 2, 0));
@@ -859,11 +878,13 @@ void main() {
       fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.version, Version(2020, 3, 0));
@@ -878,14 +899,16 @@ void main() {
 
       expect(
         AndroidStudio.allInstalled(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: FakePlatform(
-            operatingSystem: 'windows',
-            environment: <String, String>{}, // Does not include LOCALAPPDATA
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: FakePlatform(
+              operatingSystem: 'windows',
+              environment: <String, String>{}, // Does not include LOCALAPPDATA
+            ),
+            processManager: FakeProcessManager.any(),
           ),
-          processManager: FakeProcessManager.any(),
         ),
         isEmpty,
       );
@@ -899,14 +922,16 @@ void main() {
 
       expect(
         AndroidStudio.allInstalled(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: FakePlatform(
-            operatingSystem: 'windows',
-            environment: <String, String>{}, // Does not include LOCALAPPDATA
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: FakePlatform(
+              operatingSystem: 'windows',
+              environment: <String, String>{}, // Does not include LOCALAPPDATA
+            ),
+            processManager: FakeProcessManager.any(),
           ),
-          processManager: FakeProcessManager.any(),
         ),
         isEmpty,
       );
@@ -922,14 +947,16 @@ void main() {
 
         expect(
           AndroidStudio.allInstalled(
-            config: config,
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: FakePlatform(
-              operatingSystem: 'windows',
-              environment: <String, String>{}, // Does not include LOCALAPPDATA
+            toolContext: FakeToolContext(
+              config: config,
+              fs: fileSystem,
+              logger: logger,
+              platform: FakePlatform(
+                operatingSystem: 'windows',
+                environment: <String, String>{}, // Does not include LOCALAPPDATA
+              ),
+              processManager: FakeProcessManager.any(),
             ),
-            processManager: FakeProcessManager.any(),
           ),
           isEmpty,
         );
@@ -943,11 +970,13 @@ void main() {
       fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jre'));
@@ -960,11 +989,13 @@ void main() {
       fileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
@@ -979,11 +1010,13 @@ void main() {
       fileSystem.file(r'C:\Program Files\AndroidStudio\jbr\bin\java').createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.version, null);
@@ -999,11 +1032,13 @@ void main() {
       fileSystem.file(r'C:\Program Files\AndroidStudio\jbr\bin\java').createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       const expectedJdkLocationFor2022 = r'C:\Program Files\AndroidStudio\jbr';
@@ -1020,11 +1055,13 @@ void main() {
       fileSystem.directory(androidStudioDir).createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.version, equals(Version(2022, 1, null)));
@@ -1038,7 +1075,6 @@ void main() {
 
     late Config config;
     late FileSystem fileSystem;
-    late FileSystemUtils fsUtils;
     late BufferLogger logger;
     late Platform platform;
 
@@ -1046,7 +1082,6 @@ void main() {
       config = Config.test();
       platform = FakePlatform(environment: <String, String>{'HOME': homeLinux});
       fileSystem = MemoryFileSystem.test();
-      fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
       logger = BufferLogger.test();
     });
 
@@ -1061,12 +1096,13 @@ void main() {
       fileSystem.directory(studioInstallPath).createSync();
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.version, Version(4, 0, 0));
@@ -1085,12 +1121,13 @@ void main() {
       fileSystem.directory(studioInstallPath).createSync();
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.version, Version(4, 1, 0));
@@ -1112,12 +1149,13 @@ void main() {
       fileSystem.directory(pluginsInstallPath).createSync();
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.version, Version(4, 1, 0));
@@ -1136,12 +1174,13 @@ void main() {
       fileSystem.directory(studioInstallPath).createSync();
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.javaPath, equals('$studioInstallPath/jre'));
@@ -1158,12 +1197,13 @@ void main() {
       fileSystem.directory(studioInstallPath).createSync();
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.javaPath, equals('$studioInstallPath/jbr'));
@@ -1182,12 +1222,13 @@ void main() {
           .createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.version, null);
@@ -1213,12 +1254,13 @@ void main() {
       fileSystem.file(expectedJdkLocationFor2022).createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.version, equals(Version(99999, 99, 99)));
@@ -1235,11 +1277,12 @@ void main() {
 
       final AndroidStudio studio = AndroidStudio.fromHomeDot(
         fileSystem.directory(studioHome),
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       )!;
       expect(studio, isNotNull);
       expect(studio.pluginsPath, equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
@@ -1252,11 +1295,12 @@ void main() {
         fileSystem.directory(installPath).createSync(recursive: true);
         final studio = AndroidStudio(
           installPath,
-          fileSystem: fileSystem,
-          fileSystemUtils: fsUtils,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         );
         expect(studio.version, isNull);
         expect(studio.pluginsPath, isNull);
@@ -1270,11 +1314,12 @@ void main() {
       fileSystem.directory(toolboxPluginsPath).createSync(recursive: true);
       final studio = AndroidStudio(
         installPath,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       );
       expect(studio.version, isNull);
       expect(studio.pluginsPath, equals(toolboxPluginsPath));
@@ -1290,12 +1335,13 @@ void main() {
       fileSystem.directory(androidStudioDir).createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
-        config: config,
-        fileSystem: fileSystem,
-        fileSystemUtils: fsUtils,
-        logger: logger,
-        platform: platform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
       ).single;
 
       expect(studio.version, equals(Version(2022, 3, null)));
@@ -1334,21 +1380,25 @@ void main() {
 
       expect(
         AndroidStudio.allInstalled(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         ).length,
         3,
       );
       expect(
         AndroidStudio.latestValid(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         )!.version,
         Version(2022, 0, 0),
       );
@@ -1370,21 +1420,25 @@ void main() {
 
         expect(
           AndroidStudio.allInstalled(
-            config: config,
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: platform,
-            processManager: FakeProcessManager.any(),
+            toolContext: FakeToolContext(
+              config: config,
+              fs: fileSystem,
+              logger: logger,
+              platform: platform,
+              processManager: FakeProcessManager.any(),
+            ),
           ).length,
           2,
         );
         expect(
           AndroidStudio.latestValid(
-            config: config,
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: platform,
-            processManager: FakeProcessManager.any(),
+            toolContext: FakeToolContext(
+              config: config,
+              fs: fileSystem,
+              logger: logger,
+              platform: platform,
+              processManager: FakeProcessManager.any(),
+            ),
           )!.version,
           Version(3, 0, 0),
         );
@@ -1405,21 +1459,25 @@ void main() {
 
       expect(
         AndroidStudio.allInstalled(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         ).length,
         3,
       );
       expect(
         AndroidStudio.latestValid(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         )!.directory,
         r'C:\Program Files\AndroidStudioZucchini',
       );
@@ -1438,21 +1496,25 @@ void main() {
 
       expect(
         AndroidStudio.allInstalled(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         ).length,
         2,
       );
       expect(
         AndroidStudio.latestValid(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         )!.directory,
         contains('Preview'),
       );
@@ -1494,11 +1556,13 @@ void main() {
 
       expect(
         AndroidStudio.allInstalled(
-          config: config,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: processManager,
+          ),
         ).length,
         4,
       );
@@ -1510,11 +1574,13 @@ void main() {
       }
 
       final AndroidStudio chosenInstall = AndroidStudio.latestValid(
-        config: config,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       )!;
       expect(chosenInstall.directory, configuredAndroidStudioDir);
       expect(chosenInstall.isValid, false);
@@ -1529,11 +1595,13 @@ void main() {
         expect(fileSystem.directory(configuredAndroidStudioDir).existsSync(), false);
         expect(
           () => AndroidStudio.latestValid(
-            config: config,
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: platform,
-            processManager: FakeProcessManager.any(),
+            toolContext: FakeToolContext(
+              config: config,
+              fs: fileSystem,
+              logger: logger,
+              platform: platform,
+              processManager: FakeProcessManager.any(),
+            ),
           ),
           throwsA(
             (Object? e) =>
@@ -1552,12 +1620,13 @@ void main() {
 
       expect(
         () => AndroidStudio.latestValid(
-          config: config,
-          fileSystem: _FakeFileSystem(),
-          fileSystemUtils: _FakeFsUtils(),
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: _FakeFileSystem(),
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+          ),
         ),
         throwsToolExit(
           message: RegExp(r'[.\s\S]*Could not find[.\s\S]*FileSystemException[.\s\S]*'),
@@ -1601,9 +1670,4 @@ class _NonExistentDirectory extends Fake implements Directory {
 
   @override
   Directory get parent => _NonExistentDirectory();
-}
-
-class _FakeFsUtils extends Fake implements FileSystemUtils {
-  @override
-  String get homeDirPath => '/home/';
 }
