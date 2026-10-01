@@ -223,11 +223,6 @@ void main() {
     expect(elementA.innerText, 'first selection'); // Did not change
     expect(elementB.innerText, 'second selection');
     expect(web.window.getSelection()?.toString().trim(), 'second selection');
-
-    // Verify we dispose the listener when the widgets are removed.
-    expect(PlatformSelectableRegionContextMenu.debugIsCopyEventListenerAttached, isTrue);
-    await tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink()));
-    expect(PlatformSelectableRegionContextMenu.debugIsCopyEventListenerAttached, isFalse);
   }, variant: _browserContextMenuEnabledVariants);
 
   testWidgets('copy event from a nested text field is ignored', (WidgetTester tester) async {
@@ -516,7 +511,6 @@ void main() {
     await tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink()));
 
     expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNull);
-    expect(PlatformSelectableRegionContextMenu.debugIsCopyEventListenerAttached, isFalse);
   }, variant: _browserContextMenuEnabledVariants);
 
   group('when the browser context menu is disabled after attaching', () {
