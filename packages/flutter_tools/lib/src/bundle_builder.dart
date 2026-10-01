@@ -165,6 +165,7 @@ Future<void> writeBundle(
     fileSystem: fileSystem,
     dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
     buildMode: buildMode,
+    targetPlatform: targetPlatform,
   );
 
   // Limit number of open files to avoid running out of file descriptors.

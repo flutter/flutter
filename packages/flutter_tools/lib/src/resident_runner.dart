@@ -312,6 +312,7 @@ class FlutterDevice {
       fsName,
       rootDirectory,
       buildMode: buildInfo.mode,
+      targetPlatform: targetPlatform,
       toolContext: _toolContext,
     );
     return devFS!.create();

@@ -93,6 +93,7 @@ Future<Depfile> copyAssets(
     fileSystem: environment.fileSystem,
     dartBinaryPath: environment.artifacts.getArtifactPath(Artifact.engineDartBinary),
     buildMode: buildMode,
+    targetPlatform: targetPlatform,
   );
 
   final assetEntries = <String, AssetBundleEntry>{
