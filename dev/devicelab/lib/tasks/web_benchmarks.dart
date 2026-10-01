@@ -17,7 +17,6 @@ import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 /// The port at which the local benchmark server is served.
-/// This is hard-coded and must be the same as the port used for DDC's benchmark at `flutter/dev/benchmarks/macrobenchmarks/lib/web_benchmarks_ddc.dart`.
 const int benchmarkServerPort = 9999;
 
 /// The port at which Chrome listens for a debug connection.
@@ -188,6 +187,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
   try {
     return await inDirectory(macrobenchmarksDirectory, () async {
       await flutter('clean');
+
+      server = await io.HttpServer.bind('localhost', benchmarkServerPort);
+
       // DDC runs the benchmarks suite with 'flutter run', attaching to its
       // Chrome instance instead of starting a new one.
       if (benchmarkOptions.useDdc) {
@@ -225,9 +227,11 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
             '--web-browser-flag=--password-store=basic',
             if (io.Platform.isMacOS) '--web-browser-flag=--use-mock-keychain',
             '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
+            '--dart-define=BENCHMARK_SERVER_PORT=${server!.port}',
             if (!benchmarkOptions.withHotReload) '--no-web-experimental-hot-reload',
             '--no-web-resources-cdn',
-            'lib/web_benchmarks_ddc.dart',
+            '-t',
+            'lib/web_benchmarks.dart',
           ],
         );
         flutterRunProcess!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
@@ -373,7 +377,6 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         );
       }
 
-      server = await io.HttpServer.bind('localhost', benchmarkServerPort);
       shelf_io.serveRequests(server!, cascade.handler);
 
       final String dartToolDirectory = path.join(macrobenchmarksDirectory, '.dart_tool');
