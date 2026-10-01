@@ -138,10 +138,7 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
   final isWasm = file.fileSystem.path.extension(file.path) == '.wasm';
   if (sourceMapFile != null && sourceMapFile.existsSync() && !isWasm) {
     final String oldMapBasename = sourceMapFile.basename;
-    final String mapHash = crypto.sha256
-        .convert(sourceMapFile.readAsBytesSync())
-        .toString()
-        .substring(0, 8);
+    final String mapHash = computeShortContentHash(sourceMapFile.readAsBytesSync());
     final String newMapBasename = computeHashedBasename(oldMapBasename, mapHash, file.fileSystem);
     sourceMapFile.renameSync(sourceMapFile.parent.childFile(newMapBasename).path);
 
@@ -157,10 +154,7 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
     }
   }
 
-  final String contentHash = crypto.sha256
-      .convert(file.readAsBytesSync())
-      .toString()
-      .substring(0, 8);
+  final String contentHash = computeShortContentHash(file.readAsBytesSync());
   final String newBasename = computeHashedBasename(file.basename, contentHash, file.fileSystem);
   file.renameSync(file.parent.childFile(newBasename).path);
   return newBasename;
