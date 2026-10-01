@@ -24,6 +24,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart';
@@ -128,45 +129,46 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   bool disablePortPublication = false,
+  ToolContext? toolContext,
   Analytics? analytics,
-  Artifacts? artifacts,
-  BotDetector? botDetector,
   CocoaPods? cocoaPods,
-  Config? config,
   FileSystem? fileSystem,
   FileSystemUtils? fileSystemUtils,
-  FlutterVersion? flutterVersion,
   IMobileDevice? iMobileDevice,
   Logger? logger,
-  OperatingSystemUtils? operatingSystemUtils,
   Platform? platform,
   PlistParser? plistParser,
-  ProcessManager? processManager,
   ProcessUtils? processUtils,
-  Terminal? terminal,
   Xcode? xcode,
   XcodeProjectInterpreter? xcodeProjectInterpreter,
 }) async {
-  final Logger buildLogger = logger ?? BufferLogger.test();
-  final FileSystem fs = fileSystem ?? app.project.hostAppRoot.fileSystem;
+  final Logger buildLogger = logger ?? toolContext?.logger ?? BufferLogger.test();
+  final FileSystem fs = fileSystem ?? toolContext?.fs ?? app.project.hostAppRoot.fileSystem;
   final Analytics buildAnalytics = analytics ?? const NoOpAnalytics();
-  final Platform buildPlatform = platform ?? const LocalPlatform();
+  final Platform buildPlatform = platform ?? toolContext?.platform ?? const LocalPlatform();
   final FileSystemUtils fsUtils =
-      fileSystemUtils ?? FileSystemUtils(fileSystem: fs, platform: buildPlatform);
+      fileSystemUtils ??
+      toolContext?.fileSystemUtils ??
+      FileSystemUtils(fileSystem: fs, platform: buildPlatform);
   final ProcessManager buildProcessManager =
-      processManager ?? iMobileDevice?._processManager ?? const LocalProcessManager();
+      toolContext?.processManager ?? iMobileDevice?._processManager ?? const LocalProcessManager();
   final ProcessUtils buildProcessUtils =
       processUtils ??
+      toolContext?.processUtils ??
       iMobileDevice?._processUtils ??
       ProcessUtils(processManager: buildProcessManager, logger: buildLogger);
-  final Artifacts? buildArtifacts = artifacts ?? iMobileDevice?._artifacts;
+  final Artifacts? buildArtifacts = toolContext?.artifacts ?? iMobileDevice?._artifacts;
   final PlistParser parser =
       plistParser ??
       PlistParser(fileSystem: fs, logger: buildLogger, processManager: buildProcessManager);
   final Config appConfig =
-      config ??
+      toolContext?.config ??
       Config(Config.kFlutterSettings, fileSystem: fs, logger: buildLogger, platform: buildPlatform);
-  final Terminal buildTerminal = terminal ?? AnsiTerminal(stdio: Stdio(), platform: buildPlatform);
+  final Terminal buildTerminal =
+      toolContext?.terminal ?? AnsiTerminal(stdio: Stdio(), platform: buildPlatform);
+  final FlutterVersion? flutterVersion = toolContext?.flutterVersion;
+  final OperatingSystemUtils? operatingSystemUtils = toolContext?.os;
+  final BotDetector? botDetector = toolContext?.botDetector;
   final XcodeProjectInterpreter interpreter =
       xcodeProjectInterpreter ??
       XcodeProjectInterpreter(
