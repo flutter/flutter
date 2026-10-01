@@ -758,7 +758,7 @@ class Shell final : public PlatformView::Delegate,
   void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
 
   // |Engine::Delegate|
-  void OnEngineClearRenderTargetCache() override;
+  void OnEngineResetInternalState() override;
 
   // |Rasterizer::Delegate|
   void OnFrameRasterized(const FrameTiming&) override;

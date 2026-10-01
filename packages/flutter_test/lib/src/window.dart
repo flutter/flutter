@@ -702,14 +702,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _platformDispatcher.scheduleFrame();
   }
 
-  /// Clears any cached render targets and textures maintained by the rasterizer.
+  /// Resets the engine's internal caches.
   ///
   /// This is primarily intended for test harnesses to ensure test isolation
-  /// and prevent cached offscreen render targets from leaking across
-  /// consecutive tests.
+  /// and prevent cached offscreen render targets or other transient engine
+  /// state from leaking across consecutive tests.
   @override
-  void clearRenderTargetCache() {
-    _platformDispatcher.clearRenderTargetCache();
+  void resetInternalState() {
+    _platformDispatcher.resetInternalState();
   }
 
   @override

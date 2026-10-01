@@ -491,8 +491,8 @@ void RuntimeController::SetNeedsReportTimings(bool value) {
 }
 
 // |PlatformConfigurationClient|
-void RuntimeController::ClearRenderTargetCache() {
-  client_.ClearRenderTargetCache();
+void RuntimeController::ResetInternalState() {
+  client_.ResetInternalState();
 }
 
 // |PlatformConfigurationClient|

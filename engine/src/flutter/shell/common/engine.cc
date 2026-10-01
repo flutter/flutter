@@ -584,8 +584,8 @@ FontCollection& Engine::GetFontCollection() {
   return *font_collection_;
 }
 
-void Engine::ClearRenderTargetCache() {
-  delegate_.OnEngineClearRenderTargetCache();
+void Engine::ResetInternalState() {
+  delegate_.OnEngineResetInternalState();
 }
 
 void Engine::DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,

@@ -190,9 +190,8 @@ class PlatformConfigurationClient {
   virtual void SetNeedsReportTimings(bool value) = 0;
 
   //--------------------------------------------------------------------------
-  /// @brief      Clears any cached render targets and textures on the
-  /// rasterizer.
-  virtual void ClearRenderTargetCache() = 0;
+  /// @brief      Resets the engine's internal caches.
+  virtual void ResetInternalState() = 0;
 
   //--------------------------------------------------------------------------
   /// @brief      The embedder can specify data that the isolate can request
@@ -668,7 +667,7 @@ class PlatformConfigurationNativeApi {
 
   static void SetNeedsReportTimings(bool value);
 
-  static void ClearRenderTargetCache();
+  static void ResetInternalState();
 
   static Dart_Handle GetPersistentIsolateData();
 

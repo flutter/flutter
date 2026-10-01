@@ -27,11 +27,11 @@ void main() {
     expect(testPlatformDispatcher.someNewProperty, null);
   });
 
-  test('TestPlatformDispatcher delegates clearRenderTargetCache', () {
+  test('TestPlatformDispatcher delegates resetInternalState', () {
     final testPlatformDispatcher = TestPlatformDispatcher(
       platformDispatcher: PlatformDispatcher.instance,
     );
-    testPlatformDispatcher.clearRenderTargetCache();
+    testPlatformDispatcher.resetInternalState();
   });
 
   testWidgets('TestPlatformDispatcher can fake locale', (WidgetTester tester) async {

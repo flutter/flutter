@@ -99,7 +99,7 @@ class MockDelegate : public Engine::Delegate {
               RequestViewFocusChange,
               (const ViewFocusChangeRequest&),
               (override));
-  MOCK_METHOD(void, OnEngineClearRenderTargetCache, (), (override));
+  MOCK_METHOD(void, OnEngineResetInternalState, (), (override));
 };
 
 class MockResponse : public PlatformMessageResponse {
@@ -153,7 +153,7 @@ class MockRuntimeDelegate : public RuntimeDelegate {
               RequestViewFocusChange,
               (const ViewFocusChangeRequest&),
               (override));
-  MOCK_METHOD(void, ClearRenderTargetCache, (), (override));
+  MOCK_METHOD(void, ResetInternalState, (), (override));
 };
 
 class MockRuntimeController : public RuntimeController {

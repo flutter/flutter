@@ -1758,7 +1758,7 @@ double Shell::GetScaledFontSize(double unscaled_font_size,
 }
 
 // |Engine::Delegate|
-void Shell::OnEngineClearRenderTargetCache() {
+void Shell::OnEngineResetInternalState() {
   ClearRenderTargetCache();
 }
 

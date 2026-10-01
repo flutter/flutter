@@ -2175,7 +2175,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // ignore: invalid_use_of_visible_for_testing_member
     ServicesBinding.instance.resetInternalState();
 
-    platformDispatcher.clearRenderTargetCache();
+    platformDispatcher.resetInternalState();
   }
 }
 

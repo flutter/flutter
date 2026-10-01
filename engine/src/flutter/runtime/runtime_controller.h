@@ -799,7 +799,7 @@ class RuntimeController : public PlatformConfigurationClient,
   void SetNeedsReportTimings(bool value) override;
 
   // |PlatformConfigurationClient|
-  void ClearRenderTargetCache() override;
+  void ResetInternalState() override;
 
   // |PlatformConfigurationClient|
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(

@@ -356,9 +356,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
         const ViewFocusChangeRequest& request) = 0;
 
     //--------------------------------------------------------------------------
-    /// @brief      Notifies the shell to clear any cached render targets and
-    ///             textures on the rasterizer.
-    virtual void OnEngineClearRenderTargetCache() = 0;
+    /// @brief      Notifies the shell to reset internal engine caches.
+    virtual void OnEngineResetInternalState() = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -904,7 +903,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   FontCollection& GetFontCollection() override;
 
   // |RuntimeDelegate|
-  void ClearRenderTargetCache() override;
+  void ResetInternalState() override;
 
   // |RuntimeDelegate|
   std::shared_ptr<AssetManager> GetAssetManager() override;

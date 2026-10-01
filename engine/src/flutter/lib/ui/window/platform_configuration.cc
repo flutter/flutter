@@ -573,12 +573,12 @@ void PlatformConfigurationNativeApi::SetNeedsReportTimings(bool value) {
       ->SetNeedsReportTimings(value);
 }
 
-void PlatformConfigurationNativeApi::ClearRenderTargetCache() {
+void PlatformConfigurationNativeApi::ResetInternalState() {
   UIDartState::ThrowIfUIOperationsProhibited();
   UIDartState::Current()
       ->platform_configuration()
       ->client()
-      ->ClearRenderTargetCache();
+      ->ResetInternalState();
 }
 
 namespace {

@@ -641,20 +641,20 @@ class PlatformDispatcher {
   @Native<Void Function(Bool)>(symbol: 'PlatformConfigurationNativeApi::SetNeedsReportTimings')
   external static void __nativeSetNeedsReportTimings(bool value);
 
-  /// Clears any cached render targets and textures maintained by the rasterizer.
+  /// Resets the engine's internal caches.
   ///
   /// This is primarily intended for test harnesses to ensure test isolation
-  /// and prevent cached offscreen render targets from leaking across
-  /// consecutive tests.
+  /// and prevent cached offscreen render targets or other transient engine
+  /// state from leaking across consecutive tests.
   ///
   /// Production applications should not invoke this method directly. Doing so
   /// can cause unnecessary texture reallocation churn and frame hitches.
   /// Production applications should instead rely on platform low-memory
-  /// notifications, which automatically purge this cache.
-  void clearRenderTargetCache() => _clearRenderTargetCache();
+  /// notifications, which automatically purge caches under memory pressure.
+  void resetInternalState() => _resetInternalState();
 
-  @Native<Void Function()>(symbol: 'PlatformConfigurationNativeApi::ClearRenderTargetCache')
-  external static void _clearRenderTargetCache();
+  @Native<Void Function()>(symbol: 'PlatformConfigurationNativeApi::ResetInternalState')
+  external static void _resetInternalState();
 
   // Called from the engine, via hooks.dart
   void _reportTimings(List<int> timings) {
