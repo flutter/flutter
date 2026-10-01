@@ -111,19 +111,12 @@ Future<void> main(List<String> args) async {
     userMessages: UserMessages(),
   );
 
-  late final ExtensionManager extensionManager;
-
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
-      extensionManager = ExtensionManager(
-        hostPlatform: toolDependencies.toolContext.os.hostPlatform,
-        logger: toolDependencies.toolContext.logger,
-        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-        featureFlags: toolDependencies.featureFlags,
-      );
+      final ExtensionManager manager = toolDependencies.extensionManager!;
       final templateManager = ExtensionTemplateManager(
-        extensionManager: extensionManager,
+        extensionManager: manager,
         fileSystem: toolDependencies.toolContext.fs,
         logger: toolDependencies.toolContext.logger,
         featureFlags: featureFlags,
@@ -132,15 +125,15 @@ Future<void> main(List<String> args) async {
         toolDependencies: toolDependencies,
         verboseHelp: verboseHelp,
         verbose: verbose,
-        extensionManager: extensionManager,
+        extensionManager: manager,
         extensionTemplateManager: templateManager,
       );
     },
+    extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
     verbose: verbose,
     muteCommandLogging: muteCommandLogging,
     verboseHelp: verboseHelp,
     overrides: <Type, Generator>{
-      ExtensionManager: () => extensionManager,
       FlutterHookRunner: () => FlutterHookRunnerNative(),
       // The web runner is not supported in google3 because it depends
       // on dwds.
@@ -299,13 +292,13 @@ List<FlutterCommand> generateCommands({
   DaemonCommand(
     androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,
-    deviceManager: globals.deviceManager,
+    deviceManager: toolDependencies.deviceManager,
     hidden: !verboseHelp,
     toolContext: toolDependencies.toolContext,
   ),
   DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(
-    deviceManager: globals.deviceManager!,
+    deviceManager: toolDependencies.deviceManager,
     doctor: globals.doctor!,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
@@ -346,6 +339,7 @@ List<FlutterCommand> generateCommands({
   ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(toolContext: toolDependencies.toolContext),
   TestCommand(
+    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     verbose: verbose,
     nativeAssetsBuilder: toolDependencies.toolContext.nativeAssetsBuilder,
