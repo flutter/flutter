@@ -48,6 +48,7 @@ class PlatformViewEmbedder final : public PlatformView {
   using ChanneUpdateCallback = std::function<void(const std::string&, bool)>;
   using ViewFocusChangeRequestCallback =
       std::function<void(const ViewFocusChangeRequest&)>;
+  using RendererSetupCallback = std::function<void()>;
 
   struct PlatformDispatchTable {
     UpdateSemanticsCallback update_semantics_callback;  // optional
@@ -59,7 +60,8 @@ class PlatformViewEmbedder final : public PlatformView {
     OnPreEngineRestartCallback on_pre_engine_restart_callback;  // optional
     ChanneUpdateCallback on_channel_update;                     // optional
     ViewFocusChangeRequestCallback
-        view_focus_change_request_callback;  // optional
+        view_focus_change_request_callback;         // optional
+    RendererSetupCallback renderer_setup_callback;  // optional
   };
 
   // Create a platform view that sets up a software rasterizer.
@@ -122,6 +124,10 @@ class PlatformViewEmbedder final : public PlatformView {
   std::unique_ptr<EmbedderSurface> embedder_surface_;
   std::shared_ptr<EmbedderPlatformMessageHandler> platform_message_handler_;
   PlatformDispatchTable platform_dispatch_table_;
+  bool renderer_setup_called_ = false;
+
+  // |PlatformView|
+  void SetupImpellerContext() override;
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;

@@ -64,6 +64,18 @@ TEST(EmbedderTestNoFixture, MustNotRunWithInvalidArgs) {
   ASSERT_FALSE(engine.is_valid());
 }
 
+TEST(EmbedderTestNoFixture, RendererConfigSetupCallbackFields) {
+  FlutterOpenGLRendererConfig gl_config = {};
+  gl_config.struct_size = sizeof(gl_config);
+  gl_config.setup_callback = [](void* user_data) {};
+  ASSERT_NE(gl_config.setup_callback, nullptr);
+
+  FlutterVulkanRendererConfig vk_config = {};
+  vk_config.struct_size = sizeof(vk_config);
+  vk_config.setup_callback = [](void* user_data) {};
+  ASSERT_NE(vk_config.setup_callback, nullptr);
+}
+
 TEST_F(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   fml::AutoResetWaitableEvent latch;

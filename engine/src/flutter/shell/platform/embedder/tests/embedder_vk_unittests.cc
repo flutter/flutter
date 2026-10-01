@@ -124,6 +124,40 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
   EXPECT_TRUE(g_vulkan_proc_info.did_call_queue_submit);
 }
 
+TEST_F(EmbedderTest, VulkanRendererConfigSetupCallback) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+
+  fml::AutoResetWaitableEvent setup_latch;
+  bool setup_called = false;
+  void* received_user_data = nullptr;
+
+  auto& renderer_config = context.GetRendererConfig();
+  ASSERT_EQ(renderer_config.type, kVulkan);
+
+  struct CallbackPayload {
+    fml::AutoResetWaitableEvent* latch;
+    bool* called;
+    void** user_data;
+  };
+  static CallbackPayload g_callback_payload;
+  g_callback_payload = {&setup_latch, &setup_called, &received_user_data};
+
+  renderer_config.vulkan.setup_callback = [](void* user_data) {
+    *g_callback_payload.called = true;
+    *g_callback_payload.user_data = user_data;
+    g_callback_payload.latch->Signal();
+  };
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1024, 1024));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  setup_latch.Wait();
+  ASSERT_TRUE(setup_called);
+  ASSERT_EQ(received_user_data, &context);
+}
+
 }  // namespace testing
 }  // namespace flutter
 
