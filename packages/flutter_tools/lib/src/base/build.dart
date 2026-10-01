@@ -93,7 +93,7 @@ class AOTSnapshotter {
   AOTSnapshotter({
     required Logger logger,
     required this._fileSystem,
-    required this._xcode,
+    this._xcode,
     required ProcessManager processManager,
     required Artifacts artifacts,
   }) : _logger = logger,
@@ -105,7 +105,7 @@ class AOTSnapshotter {
 
   final Logger _logger;
   final FileSystem _fileSystem;
-  final Xcode _xcode;
+  final Xcode? _xcode;
   final GenSnapshot _genSnapshot;
 
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
@@ -255,7 +255,7 @@ class AOTSnapshotter {
 
     if (targetingApplePlatform) {
       if (extractAppleDebugSymbols) {
-        final RunResult dsymResult = await _xcode.dsymutil(<String>[
+        final RunResult dsymResult = await _xcode!.dsymutil(<String>[
           '-o',
           '$frameworkPath.dSYM',
           aotSharedLibrary,
