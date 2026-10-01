@@ -3437,6 +3437,7 @@ void _testSelectables() {
             tester.updateNode(
               id: 2,
               flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+              actions: ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
               scrollExtentMax: 100.0,
               scrollPosition: 0.0,
               rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
