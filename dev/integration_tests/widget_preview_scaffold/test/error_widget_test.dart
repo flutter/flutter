@@ -257,6 +257,47 @@ void main() {
       expect(find.textContaining('unconstrained dimensions'), findsNothing);
     },
   );
+
+  testWidgets(
+    'preview with CustomPaint(size: Size.infinite) inside Row displays layout error card and preserves preview name header',
+    (tester) async {
+      final fakeDtdServices = FakeWidgetPreviewScaffoldDtdServices();
+      final controller = WidgetPreviewScaffoldController(
+        dtdServicesOverride: fakeDtdServices,
+        previews: () => [
+          WidgetPreview.test(
+            builder: () =>
+                const Row(children: [CustomPaint(size: Size.infinite)]),
+            previewData: const Preview(name: 'InfiniteCustomPaintPreview'),
+          ),
+        ],
+      );
+
+      if (controller.filterBySelectedFileListenable.value) {
+        await controller.toggleFilterBySelectedFile();
+      }
+      await controller.initialize();
+
+      await tester.pumpWidget(
+        TestWidgetPreviewScaffold(controller: controller),
+      );
+
+      final Object? exception = tester.takeException();
+      expect(exception, isA<FlutterError>());
+      expect(
+        (exception! as FlutterError).message,
+        contains(
+          'A widget preview was rendered with unconstrained dimensions.',
+        ),
+      );
+
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(WidgetPreviewErrorWidget), findsOneWidget);
+      expect(find.textContaining('unconstrained dimensions'), findsOneWidget);
+      expect(find.text('InfiniteCustomPaintPreview'), findsOneWidget);
+    },
+  );
 }
 
 class _ThrowingLayoutWidget extends LeafRenderObjectWidget {

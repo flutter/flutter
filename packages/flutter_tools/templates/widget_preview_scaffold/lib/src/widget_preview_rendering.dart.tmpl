@@ -324,33 +324,45 @@ class _WidgetPreviewGroupWidgetState extends State<WidgetPreviewGroupWidget> {
 
 /// Thrown when a widget preview fails layout due to unconstrained dimensions.
 class UnconstrainedWidgetPreviewException implements Exception {
-  const UnconstrainedWidgetPreviewException([this.message]);
-
-  final String? message;
+  const UnconstrainedWidgetPreviewException();
 
   @override
   String toString() {
-    return message ??
-        'The widget preview has unconstrained dimensions (e.g. infinite width or height).\n'
-            'To preview this widget, specify a fixed size constraint via @Preview(size: Size(width, height)) '
-            'or wrap the widget in a SizedBox with explicit dimensions.';
+    return 'The widget preview has unconstrained dimensions (e.g. infinite width or height).\n'
+        'To preview this widget, specify a fixed size constraint via @Preview(size: Size(width, height)) '
+        'or wrap the widget in a SizedBox with explicit dimensions.';
   }
 }
 
+const _kUnconstrainedErrorPatterns = <String>[
+  'forces an infinite width',
+  'forces an infinite height',
+  'unbounded height',
+  'unbounded width',
+  'incoming height constraints are unbounded',
+  'incoming width constraints are unbounded',
+  'was given an infinite size during layout',
+  'BoxConstraints(unconstrained)',
+];
+
 bool _isUnconstrainedError(Object error) {
   final message = error.toString();
-  return message.contains('forces an infinite width') ||
-      message.contains('forces an infinite height') ||
-      message.contains('unbounded height') ||
-      message.contains('unbounded width') ||
-      message.contains('incoming height constraints are unbounded') ||
-      message.contains('incoming width constraints are unbounded') ||
-      message.contains('was given an infinite size during layout') ||
-      message.contains('BoxConstraints(unconstrained)');
+  return _kUnconstrainedErrorPatterns.any(message.contains);
 }
 
 bool _isUnconstrainedPreviewError(FlutterErrorDetails details) =>
     _isUnconstrainedError(details.exceptionAsString());
+
+/// Fallback size used when a widget preview fails layout and the previewer
+/// surface constraints are unbounded.
+const _kFallbackPreviewSize = Size(400, 400);
+
+/// Size of the error card for [constraints], falling back to
+/// [_kFallbackPreviewSize] when unbounded.
+Size _errorSizeFor(BoxConstraints constraints) =>
+    constraints.hasBoundedWidth && constraints.hasBoundedHeight
+    ? constraints.biggest
+    : _kFallbackPreviewSize;
 
 FlutterErrorDetails _createUnconstrainedPreviewErrorDetails(
   FlutterErrorDetails details,
@@ -405,8 +417,7 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
   final softRestartListenable = ValueNotifier<bool>(false);
   final key = GlobalKey();
 
-  Object? _layoutError;
-  StackTrace? _layoutStackTrace;
+  ({Object error, StackTrace stackTrace})? _layoutError;
 
   void _handleLayoutError(Object error, StackTrace stackTrace) {
     if (_layoutError != null) {
@@ -414,8 +425,7 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
     }
     // Assign synchronously outside setState (which cannot be called during
     // layout) so subsequent errors in the same frame are deduplicated.
-    _layoutError = error;
-    _layoutStackTrace = stackTrace;
+    _layoutError = (error: error, stackTrace: stackTrace);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {});
@@ -425,7 +435,6 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
 
   void _clearLayoutError() {
     _layoutError = null;
-    _layoutStackTrace = null;
   }
 
   /// Returns the last size of the previewed widget.
@@ -478,126 +487,128 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       maxHeight: previewerConstraints.maxHeight / 2.0,
     );
 
-    if (_layoutError != null) {
-      return WidgetPreviewErrorWidget(
-        controller: widget.controller,
-        error: _layoutError!,
-        size: maxSizeConstraints.biggest,
-        stackTrace: _layoutStackTrace ?? StackTrace.current,
-        title: 'Failed to layout widget preview: ',
-      );
-    }
-
     bool errorThrownDuringTreeConstruction = false;
 
-    // Wrap the previewed widget with a ValueListenableBuilder responsible for performing a "soft"
-    // restart.
-    //
-    // A soft restart simply removes the previewed widget from the widget tree for a frame before
-    // re-inserting it on the next frame. This has the effect of re-running local initializers in
-    // State objects, which normally requires a hot restart to accomplish in a normal application.
-    Widget preview = ValueListenableBuilder<bool>(
-      valueListenable: softRestartListenable,
-      builder: (context, performRestart, _) {
-        try {
-          final previewWidget = Container(
-            key: key,
-            child: WidgetPreviewTheming(
-              theme: widget.preview.theme,
-              child: EnableWidgetInspectorScope(
-                child: PreviewWidget(
-                  preview: widget.preview,
-                  child: widget.preview.previewBuilder(),
+    Widget preview;
+    if (_layoutError case (:final Object error, :final StackTrace stackTrace)) {
+      errorThrownDuringTreeConstruction = true;
+      preview = WidgetPreviewErrorWidget(
+        controller: widget.controller,
+        error: error,
+        size: _errorSizeFor(maxSizeConstraints),
+        stackTrace: stackTrace,
+        title: 'Failed to layout widget preview: ',
+      );
+    } else {
+      // Wrap the previewed widget with a ValueListenableBuilder responsible for performing a "soft"
+      // restart.
+      //
+      // A soft restart simply removes the previewed widget from the widget tree for a frame before
+      // re-inserting it on the next frame. This has the effect of re-running local initializers in
+      // State objects, which normally requires a hot restart to accomplish in a normal application.
+      preview = ValueListenableBuilder<bool>(
+        valueListenable: softRestartListenable,
+        builder: (context, performRestart, _) {
+          try {
+            final previewWidget = Container(
+              key: key,
+              child: WidgetPreviewTheming(
+                theme: widget.preview.theme,
+                child: EnableWidgetInspectorScope(
+                  child: PreviewWidget(
+                    preview: widget.preview,
+                    child: widget.preview.previewBuilder(),
+                  ),
                 ),
               ),
-            ),
-          );
-          if (performRestart) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              // Trigger a rebuild on the next frame to re-insert previewWidget.
-              softRestartListenable.value = false;
-            }, debugLabel: 'Soft Restart');
-            return SizedBox.fromSize(size: lastChildSize);
+            );
+            if (performRestart) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                // Trigger a rebuild on the next frame to re-insert previewWidget.
+                softRestartListenable.value = false;
+              }, debugLabel: 'Soft Restart');
+              return SizedBox.fromSize(size: lastChildSize);
+            }
+            return previewWidget;
+          } on Object catch (error, stackTrace) {
+            // Catch any unhandled exceptions and display an error widget instead of taking
+            // down the entire preview environment.
+            errorThrownDuringTreeConstruction = true;
+            return WidgetPreviewErrorWidget(
+              controller: widget.controller,
+              error: error,
+              size: _errorSizeFor(maxSizeConstraints),
+              stackTrace: stackTrace,
+            );
           }
-          return previewWidget;
-        } on Object catch (error, stackTrace) {
-          // Catch any unhandled exceptions and display an error widget instead of taking
-          // down the entire preview environment.
-          errorThrownDuringTreeConstruction = true;
-          return WidgetPreviewErrorWidget(
-            controller: widget.controller,
-            error: error,
-            size: maxSizeConstraints.biggest,
-            stackTrace: stackTrace,
-          );
-        }
-      },
-    );
+        },
+      );
 
-    final Size? size = widget.preview.size;
+      final Size? size = widget.preview.size;
 
-    // Add support for selecting only previewed widgets via the widget
-    // inspector.
-    preview = ValueListenableBuilder(
-      valueListenable:
-          WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier,
-      builder: (context, enableWidgetInspector, child) {
-        // Don't allow inspecting the error widget.
-        if (child is WidgetPreviewErrorWidget) {
-          return child;
-        }
-        if (enableWidgetInspector) {
-          return WidgetInspector(
-            // TODO(bkonyi): wire up inspector controls for individual previews or
-            // the entire preview environment. This currently requires users to
-            // to enable widget selection via the Widget Inspector tool in DevTools.
+      // Add support for selecting only previewed widgets via the widget
+      // inspector.
+      preview = ValueListenableBuilder(
+        valueListenable:
+            WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier,
+        builder: (context, enableWidgetInspector, child) {
+          // Don't allow inspecting the error widget.
+          if (child is WidgetPreviewErrorWidget) {
+            return child;
+          }
+          if (enableWidgetInspector) {
+            return WidgetInspector(
+              // TODO(bkonyi): wire up inspector controls for individual previews or
+              // the entire preview environment. This currently requires users to
+              // to enable widget selection via the Widget Inspector tool in DevTools.
 
-            // These buttons would be rendered on top of the previewed widget, so
-            // don't display them.
-            exitWidgetSelectionButtonBuilder: null,
-            moveExitWidgetSelectionButtonBuilder: null,
-            tapBehaviorButtonBuilder: null,
-            child: child!,
-          );
-        }
-        return child!;
-      },
-      child: SizedBox(
-        width: size?.width == double.infinity ? null : size?.width,
-        height: size?.height == double.infinity ? null : size?.height,
-        child: _WidgetPreviewWrapper(
-          onLayoutError: _handleLayoutError,
-          previewerConstraints: maxSizeConstraints,
-          child: preview,
+              // These buttons would be rendered on top of the previewed widget, so
+              // don't display them.
+              exitWidgetSelectionButtonBuilder: null,
+              moveExitWidgetSelectionButtonBuilder: null,
+              tapBehaviorButtonBuilder: null,
+              child: child!,
+            );
+          }
+          return child!;
+        },
+        child: SizedBox(
+          width: size?.width == double.infinity ? null : size?.width,
+          height: size?.height == double.infinity ? null : size?.height,
+          child: _WidgetPreviewWrapper(
+            previewerConstraints: maxSizeConstraints,
+            onLayoutError: _handleLayoutError,
+            child: preview,
+          ),
         ),
-      ),
-    );
+      );
 
-    preview = WidgetPreviewMediaQueryOverride(
-      preview: widget.preview,
-      brightnessListenable: brightnessListenable,
-      child: preview,
-    );
+      preview = WidgetPreviewMediaQueryOverride(
+        preview: widget.preview,
+        brightnessListenable: brightnessListenable,
+        child: preview,
+      );
 
-    preview = WidgetPreviewLocalizations(
-      localizationsData: widget.preview.localizations,
-      child: preview,
-    );
+      preview = WidgetPreviewLocalizations(
+        localizationsData: widget.preview.localizations,
+        child: preview,
+      );
 
-    // Override the asset resolution behavior to automatically insert
-    // 'packages/$packageName/` in front of non-package paths as some previews
-    // may reference assets that are within the current project and wouldn't
-    // normally require a package specifier.
-    // TODO(bkonyi): this doesn't modify the behavior of asset loading logic in
-    // the engine implementation. This means that any asset loading done by
-    // APIs provided in dart:ui won't work correctly for non-package asset
-    // paths (e.g., shaders loaded by `FragmentProgram.fromAsset()`).
-    //
-    // See https://github.com/flutter/flutter/issues/171284
-    preview = DefaultAssetBundle(
-      bundle: PreviewAssetBundle(packageName: widget.preview.packageName),
-      child: preview,
-    );
+      // Override the asset resolution behavior to automatically insert
+      // 'packages/$packageName/` in front of non-package paths as some previews
+      // may reference assets that are within the current project and wouldn't
+      // normally require a package specifier.
+      // TODO(bkonyi): this doesn't modify the behavior of asset loading logic in
+      // the engine implementation. This means that any asset loading done by
+      // APIs provided in dart:ui won't work correctly for non-package asset
+      // paths (e.g., shaders loaded by `FragmentProgram.fromAsset()`).
+      //
+      // See https://github.com/flutter/flutter/issues/171284
+      preview = DefaultAssetBundle(
+        bundle: PreviewAssetBundle(packageName: widget.preview.packageName),
+        child: preview,
+      );
+    }
 
     final hasName = widget.preview.name != null;
     preview = Column(
@@ -1041,9 +1052,9 @@ class _ScaledLayoutRenderObject extends RenderShiftedBox {
 /// unconstrained widgets.
 class _WidgetPreviewWrapper extends SingleChildRenderObjectWidget {
   const _WidgetPreviewWrapper({
+    required this.previewerConstraints,
     super.child,
     this.onLayoutError,
-    required this.previewerConstraints,
   });
 
   /// The size of the previewer render surface.
@@ -1072,10 +1083,6 @@ class _WidgetPreviewWrapper extends SingleChildRenderObjectWidget {
   }
 }
 
-/// Fallback size used when a widget preview fails layout and the previewer
-/// surface constraints are unbounded.
-const _kFallbackPreviewSize = Size(400, 400);
-
 /// Custom render box that forces constraints onto unconstrained widgets.
 class _WidgetPreviewWrapperBox extends RenderShiftedBox {
   _WidgetPreviewWrapperBox({
@@ -1090,18 +1097,22 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
   /// error interception to preview subtrees.
   static bool isPerformingPreviewLayout = false;
 
-  /// The first error reported to [FlutterError.onError] during the active
-  /// [performLayout] pass.
+  /// The first error and stack trace reported to [FlutterError.onError] during
+  /// the active [performLayout] pass.
   ///
   /// Subsequent cascading layout errors (such as ancestor `RenderBox was not
   /// laid out` assertions) within the same preview layout pass are suppressed,
   /// and this error is forwarded to [onLayoutError] to populate the error card.
-  static Object? reportedPreviewLayoutError;
+  static (Object, StackTrace)? reportedPreviewLayoutError;
 
   void Function(Object error, StackTrace stackTrace)? onLayoutError;
 
   BoxConstraints _constraintOverride = const BoxConstraints();
   BoxConstraints _previewerConstraints;
+  bool _hasLayoutError = false;
+
+  bool get _hasValidChild =>
+      !_hasLayoutError && child != null && child!.hasSize;
 
   void setPreviewerConstraints(BoxConstraints previewerConstraints) {
     if (_previewerConstraints == previewerConstraints) {
@@ -1137,38 +1148,50 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
 
   @override
   void performLayout() {
+    _hasLayoutError = false;
     final child = this.child;
     if (child == null) {
       size = Size.zero;
       return;
     }
     final updatedConstraints = _constraintOverride.enforce(constraints);
+    final previousIsPerforming = isPerformingPreviewLayout;
+    final previousReportedError = reportedPreviewLayoutError;
     isPerformingPreviewLayout = true;
+    reportedPreviewLayoutError = null;
     try {
       child.layout(updatedConstraints, parentUsesSize: true);
-      size = constraints.constrain(child.size);
+      if (reportedPreviewLayoutError case (
+        final Object error,
+        final StackTrace stackTrace,
+      )) {
+        _hasLayoutError = true;
+        size = constraints.constrain(_errorSizeFor(_previewerConstraints));
+        onLayoutError?.call(error, stackTrace);
+      } else {
+        size = constraints.constrain(child.size);
+      }
     } catch (error, stackTrace) {
-      final layoutError =
+      _hasLayoutError = true;
+      final (Object layoutError, StackTrace layoutStackTrace) =
           reportedPreviewLayoutError ??
-          (_isUnconstrainedError(error)
-              ? const UnconstrainedWidgetPreviewException()
-              : error);
-      size = constraints.constrain(
-        _previewerConstraints.hasBoundedWidth &&
-                _previewerConstraints.hasBoundedHeight
-            ? _previewerConstraints.biggest
-            : _kFallbackPreviewSize,
-      );
-      onLayoutError?.call(layoutError, stackTrace);
+          (
+            _isUnconstrainedError(error)
+                ? const UnconstrainedWidgetPreviewException()
+                : error,
+            stackTrace,
+          );
+      size = constraints.constrain(_errorSizeFor(_previewerConstraints));
+      onLayoutError?.call(layoutError, layoutStackTrace);
     } finally {
-      isPerformingPreviewLayout = false;
-      reportedPreviewLayoutError = null;
+      isPerformingPreviewLayout = previousIsPerforming;
+      reportedPreviewLayoutError = previousReportedError;
     }
   }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    if (child != null && child!.hasSize) {
+    if (_hasValidChild) {
       return super.hitTestChildren(result, position: position);
     }
     return false;
@@ -1176,14 +1199,14 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null && child!.hasSize) {
+    if (_hasValidChild) {
       super.paint(context, offset);
     }
   }
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && child!.hasSize) {
+    if (_hasValidChild) {
       super.visitChildrenForSemantics(visitor);
     }
   }
@@ -1318,14 +1341,20 @@ class _WidgetPreviewScaffoldState extends State<WidgetPreviewScaffold> {
       if (_WidgetPreviewWrapperBox.reportedPreviewLayoutError != null) {
         return;
       }
+      final stackTrace = details.stack ?? StackTrace.current;
       if (_isUnconstrainedPreviewError(details)) {
-        _WidgetPreviewWrapperBox.reportedPreviewLayoutError =
-            const UnconstrainedWidgetPreviewException();
+        _WidgetPreviewWrapperBox.reportedPreviewLayoutError = (
+          const UnconstrainedWidgetPreviewException(),
+          stackTrace,
+        );
         final customDetails = _createUnconstrainedPreviewErrorDetails(details);
         (_originalOnError ?? FlutterError.presentError)(customDetails);
         return;
       }
-      _WidgetPreviewWrapperBox.reportedPreviewLayoutError = details.exception;
+      _WidgetPreviewWrapperBox.reportedPreviewLayoutError = (
+        details.exception,
+        stackTrace,
+      );
     }
     (_originalOnError ?? FlutterError.presentError)(details);
   }
