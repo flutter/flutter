@@ -166,7 +166,20 @@ class ResidentWebRunner extends ResidentRunner {
       debuggingOptions.startPaused ||
       useDwdsWebSocketConnection;
 
-  late final useDwdsWebSocketConnection = flutterDevice!.device is! ChromiumDevice;
+  /// Whether the tool launches (and therefore owns a DevTools protocol
+  /// connection to) a Chromium instance for this run.
+  ///
+  /// This is false for non-Chromium devices and when the caller passes
+  /// `no-launch-chrome` (e.g. `flutter drive`, where WebDriver launches the
+  /// browser). In that case [ChromiumLauncher.connectedInstance] never
+  /// completes, so nothing may wait on it.
+  late final bool _toolLaunchesChromium =
+      flutterDevice?.device is ChromiumDevice && platformArgs['no-launch-chrome'] != true;
+
+  /// Chrome-based DWDS debugging requires a DevTools protocol connection to a
+  /// browser launched by the tool. Otherwise, use the DWDS WebSocket
+  /// connection.
+  late final bool useDwdsWebSocketConnection = !_toolLaunchesChromium;
 
   @override
   // Web uses a different plugin registry.
@@ -345,6 +358,12 @@ class ResidentWebRunner extends ResidentRunner {
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
             analytics: globals.analytics,
+            artifacts: globals.artifacts!,
+            buildTargets: globals.buildTargets,
+            cache: globals.cache,
+            config: globals.config,
+            platform: _platform,
+            terminal: globals.terminal,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -502,6 +521,12 @@ class ResidentWebRunner extends ResidentRunner {
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
           analytics: globals.analytics,
+          artifacts: globals.artifacts!,
+          buildTargets: globals.buildTargets,
+          cache: globals.cache,
+          config: globals.config,
+          platform: _platform,
+          terminal: globals.terminal,
         );
         await webBuilder.buildWeb(
           flutterProject,
@@ -804,7 +829,7 @@ class ResidentWebRunner extends ResidentRunner {
     Future<ConnectionResult?>? connectDebug,
     bool needsFullRestart = true,
   }) async {
-    if (_chromiumLauncher != null) {
+    if (_chromiumLauncher != null && _toolLaunchesChromium) {
       final Chromium chrome = await _chromiumLauncher!.connectedInstance;
       final ChromeTab? chromeTab = await getChromeTabGuarded(
         chrome.chromeConnection,

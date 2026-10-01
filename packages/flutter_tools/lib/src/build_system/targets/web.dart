@@ -1336,12 +1336,22 @@ class WebTemplatedFiles extends Target {
       'builds': descriptions,
       if (environment.defines[kUseLocalCanvasKitFlag] == 'true') 'useLocalCanvasKit': true,
     };
+    final bool hasWasmBuild = descriptions.any(
+      (Map<String, Object?> description) => description['compileTarget'] == 'dart2wasm',
+    );
+    final File supportJsFile = environment.buildDir.childFile('main.dart.support.js');
+    final String? supportJs = hasWasmBuild && supportJsFile.existsSync()
+        ? supportJsFile.readAsStringSync().trim()
+        : null;
+    final supportsDart2WasmLine = (supportJs != null && supportJs.isNotEmpty)
+        ? '_flutter.supportsDart2Wasm = $supportJs;\n'
+        : '';
     return '''
 if (!window._flutter) {
   window._flutter = {};
 }
 _flutter.buildConfig = ${jsonEncode(buildConfig)};
-''';
+$supportsDart2WasmLine''';
   }
 
   @override
@@ -1437,6 +1447,11 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     const Source.pattern('{PROJECT_DIR}/web/*/index.html'),
     const Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js'),
     const Source.hostArtifact(HostArtifact.flutterWebSdk),
+    if (compileTargets?.any(
+          (Dart2WebTarget target) => target is Dart2WasmTarget && !target.compilerConfig.dryRun,
+        ) ??
+        false)
+      const Source.pattern('{BUILD_DIR}/main.dart.support.js', optional: true),
     if (compileTargets != null)
       for (final Dart2WebTarget target in compileTargets!)
         for (final String stem in target.buildPatternStems) Source.pattern('{BUILD_DIR}/$stem'),
@@ -1490,6 +1505,7 @@ class WebBuiltInAssets extends Target {
   @override
   List<Source> get outputs => <Source>[
     const Source.pattern('{BUILD_DIR}/flutter.js'),
+    const Source.pattern('{BUILD_DIR}/flutter.js.map'),
     for (final File file in _canvasKitFiles)
       Source.pattern('{BUILD_DIR}/canvaskit/${_filePathRelativeToCanvasKitDirectory(file)}'),
   ];
@@ -1506,15 +1522,15 @@ class WebBuiltInAssets extends Target {
       file.copySync(targetPath);
     }
 
-    // Write the flutter.js file
-    final String flutterJsOut = fileSystem.path.join(environment.outputDir.path, 'flutter.js');
-    final File flutterJsFile = fileSystem.file(
-      fileSystem.path.join(
-        globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
-        'flutter.js',
-      ),
+    // Write the Flutter loader and its source map.
+    final Directory flutterJsDirectory = fileSystem.directory(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
     );
-    flutterJsFile.copySync(flutterJsOut);
+    for (final fileName in <String>['flutter.js', 'flutter.js.map']) {
+      final File sourceFile = flutterJsDirectory.childFile(fileName);
+      final File targetFile = environment.outputDir.childFile(fileName);
+      sourceFile.copySync(targetFile.path);
+    }
   }
 }
 
