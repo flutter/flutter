@@ -11,7 +11,6 @@ import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' show WipError;
 
 import '../framework/browser.dart';
 import '../framework/task_result.dart';
@@ -277,11 +276,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       final collectedProfiles = <Map<String, dynamic>>[];
       List<String>? benchmarks;
       late Iterator<String> benchmarkIterator;
-
-      // State reported by the stall watchdog below.
-      var currentBenchmark = '(none yet)';
-      var lastActivity = 'none';
-      var lastActivityTime = DateTime.now();
+      // Last orchestration request from the app, reported by the stall watchdog below.
+      var lastRequest = 'none';
+      var lastRequestTime = DateTime.now();
 
       var cascade = Cascade();
       List<Map<String, dynamic>>? latestPerformanceTrace;
@@ -299,14 +296,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       };
 
       cascade = cascade.add((Request request) async {
-        final String requestPath = request.requestedUri.path;
         if (request.method != 'OPTIONS') {
-          lastActivityTime = DateTime.now();
-          lastActivity = requestPath;
-          // Benchmark output is already forwarded verbatim by the handler.
-          if (!requestPath.endsWith('/print-to-console')) {
-            print('[ORCHESTRATOR] Received $requestPath (current benchmark: $currentBenchmark)');
-          }
+          lastRequest = request.requestedUri.path;
+          lastRequestTime = DateTime.now();
         }
         final String requestContents = await request.readAsString();
         try {
@@ -364,7 +356,6 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
             }
             if (benchmarkIterator.moveNext()) {
               final String nextBenchmark = benchmarkIterator.current;
-              currentBenchmark = nextBenchmark;
               print('Launching benchmark "$nextBenchmark"');
               return Response.ok(nextBenchmark, headers: requestHeaders);
             } else {
@@ -441,16 +432,11 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
                 }
               },
               workingDirectory: cwd,
-            ).then((Chrome connectedChrome) async {
-              // DDC benchmarks are uncalibrated, so the instrumentation
-              // overhead is acceptable. Page reloads between benchmarks go
-              // through DWDS and occasionally stall; these logs show where.
-              try {
-                await connectedChrome.enablePageLoadDiagnostics();
-              } on WipError catch (error) {
-                print('Warning: Failed to enable Chrome page load diagnostics: $error');
-              }
-              return connectedChrome;
+            ).then((Chrome c) async {
+              // Page reloads between DDC benchmarks go through DWDS and
+              // occasionally stall; these logs show where.
+              await c.logPageEvents();
+              return c;
             });
       } else {
         whenChromeIsReady = Chrome.launch(
@@ -466,38 +452,22 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       unawaited(whenChromeIsReady?.then((Chrome c) => chrome = c, onError: (_) {}));
 
       // Healthy runs make an orchestration request at least every couple of
-      // minutes. When nothing arrives for longer, log what the orchestrator
-      // and the page are doing so that stalls can be diagnosed from CI logs.
-      // This only logs; the recipe's test timeout ends a stalled run.
+      // minutes. When none arrives for 5 minutes, log the page state so that a
+      // stalled page reload can be diagnosed from the CI logs. This only logs;
+      // the recipe's test timeout ends a stalled run.
       const stallThreshold = Duration(minutes: 5);
-      var lastStallReportTime = DateTime.now();
-      var isReportingStall = false;
-      final stallWatchdog = Timer.periodic(const Duration(minutes: 1), (_) async {
-        final now = DateTime.now();
-        if (isReportingStall ||
-            now.difference(lastActivityTime) < stallThreshold ||
-            now.difference(lastStallReportTime) < stallThreshold) {
+      final stallWatchdog = Timer.periodic(stallThreshold, (_) async {
+        final Duration idle = DateTime.now().difference(lastRequestTime);
+        if (idle < stallThreshold) {
           return;
         }
-        isReportingStall = true;
-        lastStallReportTime = now;
+        print(
+          '[ORCHESTRATOR] No request from the app for ${idle.inSeconds}s (last: $lastRequest).',
+        );
         try {
-          print(
-            '[ORCHESTRATOR] No orchestration request for '
-            '${now.difference(lastActivityTime).inSeconds}s. Last request: $lastActivity. '
-            'Current benchmark: $currentBenchmark '
-            '(${collectedProfiles.length} benchmarks completed).',
-          );
-          final currentChrome = chrome;
-          if (currentChrome == null) {
-            print('[ORCHESTRATOR] Chrome DevTools connection is not established.');
-          } else {
-            print('[ORCHESTRATOR] Chrome state:\n${await currentChrome.describeState()}');
-          }
+          print('[ORCHESTRATOR] ${await chrome?.describeState() ?? 'Chrome is not connected.'}');
         } on Exception catch (error) {
-          print('[ORCHESTRATOR] Failed to describe Chrome state: $error');
-        } finally {
-          isReportingStall = false;
+          print('[ORCHESTRATOR] Failed to describe page state: $error');
         }
       });
 
