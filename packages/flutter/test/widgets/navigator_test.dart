@@ -1989,6 +1989,8 @@ void main() {
       ),
       invalidOldRouteMatcher,
     );
+    newRoute.dispose();
+    oldRoute.dispose();
   });
   testWidgets('push named route and remove until where routes values are awaited', (
     WidgetTester tester,
