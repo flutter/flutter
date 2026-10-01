@@ -1,22 +1,29 @@
 package com.flutter.gradle
 
+import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.BuiltArtifactsLoader
 import com.android.build.api.variant.SourceDirectories
 import com.android.build.api.variant.Sources
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
+import com.android.build.api.variant.VariantOutput
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.AndroidSourceDirectorySet
+import com.flutter.gradle.tasks.CopyFlutterApksTask
 import com.flutter.gradle.tasks.CopyFlutterAssetsTask
 import com.flutter.gradle.tasks.FlutterTask
 import com.flutter.gradle.tasks.PrintTask
+import com.flutter.gradle.testing.mockAbiFilters
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
@@ -26,7 +33,10 @@ import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.Directory
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.AfterEach
@@ -195,6 +205,160 @@ class FlutterPluginTest {
         verify(exactly = 0) {
             taskContainer.register("copyFlutterAssetsAndroidTest", CopyFlutterAssetsTask::class.java, any())
         }
+        verify(exactly = 0) {
+            taskContainer.register("copyFlutterApksAndroidTest", CopyFlutterApksTask::class.java, any())
+        }
+    }
+
+    @Test
+    fun `onVariants offsets the versionCode of each per-ABI output for split-per-abi builds`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        val arm32 = mockVariantOutput(abi = "armeabi-v7a", versionCode = 41)
+        val arm64 = mockVariantOutput(abi = "arm64-v8a", versionCode = 42)
+        val x64 = mockVariantOutput(abi = "x86_64", versionCode = 43)
+        val universal = mockVariantOutput(abi = null, versionCode = 44)
+        val noVersionCode = mockVariantOutput(abi = "arm64-v8a", versionCode = null)
+
+        val onVariant = applyPluginCapturingVariantCallback(env)
+        onVariant(mockApplicationVariant(outputs = listOf(arm32, arm64, x64, universal, noVersionCode).map { it.output }))
+
+        verify { arm32.versionCode.set(1041) }
+        verify { arm64.versionCode.set(2042) }
+        verify { x64.versionCode.set(4043) }
+        verify(exactly = 0) { universal.versionCode.set(any<Int>()) }
+        verify(exactly = 0) { noVersionCode.versionCode.set(any<Int>()) }
+    }
+
+    @Test
+    fun `onVariants leaves versionCodes unchanged without split-per-abi`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val arm64 = mockVariantOutput(abi = "arm64-v8a", versionCode = 42)
+
+        val onVariant = applyPluginCapturingVariantCallback(env)
+        onVariant(mockApplicationVariant(outputs = listOf(arm64.output)))
+
+        verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
+    }
+
+    @Test
+    fun `onVariants leaves versionCodes unchanged when force-version-code-ignoring-abi is set`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        every { env.project.findProperty("force-version-code-ignoring-abi") } returns "true"
+        val arm64 = mockVariantOutput(abi = "arm64-v8a", versionCode = 42)
+
+        val onVariant = applyPluginCapturingVariantCallback(env)
+        onVariant(mockApplicationVariant(outputs = listOf(arm64.output)))
+
+        verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
+    }
+
+    @Test
+    fun `onVariants configures the APK copy from the variant artifacts, outputs, flavor, and build mode`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        val copyApksActionSlot = slot<Action<CopyFlutterApksTask>>()
+        every {
+            project.tasks.register("copyFlutterApksFreeRelease", CopyFlutterApksTask::class.java, capture(copyApksActionSlot))
+        } returns mockk()
+        val flutterApkDir = mockk<Provider<Directory>>()
+        every { project.layout.buildDirectory.dir("outputs/flutter-apk") } returns flutterApkDir
+        val variant =
+            mockApplicationVariant(
+                name = "freeRelease",
+                buildType = "release",
+                debuggable = false,
+                flavorName = "free",
+                outputs =
+                    listOf(
+                        mockVariantOutput(abi = "armeabi-v7a", versionCode = 1).output,
+                        mockVariantOutput(abi = null, versionCode = 1).output
+                    )
+            )
+        val apkDir = mockk<Provider<Directory>>()
+        every { variant.artifacts.get(SingleArtifact.APK) } returns apkDir
+        val loader = mockk<BuiltArtifactsLoader>()
+        every { variant.artifacts.getBuiltArtifactsLoader() } returns loader
+
+        val onVariant = applyPluginCapturingVariantCallback(env)
+        onVariant(variant)
+
+        val mockCopyApksTask = mockk<CopyFlutterApksTask>(relaxed = true)
+        copyApksActionSlot.captured.execute(mockCopyApksTask)
+
+        verify { mockCopyApksTask.apkDirectory.set(apkDir) }
+        verify { mockCopyApksTask.builtArtifactsLoader.set(loader) }
+        verify { mockCopyApksTask.destinationDir.set(flutterApkDir) }
+        verify { mockCopyApksTask.outputAbis.set(listOf("armeabi-v7a", CopyFlutterApksTask.NO_ABI)) }
+        verify { mockCopyApksTask.flavorName.set("free") }
+        verify { mockCopyApksTask.buildMode.set("release") }
+    }
+
+    @Test
+    fun `onVariants names the APK copy by Flutter build mode for profile and custom build types`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        val profileActionSlot = slot<Action<CopyFlutterApksTask>>()
+        every {
+            project.tasks.register("copyFlutterApksProfile", CopyFlutterApksTask::class.java, capture(profileActionSlot))
+        } returns mockk()
+        val stagingActionSlot = slot<Action<CopyFlutterApksTask>>()
+        every {
+            project.tasks.register("copyFlutterApksStaging", CopyFlutterApksTask::class.java, capture(stagingActionSlot))
+        } returns mockk()
+
+        val onVariant = applyPluginCapturingVariantCallback(env)
+        onVariant(mockApplicationVariant(name = "profile", buildType = "profile", debuggable = false))
+        onVariant(mockApplicationVariant(name = "staging", buildType = "staging", debuggable = true))
+
+        val profileCopyTask = mockk<CopyFlutterApksTask>(relaxed = true)
+        profileActionSlot.captured.execute(profileCopyTask)
+        val stagingCopyTask = mockk<CopyFlutterApksTask>(relaxed = true)
+        stagingActionSlot.captured.execute(stagingCopyTask)
+
+        verify { profileCopyTask.buildMode.set("profile") }
+        // A debuggable custom build type builds with debug engine artifacts, so its APK is named
+        // like a debug APK, which is where the Flutter tool looks for it.
+        verify { stagingCopyTask.buildMode.set("debug") }
+    }
+
+    @Test
+    fun `onVariants makes only the variant's assemble task depend on its APK copy`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        val mockCopyApksTaskProvider = mockk<TaskProvider<CopyFlutterApksTask>>()
+        every {
+            project.tasks.register("copyFlutterApksDebug", CopyFlutterApksTask::class.java, any())
+        } returns mockCopyApksTaskProvider
+        val configureEachSlot = slot<Action<in Task>>()
+        every { project.tasks.configureEach(capture(configureEachSlot)) } returns Unit
+
+        val onVariant = applyPluginCapturingVariantCallback(env)
+        onVariant(mockApplicationVariant())
+
+        val assembleDebug = mockk<Task>()
+        every { assembleDebug.name } returns "assembleDebug"
+        every { assembleDebug.dependsOn(*anyVararg()) } returns assembleDebug
+        val assembleRelease = mockk<Task>()
+        every { assembleRelease.name } returns "assembleRelease"
+        configureEachSlot.captured.execute(assembleDebug)
+        configureEachSlot.captured.execute(assembleRelease)
+
+        verify { assembleDebug.dependsOn(mockCopyApksTaskProvider) }
+        verify(exactly = 0) { assembleRelease.dependsOn(*anyVararg()) }
     }
 
     // How each Gradle property is parsed is covered by FlutterCompileOptionsTest. This covers the
@@ -274,7 +438,8 @@ class FlutterPluginTest {
         debuggable: Boolean = true,
         flavorName: String? = null,
         minSdkApiLevel: Int = 21,
-        assetsSource: SourceDirectories.Layered? = mockk(relaxed = true)
+        assetsSource: SourceDirectories.Layered? = mockk(relaxed = true),
+        outputs: List<VariantOutput> = emptyList()
     ): ApplicationVariant {
         val mockVariant = mockk<ApplicationVariant>(relaxed = true)
         val mockSources = mockk<Sources>(relaxed = true)
@@ -285,7 +450,31 @@ class FlutterPluginTest {
         every { mockVariant.minSdk.apiLevel } returns minSdkApiLevel
         every { mockVariant.sources } returns mockSources
         every { mockSources.assets } returns assetsSource
+        every { mockVariant.outputs } returns outputs
         return mockVariant
+    }
+
+    /** A mocked [VariantOutput] and the mocked `versionCode` property it returns. */
+    private data class MockVariantOutput(
+        val output: VariantOutput,
+        val versionCode: Property<Int>
+    )
+
+    /**
+     * A [VariantOutput] with an ABI filter for [abi] (none if null), whose versionCode property
+     * holds [versionCode]. Verify on [MockVariantOutput.versionCode] to check what the plugin set.
+     */
+    private fun mockVariantOutput(
+        abi: String?,
+        versionCode: Int?
+    ): MockVariantOutput {
+        val versionCodeProperty = mockk<Property<Int>>()
+        every { versionCodeProperty.orNull } returns versionCode
+        every { versionCodeProperty.set(any<Int>()) } just Runs
+        val output = mockk<VariantOutput>()
+        every { output.filters } returns mockAbiFilters(abi)
+        every { output.versionCode } returns versionCodeProperty
+        return MockVariantOutput(output, versionCodeProperty)
     }
 
     private data class TestProjectEnvironment(

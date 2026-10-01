@@ -77,7 +77,21 @@ projects. That opt-out dies with AGP 10.
    it is seeded with the merged value; set `abiOffset * 1000 + current`,
    avoiding a self-referential `.map`. Fall back to a snapshot only if
    read-then-set is impossible; record the outcome here.
-   - *Spike result:* _pending (P6)_.
+   - *Spike result:* read-then-set works and is what P6 ships
+     (`configureSplitPerAbiVersionCodes` in `FlutterPlugin.kt`). The plugin reads
+     `VariantOutput.versionCode.orNull` in `onVariants` and sets
+     `abiOffset * 1000 + base`. This configuration-time read is a documented exception to
+     the "no `.get()` at configuration time" rule, because the lazy `.map` form is
+     circular. No `finalizeDsl` snapshot is needed. See "Features that must break" item 3
+     for the effect on apps that change `versionCode` in their own `onVariants`.
+     *Caveat:* the read works only while AGP's compatibility mode is on
+     (`android.compatibility.enableLegacyApi`, default `true` and deprecated through AGP 9.x).
+     With it set to `false`, AGP calls `disallowUnsafeRead()` on this property and the read
+     fails with "configuration of project ':app' has not completed yet". The app-side
+     `output.versionCode.get()` pattern fails the same way. `Property` has no lazy
+     self-transform to fall back on. AGP 9.1 marks the option deprecated with
+     `FeatureStage.Deprecated(VERSION_10_0)`, so re-spike against AGP 10 previews when they
+     are published. The fallback is the `finalizeDsl` snapshot described above.
 5. **`buildModeFor` semantics.** Every variant-scope call uses the
    `(name, debuggable)` overload with the public `Component.debuggable`.
    Name-based inference is confined to the one DSL-scope case with no public
@@ -165,11 +179,40 @@ else serializes through `FlutterPlugin.kt` / `FlutterPluginUtils.kt`.
    APK-rename recipes) fail under newDsl — the biggest break. Mitigated by new
    error handlers (P9) and the website page.
 2. **flutter-apk copy**: same names/paths (`app[-abi][-flavor]-<mode>.apk`,
-   byte-matching the current concatenation order), but an UP-TO-DATE-capable
-   finalizer task replaces the `doLast` block; new task names appear in
-   `gradlew tasks`.
-3. **Per-ABI versionCode**: post-`finalizeDsl` user mutations (`afterEvaluate`
-   CI patterns) may behave differently; a runtime divergence warning is added.
+   byte-matching the order `listApkPaths` in the Flutter tool expects). `CopyFlutterApksTask`
+   (`copyFlutterApks<Variant>`, which `assemble<Variant>` depends on) replaces the
+   `doLast` block, so `copyFlutterApks<Variant>` tasks appear in `gradlew tasks`. It reads
+   `SingleArtifact.APK` through `BuiltArtifactsLoader`. Its declared outputs are the
+   individual APK files rather than the shared `flutter-apk` directory, which would
+   overlap between variants. The file names come from the variant's outputs (the APKs
+   AGP will build), not from `target-platform`. A single naming function produces both
+   the declared outputs and the copied files, and the task fails if AGP built an APK it
+   did not declare.
+3. **Per-ABI versionCode** (`--split-per-abi`): Flutter sets
+   `VariantOutput.versionCode` in its own `onVariants` callback. AGP runs callbacks in
+   registration order, so for an app that applies Flutter in its `plugins {}` block,
+   Flutter's callback runs *before* the app's `androidComponents.onVariants` block.
+   `ApkVariantOutput.versionCodeOverride`, which this replaces, was applied *after* that
+   block. Apps that set `versionCode` only in the `android {}` DSL see no change. An app
+   that transforms `output.versionCode` in its own `onVariants` transforms Flutter's
+   offset value. For example, an app that multiplies by 10000, built with
+   `--build-number 42`:
+
+   | ABI (offset) | Before: `offset * 1000 + 42 * 10000` | After: `(offset * 1000 + 42) * 10000` |
+   | --- | --- | --- |
+   | `armeabi-v7a` (1) | 421000 | 10420000 |
+   | `arm64-v8a` (2) | 422000 | 20420000 |
+   | `x86_64` (4) | 424000 | 40420000 |
+
+   In this example the values stay distinct, keep the same ABI order, and only go up, so
+   Play Store upgrades keep working. Going back to an earlier Flutter release would make
+   them go down. An app that needs the "Before" numbers can undo Flutter's
+   offset in its own block before applying its formula:
+   `base = output.versionCode.get() - offset * 1000`. This only applies when Flutter
+   applied an offset, so not with `-Pforce-version-code-ignoring-abi=true`.
+   No runtime divergence warning is emitted. Flutter cannot tell an intended change in
+   the app's `onVariants` (the pattern AGP recommends) from an unintended one, so a
+   warning would fire on correct build scripts.
 4. **Custom build types → plugins**: live-aliased instances become `initWith`
    copies; library plugins cannot receive `isDebuggable` (no public setter on
    `LibraryBuildType`). **Warning:** If an app uses a custom build type (like `staging`),

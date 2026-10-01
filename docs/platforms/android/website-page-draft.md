@@ -107,12 +107,43 @@ androidComponents {
 }
 ```
 
-Note: Flutter itself sets per-ABI version codes for `--split-per-abi` inside
-`onVariants`. If your CI mutates version codes in `afterEvaluate`, that runs at
-a different time than before; Flutter prints a warning when it detects a
-divergence between the DSL value and the final output value. To verify your
-mutations worked, inspect the built APK:
-`apkanalyzer manifest print versionCode build/app/outputs/flutter-apk/app-release.apk`
+Note: For `--split-per-abi` builds, Flutter sets per-ABI version codes
+(`abiOffset * 1000 + versionCode`, with offsets 1 for `armeabi-v7a`, 2 for
+`arm64-v8a`, and 4 for `x86_64`) in its own `onVariants` callback. When the
+Flutter plugin is applied in the `plugins {}` block, as in Flutter's templates,
+that callback runs before an `androidComponents.onVariants` block in your app's
+build script, so your block sees Flutter's offset value instead of the base
+versionCode.
+Flutter releases that set `versionCodeOverride` applied the offset after your
+block. If your block changes `versionCode`, the result differs from those
+releases. For example, multiplying by 10000 with `--build-number 42` gives
+`arm64-v8a` the versionCode `20420000`, where those releases gave `422000`. To
+keep the `422000`-style numbers, undo Flutter's offset first:
+
+```kotlin
+import com.android.build.api.variant.FilterConfiguration
+
+val flutterAbiOffsets = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86_64" to 4)
+// Flutter adds its offset only for `--split-per-abi` builds (`-Psplit-per-abi=true`)
+// and not when `-Pforce-version-code-ignoring-abi=true` is passed.
+val flutterAppliedAbiOffset =
+    providers.gradleProperty("split-per-abi").orNull.toBoolean() &&
+        !providers.gradleProperty("force-version-code-ignoring-abi").orNull.toBoolean()
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.outputs.forEach { output ->
+            val abi = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
+            val offset = flutterAbiOffsets[abi] ?: 0
+            val base = output.versionCode.get() - if (flutterAppliedAbiOffset) offset * 1000 else 0
+            output.versionCode.set(offset * 1000 + base * 10000)
+        }
+    }
+}
+```
+
+To verify the result, inspect the built APK:
+`apkanalyzer manifest print versionCode build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`
 
 ### Custom build types and plugins
 

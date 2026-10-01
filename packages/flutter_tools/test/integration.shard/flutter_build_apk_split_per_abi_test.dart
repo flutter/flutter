@@ -83,7 +83,9 @@ androidComponents {
 
 ''';
 
-// Check that `flutter build apk --split-per-abi` generates a versionCode equal to abiIndex * 1000 + buildNumber
+// Check that `flutter build apk --split-per-abi` generates a versionCode equal to
+// abiIndex * 1000 + buildNumber (then multiplied by 10000 when [usingCustomAppGradleFile]), and
+// copies each per-ABI APK into flutter-apk.
 Future<void> _assertSplitPerAbiVersionCodes(
   int? buildNumber,
   Directory workingDirectory,
@@ -177,8 +179,10 @@ Future<void> _assertSplitPerAbiVersionCodes(
     );
 
     final int actual = actualVersionCodes[abi]!;
-    final int expected =
-        (abiIndex * 1000) + ((buildNumber ?? 1) * (usingCustomAppGradleFile ? 10000 : 1));
+    // Flutter sets `abiIndex * 1000 + versionCode` in its own onVariants callback, which runs
+    // before the app's. The custom app build file then multiplies that value by 10000.
+    final int baseVersionCode = (abiIndex * 1000) + (buildNumber ?? 1);
+    final int expected = usingCustomAppGradleFile ? baseVersionCode * 10000 : baseVersionCode;
     expect(
       actual,
       expected,
@@ -187,6 +191,16 @@ Future<void> _assertSplitPerAbiVersionCodes(
           '${buildNumber != null ? "buildNumber=$buildNumber" : "no explicit build-number"} '
           'expected versionCode=$expected but got $actual.',
     );
+
+    // The Flutter tool reads the APKs from flutter-apk, under per-ABI names.
+    final File flutterApk = fileSystem
+        .directory(workingDirectory)
+        .childDirectory('build')
+        .childDirectory('app')
+        .childDirectory('outputs')
+        .childDirectory('flutter-apk')
+        .childFile('app-$abi-debug.apk');
+    expect(flutterApk, exists, reason: 'Expected the per-ABI APK at ${flutterApk.path}');
   }
 }
 
@@ -220,8 +234,9 @@ void main() {
     await _assertSplitPerAbiVersionCodes(42, appDir, false);
   });
 
-  // Check with custom buildNumber=42 and custom gradle file which multiplies build number by 10000
-  testWithoutContext('APK versionCodes after --split-per-abi with custom build-number=42 and gradle file follow "(abiIndex * 1000) + (42 * 10000)"', () async {
+  // Check with custom buildNumber=42 and a custom gradle file whose onVariants block multiplies
+  // the versionCode by 10000. That block runs after Flutter applies the per-ABI offset.
+  testWithoutContext('APK versionCodes after --split-per-abi with custom build-number=42 and gradle file follow "((abiIndex * 1000) + 42) * 10000"', () async {
     await _assertSplitPerAbiVersionCodes(42, appDir, true);
   });
 }
