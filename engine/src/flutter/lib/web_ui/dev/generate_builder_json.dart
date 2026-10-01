@@ -102,7 +102,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
         packageLock,
         'Mac',
         BrowserName.safari,
-        specificOS: 'Mac-26.6.2',
+        specificOS: 'Mac-26.6',
         cpu: 'arm64',
       ),
     ];
