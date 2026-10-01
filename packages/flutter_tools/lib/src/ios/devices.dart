@@ -23,6 +23,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context_runner.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
@@ -543,20 +544,18 @@ class IOSDevice extends Device {
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
+        analytics: _analytics,
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
+        plistParser: globals.plistParser,
+        toolContext: const GlobalToolContext(),
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
         targetOverride: mainPath,
         activeArch: _cpuArch,
         deviceID: id,
         disablePortPublication:
             debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
-        analytics: _analytics,
-        fileSystem: _fileSystem,
-        fileSystemUtils: _fileSystemUtils,
-        iMobileDevice: _iMobileDevice,
-        logger: _logger,
-        platform: _platform,
-        processUtils: _processUtils,
+        cocoaPods: globals.cocoaPods,
         xcode: _xcode,
       );
       if (!buildResult.success) {

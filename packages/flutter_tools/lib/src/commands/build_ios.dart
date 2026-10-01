@@ -1026,8 +1026,12 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         globalResults?[FlutterGlobalOptions.kDeviceIdOption] as String? ??
         platform.environment['FLUTTER_DEVICE_ID'];
     final XcodeBuildResult result = await buildXcodeProject(
+      analytics: analytics,
       app: app,
       buildInfo: buildInfo,
+      plistParser: plistParser,
+      toolContext: _toolContext,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
       targetOverride: targetFile,
       environmentType: environmentType,
       codesign: shouldCodesign,
@@ -1038,15 +1042,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
           usingCISystem &&
           xcodeBuildAction == XcodeBuildAction.build &&
           await disablePortPublication,
-      toolContext: _toolContext,
-      analytics: analytics,
+      verboseLogging:
+          logger.isVerbose || (globalResults?[FlutterGlobalOptions.kVerboseFlag] == true),
       cocoaPods: cocoaPods,
-      logger: globalResults?[FlutterGlobalOptions.kVerboseFlag] == true && !logger.isVerbose
-          ? VerboseLogger(logger)
-          : logger,
-      plistParser: plistParser,
       xcode: xcode,
-      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
     xcodeBuildResult = result;
 
