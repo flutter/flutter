@@ -109,6 +109,7 @@ class DaemonCommand extends FlutterCommand {
       }
 
       await DaemonServer(
+        toolContext: toolContext,
         logger: StdoutLogger(
           terminal: terminal,
           stdio: stdio,
@@ -136,6 +137,7 @@ class DaemonCommand extends FlutterCommand {
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
+      toolContext: toolContext,
       analytics: analytics,
       androidSdk: _androidSdk,
       androidWorkflow: _androidWorkflow,
@@ -164,6 +166,7 @@ class DaemonCommand extends FlutterCommand {
 @visibleForTesting
 class DaemonServer {
   DaemonServer({
+    required this.toolContext,
     required this.logger,
     this.analytics,
     this.androidSdk,
@@ -184,6 +187,7 @@ class DaemonServer {
   });
 
   final int? port;
+  final ToolContext toolContext;
 
   /// Stdout logger used to print general server-related errors.
   final Logger logger;
@@ -225,18 +229,19 @@ class DaemonServer {
       // We have to listen to socket.done. Otherwise when the connection is
       // reset, we will receive an uncatchable exception.
       // https://github.com/dart-lang/sdk/issues/25518
-      final Future<void> socketDone = socket.done.then<void>(
-        (_) {},
-        onError: (Object error, StackTrace stackTrace) {
-          logger.printError('Socket error: $error');
-          logger.printTrace('$stackTrace');
-        },
-      );
+      final Future<void> socketDone = socket.done.handleError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        logger.printError('Socket error: $error');
+        logger.printTrace('$stackTrace');
+      });
       final daemon = Daemon(
         DaemonConnection(
           daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
           logger: logger,
         ),
+        toolContext: toolContext,
         notifyingLogger: notifyingLogger,
         fileSystem: fileSystem,
         platform: platform,
@@ -258,7 +263,6 @@ class DaemonServer {
     });
 
     // Wait indefinitely until the server closes.
-    await subscription.asFuture<void>();
     await subscription.cancel();
   }
 }
@@ -272,6 +276,7 @@ typedef CommandHandlerWithBinary = Future<Object?> Function(
 class Daemon {
   Daemon(
     this.connection, {
+    required ToolContext toolContext,
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
@@ -316,6 +321,7 @@ class Daemon {
     registerDomain(
       appDomain = AppDomain(
         this,
+        toolContext: toolContext,
         analytics: an,
         fileSystem: _fs,
         logger: _logger,
@@ -357,13 +363,14 @@ class Daemon {
   }
 
   factory Daemon.createMachineDaemon({
+    required ToolContext toolContext,
+    required FeatureFlags featureFlags,
     required Logger logger,
     required Stdio stdio,
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
-    required FeatureFlags featureFlags,
     FileSystem? fileSystem,
     Java? java,
     OutputPreferences? outputPreferences,
@@ -377,6 +384,7 @@ class Daemon {
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
+      toolContext: toolContext,
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
@@ -857,6 +865,7 @@ typedef RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
+    required this._toolContext,
     Analytics? analytics,
     FileSystem? fileSystem,
     Logger? logger,
@@ -889,6 +898,7 @@ class AppDomain extends Domain {
   final SystemClock _systemClock;
   final Logger _logger;
   final AnsiTerminal _terminal;
+  final ToolContext _toolContext;
   final OutputPreferences _outputPreferences;
 
   static const _uuidGenerator = Uuid();
@@ -930,9 +940,9 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      target: target,
+      toolContext: _toolContext,
       buildInfo: options.buildInfo,
-      platform: _platform,
+      target: target,
       userIdentifier: userIdentifier,
     );
 
@@ -1054,6 +1064,8 @@ class AppDomain extends Domain {
         }),
       );
     }
+    // Kept separate from [AppInstance.started]. Runners attach listeners to this
+    // completer that have no error handler, so it must only ever be completed.
     final appStartedCompleter = Completer<void>();
 
     // This future won't complete until the application has shutdown, so we don't want to
@@ -1079,18 +1091,31 @@ class AppDomain extends Domain {
       }
     });
 
-    await Future.any(<Future<void>>[
-      appStartedCompleter.future.then<void>((void value) {
-        _sendAppEvent(app, 'started');
-      }),
-      appRunFuture,
-    ]);
+    try {
+      await Future.any(<Future<void>>[
+        appStartedCompleter.future.then<void>((void value) {
+          app._markStarted();
+          _sendAppEvent(app, 'started');
+        }),
+        appRunFuture,
+      ]);
+    } on Object catch (error, stackTrace) {
+      // `appRunFuture` only converts an [Exception] into a `stop` event, so an
+      // [Error] thrown by the runner or by the `finally` above surfaces here.
+      // Settle anything waiting on [AppInstance.started] before it propagates,
+      // otherwise a deferred `app.restart` waits forever.
+      app._failedToStart(error, stackTrace);
+      rethrow;
+    }
 
     // If appRunFuture completes early due to a fatal initialization error
-    // without actually starting the app, we must explicitly throw an exception
-    // to prevent the IDE/client from hanging indefinitely.
+    // without actually starting the app, we must explicitly fail both this
+    // request and anything waiting on [AppInstance.started], to prevent the
+    // IDE/client from hanging indefinitely.
     if (!appStartedCompleter.isCompleted) {
-      throw DaemonException('App failed to start');
+      final failure = DaemonException('App failed to start');
+      app._failedToStart(failure);
+      throw failure;
     }
     return app;
   }
@@ -1113,6 +1138,14 @@ class AppDomain extends Domain {
     if (app == null) {
       throw DaemonException("app '$appId' not found");
     }
+
+    // The `app.start` event carries the app ID and is sent before the runner
+    // has finished starting up, so a client can ask for a restart while the
+    // initial compile is still in flight. Servicing it now would issue a
+    // recompile against a compiler that has not accepted its first compile
+    // yet. Defer instead of dropping it: the client may have edited a file
+    // that the initial compile did not pick up.
+    await app.started;
 
     return _queueAndDebounceReloadAction(
       app,
@@ -1820,12 +1853,41 @@ class NotifyingLogger extends DelegatingLogger {
 
 /// A running application, started by this daemon.
 class AppInstance {
-  AppInstance(this.id, {required this.runner, this.logToStdout = false, required this._logger});
+  AppInstance(this.id, {required this.runner, this.logToStdout = false, required this._logger}) {
+    // Nothing is obliged to await [started], so make sure a failure never
+    // surfaces as an unhandled async error.
+    _startedCompleter.future.ignore();
+  }
 
   final String id;
   final ResidentRunner runner;
   final bool logToStdout;
   final MachineOutputLogger _logger;
+
+  final _startedCompleter = Completer<void>();
+
+  /// Completes once [runner] reports the app has started, which is the same
+  /// signal the `app.started` event is sent from, or with an error if the app
+  /// exited before it got there.
+  ///
+  /// For a runner with an incremental compiler this is after the initial
+  /// compile was accepted, which is what makes it safe to ask for a reload. It
+  /// does not mean the VM service is connected: the web runner attaches that
+  /// asynchronously afterwards, so the VM service may still be unattached once
+  /// this completes.
+  Future<void> get started => _startedCompleter.future;
+
+  void _markStarted() {
+    _startedCompleter.complete();
+  }
+
+  void _failedToStart(Object error, [StackTrace? stackTrace]) {
+    // Reachable after [_markStarted] when sending the `app.started` event is
+    // what threw, so this cannot assume the completer is still pending.
+    if (!_startedCompleter.isCompleted) {
+      _startedCompleter.completeError(error, stackTrace);
+    }
+  }
 
   Future<OperationResult> restart({bool fullRestart = false, bool pause = false, String? reason}) {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);

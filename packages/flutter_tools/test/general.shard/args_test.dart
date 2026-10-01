@@ -332,10 +332,10 @@ void verifyOptions(String? command, Iterable<Option> options) {
           '$_header$target--${option.name}" is not a valid name for a command line argument. (We use "--foo-url", not "--foo-uri", for example.)',
     );
 
-    // Deprecated options and flags should be hidden but still have help text.
-    const deprecatedOptions = <String>['pwa-strategy'];
-    final bool isOptionDeprecated = deprecatedOptions.contains(option.name);
-    if (!isOptionDeprecated) {
+    // Fully hidden options and flags should still have help text.
+    const hiddenOptions = <String>['pwa-strategy'];
+    final bool isHiddenOption = hiddenOptions.contains(option.name);
+    if (!isHiddenOption) {
       expect(
         option.hide,
         isFalse,
@@ -347,7 +347,7 @@ void verifyOptions(String? command, Iterable<Option> options) {
         option.hide,
         isTrue,
         reason:
-            '${_header}Deprecated option "--${option.name}" for "flutter $command" should be hidden. $_needHelp',
+            '${_header}Hidden option "--${option.name}" for "flutter $command" should be hidden. $_needHelp',
       );
     }
 
