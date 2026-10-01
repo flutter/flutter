@@ -233,11 +233,12 @@ Future<XcodeBuildResult> buildXcodeProject({
   await migration.run();
 
   if (!_checkXcodeVersion(
-    platform: buildPlatform,
-    xcodeProjectInterpreter: xcodeProjectInterpreter,
-    xcode: xcode,
-    logger: buildLogger,
-  )) {
+        platform: buildPlatform,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
+        xcode: xcode,
+        logger: buildLogger,
+      ) ||
+      xcode == null) {
     return XcodeBuildResult(success: false);
   }
 
@@ -372,12 +373,11 @@ Future<XcodeBuildResult> buildXcodeProject({
       : null;
   final bool incrementalBuild = targetBuildDir != null && targetBuildDir.existsSync();
 
-  final List<String> xcodebuildCommandArgs = await xcode!
-      .fetchDependenciesAndGenerateXcodebuildArgs(
-        app.project,
-        fs.directory(buildDirectoryPath),
-        skipPackageValidation: false,
-      );
+  final List<String> xcodebuildCommandArgs = await xcode.fetchDependenciesAndGenerateXcodebuildArgs(
+    app.project,
+    fs.directory(buildDirectoryPath),
+    skipPackageValidation: false,
+  );
   final buildCommands = <String>[...xcodebuildCommandArgs, '-configuration', configuration];
 
   // Check the public headers before checking Xcode version so headers fingerprinter is created
