@@ -13,19 +13,8 @@
 
 namespace impeller {
 
-namespace {
-// The queue whose job this thread runs right now. Two engines in one process
-// have a queue each. With a flag instead of the queue, a job of one queue
-// would make IsRunningJobOnCurrentThread return true for the other queue.
-thread_local const PipelineCompileQueueGLES* tls_running_queue = nullptr;
-}  // namespace
-
 int PipelineCompileQueueGLES::RunningJobCount() const {
   return running_jobs_.load();
-}
-
-bool PipelineCompileQueueGLES::IsRunningJobOnCurrentThread() const {
-  return tls_running_queue == this;
 }
 
 std::shared_ptr<PipelineCompileQueueGLES> PipelineCompileQueueGLES::Create(
@@ -76,13 +65,9 @@ void PipelineCompileQueueGLES::PostJob(const fml::closure& job) {
       job();
       return;
     }
-    const PipelineCompileQueueGLES* previous = tls_running_queue;
-    tls_running_queue = queue.get();
     queue->running_jobs_.fetch_add(1);
-    fml::ScopedCleanupClosure restore([&queue, previous]() {
-      queue->running_jobs_.fetch_sub(1);
-      tls_running_queue = previous;
-    });
+    fml::ScopedCleanupClosure restore(
+        [&queue]() { queue->running_jobs_.fetch_sub(1); });
     job();
   });
 }

@@ -13,7 +13,6 @@
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/task_runner_util.h"
 #include "flutter/fml/thread.h"
-#include "flutter/testing/post_task_sync.h"
 #include "flutter/testing/testing.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 
@@ -40,7 +39,7 @@ void PostJobForDescriptorSync(PipelineCompileQueueGLES& queue,
                               const PipelineDescriptor& desc,
                               const fml::closure& job) {
   fml::AutoResetWaitableEvent latch;
-  ASSERT_TRUE(queue.PostJobForDescriptor(desc, [&]() {
+  ASSERT_TRUE(queue.PostJobForDescriptor(desc, [&](bool) {
     job();
     latch.Signal();
   }));
@@ -89,19 +88,19 @@ TEST(PipelineCompileQueueGLESTest, OnJobAddedProcessesJobsSequentially) {
   desc3.SetSampleCount(SampleCount::kCount1);
   desc3.SetCullMode(CullMode::kBackFace);
 
-  queue->PostJobForDescriptor(desc1, [&]() {
+  queue->PostJobForDescriptor(desc1, [&](bool) {
     std::this_thread::sleep_for(std::chrono::milliseconds(80));
     completed_jobs++;
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc2, [&]() {
+  queue->PostJobForDescriptor(desc2, [&](bool) {
     std::this_thread::sleep_for(std::chrono::milliseconds(80));
     completed_jobs++;
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc3, [&]() {
+  queue->PostJobForDescriptor(desc3, [&](bool) {
     std::this_thread::sleep_for(std::chrono::milliseconds(80));
     completed_jobs++;
     latch.CountDown();
@@ -126,12 +125,12 @@ TEST(PipelineCompileQueueGLESTest,
 
   PipelineDescriptor desc;
 
-  queue->PostJobForDescriptor(desc, [&]() {
+  queue->PostJobForDescriptor(desc, [&](bool) {
     first_job_count++;
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc, [&]() {
+  queue->PostJobForDescriptor(desc, [&](bool) {
     second_job_count++;
     latch.CountDown();
   });
@@ -151,13 +150,13 @@ TEST(PipelineCompileQueueGLESTest, IsProcessingResetsAfterAllJobsComplete) {
   fml::CountDownLatch latch(1);
 
   queue->PostJobForDescriptor(PipelineDescriptor{},
-                              [&]() { latch.CountDown(); });
+                              [&](bool) { latch.CountDown(); });
 
   latch.Wait();
 
   fml::CountDownLatch latch2(1);
   queue->PostJobForDescriptor(PipelineDescriptor{},
-                              [&]() { latch2.CountDown(); });
+                              [&](bool) { latch2.CountDown(); });
 
   latch2.Wait();
 
@@ -187,19 +186,19 @@ TEST(PipelineCompileQueueGLESTest, DestroyQueueWithPendingTasks) {
     desc3.SetSampleCount(SampleCount::kCount1);
     desc3.SetCullMode(CullMode::kBackFace);
 
-    queue->PostJobForDescriptor(desc1, [&]() {
+    queue->PostJobForDescriptor(desc1, [&](bool) {
       std::this_thread::sleep_for(std::chrono::milliseconds(50));
       completed_jobs++;
       latch.CountDown();
     });
 
-    queue->PostJobForDescriptor(desc2, [&]() {
+    queue->PostJobForDescriptor(desc2, [&](bool) {
       std::this_thread::sleep_for(std::chrono::milliseconds(50));
       completed_jobs++;
       latch.CountDown();
     });
 
-    queue->PostJobForDescriptor(desc3, [&]() {
+    queue->PostJobForDescriptor(desc3, [&](bool) {
       std::this_thread::sleep_for(std::chrono::milliseconds(50));
       completed_jobs++;
       latch.CountDown();
@@ -241,14 +240,14 @@ TEST(PipelineCompileQueueGLESTest, ReportsProcessingAndCallsOnDrained) {
   PipelineDescriptor desc2;
   desc2.SetCullMode(CullMode::kFrontFace);
 
-  queue->PostJobForDescriptor(desc1, [&]() {
+  queue->PostJobForDescriptor(desc1, [&](bool) {
     first_job_started.Signal();
     block_first_job.Wait();
   });
   first_job_started.Wait();
   processing_while_running.store(queue->IsProcessingJobs());
 
-  queue->PostJobForDescriptor(desc2, [&]() {});
+  queue->PostJobForDescriptor(desc2, [&](bool) {});
   block_first_job.Signal();
   drained.Wait();
 
@@ -266,31 +265,45 @@ TEST(PipelineCompileQueueGLESTest, ReportsProcessingAndCallsOnDrained) {
   EXPECT_EQ(drained_count.load(), 1);
 }
 
-TEST(PipelineCompileQueueGLESTest, ReportsRunningJobOnlyInsideJobs) {
+TEST(PipelineCompileQueueGLESTest, PassesEagerOnlyFromPerformJobEagerly) {
   fml::Thread thread;
   std::shared_ptr<PipelineCompileQueueGLES> queue =
       PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
   ASSERT_NE(queue, nullptr);
 
-  bool in_posted_job = false;
-  bool in_descriptor_job = false;
-  bool in_plain_task = true;
+  PipelineDescriptor blocking_desc;
+  blocking_desc.SetCullMode(CullMode::kNone);
+  PipelineDescriptor eager_desc;
+  eager_desc.SetCullMode(CullMode::kFrontFace);
+  PipelineDescriptor queued_desc;
+  queued_desc.SetCullMode(CullMode::kBackFace);
 
-  PostJobSync(*queue,
-              [&]() { in_posted_job = queue->IsRunningJobOnCurrentThread(); });
-  PostJobForDescriptorSync(*queue, PipelineDescriptor{}, [&]() {
-    in_descriptor_job = queue->IsRunningJobOnCurrentThread();
+  fml::AutoResetWaitableEvent blocking_started;
+  fml::AutoResetWaitableEvent blocking_may_finish;
+  fml::AutoResetWaitableEvent queued_done;
+  std::atomic<bool> eager_value{false};
+  std::atomic<bool> queued_value{true};
+
+  // The first job holds the queue, so eager_desc is still pending when this
+  // thread takes it
+  queue->PostJobForDescriptor(blocking_desc, [&](bool) {
+    blocking_started.Signal();
+    blocking_may_finish.Wait();
+  });
+  blocking_started.Wait();
+  queue->PostJobForDescriptor(eager_desc,
+                              [&](bool eager) { eager_value.store(eager); });
+  queue->PostJobForDescriptor(queued_desc, [&](bool eager) {
+    queued_value.store(eager);
+    queued_done.Signal();
   });
 
-  // A task posted to the same thread without the queue is not a job.
-  flutter::testing::PostTaskSync(thread.GetTaskRunner(), [&]() {
-    in_plain_task = queue->IsRunningJobOnCurrentThread();
-  });
+  queue->PerformJobEagerly(eager_desc);
+  blocking_may_finish.Signal();
+  queued_done.Wait();
 
-  EXPECT_TRUE(in_posted_job);
-  EXPECT_TRUE(in_descriptor_job);
-  EXPECT_FALSE(in_plain_task);
-  EXPECT_FALSE(queue->IsRunningJobOnCurrentThread());
+  EXPECT_TRUE(eager_value.load());
+  EXPECT_FALSE(queued_value.load());
 
   thread.Join();
 }
@@ -305,16 +318,12 @@ TEST(PipelineCompileQueueGLESTest, JobsOfOneQueueAreInvisibleToAnother) {
   ASSERT_NE(first, nullptr);
   ASSERT_NE(second, nullptr);
 
-  std::atomic<bool> running_on_own_queue{false};
-  std::atomic<bool> running_on_other_queue{true};
   std::atomic<int> own_count{-1};
   std::atomic<int> other_count{-1};
   fml::AutoResetWaitableEvent job_started;
   fml::AutoResetWaitableEvent job_may_finish;
 
   first->PostJob([&]() {
-    running_on_own_queue.store(first->IsRunningJobOnCurrentThread());
-    running_on_other_queue.store(second->IsRunningJobOnCurrentThread());
     own_count.store(first->RunningJobCount());
     other_count.store(second->RunningJobCount());
     job_started.Signal();
@@ -328,8 +337,6 @@ TEST(PipelineCompileQueueGLESTest, JobsOfOneQueueAreInvisibleToAnother) {
 
   PostJobSync(*first, []() {});
 
-  EXPECT_TRUE(running_on_own_queue.load());
-  EXPECT_FALSE(running_on_other_queue.load());
   EXPECT_EQ(own_count.load(), 1);
   EXPECT_EQ(other_count.load(), 0);
 

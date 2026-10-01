@@ -178,7 +178,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
   auto weak_this = weak_from_this();
 
   PipelineKey next_key = pipeline_key_++;
-  auto generation_task = [descriptor, weak_this, promise, next_key]() {
+  auto generation_task = [descriptor, weak_this, promise, next_key](bool) {
     auto thiz = weak_this.lock();
     if (!thiz) {
       promise->set_value(nullptr);
@@ -197,7 +197,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
     compile_queue_->PostJobForDescriptor(descriptor,
                                          std::move(generation_task));
   } else {
-    generation_task();
+    generation_task(/*eager=*/true);
   }
 
   return pipeline_future;

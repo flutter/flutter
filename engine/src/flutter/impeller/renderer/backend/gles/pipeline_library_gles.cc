@@ -702,24 +702,25 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
   }
   auto generation_task = [promise, weak_this, descriptor, vert_function,
                           frag_function, threadsafe, reactor,
-                          weak_compile_queue]() {
+                          weak_compile_queue](bool eager) {
     auto thiz = weak_this.lock();
     if (!thiz) {
       promise->set_value(nullptr);
       return;
     }
-    const bool result = reactor->AddOperation([promise,            //
-                                               weak_this,          //
-                                               descriptor,         //
-                                               vert_function,      //
-                                               frag_function,      //
-                                               threadsafe,         //
-                                               weak_compile_queue  //
+    const bool result = reactor->AddOperation([promise,             //
+                                               weak_this,           //
+                                               descriptor,          //
+                                               vert_function,       //
+                                               frag_function,       //
+                                               threadsafe,          //
+                                               weak_compile_queue,  //
+                                               eager                //
     ](const ReactorGLES& reactor) {
       // The job that runs this holds the queue, so the lock succeeds while a
       // job of it runs on this thread.
       auto compile_queue = weak_compile_queue.lock();
-      if (compile_queue && compile_queue->IsRunningJobOnCurrentThread()) {
+      if (!eager && compile_queue) {
         // The promise is set later unless the pipeline fails right away.
         if (!CreatePipeline(weak_this, descriptor, vert_function, frag_function,
                             threadsafe, promise)) {
@@ -737,7 +738,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
     compile_queue_->PostJobForDescriptor(descriptor,
                                          std::move(generation_task));
   } else {
-    generation_task();
+    generation_task(/*eager=*/true);
   }
 
   return pipeline_future;

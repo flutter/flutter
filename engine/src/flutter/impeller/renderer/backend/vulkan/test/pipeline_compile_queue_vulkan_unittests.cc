@@ -52,7 +52,7 @@ TEST(PipelineCompileQueueVulkanTest, OnJobAddedProcessesJobsInParallel) {
   desc3.SetSampleCount(SampleCount::kCount1);
   desc3.SetCullMode(CullMode::kBackFace);
 
-  queue->PostJobForDescriptor(desc1, [&]() {
+  queue->PostJobForDescriptor(desc1, [&](bool) {
     int current = ++concurrent_jobs;
     int prev_max = max_concurrent.load();
     while (current > prev_max &&
@@ -63,7 +63,7 @@ TEST(PipelineCompileQueueVulkanTest, OnJobAddedProcessesJobsInParallel) {
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc2, [&]() {
+  queue->PostJobForDescriptor(desc2, [&](bool) {
     int current = ++concurrent_jobs;
     int prev_max = max_concurrent.load();
     while (current > prev_max &&
@@ -74,7 +74,7 @@ TEST(PipelineCompileQueueVulkanTest, OnJobAddedProcessesJobsInParallel) {
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc3, [&]() {
+  queue->PostJobForDescriptor(desc3, [&](bool) {
     int current = ++concurrent_jobs;
     int prev_max = max_concurrent.load();
     while (current > prev_max &&
@@ -102,12 +102,12 @@ TEST(PipelineCompileQueueVulkanTest,
 
   PipelineDescriptor desc;
 
-  queue->PostJobForDescriptor(desc, [&]() {
+  queue->PostJobForDescriptor(desc, [&](bool) {
     first_job_count++;
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc, [&]() {
+  queue->PostJobForDescriptor(desc, [&](bool) {
     second_job_count++;
     latch.CountDown();
   });
@@ -147,27 +147,27 @@ TEST(PipelineCompileQueueVulkanTest, MultipleJobsCompleteSuccessfully) {
   desc5.SetCullMode(CullMode::kFrontFace);
 
   // Post 5 jobs with distinct descriptors
-  queue->PostJobForDescriptor(desc1, [&]() {
+  queue->PostJobForDescriptor(desc1, [&](bool) {
     completed_jobs++;
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc2, [&]() {
+  queue->PostJobForDescriptor(desc2, [&](bool) {
     completed_jobs++;
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc3, [&]() {
+  queue->PostJobForDescriptor(desc3, [&](bool) {
     completed_jobs++;
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc4, [&]() {
+  queue->PostJobForDescriptor(desc4, [&](bool) {
     completed_jobs++;
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc5, [&]() {
+  queue->PostJobForDescriptor(desc5, [&](bool) {
     completed_jobs++;
     latch.CountDown();
   });

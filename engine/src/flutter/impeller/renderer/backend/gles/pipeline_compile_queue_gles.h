@@ -57,16 +57,6 @@ class PipelineCompileQueueGLES : public PipelineCompileQueue {
   void OnJobAdded() override;
 
   //----------------------------------------------------------------------------
-  /// @brief      Returns true if the current thread is running a job of this
-  ///             queue.
-  ///
-  ///             PipelineLibraryGLES starts a link in one job and checks it in
-  ///             a later job on the same task runner, so it defers a link only
-  ///             when this returns true.
-  ///
-  bool IsRunningJobOnCurrentThread() const;
-
-  //----------------------------------------------------------------------------
   /// @brief      Returns how many jobs of this queue run right now.
   ///
   ///             The GL context belongs to one thread at a time, so

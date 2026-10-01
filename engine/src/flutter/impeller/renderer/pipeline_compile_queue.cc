@@ -14,7 +14,7 @@ PipelineCompileQueue::~PipelineCompileQueue() {
 }
 
 bool PipelineCompileQueue::PostJobForDescriptor(const PipelineDescriptor& desc,
-                                                const fml::closure& job) {
+                                                const Job& job) {
   if (!job) {
     return false;
   }
@@ -26,7 +26,7 @@ bool PipelineCompileQueue::PostJobForDescriptor(const PipelineDescriptor& desc,
     // eagerly.
     FML_LOG(WARNING) << "Got multiple compile jobs for the same descriptor. "
                         "Running eagerly.";
-    PostJob(job);
+    PostJob([job]() { job(/*eager=*/false); });
     return true;
   }
 
@@ -35,7 +35,7 @@ bool PipelineCompileQueue::PostJobForDescriptor(const PipelineDescriptor& desc,
 }
 
 bool PipelineCompileQueue::AddJob(const PipelineDescriptor& desc,
-                                  const fml::closure& job) {
+                                  const Job& job) {
   Lock lock(pending_jobs_mutex_);
   auto insertion_result = pending_jobs_.insert(std::make_pair(desc, job));
   return insertion_result.second;
@@ -46,7 +46,7 @@ bool PipelineCompileQueue::HasPendingJobs() {
   return !pending_jobs_.empty();
 }
 
-fml::closure PipelineCompileQueue::TakeNextJob() {
+PipelineCompileQueue::Job PipelineCompileQueue::TakeNextJob() {
   Lock lock(pending_jobs_mutex_);
   if (pending_jobs_.empty()) {
     return nullptr;
@@ -57,7 +57,8 @@ fml::closure PipelineCompileQueue::TakeNextJob() {
   return job;
 }
 
-fml::closure PipelineCompileQueue::TakeJob(const PipelineDescriptor& desc) {
+PipelineCompileQueue::Job PipelineCompileQueue::TakeJob(
+    const PipelineDescriptor& desc) {
   Lock lock(pending_jobs_mutex_);
   auto found = pending_jobs_.find(desc);
   if (found == pending_jobs_.end()) {
@@ -80,7 +81,7 @@ fml::closure PipelineCompileQueue::TakeJob(const PipelineDescriptor& desc) {
 
 void PipelineCompileQueue::DoOneJob() {
   if (auto job = TakeNextJob()) {
-    job();
+    job(/*eager=*/false);
   }
 }
 
@@ -103,7 +104,7 @@ void PipelineCompileQueue::FinishAllJobs() {
 
 void PipelineCompileQueue::PerformJobEagerly(const PipelineDescriptor& desc) {
   if (auto job = TakeJob(desc)) {
-    job();
+    job(/*eager=*/true);
   }
 }
 

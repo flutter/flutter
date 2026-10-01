@@ -23,7 +23,7 @@ class TestPipelineCompileQueue : public PipelineCompileQueue {
   void OnJobAdded() override {}
 
   bool AddJobForTest(const PipelineDescriptor& desc, const fml::closure& job) {
-    return AddJob(desc, job);
+    return AddJob(desc, [job](bool) { job(); });
   }
 
   bool HasPendingJobsForTest() { return HasPendingJobs(); }

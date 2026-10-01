@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_PIPELINE_COMPILE_QUEUE_H_
 #define FLUTTER_IMPELLER_RENDERER_PIPELINE_COMPILE_QUEUE_H_
 
+#include <functional>
+
 #include "flutter/fml/closure.h"
 #include "flutter/fml/concurrent_message_loop.h"
 #include "impeller/base/thread.h"
@@ -41,6 +43,10 @@ namespace impeller {
 class PipelineCompileQueue
     : public std::enable_shared_from_this<PipelineCompileQueue> {
  public:
+  /// `eager` is true when PerformJobEagerly runs the job on the thread that
+  /// waits for the pipeline, and false when the queue runs it
+  using Job = std::function<void(bool eager)>;
+
   PipelineCompileQueue() = default;
 
   virtual ~PipelineCompileQueue();
@@ -58,8 +64,7 @@ class PipelineCompileQueue
   /// @return     If the job was successfully posted to the parallel task
   /// runners.
   ///
-  bool PostJobForDescriptor(const PipelineDescriptor& desc,
-                            const fml::closure& job);
+  bool PostJobForDescriptor(const PipelineDescriptor& desc, const Job& job);
 
   //----------------------------------------------------------------------------
   /// @brief      If the task has not yet been done, perform it eagerly on the
@@ -112,7 +117,7 @@ class PipelineCompileQueue
   /// @return     True if the job was successfully added to the queue, false
   ///             if a job for this descriptor already exists.
   ///
-  bool AddJob(const PipelineDescriptor& desc, const fml::closure& job);
+  bool AddJob(const PipelineDescriptor& desc, const Job& job);
 
   //----------------------------------------------------------------------------
   /// @brief      Check if there are any pending compilation jobs in the queue.
@@ -125,13 +130,13 @@ class PipelineCompileQueue
  private:
   Mutex pending_jobs_mutex_;
   absl::linked_hash_map<PipelineDescriptor,
-                        fml::closure,
+                        Job,
                         ComparableHash<PipelineDescriptor>,
                         ComparableEqual<PipelineDescriptor>>
       pending_jobs_ IPLR_GUARDED_BY(pending_jobs_mutex_);
   size_t priorities_elevated_ = {};
-  fml::closure TakeJob(const PipelineDescriptor& desc);
-  fml::closure TakeNextJob();
+  Job TakeJob(const PipelineDescriptor& desc);
+  Job TakeNextJob();
   void FinishAllJobs();
 };
 

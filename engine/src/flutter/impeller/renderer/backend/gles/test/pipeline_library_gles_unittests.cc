@@ -169,7 +169,7 @@ TEST(PipelineLibraryGLESDeferredTest,
 
   // Any job drains the queue, and the queue reports that to the library.
   ASSERT_TRUE(library.compile_queue_->PostJobForDescriptor(PipelineDescriptor{},
-                                                           []() {}));
+                                                           [](bool) {}));
   EXPECT_EQ(future.get(), nullptr);
 
   io_thread.Join();
@@ -376,6 +376,19 @@ TEST(PipelineLibraryGLESDeferredTest, SynchronousFailedCompileReturnsNull) {
 
 TEST(PipelineLibraryGLESDeferredTest, SynchronousFailedLinkReturnsNull) {
   RunSynchronousLinkFailure(false);
+}
+
+// A job that WaitAndGet runs through PerformJobEagerly links on the waiting
+// thread, so its future must be ready when the call returns.
+TEST(PipelineLibraryGLESDeferredTest, EagerJobLinksSynchronously) {
+  DeferredLinkHarness harness(/*max_pending_links=*/4);
+  PipelineFuture<PipelineDescriptor> future =
+      harness.library->GetPipeline(harness.desc, /*async=*/true, true);
+  ASSERT_FALSE(IsReady(future));
+  harness.library->GetPipelineCompileQueue()->PerformJobEagerly(harness.desc);
+  ASSERT_TRUE(IsReady(future));
+  EXPECT_NE(future.Get(), nullptr);
+  EXPECT_EQ(harness.state.link_queries, 1);
 }
 
 TEST(PipelineLibraryGLESDeferredTest,
