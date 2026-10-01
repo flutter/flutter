@@ -649,12 +649,16 @@ class RenderTable extends RenderBox {
   // Whether `child` took part in the last layout, and so is painted, hit tested
   // and included in the semantics tree.
   //
-  // Placeholders (TableCell.none) are never laid out. hasSize alone does not
-  // exclude them, because a cell that turns into a placeholder keeps the size
-  // and offset from its last layout: its element, and with it its render
-  // object, is reused.
+  // Layout skips placeholders (TableCell.none) and, in release builds where the
+  // placeholder assertion does not run, any other widget in a slot that a span
+  // covers. hasSize alone does not exclude them, because a cell that ends up in
+  // such a slot keeps the size and offset from its last layout: its element,
+  // and with it its render object, is reused.
   bool _isLaidOutCell(RenderBox child) {
-    return child.hasSize && (child.parentData! as TableCellParentData)._isVisible;
+    final childParentData = child.parentData! as TableCellParentData;
+    return child.hasSize &&
+        childParentData._isVisible &&
+        !(_cachedSpannedCells?._isSpanned(childParentData.x!, childParentData.y!) ?? false);
   }
 
   final Map<int, _Index> _idToIndexMap = <int, _Index>{};
@@ -1342,24 +1346,13 @@ class RenderTable extends RenderBox {
   late double _tableWidth;
 
   // Records which cells are covered by a colSpan and/or rowSpan, used to skip
-  // the inner borders that fall inside a span while painting. Rebuilt during
-  // layout and null when the table has no spanning cells. See
-  // [TableSpannedCells].
+  // the cells and the inner borders that fall inside a span while painting and
+  // hit testing. Set at the end of every layout and null when the table has no
+  // spanning cells. See [TableSpannedCells].
   //
   // Row heights are not cached; they are computed on-the-fly as
   // _rowTops[i + 1] - _rowTops[i], which is O(1) per row.
   TableSpannedCells? _cachedSpannedCells;
-
-  /// Invalidates the cached span information when the table structure changes.
-  void _invalidateSpanCache() {
-    _cachedSpannedCells = null;
-  }
-
-  @override
-  void markNeedsLayout() {
-    _invalidateSpanCache();
-    super.markNeedsLayout();
-  }
 
   /// Computes the visual x-position for a cell, adjusting for text direction
   /// and column span.
@@ -1498,6 +1491,7 @@ class RenderTable extends RenderBox {
       // TODO(ianh): if columns is zero, this should be zero width
       // TODO(ianh): if columns is not zero, this should be based on the column width specifications
       _tableWidth = 0.0;
+      _cachedSpannedCells = null;
       size = constraints.constrain(Size.zero);
       return;
     }
