@@ -36,6 +36,7 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/emulator.dart';
@@ -1202,6 +1203,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this._buildSystem,
     this._buildTargets,
     this._crashReporter,
+    this._deviceManager,
     this._doctor,
     this._emulatorManager,
     this._featureFlags,
@@ -1214,6 +1216,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final BuildSystem? _buildSystem;
   final BuildTargets? _buildTargets;
   final CrashReporter? _crashReporter;
+  final DeviceManager? _deviceManager;
   final Doctor? _doctor;
   final EmulatorManager? _emulatorManager;
   final FeatureFlags? _featureFlags;
@@ -1236,6 +1239,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   CrashReporter get crashReporter => _crashReporter ?? FakeCrashReporter();
+
+  @override
+  late final DeviceManager deviceManager = _deviceManager ?? FakeDeviceManager();
 
   @override
   Doctor get doctor => _doctor ?? FakeDoctor();
