@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -55,138 +54,124 @@ void main() {
     expect(logger.statusText, 'test check passed.\n');
   });
 
-  testUsingContext(
-    'androidComponentSetup build.gradle does not exist',
-    () async {
-      final Directory templatesDir = flutterRootDir.childDirectory('templates');
-      final Directory deferredComponentDir = templatesDir
-          .childDirectory('module')
-          .childDirectory('android')
-          .childDirectory('deferred_component');
-      final File buildGradleTemplate = deferredComponentDir.childFile('build.gradle.tmpl');
-      final File androidManifestTemplate = deferredComponentDir
-          .childDirectory('src')
-          .childDirectory('main')
-          .childFile('AndroidManifest.xml.tmpl');
+  testWithoutContext('androidComponentSetup build.gradle does not exist', () async {
+    final Directory templatesDir = flutterRootDir.childDirectory('templates');
+    final Directory deferredComponentDir = templatesDir
+        .childDirectory('module')
+        .childDirectory('android')
+        .childDirectory('deferred_component');
+    final File buildGradleTemplate = deferredComponentDir.childFile('build.gradle.tmpl');
+    final File androidManifestTemplate = deferredComponentDir
+        .childDirectory('src')
+        .childDirectory('main')
+        .childFile('AndroidManifest.xml.tmpl');
 
-      deferredComponentDir.createSync(recursive: true);
-      buildGradleTemplate.createSync(recursive: true);
-      androidManifestTemplate.createSync(recursive: true);
-      buildGradleTemplate.writeAsStringSync(
-        'fake build.gradle template {{componentName}}',
-        flush: true,
-        mode: FileMode.append,
-      );
-      androidManifestTemplate.writeAsStringSync(
-        'fake AndroidManifest.xml template {{componentName}}',
-        flush: true,
-        mode: FileMode.append,
-      );
+    deferredComponentDir.createSync(recursive: true);
+    buildGradleTemplate.createSync(recursive: true);
+    androidManifestTemplate.createSync(recursive: true);
+    buildGradleTemplate.writeAsStringSync(
+      'fake build.gradle template {{componentName}}',
+      flush: true,
+      mode: FileMode.append,
+    );
+    androidManifestTemplate.writeAsStringSync(
+      'fake AndroidManifest.xml template {{componentName}}',
+      flush: true,
+      mode: FileMode.append,
+    );
 
-      final validator = DeferredComponentsPrebuildValidator(
-        projectDir,
-        logger,
-        platform,
-        exitOnFail: false,
-        title: 'test check',
-        templatesDir: templatesDir,
-      );
-      final Directory componentDir = projectDir
-          .childDirectory('android')
-          .childDirectory('component1');
-      final File file = componentDir
-          .childDirectory('src')
-          .childDirectory('main')
-          .childFile('AndroidManifest.xml');
-      if (file.existsSync()) {
-        file.deleteSync();
-      }
-      file.createSync(recursive: true);
-      await validator.checkAndroidDynamicFeature(<DeferredComponent>[
-        DeferredComponent(name: 'component1'),
-      ]);
-      validator.displayResults();
-      validator.attemptToolExit();
-
+    final validator = DeferredComponentsPrebuildValidator(
+      projectDir,
+      logger,
+      platform,
+      exitOnFail: false,
+      title: 'test check',
+      templatesDir: templatesDir,
+    );
+    final Directory componentDir = projectDir
+        .childDirectory('android')
+        .childDirectory('component1');
+    final File file = componentDir
+        .childDirectory('src')
+        .childDirectory('main')
+        .childFile('AndroidManifest.xml');
+    if (file.existsSync()) {
       file.deleteSync();
-      expect(logger.statusText.contains('Newly generated android files:\n'), true);
-      expect(
-        logger.statusText.contains(
-          'build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/component1/build.gradle\n',
-        ),
-        true,
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    }
+    file.createSync(recursive: true);
+    await validator.checkAndroidDynamicFeature(<DeferredComponent>[
+      DeferredComponent(name: 'component1'),
+    ]);
+    validator.displayResults();
+    validator.attemptToolExit();
 
-  testUsingContext(
-    'androidComponentSetup AndroidManifest.xml does not exist',
-    () async {
-      final Directory templatesDir = flutterRootDir.childDirectory('templates');
-      final Directory deferredComponentDir = templatesDir
-          .childDirectory('module')
-          .childDirectory('android')
-          .childDirectory('deferred_component');
-      final File buildGradleTemplate = deferredComponentDir.childFile('build.gradle.tmpl');
-      final File androidManifestTemplate = deferredComponentDir
-          .childDirectory('src')
-          .childDirectory('main')
-          .childFile('AndroidManifest.xml.tmpl');
+    file.deleteSync();
+    expect(logger.statusText.contains('Newly generated android files:\n'), true);
+    expect(
+      logger.statusText.contains(
+        'build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/component1/build.gradle\n',
+      ),
+      true,
+    );
+  });
 
-      deferredComponentDir.createSync(recursive: true);
-      buildGradleTemplate.createSync(recursive: true);
-      androidManifestTemplate.createSync(recursive: true);
-      buildGradleTemplate.writeAsStringSync(
-        'fake build.gradle template {{componentName}}',
-        flush: true,
-        mode: FileMode.append,
-      );
-      androidManifestTemplate.writeAsStringSync(
-        'fake AndroidManifest.xml template {{componentName}}',
-        flush: true,
-        mode: FileMode.append,
-      );
+  testWithoutContext('androidComponentSetup AndroidManifest.xml does not exist', () async {
+    final Directory templatesDir = flutterRootDir.childDirectory('templates');
+    final Directory deferredComponentDir = templatesDir
+        .childDirectory('module')
+        .childDirectory('android')
+        .childDirectory('deferred_component');
+    final File buildGradleTemplate = deferredComponentDir.childFile('build.gradle.tmpl');
+    final File androidManifestTemplate = deferredComponentDir
+        .childDirectory('src')
+        .childDirectory('main')
+        .childFile('AndroidManifest.xml.tmpl');
 
-      final validator = DeferredComponentsPrebuildValidator(
-        projectDir,
-        logger,
-        platform,
-        exitOnFail: false,
-        title: 'test check',
-        templatesDir: templatesDir,
-      );
-      final Directory componentDir = projectDir
-          .childDirectory('android')
-          .childDirectory('component1');
-      final File file = componentDir.childFile('build.gradle');
-      if (file.existsSync()) {
-        file.deleteSync();
-      }
-      file.createSync(recursive: true);
-      await validator.checkAndroidDynamicFeature(<DeferredComponent>[
-        DeferredComponent(name: 'component1'),
-      ]);
-      validator.displayResults();
-      validator.attemptToolExit();
+    deferredComponentDir.createSync(recursive: true);
+    buildGradleTemplate.createSync(recursive: true);
+    androidManifestTemplate.createSync(recursive: true);
+    buildGradleTemplate.writeAsStringSync(
+      'fake build.gradle template {{componentName}}',
+      flush: true,
+      mode: FileMode.append,
+    );
+    androidManifestTemplate.writeAsStringSync(
+      'fake AndroidManifest.xml template {{componentName}}',
+      flush: true,
+      mode: FileMode.append,
+    );
 
+    final validator = DeferredComponentsPrebuildValidator(
+      projectDir,
+      logger,
+      platform,
+      exitOnFail: false,
+      title: 'test check',
+      templatesDir: templatesDir,
+    );
+    final Directory componentDir = projectDir
+        .childDirectory('android')
+        .childDirectory('component1');
+    final File file = componentDir.childFile('build.gradle');
+    if (file.existsSync()) {
       file.deleteSync();
-      expect(logger.statusText.contains('Newly generated android files:\n'), true);
-      expect(
-        logger.statusText.contains(
-          'build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/component1/src/main/AndroidManifest.xml\n',
-        ),
-        true,
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    }
+    file.createSync(recursive: true);
+    await validator.checkAndroidDynamicFeature(<DeferredComponent>[
+      DeferredComponent(name: 'component1'),
+    ]);
+    validator.displayResults();
+    validator.attemptToolExit();
+
+    file.deleteSync();
+    expect(logger.statusText.contains('Newly generated android files:\n'), true);
+    expect(
+      logger.statusText.contains(
+        'build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/component1/src/main/AndroidManifest.xml\n',
+      ),
+      true,
+    );
+  });
 
   testWithoutContext('androidComponentSetup all files exist passes', () async {
     final Directory templatesDir = flutterRootDir

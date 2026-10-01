@@ -14,6 +14,7 @@ import 'package:xml/xml.dart';
 
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
+import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
@@ -175,8 +176,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required Platform platform,
     required ProcessManager processManager,
     this._androidSdk,
+    this._botDetector,
   }) : _fileSystem = fileSystem,
        _logger = logger,
+       _platform = platform,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
@@ -185,16 +188,19 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required AndroidContext androidContext,
     required ToolContext toolContext,
   }) : _artifacts = toolContext.artifacts,
+       _botDetector = toolContext.botDetector,
        _fileSystem = toolContext.fs,
        _gradleUtils = androidContext.gradleUtils,
        _java = androidContext.java,
        _logger = toolContext.logger,
+       _platform = toolContext.platform,
        _androidStudio = androidContext.androidStudio,
        _androidSdk = androidContext.androidSdk,
        _fileSystemUtils = toolContext.fileSystemUtils,
        _processUtils = toolContext.processUtils;
 
   final Analytics _analytics;
+  final BotDetector? _botDetector;
   final Java? _java;
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -203,6 +209,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final AndroidStudio? _androidStudio;
   final AndroidSdk? _androidSdk;
   final FileSystemUtils _fileSystemUtils;
+  final Platform _platform;
   final ProcessUtils _processUtils;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
@@ -385,7 +392,14 @@ class AndroidGradleBuilder implements AndroidBuilder {
         return exitCode;
       }
       final GradleBuildStatus status = await detectedGradleError!.handler(
+        botDetector: _botDetector,
+        fileSystem: _fileSystem,
+        gradleUtils: _gradleUtils,
+        java: _java,
         line: detectedGradleErrorLine!,
+        logger: _logger,
+        platform: _platform,
+        processUtils: _processUtils,
         project: project,
         usesAndroidX: usesAndroidX,
       );

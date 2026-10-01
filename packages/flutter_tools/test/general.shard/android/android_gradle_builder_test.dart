@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -559,10 +560,22 @@ void main() {
               test: (String line) {
                 return line.contains('Some gradle message');
               },
-              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                handlerCalled = true;
-                return GradleBuildStatus.exit;
-              },
+              handler:
+                  ({
+                    required String line,
+                    required Logger logger,
+                    required FlutterProject project,
+                    required bool usesAndroidX,
+                    BotDetector? botDetector,
+                    FileSystem? fileSystem,
+                    GradleUtils? gradleUtils,
+                    Java? java,
+                    Platform? platform,
+                    ProcessUtils? processUtils,
+                  }) async {
+                    handlerCalled = true;
+                    return GradleBuildStatus.exit;
+                  },
               eventLabel: 'random-event-label',
             ),
           ],
@@ -746,9 +759,21 @@ void main() {
                 }
                 return false;
               },
-              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                return GradleBuildStatus.retry;
-              },
+              handler:
+                  ({
+                    required String line,
+                    required Logger logger,
+                    required FlutterProject project,
+                    required bool usesAndroidX,
+                    BotDetector? botDetector,
+                    FileSystem? fileSystem,
+                    GradleUtils? gradleUtils,
+                    Java? java,
+                    Platform? platform,
+                    ProcessUtils? processUtils,
+                  }) async {
+                    return GradleBuildStatus.retry;
+                  },
               eventLabel: 'random-event-label',
             ),
           ],
@@ -837,9 +862,21 @@ void main() {
             localGradleErrors: <GradleHandledError>[
               GradleHandledError(
                 test: (String line) => line.contains('Some gradle message'),
-                handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                  return GradleBuildStatus.retry;
-                },
+                handler:
+                    ({
+                      required String line,
+                      required Logger logger,
+                      required FlutterProject project,
+                      required bool usesAndroidX,
+                      BotDetector? botDetector,
+                      FileSystem? fileSystem,
+                      GradleUtils? gradleUtils,
+                      Java? java,
+                      Platform? platform,
+                      ProcessUtils? processUtils,
+                    }) async {
+                      return GradleBuildStatus.retry;
+                    },
                 eventLabel: 'random-event-label',
               ),
             ],
@@ -936,10 +973,22 @@ void main() {
               test: (String line) {
                 return line.contains('Some gradle message');
               },
-              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                handlerCalled = true;
-                return GradleBuildStatus.exit;
-              },
+              handler:
+                  ({
+                    required String line,
+                    required Logger logger,
+                    required FlutterProject project,
+                    required bool usesAndroidX,
+                    BotDetector? botDetector,
+                    FileSystem? fileSystem,
+                    GradleUtils? gradleUtils,
+                    Java? java,
+                    Platform? platform,
+                    ProcessUtils? processUtils,
+                  }) async {
+                    handlerCalled = true;
+                    return GradleBuildStatus.exit;
+                  },
               eventLabel: 'random-event-label',
             ),
           ],
@@ -1110,9 +1159,21 @@ void main() {
             test: (String line) {
               return line.contains('Some gradle message');
             },
-            handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-              return GradleBuildStatus.retry;
-            },
+            handler:
+                ({
+                  required String line,
+                  required Logger logger,
+                  required FlutterProject project,
+                  required bool usesAndroidX,
+                  BotDetector? botDetector,
+                  FileSystem? fileSystem,
+                  GradleUtils? gradleUtils,
+                  Java? java,
+                  Platform? platform,
+                  ProcessUtils? processUtils,
+                }) async {
+                  return GradleBuildStatus.retry;
+                },
             eventLabel: 'random-event-label',
           ),
         ],

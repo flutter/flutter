@@ -8,7 +8,8 @@ import '../base/deferred_component.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../globals.dart' as globals;
+import '../base/template.dart';
+import '../isolated/mustache_template.dart';
 import '../project.dart';
 import '../template.dart';
 import 'deferred_components_validator.dart';
@@ -33,12 +34,14 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
     super.logger,
     super.platform, {
     super.exitOnFail,
-    super.title,
     super.outputDir,
+    this._templateRenderer = const MustacheTemplateRenderer(),
     this._templatesDir,
+    super.title,
   });
 
   final Directory? _templatesDir;
+  final TemplateRenderer _templateRenderer;
 
   /// Checks if an android dynamic feature module exists for each deferred
   /// component.
@@ -61,9 +64,10 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
     var changesMade = false;
     for (final component in components) {
       final androidFiles = _DeferredComponentAndroidFiles(
+        logger: logger,
         name: component.name,
         projectDir: projectDir,
-        logger: logger,
+        templateRenderer: _templateRenderer,
         templatesDir: _templatesDir,
       );
       if (!androidFiles.verifyFilesExist()) {
@@ -210,17 +214,19 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
 // directory.
 class _DeferredComponentAndroidFiles {
   _DeferredComponentAndroidFiles({
+    required this.logger,
     required this.name,
     required this.projectDir,
-    required this.logger,
-    this._templatesDir,
+    required this.templateRenderer,
+    this.templatesDir,
   });
 
   // The name of the deferred component.
   final String name;
   final Directory projectDir;
   final Logger logger;
-  final Directory? _templatesDir;
+  final TemplateRenderer templateRenderer;
+  final Directory? templatesDir;
 
   Directory get androidDir => projectDir.childDirectory('android');
   Directory get componentDir => androidDir.childDirectory(name);
@@ -259,32 +265,36 @@ class _DeferredComponentAndroidFiles {
 
   // generates default build.gradle and AndroidManifest.xml for the deferred component.
   Future<List<File>> _setupComponentFiles(Directory outputDir) async {
+    final FileSystem fileSystem = projectDir.fileSystem;
     Template template;
-    final Directory? templatesDir = _templatesDir;
     if (templatesDir != null) {
-      final Directory templateComponentDir = templatesDir.childDirectory(
-        'module${globals.fs.path.separator}android${globals.fs.path.separator}deferred_component',
+      final Directory templateComponentDir = templatesDir!.childDirectory(
+        'module${fileSystem.path.separator}android${fileSystem.path.separator}deferred_component',
       );
       template = Template(
         templateComponentDir,
         templateComponentDir,
-        fileSystem: globals.fs,
+        fileSystem: fileSystem,
         logger: logger,
-        templateRenderer: globals.templateRenderer,
+        templateRenderer: templateRenderer,
       );
     } else {
       template = await Template.fromName(
-        'module${globals.fs.path.separator}android${globals.fs.path.separator}deferred_component',
-        fileSystem: globals.fs,
+        'module${fileSystem.path.separator}android${fileSystem.path.separator}deferred_component',
+        fileSystem: fileSystem,
         templateManifest: null,
         logger: logger,
-        templateRenderer: globals.templateRenderer,
+        templateRenderer: templateRenderer,
       );
     }
+    final FlutterProject flutterProject = FlutterProjectFactory(
+      logger: logger,
+      fileSystem: fileSystem,
+    ).fromDirectory(projectDir);
     final context = <String, Object>{
       'androidIdentifier':
-          FlutterProject.fromDirectory(projectDir).manifest.androidPackage ??
-          'com.example.${FlutterProject.fromDirectory(projectDir).manifest.appName}',
+          flutterProject.manifest.androidPackage ??
+          'com.example.${flutterProject.manifest.appName}',
       'componentName': name,
     };
 
