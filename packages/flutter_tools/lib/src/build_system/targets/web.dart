@@ -1336,12 +1336,22 @@ class WebTemplatedFiles extends Target {
       'builds': descriptions,
       if (environment.defines[kUseLocalCanvasKitFlag] == 'true') 'useLocalCanvasKit': true,
     };
+    final bool hasWasmBuild = descriptions.any(
+      (Map<String, Object?> description) => description['compileTarget'] == 'dart2wasm',
+    );
+    final File supportJsFile = environment.buildDir.childFile('main.dart.support.js');
+    final String? supportJs = hasWasmBuild && supportJsFile.existsSync()
+        ? supportJsFile.readAsStringSync().trim()
+        : null;
+    final supportsDart2WasmLine = (supportJs != null && supportJs.isNotEmpty)
+        ? '_flutter.supportsDart2Wasm = $supportJs;\n'
+        : '';
     return '''
 if (!window._flutter) {
   window._flutter = {};
 }
 _flutter.buildConfig = ${jsonEncode(buildConfig)};
-''';
+$supportsDart2WasmLine''';
   }
 
   @override
@@ -1437,6 +1447,11 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     const Source.pattern('{PROJECT_DIR}/web/*/index.html'),
     const Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js'),
     const Source.hostArtifact(HostArtifact.flutterWebSdk),
+    if (compileTargets?.any(
+          (Dart2WebTarget target) => target is Dart2WasmTarget && !target.compilerConfig.dryRun,
+        ) ??
+        false)
+      const Source.pattern('{BUILD_DIR}/main.dart.support.js', optional: true),
     if (compileTargets != null)
       for (final Dart2WebTarget target in compileTargets!)
         for (final String stem in target.buildPatternStems) Source.pattern('{BUILD_DIR}/$stem'),
