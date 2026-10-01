@@ -25,6 +25,10 @@ final DomCanvasRenderingContext2D layoutContext =
     // possible to save memory.
     createDomCanvasElement(width: 0, height: 0).context2D;
 
+void invalidateLayoutContextFont() {
+  layoutContext.font = '';
+}
+
 /// The web implementation of  [ui.ParagraphStyle]
 @immutable
 class WebParagraphStyle implements ui.ParagraphStyle {
