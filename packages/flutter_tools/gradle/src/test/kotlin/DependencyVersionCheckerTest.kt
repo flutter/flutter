@@ -193,6 +193,70 @@ class DependencyVersionCheckerTest {
     }
 
     @Test
+    fun `checkUnsupportedAGPMajorVersion throws for unsupported AGP major version`() {
+        val exampleUnsupportedAgpVersion = AndroidPluginVersion(firstUnsupportedAGPMajorVersion, 1, 0)
+        val mockProject =
+            MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleUnsupportedAgpVersion)
+
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
+
+        val dependencyValidationException =
+            assertFailsWith<DependencyValidationException> {
+                DependencyVersionChecker.checkUnsupportedAGPMajorVersion(mockProject)
+            }
+        assertEquals(
+            getUnsupportedMajorVersionErrorMessage(
+                AGP_NAME,
+                "$firstUnsupportedAGPMajorVersion.1.0",
+                firstUnsupportedAGPMajorVersion,
+                getPotentialAGPFix(FAKE_PROJECT_ROOT_DIR)
+            ),
+            dependencyValidationException.message
+        )
+        verify { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
+    }
+
+    @Test
+    fun `checkUnsupportedAGPMajorVersion does nothing for supported AGP major version`() {
+        val exampleSupportedAgpVersion = AndroidPluginVersion(firstUnsupportedAGPMajorVersion - 1, 99, 99)
+        val mockProject =
+            MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleSupportedAgpVersion)
+
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(any(), any()) } returns Unit
+
+        DependencyVersionChecker.checkUnsupportedAGPMajorVersion(mockProject)
+
+        verify(exactly = 0) { mockExtraPropertiesExtension.set(any(), any()) }
+    }
+
+    @Test
+    fun `checkUnsupportedAGPMajorVersion does nothing when AGP version cannot be detected`() {
+        // Strict mock: any interaction other than the AGP lookup (for example, logging or
+        // setting extra properties) fails the test.
+        val mockProject = mockk<Project>()
+        every { mockProject.extensions.findByType(AndroidComponentsExtension::class.java) } returns null
+
+        DependencyVersionChecker.checkUnsupportedAGPMajorVersion(mockProject)
+
+        verify { mockProject.extensions.findByType(AndroidComponentsExtension::class.java) }
+    }
+
+    @Test
+    fun `checkUnsupportedAGPMajorVersion does not query Gradle or KGP versions`() {
+        // FlutterPlugin.apply() runs this check before the Kotlin Gradle Plugin may be
+        // auto-applied, so it must not depend on any version other than AGP's.
+        val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions()
+
+        DependencyVersionChecker.checkUnsupportedAGPMajorVersion(mockProject)
+
+        verify(exactly = 0) { mockProject.gradle }
+        verify(exactly = 0) { mockProject.hasProperty("kotlin_version") }
+        verify(exactly = 0) { mockProject.providers }
+    }
+
+    @Test
     fun `KGP version in error range results in DependencyValidationException`() {
         val exampleErrorKgpVersion = "2.0.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(kgpVersion = exampleErrorKgpVersion)

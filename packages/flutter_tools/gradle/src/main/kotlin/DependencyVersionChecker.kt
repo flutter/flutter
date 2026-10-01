@@ -158,6 +158,20 @@ object DependencyVersionChecker {
         }
     }
 
+    /**
+     * Throws a [DependencyValidationException] if the project uses an Android Gradle Plugin major
+     * version that Flutter does not support yet (see [firstUnsupportedAGPMajorVersion]).
+     *
+     * Unlike [checkDependencyVersions], this only needs the AGP version, so it is safe to call
+     * before any other AGP API is used (a newer AGP major version may have removed APIs that the
+     * rest of the Flutter Gradle Plugin relies on). Does nothing when the AGP version cannot be
+     * detected; [checkDependencyVersions] reports that case.
+     */
+    @JvmStatic fun checkUnsupportedAGPMajorVersion(project: Project) {
+        val agpVersion: AndroidPluginVersion = VersionFetcher.getAGPVersion(project) ?: return
+        checkAGPMaxVersion(agpVersion, project)
+    }
+
     private fun configureMinSdkCheck(project: Project) {
         val androidComponents =
             project.extensions.findByType(AndroidComponentsExtension::class.java)
