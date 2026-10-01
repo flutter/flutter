@@ -1960,11 +1960,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
             if (path == '/dir' && op == FileSystemOp.delete) {
               if (attemptsLeft > 0) {
                 attemptsLeft--;
-                throw const FileSystemException(
-                  '',
-                  '/dir',
-                  OSError('', 145),
-                ); // ERROR_DIR_NOT_EMPTY
+                throw const FileSystemException('', '/dir', OSError('', kSystemCodeDirNotEmpty));
               }
             }
           },
@@ -1985,7 +1981,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
           if (path == '/dir' && op == FileSystemOp.delete) {
             if (attemptsLeft > 0) {
               attemptsLeft--;
-              throw const FileSystemException('', '/dir', OSError('', 145)); // ERROR_DIR_NOT_EMPTY
+              throw const FileSystemException('', '/dir', OSError('', kSystemCodeDirNotEmpty));
             }
           }
         },
@@ -1997,6 +1993,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
         () => directory.deleteSync(recursive: true),
         throwsToolExit(message: 'The file is being used by another program'),
       );
+      expect(attemptsLeft, 0);
     });
 
     testWithoutContext(
@@ -2008,11 +2005,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
             if (path == '/dir' && op == FileSystemOp.delete) {
               if (attemptsLeft > 0) {
                 attemptsLeft--;
-                throw const FileSystemException(
-                  '',
-                  '/dir',
-                  OSError('', 145),
-                ); // ERROR_DIR_NOT_EMPTY
+                throw const FileSystemException('', '/dir', OSError('', kSystemCodeDirNotEmpty));
               }
             }
           },
@@ -2025,6 +2018,34 @@ Please ensure that the SDK and/or project is installed in a location that has re
         expect(memoryFileSystem.directory('/dir').existsSync(), false);
       },
     );
+
+    testWithoutContext('does not retry ERROR_DIR_NOT_EMPTY on non-recursive deletion', () {
+      attemptsLeft = 6;
+      final memoryFileSystem = MemoryFileSystem.test(
+        opHandle: (String path, FileSystemOp op) {
+          if (path == '/dir' && op == FileSystemOp.delete) {
+            if (attemptsLeft > 0) {
+              attemptsLeft--;
+              throw const FileSystemException('', '/dir', OSError('', kSystemCodeDirNotEmpty));
+            }
+          }
+        },
+      );
+      fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
+      final Directory directory = fileSystem.directory('/dir')..createSync();
+
+      expect(
+        () => directory.deleteSync(),
+        throwsA(
+          isA<FileSystemException>().having(
+            (FileSystemException e) => e.osError?.errorCode,
+            'errorCode',
+            kSystemCodeDirNotEmpty,
+          ),
+        ),
+      );
+      expect(attemptsLeft, 5); // Only executed once, no retries performed
+    });
   });
 
   group('deleteIfExists with broken symlinks', () {

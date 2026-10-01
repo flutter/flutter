@@ -56,11 +56,11 @@ const int kSystemCodeSharingViolation = 32;
 /// On Windows this is error code 33: ERROR_LOCK_VIOLATION.
 const int kSystemCodeLockViolation = 33;
 
-/// On Windows this is error code 1224: ERROR_USER_MAPPED_FILE.
-const int kSystemCodeUserMappedSectionOpened = 1224;
-
 /// On Windows this is error code 145: ERROR_DIR_NOT_EMPTY.
 const int kSystemCodeDirNotEmpty = 145;
+
+/// On Windows this is error code 1224: ERROR_USER_MAPPED_FILE.
+const int kSystemCodeUserMappedSectionOpened = 1224;
 
 /// On Windows this is error code 1314: ERROR_PRIVILEGE_NOT_HELD.
 const int kSystemCodePrivilegeNotHeld = 1314;
@@ -709,7 +709,11 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       platform: _platform,
       failureMessage: 'Flutter failed to delete a directory at "${delegate.path}"',
       posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.path),
-      ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound],
+      ignoreErrorCodes: <int>[
+        kSystemCodeCannotFindFile,
+        kSystemCodePathNotFound,
+        if (!recursive) kSystemCodeDirNotEmpty,
+      ],
     );
   }
 
@@ -720,7 +724,11 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       platform: _platform,
       failureMessage: 'Flutter failed to delete a directory at "${delegate.path}"',
       posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.path),
-      ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound],
+      ignoreErrorCodes: <int>[
+        kSystemCodeCannotFindFile,
+        kSystemCodePathNotFound,
+        if (!recursive) kSystemCodeDirNotEmpty,
+      ],
     );
   }
 
@@ -1459,10 +1467,10 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kSharingViolation = 32;
   const kLockViolation = 33;
   const kDeviceFull = 112;
+  const kDirNotEmpty = 145;
   const kDeviceDoesNotExist = 433;
   const kSystemIntegrityPolicyViolation = 454;
   const kFatalDeviceHardwareError = 483;
-  const kDirNotEmpty = 145;
   const kUserMappedSectionOpened = 1224;
   const kAccessDisabledByPolicy = 1260;
   const kPrivilegeNotHeld = 1314;
