@@ -2821,5 +2821,30 @@ TEST_P(AiksTest, CanRenderLinesWithCapsAnglesAndAlphas) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderBlurredRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  const std::vector<DlBlurStyle> styles = {
+      DlBlurStyle::kNormal,
+      DlBlurStyle::kSolid,
+      DlBlurStyle::kOuter,
+      DlBlurStyle::kInner,
+  };
+
+  for (size_t i = 0; i < styles.size(); i++) {
+    DlPaint paint;
+    paint.setColor(DlColor::kBlue());
+    paint.setMaskFilter(DlBlurMaskFilter::Make(styles[i], 10));
+    builder.DrawRoundSuperellipse(
+        DlRoundSuperellipse::MakeRectRadius(
+            /*rect=*/DlRect::MakeXYWH(50 + i * 180, 50, 120, 120),
+            /*radius=*/30),
+        paint);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
