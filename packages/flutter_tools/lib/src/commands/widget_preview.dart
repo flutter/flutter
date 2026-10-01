@@ -44,14 +44,13 @@ import '../widget_preview/preview_manifest.dart';
 import '../widget_preview/preview_pubspec_builder.dart';
 import 'create_base.dart';
 
-typedef ResidentRunnerFactory =
-    ResidentRunner Function(
-      FlutterDevice device, {
-      required DebuggingOptions debuggingOptions,
-      required FlutterProject flutterProject,
-      required String projectRootPath,
-      required String target,
-    });
+typedef ResidentRunnerFactory = ResidentRunner Function(
+  FlutterDevice device, {
+  required DebuggingOptions debuggingOptions,
+  required FlutterProject flutterProject,
+  required String projectRootPath,
+  required String target,
+});
 
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
@@ -136,9 +135,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
-    @visibleForTesting ResidentRunnerFactory? residentRunnerFactoryOverride,
+    @visibleForTesting this._residentRunnerFactoryOverride,
     this.verbose = false,
-  }) : _residentRunnerFactoryOverride = residentRunnerFactoryOverride {
+  }) {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
     }

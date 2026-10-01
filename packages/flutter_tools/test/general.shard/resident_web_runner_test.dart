@@ -94,8 +94,6 @@ const kStartPausedAndAttachExpectations = <VmServiceExpectation>[
   ...kAttachIsolateExpectations,
 ];
 
-const kDdcLibraryBundleFlags = <String>['--dartdevc-module-format=ddc', '--dartdevc-canary'];
-
 void main() {
   late FakeDebugConnection debugConnection;
   late FakeChromeDevice chromeDevice;
