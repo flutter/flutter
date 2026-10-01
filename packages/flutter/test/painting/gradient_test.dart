@@ -370,9 +370,9 @@ void main() {
         begin: Alignment.bottomRight,
         end: Alignment.topCenter,
         colors: <Color>[
-          const Color(0x80FFFFFF).withValues(alpha: 0.5),
-          const Color(0x80777777).withValues(alpha: 0.5),
-          const Color(0x80444444).withValues(alpha: 0.5),
+          const Color(0xFFFFFFFF).withValues(alpha: 0.5),
+          const Color(0xAF777777).withValues(alpha: 0.5),
+          const Color(0x44444444).withValues(alpha: 0.5),
         ],
         transform: const GradientRotation(1),
       ),
