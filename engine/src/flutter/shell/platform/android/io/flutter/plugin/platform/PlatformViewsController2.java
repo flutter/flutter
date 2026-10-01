@@ -822,7 +822,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     SurfaceControl.Transaction tx = platformTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
     if (width > 0 && height > 0) {
-      tx.setBufferSize(overlaySurfaceControl, width, height);
+      tx = tx.setBufferSize(overlaySurfaceControl, width, height);
     }
     tx.setPosition(overlaySurfaceControl, x, y);
   }
