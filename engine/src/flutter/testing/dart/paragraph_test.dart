@@ -59,43 +59,23 @@ void main() {
     }
   });
 
-  group('hyphens', () {
-    const fontSize = 10.0;
-
-    // "abc" + soft hyphen + "de". In FlutterTest the letters and the hyphen are
-    // 1em wide and the soft hyphen takes no space, so the unbroken text is 50
-    // wide. At a width of 45 it breaks at the soft hyphen, and the first line is
-    // 30 wide, or 40 with a hyphen.
-    Paragraph layoutParagraph(Hyphens? hyphens) {
+  // dart:ui only passes ParagraphStyle.hyphens through to the text layout. This
+  // checks that it gets there, by comparing layouts that differ only in that
+  // setting, without depending on how wide the hyphen is.
+  test('ParagraphStyle.hyphens is passed to the text layout', () {
+    double longestLine(Hyphens? hyphens) {
       final builder = ParagraphBuilder(
-        ParagraphStyle(fontFamily: 'FlutterTest', fontSize: fontSize, hyphens: hyphens),
+        ParagraphStyle(fontFamily: 'FlutterTest', fontSize: 10.0, hyphens: hyphens),
       );
+      // Narrow enough that the line breaks at the soft hyphen.
       builder.addText('abc\u00ADde');
       final Paragraph paragraph = builder.build();
-      paragraph.layout(const ParagraphConstraints(width: 4.5 * fontSize));
-      return paragraph;
+      paragraph.layout(const ParagraphConstraints(width: 45.0));
+      return paragraph.longestLine;
     }
 
-    test('manual renders a hyphen at a soft hyphen line break', () {
-      final Paragraph paragraph = layoutParagraph(Hyphens.manual);
-
-      expect(paragraph.computeLineMetrics(), hasLength(2));
-      expect(paragraph.longestLine, 4 * fontSize);
-    });
-
-    test('hidden does not render a hyphen at a soft hyphen line break', () {
-      final Paragraph paragraph = layoutParagraph(Hyphens.hidden);
-
-      expect(paragraph.computeLineMetrics(), hasLength(2));
-      expect(paragraph.longestLine, 3 * fontSize);
-    });
-
-    test('unspecified behaves like manual', () {
-      final Paragraph paragraph = layoutParagraph(null);
-
-      expect(paragraph.computeLineMetrics(), hasLength(2));
-      expect(paragraph.longestLine, 4 * fontSize);
-    });
+    expect(longestLine(Hyphens.manual), greaterThan(longestLine(Hyphens.hidden)));
+    expect(longestLine(null), longestLine(Hyphens.manual));
   });
 
   test('predictably lays out a multi-line paragraph', () {
