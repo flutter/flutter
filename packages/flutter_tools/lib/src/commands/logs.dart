@@ -10,14 +10,10 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// Show log output for running Flutter apps.
 class LogsCommand extends FlutterCommand {
-  /// Creates a new [LogsCommand].
-  ///
-  /// If [toolContext] is omitted, ambient fallbacks from [globals] will be used.
   LogsCommand({
     ApplicationPackageFactory? applicationPackageFactory,
     ProcessSignal? sigint,
@@ -68,7 +64,7 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = toolContext?.logger ?? globals.logger;
+    final Logger logger = toolContext!.logger;
     final Device cachedDevice = device!;
     if (boolArg('clear')) {
       cachedDevice.clearLogs();

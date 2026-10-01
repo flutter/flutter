@@ -113,6 +113,7 @@ void main() {
           platform: platform,
           deviceManager: deviceManager,
           logger: logger,
+          doctor: doctor,
         );
         final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
@@ -640,6 +641,12 @@ If you would like your app to run on android or fuchsia, consider running `flutt
 
           setUp(() {
             terminal = FakeTerminal();
+            targetDevices = TargetDevices(
+              platform: platform,
+              deviceManager: deviceManager,
+              logger: logger,
+              terminal: terminal,
+            );
           });
 
           testUsingContext('including attached, wireless, unsupported devices', () async {
@@ -789,6 +796,12 @@ To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d
 
           setUp(() {
             terminal = FakeTerminal(stdinHasTerminal: false);
+            targetDevices = TargetDevices(
+              platform: platform,
+              deviceManager: deviceManager,
+              logger: logger,
+              terminal: terminal,
+            );
           });
 
           testUsingContext('including attached, wireless, unsupported devices', () async {
@@ -881,6 +894,12 @@ target-device-6 (wireless) (mobile) • xxx • android • Android 10
 
           setUp(() {
             terminal = FakeTerminal();
+            targetDevices = TargetDevices(
+              platform: platform,
+              deviceManager: deviceManager,
+              logger: logger,
+              terminal: terminal,
+            );
           });
 
           testUsingContext('including attached, wireless, unsupported devices', () async {
@@ -981,6 +1000,12 @@ To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d
 
           setUp(() {
             terminal = FakeTerminal(stdinHasTerminal: false);
+            targetDevices = TargetDevices(
+              platform: platform,
+              deviceManager: deviceManager,
+              logger: logger,
+              terminal: terminal,
+            );
           });
 
           testUsingContext('including only one ephemeral', () async {
@@ -1187,6 +1212,7 @@ target-device-6 (wireless) (mobile) • xxx • android • Android 10
         final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
           deviceManager: deviceManager,
           logger: logger,
+          doctor: doctor,
         );
         final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
@@ -1745,6 +1771,7 @@ No devices found yet. Checking for wireless devices...
             final targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
+              terminal: terminal,
             );
             targetDevices.waitForWirelessBeforeInput = true;
             targetDevices.deviceSelection.input = <String>['1'];
@@ -1783,6 +1810,7 @@ Please choose one (or "q" to quit): To skip this prompt in the future, pass the 
             final targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
+              terminal: terminal,
             );
             targetDevices.waitForWirelessBeforeInput = true;
 
@@ -1830,6 +1858,7 @@ Please choose one (or "q" to quit): To skip this prompt in the future, pass the 
             targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
+              terminal: terminal,
             );
           });
 
@@ -2111,6 +2140,7 @@ Checking for wireless devices...
             targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
+              terminal: terminal,
             );
           });
 
@@ -2257,6 +2287,7 @@ To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d
               targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
                 deviceManager: deviceManager,
                 logger: logger,
+                terminal: terminal,
               );
             });
 
@@ -2306,6 +2337,7 @@ To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d
               targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
                 deviceManager: deviceManager,
                 logger: logger,
+                terminal: terminal,
               );
             });
 
@@ -2426,6 +2458,7 @@ Please choose one (or "q" to quit): To skip this prompt in the future, pass the 
             targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
+              terminal: terminal,
             );
           });
 
@@ -2545,6 +2578,7 @@ target-device-6 (wireless) (mobile) • xxx • ios • iOS 16
             targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
+              terminal: terminal,
             );
           });
 
@@ -2692,6 +2726,7 @@ To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d
             targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
+              terminal: terminal,
             );
           });
 
@@ -2913,7 +2948,10 @@ class TestTargetDevicesWithExtendedWirelessDeviceDiscovery
     required super.deviceManager,
     required super.logger,
     super.deviceConnectionInterface,
-  }) : _deviceSelection = TestTargetDeviceSelection(logger);
+    super.doctor,
+    super.terminal,
+    super.userMessages,
+  }) : _deviceSelection = TestTargetDeviceSelection(logger, terminal: terminal);
 
   final TestTargetDeviceSelection _deviceSelection;
 
@@ -2922,7 +2960,7 @@ class TestTargetDevicesWithExtendedWirelessDeviceDiscovery
 }
 
 class TestTargetDeviceSelection extends TargetDeviceSelection {
-  TestTargetDeviceSelection(super.logger);
+  TestTargetDeviceSelection(super.logger, {super.terminal});
 
   List<String> input = <String>[];
 
