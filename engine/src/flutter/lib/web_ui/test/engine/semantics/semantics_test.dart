@@ -2942,13 +2942,13 @@ void _testIncrementables() {
     });
 
     void pumpSlider({required String label}) {
-      final SemanticsTester tester = SemanticsTester(owner());
+      final tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         label: label,
         hasIncrease: true,
         hasDecrease: true,
-        flags: ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue),
+        flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue),
         value: '50%',
         increasedValue: '60%',
         decreasedValue: '40%',
