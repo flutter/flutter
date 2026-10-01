@@ -35,6 +35,19 @@ class TestScrollController extends ScrollController {
   }
 }
 
+class FreshScrollController extends ScrollController {
+  FreshScrollController({required super.initialScrollOffset});
+
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return super.createScrollPosition(physics, context, null);
+  }
+}
+
 Widget primaryScrollControllerBoilerplate({
   required Widget child,
   required ScrollController controller,
@@ -1095,252 +1108,361 @@ void main() {
     expect(tester.getSize(find.byType(SingleChildScrollView)), Size.zero);
   });
 
-  // Regression tests for https://github.com/flutter/flutter/issues/145078: an offset the physics
-  // holds past an edge is not the layout's to reconcile, whether the relayout of the content leaves
-  // the scroll range where it was or moves it.
-  group('overscroll survives a relayout of the content', () {
-    late StateSetter rebuildContent;
-    late bool revealed;
-    late int extraRows;
+  // Regression tests for https://github.com/flutter/flutter/issues/145078: preserve an overscroll
+  // on relayout unless the edge it is past moves inward. A shrinking edge keeps its old correction.
+  for (final Axis axis in Axis.values) {
+    for (final reverse in <bool>[false, true]) {
+      group('overscroll reconciliation on relayout ($axis, reverse: $reverse)', () {
+        late StateSetter rebuildContent;
+        late bool revealed;
+        late int extraRows;
 
-    Future<ScrollController> pumpOverscrollable(WidgetTester tester) async {
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
-      revealed = false;
-      extraRows = 0;
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Align(
-            child: SizedBox(
-              width: 300.0,
-              height: 300.0,
-              child: SingleChildScrollView(
-                controller: controller,
-                physics: const BouncingScrollPhysics(),
-                child: StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                    rebuildContent = setState;
-                    return Column(
-                      children: <Widget>[
-                        // Stands in for a row revealing an action on hover: the rebuild has to lay
-                        // the row out again, a repaint alone does not reach performLayout. The row
-                        // keeps its height, so the scroll range does not move.
-                        Row(
+        for (final initialOffset in <double>[-100.0, 1000.0]) {
+          testWidgets('a replacement offset is reconciled on its first layout ($initialOffset)', (
+            WidgetTester tester,
+          ) async {
+            final oldController = ScrollController();
+            final newController = FreshScrollController(initialScrollOffset: initialOffset);
+            addTearDown(oldController.dispose);
+            addTearDown(newController.dispose);
+            const contentKey = ValueKey<String>('content');
+
+            Widget frame(ScrollController controller) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: SizedBox(
+                    width: 300.0,
+                    height: 300.0,
+                    child: SingleChildScrollView(
+                      controller: controller,
+                      scrollDirection: axis,
+                      reverse: reverse,
+                      physics: const BouncingScrollPhysics(),
+                      child: SizedBox(
+                        key: contentKey,
+                        width: axis == Axis.horizontal ? 960.0 : 300.0,
+                        height: axis == Axis.vertical ? 960.0 : 300.0,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            await tester.pumpWidget(frame(oldController));
+            final RenderObject viewport = tester.renderObject(find.byKey(contentKey)).parent!;
+            final ScrollPosition oldPosition = oldController.position;
+            await tester.pumpWidget(frame(newController));
+            expect(tester.takeException(), isNull);
+            expect(tester.renderObject(find.byKey(contentKey)).parent, same(viewport));
+            expect(newController.position, isNot(same(oldPosition)));
+            expect(newController.position.pixels, initialOffset < 0.0 ? 0.0 : 660.0);
+          });
+        }
+
+        Future<ScrollController> pumpOverscrollable(WidgetTester tester) async {
+          final controller = ScrollController();
+          addTearDown(controller.dispose);
+          revealed = false;
+          extraRows = 0;
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Align(
+                child: SizedBox(
+                  width: 300.0,
+                  height: 300.0,
+                  child: SingleChildScrollView(
+                    controller: controller,
+                    scrollDirection: axis,
+                    reverse: reverse,
+                    physics: const BouncingScrollPhysics(),
+                    child: StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setState) {
+                        rebuildContent = setState;
+                        return Flex(
+                          direction: axis,
                           children: <Widget>[
-                            const Expanded(child: SizedBox(height: 32.0)),
-                            if (revealed) const SizedBox(width: 16.0, height: 32.0),
+                            // Stands in for a row revealing an action on hover: the rebuild has to lay
+                            // the row out again, a repaint alone does not reach performLayout. Its
+                            // extent along the scroll axis stays the same, so the range does not move.
+                            Flex(
+                              direction: axis == Axis.vertical ? Axis.horizontal : Axis.vertical,
+                              children: <Widget>[
+                                const Expanded(child: SizedBox(width: 32.0, height: 32.0)),
+                                if (revealed)
+                                  SizedBox(
+                                    width: axis == Axis.vertical ? 16.0 : 32.0,
+                                    height: axis == Axis.vertical ? 32.0 : 16.0,
+                                  ),
+                              ],
+                            ),
+                            for (var i = 1; i < 30 + extraRows; i++)
+                              const SizedBox(width: 32.0, height: 32.0),
                           ],
-                        ),
-                        for (var i = 1; i < 30 + extraRows; i++) const SizedBox(height: 32.0),
-                      ],
-                    );
-                  },
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      return controller;
+          );
+          await tester.pumpAndSettle();
+          return controller;
+        }
+
+        // Starts the drag from the middle of the scroll view, wherever it is laid out.
+        Future<TestGesture> dragBy(WidgetTester tester, Offset delta) async {
+          final TestGesture gesture = await tester.startGesture(
+            tester.getCenter(find.byType(SingleChildScrollView)),
+          );
+          final double distance = reverse ? -delta.dy : delta.dy;
+          await gesture.moveBy(
+            axis == Axis.vertical ? Offset(0.0, distance) : Offset(distance, 0.0),
+          );
+          await tester.pump();
+          return gesture;
+        }
+
+        // The row rebuilds the way it would when hover reveals an action.
+        Future<void> relayoutContent(WidgetTester tester) async {
+          rebuildContent(() => revealed = true);
+          await tester.pump();
+        }
+
+        // Rows are appended at the end: the trailing edge moves, the leading edge stays.
+        Future<void> growContent(WidgetTester tester, {required int rows}) async {
+          rebuildContent(() => extraRows += rows);
+          await tester.pump();
+        }
+
+        // Rows are removed from the end: the trailing edge moves, the leading edge stays.
+        Future<void> shrinkContent(WidgetTester tester, {required int rows}) async {
+          rebuildContent(() => extraRows -= rows);
+          await tester.pump();
+        }
+
+        testWidgets('during a drag past the leading edge', (WidgetTester tester) async {
+          final ScrollController controller = await pumpOverscrollable(tester);
+
+          final TestGesture gesture = await dragBy(tester, const Offset(0.0, 100.0));
+          final double overscrolled = controller.position.pixels;
+          expect(overscrolled, lessThan(-20.0));
+
+          await relayoutContent(tester);
+          expect(controller.position.pixels, overscrolled);
+
+          await gesture.up();
+          await tester.pumpAndSettle();
+          expect(controller.position.pixels, 0.0);
+        });
+
+        testWidgets('leading overscroll survives a shrink at the trailing edge', (
+          WidgetTester tester,
+        ) async {
+          final ScrollController controller = await pumpOverscrollable(tester);
+          final double maxScrollExtent = controller.position.maxScrollExtent;
+          final TestGesture gesture = await dragBy(tester, const Offset(0.0, 100.0));
+          final double overscrolled = controller.position.pixels;
+          expect(overscrolled, lessThan(-20.0));
+          await shrinkContent(tester, rows: 5);
+          expect(controller.position.maxScrollExtent, maxScrollExtent - 5 * 32.0);
+          expect(controller.position.pixels, overscrolled);
+          await gesture.up();
+          await tester.pumpAndSettle();
+          expect(controller.position.pixels, 0.0);
+        });
+
+        for (final held in <bool>[false, true]) {
+          testWidgets('trailing overscroll survives unchanged extents (held: $held)', (
+            WidgetTester tester,
+          ) async {
+            final ScrollController controller = await pumpOverscrollable(tester);
+            final double maxScrollExtent = controller.position.maxScrollExtent;
+            controller.jumpTo(maxScrollExtent);
+            await tester.pump();
+            final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
+            await gesture.up();
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 20));
+            ScrollHoldController? hold;
+            if (held) {
+              hold = controller.position.hold(() {});
+              addTearDown(hold.cancel);
+            }
+            final double overscrolled = controller.position.pixels;
+            expect(overscrolled, greaterThan(maxScrollExtent + 20.0));
+            await relayoutContent(tester);
+            expect(controller.position.pixels, overscrolled);
+            hold?.cancel();
+            await tester.pumpAndSettle();
+            expect(controller.position.pixels, maxScrollExtent);
+          });
+        }
+
+        testWidgets('during a drag past the trailing edge', (WidgetTester tester) async {
+          final ScrollController controller = await pumpOverscrollable(tester);
+          final double maxScrollExtent = controller.position.maxScrollExtent;
+          controller.jumpTo(maxScrollExtent);
+          await tester.pump();
+
+          final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
+          expect(controller.position.pixels, greaterThan(maxScrollExtent + 20.0));
+
+          // Scrolling further past the edge only repaints the viewport.
+          final Finder content = find.byWidgetPredicate(
+            (Widget widget) => widget is Flex && widget.direction == axis,
+          );
+          final RenderObject viewport = tester.renderObject(content).parent!;
+          final distance = reverse ? 20.0 : -20.0;
+          await gesture.moveBy(
+            axis == Axis.vertical ? Offset(0.0, distance) : Offset(distance, 0.0),
+          );
+          expect(viewport.debugNeedsLayout, isFalse);
+          await tester.pump();
+          final double overscrolled = controller.position.pixels;
+
+          await relayoutContent(tester);
+          expect(controller.position.pixels, overscrolled);
+
+          await gesture.up();
+          await tester.pumpAndSettle();
+          expect(controller.position.pixels, maxScrollExtent);
+        });
+
+        testWidgets(
+          'during a drag past the leading edge while the content grows at the trailing edge',
+          (WidgetTester tester) async {
+            final ScrollController controller = await pumpOverscrollable(tester);
+            final double maxScrollExtent = controller.position.maxScrollExtent;
+
+            final TestGesture gesture = await dragBy(tester, const Offset(0.0, 100.0));
+            final double overscrolled = controller.position.pixels;
+            expect(overscrolled, lessThan(-20.0));
+
+            // The trailing edge moves the way it does when a tile below expands; the leading edge the
+            // drag is past stays where it was.
+            await growContent(tester, rows: 8);
+            expect(controller.position.maxScrollExtent, maxScrollExtent + 8 * 32.0);
+            expect(controller.position.pixels, overscrolled);
+
+            await gesture.up();
+            await tester.pumpAndSettle();
+            expect(controller.position.pixels, 0.0);
+          },
+        );
+
+        testWidgets('during a drag past the trailing edge while the content grows at that edge', (
+          WidgetTester tester,
+        ) async {
+          final ScrollController controller = await pumpOverscrollable(tester);
+          final double maxScrollExtent = controller.position.maxScrollExtent;
+          controller.jumpTo(maxScrollExtent);
+          await tester.pump();
+
+          final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
+          final double overscrolled = controller.position.pixels;
+          // Past the edge by more than the row about to be appended, so the offset is still past the
+          // edge once it has moved.
+          expect(overscrolled, greaterThan(maxScrollExtent + 32.0));
+
+          // The edge the drag is past moves; the offset stays where the physics put it and the new row
+          // shows through the shrunken overscroll.
+          await growContent(tester, rows: 1);
+          expect(controller.position.maxScrollExtent, maxScrollExtent + 32.0);
+          expect(controller.position.pixels, overscrolled);
+
+          await gesture.up();
+          await tester.pumpAndSettle();
+          expect(controller.position.pixels, maxScrollExtent + 32.0);
+        });
+
+        testWidgets('during a drag past the trailing edge while the content shrinks at that edge', (
+          WidgetTester tester,
+        ) async {
+          final ScrollController controller = await pumpOverscrollable(tester);
+          final double maxScrollExtent = controller.position.maxScrollExtent;
+          controller.jumpTo(maxScrollExtent);
+          await tester.pump();
+
+          final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
+          final double overscroll = controller.position.pixels - maxScrollExtent;
+          expect(overscroll, greaterThan(20.0));
+
+          // A shrinking edge retains the correction used before the overscroll fix.
+          await shrinkContent(tester, rows: 5);
+          expect(controller.position.maxScrollExtent, maxScrollExtent - 5 * 32.0);
+          expect(controller.position.pixels, maxScrollExtent - 5 * 32.0);
+
+          // Shrinking until the content fits still brings the offset into range.
+          await shrinkContent(tester, rows: 20);
+          expect(controller.position.maxScrollExtent, 0.0);
+          expect(controller.position.pixels, 0.0);
+
+          await gesture.up();
+          await tester.pumpAndSettle();
+          expect(controller.position.pixels, 0.0);
+        });
+
+        testWidgets(
+          'while the ballistic simulation carries it back and the content shrinks at that edge',
+          (WidgetTester tester) async {
+            final ScrollController controller = await pumpOverscrollable(tester);
+            final double maxScrollExtent = controller.position.maxScrollExtent;
+            controller.jumpTo(maxScrollExtent);
+            await tester.pump();
+
+            final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
+            await gesture.up();
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 20));
+            final double settling = controller.position.pixels;
+            expect(settling, greaterThan(maxScrollExtent + 20.0));
+
+            // A shrinking edge retains the previous clamp during a ballistic activity too.
+            await shrinkContent(tester, rows: 5);
+            expect(controller.position.maxScrollExtent, maxScrollExtent - 5 * 32.0);
+            expect(controller.position.pixels, maxScrollExtent - 5 * 32.0);
+
+            await tester.pumpAndSettle();
+            // The remaining inward velocity can carry the offset farther into range, as it did
+            // before the overscroll fix; it need not finish at the trailing edge.
+            expect(controller.position.pixels, inInclusiveRange(0.0, maxScrollExtent - 5 * 32.0));
+            expect(controller.position.isScrollingNotifier.value, isFalse);
+          },
+        );
+
+        testWidgets('while the position is held and the content shrinks at that edge', (
+          WidgetTester tester,
+        ) async {
+          final ScrollController controller = await pumpOverscrollable(tester);
+          final double maxScrollExtent = controller.position.maxScrollExtent;
+          controller.jumpTo(maxScrollExtent);
+          await tester.pump();
+
+          final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
+          await gesture.up();
+          await tester.pump();
+
+          // A pointer landing on a settling scrollable holds it: the activity stops scrolling while
+          // the offset stays past the edge.
+          final ScrollHoldController hold = controller.position.hold(() {});
+          addTearDown(hold.cancel);
+          await tester.pump();
+          final double overscroll = controller.position.pixels - maxScrollExtent;
+          expect(overscroll, greaterThan(20.0));
+
+          await shrinkContent(tester, rows: 5);
+          expect(controller.position.maxScrollExtent, maxScrollExtent - 5 * 32.0);
+          expect(controller.position.pixels, maxScrollExtent - 5 * 32.0);
+
+          hold.cancel();
+          await tester.pumpAndSettle();
+          expect(controller.position.pixels, maxScrollExtent - 5 * 32.0);
+        });
+      });
     }
-
-    // Starts the drag from the middle of the scroll view, wherever it is laid out.
-    Future<TestGesture> dragBy(WidgetTester tester, Offset delta) async {
-      final TestGesture gesture = await tester.startGesture(
-        tester.getCenter(find.byType(SingleChildScrollView)),
-      );
-      await gesture.moveBy(delta);
-      await tester.pump();
-      return gesture;
-    }
-
-    // The row rebuilds the way it would when hover reveals an action.
-    Future<void> relayoutContent(WidgetTester tester) async {
-      rebuildContent(() => revealed = true);
-      await tester.pump();
-    }
-
-    // Rows are appended at the end: the trailing edge moves, the leading edge stays.
-    Future<void> growContent(WidgetTester tester, {required int rows}) async {
-      rebuildContent(() => extraRows += rows);
-      await tester.pump();
-    }
-
-    // Rows are removed from the end: the trailing edge moves, the leading edge stays.
-    Future<void> shrinkContent(WidgetTester tester, {required int rows}) async {
-      rebuildContent(() => extraRows -= rows);
-      await tester.pump();
-    }
-
-    testWidgets('during a drag past the leading edge', (WidgetTester tester) async {
-      final ScrollController controller = await pumpOverscrollable(tester);
-
-      final TestGesture gesture = await dragBy(tester, const Offset(0.0, 100.0));
-      final double overscrolled = controller.position.pixels;
-      expect(overscrolled, lessThan(-20.0));
-
-      await relayoutContent(tester);
-      expect(controller.position.pixels, overscrolled);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(controller.position.pixels, 0.0);
-    });
-
-    testWidgets('during a drag past the trailing edge', (WidgetTester tester) async {
-      final ScrollController controller = await pumpOverscrollable(tester);
-      final double maxScrollExtent = controller.position.maxScrollExtent;
-      controller.jumpTo(maxScrollExtent);
-      await tester.pump();
-
-      final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
-      expect(controller.position.pixels, greaterThan(maxScrollExtent + 20.0));
-
-      // Scrolling further past the edge only repaints the viewport.
-      final RenderObject viewport = tester.renderObject(find.byType(Column)).parent!;
-      await gesture.moveBy(const Offset(0.0, -20.0));
-      expect(viewport.debugNeedsLayout, isFalse);
-      await tester.pump();
-      final double overscrolled = controller.position.pixels;
-
-      await relayoutContent(tester);
-      expect(controller.position.pixels, overscrolled);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(controller.position.pixels, maxScrollExtent);
-    });
-
-    testWidgets(
-      'during a drag past the leading edge while the content grows at the trailing edge',
-      (WidgetTester tester) async {
-        final ScrollController controller = await pumpOverscrollable(tester);
-        final double maxScrollExtent = controller.position.maxScrollExtent;
-
-        final TestGesture gesture = await dragBy(tester, const Offset(0.0, 100.0));
-        final double overscrolled = controller.position.pixels;
-        expect(overscrolled, lessThan(-20.0));
-
-        // The trailing edge moves the way it does when a tile below expands; the leading edge the
-        // drag is past stays where it was.
-        await growContent(tester, rows: 8);
-        expect(controller.position.maxScrollExtent, maxScrollExtent + 8 * 32.0);
-        expect(controller.position.pixels, overscrolled);
-
-        await gesture.up();
-        await tester.pumpAndSettle();
-        expect(controller.position.pixels, 0.0);
-      },
-    );
-
-    testWidgets('during a drag past the trailing edge while the content grows at that edge', (
-      WidgetTester tester,
-    ) async {
-      final ScrollController controller = await pumpOverscrollable(tester);
-      final double maxScrollExtent = controller.position.maxScrollExtent;
-      controller.jumpTo(maxScrollExtent);
-      await tester.pump();
-
-      final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
-      final double overscrolled = controller.position.pixels;
-      // Past the edge by more than the row about to be appended, so the offset is still past the
-      // edge once it has moved.
-      expect(overscrolled, greaterThan(maxScrollExtent + 32.0));
-
-      // The edge the drag is past moves; the offset stays where the physics put it and the new row
-      // shows through the shrunken overscroll.
-      await growContent(tester, rows: 1);
-      expect(controller.position.maxScrollExtent, maxScrollExtent + 32.0);
-      expect(controller.position.pixels, overscrolled);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(controller.position.pixels, maxScrollExtent + 32.0);
-    });
-
-    testWidgets('during a drag past the trailing edge while the content shrinks at that edge', (
-      WidgetTester tester,
-    ) async {
-      final ScrollController controller = await pumpOverscrollable(tester);
-      final double maxScrollExtent = controller.position.maxScrollExtent;
-      controller.jumpTo(maxScrollExtent);
-      await tester.pump();
-
-      final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
-      final double overscroll = controller.position.pixels - maxScrollExtent;
-      expect(overscroll, greaterThan(20.0));
-
-      // The edge the drag is past moves in and the offset follows it, keeping the overscroll, as
-      // RangeMaintainingScrollPhysics does for a sliver viewport.
-      await shrinkContent(tester, rows: 5);
-      expect(controller.position.maxScrollExtent, maxScrollExtent - 5 * 32.0);
-      expect(controller.position.pixels, maxScrollExtent - 5 * 32.0 + overscroll);
-
-      // Down to content that fits the viewport: the offset keeps the overscroll past zero.
-      await shrinkContent(tester, rows: 20);
-      expect(controller.position.maxScrollExtent, 0.0);
-      expect(controller.position.pixels, overscroll);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(controller.position.pixels, 0.0);
-    });
-
-    testWidgets(
-      'while the ballistic simulation carries it back and the content shrinks at that edge',
-      (WidgetTester tester) async {
-        final ScrollController controller = await pumpOverscrollable(tester);
-        final double maxScrollExtent = controller.position.maxScrollExtent;
-        controller.jumpTo(maxScrollExtent);
-        await tester.pump();
-
-        final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
-        await gesture.up();
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 20));
-        final double settling = controller.position.pixels;
-        expect(settling, greaterThan(maxScrollExtent + 20.0));
-
-        // A moving offset is left where it is, as RangeMaintainingScrollPhysics leaves an animating
-        // position of a sliver viewport; the simulation carries it to the new edge.
-        await shrinkContent(tester, rows: 5);
-        expect(controller.position.maxScrollExtent, maxScrollExtent - 5 * 32.0);
-        expect(controller.position.pixels, settling);
-
-        await tester.pumpAndSettle();
-        expect(controller.position.pixels, maxScrollExtent - 5 * 32.0);
-      },
-    );
-
-    testWidgets('while the position is held and the content shrinks at that edge', (
-      WidgetTester tester,
-    ) async {
-      final ScrollController controller = await pumpOverscrollable(tester);
-      final double maxScrollExtent = controller.position.maxScrollExtent;
-      controller.jumpTo(maxScrollExtent);
-      await tester.pump();
-
-      final TestGesture gesture = await dragBy(tester, const Offset(0.0, -100.0));
-      await gesture.up();
-      await tester.pump();
-
-      // A pointer landing on a settling scrollable holds it: the activity stops scrolling while
-      // the offset stays past the edge.
-      final ScrollHoldController hold = controller.position.hold(() {});
-      addTearDown(hold.cancel);
-      await tester.pump();
-      final double overscroll = controller.position.pixels - maxScrollExtent;
-      expect(overscroll, greaterThan(20.0));
-
-      await shrinkContent(tester, rows: 5);
-      expect(controller.position.maxScrollExtent, maxScrollExtent - 5 * 32.0);
-      expect(controller.position.pixels, maxScrollExtent - 5 * 32.0 + overscroll);
-
-      hold.cancel();
-      await tester.pumpAndSettle();
-      expect(controller.position.pixels, maxScrollExtent - 5 * 32.0);
-    });
-  });
+  }
 }

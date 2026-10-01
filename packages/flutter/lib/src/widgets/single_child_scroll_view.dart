@@ -512,20 +512,14 @@ class _RenderSingleChildViewport extends RenderBox
     if (offset.hasPixels) {
       final double pixels = offset.pixels;
       final double? previousMaxScrollExtent = _reconciledMaxScrollExtent;
-      // An offset past an edge of the extents it was reconciled against got there through the
-      // physics, which also carries it across a change of extents in applyContentDimensions. The
-      // layout pulls the offset back only when the range moved out from under it: on the first
-      // layout of this offset, and when the new extents leave out an offset the previous ones held.
-      if (previousMaxScrollExtent != null &&
-          (pixels < minScrollExtent || pixels > previousMaxScrollExtent)) {
-        // The physics compares the new extents against the metrics of the previous
-        // applyContentDimensions, and this viewport does not lay out on scroll, so those metrics
-        // predate the scroll that took the offset past the edge. Applying the unchanged extents
-        // once more brings them up to the current offset.
-        offset.applyContentDimensions(minScrollExtent, previousMaxScrollExtent);
-      } else if (pixels > maxScrollExtent) {
+      // Preserve an existing overscroll unless the edge it is past moved inward. A new offset
+      // still needs its initial correction, as does an offset left out of range by a shrink.
+      if (pixels > maxScrollExtent &&
+          (previousMaxScrollExtent == null ||
+              pixels <= previousMaxScrollExtent ||
+              maxScrollExtent < previousMaxScrollExtent)) {
         offset.correctBy(maxScrollExtent - pixels);
-      } else if (pixels < minScrollExtent) {
+      } else if (pixels < minScrollExtent && previousMaxScrollExtent == null) {
         offset.correctBy(minScrollExtent - pixels);
       }
       _reconciledMaxScrollExtent = maxScrollExtent;
