@@ -270,16 +270,267 @@ class Chrome {
     await _debugConnection?.page.reload(ignoreCache: ignoreCache);
   }
 
+  StreamSubscription<WipEvent>? _diagnosticsSubscription;
+  _PageLoadDiagnostics? _pageLoadDiagnostics;
+
+  /// Logs page navigations, JS exceptions, console errors, failed network
+  /// requests, and renderer crashes, and tracks in-flight network requests so
+  /// that [describeState] can report what a stalled page load is waiting on.
+  ///
+  /// This enables the Page, Network, Runtime, and Inspector DevTools domains,
+  /// which adds instrumentation overhead to the page. Only use it where that
+  /// overhead does not matter, e.g. uncalibrated DDC benchmarks.
+  Future<void> enablePageLoadDiagnostics() async {
+    final WipConnection debugConnection = _debugConnection!;
+    final diagnostics = _PageLoadDiagnostics();
+    _pageLoadDiagnostics = diagnostics;
+    _diagnosticsSubscription = debugConnection.onNotification.listen(diagnostics.handleEvent);
+    await debugConnection.sendCommand('Page.enable');
+    await debugConnection.sendCommand('Network.enable', <String, dynamic>{
+      // Only request URLs and timing are used; keep response body buffering
+      // small so it doesn't add memory pressure to the page.
+      'maxTotalBufferSize': 1024 * 1024,
+      'maxResourceBufferSize': 1024 * 1024,
+    });
+    await debugConnection.sendCommand('Runtime.enable');
+    await debugConnection.sendCommand('Inspector.enable');
+    print('$_kDiagnosticsLogPrefix Page load diagnostics enabled.');
+  }
+
+  /// Describes the current state of the page, for debugging stalls.
+  ///
+  /// Every DevTools command is bounded by a timeout, so this completes even
+  /// when the renderer is unresponsive.
+  Future<String> describeState() async {
+    final WipConnection debugConnection = _debugConnection!;
+    final lines = <String>[];
+    try {
+      final WipResponse response = await debugConnection
+          .sendCommand('Runtime.evaluate', <String, dynamic>{
+            'expression': _kPageStateExpression,
+            'returnByValue': true,
+          })
+          .timeout(_kDiagnosticsCommandTimeout);
+      final result = response.result!['result'] as Map<String, dynamic>;
+      lines.add('Page state: ${result['value'] ?? result['description']}');
+      lines.add(await _describeEventLoopState(debugConnection));
+    } on TimeoutException {
+      lines.add(
+        'Page did not respond to Runtime.evaluate within '
+        '${_kDiagnosticsCommandTimeout.inSeconds}s; the renderer main thread is likely blocked.',
+      );
+    } on WipError catch (error) {
+      lines.add('Runtime.evaluate failed: $error');
+    }
+    final _PageLoadDiagnostics? diagnostics = _pageLoadDiagnostics;
+    if (diagnostics != null) {
+      lines.addAll(diagnostics.describe());
+    }
+    return lines.join('\n');
+  }
+
+  /// Reports whether the page's event loop is running.
+  ///
+  /// `Runtime.evaluate` still works while JavaScript is paused in the debugger
+  /// (it runs in a nested message loop), but timers do not fire. Under
+  /// `flutter run`, DWDS keeps a debugger session attached, so a pause (e.g. on
+  /// an exception during app startup) stalls the page without any output.
+  Future<String> _describeEventLoopState(WipConnection debugConnection) async {
+    const timerDelay = Duration(milliseconds: 100);
+    const timerTimeout = Duration(seconds: 5);
+    try {
+      await debugConnection
+          .sendCommand('Runtime.evaluate', <String, dynamic>{
+            'expression':
+                'new Promise((resolve) => setTimeout(resolve, ${timerDelay.inMilliseconds}))',
+            'awaitPromise': true,
+          })
+          .timeout(timerTimeout);
+      return 'Event loop: running (a ${timerDelay.inMilliseconds}ms timer fired).';
+    } on TimeoutException {
+      return 'Event loop: NOT running (a ${timerDelay.inMilliseconds}ms timer did not fire '
+          'within ${timerTimeout.inSeconds}s); JavaScript is likely paused in the debugger.';
+    } on WipError catch (error) {
+      return 'Event loop: check failed: $error';
+    }
+  }
+
   /// Disconnects from the Chrome process without killing it.
   void disconnect() {
     _isStopped = true;
     _tracingSubscription?.cancel();
+    _diagnosticsSubscription?.cancel();
   }
 
   /// Stops the Chrome process.
   void stop() {
     disconnect();
     _chromeProcess.kill();
+  }
+}
+
+const String _kDiagnosticsLogPrefix = '[CHROME DIAGNOSTICS]';
+
+const Duration _kDiagnosticsCommandTimeout = Duration(seconds: 10);
+
+/// Maximum length of a single diagnostic value (exception text, console
+/// message), to keep logs readable.
+const int _kMaxDiagnosticValueLength = 2000;
+
+/// The maximum number of in-flight requests listed by
+/// [_PageLoadDiagnostics.describe].
+const int _kMaxListedInFlightRequests = 20;
+
+/// Evaluated in the page by [Chrome.describeState].
+const String _kPageStateExpression = '''
+JSON.stringify({
+  href: location.href,
+  readyState: document.readyState,
+  msSinceNavigationStart: Math.round(performance.now()),
+  resourceEntries: performance.getEntriesByType('resource').length,
+  hasFlutterView: document.querySelector('flutter-view') !== null,
+})''';
+
+String _truncate(String value) {
+  if (value.length <= _kMaxDiagnosticValueLength) {
+    return value;
+  }
+  return '${value.substring(0, _kMaxDiagnosticValueLength)}... (truncated)';
+}
+
+/// Formats a DevTools call frame, which has `functionName`, `url`,
+/// `lineNumber`, and `columnNumber` (0-based) fields.
+String _describeCallFrame(Map<String, dynamic> frame) {
+  final String functionName = (frame['functionName'] as String?) ?? '';
+  final int line = (frame['lineNumber'] as int) + 1;
+  final int column = (frame['columnNumber'] as int) + 1;
+  return '${functionName.isEmpty ? '<anonymous>' : functionName} '
+      '(${frame['url']}:$line:$column)';
+}
+
+String _describeAge(DateTime time) => '${DateTime.now().difference(time).inSeconds}s';
+
+class _InFlightRequest {
+  _InFlightRequest(this.url, this.loaderId, this.startTime);
+
+  final String url;
+
+  /// Identifies the document load that issued this request.
+  final String loaderId;
+  final DateTime startTime;
+}
+
+/// Tracks page lifecycle and network state from DevTools events, logging
+/// events that are rare in healthy runs but explain stalls.
+class _PageLoadDiagnostics {
+  final Map<String, _InFlightRequest> _inFlightRequests = <String, _InFlightRequest>{};
+  int _requestsStarted = 0;
+  int _requestsFinished = 0;
+  int _requestsFailed = 0;
+  String _lastLifecycleEvent = 'none';
+  DateTime _lastLifecycleEventTime = DateTime.now();
+
+  void _recordLifecycleEvent(String description) {
+    _lastLifecycleEvent = description;
+    _lastLifecycleEventTime = DateTime.now();
+    print('$_kDiagnosticsLogPrefix Page: $description');
+  }
+
+  void handleEvent(WipEvent event) {
+    final Map<String, dynamic> params = event.params ?? const <String, dynamic>{};
+    switch (event.method) {
+      case 'Page.frameNavigated':
+        final frame = params['frame'] as Map<String, dynamic>;
+        // Only the top-level frame has no parent.
+        if (frame['parentId'] == null) {
+          // Chrome doesn't always report requests of the previous document as
+          // failed when navigating away, so drop them explicitly.
+          final loaderId = frame['loaderId'] as String;
+          _inFlightRequests.removeWhere(
+            (String _, _InFlightRequest request) => request.loaderId != loaderId,
+          );
+          // The new document's own request is sent before it commits.
+          _requestsStarted = _inFlightRequests.length;
+          _requestsFinished = 0;
+          _requestsFailed = 0;
+          _recordLifecycleEvent('navigated to ${frame['url']}');
+        }
+      case 'Page.domContentEventFired':
+        _recordLifecycleEvent('DOMContentLoaded');
+      case 'Page.loadEventFired':
+        _recordLifecycleEvent('load');
+      case 'Network.requestWillBeSent':
+        final request = params['request'] as Map<String, dynamic>;
+        // Redirects reuse the request ID of the original request.
+        if (params['redirectResponse'] == null) {
+          _requestsStarted += 1;
+        }
+        _inFlightRequests[params['requestId'] as String] = _InFlightRequest(
+          request['url'] as String,
+          params['loaderId'] as String,
+          DateTime.now(),
+        );
+      case 'Network.loadingFinished':
+        if (_inFlightRequests.remove(params['requestId']) != null) {
+          _requestsFinished += 1;
+        }
+      case 'Network.loadingFailed':
+        final _InFlightRequest? request = _inFlightRequests.remove(params['requestId']);
+        _requestsFailed += 1;
+        // Navigations cancel long-lived requests (e.g. the DWDS event stream)
+        // on every reload; only log real failures.
+        if (params['canceled'] != true) {
+          print(
+            '$_kDiagnosticsLogPrefix Request failed: '
+            '${request?.url ?? 'request ${params['requestId']}'} (${params['errorText']})',
+          );
+        }
+      case 'Runtime.exceptionThrown':
+        final details = params['exceptionDetails'] as Map<String, dynamic>;
+        final exception = details['exception'] as Map<String, dynamic>?;
+        final exceptionDescription = exception?['description'] as String?;
+        final stackTrace = details['stackTrace'] as Map<String, dynamic>?;
+        // The description of a JS Error already includes its stack.
+        final List<Map<String, dynamic>> callFrames = exceptionDescription != null
+            ? const <Map<String, dynamic>>[]
+            : (stackTrace?['callFrames'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ??
+                  const <Map<String, dynamic>>[];
+        final String description = _truncate(exceptionDescription ?? '${details['text']}');
+        print(
+          <String>[
+            '$_kDiagnosticsLogPrefix Uncaught exception: $description',
+            for (final Map<String, dynamic> frame in callFrames.take(10))
+              '  ${_describeCallFrame(frame)}',
+          ].join('\n'),
+        );
+      case 'Runtime.consoleAPICalled':
+        final type = params['type'] as String;
+        if (type == 'error' || type == 'assert') {
+          final List<Map<String, dynamic>> args = (params['args'] as List<dynamic>)
+              .cast<Map<String, dynamic>>();
+          final String message = args
+              .map((Map<String, dynamic> arg) => '${arg['value'] ?? arg['description']}')
+              .join(' ');
+          print('$_kDiagnosticsLogPrefix console.$type: ${_truncate(message)}');
+        }
+      case 'Inspector.targetCrashed':
+        print('$_kDiagnosticsLogPrefix Renderer process crashed.');
+      case 'Inspector.detached':
+        print('$_kDiagnosticsLogPrefix DevTools session detached: ${params['reason']}');
+    }
+  }
+
+  List<String> describe() {
+    final String lifecycleAge = _describeAge(_lastLifecycleEventTime);
+    return <String>[
+      'Last page lifecycle event: $_lastLifecycleEvent ($lifecycleAge ago)',
+      'Requests since last navigation: started $_requestsStarted, finished $_requestsFinished, failed $_requestsFailed',
+      'In-flight requests (${_inFlightRequests.length}, oldest first):',
+      for (final _InFlightRequest request in _inFlightRequests.values.take(
+        _kMaxListedInFlightRequests,
+      ))
+        '  ${request.url} (pending for ${_describeAge(request.startTime)})',
+    ];
   }
 }
 
