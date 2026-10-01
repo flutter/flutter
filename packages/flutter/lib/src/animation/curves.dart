@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
 library;
 
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 export 'dart:ui' show Offset;
@@ -742,8 +742,8 @@ class CatmullRomSpline extends Curve2D {
   CatmullRomSpline(
     List<Offset> controlPoints, {
     double tension = 0.0,
-    Offset? startHandle,
-    Offset? endHandle,
+    this._startHandle,
+    this._endHandle,
   }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
        assert(tension >= 0.0, 'tension $tension must not be negative.'),
        assert(
@@ -751,8 +751,6 @@ class CatmullRomSpline extends Curve2D {
          'There must be at least four control points to create a CatmullRomSpline.',
        ),
        _controlPoints = controlPoints,
-       _startHandle = startHandle,
-       _endHandle = endHandle,
        _tension = tension,
        _cubicSegments = <List<Offset>>[];
 

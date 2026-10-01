@@ -91,6 +91,7 @@ impeller_shaders("modern_entity_shaders") {
     "shaders/gradients/linear_gradient_ssbo_fill.frag",
     "shaders/gradients/radial_gradient_ssbo_fill.frag",
     "shaders/gradients/sweep_gradient_ssbo_fill.frag",
+    "shaders/uber_sdf_ssbo.frag",
   ]
 }
 
@@ -262,6 +263,7 @@ impeller_component("entity") {
     "../typographer",
     "//flutter/display_list",
     "//third_party/abseil-cpp/absl/container:flat_hash_map",
+    "//third_party/abseil-cpp/absl/hash",
   ]
 
   deps = [ "//flutter/fml" ]

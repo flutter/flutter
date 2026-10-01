@@ -44,17 +44,24 @@ final _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 // $ANDROID_HOME/platforms/android-23/android.jar
 // $ANDROID_HOME/platforms/android-N/android.jar
 class AndroidSdk {
-  AndroidSdk(this.directory, {Java? java, FileSystem? fileSystem}) : _java = java {
-    reinitialize(fileSystem: fileSystem);
-  }
+  AndroidSdk(this.directory, {this._java});
 
   /// The Android SDK root directory.
   final Directory directory;
 
   final Java? _java;
 
-  var _sdkVersions = <AndroidSdkVersion>[];
+  List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
   AndroidSdkVersion? _latestVersion;
+  bool _reinitialized = false;
+
+  void _ensureInitialized() {
+    if (_reinitialized) {
+      return;
+    }
+    _reinitialized = true;
+    reinitialize();
+  }
 
   /// Whether the `cmdline-tools` directory exists in the Android SDK.
   ///
@@ -170,9 +177,15 @@ class AndroidSdk {
     return globals.fs.isDirectorySync(globals.fs.path.join(dir, 'licenses'));
   }
 
-  List<AndroidSdkVersion> get sdkVersions => _sdkVersions;
+  List<AndroidSdkVersion> get sdkVersions {
+    _ensureInitialized();
+    return _sdkVersions;
+  }
 
-  AndroidSdkVersion? get latestVersion => _latestVersion;
+  AndroidSdkVersion? get latestVersion {
+    _ensureInitialized();
+    return _latestVersion;
+  }
 
   late final String? adbPath = getPlatformToolsPath(globals.platform.isWindows ? 'adb.exe' : 'adb');
 
@@ -451,7 +464,8 @@ class AndroidSdk {
   ///
   /// This method should be called in a case where the tooling may have updated
   /// SDK artifacts, such as after running a gradle build.
-  void reinitialize({FileSystem? fileSystem}) {
+  void reinitialize() {
+    _reinitialized = true;
     var buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
     final Directory buildToolsDir = directory.childDirectory('build-tools');
@@ -514,10 +528,10 @@ class AndroidSdk {
 
           return AndroidSdkVersion._(
             this,
-            sdkLevel: platformVersion,
-            platformName: platformName,
             buildToolsVersion: buildToolsVersion,
-            fileSystem: fileSystem ?? globals.fs,
+            fileSystem: directory.fileSystem,
+            platformName: platformName,
+            sdkLevel: platformVersion,
           );
         })
         .whereType<AndroidSdkVersion>()
@@ -559,49 +573,14 @@ class AndroidSdk {
   String toString() => 'AndroidSdk: $directory';
 }
 
-extension AndroidSdkNdkHelpers on AndroidSdk {
-  /// Returns whether the Android SDK already contains the requested NDK version.
-  bool hasNdkVersion(String version) {
-    final Directory ndkDirectory = directory.childDirectory('ndk').childDirectory(version);
-    return ndkDirectory.childFile('source.properties').existsSync();
-  }
-
-  /// Installs a specific Android SDK component with sdkmanager.
-  Future<RunResult> installSdkComponent(
-    String component, {
-    Java? java,
-    ProcessUtils? processUtils,
-  }) async {
-    processUtils ??= globals.processUtils;
-    final String? executable = sdkManagerPath;
-    if (executable == null || !globals.processManager.canRun(executable)) {
-      throwToolExit(
-        'Android sdkmanager not found. Update to the latest Android SDK and ensure that '
-        'the cmdline-tools are installed to resolve this.',
-      );
-    }
-    return processUtils.run(<String>[
-      executable,
-      '--sdk_root=${directory.path}',
-      '--install',
-      component,
-    ], environment: java?.environment);
-  }
-
-  /// Installs the requested NDK version via sdkmanager.
-  Future<RunResult> installNdkVersion(String version, {Java? java, ProcessUtils? processUtils}) {
-    return installSdkComponent('ndk;$version', java: java, processUtils: processUtils);
-  }
-}
-
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   AndroidSdkVersion._(
     this.sdk, {
     required this.sdkLevel,
     required this.platformName,
     required this.buildToolsVersion,
-    required FileSystem fileSystem,
-  }) : _fileSystem = fileSystem;
+    required this._fileSystem,
+  });
 
   final AndroidSdk sdk;
   final int sdkLevel;

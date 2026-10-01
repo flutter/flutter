@@ -243,6 +243,39 @@ public class PlayStoreDeferredComponentManagerTest {
   }
 
   @Test
+  public void searchPathsPrioritizeSignedApksOverInternalStorageSo() throws NameNotFoundException {
+    TestFlutterJNI jni = new TestFlutterJNI();
+    Context spyContext = createSpyContext(null);
+    doReturn(null).when(spyContext).getAssets();
+
+    // A standalone, unbundled .so file sitting directly in the app-writable internal storage dir
+    // (getFilesDir()).
+    String soTestPath = "test/path/libapp.so-123.part.so";
+    doReturn(new File(soTestPath)).when(spyContext).getFilesDir();
+
+    // A signed split APK installed by the OS, referenced via splitSourceDirs.
+    String apkTestPath = "test/path/TestModuleName_armeabi_v7a.apk";
+    spyContext.getApplicationInfo().splitSourceDirs = new String[] {apkTestPath};
+
+    TestPlayStoreDeferredComponentManager playStoreManager =
+        new TestPlayStoreDeferredComponentManager(spyContext, jni);
+    jni.setDeferredComponentManager(playStoreManager);
+
+    playStoreManager.installDeferredComponent(123, "TestModuleName");
+    assertEquals(1, jni.loadDartDeferredLibraryCalled);
+    assertEquals(0, jni.deferredComponentInstallFailureCalled);
+
+    // Search paths are ordered most-preferred first (the native loader tries them in order and
+    // stops at the first that loads). The OS-installed signed APK must be ordered before the
+    // app-writable getFilesDir() .so, so it is attempted first.
+    assertEquals(3, jni.searchPaths.length);
+    assertEquals("libapp.so-123.part.so", jni.searchPaths[0]);
+    assertTrue(jni.searchPaths[1].endsWith(apkTestPath + "!lib/armeabi-v7a/libapp.so-123.part.so"));
+    assertTrue(jni.searchPaths[2].endsWith(soTestPath));
+    assertEquals(123, jni.loadingUnitId);
+  }
+
+  @Test
   public void searchPathsSearchesSplitConfig() throws NameNotFoundException {
     TestFlutterJNI jni = new TestFlutterJNI();
     Context spyContext = createSpyContext(null);

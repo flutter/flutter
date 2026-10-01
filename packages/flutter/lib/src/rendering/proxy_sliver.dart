@@ -115,11 +115,10 @@ class RenderSliverOpacity extends RenderProxySliver {
   /// The [opacity] argument must be between 0.0 and 1.0, inclusive.
   RenderSliverOpacity({
     double opacity = 1.0,
-    bool alwaysIncludeSemantics = false,
+    this._alwaysIncludeSemantics = false,
     RenderSliver? sliver,
   }) : assert(opacity >= 0.0 && opacity <= 1.0),
        _opacity = opacity,
-       _alwaysIncludeSemantics = alwaysIncludeSemantics,
        _alpha = ui.Color.getAlphaFromOpacity(opacity) {
     child = sliver;
   }
@@ -222,20 +221,9 @@ class RenderSliverOpacity extends RenderProxySliver {
 /// collected.
 ///
 /// {@macro flutter.widgets.IgnorePointer.semantics}
-///
-/// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
 class RenderSliverIgnorePointer extends RenderProxySliver {
   /// Creates a render object that is invisible to hit testing.
-  RenderSliverIgnorePointer({
-    RenderSliver? sliver,
-    bool ignoring = true,
-    @Deprecated(
-      'Create a custom sliver ignore pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    bool? ignoringSemantics,
-  }) : _ignoring = ignoring,
-       _ignoringSemantics = ignoringSemantics {
+  RenderSliverIgnorePointer({RenderSliver? sliver, this._ignoring = true}) {
     child = sliver;
   }
 
@@ -252,26 +240,6 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
       return;
     }
     _ignoring = value;
-    if (ignoringSemantics == null) {
-      markNeedsSemanticsUpdate();
-    }
-  }
-
-  /// Whether the semantics of this render object is ignored when compiling the
-  /// semantics tree.
-  ///
-  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
-  @Deprecated(
-    'Create a custom sliver ignore pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  bool? get ignoringSemantics => _ignoringSemantics;
-  bool? _ignoringSemantics;
-  set ignoringSemantics(bool? value) {
-    if (value == _ignoringSemantics) {
-      return;
-    }
-    _ignoringSemantics = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -290,32 +258,15 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   }
 
   @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (_ignoringSemantics ?? false) {
-      return;
-    }
-    super.visitChildrenForSemantics(visitor);
-  }
-
-  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    // Do not block user interactions if _ignoringSemantics is false; otherwise,
-    // delegate to absorbing
-    config.isBlockingUserActions = ignoring && (_ignoringSemantics ?? true);
+    config.isBlockingUserActions = ignoring;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
-    properties.add(
-      DiagnosticsProperty<bool>(
-        'ignoringSemantics',
-        ignoringSemantics,
-        description: ignoringSemantics == null ? null : 'implicitly $ignoringSemantics',
-      ),
-    );
   }
 }
 
@@ -324,7 +275,7 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
 /// without taking any room in the parent.
 class RenderSliverOffstage extends RenderProxySliver {
   /// Creates an offstage render object.
-  RenderSliverOffstage({bool offstage = true, RenderSliver? sliver}) : _offstage = offstage {
+  RenderSliverOffstage({this._offstage = true, RenderSliver? sliver}) {
     child = sliver;
   }
 

@@ -9,7 +9,6 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -17,6 +16,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/web/chrome_constants.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
@@ -25,11 +25,17 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 final kChromeArgs = <String>[
   '--bwsi',
   '--disable-background-timer-throttling',
   '--disable-renderer-backgrounding',
+  '--disable-background-networking',
+  '--disable-sync',
+  '--disable-client-side-phishing-detection',
+  '--disable-notifications',
+  ...kGcmDisabledFlags,
   '--disable-default-apps',
   '--disable-extensions',
   '--disable-popup-blocking',
@@ -456,15 +462,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 }
 
 WebDriverService setUpDriverService() {
-  final logger = BufferLogger.test();
-  return WebDriverService(
-    logger: logger,
-    terminal: Terminal.test(),
-    platform: FakePlatform(),
-    outputPreferences: OutputPreferences.test(),
-    processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
-    dartSdkPath: 'dart',
-  );
+  return WebDriverService(toolContext: DelegatingToolContext(), dartSdkPath: 'dart');
 }
 
 class FakeDevice extends Fake implements Device {

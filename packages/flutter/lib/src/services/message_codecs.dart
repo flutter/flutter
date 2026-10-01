@@ -94,12 +94,15 @@ class JSONMessageCodec implements MessageCodec<Object?> {
   /// Creates a [MessageCodec] with UTF-8 encoded JSON messages.
   const JSONMessageCodec();
 
+  static final JsonUtf8Encoder _encoder = JsonUtf8Encoder();
+  static final Converter<List<int>, Object?> _decoder = utf8.decoder.fuse(json.decoder);
+
   @override
   ByteData? encodeMessage(Object? message) {
     if (message == null) {
       return null;
     }
-    return const StringCodec().encodeMessage(json.encode(message));
+    return ByteData.sublistView(Uint8List.fromList(_encoder.convert(message)));
   }
 
   @override
@@ -107,7 +110,7 @@ class JSONMessageCodec implements MessageCodec<Object?> {
     if (message == null) {
       return message;
     }
-    return json.decode(const StringCodec().decodeMessage(message)!);
+    return _decoder.convert(Uint8List.sublistView(message));
   }
 }
 

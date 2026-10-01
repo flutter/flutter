@@ -178,6 +178,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// A sliver that contains a single box child that fills the remaining space in
 /// the viewport.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=egZjhWNqrXc}
+///
 /// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///
 /// [SliverFillRemaining] will size its [child] to fill the viewport in the

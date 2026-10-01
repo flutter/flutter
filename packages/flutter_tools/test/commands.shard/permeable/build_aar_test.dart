@@ -8,8 +8,8 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
@@ -42,14 +42,21 @@ void main() {
   /// If [androidSdk] is provided, it is used, otherwise defaults to [FakeAndroidSdk].
   Future<BuildAarCommand> runBuildAar(
     String target, {
+    AndroidBuilder? androidBuilder,
     AndroidSdk? androidSdk = const _FakeAndroidSdk(),
     List<String>? arguments,
   }) async {
     final command = BuildAarCommand(
-      androidSdk: androidSdk,
-      fileSystem: globals.fs,
-      logger: BufferLogger.test(),
-      verboseHelp: false,
+      androidBuilder: androidBuilder ?? context.get<AndroidBuilder>()!,
+      androidContext: FakeAndroidContext(androidSdk: androidSdk),
+      buildSystem: globals.buildSystem,
+      toolContext: FakeToolContext(
+        fs: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+        projectFactory: globals.projectFactory,
+      ),
     );
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['aar', ...?arguments, target]);
@@ -199,7 +206,11 @@ void main() {
         tempDir,
         arguments: <String>['--no-pub', '--template=module'],
       );
-      await runBuildAar(projectPath, arguments: <String>['--no-pub']);
+      await runBuildAar(
+        projectPath,
+        arguments: <String>['--no-pub'],
+        androidBuilder: fakeAndroidBuilder,
+      );
 
       expect(
         fakeAndroidBuilder.capturedBuildAarCalls,
@@ -224,18 +235,14 @@ void main() {
         expect(buildInfo.flavor, isNull);
         expect(buildInfo.splitDebugInfoPath, isNull);
         expect(buildInfo.dartObfuscation, isFalse);
-        expect(androidBuildInfo.targetArchs, <CpuArch>[
-          CpuArch.armv7,
-          CpuArch.arm64,
-          CpuArch.x64,
-        ]);
+        expect(androidBuildInfo.targetArchs, <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64]);
       }
       expect(buildModes, hasLength(3));
       expect(
         buildModes,
         containsAll(<BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]),
       );
-    }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
+    });
 
     testUsingContext('parses flags', () async {
       final String projectPath = await createProject(
@@ -260,6 +267,7 @@ void main() {
           '--obfuscate',
           '--dart-define=foo=bar',
         ],
+        androidBuilder: fakeAndroidBuilder,
       );
 
       expect(
@@ -281,26 +289,33 @@ void main() {
       expect(buildInfo.splitDebugInfoPath, '/project-name/v1.2.3/');
       expect(buildInfo.dartObfuscation, isTrue);
       expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
-    }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
+    });
 
-    testUsingContext('defaults androidEnableHcpp to false without explicit flag', () async {
-      final String projectPath = await createProject(
-        tempDir,
-        arguments: <String>['--no-pub', '--template=module'],
-      );
-      await runBuildAar(projectPath, arguments: <String>['--no-pub']);
+    testUsingContext(
+      'pipes the enable-hcpp feature flag through, but the plugin ignores it for aars',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=module'],
+        );
+        await runBuildAar(
+          projectPath,
+          arguments: <String>['--no-pub'],
+          androidBuilder: fakeAndroidBuilder,
+        );
 
-      final Invocation buildAarCall = fakeAndroidBuilder.capturedBuildAarCalls.single;
-      for (final androidBuildInfo
-          in buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>) {
-        // The property is piped to the aar gradle build for consistency (defaulting to
-        // false in this PR), but the Flutter Gradle Plugin only consumes it for application
-        // projects: injecting into a module (aar) manifest would conflict
-        // with an explicit value in the add-to-app host's manifest and fail
-        // the host build in the manifest merger.
-        expect(androidBuildInfo.buildInfo.androidEnableHcpp, isFalse);
-      }
-    }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
+        final Invocation buildAarCall = fakeAndroidBuilder.capturedBuildAarCalls.single;
+        for (final androidBuildInfo
+            in buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>) {
+          // The property is piped to the aar gradle build for consistency, but the Flutter
+          // Gradle Plugin only consumes it for application projects: injecting into a module
+          // (aar) manifest would conflict with an explicit value in the add-to-app host's
+          // manifest and fail the host build in the manifest merger.
+          expect(androidBuildInfo.buildInfo.androidEnableHcpp, isTrue);
+        }
+      },
+      overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true)},
+    );
 
     testUsingContext('does not define --enable-hcpp', () async {
       final String projectPath = await createProject(
@@ -310,10 +325,14 @@ void main() {
       // HCPP for add-to-app is controlled by the host app's manifest; an aar
       // level flag would be a silent no-op, so the command must reject it.
       await expectLater(
-        runBuildAar(projectPath, arguments: <String>['--no-pub', '--no-enable-hcpp']),
+        runBuildAar(
+          projectPath,
+          arguments: <String>['--no-pub', '--no-enable-hcpp'],
+          androidBuilder: fakeAndroidBuilder,
+        ),
         throwsA(isA<UsageException>()),
       );
-    }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
+    });
   });
 
   group('Gradle', () {
@@ -388,6 +407,7 @@ void main() {
       });
     });
 
+    late AndroidSdk androidSdk;
     testUsingContext(
       'support ExtraDartFlagOptions',
       () async {
@@ -395,7 +415,13 @@ void main() {
           tempDir,
           arguments: <String>['--no-pub', '--template=module'],
         );
-        final AndroidSdk androidSdk = globals.androidSdk!;
+        final Directory sdkDir = tempDir.childDirectory('android-sdk');
+        sdkDir
+            .childDirectory('ndk')
+            .childDirectory('21.1.6352462')
+            .childFile('source.properties')
+            .createSync(recursive: true);
+        androidSdk = FakeAndroidSdk(sdkDir);
         final List<String> installedNdkVersions =
             androidSdk.directory
                 .childDirectory('ndk')
@@ -457,6 +483,7 @@ void main() {
         await expectLater(
           () => runBuildAar(
             projectPath,
+            androidSdk: androidSdk,
             arguments: <String>[
               '--no-pub',
               '--no-debug',
@@ -475,6 +502,7 @@ void main() {
         ProcessManager: () => processManager,
         FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
         AndroidStudio: () => _FakeAndroidStudio(),
+        AndroidSdk: () => androidSdk,
       },
     );
 
@@ -619,6 +647,22 @@ final class _CapturingFakeAndroidBuilder extends Fake implements AndroidBuilder 
     capturedBuildAarCalls.add(invocation);
     return Future<void>.value();
   }
+}
+
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  FakeAndroidSdk(this.directory, {this.sdkManagerPath});
+
+  @override
+  final Directory directory;
+
+  @override
+  final String? sdkManagerPath;
+
+  @override
+  bool get cmdlineToolsAvailable => true;
+
+  @override
+  bool get licensesAvailable => true;
 }
 
 final class _FakeAndroidSdk with Fake implements AndroidSdk {

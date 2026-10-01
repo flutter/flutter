@@ -120,6 +120,14 @@ constexpr float kScrollExtentMaxForInf = 1000;
  */
 - (void)accessibilityBridgeDidFinishUpdate;
 
+/**
+ * Called when the root view associated with this node's accessibility bridge changes.
+ *
+ * Subclasses can override this method if they own native UIKit views that must
+ * remain attached to the current Flutter view.
+ */
+- (void)accessibilityBridgeDidChangeView;
+
 #pragma mark - Designated initializers
 
 - (instancetype)init __attribute__((unavailable("Use initWithBridge instead")));

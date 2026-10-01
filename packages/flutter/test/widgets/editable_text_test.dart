@@ -572,7 +572,7 @@ void main() {
     expect(caretXPosition, lessThan(previousCaretXPosition));
 
     expect(state.currentTextEditingValue.text, equals('گیگ '));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/78550.
+  });
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1079,41 +1079,40 @@ void main() {
       }),
     );
 
-    testWidgets(
-      'infer keyboard types from autofillHints emailOTPCode: non-ios',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MediaQuery(
-            data: const MediaQueryData(),
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: FocusScope(
-                node: focusScopeNode,
-                autofocus: true,
-                child: EditableText(
-                  controller: controller,
-                  backgroundCursorColor: Colors.grey,
-                  focusNode: focusNode,
-                  style: textStyle,
-                  cursorColor: cursorColor,
-                  autofillHints: const <String>[AutofillHints.emailOTPCode],
-                ),
+    testWidgets('infer keyboard types from autofillHints emailOTPCode: non-ios', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                autofillHints: const <String>[AutofillHints.emailOTPCode],
               ),
             ),
           ),
-        );
+        ),
+      );
 
-        await tester.tap(find.byType(EditableText));
-        await tester.showKeyboard(find.byType(EditableText));
-        controller.text = 'test';
-        await tester.idle();
-        expect(tester.testTextInput.editingState!['text'], equals('test'));
-        expect(
-          (tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'],
-          equals('TextInputType.text'),
-        );
-      },
-    );
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      controller.text = 'test';
+      await tester.idle();
+      expect(tester.testTextInput.editingState!['text'], equals('test'));
+      expect(
+        (tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'],
+        equals('TextInputType.text'),
+      );
+    });
   });
 
   testWidgets('multiline keyboard is requested when set explicitly', (WidgetTester tester) async {
@@ -4143,6 +4142,95 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/132047.
+  testWidgets('Dragging selection base handle upwards scrolls the viewport', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'Line 1\n' * 100);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(home: TestTextField(controller: controller, maxLines: null)),
+    );
+
+    await tester.tap(find.byType(TestTextField));
+    await tester.pumpAndSettle();
+
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+
+    // Populate the viewport and scroll to the bottom to prepare for an upward drag.
+    scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+
+    expect(scrollable.position.pixels, equals(scrollable.position.maxScrollExtent));
+
+    // Establish an initial selection at the end of the text.
+    controller.selection = const TextSelection(baseOffset: 500, extentOffset: 600);
+    await tester.pumpAndSettle();
+
+    final EditableTextState state = tester.state(find.byType(EditableText));
+
+    // Simulate a drag that moves the base (start) handle toward the beginning
+    // of the text while keeping the extent (end) handle stationary.
+    state.userUpdateTextEditingValue(
+      TextEditingValue(
+        text: 'Line 1\n' * 100,
+        selection: const TextSelection(baseOffset: 0, extentOffset: 600),
+      ),
+      SelectionChangedCause.drag,
+    );
+
+    await tester.pumpAndSettle();
+
+    // The scroll offset updates to follow the dragged handle upwards
+    // instead of locking up or snapping to the opposite end.
+    expect(
+      scrollable.position.pixels,
+      0.0,
+      reason:
+          'The viewport should follow the base handle upwards instead of snapping to the extent.',
+    );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('Mouse drag selection from bottom to top does not snap to extent', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'Line 1\n' * 100);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(home: TestTextField(controller: controller, maxLines: null)),
+    );
+
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+
+    // Scroll to the bottom of the long text.
+    scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+
+    expect(scrollable.position.pixels, equals(scrollable.position.maxScrollExtent));
+
+    final Finder textField = find.byType(TestTextField);
+
+    // Simulate clicking and holding the mouse at the bottom left of the text field.
+    final TestGesture gesture = await tester.startGesture(
+      tester.getBottomLeft(textField) + const Offset(10, -10),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+
+    // Drag the mouse upwards to the top left of the text field to select text.
+    await gesture.moveTo(tester.getTopLeft(textField) + const Offset(10, 10));
+    await tester.pumpAndSettle();
+
+    // The viewport should follow the mouse upwards (offset decreases).
+    // It should not snap back to the bottom (maxScrollExtent).
+    expect(scrollable.position.pixels, lessThan(scrollable.position.maxScrollExtent));
+
+    // Release the mouse click.
+    await gesture.up();
+  });
+
   testWidgets(
     'finalizeEditing should reset the input connection when shouldUnfocus is true but the unfocus is cancelled',
     (WidgetTester tester) async {
@@ -6571,9 +6659,8 @@ void main() {
 
       tester.testTextInput.log.clear();
 
-      controller.value = collapsedAtEnd(
-        'a' * 100,
-      ).copyWith(composing: const TextRange(start: 0, end: 10));
+      controller.value = collapsedAtEnd('a' * 100)
+          .copyWith(composing: const TextRange(start: 0, end: 10));
       await tester.pump();
 
       expect(
@@ -16090,6 +16177,36 @@ void main() {
             controller: controller,
             focusNode: focusNode,
             keyboardType: TextInputType.visiblePassword,
+            style: const TextStyle(),
+            cursorColor: const Color(0xFF0000FF),
+            backgroundCursorColor: const Color(0xFF808080),
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: fakeSpellCheckService,
+              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+    });
+
+    testWidgets('Spell check disabled for numeric password input type', (
+      WidgetTester tester,
+    ) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            keyboardType: const TextInputType.numberWithOptions(password: true),
             style: const TextStyle(),
             cursorColor: const Color(0xFF0000FF),
             backgroundCursorColor: const Color(0xFF808080),
