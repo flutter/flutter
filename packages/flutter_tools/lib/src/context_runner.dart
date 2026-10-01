@@ -246,6 +246,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
+        fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         xcode: globals.xcode!,

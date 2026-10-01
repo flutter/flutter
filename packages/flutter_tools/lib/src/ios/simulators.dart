@@ -11,14 +11,12 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/signals.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -72,7 +70,7 @@ class IOSSimulatorUtils {
     required Logger logger,
     required ProcessManager processManager,
     required this._operatingSystemUtils,
-    this._fileSystem,
+    required this._fileSystem,
     Platform? platform,
     this._plistParser,
     this._analytics,
@@ -83,7 +81,7 @@ class IOSSimulatorUtils {
   final SimControl _simControl;
   final Xcode _xcode;
   final OperatingSystemUtils _operatingSystemUtils;
-  final FileSystem? _fileSystem;
+  final FileSystem _fileSystem;
   final Platform _platform;
   final PlistParser? _plistParser;
   final Analytics? _analytics;
@@ -386,8 +384,8 @@ class IOSSimulator extends Device {
     required this._simControl,
     required this._cpuArch,
     required super.logger,
+    required FileSystem fileSystem,
     Platform? platform,
-    FileSystem? fileSystem,
     FileSystemUtils? fileSystemUtils,
     PlistParser? plistParser,
     Analytics? analytics,
@@ -395,44 +393,14 @@ class IOSSimulator extends Device {
     ProcessManager? processManager,
   }) : _logger = logger,
        _platform = platform ?? const LocalPlatform(),
-       _fileSystem =
-           fileSystem ??
-           ErrorHandlingFileSystem(
-             delegate: LocalFileSystem(
-               LocalSignals.instance,
-               Signals.defaultExitSignals,
-               ShutdownHooks(),
-             ),
-             platform: platform ?? const LocalPlatform(),
-           ),
+       _fileSystem = fileSystem,
        _fileSystemUtils =
            fileSystemUtils ??
-           FileSystemUtils(
-             fileSystem:
-                 fileSystem ??
-                 ErrorHandlingFileSystem(
-                   delegate: LocalFileSystem(
-                     LocalSignals.instance,
-                     Signals.defaultExitSignals,
-                     ShutdownHooks(),
-                   ),
-                   platform: platform ?? const LocalPlatform(),
-                 ),
-             platform: platform ?? const LocalPlatform(),
-           ),
+           FileSystemUtils(fileSystem: fileSystem, platform: platform ?? const LocalPlatform()),
        _plistParser =
            plistParser ??
            PlistParser(
-             fileSystem:
-                 fileSystem ??
-                 ErrorHandlingFileSystem(
-                   delegate: LocalFileSystem(
-                     LocalSignals.instance,
-                     Signals.defaultExitSignals,
-                     ShutdownHooks(),
-                   ),
-                   platform: platform ?? const LocalPlatform(),
-                 ),
+             fileSystem: fileSystem,
              logger: logger,
              processManager: processManager ?? const LocalProcessManager(),
            ),

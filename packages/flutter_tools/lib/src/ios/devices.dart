@@ -307,7 +307,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 class IOSDevice extends Device {
   IOSDevice(
     super.id, {
-    required FileSystem fileSystem,
+    required this._fileSystem,
     required this._fileSystemUtils,
     required this._processUtils,
     required this.name,
@@ -321,7 +321,7 @@ class IOSDevice extends Device {
     this._sdkVersion,
     this._modelCode,
     this._operatingSystemVersion,
-    required Platform platform,
+    required this._platform,
     required this._iosDeploy,
     required this._iMobileDevice,
     required this._coreDeviceControl,
@@ -331,24 +331,14 @@ class IOSDevice extends Device {
     required super.logger,
     required this._analytics,
     required this._xcode,
+    required this._operatingSystemUtils,
     ShutdownHooks? shutdownHooks,
     UserMessages? userMessages,
-    OperatingSystemUtils? operatingSystemUtils,
     this._templateRenderer = const MustacheTemplateRenderer(),
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _iproxy = iProxy,
+  }) : _iproxy = iProxy,
        _logger = logger,
        _shutdownHooks = shutdownHooks ?? ShutdownHooks(),
        _userMessages = userMessages ?? UserMessages(),
-       _operatingSystemUtils =
-           operatingSystemUtils ??
-           OperatingSystemUtils(
-             fileSystem: fileSystem,
-             logger: logger,
-             platform: platform,
-             processManager: const LocalProcessManager(),
-           ),
        super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true) {
     if (!_platform.isMacOS) {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');

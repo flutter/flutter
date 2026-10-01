@@ -24,7 +24,6 @@ import 'application_package.dart';
 import 'device_support.dart';
 import 'lldb.dart';
 import 'xcode_debug.dart';
-import 'xcodeproj.dart';
 
 /// Provides methods for launching and debugging apps on physical iOS CoreDevices.
 ///
@@ -43,8 +42,7 @@ class IOSCoreDeviceLauncher {
     required this._fileSystem,
     required ProcessUtils processUtils,
     required Version? deviceVersion,
-    XcodeProjectInterpreter? xcodeProjectInterpreter,
-    Xcode? xcode,
+    required Xcode xcode,
     @visibleForTesting LLDB? lldb,
   }) : _logger = logger,
        _lldb =
@@ -52,7 +50,6 @@ class IOSCoreDeviceLauncher {
            LLDB(
              logger: logger,
              processUtils: processUtils,
-             xcodeProjectInterpreter: xcodeProjectInterpreter,
              xcode: xcode,
              deviceVersion: deviceVersion,
            );

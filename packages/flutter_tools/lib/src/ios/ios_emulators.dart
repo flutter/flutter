@@ -17,14 +17,14 @@ class IOSEmulators extends EmulatorDiscovery {
     Platform? platform,
     this._iosWorkflow,
     this._xcode,
-    this._processUtils,
+    required this._processUtils,
     this._logger,
   }) : _platform = platform ?? const LocalPlatform();
 
   final Platform _platform;
   final IOSWorkflow? _iosWorkflow;
   final Xcode? _xcode;
-  final ProcessUtils? _processUtils;
+  final ProcessUtils _processUtils;
   final Logger? _logger;
 
   @override
@@ -44,10 +44,11 @@ class IOSEmulators extends EmulatorDiscovery {
 }
 
 class IOSEmulator extends Emulator {
-  const IOSEmulator(String id, {this._xcode, this._processUtils, this._logger}) : super(id, true);
+  const IOSEmulator(String id, {this._xcode, required this._processUtils, this._logger})
+    : super(id, true);
 
   final Xcode? _xcode;
-  final ProcessUtils? _processUtils;
+  final ProcessUtils _processUtils;
   final Logger? _logger;
 
   @override
@@ -71,7 +72,7 @@ class IOSEmulator extends Emulator {
     Future<bool> launchSimulator(List<String> additionalArgs) async {
       final args = <String>['open', ...additionalArgs, '-a', simulatorPath];
 
-      final RunResult launchResult = await _processUtils!.run(args);
+      final RunResult launchResult = await _processUtils.run(args);
       if (launchResult.exitCode != 0) {
         _logger?.printError('$launchResult');
         return false;
@@ -91,7 +92,7 @@ class IOSEmulator extends Emulator {
 }
 
 /// Return the list of iOS Simulators (there can only be zero or one).
-List<IOSEmulator> getEmulators({Xcode? xcode, ProcessUtils? processUtils, Logger? logger}) {
+List<IOSEmulator> getEmulators({Xcode? xcode, required ProcessUtils processUtils, Logger? logger}) {
   final String? simulatorPath = xcode?.getSimulatorPath();
   if (simulatorPath == null) {
     return <IOSEmulator>[];

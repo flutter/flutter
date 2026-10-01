@@ -2131,6 +2131,7 @@ IOSDevice setUpIOSDevice({
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
+    operatingSystemUtils: FakeOperatingSystemUtils(),
   );
 }
 
