@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport '../../executable.dart';
+library;
+
 import 'dart:async';
 
 import 'package:process/process.dart';
@@ -59,7 +62,22 @@ import 'android_context.dart';
 import 'apple_context.dart';
 import 'tool_context.dart';
 
-/// Bootstraps and manages tool dependencies.
+/// The root of the Flutter tool's dependency graph.
+///
+/// [ToolDependencies.bootstrap] is called once per tool invocation, before any
+/// command runs, and constructs the tool's long-lived services in dependency
+/// order. The result holds the [ToolContext], the platform-specific
+/// [AndroidContext] and [AppleContext], and services that don't belong to a
+/// single context (such as [Analytics], [BuildSystem], [Doctor], and
+/// [FeatureFlags]).
+///
+/// Like [ToolContext], it only holds instances that live for the whole tool
+/// invocation; the two differ in what they expose, not in lifetime.
+/// [ToolDependencies] holds [ToolContext] (not the reverse) and is only used at
+/// the composition root: [generateCommands] unpacks it and passes each command
+/// only the contexts and services that command needs. Passing
+/// [ToolDependencies] itself into commands or services would expose the whole
+/// graph to every component and turn it into a service locator.
 class ToolDependencies {
   ToolDependencies({
     required this.analytics,
@@ -105,10 +123,18 @@ class ToolDependencies {
   final ToolContext toolContext;
 
   /// Bootstraps the dependency graph and constructs all three contexts.
+  ///
+  /// [FlutterVersion] uses [Git], which runs processes through the
+  /// [ErrorHandlingProcessManager], which reads [Analytics] to propagate the
+  /// analytics-suppression flag to child processes; [Analytics] in turn
+  /// depends on [FlutterVersion]. To break this cycle, the process manager
+  /// gets a lazy callback that returns [NoOpAnalytics] until [Analytics] has
+  /// been constructed.
   static Future<ToolDependencies> bootstrap({
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidStudio? androidStudio,
+    Artifacts? artifacts,
     BotDetector? botDetector,
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
@@ -121,6 +147,7 @@ class ToolDependencies {
     Doctor? doctor,
     EmulatorManager? emulatorManager,
     FeatureFlags? featureFlags,
+    FlutterVersion? flutterVersion,
     FileSystem? fs,
     Git? git,
     GradleUtils? gradleUtils,
@@ -137,7 +164,6 @@ class ToolDependencies {
     PreRunValidator? preRunValidator,
     ProcessInfo? processInfo,
     ProcessManager? processManager,
-    FlutterVersion? flutterVersion,
     FlutterProjectFactory? projectFactory,
     ShutdownHooks? shutdownHooks,
     Stdio? stdio,
@@ -362,14 +388,18 @@ class ToolDependencies {
         cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
 
     // Artifacts will be updated later if a local engine is used.
-    final finalArtifacts = DeferredArtifacts(
-      CachedArtifacts(
-        fileSystem: finalFS,
-        cache: finalCache,
-        platform: finalPlatform,
-        operatingSystemUtils: finalOS,
+    final Artifacts finalArtifacts = switch (artifacts) {
+      final DeferredArtifacts deferredArtifacts => deferredArtifacts,
+      final Artifacts providedArtifacts => DeferredArtifacts(providedArtifacts),
+      null => DeferredArtifacts(
+        CachedArtifacts(
+          fileSystem: finalFS,
+          cache: finalCache,
+          platform: finalPlatform,
+          operatingSystemUtils: finalOS,
+        ),
       ),
-    );
+    };
 
     final XCDevice finalXCDevice =
         xcdevice ??
