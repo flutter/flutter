@@ -1588,6 +1588,97 @@ bool _listEquals<T>(List<T>? a, List<T>? b) {
   return true;
 }
 
+/// Specifies the default value for a field in the generated C++ style struct.
+class _Default {
+  const _Default(this.value);
+
+  /// The default value (a compile-time constant primitive, enum, or value object).
+  final Object? value;
+}
+
+/// Maps a private FFI encoder extension type to its corresponding C++ type.
+class _CppType {
+  const _CppType(this.cppFieldType, {this.cppPackedType});
+
+  /// The C++ field type in the generated `txt::*` class.
+  final String cppFieldType;
+
+  /// Optional C++ primitive type in the generated `Packed*` struct.
+  final String? cppPackedType;
+}
+
+@_CppType('SkColor', cppPackedType: 'uint32_t')
+// ignore: unused_element
+extension type const _ColorFfiEncoder(Color value) {
+  int encode() => value.value;
+}
+
+// ignore: unused_element
+extension type const _FontWeightFfiEncoder(FontWeight value) {
+  int encode() => value.value;
+}
+
+// ignore: unused_element
+extension type const _TextDecorationFfiEncoder(TextDecoration value) {
+  int encode() => value._mask;
+}
+
+// ignore: unused_element
+extension type const _TextHeightBehaviorFfiEncoder(TextHeightBehavior value) {
+  int encode() => value._encode();
+}
+
+// ignore: unused_element
+extension type const _LocaleFfiEncoder(Locale value) {
+  String encode() => value.toString();
+}
+
+@_CppType('std::optional<flutter::DlPaint>')
+// ignore: unused_element
+extension type const _PaintFfiEncoder(Paint value) {
+  Paint encode() => value;
+}
+
+@_CppType('std::vector<TextShadow>')
+// ignore: unused_element
+extension type const _ShadowsFfiEncoder(List<Shadow> value) {
+  ByteData encode() => Shadow._encodeShadows(value);
+}
+
+@_CppType('FontFeatures')
+// ignore: unused_element
+extension type const _FontFeaturesFfiEncoder(List<FontFeature> value) {
+  ByteData encode() {
+    final encoded = ByteData(value.length * FontFeature._kEncodedSize);
+    var byteOffset = 0;
+    for (final FontFeature feature in value) {
+      feature._encode(ByteData.view(encoded.buffer, byteOffset, FontFeature._kEncodedSize));
+      byteOffset += FontFeature._kEncodedSize;
+    }
+    return encoded;
+  }
+}
+
+@_CppType('FontVariations')
+// ignore: unused_element
+extension type const _FontVariationsFfiEncoder(List<FontVariation> value) {
+  ByteData encode() {
+    final encoded = ByteData(value.length * FontVariation._kEncodedSize);
+    var byteOffset = 0;
+    for (final FontVariation variation in value) {
+      variation._encode(ByteData.view(encoded.buffer, byteOffset, FontVariation._kEncodedSize));
+      byteOffset += FontVariation._kEncodedSize;
+    }
+    return encoded;
+  }
+}
+
+@_CppType('std::optional<StrutStyle>')
+// ignore: unused_element
+extension type const _StrutStyleFfiEncoder(StrutStyle value) {
+  ByteData encode() => value._encoded;
+}
+
 // This encoding must match the C++ version of ParagraphBuilder::pushStyle.
 //
 // The encoded array buffer has 8 elements.
@@ -1757,21 +1848,21 @@ class TextStyle {
   /// * `fontFeatures`: The font features that should be applied to the text.
   /// * `fontVariations`: The font variations that should be applied to the text.
   TextStyle({
-    Color? color,
-    TextDecoration? decoration,
-    Color? decorationColor,
-    TextDecorationStyle? decorationStyle,
-    double? decorationThickness,
-    FontWeight? fontWeight,
-    FontStyle? fontStyle,
-    TextBaseline? textBaseline,
+    @_Default(Color(0xFFFFFFFF)) Color? color,
+    @_Default(TextDecoration.none) TextDecoration? decoration,
+    @_Default(Color(0x00000000)) Color? decorationColor,
+    @_Default(TextDecorationStyle.solid) TextDecorationStyle? decorationStyle,
+    @_Default(1.0) double? decorationThickness,
+    @_Default(FontWeight.normal) FontWeight? fontWeight,
+    @_Default(FontStyle.normal) FontStyle? fontStyle,
+    @_Default(TextBaseline.alphabetic) TextBaseline? textBaseline,
     String? fontFamily,
     List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? letterSpacing,
-    double? wordSpacing,
-    double? height,
-    TextLeadingDistribution? leadingDistribution,
+    @_Default(14.0) double? fontSize,
+    @_Default(0.0) double? letterSpacing,
+    @_Default(0.0) double? wordSpacing,
+    @_Default(1.0) double? height,
+    @_Default(TextLeadingDistribution.proportional) TextLeadingDistribution? leadingDistribution,
     Locale? locale,
     Paint? background,
     Paint? foreground,
@@ -2069,15 +2160,15 @@ class ParagraphStyle {
   ///
   /// * `locale`: The locale used to select region-specific glyphs.
   ParagraphStyle({
-    TextAlign? textAlign,
-    TextDirection? textDirection,
+    @_Default(TextAlign.start) TextAlign? textAlign,
+    @_Default(TextDirection.ltr) TextDirection? textDirection,
     int? maxLines,
     String? fontFamily,
-    double? fontSize,
-    double? height,
+    @_Default(14.0) double? fontSize,
+    @_Default(1.0) double? height,
     TextHeightBehavior? textHeightBehavior,
-    FontWeight? fontWeight,
-    FontStyle? fontStyle,
+    @_Default(FontWeight.normal) FontWeight? fontWeight,
+    @_Default(FontStyle.normal) FontStyle? fontStyle,
     StrutStyle? strutStyle,
     String? ellipsis,
     Locale? locale,
@@ -2296,13 +2387,13 @@ class StrutStyle {
   StrutStyle({
     String? fontFamily,
     List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    FontWeight? fontWeight,
-    FontStyle? fontStyle,
-    bool? forceStrutHeight,
+    @_Default(14.0) double? fontSize,
+    @_Default(1.0) double? height,
+    @_Default(TextLeadingDistribution.proportional) TextLeadingDistribution? leadingDistribution,
+    @_Default(-1.0) double? leading,
+    @_Default(FontWeight.normal) FontWeight? fontWeight,
+    @_Default(FontStyle.normal) FontStyle? fontStyle,
+    @_Default(false) bool? forceStrutHeight,
   }) : _encoded = _encodeStrut(
          fontFamily,
          fontFamilyFallback,
