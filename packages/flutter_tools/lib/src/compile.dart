@@ -28,6 +28,13 @@ import 'dart/package_map.dart';
 /// Opt-in changes to the dart compilers.
 const kDartCompilerExperiments = <String>[];
 
+// Flags passed when compiling with DDC.
+const kDdcLibraryBundleFlags = <String>[
+  '--dartdevc-module-format=ddc',
+  '--dartdevc-canary',
+  '--no-js-strongly-connected-components',
+];
+
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
 class TargetModel {
@@ -567,9 +574,7 @@ class ResidentCompilerFactory {
         fileSystemScheme: 'org-dartlang-app',
         extraFrontEndOptions: [
           ...buildInfo.extraFrontEndOptions,
-          if (buildInfo.webEnableHotReload)
-          // These flags are only valid to be passed when compiling with DDC.
-          ...<String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
+          if (buildInfo.webEnableHotReload) ...kDdcLibraryBundleFlags,
         ],
       );
     } else {

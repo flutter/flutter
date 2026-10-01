@@ -259,7 +259,12 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<void> validateCommand() async {
+    // For Android prebuilt applications run in release mode, validate that engine configuration flags
+    // are not passed.
+    validatePrebuiltAndroidApplicationFlags();
+
     final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+
     if (userIdentifier != null) {
       final Device? device = await findTargetDevice();
       if (device is! AndroidDevice) {
