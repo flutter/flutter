@@ -12,6 +12,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.extra
+import java.io.File
 
 /**
  * Warns or errors on version ranges of dependencies required to build a Flutter Android app.
@@ -70,6 +71,151 @@ object DependencyVersionChecker {
             "($projectDirectory/build.gradle) by the following line in the dependencies" +
             " block of the buildscript: \"classpath 'com.android.tools.build:gradle:<version>'\".\n"
 
+    /**
+     * Returns a "Potential fix" for an AGP version problem in [project].
+     *
+     * Only call this when reporting an error or warning, since it reads build files from disk.
+     */
+    @VisibleForTesting internal fun getPotentialAGPFix(project: Project): String {
+        val rootDir = File(project.rootDir.path)
+        // In add-to-app, the Flutter module is included in the host app's build as a library
+        // project, so the root project (and its AGP version) belongs to the host app. The module's
+        // own generated `.android` project is a regular Flutter app build and is excluded.
+        val isAddToApp = !FlutterPluginUtils.isFlutterAppProject(project) && rootDir.name != ".android"
+        return getPotentialAGPFix(rootDir, isAddToApp)
+    }
+
+    /**
+     * Returns a "Potential fix" for an AGP version problem in the build rooted at [rootDir].
+     *
+     * Points at the exact file and line that declares AGP when one can be found (see
+     * [findAGPDeclaration]), and otherwise falls back to describing the usual locations.
+     */
+    @VisibleForTesting internal fun getPotentialAGPFix(
+        rootDir: File,
+        isAddToApp: Boolean
+    ): String {
+        val declaration: AGPDeclaration? = findAGPDeclaration(rootDir)
+        if (!isAddToApp) {
+            return declaration?.describe(owner = "Your project's") ?: getPotentialAGPFix(rootDir.path)
+        }
+        return "This Flutter module is built as part of the host Android app at " +
+            "${rootDir.path}, so the AGP version comes from the host app, not the Flutter module. " +
+            "Change the AGP version in the host app's build files.\n" +
+            (declaration?.describe(owner = "The host app's") ?: getPotentialAddToAppAGPFix(rootDir.path))
+    }
+
+    private fun getPotentialAddToAppAGPFix(hostAppDirectory: String): String =
+        "The host app's AGP version is typically defined in its version catalog " +
+            "($hostAppDirectory/gradle/libs.versions.toml), by the version referenced by the " +
+            "com.android.application plugin or the com.android.tools.build:gradle library. \n" +
+            "If the host app doesn't use a version catalog, look for the com.android.application " +
+            "plugin in the plugins block of $hostAppDirectory/settings.gradle(.kts) or " +
+            "$hostAppDirectory/build.gradle(.kts), or for " +
+            "\"classpath 'com.android.tools.build:gradle:<version>'\" in the buildscript block of " +
+            "$hostAppDirectory/build.gradle(.kts).\n"
+
+    /**
+     * A line in a build file that sets the Android Gradle Plugin version.
+     *
+     * [referencedBy] is set when the version lives in a version catalog `[versions]` entry, and
+     * holds the plugin or library declaration that references that entry with `version.ref`.
+     */
+    @VisibleForTesting internal data class AGPDeclaration(
+        val file: File,
+        val lineNumber: Int,
+        val line: String,
+        val referencedBy: AGPDeclaration? = null
+    ) {
+        /** Describes this declaration; [owner] names whose AGP version it is, e.g. "Your project's". */
+        fun describe(owner: String): String {
+            val referencedByDescription: String =
+                if (referencedBy == null) {
+                    ""
+                } else {
+                    "It is referenced by the declaration on line ${referencedBy.lineNumber}:\n" +
+                        "    ${referencedBy.line.trim()}\n"
+                }
+            return "$owner AGP version is set in ${file.path}:$lineNumber:\n" +
+                "    ${line.trim()}\n" +
+                referencedByDescription +
+                "Change the version on that line.\n"
+        }
+    }
+
+    // Matches the AGP plugin ID, or the AGP library coordinates (but not other artifacts in the
+    // same group, such as com.android.tools.build:gradle-api).
+    private val agpCatalogEntryRegex =
+        Regex(
+            """com\.android\.application|com\.android\.tools\.build:gradle\b(?!-)|""" +
+                """group\s*=\s*["']com\.android\.tools\.build["']\s*,\s*name\s*=\s*["']gradle["']"""
+        )
+
+    private val versionRefRegex = Regex("""version\.ref\s*=\s*["']([^"']+)["']""")
+
+    /**
+     * Finds the line that sets the Android Gradle Plugin version in the build rooted at [rootDir],
+     * or returns null if none of the usual locations set it.
+     *
+     * Checks, in order: the default version catalog (`gradle/libs.versions.toml`), the plugins
+     * block of the settings file, and the root build file (buildscript classpath or plugins block).
+     */
+    @VisibleForTesting internal fun findAGPDeclaration(rootDir: File): AGPDeclaration? {
+        findAGPDeclarationInVersionCatalog(File(rootDir, "gradle/libs.versions.toml"))?.let { return it }
+
+        val pluginsBlockMatcher: (String) -> Boolean = { line ->
+            !line.trimStart().startsWith("//") &&
+                line.contains("com.android.application") &&
+                line.contains("version")
+        }
+        val classpathMatcher: (String) -> Boolean = { line ->
+            !line.trimStart().startsWith("//") && line.contains("com.android.tools.build:gradle:")
+        }
+        for (settingsFileName in listOf("settings.gradle.kts", "settings.gradle")) {
+            findLine(File(rootDir, settingsFileName), pluginsBlockMatcher)?.let { return it }
+        }
+        for (buildFileName in listOf("build.gradle.kts", "build.gradle")) {
+            val buildFile = File(rootDir, buildFileName)
+            (findLine(buildFile, classpathMatcher) ?: findLine(buildFile, pluginsBlockMatcher))
+                ?.let { return it }
+        }
+        return null
+    }
+
+    private fun findAGPDeclarationInVersionCatalog(versionCatalog: File): AGPDeclaration? {
+        val entry: AGPDeclaration =
+            findLine(versionCatalog) { line ->
+                !line.trimStart().startsWith("#") && agpCatalogEntryRegex.containsMatchIn(line)
+            } ?: return null
+        val versionRef: String = versionRefRegex.find(entry.line)?.groupValues?.get(1) ?: return entry
+        val versionKeyRegex = Regex("""^\s*["']?${Regex.escape(versionRef)}["']?\s*=""")
+        var inVersionsTable = false
+        versionCatalog.readLines().forEachIndexed { index, line ->
+            val trimmedLine = line.trim()
+            if (trimmedLine.startsWith("[")) {
+                inVersionsTable = trimmedLine == "[versions]"
+            } else if (inVersionsTable && versionKeyRegex.containsMatchIn(line)) {
+                return AGPDeclaration(versionCatalog, index + 1, line, referencedBy = entry)
+            }
+        }
+        return entry
+    }
+
+    private fun findLine(
+        file: File,
+        matches: (String) -> Boolean
+    ): AGPDeclaration? {
+        if (!file.isFile) {
+            return null
+        }
+        file.readLines().forEachIndexed { index, line ->
+            if (matches(line)) {
+                return AGPDeclaration(file, index + 1, line)
+            }
+        }
+        return null
+    }
+
     @VisibleForTesting internal fun getPotentialKGPFix(projectDirectory: String): String =
         "Your project's KGP version is typically " +
             "defined in the plugins block of the `settings.gradle` file " +
@@ -104,6 +250,11 @@ object DependencyVersionChecker {
 
     @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 11, 1)
 
+    // The first AGP major version that Flutter does not support yet. Builds using this major
+    // version or newer fail with an error. When Flutter adds support for this major version,
+    // bump this value to the next major version.
+    @VisibleForTesting internal val firstUnsupportedAGPMajorVersion: Int = 10
+
     @VisibleForTesting internal val warnKGPVersion: Version = Version(2, 3, 20)
 
     @VisibleForTesting internal val errorKGPVersion: Version = Version(2, 2, 20)
@@ -131,6 +282,7 @@ object DependencyVersionChecker {
 
         val agpVersion: AndroidPluginVersion? = VersionFetcher.getAGPVersion(project)
         if (agpVersion != null) {
+            checkAGPMaxVersion(agpVersion, project)
             checkAGPVersion(agpVersion, project)
         } else {
             project.logger.error(
@@ -150,6 +302,20 @@ object DependencyVersionChecker {
                     "AGP built-in Kotlin or does not apply KGP."
             )
         }
+    }
+
+    /**
+     * Throws a [DependencyValidationException] if the project uses an Android Gradle Plugin major
+     * version that Flutter does not support yet (see [firstUnsupportedAGPMajorVersion]).
+     *
+     * Unlike [checkDependencyVersions], this only needs the AGP version, so it is safe to call
+     * before any other AGP API is used (a newer AGP major version may have removed APIs that the
+     * rest of the Flutter Gradle Plugin relies on). Does nothing when the AGP version cannot be
+     * detected; [checkDependencyVersions] reports that case.
+     */
+    @JvmStatic fun checkUnsupportedAGPMajorVersion(project: Project) {
+        val agpVersion: AndroidPluginVersion = VersionFetcher.getAGPVersion(project) ?: return
+        checkAGPMaxVersion(agpVersion, project)
     }
 
     private fun configureMinSdkCheck(project: Project) {
@@ -214,6 +380,21 @@ object DependencyVersionChecker {
             "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
             " to bypass this check.\n\nPotential fix: $potentialFix"
 
+    @VisibleForTesting internal fun getUnsupportedMajorVersionErrorMessage(
+        dependencyName: String,
+        versionString: String,
+        unsupportedMajorVersion: Int,
+        potentialFix: String
+    ): String =
+        "Error: Your project's $dependencyName version ($versionString) is not yet " +
+            "supported. Flutter does not support $dependencyName $unsupportedMajorVersion, " +
+            "and support will be added in a future Flutter release. Please downgrade your " +
+            "$dependencyName version to a version below $unsupportedMajorVersion.0.0 to " +
+            "continue." +
+            "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
+            " to bypass this check (unsupported; your build may fail).\n\n" +
+            "Potential fix: $potentialFix"
+
     @VisibleForTesting
     internal fun getFlavorSpecificMessage(
         flavorName: String?,
@@ -272,6 +453,36 @@ object DependencyVersionChecker {
         }
     }
 
+    /**
+     * Returns [androidPluginVersion] as `major.minor.micro` (for example, `9.3.1`).
+     *
+     * [AndroidPluginVersion.toString] returns "Android Gradle Plugin version 9.3.1", which reads
+     * awkwardly inside messages that already name the dependency.
+     */
+    @VisibleForTesting internal fun formatAGPVersion(androidPluginVersion: AndroidPluginVersion): String =
+        "${androidPluginVersion.major}.${androidPluginVersion.minor}.${androidPluginVersion.micro}"
+
+    /**
+     * Throws a [DependencyValidationException] if [androidPluginVersion] is a major version that
+     * Flutter does not support yet (see [firstUnsupportedAGPMajorVersion]).
+     */
+    @VisibleForTesting internal fun checkAGPMaxVersion(
+        androidPluginVersion: AndroidPluginVersion,
+        project: Project
+    ) {
+        if (androidPluginVersion.major >= firstUnsupportedAGPMajorVersion) {
+            val errorMessage: String =
+                getUnsupportedMajorVersionErrorMessage(
+                    AGP_NAME,
+                    formatAGPVersion(androidPluginVersion),
+                    firstUnsupportedAGPMajorVersion,
+                    getPotentialAGPFix(project)
+                )
+            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
+            throw DependencyValidationException(errorMessage)
+        }
+    }
+
     @VisibleForTesting internal fun checkAGPVersion(
         androidPluginVersion: AndroidPluginVersion,
         project: Project
@@ -280,9 +491,9 @@ object DependencyVersionChecker {
             val errorMessage: String =
                 getErrorMessage(
                     AGP_NAME,
-                    androidPluginVersion.toString(),
-                    errorAGPVersion.toString(),
-                    getPotentialAGPFix(project.rootDir.path)
+                    formatAGPVersion(androidPluginVersion),
+                    formatAGPVersion(errorAGPVersion),
+                    getPotentialAGPFix(project)
                 )
             project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
             throw DependencyValidationException(errorMessage)
@@ -290,9 +501,9 @@ object DependencyVersionChecker {
             val warnMessage: String =
                 getWarnMessage(
                     AGP_NAME,
-                    androidPluginVersion.toString(),
-                    warnAGPVersion.toString(),
-                    getPotentialAGPFix(project.rootDir.path)
+                    formatAGPVersion(androidPluginVersion),
+                    formatAGPVersion(warnAGPVersion),
+                    getPotentialAGPFix(project)
                 )
             project.logger.error(warnMessage)
         }

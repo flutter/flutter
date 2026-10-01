@@ -16,9 +16,11 @@ import com.flutter.gradle.tasks.PrintTask
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
+import io.mockk.verifyOrder
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
@@ -38,6 +40,8 @@ import java.util.Base64
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class FlutterPluginTest {
     // Clear global singleton mocks to prevent mock state leaking into other tests in the same JVM.
@@ -248,6 +252,133 @@ class FlutterPluginTest {
         verify {
             FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest(project)
         }
+    }
+
+    @Test
+    fun `apply fails on unsupported AGP major version before configuring the project`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        setupMockApplicationExtension(project)
+        setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+
+        // The DependencyVersionChecker entry points are @JvmStatic, so Kotlin callers invoke the
+        // static method directly; mockkStatic (not mockkObject) is required to intercept them.
+        mockkStatic(DependencyVersionChecker::class)
+        val unsupportedVersionException = DependencyValidationException("Unsupported AGP version")
+        every { DependencyVersionChecker.checkUnsupportedAGPMajorVersion(project) } throws unsupportedVersionException
+        every { project.hasProperty("usesUnsupportedDependencyVersions") } returns true
+        every { project.properties } returns mapOf("usesUnsupportedDependencyVersions" to true)
+
+        val thrown = assertFailsWith<DependencyValidationException> { FlutterPlugin().apply(project) }
+
+        assertEquals(unsupportedVersionException, thrown)
+        // Nothing after the early AGP major version check in apply() should have run, including
+        // the remaining dependency checks and any configuration that uses AGP APIs.
+        verify(exactly = 0) { DependencyVersionChecker.checkDependencyVersions(any()) }
+        val extensions = project.extensions
+        verify(exactly = 0) { extensions.create("flutter", any<Class<*>>()) }
+        verify(exactly = 0) { extensions.findByName("android") }
+    }
+
+    @Test
+    fun `apply runs full dependency checks after the Kotlin Gradle Plugin may be auto-applied`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        setupMockApplicationExtension(project)
+        setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+
+        mockkStatic(DependencyVersionChecker::class)
+        mockkStatic(FlutterPluginUtils::class)
+        every { DependencyVersionChecker.checkUnsupportedAGPMajorVersion(project) } returns Unit
+        every { DependencyVersionChecker.checkDependencyVersions(project) } returns Unit
+
+        FlutterPlugin().apply(project)
+
+        // The KGP version can only be detected once KGP is applied, and for AGP < 9 projects
+        // that don't apply KGP themselves, detectApplyingKotlinGradlePlugin applies it.
+        verifyOrder {
+            DependencyVersionChecker.checkUnsupportedAGPMajorVersion(project)
+            FlutterPluginUtils.detectApplyingKotlinGradlePlugin(project)
+            DependencyVersionChecker.checkDependencyVersions(project)
+        }
+        verify(exactly = 1) { DependencyVersionChecker.checkUnsupportedAGPMajorVersion(project) }
+        verify(exactly = 1) { DependencyVersionChecker.checkDependencyVersions(project) }
+    }
+
+    @Test
+    fun `apply re-throws dependency validation errors from the full dependency checks`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        setupMockApplicationExtension(project)
+        setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+
+        mockkStatic(DependencyVersionChecker::class)
+        val unsupportedVersionException = DependencyValidationException("Unsupported KGP version")
+        every { DependencyVersionChecker.checkUnsupportedAGPMajorVersion(project) } returns Unit
+        every { DependencyVersionChecker.checkDependencyVersions(project) } throws unsupportedVersionException
+        every { project.hasProperty("usesUnsupportedDependencyVersions") } returns true
+        every { project.properties } returns mapOf("usesUnsupportedDependencyVersions" to true)
+
+        val thrown = assertFailsWith<DependencyValidationException> { FlutterPlugin().apply(project) }
+
+        assertEquals(unsupportedVersionException, thrown)
+    }
+
+    @Test
+    fun `apply logs and continues when the early AGP check fails unexpectedly`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        setupMockApplicationExtension(project)
+        setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+
+        mockkStatic(DependencyVersionChecker::class)
+        // Not a DependencyValidationException and usesUnsupportedDependencyVersions is not set,
+        // so this is treated as a bug in the checking code rather than an unsupported version.
+        every { DependencyVersionChecker.checkUnsupportedAGPMajorVersion(project) } throws
+            IllegalStateException("Unexpected failure")
+        every { DependencyVersionChecker.checkDependencyVersions(project) } returns Unit
+        every { project.hasProperty("usesUnsupportedDependencyVersions") } returns false
+
+        FlutterPlugin().apply(project)
+
+        verify {
+            project.logger.error(match<String> { it.contains("Skipping dependency version checking") })
+        }
+        // The rest of apply() still ran.
+        verify { project.extensions.create("flutter", any<Class<*>>()) }
+        verify(exactly = 1) { DependencyVersionChecker.checkDependencyVersions(project) }
+    }
+
+    @Test
+    fun `apply skips dependency checks when skipDependencyChecks is set`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        setupMockApplicationExtension(project)
+        setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+
+        mockkStatic(DependencyVersionChecker::class)
+        every { project.hasProperty("skipDependencyChecks") } returns true
+        every { project.properties } returns mapOf("skipDependencyChecks" to "true")
+
+        FlutterPlugin().apply(project)
+
+        verify(exactly = 0) { DependencyVersionChecker.checkUnsupportedAGPMajorVersion(any()) }
+        verify(exactly = 0) { DependencyVersionChecker.checkDependencyVersions(any()) }
     }
 
     private data class TestProjectEnvironment(
