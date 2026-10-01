@@ -1069,12 +1069,14 @@ class RenderTable extends RenderBox {
       return 0.0;
     }
     final List<double> widths = _computeColumnWidths(BoxConstraints.tightForFinite(width: width));
-    // A cell that spans several rows is parked on the last row it covers and is
-    // reduced by the height of every row in between, so that it only adds the
-    // height its span still needs. This mirrors the accounting in
-    // [computeDryLayout] and [performLayout], which keeps the intrinsic height
-    // in agreement with the height the table actually lays out to.
-    final pendingRowSpanHeights = Float64List(rows);
+    // A cell that spans several rows does not add its height to the row it
+    // starts in. It records how far down from the top of the table it reaches
+    // on the last row it covers, and that row grows to reach at least that far,
+    // so the span only adds the height its rows do not already provide. This
+    // mirrors the accounting in [computeDryLayout] and [performLayout], which
+    // keeps the intrinsic height in agreement with the height the table
+    // actually lays out to.
+    final requiredRowBottoms = Float64List(rows);
     var rowTop = 0.0;
     for (var y = 0; y < rows; y += 1) {
       var rowHeight = 0.0;
@@ -1105,26 +1107,15 @@ class RenderTable extends RenderBox {
         } else {
           final int targetY = y + rowSpan - 1;
           if (targetY < rows) {
-            pendingRowSpanHeights[targetY] = math.max(pendingRowSpanHeights[targetY], childHeight);
+            requiredRowBottoms[targetY] = math.max(
+              requiredRowBottoms[targetY],
+              rowTop + childHeight,
+            );
           }
         }
       }
 
-      rowHeight = math.max(rowHeight, pendingRowSpanHeights[y]);
-      pendingRowSpanHeights[y] = 0.0; // Reset current row
-
-      // Update pending heights - subtract rowHeight from future rows.
-      for (int futureY = y + 1; futureY < rows; futureY += 1) {
-        if (pendingRowSpanHeights[futureY] > 0) {
-          // For cells spanning multiple rows, reduce the pending height by the
-          // current row's height. Use math.max to ensure non-negative values,
-          // as the pending height may already be satisfied by earlier rows.
-          pendingRowSpanHeights[futureY] = math.max(
-            0.0,
-            pendingRowSpanHeights[futureY] - rowHeight,
-          );
-        }
-      }
+      rowHeight = math.max(rowHeight, requiredRowBottoms[y] - rowTop);
       rowTop += rowHeight;
     }
     return rowTop;
@@ -1435,7 +1426,9 @@ class RenderTable extends RenderBox {
       return constraints.constrain(Size.zero);
     }
     final List<double> widths = _computeColumnWidths(constraints);
-    final pendingRowSpanHeights = Float64List(rows);
+    // For every row, how far down from the top of the table it has to reach so
+    // that the rowSpan cells ending in it fit. See [computeMinIntrinsicHeight].
+    final requiredRowBottoms = Float64List(rows);
     final double tableWidth = widths.fold(0.0, (double a, double b) => a + b);
     var rowTop = 0.0;
     for (var y = 0; y < rows; y += 1) {
@@ -1477,9 +1470,9 @@ class RenderTable extends RenderBox {
               } else if (rowSpan > 1) {
                 final int targetY = y + rowSpan - 1;
                 if (targetY < rows) {
-                  pendingRowSpanHeights[targetY] = math.max(
-                    pendingRowSpanHeights[targetY],
-                    childSize.height,
+                  requiredRowBottoms[targetY] = math.max(
+                    requiredRowBottoms[targetY],
+                    rowTop + childSize.height,
                   );
                 }
               }
@@ -1489,22 +1482,7 @@ class RenderTable extends RenderBox {
         }
       }
 
-      final double pendingHeightForThisRow = pendingRowSpanHeights[y];
-      rowHeight = math.max(rowHeight, pendingHeightForThisRow);
-      pendingRowSpanHeights[y] = 0.0; // Reset current row
-
-      // Update pending heights - subtract rowHeight from future rows
-      for (int futureY = y + 1; futureY < rows; futureY++) {
-        if (pendingRowSpanHeights[futureY] > 0) {
-          // For cells spanning multiple rows, reduce the pending height by the
-          // current row's height. Use math.max to ensure non-negative values,
-          // as the pending height may already be satisfied by earlier rows.
-          pendingRowSpanHeights[futureY] = math.max(
-            0.0,
-            pendingRowSpanHeights[futureY] - rowHeight,
-          );
-        }
-      }
+      rowHeight = math.max(rowHeight, requiredRowBottoms[y] - rowTop);
       rowTop += rowHeight;
     }
     return constraints.constrain(Size(tableWidth, rowTop));
@@ -1530,7 +1508,9 @@ class RenderTable extends RenderBox {
     final spannedCells = TableSpannedCells._(rows: rows, columns: columns);
     // Use typed lists for predictable memory layout and faster indexed access.
     final columnStartPositions = Float64List(columns);
-    final remainingRowSpanHeights = Float64List(rows);
+    // For every row, how far down from the top of the table it has to reach so
+    // that the rowSpan cells ending in it fit. See the end of the first pass.
+    final requiredRowBottoms = Float64List(rows);
     final rowHeights = Float64List(rows);
     final beforeBaselineDistances = Float64List(rows);
     // Flat arrays in row-major order (index: y * columns + x) instead of
@@ -1698,9 +1678,9 @@ class RenderTable extends RenderBox {
             } else if (rowSpan > 1) {
               final int targetY = y + rowSpan - 1;
               if (targetY < rows) {
-                remainingRowSpanHeights[targetY] = math.max(
-                  remainingRowSpanHeights[targetY],
-                  childHeight,
+                requiredRowBottoms[targetY] = math.max(
+                  requiredRowBottoms[targetY],
+                  rowTop + childHeight,
                 );
               }
             }
@@ -1710,10 +1690,6 @@ class RenderTable extends RenderBox {
         }
       }
 
-      final double pendingHeightForThisRow = remainingRowSpanHeights[y];
-      rowHeight = math.max(rowHeight, pendingHeightForThisRow);
-      remainingRowSpanHeights[y] = 0.0; // Reset after use.
-
       if (haveBaseline) {
         if (y == 0) {
           _baselineDistance = beforeBaselineDistance;
@@ -1721,22 +1697,13 @@ class RenderTable extends RenderBox {
         rowHeight = math.max(rowHeight, beforeBaselineDistance + afterBaselineDistance);
       }
 
-      // Adjust pending heights for future rows by subtracting the current height.
-      // This has to use the final row height, including the height that
-      // baseline-aligned cells give the row.
-      for (int futureY = y + 1; futureY < rows; futureY++) {
-        if (remainingRowSpanHeights[futureY] > 0) {
-          // For cells spanning multiple rows, reduce the pending height by the
-          // current row's height. Use math.max to ensure non-negative values,
-          // as the pending height may already be satisfied by earlier rows.
-          remainingRowSpanHeights[futureY] = math.max(
-            0.0,
-            remainingRowSpanHeights[futureY] - rowHeight,
-          );
-        }
-      }
+      // A row that rowSpan cells end in has to reach down to the bottom of the
+      // tallest of them. rowTop is final here: every row above already has its
+      // final height, including the height its baseline-aligned cells give it.
+      rowHeight = math.max(rowHeight, requiredRowBottoms[y] - rowTop);
       rowHeights[y] = rowHeight;
       beforeBaselineDistances[y] = beforeBaselineDistance;
+      rowTop += rowHeight;
     }
 
     // Second layout pass: position children using final row heights.

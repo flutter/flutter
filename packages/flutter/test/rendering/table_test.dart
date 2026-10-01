@@ -929,6 +929,34 @@ void main() {
       expect(table.size.height, equals(300.0));
     });
 
+    test('rowSpan cells that start in different rows and end in the same row', () {
+      // (0, 0) spans all three rows and (1, 1) the last two. Row 1 has no cell
+      // of its own, so the last row has to make room for both: (0, 0) needs
+      // 100 from the top of the table, (1, 1) needs 70 from the top of row 1.
+      final table = RenderTable(
+        textDirection: TextDirection.ltr,
+        columns: 2,
+        rows: 3,
+        defaultColumnWidth: const FixedColumnWidth(100.0),
+      );
+      final RenderBox tall = sizedBox(100.0, 100.0);
+      tall.parentData = TableCellParentData()..rowSpan = 3;
+      table.setChild(0, 0, tall);
+      table.setChild(1, 0, sizedBox(100.0, 20.0));
+      final RenderBox lower = sizedBox(100.0, 70.0);
+      lower.parentData = TableCellParentData()..rowSpan = 2;
+      table.setChild(1, 1, lower);
+
+      layout(table, constraints: const BoxConstraints.tightFor(width: 200.0));
+
+      expect(table.getRowBox(0).height, 20.0);
+      expect(table.getRowBox(1).height, 0.0);
+      expect(table.getRowBox(2).height, 80.0);
+      expect(table.size.height, 100.0);
+      expect(table.getMinIntrinsicHeight(200.0), 100.0);
+      expect(table.getDryLayout(const BoxConstraints.tightFor(width: 200.0)).height, 100.0);
+    });
+
     test('rowSpan still grows the table when the rows it covers are shorter', () {
       // The rows the span covers only account for 40 of its 300, so the last row
       // of the span has to absorb the remaining 260.
