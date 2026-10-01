@@ -554,7 +554,9 @@ bool AndroidJvmInvoker::HandlePlatformMessage(const std::string& channel,
                         java_channel.obj(), nullptr, response_id,
                         static_cast<jlong>(0));
   }
-  return !fml::jni::CheckException(env);
+  // CheckException returns true when no exception was pending; it logs and
+  // clears a pending one and returns false.
+  return fml::jni::CheckException(env);
 }
 
 bool AndroidJvmInvoker::HandlePlatformMessageResponse(int32_t response_id,
@@ -581,7 +583,7 @@ bool AndroidJvmInvoker::HandlePlatformMessageResponse(int32_t response_id,
   env->CallVoidMethod(java_object.obj(),
                       g_handle_platform_message_response_method, response_id,
                       data_buf.obj());
-  return !fml::jni::CheckException(env);
+  return fml::jni::CheckException(env);
 }
 
 bool AndroidJvmInvoker::UpdateSemantics(
@@ -610,7 +612,7 @@ bool AndroidJvmInvoker::UpdateSemantics(
   env->CallVoidMethod(java_object.obj(), g_update_semantics_method,
                       direct_buffer.obj(), jstrings.obj(),
                       jstring_attribute_args.obj());
-  return !fml::jni::CheckException(env);
+  return fml::jni::CheckException(env);
 }
 
 bool AndroidJvmInvoker::UpdateCustomAccessibilityActions(
@@ -637,7 +639,7 @@ bool AndroidJvmInvoker::UpdateCustomAccessibilityActions(
   env->CallVoidMethod(java_object.obj(),
                       g_update_custom_accessibility_actions_method,
                       direct_actions_buffer.obj(), jstrings.obj());
-  return !fml::jni::CheckException(env);
+  return fml::jni::CheckException(env);
 }
 
 bool AndroidJvmInvoker::SetSemanticsTreeEnabled(bool enabled) {
@@ -654,7 +656,7 @@ bool AndroidJvmInvoker::SetSemanticsTreeEnabled(bool enabled) {
 
   env->CallVoidMethod(java_object.obj(), g_set_semantics_tree_enabled_method,
                       enabled);
-  return !fml::jni::CheckException(env);
+  return fml::jni::CheckException(env);
 }
 
 bool AndroidJvmInvoker::SetApplicationLocale(const std::string& locale) {
@@ -673,7 +675,7 @@ bool AndroidJvmInvoker::SetApplicationLocale(const std::string& locale) {
       fml::jni::StringToJavaString(env, locale);
   env->CallVoidMethod(java_object.obj(), g_set_application_locale_method,
                       jlocale.obj());
-  return !fml::jni::CheckException(env);
+  return fml::jni::CheckException(env);
 }
 
 bool AndroidJvmInvoker::OnFirstFrame() {
@@ -688,7 +690,7 @@ bool AndroidJvmInvoker::OnFirstFrame() {
     return false;
   }
   env->CallVoidMethod(java_object.obj(), g_on_first_frame_method);
-  return !fml::jni::CheckException(env);
+  return fml::jni::CheckException(env);
 }
 
 bool AndroidJvmInvoker::OnPreEngineRestart() {
@@ -703,12 +705,14 @@ bool AndroidJvmInvoker::OnPreEngineRestart() {
     return false;
   }
   env->CallVoidMethod(java_object.obj(), g_on_engine_restart_method);
-  return !fml::jni::CheckException(env);
+  return fml::jni::CheckException(env);
 }
 
 bool AndroidJvmInvoker::RequestDartDeferredLibrary(int loading_unit_id) {
   TRACE_EVENT1("flutter", "AndroidJvmInvoker::RequestDartDeferredLibrary",
                "loading_unit_id", std::to_string(loading_unit_id).c_str());
+  // TODO(mboetger): Unimplemented stub. Returns true without dispatching to
+  // FlutterJNI.requestDartDeferredLibrary.
   return true;
 }
 
@@ -716,6 +720,8 @@ bool AndroidJvmInvoker::DecodeImage(const uint8_t* data,
                                     size_t size,
                                     int64_t generator_handle) {
   TRACE_EVENT0("flutter", "AndroidJvmInvoker::DecodeImage");
+  // TODO(mboetger): Unimplemented stub. Returns true without dispatching to
+  // FlutterJNI.decodeImage.
   return true;
 }
 
