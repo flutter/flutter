@@ -226,22 +226,17 @@ Future<bool> shell(
   }
   Process process;
   if (Platform.isWindows) {
-    process = await Process.start(
-        'CMD.EXE',
-        <String>[
-          '/S',
-          '/C',
-          command,
-        ],
-        workingDirectory: directory.path);
+    process = await Process.start('CMD.EXE', <String>[
+      '/S',
+      '/C',
+      command,
+    ], workingDirectory: directory.path);
   } else {
-    process = await Process.start(
-        '/usr/bin/env',
-        <String>[
-          'bash',
-          command,
-        ],
-        workingDirectory: directory.path);
+    process = await Process.start('/usr/bin/env', <String>[
+      'bash',
+      '-c',
+      command,
+    ], workingDirectory: directory.path);
   }
   final output = <String>[];
   utf8.decoder
