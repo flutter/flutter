@@ -16,13 +16,16 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../vmservice.dart';
 import 'font_config_manager.dart';
 import 'test_device.dart';
+
+final _kVMServiceMessageRegExp = RegExp(
+  r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
+);
 
 /// Implementation of [TestDevice] with the Flutter Tester over a [Process].
 class FlutterTesterTestDevice extends TestDevice {
@@ -306,7 +309,7 @@ class FlutterTesterTestDevice extends TestDevice {
             (String line) async {
               logger.printTrace('test $id: Shell: $line');
 
-              final Match? match = globals.kVMServiceMessageRegExp.firstMatch(line);
+              final Match? match = _kVMServiceMessageRegExp.firstMatch(line);
               if (match != null) {
                 try {
                   final Uri uri = Uri.parse(match[1]!);

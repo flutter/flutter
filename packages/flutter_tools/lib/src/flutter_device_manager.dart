@@ -75,6 +75,7 @@ class FlutterDeviceManager extends DeviceManager {
            processManager: processManager,
            logger: logger,
            artifacts: artifacts,
+           platform: platform,
            nativeAssetsBuilder: nativeAssetsBuilder,
          ),
          MacOSDevices(
