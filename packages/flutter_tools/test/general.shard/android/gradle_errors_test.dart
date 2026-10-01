@@ -20,13 +20,17 @@ import '../../src/fakes.dart';
 
 void main() {
   late FileSystem fileSystem;
+  late Platform platform;
   late FakeProcessManager processManager;
+  late ProcessUtils processUtils;
   late BufferLogger testLogger;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    platform = FakePlatform();
     processManager = FakeProcessManager.empty();
     testLogger = BufferLogger.test();
+    processUtils = ProcessUtils(processManager: processManager, logger: testLogger);
   });
 
   group('gradleErrors', () {
@@ -83,8 +87,11 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(
         await networkErrorHandler.handler(
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
           usesAndroidX: true,
         ),
@@ -130,8 +137,11 @@ Caused by: java.io.EOFException: SSL peer shut down incorrectly
       expect(formatTestErrorMessage(errorMessage, remoteTerminatedHandshakeHandler), isTrue);
       expect(
         await remoteTerminatedHandshakeHandler.handler(
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
           usesAndroidX: true,
         ),
@@ -164,8 +174,11 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(
         await networkErrorHandler.handler(
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
           usesAndroidX: true,
         ),
@@ -196,8 +209,11 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(
         await networkErrorHandler.handler(
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
           usesAndroidX: true,
         ),
@@ -221,8 +237,11 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(
         await networkErrorHandler.handler(
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
           usesAndroidX: true,
         ),
@@ -262,8 +281,11 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(
         await networkErrorHandler.handler(
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
           usesAndroidX: true,
         ),
@@ -295,8 +317,11 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(
         await networkErrorHandler.handler(
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
           usesAndroidX: true,
         ),
@@ -339,8 +364,11 @@ Exception in thread "main" java.net.SocketException: Connection reset
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(
         await networkErrorHandler.handler(
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
           usesAndroidX: true,
         ),
@@ -370,8 +398,11 @@ A problem occurred configuring root project 'android'.
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(
         await networkErrorHandler.handler(
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
           usesAndroidX: true,
         ),
@@ -405,8 +436,11 @@ A problem occurred configuring root project 'android'.
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(
         await networkErrorHandler.handler(
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
           usesAndroidX: true,
         ),
@@ -439,8 +473,11 @@ java.base/sun.nio.ch.Net.connect0(Native Method)
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(
         await networkErrorHandler.handler(
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
           usesAndroidX: true,
         ),
@@ -463,10 +500,13 @@ Command: /home/android/gradlew assembleRelease
       expect(formatTestErrorMessage(errorMessage, permissionDeniedErrorHandler), isTrue);
       expect(
         await permissionDeniedErrorHandler.handler(
-          usesAndroidX: true,
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
+          usesAndroidX: true,
         ),
         equals(GradleBuildStatus.exit),
       );
@@ -496,10 +536,13 @@ Command: /home/android/gradlew assembleRelease
     testWithoutContext('handler', () async {
       expect(
         await permissionDeniedErrorHandler.handler(
-          usesAndroidX: true,
+          fileSystem: fileSystem,
           line: '',
           logger: testLogger,
+          platform: platform,
+          processUtils: processUtils,
           project: FakeFlutterProject(),
+          usesAndroidX: true,
         ),
         equals(GradleBuildStatus.exit),
       );
@@ -531,9 +574,11 @@ Command: /home/android/gradlew assembleRelease
 
     testWithoutContext('handler', () async {
       await licenseNotAcceptedHandler.handler(
-        line:
-            'You have not accepted the license agreements of the following SDK components: [foo, bar]',
+        fileSystem: fileSystem,
+        line: 'You have not accepted the license agreements of the following SDK components: [foo, bar]',
         logger: testLogger,
+        platform: platform,
+        processUtils: processUtils,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
       );
@@ -590,13 +635,15 @@ assembleFooTest
       );
 
       await flavorUndefinedHandler.handler(
+        fileSystem: fileSystem,
         line: '',
         logger: testLogger,
+        platform: platform,
+        processUtils: processUtils,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
         gradleUtils: FakeGradleUtils(),
         java: FakeJava(),
-        processUtils: ProcessUtils(processManager: processManager, logger: testLogger),
       );
 
       expect(
@@ -634,13 +681,15 @@ assembleProfile
       );
 
       await flavorUndefinedHandler.handler(
+        fileSystem: fileSystem,
         line: '',
         logger: testLogger,
+        platform: platform,
+        processUtils: processUtils,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
         gradleUtils: FakeGradleUtils(),
         java: FakeJava(),
-        processUtils: ProcessUtils(processManager: processManager, logger: testLogger),
       );
 
       expect(
@@ -669,8 +718,11 @@ assembleProfile
 
     testWithoutContext('suggestion', () async {
       await minSdkVersionHandler.handler(
+        fileSystem: fileSystem,
         line: stdoutLine,
         logger: testLogger,
+        platform: platform,
+        processUtils: processUtils,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
       );
@@ -709,8 +761,11 @@ assembleProfile
 
     testWithoutContext('suggestion', () async {
       await transformInputIssueHandler.handler(
+        fileSystem: fileSystem,
         line: '',
         logger: testLogger,
+        platform: platform,
+        processUtils: processUtils,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
       );
@@ -741,8 +796,11 @@ assembleProfile
 
     testWithoutContext('suggestion', () async {
       final GradleBuildStatus status = await javaHeapSpaceHandler.handler(
+        fileSystem: fileSystem,
         line: '> Java heap space',
         logger: testLogger,
+        platform: platform,
+        processUtils: processUtils,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
       );
@@ -775,11 +833,13 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
 
     testWithoutContext('suggestion', () async {
       await lockFileDepMissingHandler.handler(
+        fileSystem: fileSystem,
         line: '',
         logger: testLogger,
+        platform: fakePlatform('android'),
+        processUtils: processUtils,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
-        platform: fakePlatform('android'),
       );
 
       expect(
@@ -798,11 +858,13 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
 
   testWithoutContext('generates correct gradle command for Unix-like environment', () async {
     await lockFileDepMissingHandler.handler(
+      fileSystem: fileSystem,
       line: '',
       logger: testLogger,
+      platform: fakePlatform('linux'),
+      processUtils: processUtils,
       project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       usesAndroidX: true,
-      platform: fakePlatform('linux'),
     );
 
     expect(
@@ -821,11 +883,13 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
 
   testWithoutContext('generates correct gradle command for windows environment', () async {
     await lockFileDepMissingHandler.handler(
+      fileSystem: fileSystem,
       line: '',
       logger: testLogger,
+      platform: fakePlatform('windows'),
+      processUtils: processUtils,
       project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       usesAndroidX: true,
-      platform: fakePlatform('windows'),
     );
     expect(
       testLogger.statusText,
@@ -859,8 +923,11 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
 
     testWithoutContext('suggestion', () async {
       await incompatibleKotlinVersionHandler.handler(
+        fileSystem: fileSystem,
         line: '',
         logger: testLogger,
+        platform: platform,
+        processUtils: processUtils,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
       );
@@ -898,8 +965,11 @@ A problem occurred evaluating project ':app'.
 
     testWithoutContext('suggestion', () async {
       await outdatedGradleHandler.handler(
+        fileSystem: fileSystem,
         line: errorMessage,
         logger: testLogger,
+        platform: platform,
+        processUtils: processUtils,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
       );
@@ -949,8 +1019,11 @@ Execution failed for task ':app:checkDebugAarMetadata'.
 
     testWithoutContext('suggestion', () async {
       await minCompileSdkVersionHandler.handler(
+        fileSystem: fileSystem,
         line: errorMessage,
         logger: testLogger,
+        platform: platform,
+        processUtils: processUtils,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
       );
@@ -989,8 +1062,11 @@ An exception occurred applying plugin request [id: 'com.android.application']
 
     testWithoutContext('suggestion', () async {
       await incompatibleJavaAndAgpVersionsHandler.handler(
+        fileSystem: fileSystem,
         line: errorMessage,
         logger: testLogger,
+        platform: platform,
+        processUtils: processUtils,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
       );
@@ -1058,8 +1134,11 @@ at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:108)'''),
 
     testWithoutContext('suggestion', () async {
       final GradleBuildStatus status = await sslExceptionHandler.handler(
+        fileSystem: fileSystem,
         line: '',
         logger: testLogger,
+        platform: platform,
+        processUtils: processUtils,
         project: FakeFlutterProject(),
         usesAndroidX: true,
       );
@@ -1097,13 +1176,14 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''),
       fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
 
       final GradleBuildStatus result = await zipExceptionHandler.handler(
-        line: '',
-        logger: testLogger,
-        project: FakeFlutterProject(),
-        usesAndroidX: true,
         botDetector: const FakeBotDetector(false),
         fileSystem: fileSystem,
+        line: '',
+        logger: testLogger,
         platform: FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+        processUtils: processUtils,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
       );
 
       expect(result, equals(GradleBuildStatus.retry));
@@ -1119,13 +1199,14 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''),
       fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
 
       final GradleBuildStatus result = await zipExceptionHandler.handler(
-        line: '',
-        logger: testLogger,
-        project: FakeFlutterProject(),
-        usesAndroidX: true,
         botDetector: const FakeBotDetector(true),
         fileSystem: fileSystem,
+        line: '',
+        logger: testLogger,
         platform: FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+        processUtils: processUtils,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
       );
 
       expect(result, equals(GradleBuildStatus.retry));
@@ -1143,13 +1224,14 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''),
       final promptLogger = BufferLogger.test(terminal: _TestPromptTerminal('y'));
 
       final GradleBuildStatus result = await zipExceptionHandler.handler(
-        line: '',
-        logger: promptLogger,
-        project: FakeFlutterProject(),
-        usesAndroidX: true,
         botDetector: const FakeBotDetector(false),
         fileSystem: fileSystem,
+        line: '',
+        logger: promptLogger,
         platform: FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+        processUtils: processUtils,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
       );
 
       expect(result, equals(GradleBuildStatus.retry));
@@ -1166,13 +1248,14 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''),
       final promptLogger = BufferLogger.test(terminal: _TestPromptTerminal('n'));
 
       final GradleBuildStatus result = await zipExceptionHandler.handler(
-        line: '',
-        logger: promptLogger,
-        project: FakeFlutterProject(),
-        usesAndroidX: true,
         botDetector: const FakeBotDetector(false),
         fileSystem: fileSystem,
+        line: '',
+        logger: promptLogger,
         platform: FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+        processUtils: processUtils,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
       );
 
       expect(result, equals(GradleBuildStatus.retry));
@@ -1199,8 +1282,11 @@ Could not compile build file '…/example/android/build.gradle'.
 
     testWithoutContext('suggestion', () async {
       await incompatibleJavaAndGradleVersionsHandler.handler(
+        fileSystem: fileSystem,
         line: errorMessage,
         logger: testLogger,
+        platform: platform,
+        processUtils: processUtils,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
       );
@@ -1221,6 +1307,7 @@ Could not compile build file '…/example/android/build.gradle'.
 
   testWithoutContext('couldNotOpenCacheDirectoryHandler', () async {
     final GradleBuildStatus status = await couldNotOpenCacheDirectoryHandler.handler(
+      fileSystem: fileSystem,
       line: '''
 FAILURE: Build failed with an exception.
 
@@ -1233,6 +1320,8 @@ A problem occurred evaluating script.
    > Could not open cache directory 41rl0ui7kgmsyfwn97o2jypl6 (/Volumes/Work/s/w/ir/cache/gradle/caches/6.7/gradle-kotlin-dsl/41rl0ui7kgmsyfwn97o2jypl6).
       > Failed to create Jar file /Volumes/Work/s/w/ir/cache/gradle/caches/6.7/generated-gradle-jars/gradle-api-6.7.jar.''',
       logger: testLogger,
+      platform: platform,
+      processUtils: processUtils,
       project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       usesAndroidX: true,
     );
@@ -1251,8 +1340,11 @@ Execution failed for task ':app:bundleReleaseResources'.
     ''';
 
     await incompatibleCompileSdk35AndAgpVersionHandler.handler(
+      fileSystem: fileSystem,
       line: errorExample,
       logger: testLogger,
+      platform: platform,
+      processUtils: processUtils,
       project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       usesAndroidX: true,
     );
@@ -1287,8 +1379,11 @@ ERROR:/Users/mackall/.gradle/caches/transforms-3/bd2c84591857c6d4c308221ffece862
     ''';
 
     await r8DexingBugInAgp73Handler.handler(
+      fileSystem: fileSystem,
       line: errorExample,
       logger: testLogger,
+      platform: platform,
+      processUtils: processUtils,
       project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       usesAndroidX: true,
     );
@@ -1329,8 +1424,11 @@ FAILURE: Build failed with an exception.
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     await usageOfV1EmbeddingReferencesHandler.handler(
+      fileSystem: fileSystem,
       line: errorExample,
       logger: testLogger,
+      platform: platform,
+      processUtils: processUtils,
       project: project,
       usesAndroidX: true,
     );
@@ -1363,8 +1461,11 @@ Execution failed for task ':shared_preferences_android:compileReleaseJavaWithJav
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     await jlinkErrorWithJava21AndSourceCompatibility.handler(
+      fileSystem: fileSystem,
       line: errorExample,
       logger: testLogger,
+      platform: platform,
+      processUtils: processUtils,
       project: project,
       usesAndroidX: true,
     );
@@ -1391,8 +1492,11 @@ A problem occurred configuring project ':app'.
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     await missingNdkSourcePropertiesFile.handler(
+      fileSystem: fileSystem,
       line: unixErrorExample,
       logger: testLogger,
+      platform: platform,
+      processUtils: processUtils,
       project: project,
       usesAndroidX: true,
     );
@@ -1406,8 +1510,11 @@ A problem occurred configuring project ':app'.
 > [CXX1101] NDK at C:\Users\mackall\Library\Android\sdk\ndk\26.3.11579264 did not have a source.properties file
     ''';
     await missingNdkSourcePropertiesFile.handler(
+      fileSystem: fileSystem,
       line: windowsErrorExample,
       logger: testLogger,
+      platform: platform,
+      processUtils: processUtils,
       project: project,
       usesAndroidX: true,
     );
@@ -1438,8 +1545,11 @@ An exception occurred applying plugin request [id: 'kotlin-android']
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     await applyingKotlinAndroidPluginErrorHandler.handler(
+      fileSystem: fileSystem,
       line: applyingKotlinAndroidPluginErrorExample,
       logger: testLogger,
+      platform: platform,
+      processUtils: processUtils,
       project: project,
       usesAndroidX: true,
     );
@@ -1472,8 +1582,11 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     await useNewAgpDslErrorHandler.handler(
+      fileSystem: fileSystem,
       line: useNewAgpDslErrorHandlerExample,
       logger: testLogger,
+      platform: platform,
+      processUtils: processUtils,
       project: project,
       usesAndroidX: true,
     );
