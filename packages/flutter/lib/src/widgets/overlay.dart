@@ -1072,6 +1072,10 @@ mixin _RenderTheaterMixin on RenderBox {
   Iterable<RenderBox> _childrenInPaintOrder();
   Iterable<RenderBox> _childrenInHitTestOrder();
 
+  static bool _hasValidGeometry(RenderBox child) {
+    return child is! _RenderDeferredLayoutBox || child._hasValidGeometry;
+  }
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! StackParentData) {
@@ -1084,6 +1088,9 @@ mixin _RenderTheaterMixin on RenderBox {
     assert(!debugNeedsLayout);
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
     for (final RenderBox child in _childrenInPaintOrder()) {
+      if (!_hasValidGeometry(child)) {
+        continue;
+      }
       assert(!child.debugNeedsLayout);
       final childParentData = child.parentData! as StackParentData;
       baselineOffset = baselineOffset.minOf(
@@ -1140,6 +1147,9 @@ mixin _RenderTheaterMixin on RenderBox {
     var isHit = false;
     while (!isHit && iterator.moveNext()) {
       final RenderBox child = iterator.current;
+      if (!_hasValidGeometry(child)) {
+        continue;
+      }
       final childParentData = child.parentData! as StackParentData;
       final localChild = child;
       bool childHitTest(BoxHitTestResult result, Offset position) =>
@@ -1156,6 +1166,9 @@ mixin _RenderTheaterMixin on RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     for (final RenderBox child in _childrenInPaintOrder()) {
+      if (!_hasValidGeometry(child)) {
+        continue;
+      }
       final childParentData = child.parentData! as StackParentData;
       context.paintChild(child, childParentData.offset + offset);
     }
@@ -1566,7 +1579,11 @@ class _RenderTheater extends RenderBox
       visitor(child);
       final childParentData = child.parentData! as _TheaterParentData;
 
-      childParentData.visitOverlayPortalChildrenOnOverlayEntry(visitor);
+      childParentData.visitOverlayPortalChildrenOnOverlayEntry((RenderObject child) {
+        if (_RenderTheaterMixin._hasValidGeometry(child as RenderBox)) {
+          visitor(child);
+        }
+      });
       child = childParentData.nextSibling;
     }
   }
@@ -2595,6 +2612,8 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
     assert(debugNeedsLayout == _needsLayout);
     return _needsLayout;
   }
+
+  bool get _hasValidGeometry => !needsLayout && hasSize;
 
   bool _needsLayout = true;
   @override
