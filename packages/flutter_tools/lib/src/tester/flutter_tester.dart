@@ -11,6 +11,7 @@ import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../bundle_builder.dart';
@@ -18,7 +19,6 @@ import '../desktop_device.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
-import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
@@ -50,6 +50,7 @@ class FlutterTesterDevice extends Device {
     required super.logger,
     required this._fileSystem,
     required this._artifacts,
+    required this._platform,
     this._nativeAssetsBuilder,
   }) : _logger = logger,
        super(platformType: null, category: null, ephemeral: false);
@@ -59,6 +60,7 @@ class FlutterTesterDevice extends Device {
   final Logger _logger;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
+  final Platform _platform;
   final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   Process? _process;
@@ -173,9 +175,9 @@ class FlutterTesterDevice extends Device {
         command,
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
-          if (globals.platform.isWindows && _nativeAssetsBuilder != null)
+          if (_platform.isWindows && _nativeAssetsBuilder != null)
             'PATH':
-                '${_nativeAssetsBuilder.windowsBuildDirectory(project)};${globals.platform.environment['PATH']}',
+                '${_nativeAssetsBuilder.windowsBuildDirectory(project)};${_platform.environment['PATH']}',
         },
       );
       if (!debuggingOptions.debuggingEnabled) {
@@ -239,6 +241,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     required ProcessManager processManager,
     required Logger logger,
     required FlutterVersion flutterVersion,
+    required Platform platform,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : _testerDevice = FlutterTesterDevice(
          kTesterDeviceId,
@@ -247,6 +250,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
          processManager: processManager,
          logger: logger,
          flutterVersion: flutterVersion,
+         platform: platform,
          nativeAssetsBuilder: nativeAssetsBuilder,
        ),
        super('Flutter tester');
