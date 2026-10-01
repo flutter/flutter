@@ -13,27 +13,27 @@ import 'service_extensions.dart';
 /// service extension in [AccessibilityInspector].
 abstract final class AccessibilityInspectorKeys {
   /// Top-level response map key containing the map of semantics node IDs to
-  /// serialized node entries.
+  /// serialized [SemanticsNode] entries (from [SemanticsNode.toJson]).
   static const String data = 'data';
 
   /// Top-level response map key containing an error message if the semantics
   /// tree could not be retrieved.
   static const String error = 'error';
 
-  /// Entry map key containing the JSON serialized [SemanticsNode] (from
-  /// [SemanticsNode.toJson]).
-  static const String node = 'node';
-
-  /// Entry map key containing the list of accessibility issue maps detected on
-  /// the node.
+  /// Top-level response map key containing the list of accessibility issue maps
+  /// detected in the application.
   static const String issues = 'issues';
+
+  /// Issue map key containing the ID of the [SemanticsNode] associated with the
+  /// issue.
+  static const String nodeId = 'nodeId';
 
   /// Issue map key containing the [AccessibilityEvaluationType] `.name` of the
   /// violated accessibility rule.
   static const String rule = 'rule';
 
   /// Issue map key containing the human-readable [Violation.reason] describing
-  /// why the node violated the rule.
+  /// why the rule was violated.
   static const String description = 'description';
 }
 
@@ -120,7 +120,7 @@ class AccessibilityInspector {
       _ => const Size(48.0, 48.0),
     };
 
-    final nodeIssues = <int, List<Map<String, Object?>>>{};
+    final issues = <Map<String, Object?>>[];
 
     final evaluations = <AccessibilityEvaluation>[
       MinimumTapTargetEvaluation(size: minSize),
@@ -132,12 +132,11 @@ class AccessibilityInspector {
       final EvaluationResult result = await evaluation.evaluate(WidgetsBinding.instance);
       for (final Violation violation in result.violations) {
         if (violation.node.owner == semanticsOwner) {
-          nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
-            <String, Object?>{
-              AccessibilityInspectorKeys.rule: evaluation.type.name,
-              AccessibilityInspectorKeys.description: violation.reason,
-            },
-          );
+          issues.add(<String, Object?>{
+            AccessibilityInspectorKeys.nodeId: violation.node.id,
+            AccessibilityInspectorKeys.rule: evaluation.type.name,
+            AccessibilityInspectorKeys.description: violation.reason,
+          });
         }
       }
     }
@@ -151,10 +150,7 @@ class AccessibilityInspector {
         continue;
       }
 
-      nodes[node.id.toString()] = <String, Object?>{
-        AccessibilityInspectorKeys.node: node.toJson(),
-        AccessibilityInspectorKeys.issues: nodeIssues[node.id] ?? <Map<String, Object?>>[],
-      };
+      nodes[node.id.toString()] = node.toJson();
 
       for (final SemanticsNode child in node.debugListChildrenInOrder(
         DebugSemanticsDumpOrder.traversalOrder,
@@ -172,7 +168,10 @@ class AccessibilityInspector {
       }
     }
 
-    return <String, Object?>{AccessibilityInspectorKeys.data: nodes};
+    return <String, Object?>{
+      AccessibilityInspectorKeys.data: nodes,
+      AccessibilityInspectorKeys.issues: issues,
+    };
   }
 
   // TODO(hannah-hyj): https://github.com/flutter/devtools/issues/9991 - This returns the first RenderView with a SemanticsOwner.
