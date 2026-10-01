@@ -835,6 +835,7 @@ def run_android_tests(
     adb_path = 'adb'
 
   run_android_unittest('flutter_shell_native_unittests', android_variant, adb_path)
+  run_android_unittest('flutter_embedder_native_unittests', android_variant, adb_path)
   run_android_unittest('impeller_toolkit_android_unittests', android_variant, adb_path)
   run_android_unittest('impeller_vulkan_android_unittests', android_variant, adb_path)
 
