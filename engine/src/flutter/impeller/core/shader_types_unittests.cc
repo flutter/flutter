@@ -91,6 +91,52 @@ TEST(ShaderTypesTest, VertexAttributeFormatRejectsBadBitWidth) {
       VertexAttributeFormat::kInvalid);
 }
 
+TEST(ShaderTypesTest, VertexAttributeFormatUsesExplicitFormat) {
+  // Normalized formats have no shader-side spelling; the shader declares a
+  // float input and the explicit format says how the bytes are stored.
+  ShaderStageIOSlot slot = MakeSlot(ShaderType::kFloat, 32u, 4u);
+  slot.vertex_format = VertexAttributeFormat::kUNorm8x4;
+  EXPECT_EQ(slot.GetVertexAttributeFormat(), VertexAttributeFormat::kUNorm8x4);
+}
+
+TEST(ShaderTypesTest, VertexAttributeFormatAcceptsNarrowIntegersOfTheSameSign) {
+  ShaderStageIOSlot slot = MakeSlot(ShaderType::kSignedInt, 32u, 4u);
+  slot.vertex_format = VertexAttributeFormat::kSInt16x4;
+  EXPECT_EQ(slot.GetVertexAttributeFormat(), VertexAttributeFormat::kSInt16x4);
+}
+
+TEST(ShaderTypesTest, VertexAttributeFormatRejectsMismatchedScalarClass) {
+  ShaderStageIOSlot float_input = MakeSlot(ShaderType::kFloat, 32u, 4u);
+  float_input.vertex_format = VertexAttributeFormat::kUInt8x4;
+  EXPECT_EQ(float_input.GetVertexAttributeFormat(),
+            VertexAttributeFormat::kInvalid);
+
+  ShaderStageIOSlot int_input = MakeSlot(ShaderType::kSignedInt, 32u, 4u);
+  int_input.vertex_format = VertexAttributeFormat::kUNorm8x4;
+  EXPECT_EQ(int_input.GetVertexAttributeFormat(),
+            VertexAttributeFormat::kInvalid);
+
+  ShaderStageIOSlot unsigned_input =
+      MakeSlot(ShaderType::kUnsignedInt, 32u, 4u);
+  unsigned_input.vertex_format = VertexAttributeFormat::kSInt16x4;
+  EXPECT_EQ(unsigned_input.GetVertexAttributeFormat(),
+            VertexAttributeFormat::kInvalid);
+}
+
+TEST(ShaderTypesTest, VertexAttributeFormatRejectsExplicitFormatOnMatrix) {
+  ShaderStageIOSlot slot = MakeSlot(ShaderType::kFloat, 32u, 4u, 4u);
+  slot.vertex_format = VertexAttributeFormat::kFloat32x4;
+  EXPECT_EQ(slot.GetVertexAttributeFormat(), VertexAttributeFormat::kInvalid);
+}
+
+TEST(ShaderTypesTest, VertexAttributeFormatIsPartOfSlotIdentity) {
+  ShaderStageIOSlot derived = MakeSlot(ShaderType::kFloat, 32u, 4u);
+  ShaderStageIOSlot explicit_format = derived;
+  explicit_format.vertex_format = VertexAttributeFormat::kUNorm8x4;
+  EXPECT_FALSE(derived == explicit_format);
+  EXPECT_NE(derived.GetHash(), explicit_format.GetHash());
+}
+
 TEST(ShaderTypesTest, VertexAttributeFormatRejectsUnsupportedScalarKinds) {
   EXPECT_EQ(MakeSlot(ShaderType::kBoolean, 8u, 1u).GetVertexAttributeFormat(),
             VertexAttributeFormat::kInvalid);
