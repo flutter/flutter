@@ -14,48 +14,68 @@ import 'package:flutter_devicelab/tasks/integration_tests.dart';
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.linux;
   await task(() async {
-    const readyMarker = 'OPENBOX_READY';
-    Process? wmProcess;
+    // This test requires a window manager in order to test out placement.
+    // On a normal linux machine, you already have a window manager running -
+    // GNOME, KDE, etc.  CICD requires us starting one.
+    final windowManager = WindowManager();
+    await windowManager.tryStart();
+
     try {
-      final wmReady = Completer<void>();
-      wmProcess = await startProcess('openbox', const <String>[
+      return await createWindowingDriverTest()();
+    } finally {
+      windowManager.tryKill();
+    }
+  });
+}
+
+class WindowManager {
+  static const readyMarker = 'OPENBOX_READY';
+
+  Process? _process;
+
+  Future<void> tryStart() async {
+    try {
+      final windowManagerReady = Completer<void>();
+
+      final Process process = _process = await startProcess('openbox', const <String>[
         '--sm-disable',
         '--startup',
         'echo $readyMarker',
       ]);
-      wmProcess.stdout
+      process.stdout
           .transform<String>(const Utf8Decoder())
           .transform<String>(const LineSplitter())
           .listen((String line) {
-            print('[openbox stdout] $line');
-            if (line.contains(readyMarker) && !wmReady.isCompleted) {
-              wmReady.complete();
+            stdout.writeln('[openbox stdout] $line');
+            if (line.contains(readyMarker) && !windowManagerReady.isCompleted) {
+              windowManagerReady.complete();
             }
           });
-      wmProcess.stderr
+      process.stderr
           .transform<String>(const Utf8Decoder())
           .transform<String>(const LineSplitter())
           .listen((String line) {
-            print('[openbox stderr] $line');
+            stderr.writeln('[openbox stderr] $line');
           });
       unawaited(
-        wmProcess.exitCode.then((_) {
-          if (!wmReady.isCompleted) {
-            wmReady.complete();
+        process.exitCode.then((_) {
+          if (!windowManagerReady.isCompleted) {
+            windowManagerReady.complete();
           }
         }),
       );
-      await wmReady.future.timeout(
+      await windowManagerReady.future.timeout(
         const Duration(seconds: 5),
         onTimeout: () => print('Timed out waiting for openbox startup marker.'),
       );
     } on ProcessException catch (e) {
-      print('Could not start openbox: $e');
+      // It is OK for this to fail - you may not have openbox on your system and
+      // the test will continue to run. On CICD, the test will fail.
+      stderr.writeln('Could not start openbox: $e');
     }
-    try {
-      return await createWindowingDriverTest()();
-    } finally {
-      wmProcess?.kill();
-    }
-  });
+  }
+
+  void tryKill() {
+    _process?.kill();
+  }
 }
