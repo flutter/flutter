@@ -1184,6 +1184,19 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   // An eye-balled value for a smooth scrolling speed.
   static const double _kDefaultSelectToScrollVelocityScalar = 30;
 
+  // The position synthesized for a selection edge that lies before this
+  // scrollable's content, in this scrollable's local coordinates.
+  //
+  // This is one pixel outside the content origin rather than the origin itself
+  // so that it never lands inside a nested scrollable positioned at the origin
+  // (for example the inner scrollable of a [TwoDimensionalScrollable], or a
+  // horizontal list that is the first child of a vertical list). A nested
+  // scrollable decides whether the selection started inside it from the first
+  // position it receives; a synthesized position at its own top-left would make
+  // it believe it owns the drag and auto scroll a selection that started
+  // outside it. See https://github.com/flutter/flutter/issues/181169.
+  static const Offset _kBeforeContentOrigin = Offset(-1, -1);
+
   final ScrollableState state;
   final EdgeDraggingAutoScroller _autoScroller;
   bool _scheduledLayoutChange = false;
@@ -1319,10 +1332,11 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     if (!_selectionStartsInScrollable) {
       // If the selection starts outside of the scrollable, selecting across the
       // scrollable boundary will act as selecting the entire content in the
-      // scrollable. This logic move the offset to the 0.0 or infinity to cover
-      // the entire content if the input position is outside of the scrollable.
+      // scrollable. This logic moves the offset to just before the content
+      // origin or to infinity to cover the entire content if the input position
+      // is outside of the scrollable.
       if (localPosition.dy < 0 || localPosition.dx < 0) {
-        return box.localToGlobal(Offset.zero);
+        return box.localToGlobal(_kBeforeContentOrigin);
       }
       if (localPosition.dy > box.size.height || localPosition.dx > box.size.width) {
         return Offset.infinite;
