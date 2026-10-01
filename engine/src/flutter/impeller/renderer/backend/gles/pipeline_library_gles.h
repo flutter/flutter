@@ -166,8 +166,8 @@ class PipelineLibraryGLES final
   ///             before it finishes. FinishCompletedPipelines or
   ///             FinishPendingPipelines checks the link later and sets
   ///             deferred_promise. That requires
-  ///             GL_KHR_parallel_shader_compile and a thread that runs a
-  ///             PipelineCompileQueueGLES job.
+  ///             GL_KHR_parallel_shader_compile and the thread that runs
+  ///             PipelineCompileQueueGLES jobs.
   ///
   static std::shared_ptr<PipelineGLES> CreatePipeline(
       const std::weak_ptr<PipelineLibrary>& weak_library,

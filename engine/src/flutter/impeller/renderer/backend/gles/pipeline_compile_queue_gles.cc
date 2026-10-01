@@ -61,7 +61,7 @@ void PipelineCompileQueueGLES::PostJob(const fml::closure& job) {
         std::static_pointer_cast<PipelineCompileQueueGLES>(weak_queue.lock());
     if (!queue) {
       // The queue is gone, so there is nothing to account the job to, and the
-      // job still runs as it did before.
+      // job still runs.
       job();
       return;
     }

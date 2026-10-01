@@ -130,12 +130,16 @@ void* DeferredLinkResolver(const char* name) {
 
 }  // namespace
 
-DeferredLinkHarness::DeferredLinkHarness(size_t max_pending_links) {
+DeferredLinkHarness::DeferredLinkHarness(size_t max_pending_links,
+                                         bool parallel_shader_compile) {
   g_deferred_links = &state;
   reset_deferred_links.SetClosure([]() { g_deferred_links = nullptr; });
-  mock_gles =
-      MockGLES::Init(std::vector<const char*>{"GL_KHR_parallel_shader_compile"},
-                     "OpenGL ES 3.0 (ANGLE 2.1.0)", DeferredLinkResolver);
+  std::vector<const char*> extensions;
+  if (parallel_shader_compile) {
+    extensions.push_back("GL_KHR_parallel_shader_compile");
+  }
+  mock_gles = MockGLES::Init(extensions, "OpenGL ES 3.0 (ANGLE 2.1.0)",
+                             DeferredLinkResolver);
   runner = std::make_shared<DeferredLinkRunner>();
   context = ContextGLES::Create(
       Flags{}, std::make_unique<ProcTableGLES>(DeferredLinkResolver),

@@ -218,9 +218,9 @@ void RunDeferredLink(bool fail_compile,
     state.fail_link = false;
     desc.SetSampleCount(SampleCount::kCount1);
     desc.SetColorAttachmentDescriptor(0, ColorAttachmentDescriptor{});
-    // Next reaction on this thread creates second outside of a queue job, so
-    // it links synchronously. The abandoned program left the cache, so second
-    // links a new one, and retry reuses it.
+    // Next reaction on this thread creates second. The queue is idle, so its
+    // deferred link finishes at once. The abandoned program left the cache, so
+    // second links a new one, and retry reuses it.
     PipelineFuture<PipelineDescriptor> retry =
         library->GetPipeline(desc, false, true);
     ASSERT_TRUE(IsReady(retry));
@@ -389,6 +389,31 @@ TEST(PipelineLibraryGLESDeferredTest, EagerJobLinksSynchronously) {
   ASSERT_TRUE(IsReady(future));
   EXPECT_NE(future.Get(), nullptr);
   EXPECT_EQ(harness.state.link_queries, 1);
+}
+
+// Drivers without GL_KHR_parallel_shader_compile have no
+// GL_COMPLETION_STATUS_KHR, so an async job must link synchronously
+TEST(PipelineLibraryGLESDeferredTest,
+     AsyncJobWithoutExtensionLinksSynchronously) {
+  DeferredLinkHarness harness(/*max_pending_links=*/4,
+                              /*parallel_shader_compile=*/false);
+  PipelineDescriptor desc = harness.desc;
+  PipelineFuture<PipelineDescriptor> first =
+      harness.library->GetPipeline(desc, /*async=*/true, true);
+  desc.SetSampleCount(SampleCount::kCount4);
+  PipelineFuture<PipelineDescriptor> second =
+      harness.library->GetPipeline(desc, /*async=*/true, true);
+  ASSERT_FALSE(IsReady(first));
+  // Job of second is still queued, so a deferred link of first would stay
+  // unchecked
+  harness.runner->RunOne();
+  ASSERT_TRUE(IsReady(first));
+  EXPECT_NE(first.Get(), nullptr);
+  EXPECT_EQ(harness.state.link_queries, 1);
+  harness.runner->RunAll();
+  ASSERT_TRUE(IsReady(second));
+  EXPECT_NE(second.Get(), nullptr);
+  EXPECT_EQ(harness.state.completion_queries, 0);
 }
 
 TEST(PipelineLibraryGLESDeferredTest,

@@ -74,6 +74,8 @@ struct DeferredLinkState {
 
 /// Holds a MockGLES context with an ANGLE version and
 /// GL_KHR_parallel_shader_compile, so async requests take the deferred path.
+/// With parallel_shader_compile false the extension is missing, so they link
+/// synchronously.
 /// Jobs run only in RunOne or RunAll, so a test can check state between 2 jobs.
 struct DeferredLinkHarness {
   DeferredLinkState state;
@@ -84,7 +86,8 @@ struct DeferredLinkHarness {
   std::shared_ptr<ToggleWorker> worker;
   std::shared_ptr<PipelineLibrary> library;
   PipelineDescriptor desc;
-  explicit DeferredLinkHarness(size_t max_pending_links);
+  explicit DeferredLinkHarness(size_t max_pending_links,
+                               bool parallel_shader_compile = true);
 };
 
 bool IsReady(const PipelineFuture<PipelineDescriptor>& future);

@@ -36,9 +36,8 @@ static size_t MaxPendingLinks() {
   return std::clamp<size_t>(std::thread::hardware_concurrency() / 2, 1, 4);
 }
 
-// Only ANGLE is enabled for now. It cross compiles every program to HLSL,
-// which is what makes a link expensive, and it is the only GLES driver the
-// change was measured on.
+// Only ANGLE is enabled. It cross compiles every program to HLSL, which is
+// what makes a link expensive.
 static bool HasParallelShaderCompile(
     const std::shared_ptr<ReactorGLES>& reactor) {
   if (!reactor) {
@@ -159,7 +158,8 @@ struct ProgramShaders {
 };
 
 //------------------------------------------------------------------------------
-/// @brief      Compiles both shaders and starts the program link.
+/// @brief      Compiles vertex and fragment shaders, attaches them to the
+///             program and starts linking it.
 ///
 ///             With GL_KHR_parallel_shader_compile, a status query waits for
 ///             the compiler, so a deferred link leaves each blocking status
@@ -415,6 +415,9 @@ std::shared_ptr<PipelineGLES> PipelineLibraryGLES::CreatePipeline(
   }
 
   if (deferred_promise) {
+    // A deferred link polls GL_COMPLETION_STATUS_KHR, which drivers without
+    // GL_KHR_parallel_shader_compile reject
+    FML_DCHECK(library.SupportsParallelShaderCompile());
     ProgramShaders shaders;
     if (!has_cached_program) {
       absl::StatusOr<ProgramShaders> started = StartProgramLink(
@@ -527,7 +530,7 @@ void PipelineLibraryGLES::WatchQueueForDrain() {
       return;
     }
     // An accepted operation still waits for a reaction of this thread when the
-    // reactor could not react now, and that reaction never comes once the
+    // reactor could not react now, and that reaction may never come once the
     // thread gives up the context, so we check the list as well.
     bool still_pending = false;
     {
@@ -603,7 +606,7 @@ std::shared_ptr<PipelineGLES> PipelineLibraryGLES::FinishPipeline(
     const ReactorGLES& reactor,
     const PendingPipeline& item) {
   const auto& pipeline = item.pipeline;
-  // StartProgramLink returns both shaders or none.
+  // StartProgramLink returns vertex and fragment shaders together or neither.
   const bool owns_link = item.vert_shader != 0;
 
   absl::Status link_result = absl::OkStatus();
@@ -691,17 +694,13 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
   std::shared_ptr<ReactorGLES> reactor = reactor_;
   // A synchronous caller waits for the future on this thread, so only an
   // async job may return before its program is linked.
+  const bool may_defer_link = async && supports_parallel_shader_compile_;
   // The queue owns this job while it waits, so a strong reference here would
   // keep the queue alive through the job it holds. A task runner that drops
   // its tasks would then leak both and leave the promise unset.
-  std::weak_ptr<PipelineCompileQueueGLES> weak_compile_queue;
-  if (async && supports_parallel_shader_compile_) {
-    weak_compile_queue = compile_queue_;
-  } else {
-    weak_compile_queue = std::weak_ptr<PipelineCompileQueueGLES>();
-  }
+  std::weak_ptr<PipelineCompileQueueGLES> weak_compile_queue = compile_queue_;
   auto generation_task = [promise, weak_this, descriptor, vert_function,
-                          frag_function, threadsafe, reactor,
+                          frag_function, threadsafe, reactor, may_defer_link,
                           weak_compile_queue](bool eager) {
     auto thiz = weak_this.lock();
     if (!thiz) {
@@ -714,13 +713,14 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
                                                vert_function,       //
                                                frag_function,       //
                                                threadsafe,          //
+                                               may_defer_link,      //
                                                weak_compile_queue,  //
                                                eager                //
     ](const ReactorGLES& reactor) {
-      // The job that runs this holds the queue, so the lock succeeds while a
-      // job of it runs on this thread.
+      // Pending links are checked when the queue drains, so a link is deferred
+      // only while the queue exists.
       auto compile_queue = weak_compile_queue.lock();
-      if (!eager && compile_queue) {
+      if (may_defer_link && !eager && compile_queue) {
         // The promise is set later unless the pipeline fails right away.
         if (!CreatePipeline(weak_this, descriptor, vert_function, frag_function,
                             threadsafe, promise)) {
