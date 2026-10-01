@@ -408,14 +408,16 @@ class Dart2JSTarget extends Dart2WebTarget {
   Iterable<File> buildFiles(Environment environment) {
     final String mainJsName =
         (getBuildConfig(environment)['mainJsPath'] as String?) ?? 'main.dart.js';
-    final String mainJsMapName = compilerConfig.webContentHash
+    final String? mainJsMapName = !compilerConfig.sourceMaps
+        ? null
+        : compilerConfig.webContentHash
         ? _resolveHashedBasename(environment.buildDir, _mainJsMapRegex, 'main.dart.js.map')
         : '$mainJsName.map';
     return environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
       if (file.basename == mainJsName) {
         return true;
       }
-      if (compilerConfig.sourceMaps && file.basename == mainJsMapName) {
+      if (mainJsMapName != null && file.basename == mainJsMapName) {
         return true;
       }
       if (_partFileRegex.hasMatch(file.basename)) {
@@ -671,7 +673,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final String mainWasmName = (config['mainWasmPath'] as String?) ?? 'main.dart.wasm';
     final String jsSupportName = (config['jsSupportRuntimePath'] as String?) ?? 'main.dart.mjs';
     const mainWasmMapName = 'main.dart.wasm.map';
-    final String jsSupportMapName = compilerConfig.webContentHash
+    final String? jsSupportMapName = !compilerConfig.sourceMaps
+        ? null
+        : compilerConfig.webContentHash
         ? _resolveHashedBasename(environment.buildDir, _mainMjsMapRegex, 'main.dart.mjs.map')
         : '$jsSupportName.map';
 
