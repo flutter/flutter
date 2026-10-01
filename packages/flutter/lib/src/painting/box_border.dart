@@ -90,8 +90,8 @@ abstract class BoxBorder extends ShapeBorder {
 
   /// Creates a [Border] with symmetrical vertical and horizontal sides.
   ///
-  /// The 'vertical' argument refers to the vertical sides ([Border.left] and
-  /// [Border.right]), and the 'horizontal' argument refers to the horizontal
+  /// The `vertical` argument refers to the vertical sides ([Border.left] and
+  /// [Border.right]), and the `horizontal` argument refers to the horizontal
   /// sides ([Border.top] and [Border.bottom]).
   ///
   /// All arguments default to [BorderSide.none].
@@ -446,8 +446,8 @@ class Border extends BoxBorder {
 
   /// Creates a border with symmetrical vertical and horizontal sides.
   ///
-  /// The 'vertical' argument refers to the vertical sides ([left] and [right]),
-  /// and the 'horizontal' argument refers to the horizontal sides ([top] and [bottom]).
+  /// The `vertical` argument refers to the vertical sides ([left] and [right]),
+  /// and the `horizontal` argument refers to the horizontal sides ([top] and [bottom]).
   ///
   /// All arguments default to [BorderSide.none].
   const Border.symmetric({
