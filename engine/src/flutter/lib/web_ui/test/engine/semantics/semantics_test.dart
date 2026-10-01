@@ -6598,10 +6598,7 @@ void _testLoadingSpinner() {
         tester.updateNode(
           id: 3,
           label: 'Blocked button',
-          flags: const ui.SemanticsFlags(
-            isButton: true,
-            isFocused: ui.Tristate.isFalse,
-          ),
+          flags: const ui.SemanticsFlags(isButton: true, isFocused: ui.Tristate.isFalse),
           rect: const ui.Rect.fromLTRB(0, 100, 100, 150),
         ),
       ],
@@ -6676,10 +6673,7 @@ void _testLoadingSpinner() {
         tester.updateNode(
           id: 3,
           label: 'Blocked button',
-          flags: const ui.SemanticsFlags(
-            isButton: true,
-            isFocused: ui.Tristate.isFalse,
-          ),
+          flags: const ui.SemanticsFlags(isButton: true, isFocused: ui.Tristate.isFalse),
           rect: const ui.Rect.fromLTRB(0, 100, 100, 150),
         ),
       ],
