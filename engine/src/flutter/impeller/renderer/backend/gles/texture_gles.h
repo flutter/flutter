@@ -171,6 +171,18 @@ class TextureGLES final : public Texture,
   /// false, the FBO must be re-attached before use.
   bool CachedFBOMatchesSubresource(uint32_t mip_level, uint32_t slice) const;
 
+  /// Retrieve the `SamplerDescriptor::ToKey` of the sampler most recently
+  /// configured on this texture's GL object, if any.
+  std::optional<uint64_t> GetConfiguredSamplerKey() const {
+    return configured_sampler_key_;
+  }
+
+  /// Record the `SamplerDescriptor::ToKey` of the sampler configured on this
+  /// texture's GL object.
+  void SetConfiguredSamplerKey(uint64_t key) const {
+    configured_sampler_key_ = key;
+  }
+
   // Visible for testing.
   std::optional<HandleGLES> GetSyncFence() const;
 
@@ -201,6 +213,7 @@ class TextureGLES final : public Texture,
   UniqueHandleGLES cached_fbo_;
   uint32_t cached_fbo_mip_level_ = 0;
   uint32_t cached_fbo_slice_ = 0;
+  mutable std::optional<uint64_t> configured_sampler_key_;
   bool is_valid_ = false;
 
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,

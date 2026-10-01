@@ -25,6 +25,8 @@ FML_TEST_CLASS(BufferBindingsGLESTest,
                BindsTexturesAcrossThePerStageUnitBoundary);
 FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondThePerStageLimit);
 FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit);
+FML_TEST_CLASS(BufferBindingsGLESTest,
+               SkipsRedundantSamplerConfigurationOnSameTexture);
 }  // namespace testing
 
 //------------------------------------------------------------------------------
@@ -76,6 +78,8 @@ class BufferBindingsGLES {
                   RejectsTexturesBeyondThePerStageLimit);
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
                   RejectsTexturesBeyondTheCombinedLimit);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  SkipsRedundantSamplerConfigurationOnSameTexture);
   //----------------------------------------------------------------------------
   /// @brief      The arguments to glVertexAttribPointer.
   ///
