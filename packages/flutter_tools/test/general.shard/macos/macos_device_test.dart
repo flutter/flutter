@@ -32,6 +32,7 @@ void main() {
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      flutterVersion: FakeFlutterVersion(),
     );
     final package = FakeMacOSApp();
 
@@ -63,6 +64,7 @@ void main() {
       ]),
       logger: BufferLogger.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      flutterVersion: FakeFlutterVersion(),
     );
     final package = FakeMacOSApp();
 
@@ -88,6 +90,7 @@ void main() {
         logger: BufferLogger.test(),
         platform: linux,
         operatingSystemUtils: FakeOperatingSystemUtils(),
+        flutterVersion: FakeFlutterVersion(),
         macOSWorkflow: MacOSWorkflow(
           featureFlags: TestFeatureFlags(isMacOSEnabled: true),
           platform: linux,
@@ -106,6 +109,7 @@ void main() {
         logger: BufferLogger.test(),
         platform: macOS,
         operatingSystemUtils: FakeOperatingSystemUtils(),
+        flutterVersion: FakeFlutterVersion(),
         macOSWorkflow: MacOSWorkflow(featureFlags: TestFeatureFlags(), platform: macOS),
       );
 
@@ -120,6 +124,7 @@ void main() {
       logger: BufferLogger.test(),
       platform: macOS,
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      flutterVersion: FakeFlutterVersion(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
@@ -136,6 +141,7 @@ void main() {
       logger: BufferLogger.test(),
       platform: macOS,
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      flutterVersion: FakeFlutterVersion(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
@@ -152,6 +158,7 @@ void main() {
       logger: BufferLogger.test(),
       platform: macOS,
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      flutterVersion: FakeFlutterVersion(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
@@ -173,6 +180,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      flutterVersion: FakeFlutterVersion(),
     );
 
     fileSystem.file('pubspec.yaml').createSync();
@@ -190,6 +198,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: fakeOperatingSystemUtils,
+      flutterVersion: FakeFlutterVersion(),
     );
 
     expect(await device.targetPlatformDisplayName, 'darwin-x64');
@@ -203,6 +212,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: fakeOperatingSystemUtils,
+      flutterVersion: FakeFlutterVersion(),
     );
 
     expect(await device.targetPlatformDisplayName, 'darwin-arm64');
@@ -215,6 +225,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      flutterVersion: FakeFlutterVersion(),
     );
     fileSystem.file('pubspec.yaml').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
@@ -229,6 +240,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      flutterVersion: FakeFlutterVersion(),
     );
     const debugPath = 'debug/executable';
     const profilePath = 'profile/executable';

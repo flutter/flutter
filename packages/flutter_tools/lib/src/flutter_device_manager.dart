@@ -84,6 +84,7 @@ class FlutterDeviceManager extends DeviceManager {
            platform: platform,
            fileSystem: fileSystem,
            operatingSystemUtils: operatingSystemUtils,
+           flutterVersion: flutterVersion,
          ),
          MacOSDesignedForIPadDevices(
            processManager: processManager,

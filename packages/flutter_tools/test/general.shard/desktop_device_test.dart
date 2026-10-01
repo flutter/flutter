@@ -660,7 +660,7 @@ class FakeMacOSDevice extends MacOSDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
-  });
+  }) : super(flutterVersion: FakeFlutterVersion());
 
   @override
   String get name => 'dummy';

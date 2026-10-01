@@ -29,6 +29,7 @@ import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cache.dart';
 import 'cmake_project.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -130,50 +131,41 @@ class FlutterProject {
     FlutterManifest manifest,
     this._exampleManifest, {
     this._buildDirectory,
-    this._cache,
     this._cocoaPods,
-    this._config,
     this._featureFlags,
-    this._fileSystemUtils,
     this._logger,
-    this._platform,
     this._plistParser,
-    this._processManager,
     this._projectFactory,
     this._templateRenderer,
-    this._terminal,
+    this._toolContext,
     this._xcode,
     this._xcodeProjectInterpreter,
   }) {
     _setManifest(manifest);
   }
 
-  final Cache? _cache;
   final CocoaPods? _cocoaPods;
-  final Config? _config;
   final FeatureFlags? _featureFlags;
-  final FileSystemUtils? _fileSystemUtils;
   final Logger? _logger;
-  final Platform? _platform;
   final PlistParser? _plistParser;
-  final ProcessManager? _processManager;
   final FlutterProjectFactory? _projectFactory;
   final TemplateRenderer? _templateRenderer;
-  final AnsiTerminal? _terminal;
+  final ToolContext? _toolContext;
   final Xcode? _xcode;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
-  Cache get projectCache => _cache ?? globals.cache;
+  Cache get projectCache => _toolContext?.cache ?? globals.cache;
   CocoaPods? get projectCocoaPods => _cocoaPods ?? globals.cocoaPods;
-  Config get projectConfig => _config ?? globals.config;
+  Config get projectConfig => _toolContext?.config ?? globals.config;
   FeatureFlags get projectFeatureFlags => _featureFlags ?? featureFlags;
-  FileSystemUtils get projectFileSystemUtils => _fileSystemUtils ?? globals.fsUtils;
-  Logger get projectLogger => _logger ?? globals.logger;
-  Platform get projectPlatform => _platform ?? globals.platform;
+  FileSystemUtils get projectFileSystemUtils => _toolContext?.fileSystemUtils ?? globals.fsUtils;
+  Logger get projectLogger => _logger ?? _toolContext?.logger ?? globals.logger;
+  Platform get projectPlatform => _toolContext?.platform ?? globals.platform;
   PlistParser get projectPlistParser => _plistParser ?? globals.plistParser;
-  ProcessManager get projectProcessManager => _processManager ?? globals.processManager;
+  ProcessManager get projectProcessManager =>
+      _toolContext?.processManager ?? globals.processManager;
   TemplateRenderer get projectTemplateRenderer => _templateRenderer ?? globals.templateRenderer;
-  AnsiTerminal get projectTerminal => _terminal ?? globals.terminal;
+  AnsiTerminal get projectTerminal => _toolContext?.terminal ?? globals.terminal;
   Xcode? get projectXcode => _xcode ?? globals.xcode;
   XcodeProjectInterpreter? get projectXcodeProjectInterpreter =>
       _xcodeProjectInterpreter ?? globals.xcodeProjectInterpreter;

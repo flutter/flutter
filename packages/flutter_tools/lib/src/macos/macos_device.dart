@@ -14,6 +14,7 @@ import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../project.dart';
+import '../version.dart';
 import 'application_package.dart';
 import 'build_macos.dart';
 import 'macos_workflow.dart';
@@ -25,6 +26,7 @@ class MacOSDevice extends DesktopDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
+    required this._flutterVersion,
   }) : _processManager = processManager,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -35,6 +37,7 @@ class MacOSDevice extends DesktopDevice {
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
+  final FlutterVersion _flutterVersion;
 
   @override
   Future<bool> isSupported() async => true;
@@ -74,6 +77,7 @@ class MacOSDevice extends DesktopDevice {
       buildInfo: buildInfo,
       fileSystem: _fileSystem,
       flutterProject: FlutterProject.current(),
+      flutterVersion: _flutterVersion,
       logger: _logger,
       operatingSystemUtils: _operatingSystemUtils,
       processUtils: ProcessUtils(processManager: _processManager, logger: _logger),
@@ -115,6 +119,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
     required this._logger,
     required this._fileSystem,
     required this._operatingSystemUtils,
+    required this._flutterVersion,
   }) : super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
@@ -123,6 +128,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
+  final FlutterVersion _flutterVersion;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -144,6 +150,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
         logger: _logger,
         fileSystem: _fileSystem,
         operatingSystemUtils: _operatingSystemUtils,
+        flutterVersion: _flutterVersion,
       ),
     ];
   }

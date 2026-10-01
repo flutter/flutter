@@ -444,7 +444,7 @@ void main() {
             projectDirectory,
             manifest,
             manifest,
-            cache: FakeCache(olderThanToolsStamp: true),
+            toolContext: FakeToolContext(cache: FakeCache(olderThanToolsStamp: true), fs: fs),
           );
           final project = IosProject.fromFlutter(flutterProject);
           expect(project.lldbInitFile, isNot(exists));
@@ -465,7 +465,7 @@ void main() {
             projectDirectory,
             manifest,
             manifest,
-            cache: FakeCache(olderThanToolsStamp: true),
+            toolContext: FakeToolContext(cache: FakeCache(olderThanToolsStamp: true), fs: fs),
           );
           final project = IosProject.fromFlutter(flutterProject);
           project.lldbInitFile.createSync(recursive: true);
