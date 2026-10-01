@@ -73,30 +73,52 @@ Logger _createDefaultLogger(Platform platform) {
 
 class AndroidStudio {
   /// A [version] value of null represents an unknown version.
-  AndroidStudio(
-    this.directory, {
-    this.configuredPath,
+  factory AndroidStudio(
+    String directory, {
+    String? configuredPath,
     FileSystem? fileSystem,
     FileSystemUtils? fileSystemUtils,
     Logger? logger,
     Platform? platform,
-    this.presetPluginsPath,
+    String? presetPluginsPath,
     ProcessManager? processManager,
+    String studioAppName = 'AndroidStudio',
+    Version? version,
+  }) {
+    final Platform resolvedPlatform = platform ?? const LocalPlatform();
+    final FileSystem resolvedFileSystem = fileSystem ?? _createDefaultFileSystem(resolvedPlatform);
+    final FileSystemUtils resolvedFileSystemUtils =
+        fileSystemUtils ??
+        FileSystemUtils(fileSystem: resolvedFileSystem, platform: resolvedPlatform);
+    final Logger resolvedLogger = logger ?? _createDefaultLogger(resolvedPlatform);
+    final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
+    return AndroidStudio._(
+      directory,
+      configuredPath: configuredPath,
+      fileSystem: resolvedFileSystem,
+      fileSystemUtils: resolvedFileSystemUtils,
+      logger: resolvedLogger,
+      platform: resolvedPlatform,
+      presetPluginsPath: presetPluginsPath,
+      processManager: resolvedProcessManager,
+      studioAppName: studioAppName,
+      version: version,
+    );
+  }
+
+  AndroidStudio._(
+    this.directory, {
+    required this._fileSystem,
+    required this._fileSystemUtils,
+    required Logger logger,
+    required this._platform,
+    required ProcessManager processManager,
+    this.configuredPath,
+    this.presetPluginsPath,
     this.studioAppName = 'AndroidStudio',
     this.version,
-  }) : _platform = platform ?? const LocalPlatform(),
-       _fileSystem = fileSystem ?? _createDefaultFileSystem(platform ?? const LocalPlatform()),
-       _fileSystemUtils =
-           fileSystemUtils ??
-           FileSystemUtils(
-             fileSystem: fileSystem ?? _createDefaultFileSystem(platform ?? const LocalPlatform()),
-             platform: platform ?? const LocalPlatform(),
-           ),
-       _processManager = processManager ?? const LocalProcessManager(),
-       _processUtils = ProcessUtils(
-         logger: logger ?? _createDefaultLogger(platform ?? const LocalPlatform()),
-         processManager: processManager ?? const LocalProcessManager(),
-       ) {
+  }) : _processManager = processManager,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager) {
     _initAndValidate();
   }
 
@@ -478,6 +500,9 @@ class AndroidStudio {
     required ProcessManager processManager,
     PlistParser? plistParser,
   }) {
+    final PlistParser resolvedPlistParser =
+        plistParser ??
+        PlistParser(fileSystem: fileSystem, logger: logger, processManager: processManager);
     final candidatePaths = <FileSystemEntity>[];
 
     void checkForStudio(String path) {
@@ -559,7 +584,7 @@ class AndroidStudio {
               fileSystemUtils: fileSystemUtils,
               logger: logger,
               platform: platform,
-              plistParser: plistParser,
+              plistParser: resolvedPlistParser,
               processManager: processManager,
             );
           }
@@ -573,7 +598,7 @@ class AndroidStudio {
             fileSystemUtils: fileSystemUtils,
             logger: logger,
             platform: platform,
-            plistParser: plistParser,
+            plistParser: resolvedPlistParser,
             processManager: processManager,
           );
         })

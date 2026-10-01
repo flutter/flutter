@@ -64,28 +64,45 @@ Logger _createDefaultLogger(Platform platform) {
 // $ANDROID_HOME/platforms/android-23/android.jar
 // $ANDROID_HOME/platforms/android-N/android.jar
 class AndroidSdk {
-  AndroidSdk(
-    this.directory, {
+  factory AndroidSdk(
+    Directory directory, {
     Config? config,
-    this._java,
+    Java? java,
     Logger? logger,
     Platform? platform,
     ProcessManager? processManager,
-  }) : _platform = platform ?? const LocalPlatform(),
-       _config =
-           config ??
-           Config(
-             Config.kFlutterSettings,
-             fileSystem: directory.fileSystem,
-             logger: logger ?? _createDefaultLogger(platform ?? const LocalPlatform()),
-             platform: platform ?? const LocalPlatform(),
-           ),
-       _logger = logger ?? _createDefaultLogger(platform ?? const LocalPlatform()),
-       _processManager = processManager ?? const LocalProcessManager(),
-       _processUtils = ProcessUtils(
-         logger: logger ?? _createDefaultLogger(platform ?? const LocalPlatform()),
-         processManager: processManager ?? const LocalProcessManager(),
-       );
+  }) {
+    final Platform resolvedPlatform = platform ?? const LocalPlatform();
+    final Logger resolvedLogger = logger ?? _createDefaultLogger(resolvedPlatform);
+    final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
+    final Config resolvedConfig =
+        config ??
+        Config(
+          Config.kFlutterSettings,
+          fileSystem: directory.fileSystem,
+          logger: resolvedLogger,
+          platform: resolvedPlatform,
+        );
+    return AndroidSdk._(
+      directory,
+      config: resolvedConfig,
+      java: java,
+      logger: resolvedLogger,
+      platform: resolvedPlatform,
+      processManager: resolvedProcessManager,
+    );
+  }
+
+  AndroidSdk._(
+    this.directory, {
+    required this._config,
+    required Logger logger,
+    required this._platform,
+    required ProcessManager processManager,
+    this._java,
+  }) : _logger = logger,
+       _processManager = processManager,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   /// The Android SDK root directory.
   final Directory directory;
