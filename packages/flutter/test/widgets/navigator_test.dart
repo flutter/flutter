@@ -6,10 +6,10 @@ import 'dart:async';
 import 'dart:ui' show FlutterView;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -1006,32 +1006,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(called, isFalse);
-  });
-
-  testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
-    // Regression Test for https://github.com/flutter/flutter/issues/61346.
-    Widget buildNavigator() {
-      return Navigator(
-        pages: const <Page<void>>[TestPage<void>(child: Placeholder())],
-        onPopPage: (Route<dynamic> route, dynamic result) => false,
-      );
-    }
-
-    final controller = TabController(length: 3, vsync: tester);
-    addTearDown(controller.dispose);
-
-    await tester.pumpWidget(
-      TestDependencies(
-        child: TabBarView(
-          controller: controller,
-          children: <Widget>[buildNavigator(), buildNavigator(), buildNavigator()],
-        ),
-      ),
-    );
-
-    // This test should finish without crashing.
-    controller.index = 2;
-    await tester.pumpAndSettle();
   });
 
   testWidgets('Page-based route pop before push finishes', (WidgetTester tester) async {
