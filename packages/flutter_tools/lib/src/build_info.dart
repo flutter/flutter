@@ -969,8 +969,8 @@ String getMacOSBuildDirectory({Config? config, FileSystem? fileSystem}) {
 }
 
 /// Returns the web build output directory.
-String getWebBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'web');
+String getWebBuildDirectory({required Config config, required FileSystem fileSystem}) {
+  return fileSystem.path.join(getBuildDirectory(config, fileSystem), 'web');
 }
 
 /// Returns the Linux build output directory.

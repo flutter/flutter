@@ -53,9 +53,9 @@ android {
         testImplementation("junit:junit:4.13.2")
         testImplementation("org.mockito:mockito-core:5.8.0")
 
-        api("androidx.test:runner:1.2+")
-        api("androidx.test:rules:1.2+")
-        api("androidx.test.espresso:espresso-core:3.3+")
+        api("androidx.test:runner:1.3.0")
+        api("androidx.test:rules:1.2.0")
+        api("androidx.test.espresso:espresso-core:3.3.0")
 
         implementation("com.google.guava:guava:28.1-android")
     }
