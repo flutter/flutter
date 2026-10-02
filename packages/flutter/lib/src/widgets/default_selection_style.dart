@@ -32,6 +32,8 @@ class DefaultSelectionStyle extends InheritedTheme {
     super.key,
     this.cursorColor,
     this.selectionColor,
+    this.searchHighlightColor,
+    this.activeSearchHighlightColor,
     this.mouseCursor,
     required super.child,
   });
@@ -47,6 +49,8 @@ class DefaultSelectionStyle extends InheritedTheme {
   const DefaultSelectionStyle.fallback({super.key})
     : cursorColor = null,
       selectionColor = null,
+      searchHighlightColor = null,
+      activeSearchHighlightColor = null,
       mouseCursor = null,
       super(child: const _NullWidget());
 
@@ -59,6 +63,8 @@ class DefaultSelectionStyle extends InheritedTheme {
     Key? key,
     Color? cursorColor,
     Color? selectionColor,
+    Color? searchHighlightColor,
+    Color? activeSearchHighlightColor,
     MouseCursor? mouseCursor,
     required Widget child,
   }) {
@@ -69,6 +75,9 @@ class DefaultSelectionStyle extends InheritedTheme {
           key: key,
           cursorColor: cursorColor ?? parent.cursorColor,
           selectionColor: selectionColor ?? parent.selectionColor,
+          searchHighlightColor: searchHighlightColor ?? parent.searchHighlightColor,
+          activeSearchHighlightColor:
+              activeSearchHighlightColor ?? parent.activeSearchHighlightColor,
           mouseCursor: mouseCursor ?? parent.mouseCursor,
           child: child,
         );
@@ -82,6 +91,12 @@ class DefaultSelectionStyle extends InheritedTheme {
   /// color is null.
   static const Color defaultColor = Color(0x80808080);
 
+  /// The default background color for passive Find-in-Page matches (semi-transparent yellow).
+  static const Color defaultSearchHighlightColor = Color(0x66FFEB3B);
+
+  /// The default background color for the active Find-in-Page match (semi-transparent orange).
+  static const Color defaultActiveSearchHighlightColor = Color(0xCCFF9800);
+
   /// The color of the text field's cursor.
   ///
   /// The cursor indicates the current location of the text insertion point in
@@ -90,6 +105,16 @@ class DefaultSelectionStyle extends InheritedTheme {
 
   /// The background color of selected text.
   final Color? selectionColor;
+
+  /// The background color of passive Find-in-Page matches in [Text] and [RichText].
+  ///
+  /// If null, [defaultSearchHighlightColor] is used.
+  final Color? searchHighlightColor;
+
+  /// The background color of the active Find-in-Page match in [Text] and [RichText].
+  ///
+  /// If null, [defaultActiveSearchHighlightColor] is used.
+  final Color? activeSearchHighlightColor;
 
   /// The [MouseCursor] for mouse pointers hovering over selectable Text widgets.
   ///
@@ -116,6 +141,8 @@ class DefaultSelectionStyle extends InheritedTheme {
     return DefaultSelectionStyle(
       cursorColor: cursorColor,
       selectionColor: selectionColor,
+      searchHighlightColor: searchHighlightColor,
+      activeSearchHighlightColor: activeSearchHighlightColor,
       mouseCursor: mouseCursor,
       child: child,
     );
@@ -125,6 +152,8 @@ class DefaultSelectionStyle extends InheritedTheme {
   bool updateShouldNotify(DefaultSelectionStyle oldWidget) {
     return cursorColor != oldWidget.cursorColor ||
         selectionColor != oldWidget.selectionColor ||
+        searchHighlightColor != oldWidget.searchHighlightColor ||
+        activeSearchHighlightColor != oldWidget.activeSearchHighlightColor ||
         mouseCursor != oldWidget.mouseCursor;
   }
 }

@@ -212,6 +212,30 @@ class _SelectionContainerState extends State<SelectionContainer>
   int get contentLength => widget.delegate!.contentLength;
 
   @override
+  String getPlainText() {
+    if (widget._disabled) {
+      return '';
+    }
+    return widget.delegate!.getPlainText();
+  }
+
+  @override
+  List<Selectable> getLeafSelectables() {
+    if (widget._disabled) {
+      return const <Selectable>[];
+    }
+    return widget.delegate!.getLeafSelectables();
+  }
+
+  @override
+  bool selectRangeForSelectable(Selectable target, SelectedContentRange range) {
+    if (widget._disabled) {
+      return false;
+    }
+    return widget.delegate!.selectRangeForSelectable(target, range);
+  }
+
+  @override
   Size get size => (context.findRenderObject()! as RenderBox).size;
 
   @override
@@ -271,6 +295,15 @@ class SelectionRegistrarScope extends InheritedWidget {
 /// [Selectable]s in the [SelectionContainer] subtree.
 abstract class SelectionContainerDelegate implements SelectionHandler, SelectionRegistrar {
   BuildContext? _selectionContainerContext;
+
+  @override
+  String getPlainText() => '';
+
+  /// Returns the ordered leaf [Selectable]s managed by this delegate.
+  List<Selectable> getLeafSelectables() => const <Selectable>[];
+
+  /// Selects the given [range] within [target] if [target] is managed by this delegate.
+  bool selectRangeForSelectable(Selectable target, SelectedContentRange range) => false;
 
   /// Gets the paint transform from the [Selectable] child to
   /// [SelectionContainer] of this delegate.
