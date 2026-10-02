@@ -980,30 +980,30 @@ class BrowserManager {
       headless: headless,
       webBrowserFlags: webBrowserFlags,
     );
-    WipConnection? wipConnection;
-    unawaited(
-      Future<void>(() async {
-        try {
-          final ChromeTab? tab = await chrome.chromeConnection.getTab(
-            (ChromeTab tab) => tab.url.contains('index.html'),
-            retryFor: const Duration(seconds: 5),
+    final Future<WipConnection?> wipConnectionFuture = () async {
+      try {
+        final ChromeTab? tab = await chrome.chromeConnection.getTab(
+          (ChromeTab tab) => tab.url.contains('index.html'),
+          retryFor: const Duration(seconds: 5),
+        );
+        if (tab == null) {
+          return null;
+        }
+        final WipConnection connection = await tab.connect();
+        await connection.runtime.enable();
+        connection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
+          logger.printStatus(
+            '[BROWSER CONSOLE] [${event.type}]: ${event.args.map((RemoteObject a) => a.value ?? a.description).join(" ")}',
           );
-          if (tab != null) {
-            final WipConnection connection = await tab.connect();
-            wipConnection = connection;
-            await connection.runtime.enable();
-            connection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
-              logger.printStatus(
-                '[BROWSER CONSOLE] [${event.type}]: ${event.args.map((RemoteObject a) => a.value ?? a.description).join(" ")}',
-              );
-            });
-            connection.runtime.onExceptionThrown.listen((ExceptionThrownEvent event) {
-              logger.printStatus('[BROWSER EXCEPTION]: ${event.exceptionDetails}');
-            });
-          }
-        } on Object catch (_) {}
-      }),
-    );
+        });
+        connection.runtime.onExceptionThrown.listen((ExceptionThrownEvent event) {
+          logger.printStatus('[BROWSER EXCEPTION]: ${event.exceptionDetails}');
+        });
+        return connection;
+      } on Object catch (_) {
+        return null;
+      }
+    }();
     final completer = Completer<BrowserManager>();
 
     unawaited(
@@ -1023,7 +1023,16 @@ class BrowserManager {
     );
     unawaited(
       future.then(
-        (WebSocketChannel webSocket) {
+        (WebSocketChannel webSocket) async {
+          if (completer.isCompleted) {
+            return;
+          }
+          // The test page can open its WebSocket before the CDP connection is
+          // established. Wait for CDP (bounded) so hang diagnostics have it.
+          final WipConnection? wipConnection = await wipConnectionFuture.timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => null,
+          );
           if (completer.isCompleted) {
             return;
           }
