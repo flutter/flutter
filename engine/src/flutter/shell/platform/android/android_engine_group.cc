@@ -687,6 +687,7 @@ bool AndroidEngineGroup::ShutdownEngine(int64_t engine_id) {
                std::to_string(engine_id).c_str());
   FLUTTER_API_SYMBOL(FlutterEngine) handle_to_shutdown = nullptr;
   std::shared_ptr<AndroidEngineGroupProvider> provider;
+  std::shared_ptr<VulkanDeviceOwner> owner_to_release;
   {
     std::scoped_lock lock(mutex_);
     provider = provider_;
@@ -697,6 +698,7 @@ bool AndroidEngineGroup::ShutdownEngine(int64_t engine_id) {
     it->second.is_running = false;
     it->second.is_garbage_collected = false;
     handle_to_shutdown = it->second.engine_handle;
+    owner_to_release = std::move(it->second.vulkan_device_owner);
     if (handle_to_shutdown) {
       handle_to_id_.erase(handle_to_shutdown);
     }
@@ -711,6 +713,7 @@ bool AndroidEngineGroup::ShutdownEngine(int64_t engine_id) {
   if (handle_to_shutdown && provider) {
     provider->ShutdownEngine(handle_to_shutdown);
   }
+  owner_to_release.reset();
 
   if (jvm_invoker_) {
     jvm_invoker_->InvokeBooleanMethod(
@@ -772,6 +775,7 @@ bool AndroidEngineGroup::OnEngineGarbageCollected(int64_t engine_id) {
                "engine_id", std::to_string(engine_id).c_str());
   FLUTTER_API_SYMBOL(FlutterEngine) handle_to_shutdown = nullptr;
   std::shared_ptr<AndroidEngineGroupProvider> provider;
+  std::shared_ptr<VulkanDeviceOwner> owner_to_release;
   {
     std::scoped_lock lock(mutex_);
     provider = provider_;
@@ -782,6 +786,7 @@ bool AndroidEngineGroup::OnEngineGarbageCollected(int64_t engine_id) {
     it->second.is_running = false;
     it->second.is_garbage_collected = true;
     handle_to_shutdown = it->second.engine_handle;
+    owner_to_release = std::move(it->second.vulkan_device_owner);
     if (handle_to_shutdown) {
       handle_to_id_.erase(handle_to_shutdown);
     }
@@ -796,6 +801,7 @@ bool AndroidEngineGroup::OnEngineGarbageCollected(int64_t engine_id) {
   if (handle_to_shutdown && provider) {
     provider->ShutdownEngine(handle_to_shutdown);
   }
+  owner_to_release.reset();
 
   if (jvm_invoker_) {
     jvm_invoker_->InvokeBooleanMethod(
@@ -848,20 +854,42 @@ bool AndroidEngineGroup::RegisterEngine(int64_t engine_id,
 bool AndroidEngineGroup::UnregisterEngine(int64_t engine_id) {
   TRACE_EVENT1("flutter", "AndroidEngineGroup::UnregisterEngine", "engine_id",
                std::to_string(engine_id).c_str());
-  std::scoped_lock lock(mutex_);
-  auto it = active_engines_.find(engine_id);
-  if (it == active_engines_.end()) {
-    return false;
+  std::shared_ptr<VulkanDeviceOwner> owner_to_release;
+  {
+    std::scoped_lock lock(mutex_);
+    auto it = active_engines_.find(engine_id);
+    if (it == active_engines_.end()) {
+      return false;
+    }
+    owner_to_release = std::move(it->second.vulkan_device_owner);
+    if (it->second.engine_handle) {
+      handle_to_id_.erase(it->second.engine_handle);
+    }
+    if (primary_engine_id_ == engine_id) {
+      primary_engine_id_ = 0;
+      primary_engine_ = nullptr;
+    }
+    active_engines_.erase(it);
   }
-  if (it->second.engine_handle) {
-    handle_to_id_.erase(it->second.engine_handle);
-  }
-  if (primary_engine_id_ == engine_id) {
-    primary_engine_id_ = 0;
-    primary_engine_ = nullptr;
-  }
-  active_engines_.erase(it);
+  owner_to_release.reset();
   return true;
+}
+
+void AndroidEngineGroup::SetEngineVulkanDeviceOwner(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine_handle,
+    std::shared_ptr<VulkanDeviceOwner> vulkan_device_owner) {
+  if (engine_handle == nullptr) {
+    return;
+  }
+  std::scoped_lock lock(mutex_);
+  auto id_it = handle_to_id_.find(engine_handle);
+  if (id_it == handle_to_id_.end()) {
+    return;
+  }
+  auto rec_it = active_engines_.find(id_it->second);
+  if (rec_it != active_engines_.end()) {
+    rec_it->second.vulkan_device_owner = std::move(vulkan_device_owner);
+  }
 }
 
 size_t AndroidEngineGroup::GetActiveEngineCount() const {

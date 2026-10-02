@@ -466,6 +466,7 @@ def run_cc_tests(
       make_test('embedder_a11y_unittests'),
       make_test('embedder_proctable_unittests'),
       make_test('embedder_unittests'),
+      make_test('vulkan_queue_guard_unittests'),
       make_test('fml_unittests'),
       make_test('geometry_unittests'),
       make_test('gpu_surface_unittests'),
