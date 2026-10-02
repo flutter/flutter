@@ -11,6 +11,7 @@
 
 #include "impeller/base/backend_cast.h"
 #include "impeller/base/comparable.h"
+#include "impeller/base/thread.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"
 
@@ -27,13 +28,18 @@ class SamplerLibraryMTL final
   friend class ContextMTL;
 
   id<MTLDevice> device_ = nullptr;
-  std::vector<std::pair<uint64_t, std::shared_ptr<const Sampler>>> samplers_;
+  Mutex samplers_mutex_;
+  std::vector<std::pair<uint64_t, std::shared_ptr<const Sampler>>> samplers_
+      IPLR_GUARDED_BY(samplers_mutex_);
 
   explicit SamplerLibraryMTL(id<MTLDevice> device);
 
   // |SamplerLibrary|
   raw_ptr<const Sampler> GetSampler(
       const SamplerDescriptor& descriptor) override;
+
+  raw_ptr<const Sampler> FindSampler(uint64_t key) const
+      IPLR_REQUIRES(samplers_mutex_);
 
   SamplerLibraryMTL(const SamplerLibraryMTL&) = delete;
 
