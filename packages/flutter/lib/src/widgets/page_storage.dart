@@ -77,6 +77,8 @@ class PageStorageBucket {
     return widget is! PageStorage;
   }
 
+  // _ExpansibleState._storageIdentifier in expansible.dart collects the keys
+  // the same way and must be kept in sync with this.
   List<PageStorageKey<dynamic>> _allKeys(BuildContext context) {
     final keys = <PageStorageKey<dynamic>>[];
     if (_maybeAddKey(context, keys)) {

@@ -287,4 +287,37 @@ void main() {
     expect(buildCount, 104);
     expect(loadedWithDeferral, 100);
   });
+
+  testWidgets('ScrollPosition ignores a non-double value in PageStorage', (
+    WidgetTester tester,
+  ) async {
+    final bucket = PageStorageBucket();
+    const key = PageStorageKey<String>('list');
+    // Another widget under the same key saved a bool in the slot the scroll
+    // position restores from.
+    await tester.pumpWidget(
+      PageStorage(
+        bucket: bucket,
+        child: Builder(
+          key: key,
+          builder: (BuildContext context) {
+            bucket.writeState(context, true);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageStorage(
+          bucket: bucket,
+          child: ListView(key: key, children: const <Widget>[SizedBox(height: 2000.0)]),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0.0);
+  });
 }

@@ -225,9 +225,9 @@ class ExpansibleController extends ChangeNotifier {
 /// collapse" list entry. When used with scrolling widgets like [ListView], a
 /// unique [PageStorageKey] must be specified as the [key], to enable the
 /// [Expansible] to save and restore its expanded state when it is scrolled
-/// in and out of view. The expanded state is saved under an identifier of its
-/// own, so widgets in the body, such as a [Scrollable], can save their own
-/// state under the same [PageStorageKey].
+/// in and out of view. The saved expansion state does not conflict with state
+/// saved by descendants (such as the scroll offset of a [Scrollable] in the
+/// body) that share the same [PageStorageKey] ancestors.
 ///
 /// Provide [headerBuilder] and [bodyBuilder] callbacks to
 /// build the header and body widgets. An additional [expansibleBuilder]
@@ -390,6 +390,10 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   // The state is saved under an identifier of its own, built from the
   // PageStorageKeys above this widget, so it never shares a slot with other
   // widgets under the same keys, such as a Scrollable in the body.
+  //
+  // This collects the keys the same way as PageStorageBucket._allKeys and must
+  // be kept in sync with it.
+  // TODO(omar-alshyokh): Remove this once PageStorageBucket supports namespaces, https://github.com/flutter/flutter/issues/193699
   Object? get _storageIdentifier {
     final keys = <PageStorageKey<dynamic>>[];
     void addKey(Widget widget) {
@@ -481,9 +485,8 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
       }
       final Object? identifier = _storageIdentifier;
       if (identifier != null) {
-        PageStorage.maybeOf(
-          context,
-        )?.writeState(context, widget.controller.isExpanded, identifier: identifier);
+        PageStorage.maybeOf(context)
+            ?.writeState(context, widget.controller.isExpanded, identifier: identifier);
       }
     });
   }
@@ -527,5 +530,10 @@ class _ExpansibleStorageIdentifier {
   }
 
   @override
-  int get hashCode => Object.hashAll(keys);
+  int get hashCode => Object.hash(_ExpansibleStorageIdentifier, Object.hashAll(keys));
+
+  @override
+  String toString() {
+    return 'ExpansibleStorageIdentifier(${keys.join(":")})';
+  }
 }
