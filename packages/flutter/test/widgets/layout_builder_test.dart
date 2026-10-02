@@ -1057,6 +1057,151 @@ void main() {
       ),
     );
   });
+
+  testWidgets('a rebuild requested mid-layout under a LayoutBuilder is not lost', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/192945.
+    //
+    // A descendant's performLayout can synchronously ask a widget inside a
+    // LayoutBuilder's own subtree to rebuild (for example, code that reacts
+    // to layout the way ScrollPosition.applyNewDimensions does). If that
+    // happens after the LayoutBuilder has already run its layout callback
+    // for this frame, the request used to be dropped entirely: the render
+    // object was left flagged "needs another rebuild" but not "needs
+    // layout", so nothing ever asked for it again, and that part of the
+    // tree stopped updating.
+    final counterKey = GlobalKey<_CounterState>();
+    final generation = ValueNotifier<int>(0);
+    var armed = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return Column(
+              children: <Widget>[
+                _Counter(key: counterKey),
+                ValueListenableBuilder<int>(
+                  valueListenable: generation,
+                  builder: (BuildContext context, int value, Widget? child) {
+                    return _LayoutHook(
+                      generation: value,
+                      onLayout: () {
+                        if (!armed) {
+                          return;
+                        }
+                        armed = false;
+                        _requestRebuildDuringLayout(tester, counterKey.currentState!);
+                      },
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+    expect(find.text('0'), findsOneWidget);
+
+    // Changing `generation` dirties and re-lays-out the `_LayoutHook`, whose
+    // `performLayout` fires `onLayout` while the ancestor `LayoutBuilder` is
+    // still in the middle of laying out this same subtree.
+    armed = true;
+    generation.value += 1;
+    await tester.pump();
+
+    expect(
+      find.text('1'),
+      findsOneWidget,
+      reason: 'the counter rebuild triggered during layout must not be dropped',
+    );
+  });
+}
+
+/// Sets [state]'s counter from inside a layout callback the way framework
+/// code (for instance [ScrollPosition.applyNewDimensions]) legitimately can.
+///
+/// This sidesteps the debug-only "Build scheduled during frame." assert that
+/// guards against *illegal* mid-layout `setState` calls, since this call is
+/// standing in for a legal one. A second, unrelated debug assert
+/// ("was mutated in its own performLayout implementation") still fires: it
+/// exists to catch a widget mutating itself mid-layout, which is exactly the
+/// shape of this legal call too, and it does not run in release builds. It
+/// is swallowed here so the test observes the same framework state a release
+/// build would end up in.
+void _requestRebuildDuringLayout(WidgetTester tester, _CounterState state) {
+  final WidgetsBinding binding = tester.binding;
+  // ignore: invalid_use_of_protected_member
+  final bool wasBuildingDirtyElements = binding.debugBuildingDirtyElements;
+  // ignore: invalid_use_of_protected_member
+  binding.debugBuildingDirtyElements = false;
+  try {
+    state.bump();
+  } on FlutterError catch (error) {
+    if (!error.message.contains('was mutated in')) {
+      rethrow;
+    }
+  } finally {
+    // ignore: invalid_use_of_protected_member
+    binding.debugBuildingDirtyElements = wasBuildingDirtyElements;
+  }
+}
+
+class _Counter extends StatefulWidget {
+  const _Counter({super.key});
+
+  @override
+  State<_Counter> createState() => _CounterState();
+}
+
+class _CounterState extends State<_Counter> {
+  int _value = 0;
+
+  void bump() => setState(() => _value += 1);
+
+  @override
+  Widget build(BuildContext context) => Text('$_value', textDirection: TextDirection.ltr);
+}
+
+/// A single-child render object that invokes [onLayout] from inside its own
+/// [performLayout], standing in for framework code that notifies listeners
+/// mid-layout.
+class _LayoutHook extends SingleChildRenderObjectWidget {
+  const _LayoutHook({required this.onLayout, required this.generation})
+    : super(child: const SizedBox(width: 10, height: 10));
+
+  final VoidCallback onLayout;
+  final int generation;
+
+  @override
+  _RenderLayoutHook createRenderObject(BuildContext context) =>
+      _RenderLayoutHook(onLayout, generation);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderLayoutHook renderObject) {
+    renderObject.onLayout = onLayout;
+    if (renderObject.generation != generation) {
+      renderObject
+        ..generation = generation
+        ..markNeedsLayout();
+    }
+  }
+}
+
+class _RenderLayoutHook extends RenderProxyBox {
+  _RenderLayoutHook(this.onLayout, this.generation);
+
+  VoidCallback onLayout;
+  int generation;
+
+  @override
+  void performLayout() {
+    onLayout();
+    super.performLayout();
+  }
 }
 
 class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
