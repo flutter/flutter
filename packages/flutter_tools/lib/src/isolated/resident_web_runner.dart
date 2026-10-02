@@ -449,6 +449,7 @@ class ResidentWebRunner extends ResidentRunner {
     return JsCompilerConfig.run(
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,
       renderer: debuggingOptions.webRenderer,
+      deprecatedJsInterop: debuggingOptions.buildInfo.deprecatedJsInterop,
     );
   }
 
