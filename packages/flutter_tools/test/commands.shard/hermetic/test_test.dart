@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -1466,6 +1467,63 @@ dev_dependencies:
     },
   );
 
+  testUsingContext(
+    'builds asset bundle with data assets from hook',
+    () async {
+      final testRunner = FakeFlutterTestRunner(0);
+      final File dataAssetFile = fs.file(fs.path.join('data', 'hook_asset.txt'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('from_hook');
+      fs.file('pubspec.yaml').writeAsStringSync(_pubspecContents);
+      final nativeAssetsBuilder = _FakeNativeAssetsBuilderWithDataAssets(
+        FlutterHookResult(
+          buildStart: DateTime.now(),
+          buildEnd: DateTime.now(),
+          dataAssets: <HookAsset>[
+            HookAsset(file: dataAssetFile.uri, name: 'data/hook_asset.txt', package: 'my_app'),
+          ],
+          dependencies: <Uri>[dataAssetFile.uri],
+        ),
+      );
+      final testCommand = TestCommand(
+        toolContext: toolContext,
+        testRunner: testRunner,
+        nativeAssetsBuilder: nativeAssetsBuilder,
+      );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>['test', '--no-pub']);
+
+      final File bundledDataAsset = fs.file(
+        globals.fs.path.join('build', 'unit_test_assets', 'packages/my_app/data/hook_asset.txt'),
+      );
+      final File assetManifestBin = fs.file(
+        globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+      );
+      expect(bundledDataAsset, exists);
+      expect(bundledDataAsset.readAsStringSync(), 'from_hook');
+      final List<int> initialManifestBytes = assetManifestBin.readAsBytesSync();
+
+      // Delete the dependency file; hook now produces no data assets.
+      dataAssetFile.deleteSync();
+      nativeAssetsBuilder.hookResult = FlutterHookResult(
+        buildStart: DateTime.now(),
+        buildEnd: DateTime.now(),
+        dataAssets: const <HookAsset>[],
+        dependencies: <Uri>[dataAssetFile.uri],
+      );
+
+      await commandRunner.run(const <String>['test', '--no-pub']);
+
+      expect(assetManifestBin.readAsBytesSync(), isNot(equals(initialManifestBytes)));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.empty(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[]),
+    },
+  );
+
   group('Fatal Logs', () {
     testUsingContext(
       "doesn't fail when --fatal-warnings is set and no warning output",
@@ -2044,4 +2102,18 @@ class _FakeDeviceManager extends DeviceManager {
     }
     return _connectedDevices;
   }
+}
+
+class _FakeNativeAssetsBuilderWithDataAssets extends Fake
+    implements TestCompilerNativeAssetsBuilder {
+  _FakeNativeAssetsBuilderWithDataAssets(this.hookResult);
+
+  FlutterHookResult hookResult;
+
+  @override
+  Future<Uri?> build(BuildInfo buildInfo) async => null;
+
+  @override
+  Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) async =>
+      (nativeAssetsManifest: null, flutterHookResult: hookResult);
 }

@@ -23,6 +23,7 @@ import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
 import '../web/web_runner.dart';
@@ -35,19 +36,14 @@ class WebDriverService extends DriverService {
     required this.buildSystem,
     required this.buildTargets,
     required this._dartSdkPath,
-    required ToolContext toolContext,
-  }) : _processUtils = ProcessUtils(
-         processManager: toolContext.processManager,
-         logger: toolContext.logger,
-       ),
-       _toolContext = toolContext;
+    required this._toolContext,
+  });
 
   final Analytics _analytics;
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
-  final ToolContext _toolContext;
-  final ProcessUtils _processUtils;
   final String _dartSdkPath;
+  final ToolContext _toolContext;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -81,6 +77,7 @@ class WebDriverService extends DriverService {
       target: mainPath,
       userIdentifier: userIdentifier,
     );
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
       target: mainPath,
@@ -101,7 +98,7 @@ class WebDriverService extends DriverService {
       platformArgs: platformArgs,
       stayResident: true,
       webDefines: webDefines,
-      flutterProject: _toolContext.projectFactory.fromDirectory(_toolContext.fs.currentDirectory),
+      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
       analytics: _analytics,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
@@ -162,7 +159,8 @@ class WebDriverService extends DriverService {
     List<String>? browserDimension,
     String? profileMemory,
   }) async {
-    final ToolContext(:Logger logger, :Platform platform) = _toolContext;
+    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
+        _toolContext;
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(browserName);
     final isAndroidChrome = browser == Browser.androidChrome;
@@ -224,7 +222,7 @@ class WebDriverService extends DriverService {
       await window.setLocation(const math.Point<int>(0, 0));
       await window.setSize(math.Rectangle<int>(0, 0, width, height));
     }
-    final int result = await _processUtils.stream(
+    final int result = await processUtils.stream(
       <String>[_dartSdkPath, ...arguments, testFile],
       environment: <String, String>{
         ...platform.environment,

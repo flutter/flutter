@@ -424,18 +424,17 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   @override
   ResidentRunner createWebRunner(
     FlutterDevice device, {
-    String? target,
-    bool? stayResident,
-    FlutterProject? flutterProject,
-    bool? ipv6,
+    required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    UrlTunneller? urlTunneller,
-    BuildSystem? buildSystem,
-    BuildTargets? buildTargets,
-    ToolContext? toolContext,
-    Analytics? analytics,
+    required FlutterProject flutterProject,
+    required bool stayResident,
+    required ToolContext toolContext,
     bool machine = false,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    String? target,
+    UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
   }) {
     expect(stayResident, isTrue);

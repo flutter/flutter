@@ -19,7 +19,12 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
   const TestCompilerNativeAssetsBuilderImpl();
 
   @override
-  Future<Uri?> build(BuildInfo buildInfo) => testCompilerBuildNativeAssets(buildInfo);
+  Future<Uri?> build(BuildInfo buildInfo) async =>
+      (await buildWithHookResult(buildInfo)).nativeAssetsManifest;
+
+  @override
+  Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) =>
+      testCompilerBuildNativeAssets(buildInfo);
 
   @override
   String windowsBuildDirectory(FlutterProject project) {
@@ -28,9 +33,11 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
   }
 }
 
-Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
+Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
+  BuildInfo buildInfo,
+) async {
   if (!buildInfo.buildNativeAssets) {
-    return null;
+    return (nativeAssetsManifest: null, flutterHookResult: null);
   }
   final Uri projectUri = FlutterProject.current().directory.uri;
   final String runPackageName = buildInfo.packageConfig.packages
@@ -58,7 +65,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
       globals.fs,
       buildRunner,
     );
-    return null;
+    return (nativeAssetsManifest: null, flutterHookResult: null);
   }
 
   // Only `flutter test` uses the
@@ -99,5 +106,8 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   );
   assert(globals.fs.file(nativeAssetsFileUri).existsSync());
 
-  return nativeAssetsFileUri;
+  return (
+    nativeAssetsManifest: nativeAssetsFileUri,
+    flutterHookResult: dartHookResult.asFlutterResult,
+  );
 }
