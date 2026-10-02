@@ -471,13 +471,26 @@ class TextLayout {
       line.updateBoundingBox(ellipsisBlock);
     }
 
-    // Now when we calculated all line metrics we have to correct placeholders that depend on it
+    // Placeholders: calculate each placeholder's ascent/descent against the line metrics collected
+    // so far and fold them into the line, since a taller placeholder can increase the line ascent.
     for (final LineBlock block in line.visualBlocks) {
       if (block is! PlaceholderBlock) {
         continue;
       }
       block.calculatePlaceholderTop(line.fontBoundingBoxAscent, line.fontBoundingBoxDescent);
       line.updateBoundingBox(block);
+    }
+
+    // Now that the line ascent is final, position each placeholder vertically within the line.
+    for (final LineBlock block in line.visualBlocks) {
+      if (block is PlaceholderBlock) {
+        block.advance = ui.Rect.fromLTWH(
+          block.spanShiftFromLineStart,
+          line.fontBoundingBoxAscent - block.ascent,
+          block.span.width,
+          block.span.height,
+        );
+      }
     }
 
     line.advance = ui.Rect.fromLTWH(
@@ -602,19 +615,30 @@ class TextLayout {
           // We need to calculate the intersect rectangle
           firstRect = (block.span as TextSpan)
               .getTextRangeSelectionInBlock(block, intersect)
-              .translate(0, block.multipliedFontBoundingBoxAscent);
+              .translate(0, block.rawFontBoundingBoxAscent);
         }
         // Now we need to recalculate the rects
         double left, right, top, bottom;
         switch (boxHeightStyle) {
           case ui.BoxHeightStyle.tight:
-            top =
-                firstRect.top +
-                line.advance.top +
-                line.fontBoundingBoxAscent -
-                block.multipliedFontBoundingBoxAscent;
-            bottom = top + block.multipliedHeight;
-            assert((block.multipliedHeight - (bottom - top).abs() < epsilon));
+            if (block is PlaceholderBlock) {
+              // For PlaceholderBlock, `firstRect` is `block.advance`, which already has
+              // `top = line.fontBoundingBoxAscent - block.ascent` relative to the line.
+              top = firstRect.top + line.advance.top;
+              bottom = top + block.span.height;
+            } else {
+              // For TextBlock, BoxHeightStyle.tight returns the unscaled glyph bounds
+              // positioned relative to the line's baseline (`line.advance.top + line.fontBoundingBoxAscent`),
+              // matching SkParagraph's TextLine::getRectsForRange.
+              top = line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent;
+              bottom = top + block.rawFontBoundingBoxAscent + block.rawFontBoundingBoxDescent;
+              assert(
+                (block.rawFontBoundingBoxAscent +
+                        block.rawFontBoundingBoxDescent -
+                        (bottom - top).abs() <
+                    epsilon),
+              );
+            }
           case ui.BoxHeightStyle.max:
             top = line.advance.top;
             bottom = line.advance.bottom;
@@ -1381,10 +1405,6 @@ class PlaceholderBlock extends LineBlock {
         ascent = lineAscent - diff;
         descent = lineDescent - diff;
     }
-    final double top = lineAscent - ascent;
-    // The advance needs to be calculated relative to the line. In order to do that, we need to start
-    // from the span's own advance within the line.
-    advance = ui.Rect.fromLTWH(spanShiftFromLineStart, top, span.width, span.height);
   }
 
   // TODO(jlavrova): Why are we using separate properties instead of `rawFontBoundingBoxAscent` and `rawFontBoundingBoxDescent`?
