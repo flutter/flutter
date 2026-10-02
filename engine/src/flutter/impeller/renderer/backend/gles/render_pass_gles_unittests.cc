@@ -287,6 +287,24 @@ class RenderPassGLESCommandTest : public ::testing::Test {
             std::move(reactor),     std::move(command_buffer),
             std::move(render_pass), std::move(pipeline)};
   }
+
+  static std::shared_ptr<PipelineGLES> CreatePipelineWithDescriptor(
+      const std::shared_ptr<ReactorGLES>& reactor,
+      const PipelineDescriptor& desc,
+      std::shared_ptr<UniqueHandleGLES> shared_handle = nullptr,
+      GLint y_flip_uniform_location = -1) {
+    if (!shared_handle) {
+      HandleGLES pipeline_handle = reactor->CreateHandle(HandleType::kProgram);
+      shared_handle =
+          std::make_shared<UniqueHandleGLES>(reactor, pipeline_handle);
+    }
+    std::shared_ptr<PipelineGLES> pipeline = std::shared_ptr<PipelineGLES>(
+        new PipelineGLES(reactor, std::weak_ptr<PipelineLibrary>(), desc,
+                         std::move(shared_handle)));
+    pipeline->buffer_bindings_ = std::make_unique<BufferBindingsGLES>();
+    pipeline->y_flip_uniform_location_ = y_flip_uniform_location;
+    return pipeline;
+  }
 };
 
 TEST_F(RenderPassGLESCommandTest, ViewportCachedAcrossCommands) {
@@ -540,6 +558,172 @@ TEST_F(RenderPassGLESCommandTest, ZeroInstanceCountIssuesNoDraw) {
 
   EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, _, _)).Times(0);
   EXPECT_CALL(mock_gl_impl_ref, DrawArraysInstanced(_, _, _, _)).Times(0);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+TEST_F(RenderPassGLESCommandTest,
+       DeduplicatesPipelineAndScissorStateAcrossCommands) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  for (int i = 0; i < 3; ++i) {
+    render_pass->SetPipeline(PipelineRef(pipeline));
+    render_pass->SetScissor(IRect32::MakeXYWH(10, 10, 40, 40));
+    render_pass->SetElementCount(3);
+    render_pass->SetIndexBuffer({}, IndexType::kNone);
+    EXPECT_TRUE(render_pass->Draw().ok());
+  }
+
+  // Draw 4: a command without an explicit SetScissor (command.scissor ==
+  // std::nullopt) inherits the active scissor rect from the previous command
+  // (see flutter/engine#56494) and does not disable GL_SCISSOR_TEST.
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(3);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  // Draw 5: restoring the scissor to the full render target updates glScissor
+  // without re-calling glEnable(GL_SCISSOR_TEST).
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetScissor(IRect32::MakeXYWH(0, 0, 100, 100));
+  render_pass->SetElementCount(3);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  // Five draws: identical pipeline binds program once; first 3 scissored draws
+  // enable/set scissor (10, 10, 40, 40) once; Draw 4 preserves the active
+  // scissor; Draw 5 updates glScissor to (0, 0, 100, 100) without re-enabling
+  // GL_SCISSOR_TEST; ResetGLState defaults (ColorMask,
+  // Disable(GL_SCISSOR_TEST/GL_BLEND/GL_DEPTH_TEST/GL_STENCIL_TEST)) are not
+  // re-emitted per command.
+  EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, 0, 3)).Times(5);
+  EXPECT_CALL(mock_gl_impl_ref, UseProgram(_)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Enable(GL_SCISSOR_TEST)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Scissor(10, 10, 40, 40)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Scissor(0, 0, 100, 100)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_SCISSOR_TEST)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_DEPTH_TEST)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_STENCIL_TEST)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_CULL_FACE)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_BLEND)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_DITHER)).Times(1);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+TEST_F(RenderPassGLESCommandTest,
+       DeduplicatesEnabledBlendStencilDepthAndSharedProgramAcrossVariants) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  PipelineDescriptor desc_a;
+  ColorAttachmentDescriptor color0;
+  color0.format = PixelFormat::kR8G8B8A8UNormInt;
+  color0.blending_enabled = true;
+  color0.src_color_blend_factor = BlendFactor::kOne;
+  color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+  color0.color_blend_op = BlendOperation::kAdd;
+  color0.src_alpha_blend_factor = BlendFactor::kOne;
+  color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
+  color0.alpha_blend_op = BlendOperation::kAdd;
+  desc_a.SetColorAttachmentDescriptor(0, color0);
+
+  DepthAttachmentDescriptor depth_desc;
+  depth_desc.depth_compare = CompareFunction::kLess;
+  depth_desc.depth_write_enabled = false;
+  desc_a.SetDepthStencilAttachmentDescriptor(depth_desc);
+
+  StencilAttachmentDescriptor stencil_desc;
+  stencil_desc.stencil_compare = CompareFunction::kEqual;
+  stencil_desc.depth_stencil_pass = StencilOperation::kIncrementClamp;
+  stencil_desc.write_mask = 0x0F;
+  desc_a.SetStencilAttachmentDescriptors(stencil_desc);
+
+  auto pipeline_a =
+      CreatePipelineWithDescriptor(reactor, desc_a, /*shared_handle=*/nullptr,
+                                   /*y_flip_uniform_location=*/7);
+
+  // Create a second PipelineGLES instance that shares the same compiled program
+  // handle (UniqueHandleGLES) with identical blend/depth/stencil descriptors.
+  auto pipeline_b = CreatePipelineWithDescriptor(reactor, desc_a,
+                                                 pipeline_a->GetSharedHandle(),
+                                                 /*y_flip_uniform_location=*/7);
+
+  // Draw 1 & Draw 2: two distinct PipelineGLES instances sharing a program
+  // handle and stencil_reference = 1.
+  render_pass->SetPipeline(PipelineRef(pipeline_a));
+  render_pass->SetStencilReference(1);
+  render_pass->SetElementCount(3);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  render_pass->SetPipeline(PipelineRef(pipeline_b));
+  render_pass->SetStencilReference(1);
+  render_pass->SetElementCount(3);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  // Draw 3: same pipeline_b, but stencil_reference changes to 2. Only
+  // StencilFuncSeparate should re-fire (not StencilOpSeparate or
+  // StencilMaskSeparate).
+  render_pass->SetPipeline(PipelineRef(pipeline_b));
+  render_pass->SetStencilReference(2);
+  render_pass->SetElementCount(3);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, 0, 3)).Times(3);
+
+  // Shared program handle must bind once and upload y_flip uniform once.
+  EXPECT_CALL(mock_gl_impl_ref, UseProgram(_)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Uniform1fv(7, 1, _)).Times(1);
+
+  // Blend enabled once and configured once across all 3 draws.
+  EXPECT_CALL(mock_gl_impl_ref, Enable(GL_BLEND)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref,
+              BlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
+                                GL_ONE_MINUS_SRC_ALPHA))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, BlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD))
+      .Times(1);
+
+  // Depth enabled once, DepthFunc(GL_LESS) once, DepthMask(GL_FALSE) once (plus
+  // DepthMask(GL_TRUE) once in ResetGLState).
+  EXPECT_CALL(mock_gl_impl_ref, Enable(GL_DEPTH_TEST)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, DepthFunc(GL_LESS)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, DepthMask(GL_TRUE)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, DepthMask(GL_FALSE)).Times(1);
+
+  // Stencil enabled once; StencilOpSeparate and StencilMaskSeparate called once
+  // for GL_FRONT_AND_BACK across all 3 draws (plus GL_FRONT/GL_BACK defaults in
+  // ResetGLState); StencilFuncSeparate called once for ref=1 and once for
+  // ref=2.
+  EXPECT_CALL(mock_gl_impl_ref, Enable(GL_STENCIL_TEST)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref,
+              StencilOpSeparate(GL_FRONT_AND_BACK, GL_KEEP, GL_KEEP, GL_INCR))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, StencilMaskSeparate(GL_FRONT, 0xFFFFFFFF))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, StencilMaskSeparate(GL_BACK, 0xFFFFFFFF))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, StencilMaskSeparate(GL_FRONT_AND_BACK, 0x0F))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref,
+              StencilFuncSeparate(GL_FRONT_AND_BACK, GL_EQUAL, 1, _))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref,
+              StencilFuncSeparate(GL_FRONT_AND_BACK, GL_EQUAL, 2, _))
+      .Times(1);
 
   EXPECT_TRUE(render_pass->EncodeCommands());
   EXPECT_TRUE(reactor->React());
