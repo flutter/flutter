@@ -35,6 +35,12 @@ external JSAny? get _flutterBuildConfig;
 @JS('_flutter.buildConfig')
 external set _flutterBuildConfig(JSAny? value);
 
+@JS('_flutter.supportsDart2Wasm')
+external JSAny? get _flutterSupportsDart2Wasm;
+
+@JS('_flutter.supportsDart2Wasm')
+external set _flutterSupportsDart2Wasm(JSAny? value);
+
 @JS('WebAssembly.validate')
 external JSFunction get _wasmValidate;
 
@@ -150,6 +156,7 @@ Future<void> testMain() async {
 
   test('loader strictly honors wasmAllowList and WasmGC capability for dart2wasm builds', () async {
     final JSAny? originalBuildConfig = _flutterBuildConfig;
+    final JSAny? originalSupportsDart2Wasm = _flutterSupportsDart2Wasm;
     final JSFunction originalValidate = _wasmValidate;
     try {
       _flutterBuildConfig = <String, Object?>{
@@ -185,9 +192,10 @@ Future<void> testMain() async {
         ),
       );
 
-      // 2. When WasmGC capability validation fails, explicit opt-in via
-      // wasmAllowList must still reject the dart2wasm build.
-      _wasmValidate = (() => false).toJS;
+      // 2. When _flutter.supportsDart2Wasm is false (e.g. from main.dart.support.js),
+      // explicit opt-in via wasmAllowList must reject the dart2wasm build even if
+      // defaultSupportsDart2Wasm() would pass.
+      _flutterSupportsDart2Wasm = false.toJS;
       final JSAny? optInOptions = <String, Object?>{
         'config': <String, Object?>{
           'wasmAllowList': <String, bool>{
@@ -207,7 +215,22 @@ Future<void> testMain() async {
           ),
         ),
       );
+
+      // 3. When _flutter.supportsDart2Wasm is unset and WebAssembly.validate fails,
+      // explicit opt-in via wasmAllowList must still reject the dart2wasm build.
+      _flutterSupportsDart2Wasm = null;
+      _wasmValidate = (() => false).toJS;
+
+      await expectLater(
+        _flutterLoaderLoad(optInOptions).toDart,
+        throwsA(
+          predicate<Object>(
+            (Object e) => e.toString().contains('FlutterLoader could not find a build compatible'),
+          ),
+        ),
+      );
     } finally {
+      _flutterSupportsDart2Wasm = originalSupportsDart2Wasm;
       _wasmValidate = originalValidate;
       _flutterBuildConfig = originalBuildConfig;
     }
