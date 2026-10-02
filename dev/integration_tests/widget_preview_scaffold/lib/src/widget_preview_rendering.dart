@@ -481,9 +481,7 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
 
     preview = WidgetPreviewLocalizations(
       localizationsData: widget.preview.localizations,
-      child: ScaffoldMessenger(
-        child: ScrollNotificationObserver(child: preview),
-      ),
+      child: preview,
     );
 
     // Override the asset resolution behavior to automatically insert
@@ -1115,10 +1113,6 @@ class WidgetPreviewScaffold extends StatefulWidget {
     this.enableWebView = true,
   });
 
-  @visibleForTesting
-  static const kHotReloadRejectedMessage =
-      'Hot reload rejected due to unsupported changes. Performed a hot restart instead.';
-
   final WidgetPreviewScaffoldController controller;
   final IdeTheme ideTheme;
   final bool enableWebView;
@@ -1129,7 +1123,6 @@ class WidgetPreviewScaffold extends StatefulWidget {
 
 class _WidgetPreviewScaffoldState extends State<WidgetPreviewScaffold> {
   WebViewController? _webViewController;
-  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -1138,24 +1131,11 @@ class _WidgetPreviewScaffoldState extends State<WidgetPreviewScaffold> {
       _webViewController = WebViewController()
         ..loadRequest(widget.controller.devToolsUri);
     }
-    if (widget.controller.consumeHotReloadRejectedTriggerEvent()) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) {
-          return;
-        }
-        _scaffoldMessengerKey.currentState?.showSnackBar(
-          const SnackBar(
-            content: Text(WidgetPreviewScaffold.kHotReloadRejectedMessage),
-          ),
-        );
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      scaffoldMessengerKey: _scaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       theme: themeFor(
         isDarkTheme: false,
@@ -1168,8 +1148,8 @@ class _WidgetPreviewScaffoldState extends State<WidgetPreviewScaffold> {
         theme: ThemeData.dark(),
       ),
       themeMode: widget.ideTheme.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: Scaffold(
-        body: OutlineDecoration.onlyTop(
+      home: Material(
+        child: OutlineDecoration.onlyTop(
           child: ValueListenableBuilder(
             valueListenable: widget.controller.widgetInspectorVisible,
             builder: (context, widgetInspectorVisible, previewView) {

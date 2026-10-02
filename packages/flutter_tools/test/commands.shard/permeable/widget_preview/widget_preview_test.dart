@@ -68,9 +68,6 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   bool shouldThrow = false;
 
   @override
-  bool hotReloadRejectedTriggerEvent = false;
-
-  @override
   Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async {
     if (shouldThrow) {
       throw RpcException(123, 'Fake RPC Exception');
@@ -1090,7 +1087,6 @@ List<_i1.WidgetPreview> previews() => [
               updateFSReport: UpdateFSReport(hotReloadRejected: true),
             );
           }
-          expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isTrue);
           return OperationResult.ok;
         },
       );
@@ -1100,40 +1096,12 @@ List<_i1.WidgetPreview> previews() => [
 
       final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
       expect(fakeResidentRunner.restartCalls, <bool>[false, true]);
-      expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isTrue);
       expect(result?.isOk, isTrue);
       expect(
         bufferLogger.statusText,
         contains(WidgetPreviewStartCommand.kHotReloadRejectedMessage),
       );
     });
-
-    testWithoutContext(
-      'clears hotReloadRejectedTriggerEvent if fallback hot restart fails',
-      () async {
-        final fakeResidentRunner = FakeResidentRunner(
-          onRestart: (bool fullRestart) {
-            return OperationResult(
-              1,
-              'Failed to recompile application.',
-              updateFSReport: fullRestart ? null : UpdateFSReport(hotReloadRejected: true),
-            );
-          },
-        );
-        final WidgetPreviewStartCommand startCommand = createStartCommand(fakeResidentRunner);
-
-        final OperationResult? result = await startCommand.handleReload();
-
-        final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
-        expect(fakeResidentRunner.restartCalls, <bool>[false, true]);
-        expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isFalse);
-        expect(result?.isOk, isFalse);
-        expect(
-          bufferLogger.statusText,
-          contains(WidgetPreviewStartCommand.kHotReloadRejectedMessage),
-        );
-      },
-    );
 
     testWithoutContext(
       'does not trigger hot restart if hot reload fails for other reasons',
@@ -1153,7 +1121,6 @@ List<_i1.WidgetPreview> previews() => [
 
         final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
         expect(fakeResidentRunner.restartCalls, <bool>[false]);
-        expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isFalse);
         expect(result?.isOk, isFalse);
         expect(
           bufferLogger.statusText,
@@ -1170,7 +1137,6 @@ List<_i1.WidgetPreview> previews() => [
 
       final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
       expect(fakeResidentRunner.restartCalls, <bool>[false]);
-      expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isFalse);
       expect(result?.isOk, isTrue);
       expect(
         bufferLogger.statusText,

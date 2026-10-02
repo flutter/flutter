@@ -460,12 +460,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final OperationResult? result = await widgetPreviewApp?.restart();
     if (result case OperationResult(updateFSReport: UpdateFSReport(hotReloadRejected: true))) {
       logger.printStatus(kHotReloadRejectedMessage);
-      _dtdService.hotReloadRejectedTriggerEvent = true;
-      final OperationResult? restartResult = await widgetPreviewApp?.restart(fullRestart: true);
-      if (restartResult == null || !restartResult.isOk) {
-        _dtdService.hotReloadRejectedTriggerEvent = false;
-      }
-      return restartResult;
+      return widgetPreviewApp?.restart(fullRestart: true);
     }
     return result;
   }

@@ -45,9 +45,6 @@ class WidgetPreviewScaffoldController {
       dtdServices.getDevToolsUri().then((uri) {
         devToolsUri = uri;
       }),
-      dtdServices.checkForHotRestartTriggerEvent().then((value) {
-        _hotReloadRejectedTriggerEvent = value;
-      }),
     ]);
   }
 
@@ -154,18 +151,6 @@ class WidgetPreviewScaffoldController {
   /// Enable or disable the DevTools Widget Inspector.
   void toggleWidgetInspectorVisible() =>
       _widgetInspectorVisible.value = !_widgetInspectorVisible.value;
-
-  /// Set to true if the session was automatically restarted due to a rejected hot reload.
-  @visibleForTesting
-  bool get hotReloadRejectedTriggerEvent => _hotReloadRejectedTriggerEvent;
-  bool _hotReloadRejectedTriggerEvent = false;
-
-  /// Consumes and resets [hotReloadRejectedTriggerEvent].
-  bool consumeHotReloadRejectedTriggerEvent() {
-    final result = _hotReloadRejectedTriggerEvent;
-    _hotReloadRejectedTriggerEvent = false;
-    return result;
-  }
 
   /// The current set of previews to be displayed.
   ValueListenable<WidgetPreviewGroups> get filteredPreviewSetListenable =>
