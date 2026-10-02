@@ -1262,10 +1262,14 @@ class CdpNetworkTracker {
   final SystemClock _systemClock;
   final Map<String, _PendingRequestInfo> _pendingRequests = <String, _PendingRequestInfo>{};
   StreamSubscription<WipEvent>? _subscription;
+  bool _disposed = false;
 
   Future<void> enable() async {
     try {
       await connection.sendCommand('Network.enable');
+      if (_disposed) {
+        return;
+      }
       _subscription = connection.onNotification.listen((WipEvent event) {
         final Map<String, dynamic>? params = event.params;
         if (params == null) {
@@ -1305,7 +1309,9 @@ class CdpNetworkTracker {
   }
 
   Future<void> dispose() async {
+    _disposed = true;
     await _subscription?.cancel();
+    _subscription = null;
   }
 }
 
