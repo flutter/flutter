@@ -1230,16 +1230,26 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  // Dispatch the event synchronously if possible, there is no need to increase
-  // latency by scheduling a new run loop turn.
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetUITaskRunner(),
+  auto task =
       fml::MakeCopyable([engine = weak_engine_, packet = std::move(packet),
                          flow_id = next_pointer_flow_id_]() mutable {
         if (engine) {
           engine->DispatchPointerDataPacket(std::move(packet), flow_id);
-        }
-      }));
+        };
+      });
+
+  // Dispatch the event synchronously if possible to reduce latency.
+  // If the event dispatch is shomehow triggered from Dart code though
+  // the task will be dispatched asynchronously in order to avoid re-entrancy
+  // issues.
+  if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() &&
+      Dart_CurrentIsolate() == nullptr) {
+    task();
+    engine_->FlushMicrotaskQueue();
+  } else {
+    task_runners_.GetUITaskRunner()->PostTask(task);
+  };
+
   next_pointer_flow_id_++;
 }
 
