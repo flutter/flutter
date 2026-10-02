@@ -1238,16 +1238,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   ScrollController? _parent;
 
   void setParent(ScrollController? value) {
-    if (_parent == value) {
-      return;
-    }
-    // Null out _parent before calling its detach(), not after: detach()
-    // reenters this method with value == null (see
-    // _NestedScrollController.detach below), and if _parent were still set
-    // at that point, the reentrant call would detach from it again,
-    // recursing forever. This matters most when a NestedScrollView is
-    // nested inside another and the ambient PrimaryScrollController
-    // resolves to the outer NestedScrollView's controller (#123590).
+    // detach() reenters this method with a null value, so _parent must be
+    // cleared first or the reentrant call detaches the same parent again.
+    // See https://github.com/flutter/flutter/issues/123590.
     final ScrollController? oldParent = _parent;
     _parent = null;
     oldParent?.detach(this);
