@@ -81,6 +81,35 @@ base class Shader extends NativeFieldWrapperClass1 {
     return _uniformSlots[uniformName] ??= UniformSlot._(this, uniformName);
   }
 
+  /// The reflected size of this shader's `layout(push_constant)` block, or
+  /// null when it declares none.
+  ///
+  /// Set the block's contents with [RenderPass.setPushConstants].
+  int? get pushConstantSizeInBytes {
+    int size = _getPushConstantSize();
+    return size < 0 ? null : size;
+  }
+
+  /// The reflected offset of a named member of this shader's push constant
+  /// block.
+  ///
+  /// Returns null when the shader declares no push constant block, or when
+  /// the block has no member with the given name.
+  int? getPushConstantMemberOffsetInBytes(String memberName) {
+    int offset = _getPushConstantMemberOffset(memberName);
+    return offset < 0 ? null : offset;
+  }
+
+  @Native<Int Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Shader_GetPushConstantSize',
+  )
+  external int _getPushConstantSize();
+
+  @Native<Int Function(Pointer<Void>, Handle)>(
+    symbol: 'InternalFlutterGpu_Shader_GetPushConstantMemberOffset',
+  )
+  external int _getPushConstantMemberOffset(String memberName);
+
   @Native<Int Function(Pointer<Void>, Handle)>(
     symbol: 'InternalFlutterGpu_Shader_GetUniformStructSize',
   )

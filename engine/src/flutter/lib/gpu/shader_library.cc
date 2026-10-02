@@ -326,6 +326,48 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
       }
     }
 
+    std::optional<Shader::PushConstantBinding> push_constants;
+    if (const auto* block = backend_shader->push_constants();
+        block != nullptr &&
+        block->ext_res_0() != impeller::kOptimizedOutBinding) {
+      std::vector<impeller::ShaderStructMemberMetadata> members;
+      if (block->fields() != nullptr) {
+        for (const auto& struct_member : *block->fields()) {
+          const impeller::ShaderType type =
+              FromUniformType(struct_member->type());
+          members.push_back(impeller::ShaderStructMemberMetadata{
+              .type = type,
+              .name = struct_member->name()->c_str(),
+              .offset = static_cast<size_t>(struct_member->offset_in_bytes()),
+              .size =
+                  static_cast<size_t>(struct_member->element_size_in_bytes()),
+              .byte_length =
+                  static_cast<size_t>(struct_member->total_size_in_bytes()),
+              .array_elements =
+                  struct_member->array_elements() == 0
+                      ? std::optional<size_t>(std::nullopt)
+                      : static_cast<size_t>(struct_member->array_elements()),
+              .float_type = impeller::DeriveShaderFloatType(
+                  type, static_cast<size_t>(struct_member->vec_size()),
+                  static_cast<size_t>(struct_member->columns())),
+          });
+        }
+      }
+      push_constants = Shader::PushConstantBinding{
+          .slot =
+              impeller::ShaderPushConstantSlot{
+                  .name = block->name()->c_str(),
+                  .ext_res_0 = static_cast<size_t>(block->ext_res_0()),
+                  .size_in_bytes = static_cast<size_t>(block->size_in_bytes()),
+              },
+          .metadata =
+              impeller::ShaderMetadata{
+                  .name = block->name()->c_str(),
+                  .members = members,
+              },
+      };
+    }
+
     std::vector<impeller::ShaderStageIOSlot> inputs;
     std::vector<impeller::ShaderStageBufferLayout> layouts;
     if (backend_shader->stage() ==
@@ -360,7 +402,8 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
         library_id, backend_shader->entrypoint()->str(),
         ToShaderStage(backend_shader->stage()), std::move(code_mapping),
         std::move(inputs), std::move(layouts), std::move(uniform_structs),
-        std::move(uniform_textures), std::move(descriptor_set_layouts));
+        std::move(uniform_textures), std::move(descriptor_set_layouts),
+        std::move(push_constants));
     shader_map[bundled_shader->name()->str()] = std::move(shader);
   }
 

@@ -135,6 +135,11 @@ extern int InternalFlutterGpu_Context_GetMinimumUniformByteAlignment(
   return wrapper->GetContext().GetCapabilities()->GetMinimumUniformAlignment();
 }
 
+extern int InternalFlutterGpu_Context_GetMaxPushConstantSize(
+    flutter::gpu::Context* wrapper) {
+  return wrapper->GetContext().GetCapabilities()->GetMaxPushConstantSize();
+}
+
 extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(
     flutter::gpu::Context* wrapper) {
   return flutter::gpu::SupportsNormalOffscreenMSAA(wrapper->GetContext());
