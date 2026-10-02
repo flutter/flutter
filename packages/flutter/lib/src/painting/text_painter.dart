@@ -1066,6 +1066,8 @@ class TextPainter {
   /// Defaults to [Hyphens.manual], which renders a hyphen glyph at a line break
   /// that falls on a soft hyphen. [Hyphens.hidden] suppresses the glyph; the line
   /// still breaks at U+00AD regardless.
+  ///
+  /// Not yet supported on the web, where the hyphen glyph is never rendered.
   /// {@endtemplate}
   Hyphens get hyphens => _hyphens;
   Hyphens _hyphens;

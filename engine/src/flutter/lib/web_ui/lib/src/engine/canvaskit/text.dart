@@ -316,8 +316,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           'height: ${height != null ? "${height.toStringAsFixed(1)}x" : "unspecified"}, '
           'strutStyle: ${_strutStyle ?? "unspecified"}, '
           'ellipsis: ${_ellipsis != null ? '"$_ellipsis"' : "unspecified"}, '
-          'hyphens: ${_hyphens ?? "unspecified"}, '
-          'locale: ${_locale ?? "unspecified"}'
+          'locale: ${_locale ?? "unspecified"}, '
+          'hyphens: ${_hyphens ?? "unspecified"}'
           ')';
       return true;
     }());
