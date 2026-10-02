@@ -33,12 +33,8 @@ class FlutterDriverFactory {
     required this._buildTargets,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
-    required ToolContext toolContext,
-  }) : _processUtils = ProcessUtils(
-         processManager: toolContext.processManager,
-         logger: toolContext.logger,
-       ),
-       _toolContext = toolContext;
+    required this._toolContext,
+  });
 
   final Analytics _analytics;
   final ApplicationPackageFactory _applicationPackageFactory;
@@ -46,7 +42,6 @@ class FlutterDriverFactory {
   final BuildTargets _buildTargets;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
-  final ProcessUtils _processUtils;
   final ToolContext _toolContext;
 
   /// Create a driver service for running `flutter drive`.
@@ -60,14 +55,15 @@ class FlutterDriverFactory {
         toolContext: _toolContext,
       );
     }
-    final ToolContext(:Logger logger, :Platform platform) = _toolContext;
+    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
+        _toolContext;
     return FlutterDriverService(
+      applicationPackageFactory: _applicationPackageFactory,
+      dartSdkPath: _dartSdkPath,
+      devtoolsLauncher: _devtoolsLauncher,
       logger: logger,
       platform: platform,
-      processUtils: _processUtils,
-      dartSdkPath: _dartSdkPath,
-      applicationPackageFactory: _applicationPackageFactory,
-      devtoolsLauncher: _devtoolsLauncher,
+      processUtils: processUtils,
     );
   }
 }
@@ -118,13 +114,13 @@ abstract class DriverService {
 class FlutterDriverService extends DriverService {
   FlutterDriverService({
     required this._applicationPackageFactory,
+    required this._dartSdkPath,
+    required this._devtoolsLauncher,
     required this._logger,
     required this._platform,
     required this._processUtils,
-    required this._dartSdkPath,
-    required this._devtoolsLauncher,
-    @visibleForTesting this._vmServiceConnector = connectToVmService,
     @visibleForTesting this._logFlushDelay = const Duration(milliseconds: 500),
+    @visibleForTesting this._vmServiceConnector = connectToVmService,
   });
 
   static const _kLaunchAttempts = 3;
