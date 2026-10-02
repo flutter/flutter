@@ -2,11 +2,69 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('Slider can be disabled when a dialog closes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/193706.
+    var disabled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: Column(
+                children: <Widget>[
+                  Slider(value: 0.5, onChanged: disabled ? null : (double value) {}),
+                  FilledButton(
+                    onPressed: () async {
+                      final bool? result = await Navigator.of(context).push(
+                        DialogRoute<bool>(
+                          context: context,
+                          builder: (BuildContext context) => AlertDialog(
+                            title: FilledButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Close'),
+                            ),
+                          ),
+                        ),
+                      );
+                      if (result == true) {
+                        setState(() => disabled = true);
+                      }
+                    },
+                    child: const Text('Show dialog'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show dialog'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(tester.widget<Slider>(find.byType(Slider)).onChanged, isNull);
+    expect(
+      find.semantics.byValue('50%').evaluate().single,
+      containsSemantics(
+        isSlider: true,
+        hasEnabledState: true,
+        isEnabled: false,
+        hasIncreaseAction: false,
+        hasDecreaseAction: false,
+        value: '50%',
+      ),
+    );
+  }, variant: TargetPlatformVariant.all());
+
   const targetKey = Key('target');
 
   // A page with a semantics boundary, a text with an inline widget span, a
