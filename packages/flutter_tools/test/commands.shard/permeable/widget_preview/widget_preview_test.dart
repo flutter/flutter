@@ -158,6 +158,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
   int restartCount = 0;
   int concurrentRestarts = 0;
   int maxConcurrentRestarts = 0;
+  final fullRestartRequests = <bool>[];
   Completer<OperationResult>? currentRestartCompleter;
   Completer<void>? appStartedCompleter;
   Completer<DebugConnectionInfo>? connectionInfoCompleter;
@@ -182,6 +183,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
     bool benchmarkMode = false,
   }) async {
     restartCount++;
+    fullRestartRequests.add(fullRestart);
     concurrentRestarts++;
     if (concurrentRestarts > maxConcurrentRestarts) {
       maxConcurrentRestarts = concurrentRestarts;
@@ -1298,6 +1300,50 @@ List<_i1.WidgetPreview> previews() => [
           // The 3 rapid changes must be coalesced into exactly one follow-up restart (total 2).
           expect(fakeResidentRunner.restartCount, 2);
           expect(fakeResidentRunner.maxConcurrentRestarts, 1);
+          expect(fakeResidentRunner.fullRestartRequests, <bool>[false, false]);
+
+          // Verify that a hot restart request upgrades a queued hot reload and is
+          // not downgraded by a subsequent hot reload before the in-flight reload
+          // completes.
+          final secondInFlightCompleter = Completer<OperationResult>();
+          fakeResidentRunner.currentRestartCompleter = secondInFlightCompleter;
+
+          // Start an in-flight hot reload (#3).
+          startCommand.onChangeDetected(
+            FlutterWidgetPreviews(
+              namespaces: const <String, String>{},
+              previews: const <FlutterWidgetPreviewDetails>[],
+              scriptUris: <Uri>[Uri.file(fs.path.join(rootProject.path, 'lib', 'main.dart'))],
+            ),
+          );
+          await pumpEventQueue();
+          expect(fakeResidentRunner.restartCount, 3);
+
+          // Queue a hot reload, upgrade it with a hot restart request, then send
+          // another hot reload that must not downgrade the queued hot restart.
+          startCommand.onChangeDetected(
+            FlutterWidgetPreviews(
+              namespaces: const <String, String>{},
+              previews: const <FlutterWidgetPreviewDetails>[],
+              scriptUris: <Uri>[Uri.file(fs.path.join(rootProject.path, 'lib', 'main.dart'))],
+            ),
+          );
+          startCommand.onHotRestartRequest();
+          startCommand.onChangeDetected(
+            FlutterWidgetPreviews(
+              namespaces: const <String, String>{},
+              previews: const <FlutterWidgetPreviewDetails>[],
+              scriptUris: <Uri>[Uri.file(fs.path.join(rootProject.path, 'lib', 'main.dart'))],
+            ),
+          );
+
+          fakeResidentRunner.currentRestartCompleter = null;
+          secondInFlightCompleter.complete(OperationResult.ok);
+          await pumpEventQueue();
+
+          expect(fakeResidentRunner.restartCount, 4);
+          expect(fakeResidentRunner.maxConcurrentRestarts, 1);
+          expect(fakeResidentRunner.fullRestartRequests, <bool>[false, false, false, true]);
 
           fakeResidentRunner.waitForAppToFinishCompleter!.complete(0);
           await runFuture;

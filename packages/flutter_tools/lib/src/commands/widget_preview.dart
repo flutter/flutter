@@ -42,6 +42,7 @@ import '../widget_preview/preview_code_generator.dart';
 import '../widget_preview/preview_detector.dart';
 import '../widget_preview/preview_manifest.dart';
 import '../widget_preview/preview_pubspec_builder.dart';
+import '../widget_preview/utils.dart';
 import 'create_base.dart';
 
 typedef ResidentRunnerFactory = ResidentRunner Function(
@@ -128,6 +129,16 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
     }
     return flutterProject;
   }
+}
+
+/// The type of reload operation queued to run once [WidgetPreviewStartCommand._reloadMutex]
+/// is available.
+enum _PendingReload {
+  /// Perform a hot reload (`restart(fullRestart: false)`).
+  hotReload,
+
+  /// Perform a full hot restart (`restart(fullRestart: true)`).
+  hotRestart,
 }
 
 final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with CreateBase {
@@ -300,17 +311,21 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   @visibleForTesting
   ResidentRunner? get widgetPreviewApp => _widgetPreviewApp;
 
-  bool _previewAppReady = false;
-  bool _isRestarting = false;
-  bool _pendingRestart = false;
-  bool _pendingFullRestart = false;
-  bool _appFinished = false;
+  /// Serializes initial preview scaffold startup and subsequent hot reload / hot
+  /// restart operations so reloads cannot execute before the debug connection is
+  /// established or overlap with an in-flight reload.
+  final _reloadMutex = PreviewDetectorMutex();
 
-  @visibleForTesting
-  bool get previewAppReady => _previewAppReady;
-
-  @visibleForTesting
-  bool get isRestarting => _isRestarting;
+  /// Tracks a coalesced reload or restart request waiting to acquire
+  /// [_reloadMutex].
+  ///
+  /// When non-null, a task is already queued on [_reloadMutex] to execute the
+  /// pending reload once the current startup or in-flight reload completes.
+  /// Additional requests that arrive before that queued task acquires the lock
+  /// update this field in place (upgrading [_PendingReload.hotReload] to
+  /// [_PendingReload.hotRestart] if a full restart is requested) without
+  /// queueing duplicate tasks on [_reloadMutex].
+  _PendingReload? _pendingReload;
 
   /// The location of the widget_preview_scaffold for the current execution of the command.
   ///
@@ -405,8 +420,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final bool legacyDetection = boolArg('legacy-preview-detection');
 
     shutdownHooks.addShutdownHook(() async {
-      _appFinished = true;
-      await _widgetPreviewApp?.exitApp();
+      // Clear the runner reference before exiting so any queued or late reload
+      // callbacks become no-ops during shutdown.
+      final ResidentRunner? app = _widgetPreviewApp;
+      _widgetPreviewApp = null;
+      await app?.exitApp();
       if (legacyDetection) {
         await _previewDetector.dispose();
       } else {
@@ -475,48 +493,44 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
   }
 
-  Future<void> _triggerRestart({bool fullRestart = false}) async {
-    if (_appFinished || shutdownHooks.isShuttingDown) {
+  Future<void> _triggerReload(_PendingReload requested) async {
+    // Record the requested reload type. If a task is already queued waiting for
+    // [_reloadMutex], coalesce this request into the pending one (upgrading a
+    // queued hot reload to a full hot restart if needed, and never downgrading
+    // a queued hot restart) and return immediately rather than queueing
+    // duplicate reload tasks on the mutex.
+    final _PendingReload? queued = _pendingReload;
+    _pendingReload = queued == .hotRestart ? .hotRestart : requested;
+    if (queued != null) {
       return;
     }
-    if (!_previewAppReady) {
-      _pendingRestart = true;
-      _pendingFullRestart = _pendingFullRestart || fullRestart;
-      return;
-    }
-    if (_isRestarting) {
-      _pendingRestart = true;
-      _pendingFullRestart = _pendingFullRestart || fullRestart;
-      return;
-    }
-    _isRestarting = true;
-    try {
-      var currentFullRestart = fullRestart;
-      do {
-        final bool shouldFullRestart = _pendingFullRestart || currentFullRestart;
-        _pendingRestart = false;
-        _pendingFullRestart = false;
-        currentFullRestart = false;
-        try {
-          await _widgetPreviewApp?.restart(fullRestart: shouldFullRestart);
-        } on Object catch (e, st) {
-          logger.printTrace('Error during widget preview restart: $e\n$st');
-        }
-      } while (_pendingRestart && !_appFinished && !shutdownHooks.isShuttingDown);
-    } finally {
-      _isRestarting = false;
-    }
+    await _reloadMutex.runGuarded(() async {
+      // Consume the coalesced request now that we hold [_reloadMutex]. Any new
+      // requests that arrive while `ResidentRunner.restart` is in flight will
+      // see `_pendingReload == null` and queue a single follow-up task on the
+      // mutex.
+      final _PendingReload? pending = _pendingReload;
+      _pendingReload = null;
+      if (pending == null || shutdownHooks.isShuttingDown) {
+        return;
+      }
+      try {
+        await _widgetPreviewApp?.restart(fullRestart: pending == .hotRestart);
+      } on Object catch (e, st) {
+        logger.printTrace('Error during widget preview reload: $e\n$st');
+      }
+    });
   }
 
   void onLegacyChangeDetected(PreviewDependencyGraph previews) {
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(previews);
     logger.printStatus('Triggering reload based on change to preview set: $previews');
-    unawaited(_triggerRestart());
+    unawaited(_triggerReload(.hotReload));
   }
 
   void onHotRestartRequest() {
     logger.printStatus('Triggering restart based on request from preview environment.');
-    unawaited(_triggerRestart(fullRestart: true));
+    unawaited(_triggerReload(.hotRestart));
   }
 
   Future<void> _onPubspecChangeDetected(String path) async {
@@ -525,13 +539,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       rootProject: project,
       updatedPubspecPath: path,
     );
-    await _triggerRestart(fullRestart: true);
+    await _triggerReload(.hotRestart);
   }
 
   void onChangeDetected(FlutterWidgetPreviews update) {
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(update);
     logger.printStatus('Triggering reload based on update to script: ${update.scriptUris}');
-    unawaited(_triggerRestart());
+    unawaited(_triggerReload(.hotReload));
   }
 
   /// Configures the Dart Tooling Daemon connection.
@@ -558,144 +572,152 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   Future<int> runPreviewEnvironment({required FlutterProject widgetPreviewScaffoldProject}) async {
     try {
-      // In the rare case that Flutter Web is disabled, the device manager will not return any web
-      // devices which will cause us to crash.
-      if (!featureFlags.isWebEnabled) {
-        throwToolExit(
-          'Widget Previews requires Flutter Web to be enabled. Please run '
-          "'flutter config --enable-web' to enable Flutter Web and try again.",
-        );
-      }
-      final Device device;
-      if (boolArg(kWebServer)) {
-        final List<Device> devices;
-        try {
-          // The web-server device is hidden by default, make it visible before trying to look it up.
-          WebServerDevice.showWebServerDevice = true;
-          devices = await deviceManager!.getDevicesById(WebServerDevice.kWebServerDeviceId);
-        } finally {
-          // Reset the flag to false to avoid affecting other commands.
-          WebServerDevice.showWebServerDevice = false;
-        }
-        assert(devices.length == 1);
-        device = devices.single;
-      } else {
-        // Since the only target supported by the widget preview scaffold is the web
-        // device, only a single web device should be returned.
-        final List<Device> devices = await deviceManager!.getDevices(
-          filter: DeviceDiscoveryFilter(
-            supportFilter: DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
-              flutterProject: widgetPreviewScaffoldProject,
-            ),
-            deviceConnectionInterface: DeviceConnectionInterface.attached,
-          ),
-        );
-
-        if (devices.isEmpty) {
-          throwToolExit(kBrowserNotFoundErrorMessage);
-        }
-        if (devices.length > 1) {
-          // Prefer Google Chrome as the target browser.
-          device =
-              devices.firstWhereOrNull((device) => device is GoogleChromeDevice) ?? devices.first;
-
-          logger.printTrace(
-            'Detected ${devices.length} web devices (${devices.map((e) => e.displayName).join(', ')}). '
-            'Defaulting to ${device.displayName}.',
+      // Hold [_reloadMutex] during startup so any reload or restart requests
+      // triggered while the preview scaffold is launching and establishing its
+      // debug connection are gated until the previewer is ready.
+      await _reloadMutex.runGuarded(() async {
+        // In the rare case that Flutter Web is disabled, the device manager will not return any web
+        // devices which will cause us to crash.
+        if (!featureFlags.isWebEnabled) {
+          throwToolExit(
+            'Widget Previews requires Flutter Web to be enabled. Please run '
+            "'flutter config --enable-web' to enable Flutter Web and try again.",
           );
-        } else {
+        }
+        final Device device;
+        if (boolArg(kWebServer)) {
+          final List<Device> devices;
+          try {
+            // The web-server device is hidden by default, make it visible before trying to look it up.
+            WebServerDevice.showWebServerDevice = true;
+            devices = await deviceManager!.getDevicesById(WebServerDevice.kWebServerDeviceId);
+          } finally {
+            // Reset the flag to false to avoid affecting other commands.
+            WebServerDevice.showWebServerDevice = false;
+          }
+          assert(devices.length == 1);
           device = devices.single;
+        } else {
+          // Since the only target supported by the widget preview scaffold is the web
+          // device, only a single web device should be returned.
+          final List<Device> devices = await deviceManager!.getDevices(
+            filter: DeviceDiscoveryFilter(
+              supportFilter:
+                  DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
+                    flutterProject: widgetPreviewScaffoldProject,
+                  ),
+              deviceConnectionInterface: DeviceConnectionInterface.attached,
+            ),
+          );
+
+          if (devices.isEmpty) {
+            throwToolExit(kBrowserNotFoundErrorMessage);
+          }
+          if (devices.length > 1) {
+            // Prefer Google Chrome as the target browser.
+            device =
+                devices.firstWhereOrNull((device) => device is GoogleChromeDevice) ?? devices.first;
+
+            logger.printTrace(
+              'Detected ${devices.length} web devices (${devices.map((e) => e.displayName).join(', ')}). '
+              'Defaulting to ${device.displayName}.',
+            );
+          } else {
+            device = devices.single;
+          }
         }
-      }
 
-      // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
-      logger.printStatus('Launching the Widget Preview Scaffold on ${device.displayName}...');
+        // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
+        logger.printStatus('Launching the Widget Preview Scaffold on ${device.displayName}...');
 
-      final debuggingOptions = DebuggingOptions.enabled(
-        BuildInfo(
-          BuildMode.debug,
-          null,
-          treeShakeIcons: false,
-          packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
-          packageConfig: PackageConfig.parseBytes(
-            widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
-            widgetPreviewScaffoldProject.packageConfig.uri,
+        final debuggingOptions = DebuggingOptions.enabled(
+          BuildInfo(
+            BuildMode.debug,
+            null,
+            treeShakeIcons: false,
+            packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
+            packageConfig: PackageConfig.parseBytes(
+              widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
+              widgetPreviewScaffoldProject.packageConfig.uri,
+            ),
+            trackWidgetCreation: true,
+            // Don't try and download canvaskit from the CDN.
+            useLocalCanvasKit: true,
+            webEnableHotReload: true,
+            includeUnsupportedPlatformLibraryStubs: true,
           ),
-          trackWidgetCreation: true,
-          // Don't try and download canvaskit from the CDN.
-          useLocalCanvasKit: true,
-          webEnableHotReload: true,
-          includeUnsupportedPlatformLibraryStubs: true,
-        ),
-        webEnableExposeUrl: false,
-        webEnableExpressionEvaluation: true,
-        webRunHeadless: boolArg(kHeadless),
-        devToolsServerAddress: devToolsServerAddress,
-      );
-      final String target = bundle.defaultMainPath;
-      final FlutterDevice flutterDevice = await FlutterDevice.create(
-        device,
-        toolContext: toolContext,
-        buildInfo: debuggingOptions.buildInfo,
-        target: target,
-      );
+          webEnableExposeUrl: false,
+          webEnableExpressionEvaluation: true,
+          webRunHeadless: boolArg(kHeadless),
+          devToolsServerAddress: devToolsServerAddress,
+        );
+        final String target = bundle.defaultMainPath;
+        final FlutterDevice flutterDevice = await FlutterDevice.create(
+          device,
+          toolContext: toolContext,
+          buildInfo: debuggingOptions.buildInfo,
+          target: target,
+        );
 
-      if (boolArg(kLaunchPreviewer)) {
-        final appStarted = Completer<void>();
-        final connectionInfo = Completer<DebugConnectionInfo>();
-        _widgetPreviewApp = _residentRunnerFactoryOverride != null
-            ? _residentRunnerFactoryOverride(
-                flutterDevice,
-                target: target,
-                debuggingOptions: debuggingOptions,
-                flutterProject: widgetPreviewScaffoldProject,
-                projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
-              )
-            : ResidentWebRunner(
-                flutterDevice,
-                target: target,
-                debuggingOptions: debuggingOptions,
-                analytics: analytics,
-                flutterProject: widgetPreviewScaffoldProject,
-                fileSystem: fs,
-                logger: logger,
-                terminal: terminal,
-                platform: platform,
-                outputPreferences: toolContext.outputPreferences,
-                systemClock: toolContext.systemClock,
-                // Explicitly provide the project root path rather than relying on the current directory
-                // as the current directory exists within $TMP. At least on MacOS, when setting the
-                // current directory to the widget_preview_scaffold project created under
-                // `/var/folders/...`, the underlying chdir call actually changes the directory to
-                // `/private/var/folders/...`. These directories are identical, but confuse the package
-                // config resolution logic.
-                // TODO(bkonyi): consider removing if we stop placing the scaffold in $TMP.
-                // See https://github.com/flutter/flutter/issues/179036
-                projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
-              );
-        unawaited(
-          _widgetPreviewApp!.run(
-            appStartedCompleter: appStarted,
-            connectionInfoCompleter: connectionInfo,
-          ),
-        );
-        await appStarted.future;
-        logger.sendStartedEvent(applicationUrl: flutterDevice.devFS!.baseUri!);
-        final DebugConnectionInfo debugConnection = await connectionInfo.future;
-        final Uri? devToolsUri = devToolsServerAddress ?? debugConnection.devToolsUri;
-        if (devToolsUri == null) {
-          throwToolExit('Could not determine DevTools server address for the widget inspector.');
+        if (boolArg(kLaunchPreviewer)) {
+          final appStarted = Completer<void>();
+          final connectionInfo = Completer<DebugConnectionInfo>();
+          _widgetPreviewApp = _residentRunnerFactoryOverride != null
+              ? _residentRunnerFactoryOverride(
+                  flutterDevice,
+                  target: target,
+                  debuggingOptions: debuggingOptions,
+                  flutterProject: widgetPreviewScaffoldProject,
+                  projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
+                )
+              : ResidentWebRunner(
+                  flutterDevice,
+                  target: target,
+                  debuggingOptions: debuggingOptions,
+                  analytics: analytics,
+                  flutterProject: widgetPreviewScaffoldProject,
+                  fileSystem: fs,
+                  logger: logger,
+                  terminal: terminal,
+                  platform: platform,
+                  outputPreferences: toolContext.outputPreferences,
+                  systemClock: toolContext.systemClock,
+                  // Explicitly provide the project root path rather than relying on the current directory
+                  // as the current directory exists within $TMP. At least on MacOS, when setting the
+                  // current directory to the widget_preview_scaffold project created under
+                  // `/var/folders/...`, the underlying chdir call actually changes the directory to
+                  // `/private/var/folders/...`. These directories are identical, but confuse the package
+                  // config resolution logic.
+                  // TODO(bkonyi): consider removing if we stop placing the scaffold in $TMP.
+                  // See https://github.com/flutter/flutter/issues/179036
+                  projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
+                );
+          unawaited(
+            _widgetPreviewApp!.run(
+              appStartedCompleter: appStarted,
+              connectionInfoCompleter: connectionInfo,
+            ),
+          );
+          await appStarted.future;
+          logger.sendStartedEvent(applicationUrl: flutterDevice.devFS!.baseUri!);
+          final DebugConnectionInfo debugConnection = await connectionInfo.future;
+          final Uri? devToolsUri = devToolsServerAddress ?? debugConnection.devToolsUri;
+          if (devToolsUri == null) {
+            throwToolExit('Could not determine DevTools server address for the widget inspector.');
+          }
+          _dtdService.setDevToolsServerAddress(
+            devToolsServerAddress: devToolsServerAddress ?? debugConnection.devToolsUri!,
+            applicationUri: debugConnection.wsUri!,
+          );
         }
-        _dtdService.setDevToolsServerAddress(
-          devToolsServerAddress: devToolsServerAddress ?? debugConnection.devToolsUri!,
-          applicationUri: debugConnection.wsUri!,
-        );
-        _previewAppReady = true;
-        if (_pendingRestart && !_appFinished && !shutdownHooks.isShuttingDown) {
-          unawaited(_triggerRestart());
-        }
-      }
+      });
     } on Exception catch (error) {
+      // Clear the runner reference so any queued reload callbacks become no-ops,
+      // then tear down a partially started previewer since the shutdown hook will
+      // no longer see it.
+      final ResidentRunner? app = _widgetPreviewApp;
+      _widgetPreviewApp = null;
+      await app?.exitApp();
       throwToolExit(error.toString());
     }
 
@@ -707,11 +729,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
     // If _widgetPreviewApp is null --no-launch-previewer was provided so return success.
     if (_widgetPreviewApp == null) {
-      _appFinished = true;
       return 0;
     }
     final int exitCode = await _widgetPreviewApp!.waitForAppToFinish();
-    _appFinished = true;
+    // Clear the runner reference so any reload callbacks triggered after the
+    // previewer exits become no-ops.
+    _widgetPreviewApp = null;
     return exitCode;
   }
 }
