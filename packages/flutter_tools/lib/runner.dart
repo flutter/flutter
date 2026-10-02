@@ -10,6 +10,7 @@ import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'src/android/android_workflow.dart';
 import 'src/base/async_guard.dart';
 import 'src/base/common.dart';
 import 'src/base/context.dart';
@@ -21,6 +22,7 @@ import 'src/base/logger.dart';
 import 'src/base/process.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/context_runner.dart';
+import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/emulator.dart';
 import 'src/features.dart';
@@ -28,6 +30,7 @@ import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
+import 'src/windows/windows_workflow.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
 Future<int> run(
@@ -61,6 +64,7 @@ Future<int> run(
       analytics: globals.analytics,
       androidSdk: globals.androidSdk,
       androidStudio: globals.androidStudio,
+      androidWorkflow: androidWorkflow,
       artifacts: globals.artifacts,
       botDetector: globals.botDetector,
       buildSystem: globals.buildSystem,
@@ -71,6 +75,7 @@ Future<int> run(
       config: globals.config,
       crashReporter: globals.crashReporter,
       customDevicesConfig: globals.customDevicesConfig,
+      deviceManager: globals.deviceManager,
       doctor: globals.doctor,
       emulatorManager: emulatorManager,
       featureFlags: featureFlags,
@@ -97,109 +102,115 @@ Future<int> run(
       systemClock: globals.systemClock,
       terminal: globals.terminal,
       userMessages: globals.userMessages,
+      windowsWorkflow: windowsWorkflow,
       xcdevice: globals.xcdevice,
       xcode: globals.xcode,
       xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
     );
-    final runner = FlutterCommandRunner(
-      analytics: toolDeps.analytics,
-      featureFlags: featureFlags,
-      toolContext: toolDeps.toolContext,
-      verboseHelp: verboseHelp,
-    );
-    commands(toolDeps).forEach(runner.addCommand);
-
-    // Initialize the system locale.
-    final String systemLocale = await intl_standalone.findSystemLocale();
-    intl.Intl.defaultLocale = intl.Intl.verifiedLocale(
-      systemLocale,
-      intl.NumberFormat.localeExists,
-      onFailure: (String _) => 'en_US',
-    );
-
-    String getVersion() =>
-        flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
-    Object? firstError;
-    StackTrace? firstStackTrace;
-    return runZonedGuarded<Future<int>>(
-      () async {
-        try {
-          if (args.contains('--disable-analytics') && args.contains('--enable-analytics')) {
-            throwToolExit(
-              'Both enable and disable analytics commands were detected '
-              'when only one can be supplied per invocation.',
-              exitCode: 1,
-            );
-          }
-
-          if (args.contains('--disable-analytics')) {
-            if (globals.analytics.telemetryEnabled) {
-              globals.analytics.send(Event.analyticsCollectionEnabled(status: false));
-              // Before disablig analytics, we need to close the client to make
-              // sure the above collection event is sent.
-              await globals.analytics.close();
-            }
-            await globals.analytics.setTelemetry(false);
-            globals.printStatus('Analytics reporting disabled.');
-          }
-
-          if (args.contains('--enable-analytics')) {
-            final bool alreadyEnabled = globals.analytics.telemetryEnabled;
-            await globals.analytics.setTelemetry(true);
-            if (!alreadyEnabled) {
-              globals.analytics.send(Event.analyticsCollectionEnabled(status: true));
-            }
-            globals.printStatus('Analytics reporting enabled.');
-          }
-
-          await runner.run(args);
-
-          // Triggering [runZoned]'s error callback does not necessarily mean that
-          // we stopped executing the body. See https://github.com/dart-lang/sdk/issues/42150.
-          if (firstError == null) {
-            return await exitWithHooks(0, shutdownHooks: shutdownHooks);
-          }
-
-          // We already hit some error, so don't return success. The error path
-          // (which should be in progress) is responsible for calling _exit().
-          return 1;
-          // This catches all exceptions to send to crash logging, etc.
-          // ignore: avoid_catches_without_on_clauses
-        } catch (error, stackTrace) {
-          firstError = error;
-          firstStackTrace = stackTrace;
-          return _handleToolError(
-            error,
-            stackTrace,
-            verbose,
-            args,
-            reportCrashes!,
-            getVersion,
-            shutdownHooks,
-            featureFlags: featureFlags,
-            usingLocalEngine: usingLocalEngine,
-          );
-        }
-      },
-      (Object error, StackTrace stackTrace) async {
-        // If sending a crash report throws an error into the zone, we don't want
-        // to re-try sending the crash report with *that* error. Rather, we want
-        // to send the original error that triggered the crash report.
-        firstError ??= error;
-        firstStackTrace ??= stackTrace;
-        await _handleToolError(
-          firstError!,
-          firstStackTrace,
-          verbose,
-          args,
-          reportCrashes!,
-          getVersion,
-          shutdownHooks,
+    return context.run<int>(
+      overrides: <Type, Generator>{DeviceManager: () => toolDeps.deviceManager},
+      body: () async {
+        final runner = FlutterCommandRunner(
+          analytics: toolDeps.analytics,
           featureFlags: featureFlags,
-          usingLocalEngine: usingLocalEngine,
+          toolContext: toolDeps.toolContext,
+          verboseHelp: verboseHelp,
         );
+        commands(toolDeps).forEach(runner.addCommand);
+
+        // Initialize the system locale.
+        final String systemLocale = await intl_standalone.findSystemLocale();
+        intl.Intl.defaultLocale = intl.Intl.verifiedLocale(
+          systemLocale,
+          intl.NumberFormat.localeExists,
+          onFailure: (String _) => 'en_US',
+        );
+
+        String getVersion() =>
+            flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
+        Object? firstError;
+        StackTrace? firstStackTrace;
+        return runZonedGuarded<Future<int>>(
+          () async {
+            try {
+              if (args.contains('--disable-analytics') && args.contains('--enable-analytics')) {
+                throwToolExit(
+                  'Both enable and disable analytics commands were detected '
+                  'when only one can be supplied per invocation.',
+                  exitCode: 1,
+                );
+              }
+
+              if (args.contains('--disable-analytics')) {
+                if (globals.analytics.telemetryEnabled) {
+                  globals.analytics.send(Event.analyticsCollectionEnabled(status: false));
+                  // Before disablig analytics, we need to close the client to make
+                  // sure the above collection event is sent.
+                  await globals.analytics.close();
+                }
+                await globals.analytics.setTelemetry(false);
+                globals.printStatus('Analytics reporting disabled.');
+              }
+
+              if (args.contains('--enable-analytics')) {
+                final bool alreadyEnabled = globals.analytics.telemetryEnabled;
+                await globals.analytics.setTelemetry(true);
+                if (!alreadyEnabled) {
+                  globals.analytics.send(Event.analyticsCollectionEnabled(status: true));
+                }
+                globals.printStatus('Analytics reporting enabled.');
+              }
+
+              await runner.run(args);
+
+              // Triggering [runZoned]'s error callback does not necessarily mean that
+              // we stopped executing the body. See https://github.com/dart-lang/sdk/issues/42150.
+              if (firstError == null) {
+                return await exitWithHooks(0, shutdownHooks: shutdownHooks);
+              }
+
+              // We already hit some error, so don't return success. The error path
+              // (which should be in progress) is responsible for calling _exit().
+              return 1;
+              // This catches all exceptions to send to crash logging, etc.
+              // ignore: avoid_catches_without_on_clauses
+            } catch (error, stackTrace) {
+              firstError = error;
+              firstStackTrace = stackTrace;
+              return _handleToolError(
+                error,
+                stackTrace,
+                verbose,
+                args,
+                reportCrashes!,
+                getVersion,
+                shutdownHooks,
+                featureFlags: featureFlags,
+                usingLocalEngine: usingLocalEngine,
+              );
+            }
+          },
+          (Object error, StackTrace stackTrace) async {
+            // If sending a crash report throws an error into the zone, we don't want
+            // to re-try sending the crash report with *that* error. Rather, we want
+            // to send the original error that triggered the crash report.
+            firstError ??= error;
+            firstStackTrace ??= stackTrace;
+            await _handleToolError(
+              firstError!,
+              firstStackTrace,
+              verbose,
+              args,
+              reportCrashes!,
+              getVersion,
+              shutdownHooks,
+              featureFlags: featureFlags,
+              usingLocalEngine: usingLocalEngine,
+            );
+          },
+        )!;
       },
-    )!;
+    );
   }, overrides: overrides);
 }
 
