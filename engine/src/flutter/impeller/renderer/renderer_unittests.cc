@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <thread>
+
 #include "flutter/fml/logging.h"
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/time/time_point.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/device_buffer_descriptor.h"
@@ -1749,6 +1752,59 @@ TEST_P(RendererTest, AttachmentRejectsOutOfRangeSubresource) {
   color0.mip_level = 0u;
   color0.slice = 1u;  // A 2D texture has a single slice.
   EXPECT_FALSE(color0.IsValid());
+}
+
+TEST_P(RendererTest, SamplerLibraryAllowsConcurrentGetSampler) {
+  auto library = GetContext()->GetSamplerLibrary();
+  ASSERT_TRUE(library);
+
+  std::vector<SamplerDescriptor> descriptors;
+  for (auto min : {MinMagFilter::kNearest, MinMagFilter::kLinear}) {
+    for (auto mag : {MinMagFilter::kNearest, MinMagFilter::kLinear}) {
+      for (auto mip :
+           {MipFilter::kBase, MipFilter::kNearest, MipFilter::kLinear}) {
+        for (auto mode :
+             {SamplerAddressMode::kClampToEdge, SamplerAddressMode::kRepeat,
+              SamplerAddressMode::kMirror}) {
+          SamplerDescriptor desc("Concurrent", min, mag, mip);
+          desc.width_address_mode = mode;
+          desc.height_address_mode = mode;
+          descriptors.push_back(desc);
+        }
+      }
+    }
+  }
+
+  constexpr size_t kThreadCount = 4;
+  std::vector<std::vector<const Sampler*>> results(
+      kThreadCount, std::vector<const Sampler*>(descriptors.size()));
+  fml::CountDownLatch start(kThreadCount);
+  std::vector<std::thread> threads;
+  threads.reserve(kThreadCount);
+  for (size_t t = 0; t < kThreadCount; t++) {
+    threads.emplace_back([&, t] {
+      start.CountDown();
+      start.Wait();
+      for (size_t i = 0; i < descriptors.size(); i++) {
+        size_t index =
+            (i + t * descriptors.size() / kThreadCount) % descriptors.size();
+        results[t][index] = library->GetSampler(descriptors[index]).get();
+      }
+    });
+  }
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  for (size_t i = 0; i < descriptors.size(); i++) {
+    const Sampler* sampler = library->GetSampler(descriptors[i]).get();
+    ASSERT_NE(sampler, nullptr);
+    EXPECT_EQ(SamplerDescriptor::ToKey(sampler->GetDescriptor()),
+              SamplerDescriptor::ToKey(descriptors[i]));
+    for (size_t t = 0; t < kThreadCount; t++) {
+      EXPECT_EQ(results[t][i], sampler);
+    }
+  }
 }
 
 }  // namespace testing
