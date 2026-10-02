@@ -262,8 +262,7 @@ class FlutterPluginTest {
     ) {
         val env = setupTestProjectEnvironment(tempDir)
         val project = env.project
-        // The host's build type `staging` falls back to the module's `debug` variant. The
-        // command line names the host task, which matches none of the module's variant names.
+        // A host task, whose name matches none of the module's variant names.
         every { project.gradle.startParameter.taskNames } returns listOf(":app:assembleDemoStaging")
         val mockCopyAssetsTaskProvider = mockk<TaskProvider<CopyFlutterAssetsTask>>(relaxed = true)
         every {
@@ -619,11 +618,7 @@ class FlutterPluginTest {
         return onVariantSlot.captured
     }
 
-    /**
-     * Applies the plugin to an add-to-app module: a project with the Android library plugin
-     * instead of the application plugin. Returns the callback the plugin registered with
-     * `AndroidComponentsExtension.onVariants`.
-     */
+    /** [applyPluginCapturingVariantCallback] for an add-to-app module (Android library plugin). */
     private fun applyPluginToModuleCapturingVariantCallback(env: TestProjectEnvironment): (Variant) -> Unit {
         val project = env.project
         every { project.plugins.hasPlugin("com.android.application") } returns false
@@ -687,10 +682,7 @@ class FlutterPluginTest {
         return mockVariant
     }
 
-    /**
-     * A [LibraryVariant] of an add-to-app module that answers everything the plugin reads while
-     * configuring a variant.
-     */
+    /** [mockApplicationVariant] for an add-to-app module. */
     private fun mockLibraryVariant(
         name: String = "debug",
         buildType: String = "debug",

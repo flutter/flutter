@@ -33,9 +33,7 @@ abstract class CopyFlutterJniLibsTask : DefaultTask() {
     /**
      * The Flutter build output directory (the `flutter assemble` `--output` location).
      *
-     * This task is only registered for variants that Flutter compiles for, wired to that
-     * variant's compile task. See `registerFlutterJniLibsTask` in
-     * [FlutterPlugin][com.flutter.gradle.FlutterPlugin].
+     * Required, because this task is only registered together with its variant's compile task.
      */
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)

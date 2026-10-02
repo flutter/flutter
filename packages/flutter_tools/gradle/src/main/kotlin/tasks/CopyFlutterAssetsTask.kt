@@ -31,10 +31,7 @@ abstract class CopyFlutterAssetsTask : DefaultTask() {
     /**
      * The Flutter build output directory (the `flutter assemble` `--output` location).
      *
-     * This task is only registered for variants that Flutter compiles for, application and
-     * add-to-app module alike, wired to that variant's compile task. See
-     * `registerFlutterAssetTasks` in [FlutterPlugin][com.flutter.gradle.FlutterPlugin]. An
-     * absent value would build an APK or AAR without Flutter assets, so it is not optional.
+     * Required, because this task is only registered together with its variant's compile task.
      */
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -51,8 +48,7 @@ abstract class CopyFlutterAssetsTask : DefaultTask() {
         fileSystemOperations.sync {
             into(destinationDir)
             from(intermediateDir) {
-                // Keeps the `flutter_assets/` prefix, the assets directory the Flutter engine
-                // loads from by default.
+                // The engine loads assets from `flutter_assets/` by default, so keep the prefix.
                 include(FlutterTaskHelper.FLUTTER_ASSETS_INCLUDE_DIRECTORY)
             }
             filePermissions {

@@ -384,10 +384,6 @@ class FlutterPlugin : Plugin<Project> {
     companion object {
         const val PROP_LOCAL_ENGINE_REPO: String = "local-engine-repo"
 
-        /**
-         * A Gradle property that has no effect. Setting it logs a warning; see
-         * [warnIfHostAppProjectNameIsSet].
-         */
         internal const val PROP_HOST_APP_PROJECT_NAME: String = "flutter.hostAppProjectName"
 
         /**
@@ -399,10 +395,6 @@ class FlutterPlugin : Plugin<Project> {
          */
         private const val FLUTTER_BUILD_PREFIX: String = "flutterBuild"
 
-        /**
-         * The name of the [FlutterTask] (the `flutter assemble` invocation) for [variantName],
-         * which [registerFlutterCompileTask] registers.
-         */
         private fun flutterCompileTaskName(variantName: String): String =
             FlutterPluginUtils.toCamelCase(listOf("compile", FLUTTER_BUILD_PREFIX, variantName))
 
@@ -468,19 +460,16 @@ class FlutterPlugin : Plugin<Project> {
         /**
          * Whether to configure `flutter assemble`, and everything that depends on it, for [variant].
          *
-         * For an application variant: when a single `assemble<Variant>` task is named on the
-         * command line, Flutter is only compiled for the variants that task can build. This keeps
-         * a release build from also configuring (and therefore building) the debug Dart
-         * artifacts, which is what [FlutterPluginUtils.shouldConfigureFlutterTask] exists to
-         * prevent. Removing it is tracked by https://github.com/flutter/flutter/issues/109560,
-         * which also documents the AGP behavior that made it necessary.
+         * When a single `assemble<Variant>` task is named on the command line, Flutter is only
+         * compiled for the variants that task can build. This keeps a release build from also
+         * configuring (and therefore building) the debug Dart artifacts, which is what
+         * [FlutterPluginUtils.shouldConfigureFlutterTask] exists to prevent. Removing it is
+         * tracked by https://github.com/flutter/flutter/issues/109560, which also documents the
+         * AGP behavior that made it necessary.
          *
-         * An add-to-app module ([LibraryVariant]) is always configured. The host app selects the
-         * module variant it consumes through AGP variant matching (`matchingFallbacks`), and the
-         * command line names a host task, which can't be compared with the module's variant
-         * names: `:app:assembleDemoStaging` builds the module's `debug` variant when `staging`
-         * falls back to `debug`. Registration is lazy, so Gradle only runs the module variant
-         * the host build consumes.
+         * Library (add-to-app module) variants are never gated: the command line names a host
+         * task, and `matchingFallbacks` can map it to a module variant of any name. The tasks are
+         * registered lazily, so only the module variant the host consumes runs.
          */
         private fun shouldCompileFlutterForVariant(
             project: Project,
@@ -542,9 +531,6 @@ class FlutterPlugin : Plugin<Project> {
         /**
          * Registers the task that stages Flutter's native libraries for [variant], and declares
          * the directory it stages into as a generated jniLibs source directory.
-         *
-         * The libraries are produced by [compileTaskProvider], the `flutter assemble` task
-         * registered by [registerFlutterCompileTask].
          */
         private fun registerFlutterJniLibsTask(
             project: Project,
@@ -574,8 +560,7 @@ class FlutterPlugin : Plugin<Project> {
 
         /**
          * Registers the [FlutterTask] (the `flutter assemble` invocation) for [variant],
-         * configured entirely from the public variant API, for application and add-to-app module
-         * (library) variants.
+         * configured entirely from the public variant API.
          */
         private fun registerFlutterCompileTask(
             project: Project,
@@ -658,19 +643,14 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         /**
-         * Configures what only application variants have: one output per APK, which gets a
-         * per-ABI versionCode, and the copy of those APKs into `build/outputs/flutter-apk/`.
-         * Add-to-app module variants produce an AAR, so they have neither.
-         *
-         * [dslVersionCodes] is the project's DSL versionCodes, which this resolves for
-         * [variant]'s product flavors.
+         * Per-ABI versionCodes and the copy into `build/outputs/flutter-apk/`. Library variants
+         * produce an AAR, so they need neither.
          */
         private fun configureApplicationOutputs(
             project: Project,
             variant: Variant,
             dslVersionCodes: DslVersionCodes
         ) {
-            // An application project only has application variants.
             check(variant is ApplicationVariant) {
                 "Expected an application variant for '${variant.name}' in an application " +
                     "project, but got ${variant::class.java.name}."
@@ -684,11 +664,8 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         /**
-         * Warns that `flutter.hostAppProjectName` has no effect.
-         *
-         * The add-to-app module delivers its assets as a generated assets source of its own
-         * variants, which the host app consumes like the assets of any library. So the module
-         * does not need to know the name of the host app project.
+         * The module ships its assets as a generated assets source of its own variants, so it
+         * does not need the host app's project name.
          */
         private fun warnIfHostAppProjectNameIsSet(project: Project) {
             if (project.providers.gradleProperty(PROP_HOST_APP_PROJECT_NAME).isPresent) {

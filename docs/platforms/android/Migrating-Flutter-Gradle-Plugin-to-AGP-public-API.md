@@ -238,36 +238,23 @@ else serializes through `FlutterPlugin.kt` / `FlutterPluginUtils.kt`.
    but C++ debugging will be broken for those custom build types.
 5. **Asset merge**: flutter assets become a merged source dir instead of a
    post-merge overwrite; collisions resolve by AGP source-set priority.
-6. **Add-to-app**: the module registers its Flutter compile, assets and jniLibs tasks in
-   its own `onVariants`, and adds the staged assets and native libraries as generated
-   source directories of each library variant. The host app consumes them like the assets
-   of any Android library, so the host-project lookup, the `libraryVariants` ×
-   host `applicationVariants` loop and the explicit `:app:merge<V>Assets.dependsOn`
-   edge are removed. Effects:
-   - `flutter.hostAppProjectName` has no effect. Setting it logs a warning that says so
-     and names no removal milestone. A module whose host project is not `:app` does not
-     need it.
-   - Every module variant (`debug`, `profile`, `release`) is configured, whatever the
-     command line names. A host task such as `:app:assembleDemoStaging` cannot be mapped
-     to the module variant it consumes, which AGP selects through the host's
-     `matchingFallbacks`. The tasks are registered lazily, so a build runs only the
-     module variant the host consumes. One cost: a host build of only
-     `assemble<Variant>AndroidTest` runs the module's `flutter assemble` for that
-     variant, which the command-line check skipped for the module.
-   - The Flutter build mode comes from the module variant the host consumes (its
-     `debuggable` flag and the `profile` name), not from the host build type. A host
-     build type that is debuggable but falls back to the module's `release` variant gets
-     release Flutter artifacts. The deleted code matched module variants to host variants
-     by build mode instead. For that host build type, built as the only task on the
-     command line, it ran the module's debug Flutter build, which the host does not
-     package, and no Flutter build for the module's `release` variant: the APK had no
-     `flutter_assets` and no `libapp.so`.
-   - The module's assets are a generated assets source directory, not a copy into the
-     module's merged-assets output after `mergeAssets` (which the deleted code forced to
-     re-run with `clean<MergeAssetsTask>`). Collisions resolve by source-set priority
-     (item 5).
-   - `copyFlutterAssets<V>` in the module is a `CopyFlutterAssetsTask`, not a `Copy`
-     (item 7).
+6. **Add-to-app**: the module registers its Flutter tasks in its own `onVariants` and
+   adds the staged assets and native libraries as generated source directories of each
+   library variant. The host consumes them like any Android library's, so the
+   host-project lookup, the `libraryVariants` × host `applicationVariants` loop and the
+   `:app:merge<V>Assets.dependsOn` edge are removed.
+   - `flutter.hostAppProjectName` has no effect; setting it logs a warning that names no
+     removal milestone.
+   - Every module variant is configured whatever the command line names, because the
+     host's `matchingFallbacks`, not the task name, decide which module variant a host
+     task consumes. Registration is lazy, so only that variant runs. Cost: a host build
+     of only `assemble<Variant>AndroidTest` runs the module's `flutter assemble`.
+   - The build mode comes from the consumed module variant, not the host build type. A
+     debuggable host build type that falls back to the module's `release` gets release
+     artifacts. Built as the only task, the deleted code ran the module's debug Flutter
+     build for it, and the APK had no `flutter_assets` and no `libapp.so`.
+   - Module assets are a generated source directory (item 5), and `copyFlutterAssets<V>`
+     is a `CopyFlutterAssetsTask` (item 7).
 7. **Task realization/type**: flutter tasks become lazy `TaskProvider`s, and
    `copyFlutterAssets<V>` changes type from `org.gradle.api.tasks.Copy` to a
    custom task class — `tasks.named(..., Copy::class)` casts fail.

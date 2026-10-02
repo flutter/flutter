@@ -67,9 +67,7 @@ void main() {
       expect(chmodResult, const ProcessResultMatcher());
     }
 
-    // Builds with `android.newDsl=true`, where AGP does not provide the variant API
-    // that `libraryVariants` and `applicationVariants` belong to, and with AGP's
-    // compatibility mode off.
+    // With android.newDsl=true, AGP has no `libraryVariants` or `applicationVariants`.
     // `flutter.hostAppProjectName` has no effect; setting it must only log a warning.
     final File gradleProperties = hostAppDir.childFile('gradle.properties');
     gradleProperties.writeAsStringSync(
@@ -84,9 +82,8 @@ void main() {
     );
     expect(gradleProperties.readAsStringSync(), contains('android.newDsl=true'));
 
-    // `staging` is debuggable and falls back to the module's `debug` variant (see the
-    // fixture). `qa` is debuggable too, but falls back to the module's `release` variant,
-    // so it must get release Flutter artifacts.
+    // Both are debuggable. `staging` falls back to the module's `debug` (see the fixture),
+    // `qa` to its `release`, so `qa` must get release Flutter artifacts.
     hostAppDir.childDirectory('app').childFile('build.gradle').writeAsStringSync('''
 
 android {
@@ -99,9 +96,7 @@ android {
 }
 ''', mode: FileMode.append);
 
-    // Each host task runs on its own. With a single task on the command line, Flutter only
-    // configures the application variants that task builds, which must not apply to the
-    // module's variants: no host task name matches the module variant it consumes.
+    // One task per invocation: the single-task gate must not filter out the module's variants.
     Future<List<String>> buildHostApk(String task, String apkPath) async {
       final ProcessResult buildResult = await processManager.run(<String>[
         hostAppDir.childFile(gradlew).path,
