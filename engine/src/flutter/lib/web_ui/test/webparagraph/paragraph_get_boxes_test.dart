@@ -76,15 +76,12 @@ Future<void> testMain() async {
       final double width5 = rects[5].toRect().width;
 
       expect(height <= paragraph.height, true);
-
-      // All lines except the last one adjusted by the longest line
       expect(width01 > 500, true);
       expect(width2 > 500, true);
       expect(width34 > 500, true);
       expect(width5 < 500, true);
 
       // Rectangles for whitespaces adjustments added correctly
-
       // Vertically
       expect(rects[0].toRect().top, rects[1].toRect().top);
       expect(rects[3].toRect().top, rects[4].toRect().top);
