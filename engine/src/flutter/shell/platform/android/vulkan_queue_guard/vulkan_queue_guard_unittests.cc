@@ -61,11 +61,10 @@ void ExitInFlight() {
   g_driver->current_in_flight.fetch_sub(1, std::memory_order_seq_cst);
 }
 
-VKAPI_ATTR VkResult VKAPI_CALL
-FakeQueueSubmit(VkQueue queue,
-                uint32_t submitCount,
-                const VkSubmitInfo* pSubmits,
-                VkFence fence) {
+VKAPI_ATTR VkResult VKAPI_CALL FakeQueueSubmit(VkQueue queue,
+                                               uint32_t submitCount,
+                                               const VkSubmitInfo* pSubmits,
+                                               VkFence fence) {
   EnterInFlight();
   VkResult res = VK_SUCCESS;
   if (g_driver && g_driver->on_queue_submit) {
@@ -75,15 +74,19 @@ FakeQueueSubmit(VkQueue queue,
   return res;
 }
 
-VKAPI_ATTR VkResult VKAPI_CALL
-FakeQueueSubmit2(VkQueue, uint32_t, const VkSubmitInfo2*, VkFence) {
+VKAPI_ATTR VkResult VKAPI_CALL FakeQueueSubmit2(VkQueue,
+                                                uint32_t,
+                                                const VkSubmitInfo2*,
+                                                VkFence) {
   EnterInFlight();
   ExitInFlight();
   return VK_SUCCESS;
 }
 
-VKAPI_ATTR VkResult VKAPI_CALL
-FakeQueueSubmit2KHR(VkQueue, uint32_t, const VkSubmitInfo2KHR*, VkFence) {
+VKAPI_ATTR VkResult VKAPI_CALL FakeQueueSubmit2KHR(VkQueue,
+                                                   uint32_t,
+                                                   const VkSubmitInfo2KHR*,
+                                                   VkFence) {
   EnterInFlight();
   ExitInFlight();
   return VK_SUCCESS;
@@ -95,15 +98,17 @@ VKAPI_ATTR VkResult VKAPI_CALL FakeQueueWaitIdle(VkQueue) {
   return VK_SUCCESS;
 }
 
-VKAPI_ATTR VkResult VKAPI_CALL
-FakeQueuePresentKHR(VkQueue, const VkPresentInfoKHR*) {
+VKAPI_ATTR VkResult VKAPI_CALL FakeQueuePresentKHR(VkQueue,
+                                                   const VkPresentInfoKHR*) {
   EnterInFlight();
   ExitInFlight();
   return VK_SUCCESS;
 }
 
-VKAPI_ATTR VkResult VKAPI_CALL
-FakeQueueBindSparse(VkQueue, uint32_t, const VkBindSparseInfo*, VkFence) {
+VKAPI_ATTR VkResult VKAPI_CALL FakeQueueBindSparse(VkQueue,
+                                                   uint32_t,
+                                                   const VkBindSparseInfo*,
+                                                   VkFence) {
   EnterInFlight();
   ExitInFlight();
   return VK_SUCCESS;
@@ -136,8 +141,8 @@ VKAPI_ATTR VkResult VKAPI_CALL FakeDeviceWaitIdle(VkDevice device) {
   return res;
 }
 
-VKAPI_ATTR void VKAPI_CALL
-FakeDestroyDevice(VkDevice device, const VkAllocationCallbacks*) {
+VKAPI_ATTR void VKAPI_CALL FakeDestroyDevice(VkDevice device,
+                                             const VkAllocationCallbacks*) {
   if (g_driver) {
     g_driver->destroy_device_count.fetch_add(1, std::memory_order_seq_cst);
     if (g_driver->on_destroy_device) {
@@ -146,8 +151,8 @@ FakeDestroyDevice(VkDevice device, const VkAllocationCallbacks*) {
   }
 }
 
-VKAPI_ATTR void VKAPI_CALL
-FakeDestroyInstance(VkInstance instance, const VkAllocationCallbacks*) {
+VKAPI_ATTR void VKAPI_CALL FakeDestroyInstance(VkInstance instance,
+                                               const VkAllocationCallbacks*) {
   if (g_driver) {
     g_driver->destroy_instance_count.fetch_add(1, std::memory_order_seq_cst);
     if (g_driver->on_destroy_instance) {

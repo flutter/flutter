@@ -168,8 +168,7 @@ VKAPI_ATTR VkResult VKAPI_CALL GuardedQueueSubmit(VkQueue queue,
                                                   VkFence fence) {
   GuardedProcs fallback;
   VulkanQueueGuard::BeforeQueueLockHook hook;
-  auto entry =
-      LookupQueueEntryOrDie(queue, "vkQueueSubmit", &fallback, &hook);
+  auto entry = LookupQueueEntryOrDie(queue, "vkQueueSubmit", &fallback, &hook);
   if (!entry) {
     ReportUnregisteredHandle("vkQueueSubmit", static_cast<const void*>(queue));
     return fallback.queue_submit
@@ -196,8 +195,7 @@ GuardedQueueSubmit2(VkQueue queue,
                     VkFence fence) {
   GuardedProcs fallback;
   VulkanQueueGuard::BeforeQueueLockHook hook;
-  auto entry =
-      LookupQueueEntryOrDie(queue, "vkQueueSubmit2", &fallback, &hook);
+  auto entry = LookupQueueEntryOrDie(queue, "vkQueueSubmit2", &fallback, &hook);
   if (!entry) {
     ReportUnregisteredHandle("vkQueueSubmit2", static_cast<const void*>(queue));
     return fallback.queue_submit_2
@@ -745,8 +743,7 @@ VulkanQueueGuard::TrampolineGetDeviceProcAddr(VkDevice device,
     if (reg.tombstoned_devices.count(device) > 0) {
       FML_LOG(FATAL)
           << "VulkanQueueGuard: use-after-free call to vkGetDeviceProcAddr("
-          << pName << ") on tombstoned VkDevice "
-          << static_cast<void*>(device);
+          << pName << ") on tombstoned VkDevice " << static_cast<void*>(device);
     }
     auto it = reg.device_entries.find(device);
     if (it != reg.device_entries.end()) {
