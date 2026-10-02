@@ -77,6 +77,7 @@ TEST_F(ShellTest, VSyncTargetTime) {
   };
   AddFfiNativeCallback("NativeOnBeginFrame",
                        CREATE_FFI_LAMBDA(nativeOnBeginFrame));
+  AddFfiNativeCallback("NotifyNative", CREATE_FFI_LAMBDA([&]() {}));
 
   // Create all te prerequisites for a shell.
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
