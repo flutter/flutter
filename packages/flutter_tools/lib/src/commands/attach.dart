@@ -13,7 +13,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
@@ -305,20 +304,19 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attachDaemon({required Device device}) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform, :Stdio stdio) =
-        toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :Stdio stdio) = toolContext;
     final daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
+      analytics: analytics,
       toolContext: toolContext,
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       logToStdout: true,
       featureFlags: featureFlags,
-      platform: platform,
     );
 
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);

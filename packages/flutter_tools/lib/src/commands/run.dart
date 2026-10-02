@@ -705,15 +705,7 @@ class RunCommand extends RunCommandBase {
       androidWorkflow: android_workflow.androidWorkflow,
       deviceManager: globals.deviceManager,
       featureFlags: featureFlags,
-      fileSystem: globals.fs,
       java: globals.java,
-      logger: globals.logger,
-      outputPreferences: globals.outputPreferences,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      stdio: globals.stdio,
-      systemClock: globals.systemClock,
-      terminal: globals.terminal,
       toolContext: toolContext!,
     );
   }
