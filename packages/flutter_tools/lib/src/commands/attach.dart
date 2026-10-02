@@ -16,6 +16,8 @@ import '../base/logger.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
 import '../daemon.dart';
@@ -26,8 +28,8 @@ import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
+import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
-import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -63,7 +65,10 @@ import 'daemon.dart';
 /// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({
+    required this._buildSystem,
+    required this._buildTargets,
     required ToolContext super.toolContext,
+    required this._xcode,
     HotRunnerFactory? hotRunnerFactory,
     bool verboseHelp = false,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
@@ -133,6 +138,9 @@ class AttachCommand extends FlutterCommand {
 
   final HotRunnerFactory _hotRunnerFactory;
   final ToolContext _toolContext;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
+  final Xcode? _xcode;
 
   @override
   ToolContext get toolContext => _toolContext;
@@ -194,6 +202,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+
+  /// Optional [HotRunnerConfig] passed to [HotRunner].
+  @protected
+  HotRunnerConfig? get hotRunnerConfig => null;
+
+  /// Optional [ProjectFileInvalidator] passed to [HotRunner].
+  @protected
+  ProjectFileInvalidator? get projectFileInvalidator => null;
 
   @override
   Future<void> validateCommand() async {
@@ -311,7 +327,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         logger: logger,
       ),
       analytics: analytics,
+      buildSystem: _buildSystem,
+      buildTargets: _buildTargets,
       toolContext: toolContext,
+      xcode: _xcode,
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
@@ -347,7 +366,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
-    final Logger logger = toolContext.logger;
     final Future<Uri> vmServiceUri = _discoverVmService(device: device);
     vmServiceUri.ignore();
 
@@ -380,20 +398,28 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     return buildInfo.isDebug
         ? _hotRunnerFactory.build(
             flutterDevices,
-            target: targetFile,
+            buildSystem: _buildSystem,
+            buildTargets: _buildTargets,
             debuggingOptions: debuggingOptions,
-            packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
+            target: targetFile,
+            toolContext: toolContext,
+            xcode: _xcode,
             projectRootPath: stringArg('project-root'),
             dillOutputPath: stringArg('output-dill'),
-            flutterProject: FlutterProject.current(),
+            hotRunnerConfig: hotRunnerConfig,
             nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+            projectFileInvalidator: projectFileInvalidator,
             analytics: analytics,
-            logger: logger,
           )
         : ColdRunner(
             flutterDevices,
-            target: targetFile,
+            analytics: analytics,
+            buildSystem: _buildSystem,
+            buildTargets: _buildTargets,
             debuggingOptions: debuggingOptions,
+            target: targetFile,
+            toolContext: toolContext,
+            xcode: _xcode,
             dartBuilder: hookRunner,
           );
   }
@@ -472,33 +498,41 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 class HotRunnerFactory {
   HotRunner build(
     List<FlutterDevice> devices, {
-    required String target,
-    required DebuggingOptions debuggingOptions,
-    bool benchmarkMode = false,
-    File? applicationBinary,
-    bool hostIsIde = false,
-    String? projectRootPath,
-    String? packagesFilePath,
-    String? dillOutputPath,
-    bool stayResident = true,
-    FlutterProject? flutterProject,
-    String? nativeAssetsYamlFile,
     required Analytics analytics,
-    Logger? logger,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
+    required DebuggingOptions debuggingOptions,
+    required String target,
+    required ToolContext toolContext,
+    required Xcode? xcode,
+    File? applicationBinary,
+    bool benchmarkMode = false,
+    String? dillOutputPath,
+    bool hostIsIde = false,
+    HotRunnerConfig? hotRunnerConfig,
+    String? nativeAssetsYamlFile,
+    ProjectFileInvalidator? projectFileInvalidator,
+    String? projectRootPath,
+    bool stayResident = true,
   }) => HotRunner(
     devices,
-    target: target,
+    analytics: analytics,
+    buildSystem: buildSystem,
+    buildTargets: buildTargets,
     debuggingOptions: debuggingOptions,
+    target: target,
+    toolContext: toolContext,
+    xcode: xcode,
     benchmarkMode: benchmarkMode,
     applicationBinary: applicationBinary,
     hostIsIde: hostIsIde,
+    hotRunnerConfig: hotRunnerConfig,
+    projectFileInvalidator: projectFileInvalidator,
     projectRootPath: projectRootPath,
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
-    analytics: analytics,
     dartBuilder: hookRunner,
-    logger: logger,
   );
 }
 
