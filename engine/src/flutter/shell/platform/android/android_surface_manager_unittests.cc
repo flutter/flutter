@@ -334,7 +334,14 @@ TEST_P(AndroidSurfaceManagerMultiBackendMatrixTest,
   auto manager = AndroidSurfaceManager::Create(rendering_api_);
   ASSERT_NE(manager, nullptr);
   EXPECT_TRUE(manager->IsValid());
-  EXPECT_EQ(manager->GetRenderingAPI(), rendering_api_);
+  if (rendering_api_ == AndroidRenderingAPI::kImpellerAutoselect) {
+    EXPECT_EQ(manager->GetRenderingAPI(),
+              manager->IsVulkanInitialized()
+                  ? AndroidRenderingAPI::kImpellerVulkan
+                  : AndroidRenderingAPI::kImpellerOpenGLES);
+  } else {
+    EXPECT_EQ(manager->GetRenderingAPI(), rendering_api_);
+  }
   EXPECT_EQ(manager->GetNativeWindow(), nullptr);
   EXPECT_FALSE(manager->IsFakeWindow());
 
@@ -354,12 +361,13 @@ TEST_P(AndroidSurfaceManagerMultiBackendMatrixTest, RendererConfigPopulation) {
   ASSERT_NE(manager, nullptr);
   EXPECT_TRUE(manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
 
-  if (rendering_api_ == AndroidRenderingAPI::kSoftware) {
+  if (manager->GetRenderingAPI() == AndroidRenderingAPI::kSoftware) {
     FlutterSoftwareRendererConfig config = {};
     manager->PopulateSoftwareRendererConfig(&config);
     EXPECT_EQ(config.struct_size, sizeof(FlutterSoftwareRendererConfig));
     ASSERT_NE(config.surface_present_callback, nullptr);
-  } else if (rendering_api_ == AndroidRenderingAPI::kImpellerVulkan) {
+  } else if (manager->GetRenderingAPI() ==
+             AndroidRenderingAPI::kImpellerVulkan) {
     // Vulkan uses embedder compositor backing stores rather than
     // OpenGL/Software configs.
     EXPECT_TRUE(manager->IsValid());
@@ -774,6 +782,307 @@ TEST_F(AndroidSurfaceManagerTest, ValidationConfigNotRequested) {
   EXPECT_TRUE(config.layers.empty());
   EXPECT_TRUE(config.instance_extensions.empty());
   EXPECT_TRUE(capture.str().empty());
+}
+
+namespace {
+
+VKAPI_ATTR VkResult VKAPI_CALL FakeVkQueueSubmit(VkQueue queue,
+                                                 uint32_t submitCount,
+                                                 const VkSubmitInfo* pSubmits,
+                                                 VkFence fence) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL FakeVkQueueWaitIdle(VkQueue queue) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+FakeVkQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR* pPresentInfo) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL FakeVkDeviceWaitIdle(VkDevice device) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+FakeVkDestroyDevice(VkDevice device, const VkAllocationCallbacks* pAllocator) {}
+
+VKAPI_ATTR void VKAPI_CALL
+FakeVkDestroyInstance(VkInstance instance,
+                      const VkAllocationCallbacks* pAllocator) {}
+
+VKAPI_ATTR void VKAPI_CALL FakeNoopVulkanProc() {}
+
+VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL
+FakeVulkanGetInstanceProcAddr(VkInstance instance, const char* pName) {
+  if (pName == nullptr || std::strcmp(pName, "vkGetDeviceProcAddr") == 0) {
+    return nullptr;
+  }
+  if (std::strcmp(pName, "vkQueueSubmit") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeVkQueueSubmit);
+  }
+  if (std::strcmp(pName, "vkQueueWaitIdle") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeVkQueueWaitIdle);
+  }
+  if (std::strcmp(pName, "vkQueuePresentKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeVkQueuePresentKHR);
+  }
+  if (std::strcmp(pName, "vkDeviceWaitIdle") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeVkDeviceWaitIdle);
+  }
+  if (std::strcmp(pName, "vkDestroyDevice") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeVkDestroyDevice);
+  }
+  if (std::strcmp(pName, "vkDestroyInstance") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeVkDestroyInstance);
+  }
+  return &FakeNoopVulkanProc;
+}
+
+std::shared_ptr<VulkanDeviceOwner> CreateFakeVulkanDeviceOwner(
+    uintptr_t tag = 0x7000) {
+  auto fake_instance = reinterpret_cast<VkInstance>(tag + 1);
+  auto fake_phys_dev = reinterpret_cast<VkPhysicalDevice>(tag + 2);
+  auto fake_device = reinterpret_cast<VkDevice>(tag + 3);
+  auto fake_queue = reinterpret_cast<VkQueue>(tag + 4);
+  return std::make_shared<VulkanDeviceOwner>(
+      /*vulkan_lib_handle=*/nullptr, fake_instance, fake_phys_dev, fake_device,
+      fake_queue, /*graphics_queue_family_index=*/0, VK_API_VERSION_1_1,
+      std::vector<std::string>{"VK_KHR_surface", "VK_KHR_android_surface"},
+      std::vector<std::string>{"VK_KHR_swapchain"},
+      &FakeVulkanGetInstanceProcAddr, &FakeVkDestroyDevice,
+      &FakeVkDestroyInstance);
+}
+
+}  // namespace
+
+TEST_F(AndroidSurfaceManagerTest, InstanceProcAddrReturnsGuardTrampoline) {
+  VulkanQueueGuard::ResetForTesting();
+  auto owner = CreateFakeVulkanDeviceOwner(0x7100);
+  auto manager = AndroidSurfaceManager::Create(
+      AndroidRenderingAPI::kImpellerVulkan, owner);
+  ASSERT_NE(manager, nullptr);
+  ASSERT_TRUE(manager->IsVulkanInitialized());
+
+  void* resolved_gipa = manager->GetInstanceProcAddress(
+      manager->GetVulkanInstance(), "vkGetInstanceProcAddr");
+  EXPECT_EQ(resolved_gipa,
+            reinterpret_cast<void*>(
+                VulkanQueueGuard::GetInstanceProcAddrTrampoline()));
+
+  void* resolved_null_gipa =
+      manager->GetInstanceProcAddress(nullptr, "vkGetInstanceProcAddr");
+  EXPECT_EQ(resolved_null_gipa,
+            reinterpret_cast<void*>(
+                VulkanQueueGuard::GetInstanceProcAddrTrampoline()));
+
+  auto trampoline = reinterpret_cast<PFN_vkGetInstanceProcAddr>(resolved_gipa);
+  ASSERT_NE(trampoline, nullptr);
+  auto guarded_submit = reinterpret_cast<PFN_vkQueueSubmit>(
+      trampoline(manager->GetVulkanInstance(), "vkQueueSubmit"));
+  ASSERT_NE(guarded_submit, nullptr);
+  EXPECT_NE(guarded_submit, &FakeVkQueueSubmit);
+  EXPECT_EQ(
+      guarded_submit(manager->GetVulkanQueue(), 0, nullptr, VK_NULL_HANDLE),
+      VK_SUCCESS);
+  EXPECT_EQ(VulkanQueueGuard::GetQueueSubmitCountForTesting(), 1u);
+
+  manager.reset();
+  owner.reset();
+  VulkanQueueGuard::ResetForTesting();
+}
+
+TEST_F(AndroidSurfaceManagerTest, SharedOwnerSurvivesManagerTeardown) {
+  VulkanQueueGuard::ResetForTesting();
+  auto owner = CreateFakeVulkanDeviceOwner(0x7200);
+  int owner_destroyed_count = 0;
+  owner->SetDestructionCallbackForTesting(
+      [&owner_destroyed_count]() { ++owner_destroyed_count; });
+
+  auto manager1 = AndroidSurfaceManager::Create(
+      AndroidRenderingAPI::kImpellerVulkan, owner);
+  auto manager2 = AndroidSurfaceManager::Create(
+      AndroidRenderingAPI::kImpellerVulkan, owner);
+  ASSERT_NE(manager1, nullptr);
+  ASSERT_NE(manager2, nullptr);
+  EXPECT_TRUE(manager1->IsVulkanInitialized());
+  EXPECT_TRUE(manager2->IsVulkanInitialized());
+  EXPECT_EQ(manager1->GetVulkanDevice(), manager2->GetVulkanDevice());
+  EXPECT_EQ(manager1->GetVulkanDeviceOwner(), manager2->GetVulkanDeviceOwner());
+
+  // Drop our local test ref so only manager1 and manager2 hold the owner.
+  VkDevice shared_device = manager2->GetVulkanDevice();
+  VkQueue shared_queue = manager2->GetVulkanQueue();
+  owner.reset();
+
+  // Tearing down manager1 must not destroy the shared VulkanDeviceOwner.
+  manager1->TeardownVulkan();
+  manager1.reset();
+  EXPECT_EQ(owner_destroyed_count, 0);
+  EXPECT_TRUE(manager2->IsVulkanInitialized());
+  EXPECT_EQ(manager2->GetVulkanDevice(), shared_device);
+
+  // manager2 can still render a fake-window frame and submit to the guarded
+  // queue after manager1 is torn down.
+  EXPECT_TRUE(manager2->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+  FlutterFrameInfo frame_info = {};
+  frame_info.struct_size = sizeof(FlutterFrameInfo);
+  frame_info.size = {100, 100};
+  FlutterVulkanImage img = manager2->GetNextImage(&frame_info);
+  EXPECT_NE(img.image, 0u);
+  EXPECT_TRUE(manager2->PresentImage(&img));
+
+  auto trampoline = reinterpret_cast<PFN_vkGetInstanceProcAddr>(
+      manager2->GetInstanceProcAddress(manager2->GetVulkanInstance(),
+                                       "vkGetInstanceProcAddr"));
+  ASSERT_NE(trampoline, nullptr);
+  auto guarded_submit = reinterpret_cast<PFN_vkQueueSubmit>(
+      trampoline(manager2->GetVulkanInstance(), "vkQueueSubmit"));
+  ASSERT_NE(guarded_submit, nullptr);
+  EXPECT_EQ(guarded_submit(shared_queue, 0, nullptr, VK_NULL_HANDLE),
+            VK_SUCCESS);
+
+  // Destroying manager2 drops the last reference and runs ~VulkanDeviceOwner
+  // exactly once.
+  manager2.reset();
+  EXPECT_EQ(owner_destroyed_count, 1);
+  VulkanQueueGuard::ResetForTesting();
+}
+
+TEST_F(AndroidSurfaceManagerTest, PowerVRPixel10DriverProbeThroughProcTable) {
+  auto probe = AndroidSurfaceManager::DefaultVulkanDriverProbe();
+  ASSERT_TRUE(static_cast<bool>(probe));
+
+  // PowerVR PCI vendor ID (0x1010) and Pixel 10 device ID (0x71061212).
+  // Minimum supported Pixel 10 driver version is 25.1 (6794074).
+  constexpr uint32_t kPowerVrVendorId = 0x1010;
+  constexpr uint32_t kPixel10DeviceId = 0x71061212;
+  constexpr uint32_t kPixel10MinDriverVersion = 6794074;
+  constexpr uint32_t kOldDriverVersion = kPixel10MinDriverVersion - 1;
+
+  FlutterVulkanDriverProperties old_props = {};
+  old_props.struct_size = sizeof(FlutterVulkanDriverProperties);
+  old_props.api_version = VK_API_VERSION_1_3;
+  old_props.driver_version = kOldDriverVersion;
+  old_props.vendor_id = kPowerVrVendorId;
+  old_props.device_id = kPixel10DeviceId;
+  old_props.device_name = "PowerVR D-Series DXT-48-1536";
+
+  bool is_known_bad = false;
+  EXPECT_EQ(probe(old_props, &is_known_bad), kSuccess);
+#if FML_OS_ANDROID
+  EXPECT_TRUE(is_known_bad);
+#endif
+
+  FlutterVulkanDriverProperties good_props = old_props;
+  good_props.driver_version = kPixel10MinDriverVersion;
+  is_known_bad = true;
+  EXPECT_EQ(probe(good_props, &is_known_bad), kSuccess);
+  EXPECT_FALSE(is_known_bad);
+}
+
+TEST_F(AndroidSurfaceManagerTest, EffectiveRenderingBackendAndDriverProbe) {
+  // 1. Autoselect + probe reports known-bad driver -> falls back to OpenGLES.
+  {
+    auto bad_probe = [](const FlutterVulkanDriverProperties& /*props*/,
+                        bool* out_is_known_bad) -> FlutterEngineResult {
+      *out_is_known_bad = true;
+      return kSuccess;
+    };
+    auto manager = AndroidSurfaceManager::Create(
+        AndroidRenderingAPI::kImpellerAutoselect, bad_probe);
+    ASSERT_NE(manager, nullptr);
+    EXPECT_TRUE(manager->IsValid());
+    EXPECT_FALSE(manager->IsVulkanInitialized());
+    EXPECT_EQ(manager->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerOpenGLES);
+  }
+
+  // 2. Autoselect + probe returns non-kSuccess -> logs ERROR and falls back to
+  // OpenGLES.
+  {
+    auto error_probe = [](const FlutterVulkanDriverProperties& /*props*/,
+                          bool* /*out_is_known_bad*/) -> FlutterEngineResult {
+      return kInvalidArguments;
+    };
+    fml::testing::LogCapture capture;
+    auto manager = AndroidSurfaceManager::Create(
+        AndroidRenderingAPI::kImpellerAutoselect, error_probe);
+    ASSERT_NE(manager, nullptr);
+    EXPECT_TRUE(manager->IsValid());
+    EXPECT_FALSE(manager->IsVulkanInitialized());
+    EXPECT_EQ(manager->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerOpenGLES);
+    EXPECT_NE(capture.str().find(
+                  "FlutterEngineQueryVulkanDriverSupport failed with result"),
+              std::string::npos);
+  }
+
+  // 3. Autoselect + probe reports good driver -> resolves to kImpellerVulkan.
+  {
+    auto good_probe = [](const FlutterVulkanDriverProperties& /*props*/,
+                         bool* out_is_known_bad) -> FlutterEngineResult {
+      *out_is_known_bad = false;
+      return kSuccess;
+    };
+    auto manager = AndroidSurfaceManager::Create(
+        AndroidRenderingAPI::kImpellerAutoselect, good_probe);
+    ASSERT_NE(manager, nullptr);
+    EXPECT_TRUE(manager->IsValid());
+    EXPECT_TRUE(manager->IsVulkanInitialized());
+    EXPECT_EQ(manager->GetRenderingAPI(), AndroidRenderingAPI::kImpellerVulkan);
+  }
+
+  // 4. Explicit kImpellerVulkan + probe reports known-bad driver -> logs
+  // WARNING and stays on kImpellerVulkan.
+  {
+    auto bad_probe = [](const FlutterVulkanDriverProperties& /*props*/,
+                        bool* out_is_known_bad) -> FlutterEngineResult {
+      *out_is_known_bad = true;
+      return kSuccess;
+    };
+    fml::testing::LogCapture capture;
+    auto manager = AndroidSurfaceManager::Create(
+        AndroidRenderingAPI::kImpellerVulkan, bad_probe);
+    ASSERT_NE(manager, nullptr);
+    EXPECT_TRUE(manager->IsValid());
+    EXPECT_TRUE(manager->IsVulkanInitialized());
+    EXPECT_EQ(manager->GetRenderingAPI(), AndroidRenderingAPI::kImpellerVulkan);
+    EXPECT_NE(
+        capture.str().find(
+            "known-bad Vulkan driver; release builds use OpenGLES on this "
+            "device"),
+        std::string::npos);
+  }
+
+  // 5. Explicit kImpellerVulkan with forced init failure on the device path ->
+  // logs ERROR and falls back to kImpellerOpenGLES.
+  {
+    fml::testing::LogCapture capture;
+    auto manager =
+        AndroidSurfaceManager::CreateWithForcedVulkanInitFailureForTesting(
+            AndroidRenderingAPI::kImpellerVulkan);
+    ASSERT_NE(manager, nullptr);
+    EXPECT_TRUE(manager->IsValid());
+    EXPECT_FALSE(manager->IsVulkanInitialized());
+    EXPECT_EQ(manager->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerOpenGLES);
+    EXPECT_NE(capture.str().find(
+                  "Vulkan initialization failed for explicit kImpellerVulkan"),
+              std::string::npos);
+  }
+
+  // 6. Fake-window factory preserves kImpellerVulkan backed by EGL.
+  {
+    auto manager = AndroidSurfaceManager::CreateForFakeWindow(
+        AndroidRenderingAPI::kImpellerVulkan);
+    ASSERT_NE(manager, nullptr);
+    EXPECT_TRUE(manager->IsValid());
+    EXPECT_FALSE(manager->IsVulkanInitialized());
+    EXPECT_EQ(manager->GetRenderingAPI(), AndroidRenderingAPI::kImpellerVulkan);
+  }
 }
 
 INSTANTIATE_TEST_SUITE_P(
