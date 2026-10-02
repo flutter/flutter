@@ -462,7 +462,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 }
 
 WebDriverService setUpDriverService() {
-  return WebDriverService(toolContext: DelegatingToolContext(), dartSdkPath: 'dart');
+  return WebDriverService(toolContext: const DelegatingToolContext(), dartSdkPath: 'dart');
 }
 
 class FakeDevice extends Fake implements Device {

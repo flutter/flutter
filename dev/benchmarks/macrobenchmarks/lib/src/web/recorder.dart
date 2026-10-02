@@ -269,17 +269,18 @@ abstract class SceneBuilderRecorder extends Recorder {
         rethrow;
       }
     };
-    PlatformDispatcher.instance.onDrawFrame = () {
+    PlatformDispatcher.instance.onDrawFrame = () async {
       try {
-        _profile!.recordAsync('drawFrameDuration', () async {
+        await _profile!.recordAsync('drawFrameDuration', () async {
           final sceneBuilder = SceneBuilder();
           onDrawFrame(sceneBuilder);
-          _profile!.recordAsync('sceneBuildDuration', () async {
-            final Scene scene = sceneBuilder.build();
-            _profile!.recordAsync('windowRenderDuration', () async {
-              // On the web, render is asynchronous.
-              await (PlatformDispatcher.instance as dynamic).render(scene);
-            }, reported: false);
+          late final Scene scene;
+          _profile!.record('sceneBuildDuration', () {
+            scene = sceneBuilder.build();
+          }, reported: false);
+          await _profile!.recordAsync('windowRenderDuration', () async {
+            // On the web, render is asynchronous.
+            await (PlatformDispatcher.instance as dynamic).render(scene);
           }, reported: false);
         }, reported: true);
         endMeasureFrame();
@@ -1234,13 +1235,6 @@ class _RecordingWidgetsBinding extends BindingBase
     }
     try {
       _recorder?.frameWillDraw();
-      // Flutter will not render views that don't need compositing,
-      // but this recorder expect preroll/applyFrame for every frame,
-      // even if the views don't change otherwise it stalls.
-      // See https://github.com/flutter/flutter/issues/191251
-      for (final RenderView renderView in renderViews) {
-        renderView.markNeedsCompositeFrame();
-      }
       super.handleDrawFrame();
       _recorder?.frameDidDraw();
     } catch (error, stackTrace) {
