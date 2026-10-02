@@ -540,6 +540,108 @@ GLint mockGetUniformLocation(GLuint program, const GLchar* name) {
 static_assert(CheckSameSignature<decltype(mockGetUniformLocation),  //
                                  decltype(glGetUniformLocation)>::value);
 
+void mockTexParameteri(GLenum target, GLenum pname, GLint param) {
+  CallMockMethod(&IMockGLESImpl::TexParameteri, target, pname, param);
+}
+
+static_assert(CheckSameSignature<decltype(mockTexParameteri),  //
+                                 decltype(glTexParameteri)>::value);
+
+void mockUseProgram(GLuint program) {
+  CallMockMethod(&IMockGLESImpl::UseProgram, program);
+}
+
+static_assert(CheckSameSignature<decltype(mockUseProgram),  //
+                                 decltype(glUseProgram)>::value);
+
+void mockEnable(GLenum cap) {
+  CallMockMethod(&IMockGLESImpl::Enable, cap);
+}
+
+static_assert(CheckSameSignature<decltype(mockEnable),  //
+                                 decltype(glEnable)>::value);
+
+void mockDisable(GLenum cap) {
+  CallMockMethod(&IMockGLESImpl::Disable, cap);
+}
+
+static_assert(CheckSameSignature<decltype(mockDisable),  //
+                                 decltype(glDisable)>::value);
+
+void mockScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
+  CallMockMethod(&IMockGLESImpl::Scissor, x, y, width, height);
+}
+
+static_assert(CheckSameSignature<decltype(mockScissor),  //
+                                 decltype(glScissor)>::value);
+
+void mockColorMask(GLboolean red,
+                   GLboolean green,
+                   GLboolean blue,
+                   GLboolean alpha) {
+  CallMockMethod(&IMockGLESImpl::ColorMask, red, green, blue, alpha);
+}
+
+static_assert(CheckSameSignature<decltype(mockColorMask),  //
+                                 decltype(glColorMask)>::value);
+
+void mockBlendFuncSeparate(GLenum sfactorRGB,
+                           GLenum dfactorRGB,
+                           GLenum sfactorAlpha,
+                           GLenum dfactorAlpha) {
+  CallMockMethod(&IMockGLESImpl::BlendFuncSeparate, sfactorRGB, dfactorRGB,
+                 sfactorAlpha, dfactorAlpha);
+}
+
+static_assert(CheckSameSignature<decltype(mockBlendFuncSeparate),  //
+                                 decltype(glBlendFuncSeparate)>::value);
+
+void mockBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha) {
+  CallMockMethod(&IMockGLESImpl::BlendEquationSeparate, modeRGB, modeAlpha);
+}
+
+static_assert(CheckSameSignature<decltype(mockBlendEquationSeparate),  //
+                                 decltype(glBlendEquationSeparate)>::value);
+
+void mockDepthFunc(GLenum func) {
+  CallMockMethod(&IMockGLESImpl::DepthFunc, func);
+}
+
+static_assert(CheckSameSignature<decltype(mockDepthFunc),  //
+                                 decltype(glDepthFunc)>::value);
+
+void mockDepthMask(GLboolean flag) {
+  CallMockMethod(&IMockGLESImpl::DepthMask, flag);
+}
+
+static_assert(CheckSameSignature<decltype(mockDepthMask),  //
+                                 decltype(glDepthMask)>::value);
+
+void mockStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask) {
+  CallMockMethod(&IMockGLESImpl::StencilFuncSeparate, face, func, ref, mask);
+}
+
+static_assert(CheckSameSignature<decltype(mockStencilFuncSeparate),  //
+                                 decltype(glStencilFuncSeparate)>::value);
+
+void mockStencilOpSeparate(GLenum face,
+                           GLenum sfail,
+                           GLenum dpfail,
+                           GLenum dppass) {
+  CallMockMethod(&IMockGLESImpl::StencilOpSeparate, face, sfail, dpfail,
+                 dppass);
+}
+
+static_assert(CheckSameSignature<decltype(mockStencilOpSeparate),  //
+                                 decltype(glStencilOpSeparate)>::value);
+
+void mockStencilMaskSeparate(GLenum face, GLuint mask) {
+  CallMockMethod(&IMockGLESImpl::StencilMaskSeparate, face, mask);
+}
+
+static_assert(CheckSameSignature<decltype(mockStencilMaskSeparate),  //
+                                 decltype(glStencilMaskSeparate)>::value);
+
 // static
 IPLR_NO_THREAD_SAFETY_ANALYSIS std::shared_ptr<MockGLES> MockGLES::Init(
     std::unique_ptr<MockGLESImpl> impl,
@@ -696,6 +798,32 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockGetActiveUniform);
   } else if (strcmp(name, "glGetUniformLocation") == 0) {
     return reinterpret_cast<void*>(mockGetUniformLocation);
+  } else if (strcmp(name, "glTexParameteri") == 0) {
+    return reinterpret_cast<void*>(mockTexParameteri);
+  } else if (strcmp(name, "glUseProgram") == 0) {
+    return reinterpret_cast<void*>(mockUseProgram);
+  } else if (strcmp(name, "glEnable") == 0) {
+    return reinterpret_cast<void*>(mockEnable);
+  } else if (strcmp(name, "glDisable") == 0) {
+    return reinterpret_cast<void*>(mockDisable);
+  } else if (strcmp(name, "glScissor") == 0) {
+    return reinterpret_cast<void*>(mockScissor);
+  } else if (strcmp(name, "glColorMask") == 0) {
+    return reinterpret_cast<void*>(mockColorMask);
+  } else if (strcmp(name, "glBlendFuncSeparate") == 0) {
+    return reinterpret_cast<void*>(mockBlendFuncSeparate);
+  } else if (strcmp(name, "glBlendEquationSeparate") == 0) {
+    return reinterpret_cast<void*>(mockBlendEquationSeparate);
+  } else if (strcmp(name, "glDepthFunc") == 0) {
+    return reinterpret_cast<void*>(mockDepthFunc);
+  } else if (strcmp(name, "glDepthMask") == 0) {
+    return reinterpret_cast<void*>(mockDepthMask);
+  } else if (strcmp(name, "glStencilFuncSeparate") == 0) {
+    return reinterpret_cast<void*>(mockStencilFuncSeparate);
+  } else if (strcmp(name, "glStencilOpSeparate") == 0) {
+    return reinterpret_cast<void*>(mockStencilOpSeparate);
+  } else if (strcmp(name, "glStencilMaskSeparate") == 0) {
+    return reinterpret_cast<void*>(mockStencilMaskSeparate);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }
