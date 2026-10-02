@@ -259,10 +259,11 @@ class AnimationController extends Animation<double>
     this.lowerBound = 0.0,
     this.upperBound = 1.0,
     this.animationBehavior = AnimationBehavior.normal,
+    this.animateWithoutListeners = true,
     required TickerProvider vsync,
   }) : assert(upperBound >= lowerBound) {
     assert(debugMaybeDispatchCreated('animation', 'AnimationController', this));
-    _ticker = vsync.createTicker(_tick);
+    _ticker = vsync.createTicker(_tick)..enabled = animateWithoutListeners;
     _internalSetValue(value ?? lowerBound);
   }
 
@@ -290,10 +291,11 @@ class AnimationController extends Animation<double>
     this.debugLabel,
     required TickerProvider vsync,
     this.animationBehavior = AnimationBehavior.preserve,
+    this.animateWithoutListeners = true,
   }) : lowerBound = double.negativeInfinity,
        upperBound = double.infinity {
     assert(debugMaybeDispatchCreated('animation', 'AnimationController', this));
-    _ticker = vsync.createTicker(_tick);
+    _ticker = vsync.createTicker(_tick)..enabled = animateWithoutListeners;
     _internalSetValue(value);
   }
 
@@ -314,6 +316,50 @@ class AnimationController extends Animation<double>
   /// constructor, and [AnimationBehavior.preserve] for the
   /// [AnimationController.unbounded] constructor.
   final AnimationBehavior animationBehavior;
+
+  /// Whether to request animation frames without any value listeners.
+  ///
+  /// Defaults to true. If false, the controller silences its ticker whenever
+  /// there are no listeners registered with [addListener]. This can save work
+  /// when, for example, [Visibility] removes an [AnimatedBuilder] that listens
+  /// to an animation whose controller is owned by an ancestor.
+  ///
+  /// Listeners registered with [addStatusListener] do not keep the ticker
+  /// running. In particular, a [CurvedAnimation]'s internal status listener does
+  /// not prevent this optimization when its value is no longer being observed.
+  ///
+  /// While silenced, [isAnimating] remains true and time continues to elapse,
+  /// but [value] is not updated. Status changes and completion of the
+  /// [TickerFuture] that depend on animation ticks are also deferred. Adding a
+  /// value listener resumes ticks on the next frame, unless [TickerMode] has
+  /// muted the ticker. The next tick accounts for the elapsed time as described
+  /// by [Ticker.enabled].
+  ///
+  /// Leave this true when polling [value], listening only for status changes,
+  /// or awaiting animation completion without registering a value listener.
+  final bool animateWithoutListeners;
+
+  @override
+  void addListener(VoidCallback listener) {
+    super.addListener(listener);
+    _updateTickerEnabled();
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    super.removeListener(listener);
+    _updateTickerEnabled();
+  }
+
+  @override
+  void clearListeners() {
+    super.clearListeners();
+    _updateTickerEnabled();
+  }
+
+  void _updateTickerEnabled() {
+    _ticker?.enabled = animateWithoutListeners || hasListeners;
+  }
 
   /// Returns an [Animation<double>] for this animation controller, so that a
   /// pointer to this object can be passed around without allowing users of that
