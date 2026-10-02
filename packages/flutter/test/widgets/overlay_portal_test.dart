@@ -3245,14 +3245,6 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/189902 and
     // https://github.com/flutter/flutter/issues/187198.
-    //
-    // Showing an overlay child gives the anchor next to it a sibling conflict,
-    // and hiding it takes that conflict away again. The conflict feeds
-    // shouldFormSemanticsNode, so the fragment stops producing a node of its
-    // own while keeping the one it cached. Its children are taken by an
-    // ancestor while it is out of the tree, and it used to be handed back in
-    // still holding them, leaving a SemanticsNode that was attached but had no
-    // parent.
     testWidgets('toggling an overlay child does not leave a parentless attached semantics node', (
       WidgetTester tester,
     ) async {
@@ -3280,18 +3272,20 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              OverlayEntry(
-                builder: (BuildContext context) =>
-                    Semantics(container: true, child: Column(children: <Widget>[sibling, portal])),
-              ),
-            ],
+          child: Overlay.wrap(
+            child: Semantics(container: true, child: Column(children: <Widget>[sibling, portal])),
           ),
         ),
       );
 
-      // The corruption only becomes observable on the second round trip.
+      // Showing the overlay child gives the sibling anchor a sibling conflict,
+      // and hiding it takes that conflict away again. The conflict feeds
+      // shouldFormSemanticsNode, so the sibling's fragment stops producing a
+      // node of its own while keeping the one it cached. Its children are taken
+      // by an ancestor while it is out of the tree, and it used to be handed
+      // back in still holding them, leaving a SemanticsNode that was attached
+      // but had no parent. That only becomes observable on the second round
+      // trip.
       for (var i = 0; i < 2; i += 1) {
         controller.show();
         await tester.pumpAndSettle();
