@@ -138,16 +138,6 @@ class SurfaceTransaction {
   [[nodiscard]] bool SetParent(const SurfaceControl& control,
                                const SurfaceControl* new_parent = nullptr);
 
-  //----------------------------------------------------------------------------
-  /// @brief      Sets the desired presentation time for the transaction.
-  ///
-  /// @param[in]  desired_present_time_ns  The target presentation timestamp in
-  ///                                      nanoseconds (CLOCK_MONOTONIC).
-  ///
-  /// @return     `true` if the desired present time was set.
-  ///
-  [[nodiscard]] bool SetDesiredPresentTime(int64_t desired_present_time_ns);
-
  private:
   struct UniqueASurfaceTransactionTraits {
     static WrappedSurfaceTransaction InvalidValue() { return {}; }

@@ -139,15 +139,6 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
     frame_uses_java_transactions_ = uses_java;
   }
 
-  std::optional<int64_t> FrameDesiredPresentTime() const override {
-    return frame_desired_present_time_;
-  }
-
-  void SetFrameDesiredPresentTime(
-      std::optional<int64_t> present_time_ns) override {
-    frame_desired_present_time_ = present_time_ns;
-  }
-
   void swapTransaction() override;
 
   std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
@@ -178,7 +169,6 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
   // Reference to FlutterJNI object.
   const fml::jni::JavaObjectWeakGlobalRef java_object_;
   bool frame_uses_java_transactions_ = false;
-  std::optional<int64_t> frame_desired_present_time_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroidJNIImpl);
 };

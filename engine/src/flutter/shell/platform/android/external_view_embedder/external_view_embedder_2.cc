@@ -114,18 +114,6 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         fml::ScopedCleanupClosure([jni_facade = jni_facade_]() {
           jni_facade->SetFrameUsesJavaTransactions(false);
         });
-  } else {
-    std::optional<int64_t> present_time_ns;
-    if (frame->submit_info().presentation_time.has_value()) {
-      present_time_ns = frame->submit_info()
-                            .presentation_time->ToEpochDelta()
-                            .ToNanoseconds();
-    }
-    jni_facade_->SetFrameDesiredPresentTime(present_time_ns);
-    restore_transaction_path =
-        fml::ScopedCleanupClosure([jni_facade = jni_facade_]() {
-          jni_facade->SetFrameDesiredPresentTime(std::nullopt);
-        });
   }
 
   if (!FrameHasPlatformLayers()) {

@@ -5,7 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 
-#include <optional>
 #include <utility>
 
 #include "flutter/fml/mapping.h"
@@ -243,18 +242,6 @@ class PlatformViewAndroidJNI {
   // by the external view embedder and reset via an RAII cleanup closure upon
   // leaving SubmitFlutterView. Called strictly on the raster thread.
   virtual void SetFrameUsesJavaTransactions(bool uses_java) = 0;
-
-  // Returns the desired presentation timestamp in nanoseconds (CLOCK_MONOTONIC)
-  // for the current frame when using direct native transactions.
-  // Called strictly on the raster thread.
-  virtual std::optional<int64_t> FrameDesiredPresentTime() const {
-    return std::nullopt;
-  }
-
-  // Scopes the desired presentation timestamp in nanoseconds (CLOCK_MONOTONIC)
-  // for the current frame. Called strictly on the raster thread.
-  virtual void SetFrameDesiredPresentTime(
-      std::optional<int64_t> present_time_ns) {}
 
   virtual void swapTransaction() = 0;
 

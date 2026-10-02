@@ -102,14 +102,6 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
   MOCK_METHOD(ASurfaceTransaction*, createTransaction, (), (override));
   MOCK_METHOD(bool, FrameUsesJavaTransactions, (), (const, override));
   MOCK_METHOD(void, SetFrameUsesJavaTransactions, (bool), (override));
-  MOCK_METHOD(std::optional<int64_t>,
-              FrameDesiredPresentTime,
-              (),
-              (const, override));
-  MOCK_METHOD(void,
-              SetFrameDesiredPresentTime,
-              (std::optional<int64_t>),
-              (override));
   MOCK_METHOD(void, swapTransaction, (), (override));
   MOCK_METHOD(void, destroyOverlaySurface2, (), (override));
   MOCK_METHOD(std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>,

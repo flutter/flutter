@@ -1595,10 +1595,8 @@ TEST(AndroidExternalViewEmbedder2,
 
   // Frame 4: Steady-state no-PV frame. No layers, views_visible_last_frame_ is
   // empty, no resize, and transition cooldown has completed. Java transactions
-  // are bypassed, desired present time is forwarded, and no platform task is
-  // posted.
+  // are bypassed and no platform task is posted.
   EXPECT_CALL(*jni_mock, SetFrameUsesJavaTransactions(_)).Times(0);
-  EXPECT_CALL(*jni_mock, SetFrameDesiredPresentTime(_)).Times(2);
   EXPECT_CALL(*jni_mock, swapTransaction()).Times(0);
   EXPECT_CALL(*jni_mock, onEndFrame2()).Times(0);
   embedder->PrepareFlutterView(frame_size, 1.0);

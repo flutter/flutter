@@ -183,17 +183,12 @@ TEST_F(PlatformViewAndroidJNIImplTest, FrameTransactionConfigToggle) {
       fml::jni::JavaObjectWeakGlobalRef(&mock_env, jcaller));
 
   EXPECT_FALSE(impl.FrameUsesJavaTransactions());
-  EXPECT_FALSE(impl.FrameDesiredPresentTime().has_value());
 
   impl.SetFrameUsesJavaTransactions(true);
-  impl.SetFrameDesiredPresentTime(123456789LL);
   EXPECT_TRUE(impl.FrameUsesJavaTransactions());
-  EXPECT_EQ(impl.FrameDesiredPresentTime(), 123456789LL);
 
   impl.SetFrameUsesJavaTransactions(false);
-  impl.SetFrameDesiredPresentTime(std::nullopt);
   EXPECT_FALSE(impl.FrameUsesJavaTransactions());
-  EXPECT_FALSE(impl.FrameDesiredPresentTime().has_value());
 }
 
 // The load order is exercised with an injected loader rather than real
