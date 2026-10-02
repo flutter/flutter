@@ -163,7 +163,6 @@ class ToolDependencies {
     Doctor? doctor,
     EmulatorManager? emulatorManager,
     List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
-    ExtensionManager? extensionManager,
     FeatureFlags? featureFlags,
     FlutterVersion? flutterVersion,
     FileSystem? fs,
@@ -528,14 +527,12 @@ class ToolDependencies {
         windowsWorkflow ??
         WindowsWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
 
-    final ExtensionManager finalExtensionManager =
-        extensionManager ??
-        ExtensionManager(
-          entryPoints: extensionEntryPoints,
-          featureFlags: finalFeatureFlags,
-          hostPlatform: finalOS.hostPlatform,
-          logger: finalLogger,
-        );
+    final extensionManager = ExtensionManager(
+      entryPoints: extensionEntryPoints,
+      featureFlags: finalFeatureFlags,
+      hostPlatform: finalOS.hostPlatform,
+      logger: finalLogger,
+    );
 
     final DeviceManager finalDeviceManager =
         deviceManager ??
@@ -558,7 +555,7 @@ class ToolDependencies {
           windowsWorkflow: finalWindowsWorkflow,
           customDevicesConfig: finalCustomDevicesConfig,
           nativeAssetsBuilder: finalNativeAssetsBuilder,
-          extensionManager: finalExtensionManager,
+          extensionManager: extensionManager,
         );
 
     return ToolDependencies(
@@ -584,7 +581,7 @@ class ToolDependencies {
       deviceManager: finalDeviceManager,
       doctor: finalDoctor,
       emulatorManager: finalEmulatorManager,
-      extensionManager: finalExtensionManager,
+      extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
       toolContext: ToolContext(
         artifacts: finalArtifacts,

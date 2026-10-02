@@ -125,7 +125,6 @@ Future<void> main(List<String> args) async {
         toolDependencies: toolDependencies,
         verboseHelp: verboseHelp,
         verbose: verbose,
-        extensionManager: manager,
         extensionTemplateManager: templateManager,
       );
     },
@@ -228,7 +227,6 @@ List<FlutterCommand> generateCommands({
   required ToolDependencies toolDependencies,
   required bool verbose,
   required bool verboseHelp,
-  ExtensionManager? extensionManager,
   ExtensionTemplateManager? extensionTemplateManager,
 }) => <FlutterCommand>[
   AnalyzeCommand(
@@ -278,7 +276,7 @@ List<FlutterCommand> generateCommands({
     androidContext: toolDependencies.androidContext,
     toolContext: toolDependencies.toolContext,
     featureFlags: featureFlags,
-    extensionManager: extensionManager,
+    extensionManager: toolDependencies.extensionManager,
   ),
   CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
   CreateCommand(
@@ -309,7 +307,7 @@ List<FlutterCommand> generateCommands({
     // Provide the shared singleton from globals until dependent commands
     // (e.g. DevicesCommand, EmulatorsCommand) are migrated to DI.
     doctor: globals.doctor,
-    extensionManager: extensionManager,
+    extensionManager: toolDependencies.extensionManager,
   ),
   DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DriveCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
