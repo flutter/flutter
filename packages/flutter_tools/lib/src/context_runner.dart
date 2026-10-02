@@ -17,34 +17,27 @@ import 'android/java.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
-import 'base/bot_detector.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/error_handling_io.dart';
-import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
-import 'base/platform.dart';
 import 'base/process.dart';
-import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
-import 'context/tool_context.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
-import 'device.dart';
 import 'devtools_launcher.dart';
 import 'doctor.dart';
 import 'emulator.dart';
 import 'features.dart';
 import 'flutter_application_package.dart';
 import 'flutter_cache.dart';
-import 'flutter_device_manager.dart';
 import 'flutter_features.dart';
 import 'flutter_features_config.dart';
 import 'flutter_manifest.dart';
@@ -60,10 +53,7 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
 import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
-import 'native_assets.dart';
 import 'persistent_tool_state.dart';
-import 'pre_run_validator.dart';
-import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/unified_analytics.dart';
 import 'resident_runner.dart';
@@ -74,92 +64,6 @@ import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
-
-/// A [ToolContext] that delegates to [globals] for legacy callers.
-class GlobalToolContext implements ToolContext {
-  const GlobalToolContext();
-
-  @override
-  Artifacts get artifacts => globals.artifacts!;
-
-  @override
-  BotDetector get botDetector => globals.botDetector;
-
-  @override
-  Cache get cache => globals.cache;
-
-  @override
-  Config get config => globals.config;
-
-  @override
-  CustomDevicesConfig get customDevicesConfig => globals.customDevicesConfig;
-
-  @override
-  FileSystemUtils get fileSystemUtils => globals.fsUtils;
-
-  @override
-  FlutterVersion get flutterVersion => globals.flutterVersion;
-
-  @override
-  FileSystem get fs => globals.fs;
-
-  @override
-  Git get git => globals.git;
-
-  @override
-  LocalEngineLocator get localEngineLocator => globals.localEngineLocator!;
-
-  @override
-  Logger get logger => globals.logger;
-
-  @override
-  TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder => globals.nativeAssetsBuilder;
-
-  @override
-  OperatingSystemUtils get os => globals.os;
-
-  @override
-  OutputPreferences get outputPreferences => globals.outputPreferences;
-
-  @override
-  PersistentToolState get persistentToolState => globals.persistentToolState!;
-
-  @override
-  Platform get platform => globals.platform;
-
-  @override
-  PreRunValidator get preRunValidator => globals.preRunValidator;
-
-  @override
-  ProcessInfo get processInfo => globals.processInfo;
-
-  @override
-  ProcessManager get processManager => globals.processManager;
-
-  @override
-  ProcessUtils get processUtils => globals.processUtils;
-
-  @override
-  FlutterProjectFactory get projectFactory => globals.projectFactory;
-
-  @override
-  ShutdownHooks get shutdownHooks => globals.shutdownHooks;
-
-  @override
-  Signals get signals => globals.signals;
-
-  @override
-  Stdio get stdio => globals.stdio;
-
-  @override
-  SystemClock get systemClock => globals.systemClock;
-
-  @override
-  AnsiTerminal get terminal => globals.terminal;
-
-  @override
-  UserMessages get userMessages => globals.userMessages;
-}
 
 Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? overrides}) async {
   // Wrap runner with any asynchronous initialization that should run with the
@@ -277,27 +181,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         flutterProjectFactory: globals.projectFactory,
       ),
       DevFSConfig: () => DevFSConfig(),
-      DeviceManager: () => FlutterDeviceManager(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        androidSdk: globals.androidSdk,
-        iosSimulatorUtils: globals.iosSimulatorUtils!,
-        featureFlags: featureFlags,
-        fileSystem: globals.fs,
-        iosWorkflow: globals.iosWorkflow!,
-        artifacts: globals.artifacts!,
-        flutterVersion: globals.flutterVersion,
-        androidWorkflow: androidWorkflow!,
-        xcDevice: globals.xcdevice!,
-        userMessages: globals.userMessages,
-        windowsWorkflow: windowsWorkflow!,
-        macOSWorkflow: MacOSWorkflow(platform: globals.platform, featureFlags: featureFlags),
-        operatingSystemUtils: globals.os,
-        customDevicesConfig: globals.customDevicesConfig,
-        nativeAssetsBuilder: globals.nativeAssetsBuilder,
-        toolContext: const GlobalToolContext(),
-      ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
         artifacts: globals.artifacts!,
