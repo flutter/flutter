@@ -42,6 +42,10 @@ std::optional<ShaderBundleConfig> ParseShaderBundleConfig(
 /// @note   Exposed only for testing purposes. Use `GenerateShaderBundle`
 ///         directly.
 ///
+/// @param  target_platforms  The backends to compile each shader for. Only
+///                           these entries are populated on the resulting
+///                           shaders; the rest are left absent.
+///
 /// @param  out_dependencies  Optional. When non-null, populated with the
 ///                           set of source files (including transitive
 ///                           `#include`s) that contributed to the
@@ -50,6 +54,7 @@ std::optional<ShaderBundleConfig> ParseShaderBundleConfig(
 std::optional<fb::shaderbundle::ShaderBundleT> GenerateShaderBundleFlatbuffer(
     const std::string& bundle_config_json,
     const SourceOptions& options,
+    const std::vector<TargetPlatform>& target_platforms,
     std::set<std::string>* out_dependencies = nullptr);
 
 /// @brief  Parses the JSON shader bundle configuration and invokes the
