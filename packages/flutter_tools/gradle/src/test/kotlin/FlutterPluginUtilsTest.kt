@@ -385,6 +385,7 @@ class FlutterPluginUtilsTest {
         val assembleTask = mockk<Task>()
 
         every { project.gradle.startParameter.taskNames } returns listOf("assemble")
+        every { assembleTask.name } returns "assemble"
 
         val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, assembleTask)
         assertEquals(true, result)
@@ -400,6 +401,50 @@ class FlutterPluginUtilsTest {
 
         val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, assembleTask)
         assertEquals(true, result)
+    }
+
+    @Test
+    fun `shouldConfigureFlutterTask with assembleTaskName string parameter`() {
+        val project = mockk<Project>()
+
+        every { project.gradle.startParameter.taskNames } returns listOf("assembleDebug")
+
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assembleDebug")
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `shouldConfigureFlutterTask returns true when taskname and assembleTask end with Profile`() {
+        val project = mockk<Project>()
+        val assembleTask = mockk<Task>()
+
+        every { project.gradle.startParameter.taskNames } returns listOf("assembleProfile")
+        every { assembleTask.name } returns "assembleSomethingElseProfile"
+
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, assembleTask)
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `shouldConfigureFlutterTask with assembleTaskName string parameter for Profile`() {
+        val project = mockk<Project>()
+
+        every { project.gradle.startParameter.taskNames } returns listOf("assembleProfile")
+
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assembleProfile")
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `shouldConfigureFlutterTask returns false when taskname is Debug and assembleTask is Profile`() {
+        val project = mockk<Project>()
+        val assembleTask = mockk<Task>()
+
+        every { project.gradle.startParameter.taskNames } returns listOf("assembleDebug")
+        every { assembleTask.name } returns "assembleSomethingElseProfile"
+
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, assembleTask)
+        assertEquals(false, result)
     }
 
     // getFlutterSourceDirectory
@@ -1280,7 +1325,7 @@ class FlutterPluginUtilsTest {
 
             // This AGP version will should match the Flutter create template values.
             // In //packages/flutter_tools/lib/src/android/gradle_utils.dart
-            private val templateAgpVersion = AndroidPluginVersion(9, 1, 0)
+            private val templateAgpVersion = AndroidPluginVersion(9, 3, 1)
 
             private val errorAgpVersion = DependencyVersionChecker.errorAGPVersion
 

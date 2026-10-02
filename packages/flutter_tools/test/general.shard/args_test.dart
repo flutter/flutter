@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -333,7 +334,7 @@ void verifyOptions(String? command, Iterable<Option> options) {
     );
 
     // Fully hidden options and flags should still have help text.
-    const hiddenOptions = <String>['pwa-strategy', 'web-content-hash'];
+    const hiddenOptions = <String>['pwa-strategy'];
     final bool isHiddenOption = hiddenOptions.contains(option.name);
     if (!isHiddenOption) {
       expect(
@@ -500,6 +501,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
     CrashReporter? crashReporter,
+    DeviceManager? deviceManager,
     Doctor? doctor,
     EmulatorManager? emulatorManager,
     FeatureFlags? featureFlags,
@@ -510,6 +512,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        buildSystem = buildSystem ?? FakeBuildSystem(),
        buildTargets = buildTargets ?? FakeBuildTargets(),
        crashReporter = crashReporter ?? FakeCrashReporter(),
+       deviceManager = deviceManager ?? FakeDeviceManager(),
        doctor = doctor ?? FakeDoctor(),
        emulatorManager = emulatorManager ?? FakeEmulatorManager(),
        featureFlags = featureFlags ?? TestFeatureFlags(),
@@ -532,6 +535,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   final CrashReporter crashReporter;
+
+  @override
+  final DeviceManager deviceManager;
 
   @override
   final Doctor doctor;
