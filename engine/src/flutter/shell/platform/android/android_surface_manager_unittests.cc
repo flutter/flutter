@@ -5,9 +5,11 @@
 #include "flutter/shell/platform/android/android_surface_manager.h"
 
 #include <dlfcn.h>
+#include <cstring>
 #include <thread>
 #include <vector>
 
+#include "flutter/fml/logging.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -633,6 +635,145 @@ TEST_F(AndroidSurfaceManagerTest, VulkanNullFunctionPointersHandledSafely) {
   // Reset handles before manager destruction to avoid attempting real
   // teardown on dummy handles.
   ResetMockHandles(manager.get());
+}
+
+namespace {
+
+VkLayerProperties MakeLayerProps(const char* name) {
+  VkLayerProperties props = {};
+  std::strncpy(props.layerName, name, VK_MAX_EXTENSION_NAME_SIZE - 1);
+  props.layerName[VK_MAX_EXTENSION_NAME_SIZE - 1] = '\0';
+  return props;
+}
+
+VkExtensionProperties MakeExtProps(const char* name) {
+  VkExtensionProperties props = {};
+  std::strncpy(props.extensionName, name, VK_MAX_EXTENSION_NAME_SIZE - 1);
+  props.extensionName[VK_MAX_EXTENSION_NAME_SIZE - 1] = '\0';
+  return props;
+}
+
+}  // namespace
+
+TEST_F(AndroidSurfaceManagerTest, ValidationConfigBothPresentInGlobal) {
+  const std::vector<VkLayerProperties> available_layers = {
+      MakeLayerProps("VK_LAYER_KHRONOS_validation"),
+  };
+  const std::vector<VkExtensionProperties> available_instance_exts = {
+      MakeExtProps("VK_KHR_surface"),
+      MakeExtProps("VK_EXT_debug_utils"),
+  };
+  const std::vector<VkExtensionProperties> validation_layer_exts = {};
+
+  fml::testing::LogCapture capture;
+  VulkanValidationConfig config = SelectVulkanValidationConfig(
+      /*requested=*/true, available_layers, available_instance_exts,
+      validation_layer_exts);
+
+  ASSERT_EQ(config.layers.size(), 1u);
+  EXPECT_EQ(config.layers[0], "VK_LAYER_KHRONOS_validation");
+  ASSERT_EQ(config.instance_extensions.size(), 1u);
+  EXPECT_EQ(config.instance_extensions[0], "VK_EXT_debug_utils");
+  EXPECT_NE(
+      capture.str().find(
+          "Vulkan validation: enabled layer VK_LAYER_KHRONOS_validation with "
+          "instance extension VK_EXT_debug_utils"),
+      std::string::npos);
+}
+
+TEST_F(AndroidSurfaceManagerTest, ValidationConfigExtensionInLayerListOnly) {
+  const std::vector<VkLayerProperties> available_layers = {
+      MakeLayerProps("VK_LAYER_KHRONOS_validation"),
+  };
+  const std::vector<VkExtensionProperties> available_instance_exts = {
+      MakeExtProps("VK_KHR_surface"),
+  };
+  const std::vector<VkExtensionProperties> validation_layer_exts = {
+      MakeExtProps("VK_EXT_debug_utils"),
+  };
+
+  fml::testing::LogCapture capture;
+  VulkanValidationConfig config = SelectVulkanValidationConfig(
+      /*requested=*/true, available_layers, available_instance_exts,
+      validation_layer_exts);
+
+  ASSERT_EQ(config.layers.size(), 1u);
+  EXPECT_EQ(config.layers[0], "VK_LAYER_KHRONOS_validation");
+  ASSERT_EQ(config.instance_extensions.size(), 1u);
+  EXPECT_EQ(config.instance_extensions[0], "VK_EXT_debug_utils");
+  EXPECT_NE(
+      capture.str().find(
+          "Vulkan validation: enabled layer VK_LAYER_KHRONOS_validation with "
+          "instance extension VK_EXT_debug_utils"),
+      std::string::npos);
+}
+
+TEST_F(AndroidSurfaceManagerTest,
+       ValidationConfigLayerMissingWithGlobalExtension) {
+  const std::vector<VkLayerProperties> available_layers = {};
+  const std::vector<VkExtensionProperties> available_instance_exts = {
+      MakeExtProps("VK_KHR_surface"),
+      MakeExtProps("VK_EXT_debug_utils"),
+  };
+  const std::vector<VkExtensionProperties> validation_layer_exts = {};
+
+  fml::testing::LogCapture capture;
+  VulkanValidationConfig config = SelectVulkanValidationConfig(
+      /*requested=*/true, available_layers, available_instance_exts,
+      validation_layer_exts);
+
+  EXPECT_TRUE(config.layers.empty());
+  EXPECT_TRUE(config.instance_extensions.empty());
+  EXPECT_NE(
+      capture.str().find(
+          "Vulkan validation requested but VK_LAYER_KHRONOS_validation is not "
+          "available"),
+      std::string::npos);
+}
+
+TEST_F(AndroidSurfaceManagerTest, ValidationConfigExtensionMissingInBoth) {
+  const std::vector<VkLayerProperties> available_layers = {
+      MakeLayerProps("VK_LAYER_KHRONOS_validation"),
+  };
+  const std::vector<VkExtensionProperties> available_instance_exts = {
+      MakeExtProps("VK_KHR_surface"),
+  };
+  const std::vector<VkExtensionProperties> validation_layer_exts = {};
+
+  fml::testing::LogCapture capture;
+  VulkanValidationConfig config = SelectVulkanValidationConfig(
+      /*requested=*/true, available_layers, available_instance_exts,
+      validation_layer_exts);
+
+  ASSERT_EQ(config.layers.size(), 1u);
+  EXPECT_EQ(config.layers[0], "VK_LAYER_KHRONOS_validation");
+  EXPECT_TRUE(config.instance_extensions.empty());
+  EXPECT_NE(capture.str().find(
+                "Vulkan validation: enabled layer VK_LAYER_KHRONOS_validation "
+                "without VK_EXT_debug_utils; no messages will be reported"),
+            std::string::npos);
+}
+
+TEST_F(AndroidSurfaceManagerTest, ValidationConfigNotRequested) {
+  const std::vector<VkLayerProperties> available_layers = {
+      MakeLayerProps("VK_LAYER_KHRONOS_validation"),
+  };
+  const std::vector<VkExtensionProperties> available_instance_exts = {
+      MakeExtProps("VK_KHR_surface"),
+      MakeExtProps("VK_EXT_debug_utils"),
+  };
+  const std::vector<VkExtensionProperties> validation_layer_exts = {
+      MakeExtProps("VK_EXT_debug_utils"),
+  };
+
+  fml::testing::LogCapture capture;
+  VulkanValidationConfig config = SelectVulkanValidationConfig(
+      /*requested=*/false, available_layers, available_instance_exts,
+      validation_layer_exts);
+
+  EXPECT_TRUE(config.layers.empty());
+  EXPECT_TRUE(config.instance_extensions.empty());
+  EXPECT_TRUE(capture.str().empty());
 }
 
 INSTANTIATE_TEST_SUITE_P(

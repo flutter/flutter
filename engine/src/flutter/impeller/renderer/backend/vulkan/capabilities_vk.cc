@@ -65,9 +65,12 @@ CapabilitiesVK::CapabilitiesVK(bool enable_validations,
     }
   }
 
+  const bool has_validation_layer = HasLayer("VK_LAYER_KHRONOS_validation");
+  const bool has_embedder_debug_utils =
+      !use_embedder_extensions_ || HasExtension("VK_EXT_debug_utils");
   validations_enabled_ =
-      enable_validations && HasLayer("VK_LAYER_KHRONOS_validation");
-  if (enable_validations && !validations_enabled_) {
+      enable_validations && has_validation_layer && has_embedder_debug_utils;
+  if (enable_validations && !has_validation_layer) {
     FML_LOG(ERROR)
         << "Requested Impeller context creation with validations but the "
            "validation layers could not be found. Expect no Vulkan validation "
@@ -75,6 +78,11 @@ CapabilitiesVK::CapabilitiesVK(bool enable_validations,
     if (fatal_missing_validations) {
       FML_LOG(FATAL) << "Validation missing. Exiting.";
     }
+  } else if (enable_validations && !has_embedder_debug_utils) {
+    FML_LOG(ERROR)
+        << "Requested Impeller context creation with validations, but the "
+           "embedder did not enable VK_EXT_debug_utils on its VkInstance. "
+           "Expect no Vulkan validation messages!";
   }
   if (validations_enabled_) {
     FML_LOG(INFO) << "Vulkan validations are enabled.";

@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/debug_report_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 #include "vulkan/vulkan_core.h"
 
@@ -176,6 +178,50 @@ TEST(ContextVKTest, CanCreateContextWithValidationLayers) {
   const CapabilitiesVK* capabilites_vk =
       reinterpret_cast<const CapabilitiesVK*>(context->GetCapabilities().get());
   ASSERT_TRUE(capabilites_vk->AreValidationsEnabled());
+
+  fml::testing::LogCapture capture;
+  DebugReportVK debug_report(*capabilites_vk, context->GetInstance());
+  ASSERT_TRUE(debug_report.IsValid());
+  EXPECT_NE(capture.str().find("Vulkan debug messenger installed"),
+            std::string::npos);
+}
+
+TEST(CapabilitiesVKTest, EmbedderValidationsRequireDebugUtilsExtension) {
+  // Initialize the mock Vulkan dispatcher with the validation layer present.
+  auto seed_context = MockVulkanContextBuilder()
+                          .SetInstanceLayers({"VK_LAYER_KHRONOS_validation"})
+                          .Build();
+  ASSERT_NE(seed_context, nullptr);
+
+  {
+    fml::testing::LogCapture capture;
+    CapabilitiesVK caps_without_debug_utils(
+        /*enable_validations=*/true,
+        /*fatal_missing_validations=*/false,
+        /*use_embedder_extensions=*/true,
+        /*instance_extensions=*/{"VK_KHR_surface", "VK_KHR_android_surface"},
+        /*device_extensions=*/{"VK_KHR_swapchain"});
+    EXPECT_TRUE(caps_without_debug_utils.IsValid());
+    EXPECT_FALSE(caps_without_debug_utils.AreValidationsEnabled());
+    EXPECT_NE(
+        capture.str().find(
+            "Requested Impeller context creation with validations, but the "
+            "embedder did not enable VK_EXT_debug_utils on its VkInstance. "
+            "Expect no Vulkan validation messages!"),
+        std::string::npos);
+  }
+
+  {
+    CapabilitiesVK caps_with_debug_utils(
+        /*enable_validations=*/true,
+        /*fatal_missing_validations=*/false,
+        /*use_embedder_extensions=*/true,
+        /*instance_extensions=*/
+        {"VK_KHR_surface", "VK_KHR_android_surface", "VK_EXT_debug_utils"},
+        /*device_extensions=*/{"VK_KHR_swapchain"});
+    EXPECT_TRUE(caps_with_debug_utils.IsValid());
+    EXPECT_TRUE(caps_with_debug_utils.AreValidationsEnabled());
+  }
 }
 
 // In Impeller's 2D renderer, we no longer use stencil-only formats. They're
