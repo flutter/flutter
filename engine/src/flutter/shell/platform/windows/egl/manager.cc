@@ -14,19 +14,22 @@ namespace egl {
 
 int Manager::instance_count_ = 0;
 
-std::unique_ptr<Manager> Manager::Create(GpuPreference gpu_preference) {
+std::unique_ptr<Manager> Manager::Create(
+    GpuPreference gpu_preference,
+    std::unique_ptr<ProgramCache> program_cache) {
   std::unique_ptr<Manager> manager;
-  manager.reset(new Manager(gpu_preference));
+  manager.reset(new Manager(gpu_preference, std::move(program_cache)));
   if (!manager->IsValid()) {
     return nullptr;
   }
   return std::move(manager);
 }
 
-Manager::Manager(GpuPreference gpu_preference) {
+Manager::Manager(GpuPreference gpu_preference,
+                 std::unique_ptr<ProgramCache> program_cache) {
   ++instance_count_;
 
-  if (!InitializeDisplay(gpu_preference)) {
+  if (!InitializeDisplay(gpu_preference, std::move(program_cache))) {
     return;
   }
 
@@ -46,7 +49,8 @@ Manager::~Manager() {
   --instance_count_;
 }
 
-bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
+bool Manager::InitializeDisplay(GpuPreference gpu_preference,
+                                std::unique_ptr<ProgramCache> program_cache) {
   // If the request for a low power GPU is provided,
   // we will attempt to select GPU explicitly, via ANGLE extension
   // that allows to specify the GPU to use via LUID.
@@ -178,6 +182,11 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
       continue;
     }
 
+    // Before any context exists, so that ANGLE offers every program it
+    // links to the cache.
+    if (program_cache) {
+      ProgramCache::InstallForDisplay(display_, std::move(program_cache));
+    }
     return true;
   }
 

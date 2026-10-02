@@ -27,6 +27,7 @@
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 #include "flutter/shell/platform/windows/window_manager.h"
+#include "flutter/shell/version/version.h"
 #include "flutter/third_party/accessibility/ax/ax_node.h"
 #include "shell/platform/windows/flutter_project_bundle.h"
 
@@ -210,8 +211,20 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   }
   enable_impeller_ = enable_impeller;
 
+  // ANGLE compiles every GL program with the Direct3D compiler. The cache
+  // keeps the compiled programs, so later launches load them instead.
+  std::unique_ptr<egl::ProgramCache> program_cache;
+  if (std::optional<std::filesystem::path> directory =
+          egl::ProgramCacheLocation::ForCurrentProcess(
+              project_->program_cache_path(), switches)
+              .Resolve()) {
+    program_cache =
+        std::make_unique<egl::ProgramCache>(egl::ProgramCache::Options{
+            .directory = *directory, .version = GetFlutterEngineVersion()});
+  }
   egl_manager_ = egl::Manager::Create(
-      static_cast<egl::GpuPreference>(project_->gpu_preference()));
+      static_cast<egl::GpuPreference>(project_->gpu_preference()),
+      std::move(program_cache));
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
 
   display_manager_ = std::make_shared<DisplayManagerWin32>(this);
