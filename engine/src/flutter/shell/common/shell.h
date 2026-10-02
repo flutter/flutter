@@ -307,7 +307,7 @@ class Shell final : public PlatformView::Delegate,
 
   //----------------------------------------------------------------------------
   /// @brief      Clears any cached render targets and textures on the
-  /// rasterizer.
+  ///             rasterizer.
   void ClearRenderTargetCache() const;
 
   //----------------------------------------------------------------------------

@@ -35,7 +35,7 @@ class AiksContext {
               std::optional<std::shared_ptr<RenderTargetAllocator>>
                   render_target_allocator = std::nullopt);
 
-  ~AiksContext();
+  virtual ~AiksContext();
 
   bool IsValid() const;
 
@@ -44,10 +44,10 @@ class AiksContext {
   ContentContext& GetContentContext() const;
 
   /// @brief Clear all cached render targets from the content context.
-  void ClearRenderTargetCache() const;
+  virtual void ClearRenderTargetCache() const;
 
   /// @brief Clear all cached DL image textures from the content context.
-  void ClearCachedTextures() const;
+  virtual void ClearCachedTextures() const;
 
  private:
   std::shared_ptr<Context> context_;

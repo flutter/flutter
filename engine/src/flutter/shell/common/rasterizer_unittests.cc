@@ -132,6 +132,15 @@ class MockExternalViewEmbedder : public ExternalViewEmbedder {
       (override));
   MOCK_METHOD(bool, SupportsDynamicThreadMerging, (), (override));
 };
+
+#if IMPELLER_SUPPORTS_RENDERING
+class MockAiksContext : public impeller::AiksContext {
+ public:
+  MockAiksContext() : impeller::AiksContext(nullptr, nullptr) {}
+  MOCK_METHOD(void, ClearRenderTargetCache, (), (const, override));
+  MOCK_METHOD(void, ClearCachedTextures, (), (const, override));
+};
+#endif  // IMPELLER_SUPPORTS_RENDERING
 }  // namespace
 
 TEST(RasterizerTest, create) {
@@ -173,11 +182,13 @@ TEST(RasterizerTest, NotifyLowMemoryWarningClearsImpellerCache) {
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<NiceMock<MockSurface>>();
 
-  auto aiks_context = std::make_shared<impeller::AiksContext>(nullptr, nullptr);
+  auto aiks_context = std::make_shared<NiceMock<MockAiksContext>>();
   EXPECT_CALL(*surface, GetAiksContext()).WillRepeatedly(Return(aiks_context));
   EXPECT_CALL(*surface, MakeRenderContextCurrent()).WillRepeatedly([] {
     return std::make_unique<GLContextDefaultResult>(true);
   });
+  EXPECT_CALL(*aiks_context, ClearRenderTargetCache()).Times(1);
+  EXPECT_CALL(*aiks_context, ClearCachedTextures()).Times(1);
 
   rasterizer->Setup(std::move(surface));
   rasterizer->NotifyLowMemoryWarning();
@@ -201,11 +212,13 @@ TEST(RasterizerTest, ClearRenderTargetCacheClearsImpellerCache) {
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<NiceMock<MockSurface>>();
 
-  auto aiks_context = std::make_shared<impeller::AiksContext>(nullptr, nullptr);
+  auto aiks_context = std::make_shared<NiceMock<MockAiksContext>>();
   EXPECT_CALL(*surface, GetAiksContext()).WillRepeatedly(Return(aiks_context));
   EXPECT_CALL(*surface, MakeRenderContextCurrent()).WillRepeatedly([] {
     return std::make_unique<GLContextDefaultResult>(true);
   });
+  EXPECT_CALL(*aiks_context, ClearRenderTargetCache()).Times(1);
+  EXPECT_CALL(*aiks_context, ClearCachedTextures()).Times(1);
 
   rasterizer->Setup(std::move(surface));
   rasterizer->ClearRenderTargetCache();
