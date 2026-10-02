@@ -296,13 +296,13 @@ List<FlutterCommand> generateCommands({
   DaemonCommand(
     androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,
-    deviceManager: globals.deviceManager,
+    deviceManager: toolDependencies.deviceManager,
     hidden: !verboseHelp,
     toolContext: toolDependencies.toolContext,
   ),
   DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(
-    deviceManager: globals.deviceManager!,
+    deviceManager: toolDependencies.deviceManager,
     doctor: globals.doctor!,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
@@ -348,6 +348,7 @@ List<FlutterCommand> generateCommands({
   ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(toolContext: toolDependencies.toolContext),
   TestCommand(
+    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     verbose: verbose,
     nativeAssetsBuilder: toolDependencies.toolContext.nativeAssetsBuilder,

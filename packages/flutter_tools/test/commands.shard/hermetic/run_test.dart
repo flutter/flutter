@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_engine_cli_flags.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -167,6 +168,120 @@ void main() {
           final CommandRunner<void> runner = createTestCommandRunner(command);
           await runner.run(<String>['run', '--no-pub', '--use-application-binary=path/to/binary']);
           expect(command.prebuiltApplicationBinaryPath, 'path/to/binary');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      for (final String flag in AndroidEngineCliFlags.allFlags) {
+        testUsingContext(
+          'fails when --use-application-binary is provided with --release and --$flag for Android',
+          () async {
+            testDeviceManager.devices = <Device>[FakeDevice()];
+            final RunCommand command = TestRunCommandThatOnlyValidates();
+            final CommandRunner<void> runner = createTestCommandRunner(command);
+            final String flagArg = switch (flag) {
+              AndroidEngineCliFlags.route => '--route=/',
+              AndroidEngineCliFlags.traceAllowlist => '--trace-allowlist=foo',
+              AndroidEngineCliFlags.traceSkiaAllowlist => '--trace-skia-allowlist=foo',
+              AndroidEngineCliFlags.traceToFile => '--trace-to-file=path',
+              AndroidEngineCliFlags.dartFlags => '--dart-flags=--foo',
+              _ => '--$flag',
+            };
+            expect(
+              () => runner.run(<String>[
+                'run',
+                '--no-pub',
+                '--release',
+                flagArg,
+                '--use-application-binary=path/to/app.apk',
+              ]),
+              throwsA(
+                isA<ToolExit>().having(
+                  (ToolExit error) => error.message,
+                  'message',
+                  allOf(
+                    contains(flag),
+                    contains(
+                      'https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries',
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fs,
+            ProcessManager: () => FakeProcessManager.any(),
+            DeviceManager: () => testDeviceManager,
+          },
+        );
+      }
+
+      testUsingContext(
+        'succeeds when --use-application-binary is provided with --release and engine config flags for iOS',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice()];
+          final RunCommand command = TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+
+          await runner.run(<String>[
+            'run',
+            '--no-pub',
+            '--release',
+            '--route=/',
+            '--use-application-binary=path/to/app.ipa',
+          ]);
+          expect(command.prebuiltApplicationBinaryPath, 'path/to/app.ipa');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'succeeds when --use-application-binary is provided with --release and engine config flags for Windows',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice()];
+          final RunCommand command = TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+
+          await runner.run(<String>[
+            'run',
+            '--no-pub',
+            '--release',
+            '--route=/',
+            '--use-application-binary=path/to/app.exe',
+          ]);
+          expect(command.prebuiltApplicationBinaryPath, 'path/to/app.exe');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'succeeds when --use-application-binary is provided with --release and engine config flags for macOS',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice()];
+          final RunCommand command = TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+
+          await runner.run(<String>[
+            'run',
+            '--no-pub',
+            '--release',
+            '--route=/',
+            '--use-application-binary=path/to/app.app',
+          ]);
+          expect(command.prebuiltApplicationBinaryPath, 'path/to/app.app');
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
