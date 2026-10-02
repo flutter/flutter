@@ -11,6 +11,18 @@ import 'package:material_ui/material_ui.dart';
 import 'models.dart';
 import 'tooltip_window_content.dart';
 
+class _TooltipDelegate with TooltipWindowControllerDelegate {
+  _TooltipDelegate(this.onDestroyed);
+
+  final VoidCallback onDestroyed;
+
+  @override
+  void onWindowDestroyed() {
+    super.onWindowDestroyed();
+    onDestroyed();
+  }
+}
+
 class TooltipButton extends StatefulWidget {
   const TooltipButton({super.key, required this.parentController});
 
@@ -21,59 +33,57 @@ class TooltipButton extends StatefulWidget {
 }
 
 class _TooltipButtonState extends State<TooltipButton> {
-  final NestedWindowController _anchorController = NestedWindowController();
+  TooltipWindowController? _tooltip;
+  bool _disposing = false;
 
-  void _onPressed() {
-    _anchorController.toggle();
+  void _onTooltipDestroyed(TooltipWindowController tooltip) {
+    if (_disposing || _tooltip != tooltip) {
+      return;
+    }
+    setState(() {
+      _tooltip = null;
+    });
   }
 
-  WindowEntry _buildEntry(NestedWindowLayoutInfo info, WindowSettings windowSettings) {
-    final controller = TooltipWindowController(
+  void _onPressed(BuildContext anchorContext, WindowSettings windowSettings) {
+    if (_tooltip != null) {
+      _tooltip!.destroy();
+      return;
+    }
+    final NestedWindowLayoutInfo info = NestedWindow.layoutInfoOf(anchorContext);
+    late final TooltipWindowController tooltip;
+    tooltip = TooltipWindowController(
       anchorRect: info.anchorRect,
       positioner: windowSettings.positioner,
-      delegate: _TooltipWindowControllerDelegate(
-        onDestroyed: () {
-          if (mounted) {
-            _anchorController.hide();
-          }
-        },
-      ),
       parent: widget.parentController,
+      delegate: _TooltipDelegate(() => _onTooltipDestroyed(tooltip)),
     );
-    return WindowEntry(
-      controller: controller,
-      builder: (BuildContext context) => TooltipWindowContent(controller: controller),
-    );
+    setState(() {
+      _tooltip = tooltip;
+    });
+  }
+
+  @override
+  void dispose() {
+    _disposing = true;
+    _tooltip?.destroy();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
-    return NestedWindow.windowLayoutBuilder(
-      controller: _anchorController,
-      entryBuilder: (BuildContext context, NestedWindowLayoutInfo info) =>
-          _buildEntry(info, windowSettings),
-      child: OutlinedButton(
-        onPressed: _onPressed,
-        child: ListenableBuilder(
-          listenable: _anchorController,
-          builder: (BuildContext context, Widget? child) =>
-              Text(_anchorController.isShowing ? 'Hide Tooltip' : 'Show Tooltip'),
+    return NestedWindow(
+      controller: _tooltip,
+      builder: (BuildContext context, TooltipWindowController tooltip) =>
+          TooltipWindowContent(controller: tooltip),
+      child: Builder(
+        builder: (BuildContext anchorContext) => OutlinedButton(
+          onPressed: () => _onPressed(anchorContext, windowSettings),
+          child: Text(_tooltip != null ? 'Hide Tooltip' : 'Show Tooltip'),
         ),
       ),
     );
   }
-}
-
-class _TooltipWindowControllerDelegate extends TooltipWindowControllerDelegate {
-  _TooltipWindowControllerDelegate({required this.onDestroyed});
-
-  @override
-  void onWindowDestroyed() {
-    onDestroyed();
-    super.onWindowDestroyed();
-  }
-
-  final VoidCallback onDestroyed;
 }

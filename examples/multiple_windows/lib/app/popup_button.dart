@@ -11,6 +11,18 @@ import 'package:material_ui/material_ui.dart';
 import 'models.dart';
 import 'popup_window_content.dart';
 
+class _PopupDelegate with PopupWindowControllerDelegate {
+  _PopupDelegate(this.onDestroyed);
+
+  final VoidCallback onDestroyed;
+
+  @override
+  void onWindowDestroyed() {
+    super.onWindowDestroyed();
+    onDestroyed();
+  }
+}
+
 class PopupButton extends StatefulWidget {
   const PopupButton({super.key, required this.parentController});
 
@@ -21,59 +33,57 @@ class PopupButton extends StatefulWidget {
 }
 
 class _PopupButtonState extends State<PopupButton> {
-  final NestedWindowController _anchorController = NestedWindowController();
+  PopupWindowController? _popup;
+  bool _disposing = false;
 
-  void _onPressed() {
-    _anchorController.toggle();
+  void _onPopupDestroyed(PopupWindowController popup) {
+    if (_disposing || _popup != popup) {
+      return;
+    }
+    setState(() {
+      _popup = null;
+    });
   }
 
-  WindowEntry _buildEntry(NestedWindowLayoutInfo info, WindowSettings windowSettings) {
-    final controller = PopupWindowController(
+  void _onPressed(BuildContext anchorContext, WindowSettings windowSettings) {
+    if (_popup != null) {
+      _popup!.destroy();
+      return;
+    }
+    final NestedWindowLayoutInfo info = NestedWindow.layoutInfoOf(anchorContext);
+    late final PopupWindowController popup;
+    popup = PopupWindowController(
       anchorRect: info.anchorRect,
       positioner: windowSettings.positioner,
-      delegate: _PopupWindowControllerDelegate(
-        onDestroyed: () {
-          if (mounted) {
-            _anchorController.hide();
-          }
-        },
-      ),
       parent: widget.parentController,
+      delegate: _PopupDelegate(() => _onPopupDestroyed(popup)),
     );
-    return WindowEntry(
-      controller: controller,
-      builder: (BuildContext context) => PopupWindowContent(controller: controller),
-    );
+    setState(() {
+      _popup = popup;
+    });
+  }
+
+  @override
+  void dispose() {
+    _disposing = true;
+    _popup?.destroy();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
-    return NestedWindow.windowLayoutBuilder(
-      controller: _anchorController,
-      entryBuilder: (BuildContext context, NestedWindowLayoutInfo info) =>
-          _buildEntry(info, windowSettings),
-      child: OutlinedButton(
-        onPressed: _onPressed,
-        child: ListenableBuilder(
-          listenable: _anchorController,
-          builder: (BuildContext context, Widget? child) =>
-              Text(_anchorController.isShowing ? 'Hide Popup' : 'Show Popup'),
+    return NestedWindow(
+      controller: _popup,
+      builder: (BuildContext context, PopupWindowController popup) =>
+          PopupWindowContent(controller: popup),
+      child: Builder(
+        builder: (BuildContext anchorContext) => OutlinedButton(
+          onPressed: () => _onPressed(anchorContext, windowSettings),
+          child: Text(_popup != null ? 'Hide Popup' : 'Show Popup'),
         ),
       ),
     );
   }
-}
-
-class _PopupWindowControllerDelegate extends PopupWindowControllerDelegate {
-  _PopupWindowControllerDelegate({required this.onDestroyed});
-
-  @override
-  void onWindowDestroyed() {
-    onDestroyed();
-    super.onWindowDestroyed();
-  }
-
-  final VoidCallback onDestroyed;
 }

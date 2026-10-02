@@ -48,47 +48,56 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final NestedWindowController _nestedWindowController =
-      NestedWindowController();
+  PopupWindowController? _popup;
+
+  bool get _isShowing => !(_popup?.isDestroyed ?? true);
+
+  // The anchorContext is below the NestedWindow, so NestedWindow.layoutInfoOf
+  // reports the geometry of the button that the popup is anchored to.
+  void _togglePopup(BuildContext anchorContext) {
+    if (_isShowing) {
+      _popup!.destroy();
+      return;
+    }
+    final NestedWindowLayoutInfo info = NestedWindow.layoutInfoOf(
+      anchorContext,
+    );
+    setState(() {
+      _popup = PopupWindowController(
+        parent: WindowScope.of(context),
+        anchorRect: info.anchorRect,
+        positioner: const WindowPositioner(
+          parentAnchor: .right,
+          childAnchor: .left,
+        ),
+      );
+    });
+  }
 
   @override
   void dispose() {
-    _nestedWindowController.dispose();
+    _popup?.destroy();
     super.dispose();
   }
 
-  WindowEntry _buildPopupEntry(
-    BuildContext context,
-    NestedWindowLayoutInfo info,
-  ) {
-    final PopupWindowController controller = PopupWindowController(
-      parent: WindowScope.of(context),
-      anchorRect: info.anchorRect,
-      positioner: const WindowPositioner(
-        parentAnchor: .right,
-        childAnchor: .left,
-      ),
-    );
-    return WindowEntry(
-      controller: controller,
-      builder: (BuildContext context) => Material(
-        color: Colors.black,
-        child: Padding(
-          padding: const .all(8),
-          child: Column(
-            mainAxisSize: .min,
-            children: <Widget>[
-              const Text(
-                'This is a popup',
-                style: TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: _nestedWindowController.hide,
-                child: const Text('Close'),
-              ),
-            ],
-          ),
+  Widget _buildPopupContent(BuildContext context, PopupWindowController popup) {
+    return Material(
+      color: Colors.black,
+      child: Padding(
+        padding: const .all(8),
+        child: Column(
+          mainAxisSize: .min,
+          children: <Widget>[
+            const Text(
+              'This is a popup',
+              style: TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: popup.destroy,
+              child: const Text('Close'),
+            ),
+          ],
         ),
       ),
     );
@@ -96,16 +105,20 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final PopupWindowController? popup = _popup;
     return Center(
-      child: NestedWindow.windowLayoutBuilder(
-        controller: _nestedWindowController,
-        entryBuilder: _buildPopupEntry,
-        child: ElevatedButton(
-          onPressed: _nestedWindowController.toggle,
-          child: ListenableBuilder(
-            listenable: _nestedWindowController,
-            builder: (BuildContext context, Widget? child) => Text(
-              _nestedWindowController.isShowing ? 'Hide Popup' : 'Show Popup',
+      child: NestedWindow(
+        controller: popup,
+        builder: _buildPopupContent,
+        child: Builder(
+          builder: (BuildContext anchorContext) => ElevatedButton(
+            onPressed: () => _togglePopup(anchorContext),
+            // The popup may also be destroyed by the platform, for example when
+            // it loses focus, so the label listens to the popup directly.
+            child: ListenableBuilder(
+              listenable: Listenable.merge(<Listenable?>[popup]),
+              builder: (BuildContext context, Widget? child) =>
+                  Text(_isShowing ? 'Hide Popup' : 'Show Popup'),
             ),
           ),
         ),

@@ -48,63 +48,80 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final NestedWindowController _nestedWindowController =
-      NestedWindowController();
+  TooltipWindowController? _tooltip;
+
+  bool get _isShowing => !(_tooltip?.isDestroyed ?? true);
+
+  // The anchorContext is below the NestedWindow, so NestedWindow.layoutInfoOf
+  // reports the geometry of the widget that the tooltip is anchored to.
+  void _showTooltip(BuildContext anchorContext) {
+    if (_isShowing) {
+      return;
+    }
+    final NestedWindowLayoutInfo info = NestedWindow.layoutInfoOf(
+      anchorContext,
+    );
+    setState(() {
+      _tooltip = TooltipWindowController(
+        parent: WindowScope.of(context),
+        anchorRect: info.anchorRect,
+        positioner: const WindowPositioner(
+          parentAnchor: WindowPositionerAnchor.right,
+          childAnchor: WindowPositionerAnchor.left,
+        ),
+      );
+    });
+  }
+
+  void _hideTooltip() {
+    _tooltip?.destroy();
+  }
 
   @override
   void dispose() {
-    _nestedWindowController.dispose();
+    _tooltip?.destroy();
     super.dispose();
   }
 
-  WindowEntry _buildTooltipEntry(
+  Widget _buildTooltipContent(
     BuildContext context,
-    NestedWindowLayoutInfo info,
+    TooltipWindowController tooltip,
   ) {
-    final TooltipWindowController tooltipController = TooltipWindowController(
-      parent: WindowScope.of(context),
-      anchorRect: info.anchorRect,
-      positioner: const WindowPositioner(
-        parentAnchor: WindowPositionerAnchor.right,
-        childAnchor: WindowPositionerAnchor.left,
-      ),
-    );
-    return WindowEntry(
-      controller: tooltipController,
-      builder: (BuildContext context) => Container(
-        padding: const .all(8),
-        color: Colors.black,
-        child: const Text(
-          'This is a tooltip',
-          style: TextStyle(color: Colors.white),
-        ),
+    return Container(
+      padding: const .all(8),
+      color: Colors.black,
+      child: const Text(
+        'This is a tooltip',
+        style: TextStyle(color: Colors.white),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final TooltipWindowController? tooltip = _tooltip;
     return Center(
-      child: NestedWindow.windowLayoutBuilder(
-        controller: _nestedWindowController,
-        entryBuilder: _buildTooltipEntry,
-        child: MouseRegion(
-          onEnter: (_) => _nestedWindowController.show(),
-          onExit: (_) => _nestedWindowController.hide(),
-          cursor: SystemMouseCursors.click,
-          child: ListenableBuilder(
-            listenable: _nestedWindowController,
-            builder: (BuildContext context, Widget? child) => AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              color: _nestedWindowController.isShowing
-                  ? Colors.blueAccent
-                  : Colors.blue,
-              padding: const .all(12),
-              child: child,
-            ),
-            child: const Text(
-              'Hover Me',
-              style: TextStyle(color: Colors.white),
+      child: NestedWindow(
+        controller: tooltip,
+        builder: _buildTooltipContent,
+        child: Builder(
+          builder: (BuildContext anchorContext) => MouseRegion(
+            onEnter: (_) => _showTooltip(anchorContext),
+            onExit: (_) => _hideTooltip(),
+            cursor: SystemMouseCursors.click,
+            child: ListenableBuilder(
+              listenable: Listenable.merge(<Listenable?>[tooltip]),
+              builder: (BuildContext context, Widget? child) =>
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    color: _isShowing ? Colors.blueAccent : Colors.blue,
+                    padding: const .all(12),
+                    child: child,
+                  ),
+              child: const Text(
+                'Hover Me',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ),
         ),
