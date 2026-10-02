@@ -356,8 +356,9 @@ static void EncodeViewport(const ProcTableGLES& gl,
   // is bottom left origin, so we convert the coordinates here.
   ISize target_size = pass_data.color_attachment->GetSize();
 
-  // Offscreen FBO passes flip in the vertex shader (the swapchain is
-  // left alone); see https://github.com/flutter/flutter/issues/186554.
+  // Offscreen (non-wrapped) FBOs always flip in the vertex shader so they are
+  // stored with a top-left origin, matching Impeller's coordinate system. See
+  // https://github.com/flutter/flutter/issues/186554.
   //
   // Wrapped FBOs match the embedder's default framebuffer origin:
   // - Bottom-left (the OpenGL default): no flip.
