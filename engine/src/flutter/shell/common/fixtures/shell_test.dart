@@ -95,6 +95,7 @@ void onBeginFrameMain() {
   PlatformDispatcher.instance.onBeginFrame = (Duration beginTime) {
     nativeOnBeginFrame(beginTime.inMicroseconds);
   };
+  notifyNative();
   PlatformDispatcher.instance.scheduleFrame();
 }
 
@@ -114,6 +115,7 @@ external void _reportMetrics(double devicePixelRatio, double width, double heigh
 @pragma('vm:entry-point')
 void dummyReportTimingsMain() {
   PlatformDispatcher.instance.onReportTimings = (List<FrameTiming> timings) {};
+  notifyNative();
 }
 
 @pragma('vm:entry-point')

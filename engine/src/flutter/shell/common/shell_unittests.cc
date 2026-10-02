@@ -828,7 +828,13 @@ TEST_F(ShellTest, NeedsReportTimingsIsSetWithCallback) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("dummyReportTimingsMain");
 
+  fml::AutoResetWaitableEvent startupLatch;
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&]() { startupLatch.Signal(); }));
+
   RunEngine(shell.get(), std::move(configuration));
+  startupLatch.Wait();
+
   PumpOneFrame(shell.get());
   ASSERT_TRUE(GetNeedsReportTimings(shell.get()));
   DestroyShell(std::move(shell));
@@ -948,14 +954,21 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("onBeginFrameMain");
 
-  int64_t frame_target_time;
+  int64_t frame_target_time = 0;
+
   auto nativeOnBeginFrame = [&frame_target_time](int64_t microseconds) {
     frame_target_time = microseconds;
   };
   AddFfiNativeCallback("NativeOnBeginFrame",
                        CREATE_FFI_LAMBDA(nativeOnBeginFrame));
 
+  fml::AutoResetWaitableEvent startupLatch;
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&]() { startupLatch.Signal(); }));
+
   RunEngine(shell.get(), std::move(configuration));
+  startupLatch.Wait();
+
   PumpOneFrame(shell.get());
 
   // Check that timing is properly set. This implies that
