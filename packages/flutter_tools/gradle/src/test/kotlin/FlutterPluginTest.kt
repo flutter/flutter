@@ -21,6 +21,7 @@ import com.flutter.gradle.tasks.CopyFlutterAssetsTask
 import com.flutter.gradle.tasks.FlutterTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.testing.mockAbiFilters
+import com.flutter.gradle.testing.mockProductFlavors
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -211,25 +212,65 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `onVariants offsets the versionCode of each per-ABI output for split-per-abi builds`(
+    fun `onVariants offsets the defaultConfig versionCode for each per-ABI output for split-per-abi builds`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
         every { env.project.findProperty("split-per-abi") } returns "true"
-        val arm32 = mockVariantOutput(abi = "armeabi-v7a", versionCode = 41)
-        val arm64 = mockVariantOutput(abi = "arm64-v8a", versionCode = 42)
-        val x64 = mockVariantOutput(abi = "x86_64", versionCode = 43)
-        val universal = mockVariantOutput(abi = null, versionCode = 44)
-        val noVersionCode = mockVariantOutput(abi = "arm64-v8a", versionCode = null)
+        val arm32 = mockVariantOutput(abi = "armeabi-v7a")
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val x64 = mockVariantOutput(abi = "x86_64")
+        val universal = mockVariantOutput(abi = null)
 
-        val onVariant = applyPluginCapturingVariantCallback(env)
-        onVariant(mockApplicationVariant(outputs = listOf(arm32, arm64, x64, universal, noVersionCode).map { it.output }))
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = 42)
+        onVariant(mockApplicationVariant(outputs = listOf(arm32, arm64, x64, universal).map { it.output }))
 
-        verify { arm32.versionCode.set(1041) }
+        verify { arm32.versionCode.set(1042) }
         verify { arm64.versionCode.set(2042) }
-        verify { x64.versionCode.set(4043) }
+        verify { x64.versionCode.set(4042) }
         verify(exactly = 0) { universal.versionCode.set(any<Int>()) }
-        verify(exactly = 0) { noVersionCode.versionCode.set(any<Int>()) }
+    }
+
+    @Test
+    fun `onVariants offsets the versionCode of the variant's product flavor for split-per-abi builds`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+
+        val onVariant =
+            applyPluginCapturingVariantCallback(
+                env,
+                defaultConfigVersionCode = 42,
+                productFlavorVersionCodes = mapOf("free" to 7, "paid" to 9)
+            )
+        onVariant(
+            mockApplicationVariant(
+                name = "paidDebug",
+                flavorName = "paid",
+                productFlavors = listOf("tier" to "paid"),
+                outputs = listOf(arm64.output)
+            )
+        )
+
+        verify { arm64.versionCode.set(2009) }
+    }
+
+    @Test
+    fun `onVariants warns and leaves versionCodes unchanged when the DSL declares no versionCode`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
+        onVariant(mockApplicationVariant(outputs = listOf(arm64.output)))
+
+        verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
+        val logger = env.project.logger
+        verify { logger.warn(match<String> { it.contains("variant 'debug'") && it.contains("declares no versionCode") }) }
     }
 
     @Test
@@ -237,9 +278,9 @@ class FlutterPluginTest {
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
-        val arm64 = mockVariantOutput(abi = "arm64-v8a", versionCode = 42)
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
 
-        val onVariant = applyPluginCapturingVariantCallback(env)
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = 42)
         onVariant(mockApplicationVariant(outputs = listOf(arm64.output)))
 
         verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
@@ -252,9 +293,9 @@ class FlutterPluginTest {
         val env = setupTestProjectEnvironment(tempDir)
         every { env.project.findProperty("split-per-abi") } returns "true"
         every { env.project.findProperty("force-version-code-ignoring-abi") } returns "true"
-        val arm64 = mockVariantOutput(abi = "arm64-v8a", versionCode = 42)
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
 
-        val onVariant = applyPluginCapturingVariantCallback(env)
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = 42)
         onVariant(mockApplicationVariant(outputs = listOf(arm64.output)))
 
         verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
@@ -280,8 +321,8 @@ class FlutterPluginTest {
                 flavorName = "free",
                 outputs =
                     listOf(
-                        mockVariantOutput(abi = "armeabi-v7a", versionCode = 1).output,
-                        mockVariantOutput(abi = null, versionCode = 1).output
+                        mockVariantOutput(abi = "armeabi-v7a").output,
+                        mockVariantOutput(abi = null).output
                     )
             )
         val apkDir = mockk<Provider<Directory>>()
@@ -413,18 +454,35 @@ class FlutterPluginTest {
     }
 
     /**
-     * Applies the plugin to [env]'s project with the Android mocks it needs, and returns the
-     * callback the plugin registered with `AndroidComponentsExtension.onVariants`.
+     * Applies the plugin to [env]'s project with the Android mocks it needs, runs the callbacks
+     * the plugin registered with `AndroidComponentsExtension.finalizeDsl` (AGP runs those before
+     * any `onVariants` callback), and returns the callback the plugin registered with
+     * `AndroidComponentsExtension.onVariants`.
+     *
+     * @param defaultConfigVersionCode the versionCode the DSL sets on `defaultConfig`.
+     * @param productFlavorVersionCodes the product flavors the DSL declares, by name, with the
+     *   versionCode each sets.
      */
-    private fun applyPluginCapturingVariantCallback(env: TestProjectEnvironment): (Variant) -> Unit {
-        setupMockApplicationExtension(env.project)
+    private fun applyPluginCapturingVariantCallback(
+        env: TestProjectEnvironment,
+        defaultConfigVersionCode: Int? = null,
+        productFlavorVersionCodes: Map<String, Int?> = emptyMap()
+    ): (Variant) -> Unit {
+        val appExtension = setupMockApplicationExtension(env.project)
+        val defaultConfig = appExtension.defaultConfig
+        every { defaultConfig.versionCode } returns defaultConfigVersionCode
+        val productFlavors = mockProductFlavors(productFlavorVersionCodes)
+        every { appExtension.productFlavors } returns productFlavors
         val mockComponentsExtension = setupMockComponentsExtension(env.project)
         setupMockNativePluginLoader(env.project, env.flutterExtension)
 
+        val finalizeDslCallbacks = mutableListOf<(Any) -> Unit>()
+        every { mockComponentsExtension.finalizeDsl(capture(finalizeDslCallbacks)) } returns Unit
         val onVariantSlot = slot<(Variant) -> Unit>()
         every { mockComponentsExtension.onVariants(any(), capture(onVariantSlot)) } returns Unit
 
         FlutterPlugin().apply(env.project)
+        finalizeDslCallbacks.forEach { callback -> callback(appExtension) }
         return onVariantSlot.captured
     }
 
@@ -437,6 +495,7 @@ class FlutterPluginTest {
         buildType: String = "debug",
         debuggable: Boolean = true,
         flavorName: String? = null,
+        productFlavors: List<Pair<String, String>> = emptyList(),
         minSdkApiLevel: Int = 21,
         assetsSource: SourceDirectories.Layered? = mockk(relaxed = true),
         outputs: List<VariantOutput> = emptyList()
@@ -447,6 +506,7 @@ class FlutterPluginTest {
         every { mockVariant.buildType } returns buildType
         every { mockVariant.debuggable } returns debuggable
         every { mockVariant.flavorName } returns flavorName
+        every { mockVariant.productFlavors } returns productFlavors
         every { mockVariant.minSdk.apiLevel } returns minSdkApiLevel
         every { mockVariant.sources } returns mockSources
         every { mockSources.assets } returns assetsSource
@@ -461,15 +521,14 @@ class FlutterPluginTest {
     )
 
     /**
-     * A [VariantOutput] with an ABI filter for [abi] (none if null), whose versionCode property
-     * holds [versionCode]. Verify on [MockVariantOutput.versionCode] to check what the plugin set.
+     * A [VariantOutput] with an ABI filter for [abi] (none if null). Verify on
+     * [MockVariantOutput.versionCode] to check what the plugin set.
+     *
+     * Only `set` is stubbed on the versionCode property, so a read fails the test. AGP disallows
+     * reading it during configuration when its compatibility mode is off.
      */
-    private fun mockVariantOutput(
-        abi: String?,
-        versionCode: Int?
-    ): MockVariantOutput {
+    private fun mockVariantOutput(abi: String?): MockVariantOutput {
         val versionCodeProperty = mockk<Property<Int>>()
-        every { versionCodeProperty.orNull } returns versionCode
         every { versionCodeProperty.set(any<Int>()) } just Runs
         val output = mockk<VariantOutput>()
         every { output.filters } returns mockAbiFilters(abi)
@@ -578,7 +637,7 @@ class FlutterPluginTest {
         return mockApplicationExtension
     }
 
-    private fun setupMockComponentsExtension(project: Project): AndroidComponentsExtension<*, VariantBuilder, Variant> {
+    private fun setupMockComponentsExtension(project: Project): AndroidComponentsExtension<Any, VariantBuilder, Variant> {
         val mockAndroidComponentsExtension =
             mockk<AndroidComponentsExtension<Any, VariantBuilder, Variant>>(relaxed = true)
         every {

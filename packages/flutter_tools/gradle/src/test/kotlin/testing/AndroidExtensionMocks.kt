@@ -6,6 +6,7 @@ package com.flutter.gradle.testing
 
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.ApplicationProductFlavor
 import com.android.build.api.dsl.Cmake
 import com.android.build.api.dsl.LibraryBuildType
 import com.android.build.api.dsl.LibraryExtension
@@ -192,4 +193,22 @@ fun setUpMockExternalNativeBuild(
         cmakeArguments = cmakeArguments,
         buildType = mockBuildType
     )
+}
+
+/**
+ * A `productFlavors` container holding one flavor per entry of [versionCodes], named by its key
+ * and setting the versionCode of its value (none if null).
+ */
+fun mockProductFlavors(versionCodes: Map<String, Int?>): NamedDomainObjectContainer<ApplicationProductFlavor> {
+    val productFlavors =
+        versionCodes.map { (flavorName, flavorVersionCode) ->
+            mockk<ApplicationProductFlavor> {
+                every { name } returns flavorName
+                every { versionCode } returns flavorVersionCode
+            }
+        }
+    val container = mockk<NamedDomainObjectContainer<ApplicationProductFlavor>>()
+    // A fresh iterator per call, so the container can be iterated more than once.
+    every { container.iterator() } answers { productFlavors.toMutableList().iterator() }
+    return container
 }

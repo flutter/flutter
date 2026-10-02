@@ -85,12 +85,15 @@ androidComponents {
 
 // Check that `flutter build apk --split-per-abi` generates a versionCode equal to
 // abiIndex * 1000 + buildNumber (then multiplied by 10000 when [usingCustomAppGradleFile]), and
-// copies each per-ABI APK into flutter-apk.
+// copies each per-ABI APK into flutter-apk. With [compatibilityModeOff], the build sets
+// `android.compatibility.enableLegacyApi=false`, under which AGP disallows reading
+// `VariantOutput.versionCode` during configuration.
 Future<void> _assertSplitPerAbiVersionCodes(
   int? buildNumber,
   Directory workingDirectory,
-  bool usingCustomAppGradleFile,
-) async {
+  bool usingCustomAppGradleFile, {
+  bool compatibilityModeOff = false,
+}) async {
   if (usingCustomAppGradleFile) {
     // Replace the app level build.gradle with one that modifies the version code.
     final File appBuildGradle = fileSystem
@@ -100,6 +103,17 @@ Future<void> _assertSplitPerAbiVersionCodes(
         .childFile('build.gradle.kts');
 
     await appBuildGradle.writeAsString(_appGradleWithVersionCodeModification);
+  }
+
+  if (compatibilityModeOff) {
+    final File gradleProperties = fileSystem
+        .directory(workingDirectory)
+        .childDirectory('android')
+        .childFile('gradle.properties');
+    await gradleProperties.writeAsString(
+      '\nandroid.compatibility.enableLegacyApi=false\n',
+      mode: FileMode.append,
+    );
   }
 
   final args = <String>[
@@ -238,5 +252,11 @@ void main() {
   // the versionCode by 10000. That block runs after Flutter applies the per-ABI offset.
   testWithoutContext('APK versionCodes after --split-per-abi with custom build-number=42 and gradle file follow "((abiIndex * 1000) + 42) * 10000"', () async {
     await _assertSplitPerAbiVersionCodes(42, appDir, true);
+  });
+
+  // Check with custom buildNumber=42 and AGP's compatibility mode off. Flutter takes the base
+  // versionCode from the DSL, so it does not read VariantOutput.versionCode.
+  testWithoutContext('APK versionCodes after --split-per-abi with custom build-number=42 and enableLegacyApi=false follow "(abiIndex * 1000) + 42"', () async {
+    await _assertSplitPerAbiVersionCodes(42, appDir, false, compatibilityModeOff: true);
   });
 }

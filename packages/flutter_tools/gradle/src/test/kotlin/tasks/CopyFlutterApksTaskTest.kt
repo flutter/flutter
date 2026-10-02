@@ -121,6 +121,8 @@ class CopyFlutterApksTaskTest {
 
         val exception = assertThrows<GradleException> { task.copyApks() }
         assertContains(exception.message!!, "for ABI 'x86_64'")
+        assertContains(exception.message!!, "transforms SingleArtifact.APK")
+        assertFalse(exception.message!!.contains("github.com/flutter/flutter/issues"))
         assertFalse(destinationDir.resolve("app-x86_64-release.apk").exists())
     }
 
@@ -145,6 +147,8 @@ class CopyFlutterApksTaskTest {
 
         val exception = assertThrows<GradleException> { task.copyApks() }
         assertContains(exception.message!!, "could not read the APK metadata")
+        assertContains(exception.message!!, "transforms SingleArtifact.APK")
+        assertFalse(exception.message!!.contains("github.com/flutter/flutter/issues"))
     }
 
     private fun projectIn(tempDir: Path): Project = ProjectBuilder.builder().withProjectDir(tempDir.resolve("project").toFile()).build()

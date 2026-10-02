@@ -324,6 +324,13 @@ class FlutterPlugin : Plugin<Project> {
         // plugin instance that owns the resolved Flutter SDK and local engine paths.
         val flutterGradlePlugin = this
         val isApplicationProject = FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)
+        // AGP runs every finalizeDsl callback before any onVariants callback, so this is set
+        // before the application branch below reads it.
+        var dslVersionCodes: DslVersionCodes? = null
+        if (isApplicationProject) {
+            val appExtension = FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo)
+            androidComponents.finalizeDsl { dslVersionCodes = DslVersionCodes.from(appExtension) }
+        }
         androidComponents.onVariants { variant ->
             // Application projects register the Flutter compile task here, from the public variant
             // API. Add-to-app module (library) projects still register theirs from the
@@ -344,7 +351,13 @@ class FlutterPlugin : Plugin<Project> {
                     "Expected an application variant for '${variant.name}' in an application " +
                         "project, but got ${variant::class.java.name}."
                 }
-                configureSplitPerAbiVersionCodes(projectToAddTasksTo, variant)
+                configureSplitPerAbiVersionCodes(
+                    projectToAddTasksTo,
+                    variant,
+                    checkNotNull(dslVersionCodes) {
+                        "Flutter read the DSL versionCodes before AGP ran finalizeDsl."
+                    }.forVariant(variant.productFlavors)
+                )
                 registerCopyFlutterApksTask(projectToAddTasksTo, variant)
             }
             registerFlutterJniLibsTask(projectToAddTasksTo, variant, targetPlatforms)
@@ -729,46 +742,51 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         /**
-         * Offsets the `versionCode` of each per-ABI output by that ABI's
-         * [FlutterPluginConstants.ABI_VERSION] for `--split-per-abi` builds, so every APK gets a
-         * distinct versionCode: `ABI_VERSION[abi] * 1000 + versionCode`.
+         * Sets the `versionCode` of each per-ABI output to
+         * `ABI_VERSION[abi] * 1000 + baseVersionCode` for `--split-per-abi` builds, so every APK
+         * gets a distinct versionCode. [FlutterPluginConstants.ABI_VERSION] holds the offsets.
          *
-         * Does nothing when `force-version-code-ignoring-abi` is set. Leaves an output unchanged if
-         * it has no ABI filter (a universal APK) or if Flutter has no offset for its ABI. AGP always
-         * seeds `output.versionCode` (with -1 when no versionCode is declared anywhere, as
-         * `BaseVariant.getVersionCode` did), so the check for an unset value is only a guard.
+         * [baseVersionCode] is the versionCode the variant's DSL declares (see [DslVersionCodes]).
+         * This never reads `output.versionCode`, which AGP disallows during configuration when its
+         * compatibility mode is off. So a versionCode set only in the manifest is not offset, and
+         * Flutter replaces a value that an `onVariants` callback running before its own has set.
          *
-         * Flutter registers its `onVariants` callback when the plugin is applied, so AGP normally
-         * runs it before an `androidComponents.onVariants` block in the app's build script. An app
-         * that changes `output.versionCode` there therefore changes the offset value.
-         * `ApkVariantOutput.versionCodeOverride`, which this replaces, was applied after such
-         * blocks, so for those apps the resulting versionCode differs from earlier Flutter
-         * releases. See "Features that must break" in
-         * docs/platforms/android/Migrating-Flutter-Gradle-Plugin-to-AGP-public-API.md.
+         * Does nothing when `force-version-code-ignoring-abi` is set, and warns and does nothing
+         * when [baseVersionCode] is null. Leaves an output unchanged if it has no ABI filter (a
+         * universal APK) or if Flutter has no offset for its ABI.
+         *
+         * AGP runs `onVariants` callbacks in registration order. Flutter registers its callback
+         * when the plugin is applied, so it normally runs before an `androidComponents.onVariants`
+         * block in the app's build script: that block sees the offset value, and a value it sets
+         * replaces Flutter's. See "Setting per-ABI or per-variant versionCode" in
+         * docs/platforms/android/website-page-draft.md.
+         *
+         * TODO(reidbaker): Link to the docs.flutter.dev page once it is published.
+         * https://github.com/flutter/flutter/issues/193713
          */
         private fun configureSplitPerAbiVersionCodes(
             project: Project,
-            variant: ApplicationVariant
+            variant: ApplicationVariant,
+            baseVersionCode: Int?
         ) {
             if (!FlutterPluginUtils.shouldProjectSplitPerAbi(project) ||
                 FlutterPluginUtils.shouldForceVersionCodeIgnoringAbi(project)
             ) {
                 return
             }
+            if (baseVersionCode == null) {
+                project.logger.warn(
+                    "Flutter did not apply per-ABI versionCodes to variant '${variant.name}' " +
+                        "because its android {} block declares no versionCode. Set versionCode " +
+                        "in defaultConfig or a product flavor, so each split APK gets a distinct " +
+                        "versionCode."
+                )
+                return
+            }
             variant.outputs.forEach { output ->
                 val abiVersionCode =
                     FlutterPluginConstants.ABI_VERSION[CopyFlutterApksTask.abiOf(output.filters)]
                         ?: return@forEach
-                // A deliberate exception to "no .get() at configuration time" (AGENTS.md §3).
-                // The lazy form, `versionCode.set(versionCode.map { ... })`, would make the
-                // property depend on itself, which Gradle rejects as a circular evaluation. AGP
-                // seeds this property with the variant's merged versionCode (including one set
-                // by a product flavor) before calling onVariants, so reading it here is safe.
-                // The read relies on AGP's compatibility mode (`android.compatibility.enableLegacyApi`,
-                // on by default through AGP 9.x). With it off, AGP disallows unsafe reads of this
-                // property during configuration and this line throws. See decision record 4 in
-                // docs/platforms/android/Migrating-Flutter-Gradle-Plugin-to-AGP-public-API.md.
-                val baseVersionCode = output.versionCode.orNull ?: return@forEach
                 output.versionCode.set(abiVersionCode * 1000 + baseVersionCode)
             }
         }
