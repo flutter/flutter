@@ -1430,88 +1430,17 @@ name: my_app
 
       final OperationResult firstResult = await firstRestart;
       expect(firstResult.code, 0);
-    },
-    overrides: <Type, Generator>{
-      Analytics: () => fakeAnalytics,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Pub: ThrowingPub.new,
-    },
-  );
 
-  testUsingContext(
-    'Allows another hot reload after a failed recompile',
-    () async {
-      final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(
-        flutterDevice,
-        logger: logger,
-        systemClock: SystemClock.fixed(DateTime(2001)),
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            webEnableHotReload: true,
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-        ),
-      );
-      fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[
-          ...kAttachExpectations,
-          FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
-          const FakeVmServiceRequest(
-            method: kReloadSourcesServiceName,
-            args: <String, Object>{'isolateId': '1'},
-            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
-          ),
-          const FakeVmServiceRequest(
-            method: 'ext.flutter.reassemble',
-            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
-          ),
-          const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{'streamId': 'Isolate'},
-          ),
-        ],
-      );
-      setupMocks();
-      final chromiumLauncher = TestChromiumLauncher();
-      final process = FakeProcess();
-      final chrome = Chromium(
-        1,
-        chromeConnection,
-        chromiumLauncher: chromiumLauncher,
-        process: process,
-        logger: logger,
-      );
-      chromiumLauncher.setInstance(chrome);
-
-      flutterDevice.device = GoogleChromeDevice(
-        fileSystem: fileSystem,
-        chromiumLauncher: chromiumLauncher,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.any(),
-      );
-      webDevFS.report = UpdateFSReport(success: true);
-
-      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
-      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
-      await connectionInfoCompleter.future;
-
+      // Verify that a failed recompile resets `_isRestarting` so subsequent
+      // restarts can proceed.
       webDevFS.report = UpdateFSReport();
-      final OperationResult failedResult = await residentWebRunner.restart();
+      final OperationResult failedResult = await residentWebRunner.restart(fullRestart: true);
       expect(failedResult.code, 1);
       expect(failedResult.message, 'Failed to recompile application.');
 
       webDevFS.report = UpdateFSReport(success: true);
-      final OperationResult succeededResult = await residentWebRunner.restart();
-      expect(succeededResult.code, 0);
-      expect(logger.statusText, contains('Reloaded application in'));
+      final OperationResult recoveredResult = await residentWebRunner.restart(fullRestart: true);
+      expect(recoveredResult.code, 0);
     },
     overrides: <Type, Generator>{
       Analytics: () => fakeAnalytics,

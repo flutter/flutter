@@ -1126,142 +1126,34 @@ List<_i1.WidgetPreview> previews() => [
       },
     );
 
-    group('hot reload and restart orchestration', () {
-      testUsingContext(
-        'does not perform reload until preview app connection is established',
-        () async {
-          final Directory rootProject = await createRootProject();
-          final fakeResidentRunner = FakeResidentRunner(
-            waitForAppToFinishCompleter: Completer<int>(),
-          );
+    testUsingContext(
+      'serializes, coalesces, and gates reloads across previewer lifecycle',
+      () async {
+        final Directory rootProject = await createRootProject();
+        final fakeResidentRunner = FakeResidentRunner(
+          waitForAppToFinishCompleter: Completer<int>(),
+        );
 
-          final CommandRunner<void> runner = createTestCommandRunner(
-            createWidgetPreviewCommand(
-              residentRunnerFactoryOverride:
-                  (
-                    FlutterDevice device, {
-                    required DebuggingOptions debuggingOptions,
-                    required FlutterProject flutterProject,
-                    required String projectRootPath,
-                    required String target,
-                  }) {
-                    device.devFS = FakeDevFS();
-                    return fakeResidentRunner;
-                  },
-            ),
-          );
-
-          final startCommand =
-              runner.commands['widget-preview']!.subcommands['start']! as WidgetPreviewStartCommand;
-
-          final Future<void> runFuture = runner.run(<String>[
-            'widget-preview',
-            'start',
-            rootProject.path,
-          ]);
-
-          while (fakeResidentRunner.appStartedCompleter == null) {
-            await pumpEventQueue();
-          }
-          await fakeResidentRunner.appStartedCompleter!.future;
-
-          // Trigger a change while the previewer is still waiting for debug connection.
-          startCommand.onChangeDetected(
-            FlutterWidgetPreviews(
-              namespaces: const <String, String>{},
-              previews: const <FlutterWidgetPreviewDetails>[],
-              scriptUris: <Uri>[Uri.file(fs.path.join(rootProject.path, 'lib', 'main.dart'))],
-            ),
-          );
-
-          // On unfixed code, restart() is immediately invoked on the unconnected runner.
-          // With the fix, restart() is deferred until connection is ready.
-          expect(fakeResidentRunner.restartCount, 0);
-
-          // Now complete the connection info completer.
-          fakeResidentRunner.connectionInfoCompleter!.complete(
-            DebugConnectionInfo(
-              wsUri: Uri.parse('ws://127.0.0.1:1234/ws'),
-              devToolsUri: Uri.parse('http://127.0.0.1:1234/devtools'),
-            ),
-          );
-
-          await pumpEventQueue();
-
-          // After connection is established, the deferred reload should execute.
-          expect(fakeResidentRunner.restartCount, 1);
-
-          fakeResidentRunner.waitForAppToFinishCompleter!.complete(0);
-          await runFuture;
-        },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => loggingProcessManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
+        final CommandRunner<void> runner = createTestCommandRunner(
+          createWidgetPreviewCommand(
+            residentRunnerFactoryOverride:
+                (
+                  FlutterDevice device, {
+                  required DebuggingOptions debuggingOptions,
+                  required FlutterProject flutterProject,
+                  required String projectRootPath,
+                  required String target,
+                }) {
+                  device.devFS = FakeDevFS();
+                  return fakeResidentRunner;
+                },
           ),
-        },
-      );
+        );
 
-      testUsingContext(
-        'coalesces multiple rapid file changes and serializes restarts',
-        () async {
-          final Directory rootProject = await createRootProject();
-          final fakeResidentRunner = FakeResidentRunner(
-            waitForAppToFinishCompleter: Completer<int>(),
-          );
+        final startCommand =
+            runner.commands['widget-preview']!.subcommands['start']! as WidgetPreviewStartCommand;
 
-          final CommandRunner<void> runner = createTestCommandRunner(
-            createWidgetPreviewCommand(
-              residentRunnerFactoryOverride:
-                  (
-                    FlutterDevice device, {
-                    required DebuggingOptions debuggingOptions,
-                    required FlutterProject flutterProject,
-                    required String projectRootPath,
-                    required String target,
-                  }) {
-                    device.devFS = FakeDevFS();
-                    return fakeResidentRunner;
-                  },
-            ),
-          );
-
-          final startCommand =
-              runner.commands['widget-preview']!.subcommands['start']! as WidgetPreviewStartCommand;
-
-          final Future<void> runFuture = runner.run(<String>[
-            'widget-preview',
-            'start',
-            rootProject.path,
-          ]);
-
-          while (fakeResidentRunner.appStartedCompleter == null) {
-            await pumpEventQueue();
-          }
-          await fakeResidentRunner.appStartedCompleter!.future;
-
-          // Complete debug connection so previewer is ready.
-          fakeResidentRunner.connectionInfoCompleter!.complete(
-            DebugConnectionInfo(
-              wsUri: Uri.parse('ws://127.0.0.1:1234/ws'),
-              devToolsUri: Uri.parse('http://127.0.0.1:1234/devtools'),
-            ),
-          );
-          await pumpEventQueue();
-
-          // Make the first restart block in flight.
-          final inFlightRestartCompleter = Completer<OperationResult>();
-          fakeResidentRunner.currentRestartCompleter = inFlightRestartCompleter;
-
-          // Trigger first reload.
+        void triggerChange() {
           startCommand.onChangeDetected(
             FlutterWidgetPreviews(
               namespaces: const <String, String>{},
@@ -1269,181 +1161,101 @@ List<_i1.WidgetPreview> previews() => [
               scriptUris: <Uri>[Uri.file(fs.path.join(rootProject.path, 'lib', 'main.dart'))],
             ),
           );
+        }
 
+        final Future<void> runFuture = runner.run(<String>[
+          'widget-preview',
+          'start',
+          rootProject.path,
+        ]);
+
+        while (fakeResidentRunner.appStartedCompleter == null) {
           await pumpEventQueue();
-          expect(fakeResidentRunner.restartCount, 1);
-          expect(fakeResidentRunner.concurrentRestarts, 1);
+        }
+        await fakeResidentRunner.appStartedCompleter!.future;
 
-          // Trigger 3 more rapid file changes while the first restart is still in flight.
-          for (var i = 0; i < 3; i++) {
-            startCommand.onChangeDetected(
-              FlutterWidgetPreviews(
-                namespaces: const <String, String>{},
-                previews: const <FlutterWidgetPreviewDetails>[],
-                scriptUris: <Uri>[Uri.file(fs.path.join(rootProject.path, 'lib', 'main.dart'))],
-              ),
-            );
-          }
+        // 1. Trigger a change while the previewer is still waiting for the debug
+        // connection. Reload must be gated until the connection is established.
+        triggerChange();
+        await pumpEventQueue();
+        expect(fakeResidentRunner.restartCount, 0);
 
-          await pumpEventQueue();
-
-          // Restarts must NOT execute concurrently on the runner.
-          expect(fakeResidentRunner.maxConcurrentRestarts, 1);
-          expect(fakeResidentRunner.restartCount, 1);
-
-          // Complete the in-flight restart and let the follow-up restart execute.
-          fakeResidentRunner.currentRestartCompleter = null;
-          inFlightRestartCompleter.complete(OperationResult.ok);
-
-          await pumpEventQueue();
-
-          // The 3 rapid changes must be coalesced into exactly one follow-up restart (total 2).
-          expect(fakeResidentRunner.restartCount, 2);
-          expect(fakeResidentRunner.maxConcurrentRestarts, 1);
-          expect(fakeResidentRunner.fullRestartRequests, <bool>[false, false]);
-
-          // Verify that a hot restart request upgrades a queued hot reload and is
-          // not downgraded by a subsequent hot reload before the in-flight reload
-          // completes.
-          final secondInFlightCompleter = Completer<OperationResult>();
-          fakeResidentRunner.currentRestartCompleter = secondInFlightCompleter;
-
-          // Start an in-flight hot reload (#3).
-          startCommand.onChangeDetected(
-            FlutterWidgetPreviews(
-              namespaces: const <String, String>{},
-              previews: const <FlutterWidgetPreviewDetails>[],
-              scriptUris: <Uri>[Uri.file(fs.path.join(rootProject.path, 'lib', 'main.dart'))],
-            ),
-          );
-          await pumpEventQueue();
-          expect(fakeResidentRunner.restartCount, 3);
-
-          // Queue a hot reload, upgrade it with a hot restart request, then send
-          // another hot reload that must not downgrade the queued hot restart.
-          startCommand.onChangeDetected(
-            FlutterWidgetPreviews(
-              namespaces: const <String, String>{},
-              previews: const <FlutterWidgetPreviewDetails>[],
-              scriptUris: <Uri>[Uri.file(fs.path.join(rootProject.path, 'lib', 'main.dart'))],
-            ),
-          );
-          startCommand.onHotRestartRequest();
-          startCommand.onChangeDetected(
-            FlutterWidgetPreviews(
-              namespaces: const <String, String>{},
-              previews: const <FlutterWidgetPreviewDetails>[],
-              scriptUris: <Uri>[Uri.file(fs.path.join(rootProject.path, 'lib', 'main.dart'))],
-            ),
-          );
-
-          fakeResidentRunner.currentRestartCompleter = null;
-          secondInFlightCompleter.complete(OperationResult.ok);
-          await pumpEventQueue();
-
-          expect(fakeResidentRunner.restartCount, 4);
-          expect(fakeResidentRunner.maxConcurrentRestarts, 1);
-          expect(fakeResidentRunner.fullRestartRequests, <bool>[false, false, false, true]);
-
-          fakeResidentRunner.waitForAppToFinishCompleter!.complete(0);
-          await runFuture;
-        },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => loggingProcessManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
+        fakeResidentRunner.connectionInfoCompleter!.complete(
+          DebugConnectionInfo(
+            wsUri: Uri.parse('ws://127.0.0.1:1234/ws'),
+            devToolsUri: Uri.parse('http://127.0.0.1:1234/devtools'),
           ),
-        },
-      );
+        );
+        await pumpEventQueue();
+        expect(fakeResidentRunner.restartCount, 1);
 
-      testUsingContext(
-        'does not trigger reload after previewer has finished',
-        () async {
-          final Directory rootProject = await createRootProject();
-          final fakeResidentRunner = FakeResidentRunner(
-            waitForAppToFinishCompleter: Completer<int>(),
-          );
+        // 2. Coalesce multiple rapid file changes while a reload is in flight.
+        final inFlightRestartCompleter = Completer<OperationResult>();
+        fakeResidentRunner.currentRestartCompleter = inFlightRestartCompleter;
 
-          final CommandRunner<void> runner = createTestCommandRunner(
-            createWidgetPreviewCommand(
-              residentRunnerFactoryOverride:
-                  (
-                    FlutterDevice device, {
-                    required DebuggingOptions debuggingOptions,
-                    required FlutterProject flutterProject,
-                    required String projectRootPath,
-                    required String target,
-                  }) {
-                    device.devFS = FakeDevFS();
-                    return fakeResidentRunner;
-                  },
-            ),
-          );
+        triggerChange();
+        await pumpEventQueue();
+        expect(fakeResidentRunner.restartCount, 2);
+        expect(fakeResidentRunner.concurrentRestarts, 1);
 
-          final startCommand =
-              runner.commands['widget-preview']!.subcommands['start']! as WidgetPreviewStartCommand;
+        for (var i = 0; i < 3; i++) {
+          triggerChange();
+        }
+        await pumpEventQueue();
+        expect(fakeResidentRunner.maxConcurrentRestarts, 1);
+        expect(fakeResidentRunner.restartCount, 2);
 
-          final Future<void> runFuture = runner.run(<String>[
-            'widget-preview',
-            'start',
-            rootProject.path,
-          ]);
+        fakeResidentRunner.currentRestartCompleter = null;
+        inFlightRestartCompleter.complete(OperationResult.ok);
+        await pumpEventQueue();
 
-          while (fakeResidentRunner.appStartedCompleter == null) {
-            await pumpEventQueue();
-          }
-          await fakeResidentRunner.appStartedCompleter!.future;
+        expect(fakeResidentRunner.restartCount, 3);
+        expect(fakeResidentRunner.maxConcurrentRestarts, 1);
+        expect(fakeResidentRunner.fullRestartRequests, <bool>[false, false, false]);
 
-          fakeResidentRunner.connectionInfoCompleter!.complete(
-            DebugConnectionInfo(
-              wsUri: Uri.parse('ws://127.0.0.1:1234/ws'),
-              devToolsUri: Uri.parse('http://127.0.0.1:1234/devtools'),
-            ),
-          );
-          await pumpEventQueue();
+        // 3. Upgrade a queued hot reload to a hot restart without downgrading on
+        // a subsequent hot reload.
+        final secondInFlightCompleter = Completer<OperationResult>();
+        fakeResidentRunner.currentRestartCompleter = secondInFlightCompleter;
 
-          // Finish the app.
-          fakeResidentRunner.waitForAppToFinishCompleter!.complete(0);
-          await runFuture;
+        triggerChange();
+        await pumpEventQueue();
+        expect(fakeResidentRunner.restartCount, 4);
 
-          final int restartCountBeforeExit = fakeResidentRunner.restartCount;
+        triggerChange();
+        startCommand.onHotRestartRequest();
+        triggerChange();
 
-          // Trigger change after app finished.
-          startCommand.onChangeDetected(
-            FlutterWidgetPreviews(
-              namespaces: const <String, String>{},
-              previews: const <FlutterWidgetPreviewDetails>[],
-              scriptUris: <Uri>[Uri.file(fs.path.join(rootProject.path, 'lib', 'main.dart'))],
-            ),
-          );
+        fakeResidentRunner.currentRestartCompleter = null;
+        secondInFlightCompleter.complete(OperationResult.ok);
+        await pumpEventQueue();
 
-          await pumpEventQueue();
+        expect(fakeResidentRunner.restartCount, 5);
+        expect(fakeResidentRunner.maxConcurrentRestarts, 1);
+        expect(fakeResidentRunner.fullRestartRequests, <bool>[false, false, false, false, true]);
 
-          expect(fakeResidentRunner.restartCount, restartCountBeforeExit);
-        },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => loggingProcessManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
-      );
-    });
+        // 4. Ignore reload requests after the previewer has finished.
+        fakeResidentRunner.waitForAppToFinishCompleter!.complete(0);
+        await runFuture;
+
+        triggerChange();
+        await pumpEventQueue();
+        expect(fakeResidentRunner.restartCount, 5);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
   });
 }
