@@ -20,7 +20,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -811,7 +810,7 @@ class FlutterPlatform extends PlatformPlugin {
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
       packageConfig[flutterProject!.manifest.appName],
-      Cache.flutterRoot!,
+      _toolContext.cache.flutterRoot,
     );
     return generateTestBootstrap(
       testUrl: testUrl,

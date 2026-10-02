@@ -6,7 +6,6 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/package_graph.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:package_config/package_config.dart';
@@ -30,7 +29,6 @@ void main() {
   late FileSystem fileSystem;
 
   setUp(() {
-    Cache.flutterRoot = '';
     fileSystem = MemoryFileSystem.test();
   });
 

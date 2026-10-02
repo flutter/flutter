@@ -223,7 +223,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     buildSystem: _buildSystem,
     cache: _cache,
     fileSystem: _fileSystem,
-    flutterRoot: Cache.flutterRoot!,
+    flutterRoot: _cache.flutterRoot,
     flutterVersion: _flutterVersion,
     logger: logger,
     platform: _platform,

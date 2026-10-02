@@ -27,9 +27,6 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
-import '../cache.dart';
-import '../context/android_context.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
@@ -179,20 +176,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _logger = logger,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
-
-  AndroidGradleBuilder.fromContexts({
-    required this._analytics,
-    required AndroidContext androidContext,
-    required ToolContext toolContext,
-  }) : _artifacts = toolContext.artifacts,
-       _fileSystem = toolContext.fs,
-       _gradleUtils = androidContext.gradleUtils,
-       _java = androidContext.java,
-       _logger = toolContext.logger,
-       _androidStudio = androidContext.androidStudio,
-       _androidSdk = androidContext.androidSdk,
-       _fileSystemUtils = toolContext.fileSystemUtils,
-       _processUtils = toolContext.processUtils;
 
   final Analytics _analytics;
   final Java? _java;
@@ -874,7 +857,7 @@ To fix this, you can either:
     final String aarTask = getAarTaskFor(buildInfo);
     final Status status = _logger.startProgress("Running Gradle task '$aarTask'...");
 
-    final String flutterRoot = _fileSystem.path.absolute(Cache.flutterRoot!);
+    final String flutterRoot = _fileSystem.path.absolute(globals.cache.flutterRoot);
     final String initScript = _fileSystem.path.join(
       flutterRoot,
       'packages',
