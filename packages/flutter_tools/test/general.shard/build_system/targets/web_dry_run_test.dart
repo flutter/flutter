@@ -716,6 +716,8 @@ package:foo/some/path.dart 8:1 - dart:js_util unsupported (15)
     const otherFinding =
         "package:bar/some/path.dart 94:6 - JS interop class 'B' cannot extend "
         "Dart class 'A'. (2)";
+    const legacyWebDeprecationWarning =
+        'dart:html, dart:js, and legacy JS interop libraries are deprecated';
 
     void addDryRunCommand(String stdout) {
       processManager.addCommand(FakeCommand(command: commandArgs, exitCode: 254, stdout: stdout));
@@ -731,6 +733,7 @@ package:foo/some/path.dart 8:1 - dart:js_util unsupported (15)
         final logger = environment.logger as BufferLogger;
         expect(logger.warningText, contains('Wasm dry run findings:'));
         expect(logger.warningText, contains('dart:html unsupported (0)'));
+        expect(logger.warningText, contains(legacyWebDeprecationWarning));
         expect(
           logger.statusText,
           contains('Note: WebAssembly compilation failed due to legacy web imports.'),
@@ -763,11 +766,30 @@ package:foo/some/path.dart 8:1 - dart:js_util unsupported (15)
         expect(logger.warningText, contains('Found incompatibilities with WebAssembly.'));
         expect(logger.warningText, contains(otherFinding));
         expect(logger.warningText, isNot(contains('unsupported')));
+        // None of the remaining findings are deprecated JS interop imports.
+        expect(logger.warningText, isNot(contains(legacyWebDeprecationWarning)));
         expect(logger.warningText, contains('Use --no-wasm-dry-run to disable these warnings.'));
         expect(
           logger.statusText,
           isNot(contains('Note: WebAssembly compilation failed due to legacy web imports.')),
         );
+      }),
+    );
+
+    test(
+      'does not mention the deprecation without deprecated JS interop findings',
+      () => testbed.run(() async {
+        addDryRunCommand('Found incompatibilities with WebAssembly.\n\n$otherFinding\n');
+
+        await createTarget().build(environment);
+
+        final logger = environment.logger as BufferLogger;
+        expect(logger.warningText, contains(otherFinding));
+        expect(
+          logger.warningText,
+          contains('Consider addressing these issues to enable wasm builds.'),
+        );
+        expect(logger.warningText, isNot(contains(legacyWebDeprecationWarning)));
       }),
     );
 
