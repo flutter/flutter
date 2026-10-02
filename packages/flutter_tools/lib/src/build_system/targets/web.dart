@@ -845,9 +845,12 @@ class Dart2WasmTarget extends Dart2WebTarget {
       case _DryRunOutcome.findings:
         logger.printWarning('Wasm dry run findings:');
         logger.printWarning(displayedStdout);
+        final deprecationWarning = _hasDeprecatedJsInteropFindings(displayedStdout)
+            ? '$_kLegacyWebDeprecationWarning\n'
+            : '';
         logger.printWarning(
           'Consider addressing these issues to enable wasm builds. '
-          '$_kLegacyWebDeprecationWarning\n'
+          '$deprecationWarning'
           'See docs for more info: '
           'https://docs.flutter.dev/platform-integration/web/wasm\n',
         );
@@ -967,13 +970,22 @@ class Dart2WasmTarget extends Dart2WebTarget {
   static String _removeDeprecatedJsInteropFindings(String stdout) {
     final List<String> remainingLines = stdout
         .split('\n')
-        .where((String line) => !_deprecatedJsInteropErrorCodes.contains(_findingErrorCode(line)))
+        .where((String line) => !_isDeprecatedJsInteropFinding(line))
         .toList();
     final bool hasRemainingFindings = remainingLines.any(
       (String line) => _findingErrorCode(line) != null,
     );
     return hasRemainingFindings ? remainingLines.join('\n') : '';
   }
+
+  /// Whether the dry-run [stdout] contains a finding for a deprecated JS
+  /// interop import.
+  static bool _hasDeprecatedJsInteropFindings(String stdout) =>
+      stdout.split('\n').any(_isDeprecatedJsInteropFinding);
+
+  /// Whether [line] is a dry-run finding for a deprecated JS interop import.
+  static bool _isDeprecatedJsInteropFinding(String line) =>
+      _deprecatedJsInteropErrorCodes.contains(_findingErrorCode(line));
 
   /// Splits the packages in the project's package config into pub-hosted
   /// packages (mapped to their resolved version, which is safe to report to
