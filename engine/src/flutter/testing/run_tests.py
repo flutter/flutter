@@ -835,9 +835,11 @@ def run_android_tests(
     adb_path = 'adb'
 
   run_android_unittest('flutter_shell_native_unittests', android_variant, adb_path)
-  run_android_unittest('flutter_embedder_native_unittests', android_variant, adb_path)
   run_android_unittest('impeller_toolkit_android_unittests', android_variant, adb_path)
   run_android_unittest('impeller_vulkan_android_unittests', android_variant, adb_path)
+  # Last, because run_android_unittest raises on the first failure: a failure
+  # in this large suite must not hide the results of the suites above.
+  run_android_unittest('flutter_embedder_native_unittests', android_variant, adb_path)
 
 
 def run_objc_tests(
