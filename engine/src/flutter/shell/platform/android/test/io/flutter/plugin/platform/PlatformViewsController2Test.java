@@ -24,6 +24,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.Build.API_LEVELS;
 import io.flutter.embedding.android.FlutterImageView;
 import io.flutter.embedding.android.FlutterSurfaceView;
 import io.flutter.embedding.android.FlutterView;
@@ -32,6 +33,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorView;
+import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
@@ -61,6 +63,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -924,6 +927,71 @@ public class PlatformViewsController2Test {
     // Matching gestureId sets flutterWonGesture.
     rejectGesturePlatformView(jni, platformViewsController, platformViewId, eventId.getId());
     assertTrue(parentView.getFlutterWonGesture());
+  }
+
+  @Test
+  @Config(minSdk = API_LEVELS.API_34)
+  public void surfaceCreated_appliesClipDirectlyViaApplyTransactionOnDraw() {
+    SurfaceControl.Transaction mockTx = mock(SurfaceControl.Transaction.class);
+    when(mockTx.setAlpha(any(), anyFloat())).thenReturn(mockTx);
+    when(mockTx.setCrop(any(), any())).thenReturn(mockTx);
+
+    PlatformViewsController2 controller =
+        new PlatformViewsController2() {
+          @Override
+          SurfaceControl.Transaction newTransaction() {
+            return mockTx;
+          }
+        };
+
+    PlatformViewRegistryImpl registry = new PlatformViewRegistryImpl();
+    controller.setRegistry(registry);
+
+    SurfaceView mockSurfaceView = mock(SurfaceView.class);
+    SurfaceHolder mockHolder = mock(SurfaceHolder.class);
+    when(mockSurfaceView.getHolder()).thenReturn(mockHolder);
+    // Initially null during onDisplayPlatformView so the callback is registered.
+    when(mockSurfaceView.getSurfaceControl()).thenReturn(null);
+
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(mockSurfaceView);
+    when(viewFactory.create(any(), eq(0), any())).thenReturn(platformView);
+    registry.registerViewFactory("testType", viewFactory);
+
+    FlutterJNI mockJNI = mock(FlutterJNI.class);
+    controller.setFlutterJNI(mockJNI);
+
+    FlutterView mockFlutterView = mock(FlutterView.class);
+    AttachedSurfaceControl mockRootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockRootSurfaceControl);
+    controller.attach(ApplicationProvider.getApplicationContext(), mock(DartExecutor.class));
+    controller.attachToView(mockFlutterView);
+
+    controller.createFlutterPlatformView(
+        PlatformViewCreationRequest.createHCPPRequest(
+            0, "testType", View.LAYOUT_DIRECTION_LTR, null));
+    controller.initializePlatformViewIfNeeded(0);
+
+    FlutterMutatorsStack stack = new FlutterMutatorsStack();
+    controller.onDisplayPlatformView(0, 10, 20, 100, 200, 100, 200, stack);
+
+    ArgumentCaptor<SurfaceHolder.Callback> callbackCaptor =
+        ArgumentCaptor.forClass(SurfaceHolder.Callback.class);
+    verify(mockHolder).addCallback(callbackCaptor.capture());
+
+    // Simulate surfaceCreated firing when SurfaceControl becomes valid.
+    SurfaceControl mockSurfaceControl = mock(SurfaceControl.class);
+    when(mockSurfaceControl.isValid()).thenReturn(true);
+    when(mockSurfaceView.getSurfaceControl()).thenReturn(mockSurfaceControl);
+
+    callbackCaptor.getValue().surfaceCreated(mockHolder);
+
+    verify(mockTx).setAlpha(eq(mockSurfaceControl), anyFloat());
+    verify(mockTx).setCrop(eq(mockSurfaceControl), any());
+    verify(mockFlutterView).invalidate();
+    verify(mockRootSurfaceControl).applyTransactionOnDraw(mockTx);
+    verify(mockJNI).scheduleFrame();
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {

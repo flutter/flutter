@@ -642,12 +642,26 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return new SurfaceHolder.Callback() {
       @Override
       public void surfaceCreated(@NonNull SurfaceHolder holder) {
+        if (platformViews.get(viewId) == null) {
+          viewsWithPendingSurfaceCallback.remove(viewId);
+          surfaceView.getHolder().removeCallback(this);
+          return;
+        }
         SurfaceControl surfaceControl = surfaceView.getSurfaceControl();
         if (surfaceControl != null && surfaceControl.isValid()) {
           SurfaceControl.Transaction tx =
-              platformTransaction()
+              newTransaction()
                   .setAlpha(surfaceControl, opacity)
                   .setCrop(surfaceControl, screenRect);
+          final AttachedSurfaceControl rootSurfaceControl =
+              flutterView == null ? null : flutterView.getRootSurfaceControl();
+          if (rootSurfaceControl != null) {
+            flutterView.invalidate();
+            rootSurfaceControl.applyTransactionOnDraw(tx);
+          } else {
+            tx.apply();
+            tx.close();
+          }
         } else {
           Log.i(
               TAG,

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 
+#include <optional>
 #include <utility>
 
 #include "flutter/fml/mapping.h"
@@ -230,6 +231,30 @@ class PlatformViewAndroidJNI {
 
   // New Platform View Support.
   virtual ASurfaceTransaction* createTransaction() = 0;
+
+  // Returns whether the current frame submission is routed through Java
+  // transactions. This is read rather than consumed because a single
+  // SubmitFlutterView execution may synchronously submit both an overlay
+  // surface and the root surface, and both must route consistently.
+  // Called strictly on the raster thread.
+  virtual bool FrameUsesJavaTransactions() const = 0;
+
+  // Scopes whether the current frame uses Java transactions. This is latched
+  // by the external view embedder and reset via an RAII cleanup closure upon
+  // leaving SubmitFlutterView. Called strictly on the raster thread.
+  virtual void SetFrameUsesJavaTransactions(bool uses_java) = 0;
+
+  // Returns the desired presentation timestamp in nanoseconds (CLOCK_MONOTONIC)
+  // for the current frame when using direct native transactions.
+  // Called strictly on the raster thread.
+  virtual std::optional<int64_t> FrameDesiredPresentTime() const {
+    return std::nullopt;
+  }
+
+  // Scopes the desired presentation timestamp in nanoseconds (CLOCK_MONOTONIC)
+  // for the current frame. Called strictly on the raster thread.
+  virtual void SetFrameDesiredPresentTime(
+      std::optional<int64_t> present_time_ns) {}
 
   virtual void swapTransaction() = 0;
 

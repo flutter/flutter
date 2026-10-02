@@ -66,6 +66,7 @@ ASurfaceTransaction* ASurfaceTransaction_fromJava(JNIEnv* env,
   INVOKE(ASurfaceTransaction_reparent, 29)                         \
   INVOKE(ASurfaceTransaction_setBuffer, 29)                        \
   INVOKE(ASurfaceTransaction_setColor, 29)                         \
+  INVOKE(ASurfaceTransaction_setDesiredPresentTime, 29)            \
   INVOKE(ASurfaceTransaction_setOnComplete, 29)                    \
   INVOKE(ASurfaceTransactionStats_getPreviousReleaseFenceFd, 29)   \
   INVOKE(ASurfaceTransaction_fromJava, 34)                         \
