@@ -2446,7 +2446,8 @@ class DaemonCapturingRunCommand extends RunCommand {
 }
 
 class CapturingAppDomain extends AppDomain {
-  CapturingAppDomain(super.daemon) : super(toolContext: DelegatingToolContext());
+  CapturingAppDomain(super.daemon)
+    : super(analytics: const analytics.NoOpAnalytics(), toolContext: const DelegatingToolContext());
 
   String? userIdentifier;
   bool? enableDevTools;
