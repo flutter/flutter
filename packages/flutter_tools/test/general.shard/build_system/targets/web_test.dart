@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart' as crypto;
@@ -16,6 +15,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
@@ -842,6 +842,9 @@ _flutter.loader.load();
       processManager.addCommand(
         FakeCommand(
           command: dart2jsCfeCommand(releaseDeprecatedJsInteropDisabledArgs),
+          // The import tree uses non-ASCII characters, so the output must be
+          // decoded as UTF-8 rather than the system encoding.
+          encoding: utf8,
           exitCode: 1,
           stdout: diagnostics,
           stderr: 'Unhandled dart2js issue\n',

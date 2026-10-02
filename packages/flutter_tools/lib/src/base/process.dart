@@ -183,6 +183,10 @@ abstract class ProcessUtils {
   ///
   /// If [timeout] is supplied, the command will be retried [timeoutRetries] times
   /// if it times out.
+  ///
+  /// The child process's stdout and stderr are decoded with [encoding], which
+  /// defaults to the system encoding. When [timeout] is supplied, they are
+  /// always decoded as UTF-8.
   Future<RunResult> run(
     List<String> cmd, {
     bool throwOnError = false,
@@ -370,6 +374,8 @@ class _DefaultProcessUtils implements ProcessUtils {
         cmd,
         workingDirectory: workingDirectory,
         environment: _environment(allowReentrantFlutter, environment),
+        stdoutEncoding: encoding,
+        stderrEncoding: encoding,
       );
       final runResult = RunResult(results, cmd);
       _logger.printTrace(runResult.toString());
