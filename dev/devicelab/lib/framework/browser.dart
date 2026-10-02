@@ -289,6 +289,7 @@ class Chrome {
           'console.${params['type']}: ${_describeConsoleArgs(params['args'] as List<dynamic>)}',
         'Runtime.exceptionThrown' =>
           'uncaught exception: ${_describeException(params['exceptionDetails'] as Map<String, dynamic>)}',
+        'Log.entryAdded' => _describeLogEntry(params['entry'] as Map<String, dynamic>),
         'Inspector.targetCrashed' => 'renderer process crashed',
         'Inspector.detached' => 'DevTools session detached: ${params['reason']}',
         _ => null,
@@ -297,7 +298,7 @@ class Chrome {
         print('[CHROME PAGE] $message');
       }
     });
-    for (final domain in <String>['Page', 'Runtime', 'Inspector']) {
+    for (final domain in <String>['Page', 'Runtime', 'Log', 'Inspector']) {
       await debugConnection.sendCommand('$domain.enable');
     }
     // DDC loads 600+ library scripts per reload, which overflows the default
@@ -320,6 +321,12 @@ class Chrome {
     final exception = exceptionDetails['exception'] as Map<String, dynamic>?;
     // The description of a JS Error includes its stack trace.
     return '${exception?['description'] ?? exceptionDetails['text']}';
+  }
+
+  static String _describeLogEntry(Map<String, dynamic> entry) {
+    final url = entry['url'] as String?;
+    final suffix = url != null && url.isNotEmpty ? ' ($url)' : '';
+    return 'log.${entry['level']}: ${entry['text']}$suffix';
   }
 
   /// Describes the state of the page, for diagnosing a stalled page load.

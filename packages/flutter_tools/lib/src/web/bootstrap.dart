@@ -367,10 +367,10 @@ String generateDDCLibraryBundleMainModule({
   required String onLoadEndBootstrap,
   required bool isCi,
 }) {
-  // Chrome in CI seems to hang when there are too many requests at once, so we
-  // limit the max number of script requests for that environment.
+  // Chrome in CI fails script loads with net::ERR_INSUFFICIENT_RESOURCES when
+  // too many concurrent requests are in flight across repeated reloads.
   // https://github.com/flutter/flutter/issues/169574
-  final setMaxRequests = isCi ? r'window.$dartLoader.loadConfig.maxRequestPoolSize = 100;' : '';
+  final setMaxRequests = isCi ? r'window.$dartLoader.loadConfig.maxRequestPoolSize = 20;' : '';
   // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
   return '''
 /* ENTRYPOINT_EXTENTION_MARKER */
