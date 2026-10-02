@@ -275,6 +275,13 @@ void Animator::RequestFrame(bool regenerate_layer_trees) {
 
   AwaitVSync();
   frame_scheduled_ = true;
+  task_runners_.GetUITaskRunner()->PostTask(
+      [self = weak_factory_.GetWeakPtr()]() {
+        if (!self || !self->has_rendered_) {
+          return;
+        }
+        self->delegate_.OnAnimatorNotifyIdle(self->dart_frame_deadline_);
+      });
 }
 
 void Animator::AwaitVSync() {
@@ -290,9 +297,6 @@ void Animator::AwaitVSync() {
           }
         }
       });
-  if (has_rendered_) {
-    delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
-  }
 }
 
 void Animator::OnAllViewsRendered() {
