@@ -32,6 +32,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
+import io.flutter.BuildConfig;
 import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.android.FlutterView;
@@ -88,6 +89,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   // Platform-thread only. Clips and overlay visibility share one transaction per frame.
   private SurfaceControl.Transaction pendingPlatformTransaction;
   private SurfaceControl.Transaction activePlatformTransaction;
+
+  // Platform-thread only. Set by onBeginFrame() and cleared by swapTransactions(): only mutations
+  // recorded through platformTransaction() in between are applied by this frame's onEndFrame().
+  private boolean frameInProgress = false;
 
   // SurfaceFlinger reports transaction commits on a binder thread; FlutterJNI must be called on
   // the platform thread.
@@ -705,6 +710,20 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     parentView.setVisibility(View.GONE);
   }
 
+  /**
+   * Starts the platform-thread half of a frame.
+   *
+   * <p>The engine calls this before it displays or hides platform views and the overlay for a
+   * frame, and follows up with {@link #swapTransactions()} and {@link #onEndFrame()}. Mutations
+   * recorded through {@link #platformTransaction()} in between are applied together with the
+   * frame's swapchain buffers.
+   */
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  public void onBeginFrame() {
+    frameInProgress = true;
+  }
+
   @UiThread
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
@@ -773,6 +792,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
     activePlatformTransaction = pendingPlatformTransaction;
     pendingPlatformTransaction = null;
+    // Anything recorded from here on would only be picked up by the next swap.
+    frameInProgress = false;
   }
 
   /**
@@ -804,6 +825,20 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   @UiThread
   @RequiresApi(API_LEVELS.API_34)
   private SurfaceControl.Transaction platformTransaction() {
+    if (!frameInProgress) {
+      // The pending transaction is only picked up by the next swapTransactions(), and the engine
+      // only routes a frame through the platform thread when it expects View state to change. A
+      // mutation recorded outside of a frame would therefore sit here until some later frame
+      // happens to come this way, which may be never. Out-of-frame mutations must be applied on
+      // their own instead, see createSurfaceClipCallback().
+      final String message =
+          "platformTransaction() called outside of a frame; the mutation will not be applied"
+              + " until the next frame that goes through the platform thread.";
+      if (BuildConfig.DEBUG) {
+        throw new IllegalStateException(message);
+      }
+      Log.e(TAG, message);
+    }
     if (pendingPlatformTransaction == null) {
       pendingPlatformTransaction = newTransaction();
     }

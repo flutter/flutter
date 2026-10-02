@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.Build.API_LEVELS;
+import io.flutter.BuildConfig;
 import io.flutter.embedding.android.FlutterImageView;
 import io.flutter.embedding.android.FlutterSurfaceView;
 import io.flutter.embedding.android.FlutterView;
@@ -553,6 +554,7 @@ public class PlatformViewsController2Test {
     TransactionTrackingController controller = new TransactionTrackingController();
     AttachedSurfaceControl rootSurfaceControl = attachToViewWithOverlay(controller);
 
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     assertEquals(1, controller.transactions.size());
     SurfaceControl.Transaction platformTx = controller.transactions.get(0);
@@ -573,6 +575,7 @@ public class PlatformViewsController2Test {
     TransactionTrackingController controller = new TransactionTrackingController();
     attachToViewWithOverlay(controller);
 
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     controller.hideOverlaySurface();
     assertEquals(1, controller.transactions.size());
@@ -582,6 +585,7 @@ public class PlatformViewsController2Test {
 
     controller.swapTransactions();
 
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     assertEquals(2, controller.transactions.size());
     assertNotSame(platformTx, controller.transactions.get(1));
@@ -592,6 +596,7 @@ public class PlatformViewsController2Test {
   public void createTransactionIsolatesRasterSubmissionsRegardlessOfCallingThread() {
     TransactionTrackingController controller = new TransactionTrackingController();
     AttachedSurfaceControl rootSurfaceControl = attachToViewWithOverlay(controller);
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     SurfaceControl.Transaction platformTx = controller.transactions.get(0);
 
@@ -725,6 +730,7 @@ public class PlatformViewsController2Test {
   public void swapTransactionsClosesDiscardedPlatformTransaction() {
     TransactionTrackingController controller = new TransactionTrackingController();
     attachToViewWithOverlay(controller);
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     // Defensive coverage: production calls onEndFrame() between swaps.
     controller.swapTransactions();
@@ -739,10 +745,12 @@ public class PlatformViewsController2Test {
     TransactionTrackingController controller = new TransactionTrackingController();
     attachToViewWithOverlay(controller);
 
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     controller.swapTransactions();
     // The active transaction from the frame above and a pending one from the frame that never
     // reached onEndFrame().
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     assertEquals(2, controller.transactions.size());
 
@@ -751,6 +759,46 @@ public class PlatformViewsController2Test {
     // Both target the overlay SurfaceControl that detachFromView() just released.
     verify(controller.transactions.get(0)).close();
     verify(controller.transactions.get(1)).close();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void overlayMutationOutsideOfAFrameThrowsInDebug() {
+    // Release builds only log the problem.
+    Assume.assumeTrue(BuildConfig.DEBUG);
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
+
+    // Nothing would apply a transaction recorded outside of a frame until some later frame goes
+    // through the platform thread, which the engine only does when View state is expected to
+    // change.
+    assertThrows(IllegalStateException.class, controller::showOverlaySurface);
+    assertThrows(IllegalStateException.class, controller::hideOverlaySurface);
+    assertEquals(0, controller.transactions.size());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void overlayMutationsAreAcceptedBetweenBeginFrameAndSwapOnly() {
+    Assume.assumeTrue(BuildConfig.DEBUG);
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
+
+    controller.onBeginFrame();
+    controller.showOverlaySurface();
+    assertEquals(1, controller.transactions.size());
+    controller.swapTransactions();
+
+    // The swap handed the pending transaction over to onEndFrame(); a mutation recorded now would
+    // only be picked up by a later frame.
+    assertThrows(IllegalStateException.class, controller::hideOverlaySurface);
+    controller.onEndFrame();
+    assertThrows(IllegalStateException.class, controller::hideOverlaySurface);
+    assertEquals(1, controller.transactions.size());
+
+    controller.onBeginFrame();
+    controller.hideOverlaySurface();
+    assertEquals(2, controller.transactions.size());
   }
 
   /**
@@ -811,6 +859,7 @@ public class PlatformViewsController2Test {
       for (int round = 0; round < rounds; round++) {
         roundStart.await(timeoutMs, TimeUnit.MILLISECONDS);
 
+        controller.onBeginFrame();
         controller.showOverlaySurface();
         controller.hideOverlaySurface();
 

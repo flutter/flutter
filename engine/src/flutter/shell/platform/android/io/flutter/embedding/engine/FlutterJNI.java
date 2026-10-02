@@ -1381,6 +1381,16 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
   @UiThread
+  public void beginFrame2() {
+    if (platformViewsController2 == null) {
+      throw new RuntimeException("");
+    }
+    platformViewsController2.onBeginFrame();
+  }
+
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  @UiThread
   public void endFrame2() {
     if (platformViewsController2 == null) {
       throw new RuntimeException("");

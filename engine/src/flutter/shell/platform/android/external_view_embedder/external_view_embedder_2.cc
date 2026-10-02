@@ -140,6 +140,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
             // This pointer is guaranteed to not be dangling as long as
             // DestroySurfaces is called before the embedder is deleted. See
             // https://github.com/flutter/flutter/pull/176742#discussion_r2415229396.
+            jni_facade->onBeginFrame2();
             this->HideOverlayLayerIfNeeded();
             for (int64_t view_id : views_visible_last_frame) {
               jni_facade->hidePlatformView2(view_id);
@@ -235,6 +236,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
        slices = std::move(slices_),
        views_visible_last_frame = views_visible_last_frame_,
        overlay_layer_has_content_this_frame_]() mutable -> void {
+        jni_facade->onBeginFrame2();
         if (overlay_layer_has_content_this_frame_) {
           ShowOverlayLayerIfNeeded();
         } else {

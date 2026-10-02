@@ -1226,6 +1226,7 @@ TEST(AndroidExternalViewEmbedder2,
   {
     ::testing::InSequence sequence;
 
+    EXPECT_CALL(*jni_mock, onBeginFrame2());
     EXPECT_CALL(*jni_mock, onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50, 50,
                                                   mutators));
     EXPECT_CALL(*jni_mock, swapTransaction());
@@ -1324,6 +1325,7 @@ TEST(AndroidExternalViewEmbedder2, FrameSizeChangeDoesNotDestroySurfaces) {
   auto canvas1 = embedder->CompositeEmbeddedView(view_id);
   canvas1->DrawRect(DlRect::MakeXYWH(0, 0, 50, 50), rect_paint);
 
+  EXPECT_CALL(*jni_mock, onBeginFrame2());
   EXPECT_CALL(*jni_mock,
               onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50, 50, mutators));
   EXPECT_CALL(*jni_mock, swapTransaction());
@@ -1352,6 +1354,7 @@ TEST(AndroidExternalViewEmbedder2, FrameSizeChangeDoesNotDestroySurfaces) {
   auto canvas2 = embedder->CompositeEmbeddedView(view_id);
   canvas2->DrawRect(DlRect::MakeXYWH(0, 0, 100, 100), rect_paint);
 
+  EXPECT_CALL(*jni_mock, onBeginFrame2());
   EXPECT_CALL(*jni_mock, onDisplayPlatformView2(view_id, 0, 0, 100, 100, 100,
                                                 100, mutators));
   EXPECT_CALL(*jni_mock, swapTransaction());
@@ -1445,6 +1448,7 @@ TEST(AndroidExternalViewEmbedder2, ResizeDoesNotBlockRasterOnPlatformThread) {
   auto canvas = embedder->CompositeEmbeddedView(view_id);
   canvas->DrawRect(DlRect::MakeXYWH(0, 0, 50, 50), rect_paint);
 
+  EXPECT_CALL(*jni_mock, onBeginFrame2());
   EXPECT_CALL(*jni_mock,
               onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50, 50, mutators));
   EXPECT_CALL(*jni_mock, swapTransaction());
@@ -1568,6 +1572,7 @@ TEST(AndroidExternalViewEmbedder2,
   };
 
   // Frame 1: Displays a platform view.
+  EXPECT_CALL(*jni_mock, onBeginFrame2());
   EXPECT_CALL(*jni_mock,
               onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50, 50, mutators));
   EXPECT_CALL(*jni_mock, swapTransaction());
@@ -1592,6 +1597,7 @@ TEST(AndroidExternalViewEmbedder2,
   // Frame 2: No platform layers, but views_visible_last_frame_ still forces
   // platform routing to issue hidePlatformView2 and swap the hide
   // transaction.
+  EXPECT_CALL(*jni_mock, onBeginFrame2());
   EXPECT_CALL(*jni_mock, hidePlatformView2(view_id));
   EXPECT_CALL(*jni_mock, swapTransaction());
   EXPECT_CALL(*jni_mock, onEndFrame2());
@@ -1604,6 +1610,7 @@ TEST(AndroidExternalViewEmbedder2,
   // but Frame 2 has not been committed yet, so this frame must stay on the
   // platform route: a direct raster-thread ASurfaceTransaction_apply could
   // otherwise overtake Frame 2's applyTransactionOnDraw.
+  EXPECT_CALL(*jni_mock, onBeginFrame2());
   EXPECT_CALL(*jni_mock, swapTransaction());
   EXPECT_CALL(*jni_mock, onEndFrame2());
   embedder->PrepareFlutterView(frame_size, 1.0);
@@ -1620,6 +1627,7 @@ TEST(AndroidExternalViewEmbedder2,
   // empty, no resize, and nothing is uncommitted. The platform thread is
   // bypassed entirely: no platform task is posted and the swapchain observes
   // the direct route.
+  EXPECT_CALL(*jni_mock, onBeginFrame2()).Times(0);
   EXPECT_CALL(*jni_mock, swapTransaction()).Times(0);
   EXPECT_CALL(*jni_mock, onEndFrame2()).Times(0);
   embedder->PrepareFlutterView(frame_size, 1.0);
@@ -1633,6 +1641,7 @@ TEST(AndroidExternalViewEmbedder2,
   // with ViewRootImpl via applyTransactionOnDraw.
   const DlISize resized_frame_size(200, 200);
   EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(200, 200)).Times(AnyNumber());
+  EXPECT_CALL(*jni_mock, onBeginFrame2());
   EXPECT_CALL(*jni_mock, swapTransaction());
   EXPECT_CALL(*jni_mock, onEndFrame2());
   embedder->PrepareFlutterView(resized_frame_size, 1.0);
@@ -1652,6 +1661,7 @@ TEST(AndroidExternalViewEmbedder2,
   // behind unblock_platform, so the frame is uncommitted.
   const DlISize resized_again_frame_size(300, 300);
   EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(300, 300)).Times(AnyNumber());
+  EXPECT_CALL(*jni_mock, onBeginFrame2()).Times(2);
   EXPECT_CALL(*jni_mock, swapTransaction()).Times(2);
   EXPECT_CALL(*jni_mock, onEndFrame2()).Times(2);
   embedder->PrepareFlutterView(resized_again_frame_size, 1.0);
@@ -1676,6 +1686,7 @@ TEST(AndroidExternalViewEmbedder2,
   EXPECT_FALSE(router->HasUncommittedPlatformFrames());
 
   // Frame 8: Back to the direct route.
+  EXPECT_CALL(*jni_mock, onBeginFrame2()).Times(0);
   EXPECT_CALL(*jni_mock, swapTransaction()).Times(0);
   EXPECT_CALL(*jni_mock, onEndFrame2()).Times(0);
   embedder->PrepareFlutterView(resized_again_frame_size, 1.0);
@@ -1737,6 +1748,7 @@ TEST(AndroidExternalViewEmbedder2,
   };
 
   // The first frame has nothing to synchronize with the View hierarchy.
+  EXPECT_CALL(*jni_mock, onBeginFrame2()).Times(0);
   EXPECT_CALL(*jni_mock, swapTransaction()).Times(0);
   EXPECT_CALL(*jni_mock, onEndFrame2()).Times(0);
   submit_frame(DlISize(100, 100));
@@ -1744,6 +1756,7 @@ TEST(AndroidExternalViewEmbedder2,
   EXPECT_FALSE(router->HasUncommittedPlatformFrames());
 
   // A resize goes through the platform thread.
+  EXPECT_CALL(*jni_mock, onBeginFrame2());
   EXPECT_CALL(*jni_mock, swapTransaction());
   EXPECT_CALL(*jni_mock, onEndFrame2());
   submit_frame(DlISize(200, 200));
@@ -1752,6 +1765,7 @@ TEST(AndroidExternalViewEmbedder2,
 
   // The platform task ran, but Java has not reported the commit, so the next
   // frame cannot take the direct route even though it changes nothing.
+  EXPECT_CALL(*jni_mock, onBeginFrame2());
   EXPECT_CALL(*jni_mock, swapTransaction());
   EXPECT_CALL(*jni_mock, onEndFrame2());
   submit_frame(DlISize(200, 200));
@@ -1764,6 +1778,7 @@ TEST(AndroidExternalViewEmbedder2,
   router->OnPlatformFrameCommitted();
   EXPECT_FALSE(router->HasUncommittedPlatformFrames());
 
+  EXPECT_CALL(*jni_mock, onBeginFrame2()).Times(0);
   EXPECT_CALL(*jni_mock, swapTransaction()).Times(0);
   EXPECT_CALL(*jni_mock, onEndFrame2()).Times(0);
   submit_frame(DlISize(200, 200));
@@ -1822,6 +1837,7 @@ TEST(AndroidExternalViewEmbedder2,
       .WillRepeatedly(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
               0, window))));
+  EXPECT_CALL(*jni_mock, onBeginFrame2()).Times(AtLeast(1));
   EXPECT_CALL(*jni_mock, swapTransaction()).Times(AtLeast(1));
   EXPECT_CALL(*jni_mock, onEndFrame2()).Times(AtLeast(1));
   EXPECT_CALL(*jni_mock, destroyOverlaySurface2()).Times(AnyNumber());
