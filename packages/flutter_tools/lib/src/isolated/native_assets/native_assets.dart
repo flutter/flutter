@@ -918,9 +918,11 @@ Never _throwNativeAssetsLinkFailed() {
 
 OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
   switch (platform) {
-    case TargetPlatform.ios:
+    case TargetPlatform.ios_arm64:
+    case TargetPlatform.ios_x64:
       return OS.iOS;
-    case TargetPlatform.darwin:
+    case TargetPlatform.darwin_x64:
+    case TargetPlatform.darwin_arm64:
       return OS.macOS;
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:

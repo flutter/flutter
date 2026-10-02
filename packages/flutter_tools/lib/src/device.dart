@@ -696,7 +696,7 @@ abstract class Device {
   Future<CpuArch> get cpuArch;
 
   /// Platform name for display only.
-  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).devicePlatformName;
 
   Future<String> get sdkNameAndVersion;
 
@@ -834,7 +834,10 @@ abstract class Device {
       var supportIndicator = await device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
       if (await device.isLocalEmulator) {
-        final type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
+        final String type = switch (targetPlatform) {
+          .ios_arm64 || .ios_x64 => 'simulator',
+          _ => 'emulator',
+        };
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
@@ -870,7 +873,7 @@ abstract class Device {
       'name': name,
       'id': id,
       'isSupported': await isSupported(),
-      'targetPlatform': (await targetPlatform).getName(),
+      'targetPlatform': (await targetPlatform).devicePlatformName,
       'cpuArch': (await cpuArch).name,
       'emulator': isLocalEmu,
       'sdk': await sdkNameAndVersion,

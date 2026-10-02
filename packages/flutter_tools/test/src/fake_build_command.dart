@@ -172,7 +172,7 @@ class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackag
     BuildInfo? buildInfo,
     File? applicationBinary,
   }) async {
-    if (platform != TargetPlatform.ios) {
+    if (platform != TargetPlatform.ios_arm64) {
       return null;
     }
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);

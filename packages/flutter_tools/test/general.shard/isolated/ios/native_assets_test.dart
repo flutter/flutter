@@ -259,7 +259,7 @@ void main() {
         };
         final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
           environmentDefines: environmentDefines,
-          targetPlatform: TargetPlatform.ios,
+          targetPlatform: TargetPlatform.ios_arm64,
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
@@ -270,7 +270,7 @@ void main() {
         await installCodeAssets(
           dartHookResult: dartHookResult,
           environmentDefines: environmentDefines,
-          targetPlatform: TargetPlatform.ios,
+          targetPlatform: TargetPlatform.ios_arm64,
           projectUri: projectUri,
           fileSystem: fileSystem,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,

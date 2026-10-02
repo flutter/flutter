@@ -56,29 +56,18 @@ class GenSnapshot {
 
   Future<int> run({
     required SnapshotType snapshotType,
-    // TODO(chingjun): The [CpuArch] parameter is only used for iOS builds (to
-    // select the correct per-architecture gen_snapshot). This architecture
-    // information should instead be consolidated into [TargetPlatform] so that
-    // callers do not need to pass it separately.
-    CpuArch? cpuArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
-    assert(cpuArch != CpuArch.armv7);
-    assert(snapshotType.platform != TargetPlatform.ios || cpuArch != null);
     final args = <String>[...additionalArgs];
 
     // iOS and macOS have separate gen_snapshot binaries for each target
-    // architecture (iOS: armv7, arm64; macOS: x86_64, arm64). Select the right
-    // one for the target architecture in question.
-    Artifact genSnapshotArtifact;
-    if (snapshotType.platform == TargetPlatform.ios ||
-        snapshotType.platform == TargetPlatform.darwin) {
-      genSnapshotArtifact = cpuArch == CpuArch.arm64
-          ? Artifact.genSnapshotArm64
-          : Artifact.genSnapshotX64;
-    } else {
-      genSnapshotArtifact = Artifact.genSnapshot;
-    }
+    // architecture (iOS: arm64; macOS: x86_64, arm64). Select the right one for
+    // the target architecture in question.
+    final Artifact genSnapshotArtifact = switch (snapshotType.platform) {
+      .ios_arm64 || .darwin_arm64 => Artifact.genSnapshotArm64,
+      .ios_x64 || .darwin_x64 => Artifact.genSnapshotX64,
+      _ => Artifact.genSnapshot,
+    };
 
     final String snapshotterPath = getSnapshotterPath(snapshotType, genSnapshotArtifact);
 
@@ -114,15 +103,12 @@ class AOTSnapshotter {
     required BuildMode buildMode,
     required String mainPath,
     required String outputPath,
-    CpuArch? cpuArch,
     String? sdkRoot,
     List<String> extraGenSnapshotOptions = const <String>[],
     String? splitDebugInfo,
     required bool dartObfuscation,
     bool quiet = false,
   }) async {
-    assert(platform != TargetPlatform.ios || cpuArch != null);
-
     if (!_isValidAotPlatform(platform, buildMode)) {
       _logger.printError('${platform.getName()} does not support AOT compilation.');
       return 1;
@@ -133,8 +119,10 @@ class AOTSnapshotter {
 
     final genSnapshotArgs = <String>['--deterministic'];
 
-    final bool targetingApplePlatform =
-        platform == TargetPlatform.ios || platform == TargetPlatform.darwin;
+    final bool targetingApplePlatform = switch (platform) {
+      .ios_arm64 || .ios_x64 || .darwin_x64 || .darwin_arm64 => true,
+      _ => false,
+    };
     _logger.printTrace('targetingApplePlatform = $targetingApplePlatform');
 
     final bool extractAppleDebugSymbols =
@@ -169,7 +157,7 @@ class AOTSnapshotter {
       // library that the end-developer can link into their app.
       const frameworkName = 'App.framework';
       if (!quiet) {
-        final String targetArch = cpuArch!.darwinArchName;
+        final String targetArch = platform.cpuArch.darwinArchName;
         _logger.printStatus('Building $frameworkName for $targetArch...');
       }
       frameworkPath = _fileSystem.path.join(outputPath, frameworkName);
@@ -181,7 +169,8 @@ class AOTSnapshotter {
       // When the minimum version is updated, remember to update
       // template MinimumOSVersion.
       // https://github.com/flutter/flutter/pull/62902
-      final minOSVersion = platform == TargetPlatform.ios
+      final minOSVersion =
+          platform == TargetPlatform.ios_arm64 || platform == TargetPlatform.ios_x64
           ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
           : FlutterDarwinPlatform.macos.deploymentTarget().toString();
       genSnapshotArgs.addAll(<String>[
@@ -222,8 +211,9 @@ class AOTSnapshotter {
 
     // The name of the debug file must contain additional information about
     // the architecture, since a single build command may produce
-    // multiple debug files.
-    final String archName = platform.getName(cpuArch: cpuArch);
+    // multiple debug files. [TargetPlatform.getName] already includes the
+    // architecture for the platforms that need it (e.g. `ios-arm64`).
+    final String archName = platform.getName();
     final debugFilename = 'app.$archName.symbols';
     final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
     if (shouldSplitDebugInfo) {
@@ -246,7 +236,6 @@ class AOTSnapshotter {
     final int genSnapshotExitCode = await _genSnapshot.run(
       snapshotType: snapshotType,
       additionalArgs: genSnapshotArgs,
-      cpuArch: cpuArch,
     );
     if (genSnapshotExitCode != 0) {
       _logger.printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
@@ -298,8 +287,10 @@ class AOTSnapshotter {
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
       TargetPlatform.android_x64,
-      TargetPlatform.ios,
-      TargetPlatform.darwin,
+      TargetPlatform.ios_arm64,
+      TargetPlatform.ios_x64,
+      TargetPlatform.darwin_x64,
+      TargetPlatform.darwin_arm64,
       TargetPlatform.linux_x64,
       TargetPlatform.linux_arm64,
       TargetPlatform.linux_riscv64,

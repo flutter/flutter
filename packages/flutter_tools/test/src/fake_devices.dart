@@ -91,7 +91,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         type: PlatformType.ios,
         connectionInterface: DeviceConnectionInterface.wireless,
       )
-      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.ios)
+      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.ios_arm64)
       ..cpuArch = Future<CpuArch>.value(CpuArch.arm64)
       ..sdkNameAndVersion = Future<String>.value('iOS 16'),
     <String, Object>{

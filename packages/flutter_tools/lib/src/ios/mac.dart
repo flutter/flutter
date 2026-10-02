@@ -712,7 +712,8 @@ bool publicHeadersChanged({
 }) {
   final String? basePath = artifacts?.getArtifactPath(
     Artifact.flutterFramework,
-    platform: TargetPlatform.ios,
+    // iOS engine artifacts are universal, so any ios_* value resolves to the same path.
+    platform: TargetPlatform.ios_arm64,
     mode: mode,
     environmentType: environmentType,
   );

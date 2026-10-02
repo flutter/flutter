@@ -28,7 +28,7 @@ void main() {
       });
       testWithoutContext('fromTargetPlatform', () {
         expect(
-          FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.ios),
+          FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.ios_arm64),
           FlutterDarwinPlatform.ios,
         );
         expect(FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.android), null);
@@ -55,7 +55,7 @@ void main() {
       });
       testWithoutContext('fromTargetPlatform', () {
         expect(
-          FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.darwin),
+          FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.darwin_arm64),
           FlutterDarwinPlatform.macos,
         );
         expect(FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.android), null);

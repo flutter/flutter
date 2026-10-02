@@ -1876,9 +1876,11 @@ DevelopmentArtifact? artifactFromTargetPlatform(
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
       return null;
-    case TargetPlatform.ios:
+    case TargetPlatform.ios_arm64:
+    case TargetPlatform.ios_x64:
       return DevelopmentArtifact.iOS;
-    case TargetPlatform.darwin:
+    case TargetPlatform.darwin_x64:
+    case TargetPlatform.darwin_arm64:
       if (featureFlags.isMacOSEnabled) {
         return DevelopmentArtifact.macOS;
       }

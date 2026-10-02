@@ -18,7 +18,7 @@ import '../project.dart';
 enum FlutterDarwinPlatform {
   ios(
     binaryName: 'Flutter',
-    targetPlatform: TargetPlatform.ios,
+    targetPlatforms: <TargetPlatform>[TargetPlatform.ios_arm64, TargetPlatform.ios_x64],
     swiftPackagePlatform: SwiftPackagePlatform.ios,
     artifactName: 'ios',
     artifactZip: 'artifacts.zip',
@@ -27,7 +27,7 @@ enum FlutterDarwinPlatform {
   ),
   macos(
     binaryName: 'FlutterMacOS',
-    targetPlatform: TargetPlatform.darwin,
+    targetPlatforms: <TargetPlatform>[TargetPlatform.darwin_arm64, TargetPlatform.darwin_x64],
     swiftPackagePlatform: SwiftPackagePlatform.macos,
     artifactName: 'darwin-x64',
     artifactZip: 'framework.zip',
@@ -37,7 +37,7 @@ enum FlutterDarwinPlatform {
 
   const FlutterDarwinPlatform({
     required this.binaryName,
-    required this.targetPlatform,
+    required this.targetPlatforms,
     required this.swiftPackagePlatform,
     required this._artifactName,
     required this.artifactZip,
@@ -48,8 +48,8 @@ enum FlutterDarwinPlatform {
   /// The name of the binary file within the [xcframeworkArtifact].
   final String binaryName;
 
-  /// The corresponding [TargetPlatform] for the [FlutterDarwinPlatform].
-  final TargetPlatform targetPlatform;
+  /// The architecture-specific [TargetPlatform]s for the [FlutterDarwinPlatform].
+  final List<TargetPlatform> targetPlatforms;
 
   /// The corresponding [SwiftPackagePlatform] for the [FlutterDarwinPlatform].
   final SwiftPackagePlatform swiftPackagePlatform;
@@ -110,7 +110,7 @@ enum FlutterDarwinPlatform {
   /// Returns corresponding [FlutterDarwinPlatform] for the [targetPlatform].
   static FlutterDarwinPlatform? fromTargetPlatform(TargetPlatform targetPlatform) {
     for (final FlutterDarwinPlatform darwinPlatform in FlutterDarwinPlatform.values) {
-      if (targetPlatform == darwinPlatform.targetPlatform) {
+      if (darwinPlatform.targetPlatforms.contains(targetPlatform)) {
         return darwinPlatform;
       }
     }

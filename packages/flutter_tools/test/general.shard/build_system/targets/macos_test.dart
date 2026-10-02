@@ -121,7 +121,7 @@ void main() {
         .directory(
           artifacts.getArtifactPath(
             Artifact.flutterMacOSFrameworkDsym,
-            platform: TargetPlatform.darwin,
+            platform: TargetPlatform.darwin_arm64,
             mode: BuildMode.release,
           ),
         )
@@ -145,7 +145,7 @@ void main() {
         '--filter',
         '- .DS_Store/',
         '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-        'Artifact.flutterMacOSFrameworkDsym.TargetPlatform.darwin.release',
+        'Artifact.flutterMacOSFrameworkDsym.TargetPlatform.darwin_arm64.release',
         environment.outputDir.path,
       ],
     );
@@ -386,7 +386,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterMacOSFrameworkDsym.TargetPlatform.darwin.release',
+          'Artifact.flutterMacOSFrameworkDsym.TargetPlatform.darwin_arm64.release',
           environment.outputDir.path,
         ],
         exitCode: 1,
@@ -450,7 +450,7 @@ void main() {
           .file(
             artifacts.getArtifactPath(
               Artifact.vmSnapshotData,
-              platform: TargetPlatform.darwin,
+              platform: TargetPlatform.darwin_arm64,
               mode: BuildMode.debug,
             ),
           )
@@ -459,7 +459,7 @@ void main() {
           .file(
             artifacts.getArtifactPath(
               Artifact.isolateSnapshotData,
-              platform: TargetPlatform.darwin,
+              platform: TargetPlatform.darwin_arm64,
               mode: BuildMode.debug,
             ),
           )
@@ -511,7 +511,7 @@ void main() {
           .file(
             artifacts.getArtifactPath(
               Artifact.vmSnapshotData,
-              platform: TargetPlatform.darwin,
+              platform: TargetPlatform.darwin_arm64,
               mode: BuildMode.debug,
             ),
           )
@@ -520,7 +520,7 @@ void main() {
           .file(
             artifacts.getArtifactPath(
               Artifact.isolateSnapshotData,
-              platform: TargetPlatform.darwin,
+              platform: TargetPlatform.darwin_arm64,
               mode: BuildMode.debug,
             ),
           )
@@ -842,7 +842,7 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
-            'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
+            'Artifact.genSnapshotArm64.TargetPlatform.darwin_arm64.release',
             '--deterministic',
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
@@ -855,7 +855,7 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
-            'Artifact.genSnapshotX64.TargetPlatform.darwin.release',
+            'Artifact.genSnapshotX64.TargetPlatform.darwin_x64.release',
             '--deterministic',
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=${environment.buildDir.childFile('x86_64/App.framework/App').path}',

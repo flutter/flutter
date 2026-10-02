@@ -31,11 +31,11 @@ void main() {
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
+      operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
     );
     final package = FakeMacOSApp();
 
-    expect(await device.targetPlatform, TargetPlatform.darwin);
+    expect(await device.targetPlatform, TargetPlatform.darwin_arm64);
     expect(device.name, 'macOS');
     expect(await device.installApp(package), true);
     expect(await device.uninstallApp(package), true);

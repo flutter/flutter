@@ -124,14 +124,16 @@ void _updateGeneratedEnvironmentVariablesScript({
 /// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.
 String? parsedBuildName({required FlutterManifest manifest, BuildInfo? buildInfo}) {
   final String? buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, globals.logger);
+  // Only the OS family matters here, not the architecture.
+  return validatedBuildNameForPlatform(TargetPlatform.ios_arm64, buildNameToParse, globals.logger);
 }
 
 /// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
 String? parsedBuildNumber({required FlutterManifest manifest, BuildInfo? buildInfo}) {
   String? buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
   final String? buildNumber = validatedBuildNumberForPlatform(
-    TargetPlatform.ios,
+    // Only the OS family matters here, not the architecture.
+    TargetPlatform.ios_arm64,
     buildNumberToParse,
     globals.logger,
   );
@@ -141,7 +143,12 @@ String? parsedBuildNumber({required FlutterManifest manifest, BuildInfo? buildIn
   // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
   // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
   buildNumberToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse, globals.logger);
+  return validatedBuildNumberForPlatform(
+    // Only the OS family matters here, not the architecture.
+    TargetPlatform.ios_arm64,
+    buildNumberToParse,
+    globals.logger,
+  );
 }
 
 /// List of lines of build settings. Example: 'FLUTTER_BUILD_DIR=build'

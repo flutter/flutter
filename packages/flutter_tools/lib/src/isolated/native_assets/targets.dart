@@ -78,14 +78,16 @@ sealed class AssetBuildTarget {
         return _linuxTarget(supportedAssetTypes, Architecture.riscv64, buildMode, buildDirectory);
       case TargetPlatform.windows_arm64:
         return _windowsTarget(supportedAssetTypes, Architecture.arm64);
-      case TargetPlatform.darwin:
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin_arm64:
         return _macTargets(environmentDefines, supportedAssetTypes);
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
         return _androidTargets(targetPlatform, environmentDefines, supportedAssetTypes);
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
+      case TargetPlatform.ios_x64:
         return _iosTargets(environmentDefines, fileSystem, supportedAssetTypes);
       case TargetPlatform.web_javascript:
         return _webTarget(supportedAssetTypes);
@@ -431,10 +433,12 @@ List<CpuArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsE
         throw MissingDefineException(kAndroidArchs, 'native_assets');
       }
       return androidArchsEnvironment.split(' ').map(getCpuArchForName).toList();
-    case TargetPlatform.darwin:
+    case TargetPlatform.darwin_x64:
+    case TargetPlatform.darwin_arm64:
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
-    case TargetPlatform.ios:
+    case TargetPlatform.ios_arm64:
+    case TargetPlatform.ios_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.linux_riscv64:
     case TargetPlatform.linux_x64:

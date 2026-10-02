@@ -603,7 +603,9 @@ class FlutterFrameworkDependency {
     try {
       final String frameworkArtifactPath = _utils.artifacts.getArtifactPath(
         _targetPlatform.xcframeworkArtifact,
-        platform: _targetPlatform.targetPlatform,
+        // The xcframework artifact is universal, so its path is the same for
+        // all architectures of the platform.
+        platform: _targetPlatform.targetPlatforms.first,
         mode: buildMode,
       );
       final ProcessResult result = await _utils.processManager.run(<String>[
@@ -1243,7 +1245,9 @@ class AppFrameworkAndNativeAssetsDependencies {
       flutterRootDir: _utils.fileSystem.directory(_utils.flutterRoot),
       defines: <String, String>{
         kTargetFile: targetFile,
-        kTargetPlatform: platform.targetPlatform.getName(),
+        // The architectures to build for are specified via [_platformDefines]
+        // (e.g. kIosArchs/kDarwinArchs), so the arch of this define is not used.
+        kTargetPlatform: platform.targetPlatforms.first.getName(),
         ...await _platformDefines(platform, sdk),
         ...buildInfo.toBuildSystemEnvironment(),
         kBuildSwiftPackage: 'true',

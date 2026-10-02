@@ -39,7 +39,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: TargetPlatform.ios.getName(),
+        kTargetPlatform: TargetPlatform.ios_arm64.getName(),
         kIosArchs: 'arm64',
         kSdkRoot: 'path/to/iPhoneOS.sdk',
       },

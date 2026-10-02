@@ -44,7 +44,7 @@ void main() {
       });
 
       await BundleBuilder().build(
-        platform: TargetPlatform.ios,
+        platform: TargetPlatform.ios_arm64,
         buildInfo: BuildInfo.debug,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
         mainPath: globals.fs.path.join('lib', 'main.dart'),
@@ -140,7 +140,7 @@ void main() {
     () {
       expect(
         () => BundleBuilder().build(
-          platform: TargetPlatform.ios,
+          platform: TargetPlatform.ios_arm64,
           buildInfo: BuildInfo.debug,
           project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
           mainPath: 'lib/main.dart',
@@ -177,7 +177,7 @@ void main() {
       });
 
       await BundleBuilder().build(
-        platform: TargetPlatform.ios,
+        platform: TargetPlatform.ios_arm64,
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
@@ -200,7 +200,7 @@ void main() {
 
       expect(env, isNotNull);
       expect(env!.defines[kBuildMode], 'debug');
-      expect(env!.defines[kTargetPlatform], 'ios');
+      expect(env!.defines[kTargetPlatform], 'ios-arm64');
       expect(env!.defines[kTargetFile], mainPath);
       expect(env!.defines[kTrackWidgetCreation], 'true');
       expect(env!.defines[kFrontendServerStarterPath], 'path/to/frontend_server_starter.dart');
@@ -312,7 +312,7 @@ void main() {
         }
       });
       await BundleBuilder().build(
-        platform: TargetPlatform.ios,
+        platform: TargetPlatform.ios_arm64,
         buildInfo: BuildInfo.release,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
         mainPath: globals.fs.path.join('lib', 'main.dart'),

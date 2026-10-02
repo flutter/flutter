@@ -230,10 +230,12 @@ class AndroidDevice extends Device {
       case TargetPlatform.android_x64:
         return buildMode != BuildMode.jitRelease;
       case TargetPlatform.android:
-      case TargetPlatform.darwin:
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin_arm64:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
+      case TargetPlatform.ios_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_riscv64:
       case TargetPlatform.linux_x64:

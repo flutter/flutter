@@ -75,7 +75,7 @@ abstract class AotAssemblyBase extends Target {
     final List<CpuArch> cpuArchs =
         environment.defines[kIosArchs]?.split(' ').map(getCpuArchForName).toList() ??
         <CpuArch>[CpuArch.arm64];
-    if (targetPlatform != TargetPlatform.ios) {
+    if (targetPlatform != TargetPlatform.ios_arm64 && targetPlatform != TargetPlatform.ios_x64) {
       throw Exception('aot_assembly is only supported for iOS applications.');
     }
 
@@ -108,11 +108,10 @@ abstract class AotAssemblyBase extends Target {
       }
       pending.add(
         snapshotter.build(
-          platform: targetPlatform,
+          platform: TargetPlatform.iosForArch(cpuArch),
           buildMode: buildMode,
           mainPath: environment.buildDir.childFile('app.dill').path,
           outputPath: environment.fileSystem.path.join(buildOutputPath, cpuArch.darwinArchName),
-          cpuArch: cpuArch,
           sdkRoot: sdkRoot,
           quiet: true,
           splitDebugInfo: splitDebugInfo,
@@ -163,7 +162,7 @@ class AotAssemblyRelease extends AotAssemblyBase {
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
     // split into gen_snapshot_arm64 and gen_snapshot_armv7.
     // Source.artifact(Artifact.genSnapshot,
-    //   platform: TargetPlatform.ios,
+    //   platform: TargetPlatform.ios_arm64,
     //   mode: BuildMode.release,
     // ),
   ];
@@ -192,7 +191,7 @@ class AotAssemblyProfile extends AotAssemblyBase {
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
     // split into gen_snapshot_arm64 and gen_snapshot_armv7.
     // Source.artifact(Artifact.genSnapshot,
-    //   platform: TargetPlatform.ios,
+    //   platform: TargetPlatform.ios_arm64,
     //   mode: BuildMode.profile,
     // ),
   ];
@@ -250,7 +249,12 @@ abstract class UnpackIOS extends UnpackDarwin {
     const Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
     ),
-    Source.artifact(Artifact.flutterXcframework, platform: TargetPlatform.ios, mode: buildMode),
+    Source.artifact(
+      Artifact.flutterXcframework,
+      // iOS engine artifacts are universal, so any ios_* value resolves to the same path.
+      platform: TargetPlatform.ios_arm64,
+      mode: buildMode,
+    ),
   ];
 
   @override
@@ -285,7 +289,8 @@ abstract class UnpackIOS extends UnpackDarwin {
       environment,
       environmentType: environmentType,
       framework: Artifact.flutterFramework,
-      targetPlatform: TargetPlatform.ios,
+      // iOS engine artifacts are universal, so any ios_* value resolves to the same path.
+      targetPlatform: TargetPlatform.ios_arm64,
       buildMode: buildMode,
     );
     await _copyFrameworkDysm(environment, sdkRoot: sdkRoot, environmentType: environmentType);
@@ -311,7 +316,8 @@ abstract class UnpackIOS extends UnpackDarwin {
     final Directory frameworkDsym = environment.fileSystem.directory(
       environment.artifacts.getArtifactPath(
         Artifact.flutterFrameworkDsym,
-        platform: TargetPlatform.ios,
+        // iOS engine artifacts are universal, so any ios_* value resolves to the same path.
+        platform: TargetPlatform.ios_arm64,
         mode: buildMode,
         environmentType: environmentType,
       ),
@@ -715,7 +721,8 @@ abstract class IosAssetBundle extends Target {
       environment,
       assetDirectory,
       dartHookResult: dartHookResult,
-      targetPlatform: TargetPlatform.ios,
+      // Only the OS family matters here, not the architecture.
+      targetPlatform: TargetPlatform.ios_arm64,
       buildMode: buildMode,
       additionalInputs: <File>[
         flutterProject.ios.infoPlist,

@@ -189,9 +189,11 @@ class ShaderCompiler {
           '--runtime-stage-vulkan',
         ];
 
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
+      case TargetPlatform.ios_x64:
         return <String>['--runtime-stage-metal'];
-      case TargetPlatform.darwin:
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin_arm64:
         return <String>['--sksl', '--runtime-stage-metal'];
 
       case TargetPlatform.fuchsia_arm64:
