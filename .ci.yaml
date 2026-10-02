@@ -1149,8 +1149,8 @@ targets:
       - engine/**
       - DEPS
 
-  # Gradle 8.4 cannot run on Java 25, so the pre-AGP 8.3 module test is pinned
-  # to Java 17 instead of the default JDK.
+  # Gradle 8.x cannot run on Java 25, so the oldest-supported-AGP module test is
+  # pinned to Java 17 instead of the default JDK.
   - name: Linux android_java17_build_android_host_app_with_module_aar
     recipe: devicelab/devicelab_drone
     timeout: 60
