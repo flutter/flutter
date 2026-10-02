@@ -449,8 +449,11 @@ Future<void> main() async {
   await task(
     combine(<TaskFunction>[
       // 3 tests comes close to timeout.
-      // Pre AGP 8.3
-      ModuleTest(gradleVersion: '8.4', agpVersion: Version.parse('8.2.1')).call,
+      // Oldest supported AGP and Gradle. Keep in sync with errorAGPVersion and
+      // errorGradleVersion in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt.
+      // Older AGP versions (e.g. 8.2.1) can't compile against API 37, which
+      // Flutter AARs require of their consumers.
+      ModuleTest(gradleVersion: '8.14', agpVersion: Version.parse('8.11.1')).call,
       // Post AGP 8.3 + rc candidates can work
       ModuleTest(gradleVersion: '9.5.0', agpVersion: Version.parse('9.3.1')).call,
     ]),
