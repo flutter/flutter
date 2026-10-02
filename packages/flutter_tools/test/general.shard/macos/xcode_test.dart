@@ -2043,10 +2043,25 @@ void main() {
         );
       });
 
-      testWithoutContext('returns null for non-iOS sdk', () {
-        expect(environmentTypeFromSdkroot('/path/to/MacOSX.sdk', fileSystem), isNull);
-        expect(environmentTypeFromSdkroot('/path/to/XROS1.0.sdk', fileSystem), isNull);
-        expect(environmentTypeFromSdkroot('/path/to/WatchOS.sdk', fileSystem), isNull);
+      testWithoutContext('throws ToolExit for non-iOS sdk', () {
+        expect(
+          () => environmentTypeFromSdkroot('/path/to/MacOSX.sdk', fileSystem),
+          throwsToolExit(
+            message: 'Unsupported iOS SDK root "/path/to/MacOSX.sdk". Expected an iPhoneOS or iPhoneSimulator SDK.',
+          ),
+        );
+        expect(
+          () => environmentTypeFromSdkroot('/path/to/XROS1.0.sdk', fileSystem),
+          throwsToolExit(
+            message: 'Unsupported iOS SDK root "/path/to/XROS1.0.sdk". Expected an iPhoneOS or iPhoneSimulator SDK.',
+          ),
+        );
+        expect(
+          () => environmentTypeFromSdkroot('/path/to/WatchOS.sdk', fileSystem),
+          throwsToolExit(
+            message: 'Unsupported iOS SDK root "/path/to/WatchOS.sdk". Expected an iPhoneOS or iPhoneSimulator SDK.',
+          ),
+        );
       });
     });
   });

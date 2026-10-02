@@ -79,15 +79,10 @@ abstract class AotAssemblyBase extends Target {
       throw Exception('aot_assembly is only supported for iOS applications.');
     }
 
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
     );
-    if (environmentType == null) {
-      throwToolExit(
-        'Unsupported iOS SDK root "$sdkRoot". Expected an iPhoneOS or iPhoneSimulator SDK.',
-      );
-    }
     if (environmentType == EnvironmentType.simulator) {
       throw Exception(
         'release/profile builds are only supported for physical devices. '
@@ -282,15 +277,10 @@ abstract class UnpackIOS extends UnpackDarwin {
     }
 
     // Copy Flutter framework.
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
     );
-    if (environmentType == null) {
-      throwToolExit(
-        'Unsupported iOS SDK root "$sdkRoot". Expected an iPhoneOS or iPhoneSimulator SDK.',
-      );
-    }
     await copyFramework(
       environment,
       environmentType: environmentType,
@@ -541,15 +531,10 @@ class DebugIosLLDBInit extends Target {
     if (sdkRoot == null) {
       throw MissingDefineException(kSdkRoot, name);
     }
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
     );
-    if (environmentType == null) {
-      throwToolExit(
-        'Unsupported iOS SDK root "$sdkRoot". Expected an iPhoneOS or iPhoneSimulator SDK.',
-      );
-    }
 
     // LLDB Init File is only required for physical devices in debug mode.
     if (environmentType != EnvironmentType.physical) {
@@ -901,12 +886,7 @@ Future<void> _createStubAppFramework(
   static const int Moo = 88;
   ''');
 
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, fileSystem);
-    if (environmentType == null) {
-      throwToolExit(
-        'Unsupported iOS SDK root "$sdkRoot". Expected an iPhoneOS or iPhoneSimulator SDK.',
-      );
-    }
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot, fileSystem);
 
     await globals.xcode!.clang(<String>[
       '-x',
