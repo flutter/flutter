@@ -1972,6 +1972,116 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/193247.
+  testWidgets(
+    'Offstage size-determining OverlayEntry can be rebuilt in an unconstrained environment',
+    (WidgetTester tester) async {
+      final childWidth = ValueNotifier<double>(100);
+      addTearDown(childWidth.dispose);
+      final offstageEntry = OverlayEntry(
+        maintainState: true,
+        canSizeOverlay: true,
+        builder: (BuildContext context) {
+          return ValueListenableBuilder<double>(
+            valueListenable: childWidth,
+            builder: (BuildContext context, double value, Widget? child) {
+              return SizedBox(width: value, height: 100);
+            },
+          );
+        },
+      );
+      addTearDown(
+        () => offstageEntry
+          ..remove()
+          ..dispose(),
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: UnconstrainedBox(child: Overlay(initialEntries: <OverlayEntry>[offstageEntry])),
+        ),
+      );
+      expect(tester.getSize(find.byType(Overlay)), const Size(100, 100));
+
+      final opaqueEntry = OverlayEntry(
+        opaque: true,
+        canSizeOverlay: true,
+        builder: (BuildContext context) => const SizedBox(width: 50, height: 50),
+      );
+      addTearDown(opaqueEntry.dispose);
+      tester.state<OverlayState>(find.byType(Overlay)).insert(opaqueEntry);
+      await tester.pump();
+      expect(tester.getSize(find.byType(Overlay)), const Size(50, 50));
+
+      // Rebuilding the offstage entry more than once used to trip an assertion
+      // in RenderObject.markNeedsLayout.
+      childWidth.value = 110;
+      await tester.pump();
+      childWidth.value = 120;
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(tester.getSize(find.byType(Overlay)), const Size(50, 50));
+
+      opaqueEntry.remove();
+      await tester.pump();
+      expect(tester.getSize(find.byType(Overlay)), const Size(120, 100));
+    },
+  );
+
+  testWidgets('Offstage positioned OverlayEntry can be rebuilt', (WidgetTester tester) async {
+    final GlobalKey childKey = GlobalKey();
+    final childWidth = ValueNotifier<double>(100);
+    addTearDown(childWidth.dispose);
+    final offstageEntry = OverlayEntry(
+      maintainState: true,
+      builder: (BuildContext context) {
+        return Positioned(
+          left: 0,
+          top: 0,
+          child: ValueListenableBuilder<double>(
+            valueListenable: childWidth,
+            builder: (BuildContext context, double value, Widget? child) {
+              return SizedBox(key: childKey, width: value, height: 100);
+            },
+          ),
+        );
+      },
+    );
+    addTearDown(
+      () => offstageEntry
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(initialEntries: <OverlayEntry>[offstageEntry]),
+      ),
+    );
+    expect(tester.getSize(find.byKey(childKey)), const Size(100, 100));
+
+    final opaqueEntry = OverlayEntry(
+      opaque: true,
+      builder: (BuildContext context) => const SizedBox.expand(),
+    );
+    addTearDown(opaqueEntry.dispose);
+    tester.state<OverlayState>(find.byType(Overlay)).insert(opaqueEntry);
+    await tester.pump();
+    expect(find.byKey(childKey), findsNothing);
+
+    childWidth.value = 110;
+    await tester.pump();
+    childWidth.value = 120;
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    opaqueEntry.remove();
+    await tester.pump();
+    expect(tester.getSize(find.byKey(childKey)), const Size(120, 100));
+  });
+
   testWidgets('Overlay is not visible from sub-views', (WidgetTester tester) async {
     OverlayState? outsideView;
     OverlayState? insideView;
