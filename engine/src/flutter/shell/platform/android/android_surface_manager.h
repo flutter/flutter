@@ -76,6 +76,21 @@ struct AndroidSurfaceDimensions {
   int32_t height = 0;
 };
 
+/// @brief Selected Vulkan validation layers and instance extensions.
+struct VulkanValidationConfig {
+  std::vector<std::string> layers;
+  std::vector<std::string> instance_extensions;
+};
+
+/// @brief Selects the Vulkan validation layer and debug utils extension from
+///        the enumerated layer and extension lists and logs the resulting
+///        state.
+VulkanValidationConfig SelectVulkanValidationConfig(
+    bool requested,
+    const std::vector<VkLayerProperties>& available_layers,
+    const std::vector<VkExtensionProperties>& available_instance_extensions,
+    const std::vector<VkExtensionProperties>& validation_layer_extensions);
+
 /// @brief Manages platform window and graphics rendering contexts (EGL, Vulkan,
 ///        Software) for the Flutter Android Embedder, handling thread-safe
 ///        lifecycle, resource context pooling, and surface presentation.
