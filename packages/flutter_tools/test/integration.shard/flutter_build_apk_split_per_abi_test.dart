@@ -83,11 +83,9 @@ androidComponents {
 
 ''';
 
-// Check that `flutter build apk --split-per-abi` generates a versionCode equal to
-// abiIndex * 1000 + buildNumber (then multiplied by 10000 when [usingCustomAppGradleFile]), and
-// copies each per-ABI APK into flutter-apk. With [compatibilityModeOff], the build sets
-// `android.compatibility.enableLegacyApi=false`, under which AGP disallows reading
-// `VariantOutput.versionCode` during configuration.
+// Check that `flutter build apk --split-per-abi` sets versionCode to abiIndex * 1000 + buildNumber
+// (times 10000 with [usingCustomAppGradleFile]) and copies each per-ABI APK into flutter-apk.
+// [compatibilityModeOff] sets `android.compatibility.enableLegacyApi=false`.
 Future<void> _assertSplitPerAbiVersionCodes(
   int? buildNumber,
   Directory workingDirectory,
@@ -193,8 +191,7 @@ Future<void> _assertSplitPerAbiVersionCodes(
     );
 
     final int actual = actualVersionCodes[abi]!;
-    // Flutter sets `abiIndex * 1000 + versionCode` in its own onVariants callback, which runs
-    // before the app's. The custom app build file then multiplies that value by 10000.
+    // The custom app build file's onVariants runs after Flutter's and multiplies by 10000.
     final int baseVersionCode = (abiIndex * 1000) + (buildNumber ?? 1);
     final int expected = usingCustomAppGradleFile ? baseVersionCode * 10000 : baseVersionCode;
     expect(
@@ -248,14 +245,12 @@ void main() {
     await _assertSplitPerAbiVersionCodes(42, appDir, false);
   });
 
-  // Check with custom buildNumber=42 and a custom gradle file whose onVariants block multiplies
-  // the versionCode by 10000. That block runs after Flutter applies the per-ABI offset.
+  // Check with custom buildNumber=42 and custom gradle file which multiplies build number by 10000
   testWithoutContext('APK versionCodes after --split-per-abi with custom build-number=42 and gradle file follow "((abiIndex * 1000) + 42) * 10000"', () async {
     await _assertSplitPerAbiVersionCodes(42, appDir, true);
   });
 
-  // Check with custom buildNumber=42 and AGP's compatibility mode off. Flutter takes the base
-  // versionCode from the DSL, so it does not read VariantOutput.versionCode.
+  // Check with custom buildNumber=42 and AGP's compatibility mode off
   testWithoutContext('APK versionCodes after --split-per-abi with custom build-number=42 and enableLegacyApi=false follow "(abiIndex * 1000) + 42"', () async {
     await _assertSplitPerAbiVersionCodes(42, appDir, false, compatibilityModeOff: true);
   });

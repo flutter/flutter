@@ -509,8 +509,7 @@ class FlutterPluginTest {
         stagingActionSlot.captured.execute(stagingCopyTask)
 
         verify { profileCopyTask.buildMode.set("profile") }
-        // A debuggable custom build type builds with debug engine artifacts, so its APK is named
-        // like a debug APK, which is where the Flutter tool looks for it.
+        // A debuggable custom build type uses debug artifacts, so its APK is named as debug.
         verify { stagingCopyTask.buildMode.set("debug") }
     }
 
@@ -594,14 +593,8 @@ class FlutterPluginTest {
     }
 
     /**
-     * Applies the plugin to [env]'s project with the Android mocks it needs, runs the callbacks
-     * the plugin registered with `AndroidComponentsExtension.finalizeDsl` (AGP runs those before
-     * any `onVariants` callback), and returns the callback the plugin registered with
-     * `AndroidComponentsExtension.onVariants`.
-     *
-     * @param defaultConfigVersionCode the versionCode the DSL sets on `defaultConfig`.
-     * @param productFlavorVersionCodes the product flavors the DSL declares, by name, with the
-     *   versionCode each sets.
+     * Applies the plugin to [env]'s project, runs its `finalizeDsl` callbacks as AGP would, and
+     * returns its `onVariants` callback.
      */
     private fun applyPluginCapturingVariantCallback(
         env: TestProjectEnvironment,
@@ -727,11 +720,8 @@ class FlutterPluginTest {
     )
 
     /**
-     * A [VariantOutput] with an ABI filter for [abi] (none if null). Verify on
-     * [MockVariantOutput.versionCode] to check what the plugin set.
-     *
-     * Only `set` is stubbed on the versionCode property, so a read fails the test. AGP disallows
-     * reading it during configuration when its compatibility mode is off.
+     * A [VariantOutput] with an ABI filter for [abi] (none if null). Only `set` is stubbed on its
+     * versionCode, so any read fails the test, as AGP's strict mode would.
      */
     private fun mockVariantOutput(abi: String?): MockVariantOutput {
         val versionCodeProperty = mockk<Property<Int>>()

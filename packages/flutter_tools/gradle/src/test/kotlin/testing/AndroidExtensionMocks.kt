@@ -195,10 +195,7 @@ fun setUpMockExternalNativeBuild(
     )
 }
 
-/**
- * A `productFlavors` container holding one flavor per entry of [versionCodes], named by its key
- * and setting the versionCode of its value (none if null).
- */
+/** A `productFlavors` container with one flavor per entry: name to versionCode (or null). */
 fun mockProductFlavors(versionCodes: Map<String, Int?>): NamedDomainObjectContainer<ApplicationProductFlavor> {
     val productFlavors =
         versionCodes.map { (flavorName, flavorVersionCode) ->

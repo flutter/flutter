@@ -45,7 +45,6 @@ class CopyFlutterApksTaskTest {
     ) {
         val project = projectIn(tempDir)
         val apkDir = tempDir.resolve("apk").toFile()
-        // AGP's own names put the flavor before the ABI, so the copy has to rename each APK.
         val armApk = writeApk(apkDir, "app-free-armeabi-v7a-release.apk")
         val arm64Apk = writeApk(apkDir, "app-free-arm64-v8a-release.apk")
         val destinationDir = tempDir.resolve("flutter-apk").toFile()
@@ -68,8 +67,7 @@ class CopyFlutterApksTaskTest {
         assertEquals(setOf(armCopy, arm64Copy), destinationDir.listFiles()!!.toSet())
         assertEquals("app-free-armeabi-v7a-release.apk", armCopy.readText())
         assertEquals("app-free-arm64-v8a-release.apk", arm64Copy.readText())
-        // The declared outputs and the written files come from the same naming function, so they
-        // must match exactly. Querying task.outputs also proves Gradle resolves the provider.
+        // Reading task.outputs also checks that Gradle resolves the provider.
         assertEquals(setOf(armCopy, arm64Copy), task.outputs.files.files)
     }
 
