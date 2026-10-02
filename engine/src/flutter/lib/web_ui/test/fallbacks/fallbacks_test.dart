@@ -19,13 +19,6 @@ void main() {
 @JS()
 external bool get crossOriginIsolated;
 
-@JS('_flutter')
-external _FlutterObject get _flutterObject;
-
-extension type _FlutterObject._(JSObject _) implements JSObject {
-  external JSAny? supportsDart2Wasm;
-}
-
 @JS('_flutter.loader.load')
 external JSPromise<JSAny?> _flutterLoaderLoad(JSAny? options);
 
@@ -64,12 +57,9 @@ Future<void> testMain() async {
   });
 
   test('loader rejects dart2wasm on Firefox < 147 before checking Wasm capabilities', () async {
-    if (ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox) {
-      return;
-    }
     final String originalUserAgent = domWindow.navigator.userAgent;
     final JSAny? originalBuildConfig = _flutterBuildConfig;
-    final JSAny? originalSupportsDart2Wasm = _flutterObject.supportsDart2Wasm;
+    final JSAny? originalSupportsDart2Wasm = _flutterSupportsDart2Wasm;
     final JSFunction originalValidate = _wasmValidate;
     try {
       _flutterBuildConfig = <String, Object?>{
@@ -99,7 +89,7 @@ Future<void> testMain() async {
           configurable: true,
         ),
       );
-      _flutterObject.supportsDart2Wasm = true.toJS;
+      _flutterSupportsDart2Wasm = true.toJS;
       var validateCalls = 0;
       _wasmValidate = (() {
         validateCalls++;
@@ -126,7 +116,7 @@ Future<void> testMain() async {
           configurable: true,
         ),
       );
-      _flutterObject.supportsDart2Wasm = null;
+      _flutterSupportsDart2Wasm = null;
       validateCalls = 0;
       _wasmValidate = (() {
         validateCalls++;
@@ -148,11 +138,11 @@ Future<void> testMain() async {
         'userAgent',
         DomPropertyDataDescriptor(value: originalUserAgent, configurable: true),
       );
-      _flutterObject.supportsDart2Wasm = originalSupportsDart2Wasm;
+      _flutterSupportsDart2Wasm = originalSupportsDart2Wasm;
       _wasmValidate = originalValidate;
       _flutterBuildConfig = originalBuildConfig;
     }
-  });
+  }, skip: ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox);
 
   test('loader strictly honors wasmAllowList and WasmGC capability for dart2wasm builds', () async {
     final JSAny? originalBuildConfig = _flutterBuildConfig;
