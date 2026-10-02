@@ -610,6 +610,9 @@ TEST_F(RenderPassGLESCommandTest, WrappedFBOConvertsViewportByDefault) {
 
   // flip_y = false, so y is converted: 100 - 0 - 50 == 50.
   EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 50, 50, 50)).Times(1);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
 }
 
 TEST_F(RenderPassGLESCommandTest,
@@ -692,6 +695,9 @@ TEST_F(RenderPassGLESCommandTest, WrappedFBOPassesViewportThroughWhenTopLeft) {
 
   // flip_y = true, so y is used as-is.
   EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 50, 50)).Times(1);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
 }
 
 TEST_F(RenderPassGLESCommandTest,
