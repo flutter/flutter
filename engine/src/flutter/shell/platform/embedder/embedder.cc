@@ -115,6 +115,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/platform/embedder/embedder_surface_vulkan_impeller.h"  // nogncheck
 #include "impeller/core/texture.h"                                // nogncheck
 #include "impeller/renderer/backend/vulkan/context_vk.h"          // nogncheck
+#include "impeller/renderer/backend/vulkan/driver_info_vk.h"      // nogncheck
 #include "impeller/renderer/backend/vulkan/formats_vk.h"          // nogncheck
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"   // nogncheck
 #include "impeller/renderer/backend/vulkan/texture_vk.h"          // nogncheck
@@ -4994,6 +4995,45 @@ FlutterEngineResult FlutterEngineDeregisterVMServiceUriCallback(
                             "Could not deregister VM service URI callback.");
 }
 
+FlutterEngineResult FlutterEngineQueryVulkanDriverSupport(
+    const FlutterVulkanDriverProperties* properties,
+    bool* out_is_known_bad) {
+  if (properties == nullptr || out_is_known_bad == nullptr) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "properties and out_is_known_bad must not be null.");
+  }
+
+  constexpr size_t kMinStructSize =
+      offsetof(FlutterVulkanDriverProperties, device_name) +
+      sizeof(FlutterVulkanDriverProperties::device_name);
+  if (properties->struct_size < kMinStructSize) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "FlutterVulkanDriverProperties struct_size is too small.");
+  }
+
+#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
+  impeller::vk::PhysicalDeviceProperties vk_props{};
+  vk_props.apiVersion = properties->api_version;
+  vk_props.driverVersion = properties->driver_version;
+  vk_props.vendorID = properties->vendor_id;
+  vk_props.deviceID = properties->device_id;
+  vk_props.deviceType = impeller::vk::PhysicalDeviceType::eIntegratedGpu;
+  if (properties->device_name != nullptr) {
+    std::strncpy(vk_props.deviceName.data(), properties->device_name,
+                 VK_MAX_PHYSICAL_DEVICE_NAME_SIZE - 1);
+    vk_props.deviceName[VK_MAX_PHYSICAL_DEVICE_NAME_SIZE - 1] = '\0';
+  }
+  impeller::DriverInfoVK driver_info(vk_props);
+  *out_is_known_bad = driver_info.IsKnownBadDriver();
+  return kSuccess;
+#else
+  return LOG_EMBEDDER_ERROR(
+      kInvalidArguments,
+      "Vulkan rendering is not compiled into this embedder build.");
+#endif
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -5070,6 +5110,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
            FlutterEngineRegisterVMServiceUriCallback);
   SET_PROC(DeregisterVMServiceUriCallback,
            FlutterEngineDeregisterVMServiceUriCallback);
+  SET_PROC(QueryVulkanDriverSupport, FlutterEngineQueryVulkanDriverSupport);
 #undef SET_PROC
 
   return kSuccess;
