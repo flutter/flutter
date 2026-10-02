@@ -60,7 +60,8 @@ class VulkanDeviceOwner {
     return enabled_device_extensions_;
   }
 
-  /// @brief Returns the raw unguarded PFN_vkGetInstanceProcAddr function pointer.
+  /// @brief Returns the raw unguarded PFN_vkGetInstanceProcAddr function
+  /// pointer.
   PFN_vkGetInstanceProcAddr GetRawInstanceProcAddr() const {
     return raw_get_instance_proc_addr_fn_;
   }
