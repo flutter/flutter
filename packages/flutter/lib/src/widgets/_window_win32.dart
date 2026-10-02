@@ -1357,11 +1357,8 @@ class SatelliteWindowControllerWin32 extends SatelliteWindowController
   @internal
   void setParent(BaseWindowController parent) {
     _ensureNotDestroyed();
+    assert(!identical(parent, this), 'A satellite cannot specify itself as a parent');
     if (identical(parent, _parent)) {
-      return;
-    }
-
-    if (identical(parent, this)) {
       return;
     }
 
