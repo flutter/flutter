@@ -88,10 +88,6 @@ static PoolVMA CreateBufferPool(VmaAllocator allocator) {
   VmaPoolCreateInfo pool_create_info = {};
   pool_create_info.memoryTypeIndex = memTypeIndex;
   pool_create_info.flags = VMA_POOL_CREATE_IGNORE_BUFFER_IMAGE_GRANULARITY_BIT;
-  // An explicit 16 MB block size ensures custom staging pool blocks have
-  // sufficient capacity for transient host-visible allocations (including the
-  // 4 MB glyph atlas upload) regardless of small-heap heuristics on emulators.
-  pool_create_info.blockSize = 16 * 1024 * 1024;  // 16 MB
   pool_create_info.minBlockCount = 1;
 
   VmaPool pool = {};
@@ -153,10 +149,8 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
   allocator_info.physicalDevice = physical_device;
   allocator_info.device = device_holder->GetDevice();
   allocator_info.instance = instance;
-  // 16 MB preferred large heap block size provides sufficient headroom for
-  // large transient host-visible allocations (e.g. 4 MB glyph atlases) and
-  // aligns with standard Vulkan memory allocator block sizing.
-  allocator_info.preferredLargeHeapBlockSize = 16 * 1024 * 1024;
+  // 4 MB, matching the default used by Skia Vulkan.
+  allocator_info.preferredLargeHeapBlockSize = 4 * 1024 * 1024;
   allocator_info.pVulkanFunctions = &proc_table;
 
   VmaAllocator allocator = {};
@@ -612,26 +606,9 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
       ToVKBufferMemoryPropertyFlags(desc.storage_mode));
   allocation_info.flags =
       ToVmaAllocationBufferCreateFlags(desc.storage_mode, desc.readback);
-  // The staging buffer pool uses an explicit 16 MB block size, which provides
-  // ample capacity for transient host-visible allocations up to 8 MB (including
-  // the initial 4 MB glyph atlas upload and oversized transfer buffers) while
-  // guaranteeing they suballocate cleanly without block boundary overshoots.
-  // Buffers exceeding 8 MB bypass the staging pool and are routed to dedicated
-  // device memory allocations with aliasing enabled.
-  constexpr size_t kMaxStagingPoolBufferSize = 8 * 1024 * 1024;  // 8 MB
-  if (desc.storage_mode == StorageMode::kHostVisible) {
-    if (created_buffer_pool_ && !desc.readback &&
-        desc.size <= kMaxStagingPoolBufferSize) {
-      allocation_info.pool = staging_buffer_pool_.get().pool;
-    } else if (desc.size > kMaxStagingPoolBufferSize) {
-      // Set VMA_ALLOCATION_CREATE_CAN_ALIAS_BIT alongside
-      // VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT so VMA creates an isolated
-      // dedicated allocation without appending VkMemoryDedicatedAllocateInfoKHR
-      // to pNext, which is rejected by Android emulator (goldfish-opengl)
-      // drivers.
-      allocation_info.flags |= (VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT |
-                                VMA_ALLOCATION_CREATE_CAN_ALIAS_BIT);
-    }
+  if (created_buffer_pool_ && desc.storage_mode == StorageMode::kHostVisible &&
+      !desc.readback) {
+    allocation_info.pool = staging_buffer_pool_.get().pool;
   }
   VkBuffer buffer = {};
   VmaAllocation buffer_allocation = {};
