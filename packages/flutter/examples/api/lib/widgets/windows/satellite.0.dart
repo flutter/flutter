@@ -80,27 +80,25 @@ class _MyAppState extends State<MyApp> {
     );
     showWindow(
       context: context,
-      entry: WindowEntry(
-        controller: controller,
-        builder: (BuildContext context) => MaterialApp(
-          home: Material(
-            color: Colors.black,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  const Text(
-                    'This is a satellite window',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: controller.destroy,
-                    child: const Text('Close'),
-                  ),
-                ],
-              ),
+      controller: controller,
+      builder: (BuildContext context) => MaterialApp(
+        home: Material(
+          color: Colors.black,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const Text(
+                  'This is a satellite window',
+                  style: TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: controller.destroy,
+                  child: const Text('Close'),
+                ),
+              ],
             ),
           ),
         ),

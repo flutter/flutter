@@ -114,10 +114,8 @@ class _WindowCreationButtons extends StatelessWidget {
             final controller = WindowController(title: 'Regular', size: windowSettings.regularSize);
             showWindow(
               context: context,
-              entry: WindowEntry(
-                controller: controller,
-                builder: (context) => WindowContent(windowController: controller),
-              ),
+              controller: controller,
+              builder: (context) => WindowContent(windowController: controller),
             );
           },
           child: const Text('Create Regular Window'),
@@ -133,10 +131,8 @@ class _WindowCreationButtons extends StatelessWidget {
 
             showWindow(
               context: context,
-              entry: WindowEntry(
-                controller: controller,
-                builder: (context) => DialogWindowContent(dialogWindowController: controller),
-              ),
+              controller: controller,
+              builder: (context) => DialogWindowContent(dialogWindowController: controller),
             );
           },
           child: const Text('Create Modal Dialog'),

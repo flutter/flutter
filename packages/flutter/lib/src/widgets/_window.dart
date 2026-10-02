@@ -2345,9 +2345,10 @@ class _WindowEntryRenderState extends State<_WindowEntryRender> {
 
 /// Mounts a window as a new entry in the nearest [WindowManager].
 ///
-/// The [entry] pairs an existing native window controller with a builder for its
-/// content. The manager registers the entry and renders its content in the
-/// controller's [BaseWindowController.rootView] on a subsequent build.
+/// The [controller] builds the native window, while the [builder] provides
+/// the content that will be rendered inside of the native window.
+/// The manager registers the controller and renders its content inside of
+/// its [BaseWindowController.rootView] on a subsequent build.
 /// A native window must not be mounted more than once.
 ///
 /// The new window's subtree is a sibling of the manager's other windows, not a
@@ -2382,7 +2383,11 @@ class _WindowEntryRenderState extends State<_WindowEntryRender> {
 ///  * [WindowManager.initialWindows], which supplies windows at startup.
 ///  * [NestedWindow], which renders a window in the surrounding widget subtree.
 @internal
-void showWindow({required BuildContext context, required WindowEntry entry}) {
+void showWindow({
+  required BuildContext context,
+  required BaseWindowController controller,
+  required WidgetBuilder builder,
+}) {
   if (!isWindowingEnabled) {
     throw UnsupportedError(_kWindowingDisabledErrorMessage);
   }
@@ -2394,7 +2399,7 @@ void showWindow({required BuildContext context, required WindowEntry entry}) {
     );
   }
 
-  windowRegistry._register(entry);
+  windowRegistry._register(WindowEntry(controller: controller, builder: builder));
 }
 
 /// Creates a window entry when a [NestedWindow] is shown.

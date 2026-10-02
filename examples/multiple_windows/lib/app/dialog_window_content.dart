@@ -42,11 +42,9 @@ class DialogWindowContent extends StatelessWidget {
                           );
                           showWindow(
                             context: context,
-                            entry: WindowEntry(
-                              controller: controller,
-                              builder: (BuildContext context) =>
-                                  DialogWindowContent(dialogWindowController: controller),
-                            ),
+                            controller: controller,
+                            builder: (BuildContext context) =>
+                                DialogWindowContent(dialogWindowController: controller),
                           );
                         },
                         child: const Text('Create Modal Dialog'),

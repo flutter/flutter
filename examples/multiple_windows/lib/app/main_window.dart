@@ -197,10 +197,8 @@ class _WindowCreatorCard extends StatelessWidget {
 
                         showWindow(
                           context: context,
-                          entry: WindowEntry(
-                            controller: controller,
-                            builder: (context) => WindowContent(windowController: controller),
-                          ),
+                          controller: controller,
+                          builder: (context) => WindowContent(windowController: controller),
                         );
                       },
                       child: const Text('Regular'),
@@ -225,11 +223,9 @@ class _WindowCreatorCard extends StatelessWidget {
 
                         showWindow(
                           context: context,
-                          entry: WindowEntry(
-                            controller: controller,
-                            builder: (context) =>
-                                DialogWindowContent(dialogWindowController: controller),
-                          ),
+                          controller: controller,
+                          builder: (context) =>
+                              DialogWindowContent(dialogWindowController: controller),
                         );
                       },
                       child: const Text('Modeless Dialog'),
@@ -254,11 +250,9 @@ class _WindowCreatorCard extends StatelessWidget {
 
                         showWindow(
                           context: context,
-                          entry: WindowEntry(
-                            controller: controller,
-                            builder: (context) =>
-                                DialogWindowContent(dialogWindowController: controller),
-                          ),
+                          controller: controller,
+                          builder: (context) =>
+                              DialogWindowContent(dialogWindowController: controller),
                         );
                       },
                       child: const Text('Modal Dialog'),

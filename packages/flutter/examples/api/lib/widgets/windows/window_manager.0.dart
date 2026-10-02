@@ -56,15 +56,13 @@ class MainWindow extends StatelessWidget {
           child: GestureDetector(
             onTap: () => showWindow(
               context: context,
-              entry: WindowEntry(
-                controller: DialogWindowController(
-                  parent: WindowScope.of(context),
-                  size: const Size(400, 300),
-                ),
-                builder: (BuildContext context) {
-                  return const SizedBox.shrink();
-                },
+              controller: DialogWindowController(
+                parent: WindowScope.of(context),
+                size: const Size(400, 300),
               ),
+              builder: (BuildContext context) {
+                return const SizedBox.shrink();
+              },
             ),
             child: const Text(
               'Open a dialog',

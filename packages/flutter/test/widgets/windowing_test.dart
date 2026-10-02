@@ -417,16 +417,19 @@ void main() {
       testWidgets('showWindow throws UnsupportedError', (WidgetTester tester) async {
         // The entry itself can only be created while windowing is enabled.
         isWindowingEnabled = true;
-        final entry = WindowEntry(
-          controller: _StubWindowController(tester),
-          builder: (BuildContext context) => const Text('Test'),
-        );
         isWindowingEnabled = false;
 
         await tester.pumpWidget(Container());
         final BuildContext context = tester.element(find.byType(Container));
 
-        expect(() => showWindow(context: context, entry: entry), throwsUnsupportedError);
+        expect(
+          () => showWindow(
+            context: context,
+            controller: _StubWindowController(tester),
+            builder: (BuildContext context) => const Text('Test'),
+          ),
+          throwsUnsupportedError,
+        );
       });
 
       testWidgets('Accessing WindowScope.of throws UnsupportedError', (WidgetTester tester) async {
@@ -2327,10 +2330,8 @@ void main() {
 
         showWindow(
           context: windowContext,
-          entry: WindowEntry(
-            controller: second,
-            builder: (BuildContext context) => _text('second'),
-          ),
+          controller: second,
+          builder: (BuildContext context) => _text('second'),
         );
         await tester.pump();
 
@@ -2375,10 +2376,8 @@ void main() {
         expect(
           () => showWindow(
             context: context,
-            entry: WindowEntry(
-              controller: controller,
-              builder: (BuildContext context) => const SizedBox.shrink(),
-            ),
+            controller: controller,
+            builder: (BuildContext context) => const SizedBox.shrink(),
           ),
           throwsStateError,
         );
