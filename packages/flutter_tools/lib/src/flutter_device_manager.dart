@@ -125,11 +125,7 @@ class FlutterDeviceManager extends DeviceManager {
            config: customDevicesConfig,
          ),
          if (extensionManager != null)
-           ExtensionDevices(
-             extensionManager: extensionManager,
-             fileSystem: fileSystem,
-             logger: logger,
-           ),
+           ExtensionDevices(extensionManager: extensionManager, logger: logger),
        ];
 
   @override

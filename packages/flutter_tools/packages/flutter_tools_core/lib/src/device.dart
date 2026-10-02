@@ -47,7 +47,6 @@ class TargetDevice {
     required this.name,
     this.ephemeral = true,
     this.isSupported = true,
-    this.isSupportedForProject = true,
     this.sdkNameAndVersion,
     this.targetPlatform,
   });
@@ -60,7 +59,6 @@ class TargetDevice {
       name: json[nameKey] as String? ?? '',
       ephemeral: json[ephemeralKey] as bool? ?? true,
       isSupported: json[isSupportedKey] as bool? ?? true,
-      isSupportedForProject: json[isSupportedForProjectKey] as bool? ?? true,
       sdkNameAndVersion: json[sdkNameAndVersionKey] as String?,
       targetPlatform: json[targetPlatformKey] as String?,
     );
@@ -80,9 +78,6 @@ class TargetDevice {
 
   /// Map key for [isSupported].
   static const String isSupportedKey = 'isSupported';
-
-  /// Map key for [isSupportedForProject].
-  static const String isSupportedForProjectKey = 'isSupportedForProject';
 
   /// Map key for [sdkNameAndVersion].
   static const String sdkNameAndVersionKey = 'sdkNameAndVersion';
@@ -123,9 +118,6 @@ class TargetDevice {
   /// Whether the device is supported by Flutter tooling on the host platform.
   final bool isSupported;
 
-  /// Whether the device is supported for the current project.
-  final bool isSupportedForProject;
-
   /// Operating system SDK name and version string (e.g. `'Custom Linux 1.0.0'`).
   final String? sdkNameAndVersion;
 
@@ -139,7 +131,6 @@ class TargetDevice {
     nameKey: name,
     ephemeralKey: ephemeral,
     isSupportedKey: isSupported,
-    isSupportedForProjectKey: isSupportedForProject,
     sdkNameAndVersionKey: ?sdkNameAndVersion,
     targetPlatformKey: ?targetPlatform,
   };
@@ -148,7 +139,7 @@ class TargetDevice {
   String toString() =>
       'TargetDevice(id: $id, name: $name, category: $category, '
       'targetPlatform: $targetPlatform, sdkNameAndVersion: $sdkNameAndVersion, '
-      'ephemeral: $ephemeral, isSupported: $isSupported, isSupportedForProject: $isSupportedForProject)';
+      'ephemeral: $ephemeral, isSupported: $isSupported)';
 
   @override
   bool operator ==(Object other) {
@@ -159,20 +150,11 @@ class TargetDevice {
             other.name == name &&
             other.ephemeral == ephemeral &&
             other.isSupported == isSupported &&
-            other.isSupportedForProject == isSupportedForProject &&
             other.sdkNameAndVersion == sdkNameAndVersion &&
             other.targetPlatform == targetPlatform);
   }
 
   @override
-  int get hashCode => Object.hash(
-    category,
-    id,
-    name,
-    ephemeral,
-    isSupported,
-    isSupportedForProject,
-    sdkNameAndVersion,
-    targetPlatform,
-  );
+  int get hashCode =>
+      Object.hash(category, id, name, ephemeral, isSupported, sdkNameAndVersion, targetPlatform);
 }

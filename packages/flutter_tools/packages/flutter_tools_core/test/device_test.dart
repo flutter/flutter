@@ -35,7 +35,6 @@ void main() {
       expect(map['category'], 'desktop');
       expect(map['ephemeral'], isFalse);
       expect(map['isSupported'], isTrue);
-      expect(map['isSupportedForProject'], isTrue);
       expect(map['sdkNameAndVersion'], 'Custom Linux 1.0.0');
       expect(map['targetPlatform'], 'linux-x64');
 
@@ -58,7 +57,6 @@ void main() {
       expect(device.category, Category.mobile);
       expect(device.ephemeral, isTrue);
       expect(device.isSupported, isTrue);
-      expect(device.isSupportedForProject, isTrue);
       expect(device.sdkNameAndVersion, isNull);
       expect(device.targetPlatform, isNull);
 

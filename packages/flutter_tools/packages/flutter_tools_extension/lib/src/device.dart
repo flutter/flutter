@@ -14,6 +14,12 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC method identifier to query contributed target devices.
   static const String getDevicesMethod = 'device.getDevices';
 
+  /// RPC method identifier to query whether a target device is supported for a project.
+  static const String isSupportedForProjectMethod = 'device.isSupportedForProject';
+
+  /// RPC parameter key for the target device ID.
+  static const String deviceIdParam = 'deviceId';
+
   /// RPC parameter key for the project root URI.
   static const String projectRootParam = 'projectRoot';
 
@@ -21,20 +27,31 @@ abstract base class DeviceService extends ToolExtensionService {
   String get namespace => serviceNamespace;
 
   /// Returns the target devices contributed by this extension.
-  Future<List<TargetDevice>> getDevices({Uri? projectRoot});
+  Future<List<TargetDevice>> getDevices();
+
+  /// Returns whether the target device with [deviceId] is supported for the
+  /// Flutter project at [projectRoot].
+  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot});
 
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
-    return <String, ExtensionRpcHandler>{'getDevices': _getDevicesRpc};
+    return <String, ExtensionRpcHandler>{
+      'getDevices': _getDevicesRpc,
+      'isSupportedForProject': _isSupportedForProjectRpc,
+    };
   }
 
   @override
   Future<void> shutdown() async {}
 
-  Future<List<Map<String, Object?>>> _getDevicesRpc(Map<String, Object?> params) async {
-    final projectRootStr = params[projectRootParam] as String?;
-    final Uri? projectRoot = projectRootStr != null ? Uri.parse(projectRootStr) : null;
-    final List<TargetDevice> devices = await getDevices(projectRoot: projectRoot);
+  Future<List<Map<String, Object?>>> _getDevicesRpc(Map<String, Object?> _) async {
+    final List<TargetDevice> devices = await getDevices();
     return devices.map((TargetDevice device) => device.toMap()).toList();
+  }
+
+  Future<bool> _isSupportedForProjectRpc(Map<String, Object?> params) async {
+    final String deviceId = params[deviceIdParam] as String? ?? '';
+    final String projectRootStr = params[projectRootParam] as String? ?? '';
+    return isSupportedForProject(deviceId: deviceId, projectRoot: Uri.parse(projectRootStr));
   }
 }

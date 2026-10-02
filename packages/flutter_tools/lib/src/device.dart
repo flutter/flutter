@@ -361,7 +361,7 @@ class DeviceDiscoverySupportFilter {
     if (_flutterProject == null) {
       return true;
     }
-    return device.isSupportedForProject(_flutterProject);
+    return await device.isSupportedForProject(_flutterProject);
   }
 }
 
@@ -661,7 +661,7 @@ abstract class Device {
   }
 
   /// Whether the device is supported for the current project directory.
-  bool isSupportedForProject(FlutterProject flutterProject);
+  FutureOr<bool> isSupportedForProject(FlutterProject flutterProject);
 
   /// Check if a version of the given app is already installed.
   ///

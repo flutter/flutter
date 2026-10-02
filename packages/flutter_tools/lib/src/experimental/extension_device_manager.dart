@@ -8,7 +8,6 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import '../application_package.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../device.dart';
@@ -27,15 +26,13 @@ final class ExtensionDeviceClient extends DeviceService {
   final Logger _logger;
 
   @override
-  Future<List<TargetDevice>> getDevices({Uri? projectRoot}) async {
+  Future<List<TargetDevice>> getDevices() async {
     _logger.printTrace(
       'ExtensionDeviceClient fetching devices via RPC ("${DeviceService.getDevicesMethod}")...',
     );
     try {
       final Object? rawResult = await connection
-          .sendRequest(DeviceService.getDevicesMethod, <String, Object?>{
-            if (projectRoot != null) DeviceService.projectRootParam: projectRoot.toString(),
-          })
+          .sendRequest(DeviceService.getDevicesMethod)
           .timeout(const Duration(seconds: 5));
       final List<TargetDevice> devices = TargetDevice.listFromJson(rawResult);
       _logger.printTrace('ExtensionDeviceClient received ${devices.length} device(s) via RPC.');
@@ -45,16 +42,39 @@ final class ExtensionDeviceClient extends DeviceService {
     }
     return const <TargetDevice>[];
   }
+
+  @override
+  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient checking project support for "$deviceId" via RPC '
+      '("${DeviceService.isSupportedForProjectMethod}")...',
+    );
+    try {
+      final Object? rawResult = await connection
+          .sendRequest(DeviceService.isSupportedForProjectMethod, <String, Object?>{
+            DeviceService.deviceIdParam: deviceId,
+            DeviceService.projectRootParam: projectRoot.toString(),
+          })
+          .timeout(const Duration(seconds: 5));
+      if (rawResult case final bool supported) {
+        return supported;
+      }
+    } on Object catch (err, stack) {
+      _logger.printTrace(
+        'ExtensionDeviceClient failed to check project support for "$deviceId": $err\n$stack',
+      );
+    }
+    return false;
+  }
 }
 
 /// A host-side [DeviceDiscovery] mechanism that discovers devices registered by active extensions.
 class ExtensionDevices extends PollingDeviceDiscovery {
   /// Creates an [ExtensionDevices] instance.
-  ExtensionDevices({required this._extensionManager, required this._logger, this._fileSystem})
+  ExtensionDevices({required this._extensionManager, required this._logger})
     : super('tool_extension');
 
   final ExtensionManager _extensionManager;
-  final FileSystem? _fileSystem;
   final Logger _logger;
 
   @override
@@ -82,13 +102,12 @@ class ExtensionDevices extends PollingDeviceDiscovery {
     final List<List<Device>> devicesPerService = await Future.wait(
       deviceServices.whereType<ExtensionDeviceClient>().map((ExtensionDeviceClient service) async {
         try {
-          final List<TargetDevice> devices = await service.getDevices(
-            projectRoot: _fileSystem?.currentDirectory.uri,
-          );
+          final List<TargetDevice> devices = await service.getDevices();
           return devices
               .map(
                 (TargetDevice targetDevice) => ExtensionBackedDevice(
                   connection: service.connection,
+                  deviceService: service,
                   logger: _logger,
                   targetDevice: targetDevice,
                 ),
@@ -116,6 +135,7 @@ class ExtensionBackedDevice extends Device {
   /// Creates an [ExtensionBackedDevice] wrapping a [TargetDevice].
   ExtensionBackedDevice({
     required this.connection,
+    required this._deviceService,
     required super.logger,
     required TargetDevice targetDevice,
   }) : _targetDevice = targetDevice,
@@ -126,6 +146,7 @@ class ExtensionBackedDevice extends Device {
          ephemeral: targetDevice.ephemeral,
        );
 
+  final DeviceService _deviceService;
   final TargetDevice _targetDevice;
   final ExtensionConnection connection;
 
@@ -136,7 +157,8 @@ class ExtensionBackedDevice extends Device {
   Future<bool> isSupported() async => _targetDevice.isSupported;
 
   @override
-  bool isSupportedForProject(FlutterProject project) => _targetDevice.isSupportedForProject;
+  Future<bool> isSupportedForProject(FlutterProject flutterProject) =>
+      _deviceService.isSupportedForProject(deviceId: id, projectRoot: flutterProject.directory.uri);
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.unknown;

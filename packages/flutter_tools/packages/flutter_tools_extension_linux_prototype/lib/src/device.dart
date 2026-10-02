@@ -10,19 +10,24 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 /// Prototype Linux [DeviceService] implementation.
 final class LinuxDeviceService extends DeviceService {
   @override
-  Future<List<TargetDevice>> getDevices({Uri? projectRoot}) async {
-    final bool isSupportedForProject =
-        projectRoot == null || Directory.fromUri(projectRoot.resolve('linux')).existsSync();
-    return <TargetDevice>[
+  Future<List<TargetDevice>> getDevices() async {
+    return const <TargetDevice>[
       TargetDevice(
         category: Category.desktop,
         id: 'custom_linux_device',
         name: 'Linux Custom Extension Prototype Device',
         ephemeral: false,
-        isSupportedForProject: isSupportedForProject,
         sdkNameAndVersion: 'Custom Linux 1.0.0',
         targetPlatform: 'linux-x64',
       ),
     ];
+  }
+
+  @override
+  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot}) async {
+    if (deviceId != 'custom_linux_device') {
+      return false;
+    }
+    return Directory.fromUri(projectRoot.resolve('linux')).existsSync();
   }
 }

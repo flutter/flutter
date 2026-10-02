@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
@@ -12,6 +14,7 @@ import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 
 import '../../src/context.dart';
@@ -82,6 +85,15 @@ void main() {
     testUsingContext(
       'ExtensionDevices discovers custom device when feature flag enabled',
       () async {
+        final localFs = LocalFileSystem.test(signals: LocalSignals.instance);
+        addTearDown(localFs.dispose);
+        final Directory tempDir = localFs.systemTempDirectory.createTempSync(
+          'flutter_tool_extensions_device_test.',
+        );
+
+        final projectFactory = FlutterProjectFactory(fileSystem: localFs, logger: testLogger);
+        final FlutterProject project = projectFactory.fromDirectory(tempDir);
+
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
@@ -101,6 +113,10 @@ void main() {
         expect(await devices.first.targetPlatformDisplayName, equals('linux-x64'));
         expect(await devices.first.sdkNameAndVersion, equals('Custom Linux 1.0.0'));
         expect(await devices.first.isSupported(), isTrue);
+        expect(await devices.first.isSupportedForProject(project), isFalse);
+
+        tempDir.childDirectory('linux').createSync();
+        expect(await devices.first.isSupportedForProject(project), isTrue);
 
         await manager.dispose();
       },
