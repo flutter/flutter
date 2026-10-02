@@ -2206,6 +2206,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     child.parentData!.detach();
     child.parentData = null;
     child._parent = null;
+    child._semantics.invalidateParentData();
     if (attached) {
       child.detach();
     }
@@ -5769,6 +5770,18 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   static bool shouldDrop(SemanticsNode node) => node.isInvisible;
+
+  /// Invalidates the parent data throughout a subtree that has been reparented.
+  ///
+  /// The semantics parents may no longer be ancestors in the render tree.
+  /// Geometry updates must wait until the subtree is reached again when
+  /// updating semantics, including when it is currently blocked.
+  void invalidateParentData() {
+    parentData = null;
+    renderObject.visitChildren((RenderObject child) {
+      child._semantics.invalidateParentData();
+    });
+  }
 
   void markNeedsBuild() {
     built = false;

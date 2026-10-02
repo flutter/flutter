@@ -165,6 +165,53 @@ void main() {
     expect(globalSemanticsRect(tester, target), tester.getRect(find.byKey(targetKey)));
   });
 
+  testWidgets('A blocked subtree can be reparented', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/193706.
+    final GlobalKey targetKey = GlobalKey();
+
+    Widget buildFrame({required bool blocked, required bool wrapped}) {
+      Widget target = SizedBox(
+        key: targetKey,
+        width: 100,
+        height: 20,
+        child: Semantics(container: true, label: 'target'),
+      );
+      if (wrapped) {
+        target = Semantics(container: true, child: target);
+      }
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Positioned(left: wrapped ? 10 : 30, top: 20, child: target),
+            if (blocked)
+              BlockSemantics(
+                child: Semantics(container: true, label: 'barrier', child: const SizedBox.expand()),
+              ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(blocked: false, wrapped: true));
+    expect(find.semantics.byLabel('target'), findsOne);
+    await tester.pumpWidget(buildFrame(blocked: true, wrapped: true));
+    expect(find.semantics.byLabel('target'), findsNothing);
+
+    // Remove a semantics ancestor while its globally keyed child remains blocked.
+    await tester.pumpWidget(buildFrame(blocked: true, wrapped: false));
+    expect(tester.takeException(), isNull);
+    expect(find.semantics.byLabel('target'), findsNothing);
+
+    await tester.pumpWidget(buildFrame(blocked: false, wrapped: false));
+    expect(tester.takeException(), isNull);
+    final SemanticsNode target = find.semantics.byLabel('target').evaluate().single;
+    expect(target.label, 'target');
+    expect(target.isInvisible, isFalse);
+    expect(target.flagsCollection.isHidden, isFalse);
+    expect(globalSemanticsRect(tester, target), tester.getRect(find.byKey(targetKey)));
+  });
+
   testWidgets('blocked branch with pending geometry update can be removed', (
     WidgetTester tester,
   ) async {
