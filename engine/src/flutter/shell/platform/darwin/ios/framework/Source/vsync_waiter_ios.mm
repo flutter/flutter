@@ -101,6 +101,7 @@ void VsyncWaiterIOS::SetDispatchingEvent(bool dispatching_event) {
     const fml::TimePoint frame_target_time =
         frame_start_time + fml::TimeDelta::FromSecondsF(SnapDuration(0.0, max_refresh_rate_));
     FireCallback(frame_start_time, frame_target_time);
+    [layout_trampoline_view_ setNeedsLayout];
   }
 }
 
