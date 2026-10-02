@@ -115,8 +115,11 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
     PipelineDescriptor descriptor,
     bool async,
     bool threadsafe) {
-  if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
-    return found->second;
+  {
+    Lock lock(pipelines_mutex_);
+    if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
+      return found->second;
+    }
   }
 
   if (!IsValid()) {
@@ -129,7 +132,14 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
       std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
   auto pipeline_future =
       PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
-  pipelines_[descriptor] = pipeline_future;
+  {
+    Lock lock(pipelines_mutex_);
+    auto [found, inserted] =
+        pipelines_.try_emplace(descriptor, pipeline_future);
+    if (!inserted) {
+      return found->second;
+    }
+  }
   auto weak_this = weak_from_this();
 
   auto get_pipeline_descriptor =
@@ -205,9 +215,12 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
 PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
     ComputePipelineDescriptor descriptor,
     bool async) {
-  if (auto found = compute_pipelines_.find(descriptor);
-      found != compute_pipelines_.end()) {
-    return found->second;
+  {
+    Lock lock(pipelines_mutex_);
+    if (auto found = compute_pipelines_.find(descriptor);
+        found != compute_pipelines_.end()) {
+      return found->second;
+    }
   }
 
   if (!IsValid()) {
@@ -221,7 +234,14 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
       std::promise<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>>();
   auto pipeline_future = PipelineFuture<ComputePipelineDescriptor>{
       descriptor, promise->get_future()};
-  compute_pipelines_[descriptor] = pipeline_future;
+  {
+    Lock lock(pipelines_mutex_);
+    auto [found, inserted] =
+        compute_pipelines_.try_emplace(descriptor, pipeline_future);
+    if (!inserted) {
+      return found->second;
+    }
+  }
   auto weak_this = weak_from_this();
 
   auto completion_handler =
@@ -260,12 +280,14 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
 
 // |PipelineLibrary|
 bool PipelineLibraryMTL::HasPipeline(const PipelineDescriptor& descriptor) {
+  Lock lock(pipelines_mutex_);
   return pipelines_.find(descriptor) != pipelines_.end();
 }
 
 // |PipelineLibrary|
 void PipelineLibraryMTL::RemovePipelinesWithEntryPoint(
     std::shared_ptr<const ShaderFunction> function) {
+  Lock lock(pipelines_mutex_);
   fml::erase_if(pipelines_, [&](auto item) {
     return item->first.GetEntrypointForStage(function->GetStage())
         ->IsEqual(*function);
