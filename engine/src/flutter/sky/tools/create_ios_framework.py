@@ -171,13 +171,16 @@ def zip_archive(dst, args):
   # pylint: disable=line-too-long
 
   # When updating with_entitlements and without_entitlements,
-  # `binariesWithoutEntitlements` and `signedXcframeworks` should be updated in
-  # the framework's `verifyCodeSignedTestRunner`.
+  # `binariesWithEntitlements`, `binariesWithoutEntitlements`, and
+  # `signedXcframeworks` should be updated in the framework's
+  # `verifyCodeSignedTestRunner`.
   #
   # See: https://github.com/flutter/flutter/blob/62382c7b83a16b3f48dc06c19a47f6b8667005a5/dev/bots/suite_runners/run_verify_binaries_codesigned_tests.dart#L82-L130
 
   # Binaries that must be codesigned and require entitlements for particular APIs.
   with_entitlements = ['gen_snapshot_arm64']
+  if args.x64_out_dir:
+    with_entitlements.append('gen_snapshot_x64')
   with_entitlements_file = os.path.join(dst, 'entitlements.txt')
   sky_utils.write_codesign_config(with_entitlements_file, with_entitlements)
 
@@ -210,8 +213,7 @@ def zip_archive(dst, args):
   sky_utils.write_codesign_config(unsigned_binaries_file, unsigned_binaries)
   # pylint: enable=line-too-long
 
-  zip_contents = [
-      'gen_snapshot_arm64',
+  zip_contents = with_entitlements + [
       'Flutter.xcframework',
       'entitlements.txt',
       'without_entitlements.txt',

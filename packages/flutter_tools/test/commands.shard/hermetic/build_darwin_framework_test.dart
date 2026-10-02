@@ -337,7 +337,7 @@ void main() {
     });
 
     testUsingContext(
-      'throws if simulator contains extra assets',
+      'release simulator target throws if it contains extra assets',
       () async {
         final Directory projectDir = memoryFileSystem.directory('project')..createSync();
         projectDir.childDirectory('ios').createSync();
@@ -366,6 +366,7 @@ void main() {
             Target target,
             Environment environment,
           ) {
+            expect(target.name, 'release_ios_bundle_flutter_assets');
             final Directory output = environment.outputDir;
             output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
             final File manifest = output
@@ -389,7 +390,7 @@ void main() {
 
         // Mock engine artifacts. _TestArtifacts uses a string like this for getArtifactPath.
         memoryFileSystem
-            .directory('Artifact.flutterXcframework.TargetPlatform.ios.debug')
+            .directory('Artifact.flutterXcframework.TargetPlatform.ios.release')
             .createSync(recursive: true);
 
         final Directory buildDir =
@@ -405,8 +406,8 @@ void main() {
             'ios-framework',
             '--no-pub',
             '--no-plugins',
+            '--no-debug',
             '--no-profile',
-            '--no-release',
           ]),
           throwsToolExit(
             message: 'The simulator build contains a code asset "package:project/asset1" that is not present in the physical device build.',
