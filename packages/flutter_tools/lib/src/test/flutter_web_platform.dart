@@ -758,7 +758,7 @@ window.\$dartLoader.loader.nextAttempt();
       completer.future,
       headless: !_config.pauseAfterLoad,
       logger: _logger,
-      systemClock: globals.systemClock,
+      systemClock: _toolContext.systemClock,
       webBrowserFlags: const <String>[
         // Enforce high-DPI (3x) device scale factor and standard window size
         // to standardize rendering across platforms and match CI golden baselines.
