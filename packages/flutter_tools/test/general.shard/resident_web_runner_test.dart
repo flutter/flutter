@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -392,6 +393,49 @@ name: my_app
         targetModel: TargetModel.dartdevc,
       );
       expect(await fileSystem.file(expectedPath).readAsString(), 'ABC');
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'WebRunner caches app.dill where the resident compiler initializes from',
+    () async {
+      const buildInfo = BuildInfo(
+        BuildMode.debug,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+        webEnableHotReload: true,
+        deprecatedJsInterop: false,
+      );
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        debuggingOptions: DebuggingOptions.enabled(buildInfo),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+
+      residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+
+      final compiler = const ResidentCompilerFactory().create(
+        targetPlatform: TargetPlatform.web_javascript,
+        buildInfo: buildInfo,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.any(),
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(),
+        fileSystem: fileSystem,
+        shutdownHooks: test_fakes.FakeShutdownHooks(),
+        config: globals.config,
+      ) as DefaultResidentCompiler;
+      expect(await fileSystem.file(compiler.initializeFromDill).readAsString(), 'ABC');
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

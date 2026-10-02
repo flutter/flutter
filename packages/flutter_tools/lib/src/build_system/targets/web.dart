@@ -390,7 +390,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     Logger logger,
     List<String> args,
   ) async {
-    final RunResult result = await processUtils.run(args);
+    final RunResult result = await processUtils.run(args, encoding: utf8);
     if (result.exitCode == 0) {
       return;
     }

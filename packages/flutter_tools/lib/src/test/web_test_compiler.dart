@@ -122,12 +122,7 @@ class WebTestCompiler {
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       dartDefines: buildInfo.dartDefines,
       targetModel: TargetModel.dartdevc,
-      // Kernel compiled with a different deprecated JS interop setting must
-      // not be used to initialize the compiler.
-      extraFrontEndOptions: <String>[
-        ...buildInfo.extraFrontEndOptions,
-        ...deprecatedJsInteropCompilerFlags(buildInfo.deprecatedJsInterop),
-      ],
+      extraFrontEndOptions: ddcFrontEndOptions(buildInfo),
       fileSystem: fs,
       config: config,
     );

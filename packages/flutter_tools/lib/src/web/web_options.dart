@@ -329,6 +329,7 @@ abstract final class WebOptions {
         'and "dart:js_interop".\n'
         'If not specified, the Dart compiler default is used. '
         'Has no effect when compiling to WebAssembly.',
+    verboseOnly: true,
   );
 }
 
