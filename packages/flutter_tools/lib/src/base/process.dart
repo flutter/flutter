@@ -192,6 +192,7 @@ abstract class ProcessUtils {
     Map<String, String>? environment,
     Duration? timeout,
     int timeoutRetries = 0,
+    Encoding encoding = systemEncoding,
   });
 
   /// Run the command and block waiting for its result.
@@ -352,6 +353,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     Map<String, String>? environment,
     Duration? timeout,
     int timeoutRetries = 0,
+    Encoding encoding = systemEncoding,
   }) async {
     if (cmd.isEmpty) {
       throw ArgumentError('cmd must be a non-empty list');
