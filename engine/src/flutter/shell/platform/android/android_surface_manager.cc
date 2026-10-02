@@ -646,6 +646,63 @@ void AndroidSurfaceManager::PopulateSoftwareRendererConfig(
   };
 }
 
+VulkanValidationConfig SelectVulkanValidationConfig(
+    bool requested,
+    const std::vector<VkLayerProperties>& available_layers,
+    const std::vector<VkExtensionProperties>& available_instance_extensions,
+    const std::vector<VkExtensionProperties>& validation_layer_extensions) {
+  VulkanValidationConfig config;
+  if (!requested) {
+    return config;
+  }
+
+  constexpr const char* kValidationLayerName = "VK_LAYER_KHRONOS_validation";
+  constexpr const char* kDebugUtilsExtensionName = "VK_EXT_debug_utils";
+
+  bool has_validation_layer = false;
+  for (const auto& layer : available_layers) {
+    if (std::strcmp(layer.layerName, kValidationLayerName) == 0) {
+      has_validation_layer = true;
+      break;
+    }
+  }
+
+  if (!has_validation_layer) {
+    FML_LOG(WARNING) << "Vulkan validation requested but "
+                        "VK_LAYER_KHRONOS_validation is not available";
+    return config;
+  }
+
+  config.layers.push_back(kValidationLayerName);
+
+  auto contains_extension =
+      [](const std::vector<VkExtensionProperties>& extensions,
+         const char* name) -> bool {
+    for (const auto& ext : extensions) {
+      if (std::strcmp(ext.extensionName, name) == 0) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  if (contains_extension(available_instance_extensions,
+                         kDebugUtilsExtensionName) ||
+      contains_extension(validation_layer_extensions,
+                         kDebugUtilsExtensionName)) {
+    config.instance_extensions.push_back(kDebugUtilsExtensionName);
+    FML_LOG(INFO) << "Vulkan validation: enabled layer "
+                     "VK_LAYER_KHRONOS_validation with instance extension "
+                     "VK_EXT_debug_utils";
+  } else {
+    FML_LOG(WARNING) << "Vulkan validation: enabled layer "
+                        "VK_LAYER_KHRONOS_validation without "
+                        "VK_EXT_debug_utils; no messages will be reported";
+  }
+
+  return config;
+}
+
 bool AndroidSurfaceManager::InitializeVulkan() {
   vulkan_lib_handle_ = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
   if (!vulkan_lib_handle_) {
@@ -720,25 +777,39 @@ bool AndroidSurfaceManager::InitializeVulkan() {
     }
   }
 
-  std::vector<std::string> enabled_layers;
+  std::vector<VkLayerProperties> available_layers;
+  std::vector<VkExtensionProperties> validation_layer_exts;
   if (enable_validation &&
       vk_enumerate_instance_layer_properties_fn_ != nullptr) {
     uint32_t layer_count = 0;
     vk_enumerate_instance_layer_properties_fn_(&layer_count, nullptr);
-    std::vector<VkLayerProperties> available_layers(layer_count);
+    available_layers.resize(layer_count);
     if (layer_count > 0) {
       vk_enumerate_instance_layer_properties_fn_(&layer_count,
                                                  available_layers.data());
     }
     for (const auto& layer : available_layers) {
       if (std::strcmp(layer.layerName, "VK_LAYER_KHRONOS_validation") == 0) {
-        enabled_layers.push_back("VK_LAYER_KHRONOS_validation");
-        if (has_instance_ext("VK_EXT_debug_utils")) {
-          enabled_instance_extensions_.push_back("VK_EXT_debug_utils");
+        uint32_t layer_ext_count = 0;
+        vk_enumerate_instance_extension_properties_fn_(
+            "VK_LAYER_KHRONOS_validation", &layer_ext_count, nullptr);
+        validation_layer_exts.resize(layer_ext_count);
+        if (layer_ext_count > 0) {
+          vk_enumerate_instance_extension_properties_fn_(
+              "VK_LAYER_KHRONOS_validation", &layer_ext_count,
+              validation_layer_exts.data());
         }
         break;
       }
     }
+  }
+
+  VulkanValidationConfig validation_config =
+      SelectVulkanValidationConfig(enable_validation, available_layers,
+                                   available_exts, validation_layer_exts);
+  std::vector<std::string> enabled_layers = std::move(validation_config.layers);
+  for (auto& ext : validation_config.instance_extensions) {
+    enabled_instance_extensions_.push_back(std::move(ext));
   }
 
   enabled_instance_extensions_ptrs_.clear();

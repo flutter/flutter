@@ -38,6 +38,7 @@ DebugReportVK::DebugReportVK(const CapabilitiesVK& caps,
   messenger_ = std::make_unique<vk::UniqueDebugUtilsMessengerEXT>(
       std::move(messenger.value));
   is_valid_ = true;
+  FML_LOG(INFO) << "Vulkan debug messenger installed";
 }
 
 DebugReportVK::~DebugReportVK() = default;
