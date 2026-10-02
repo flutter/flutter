@@ -67,6 +67,8 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
   if (callback) {
     const uint64_t flow_identifier = fml::tracing::TraceNonce();
 
+    PauseDartEventLoopTasks();
+
     // The base trace ensures that flows have a root to begin from if one does
     // not exist. The trace viewer will ignore traces that have no base event
     // trace. While all our message loops insert a base trace trace
@@ -77,19 +79,39 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
 
     TRACE_FLOW_BEGIN("flutter", kVsyncFlowName, flow_identifier);
 
-    task_runners_.GetUITaskRunner()->PostTask(
-        [callback, flow_identifier, frame_start_time, frame_target_time]() {
-          FML_TRACE_EVENT_WITH_FLOW_IDS(
-              "flutter", kVsyncTraceName, /*flow_id_count=*/1,
-              /*flow_ids=*/&flow_identifier, "StartTime", frame_start_time,
-              "TargetTime", frame_target_time);
-          std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder =
-              std::make_unique<FrameTimingsRecorder>();
-          frame_timings_recorder->RecordVsync(frame_start_time,
-                                              frame_target_time);
-          callback(std::move(frame_timings_recorder));
-          TRACE_FLOW_END("flutter", kVsyncFlowName, flow_identifier);
-        });
+    fml::TaskQueueId ui_task_queue_id =
+        task_runners_.GetUITaskRunner()->GetTaskQueueId();
+    task_runners_.GetUITaskRunner()->PostTask([ui_task_queue_id, callback,
+                                               flow_identifier,
+                                               frame_start_time,
+                                               frame_target_time]() {
+      FML_TRACE_EVENT_WITH_FLOW_IDS(
+          "flutter", kVsyncTraceName, /*flow_id_count=*/1,
+          /*flow_ids=*/&flow_identifier, "StartTime", frame_start_time,
+          "TargetTime", frame_target_time);
+      std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder =
+          std::make_unique<FrameTimingsRecorder>();
+      frame_timings_recorder->RecordVsync(frame_start_time, frame_target_time);
+      callback(std::move(frame_timings_recorder));
+      TRACE_FLOW_END("flutter", kVsyncFlowName, flow_identifier);
+
+      ResumeDartEventLoopTasks(ui_task_queue_id);
+    });
+  }
+}
+
+void VsyncWaiter::PauseDartEventLoopTasks() {
+  auto ui_task_queue_id = task_runners_.GetUITaskRunner()->GetTaskQueueId();
+  auto task_queues = fml::MessageLoopTaskQueues::GetInstance();
+  if (ui_task_queue_id.is_valid()) {
+    task_queues->PauseSecondarySource(ui_task_queue_id);
+  }
+}
+
+void VsyncWaiter::ResumeDartEventLoopTasks(fml::TaskQueueId ui_task_queue_id) {
+  auto task_queues = fml::MessageLoopTaskQueues::GetInstance();
+  if (ui_task_queue_id.is_valid()) {
+    task_queues->ResumeSecondarySource(ui_task_queue_id);
   }
 }
 

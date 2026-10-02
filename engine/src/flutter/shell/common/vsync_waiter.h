@@ -58,6 +58,9 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
                     fml::TimePoint frame_target_time);
 
  private:
+  void PauseDartEventLoopTasks();
+  static void ResumeDartEventLoopTasks(fml::TaskQueueId ui_task_queue_id);
+
   std::mutex callback_mutex_;
   Callback callback_;
 
