@@ -1518,11 +1518,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   _viewportMetrics.physical_max_height_constraint = _viewportMetrics.physical_height;
 }
 
-// Corrects the top safe area inset for the iOS 26+ status bar behavior change.
+// Corrects the top safe area inset for the iOS 26.0/26.0.1 status bar behavior regression.
 //
-// Through iOS 25, hiding the status bar shrank safeAreaInsets.top accordingly. Since
-// iOS 26, UIKit keeps safeAreaInsets.top at its pre-hiding value, so Flutter would
-// report padding for a bar that is no longer on screen.
+// Prior to iOS 26, hiding the status bar shrank safeAreaInsets.top accordingly. On iOS
+// 26.0 and 26.0.1, UIKit keeps safeAreaInsets.top at its pre-hiding value instead, so
+// Flutter would report padding for a bar that is no longer on screen. UIKit resumes
+// updating safeAreaInsets.top correctly starting with iOS 26.1, so this correction is only
+// applied on 26.0.x; see the call site in setViewportMetricsPaddings.
 //
 // The correction only applies where the status bar is the sole contributor to the top
 // inset. On notch/Dynamic Island devices the inset is driven by the physical cutout and
@@ -1562,7 +1564,9 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
   CGFloat scale = screen.scale;
   CGFloat topPadding = self.view.safeAreaInsets.top;
-  if (@available(iOS 26.0, *)) {
+  if (@available(iOS 26.1, *)) {
+    // UIKit updates safeAreaInsets correctly. No-op.
+  } else if (@available(iOS 26.0, *)) {
     topPadding = [self topPaddingCorrected:topPadding];
   }
   _viewportMetrics.physical_padding_top = topPadding * scale;
@@ -1989,9 +1993,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (hidden != self.flutterPrefersStatusBarHidden) {
     self.flutterPrefersStatusBarHidden = hidden;
     [self setNeedsStatusBarAppearanceUpdate];
-    if (@available(iOS 26.0, *)) {
-      // On iOS 26+, hiding the status bar no longer changes safeAreaInsets, so UIKit may
-      // not schedule a layout pass on its own. Request one so that viewDidLayoutSubviews
+    if (@available(iOS 26.1, *)) {
+      // UIKit updates safeAreaInsets correctly and schedules its own layout pass. No-op.
+    } else if (@available(iOS 26.0, *)) {
+      // On iOS 26.0/26.0.1, hiding the status bar no longer changes safeAreaInsets, so UIKit
+      // may not schedule a layout pass on its own. Request one so that viewDidLayoutSubviews
       // runs setViewportMetricsPaddings against the updated status bar visibility.
       // See: https://github.com/flutter/flutter/issues/175520
       dispatch_async(dispatch_get_main_queue(), ^{

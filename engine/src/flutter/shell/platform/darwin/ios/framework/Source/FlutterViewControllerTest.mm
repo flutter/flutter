@@ -3371,9 +3371,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 // Regression test for https://github.com/flutter/flutter/issues/175520.
 - (void)testSetViewportMetricsPaddings_subtractsStatusBarHeightAfterHidingOnNonNotchDevice {
+  if (@available(iOS 26.1, *)) {
+    XCTSkip(@"Fixed in iOS 26.1+: UIKit updates safeAreaInsets.top correctly, so the "
+            @"correction is not applied. See "
+            @"testSetViewportMetricsPaddings_doesNotApplyCorrectionOnIOS26_1OrLater.");
+  }
   if (!@available(iOS 26.0, *)) {
-    XCTSkip(@"iOS 26+ specific behavior: UIKit stale safeAreaInsets.top fix not needed on "
-            @"earlier OS versions.");
+    XCTSkip(@"iOS 26.0/26.0.1 specific behavior: UIKit stale safeAreaInsets.top fix not needed "
+            @"on earlier OS versions.");
   }
   FlutterEngineForPaddingTest* testEngine = [[FlutterEngineForPaddingTest alloc] init];
   [testEngine runWithEntrypoint:nil];
@@ -3439,9 +3444,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 // Covers the status bar coming back (rotation, iPad resize, leaving Split View): the
 // correction must stop applying and the full inset must be reported again.
 - (void)testSetViewportMetricsPaddings_restoresPaddingWhenStatusBarBecomesVisibleAgain {
+  if (@available(iOS 26.1, *)) {
+    XCTSkip(@"Fixed in iOS 26.1+: UIKit updates safeAreaInsets.top correctly, so the "
+            @"correction is not applied. See "
+            @"testSetViewportMetricsPaddings_doesNotApplyCorrectionOnIOS26_1OrLater.");
+  }
   if (!@available(iOS 26.0, *)) {
-    XCTSkip(@"iOS 26+ specific behavior: UIKit stale safeAreaInsets.top fix not needed on "
-            @"earlier OS versions.");
+    XCTSkip(@"iOS 26.0/26.0.1 specific behavior: UIKit stale safeAreaInsets.top fix not needed "
+            @"on earlier OS versions.");
   }
   FlutterEngineForPaddingTest* testEngine = [[FlutterEngineForPaddingTest alloc] init];
   [testEngine runWithEntrypoint:nil];
@@ -3463,6 +3473,39 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [viewController setViewportMetricsPaddings];
   [viewController updateViewportMetricsIfNeeded];
   XCTAssertEqual(testEngine.capturedPhysicalPaddingTop, 24.0);
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/175520.
+//
+// On iOS 26.1+ UIKit updates safeAreaInsets.top correctly, so the correction must not run --
+// otherwise it would double-subtract the status bar height when the view is nested in a
+// container that contributes its own additionalSafeAreaInsets (e.g. a translucent nav bar).
+- (void)testSetViewportMetricsPaddings_doesNotApplyCorrectionOnIOS26_1OrLater {
+  if (!@available(iOS 26.1, *)) {
+    XCTSkip(@"iOS 26.1+ specific behavior: the stale safeAreaInsets.top correction is only "
+            @"applied on iOS 26.0/26.0.1.");
+  }
+  FlutterEngineForPaddingTest* testEngine = [[FlutterEngineForPaddingTest alloc] init];
+  [testEngine runWithEntrypoint:nil];
+
+  // Simulates a view nested in a container that folds its own additional inset in on top of
+  // the status bar's, e.g. 24pt status bar + 50pt additionalSafeAreaInsets.
+  FlutterFakeStatusBarState* statusBar = [[FlutterFakeStatusBarState alloc] init];
+  statusBar.hidden = NO;
+  statusBar.height = 24;
+  FlutterViewController* viewController = [self setUpPaddingTestViewControllerWithEngine:testEngine
+                                                                           safeAreaInset:74
+                                                                          statusBarState:statusBar];
+
+  [viewController setViewportMetricsPaddings];
+  [viewController updateViewportMetricsIfNeeded];
+  XCTAssertEqual(testEngine.capturedPhysicalPaddingTop, 74.0);
+  XCTAssertEqual(viewController.statusBarInset, 0.0);
+
+  statusBar.hidden = YES;
+  [viewController setViewportMetricsPaddings];
+  [viewController updateViewportMetricsIfNeeded];
+  XCTAssertEqual(testEngine.capturedPhysicalPaddingTop, 74.0);
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/175520.
@@ -3493,6 +3536,16 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
   XCTAssertNil(viewController.viewIfLoaded, @"Precondition: view must not be loaded yet.");
   viewController.prefersStatusBarHidden = YES;
+
+  // On iOS 26.0/26.0.1, setPrefersStatusBarHidden: queues a block on the main queue via
+  // dispatch_async. Wait for it to run before asserting, otherwise this test would pass
+  // trivially regardless of what that block does.
+  XCTestExpectation* drained = [self expectationWithDescription:@"main queue drained"];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [drained fulfill];
+  });
+  [self waitForExpectationsWithTimeout:5.0 handler:nil];
+
   XCTAssertNil(viewController.viewIfLoaded,
                @"setPrefersStatusBarHidden: must not force-load the view.");
 }
