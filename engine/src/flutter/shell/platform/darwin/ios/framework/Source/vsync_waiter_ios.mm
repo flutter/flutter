@@ -69,10 +69,18 @@ void VsyncWaiterIOS::AwaitVSync() {
 
   if (client_.displayLink.paused) {
     [client_ await];
-    const fml::TimePoint frame_start_time = fml::TimePoint::Now();
-    const fml::TimePoint frame_target_time =
-        frame_start_time + fml::TimeDelta::FromSecondsF(SnapDuration(0.0, max_refresh_rate_));
-    FireCallback(frame_start_time, frame_target_time);
+    if (dispatching_event_) {
+      // This vsync request came synchronously while dispatching UIKit event and
+      // there is an entire frame ahead - the vsync callback can be short-circuited.
+      const fml::TimePoint frame_start_time = fml::TimePoint::Now();
+      const fml::TimePoint frame_target_time =
+          frame_start_time + fml::TimeDelta::FromSecondsF(SnapDuration(0.0, max_refresh_rate_));
+      FireCallback(frame_start_time, frame_target_time);
+    } else {
+      // This vsync request came at an unknown phase of the frame so wait for
+      // the next display link callback.
+      waiting_for_vsync_ = true;
+    }
   } else {
     waiting_for_vsync_ = true;
   }
