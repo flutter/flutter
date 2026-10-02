@@ -232,7 +232,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                   controller: _satelliteWidthController,
                   decoration: const InputDecoration(labelText: 'Initial width'),
                   enabled: !_satelliteShrinkWrap,
-                  autovalidateMode: AutovalidateMode.always,
+                  autovalidateMode: .always,
                   validator: (String? value) =>
                       _satelliteShrinkWrap ? null : validateWindowDimension(value),
                 ),
@@ -243,7 +243,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                   controller: _satelliteHeightController,
                   decoration: const InputDecoration(labelText: 'Initial height'),
                   enabled: !_satelliteShrinkWrap,
-                  autovalidateMode: AutovalidateMode.always,
+                  autovalidateMode: .always,
                   validator: (String? value) =>
                       _satelliteShrinkWrap ? null : validateWindowDimension(value),
                 ),
@@ -276,7 +276,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       title: const Text('Tooltips, Popups, and Satellites'),
       subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           const Text('Satellite positioning settings apply only when a window is created.'),
           const Text('Parent Anchor', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),

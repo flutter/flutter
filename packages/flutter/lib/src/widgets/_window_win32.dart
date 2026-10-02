@@ -1360,6 +1360,11 @@ class SatelliteWindowControllerWin32 extends SatelliteWindowController
     if (identical(parent, _parent)) {
       return;
     }
+
+    if (identical(parent, this)) {
+      return;
+    }
+
     _parent = parent;
     _Win32PlatformInterface.setSatelliteParent(
       windowHandle,
@@ -1450,6 +1455,7 @@ class SatelliteWindowControllerWin32 extends SatelliteWindowController
 final class _Size extends ffi.Struct {
   @ffi.Int32()
   external int width;
+
   @ffi.Int32()
   external int height;
 
@@ -1680,17 +1686,7 @@ class _Win32PlatformInterface {
     Size? size,
     BoxConstraints? constraints,
     HWND parent,
-    ffi.Pointer<
-      ffi.NativeFunction<
-        ffi.Void Function(
-          ffi.Pointer<_Size> childSize,
-          ffi.Pointer<_Rect> parentRect,
-          ffi.Pointer<_Rect> displayRect,
-          ffi.Pointer<_Rect> result, // output parameter
-        )
-      >
-    >
-    onGetWindowPosition,
+    ffi.Pointer<ffi.NativeFunction<_GetWindowPositionNative>> onGetWindowPosition,
     String? title,
     bool shrinkWrap,
     bool resizable,
@@ -1968,17 +1964,7 @@ final class _SatelliteWindowCreationRequest extends ffi.Struct {
   external _WindowSizeRequest size;
   external _WindowConstraintsRequest constraints;
   external HWND parent;
-  external ffi.Pointer<
-    ffi.NativeFunction<
-      ffi.Void Function(
-        ffi.Pointer<_Size> childSize,
-        ffi.Pointer<_Rect> parentRect,
-        ffi.Pointer<_Rect> displayRect,
-        ffi.Pointer<_Rect> result,
-      )
-    >
-  >
-  onGetWindowPosition;
+  external ffi.Pointer<ffi.NativeFunction<_GetWindowPositionNative>> onGetWindowPosition;
   external ffi.Pointer<_Utf16> title;
 
   @ffi.Bool()

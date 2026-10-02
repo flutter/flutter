@@ -9,9 +9,9 @@ import 'package:flutter/src/widgets/_window.dart';
 import 'package:material_ui/material_ui.dart';
 
 class SatelliteWindowContent extends StatelessWidget {
-  const SatelliteWindowContent({super.key, required this.satelliteWindowController});
+  const SatelliteWindowContent({super.key, required this.controller});
 
-  final SatelliteWindowController satelliteWindowController;
+  final SatelliteWindowController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -25,29 +25,26 @@ class SatelliteWindowContent extends StatelessWidget {
               children: [
                 AppBar(title: const Text('Satellite')),
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const .all(16.0),
                   child: Column(
                     mainAxisSize: .min,
                     children: [
                       ListenableBuilder(
-                        listenable: satelliteWindowController,
+                        listenable: controller,
                         builder: (BuildContext context, Widget? _) {
                           final double dpr = MediaQuery.of(context).devicePixelRatio;
                           final Size windowSize = WindowScope.contentSizeOf(context);
                           return Text(
-                            'View ID: ${satelliteWindowController.rootView.viewId}\n'
-                            'Parent View ID: ${satelliteWindowController.parent.rootView.viewId}\n'
+                            'View ID: ${controller.rootView.viewId}\n'
+                            'Parent View ID: ${controller.parent.rootView.viewId}\n'
                             'Size: ${windowSize.width.toStringAsFixed(1)}\u00D7${windowSize.height.toStringAsFixed(1)}\n'
                             'Device Pixel Ratio: $dpr',
-                            textAlign: TextAlign.center,
+                            textAlign: .center,
                           );
                         },
                       ),
                       const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: satelliteWindowController.destroy,
-                        child: const Text('Close'),
-                      ),
+                      ElevatedButton(onPressed: controller.destroy, child: const Text('Close')),
                     ],
                   ),
                 ),
