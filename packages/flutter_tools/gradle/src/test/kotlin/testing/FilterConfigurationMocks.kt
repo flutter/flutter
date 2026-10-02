@@ -8,10 +8,7 @@ import com.android.build.api.variant.FilterConfiguration
 import io.mockk.every
 import io.mockk.mockk
 
-/**
- * The filters of a variant output or built APK for [abi]: one ABI filter, or none if [abi] is
- * null (the APK of a build without ABI splits, or a universal APK).
- */
+/** One ABI filter for [abi], or no filters if [abi] is null. */
 fun mockAbiFilters(abi: String?): List<FilterConfiguration> {
     if (abi == null) {
         return emptyList()

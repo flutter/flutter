@@ -324,8 +324,7 @@ class FlutterPlugin : Plugin<Project> {
         // plugin instance that owns the resolved Flutter SDK and local engine paths.
         val flutterGradlePlugin = this
         val isApplicationProject = FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)
-        // AGP runs every finalizeDsl callback before any onVariants callback, so this is set
-        // before the application branch below reads it.
+        // Set in finalizeDsl, which AGP runs before any onVariants callback.
         var dslVersionCodes: DslVersionCodes? = null
         if (isApplicationProject) {
             val appExtension = FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo)
@@ -345,8 +344,6 @@ class FlutterPlugin : Plugin<Project> {
                         targetPlatforms
                     )
                 registerFlutterAssetTasks(projectToAddTasksTo, variant, compileTaskProvider)
-                // An application project only has application variants, and only those have
-                // the outputs (one per APK) that the versionCode and APK copy are configured on.
                 check(variant is ApplicationVariant) {
                     "Expected an application variant for '${variant.name}' in an application " +
                         "project, but got ${variant::class.java.name}."
@@ -547,8 +544,7 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         /**
-         * Whether `flutter assemble`, and the application wiring that depends on it (assets,
-         * per-ABI versionCodes and the flutter-apk copy), should be configured for [variant].
+         * Whether to configure `flutter assemble`, and everything that depends on it, for [variant].
          *
          * When a single `assemble<Variant>` task is named on the command line, Flutter is only
          * compiled for the variants that task can build. This keeps a release build from also
@@ -675,12 +671,7 @@ class FlutterPlugin : Plugin<Project> {
             }
         }
 
-        /**
-         * The Flutter build mode ("debug", "profile" or "release") for [variant].
-         *
-         * Uses the public debuggable flag so that custom debuggable build types (e.g. `staging`)
-         * map to the debug engine artifacts.
-         */
+        /** "debug", "profile" or "release" for [variant]; debuggable custom build types are "debug". */
         private fun flutterBuildModeFor(variant: Variant): String {
             val variantBuildType =
                 requireNotNull(variant.buildType) {
@@ -742,23 +733,13 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         /**
-         * Sets the `versionCode` of each per-ABI output to
-         * `ABI_VERSION[abi] * 1000 + baseVersionCode` for `--split-per-abi` builds, so every APK
-         * gets a distinct versionCode. [FlutterPluginConstants.ABI_VERSION] holds the offsets.
+         * For `--split-per-abi`, sets each output's versionCode to
+         * `ABI_VERSION[abi] * 1000 + baseVersionCode`, where [baseVersionCode] comes from the DSL
+         * (see [DslVersionCodes]). A versionCode set only in the manifest is not offset.
          *
-         * [baseVersionCode] is the versionCode the variant's DSL declares (see [DslVersionCodes]).
-         * This never reads `output.versionCode`, which AGP disallows during configuration when its
-         * compatibility mode is off. So a versionCode set only in the manifest is not offset, and
-         * Flutter replaces a value that an `onVariants` callback running before its own has set.
-         *
-         * Does nothing when `force-version-code-ignoring-abi` is set, and warns and does nothing
-         * when [baseVersionCode] is null. Leaves an output unchanged if it has no ABI filter (a
-         * universal APK) or if Flutter has no offset for its ABI.
-         *
-         * AGP runs `onVariants` callbacks in registration order. Flutter registers its callback
-         * when the plugin is applied, so it normally runs before an `androidComponents.onVariants`
-         * block in the app's build script: that block sees the offset value, and a value it sets
-         * replaces Flutter's. See "Setting per-ABI or per-variant versionCode" in
+         * Skipped with `force-version-code-ignoring-abi`. Outputs without an ABI filter are left
+         * unchanged. An `onVariants` block in the app's build script runs after this one, so a
+         * value it sets wins. See "Setting per-ABI or per-variant versionCode" in
          * docs/platforms/android/website-page-draft.md.
          *
          * TODO(reidbaker): Link to the docs.flutter.dev page once it is published.
@@ -791,11 +772,7 @@ class FlutterPlugin : Plugin<Project> {
             }
         }
 
-        /**
-         * Registers the task that copies [variant]'s APKs into `build/outputs/flutter-apk/`,
-         * where `flutter run` and `flutter build apk` look for them, and makes
-         * `assemble<Variant>` run it.
-         */
+        /** Registers the copy of [variant]'s APKs into flutter-apk, run by `assemble<Variant>`. */
         private fun registerCopyFlutterApksTask(
             project: Project,
             variant: ApplicationVariant
@@ -807,18 +784,13 @@ class FlutterPlugin : Plugin<Project> {
                 ) {
                     apkDirectory.set(variant.artifacts.get(SingleArtifact.APK))
                     builtArtifactsLoader.set(variant.artifacts.getBuiltArtifactsLoader())
-                    // The variant's outputs are the APKs AGP will build, so the copy declares
-                    // exactly the files it will write.
                     outputAbis.set(variant.outputs.map { CopyFlutterApksTask.abiOf(it.filters) })
                     flavorName.set(variant.flavorName?.takeIf { it.isNotEmpty() })
                     buildMode.set(flutterBuildModeFor(variant))
                     destinationDir.set(project.layout.buildDirectory.dir("outputs/flutter-apk"))
                 }
-            // The variant API has no provider for the assemble task, and AGP has not created that
-            // task yet when onVariants runs, so the task has to be matched by name.
-            // `configureEach` runs only when a task is realized, so this realizes no tasks. It is
-            // used instead of `tasks.named(Spec)`, which is @Incubating in the Gradle API this
-            // plugin compiles against.
+            // The variant API has no provider for the assemble task, so match it by name.
+            // `configureEach` realizes no tasks; `tasks.named(Spec)` is @Incubating in our API.
             val assembleTaskName = "assemble${FlutterPluginUtils.capitalize(variant.name)}"
             project.tasks.configureEach {
                 if (name == assembleTaskName) {

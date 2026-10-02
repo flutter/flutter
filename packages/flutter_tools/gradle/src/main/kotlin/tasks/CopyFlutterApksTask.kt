@@ -26,48 +26,28 @@ import org.gradle.work.DisableCachingByDefault
 import javax.inject.Inject
 
 /**
- * Copies the APKs that AGP built for one variant into the flutter-apk directory, where
- * `flutter run` and `flutter build apk` look for them, under the names the Flutter tool expects
- * (see [apkFileName]).
+ * Copies one variant's APKs into the flutter-apk directory, renamed to what the Flutter tool
+ * expects (see [apkFileName]).
  *
- * Every variant copies into the same flutter-apk directory, so declaring that directory as an
- * output would make the variants' outputs overlap. The task declares the individual
- * [outputApks] instead. Those and the files the copy writes are both named by [apkFileName] from
- * the same inputs, so the declared outputs cannot drift from what the task produces.
+ * Every variant writes into the same directory, so the task declares the individual
+ * [outputApks] as outputs rather than the directory.
  *
- * The task only copies files, so like Gradle's own `Copy` and `Sync` tasks, which carry the same
- * annotation and reason, it is not cached.
- *
- * The task fails, and names the APK artifact (`SingleArtifact.APK`) in its error, when another
- * plugin or build script transforms that artifact so that either:
- * - the directory has no `output-metadata.json`. A transform registered with `toTransformMany`
- *   and `ArtifactTransformationRequest` gets the file written by AGP. A transform registered with
- *   `toTransform` must write it with `BuiltArtifacts.save`.
- * - an APK has an ABI filter that none of the variant's outputs has.
- *
- * The task cannot fix either case, so the errors point at the plugin that did the transform, not
- * at Flutter. Plugins that only read the APK artifact, or that write extra APKs after `assemble`
- * (as channel-packaging plugins do), do not cause either failure.
+ * Fails if another plugin transforms `SingleArtifact.APK` without writing `output-metadata.json`,
+ * or into APKs whose ABI filters differ from the variant outputs. Flutter cannot fix either, so
+ * the error points at that plugin.
  */
-@DisableCachingByDefault(because = "Not worth caching")
+@DisableCachingByDefault(because = "Copies local APKs; a cache entry would only duplicate them")
 abstract class CopyFlutterApksTask : DefaultTask() {
     /** The variant's `SingleArtifact.APK` directory: the APKs and AGP's metadata file. */
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val apkDirectory: DirectoryProperty
 
-    /**
-     * Reads the metadata in [apkDirectory]. Not an input itself, because [apkDirectory] already
-     * covers every file it reads.
-     */
+    /** Reads the metadata in [apkDirectory], which already covers its inputs. */
     @get:Internal
     abstract val builtArtifactsLoader: Property<BuiltArtifactsLoader>
 
-    /**
-     * The ABI of each APK the variant produces, taken from the ABI filters of the variant's
-     * outputs. An output without an ABI filter is listed as [NO_ABI]: the single APK of a build
-     * without ABI splits, or a universal APK.
-     */
+    /** The ABI of each variant output, or [NO_ABI] for an output without an ABI filter. */
     @get:Input
     abstract val outputAbis: ListProperty<String>
 
@@ -80,10 +60,7 @@ abstract class CopyFlutterApksTask : DefaultTask() {
     @get:Input
     abstract val buildMode: Property<String>
 
-    /**
-     * The flutter-apk directory. Shared by every variant's copy task, so it is not declared as an
-     * output; [outputApks] are the declared outputs.
-     */
+    /** The flutter-apk directory, shared by every variant, so not an output itself. */
     @get:Internal
     abstract val destinationDir: DirectoryProperty
 
@@ -101,37 +78,28 @@ abstract class CopyFlutterApksTask : DefaultTask() {
     @TaskAction
     fun copyApks() {
         val apkDir = apkDirectory.get()
-        // `load` returns null only when the directory has no `output-metadata.json`. AGP's
-        // packaging task always writes one. A plugin that transforms the APK artifact with
-        // `toTransformMany` and `ArtifactTransformationRequest` gets one written by AGP. So this
-        // means another plugin or build script replaced the artifact with `toTransform` and did
-        // not call `BuiltArtifacts.save`. An unreadable or malformed file throws instead.
+        // `load` returns null only when `output-metadata.json` is missing.
         val builtArtifacts =
             builtArtifactsLoader.get().load(apkDir)
-                ?: throw GradleException(
-                    "Flutter could not read the APK metadata in $apkDir (no output-metadata.json), " +
-                        "so it cannot copy the APKs to ${destinationDir.get()}. Another Gradle " +
-                        "plugin or build script in this project replaced the APK artifact " +
-                        "(SingleArtifact.APK) without writing output-metadata.json. Find the " +
-                        "plugin or script that transforms SingleArtifact.APK, and ask its " +
-                        "maintainer to write the metadata, for example with " +
-                        "ArtifactTransformationRequest or BuiltArtifacts.save()."
+                ?: throw transformedApkError(
+                    problem =
+                        "Flutter could not read the APK metadata in $apkDir " +
+                            "(no output-metadata.json), so it cannot copy the APKs to " +
+                            "${destinationDir.get()}.",
+                    fix =
+                        "write output-metadata.json, for example with " +
+                            "ArtifactTransformationRequest or BuiltArtifacts.save()"
                 )
         val declaredAbis = outputAbis.get()
         builtArtifacts.elements.forEach { artifact ->
             val abi = abiOf(artifact.filters)
-            // AGP writes one APK per variant output, and the declared ABIs come from those same
-            // outputs, so with AGP alone they always match. They differ only if another plugin
-            // or build script transforms the APK artifact into APKs with different ABI filters.
-            // Fail rather than write a file that Gradle does not track.
+            // With AGP alone this always matches, because both come from the variant outputs.
             if (abi !in declaredAbis) {
-                throw GradleException(
-                    "Flutter expected APKs for the ABIs $declaredAbis, but the APK metadata in " +
-                        "$apkDir lists ${artifact.outputFile} for ABI '$abi'. Another Gradle " +
-                        "plugin or build script in this project changed the APK artifact " +
-                        "(SingleArtifact.APK). Find the plugin or script that transforms " +
-                        "SingleArtifact.APK, and ask its maintainer to keep one APK per variant " +
-                        "output with the same ABI filters."
+                throw transformedApkError(
+                    problem =
+                        "Flutter expected APKs for the ABIs $declaredAbis, but the APK metadata " +
+                            "in $apkDir lists ${artifact.outputFile} for ABI '$abi'.",
+                    fix = "keep one APK per variant output, with the same ABI filters"
                 )
             }
             val fileName = apkFileName(abi, flavorName.orNull, buildMode.get())
@@ -147,22 +115,14 @@ abstract class CopyFlutterApksTask : DefaultTask() {
         /** The [outputAbis] entry for an APK that has no ABI filter. */
         const val NO_ABI: String = ""
 
-        /**
-         * The ABI that [filters] select, or [NO_ABI] if they have no ABI filter.
-         *
-         * Used both for the variant outputs at configuration time and for the built APKs at
-         * execution time, so the two always agree on what "no ABI" means.
-         */
+        /** The ABI that [filters] select, or [NO_ABI] if they have no ABI filter. */
         internal fun abiOf(filters: Collection<FilterConfiguration>): String =
             filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier ?: NO_ABI
 
         /**
-         * The file name the Flutter tool expects for an APK:
          * `app[-<abi>][-<flavor>]-<build mode>.apk`, with the flavor in lower case.
          *
-         * Must stay in sync with `listApkPaths` in
-         * `packages/flutter_tools/lib/src/android/gradle.dart`, which is how the Flutter tool
-         * finds these files.
+         * Must match `listApkPaths` in `packages/flutter_tools/lib/src/android/gradle.dart`.
          */
         internal fun apkFileName(
             abi: String,
@@ -173,5 +133,15 @@ abstract class CopyFlutterApksTask : DefaultTask() {
             val flavorPart = if (flavorName.isNullOrEmpty()) "" else "-${flavorName.lowercase()}"
             return "app$abiPart$flavorPart-$buildMode.apk"
         }
+
+        private fun transformedApkError(
+            problem: String,
+            fix: String
+        ): GradleException =
+            GradleException(
+                "$problem Another Gradle plugin or build script in this project transforms the " +
+                    "APK artifact (SingleArtifact.APK). Find the plugin or script that transforms " +
+                    "SingleArtifact.APK, and ask its maintainer to $fix."
+            )
     }
 }
