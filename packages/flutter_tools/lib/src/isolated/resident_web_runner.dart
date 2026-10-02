@@ -25,6 +25,7 @@ import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
@@ -51,22 +52,25 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
   @override
   ResidentRunner createWebRunner(
     FlutterDevice device, {
-    String? target,
-    required bool stayResident,
-    required FlutterProject flutterProject,
-    required DebuggingOptions debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    UrlTunneller? urlTunneller,
-    required Logger logger,
-    required Terminal terminal,
-    required Platform platform,
-    required OutputPreferences outputPreferences,
-    required FileSystem fileSystem,
-    required SystemClock systemClock,
     required Analytics analytics,
+    required DebuggingOptions debuggingOptions,
+    required FlutterProject flutterProject,
+    required bool stayResident,
+    required ToolContext toolContext,
     bool machine = false,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    String? target,
+    UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
   }) {
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :OutputPreferences outputPreferences,
+      :Platform platform,
+      :SystemClock systemClock,
+      :AnsiTerminal terminal,
+    ) = toolContext;
     return ResidentWebRunner(
       device,
       target: target,
@@ -78,7 +82,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       machine: machine,
       analytics: analytics,
       systemClock: systemClock,
-      fileSystem: fileSystem,
+      fileSystem: fs,
       logger: logger,
       terminal: terminal,
       platform: platform,

@@ -5,14 +5,11 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
@@ -426,21 +423,15 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   @override
   ResidentRunner createWebRunner(
     FlutterDevice device, {
-    String? target,
-    bool? stayResident,
-    FlutterProject? flutterProject,
-    bool? ipv6,
+    required Analytics analytics,
     required DebuggingOptions debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    UrlTunneller? urlTunneller,
-    Logger? logger,
-    Terminal? terminal,
-    Platform? platform,
-    OutputPreferences? outputPreferences,
-    FileSystem? fileSystem,
-    SystemClock? systemClock,
-    Analytics? analytics,
+    required FlutterProject flutterProject,
+    required bool stayResident,
+    required ToolContext toolContext,
     bool machine = false,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    String? target,
+    UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
   }) {
     expect(stayResident, isTrue);
