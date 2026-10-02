@@ -114,6 +114,10 @@ if (is_android) {
       "android_vm_init.h",
       "android_vsync_waiter.cc",
       "android_vsync_waiter.h",
+      "android_vulkan_device_owner.cc",
+      "android_vulkan_device_owner.h",
+      "android_vulkan_eligibility.cc",
+      "android_vulkan_eligibility.h",
       "android_vulkan_texture.cc",
       "android_vulkan_texture.h",
       "android_window_metrics_mapper.cc",
@@ -137,6 +141,7 @@ if (is_android) {
     public_deps = [
       "//flutter/assets",
       "//flutter/fml",
+      "//flutter/shell/platform/android/vulkan_queue_guard",
       "//flutter/shell/platform/embedder:embedder_headers",
     ]
 

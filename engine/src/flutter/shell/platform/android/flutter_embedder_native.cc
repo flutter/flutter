@@ -358,7 +358,9 @@ class FlutterEmbedderNative::CompositorDelegate
   FlutterEmbedderNative* owner_ = nullptr;
 };
 
-void FlutterEmbedderNative::InitializeRuntimeSubsystems() {
+void FlutterEmbedderNative::InitializeRuntimeSubsystems(
+    std::shared_ptr<VulkanDeviceOwner> shared_vulkan_device_owner,
+    std::shared_ptr<AndroidSurfaceManager> surface_manager) {
   if (vm_init_ && !vm_init_->IsInitialized()) {
     auto global_args = AndroidVMInit::GetGlobalVMArgs();
     if (global_args.has_value()) {
@@ -371,8 +373,11 @@ void FlutterEmbedderNative::InitializeRuntimeSubsystems() {
   }
   android_task_runners_ =
       std::make_shared<AndroidTaskRunners>("1", merge_threads);
-  surface_manager_ =
-      std::make_shared<AndroidSurfaceManager>(GetSelectedRenderingAPI());
+  surface_manager_ = surface_manager
+                         ? std::move(surface_manager)
+                         : std::make_shared<AndroidSurfaceManager>(
+                               GetSelectedRenderingAPI(),
+                               std::move(shared_vulkan_device_owner));
   compositor_delegate_ = std::make_shared<CompositorDelegate>(this);
   compositor_ = std::make_shared<AndroidCompositor>(surface_manager_,
                                                     compositor_delegate_);
@@ -625,8 +630,7 @@ void FlutterEmbedderNative::PopulateRendererConfig(
                                           ? surface_manager_->GetRenderingAPI()
                                           : GetSelectedRenderingAPI();
   if (IsHcppEnabled() &&
-      rendering_api != AndroidRenderingAPI::kImpellerVulkan &&
-      rendering_api != AndroidRenderingAPI::kImpellerAutoselect) {
+      rendering_api != AndroidRenderingAPI::kImpellerVulkan) {
     SetHcppEnabled(false);
   }
   switch (rendering_api) {
@@ -647,6 +651,7 @@ void FlutterEmbedderNative::PopulateRendererConfig(
     case AndroidRenderingAPI::kImpellerVulkan:
     case AndroidRenderingAPI::kImpellerAutoselect:
       if (surface_manager_ && surface_manager_->IsVulkanInitialized()) {
+        engine_vulkan_device_owner_ = surface_manager_->GetVulkanDeviceOwner();
         config->type = kVulkan;
         surface_manager_->PopulateVulkanRendererConfig(&config->vulkan);
         config->vulkan.get_instance_proc_address_callback =
@@ -1116,6 +1121,10 @@ void FlutterEmbedderNative::PopulateRendererConfig(
 }
 
 FlutterEmbedderNative::FlutterEmbedderNative()
+    : FlutterEmbedderNative(std::shared_ptr<VulkanDeviceOwner>(nullptr)) {}
+
+FlutterEmbedderNative::FlutterEmbedderNative(
+    std::shared_ptr<VulkanDeviceOwner> shared_vulkan_device_owner)
     : jvm_invoker_(std::make_shared<AndroidJvmInvoker>()),
       image_lru_(std::make_shared<EmbedderImageLRU>()),
       platform_views_provider_(
@@ -1176,12 +1185,13 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       vm_init_->Init(*default_args);
     }
   }
-  InitializeRuntimeSubsystems();
+  InitializeRuntimeSubsystems(std::move(shared_vulkan_device_owner));
   AttachWindowMetricsCallbacks();
+  FML_CHECK(surface_manager_);
   if (auto vm_args = GetVMArgs(); vm_args.has_value()) {
-    bool enable_hcpp =
-        ShouldEnableSurfaceControl(*vm_args, GetSelectedRenderingAPI());
-    if (enable_hcpp || IsHcppEnabled()) {
+    bool enable_hcpp = ShouldEnableSurfaceControl(
+        *vm_args, surface_manager_->GetRenderingAPI());
+    if (enable_hcpp || vm_args->enable_surface_control || IsHcppEnabled()) {
       SetHcppEnabled(enable_hcpp);
     }
   }
@@ -1209,7 +1219,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider,
     std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider,
     std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider,
-    std::shared_ptr<AndroidEngineGroup> engine_group)
+    std::shared_ptr<AndroidEngineGroup> engine_group,
+    std::shared_ptr<AndroidSurfaceManager> surface_manager)
     : jvm_invoker_(jvm_invoker ? std::move(jvm_invoker)
                                : std::make_shared<AndroidJvmInvoker>()),
       image_lru_(image_lru ? std::move(image_lru)
@@ -1292,12 +1303,13 @@ FlutterEmbedderNative::FlutterEmbedderNative(
               ? std::move(asset_provider)
               : std::make_shared<APKAssetProvider>(
                     std::make_shared<InMemoryAPKAssetProviderImpl>())) {
-  InitializeRuntimeSubsystems();
+  InitializeRuntimeSubsystems(nullptr, std::move(surface_manager));
   AttachWindowMetricsCallbacks();
+  FML_CHECK(surface_manager_);
   if (auto vm_args = GetVMArgs(); vm_args.has_value()) {
-    bool enable_hcpp =
-        ShouldEnableSurfaceControl(*vm_args, GetSelectedRenderingAPI());
-    if (enable_hcpp || IsHcppEnabled()) {
+    bool enable_hcpp = ShouldEnableSurfaceControl(
+        *vm_args, surface_manager_->GetRenderingAPI());
+    if (enable_hcpp || vm_args->enable_surface_control || IsHcppEnabled()) {
       SetHcppEnabled(enable_hcpp);
     }
   }
@@ -1427,7 +1439,11 @@ FlutterEmbedderNative::~FlutterEmbedderNative() {
   }
   if (surface_manager_) {
     surface_manager_->DestroyOverlaySurfaces();
+    if (surface_manager_->IsVulkanInitialized()) {
+      surface_manager_->TeardownVulkan();
+    }
   }
+  engine_vulkan_device_owner_.reset();
 }
 
 void FlutterEmbedderNative::AttachJavaObject(JNIEnv* env, jobject flutterJNI) {
@@ -3443,9 +3459,10 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
   project_args_.dart_entrypoint_argv =
       entrypoint_argv_ptrs_.empty() ? nullptr : entrypoint_argv_ptrs_.data();
 
+  FML_CHECK(surface_manager_);
   AndroidVMArgs vm_args = GetVMArgs().value_or(AndroidVMArgs{});
   SetHcppEnabled(
-      ShouldEnableSurfaceControl(vm_args, GetSelectedRenderingAPI()));
+      ShouldEnableSurfaceControl(vm_args, surface_manager_->GetRenderingAPI()));
 
   command_line_args_storage_ = vm_args.command_line_args;
   if (command_line_args_storage_.empty()) {
@@ -3619,7 +3636,13 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::SpawnChild(
     const AndroidEngineSpawnArgs& spawn_args) {
   TRACE_EVENT1("flutter", "FlutterEmbedderNative::SpawnChild", "engine_id",
                std::to_string(spawn_args.engine_id).c_str());
-  auto child = std::make_unique<FlutterEmbedderNative>();
+  std::shared_ptr<VulkanDeviceOwner> shared_vulkan_device_owner =
+      surface_manager_ ? surface_manager_->GetVulkanDeviceOwner() : nullptr;
+  if (!shared_vulkan_device_owner) {
+    shared_vulkan_device_owner = engine_vulkan_device_owner_;
+  }
+  auto child = std::make_unique<FlutterEmbedderNative>(
+      std::move(shared_vulkan_device_owner));
   if (env && child_flutter_jni) {
     child->AttachJavaObject(env, child_flutter_jni);
   }
@@ -3631,7 +3654,6 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::SpawnChild(
     }
   }
 
-  child->InitializeRuntimeSubsystems();
   child->SetHcppEnabled(IsHcppEnabled());
   child->PopulateRendererConfig(&child->renderer_config_);
   child->compositor_->PopulateCompositorConfig(&child->embedder_compositor_);
@@ -3691,6 +3713,10 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::SpawnChild(
     spawned_engine =
         SpawnEngine(parent_engine, &spawn_config, spawn_args.engine_id);
     if (spawned_engine) {
+      if (auto group = GetEngineGroup()) {
+        group->SetEngineVulkanDeviceOwner(spawned_engine,
+                                          child->engine_vulkan_device_owner_);
+      }
       child->SetEngine(spawned_engine);
       child->android_task_runners_->SetEngine(spawned_engine);
       if (child->vsync_waiter_) {
@@ -3706,6 +3732,8 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::SpawnChild(
     if (spawned_id != 0 && GetEngineGroup()) {
       auto spawned_engine = GetEngineGroup()->GetEngineHandle(spawned_id);
       if (spawned_engine) {
+        GetEngineGroup()->SetEngineVulkanDeviceOwner(
+            spawned_engine, child->engine_vulkan_device_owner_);
         child->SetEngine(spawned_engine);
       }
     }
@@ -4825,7 +4853,14 @@ FlutterEmbedderNative::SpawnEngine(FLUTTER_API_SYMBOL(FlutterEngine)
     provider = engine_group_provider_;
   }
   if (group) {
-    return group->SpawnEngineWithConfig(parent_engine, config, engine_id);
+    auto handle =
+        group->SpawnEngineWithConfig(parent_engine, config, engine_id);
+    if (handle) {
+      group->SetEngineVulkanDeviceOwner(
+          handle, surface_manager_ ? surface_manager_->GetVulkanDeviceOwner()
+                                   : engine_vulkan_device_owner_);
+    }
+    return handle;
   }
   if (!provider) {
     return nullptr;
@@ -4856,6 +4891,12 @@ FlutterEngineResult FlutterEmbedderNative::SpawnEngine(
   }
   if (group) {
     *engine_out = group->SpawnEngineWithConfig(parent_engine, config);
+    if (*engine_out) {
+      group->SetEngineVulkanDeviceOwner(
+          *engine_out, surface_manager_
+                           ? surface_manager_->GetVulkanDeviceOwner()
+                           : engine_vulkan_device_owner_);
+    }
     return *engine_out ? kSuccess : kInvalidArguments;
   }
   if (!provider) {
@@ -4877,13 +4918,21 @@ FlutterEngineResult FlutterEmbedderNative::ShutdownEngine(
     group = engine_group_;
     provider = engine_group_provider_;
   }
+  FlutterEngineResult result = kInternalInconsistency;
   if (group) {
-    return group->ShutdownEngine(engine) ? kSuccess : kInvalidArguments;
+    result = group->ShutdownEngine(engine) ? kSuccess : kInvalidArguments;
+  } else if (provider) {
+    result = provider->ShutdownEngine(engine);
   }
-  if (provider) {
-    return provider->ShutdownEngine(engine);
+  if (engine == GetEngine()) {
+    std::shared_ptr<VulkanDeviceOwner> owner_to_release;
+    {
+      std::lock_guard<std::mutex> lock(engine_mutex_);
+      owner_to_release = std::move(engine_vulkan_device_owner_);
+    }
+    owner_to_release.reset();
   }
-  return kInternalInconsistency;
+  return result;
 }
 
 bool FlutterEmbedderNative::ShutdownSpawnedEngine(int64_t engine_id) const {
