@@ -1624,8 +1624,8 @@ public class FlutterFragment extends Fragment
   }
 
   /**
-   * See {@link NewEngineFragmentBuilder#shouldAttachEngineToActivity()} and {@link
-   * CachedEngineFragmentBuilder#shouldAttachEngineToActivity()}.
+   * See {@link NewEngineFragmentBuilder#shouldAttachEngineToActivity(boolean)} and {@link
+   * CachedEngineFragmentBuilder#shouldAttachEngineToActivity(boolean)}.
    *
    * <p>Used by this {@code FlutterFragment}'s {@link FlutterActivityAndFragmentDelegate}
    */
