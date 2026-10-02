@@ -132,6 +132,10 @@ void main() {
       },
     );
 
+    testUsingContext('accepts --[no-]deprecated-js-interop', () {
+      expectAcceptsDeprecatedJsInteropFlag(RunCommand());
+    });
+
     group('run app', () {
       late MemoryFileSystem fs;
       late Artifacts artifacts;

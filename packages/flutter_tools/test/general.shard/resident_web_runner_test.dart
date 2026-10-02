@@ -2554,6 +2554,67 @@ flutter:
       },
     );
   });
+
+  group('JsCompilerConfig deprecated JS interop', () {
+    WebCompilerConfig? capturedConfig;
+
+    for (final deprecatedJsInterop in <bool?>[null, true, false]) {
+      testUsingContext(
+        'ResidentWebRunner passes deprecatedJsInterop: $deprecatedJsInterop '
+        'to dart2js in release mode',
+        () async {
+          capturedConfig = null;
+          fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+          setupMocks();
+
+          final residentWebRunner = ResidentWebRunner(
+            flutterDevice,
+            flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+            debuggingOptions: DebuggingOptions.enabled(
+              BuildInfo(
+                BuildMode.release,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+                deprecatedJsInterop: deprecatedJsInterop,
+              ),
+            ),
+            stayResident: false,
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+            terminal: Terminal.test(),
+            platform: FakePlatform(),
+            outputPreferences: OutputPreferences.test(),
+            analytics: globals.analytics,
+            systemClock: globals.systemClock,
+          );
+
+          expect(await residentWebRunner.run(), 0);
+          expect(
+            capturedConfig,
+            isA<JsCompilerConfig>().having(
+              (JsCompilerConfig config) => config.deprecatedJsInterop,
+              'deprecatedJsInterop',
+              deprecatedJsInterop,
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            if (target is WebServiceWorker) {
+              capturedConfig = target.compileConfigs.first;
+            }
+          }),
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Pub: ThrowingPub.new,
+        },
+      );
+    }
+  });
 }
 
 ResidentRunner setUpResidentRunner(
