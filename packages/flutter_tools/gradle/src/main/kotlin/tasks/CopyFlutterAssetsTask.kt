@@ -8,7 +8,6 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -32,20 +31,11 @@ abstract class CopyFlutterAssetsTask : DefaultTask() {
     /**
      * The Flutter build output directory (the `flutter assemble` `--output` location).
      *
-     * Always present on the application path: this task is only registered for variants that
-     * Flutter compiles for, and it is wired directly to that variant's compile task, which
-     * always sets an output directory. A variant Flutter does not compile for gets no task at
-     * all, rather than a task with an absent input. That is the opposite of
-     * [CopyFlutterJniLibsTask.intermediateDir], which is registered unconditionally and so
-     * genuinely can be absent.
-     *
-     * Declared `@Optional` regardless, because the add-to-app module path registers this task
-     * for library variants once it migrates
-     * (https://github.com/flutter/flutter/issues/166550), where an absent value is expected.
-     * Until then, an absent value here means Flutter assets would silently be missing from the
-     * APK, so the registration site asserts the value is set rather than letting it default.
+     * This task is only registered for variants that Flutter compiles for, application and
+     * add-to-app module alike, wired to that variant's compile task. See
+     * `registerFlutterAssetTasks` in [FlutterPlugin][com.flutter.gradle.FlutterPlugin]. An
+     * absent value would build an APK or AAR without Flutter assets, so it is not optional.
      */
-    @get:Optional
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val intermediateDir: DirectoryProperty
@@ -60,12 +50,10 @@ abstract class CopyFlutterAssetsTask : DefaultTask() {
     fun copy() {
         fileSystemOperations.sync {
             into(destinationDir)
-            if (intermediateDir.isPresent) {
-                from(intermediateDir) {
-                    // Keeps the `flutter_assets/` prefix, so the staged layout matches what
-                    // the pre-migration copy produced inside the merged-assets directory.
-                    include(FlutterTaskHelper.FLUTTER_ASSETS_INCLUDE_DIRECTORY)
-                }
+            from(intermediateDir) {
+                // Keeps the `flutter_assets/` prefix, the assets directory the Flutter engine
+                // loads from by default.
+                include(FlutterTaskHelper.FLUTTER_ASSETS_INCLUDE_DIRECTORY)
             }
             filePermissions {
                 user {

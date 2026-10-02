@@ -11,7 +11,6 @@ import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -34,11 +33,10 @@ abstract class CopyFlutterJniLibsTask : DefaultTask() {
     /**
      * The Flutter build output directory (the `flutter assemble` `--output` location).
      *
-     * Optional: it is absent when there is no Flutter compile task for the variant (e.g. an
-     * `assembleAndroidTest` build), in which case this task stages nothing. See
-     * https://github.com/flutter/flutter/issues/188785.
+     * This task is only registered for variants that Flutter compiles for, wired to that
+     * variant's compile task. See `registerFlutterJniLibsTask` in
+     * [FlutterPlugin][com.flutter.gradle.FlutterPlugin].
      */
-    @get:Optional
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val intermediateDir: DirectoryProperty
@@ -56,21 +54,17 @@ abstract class CopyFlutterJniLibsTask : DefaultTask() {
     fun copy() {
         fileSystemOperations.sync {
             into(destinationDir)
-            // When there is no Flutter build for this variant (e.g. an assembleAndroidTest build),
-            // there is nothing to stage; the empty sync simply clears destinationDir.
-            if (intermediateDir.isPresent) {
-                targetPlatforms.get().forEach { targetPlatform ->
-                    val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
-                    from(intermediateDir.dir(abi ?: "null")) {
-                        include("*.so")
-                        rename { filename: String -> "lib$filename" }
-                        into(abi ?: "null")
-                    }
-                    val nativeAssetsDir = intermediateDir.dir("native_assets/jniLibs/lib/$abi")
-                    from(nativeAssetsDir) {
-                        include("*.so")
-                        into(abi ?: "null")
-                    }
+            targetPlatforms.get().forEach { targetPlatform ->
+                val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
+                from(intermediateDir.dir(abi ?: "null")) {
+                    include("*.so")
+                    rename { filename: String -> "lib$filename" }
+                    into(abi ?: "null")
+                }
+                val nativeAssetsDir = intermediateDir.dir("native_assets/jniLibs/lib/$abi")
+                from(nativeAssetsDir) {
+                    include("*.so")
+                    into(abi ?: "null")
                 }
             }
         }
