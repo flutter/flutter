@@ -14,6 +14,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
+#include "flutter/shell/platform/android/vulkan_queue_guard/vulkan_queue_guard.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_vulkan.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
@@ -143,6 +144,70 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
   latch.Wait();
   engine.reset();
   EXPECT_TRUE(g_vulkan_proc_info.did_call_queue_submit);
+}
+
+TEST_F(EmbedderTest, VulkanImpellerQueueCallsGoThroughEmbedderGuard) {
+  VulkanQueueGuard::ResetForTesting();
+  struct ScopedGuardReset {
+    ~ScopedGuardReset() { VulkanQueueGuard::ResetForTesting(); }
+  } scoped_reset;
+
+  fml::AutoResetWaitableEvent present_latch;
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
+  ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&]() {
+    present_latch.Signal();
+  });
+
+  VkInstance vk_instance =
+      static_cast<VkInstance>(context.GetRendererConfig().vulkan.instance);
+  VkDevice vk_device =
+      static_cast<VkDevice>(context.GetRendererConfig().vulkan.device);
+  VkQueue vk_queue =
+      static_cast<VkQueue>(context.GetRendererConfig().vulkan.queue);
+  auto real_gipa = reinterpret_cast<PFN_vkGetInstanceProcAddr>(
+      EmbedderTestContextVulkan::InstanceProcAddr(
+          &context, context.GetRendererConfig().vulkan.instance,
+          "vkGetInstanceProcAddr"));
+  ASSERT_NE(real_gipa, nullptr);
+
+  VulkanQueueGuard::RegisterInstance(vk_instance, real_gipa);
+  VulkanQueueGuard::RegisterDevice(vk_instance, vk_device, {vk_queue});
+
+  context.SetVulkanInstanceProcAddressCallback(
+      [](void* user_data, FlutterVulkanInstanceHandle instance,
+         const char* name) -> void* {
+        if (name != nullptr &&
+            std::strcmp(name, "vkGetInstanceProcAddr") == 0) {
+          return reinterpret_cast<void*>(
+              VulkanQueueGuard::GetInstanceProcAddrTrampoline());
+        }
+        return EmbedderTestContextVulkan::InstanceProcAddr(user_data, instance,
+                                                           name);
+      });
+
+  // 800x600 test surface dimensions matching kWidth/kHeight in this file.
+  constexpr int kSurfaceWidth = 800;
+  constexpr int kSurfaceHeight = 600;
+  EmbedderConfigBuilder builder(context);
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetDartEntrypoint("render_gradient");
+  builder.SetSurface(DlISize(kSurfaceWidth, kSurfaceHeight));
+
+  UniqueEngine engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = kSurfaceWidth;
+  event.height = kSurfaceHeight;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  present_latch.Wait();
+  engine.reset();
+  EXPECT_GT(VulkanQueueGuard::GetQueueSubmitCountForTesting(), 0u);
 }
 
 namespace {
