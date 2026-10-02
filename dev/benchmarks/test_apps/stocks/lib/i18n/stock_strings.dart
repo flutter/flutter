@@ -57,14 +57,15 @@ import 'stock_strings_es.dart';
 ///
 /// 1. Open your project's `ios/Runner.xcworkspace` Xcode workspace file.
 ///
-/// 2. In the **Project Navigator**, select the `Runner` project
-///    file under **Projects**.
+/// 2. In the **Project Navigator**, select the `Runner` project. Then, in the
+///    editor's sidebar, select `Runner` under **PROJECT** (not **TARGETS**).
 ///
 /// 3. Select the `Info` tab in the project editor.
 ///
 /// 4. In the **Localizations** section, click the `Add` button
 ///    (`+`) to add the supported languages and regions to your
-///    project.
+///    project. When asked to choose files and reference language,
+///    select `Finish`.
 ///
 /// This list should be consistent with the languages listed in the
 /// StockStrings.supportedLocales property.
