@@ -14,6 +14,7 @@
 #include "flutter/flow/embedded_views.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/surface_pool.h"
+#include "flutter/shell/platform/android/external_view_embedder/surface_transaction_router.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 #include "third_party/abseil-cpp/absl/container/flat_hash_set.h"
@@ -39,6 +40,7 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
       const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
+      std::shared_ptr<SurfaceTransactionRouter> transaction_router,
       const TaskRunners& task_runners);
 
   // |ExternalViewEmbedder|
@@ -113,6 +115,12 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // Holds surfaces. Allows to recycle surfaces or allocate new ones.
   const std::unique_ptr<SurfacePool> surface_pool_;
 
+  // Selects, per frame, whether swapchain transactions are applied by the
+  // raster thread or routed through the platform thread, and tracks the
+  // platform-routed frames that SurfaceFlinger has not committed yet. Shared
+  // with the surfaces created by |surface_factory_|.
+  const std::shared_ptr<SurfaceTransactionRouter> transaction_router_;
+
   // The task runners.
   const TaskRunners task_runners_;
 
@@ -145,12 +153,6 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The size of the root canvas on the last submitted frame, used to detect
   // surface resizes that require ViewRootImpl BLAST synchronization.
   std::optional<DlISize> last_submitted_frame_size_;
-
-  // Number of Java-routed frames posted to the platform thread that have not
-  // yet finished onEndFrame2(). Shared with posted tasks to prevent raster
-  // submissions from overtaking pending UI-thread transactions.
-  std::shared_ptr<std::atomic<int32_t>> in_flight_java_frames_ =
-      std::make_shared<std::atomic<int32_t>>(0);
 
   // Whether the previous frame required Java transactions, used to hold the
   // Java path for one transition frame so ViewRootImpl drains in FIFO order.

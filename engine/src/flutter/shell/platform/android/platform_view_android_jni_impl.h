@@ -5,7 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_JNI_IMPL_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_JNI_IMPL_H_
 
-#include <atomic>
 #include <functional>
 #include <string>
 #include <vector>
@@ -131,14 +130,6 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
   // New Platform View Support.
   ASurfaceTransaction* createTransaction() override;
 
-  bool FrameUsesJavaTransactions() const override {
-    return frame_uses_java_transactions_;
-  }
-
-  void SetFrameUsesJavaTransactions(bool uses_java) override {
-    frame_uses_java_transactions_ = uses_java;
-  }
-
   void swapTransaction() override;
 
   std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
@@ -168,7 +159,6 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
  private:
   // Reference to FlutterJNI object.
   const fml::jni::JavaObjectWeakGlobalRef java_object_;
-  bool frame_uses_java_transactions_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroidJNIImpl);
 };

@@ -15,6 +15,7 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/snapshot_surface_producer.h"
 #include "flutter/shell/platform/android/context/android_context.h"
+#include "flutter/shell/platform/android/external_view_embedder/surface_transaction_router.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
@@ -26,9 +27,11 @@ namespace flutter {
 
 class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  public:
-  AndroidSurfaceFactoryImpl(const std::shared_ptr<AndroidContext>& context,
-                            bool enable_impeller,
-                            bool lazy_shader_mode);
+  AndroidSurfaceFactoryImpl(
+      const std::shared_ptr<AndroidContext>& context,
+      std::shared_ptr<SurfaceTransactionRouter> transaction_router,
+      bool enable_impeller,
+      bool lazy_shader_mode);
 
   ~AndroidSurfaceFactoryImpl() override;
 
@@ -36,6 +39,7 @@ class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
 
  private:
   const std::shared_ptr<AndroidContext>& android_context_;
+  const std::shared_ptr<SurfaceTransactionRouter> transaction_router_;
   const bool enable_impeller_;
   const bool lazy_shader_mode_;
 };
@@ -130,6 +134,9 @@ class PlatformViewAndroid final : public PlatformView {
  private:
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidContext> android_context_;
+  // Shared by the surfaces created through |surface_factory_| and the HC++
+  // view embedder; see |SurfaceTransactionRouter|.
+  std::shared_ptr<SurfaceTransactionRouter> transaction_router_;
   std::shared_ptr<AndroidSurfaceFactoryImpl> surface_factory_;
 
   PlatformViewAndroidDelegate platform_view_android_delegate_;

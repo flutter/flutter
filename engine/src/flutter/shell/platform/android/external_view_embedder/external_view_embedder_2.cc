@@ -40,6 +40,7 @@ AndroidExternalViewEmbedder2::AndroidExternalViewEmbedder2(
     const AndroidContext& android_context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     std::shared_ptr<AndroidSurfaceFactory> surface_factory,
+    std::shared_ptr<SurfaceTransactionRouter> transaction_router,
     const TaskRunners& task_runners)
     : ExternalViewEmbedder(),
       android_context_(android_context),
@@ -47,7 +48,10 @@ AndroidExternalViewEmbedder2::AndroidExternalViewEmbedder2(
       surface_factory_(std::move(surface_factory)),
       surface_pool_(
           std::make_unique<SurfacePool>(/*use_new_surface_methods=*/true)),
-      task_runners_(task_runners) {}
+      transaction_router_(std::move(transaction_router)),
+      task_runners_(task_runners) {
+  FML_DCHECK(transaction_router_);
+}
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder2::PrerollCompositeEmbeddedView(
@@ -104,25 +108,27 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   const bool uses_java_transactions =
       primary_uses_java_transactions ||
       previous_frame_used_java_transactions_ ||
-      in_flight_java_frames_->load(std::memory_order_acquire) > 0;
+      transaction_router_->HasUncommittedPlatformFrames();
   previous_frame_used_java_transactions_ = primary_uses_java_transactions;
 
-  fml::ScopedCleanupClosure restore_transaction_path;
+  // The route is read by the swapchain of every surface submitted below, so it
+  // is latched for the whole submission rather than consumed per surface.
+  fml::ScopedCleanupClosure restore_transaction_route;
   if (uses_java_transactions) {
-    jni_facade_->SetFrameUsesJavaTransactions(true);
-    restore_transaction_path =
-        fml::ScopedCleanupClosure([jni_facade = jni_facade_]() {
-          jni_facade->SetFrameUsesJavaTransactions(false);
+    transaction_router_->SetFrameRoute(
+        SurfaceTransactionRouter::Route::kPlatform);
+    restore_transaction_route =
+        fml::ScopedCleanupClosure([router = transaction_router_]() {
+          router->SetFrameRoute(SurfaceTransactionRouter::Route::kDirect);
         });
   }
 
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
     if (uses_java_transactions) {
-      in_flight_java_frames_->fetch_add(1, std::memory_order_acq_rel);
+      transaction_router_->OnPlatformFrameSubmitted();
       task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
-          [this, jni_facade = jni_facade_,
-           in_flight_java_frames = in_flight_java_frames_,
+          [this, jni_facade = jni_facade_, router = transaction_router_,
            views_visible_last_frame = views_visible_last_frame_]() {
             // This pointer is guaranteed to not be dangling as long as
             // DestroySurfaces is called before the embedder is deleted. See
@@ -134,7 +140,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
             jni_facade->swapTransaction();
             jni_facade->onEndFrame2();
-            in_flight_java_frames->fetch_sub(1, std::memory_order_acq_rel);
+            router->OnPlatformFrameCommitted();
           }));
     }
     views_visible_last_frame_.clear();
@@ -216,14 +222,13 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   }
 
   frame->Submit();
-  in_flight_java_frames_->fetch_add(1, std::memory_order_acq_rel);
+  transaction_router_->OnPlatformFrameSubmitted();
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
-       jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
-       slices = std::move(slices_),
+       jni_facade = jni_facade_, router = transaction_router_,
+       device_pixel_ratio = device_pixel_ratio_, slices = std::move(slices_),
        views_visible_last_frame = views_visible_last_frame_,
-       overlay_layer_has_content_this_frame_,
-       in_flight_java_frames = in_flight_java_frames_]() mutable -> void {
+       overlay_layer_has_content_this_frame_]() mutable -> void {
         if (overlay_layer_has_content_this_frame_) {
           ShowOverlayLayerIfNeeded();
         } else {
@@ -255,8 +260,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         }
 
         jni_facade->swapTransaction();
-        jni_facade_->onEndFrame2();
-        in_flight_java_frames->fetch_sub(1, std::memory_order_acq_rel);
+        jni_facade->onEndFrame2();
+        router->OnPlatformFrameCommitted();
       }));
 
   views_visible_last_frame_.clear();
