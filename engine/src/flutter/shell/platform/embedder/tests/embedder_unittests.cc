@@ -6642,6 +6642,83 @@ TEST_F(EmbedderTest, EmbedderGetProcAddressesImageGenerator) {
             &FlutterEngineRegisterVMServiceUriCallback);
   EXPECT_EQ(table.DeregisterVMServiceUriCallback,
             &FlutterEngineDeregisterVMServiceUriCallback);
+  EXPECT_NE(table.QueryVulkanDriverSupport, nullptr);
+  EXPECT_EQ(table.QueryVulkanDriverSupport,
+            &FlutterEngineQueryVulkanDriverSupport);
+}
+
+TEST_F(EmbedderTest, EmbedderQueryVulkanDriverSupportProbeTable) {
+  // Null arguments and short struct_size must return kInvalidArguments and
+  // leave out_is_known_bad unmodified.
+  bool is_known_bad = true;
+  EXPECT_EQ(FlutterEngineQueryVulkanDriverSupport(nullptr, &is_known_bad),
+            kInvalidArguments);
+  EXPECT_TRUE(is_known_bad);
+
+  FlutterVulkanDriverProperties props = {};
+  props.struct_size = sizeof(FlutterVulkanDriverProperties);
+  EXPECT_EQ(FlutterEngineQueryVulkanDriverSupport(&props, nullptr),
+            kInvalidArguments);
+
+  FlutterVulkanDriverProperties short_props = {};
+  short_props.struct_size = sizeof(size_t);
+  is_known_bad = false;
+  EXPECT_EQ(FlutterEngineQueryVulkanDriverSupport(&short_props, &is_known_bad),
+            kInvalidArguments);
+  EXPECT_FALSE(is_known_bad);
+
+#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
+  // 0x168C is Qualcomm PCI vendor ID; 0x13B5 is ARM; 0x144D is Samsung.
+  constexpr uint32_t kVendorQualcomm = 0x168C;
+  constexpr uint32_t kVendorArm = 0x13B5;
+  constexpr uint32_t kVendorSamsung = 0x144D;
+  // Vulkan API versions encoded via standard Vulkan bit shifts:
+  // major << 22 | minor << 12.
+  constexpr uint32_t kVulkan1_2 = (1u << 22) | (2u << 12);
+  constexpr uint32_t kVulkan1_3 = (1u << 22) | (3u << 12);
+
+  // Adreno 640 -> known bad.
+  props = {};
+  props.struct_size = sizeof(FlutterVulkanDriverProperties);
+  props.api_version = kVulkan1_3;
+  props.vendor_id = kVendorQualcomm;
+  props.device_name = "Adreno (TM) 640";
+  is_known_bad = false;
+  ASSERT_EQ(FlutterEngineQueryVulkanDriverSupport(&props, &is_known_bad),
+            kSuccess);
+  EXPECT_TRUE(is_known_bad);
+
+  // Adreno 740 -> ok.
+  props.device_name = "Adreno (TM) 740";
+  is_known_bad = true;
+  ASSERT_EQ(FlutterEngineQueryVulkanDriverSupport(&props, &is_known_bad),
+            kSuccess);
+  EXPECT_FALSE(is_known_bad);
+
+  // Mali-G52 -> ok.
+  props.vendor_id = kVendorArm;
+  props.device_name = "Mali-G52";
+  is_known_bad = true;
+  ASSERT_EQ(FlutterEngineQueryVulkanDriverSupport(&props, &is_known_bad),
+            kSuccess);
+  EXPECT_FALSE(is_known_bad);
+
+  // Samsung Xclipse with Vulkan 1.2 -> known bad.
+  props.vendor_id = kVendorSamsung;
+  props.api_version = kVulkan1_2;
+  props.device_name = "Samsung Xclipse 920";
+  is_known_bad = false;
+  ASSERT_EQ(FlutterEngineQueryVulkanDriverSupport(&props, &is_known_bad),
+            kSuccess);
+  EXPECT_TRUE(is_known_bad);
+
+  // Samsung Xclipse with Vulkan 1.3 -> ok.
+  props.api_version = kVulkan1_3;
+  is_known_bad = true;
+  ASSERT_EQ(FlutterEngineQueryVulkanDriverSupport(&props, &is_known_bad),
+            kSuccess);
+  EXPECT_FALSE(is_known_bad);
+#endif
 }
 
 }  // namespace testing

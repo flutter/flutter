@@ -3941,6 +3941,27 @@ typedef struct {
   void* user_data;
 } FlutterVMServiceUriCallbackConfig;
 
+//------------------------------------------------------------------------------
+/// @brief      Vulkan physical device properties queried by the embedder to
+///             determine whether Impeller's Vulkan backend considers the driver
+///             known-bad.
+///
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanDriverProperties).
+  size_t struct_size;
+  /// Vulkan API version reported by VkPhysicalDeviceProperties::apiVersion.
+  uint32_t api_version;
+  /// Driver version reported by VkPhysicalDeviceProperties::driverVersion.
+  uint32_t driver_version;
+  /// PCI/Khronos vendor ID reported by VkPhysicalDeviceProperties::vendorID.
+  uint32_t vendor_id;
+  /// Device ID reported by VkPhysicalDeviceProperties::deviceID.
+  uint32_t device_id;
+  /// NUL-terminated device name string from
+  /// VkPhysicalDeviceProperties::deviceName; only read during the call.
+  const char* device_name;
+} FlutterVulkanDriverProperties;
+
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -5014,6 +5035,27 @@ FlutterEngineResult FlutterEngineRegisterImageGenerator(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterImageGeneratorRegistrationInfo* info);
 
+//------------------------------------------------------------------------------
+/// @brief      Queries whether a Vulkan physical device's driver properties
+///             match a driver that Impeller considers known-bad (ineligible for
+///             Vulkan rendering).
+///
+/// @param[in]  properties        Pointer to the Vulkan driver properties
+/// struct.
+///                               Must not be null, and struct_size must cover
+///                               all read fields.
+/// @param[out] out_is_known_bad  Pointer to receive true if the driver is
+///                               known-bad, false otherwise. Written only when
+///                               `kSuccess` is returned.
+///
+/// @return     `kSuccess` on success, or `kInvalidArguments` if arguments are
+///             invalid or if Vulkan rendering is not compiled into this build.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineQueryVulkanDriverSupport(
+    const FlutterVulkanDriverProperties* properties,
+    bool* out_is_known_bad);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -5194,6 +5236,9 @@ typedef FlutterEngineResult (*FlutterEngineRegisterVMServiceUriCallbackFnPtr)(
     intptr_t* handle_out);
 typedef FlutterEngineResult (*FlutterEngineDeregisterVMServiceUriCallbackFnPtr)(
     intptr_t handle);
+typedef FlutterEngineResult (*FlutterEngineQueryVulkanDriverSupportFnPtr)(
+    const FlutterVulkanDriverProperties* properties,
+    bool* out_is_known_bad);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -5263,6 +5308,7 @@ typedef struct {
   FlutterEngineRegisterVMServiceUriCallbackFnPtr RegisterVMServiceUriCallback;
   FlutterEngineDeregisterVMServiceUriCallbackFnPtr
       DeregisterVMServiceUriCallback;
+  FlutterEngineQueryVulkanDriverSupportFnPtr QueryVulkanDriverSupport;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

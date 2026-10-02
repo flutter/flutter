@@ -7,6 +7,7 @@
 {
   global:
     Flutter*;
+    FlutterEngineQueryVulkanDriverSupport;
     __Flutter*;
     kFlutter*;
     kDartSnapshotData;
