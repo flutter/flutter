@@ -451,6 +451,39 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   return view;
 }
 
+// Verifies that `engineAllowHeadlessExecution` can be set through key-value coding.
+// The property is readonly and has no setter, so Interface Builder's User Defined Runtime
+// Attributes set the synthesized instance variable directly via KVC. If we ever declared a getter
+// or marked the poperty @dynamic, it would break.
+//
+// Interface Builder applies runtime attributes during nib loading, before `awakeFromNib` creates
+// the engine. Only the value in place at that point reaches the engine.
+- (void)testEngineAllowHeadlessExecutionIsSettableViaKeyValueCoding {
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:nil
+                                                                                 nibName:nil
+                                                                                  bundle:nil];
+  XCTAssertFalse(viewController.engineAllowHeadlessExecution);
+
+  // Verify set via key-value coding.
+  [viewController setValue:@YES forKey:@"engineAllowHeadlessExecution"];
+  XCTAssertTrue(viewController.engineAllowHeadlessExecution);
+}
+
+// Verifies that an implicitly created engine sets `allowHeadlessExecution` based on the view
+// controller's `engineAllowHeadlessExecution`.
+- (void)testImplicitEngineTakesAllowHeadlessExecutionFromViewController {
+  // Verify allowHeadlessExecution is NO by default.
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:nil
+                                                                                 nibName:nil
+                                                                                  bundle:nil];
+  XCTAssertFalse(viewController.engine.allowHeadlessExecution);
+
+  // Verify allowHeadlessExecution is YES when the VC allows it.
+  FlutterViewController* headlessViewController =
+      [[FlutterHeadlessAllowedViewController alloc] initWithProject:nil nibName:nil bundle:nil];
+  XCTAssertTrue(headlessViewController.engine.allowHeadlessExecution);
+}
+
 - (void)testStartKeyboardAnimationWillInvokeSetupKeyboardSpringAnimationIfNeeded {
   FlutterEnginePartialMock* engine = [[FlutterEnginePartialMock alloc] init];
   [engine runWithEntrypoint:nil];
