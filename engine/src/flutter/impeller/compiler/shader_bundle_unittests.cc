@@ -348,6 +348,42 @@ TEST(ShaderBundleTest, InjectsTargetDefinesDuringCompilation) {
   EXPECT_FALSE(bundle.has_value());
 }
 
+TEST(ShaderBundleTest, GeneratesCombinedImageSamplersForHLSL) {
+  // HLSL declares the texture and the sampler separately, so the bundle can
+  // only record a binding if the two are folded together. The texture's name
+  // is the one that survives.
+  std::string fixtures_path = flutter::testing::GetFixturesPath();
+  std::string config =
+      "{\"Sampled\": {\"type\": \"fragment\", \"language\": \"hlsl\", "
+      "\"entry_point\": \"FragmentShader\", \"file\": \"" +
+      fixtures_path + "/sampled_texture.hlsl\"}}";
+
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kHLSL;
+
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateShaderBundleFlatbuffer(config, options);
+  ASSERT_TRUE(bundle.has_value());
+
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+  const auto* sampled = FindByName(bundle->shaders, "Sampled");
+  ASSERT_NE(sampled, nullptr);
+
+  const std::vector<const fb::shaderbundle::BackendShaderT*> backends = {
+      sampled->metal_ios.get(),       //
+      sampled->metal_desktop.get(),   //
+      sampled->opengl_es.get(),       //
+      sampled->opengl_desktop.get(),  //
+      sampled->vulkan.get(),          //
+  };
+  for (const auto* backend : backends) {
+    ASSERT_NE(backend, nullptr);
+    ASSERT_EQ(backend->uniform_textures.size(), 1u);
+    EXPECT_STREQ(backend->uniform_textures[0]->name.c_str(), "tex");
+  }
+}
+
 }  // namespace testing
 }  // namespace compiler
 }  // namespace impeller
