@@ -303,8 +303,8 @@ class MatrixTransition extends AnimatedWidget {
   /// When the animation is stopped (either in [AnimationStatus.dismissed] or
   /// [AnimationStatus.completed]), the filter quality argument will be ignored.
   /// This means the offscreen bitmap described below is only used while the
-  /// animation is running, and the child is painted directly the rest of the
-  /// time.
+  /// animation is running, and the transform is applied directly to the
+  /// child's painting the rest of the time.
   ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;
