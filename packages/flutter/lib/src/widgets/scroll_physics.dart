@@ -89,6 +89,27 @@ class ScrollPhysics {
   /// Creates an object with the default scroll physics.
   const ScrollPhysics({this.parent});
 
+  /// Creates an [AlwaysScrollableScrollPhysics] instance.
+  const factory ScrollPhysics.alwaysScrollable({ScrollPhysics? parent}) =
+      AlwaysScrollableScrollPhysics;
+
+  /// Creates a [BouncingScrollPhysics] instance.
+  const factory ScrollPhysics.bouncing({
+    ScrollPhysics? parent,
+    ScrollDecelerationRate decelerationRate,
+  }) = BouncingScrollPhysics;
+
+  /// Creates a [ClampingScrollPhysics] instance.
+  const factory ScrollPhysics.clamping({ScrollPhysics? parent}) = ClampingScrollPhysics;
+
+  /// Creates a [NeverScrollableScrollPhysics] instance.
+  const factory ScrollPhysics.neverScrollable({ScrollPhysics? parent}) =
+      NeverScrollableScrollPhysics;
+
+  /// Creates a [RangeMaintainingScrollPhysics] instance.
+  const factory ScrollPhysics.rangeMaintaining({ScrollPhysics? parent}) =
+      RangeMaintainingScrollPhysics;
+
   /// If non-null, determines the default behavior for each method.
   ///
   /// If a subclass of [ScrollPhysics] does not override a method, that subclass
