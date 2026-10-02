@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:path/path.dart' as path;
 
 Future<void> main(List<String> args) async {
   final parser = ArgParser()
@@ -55,7 +56,10 @@ Future<void> main(List<String> args) async {
       'groovy',
       '--no-daemon',
     ], stagingProject.path);
-    final gradlewExecutable = isWindows ? r'.\gradlew.bat' : './gradlew';
+    final String gradlewExecutable = path.join(
+      stagingProject.path,
+      isWindows ? 'gradlew.bat' : 'gradlew',
+    );
 
     for (final versionStr in versions) {
       print('Processing Gradle Wrapper $versionStr...');
