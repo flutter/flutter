@@ -33,6 +33,16 @@ void DescriptorPoolVK::Destroy() {
   pools_.clear();
 }
 
+void DescriptorPoolVK::AbandonForDriverCrash() {
+  // Release each UniqueDescriptorPool handle so that the vk::UniqueHandle
+  // destructor never calls vkDestroyDescriptorPool on the corrupted device.
+  for (auto& pool : pools_) {
+    pool.release();
+  }
+  pools_.clear();
+  descriptor_sets_.clear();
+}
+
 DescriptorPoolVK::DescriptorPoolVK(std::weak_ptr<const ContextVK> context,
                                    DescriptorCacheMap descriptor_sets,
                                    std::vector<vk::UniqueDescriptorPool> pools)
@@ -47,10 +57,17 @@ DescriptorPoolVK::~DescriptorPoolVK() {
 
   auto const context = context_.lock();
   if (!context) {
+    // Context is dying - release Vulkan handles without making API calls.
+    for (auto& pool : pools_) {
+      pool.release();
+    }
     return;
   }
   auto const recycler = context->GetDescriptorPoolRecycler();
   if (!recycler) {
+    for (auto& pool : pools_) {
+      pool.release();
+    }
     return;
   }
 
@@ -84,19 +101,28 @@ fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
       // FragmentedPool == OutOfMemory AND most likely due to fragmentation
       result == vk::Result::eErrorFragmentedPool) {
     // If the pool ran out of memory, we need to create a new pool.
-    CreateNewPool(context_vk);
+    auto pool_status = CreateNewPool(context_vk);
+    if (!pool_status.ok()) {
+      return fml::Status(fml::StatusCode::kUnknown,
+                         "Failed to create descriptor pool");
+    }
     set_info.setDescriptorPool(pools_.back().get());
     result = context_vk.GetDevice().allocateDescriptorSets(&set_info, &set);
   }
-  auto lookup_result =
-      descriptor_sets_.try_emplace(pipeline_key, DescriptorCache{});
-  lookup_result.first->second.used.push_back(set);
 
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not allocate descriptor sets: "
                    << vk::to_string(result);
     return fml::Status(fml::StatusCode::kUnknown, "");
   }
+
+  // Register the newly allocated descriptor set in the per-pipeline cache.
+  // try_emplace inserts a new DescriptorCache if one doesn't exist for
+  // this pipeline key. The set is tracked as "used" and will be moved
+  // to "unused" during frame-end reclamation for reuse in future frames.
+  auto lookup_result =
+      descriptor_sets_.try_emplace(pipeline_key, DescriptorCache{});
+  lookup_result.first->second.used.push_back(set);
   return set;
 }
 
@@ -113,20 +139,21 @@ fml::Status DescriptorPoolVK::CreateNewPool(const ContextVK& context_vk) {
 void DescriptorPoolRecyclerVK::Reclaim(
     DescriptorCacheMap descriptor_sets,
     std::vector<vk::UniqueDescriptorPool> pools) {
-  // Reset the pool on a background thread.
   auto strong_context = context_.lock();
   if (!strong_context) {
     return;
   }
 
+  // Return the used descriptor sets to the unused cache so they are reused
+  // by future frames instead of being reallocated.
   for (auto& [_, cache] : descriptor_sets) {
     cache.unused.insert(cache.unused.end(), cache.used.begin(),
                         cache.used.end());
     cache.used.clear();
   }
 
-  // Move the pool to the recycled list. If more than 32 pool are
-  // cached then delete the newest entry.
+  // Move the pool to the recycled list. If more than 32 pools are
+  // cached then delete the newest entry (back of the deque).
   Lock recycled_lock(recycled_mutex_);
   while (recycled_.size() >= kMaxRecycledPools) {
     auto& back_entry = recycled_.back();
@@ -138,7 +165,6 @@ void DescriptorPoolRecyclerVK::Reclaim(
 }
 
 vk::UniqueDescriptorPool DescriptorPoolRecyclerVK::Get() {
-  // Recycle a pool with a matching minumum capcity if it is available.
   return Create();
 }
 
