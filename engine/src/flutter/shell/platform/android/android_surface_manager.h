@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_MANAGER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_MANAGER_H_
 
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -15,6 +16,7 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
+#include "flutter/shell/platform/android/android_vulkan_device_owner.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 #if FML_OS_ANDROID
@@ -96,11 +98,40 @@ VulkanValidationConfig SelectVulkanValidationConfig(
 ///        lifecycle, resource context pooling, and surface presentation.
 class AndroidSurfaceManager {
  public:
+  using VulkanDriverProbe =
+      std::function<FlutterEngineResult(const FlutterVulkanDriverProperties&,
+                                        bool*)>;
+
+  /// Returns the default Vulkan driver probe backed by the embedder proc table.
+  static VulkanDriverProbe DefaultVulkanDriverProbe();
+
   /// Creates a new surface manager configured for the specified rendering API.
   static std::unique_ptr<AndroidSurfaceManager> Create(
+      AndroidRenderingAPI rendering_api,
+      VulkanDriverProbe vulkan_driver_probe = DefaultVulkanDriverProbe());
+
+  static std::unique_ptr<AndroidSurfaceManager> Create(
+      AndroidRenderingAPI rendering_api,
+      std::shared_ptr<VulkanDeviceOwner> shared_vulkan_device_owner,
+      VulkanDriverProbe vulkan_driver_probe = DefaultVulkanDriverProbe());
+
+  /// Creates a surface manager for fake-window unit tests, preserving
+  /// GetRenderingAPI() == kImpellerVulkan backed by EGL.
+  static std::unique_ptr<AndroidSurfaceManager> CreateForFakeWindow(
       AndroidRenderingAPI rendering_api);
 
-  explicit AndroidSurfaceManager(AndroidRenderingAPI rendering_api);
+  /// Creates a surface manager with a forced Vulkan initialization failure for
+  /// testing the device fallback path.
+  static std::unique_ptr<AndroidSurfaceManager>
+  CreateWithForcedVulkanInitFailureForTesting(
+      AndroidRenderingAPI rendering_api);
+
+  explicit AndroidSurfaceManager(
+      AndroidRenderingAPI rendering_api,
+      std::shared_ptr<VulkanDeviceOwner> shared_vulkan_device_owner = nullptr,
+      VulkanDriverProbe vulkan_driver_probe = DefaultVulkanDriverProbe(),
+      bool preserve_vulkan_api_for_fake_window = false,
+      bool force_vulkan_init_failure_for_testing = false);
   virtual ~AndroidSurfaceManager();
 
   AndroidRenderingAPI GetRenderingAPI() const { return rendering_api_; }
@@ -186,6 +217,17 @@ class AndroidSurfaceManager {
 
   /// Returns the native VkInstance handle.
   VkInstance GetVulkanInstance() const { return vk_instance_; }
+
+  /// Returns the native VkDevice handle.
+  VkDevice GetVulkanDevice() const { return vk_device_; }
+
+  /// Returns the native VkQueue handle.
+  VkQueue GetVulkanQueue() const { return vk_queue_; }
+
+  /// Returns the shared VulkanDeviceOwner, or nullptr if Vulkan is not active.
+  std::shared_ptr<VulkanDeviceOwner> GetVulkanDeviceOwner() const {
+    return vulkan_device_owner_;
+  }
 
   /// Tears down the Vulkan instance and device resources.
   void TeardownVulkan();
@@ -313,6 +355,8 @@ class AndroidSurfaceManager {
 #endif
 
   // Vulkan state
+  std::shared_ptr<VulkanDeviceOwner> vulkan_device_owner_;
+  VulkanDriverProbe vulkan_driver_probe_;
   void* vulkan_lib_handle_ = nullptr;
   VkInstance vk_instance_ = VK_NULL_HANDLE;
   VkPhysicalDevice vk_physical_device_ = VK_NULL_HANDLE;
@@ -384,7 +428,7 @@ class AndroidSurfaceManager {
       overlay_vulkan_surfaces_;
 
   // 4-byte aligned members (40 bytes total: 10 * 4 bytes, aligned to 8)
-  const AndroidRenderingAPI rendering_api_;
+  AndroidRenderingAPI rendering_api_;
   uint32_t vk_version_ = VK_API_VERSION_1_1;
   uint32_t vk_graphics_queue_family_index_ = 0;
   VkImageUsageFlags vk_swapchain_usage_ = 0;
@@ -401,8 +445,8 @@ class AndroidSurfaceManager {
   bool has_acquired_image_ = false;
   bool vk_swapchain_out_of_date_ = false;
   bool vk_surface_lost_ = false;
-  [[maybe_unused]] bool reserved_bool_1_ = false;
-  [[maybe_unused]] bool reserved_bool_2_ = false;
+  bool preserve_vulkan_api_for_fake_window_ = false;
+  bool force_vulkan_init_failure_for_testing_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceManager);
 };

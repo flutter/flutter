@@ -4018,8 +4018,7 @@ TEST(GlobalVMInitializationTest, FlutterEmbedderNativeVMIntegration) {
   EXPECT_TRUE(native.InitVM(args));
   EXPECT_TRUE(native.IsVMInitialized());
   EXPECT_TRUE(native.GetVMArgs().has_value());
-  EXPECT_EQ(native.GetSelectedRenderingAPI(),
-            AndroidRenderingAPI::kImpellerAutoselect);
+  EXPECT_EQ(native.GetSelectedRenderingAPI(), SelectRenderingAPI(args));
 
   const FlutterProjectArgs* project_args = native.GetProjectArgs();
   ASSERT_NE(project_args, nullptr);
@@ -8614,8 +8613,7 @@ TEST_F(Phase63FinalGNIntegrationTest, VMInitAndProjectArgsIsolation) {
   ASSERT_TRUE(vm_init_->Init(args));
   EXPECT_TRUE(vm_init_->IsInitialized());
   EXPECT_EQ(vm_init_->GetVmServiceUri(), "http://127.0.0.1:8888/auth/");
-  EXPECT_EQ(vm_init_->GetSelectedRenderingAPI(),
-            AndroidRenderingAPI::kImpellerAutoselect);
+  EXPECT_EQ(vm_init_->GetSelectedRenderingAPI(), SelectRenderingAPI(args));
 
   const FlutterProjectArgs* project_args = vm_init_->GetProjectArgs();
   ASSERT_NE(project_args, nullptr);
@@ -8661,12 +8659,18 @@ TEST_F(Phase63FinalGNIntegrationTest, RenderingAPISelectionMatrix) {
     EXPECT_EQ(SelectRenderingAPI(args), AndroidRenderingAPI::kSkiaOpenGLES);
   }
 
-  // Test API level >= 29 selects Impeller Autoselect
+  // Test API level >= 29 selects Impeller Autoselect on eligible device
   {
     AndroidVMArgs args;
     args.enable_impeller = true;
     args.api_level = 29;  // Android 10 Q API level 29.
-    EXPECT_EQ(SelectRenderingAPI(args),
+    DeviceProperties eligible_device;
+    eligible_device.hardware = "tensor";
+    eligible_device.product_model = "Pixel 8";
+    eligible_device.client_id_base = "android-google";
+    eligible_device.product_board = "shiba";
+    eligible_device.vendor_api_level = 34;  // Android 14 vendor API level 34.
+    EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/false, eligible_device),
               AndroidRenderingAPI::kImpellerAutoselect);
   }
 
@@ -8718,8 +8722,7 @@ TEST_F(Phase63FinalGNIntegrationTest, ConcurrentMultithreadedOperations) {
         if (!thread_vm->IsInitialized()) {
           return false;
         }
-        if (thread_vm->GetSelectedRenderingAPI() !=
-            AndroidRenderingAPI::kImpellerAutoselect) {
+        if (thread_vm->GetSelectedRenderingAPI() != SelectRenderingAPI(args)) {
           return false;
         }
       }
@@ -8759,7 +8762,7 @@ TEST_F(Phase63FinalGNIntegrationTest,
   EXPECT_EQ(native_instance->GetVMInit(), vm_init);
   EXPECT_TRUE(native_instance->IsVMInitialized());
   EXPECT_EQ(native_instance->GetSelectedRenderingAPI(),
-            AndroidRenderingAPI::kImpellerAutoselect);
+            native_instance->GetSurfaceManager()->GetRenderingAPI());
 
   // Clean up global state
   FlutterEmbedderNative::ResetDefaults();
@@ -9183,6 +9186,182 @@ TEST(FlutterEmbedderNativeHcppGatingTest,
 }
 
 TEST(FlutterEmbedderNativeHcppGatingTest,
+     EffectiveBackendControlsHcppAndNotifiesJava) {
+  auto make_tracking_invoker = [](bool* out_java_hcpp_enabled,
+                                  int* out_set_calls) {
+    auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+    ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+        .WillByDefault(Return(true));
+    ON_CALL(*mock_invoker, InvokeVoidMethod(Eq("setHcppEnabled"), _, _))
+        .WillByDefault([out_java_hcpp_enabled, out_set_calls](
+                           const std::string&, const std::string&,
+                           const std::vector<uint8_t>& payload) {
+          if (!payload.empty()) {
+            *out_java_hcpp_enabled = (payload[0] != 0);
+          }
+          ++(*out_set_calls);
+          return true;
+        });
+    ON_CALL(*mock_invoker, InvokeBooleanMethod(Eq("isHcppEnabled"), _, _))
+        .WillByDefault([out_java_hcpp_enabled](const std::string&,
+                                               const std::string&,
+                                               const std::vector<uint8_t>&) {
+          return *out_java_hcpp_enabled;
+        });
+    return mock_invoker;
+  };
+
+  // 1. Autoselect + probe "bad" on API 35 -> falls back to kImpellerOpenGLES,
+  // ShouldEnableSurfaceControl == false, Java sees HCPP disabled.
+  {
+    constexpr int kAndroid15ApiLevel = 35;
+    bool java_hcpp_enabled = true;
+    int set_calls = 0;
+    auto mock_invoker = make_tracking_invoker(&java_hcpp_enabled, &set_calls);
+
+    auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker);
+    AndroidVMArgs args;
+    args.enable_surface_control = true;
+    args.enable_impeller = true;
+    args.api_level = kAndroid15ApiLevel;
+    ASSERT_TRUE(vm_init->Init(args));
+
+    auto bad_probe = [](const FlutterVulkanDriverProperties& /*props*/,
+                        bool* out_is_known_bad) -> FlutterEngineResult {
+      *out_is_known_bad = true;
+      return kSuccess;
+    };
+    std::shared_ptr<AndroidSurfaceManager> surface_manager =
+        AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerAutoselect,
+                                      bad_probe);
+    ASSERT_NE(surface_manager, nullptr);
+    EXPECT_EQ(surface_manager->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerOpenGLES);
+    EXPECT_FALSE(
+        ShouldEnableSurfaceControl(args, surface_manager->GetRenderingAPI()));
+
+    FlutterEmbedderNative native(
+        mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, vm_init, nullptr,
+        nullptr, nullptr, nullptr, nullptr, surface_manager);
+    EXPECT_EQ(native.GetSurfaceManager()->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerOpenGLES);
+    EXPECT_FALSE(native.IsHcppEnabled());
+    EXPECT_FALSE(java_hcpp_enabled);
+    EXPECT_GE(set_calls, 1);
+  }
+
+  // 2. Autoselect + probe "good" on API 34 -> resolves to kImpellerVulkan,
+  // ShouldEnableSurfaceControl == true, Java sees HCPP enabled.
+  {
+    constexpr int kAndroid14ApiLevel = 34;
+    bool java_hcpp_enabled = false;
+    int set_calls = 0;
+    auto mock_invoker = make_tracking_invoker(&java_hcpp_enabled, &set_calls);
+
+    auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker);
+    AndroidVMArgs args;
+    args.enable_surface_control = true;
+    args.enable_impeller = true;
+    args.api_level = kAndroid14ApiLevel;
+    ASSERT_TRUE(vm_init->Init(args));
+
+    auto good_probe = [](const FlutterVulkanDriverProperties& /*props*/,
+                         bool* out_is_known_bad) -> FlutterEngineResult {
+      *out_is_known_bad = false;
+      return kSuccess;
+    };
+    std::shared_ptr<AndroidSurfaceManager> surface_manager =
+        AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerAutoselect,
+                                      good_probe);
+    ASSERT_NE(surface_manager, nullptr);
+    EXPECT_EQ(surface_manager->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerVulkan);
+    EXPECT_TRUE(
+        ShouldEnableSurfaceControl(args, surface_manager->GetRenderingAPI()));
+
+    FlutterEmbedderNative native(
+        mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, vm_init, nullptr,
+        nullptr, nullptr, nullptr, nullptr, surface_manager);
+    EXPECT_EQ(native.GetSurfaceManager()->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerVulkan);
+    EXPECT_TRUE(native.IsHcppEnabled());
+    EXPECT_TRUE(java_hcpp_enabled);
+    EXPECT_GE(set_calls, 1);
+  }
+
+  // 3. Explicit Vulkan with forced init failure on the device path -> falls
+  // back to kImpellerOpenGLES, HCPP disabled.
+  {
+    constexpr int kAndroid15ApiLevel = 35;
+    bool java_hcpp_enabled = true;
+    int set_calls = 0;
+    auto mock_invoker = make_tracking_invoker(&java_hcpp_enabled, &set_calls);
+
+    auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker);
+    AndroidVMArgs args;
+    args.enable_surface_control = true;
+    args.enable_impeller = true;
+    args.api_level = kAndroid15ApiLevel;
+    args.requested_rendering_backend = "vulkan";
+    ASSERT_TRUE(vm_init->Init(args));
+
+    std::shared_ptr<AndroidSurfaceManager> surface_manager =
+        AndroidSurfaceManager::CreateWithForcedVulkanInitFailureForTesting(
+            AndroidRenderingAPI::kImpellerVulkan);
+    ASSERT_NE(surface_manager, nullptr);
+    EXPECT_EQ(surface_manager->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerOpenGLES);
+    EXPECT_FALSE(
+        ShouldEnableSurfaceControl(args, surface_manager->GetRenderingAPI()));
+
+    FlutterEmbedderNative native(
+        mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, vm_init, nullptr,
+        nullptr, nullptr, nullptr, nullptr, surface_manager);
+    EXPECT_EQ(native.GetSurfaceManager()->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerOpenGLES);
+    EXPECT_FALSE(native.IsHcppEnabled());
+    EXPECT_FALSE(java_hcpp_enabled);
+    EXPECT_GE(set_calls, 1);
+  }
+
+  // 4. Fake-window path preserves kImpellerVulkan.
+  {
+    constexpr int kAndroid15ApiLevel = 35;
+    bool java_hcpp_enabled = false;
+    int set_calls = 0;
+    auto mock_invoker = make_tracking_invoker(&java_hcpp_enabled, &set_calls);
+
+    auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker);
+    AndroidVMArgs args;
+    args.enable_surface_control = true;
+    args.enable_impeller = true;
+    args.api_level = kAndroid15ApiLevel;
+    args.requested_rendering_backend = "vulkan";
+    ASSERT_TRUE(vm_init->Init(args));
+
+    std::shared_ptr<AndroidSurfaceManager> surface_manager =
+        AndroidSurfaceManager::CreateForFakeWindow(
+            AndroidRenderingAPI::kImpellerVulkan);
+    ASSERT_NE(surface_manager, nullptr);
+    EXPECT_EQ(surface_manager->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerVulkan);
+
+    FlutterEmbedderNative native(
+        mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, vm_init, nullptr,
+        nullptr, nullptr, nullptr, nullptr, surface_manager);
+    EXPECT_EQ(native.GetSurfaceManager()->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerVulkan);
+    EXPECT_TRUE(native.IsHcppEnabled());
+    EXPECT_TRUE(java_hcpp_enabled);
+    EXPECT_GE(set_calls, 1);
+  }
+}
+
+TEST(FlutterEmbedderNativeHcppGatingTest,
      NonHcppPlatformViewPresentedSynchronouslyWaitsForPlatformTaskRunner) {
   auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
   ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
@@ -9341,6 +9520,244 @@ TEST(FlutterEmbedderNativeTest, RequiresOnscreenClearanceLifecycle) {
     dlclose(mediandk);
   }
 #endif
+}
+
+namespace {
+
+VKAPI_ATTR VkResult VKAPI_CALL
+FakeGroupVkQueueSubmit(VkQueue queue,
+                       uint32_t submitCount,
+                       const VkSubmitInfo* pSubmits,
+                       VkFence fence) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL FakeGroupVkQueueWaitIdle(VkQueue queue) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+FakeGroupVkQueuePresentKHR(VkQueue queue,
+                           const VkPresentInfoKHR* pPresentInfo) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL FakeGroupVkDeviceWaitIdle(VkDevice device) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+FakeGroupVkDestroyDevice(VkDevice device,
+                         const VkAllocationCallbacks* pAllocator) {}
+
+VKAPI_ATTR void VKAPI_CALL
+FakeGroupVkDestroyInstance(VkInstance instance,
+                           const VkAllocationCallbacks* pAllocator) {}
+
+VKAPI_ATTR void VKAPI_CALL FakeGroupNoopVulkanProc() {}
+
+VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL
+FakeGroupVulkanGetInstanceProcAddr(VkInstance instance, const char* pName) {
+  if (pName == nullptr || std::strcmp(pName, "vkGetDeviceProcAddr") == 0) {
+    return nullptr;
+  }
+  if (std::strcmp(pName, "vkQueueSubmit") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeGroupVkQueueSubmit);
+  }
+  if (std::strcmp(pName, "vkQueueWaitIdle") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeGroupVkQueueWaitIdle);
+  }
+  if (std::strcmp(pName, "vkQueuePresentKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeGroupVkQueuePresentKHR);
+  }
+  if (std::strcmp(pName, "vkDeviceWaitIdle") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeGroupVkDeviceWaitIdle);
+  }
+  if (std::strcmp(pName, "vkDestroyDevice") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeGroupVkDestroyDevice);
+  }
+  if (std::strcmp(pName, "vkDestroyInstance") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeGroupVkDestroyInstance);
+  }
+  return &FakeGroupNoopVulkanProc;
+}
+
+std::shared_ptr<VulkanDeviceOwner> CreateFakeGroupVulkanDeviceOwner(
+    uintptr_t tag = 0x8000) {
+  auto fake_instance = reinterpret_cast<VkInstance>(tag + 1);
+  auto fake_phys_dev = reinterpret_cast<VkPhysicalDevice>(tag + 2);
+  auto fake_device = reinterpret_cast<VkDevice>(tag + 3);
+  auto fake_queue = reinterpret_cast<VkQueue>(tag + 4);
+  return std::make_shared<VulkanDeviceOwner>(
+      /*vulkan_lib_handle=*/nullptr, fake_instance, fake_phys_dev, fake_device,
+      fake_queue, /*graphics_queue_family_index=*/0, VK_API_VERSION_1_1,
+      std::vector<std::string>{"VK_KHR_surface", "VK_KHR_android_surface"},
+      std::vector<std::string>{"VK_KHR_swapchain"},
+      &FakeGroupVulkanGetInstanceProcAddr, &FakeGroupVkDestroyDevice,
+      &FakeGroupVkDestroyInstance);
+}
+
+}  // namespace
+
+TEST(VulkanDeviceOwnerTest, EngineOutlivesSurfaceManager) {
+  VulkanQueueGuard::ResetForTesting();
+  FlutterEmbedderNative::ResetDefaults();
+  AndroidVMArgs vm_args;
+  vm_args.enable_impeller = true;
+  vm_args.requested_rendering_backend = "vulkan";
+  FlutterEmbedderNative::SetDefaultVMArgs(vm_args);
+
+  auto owner = CreateFakeGroupVulkanDeviceOwner(0x8100);
+  int owner_destroyed_count = 0;
+  owner->SetDestructionCallbackForTesting(
+      [&owner_destroyed_count]() { ++owner_destroyed_count; });
+  VkInstance shared_instance = owner->GetInstance();
+  VkDevice shared_device = owner->GetDevice();
+
+  auto native = std::make_unique<FlutterEmbedderNative>(owner);
+  owner.reset();
+  ASSERT_NE(native->GetSurfaceManager(), nullptr);
+  ASSERT_TRUE(native->GetSurfaceManager()->IsVulkanInitialized());
+  EXPECT_EQ(native->GetSurfaceManager()->GetVulkanDevice(), shared_device);
+
+  auto fake_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x9001);
+  native->SetEngine(fake_engine);
+  bool deinit_called = false;
+  native->SetDeinitializeEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) -> FlutterEngineResult {
+        EXPECT_EQ(engine, fake_engine);
+        // The owner must still be alive while the engine deinitializes, even
+        // after the surface manager has torn down its Vulkan state.
+        EXPECT_EQ(owner_destroyed_count, 0);
+        auto trampoline = VulkanQueueGuard::GetInstanceProcAddrTrampoline();
+        auto wait_idle = reinterpret_cast<PFN_vkDeviceWaitIdle>(
+            trampoline(shared_instance, "vkDeviceWaitIdle"));
+        EXPECT_NE(wait_idle, nullptr);
+        if (wait_idle != nullptr) {
+          EXPECT_EQ(wait_idle(shared_device), VK_SUCCESS);
+        }
+        deinit_called = true;
+        return kSuccess;
+      });
+
+  // Tear down the surface manager before the engine shuts down.
+  native->GetSurfaceManager()->TeardownVulkan();
+  EXPECT_FALSE(native->GetSurfaceManager()->IsVulkanInitialized());
+  EXPECT_EQ(owner_destroyed_count, 0);
+
+  // Destroying native runs engine shutdown/deinitialization while the owner is
+  // still alive, then drops the last owner reference.
+  native.reset();
+  EXPECT_TRUE(deinit_called);
+  EXPECT_EQ(owner_destroyed_count, 1);
+
+  FlutterEmbedderNative::ResetDefaults();
+  VulkanQueueGuard::ResetForTesting();
+}
+
+TEST(FlutterEmbedderNativeTest, SpawnedEngineSharesParentVkDevice) {
+  VulkanQueueGuard::ResetForTesting();
+  FlutterEmbedderNative::ResetDefaults();
+  AndroidVMArgs vm_args;
+  vm_args.enable_impeller = true;
+  vm_args.requested_rendering_backend = "vulkan";
+  FlutterEmbedderNative::SetDefaultVMArgs(vm_args);
+
+  auto owner = CreateFakeGroupVulkanDeviceOwner(0x8200);
+  auto parent = std::make_unique<FlutterEmbedderNative>(owner);
+  owner.reset();
+
+  ASSERT_NE(parent->GetSurfaceManager(), nullptr);
+  ASSERT_TRUE(parent->GetSurfaceManager()->IsVulkanInitialized());
+  VkDevice parent_device = parent->GetSurfaceManager()->GetVulkanDevice();
+  ASSERT_NE(parent_device, static_cast<VkDevice>(VK_NULL_HANDLE));
+
+  AndroidEngineSpawnArgs spawn_args;
+  spawn_args.entrypoint = "childMain";
+  spawn_args.engine_id = 42;
+  auto child = parent->SpawnChild(nullptr, nullptr, spawn_args);
+  ASSERT_NE(child, nullptr);
+  ASSERT_NE(child->GetSurfaceManager(), nullptr);
+  EXPECT_TRUE(child->GetSurfaceManager()->IsVulkanInitialized());
+  EXPECT_EQ(child->GetSurfaceManager()->GetVulkanDevice(), parent_device);
+  EXPECT_EQ(child->GetSurfaceManager()->GetVulkanDeviceOwner(),
+            parent->GetSurfaceManager()->GetVulkanDeviceOwner());
+
+  child.reset();
+  parent.reset();
+  FlutterEmbedderNative::ResetDefaults();
+  VulkanQueueGuard::ResetForTesting();
+}
+
+TEST(FlutterEmbedderNativeTest, SpawnedEngineOutlivesParent) {
+  VulkanQueueGuard::ResetForTesting();
+  FlutterEmbedderNative::ResetDefaults();
+  AndroidVMArgs vm_args;
+  vm_args.enable_impeller = true;
+  vm_args.requested_rendering_backend = "vulkan";
+  FlutterEmbedderNative::SetDefaultVMArgs(vm_args);
+
+  auto owner = CreateFakeGroupVulkanDeviceOwner(0x8300);
+  int owner_destroyed_count = 0;
+  owner->SetDestructionCallbackForTesting(
+      [&owner_destroyed_count]() { ++owner_destroyed_count; });
+  VkInstance shared_instance = owner->GetInstance();
+  VkDevice shared_device = owner->GetDevice();
+  VkQueue shared_queue = owner->GetQueue();
+
+  auto parent = std::make_unique<FlutterEmbedderNative>(owner);
+  owner.reset();
+
+  AndroidEngineSpawnArgs spawn_args;
+  spawn_args.entrypoint = "childMain";
+  spawn_args.engine_id = 43;
+  auto child = parent->SpawnChild(nullptr, nullptr, spawn_args);
+  ASSERT_NE(child, nullptr);
+  ASSERT_NE(child->GetSurfaceManager(), nullptr);
+  EXPECT_EQ(child->GetSurfaceManager()->GetVulkanDevice(), shared_device);
+
+  // Destroy the parent first while the child remains active.
+  parent.reset();
+  EXPECT_EQ(owner_destroyed_count, 0);
+  EXPECT_TRUE(child->GetSurfaceManager()->IsVulkanInitialized());
+  EXPECT_EQ(child->GetSurfaceManager()->GetVulkanDevice(), shared_device);
+
+  // Render a frame on the child and perform a guarded queue submit and image
+  // decode on the shared device after the parent is gone.
+  EXPECT_TRUE(child->GetSurfaceManager()->SetNativeWindow(
+      nullptr, /*is_fake_window=*/true));
+  FlutterFrameInfo frame_info = {};
+  frame_info.struct_size = sizeof(FlutterFrameInfo);
+  frame_info.size = {128, 128};
+  FlutterVulkanImage img =
+      child->GetSurfaceManager()->GetNextImage(&frame_info);
+  EXPECT_NE(img.image, 0u);
+  EXPECT_TRUE(child->GetSurfaceManager()->PresentImage(&img));
+
+  auto trampoline = VulkanQueueGuard::GetInstanceProcAddrTrampoline();
+  auto guarded_submit = reinterpret_cast<PFN_vkQueueSubmit>(
+      trampoline(shared_instance, "vkQueueSubmit"));
+  ASSERT_NE(guarded_submit, nullptr);
+  EXPECT_EQ(guarded_submit(shared_queue, 0, nullptr, VK_NULL_HANDLE),
+            VK_SUCCESS);
+
+  // Decode an image via the child's ImageDecoderProvider to exercise the IO
+  // decode path while the parent is already destroyed.
+  auto mock_decoder = std::make_shared<InMemoryImageDecoderProvider>();
+  child->SetImageDecoderProvider(mock_decoder);
+  std::vector<uint8_t> encoded_bytes = {0x89, 0x50, 0x4E, 0x47};
+  EXPECT_TRUE(child->DecodeImage(encoded_bytes.data(), encoded_bytes.size(),
+                                 /*generator_handle=*/1));
+  EXPECT_EQ(owner_destroyed_count, 0);
+
+  // Destroy the child; the shared VulkanDeviceOwner destructor must run
+  // exactly once after the child is destroyed.
+  child.reset();
+  EXPECT_EQ(owner_destroyed_count, 1);
+
+  FlutterEmbedderNative::ResetDefaults();
+  VulkanQueueGuard::ResetForTesting();
 }
 
 }  // namespace testing

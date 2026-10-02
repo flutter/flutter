@@ -163,6 +163,8 @@ class FlutterEmbedderNative {
  public:
   FlutterEmbedderNative();
   explicit FlutterEmbedderNative(
+      std::shared_ptr<VulkanDeviceOwner> shared_vulkan_device_owner);
+  explicit FlutterEmbedderNative(
       std::shared_ptr<JvmInvoker> jvm_invoker,
       const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr,
       std::shared_ptr<OSLibraryLoader> library_loader = nullptr,
@@ -186,7 +188,8 @@ class FlutterEmbedderNative {
           nullptr,
       std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider =
           nullptr,
-      std::shared_ptr<AndroidEngineGroup> engine_group = nullptr);
+      std::shared_ptr<AndroidEngineGroup> engine_group = nullptr,
+      std::shared_ptr<AndroidSurfaceManager> surface_manager = nullptr);
   virtual ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -1180,7 +1183,9 @@ class FlutterEmbedderNative {
   static std::shared_ptr<AndroidVMInit> default_vm_init_;
   static std::optional<AndroidVMArgs> default_vm_args_;
 
-  void InitializeRuntimeSubsystems();
+  void InitializeRuntimeSubsystems(
+      std::shared_ptr<VulkanDeviceOwner> shared_vulkan_device_owner = nullptr,
+      std::shared_ptr<AndroidSurfaceManager> surface_manager = nullptr);
   void HandleCompositorBeginFrame();
   void HandleCompositorPlatformViewPresented(
       int64_t view_id,
@@ -1238,6 +1243,7 @@ class FlutterEmbedderNative {
   std::shared_ptr<JniRouter> jni_router_;
   std::shared_ptr<APKAssetProvider> asset_provider_;
 
+  mutable std::shared_ptr<VulkanDeviceOwner> engine_vulkan_device_owner_;
   std::shared_ptr<AndroidTaskRunners> android_task_runners_;
   std::shared_ptr<AndroidSurfaceManager> surface_manager_;
   std::shared_ptr<CompositorDelegate> compositor_delegate_;

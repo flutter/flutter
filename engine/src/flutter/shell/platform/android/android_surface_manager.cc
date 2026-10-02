@@ -34,9 +34,36 @@ inline uint64_t VkImageToHandle(VkImage img) {
 }
 }  // namespace
 
+AndroidSurfaceManager::VulkanDriverProbe
+AndroidSurfaceManager::DefaultVulkanDriverProbe() {
+  return [](const FlutterVulkanDriverProperties& props,
+            bool* out_is_known_bad) -> FlutterEngineResult {
+    static FlutterEngineProcTable s_procs = []() {
+      FlutterEngineProcTable procs = {};
+      procs.struct_size = sizeof(FlutterEngineProcTable);
+      FlutterEngineGetProcAddresses(&procs);
+      return procs;
+    }();
+    if (!s_procs.QueryVulkanDriverSupport) {
+      return kInvalidArguments;
+    }
+    return s_procs.QueryVulkanDriverSupport(&props, out_is_known_bad);
+  };
+}
+
 std::unique_ptr<AndroidSurfaceManager> AndroidSurfaceManager::Create(
-    AndroidRenderingAPI rendering_api) {
-  auto manager = std::make_unique<AndroidSurfaceManager>(rendering_api);
+    AndroidRenderingAPI rendering_api,
+    VulkanDriverProbe vulkan_driver_probe) {
+  return Create(rendering_api, nullptr, std::move(vulkan_driver_probe));
+}
+
+std::unique_ptr<AndroidSurfaceManager> AndroidSurfaceManager::Create(
+    AndroidRenderingAPI rendering_api,
+    std::shared_ptr<VulkanDeviceOwner> shared_vulkan_device_owner,
+    VulkanDriverProbe vulkan_driver_probe) {
+  auto manager = std::make_unique<AndroidSurfaceManager>(
+      rendering_api, std::move(shared_vulkan_device_owner),
+      std::move(vulkan_driver_probe));
   if (!manager->IsValid()) {
     FML_LOG(ERROR)
         << "Failed to initialize AndroidSurfaceManager for rendering API "
@@ -45,29 +72,72 @@ std::unique_ptr<AndroidSurfaceManager> AndroidSurfaceManager::Create(
   return manager;
 }
 
-AndroidSurfaceManager::AndroidSurfaceManager(AndroidRenderingAPI rendering_api)
-    : rendering_api_(rendering_api) {
+std::unique_ptr<AndroidSurfaceManager>
+AndroidSurfaceManager::CreateForFakeWindow(AndroidRenderingAPI rendering_api) {
+  auto manager = std::make_unique<AndroidSurfaceManager>(
+      rendering_api, nullptr, DefaultVulkanDriverProbe(),
+      /*preserve_vulkan_api_for_fake_window=*/true,
+      /*force_vulkan_init_failure_for_testing=*/false);
+  if (!manager->IsValid()) {
+    FML_LOG(ERROR) << "Failed to initialize AndroidSurfaceManager for fake "
+                      "window rendering API "
+                   << static_cast<int>(rendering_api);
+  }
+  return manager;
+}
+
+std::unique_ptr<AndroidSurfaceManager>
+AndroidSurfaceManager::CreateWithForcedVulkanInitFailureForTesting(
+    AndroidRenderingAPI rendering_api) {
+  auto manager = std::make_unique<AndroidSurfaceManager>(
+      rendering_api, nullptr, DefaultVulkanDriverProbe(),
+      /*preserve_vulkan_api_for_fake_window=*/false,
+      /*force_vulkan_init_failure_for_testing=*/true);
+  if (!manager->IsValid()) {
+    FML_LOG(ERROR)
+        << "Failed to initialize AndroidSurfaceManager for rendering API "
+        << static_cast<int>(rendering_api);
+  }
+  return manager;
+}
+
+AndroidSurfaceManager::AndroidSurfaceManager(
+    AndroidRenderingAPI rendering_api,
+    std::shared_ptr<VulkanDeviceOwner> shared_vulkan_device_owner,
+    VulkanDriverProbe vulkan_driver_probe,
+    bool preserve_vulkan_api_for_fake_window,
+    bool force_vulkan_init_failure_for_testing)
+    : vulkan_device_owner_(std::move(shared_vulkan_device_owner)),
+      vulkan_driver_probe_(std::move(vulkan_driver_probe)),
+      rendering_api_(rendering_api),
+      preserve_vulkan_api_for_fake_window_(preserve_vulkan_api_for_fake_window),
+      force_vulkan_init_failure_for_testing_(
+          force_vulkan_init_failure_for_testing) {
   switch (rendering_api_) {
     case AndroidRenderingAPI::kSoftware:
       is_valid_ = true;
       break;
     case AndroidRenderingAPI::kImpellerVulkan: {
-      if (InitializeVulkan()) {
+      if (preserve_vulkan_api_for_fake_window_) {
+        is_valid_ = InitializeEGL();
+      } else if (InitializeVulkan()) {
         is_valid_ = true;
       } else {
-        // Fallback EGL initialization for host testing or devices without
-        // Vulkan. We preserve rendering_api_ as kImpellerVulkan so
-        // GetRenderingAPI() reflects the requested backend configuration, while
-        // is_valid_ = true allows host tests and fake window mocks to function.
+        FML_LOG(ERROR)
+            << "Vulkan initialization failed for explicit kImpellerVulkan; "
+               "falling back to OpenGLES.";
+        rendering_api_ = AndroidRenderingAPI::kImpellerOpenGLES;
         is_valid_ = InitializeEGL();
       }
       break;
     }
     case AndroidRenderingAPI::kImpellerAutoselect: {
       if (InitializeVulkan()) {
+        rendering_api_ = AndroidRenderingAPI::kImpellerVulkan;
         is_valid_ = true;
       } else {
         FML_LOG(INFO) << "Vulkan autoselect failed, falling back to OpenGLES.";
+        rendering_api_ = AndroidRenderingAPI::kImpellerOpenGLES;
         is_valid_ = InitializeEGL();
       }
       break;
@@ -704,157 +774,199 @@ VulkanValidationConfig SelectVulkanValidationConfig(
 }
 
 bool AndroidSurfaceManager::InitializeVulkan() {
-  vulkan_lib_handle_ = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
-  if (!vulkan_lib_handle_) {
+  if (force_vulkan_init_failure_for_testing_) {
     return false;
   }
+  if (vulkan_device_owner_ != nullptr) {
+    if (vulkan_device_owner_->GetInstance() == VK_NULL_HANDLE ||
+        vulkan_device_owner_->GetDevice() == VK_NULL_HANDLE ||
+        vulkan_device_owner_->GetRawInstanceProcAddr() == nullptr) {
+      vulkan_device_owner_.reset();
+      return false;
+    }
+    vk_instance_ = vulkan_device_owner_->GetInstance();
+    vk_physical_device_ = vulkan_device_owner_->GetPhysicalDevice();
+    vk_device_ = vulkan_device_owner_->GetDevice();
+    vk_queue_ = vulkan_device_owner_->GetQueue();
+    vk_graphics_queue_family_index_ =
+        vulkan_device_owner_->GetGraphicsQueueFamilyIndex();
+    vk_version_ = vulkan_device_owner_->GetApiVersion();
+    vk_get_instance_proc_addr_fn_ =
+        vulkan_device_owner_->GetRawInstanceProcAddr();
 
-  vk_get_instance_proc_addr_fn_ = reinterpret_cast<PFN_vkGetInstanceProcAddr>(
-      dlsym(vulkan_lib_handle_, "vkGetInstanceProcAddr"));
-  if (!vk_get_instance_proc_addr_fn_) {
-    dlclose(vulkan_lib_handle_);
-    vulkan_lib_handle_ = nullptr;
-    return false;
-  }
+    enabled_instance_extensions_ =
+        vulkan_device_owner_->GetEnabledInstanceExtensions();
+    enabled_instance_extensions_ptrs_.clear();
+    enabled_instance_extensions_ptrs_.reserve(
+        enabled_instance_extensions_.size());
+    for (const auto& ext : enabled_instance_extensions_) {
+      enabled_instance_extensions_ptrs_.push_back(ext.c_str());
+    }
 
-  vk_create_instance_fn_ = reinterpret_cast<PFN_vkCreateInstance>(
-      vk_get_instance_proc_addr_fn_(VK_NULL_HANDLE, "vkCreateInstance"));
-  vk_enumerate_instance_extension_properties_fn_ =
-      reinterpret_cast<PFN_vkEnumerateInstanceExtensionProperties>(
-          vk_get_instance_proc_addr_fn_(
-              VK_NULL_HANDLE, "vkEnumerateInstanceExtensionProperties"));
-  vk_enumerate_instance_layer_properties_fn_ =
-      reinterpret_cast<PFN_vkEnumerateInstanceLayerProperties>(
-          vk_get_instance_proc_addr_fn_(VK_NULL_HANDLE,
-                                        "vkEnumerateInstanceLayerProperties"));
+    enabled_device_extensions_ =
+        vulkan_device_owner_->GetEnabledDeviceExtensions();
+    enabled_device_extensions_ptrs_.clear();
+    enabled_device_extensions_ptrs_.reserve(enabled_device_extensions_.size());
+    for (const auto& ext : enabled_device_extensions_) {
+      enabled_device_extensions_ptrs_.push_back(ext.c_str());
+    }
+  } else {
+    vulkan_lib_handle_ = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
+    if (!vulkan_lib_handle_) {
+      return false;
+    }
 
-  if (!vk_create_instance_fn_ ||
-      !vk_enumerate_instance_extension_properties_fn_) {
-    TeardownVulkan();
-    return false;
-  }
+    vk_get_instance_proc_addr_fn_ = reinterpret_cast<PFN_vkGetInstanceProcAddr>(
+        dlsym(vulkan_lib_handle_, "vkGetInstanceProcAddr"));
+    if (!vk_get_instance_proc_addr_fn_) {
+      dlclose(vulkan_lib_handle_);
+      vulkan_lib_handle_ = nullptr;
+      return false;
+    }
 
-  uint32_t ext_count = 0;
-  vk_enumerate_instance_extension_properties_fn_(nullptr, &ext_count, nullptr);
-  std::vector<VkExtensionProperties> available_exts(ext_count);
-  if (ext_count > 0) {
+    vk_create_instance_fn_ = reinterpret_cast<PFN_vkCreateInstance>(
+        vk_get_instance_proc_addr_fn_(VK_NULL_HANDLE, "vkCreateInstance"));
+    vk_enumerate_instance_extension_properties_fn_ =
+        reinterpret_cast<PFN_vkEnumerateInstanceExtensionProperties>(
+            vk_get_instance_proc_addr_fn_(
+                VK_NULL_HANDLE, "vkEnumerateInstanceExtensionProperties"));
+    vk_enumerate_instance_layer_properties_fn_ =
+        reinterpret_cast<PFN_vkEnumerateInstanceLayerProperties>(
+            vk_get_instance_proc_addr_fn_(
+                VK_NULL_HANDLE, "vkEnumerateInstanceLayerProperties"));
+
+    if (!vk_create_instance_fn_ ||
+        !vk_enumerate_instance_extension_properties_fn_) {
+      TeardownVulkan();
+      return false;
+    }
+
+    uint32_t ext_count = 0;
     vk_enumerate_instance_extension_properties_fn_(nullptr, &ext_count,
-                                                   available_exts.data());
-  }
-
-  auto has_instance_ext = [&](const char* name) -> bool {
-    for (const auto& ext : available_exts) {
-      if (std::strcmp(ext.extensionName, name) == 0) {
-        return true;
-      }
+                                                   nullptr);
+    std::vector<VkExtensionProperties> available_exts(ext_count);
+    if (ext_count > 0) {
+      vk_enumerate_instance_extension_properties_fn_(nullptr, &ext_count,
+                                                     available_exts.data());
     }
-    return false;
-  };
 
-  if (!has_instance_ext("VK_KHR_surface") ||
-      !has_instance_ext("VK_KHR_android_surface")) {
-    FML_LOG(INFO) << "Vulkan instance missing surface extensions.";
-    TeardownVulkan();
-    return false;
-  }
-
-  enabled_instance_extensions_.clear();
-  enabled_instance_extensions_.push_back("VK_KHR_surface");
-  enabled_instance_extensions_.push_back("VK_KHR_android_surface");
-  if (has_instance_ext("VK_KHR_get_physical_device_properties2")) {
-    enabled_instance_extensions_.push_back(
-        "VK_KHR_get_physical_device_properties2");
-  }
-
-  bool enable_validation = false;
-  auto global_args = android::AndroidVMInit::GetGlobalVMArgs();
-  if (global_args.has_value()) {
-    for (const auto& arg : global_args->command_line_args) {
-      if (arg == "--enable-vulkan-validation") {
-        enable_validation = true;
-        break;
-      }
-    }
-  }
-
-  std::vector<VkLayerProperties> available_layers;
-  std::vector<VkExtensionProperties> validation_layer_exts;
-  if (enable_validation &&
-      vk_enumerate_instance_layer_properties_fn_ != nullptr) {
-    uint32_t layer_count = 0;
-    vk_enumerate_instance_layer_properties_fn_(&layer_count, nullptr);
-    available_layers.resize(layer_count);
-    if (layer_count > 0) {
-      vk_enumerate_instance_layer_properties_fn_(&layer_count,
-                                                 available_layers.data());
-    }
-    for (const auto& layer : available_layers) {
-      if (std::strcmp(layer.layerName, "VK_LAYER_KHRONOS_validation") == 0) {
-        uint32_t layer_ext_count = 0;
-        vk_enumerate_instance_extension_properties_fn_(
-            "VK_LAYER_KHRONOS_validation", &layer_ext_count, nullptr);
-        validation_layer_exts.resize(layer_ext_count);
-        if (layer_ext_count > 0) {
-          vk_enumerate_instance_extension_properties_fn_(
-              "VK_LAYER_KHRONOS_validation", &layer_ext_count,
-              validation_layer_exts.data());
+    auto has_instance_ext = [&](const char* name) -> bool {
+      for (const auto& ext : available_exts) {
+        if (std::strcmp(ext.extensionName, name) == 0) {
+          return true;
         }
-        break;
+      }
+      return false;
+    };
+
+    if (!has_instance_ext("VK_KHR_surface") ||
+        !has_instance_ext("VK_KHR_android_surface")) {
+      FML_LOG(INFO) << "Vulkan instance missing surface extensions.";
+      TeardownVulkan();
+      return false;
+    }
+
+    enabled_instance_extensions_.clear();
+    enabled_instance_extensions_.push_back("VK_KHR_surface");
+    enabled_instance_extensions_.push_back("VK_KHR_android_surface");
+    if (has_instance_ext("VK_KHR_get_physical_device_properties2")) {
+      enabled_instance_extensions_.push_back(
+          "VK_KHR_get_physical_device_properties2");
+    }
+
+    bool enable_validation = false;
+    auto global_args = android::AndroidVMInit::GetGlobalVMArgs();
+    if (global_args.has_value()) {
+      for (const auto& arg : global_args->command_line_args) {
+        if (arg == "--enable-vulkan-validation") {
+          enable_validation = true;
+          break;
+        }
       }
     }
-  }
 
-  VulkanValidationConfig validation_config =
-      SelectVulkanValidationConfig(enable_validation, available_layers,
-                                   available_exts, validation_layer_exts);
-  std::vector<std::string> enabled_layers = std::move(validation_config.layers);
-  for (auto& ext : validation_config.instance_extensions) {
-    enabled_instance_extensions_.push_back(std::move(ext));
-  }
+    std::vector<VkLayerProperties> available_layers;
+    std::vector<VkExtensionProperties> validation_layer_exts;
+    if (enable_validation &&
+        vk_enumerate_instance_layer_properties_fn_ != nullptr) {
+      uint32_t layer_count = 0;
+      vk_enumerate_instance_layer_properties_fn_(&layer_count, nullptr);
+      available_layers.resize(layer_count);
+      if (layer_count > 0) {
+        vk_enumerate_instance_layer_properties_fn_(&layer_count,
+                                                   available_layers.data());
+      }
+      for (const auto& layer : available_layers) {
+        if (std::strcmp(layer.layerName, "VK_LAYER_KHRONOS_validation") == 0) {
+          uint32_t layer_ext_count = 0;
+          vk_enumerate_instance_extension_properties_fn_(
+              "VK_LAYER_KHRONOS_validation", &layer_ext_count, nullptr);
+          validation_layer_exts.resize(layer_ext_count);
+          if (layer_ext_count > 0) {
+            vk_enumerate_instance_extension_properties_fn_(
+                "VK_LAYER_KHRONOS_validation", &layer_ext_count,
+                validation_layer_exts.data());
+          }
+          break;
+        }
+      }
+    }
 
-  enabled_instance_extensions_ptrs_.clear();
-  enabled_instance_extensions_ptrs_.reserve(
-      enabled_instance_extensions_.size());
-  for (const auto& ext : enabled_instance_extensions_) {
-    enabled_instance_extensions_ptrs_.push_back(ext.c_str());
-  }
+    VulkanValidationConfig validation_config =
+        SelectVulkanValidationConfig(enable_validation, available_layers,
+                                     available_exts, validation_layer_exts);
+    std::vector<std::string> enabled_layers =
+        std::move(validation_config.layers);
+    for (auto& ext : validation_config.instance_extensions) {
+      enabled_instance_extensions_.push_back(std::move(ext));
+    }
 
-  std::vector<const char*> enabled_layers_ptrs;
-  enabled_layers_ptrs.reserve(enabled_layers.size());
-  for (const auto& layer : enabled_layers) {
-    enabled_layers_ptrs.push_back(layer.c_str());
-  }
+    enabled_instance_extensions_ptrs_.clear();
+    enabled_instance_extensions_ptrs_.reserve(
+        enabled_instance_extensions_.size());
+    for (const auto& ext : enabled_instance_extensions_) {
+      enabled_instance_extensions_ptrs_.push_back(ext.c_str());
+    }
 
-  VkApplicationInfo app_info = {
-      .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-      .pNext = nullptr,
-      .pApplicationName = "Flutter",
-      .applicationVersion = 0,
-      .pEngineName = "Flutter",
-      .engineVersion = 0,
-      .apiVersion = VK_API_VERSION_1_1,
-  };
+    std::vector<const char*> enabled_layers_ptrs;
+    enabled_layers_ptrs.reserve(enabled_layers.size());
+    for (const auto& layer : enabled_layers) {
+      enabled_layers_ptrs.push_back(layer.c_str());
+    }
 
-  VkInstanceCreateInfo instance_info = {
-      .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-      .pNext = nullptr,
-      .flags = 0,
-      .pApplicationInfo = &app_info,
-      .enabledLayerCount = static_cast<uint32_t>(enabled_layers_ptrs.size()),
-      .ppEnabledLayerNames =
-          enabled_layers_ptrs.empty() ? nullptr : enabled_layers_ptrs.data(),
-      .enabledExtensionCount =
-          static_cast<uint32_t>(enabled_instance_extensions_ptrs_.size()),
-      .ppEnabledExtensionNames = enabled_instance_extensions_ptrs_.empty()
-                                     ? nullptr
-                                     : enabled_instance_extensions_ptrs_.data(),
-  };
+    VkApplicationInfo app_info = {
+        .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        .pNext = nullptr,
+        .pApplicationName = "Flutter",
+        .applicationVersion = 0,
+        .pEngineName = "Flutter",
+        .engineVersion = 0,
+        .apiVersion = VK_API_VERSION_1_1,
+    };
 
-  VkResult res = vk_create_instance_fn_(&instance_info, nullptr, &vk_instance_);
-  if (res != VK_SUCCESS || vk_instance_ == VK_NULL_HANDLE) {
-    FML_LOG(INFO) << "vkCreateInstance failed: " << res;
-    TeardownVulkan();
-    return false;
+    VkInstanceCreateInfo instance_info = {
+        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .pApplicationInfo = &app_info,
+        .enabledLayerCount = static_cast<uint32_t>(enabled_layers_ptrs.size()),
+        .ppEnabledLayerNames =
+            enabled_layers_ptrs.empty() ? nullptr : enabled_layers_ptrs.data(),
+        .enabledExtensionCount =
+            static_cast<uint32_t>(enabled_instance_extensions_ptrs_.size()),
+        .ppEnabledExtensionNames =
+            enabled_instance_extensions_ptrs_.empty()
+                ? nullptr
+                : enabled_instance_extensions_ptrs_.data(),
+    };
+
+    VkResult res =
+        vk_create_instance_fn_(&instance_info, nullptr, &vk_instance_);
+    if (res != VK_SUCCESS || vk_instance_ == VK_NULL_HANDLE) {
+      FML_LOG(INFO) << "vkCreateInstance failed: " << res;
+      TeardownVulkan();
+      return false;
+    }
   }
 
   // Load instance functions
@@ -911,181 +1023,244 @@ bool AndroidSurfaceManager::InitializeVulkan() {
   LOAD_VK_INST_PROC(vk_reset_fences, vkResetFences);
 #undef LOAD_VK_INST_PROC
 
-  uint32_t phys_count = 0;
-  vk_enumerate_physical_devices_fn_(vk_instance_, &phys_count, nullptr);
-  if (phys_count == 0) {
-    FML_LOG(INFO) << "No Vulkan physical devices found.";
-    TeardownVulkan();
-    return false;
-  }
-
-  std::vector<VkPhysicalDevice> phys_devices(phys_count);
-  vk_enumerate_physical_devices_fn_(vk_instance_, &phys_count,
-                                    phys_devices.data());
-
-  const std::vector<const char*> required_dev_exts = {
-      "VK_KHR_swapchain",
-      "VK_ANDROID_external_memory_android_hardware_buffer",
-      "VK_KHR_sampler_ycbcr_conversion",
-      "VK_KHR_external_memory",
-      "VK_EXT_queue_family_foreign",
-      "VK_KHR_dedicated_allocation",
-  };
-
-  vk_physical_device_ = VK_NULL_HANDLE;
-  vk_graphics_queue_family_index_ = 0;
-
-  for (VkPhysicalDevice pdev : phys_devices) {
-    uint32_t qf_count = 0;
-    vk_get_physical_device_queue_family_properties_fn_(pdev, &qf_count,
-                                                       nullptr);
-    std::vector<VkQueueFamilyProperties> qf_props(qf_count);
-    vk_get_physical_device_queue_family_properties_fn_(pdev, &qf_count,
-                                                       qf_props.data());
-
-    std::optional<uint32_t> graphics_qf;
-    for (uint32_t i = 0; i < qf_count; ++i) {
-      if (qf_props[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-        graphics_qf = i;
-        break;
-      }
-    }
-    if (!graphics_qf.has_value()) {
-      continue;
+  if (vulkan_device_owner_ == nullptr) {
+    uint32_t phys_count = 0;
+    vk_enumerate_physical_devices_fn_(vk_instance_, &phys_count, nullptr);
+    if (phys_count == 0) {
+      FML_LOG(INFO) << "No Vulkan physical devices found.";
+      TeardownVulkan();
+      return false;
     }
 
-    uint32_t dev_ext_count = 0;
-    vk_enumerate_device_extension_properties_fn_(pdev, nullptr, &dev_ext_count,
-                                                 nullptr);
-    std::vector<VkExtensionProperties> dev_exts(dev_ext_count);
-    if (dev_ext_count > 0) {
-      vk_enumerate_device_extension_properties_fn_(
-          pdev, nullptr, &dev_ext_count, dev_exts.data());
-    }
+    std::vector<VkPhysicalDevice> phys_devices(phys_count);
+    vk_enumerate_physical_devices_fn_(vk_instance_, &phys_count,
+                                      phys_devices.data());
 
-    auto has_dev_ext = [&](const char* name) -> bool {
-      for (const auto& ext : dev_exts) {
-        if (std::strcmp(ext.extensionName, name) == 0) {
-          return true;
+    const std::vector<const char*> required_dev_exts = {
+        "VK_KHR_swapchain",
+        "VK_ANDROID_external_memory_android_hardware_buffer",
+        "VK_KHR_sampler_ycbcr_conversion",
+        "VK_KHR_external_memory",
+        "VK_EXT_queue_family_foreign",
+        "VK_KHR_dedicated_allocation",
+    };
+
+    vk_physical_device_ = VK_NULL_HANDLE;
+    vk_graphics_queue_family_index_ = 0;
+
+    for (VkPhysicalDevice pdev : phys_devices) {
+      uint32_t qf_count = 0;
+      vk_get_physical_device_queue_family_properties_fn_(pdev, &qf_count,
+                                                         nullptr);
+      std::vector<VkQueueFamilyProperties> qf_props(qf_count);
+      vk_get_physical_device_queue_family_properties_fn_(pdev, &qf_count,
+                                                         qf_props.data());
+
+      std::optional<uint32_t> graphics_qf;
+      for (uint32_t i = 0; i < qf_count; ++i) {
+        if (qf_props[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+          graphics_qf = i;
+          break;
         }
       }
+      if (!graphics_qf.has_value()) {
+        continue;
+      }
+
+      uint32_t dev_ext_count = 0;
+      vk_enumerate_device_extension_properties_fn_(pdev, nullptr,
+                                                   &dev_ext_count, nullptr);
+      std::vector<VkExtensionProperties> dev_exts(dev_ext_count);
+      if (dev_ext_count > 0) {
+        vk_enumerate_device_extension_properties_fn_(
+            pdev, nullptr, &dev_ext_count, dev_exts.data());
+      }
+
+      auto has_dev_ext = [&](const char* name) -> bool {
+        for (const auto& ext : dev_exts) {
+          if (std::strcmp(ext.extensionName, name) == 0) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      bool missing_required = false;
+      for (const char* req : required_dev_exts) {
+        if (!has_dev_ext(req)) {
+          missing_required = true;
+          break;
+        }
+      }
+      if (missing_required) {
+        continue;
+      }
+
+      vk_physical_device_ = pdev;
+      vk_graphics_queue_family_index_ = *graphics_qf;
+
+      enabled_device_extensions_.clear();
+      for (const char* req : required_dev_exts) {
+        enabled_device_extensions_.push_back(req);
+      }
+      const std::vector<const char*> optional_dev_exts = {
+          "VK_KHR_external_fence",
+          "VK_KHR_external_fence_fd",
+          "VK_KHR_external_semaphore",
+          "VK_KHR_external_semaphore_fd",
+      };
+      for (const char* opt : optional_dev_exts) {
+        if (has_dev_ext(opt)) {
+          enabled_device_extensions_.push_back(opt);
+        }
+      }
+      break;
+    }
+
+    if (vk_physical_device_ == VK_NULL_HANDLE) {
+      FML_LOG(INFO)
+          << "No suitable Vulkan physical device with required Impeller "
+             "extensions found.";
+      TeardownVulkan();
       return false;
-    };
+    }
 
-    bool missing_required = false;
-    for (const char* req : required_dev_exts) {
-      if (!has_dev_ext(req)) {
-        missing_required = true;
-        break;
+    VkPhysicalDeviceProperties phys_props = {};
+    vk_get_physical_device_properties_fn_(vk_physical_device_, &phys_props);
+    vk_version_ = phys_props.apiVersion;
+
+    FlutterVulkanDriverProperties driver_props = {};
+    driver_props.struct_size = sizeof(FlutterVulkanDriverProperties);
+    driver_props.api_version = phys_props.apiVersion;
+    driver_props.driver_version = phys_props.driverVersion;
+    driver_props.vendor_id = phys_props.vendorID;
+    driver_props.device_id = phys_props.deviceID;
+    driver_props.device_name = phys_props.deviceName;
+
+    bool is_known_bad = true;
+    FlutterEngineResult probe_result =
+        vulkan_driver_probe_ ? vulkan_driver_probe_(driver_props, &is_known_bad)
+                             : kInvalidArguments;
+    if (probe_result != kSuccess) {
+      FML_LOG(ERROR)
+          << "FlutterEngineQueryVulkanDriverSupport failed with result "
+          << static_cast<int>(probe_result) << ", falling back to OpenGLES.";
+      TeardownVulkan();
+      return false;
+    }
+    if (is_known_bad) {
+      if (rendering_api_ == AndroidRenderingAPI::kImpellerVulkan) {
+        FML_LOG(WARNING) << "known-bad Vulkan driver; release builds use "
+                            "OpenGLES on this device";
+      } else {
+        FML_LOG(INFO)
+            << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
+        TeardownVulkan();
+        return false;
       }
     }
-    if (missing_required) {
-      continue;
+
+    enabled_device_extensions_ptrs_.clear();
+    enabled_device_extensions_ptrs_.reserve(enabled_device_extensions_.size());
+    for (const auto& ext : enabled_device_extensions_) {
+      enabled_device_extensions_ptrs_.push_back(ext.c_str());
     }
 
-    vk_physical_device_ = pdev;
-    vk_graphics_queue_family_index_ = *graphics_qf;
-
-    enabled_device_extensions_.clear();
-    for (const char* req : required_dev_exts) {
-      enabled_device_extensions_.push_back(req);
-    }
-    const std::vector<const char*> optional_dev_exts = {
-        "VK_KHR_external_fence",
-        "VK_KHR_external_fence_fd",
-        "VK_KHR_external_semaphore",
-        "VK_KHR_external_semaphore_fd",
+    // Queue priority set to maximum (1.0f) for graphics presentation queue
+    float queue_priority = 1.0f;
+    VkDeviceQueueCreateInfo queue_create_info = {
+        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .queueFamilyIndex = vk_graphics_queue_family_index_,
+        .queueCount = 1,
+        .pQueuePriorities = &queue_priority,
     };
-    for (const char* opt : optional_dev_exts) {
-      if (has_dev_ext(opt)) {
-        enabled_device_extensions_.push_back(opt);
-      }
+
+    VkDeviceCreateInfo device_info = {
+        .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .queueCreateInfoCount = 1,
+        .pQueueCreateInfos = &queue_create_info,
+        .enabledLayerCount = 0,
+        .ppEnabledLayerNames = nullptr,
+        .enabledExtensionCount =
+            static_cast<uint32_t>(enabled_device_extensions_ptrs_.size()),
+        .ppEnabledExtensionNames = enabled_device_extensions_ptrs_.data(),
+        .pEnabledFeatures = nullptr,
+    };
+
+    VkResult res = vk_create_device_fn_(vk_physical_device_, &device_info,
+                                        nullptr, &vk_device_);
+    if (res != VK_SUCCESS || vk_device_ == VK_NULL_HANDLE) {
+      FML_LOG(INFO) << "vkCreateDevice failed: " << res;
+      TeardownVulkan();
+      return false;
     }
-    break;
+
+    vk_get_device_queue_fn_(vk_device_, vk_graphics_queue_family_index_, 0,
+                            &vk_queue_);
+
+    void* transferred_lib_handle = vulkan_lib_handle_;
+    vulkan_lib_handle_ = nullptr;
+    vulkan_device_owner_ = std::make_shared<VulkanDeviceOwner>(
+        transferred_lib_handle, vk_instance_, vk_physical_device_, vk_device_,
+        vk_queue_, vk_graphics_queue_family_index_, vk_version_,
+        enabled_instance_extensions_, enabled_device_extensions_,
+        vk_get_instance_proc_addr_fn_, vk_destroy_device_fn_,
+        vk_destroy_instance_fn_);
   }
 
-  if (vk_physical_device_ == VK_NULL_HANDLE) {
-    FML_LOG(INFO)
-        << "No suitable Vulkan physical device with required Impeller "
-           "extensions found.";
-    TeardownVulkan();
-    return false;
-  }
-
-  enabled_device_extensions_ptrs_.clear();
-  enabled_device_extensions_ptrs_.reserve(enabled_device_extensions_.size());
-  for (const auto& ext : enabled_device_extensions_) {
-    enabled_device_extensions_ptrs_.push_back(ext.c_str());
-  }
-
-  // Queue priority set to maximum (1.0f) for graphics presentation queue
-  float queue_priority = 1.0f;
-  VkDeviceQueueCreateInfo queue_create_info = {
-      .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-      .pNext = nullptr,
-      .flags = 0,
-      .queueFamilyIndex = vk_graphics_queue_family_index_,
-      .queueCount = 1,
-      .pQueuePriorities = &queue_priority,
-  };
-
-  VkDeviceCreateInfo device_info = {
-      .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-      .pNext = nullptr,
-      .flags = 0,
-      .queueCreateInfoCount = 1,
-      .pQueueCreateInfos = &queue_create_info,
-      .enabledLayerCount = 0,
-      .ppEnabledLayerNames = nullptr,
-      .enabledExtensionCount =
-          static_cast<uint32_t>(enabled_device_extensions_ptrs_.size()),
-      .ppEnabledExtensionNames = enabled_device_extensions_ptrs_.data(),
-      .pEnabledFeatures = nullptr,
-  };
-
-  res = vk_create_device_fn_(vk_physical_device_, &device_info, nullptr,
-                             &vk_device_);
-  if (res != VK_SUCCESS || vk_device_ == VK_NULL_HANDLE) {
-    FML_LOG(INFO) << "vkCreateDevice failed: " << res;
-    TeardownVulkan();
-    return false;
-  }
-
-  vk_get_device_queue_fn_(vk_device_, vk_graphics_queue_family_index_, 0,
-                          &vk_queue_);
+  vk_device_wait_idle_fn_ = reinterpret_cast<PFN_vkDeviceWaitIdle>(
+      vulkan_device_owner_->ResolveGuardedProc("vkDeviceWaitIdle"));
+  vk_queue_wait_idle_fn_ = reinterpret_cast<PFN_vkQueueWaitIdle>(
+      vulkan_device_owner_->ResolveGuardedProc("vkQueueWaitIdle"));
+  vk_queue_present_khr_fn_ = reinterpret_cast<PFN_vkQueuePresentKHR>(
+      vulkan_device_owner_->ResolveGuardedProc("vkQueuePresentKHR"));
+  vk_queue_submit_fn_ = reinterpret_cast<PFN_vkQueueSubmit>(
+      vulkan_device_owner_->ResolveGuardedProc("vkQueueSubmit"));
   return true;
 }
 
 void AndroidSurfaceManager::TeardownVulkan() {
-  std::lock_guard<std::mutex> lock(window_mutex_);
-  for (auto& [window, entry] : overlay_vulkan_surfaces_) {
-    DestroyOverlayVulkanSurfaceLocked(entry);
-  }
-  overlay_vulkan_surfaces_.clear();
-  DestroyVulkanSurfaceLocked();
-  if (vk_device_ != VK_NULL_HANDLE) {
-    if (vk_destroy_device_fn_ != nullptr) {
-      vk_destroy_device_fn_(vk_device_, nullptr);
+  std::shared_ptr<VulkanDeviceOwner> owner_to_release;
+  {
+    std::lock_guard<std::mutex> lock(window_mutex_);
+    for (auto& [window, entry] : overlay_vulkan_surfaces_) {
+      DestroyOverlayVulkanSurfaceLocked(entry);
+    }
+    overlay_vulkan_surfaces_.clear();
+    DestroyVulkanSurfaceLocked();
+    if (vulkan_device_owner_ != nullptr) {
+      owner_to_release = std::move(vulkan_device_owner_);
+    } else {
+      if (vk_device_ != VK_NULL_HANDLE) {
+        if (vk_destroy_device_fn_ != nullptr) {
+          vk_destroy_device_fn_(vk_device_, nullptr);
+        }
+      }
+      if (vk_instance_ != VK_NULL_HANDLE) {
+        if (vk_destroy_instance_fn_ != nullptr) {
+          vk_destroy_instance_fn_(vk_instance_, nullptr);
+        }
+      }
+      if (vulkan_lib_handle_ != nullptr) {
+        dlclose(vulkan_lib_handle_);
+        vulkan_lib_handle_ = nullptr;
+      }
     }
     vk_device_ = VK_NULL_HANDLE;
-  }
-  if (vk_instance_ != VK_NULL_HANDLE) {
-    if (vk_destroy_instance_fn_ != nullptr) {
-      vk_destroy_instance_fn_(vk_instance_, nullptr);
-    }
     vk_instance_ = VK_NULL_HANDLE;
+    vk_physical_device_ = VK_NULL_HANDLE;
+    vk_queue_ = VK_NULL_HANDLE;
+    vk_graphics_queue_family_index_ = 0;
+    enabled_instance_extensions_.clear();
+    enabled_instance_extensions_ptrs_.clear();
+    enabled_device_extensions_.clear();
+    enabled_device_extensions_ptrs_.clear();
   }
-  if (vulkan_lib_handle_ != nullptr) {
-    dlclose(vulkan_lib_handle_);
-    vulkan_lib_handle_ = nullptr;
-  }
-  vk_physical_device_ = VK_NULL_HANDLE;
-  vk_queue_ = VK_NULL_HANDLE;
-  vk_graphics_queue_family_index_ = 0;
-  enabled_instance_extensions_.clear();
-  enabled_instance_extensions_ptrs_.clear();
-  enabled_device_extensions_.clear();
-  enabled_device_extensions_ptrs_.clear();
+  owner_to_release.reset();
 }
 
 bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked() {
@@ -1639,13 +1814,19 @@ void* AndroidSurfaceManager::GetInstanceProcAddress(
   if (name == nullptr) {
     return nullptr;
   }
-  if (std::strcmp(name, "vkGetInstanceProcAddr") == 0 &&
+  if (vulkan_device_owner_ != nullptr ||
       vk_get_instance_proc_addr_fn_ != nullptr) {
-    return reinterpret_cast<void*>(vk_get_instance_proc_addr_fn_);
-  }
-  if (vk_get_instance_proc_addr_fn_ != nullptr && instance != nullptr) {
-    return reinterpret_cast<void*>(
-        vk_get_instance_proc_addr_fn_(static_cast<VkInstance>(instance), name));
+    auto trampoline = VulkanQueueGuard::GetInstanceProcAddrTrampoline();
+    if (std::strcmp(name, "vkGetInstanceProcAddr") == 0) {
+      return reinterpret_cast<void*>(trampoline);
+    }
+    if (trampoline != nullptr) {
+      void* resolved = reinterpret_cast<void*>(
+          trampoline(static_cast<VkInstance>(instance), name));
+      if (resolved != nullptr) {
+        return resolved;
+      }
+    }
   }
   if (vulkan_lib_handle_ != nullptr) {
     return dlsym(vulkan_lib_handle_, name);
