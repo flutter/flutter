@@ -1149,8 +1149,8 @@ targets:
       - engine/**
       - DEPS
 
-  # Gradle 8.4 cannot run on Java 25, so the pre-AGP 8.3 module test is pinned
-  # to Java 17 instead of the default JDK.
+  # Gradle 8.x cannot run on Java 25, so the oldest-supported-AGP module test is
+  # pinned to Java 17 instead of the default JDK.
   - name: Linux android_java17_build_android_host_app_with_module_aar
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -1679,13 +1679,15 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      # This makes use of Baklava, a preview version of android. Preview versions eventually
+      # This makes use of CinnamonBun, a preview version of android. Preview versions eventually
       # get removed from the sdk manager, so it is hosted on CIPD to ensure integration testing
-      # doesn't flake when that happens.
-      # https://chrome-infra-packages.appspot.com/p/flutter/android/sdk/all/linux-amd64/+/version:baklava_v1
+      # doesn't flake when that happens. The preview must be at least FlutterExtension.compileSdkVersion.
+      # Keep in sync with `previewCodename` in
+      # packages/flutter_tools/test/android_preview_integration.shard/flutter_build_preview_sdk_test.dart.
+      # https://chrome-infra-packages.appspot.com/p/flutter/android/sdk/all/linux-amd64/+/version:cinnamonbun
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:baklava_v1"},
+          {"dependency": "android_sdk", "version": "version:cinnamonbun"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
@@ -7223,7 +7225,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v4"},
+          {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "vs_build", "version": "version:vs2019"},
           {"dependency": "gradle_dists", "version": "8.4-bin:8.13-rc-1-bin:8.14-bin:9.3.1-bin:9.3.1-all"}
