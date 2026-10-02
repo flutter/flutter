@@ -403,8 +403,8 @@ typedef EdgeInsetsDirectionalOverlayWidgetBuilder = Widget Function(
   EdgeInsetsDirectional overlayPadding,
 );
 
-/// Signature for building the main content of an [EdgeInsetsGeometryOverlay.metrics]
-/// (such as [EdgeInsetsOverlay.metrics] or [EdgeInsetsDirectionalOverlay.metrics]),
+/// Signature for building the main content of a `metrics` (such as
+/// [EdgeInsetsOverlay.metrics] or [EdgeInsetsDirectionalOverlay.metrics]),
 /// receiving the layout [constraints] and computed overlay [metrics].
 typedef EdgeInsetsOverlayMetricsWidgetBuilder = Widget Function(
   BuildContext context,
@@ -435,7 +435,7 @@ typedef EdgeInsetsOverlayMetricsWidgetBuilder = Widget Function(
 /// Similar to [Stack] with multiple edge-aligned [Positioned] widgets, edge
 /// overlays are positioned independently along each edge across the full bounds
 /// and are not partitioned sequentially. If multiple edge overlays intersect
-/// (for example, a [top] bar and a [left] rail sharing the top-left corner),
+/// (for example, a `top` bar and a `left` rail sharing the top-left corner),
 /// they will overlap.
 ///
 /// The relative painting and hit-testing order between the main content and the
@@ -495,7 +495,7 @@ abstract class EdgeInsetsGeometryOverlay extends StatelessWidget {
   final TextDirection? textDirection;
 
   /// Called to build the main content for [EdgeInsetsOverlaySlot.child],
-  /// receiving the layout [constraints] and computed [metrics] of active edge widgets.
+  /// receiving the layout `constraints` and computed `metrics` of active edge widgets.
   final EdgeInsetsOverlayMetricsWidgetBuilder builder;
 
   /// Builds the content child wrapped in a [LayoutBuilder] that unpacks
