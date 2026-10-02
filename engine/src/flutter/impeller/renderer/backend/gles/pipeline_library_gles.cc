@@ -4,24 +4,62 @@
 
 #include "impeller/renderer/backend/gles/pipeline_library_gles.h"
 
+#include <algorithm>
 #include <sstream>
 #include <string>
+#include <thread>
+#include <vector>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/closure.h"
 #include "impeller/base/promise.h"
+#include "impeller/renderer/backend/gles/description_gles.h"
 #include "impeller/renderer/backend/gles/pipeline_gles.h"
 #include "impeller/renderer/backend/gles/shader_function_gles.h"
 #include "impeller/renderer/pipeline_descriptor.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
+
+static const constexpr char* kParallelShaderCompileExt =
+    "GL_KHR_parallel_shader_compile";
+
+// At this many pending links the library checks all of them in one batch,
+// and the queue processes no other pipeline until the batch ends. Every link
+// occupies a thread of the driver, so starting all of them at once takes the
+// cores that the Dart isolate needs while it starts. This is the bound that
+// ContextVK::ChooseThreadCountForWorkers uses for the same reason, see
+// https://github.com/flutter/flutter/issues/143540
+static size_t MaxPendingLinks() {
+  return std::clamp<size_t>(std::thread::hardware_concurrency() / 2, 1, 4);
+}
+
+// Only ANGLE is enabled. It cross compiles every program to HLSL, which is
+// what makes a link expensive.
+static bool HasParallelShaderCompile(
+    const std::shared_ptr<ReactorGLES>& reactor) {
+  if (!reactor) {
+    return false;
+  }
+  const DescriptionGLES* description = reactor->GetProcTable().GetDescription();
+  return description != nullptr && description->IsANGLE() &&
+         description->HasExtension(kParallelShaderCompileExt);
+}
 
 PipelineLibraryGLES::PipelineLibraryGLES(
     std::shared_ptr<ReactorGLES> reactor,
     std::shared_ptr<fml::BasicTaskRunner> io_task_runner)
     : reactor_(std::move(reactor)),
       compile_queue_(
-          PipelineCompileQueueGLES::Create(std::move(io_task_runner))) {}
+          PipelineCompileQueueGLES::Create(std::move(io_task_runner))),
+      supports_parallel_shader_compile_(HasParallelShaderCompile(reactor_)),
+      max_pending_links_(MaxPendingLinks()) {}
+
+void PipelineLibraryGLES::SetMaxPendingLinksForTesting(size_t count) {
+  max_pending_links_ = count;
+}
 
 static std::string GetShaderInfoLog(const ProcTableGLES& gl, GLuint shader) {
   GLint log_length = 0;
@@ -78,11 +116,72 @@ static void LogShaderCompilationFailure(const ProcTableGLES& gl,
   VALIDATION_LOG << stream.str();
 }
 
-static bool LinkProgram(
+static bool CheckCompileStatus(
+    const ProcTableGLES& gl,
+    const PipelineDescriptor& descriptor,
+    GLuint vert_shader,
+    GLuint frag_shader,
+    const std::shared_ptr<const ShaderFunction>& vert_function,
+    const std::shared_ptr<const ShaderFunction>& frag_function) {
+  GLint vert_status = GL_FALSE;
+  GLint frag_status = GL_FALSE;
+
+  gl.GetShaderiv(vert_shader, GL_COMPILE_STATUS, &vert_status);
+  gl.GetShaderiv(frag_shader, GL_COMPILE_STATUS, &frag_status);
+
+  if (vert_status != GL_TRUE) {
+    LogShaderCompilationFailure(
+        gl, vert_shader, descriptor.GetLabel(),
+        *ShaderFunctionGLES::Cast(*vert_function).GetSourceMapping(),
+        ShaderStage::kVertex);
+    return false;
+  }
+
+  if (frag_status != GL_TRUE) {
+    LogShaderCompilationFailure(
+        gl, frag_shader, descriptor.GetLabel(),
+        *ShaderFunctionGLES::Cast(*frag_function).GetSourceMapping(),
+        ShaderStage::kFragment);
+    return false;
+  }
+  return true;
+}
+
+// Shaders stay attached to their program until FinishProgramLink checks the
+// link status.
+struct ProgramShaders {
+  GLuint vert = 0;
+  GLuint frag = 0;
+  /// True when StartProgramLink flagged the shaders for deletion and left
+  /// their compile status to FinishProgramLink.
+  bool deferred = false;
+};
+
+//------------------------------------------------------------------------------
+/// @brief      Compiles vertex and fragment shaders, attaches them to the
+///             program and starts linking it.
+///
+///             With GL_KHR_parallel_shader_compile, a status query waits for
+///             the compiler, so a deferred link leaves each blocking status
+///             query to FinishProgramLink. A deferred link also flags the
+///             shaders for deletion right away. GL frees them when they are
+///             detached or when the program is deleted, so they do not leak
+///             if FinishProgramLink never runs.
+///
+/// @param[in]  deferred  If true, this call does not wait for the shader
+///                       compiler. FinishProgramLink checks the compile status
+///                       later, when the library checks the pending pipelines.
+///
+/// @return     The shaders attached to the program, or an error when a shader
+///             cannot be created, a compile that is not deferred fails, or the
+///             program handle is missing.
+///
+static absl::StatusOr<ProgramShaders> StartProgramLink(
     const ReactorGLES& reactor,
     const std::shared_ptr<PipelineGLES>& pipeline,
     const std::shared_ptr<const ShaderFunction>& vert_function,
-    const std::shared_ptr<const ShaderFunction>& frag_function) {
+    const std::shared_ptr<const ShaderFunction>& frag_function,
+    bool deferred) {
   TRACE_EVENT0("impeller", __FUNCTION__);
 
   const auto& descriptor = pipeline->GetDescriptor();
@@ -98,8 +197,7 @@ static bool LinkProgram(
   auto frag_shader = gl.CreateShader(GL_FRAGMENT_SHADER);
 
   if (vert_shader == 0 || frag_shader == 0) {
-    VALIDATION_LOG << "Could not create shader handles.";
-    return false;
+    return absl::InternalError("Could not create shader handles.");
   }
 
   gl.SetDebugLabel(DebugResourceType::kShader, vert_shader,
@@ -120,41 +218,18 @@ static bool LinkProgram(
   gl.CompileShader(vert_shader);
   gl.CompileShader(frag_shader);
 
-  GLint vert_status = GL_FALSE;
-  GLint frag_status = GL_FALSE;
-
-  gl.GetShaderiv(vert_shader, GL_COMPILE_STATUS, &vert_status);
-  gl.GetShaderiv(frag_shader, GL_COMPILE_STATUS, &frag_status);
-
-  if (vert_status != GL_TRUE) {
-    LogShaderCompilationFailure(gl, vert_shader, descriptor.GetLabel(),
-                                *vert_mapping, ShaderStage::kVertex);
-    return false;
-  }
-
-  if (frag_status != GL_TRUE) {
-    LogShaderCompilationFailure(gl, frag_shader, descriptor.GetLabel(),
-                                *frag_mapping, ShaderStage::kFragment);
-    return false;
+  if (!deferred && !CheckCompileStatus(gl, descriptor, vert_shader, frag_shader,
+                                       vert_function, frag_function)) {
+    return absl::InternalError("Could not compile shaders.");
   }
 
   auto program = reactor.GetGLHandle(pipeline->GetProgramHandle());
   if (!program.has_value()) {
-    VALIDATION_LOG << "Could not get program handle from reactor.";
-    return false;
+    return absl::InternalError("Could not get program handle from reactor.");
   }
 
   gl.AttachShader(*program, vert_shader);
   gl.AttachShader(*program, frag_shader);
-
-  fml::ScopedCleanupClosure detach_vert_shader(
-      [&gl, program = *program, vert_shader]() {
-        gl.DetachShader(program, vert_shader);
-      });
-  fml::ScopedCleanupClosure detach_frag_shader(
-      [&gl, program = *program, frag_shader]() {
-        gl.DetachShader(program, frag_shader);
-      });
 
   for (const auto& stage_input :
        descriptor.GetVertexDescriptor()->GetStageInputs()) {
@@ -166,6 +241,65 @@ static bool LinkProgram(
 
   gl.LinkProgram(*program);
 
+  if (deferred) {
+    gl.DeleteShader(vert_shader);
+    gl.DeleteShader(frag_shader);
+  }
+  // FinishProgramLink deletes the shaders after it detaches them. Shaders of a
+  // deferred link are already flagged, so detaching them or deleting the
+  // program frees them.
+  delete_vert_shader.Release();
+  delete_frag_shader.Release();
+  return ProgramShaders{
+      .vert = vert_shader, .frag = frag_shader, .deferred = deferred};
+}
+
+// Checks the result of StartProgramLink, then detaches the shaders. A shader
+// of a deferred link is already flagged for deletion, so detaching frees it.
+static absl::Status FinishProgramLink(
+    const ReactorGLES& reactor,
+    const std::shared_ptr<PipelineGLES>& pipeline,
+    const std::shared_ptr<const ShaderFunction>& vert_function,
+    const std::shared_ptr<const ShaderFunction>& frag_function,
+    const ProgramShaders& shaders) {
+  TRACE_EVENT0("impeller", __FUNCTION__);
+
+  const auto& descriptor = pipeline->GetDescriptor();
+  const auto& gl = reactor.GetProcTable();
+  const GLuint vert_shader = shaders.vert;
+  const GLuint frag_shader = shaders.frag;
+  const bool deferred = shaders.deferred;
+
+  fml::ScopedCleanupClosure delete_vert_shader([&gl, vert_shader, deferred]() {
+    if (!deferred) {
+      gl.DeleteShader(vert_shader);
+    }
+  });
+  fml::ScopedCleanupClosure delete_frag_shader([&gl, frag_shader, deferred]() {
+    if (!deferred) {
+      gl.DeleteShader(frag_shader);
+    }
+  });
+
+  auto program = reactor.GetGLHandle(pipeline->GetProgramHandle());
+  if (!program.has_value()) {
+    return absl::InternalError("Could not get program handle from reactor.");
+  }
+
+  fml::ScopedCleanupClosure detach_vert_shader(
+      [&gl, program = *program, vert_shader]() {
+        gl.DetachShader(program, vert_shader);
+      });
+  fml::ScopedCleanupClosure detach_frag_shader(
+      [&gl, program = *program, frag_shader]() {
+        gl.DetachShader(program, frag_shader);
+      });
+
+  if (deferred && !CheckCompileStatus(gl, descriptor, vert_shader, frag_shader,
+                                      vert_function, frag_function)) {
+    return absl::InternalError("Could not compile shaders.");
+  }
+
   GLint link_status = GL_FALSE;
   gl.GetProgramiv(*program, GL_LINK_STATUS, &link_status);
 
@@ -175,9 +309,50 @@ static bool LinkProgram(
                    << "\nVertex Shader:\n"
                    << GetShaderSource(gl, vert_shader) << "\nFragment Shader:\n"
                    << GetShaderSource(gl, frag_shader);
+    return absl::InternalError("Could not link shader program.");
+  }
+  return absl::OkStatus();
+}
+
+static absl::Status LinkProgram(
+    const ReactorGLES& reactor,
+    const std::shared_ptr<PipelineGLES>& pipeline,
+    const std::shared_ptr<const ShaderFunction>& vert_function,
+    const std::shared_ptr<const ShaderFunction>& frag_function) {
+  absl::StatusOr<ProgramShaders> shaders = StartProgramLink(
+      reactor, pipeline, vert_function, frag_function, /*deferred=*/false);
+  if (!shaders.ok()) {
+    return shaders.status();
+  }
+  return FinishProgramLink(reactor, pipeline, vert_function, frag_function,
+                           *shaders);
+}
+
+static bool IsProgramLinked(const ReactorGLES& reactor,
+                            const PipelineGLES& pipeline) {
+  auto program = reactor.GetGLHandle(pipeline.GetProgramHandle());
+  if (!program.has_value()) {
     return false;
   }
-  return true;
+  GLint link_status = GL_FALSE;
+  reactor.GetProcTable().GetProgramiv(*program, GL_LINK_STATUS, &link_status);
+  return link_status == GL_TRUE;
+}
+
+// GL_COMPLETION_STATUS_KHR returns at once, while GL_LINK_STATUS waits for
+// the link to finish
+static bool IsLinkCompleted(const ReactorGLES& reactor,
+                            const PipelineGLES& pipeline) {
+  auto program = reactor.GetGLHandle(pipeline.GetProgramHandle());
+  if (!program.has_value()) {
+    return false;
+  }
+  // A query that fails leaves the value unchanged, so the link stays pending
+  // until FinishPendingPipelines checks it
+  GLint completed = GL_FALSE;
+  reactor.GetProcTable().GetProgramiv(*program, GL_COMPLETION_STATUS_KHR,
+                                      &completed);
+  return completed == GL_TRUE;
 }
 
 // |PipelineLibrary|
@@ -190,7 +365,8 @@ std::shared_ptr<PipelineGLES> PipelineLibraryGLES::CreatePipeline(
     const PipelineDescriptor& desc,
     const std::shared_ptr<const ShaderFunction>& vert_function,
     const std::shared_ptr<const ShaderFunction>& frag_function,
-    bool threadsafe) {
+    bool threadsafe,
+    std::shared_ptr<PipelinePromise> deferred_promise) {
   auto strong_library = weak_library.lock();
 
   if (!strong_library) {
@@ -238,14 +414,64 @@ std::shared_ptr<PipelineGLES> PipelineLibraryGLES::CreatePipeline(
     return nullptr;
   }
 
+  if (deferred_promise) {
+    // A deferred link polls GL_COMPLETION_STATUS_KHR, which drivers without
+    // GL_KHR_parallel_shader_compile reject
+    FML_DCHECK(library.SupportsParallelShaderCompile());
+    ProgramShaders shaders;
+    if (!has_cached_program) {
+      absl::StatusOr<ProgramShaders> started = StartProgramLink(
+          *reactor, pipeline, vert_function, frag_function, /*deferred=*/true);
+      if (!started.ok()) {
+        VALIDATION_LOG << "Could not link pipeline program. "
+                       << started.status().message();
+        return nullptr;
+      }
+      shaders = *started;
+      // Other variants of this program reuse it while it links.
+      library.SetProgramForKey(program_key, pipeline->GetSharedHandle());
+    }
+    library.WatchQueueForDrain();
+    library.FinishCompletedPipelines(*reactor);
+    size_t pending_count = 0;
+    {
+      Lock lock(library.pending_mutex_);
+      library.pending_pipelines_.push_back(PendingPipeline{
+          .pipeline = pipeline,
+          .promise = std::move(deferred_promise),
+          .program_key = std::move(program_key),
+          .vert_shader = shaders.vert,
+          .frag_shader = shaders.frag,
+      });
+      pending_count = library.pending_pipelines_.size();
+    }
+    // The queue tells the library when it runs out of jobs. An idle queue
+    // never sends that report, and at the limit the library does not wait
+    // for it, so both cases check the links here.
+    if (pending_count >= library.max_pending_links_ ||
+        !library.compile_queue_->IsProcessingJobs()) {
+      library.FinishPendingPipelines(*reactor);
+    }
+    return pipeline;
+  }
+
   const auto link_result = !has_cached_program ? LinkProgram(*reactor,       //
                                                              pipeline,       //
                                                              vert_function,  //
                                                              frag_function   //
                                                              )
-                                               : true;
+                                               : absl::OkStatus();
 
-  if (!link_result) {
+  if (!link_result.ok()) {
+    VALIDATION_LOG << "Could not link pipeline program. "
+                   << link_result.message();
+    return nullptr;
+  }
+
+  // A cached program can still be linking on another thread. The status
+  // query waits for that link.
+  if (has_cached_program && library.SupportsParallelShaderCompile() &&
+      !IsProgramLinked(*reactor, *pipeline)) {
     VALIDATION_LOG << "Could not link pipeline program.";
     return nullptr;
   }
@@ -266,6 +492,170 @@ std::shared_ptr<PipelineGLES> PipelineLibraryGLES::CreatePipeline(
   }
 
   return pipeline;
+}
+
+void PipelineLibraryGLES::WatchQueueForDrain() {
+  {
+    Lock lock(pending_mutex_);
+    if (is_watching_queue_) {
+      return;
+    }
+    is_watching_queue_ = true;
+  }
+  // The callback runs on the same task runner as the compile jobs, and the
+  // reactor keeps an operation on the thread that added it, so the check runs
+  // on that thread and never next to a link on another one.
+  std::weak_ptr<PipelineLibrary> weak_this = weak_from_this();
+  compile_queue_->SetOnDrained([weak_this]() {
+    auto thiz = weak_this.lock();
+    if (!thiz) {
+      return;
+    }
+    auto& library = PipelineLibraryGLES::Cast(*thiz);
+    {
+      Lock lock(library.pending_mutex_);
+      if (library.pending_pipelines_.empty()) {
+        return;
+      }
+    }
+    const bool result =
+        library.reactor_->AddOperation([weak_this](const ReactorGLES& reactor) {
+          if (auto library = weak_this.lock()) {
+            PipelineLibraryGLES::Cast(*library).FinishPendingPipelines(reactor);
+          }
+        });
+    if (!result) {
+      // The reactor is gone, so no thread can check the links anymore.
+      library.FailPendingPipelines();
+      return;
+    }
+    // An accepted operation still waits for a reaction of this thread when the
+    // reactor could not react now, and that reaction may never come once the
+    // thread gives up the context, so we check the list as well.
+    bool still_pending = false;
+    {
+      Lock lock(library.pending_mutex_);
+      still_pending = !library.pending_pipelines_.empty();
+    }
+    if (still_pending) {
+      library.FailPendingPipelines();
+    }
+  });
+}
+
+void PipelineLibraryGLES::FinishPendingPipelines(const ReactorGLES& reactor) {
+  TRACE_EVENT0("impeller", __FUNCTION__);
+  // The compile queue runs its jobs one at a time, so this never runs at the
+  // same time as a job that starts a link.
+  FML_DCHECK(!compile_queue_ || compile_queue_->RunningJobCount() <= 1);
+
+  std::vector<PendingPipeline> pending;
+  {
+    Lock lock(pending_mutex_);
+    pending.swap(pending_pipelines_);
+  }
+
+  for (auto& item : pending) {
+    item.promise->set_value(FinishPipeline(reactor, item));
+  }
+}
+
+void PipelineLibraryGLES::FinishCompletedPipelines(const ReactorGLES& reactor) {
+  TRACE_EVENT0("impeller", __FUNCTION__);
+  FML_DCHECK(!compile_queue_ || compile_queue_->RunningJobCount() <= 1);
+
+  std::vector<std::shared_ptr<PipelineGLES>> pipelines;
+  {
+    Lock lock(pending_mutex_);
+    for (const PendingPipeline& item : pending_pipelines_) {
+      pipelines.push_back(item.pipeline);
+    }
+  }
+
+  std::vector<const PipelineGLES*> completed;
+  for (const std::shared_ptr<PipelineGLES>& pipeline : pipelines) {
+    if (pipeline && IsLinkCompleted(reactor, *pipeline)) {
+      completed.push_back(pipeline.get());
+    }
+  }
+  if (completed.empty()) {
+    return;
+  }
+
+  std::vector<PendingPipeline> finished;
+  {
+    Lock lock(pending_mutex_);
+    auto it = pending_pipelines_.begin();
+    while (it != pending_pipelines_.end()) {
+      if (std::find(completed.begin(), completed.end(), it->pipeline.get()) !=
+          completed.end()) {
+        finished.push_back(std::move(*it));
+        it = pending_pipelines_.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
+
+  for (auto& item : finished) {
+    item.promise->set_value(FinishPipeline(reactor, item));
+  }
+}
+
+std::shared_ptr<PipelineGLES> PipelineLibraryGLES::FinishPipeline(
+    const ReactorGLES& reactor,
+    const PendingPipeline& item) {
+  const auto& pipeline = item.pipeline;
+  // StartProgramLink returns vertex and fragment shaders together or neither.
+  const bool owns_link = item.vert_shader != 0;
+
+  absl::Status link_result = absl::OkStatus();
+  if (owns_link) {
+    link_result =
+        FinishProgramLink(reactor, pipeline, item.program_key.vertex_shader,
+                          item.program_key.fragment_shader,
+                          ProgramShaders{.vert = item.vert_shader,
+                                         .frag = item.frag_shader,
+                                         .deferred = true});
+  } else if (!IsProgramLinked(reactor, *pipeline)) {
+    link_result = absl::InternalError("Could not link shader program.");
+  }
+
+  auto fail = [&]() -> std::shared_ptr<PipelineGLES> {
+    if (owns_link) {
+      RemoveProgramForKey(item.program_key, pipeline->GetSharedHandle());
+    }
+    return nullptr;
+  };
+
+  if (!link_result.ok()) {
+    VALIDATION_LOG << "Could not link pipeline program. "
+                   << link_result.message();
+    return fail();
+  }
+
+  auto program = reactor.GetGLHandle(pipeline->GetProgramHandle());
+  if (!program.has_value()) {
+    VALIDATION_LOG << "Could not obtain program handle.";
+    return fail();
+  }
+
+  if (!pipeline->BuildVertexDescriptor(reactor.GetProcTable(),
+                                       program.value())) {
+    VALIDATION_LOG << "Could not build pipeline vertex descriptors.";
+    return fail();
+  }
+
+  if (!pipeline->IsValid()) {
+    VALIDATION_LOG << "Pipeline validation checks failed.";
+    return fail();
+  }
+
+  return pipeline;
+}
+
+bool PipelineLibraryGLES::SupportsParallelShaderCompile() const {
+  return supports_parallel_shader_compile_;
 }
 
 // |PipelineLibrary|
@@ -302,20 +692,42 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
 
   std::weak_ptr<PipelineLibrary> weak_this = weak_from_this();
   std::shared_ptr<ReactorGLES> reactor = reactor_;
+  // A synchronous caller waits for the future on this thread, so only an
+  // async job may return before its program is linked.
+  const bool may_defer_link = async && supports_parallel_shader_compile_;
+  // The queue owns this job while it waits, so a strong reference here would
+  // keep the queue alive through the job it holds. A task runner that drops
+  // its tasks would then leak both and leave the promise unset.
+  std::weak_ptr<PipelineCompileQueueGLES> weak_compile_queue = compile_queue_;
   auto generation_task = [promise, weak_this, descriptor, vert_function,
-                          frag_function, threadsafe, reactor]() {
+                          frag_function, threadsafe, reactor, may_defer_link,
+                          weak_compile_queue](bool eager) {
     auto thiz = weak_this.lock();
     if (!thiz) {
       promise->set_value(nullptr);
       return;
     }
-    const bool result = reactor->AddOperation([promise,        //
-                                               weak_this,      //
-                                               descriptor,     //
-                                               vert_function,  //
-                                               frag_function,  //
-                                               threadsafe      //
+    const bool result = reactor->AddOperation([promise,             //
+                                               weak_this,           //
+                                               descriptor,          //
+                                               vert_function,       //
+                                               frag_function,       //
+                                               threadsafe,          //
+                                               may_defer_link,      //
+                                               weak_compile_queue,  //
+                                               eager                //
     ](const ReactorGLES& reactor) {
+      // Pending links are checked when the queue drains, so a link is deferred
+      // only while the queue exists.
+      auto compile_queue = weak_compile_queue.lock();
+      if (may_defer_link && !eager && compile_queue) {
+        // The promise is set later unless the pipeline fails right away.
+        if (!CreatePipeline(weak_this, descriptor, vert_function, frag_function,
+                            threadsafe, promise)) {
+          promise->set_value(nullptr);
+        }
+        return;
+      }
       promise->set_value(CreatePipeline(weak_this, descriptor, vert_function,
                                         frag_function, threadsafe));
     });
@@ -326,7 +738,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
     compile_queue_->PostJobForDescriptor(descriptor,
                                          std::move(generation_task));
   } else {
-    generation_task();
+    generation_task(/*eager=*/true);
   }
 
   return pipeline_future;
@@ -371,7 +783,26 @@ void PipelineLibraryGLES::RemovePipelinesWithEntryPoint(
 }
 
 // |PipelineLibrary|
-PipelineLibraryGLES::~PipelineLibraryGLES() = default;
+PipelineLibraryGLES::~PipelineLibraryGLES() {
+  FailPendingPipelines();
+}
+
+void PipelineLibraryGLES::FailPendingPipelines() {
+  std::vector<PendingPipeline> pending;
+  {
+    Lock lock(pending_mutex_);
+    pending.swap(pending_pipelines_);
+  }
+  for (auto& item : pending) {
+    // Nobody checks this link, so the cache must not hand the program to a
+    // later request once the reactor works again. FinishPipeline removes it
+    // the same way when the link fails.
+    if (item.vert_shader != 0 && item.pipeline) {
+      RemoveProgramForKey(item.program_key, item.pipeline->GetSharedHandle());
+    }
+    item.promise->set_value(nullptr);
+  }
+}
 
 const std::shared_ptr<ReactorGLES>& PipelineLibraryGLES::GetReactor() const {
   return reactor_;
@@ -392,6 +823,16 @@ void PipelineLibraryGLES::SetProgramForKey(
     std::shared_ptr<UniqueHandleGLES> program) {
   Lock lock(programs_mutex_);
   programs_[key] = std::move(program);
+}
+
+void PipelineLibraryGLES::RemoveProgramForKey(
+    const ProgramKey& key,
+    const std::shared_ptr<UniqueHandleGLES>& program) {
+  Lock lock(programs_mutex_);
+  auto found = programs_.find(key);
+  if (found != programs_.end() && found->second == program) {
+    programs_.erase(found);
+  }
 }
 
 PipelineCompileQueue* PipelineLibraryGLES::GetPipelineCompileQueue() const {
