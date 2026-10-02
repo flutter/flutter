@@ -24,6 +24,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/time.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -767,6 +768,7 @@ window.\$dartLoader.loader.nextAttempt();
       completer.future,
       headless: !_config.pauseAfterLoad,
       logger: _logger,
+      systemClock: globals.systemClock,
       webBrowserFlags: const <String>[
         // Enforce high-DPI (3x) device scale factor and standard window size
         // to standardize rendering across platforms and match CI golden baselines.
@@ -838,11 +840,12 @@ class BrowserManager {
     this._browser,
     this._runtime,
     WebSocketChannel webSocket,
-    this._logger, {
+    this._logger,
+    this._systemClock, {
     WipConnection? wipConnection,
   }) : _wipConnection = wipConnection {
     if (wipConnection != null) {
-      _networkTracker = CdpNetworkTracker(wipConnection);
+      _networkTracker = CdpNetworkTracker(wipConnection, _systemClock);
       unawaited(_networkTracker!.enable());
     }
 
@@ -884,7 +887,7 @@ class BrowserManager {
             .map((Object? message) {
               if (!_closed) {
                 _timer.reset();
-                _lastMessageTime = DateTime.now();
+                _lastMessageTime = _systemClock.now();
               }
               for (final RunnerSuiteController controller in _controllers) {
                 controller.setDebugging(false);
@@ -903,6 +906,7 @@ class BrowserManager {
   final Chromium _browser;
   final Runtime _runtime;
   final Logger _logger;
+  final SystemClock _systemClock;
   final WipConnection? _wipConnection;
   CdpNetworkTracker? _networkTracker;
   DateTime? _lastMessageTime;
@@ -969,6 +973,7 @@ class BrowserManager {
     bool headless = true,
     List<String> webBrowserFlags = const <String>[],
     required Logger logger,
+    required SystemClock systemClock,
   }) async {
     final Chromium chrome = await chromiumLauncher.launch(
       url.toString(),
@@ -1023,7 +1028,14 @@ class BrowserManager {
             return;
           }
           completer.complete(
-            BrowserManager._(chrome, runtime, webSocket, logger, wipConnection: wipConnection),
+            BrowserManager._(
+              chrome,
+              runtime,
+              webSocket,
+              logger,
+              systemClock,
+              wipConnection: wipConnection,
+            ),
           );
         },
         onError: (Object error, StackTrace stackTrace) {
@@ -1163,7 +1175,7 @@ class BrowserManager {
     final report = StringBuffer();
     report.writeln('[flutter_tools] --- Chrome Web Test Timeout Diagnostic ---');
 
-    final now = DateTime.now();
+    final DateTime now = _systemClock.now();
     final Duration? timeSinceLastPing = _lastMessageTime != null
         ? now.difference(_lastMessageTime!)
         : null;
@@ -1243,10 +1255,11 @@ class BrowserManager {
 /// Tracks active network requests via Chrome DevTools Protocol to identify pending or stalled asset fetches.
 class CdpNetworkTracker {
   /// Creates a [CdpNetworkTracker] using the provided [connection].
-  CdpNetworkTracker(this.connection);
+  CdpNetworkTracker(this.connection, this._systemClock);
 
   /// The connection to the Chrome DevTools Protocol.
   final WipConnection connection;
+  final SystemClock _systemClock;
   final Map<String, _PendingRequestInfo> _pendingRequests = <String, _PendingRequestInfo>{};
   StreamSubscription<WipEvent>? _subscription;
 
@@ -1266,7 +1279,7 @@ class CdpNetworkTracker {
             if (requestId != null && url != null) {
               _pendingRequests[requestId] = _PendingRequestInfo(
                 url: url,
-                startTime: DateTime.now(),
+                startTime: _systemClock.now(),
               );
             }
           case 'Network.loadingFinished':
@@ -1281,7 +1294,7 @@ class CdpNetworkTracker {
   }
 
   List<String> getStalledRequests({Duration threshold = const Duration(seconds: 5)}) {
-    final now = DateTime.now();
+    final DateTime now = _systemClock.now();
     return _pendingRequests.values
         .where((_PendingRequestInfo r) => now.difference(r.startTime) >= threshold)
         .map(
