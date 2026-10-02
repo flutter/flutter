@@ -216,7 +216,7 @@ object DependencyVersionChecker {
             "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
             " to bypass this check.\n\nPotential fix: $potentialFix"
 
-    @VisibleForTesting internal fun getUnsupportedMajorVersionErrorMessage(
+    @VisibleForTesting internal fun getFutureUnsupportedMajorVersionErrorMessage(
         dependencyName: String,
         versionString: String,
         unsupportedMajorVersion: Int,
@@ -294,7 +294,7 @@ object DependencyVersionChecker {
     ) {
         if (androidPluginVersion.major >= firstUnsupportedAGPMajorVersion) {
             val errorMessage: String =
-                getUnsupportedMajorVersionErrorMessage(
+                getFutureUnsupportedMajorVersionErrorMessage(
                     AGP_NAME,
                     "${androidPluginVersion.major}.${androidPluginVersion.minor}.${androidPluginVersion.micro}",
                     firstUnsupportedAGPMajorVersion,

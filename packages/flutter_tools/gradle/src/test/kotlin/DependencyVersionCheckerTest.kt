@@ -22,11 +22,11 @@ import com.flutter.gradle.DependencyVersionChecker.errorMinSdkVersion
 import com.flutter.gradle.DependencyVersionChecker.firstUnsupportedAGPMajorVersion
 import com.flutter.gradle.DependencyVersionChecker.getErrorMessage
 import com.flutter.gradle.DependencyVersionChecker.getFlavorSpecificMessage
+import com.flutter.gradle.DependencyVersionChecker.getFutureUnsupportedMajorVersionErrorMessage
 import com.flutter.gradle.DependencyVersionChecker.getPotentialAGPFix
 import com.flutter.gradle.DependencyVersionChecker.getPotentialGradleFix
 import com.flutter.gradle.DependencyVersionChecker.getPotentialKGPFix
 import com.flutter.gradle.DependencyVersionChecker.getPotentialSDKFix
-import com.flutter.gradle.DependencyVersionChecker.getUnsupportedMajorVersionErrorMessage
 import com.flutter.gradle.DependencyVersionChecker.getWarnMessage
 import com.flutter.gradle.DependencyVersionChecker.warnAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnGradleVersion
@@ -139,7 +139,7 @@ class DependencyVersionCheckerTest {
         val dependencyValidationException =
             assertFailsWith<DependencyValidationException> { DependencyVersionChecker.checkDependencyVersions(mockProject) }
         assertEquals(
-            getUnsupportedMajorVersionErrorMessage(
+            getFutureUnsupportedMajorVersionErrorMessage(
                 AGP_NAME,
                 "$firstUnsupportedAGPMajorVersion.0.0",
                 firstUnsupportedAGPMajorVersion,
@@ -162,7 +162,7 @@ class DependencyVersionCheckerTest {
         val dependencyValidationException =
             assertFailsWith<DependencyValidationException> { DependencyVersionChecker.checkDependencyVersions(mockProject) }
         assertEquals(
-            getUnsupportedMajorVersionErrorMessage(
+            getFutureUnsupportedMajorVersionErrorMessage(
                 AGP_NAME,
                 "$firstUnsupportedAGPMajorVersion.3.1",
                 firstUnsupportedAGPMajorVersion,
