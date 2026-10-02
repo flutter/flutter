@@ -1581,6 +1581,12 @@ TEST(AndroidExternalViewEmbedder2,
   EXPECT_EQ(observed_route.load(), Route::kPlatform);
   EXPECT_TRUE(router->HasUncommittedPlatformFrames());
   PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+  // Running the platform task is not enough: onEndFrame2() only hands the
+  // transaction to ViewRootImpl. The frame stays uncommitted until Java reports
+  // the commit (PlatformViewAndroid::OnPlatformFrameCommitted), played here by
+  // the test.
+  EXPECT_TRUE(router->HasUncommittedPlatformFrames());
+  router->OnPlatformFrameCommitted();
   EXPECT_FALSE(router->HasUncommittedPlatformFrames());
 
   // Frame 2: No platform layers, but views_visible_last_frame_ still forces
@@ -1595,21 +1601,25 @@ TEST(AndroidExternalViewEmbedder2,
   PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
 
   // Frame 3: Nothing composited and views_visible_last_frame_ is now empty,
-  // but previous_frame_used_java_transactions_ keeps platform routing enabled
-  // for a 1-frame transition cooldown so direct raster-thread
-  // ASurfaceTransaction_apply cannot overtake Frame 2's UI-thread
-  // applyTransactionOnDraw.
+  // but Frame 2 has not been committed yet, so this frame must stay on the
+  // platform route: a direct raster-thread ASurfaceTransaction_apply could
+  // otherwise overtake Frame 2's applyTransactionOnDraw.
   EXPECT_CALL(*jni_mock, swapTransaction());
   EXPECT_CALL(*jni_mock, onEndFrame2());
   embedder->PrepareFlutterView(frame_size, 1.0);
   submit_frame(frame_size);
   EXPECT_EQ(observed_route.load(), Route::kPlatform);
   PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+  // Frames 2 and 3 commit.
+  router->OnPlatformFrameCommitted();
+  EXPECT_TRUE(router->HasUncommittedPlatformFrames());
+  router->OnPlatformFrameCommitted();
+  EXPECT_FALSE(router->HasUncommittedPlatformFrames());
 
   // Frame 4: Steady-state no-PV frame. No layers, views_visible_last_frame_ is
-  // empty, no resize, and transition cooldown has completed. The platform
-  // thread is bypassed entirely: no platform task is posted and the swapchain
-  // observes the direct route.
+  // empty, no resize, and nothing is uncommitted. The platform thread is
+  // bypassed entirely: no platform task is posted and the swapchain observes
+  // the direct route.
   EXPECT_CALL(*jni_mock, swapTransaction()).Times(0);
   EXPECT_CALL(*jni_mock, onEndFrame2()).Times(0);
   embedder->PrepareFlutterView(frame_size, 1.0);
@@ -1628,38 +1638,136 @@ TEST(AndroidExternalViewEmbedder2,
   embedder->PrepareFlutterView(resized_frame_size, 1.0);
   submit_frame(resized_frame_size);
   EXPECT_EQ(observed_route.load(), Route::kPlatform);
-  // Drain platform task runner for Frame 5.
   PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+  router->OnPlatformFrameCommitted();
+  EXPECT_FALSE(router->HasUncommittedPlatformFrames());
 
-  // Block the platform thread so Frame 6's platform task remains in-flight
-  // while Frame 7 is submitted on the raster thread.
+  // Block the platform thread so Frame 6's platform task remains queued while
+  // Frame 7 is submitted on the raster thread.
   fml::AutoResetWaitableEvent unblock_platform;
   task_runners.GetPlatformTaskRunner()->PostTask(
       [&unblock_platform]() { unblock_platform.Wait(); });
 
-  // Frame 6: Cooldown frame after resize (200x200). Its platform task is
-  // queued behind unblock_platform, so the router keeps reporting an
-  // uncommitted platform frame.
+  // Frame 6: Another resize (200x200 -> 300x300). Its platform task is queued
+  // behind unblock_platform, so the frame is uncommitted.
+  const DlISize resized_again_frame_size(300, 300);
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(300, 300)).Times(AnyNumber());
   EXPECT_CALL(*jni_mock, swapTransaction()).Times(2);
   EXPECT_CALL(*jni_mock, onEndFrame2()).Times(2);
-  embedder->PrepareFlutterView(resized_frame_size, 1.0);
-  submit_frame(resized_frame_size);
+  embedder->PrepareFlutterView(resized_again_frame_size, 1.0);
+  submit_frame(resized_again_frame_size);
   EXPECT_EQ(observed_route.load(), Route::kPlatform);
   EXPECT_TRUE(router->HasUncommittedPlatformFrames());
 
-  // Frame 7: Even though primary_uses_java_transactions and
-  // previous_frame_used_java_transactions_ are now false, Frame 6's platform
-  // task has not committed yet, so Frame 7 must stay on the platform route to
-  // prevent out-of-order submission.
-  embedder->PrepareFlutterView(resized_frame_size, 1.0);
-  submit_frame(resized_frame_size);
+  // Frame 7: No View mutation of its own, but Frame 6 has not even reached the
+  // platform thread, so Frame 7 must stay on the platform route to prevent
+  // out-of-order submission.
+  embedder->PrepareFlutterView(resized_again_frame_size, 1.0);
+  submit_frame(resized_again_frame_size);
   EXPECT_EQ(observed_route.load(), Route::kPlatform);
   EXPECT_TRUE(router->HasUncommittedPlatformFrames());
 
-  // Unblock and drain both Frame 6 and Frame 7 platform tasks.
+  // Unblock and drain both Frame 6 and Frame 7 platform tasks, then commit.
   unblock_platform.Signal();
   PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+  EXPECT_TRUE(router->HasUncommittedPlatformFrames());
+  router->OnPlatformFrameCommitted();
+  router->OnPlatformFrameCommitted();
   EXPECT_FALSE(router->HasUncommittedPlatformFrames());
+
+  // Frame 8: Back to the direct route.
+  EXPECT_CALL(*jni_mock, swapTransaction()).Times(0);
+  EXPECT_CALL(*jni_mock, onEndFrame2()).Times(0);
+  embedder->PrepareFlutterView(resized_again_frame_size, 1.0);
+  submit_frame(resized_again_frame_size);
+  EXPECT_EQ(observed_route.load(), Route::kDirect);
+  PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+
+  embedder->Teardown();
+  embedder.reset();
+}
+
+TEST(AndroidExternalViewEmbedder2,
+     StaysOnPlatformRouteUntilJavaReportsTheCommit) {
+  auto jni_mock = std::make_shared<JNIMock>();
+  auto android_context =
+      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi | ThreadHost::Type::kRaster);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+
+  auto surface_factory = std::make_shared<TestAndroidSurfaceFactory>([]() {
+    auto android_surface = std::make_unique<AndroidSurfaceMock>();
+    EXPECT_CALL(*android_surface, IsValid()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*android_surface, SetNativeWindow(_, _))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*android_surface, CreateGPUSurface(_))
+        .WillRepeatedly(Return(ByMove(std::make_unique<SurfaceMock>())));
+    return android_surface;
+  });
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(_, _)).Times(AnyNumber());
+
+  auto router = std::make_shared<SurfaceTransactionRouter>();
+  auto embedder = std::make_unique<AndroidExternalViewEmbedder2>(
+      *android_context, jni_mock, surface_factory, router, task_runners);
+
+  std::atomic<Route> observed_route{Route::kDirect};
+  SurfaceFrame::FramebufferInfo framebuffer_info;
+  auto submit_frame = [&](const DlISize& size) {
+    embedder->PrepareFlutterView(size, 1.0);
+    PostTaskSync(task_runners.GetRasterTaskRunner(), [&]() {
+      embedder->SubmitFlutterView(
+          kImplicitViewId, nullptr, nullptr,
+          std::make_unique<SurfaceFrame>(
+              SkSurfaces::Null(static_cast<int>(size.width),
+                               static_cast<int>(size.height)),
+              framebuffer_info,
+              [](const SurfaceFrame&, DlCanvas*) { return true; },
+              [&](const SurfaceFrame&) {
+                observed_route.store(router->GetFrameRoute());
+                return true;
+              },
+              size));
+    });
+    PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+  };
+
+  // The first frame has nothing to synchronize with the View hierarchy.
+  EXPECT_CALL(*jni_mock, swapTransaction()).Times(0);
+  EXPECT_CALL(*jni_mock, onEndFrame2()).Times(0);
+  submit_frame(DlISize(100, 100));
+  EXPECT_EQ(observed_route.load(), Route::kDirect);
+  EXPECT_FALSE(router->HasUncommittedPlatformFrames());
+
+  // A resize goes through the platform thread.
+  EXPECT_CALL(*jni_mock, swapTransaction());
+  EXPECT_CALL(*jni_mock, onEndFrame2());
+  submit_frame(DlISize(200, 200));
+  EXPECT_EQ(observed_route.load(), Route::kPlatform);
+  EXPECT_TRUE(router->HasUncommittedPlatformFrames());
+
+  // The platform task ran, but Java has not reported the commit, so the next
+  // frame cannot take the direct route even though it changes nothing.
+  EXPECT_CALL(*jni_mock, swapTransaction());
+  EXPECT_CALL(*jni_mock, onEndFrame2());
+  submit_frame(DlISize(200, 200));
+  EXPECT_EQ(observed_route.load(), Route::kPlatform);
+  EXPECT_TRUE(router->HasUncommittedPlatformFrames());
+
+  // Both platform frames commit.
+  router->OnPlatformFrameCommitted();
+  EXPECT_TRUE(router->HasUncommittedPlatformFrames());
+  router->OnPlatformFrameCommitted();
+  EXPECT_FALSE(router->HasUncommittedPlatformFrames());
+
+  EXPECT_CALL(*jni_mock, swapTransaction()).Times(0);
+  EXPECT_CALL(*jni_mock, onEndFrame2()).Times(0);
+  submit_frame(DlISize(200, 200));
+  EXPECT_EQ(observed_route.load(), Route::kDirect);
 
   embedder->Teardown();
   embedder.reset();

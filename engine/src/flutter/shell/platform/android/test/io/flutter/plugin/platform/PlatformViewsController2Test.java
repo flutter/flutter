@@ -7,6 +7,7 @@ package io.flutter.plugin.platform;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 import android.app.Presentation;
 import android.content.Context;
@@ -56,6 +57,7 @@ import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -67,6 +69,8 @@ import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.RealObject;
+import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowDialog;
 import org.robolectric.shadows.ShadowSurfaceView;
 
@@ -883,6 +887,93 @@ public class PlatformViewsController2Test {
   }
 
   @Test
+  @Config(shadows = {ShadowPlatformTaskQueue.class, ShadowTransactionCommittedListeners.class})
+  public void onEndFrameReportsCommitOnlyAfterTheFrameTransactionIsCommitted() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterJNI mockJNI = mock(FlutterJNI.class);
+    controller.setFlutterJNI(mockJNI);
+
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    // applyTransactionOnDraw() merges the transaction into ViewRootImpl's own, which carries
+    // listeners along only if they were already registered. Record what is registered at that
+    // moment.
+    AtomicReference<ShadowTransactionCommittedListeners> listenersAtApply = new AtomicReference<>();
+    doAnswer(
+            invocation -> {
+              SurfaceControl.Transaction tx = invocation.getArgument(0);
+              listenersAtApply.set(Shadow.extract(tx));
+              return null;
+            })
+        .when(rootSurfaceControl)
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    controller.attachToView(flutterView);
+
+    controller.createTransaction();
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(rootSurfaceControl).applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    assertNotNull(listenersAtApply.get());
+    assertEquals(1, listenersAtApply.get().listeners.size());
+    // Handing the transaction to ViewRootImpl is not a commit.
+    verify(mockJNI, never()).onEndFrameTransactionCommitted();
+
+    listenersAtApply.get().fireAll();
+    // The callback hops to the main looper before reaching FlutterJNI.
+    verify(mockJNI, never()).onEndFrameTransactionCommitted();
+    shadowMainLooper().idle();
+    verify(mockJNI, times(1)).onEndFrameTransactionCommitted();
+  }
+
+  @Test
+  @Config(shadows = {ShadowPlatformTaskQueue.class})
+  public void onEndFrameReportsCommitImmediatelyWhenThereIsNoRootSurfaceControl() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterJNI mockJNI = mock(FlutterJNI.class);
+    controller.setFlutterJNI(mockJNI);
+
+    FlutterView flutterView = mock(FlutterView.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(null);
+    controller.attachToView(flutterView);
+
+    controller.createTransaction();
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    // The transaction was closed without being applied, so nothing will ever commit it. The
+    // engine must not be left waiting for it.
+    verify(mockJNI, times(1)).onEndFrameTransactionCommitted();
+  }
+
+  @Test
+  @Config(shadows = {ShadowPlatformTaskQueue.class})
+  public void onEndFrameReportsCommitImmediatelyAfterDetachFromView() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterJNI mockJNI = mock(FlutterJNI.class);
+    controller.setFlutterJNI(mockJNI);
+
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    controller.attachToView(flutterView);
+
+    controller.createTransaction();
+    controller.swapTransactions();
+    // The platform task that ends the frame can run after the view detached.
+    controller.detachFromView();
+    controller.onEndFrame();
+
+    verify(rootSurfaceControl, never())
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    verify(mockJNI, times(1)).onEndFrameTransactionCommitted();
+  }
+
+  @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void itInformsMutatorViewWhenGestureIsRejected() {
     PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
@@ -1352,6 +1443,31 @@ public class PlatformViewsController2Test {
     @Implementation
     public SurfaceHolder getHolder() {
       return holder;
+    }
+  }
+
+  /**
+   * Records the committed listeners of a {@link SurfaceControl.Transaction} so a test can fire
+   * them. The native registration is a no-op under Robolectric.
+   */
+  @Implements(SurfaceControl.Transaction.class)
+  public static class ShadowTransactionCommittedListeners {
+    @RealObject private SurfaceControl.Transaction realTransaction;
+    final List<Runnable> listeners = new ArrayList<>();
+
+    public ShadowTransactionCommittedListeners() {}
+
+    @Implementation(minSdk = API_LEVELS.API_31)
+    protected SurfaceControl.Transaction addTransactionCommittedListener(
+        Executor executor, SurfaceControl.TransactionCommittedListener listener) {
+      listeners.add(() -> executor.execute(listener::onTransactionCommitted));
+      return realTransaction;
+    }
+
+    void fireAll() {
+      for (Runnable listener : listeners) {
+        listener.run();
+      }
     }
   }
 }

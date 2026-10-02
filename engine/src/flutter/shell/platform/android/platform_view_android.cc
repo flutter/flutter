@@ -571,6 +571,10 @@ bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
              .GetShouldEnableSurfaceControlSwapchain();
 }
 
+void PlatformViewAndroid::OnPlatformFrameCommitted() {
+  transaction_router_->OnPlatformFrameCommitted();
+}
+
 void PlatformViewAndroid::SetupImpellerContext() {
   android_context_->SetupImpellerContext();
   android_surface_->SetupImpellerSurface();

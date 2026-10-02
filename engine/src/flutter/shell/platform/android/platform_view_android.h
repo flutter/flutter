@@ -128,6 +128,16 @@ class PlatformViewAndroid final : public PlatformView {
   /// @brief Whether the SurfaceControl based swapchain is enabled and active.
   bool IsSurfaceControlEnabled() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Called from Java (on the platform thread) once the
+  ///             transaction that PlatformViewsController2.onEndFrame() handed
+  ///             to the View hierarchy has been committed by SurfaceFlinger,
+  ///             or was released without ever being applied. Until then the
+  ///             frames that follow keep going through the platform thread;
+  ///             see |SurfaceTransactionRouter|.
+  ///
+  void OnPlatformFrameCommitted();
+
   // |PlatformView|
   void SetupImpellerContext() override;
 

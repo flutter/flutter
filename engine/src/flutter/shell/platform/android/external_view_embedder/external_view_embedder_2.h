@@ -154,10 +154,6 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // surface resizes that require ViewRootImpl BLAST synchronization.
   std::optional<DlISize> last_submitted_frame_size_;
 
-  // Whether the previous frame required Java transactions, used to hold the
-  // Java path for one transition frame so ViewRootImpl drains in FIFO order.
-  bool previous_frame_used_java_transactions_ = false;
-
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for
   // the task until it completes.

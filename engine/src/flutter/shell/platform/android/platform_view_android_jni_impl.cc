@@ -604,6 +604,12 @@ static void ScheduleFrame(JNIEnv* env, jobject jcaller, jlong shell_holder) {
   ANDROID_SHELL_HOLDER->GetPlatformView()->ScheduleFrame();
 }
 
+static void OnEndFrameTransactionCommitted(JNIEnv* env,
+                                           jobject jcaller,
+                                           jlong shell_holder) {
+  ANDROID_SHELL_HOLDER->GetPlatformView()->OnPlatformFrameCommitted();
+}
+
 static void InvokePlatformMessageResponseCallback(JNIEnv* env,
                                                   jobject jcaller,
                                                   jlong shell_holder,
@@ -886,6 +892,11 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeScheduleFrame",
           .signature = "(J)V",
           .fnPtr = reinterpret_cast<void*>(&ScheduleFrame),
+      },
+      {
+          .name = "nativeOnEndFrameTransactionCommitted",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&OnEndFrameTransactionCommitted),
       },
       {
           .name = "nativeUnregisterTexture",

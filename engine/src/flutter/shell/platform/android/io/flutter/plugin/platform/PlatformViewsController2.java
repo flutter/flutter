@@ -12,6 +12,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.SparseArray;
 import android.view.AttachedSurfaceControl;
 import android.view.Gravity;
@@ -86,6 +88,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   // Platform-thread only. Clips and overlay visibility share one transaction per frame.
   private SurfaceControl.Transaction pendingPlatformTransaction;
   private SurfaceControl.Transaction activePlatformTransaction;
+
+  // SurfaceFlinger reports transaction commits on a binder thread; FlutterJNI must be called on
+  // the platform thread.
+  private final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
 
   private Surface overlayerSurface = null;
   private SurfaceControl overlaySurfaceControl = null;
@@ -721,13 +727,34 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     final AttachedSurfaceControl rootSurfaceControl =
         flutterView == null ? null : flutterView.getRootSurfaceControl();
     if (rootSurfaceControl == null) {
-      // Release the unapplied transaction and its owned fence FDs.
+      // Release the unapplied transaction and its owned fence FDs. Nothing will ever commit, so
+      // report the frame as done right away or the engine would keep routing frames here.
       tx.close();
+      notifyEndFrameTransactionCommitted();
       return;
     }
 
     flutterView.invalidate();
+    // ViewRootImpl merges tx into its own frame transaction, and merging carries the listener
+    // along, so this must be registered before applyTransactionOnDraw(). ViewRootImpl applies
+    // the merged transaction with its next draw, or on its own if that draw never happens, so
+    // the listener always fires eventually.
+    tx.addTransactionCommittedListener(
+        mainThreadHandler::post, this::notifyEndFrameTransactionCommitted);
     rootSurfaceControl.applyTransactionOnDraw(tx);
+  }
+
+  /**
+   * Tells the engine that the transaction of a frame that went through {@link #onEndFrame()} is no
+   * longer pending, so the raster thread may stop routing swapchain frames through here.
+   */
+  @UiThread
+  private void notifyEndFrameTransactionCommitted() {
+    if (flutterJNI == null) {
+      // Tests drive the transaction plumbing without an engine.
+      return;
+    }
+    flutterJNI.onEndFrameTransactionCommitted();
   }
 
   @UiThread

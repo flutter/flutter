@@ -102,14 +102,21 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
                                   *last_submitted_frame_size_ != frame_size_;
   last_submitted_frame_size_ = frame_size_;
 
+  // A frame mutates View state when it displays or hides platform views or
+  // when the FlutterView resizes; those frames must reach SurfaceFlinger
+  // together with the View hierarchy draw, which only the platform thread can
+  // arrange (AttachedSurfaceControl.applyTransactionOnDraw).
   const bool primary_uses_java_transactions =
       FrameHasPlatformLayers() || !views_visible_last_frame_.empty() ||
       frame_size_changed;
+  // Direct and platform-routed transactions are applied with different apply
+  // tokens, so a direct frame could be committed before an older platform
+  // frame that is still waiting for its View draw. Keep routing through the
+  // platform thread until Java reports that every such frame was committed
+  // (PlatformViewAndroid::OnPlatformFrameCommitted).
   const bool uses_java_transactions =
       primary_uses_java_transactions ||
-      previous_frame_used_java_transactions_ ||
       transaction_router_->HasUncommittedPlatformFrames();
-  previous_frame_used_java_transactions_ = primary_uses_java_transactions;
 
   // The route is read by the swapchain of every surface submitted below, so it
   // is latched for the whole submission rather than consumed per surface.
@@ -128,7 +135,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
     if (uses_java_transactions) {
       transaction_router_->OnPlatformFrameSubmitted();
       task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
-          [this, jni_facade = jni_facade_, router = transaction_router_,
+          [this, jni_facade = jni_facade_,
            views_visible_last_frame = views_visible_last_frame_]() {
             // This pointer is guaranteed to not be dangling as long as
             // DestroySurfaces is called before the embedder is deleted. See
@@ -140,7 +147,6 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
             jni_facade->swapTransaction();
             jni_facade->onEndFrame2();
-            router->OnPlatformFrameCommitted();
           }));
     }
     views_visible_last_frame_.clear();
@@ -225,8 +231,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   transaction_router_->OnPlatformFrameSubmitted();
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
-       jni_facade = jni_facade_, router = transaction_router_,
-       device_pixel_ratio = device_pixel_ratio_, slices = std::move(slices_),
+       jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
+       slices = std::move(slices_),
        views_visible_last_frame = views_visible_last_frame_,
        overlay_layer_has_content_this_frame_]() mutable -> void {
         if (overlay_layer_has_content_this_frame_) {
@@ -261,7 +267,6 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
         jni_facade->swapTransaction();
         jni_facade->onEndFrame2();
-        router->OnPlatformFrameCommitted();
       }));
 
   views_visible_last_frame_.clear();
@@ -341,7 +346,9 @@ void AndroidExternalViewEmbedder2::Teardown() {
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder2::DestroySurfaces() {
   last_submitted_frame_size_ = std::nullopt;
-  previous_frame_used_java_transactions_ = false;
+  // |transaction_router_| is intentionally left alone: frames already handed
+  // to the platform thread still commit (ViewRootImpl applies pending
+  // transactions even when it dies) and report themselves when they do.
   if (!surface_pool_->HasLayers()) {
     return;
   }
