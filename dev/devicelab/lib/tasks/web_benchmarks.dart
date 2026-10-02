@@ -456,7 +456,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       // stalled page reload can be diagnosed from the CI logs. This only logs;
       // the recipe's test timeout ends a stalled run.
       const stallThreshold = Duration(minutes: 5);
-      final stallWatchdog = Timer.periodic(stallThreshold, (_) async {
+      final stallWatchdog = Timer.periodic(const Duration(minutes: 1), (_) async {
         final Duration idle = DateTime.now().difference(lastRequestTime);
         if (idle < stallThreshold) {
           return;

@@ -285,6 +285,8 @@ class Chrome {
       final String? message = switch (event.method) {
         'Page.frameNavigated' => 'navigated to ${(params['frame'] as Map<String, dynamic>)['url']}',
         'Page.loadEventFired' => 'load event fired',
+        'Runtime.consoleAPICalled' =>
+          'console.${params['type']}: ${_describeConsoleArgs(params['args'] as List<dynamic>)}',
         'Runtime.exceptionThrown' =>
           'uncaught exception: ${_describeException(params['exceptionDetails'] as Map<String, dynamic>)}',
         'Inspector.targetCrashed' => 'renderer process crashed',
@@ -298,6 +300,20 @@ class Chrome {
     for (final domain in <String>['Page', 'Runtime', 'Inspector']) {
       await debugConnection.sendCommand('$domain.enable');
     }
+    // DDC loads 600+ library scripts per reload, which overflows the default
+    // 250-entry Resource Timing buffer.
+    await debugConnection.sendCommand('Page.addScriptToEvaluateOnNewDocument', <String, dynamic>{
+      'source': 'performance.setResourceTimingBufferSize(2000);',
+    });
+  }
+
+  static String _describeConsoleArgs(List<dynamic> args) {
+    return args
+        .map((dynamic arg) {
+          final map = arg as Map<String, dynamic>;
+          return '${map['value'] ?? map['description'] ?? map['type']}';
+        })
+        .join(' ');
   }
 
   static String _describeException(Map<String, dynamic> exceptionDetails) {
@@ -326,13 +342,31 @@ class Chrome {
       return '${(response.result!['result'] as Map<String, dynamic>)['value']}';
     }
 
-    const pageState = '''
-JSON.stringify({
-  href: location.href,
-  readyState: document.readyState,
-  msSinceNavigationStart: Math.round(performance.now()),
-  lastLoadedResources: performance.getEntriesByType('resource').slice(-5).map((e) => e.name),
-})''';
+    const pageState = r'''
+(() => {
+  const loaded = new Set(performance.getEntriesByType('resource').map((e) => e.name));
+  const scripts = document.head ? Array.from(document.head.querySelectorAll('script')) : [];
+  const loader = window.$dartLoader?.loader;
+  return JSON.stringify({
+    href: location.href,
+    readyState: document.readyState,
+    msSinceNavigationStart: Math.round(performance.now()),
+    dwdsInitialized: Boolean(window.$dwdsInitialized),
+    dartMainExecuted: Boolean(window.$dartMainExecuted),
+    dartAppInstanceId: window.$dartAppInstanceId ?? null,
+    resourceCount: loaded.size,
+    scriptTagCount: scripts.length,
+    pendingScripts: scripts.map((s) => s.src).filter((src) => src && !loaded.has(src)),
+    lastLoadedResources: performance.getEntriesByType('resource').slice(-5).map((e) => e.name),
+    loader: loader ? {
+      attemptCount: loader.attemptCount,
+      numToLoad: loader.numToLoad,
+      numLoaded: loader.numLoaded,
+      numFailed: loader.numFailed,
+      queueLength: loader.queue.length,
+    } : null,
+  });
+})()''';
     final lines = <String>[];
     try {
       lines.add('Page: ${await evaluate(pageState)}');
