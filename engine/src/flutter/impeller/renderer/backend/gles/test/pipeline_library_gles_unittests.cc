@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <atomic>
+#include <string>
+#include <thread>
+
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "impeller/fixtures/spec_constant.frag.h"
 #include "impeller/fixtures/spec_constant.vert.h"
 #include "impeller/playground/playground_test.h"
@@ -94,6 +99,43 @@ TEST_P(PipelineLibraryGLESTest, ClearingPipelineWillAlsoClearProgramHandle) {
   HandleGLES handle_2 = pipeline_gles_2.GetProgramHandle();
 
   EXPECT_FALSE(HandleGLES::Equal{}(handle, handle_2));
+}
+
+TEST_P(PipelineLibraryGLESTest, CanLookUpPipelinesWhileCreatingPipelines) {
+  using VS = SpecConstantVertexShader;
+  using FS = SpecConstantFragmentShader;
+  std::shared_ptr<Context> context = GetContext();
+  ASSERT_TRUE(context);
+  std::optional<PipelineDescriptor> desc =
+      PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+  std::shared_ptr<PipelineLibrary> library = context->GetPipelineLibrary();
+  ASSERT_TRUE(library->GetPipeline(desc).Get());
+
+  std::atomic_bool done = false;
+  std::atomic_int misses = 0;
+  fml::CountDownLatch reading(1);
+  std::thread reader([&] {
+    reading.CountDown();
+    while (!done) {
+      if (!library->HasPipeline(desc.value()) ||
+          !library->GetPipeline(desc.value()).IsValid()) {
+        misses++;
+      }
+    }
+  });
+  reading.Wait();
+
+  for (int i = 0; i < 128; i++) {
+    PipelineDescriptor variant = desc.value();
+    variant.SetLabel("Variant " + std::to_string(i));
+    std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline =
+        library->GetPipeline(variant).Get();
+    EXPECT_TRUE(pipeline && pipeline->IsValid());
+  }
+  done = true;
+  reader.join();
+  EXPECT_EQ(misses, 0);
 }
 // NOLINTEND(bugprone-unchecked-optional-access)
 
