@@ -111,15 +111,41 @@ flutter::TaskRunners CreateTestTaskRunners() {
 
   bool fired = false;
   fml::TimeDelta frameInterval;
+  waiter->SetDispatchingEvent(true);
   waiter->AsyncWaitForVsync([&](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
     fired = true;
     frameInterval = recorder->GetVsyncTargetTime() - recorder->GetVsyncStartTime();
   });
+  waiter->SetDispatchingEvent(false);
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
 
   XCTAssertTrue(fired);
   XCTAssertGreaterThan(frameInterval.ToNanoseconds(), 0);
   XCTAssertEqualWithAccuracy(frameInterval.ToSecondsF(), 1.0 / maxFrameRate, 0.0001);
+}
+
+- (void)testAwaitVSyncFromPausedDisplayLinkWhenNotDispatchingEvent {
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
+  double maxFrameRate = 120;
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+
+  flutter::TaskRunners taskRunners = CreateTestTaskRunners();
+  auto waiter = std::make_unique<flutter::VsyncWaiterIOS>(taskRunners, mockDisplayLinkManager);
+
+  bool fired = false;
+  XCTestExpectation* expectation = [self expectationWithDescription:@"display link callback"];
+  waiter->AsyncWaitForVsync([&](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
+    fired = true;
+    [expectation fulfill];
+  });
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+
+  XCTAssertFalse(fired);
+  [self waitForExpectationsWithTimeout:5.0 handler:nil];
+  XCTAssertTrue(fired);
 }
 
 @end
