@@ -51,8 +51,8 @@ class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
   @override
   List<ui.TextBox> getBoxesForSelection(
     TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? boxHeightStyle,
+    ui.BoxWidthStyle? boxWidthStyle,
   }) {
     if (selection == emptyListSelection) {
       return <ui.TextBox>[];
@@ -79,8 +79,8 @@ class RenderParagraphWithEmptyBoxListForWidgetSpan extends RenderParagraph {
   @override
   List<ui.TextBox> getBoxesForSelection(
     TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? boxHeightStyle,
+    ui.BoxWidthStyle? boxWidthStyle,
   }) {
     if (text.getSpanForPosition(selection.base) is WidgetSpan) {
       return <ui.TextBox>[];
@@ -247,6 +247,54 @@ void main() {
     expect(boxes[3], const TextBox.fromLTRBD(130.0, 10.0, 156.0, 20.0, TextDirection.ltr));
     // 'fifth':
     expect(boxes[4], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
+  });
+
+  test('RenderParagraph uses selection styles in getBoxesForSelection', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(
+        text: 'Test\nText',
+        style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0, height: 3.0),
+      ),
+      textDirection: TextDirection.ltr,
+      selectionHeightStyle: ui.BoxHeightStyle.max,
+      selectionWidthStyle: ui.BoxWidthStyle.max,
+    );
+
+    layout(paragraph);
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 4),
+    );
+
+    expect(boxes, isNotEmpty);
+
+    final double height = boxes.first.bottom - boxes.first.top;
+
+    // Height should reflect expanded line height rather than tight glyph bounds.
+    expect(height, greaterThan(20.0));
+  });
+
+  test('RenderParagraph defaults to tight selection bounds', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(
+        text: 'Test\nText',
+        style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0, height: 3.0),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    layout(paragraph);
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 4),
+    );
+
+    expect(boxes, isNotEmpty);
+
+    final double height = boxes.first.bottom - boxes.first.top;
+
+    // Tight bounds should stay close to glyph height.
+    expect(height, lessThan(40.0));
   });
 
   test('getWordBoundary control test', () {
@@ -1037,6 +1085,50 @@ void main() {
         );
       }
     }
+
+    test('RenderParagraph updates selection geometry when selection styles change', () {
+      final registrar = TestSelectionRegistrar();
+      const selectionColor = Color(0xAF6694e8);
+
+      const tightRect = Rect.fromLTRB(0.0, 30.0, 80.0, 50.0);
+      const maxRect = Rect.fromLTRB(0.0, 0.0, 80.0, 60.0);
+      final paragraph = RenderParagraph(
+        const TextSpan(
+          text: 'Test',
+          style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0, height: 3.0),
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        selectionColor: selectionColor,
+      );
+      layout(paragraph);
+      selectionParagraph(paragraph, const TextPosition(offset: 0), const TextPosition(offset: 4));
+
+      final paintingContext = MockPaintingContext();
+
+      expect(registrar.selectables[0].value.selectionRects, <Rect>[tightRect]);
+      paintingContext.canvas.clear();
+      paragraph.paint(paintingContext, Offset.zero);
+      expect(paintingContext.canvas.drawnRect, tightRect);
+
+      paragraph.selectionHeightStyle = ui.BoxHeightStyle.max;
+      TestRenderingFlutterBinding.instance.handleBeginFrame(null);
+      TestRenderingFlutterBinding.instance.handleDrawFrame();
+
+      expect(registrar.selectables[0].value.selectionRects, <Rect>[maxRect]);
+      paintingContext.canvas.clear();
+      paragraph.paint(paintingContext, Offset.zero);
+      expect(paintingContext.canvas.drawnRect, maxRect);
+
+      paragraph.selectionWidthStyle = ui.BoxWidthStyle.max;
+      TestRenderingFlutterBinding.instance.handleBeginFrame(null);
+      TestRenderingFlutterBinding.instance.handleDrawFrame();
+
+      expect(registrar.selectables[0].value.selectionRects, <Rect>[maxRect]);
+      paintingContext.canvas.clear();
+      paragraph.paint(paintingContext, Offset.zero);
+      expect(paintingContext.canvas.drawnRect, maxRect);
+    });
 
     test('subscribe to SelectionRegistrar', () {
       final registrar = TestSelectionRegistrar();
