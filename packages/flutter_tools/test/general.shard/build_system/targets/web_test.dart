@@ -785,6 +785,82 @@ _flutter.loader.load();
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
+  List<String> dart2jsCfeCommand(List<String> common) => <String>[
+    ...common,
+    environment.buildDir.childFile('app.dill').absolute.path,
+    '--packages=/.dart_tool/package_config.json',
+    '--cfe-only',
+    environment.buildDir.childFile('main.dart').absolute.path,
+  ];
+
+  List<String> dart2jsCompileCommand(List<String> common) => <String>[
+    ...common,
+    environment.buildDir.childFile('main.dart.js').absolute.path,
+    environment.buildDir.childFile('app.dill').absolute.path,
+  ];
+
+  const releaseDeprecatedJsInteropDisabledArgs = <String>[
+    ..._kDart2jsLinuxArgs,
+    '-Ddart.vm.product=true',
+    ..._kStandardFlutterWebDefines,
+    '-O4',
+    '--minify',
+    '--no-deprecated-js-interop',
+    '-o',
+  ];
+
+  test(
+    'Dart2JSTarget passes --no-deprecated-js-interop to both dart2js phases',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(command: dart2jsCfeCommand(releaseDeprecatedJsInteropDisabledArgs)),
+        FakeCommand(command: dart2jsCompileCommand(releaseDeprecatedJsInteropDisabledArgs)),
+      ]);
+
+      await Dart2JSTarget(const JsCompilerConfig(deprecatedJsInterop: false)).build(environment);
+
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
+  );
+
+  test(
+    'Dart2JSTarget prints dart2js output to stderr when compilation fails',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      const diagnostics =
+          'web/main.dart:1:8:\n'
+          "Error: Import of deprecated JS interop library 'dart:html' is not "
+          'allowed.\n'
+          "import 'dart:html';\n"
+          '       ^\n'
+          'Deprecated JS interop libraries are imported through:\n'
+          '  main library\n'
+          '  └── package:foo/main.dart\n'
+          '      └── dart:html\n'
+          'Error: Compilation failed.\n';
+      processManager.addCommand(
+        FakeCommand(
+          command: dart2jsCfeCommand(releaseDeprecatedJsInteropDisabledArgs),
+          exitCode: 1,
+          stdout: diagnostics,
+          stderr: 'Unhandled dart2js issue\n',
+        ),
+      );
+
+      await expectLater(
+        Dart2JSTarget(const JsCompilerConfig(deprecatedJsInterop: false)).build(environment),
+        throwsToolExit(message: 'Failed to compile application for the Web.'),
+      );
+
+      final logger = globals.logger as BufferLogger;
+      expect(logger.statusText, isEmpty);
+      expect(logger.errorText, '${diagnostics}Unhandled dart2js issue\n');
+      // The second dart2js phase must not run after the first one fails.
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
+  );
+
   test(
     'Dart2JSTarget ignores frontend server starter path option when calling dart2js',
     () => testbed.run(() async {
@@ -1596,6 +1672,8 @@ _flutter.loader.load();
       JsCompilerConfig(sourceMaps: false),
       JsCompilerConfig(minify: false),
       JsCompilerConfig(webContentHash: true),
+      JsCompilerConfig(deprecatedJsInterop: true),
+      JsCompilerConfig(deprecatedJsInterop: false),
 
       // All properties non-default
       JsCompilerConfig(

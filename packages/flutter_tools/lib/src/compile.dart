@@ -572,9 +572,13 @@ class ResidentCompilerFactory {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
+        // These are also part of the default cached kernel path, so kernel
+        // files compiled with different values aren't used to initialize the
+        // compiler.
         extraFrontEndOptions: [
           ...buildInfo.extraFrontEndOptions,
           if (buildInfo.webEnableHotReload) ...kDdcLibraryBundleFlags,
+          ...deprecatedJsInteropCompilerFlags(buildInfo.deprecatedJsInterop),
         ],
       );
     } else {
