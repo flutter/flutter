@@ -60,7 +60,7 @@ class DriveCommand extends RunCommandBase {
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     super.verboseHelp = false,
-  }) : _fsUtils = FileSystemUtils(fileSystem: toolContext.fs, platform: toolContext.platform) {
+  }) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
 
@@ -193,7 +193,6 @@ class DriveCommand extends RunCommandBase {
   }
 
   FlutterDriverFactory? _flutterDriverFactory;
-  final FileSystemUtils _fsUtils;
 
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
@@ -552,10 +551,10 @@ class DriveCommand extends RunCommandBase {
     if (!device.supportsScreenshot) {
       return;
     }
-    final Logger logger = toolContext.logger;
+    final ToolContext(:FileSystemUtils fileSystemUtils, :Logger logger) = toolContext;
     try {
       outputDirectory.createSync(recursive: true);
-      final File outputFile = _fsUtils.getUniqueFile(outputDirectory, 'drive', 'png');
+      final File outputFile = fileSystemUtils.getUniqueFile(outputDirectory, 'drive', 'png');
       await device.takeScreenshot(outputFile);
       logger.printStatus('Screenshot written to ${outputFile.path}');
     } on Exception catch (error) {

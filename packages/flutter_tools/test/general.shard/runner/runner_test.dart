@@ -21,6 +21,8 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -755,6 +757,34 @@ void main() {
         BotDetector: () => const FakeBotDetector(true),
       },
     );
+
+    testUsingContext(
+      'binds bootstrapped DeviceManager into context for command execution',
+      () async {
+        expect(globals.deviceManager, isNull);
+
+        late final ToolDependencies capturedDependencies;
+        final command = _DeviceManagerRecordingFlutterCommand();
+        await runner.run(
+          <String>[command.name],
+          (ToolDependencies toolDependencies) {
+            capturedDependencies = toolDependencies;
+            return <FlutterCommand>[command];
+          },
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(capturedDependencies.deviceManager, isA<FlutterDeviceManager>());
+        expect(command.deviceManager, same(capturedDependencies.deviceManager));
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => null,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
   });
 
   group('unified_analytics', () {
@@ -934,6 +964,22 @@ class ArtifactsRecordingFlutterCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     ran = true;
     artifacts = toolContext?.artifacts;
+    return FlutterCommandResult.success();
+  }
+}
+
+class _DeviceManagerRecordingFlutterCommand extends FlutterCommand {
+  DeviceManager? deviceManager;
+
+  @override
+  String get description => '';
+
+  @override
+  String get name => 'record-device-manager';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    deviceManager = globals.deviceManager;
     return FlutterCommandResult.success();
   }
 }
