@@ -33,10 +33,12 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../custom_devices/custom_devices_config.dart';
+import '../device.dart';
 import '../doctor.dart';
 import '../emulator.dart';
 import '../features.dart';
 import '../flutter_cache.dart';
+import '../flutter_device_manager.dart';
 import '../flutter_features.dart';
 import '../flutter_features_config.dart';
 import '../flutter_manifest.dart';
@@ -48,6 +50,7 @@ import '../ios/simulators.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapods.dart';
 import '../macos/cocoapods_validator.dart';
+import '../macos/macos_workflow.dart';
 import '../macos/xcdevice.dart';
 import '../macos/xcode.dart';
 import '../native_assets.dart';
@@ -58,6 +61,7 @@ import '../reporting/crash_reporting.dart';
 import '../reporting/unified_analytics.dart';
 import '../runner/local_engine.dart';
 import '../version.dart';
+import '../windows/windows_workflow.dart';
 import 'android_context.dart';
 import 'apple_context.dart';
 import 'tool_context.dart';
@@ -86,6 +90,7 @@ class ToolDependencies {
     required this.buildSystem,
     required this.buildTargets,
     required this.crashReporter,
+    required this.deviceManager,
     required this.doctor,
     required this.emulatorManager,
     required this.featureFlags,
@@ -109,6 +114,9 @@ class ToolDependencies {
 
   /// Captures and submits unhandled tool crash reports and stack traces.
   final CrashReporter crashReporter;
+
+  /// Manager for discovering and filtering connected target devices.
+  final DeviceManager deviceManager;
 
   /// System health diagnostics and toolchain validator.
   final Doctor doctor;
@@ -134,6 +142,7 @@ class ToolDependencies {
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidStudio? androidStudio,
+    AndroidWorkflow? androidWorkflow,
     Artifacts? artifacts,
     BotDetector? botDetector,
     BuildSystem? buildSystem,
@@ -144,6 +153,7 @@ class ToolDependencies {
     Config? config,
     CrashReporter? crashReporter,
     CustomDevicesConfig? customDevicesConfig,
+    DeviceManager? deviceManager,
     Doctor? doctor,
     EmulatorManager? emulatorManager,
     FeatureFlags? featureFlags,
@@ -156,6 +166,7 @@ class ToolDependencies {
     Java? java,
     LocalEngineLocator? localEngineLocator,
     Logger? logger,
+    MacOSWorkflow? macOSWorkflow,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
     OutputPreferences? outputPreferences,
     PersistentToolState? persistentToolState,
@@ -170,6 +181,7 @@ class ToolDependencies {
     SystemClock? systemClock,
     AnsiTerminal? terminal,
     UserMessages? userMessages,
+    WindowsWorkflow? windowsWorkflow,
     XCDevice? xcdevice,
     Xcode? xcode,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
@@ -482,22 +494,53 @@ class ToolDependencies {
           operatingSystemUtils: finalOS,
         );
 
-    // 13. Doctor and EmulatorManager Dependencies
+    // 13. Doctor, EmulatorManager, and DeviceManager Dependencies
     final Doctor finalDoctor =
         doctor ?? Doctor(clock: finalSystemClock, logger: finalLogger, analytics: finalAnalytics);
+
+    final AndroidWorkflow finalAndroidWorkflow =
+        androidWorkflow ??
+        AndroidWorkflow(androidSdk: finalAndroidSdk, featureFlags: finalFeatureFlags);
 
     final EmulatorManager finalEmulatorManager =
         emulatorManager ??
         EmulatorManager(
-          androidWorkflow: AndroidWorkflow(
-            androidSdk: finalAndroidSdk,
-            featureFlags: finalFeatureFlags,
-          ),
+          androidWorkflow: finalAndroidWorkflow,
           fileSystem: finalFS,
           java: finalJava,
           logger: finalLogger,
           processManager: finalProcessManager,
           androidSdk: finalAndroidSdk,
+        );
+
+    final MacOSWorkflow finalMacOSWorkflow =
+        macOSWorkflow ?? MacOSWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
+
+    final WindowsWorkflow finalWindowsWorkflow =
+        windowsWorkflow ??
+        WindowsWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
+
+    final DeviceManager finalDeviceManager =
+        deviceManager ??
+        FlutterDeviceManager(
+          logger: finalLogger,
+          platform: finalPlatform,
+          processManager: finalProcessManager,
+          fileSystem: finalFS,
+          androidSdk: finalAndroidSdk,
+          featureFlags: finalFeatureFlags,
+          iosSimulatorUtils: finalIOSSimulatorUtils,
+          xcDevice: finalXCDevice,
+          androidWorkflow: finalAndroidWorkflow,
+          iosWorkflow: finalIOSWorkflow,
+          flutterVersion: finalFlutterVersion,
+          artifacts: finalArtifacts,
+          macOSWorkflow: finalMacOSWorkflow,
+          userMessages: finalUserMessages,
+          operatingSystemUtils: finalOS,
+          windowsWorkflow: finalWindowsWorkflow,
+          customDevicesConfig: finalCustomDevicesConfig,
+          nativeAssetsBuilder: finalNativeAssetsBuilder,
         );
 
     return ToolDependencies(
@@ -521,6 +564,7 @@ class ToolDependencies {
       buildSystem: finalBuildSystem,
       buildTargets: finalBuildTargets,
       crashReporter: finalCrashReporter,
+      deviceManager: finalDeviceManager,
       doctor: finalDoctor,
       emulatorManager: finalEmulatorManager,
       featureFlags: finalFeatureFlags,

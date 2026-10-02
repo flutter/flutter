@@ -455,6 +455,10 @@ class LabelAndValue extends SemanticBehavior {
 
   @override
   void update() {
+    if (semanticsObject.isAccessibilityFocusBlocked) {
+      _cleanUpDom();
+      return;
+    }
     final String? computedLabel = _computeLabel();
 
     if (computedLabel == null) {
@@ -584,6 +588,7 @@ class LabelAndValue extends SemanticBehavior {
   void _cleanUpDom() {
     _cleanUpDescriptionOrDescribedBy();
     _representation?.cleanUp();
+    _representation = null;
   }
 
   @override
