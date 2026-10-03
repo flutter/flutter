@@ -238,6 +238,18 @@ class PlatformViewAndroidJNI {
 
   virtual void destroyOverlaySurface2() = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Opens the platform-thread half of a frame. Every mutation of
+  ///             the View hierarchy's SurfaceControls that the embedder issues
+  ///             through this facade (onDisplayPlatformView2,
+  ///             showOverlaySurface2, ...) must happen between this call and
+  ///             swapTransaction() so that it is applied together with the
+  ///             frame's swapchain buffers by onEndFrame2().
+  ///
+  /// @note       Must be called from the platform thread.
+  ///
+  virtual void onBeginFrame2() = 0;
+
   virtual void onEndFrame2() = 0;
 
   virtual void onDisplayPlatformView2(int32_t view_id,

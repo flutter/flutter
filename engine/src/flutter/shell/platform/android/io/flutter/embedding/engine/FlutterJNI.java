@@ -1381,12 +1381,41 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
   @UiThread
+  public void beginFrame2() {
+    if (platformViewsController2 == null) {
+      throw new RuntimeException("");
+    }
+    platformViewsController2.onBeginFrame();
+  }
+
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  @UiThread
   public void endFrame2() {
     if (platformViewsController2 == null) {
       throw new RuntimeException("");
     }
     platformViewsController2.onEndFrame();
   }
+
+  /**
+   * Reports that the transaction {@link PlatformViewsController2#onEndFrame()} handed to the view
+   * hierarchy was committed by SurfaceFlinger, or released without ever being applied.
+   *
+   * <p>The engine keeps routing swapchain frames through the platform thread until every such
+   * transaction has been reported, so this must be called exactly once per {@link #endFrame2()}.
+   */
+  @UiThread
+  public void onEndFrameTransactionCommitted() {
+    ensureRunningOnMainThread();
+    if (!isAttached()) {
+      // The engine was destroyed while the frame was pending; there is nobody left to tell.
+      return;
+    }
+    nativeOnEndFrameTransactionCommitted(nativeShellHolderId);
+  }
+
+  private native void nativeOnEndFrameTransactionCommitted(long nativeShellHolderId);
 
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")

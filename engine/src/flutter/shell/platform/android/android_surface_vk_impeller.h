@@ -10,6 +10,7 @@
 #include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
+#include "flutter/shell/platform/android/external_view_embedder/surface_transaction_router.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 #include "shell/gpu/gpu_surface_vulkan_impeller.h"
@@ -18,8 +19,9 @@ namespace flutter {
 
 class AndroidSurfaceVKImpeller : public AndroidSurface {
  public:
-  explicit AndroidSurfaceVKImpeller(
-      const std::shared_ptr<AndroidContextVKImpeller>& android_context);
+  AndroidSurfaceVKImpeller(
+      const std::shared_ptr<AndroidContextVKImpeller>& android_context,
+      std::shared_ptr<SurfaceTransactionRouter> transaction_router);
 
   ~AndroidSurfaceVKImpeller() override;
 
@@ -52,6 +54,7 @@ class AndroidSurfaceVKImpeller : public AndroidSurface {
 
  private:
   std::shared_ptr<impeller::SurfaceContextVK> surface_context_vk_;
+  const std::shared_ptr<SurfaceTransactionRouter> transaction_router_;
   fml::RefPtr<AndroidNativeWindow> native_window_;
   bool is_valid_ = false;
 

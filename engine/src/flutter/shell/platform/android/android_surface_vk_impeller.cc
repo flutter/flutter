@@ -20,7 +20,9 @@
 namespace flutter {
 
 AndroidSurfaceVKImpeller::AndroidSurfaceVKImpeller(
-    const std::shared_ptr<AndroidContextVKImpeller>& android_context) {
+    const std::shared_ptr<AndroidContextVKImpeller>& android_context,
+    std::shared_ptr<SurfaceTransactionRouter> transaction_router)
+    : transaction_router_(std::move(transaction_router)) {
   is_valid_ = android_context->IsValid();
 
   auto& context_vk =
@@ -85,8 +87,16 @@ bool AndroidSurfaceVKImpeller::SetNativeWindow(
     return false;
   }
 
-  impeller::CreateTransactionCB cb = [jni_facade = jni_facade]() {
+  impeller::CreateTransactionCB cb = [jni_facade = jni_facade,
+                                      router = transaction_router_]() {
     FML_CHECK(jni_facade) << "JNI was nullptr";
+    // The embedder latches the route for the whole frame submission; see
+    // |SurfaceTransactionRouter|. Without a router every frame goes through
+    // the platform thread.
+    if (router &&
+        router->GetFrameRoute() == SurfaceTransactionRouter::Route::kDirect) {
+      return impeller::android::SurfaceTransaction();
+    }
     ASurfaceTransaction* tx = jni_facade->createTransaction();
     if (tx == nullptr) {
       return impeller::android::SurfaceTransaction();
