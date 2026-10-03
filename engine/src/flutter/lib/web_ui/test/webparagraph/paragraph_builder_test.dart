@@ -297,4 +297,26 @@ Future<void> testMain() async {
     expect(placeholderBoxes[1].toRect().width, 40 * 4.0);
     expect(placeholderBoxes[1].toRect().height, 45 * 4.0);
   });
+
+  test('StrutStyle with kTextHeightNone does not apply a height multiplier', () {
+    // `kTextHeightNone` on a StrutStyle means "no height multiplier", exactly like omitting
+    // `height`; it must not end up as a multiplier of 0.0
+    Paragraph layout(double? strutHeight) {
+      final builder = ParagraphBuilder(
+        ParagraphStyle(
+          fontFamily: 'Arial',
+          fontSize: 10,
+          strutStyle: StrutStyle(fontFamily: 'Arial', fontSize: 10, height: strutHeight),
+        ),
+      )..addText('Hello');
+      return builder.build()..layout(const ParagraphConstraints(width: 1000));
+    }
+
+    final Paragraph withHeight = layout(2.0);
+    final Paragraph withNone = layout(kTextHeightNone);
+    final Paragraph withoutHeight = layout(null);
+    expect(withHeight.height, closeTo(20, 1e-3));
+    expect(withNone.height, closeTo(withoutHeight.height, 1e-3));
+    expect(withNone.height, isNot(closeTo(withHeight.height, 1e-3)));
+  });
 }
