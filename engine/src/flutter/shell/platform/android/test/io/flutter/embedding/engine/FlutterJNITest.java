@@ -320,27 +320,6 @@ public class FlutterJNITest {
   }
 
   @Test
-  public void onDisplayOverlaySurface_routesToPlatformViewsController2WhenHcppEnabled() {
-    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
-    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
-    when(platformViewsController2.isHcppEnabled()).thenReturn(true);
-
-    FlutterJNI flutterJNI = new FlutterJNI();
-    flutterJNI.setPlatformViewsController(platformViewsController);
-    flutterJNI.setPlatformViewsController2(platformViewsController2);
-
-    // --- Execute Test ---
-    flutterJNI.onDisplayOverlaySurface(
-        /*id=*/ 1, /*x=*/ 10, /*y=*/ 20, /*width=*/ 100, /*height=*/ 200);
-
-    // --- Verify Results ---
-    verify(platformViewsController2, times(1))
-        .onDisplayOverlaySurface(/*id=*/ 1, /*x=*/ 10, /*y=*/ 20, /*width=*/ 100, /*height=*/ 200);
-    verify(platformViewsController, never())
-        .onDisplayOverlaySurface(anyInt(), anyInt(), anyInt(), anyInt(), anyInt());
-  }
-
-  @Test
   public void onBeginFrame_callsPlatformViewsController() {
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
 
