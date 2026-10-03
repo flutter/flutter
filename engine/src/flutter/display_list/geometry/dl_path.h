@@ -96,6 +96,9 @@ class DlPath : public impeller::PathSource {
   bool IsVolatile() const;
   bool IsConvex() const override;
 
+  // |impeller::PathSource|
+  std::shared_ptr<const void> GetCacheIdentity() const override;
+
   DlPath operator+(const DlPath& other) const;
 
  private:
