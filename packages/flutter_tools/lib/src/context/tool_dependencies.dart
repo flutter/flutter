@@ -466,6 +466,7 @@ class ToolDependencies {
     final IOSSimulatorUtils finalIOSSimulatorUtils =
         iosSimulatorUtils ??
         IOSSimulatorUtils(
+          fileSystem: finalFS,
           logger: finalLogger,
           operatingSystemUtils: finalOS,
           processManager: finalProcessManager,

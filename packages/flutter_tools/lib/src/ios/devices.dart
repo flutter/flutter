@@ -20,6 +20,8 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
+import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -29,7 +31,7 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../isolated/mustache_template.dart';
 import '../macos/xcdevice.dart';
 import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
@@ -329,8 +331,13 @@ class IOSDevice extends Device {
     required super.logger,
     required this._analytics,
     required this._xcode,
+    required this._operatingSystemUtils,
+    required this._shutdownHooks,
+    UserMessages? userMessages,
+    this._templateRenderer = const MustacheTemplateRenderer(),
   }) : _iproxy = iProxy,
        _logger = logger,
+       _userMessages = userMessages ?? UserMessages(),
        super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true) {
     if (!_platform.isMacOS) {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
@@ -354,6 +361,10 @@ class IOSDevice extends Device {
   final XcodeDebug _xcodeDebug;
   final Xcode? _xcode;
   final IProxy _iproxy;
+  final ShutdownHooks _shutdownHooks;
+  final UserMessages _userMessages;
+  final OperatingSystemUtils _operatingSystemUtils;
+  final TemplateRenderer _templateRenderer;
 
   Version? get sdkVersion {
     return Version.parse(_sdkVersion);
@@ -556,8 +567,8 @@ class IOSDevice extends Device {
         await diagnoseXcodeBuildFailure(
           buildResult,
           analytics: _analytics,
-          fileSystem: globals.fs,
-          logger: globals.logger,
+          fileSystem: _fileSystem,
+          logger: _logger,
           platform: FlutterDarwinPlatform.ios,
           project: package.project.parent,
           device: this,
@@ -629,7 +640,7 @@ class IOSDevice extends Device {
           launchArguments: launchArguments,
           mainPath: mainPath,
           discoveryTimeout: discoveryTimeout,
-          shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
+          shutdownHooks: shutdownHooks ?? _shutdownHooks,
           shouldAttachDebugger: shouldAttachDebugger,
         );
         installationResult = result ? 0 : 1;
@@ -880,7 +891,7 @@ class IOSDevice extends Device {
     SharedIOSDeviceLogReader deviceLogReader,
     Completer<Uri?> appTerminatedCompleter,
   ) async {
-    final String? uisceneWarning = globals.userMessages.uiSceneMigrationWarning;
+    final String? uisceneWarning = _userMessages.uiSceneMigrationWarning;
     if (uisceneWarning != null) {
       final uisceneWarningInterceptor = LogInterceptor(
         identifier: 'uiscene_requirement',
@@ -1116,7 +1127,7 @@ class IOSDevice extends Device {
     // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
-    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode?.currentVersion;
     if (xcodeVersion != null && xcodeVersion.major >= 26 && featureFlags.isLLDBDebuggingEnabled) {
       final DeviceLogReader deviceLogReader = getLogReader(
         app: package,
@@ -1133,7 +1144,7 @@ class IOSDevice extends Device {
           bundlePath: package.deviceBundlePath,
           bundleId: package.id,
           launchArguments: launchArguments,
-          shutdownHooks: globals.shutdownHooks,
+          shutdownHooks: _shutdownHooks,
           mode: debuggingOptions.buildInfo.mode,
         );
 
@@ -1155,7 +1166,7 @@ class IOSDevice extends Device {
           bundlePath: package.deviceBundlePath,
           bundleId: package.id,
           launchArguments: launchArguments,
-          shutdownHooks: globals.shutdownHooks,
+          shutdownHooks: _shutdownHooks,
         );
 
         if (launchSuccess) {
@@ -1195,7 +1206,7 @@ class IOSDevice extends Device {
     if (package is PrebuiltIOSApp) {
       debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
         package.deviceBundlePath,
-        templateRenderer: globals.templateRenderer,
+        templateRenderer: _templateRenderer,
         verboseLogging: _logger.isVerbose,
       );
     } else if (package is BuildableIOSApp) {
@@ -1213,11 +1224,11 @@ class IOSDevice extends Device {
       final IosProject project = package.project;
       final XcodeProjectInfo? projectInfo = await project.projectInfo();
       if (projectInfo == null) {
-        globals.printError('Xcode project not found.');
+        _logger.printError('Xcode project not found.');
         return (false, deploymentMethod);
       }
       if (project.xcodeWorkspace == null) {
-        globals.printError('Unable to get Xcode workspace.');
+        _logger.printError('Unable to get Xcode workspace.');
         return (false, deploymentMethod);
       }
       final String? scheme = projectInfo.schemeFor(debuggingOptions.buildInfo);
@@ -1297,7 +1308,7 @@ class IOSDevice extends Device {
         app: app,
         iMobileDevice: _iMobileDevice,
         usingCISystem: usingCISystem,
-        xcode: globals.xcode,
+        xcode: _xcode,
       ),
     );
   }
@@ -1312,7 +1323,7 @@ class IOSDevice extends Device {
     logger: _logger,
     iproxy: _iproxy,
     id: id,
-    operatingSystemUtils: globals.os,
+    operatingSystemUtils: _operatingSystemUtils,
   );
 
   @visibleForTesting
@@ -1363,16 +1374,16 @@ class IOSDevice extends Device {
 
   @override
   bool get supportsScreenshot {
-    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode?.currentVersion;
     if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
-      return globals.xcode!.isDevicectlInstalled;
+      return _xcode!.isDevicectlInstalled;
     }
     return false;
   }
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode?.currentVersion;
     if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
       var success = false;
       try {

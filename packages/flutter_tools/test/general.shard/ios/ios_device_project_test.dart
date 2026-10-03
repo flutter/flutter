@@ -22,6 +22,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 // FlutterProject still depends on context.
 void main() {
@@ -126,6 +127,8 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: false,
+    operatingSystemUtils: FakeOperatingSystemUtils(),
+    shutdownHooks: FakeShutdownHooks(),
   );
 }
 

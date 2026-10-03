@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -34,6 +33,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   final macPlatform = FakePlatform(operatingSystem: 'macos');
@@ -101,6 +101,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: processUtils,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       );
       expect(await device.isSupported(), isTrue);
@@ -130,6 +132,8 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: false,
           processUtils: processUtils,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          shutdownHooks: FakeShutdownHooks(),
           xcode: null,
         );
 
@@ -179,6 +183,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: processUtils,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       );
       expect(await device.isSupported(), isFalse);
@@ -208,6 +214,8 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: false,
           processUtils: processUtils,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          shutdownHooks: FakeShutdownHooks(),
           xcode: null,
         ).majorSdkVersion,
         1,
@@ -235,6 +243,8 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: false,
           processUtils: processUtils,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          shutdownHooks: FakeShutdownHooks(),
           xcode: null,
         ).majorSdkVersion,
         13,
@@ -262,6 +272,8 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: false,
           processUtils: processUtils,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          shutdownHooks: FakeShutdownHooks(),
           xcode: null,
         ).majorSdkVersion,
         10,
@@ -289,6 +301,8 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: false,
           processUtils: processUtils,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          shutdownHooks: FakeShutdownHooks(),
           xcode: null,
         ).majorSdkVersion,
         0,
@@ -316,6 +330,8 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: false,
           processUtils: processUtils,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          shutdownHooks: FakeShutdownHooks(),
           xcode: null,
         ).majorSdkVersion,
         0,
@@ -345,6 +361,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: processUtils,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       ).sdkVersion;
       var expectedVersion = Version(13, 3, 1, text: '13.3.1');
@@ -374,6 +392,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: processUtils,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       ).sdkVersion;
       expectedVersion = Version(13, 3, 1, text: '13.3.1 (20ADBC)');
@@ -403,6 +423,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: processUtils,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       ).sdkVersion;
       expectedVersion = Version(16, 4, 1, text: '16.4.1(a) (20ADBC)');
@@ -432,6 +454,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: processUtils,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       ).sdkVersion;
       expectedVersion = Version(0, 0, 0, text: '0');
@@ -460,6 +484,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: processUtils,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       ).sdkVersion;
       expect(sdkVersion, isNull);
@@ -486,6 +512,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: processUtils,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       ).sdkVersion;
       expect(sdkVersion, isNull);
@@ -514,6 +542,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: processUtils,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       );
 
@@ -543,6 +573,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: processUtils,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       );
 
@@ -579,6 +611,8 @@ void main() {
               devModeEnabled: true,
               isCoreDevice: false,
               processUtils: processUtils,
+              operatingSystemUtils: FakeOperatingSystemUtils(),
+              shutdownHooks: FakeShutdownHooks(),
               xcode: null,
             );
           }, throwsAssertionError);
@@ -673,6 +707,8 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: false,
           processUtils: processUtils,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          shutdownHooks: FakeShutdownHooks(),
           xcode: null,
         );
         logReader1 = createLogReader(device, appPackage1, process1);
@@ -723,7 +759,9 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: true,
           processUtils: processUtils,
-          xcode: null,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          shutdownHooks: FakeShutdownHooks(),
+          xcode: FakeXcode(currentVersion: Version(15, 0, 0)),
         );
 
         expect(device.supportsScreenshot, isFalse);
@@ -732,6 +770,7 @@ void main() {
       testUsingContext(
         'supportsScreenshot is true on CoreDevice with Xcode 27+ and devicectl installed',
         () async {
+          final fakeXcode = FakeXcode(currentVersion: Version(27, 0, 0));
           device = IOSDevice(
             'device-123',
             iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
@@ -754,10 +793,11 @@ void main() {
             devModeEnabled: true,
             isCoreDevice: true,
             processUtils: processUtils,
-            xcode: null,
+            operatingSystemUtils: FakeOperatingSystemUtils(),
+            shutdownHooks: FakeShutdownHooks(),
+            xcode: fakeXcode,
           );
 
-          final fakeXcode = globals.xcode! as FakeXcode;
           fakeXcode.isDevicectlInstalled = true;
           expect(device.supportsScreenshot, isTrue);
 
@@ -790,7 +830,9 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: true,
           processUtils: processUtils,
-          xcode: null,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          shutdownHooks: FakeShutdownHooks(),
+          xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
 
         fakeCoreDeviceControl.takeScreenshotSuccess = true;
@@ -823,7 +865,9 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: true,
           processUtils: processUtils,
-          xcode: null,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          shutdownHooks: FakeShutdownHooks(),
+          xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
 
         fakeCoreDeviceControl.takeScreenshotException = Exception(
@@ -860,7 +904,9 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: true,
           processUtils: processUtils,
-          xcode: null,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          shutdownHooks: FakeShutdownHooks(),
+          xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
         );
 
         expect(
@@ -937,6 +983,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       );
 
@@ -962,6 +1010,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       );
     });
@@ -1300,6 +1350,8 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        shutdownHooks: FakeShutdownHooks(),
         xcode: null,
       );
     });
