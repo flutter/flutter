@@ -253,20 +253,7 @@ void Animator::RequestFrame(bool regenerate_layer_trees) {
     return;
   }
 
-  // The AwaitVSync is going to call us back at the next VSync. However, we want
-  // to be reasonably certain that the UI thread is not in the middle of a
-  // particularly expensive callout. We post the AwaitVSync to run right after
-  // an idle. This does NOT provide a guarantee that the UI thread has not
-  // started an expensive operation right after posting this message however.
-  // To support that, we need edge triggered wakes on VSync.
-
-  task_runners_.GetUITaskRunner()->PostTask(
-      [self = weak_factory_.GetWeakPtr()]() {
-        if (!self) {
-          return;
-        }
-        self->AwaitVSync();
-      });
+  AwaitVSync();
   frame_scheduled_ = true;
 }
 
@@ -300,6 +287,9 @@ void Animator::ScheduleSecondaryVsyncCallback(uintptr_t id,
 }
 
 void Animator::ScheduleMaybeClearTraceFlowIds() {
+  // Don't schedule the secondary callback nonsense, just to not get
+  // confused while debugging the vsync client.
+#if 0
   waiter_->ScheduleSecondaryCallback(
       reinterpret_cast<uintptr_t>(this), [self = weak_factory_.GetWeakPtr()] {
         if (!self) {
@@ -324,6 +314,7 @@ void Animator::ScheduleMaybeClearTraceFlowIds() {
           }
         }
       });
+#endif
 }
 
 }  // namespace flutter
