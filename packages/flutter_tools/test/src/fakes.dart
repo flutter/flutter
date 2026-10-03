@@ -63,6 +63,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'common.dart';
 import 'context.dart';
 
 class FakeDyldEnvironmentArtifact extends ArtifactSet {
@@ -1092,10 +1093,13 @@ class FakeCache extends Fake implements Cache {
     : _fileSystem = fileSystem ?? MemoryFileSystem.test();
 
   final FileSystem _fileSystem;
-  final String? _flutterRoot;
+  String? _flutterRoot;
 
   @override
-  String get flutterRoot => _flutterRoot ?? '/flutter';
+  String get flutterRoot => _flutterRoot ?? getFlutterRoot();
+
+  @override
+  set flutterRoot(String? value) => _flutterRoot = value;
 
   @override
   Future<void> lock() async {}

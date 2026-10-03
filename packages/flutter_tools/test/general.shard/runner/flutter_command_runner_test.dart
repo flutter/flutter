@@ -274,11 +274,7 @@ void main() {
       );
 
       group('getRepoPackages', () {
-        late String? oldFlutterRoot;
-
         setUp(() {
-          oldFlutterRoot = globals.cache.flutterRoot;
-          globals.cache.flutterRoot = _kFlutterRoot;
           fileSystem
               .directory(fileSystem.path.join(_kFlutterRoot, 'examples'))
               .createSync(recursive: true);
@@ -297,13 +293,10 @@ void main() {
               .createSync();
         });
 
-        tearDown(() {
-          globals.cache.flutterRoot = oldFlutterRoot;
-        });
-
         testUsingContext(
           '',
           () {
+            globals.cache.flutterRoot = _kFlutterRoot;
             final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
             final List<String> packagePaths = runner
                 .getRepoPackages()

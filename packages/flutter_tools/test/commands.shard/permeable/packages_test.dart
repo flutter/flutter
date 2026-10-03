@@ -33,9 +33,6 @@ void main() {
 
   setUp(() {
     mockStdio = FakeStdio()..stdout.terminalColumns = 80;
-
-    // Some tests below override this with a blank root, always reset it.
-    globals.cache.flutterRoot = null;
   });
 
   setUpAll(() {

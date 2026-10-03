@@ -119,8 +119,6 @@ class TestBed {
     if (testOverrides.containsKey(ProcessUtils)) {
       throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
     }
-    // Cache the original flutter root to restore after the test case.
-    final String originalFlutterRoot = globals.cache.flutterRoot;
     // Track pending timers to verify that they were correctly cleaned up.
     final timers = <Timer, StackTrace>{};
 
@@ -155,6 +153,8 @@ class TestBed {
                 },
           ),
           body: () async {
+            // Cache the original flutter root to restore after the test case.
+            final String originalFlutterRoot = globals.cache.flutterRoot;
             globals.cache.flutterRoot = '';
             if (_setup != null) {
               await _setup.call();
