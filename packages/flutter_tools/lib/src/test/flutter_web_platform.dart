@@ -507,12 +507,12 @@ window.\$dartLoader.loader.nextAttempt();
   /// Serves a local build of CanvasKit, replacing the CDN build, which can
   /// cause test flakiness due to reliance on network.
   shelf.Response _localCanvasKitHandler(shelf.Request request) {
-    final String fullPath = _fileSystem.path.fromUri(request.url);
-    if (!fullPath.startsWith('canvaskit/')) {
+    final List<String> pathSegments = request.url.pathSegments;
+    if (pathSegments.length < 2 || pathSegments.first != 'canvaskit') {
       return shelf.Response.notFound('Not a CanvasKit file request');
     }
 
-    final String relativePath = fullPath.replaceFirst('canvaskit/', '');
+    final String relativePath = _fileSystem.path.joinAll(pathSegments.skip(1));
     final String extension = _fileSystem.path.extension(relativePath);
     String contentType;
     switch (extension) {
