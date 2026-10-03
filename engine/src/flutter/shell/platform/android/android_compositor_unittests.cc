@@ -1204,5 +1204,51 @@ TEST(AndroidCompositorTest,
   EXPECT_TRUE(compositor->CollectBackingStore(&overlay_bs));
 }
 
+TEST(AndroidCompositorTest,
+     PresentLayersDoesNotInvokeOnFramePresentedWithoutSurfaceOrLayers) {
+  std::shared_ptr<AndroidSurfaceManager> surface_manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kSoftware);
+  ASSERT_NE(surface_manager, nullptr);
+
+  auto mock_delegate = std::make_shared<MockPlatformViewDelegate>();
+  auto compositor =
+      std::make_unique<AndroidCompositor>(surface_manager, mock_delegate);
+
+  FlutterBackingStoreConfig config = {};
+  config.struct_size = sizeof(FlutterBackingStoreConfig);
+  config.size = FlutterSize{100.0, 100.0};
+  config.view_id = 0;
+
+  FlutterBackingStore backing_store = {};
+  ASSERT_TRUE(compositor->CreateBackingStore(&config, &backing_store));
+
+  FlutterLayer backing_store_layer = {};
+  backing_store_layer.struct_size = sizeof(FlutterLayer);
+  backing_store_layer.type = kFlutterLayerContentTypeBackingStore;
+  backing_store_layer.backing_store = &backing_store;
+  backing_store_layer.offset = FlutterPoint{0.0, 0.0};
+  backing_store_layer.size = FlutterSize{100.0, 100.0};
+  const FlutterLayer* layers[] = {&backing_store_layer};
+
+  // 1. Detached surface (no native window and not a fake window):
+  // PresentLayers returns true (ANR-safe), but OnFramePresented is NOT called.
+  EXPECT_TRUE(compositor->PresentLayers(layers, 1));
+  EXPECT_EQ(mock_delegate->GetFramePresentedCount(), 0u);
+
+  // 2. Attach fake window, but present 0 layers:
+  // PresentLayers returns true, but OnFramePresented is NOT called.
+  EXPECT_TRUE(
+      surface_manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+  EXPECT_TRUE(compositor->PresentLayers(nullptr, 0));
+  EXPECT_EQ(mock_delegate->GetFramePresentedCount(), 0u);
+
+  // 3. Present 1 valid layer with fake window attached:
+  // OnFramePresented is called once.
+  EXPECT_TRUE(compositor->PresentLayers(layers, 1));
+  EXPECT_EQ(mock_delegate->GetFramePresentedCount(), 1u);
+
+  EXPECT_TRUE(compositor->CollectBackingStore(&backing_store));
+}
+
 }  // namespace testing
 }  // namespace flutter

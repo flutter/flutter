@@ -418,7 +418,14 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
     }
   }
 
-  if (delegate != nullptr) {
+  const bool has_valid_surface =
+      surface_manager_->GetNativeWindow() != nullptr ||
+      surface_manager_->IsFakeWindow();
+  const bool has_presented_content = root_backing_store_layer != nullptr ||
+                                     overlays_count > 0 ||
+                                     platform_views_count > 0;
+  if (delegate != nullptr && has_valid_surface && present_success &&
+      has_presented_content) {
     delegate->OnFramePresented();
   }
 

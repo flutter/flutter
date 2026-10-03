@@ -10058,6 +10058,57 @@ TEST(FlutterEmbedderNativeSurfaceTest,
   EXPECT_EQ(resized_height, kNewHeight);
 }
 
+TEST(FlutterEmbedderNativeSurfaceTest,
+     FirstFrameIsNotConsumedOrRoutedBeforeSurfaceCreated) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  int first_frame_calls = 0;
+  ON_CALL(*mock_invoker, OnFirstFrame()).WillByDefault([&]() {
+    ++first_frame_calls;
+    return true;
+  });
+
+  FlutterEmbedderNative native(mock_invoker);
+  JniRouter::SetEmbedderEnabled(true);
+  ASSERT_NE(native.GetCompositor(), nullptr);
+  ASSERT_NE(native.GetSurfaceManager(), nullptr);
+
+  FlutterBackingStore root_store = {};
+  root_store.struct_size = sizeof(FlutterBackingStore);
+  FlutterLayer root_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &root_store,
+      .size = FlutterSize{100.0, 100.0},
+  };
+  const FlutterLayer* layers[] = {&root_layer};
+
+  // 1. With no surface attached and no native/fake window on surface_manager,
+  // PresentLayers does not route OnFirstFrame.
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 0);
+
+  // 2. Even if surface_manager has a fake window set directly while
+  // FlutterEmbedderNative::surface_attached_ is still false,
+  // HandleCompositorFramePresented must not consume first_frame_presented_ or
+  // route OnFirstFrame.
+  EXPECT_TRUE(native.GetSurfaceManager()->SetNativeWindow(
+      nullptr, /*is_fake_window=*/true));
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 0);
+
+  // 3. Once NotifySurfaceCreated attaches the surface, the first presented
+  // frame routes OnFirstFrame exactly once.
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 1);
+
+  // 4. Subsequent frames do not route OnFirstFrame again.
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 1);
+
+  native.NotifySurfaceDestroyed();
+}
+
 TEST(AndroidSurfaceManagerVulkanTest,
      ClearAndPresentOnscreenSurfaceLazilyCreatesSwapchainForFakeWindow) {
   VulkanQueueGuard::ResetForTesting();
