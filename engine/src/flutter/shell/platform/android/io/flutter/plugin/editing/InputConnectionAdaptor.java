@@ -20,6 +20,8 @@ import android.text.Selection;
 import android.text.TextPaint;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
@@ -27,12 +29,14 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.TextAttribute;
 import androidx.annotation.NonNull;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import io.flutter.view.AccessibilityBridge;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -170,9 +174,47 @@ public class InputConnectionAdaptor extends BaseInputConnection
     return result;
   }
 
+  /**
+   * Translates the IME's text change state into an Android AccessibilityEvent change type, and
+   * queues it into the AccessibilityBridge.
+   *
+   * @param textAttribute the TextAttribute passed in with the text change, or null if none.
+   * @param isComposing true if the text is still in the composition phase, false if the text has
+   *     been finalized by the user.
+   * @param newValue the new text string value.
+   */
+  private void updateTextChangeType(
+      TextAttribute textAttribute, boolean isComposing, String newValue) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
+      boolean isSuggestion = textAttribute != null && textAttribute.isTextSuggestionSelected();
+      int changeType;
+      if (isSuggestion) {
+        changeType = AccessibilityEvent.TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME;
+      } else if (isComposing) {
+        changeType = AccessibilityEvent.TEXT_CHANGE_TYPE_IN_COMPOSITION;
+      } else {
+        changeType = AccessibilityEvent.TEXT_CHANGE_TYPE_COMMITTED_BY_IME;
+      }
+
+      if (mFlutterView != null) {
+        AccessibilityNodeProvider provider = mFlutterView.getAccessibilityNodeProvider();
+        if (provider instanceof AccessibilityBridge) {
+          ((AccessibilityBridge) provider).addImeTextChange(newValue, changeType);
+        }
+      }
+    }
+  }
+
   @Override
   public boolean commitText(CharSequence text, int newCursorPosition) {
     final boolean result = super.commitText(text, newCursorPosition);
+    return result;
+  }
+
+  @Override
+  public boolean commitText(CharSequence text, int newCursorPosition, TextAttribute textAttribute) {
+    final boolean result = super.commitText(text, newCursorPosition, textAttribute);
+    updateTextChangeType(textAttribute, false, mEditable.toString());
     return result;
   }
 
@@ -199,6 +241,13 @@ public class InputConnectionAdaptor extends BaseInputConnection
   }
 
   @Override
+  public boolean setComposingRegion(int start, int end, TextAttribute textAttribute) {
+    final boolean result = super.setComposingRegion(start, end, textAttribute);
+    updateTextChangeType(textAttribute, true, mEditable.toString());
+    return result;
+  }
+
+  @Override
   public boolean setComposingText(CharSequence text, int newCursorPosition) {
     boolean result;
     beginBatchEdit();
@@ -207,6 +256,21 @@ public class InputConnectionAdaptor extends BaseInputConnection
     } else {
       result = super.setComposingText(text, newCursorPosition);
     }
+    endBatchEdit();
+    return result;
+  }
+
+  @Override
+  public boolean setComposingText(
+      CharSequence text, int newCursorPosition, TextAttribute textAttribute) {
+    boolean result;
+    beginBatchEdit();
+    if (text.length() == 0) {
+      result = super.commitText(text, newCursorPosition, textAttribute);
+    } else {
+      result = super.setComposingText(text, newCursorPosition, textAttribute);
+    }
+    updateTextChangeType(textAttribute, true, mEditable.toString());
     endBatchEdit();
     return result;
   }
