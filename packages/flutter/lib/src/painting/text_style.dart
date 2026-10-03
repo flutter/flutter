@@ -506,6 +506,7 @@ class TextStyle with Diagnosticable {
     this._fontFamilyFallback,
     String? package,
     this.overflow,
+    this.fakeMissingFontStyles,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _package = package,
        assert(color == null || foreground == null, _kColorForegroundWarning),
@@ -847,6 +848,12 @@ class TextStyle with Diagnosticable {
   /// How visual text overflow should be handled.
   final TextOverflow? overflow;
 
+  /// Whether to fake missing font styles (such as synthetic bolding or
+  /// italicizing) when the font does not natively support them.
+  ///
+  /// Defaults to true.
+  final bool? fakeMissingFontStyles;
+
   // Return the original value of fontFamily, without the additional
   // "packages/$_package/" prefix.
   String? get _fontFamily {
@@ -894,6 +901,7 @@ class TextStyle with Diagnosticable {
     List<String>? fontFamilyFallback,
     String? package,
     TextOverflow? overflow,
+    bool? fakeMissingFontStyles,
   }) {
     assert(color == null || foreground == null, _kColorForegroundWarning);
     assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
@@ -936,6 +944,7 @@ class TextStyle with Diagnosticable {
       fontFamilyFallback: fontFamilyFallback ?? _fontFamilyFallback,
       package: package ?? _package,
       overflow: overflow ?? this.overflow,
+      fakeMissingFontStyles: fakeMissingFontStyles ?? this.fakeMissingFontStyles,
     );
   }
 
@@ -995,6 +1004,7 @@ class TextStyle with Diagnosticable {
     List<FontVariation>? fontVariations,
     String? package,
     TextOverflow? overflow,
+    bool? fakeMissingFontStyles,
   }) {
     assert(fontSize != null || (fontSizeFactor == 1.0 && fontSizeDelta == 0.0));
     assert(fontWeight != null || fontWeightDelta == 0.0);
@@ -1051,6 +1061,7 @@ class TextStyle with Diagnosticable {
       overflow: overflow ?? this.overflow,
       package: package ?? _package,
       debugLabel: modifiedDebugLabel,
+      fakeMissingFontStyles: fakeMissingFontStyles ?? this.fakeMissingFontStyles,
     );
   }
 
@@ -1118,6 +1129,7 @@ class TextStyle with Diagnosticable {
       fontFamilyFallback: other._fontFamilyFallback,
       package: other._package,
       overflow: other.overflow,
+      fakeMissingFontStyles: other.fakeMissingFontStyles,
     );
   }
 
@@ -1183,6 +1195,7 @@ class TextStyle with Diagnosticable {
         fontFamilyFallback: t < 0.5 ? null : b._fontFamilyFallback,
         package: t < 0.5 ? null : b._package,
         overflow: t < 0.5 ? null : b.overflow,
+        fakeMissingFontStyles: t < 0.5 ? null : b.fakeMissingFontStyles,
       );
     }
 
@@ -1214,6 +1227,7 @@ class TextStyle with Diagnosticable {
         fontFamilyFallback: t < 0.5 ? a._fontFamilyFallback : null,
         package: t < 0.5 ? a._package : null,
         overflow: t < 0.5 ? a.overflow : null,
+        fakeMissingFontStyles: t < 0.5 ? a.fakeMissingFontStyles : null,
       );
     }
 
@@ -1329,6 +1343,7 @@ class TextStyle with Diagnosticable {
       fontFamilyFallback: t < 0.5 ? a._fontFamilyFallback : b._fontFamilyFallback,
       package: t < 0.5 ? a._package : b._package,
       overflow: t < 0.5 ? a.overflow : b.overflow,
+      fakeMissingFontStyles: t < 0.5 ? a.fakeMissingFontStyles : b.fakeMissingFontStyles,
     );
   }
 
@@ -1402,6 +1417,7 @@ class TextStyle with Diagnosticable {
     FontStyle? fontStyle,
     double? height,
     StrutStyle? strutStyle,
+    bool? fakeMissingFontStyles,
   }) {
     assert(maxLines == null || maxLines > 0);
     assert(height == null || !height.isNaN, _kTextStyleHeightNaNWarning);
@@ -1442,6 +1458,7 @@ class TextStyle with Diagnosticable {
       maxLines: maxLines,
       ellipsis: ellipsis,
       locale: locale,
+      fakeMissingFontStyles: fakeMissingFontStyles ?? this.fakeMissingFontStyles,
     );
   }
 
@@ -1472,7 +1489,8 @@ class TextStyle with Diagnosticable {
         !listEquals(fontFeatures, other.fontFeatures) ||
         !listEquals(fontVariations, other.fontVariations) ||
         !listEquals(fontFamilyFallback, other.fontFamilyFallback) ||
-        overflow != other.overflow) {
+        overflow != other.overflow ||
+        fakeMissingFontStyles != other.fakeMissingFontStyles) {
       return RenderComparison.layout;
     }
     if (color != other.color ||
@@ -1519,7 +1537,8 @@ class TextStyle with Diagnosticable {
         other.fontFamily == fontFamily &&
         listEquals(other.fontFamilyFallback, fontFamilyFallback) &&
         other._package == _package &&
-        other.overflow == overflow;
+        other.overflow == overflow &&
+        other.fakeMissingFontStyles == fakeMissingFontStyles;
   }
 
   @override
@@ -1532,6 +1551,7 @@ class TextStyle with Diagnosticable {
       fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback),
       _package,
       overflow,
+      fakeMissingFontStyles,
     );
 
     final List<Shadow>? shadows = this.shadows;
@@ -1681,7 +1701,15 @@ class TextStyle with Diagnosticable {
       );
     }
 
-    styles.add(EnumProperty<TextOverflow>('${prefix}overflow', overflow, defaultValue: null));
+    properties.add(EnumProperty<TextOverflow>('${prefix}overflow', overflow, defaultValue: null));
+    properties.add(
+      FlagProperty(
+        '${prefix}fakeMissingFontStyles',
+        value: fakeMissingFontStyles,
+        ifTrue: '$prefix<fake missing font styles enabled>',
+        ifFalse: '$prefix<fake missing font styles disabled>',
+      ),
+    );
   }
 }
 
