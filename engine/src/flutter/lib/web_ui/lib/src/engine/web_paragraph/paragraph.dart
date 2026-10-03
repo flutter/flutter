@@ -434,12 +434,13 @@ class WebStrutStyle extends SharedTextStyle implements ui.StrutStyle {
     this.fontFamilyFallback,
     this.fontSize,
     double? height,
-    // TODO(jlavrova): Implement leadingDistribution.
     this.leadingDistribution,
     this.leading,
     this.fontWeight,
     this.fontStyle,
     this.forceStrutHeight,
+    // Unlike TextStyle, StrutStyle has no parent strut to override, so
+    // kTextHeightNone is equivalent to an unspecified (null) height.
   }) : height = height == ui.kTextHeightNone ? null : height;
 
   @override
@@ -459,6 +460,20 @@ class WebStrutStyle extends SharedTextStyle implements ui.StrutStyle {
   double strutAscent = 0;
   double strutDescent = 0;
   double strutLeading = 0;
+
+  /// The leading distribution actually used by this strut: [leadingDistribution] if set,
+  /// otherwise the paragraph's `TextHeightBehavior.leadingDistribution` passed to
+  /// [calculateMetrics]. This is how `dart:ui` resolves it for SkParagraph as well.
+  ui.TextLeadingDistribution? effectiveLeadingDistribution;
+
+  /// The minimum line ascent imposed by this strut.
+  ///
+  /// `StrutStyle.leading` is always distributed evenly over and under the strut, regardless of
+  /// [leadingDistribution], so half of [strutLeading] is added on each side.
+  double get lineAscent => strutAscent + strutLeading / 2;
+
+  /// The minimum line descent imposed by this strut. See [lineAscent].
+  double get lineDescent => strutDescent + strutLeading / 2;
 
   @override
   bool operator ==(Object other) {
@@ -492,8 +507,15 @@ class WebStrutStyle extends SharedTextStyle implements ui.StrutStyle {
     );
   }
 
-  void calculateMetrics() {
-    if (fontSize == null || fontSize! < 0) {
+  void calculateMetrics([ui.TextLeadingDistribution? paragraphLeadingDistribution]) {
+    // Use StrutStyle.leadingDistribution if provided; otherwise fall back to the
+    // paragraph's TextHeightBehavior.leadingDistribution (same as `dart:ui` does for SkParagraph).
+    effectiveLeadingDistribution = leadingDistribution ?? paragraphLeadingDistribution;
+
+    // Fall back to the default font size (14.0) when StrutStyle.fontSize is not specified,
+    // matching SkParagraph's behavior.
+    final double effectiveFontSize = fontSize ?? StyleManager.defaultFontSize;
+    if (effectiveFontSize <= 0) {
       return;
     }
 
@@ -501,15 +523,17 @@ class WebStrutStyle extends SharedTextStyle implements ui.StrutStyle {
 
     final DomTextMetrics strutTextMetrics = layoutContext.measureText('');
 
-    strutLeading = leading == null ? 0 : leading! * fontSize!;
+    // StrutStyle.leading is specified as a multiple of fontSize; negative values are ignored.
+    strutLeading = (leading == null || leading! < 0) ? 0 : leading! * effectiveFontSize;
 
+    // `height` is already normalized by the constructor: kTextHeightNone becomes null.
     if (height != null) {
       // The half leading flag doesn't take effect unless there's height override.
-      if (leadingDistribution == ui.TextLeadingDistribution.even) {
+      if (effectiveLeadingDistribution == ui.TextLeadingDistribution.even) {
         final double occupiedHeight =
             strutTextMetrics.fontBoundingBoxAscent + strutTextMetrics.fontBoundingBoxDescent;
         // Distribute the flexible height evenly over and under.
-        final double flexibleHeight = (height! * fontSize! - occupiedHeight) / 2;
+        final double flexibleHeight = (height! * effectiveFontSize - occupiedHeight) / 2;
         strutAscent = strutTextMetrics.fontBoundingBoxAscent + flexibleHeight;
         strutDescent = strutTextMetrics.fontBoundingBoxDescent + flexibleHeight;
       } else {
@@ -517,7 +541,7 @@ class WebStrutStyle extends SharedTextStyle implements ui.StrutStyle {
             strutTextMetrics.fontBoundingBoxAscent + strutTextMetrics.fontBoundingBoxDescent;
         final double strutHeightMultiplier = strutMetricsHeight == 0
             ? height!
-            : height! * fontSize! / strutMetricsHeight;
+            : height! * effectiveFontSize / strutMetricsHeight;
         strutAscent = strutTextMetrics.fontBoundingBoxAscent * strutHeightMultiplier;
         strutDescent = strutTextMetrics.fontBoundingBoxDescent * strutHeightMultiplier;
       }

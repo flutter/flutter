@@ -17,6 +17,11 @@ const double _heightMultiplier = 3.0;
 // The line height produced by `_heightMultiplier` at `_fontSize`.
 const double _scaledHeight = _heightMultiplier * _fontSize;
 
+const ui.TextHeightBehavior _noFirstAscentNoLastDescent = ui.TextHeightBehavior(
+  applyHeightToFirstAscent: false,
+  applyHeightToLastDescent: false,
+);
+
 ui.ParagraphStyle _style({
   double fontSize = _fontSize,
   double? height,
@@ -95,5 +100,315 @@ Future<void> testMain() async {
     expect(even.descent, closeTo(raw.descent + extraLeading, 1e-3));
     expect(even.descent, isNegative);
     expect(even.height, closeTo(expectedHeight, 1e-3));
+  });
+
+  test('Empty paragraph scales ascent and descent proportionally by default', () {
+    // For an empty paragraph `alphabeticBaseline` is the line ascent and `height` is the line
+    // height, which is all we can observe
+    final ui.Paragraph raw = _layout(_style());
+    final ui.Paragraph scaled = _layout(_style(height: _heightMultiplier));
+    expect(scaled.height, closeTo(_scaledHeight, 1e-3));
+    final double factor = _scaledHeight / raw.height;
+    expect(scaled.alphabeticBaseline, closeTo(raw.alphabeticBaseline * factor, 1e-3));
+
+    // SkParagraph quirk, mirrored on purpose (see `TextLayout.wrapText`): for an empty paragraph
+    // the half-leading flag is taken from the StrutStyle, so without a strut
+    // `TextHeightBehavior.leadingDistribution` alone has no effect...
+    final ui.Paragraph evenWithoutStrut = _layout(
+      _style(
+        height: _heightMultiplier,
+        textHeightBehavior: const ui.TextHeightBehavior(
+          leadingDistribution: ui.TextLeadingDistribution.even,
+        ),
+      ),
+    );
+    expect(evenWithoutStrut.height, closeTo(_scaledHeight, 1e-3));
+    expect(evenWithoutStrut.alphabeticBaseline, closeTo(scaled.alphabeticBaseline, 1e-3));
+
+    // ...but a strut with `leadingDistribution: even` does. (A strut without `height` and
+    // `leading` is no taller than the font itself, so it doesn't change the metrics otherwise)
+    final ui.Paragraph evenWithStrut = _layout(
+      _style(
+        height: _heightMultiplier,
+        strutStyle: ui.StrutStyle(
+          fontFamily: 'Arial',
+          fontSize: _fontSize,
+          leadingDistribution: ui.TextLeadingDistribution.even,
+        ),
+      ),
+    );
+    expect(evenWithStrut.height, closeTo(_scaledHeight, 1e-3));
+    final double extraLeading = (_scaledHeight - raw.height) / 2;
+    expect(evenWithStrut.alphabeticBaseline, closeTo(raw.alphabeticBaseline + extraLeading, 1e-3));
+  });
+
+  test('Empty paragraph keeps the half-leading extra as line leading', () {
+    // SkParagraph quirk, mirrored on purpose (see `TextLayout.wrapText`): with half-leading the
+    // extra leading of an empty paragraph is kept apart from the ascent and the descent, so
+    // `TextHeightBehavior` does not remove it and a non-forced strut is compared against the
+    // unscaled metrics. A line with text folds the extra into the ascent and the descent instead.
+    final ui.Paragraph raw = _layout(_style());
+    final double extraLeading = _scaledHeight - raw.height;
+    final evenStrut = ui.StrutStyle(
+      fontFamily: 'Arial',
+      fontSize: _fontSize,
+      leadingDistribution: ui.TextLeadingDistribution.even,
+    );
+
+    // `TextHeightBehavior` reverts a line with text to the unscaled metrics, but not the empty
+    // paragraph.
+    final ui.ParagraphStyle style = _style(
+      height: _heightMultiplier,
+      strutStyle: evenStrut,
+      textHeightBehavior: _noFirstAscentNoLastDescent,
+    );
+    expect(_layout(style, 'x').height, closeTo(raw.height, 1e-3));
+    final ui.Paragraph empty = _layout(style);
+    expect(empty.height, closeTo(_scaledHeight, 1e-3));
+    expect(empty.alphabeticBaseline, closeTo(raw.alphabeticBaseline + extraLeading / 2, 1e-3));
+
+    // A taller strut replaces the unscaled ascent and descent, and the extra leading is added on
+    // top of it instead of being partially absorbed by it.
+    final tallEvenStrut = ui.StrutStyle(
+      fontFamily: 'Arial',
+      fontSize: _fontSize * 1.5,
+      leadingDistribution: ui.TextLeadingDistribution.even,
+    );
+    final ui.Paragraph strutOnly = _layout(_style(strutStyle: tallEvenStrut));
+    expect(strutOnly.height, greaterThan(raw.height));
+    final ui.Paragraph strutAndHeight = _layout(
+      _style(height: _heightMultiplier, strutStyle: tallEvenStrut),
+    );
+    expect(strutAndHeight.height, closeTo(strutOnly.height + extraLeading, 1e-3));
+    expect(
+      strutAndHeight.alphabeticBaseline,
+      closeTo(strutOnly.alphabeticBaseline + extraLeading / 2, 1e-3),
+    );
+  });
+
+  test('TextHeightBehavior reverts a single line to the unscaled font metrics', () {
+    final ui.LineMetrics raw = _singleLineMetrics(_style(), 'x');
+
+    // A single line is both the first and the last line, so with both flags off it ends up as
+    // tall as it would be without a height multiplier at all.
+    final ui.Paragraph single = _layout(
+      _style(height: _heightMultiplier, textHeightBehavior: _noFirstAscentNoLastDescent),
+      'x',
+    );
+    final ui.LineMetrics singleMetrics = single.computeLineMetrics().single;
+    expect(singleMetrics.ascent, closeTo(raw.ascent, 1e-3));
+    expect(singleMetrics.descent, closeTo(raw.descent, 1e-3));
+    expect(single.height, closeTo(raw.height, 1e-3));
+    expect(single.alphabeticBaseline, closeTo(raw.ascent, 1e-3));
+
+    // An empty paragraph behaves like a single line.
+    final ui.Paragraph empty = _layout(
+      _style(height: _heightMultiplier, textHeightBehavior: _noFirstAscentNoLastDescent),
+    );
+    expect(empty.height, closeTo(single.height, 1e-3));
+    expect(empty.alphabeticBaseline, closeTo(single.alphabeticBaseline, 1e-3));
+  });
+
+  test('TextHeightBehavior affects only the first line ascent and the last line descent', () {
+    final ui.LineMetrics raw = _singleLineMetrics(_style(), 'x');
+    final ui.LineMetrics scaled = _singleLineMetrics(_style(height: _heightMultiplier), 'x');
+
+    final ui.Paragraph noFirstAscent = _layout(
+      _style(
+        height: _heightMultiplier,
+        textHeightBehavior: const ui.TextHeightBehavior(applyHeightToFirstAscent: false),
+      ),
+      'Hello\nWorld',
+    );
+    final List<ui.LineMetrics> noFirstAscentLines = noFirstAscent.computeLineMetrics();
+    expect(noFirstAscentLines, hasLength(2));
+    expect(noFirstAscentLines[0].ascent, closeTo(raw.ascent, 1e-3));
+    expect(noFirstAscentLines[0].descent, closeTo(scaled.descent, 1e-3));
+    expect(noFirstAscentLines[1].ascent, closeTo(scaled.ascent, 1e-3));
+    expect(noFirstAscentLines[1].descent, closeTo(scaled.descent, 1e-3));
+    // The second line starts right below the (shorter) first line.
+    expect(
+      noFirstAscentLines[1].baseline,
+      closeTo(noFirstAscentLines[0].height + scaled.ascent, 1e-3),
+    );
+    expect(noFirstAscent.height, closeTo(raw.ascent + scaled.descent + _scaledHeight, 1e-3));
+    expect(noFirstAscent.alphabeticBaseline, closeTo(raw.ascent, 1e-3));
+
+    final ui.Paragraph noLastDescent = _layout(
+      _style(
+        height: _heightMultiplier,
+        textHeightBehavior: const ui.TextHeightBehavior(applyHeightToLastDescent: false),
+      ),
+      'Hello\nWorld',
+    );
+    final List<ui.LineMetrics> noLastDescentLines = noLastDescent.computeLineMetrics();
+    expect(noLastDescentLines, hasLength(2));
+    expect(noLastDescentLines[0].ascent, closeTo(scaled.ascent, 1e-3));
+    expect(noLastDescentLines[0].descent, closeTo(scaled.descent, 1e-3));
+    expect(noLastDescentLines[1].ascent, closeTo(scaled.ascent, 1e-3));
+    expect(noLastDescentLines[1].descent, closeTo(raw.descent, 1e-3));
+    expect(noLastDescentLines[1].baseline, closeTo(_scaledHeight + scaled.ascent, 1e-3));
+    expect(noLastDescent.height, closeTo(_scaledHeight + scaled.ascent + raw.descent, 1e-3));
+    expect(noLastDescent.alphabeticBaseline, closeTo(scaled.ascent, 1e-3));
+  });
+
+  test('TextHeightBehavior treats the empty line after a trailing newline as the last line', () {
+    final ui.LineMetrics raw = _singleLineMetrics(_style(), 'x');
+    final ui.LineMetrics scaled = _singleLineMetrics(_style(height: _heightMultiplier), 'x');
+
+    // The empty line after the trailing `\n` inherits the metrics of the previous line (as in
+    // SkParagraph), and it is the one that loses its descent; the text line keeps it.
+    final ui.Paragraph paragraph = _layout(
+      _style(
+        height: _heightMultiplier,
+        textHeightBehavior: const ui.TextHeightBehavior(applyHeightToLastDescent: false),
+      ),
+      'x\n',
+    );
+    final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+    expect(lines, hasLength(2));
+    expect(lines[0].ascent, closeTo(scaled.ascent, 1e-3));
+    expect(lines[0].descent, closeTo(scaled.descent, 1e-3));
+    expect(lines[1].ascent, closeTo(scaled.ascent, 1e-3));
+    expect(lines[1].descent, closeTo(raw.descent, 1e-3));
+    expect(paragraph.height, closeTo(_scaledHeight + scaled.ascent + raw.descent, 1e-3));
+  });
+
+  test('TextHeightBehavior is a no-op when forceStrutHeight is set', () {
+    // The strut is 1.0 * 10 = 10 tall; the text is four times bigger.
+    final strutStyle = ui.StrutStyle(
+      fontFamily: 'Arial',
+      fontSize: 10,
+      height: 1.0,
+      forceStrutHeight: true,
+    );
+    final ui.Paragraph withoutBehavior = _layout(
+      _style(fontSize: 40, strutStyle: strutStyle),
+      'Hello',
+    );
+    final ui.Paragraph withBehavior = _layout(
+      _style(fontSize: 40, strutStyle: strutStyle, textHeightBehavior: _noFirstAscentNoLastDescent),
+      'Hello',
+    );
+    expect(withoutBehavior.height, closeTo(10.0, 1e-3));
+    expect(withBehavior.height, closeTo(withoutBehavior.height, 1e-3));
+
+    final ui.LineMetrics withoutBehaviorMetrics = withoutBehavior.computeLineMetrics().single;
+    final ui.LineMetrics withBehaviorMetrics = withBehavior.computeLineMetrics().single;
+    expect(withBehaviorMetrics.ascent, closeTo(withoutBehaviorMetrics.ascent, 1e-3));
+    expect(withBehaviorMetrics.descent, closeTo(withoutBehaviorMetrics.descent, 1e-3));
+
+    // Every line is exactly the strut, including the empty paragraph.
+    final ui.Paragraph twoLines = _layout(
+      _style(fontSize: 40, strutStyle: strutStyle, textHeightBehavior: _noFirstAscentNoLastDescent),
+      'Hello\nWorld',
+    );
+    expect(twoLines.height, closeTo(20.0, 1e-3));
+    final ui.Paragraph empty = _layout(
+      _style(fontSize: 40, strutStyle: strutStyle, textHeightBehavior: _noFirstAscentNoLastDescent),
+    );
+    expect(empty.height, closeTo(10.0, 1e-3));
+  });
+
+  test('StrutStyle.leading is kept when TextHeightBehavior reverts to unscaled metrics', () {
+    // The strut is 1.0 * 20 = 20 of font height plus 1.5 * 20 = 30 of leading (split evenly
+    // above and below), 50 in total.
+    final forcedStrut = ui.StrutStyle(
+      fontFamily: 'Arial',
+      fontSize: _fontSize,
+      height: 1.0,
+      leading: 1.5,
+      forceStrutHeight: true,
+    );
+    final ui.Paragraph forcedWithoutBehavior = _layout(_style(strutStyle: forcedStrut), 'Hello');
+    final ui.Paragraph forcedWithBehavior = _layout(
+      _style(strutStyle: forcedStrut, textHeightBehavior: _noFirstAscentNoLastDescent),
+      'Hello',
+    );
+    expect(forcedWithoutBehavior.height, closeTo(50.0, 1e-3));
+    expect(forcedWithBehavior.height, closeTo(50.0, 1e-3));
+    expect(
+      forcedWithBehavior.alphabeticBaseline,
+      closeTo(forcedWithoutBehavior.alphabeticBaseline, 1e-3),
+    );
+    expect(
+      _layout(_style(strutStyle: forcedStrut, textHeightBehavior: _noFirstAscentNoLastDescent))
+          .height,
+      closeTo(50.0, 1e-3),
+    );
+
+    // Without forceStrutHeight the strut (leading included) is still the minimum line height, so
+    // the smaller text doesn't shrink the line.
+    final strut = ui.StrutStyle(
+      fontFamily: 'Arial',
+      fontSize: _fontSize,
+      height: 1.0,
+      leading: 1.5,
+    );
+    final ui.Paragraph small = _layout(
+      _style(fontSize: 10, strutStyle: strut, textHeightBehavior: _noFirstAscentNoLastDescent),
+      'Hello',
+    );
+    expect(small.height, closeTo(50.0, 1e-3));
+    expect(
+      _layout(
+        _style(fontSize: 10, strutStyle: strut, textHeightBehavior: _noFirstAscentNoLastDescent),
+      ).height,
+      closeTo(50.0, 1e-3),
+    );
+  });
+
+  test('Empty paragraph and placeholder respect StrutStyle and height multiplier', () {
+    // Empty paragraph with forceStrutHeight uses strut height (11 * 7 = 77.0).
+    final ui.Paragraph emptyWithStrut = ui.ParagraphBuilder(
+      ui.ParagraphStyle(
+        strutStyle: ui.StrutStyle(
+          fontFamily: 'Arial',
+          height: 11,
+          fontSize: 7,
+          forceStrutHeight: true,
+        ),
+      ),
+    ).build()..layout(const ui.ParagraphConstraints(width: double.infinity));
+    expect(emptyWithStrut.height, closeTo(77.0, 1e-3));
+
+    // Empty paragraph applies ParagraphStyle.height multiplier (5.0 * 10 = 50.0).
+    final ui.Paragraph emptyWithHeight = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontFamily: 'Ahem', fontSize: 10, height: 5.0),
+    ).build()..layout(const ui.ParagraphConstraints(width: double.infinity));
+    expect(emptyWithHeight.height, closeTo(50.0, 1e-3));
+
+    // StrutStyle.leading adds leading * fontSize (1.5 * 20 = 30.0) to the scaled strut height (20.0).
+    final strutLeadingBuilder = ui.ParagraphBuilder(
+      ui.ParagraphStyle(
+        fontFamily: 'Arial',
+        fontSize: 20,
+        strutStyle: ui.StrutStyle(
+          fontFamily: 'Arial',
+          fontSize: 20,
+          height: 1.0,
+          leading: 1.5,
+          forceStrutHeight: true,
+        ),
+      ),
+    )..addText('Hello');
+    final ui.Paragraph strutLeadingParagraph = strutLeadingBuilder.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+    expect(strutLeadingParagraph.height, closeTo(50.0, 1e-3));
+
+    // When forceStrutHeight is true, a taller placeholder does not expand the line height beyond the strut.
+    final placeholderForceStrutBuilder = ui.ParagraphBuilder(
+      ui.ParagraphStyle(
+        strutStyle: ui.StrutStyle(
+          fontFamily: 'Arial',
+          fontSize: 10,
+          height: 10.0,
+          forceStrutHeight: true,
+        ),
+      ),
+    )..addPlaceholder(1000, 1000, ui.PlaceholderAlignment.bottom);
+    final ui.Paragraph placeholderForceStrut = placeholderForceStrutBuilder.build()
+      ..layout(const ui.ParagraphConstraints(width: 2000));
+    expect(placeholderForceStrut.height, closeTo(100.0, 1e-3));
   });
 }
