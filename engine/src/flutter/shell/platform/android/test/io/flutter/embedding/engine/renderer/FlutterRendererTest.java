@@ -39,6 +39,7 @@ import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.view.TextureRegistry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -67,6 +68,11 @@ public class FlutterRendererTest {
   @Before
   public void setup() {
     fakeFlutterJNI = engineRule.getFlutterJNI();
+  }
+
+  @After
+  public void resetHardwareBufferDefectOverride() {
+    FlutterRenderer.setHardwareBufferDefectOverride(null);
   }
 
   @Test
@@ -840,6 +846,83 @@ public class FlutterRendererTest {
     assertTrue(
         "Expected SurfaceTextureSurfaceProducer on Huawei API <= 29 due to HardwareBuffer defect causing video playback failures",
         producer instanceof SurfaceTextureSurfaceProducer);
+  }
+
+  @Test
+  @Config(sdk = 29)
+  public void createSurfaceProducer_overrideFalseUsesImageReaderOnHuawei() {
+    ShadowBuild.setManufacturer("HUAWEI");
+    FlutterRenderer.setHardwareBufferDefectOverride(false);
+
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    assertTrue(producer instanceof FlutterRenderer.ImageReaderSurfaceProducer);
+  }
+
+  @Test
+  @Config(sdk = 34)
+  public void createSurfaceProducer_overrideTrueUsesSurfaceTexture() {
+    FlutterRenderer.setHardwareBufferDefectOverride(true);
+
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    assertTrue(producer instanceof SurfaceTextureSurfaceProducer);
+  }
+
+  @Test
+  @Config(sdk = 34)
+  public void createSurfaceProducer_overrideFalseUsesImageReaderOnUnaffectedDevice() {
+    FlutterRenderer.setHardwareBufferDefectOverride(false);
+
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    assertTrue(producer instanceof FlutterRenderer.ImageReaderSurfaceProducer);
+  }
+
+  @Test
+  @Config(sdk = 28)
+  public void createSurfaceProducer_overrideFalseKeepsSurfaceTextureBelowApi29() {
+    FlutterRenderer.setHardwareBufferDefectOverride(false);
+
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    assertTrue(producer instanceof SurfaceTextureSurfaceProducer);
+  }
+
+  @Test
+  @Config(sdk = 29)
+  public void createSurfaceProducer_nullOverrideRestoresHuaweiFallback() {
+    ShadowBuild.setManufacturer("HUAWEI");
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    FlutterRenderer.setHardwareBufferDefectOverride(false);
+    assertTrue(
+        flutterRenderer.createSurfaceProducer()
+            instanceof FlutterRenderer.ImageReaderSurfaceProducer);
+
+    FlutterRenderer.setHardwareBufferDefectOverride(null);
+
+    assertTrue(flutterRenderer.createSurfaceProducer() instanceof SurfaceTextureSurfaceProducer);
+  }
+
+  @Test
+  @Config(sdk = 29)
+  public void createSurfaceProducer_debugFlagTakesPrecedenceOverOverride() {
+    ShadowBuild.setManufacturer("HUAWEI");
+    try {
+      FlutterRenderer.debugForceSurfaceProducerGlTextures = true;
+      FlutterRenderer.setHardwareBufferDefectOverride(false);
+
+      FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+      TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+      assertTrue(producer instanceof SurfaceTextureSurfaceProducer);
+    } finally {
+      FlutterRenderer.debugForceSurfaceProducerGlTextures = false;
+    }
   }
 
   @Test
