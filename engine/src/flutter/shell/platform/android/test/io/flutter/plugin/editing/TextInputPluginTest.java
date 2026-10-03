@@ -1366,6 +1366,81 @@ public class TextInputPluginTest {
     verify(textInputChannel, times(1)).setTextInputMethodHandler(isNull());
   }
 
+  @Test
+  public void isTextEditor_reflectsInputTarget() {
+    View testView = new View(ctx);
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    ArgumentCaptor<TextInputChannel.TextInputMethodHandler> handlerCaptor =
+        ArgumentCaptor.forClass(TextInputChannel.TextInputMethodHandler.class);
+    verify(textInputChannel).setTextInputMethodHandler(handlerCaptor.capture());
+    TextInputChannel.TextInputMethodHandler handler = handlerCaptor.getValue();
+    TextInputChannel.Configuration textConfiguration =
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+    TextInputChannel.Configuration noneConfiguration =
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.NONE, false, false, false),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+
+    // Nothing is attached yet.
+    assertFalse(textInputPlugin.isTextEditor());
+
+    // A framework client that accepts text.
+    handler.setClient(0, textConfiguration);
+    assertTrue(textInputPlugin.isTextEditor());
+
+    // TextInputType.none never shows the keyboard, so the view is not a text editor.
+    handler.setClient(1, noneConfiguration);
+    assertFalse(textInputPlugin.isTextEditor());
+
+    // Detaching the client drops the flag again.
+    handler.setClient(2, textConfiguration);
+    assertTrue(textInputPlugin.isTextEditor());
+    handler.clearClient();
+    assertFalse(textInputPlugin.isTextEditor());
+
+    // A virtual display platform view proxies its input connection through the Flutter view.
+    handler.setPlatformViewClient(3, /* usesVirtualDisplay= */ true);
+    assertTrue(textInputPlugin.isTextEditor());
+
+    // A hybrid composition platform view owns its own input connection.
+    handler.setPlatformViewClient(4, /* usesVirtualDisplay= */ false);
+    assertFalse(textInputPlugin.isTextEditor());
+  }
+
   @SuppressWarnings("deprecation")
   // DartExecutor.send is deprecated.
   private void verifyInputConnection(TextInputChannel.TextInputType textInputType)

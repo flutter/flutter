@@ -406,6 +406,31 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   }
 
   /**
+   * Returns whether the {@link InputMethodManager} should treat the Flutter view as a text editor.
+   *
+   * <p>Backs {@link View#onCheckIsTextEditor()} on the Flutter view. The framework sets its {@code
+   * IS_TEXT_EDITOR} start-input flag from that callback, and some devices (Android TV builds with
+   * {@code config_preventImeStartupUnlessTextEditor}) refuse to bind an IME to a view that does not
+   * report itself as a text editor.
+   *
+   * <p>This is {@code true} while a framework text input client with a non-{@link
+   * TextInputChannel.TextInputType#NONE} input type is attached, and while a virtual display
+   * platform view is the input target (its input connection is proxied through the Flutter view).
+   */
+  public boolean isTextEditor() {
+    switch (inputTarget.type) {
+      case FRAMEWORK_CLIENT:
+        return configuration != null
+            && configuration.inputType != null
+            && configuration.inputType.type != TextInputChannel.TextInputType.NONE;
+      case VIRTUAL_DISPLAY_PLATFORM_VIEW:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /**
    * Clears a platform view text input client if it is the current input target.
    *
    * <p>This is called when a platform view is disposed to make sure we're not hanging to a stale
