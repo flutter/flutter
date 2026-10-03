@@ -37,7 +37,10 @@ FlScrollingManager* fl_scrolling_manager_new(FlEngine* engine,
  * @y: the mouse y-position, in window coordinates.
  *
  * Inform the scrolling manager of the mouse position.
- * This position will be used when sending scroll pointer events.
+ *
+ * This position is only a fallback: pan/zoom gestures pass the position of the
+ * gesture itself to fl_scrolling_manager_handle_*_begin/update/end, and this
+ * stored value is used only when a gesture cannot supply one.
  */
 void fl_scrolling_manager_set_last_mouse_position(FlScrollingManager* manager,
                                                   gdouble x,
@@ -58,54 +61,96 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* manager,
 /**
  * fl_scrolling_manager_handle_rotation_begin:
  * @manager: an #FlScrollingManager.
+ * @has_position: whether @x and @y hold the gesture position.
+ * @x: the gesture x-position, in window coordinates.
+ * @y: the gesture y-position, in window coordinates.
  *
  * Inform the scrolling manager that a rotation gesture has begun.
+ *
+ * When @has_position is false the last position reported with
+ * fl_scrolling_manager_set_last_mouse_position() is used instead. Callers
+ * should pass the position of the gesture they are handling so that a gesture
+ * is not reported at a stale position (or at the origin) when it is the first
+ * interaction with the window.
  */
-void fl_scrolling_manager_handle_rotation_begin(FlScrollingManager* manager);
+void fl_scrolling_manager_handle_rotation_begin(FlScrollingManager* manager,
+                                                gboolean has_position,
+                                                gdouble x,
+                                                gdouble y);
 
 /**
  * fl_scrolling_manager_handle_rotation_update:
  * @manager: an #FlScrollingManager.
+ * @has_position: whether @x and @y hold the gesture position.
+ * @x: the gesture x-position, in window coordinates.
+ * @y: the gesture y-position, in window coordinates.
  * @rotation: the rotation angle, in radians.
  *
  * Inform the scrolling manager that a rotation gesture has updated.
  */
 void fl_scrolling_manager_handle_rotation_update(FlScrollingManager* manager,
+                                                 gboolean has_position,
+                                                 gdouble x,
+                                                 gdouble y,
                                                  gdouble rotation);
 
 /**
  * fl_scrolling_manager_handle_rotation_end:
  * @manager: an #FlScrollingManager.
+ * @has_position: whether @x and @y hold the gesture position.
+ * @x: the gesture x-position, in window coordinates.
+ * @y: the gesture y-position, in window coordinates.
  *
  * Inform the scrolling manager that a rotation gesture has ended.
  */
-void fl_scrolling_manager_handle_rotation_end(FlScrollingManager* manager);
+void fl_scrolling_manager_handle_rotation_end(FlScrollingManager* manager,
+                                              gboolean has_position,
+                                              gdouble x,
+                                              gdouble y);
 
 /**
  * fl_scrolling_manager_handle_zoom_begin:
  * @manager: an #FlScrollingManager.
+ * @has_position: whether @x and @y hold the gesture position.
+ * @x: the gesture x-position, in window coordinates.
+ * @y: the gesture y-position, in window coordinates.
  *
  * Inform the scrolling manager that a zoom gesture has begun.
  */
-void fl_scrolling_manager_handle_zoom_begin(FlScrollingManager* manager);
+void fl_scrolling_manager_handle_zoom_begin(FlScrollingManager* manager,
+                                            gboolean has_position,
+                                            gdouble x,
+                                            gdouble y);
 
 /**
  * fl_scrolling_manager_handle_zoom_update:
  * @manager: an #FlScrollingManager.
+ * @has_position: whether @x and @y hold the gesture position.
+ * @x: the gesture x-position, in window coordinates.
+ * @y: the gesture y-position, in window coordinates.
  * @scale: the zoom scale.
  *
  * Inform the scrolling manager that a zoom gesture has updated.
  */
 void fl_scrolling_manager_handle_zoom_update(FlScrollingManager* manager,
+                                             gboolean has_position,
+                                             gdouble x,
+                                             gdouble y,
                                              gdouble scale);
 
 /**
  * fl_scrolling_manager_handle_zoom_end:
  * @manager: an #FlScrollingManager.
+ * @has_position: whether @x and @y hold the gesture position.
+ * @x: the gesture x-position, in window coordinates.
+ * @y: the gesture y-position, in window coordinates.
  *
  * Inform the scrolling manager that a zoom gesture has ended.
  */
-void fl_scrolling_manager_handle_zoom_end(FlScrollingManager* manager);
+void fl_scrolling_manager_handle_zoom_end(FlScrollingManager* manager,
+                                          gboolean has_position,
+                                          gdouble x,
+                                          gdouble y);
 
 G_END_DECLS
 

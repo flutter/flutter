@@ -303,6 +303,36 @@ static void set_scrolling_position(FlView* self, gdouble x, gdouble y) {
       self->scrolling_manager, x * scale_factor, y * scale_factor);
 }
 
+// Returns the position of the touchpad pinch currently being processed, in
+// window coordinates.
+//
+// A pinch is frequently the very first interaction with a freshly opened
+// window, so the position must come from the gesture being handled: a position
+// cached from earlier pointer activity can be absent, in which case the gesture
+// would be delivered to Flutter at (0, 0). The framework hit-tests a pan/zoom
+// gesture at that position, so (0, 0) routes it to the top-left corner of the
+// window instead of to whatever is under the user's fingers.
+//
+// Returns FALSE if the current event is not a touchpad pinch (for example a
+// touchscreen pinch), in which case the caller falls back to the last known
+// position.
+static gboolean get_touchpad_pinch_position(FlView* self,
+                                            gdouble* x,
+                                            gdouble* y) {
+  g_autoptr(GdkEvent) event = gtk_get_current_event();
+  if (event == nullptr ||
+      gdk_event_get_event_type(event) != GDK_TOUCHPAD_PINCH) {
+    return FALSE;
+  }
+
+  GdkEventTouchpadPinch* pinch =
+      reinterpret_cast<GdkEventTouchpadPinch*>(event);
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  *x = pinch->x * scale_factor;
+  *y = pinch->y * scale_factor;
+  return TRUE;
+}
+
 // Signal handler for GtkWidget::button-press-event
 static gboolean button_press_event_cb(FlView* self,
                                       GdkEventButton* button_event) {
@@ -479,30 +509,47 @@ static gboolean leave_notify_event_cb(FlView* self,
 }
 
 static void gesture_rotation_begin_cb(FlView* self) {
-  fl_scrolling_manager_handle_rotation_begin(self->scrolling_manager);
+  gdouble x = 0.0, y = 0.0;
+  gboolean has_position = get_touchpad_pinch_position(self, &x, &y);
+  fl_scrolling_manager_handle_rotation_begin(self->scrolling_manager,
+                                             has_position, x, y);
 }
 
 static void gesture_rotation_update_cb(FlView* self,
                                        gdouble rotation,
                                        gdouble delta) {
+  gdouble x = 0.0, y = 0.0;
+  gboolean has_position = get_touchpad_pinch_position(self, &x, &y);
   fl_scrolling_manager_handle_rotation_update(self->scrolling_manager,
-                                              rotation);
+                                              has_position, x, y, rotation);
 }
 
 static void gesture_rotation_end_cb(FlView* self) {
-  fl_scrolling_manager_handle_rotation_end(self->scrolling_manager);
+  gdouble x = 0.0, y = 0.0;
+  gboolean has_position = get_touchpad_pinch_position(self, &x, &y);
+  fl_scrolling_manager_handle_rotation_end(self->scrolling_manager,
+                                           has_position, x, y);
 }
 
 static void gesture_zoom_begin_cb(FlView* self) {
-  fl_scrolling_manager_handle_zoom_begin(self->scrolling_manager);
+  gdouble x = 0.0, y = 0.0;
+  gboolean has_position = get_touchpad_pinch_position(self, &x, &y);
+  fl_scrolling_manager_handle_zoom_begin(self->scrolling_manager, has_position,
+                                         x, y);
 }
 
 static void gesture_zoom_update_cb(FlView* self, gdouble scale) {
-  fl_scrolling_manager_handle_zoom_update(self->scrolling_manager, scale);
+  gdouble x = 0.0, y = 0.0;
+  gboolean has_position = get_touchpad_pinch_position(self, &x, &y);
+  fl_scrolling_manager_handle_zoom_update(self->scrolling_manager, has_position,
+                                          x, y, scale);
 }
 
 static void gesture_zoom_end_cb(FlView* self) {
-  fl_scrolling_manager_handle_zoom_end(self->scrolling_manager);
+  gdouble x = 0.0, y = 0.0;
+  gboolean has_position = get_touchpad_pinch_position(self, &x, &y);
+  fl_scrolling_manager_handle_zoom_end(self->scrolling_manager, has_position, x,
+                                       y);
 }
 
 static void realize_cb(FlView* self) {
