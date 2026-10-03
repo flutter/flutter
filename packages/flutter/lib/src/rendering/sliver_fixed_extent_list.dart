@@ -260,14 +260,24 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     return index - 1;
   }
 
-  BoxConstraints _getChildConstraints(int index) {
-    double extent;
+  /// Returns the extent of the child at the given [index].
+  ///
+  /// This is used to determine the dimensions of the child when laying it out.
+  @protected
+  double? itemExtentOf(int index) {
     if (itemExtentBuilder == null) {
-      extent = itemExtent!;
-    } else {
-      extent = itemExtentBuilder!(index, layoutDimensions)!;
+      return itemExtent;
     }
-    return constraints.asBoxConstraints(minExtent: extent, maxExtent: extent);
+    return itemExtentBuilder!(index, layoutDimensions);
+  }
+
+  BoxConstraints _getChildConstraints(int index) {
+    final double? extent = itemExtentOf(index);
+    assert(
+      extent != null,
+      'The itemExtentBuilder must not return null for valid items being laid out.',
+    );
+    return constraints.asBoxConstraints(minExtent: extent!, maxExtent: extent);
   }
 
   /// The layout dimensions for the sliver.
@@ -539,17 +549,190 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   /// extent in the main axis.
   RenderSliverVariedExtentList({required super.childManager, required this._itemExtentBuilder});
 
+  final List<double> _itemExtentCache = <double>[];
+  final List<double> _itemOffsetCache = <double>[0.0];
+
+  /// Clears the cached item extents.
+  ///
+  /// This is called when the [itemExtentBuilder] is assigned or when
+  /// the layout dimensions change in a way that affects the item extents.
+  void _clearItemExtentCache() {
+    _itemExtentCache.clear();
+    _itemOffsetCache.clear();
+    _itemOffsetCache.add(0.0);
+  }
+
+  double? _getOrCreateItemOffset(int index) {
+    if (index < _itemOffsetCache.length) {
+      return _itemOffsetCache[index];
+    }
+    final SliverLayoutDimensions dimensions = layoutDimensions;
+    for (int i = _itemExtentCache.length; i < index; i++) {
+      final double? extent = itemExtentBuilder(i, dimensions);
+      if (extent == null) {
+        return null;
+      }
+      _itemExtentCache.add(extent);
+      _itemOffsetCache.add(_itemOffsetCache[i] + extent);
+    }
+    return _itemOffsetCache[index];
+  }
+
+  @override
+  double? itemExtentOf(int index) {
+    if (index < _itemExtentCache.length) {
+      return _itemExtentCache[index];
+    }
+    final double? offset = _getOrCreateItemOffset(index + 1);
+    if (offset == null) {
+      return null;
+    }
+    return _itemExtentCache[index];
+  }
+
   @override
   ItemExtentBuilder get itemExtentBuilder => _itemExtentBuilder;
   ItemExtentBuilder _itemExtentBuilder;
   set itemExtentBuilder(ItemExtentBuilder value) {
-    if (_itemExtentBuilder == value) {
-      return;
+    if (_itemExtentBuilder != value) {
+      _itemExtentBuilder = value;
+      _clearItemExtentCache();
+      markNeedsLayout();
     }
-    _itemExtentBuilder = value;
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    _clearItemExtentCache();
     markNeedsLayout();
   }
 
   @override
   double? get itemExtent => null;
+
+  @override
+  double paintExtentOf(RenderBox child) {
+    final int index = indexOf(child);
+    assert(
+      index != -1 && index < _itemExtentCache.length,
+      'The itemExtentBuilder should have already been called for child at index $index.',
+    );
+    return _itemExtentCache[index];
+  }
+
+  @override
+  void performLayout() {
+    final SliverConstraints constraints = this.constraints;
+    if (_currentLayoutDimensions == null ||
+        _currentLayoutDimensions!.viewportMainAxisExtent != constraints.viewportMainAxisExtent ||
+        _currentLayoutDimensions!.crossAxisExtent != constraints.crossAxisExtent ||
+        _currentLayoutDimensions!.precedingScrollExtent != constraints.precedingScrollExtent) {
+      _clearItemExtentCache();
+    }
+
+    super.performLayout();
+
+    // Invoke the builder at least once per layout for the first visible index
+    // so that it receives the latest SliverLayoutDimensions (including scrollOffset).
+    // We do this after super.performLayout() so that _currentLayoutDimensions is updated.
+    final int firstIndex = math.max(0, _findChildIndexForScrollOffset(constraints.scrollOffset, findMax: false));
+    itemExtentBuilder(firstIndex, layoutDimensions);
+  }
+
+  @override
+  double indexToLayoutOffset(
+    @Deprecated(
+      'The itemExtent is already available within the scope of this function. '
+      'This feature was deprecated after v3.20.0-7.0.pre.',
+    )
+    double itemExtent,
+    int index,
+  ) {
+    final int? childCount = childManager.estimatedChildCount;
+    var clampedIndex = index;
+    if (childCount != null && clampedIndex > childCount) {
+      clampedIndex = childCount;
+    }
+    return _getOrCreateItemOffset(clampedIndex) ?? _itemOffsetCache.last;
+  }
+
+  @override
+  double computeMaxScrollOffset(
+    SliverConstraints constraints,
+    @Deprecated(
+      'The itemExtent is already available within the scope of this function. '
+      'This feature was deprecated after v3.20.0-7.0.pre.',
+    )
+    double itemExtent,
+  ) {
+    return _getOrCreateItemOffset(childManager.childCount) ?? _itemOffsetCache.last;
+  }
+
+  @override
+  int getMinChildIndexForScrollOffset(
+    double scrollOffset,
+    @Deprecated(
+      'The itemExtent is already available within the scope of this function. '
+      'This feature was deprecated after v3.20.0-7.0.pre.',
+    )
+    double itemExtent,
+  ) {
+    return _findChildIndexForScrollOffset(scrollOffset, findMax: false);
+  }
+
+  @override
+  int getMaxChildIndexForScrollOffset(
+    double scrollOffset,
+    @Deprecated(
+      'The itemExtent is already available within the scope of this function. '
+      'This feature was deprecated after v3.20.0-7.0.pre.',
+    )
+    double itemExtent,
+  ) {
+    return _findChildIndexForScrollOffset(scrollOffset, findMax: true);
+  }
+
+  int _findChildIndexForScrollOffset(double scrollOffset, {required bool findMax}) {
+    if (scrollOffset <= 0.0) {
+      return 0;
+    }
+    _ensureItemOffsetsFor(scrollOffset);
+
+    var low = 0;
+    int high = _itemOffsetCache.length - 1;
+    int result = _itemOffsetCache.length - 1;
+    while (low <= high) {
+      final int mid = (low + high) ~/ 2;
+      double itemOffset = _itemOffsetCache[mid];
+      if ((itemOffset - scrollOffset).abs() < precisionErrorTolerance) {
+        itemOffset = scrollOffset;
+      }
+      final bool isPastScrollOffset = findMax
+          ? itemOffset >= scrollOffset
+          : itemOffset > scrollOffset;
+      if (isPastScrollOffset) {
+        result = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return math.max(0, result - 1);
+  }
+
+  void _ensureItemOffsetsFor(double scrollOffset) {
+    int index = _itemOffsetCache.length - 1;
+    final int? childCount = childManager.estimatedChildCount;
+    while (_itemOffsetCache[index] <= scrollOffset + precisionErrorTolerance) {
+      if (childCount != null && index >= childCount) {
+        break;
+      }
+      final double? nextOffset = _getOrCreateItemOffset(index + 1);
+      if (nextOffset == null) {
+        break;
+      }
+      index++;
+    }
+  }
 }
