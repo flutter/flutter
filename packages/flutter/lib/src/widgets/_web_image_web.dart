@@ -19,7 +19,7 @@ import 'framework.dart';
 import 'platform_view.dart';
 
 /// Displays an `<img>` element with `src` set to [src].
-class ImgElementPlatformView extends StatelessWidget {
+class ImgElementPlatformView extends StatefulWidget {
   /// Creates a platform view backed with an `<img>` element.
   ImgElementPlatformView(this.src, {super.key}) {
     if (!_registered) {
@@ -52,13 +52,60 @@ class ImgElementPlatformView extends StatelessWidget {
   final String? src;
 
   @override
+  State<ImgElementPlatformView> createState() => _ImgElementPlatformViewState();
+}
+
+class _ImgElementPlatformViewState extends State<ImgElementPlatformView> {
+  web.HTMLImageElement? _imgElement;
+  bool _srcUpdatedBeforeCreated = false;
+
+  void _onPlatformViewCreated(int viewId) {
+    final img = ui_web.platformViewRegistry.getViewById(viewId) as web.HTMLImageElement;
+    if (!mounted || widget.src == null) {
+      img.src = '';
+      return;
+    }
+    _imgElement = img;
+    if (_srcUpdatedBeforeCreated) {
+      _srcUpdatedBeforeCreated = false;
+      img.src = widget.src!;
+    }
+  }
+
+  @override
+  void didUpdateWidget(ImgElementPlatformView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.src != oldWidget.src) {
+      if (widget.src == null) {
+        _imgElement?.src = '';
+        _imgElement = null;
+        _srcUpdatedBeforeCreated = false;
+      } else if (_imgElement != null) {
+        _imgElement!.src = widget.src!;
+      } else if (oldWidget.src != null) {
+        _srcUpdatedBeforeCreated = true;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    // Clear the src attribute when the platform view is disposed so the browser
+    // can eagerly reclaim the decoded image buffer.
+    _imgElement?.src = '';
+    _imgElement = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (src == null) {
+    if (widget.src == null) {
       return const SizedBox.expand();
     }
     return HtmlElementView(
-      viewType: _viewType,
-      creationParams: <String, String?>{'src': src},
+      viewType: ImgElementPlatformView._viewType,
+      onPlatformViewCreated: _onPlatformViewCreated,
+      creationParams: <String, String?>{'src': widget.src},
       hitTestBehavior: PlatformViewHitTestBehavior.transparent,
     );
   }
