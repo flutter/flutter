@@ -649,13 +649,24 @@ public class FlutterJNI {
    */
   @UiThread
   public void onSurfaceWindowChanged(@NonNull Surface surface) {
+    onSurfaceWindowChanged(surface, false);
+  }
+
+  /**
+   * In hybrid composition, call this method when the {@link Surface} has changed.
+   *
+   * @param surface The surface to render to.
+   * @param isImageView Whether this surface is an ImageReader backing a FlutterImageView.
+   */
+  @UiThread
+  public void onSurfaceWindowChanged(@NonNull Surface surface, boolean isImageView) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
-    nativeSurfaceWindowChanged(nativeShellHolderId, surface);
+    nativeSurfaceWindowChanged(nativeShellHolderId, surface, isImageView);
   }
 
   private native void nativeSurfaceWindowChanged(
-      long nativeShellHolderId, @NonNull Surface surface);
+      long nativeShellHolderId, @NonNull Surface surface, boolean isImageView);
 
   /**
    * Call this method when the {@link Surface} changes that was previously registered with {@link
@@ -1349,6 +1360,15 @@ public class FlutterJNI {
 
   @SuppressWarnings("unused")
   @UiThread
+  public void synchronizeToNativeViewHierarchy(boolean yes) {
+    ensureRunningOnMainThread();
+    if (platformViewsController != null) {
+      platformViewsController.synchronizeToNativeViewHierarchy(yes);
+    }
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
   public void maybeResizeSurfaceView(int width, int height) {
     for (FlutterUiResizeListener listener : flutterUiResizeListeners) {
       listener.resizeEngineView(width, height);
@@ -1449,6 +1469,13 @@ public class FlutterJNI {
     if (platformViewsController2 == null) {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to position a platform view");
+    }
+    if (platformViewsController2.getPlatformViewById(viewId) == null
+        && platformViewsController != null
+        && platformViewsController.getPlatformViewById(viewId) != null) {
+      platformViewsController.onDisplayPlatformView(
+          viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
+      return;
     }
     platformViewsController2.onDisplayPlatformView(
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
@@ -1654,6 +1681,7 @@ public class FlutterJNI {
 
   // @SuppressWarnings("unused")
   @UiThread
+  @SuppressLint("NewApi")
   public void onDisplayPlatformView(
       int viewId,
       int x,
@@ -1667,6 +1695,14 @@ public class FlutterJNI {
     if (platformViewsController == null) {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to position a platform view");
+    }
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34
+        && platformViewsController.getPlatformViewById(viewId) == null
+        && platformViewsController2 != null
+        && platformViewsController2.getPlatformViewById(viewId) != null) {
+      platformViewsController2.onDisplayPlatformView(
+          viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
+      return;
     }
     platformViewsController.onDisplayPlatformView(
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);

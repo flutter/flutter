@@ -278,8 +278,10 @@ constexpr DeviceTypeVK ToDeviceType(const vk::PhysicalDeviceType& type) {
   return DeviceTypeVK::kUnknown;
 }
 
-DriverInfoVK::DriverInfoVK(const vk::PhysicalDevice& device) {
-  auto props = device.getProperties();
+DriverInfoVK::DriverInfoVK(const vk::PhysicalDevice& device)
+    : DriverInfoVK(device.getProperties()) {}
+
+DriverInfoVK::DriverInfoVK(const vk::PhysicalDeviceProperties& props) {
   api_version_ = Version{VK_API_VERSION_MAJOR(props.apiVersion),
                          VK_API_VERSION_MINOR(props.apiVersion),
                          VK_API_VERSION_PATCH(props.apiVersion)};
