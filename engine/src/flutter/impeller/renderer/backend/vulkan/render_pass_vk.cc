@@ -171,11 +171,41 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   // attachment set are the same as before.
   const uint32_t cache_mip_level = color0.mip_level;
   const uint32_t cache_slice = color0.slice;
+  // And on the rest of the attachment set, which used to be assumed constant
+  // for a given color attachment. It is not: the same color texture paired with
+  // a different depth texture — a shadow atlas drawn with a pooled depth buffer
+  // is the ordinary case — otherwise hands back a framebuffer holding the
+  // previous depth's image view, and once that texture is released the view is
+  // dangling. Vulkan reports it as
+  // VUID-VkRenderPassBeginInfo-framebuffer-parameter and the driver then
+  // dereferences it.
+  uint64_t attachments_key = 0u;
+  {
+    auto mix = [&attachments_key](const std::shared_ptr<Texture>& texture) {
+      attachments_key = attachments_key * 1099511628211ull ^
+                        reinterpret_cast<uintptr_t>(texture.get());
+    };
+    render_target_.IterateAllColorAttachments(
+        [&mix](size_t index, const ColorAttachment& attachment) -> bool {
+          if (index != 0u) {
+            mix(attachment.texture);
+            mix(attachment.resolve_texture);
+          }
+          return true;
+        });
+    if (auto depth = render_target_.GetDepthAttachment(); depth.has_value()) {
+      mix(depth->texture);
+    }
+    if (auto stencil = render_target_.GetStencilAttachment();
+        stencil.has_value()) {
+      mix(stencil->texture);
+    }
+  }
   TextureVK& frame_data_texture = TextureVK::Cast(
       resolve_image_vk_ ? *resolve_image_vk_ : *color_image_vk_);
   is_swapchain = frame_data_texture.IsSwapchainImage();
   frame_data = frame_data_texture.GetCachedFrameData(
-      sample_count, cache_mip_level, cache_slice);
+      sample_count, cache_mip_level, cache_slice, attachments_key);
 
   const auto& target_size = render_target_.GetRenderTargetSize();
 
@@ -205,8 +235,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   frame_data.framebuffer = framebuffer;
   frame_data.render_pass = render_pass_;
 
-  frame_data_texture.SetCachedFrameData(frame_data, sample_count,
-                                        cache_mip_level, cache_slice);
+  frame_data_texture.SetCachedFrameData(
+      frame_data, sample_count, cache_mip_level, cache_slice, attachments_key);
 
   // If the resolve image exists and has mipmaps, transition mip levels besides
   // the base to shader read only in preparation for mipmap generation.
