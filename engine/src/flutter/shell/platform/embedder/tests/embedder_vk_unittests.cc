@@ -630,6 +630,170 @@ TEST_F(EmbedderTest, CanRenderSceneWithVulkanCompositorSkia) {
   engine.reset();
 }
 
+namespace {
+
+struct CompositorTransientAndPoolTracker {
+  PFN_vkGetInstanceProcAddr get_instance_proc_addr = nullptr;
+  PFN_vkGetDeviceProcAddr get_device_proc_addr = nullptr;
+  PFN_vkCreateImage create_image_proc_addr = nullptr;
+  PFN_vkResetCommandPool reset_command_pool_proc_addr = nullptr;
+  uint32_t target_width = 0;
+  uint32_t target_height = 0;
+  std::atomic<uint32_t> msaa_image_create_count{0};
+  std::atomic<uint32_t> command_pool_reset_count{0};
+
+  void Reset(uint32_t width, uint32_t height) {
+    get_instance_proc_addr = nullptr;
+    get_device_proc_addr = nullptr;
+    create_image_proc_addr = nullptr;
+    reset_command_pool_proc_addr = nullptr;
+    target_width = width;
+    target_height = height;
+    msaa_image_create_count.store(0);
+    command_pool_reset_count.store(0);
+  }
+};
+
+static_assert(
+    std::is_trivially_destructible_v<CompositorTransientAndPoolTracker>);
+
+CompositorTransientAndPoolTracker g_compositor_tracker;
+
+VkResult TrackedCreateImage(VkDevice device,
+                            const VkImageCreateInfo* pCreateInfo,
+                            const VkAllocationCallbacks* pAllocator,
+                            VkImage* pImage) {
+  FML_DCHECK(g_compositor_tracker.create_image_proc_addr != nullptr);
+  if (pCreateInfo != nullptr && pCreateInfo->samples == VK_SAMPLE_COUNT_4_BIT &&
+      pCreateInfo->extent.width == g_compositor_tracker.target_width &&
+      pCreateInfo->extent.height == g_compositor_tracker.target_height) {
+    g_compositor_tracker.msaa_image_create_count.fetch_add(1);
+  }
+  return g_compositor_tracker.create_image_proc_addr(device, pCreateInfo,
+                                                     pAllocator, pImage);
+}
+
+VkResult TrackedResetCommandPool(VkDevice device,
+                                 VkCommandPool commandPool,
+                                 VkCommandPoolResetFlags flags) {
+  FML_DCHECK(g_compositor_tracker.reset_command_pool_proc_addr != nullptr);
+  g_compositor_tracker.command_pool_reset_count.fetch_add(1);
+  return g_compositor_tracker.reset_command_pool_proc_addr(device, commandPool,
+                                                           flags);
+}
+
+PFN_vkVoidFunction TrackedGetDeviceProcAddr(VkDevice device,
+                                            const char* pName) {
+  FML_DCHECK(g_compositor_tracker.get_device_proc_addr != nullptr);
+  if (pName != nullptr && std::strcmp(pName, "vkCreateImage") == 0) {
+    g_compositor_tracker.create_image_proc_addr =
+        reinterpret_cast<PFN_vkCreateImage>(
+            g_compositor_tracker.get_device_proc_addr(device, pName));
+    return reinterpret_cast<PFN_vkVoidFunction>(TrackedCreateImage);
+  }
+  if (pName != nullptr && std::strcmp(pName, "vkResetCommandPool") == 0) {
+    g_compositor_tracker.reset_command_pool_proc_addr =
+        reinterpret_cast<PFN_vkResetCommandPool>(
+            g_compositor_tracker.get_device_proc_addr(device, pName));
+    return reinterpret_cast<PFN_vkVoidFunction>(TrackedResetCommandPool);
+  }
+  return g_compositor_tracker.get_device_proc_addr(device, pName);
+}
+
+PFN_vkVoidFunction TrackedGetInstanceProcAddr(VkInstance instance,
+                                              const char* pName) {
+  FML_DCHECK(g_compositor_tracker.get_instance_proc_addr != nullptr);
+  if (pName != nullptr && std::strcmp(pName, "vkGetDeviceProcAddr") == 0) {
+    g_compositor_tracker.get_device_proc_addr =
+        reinterpret_cast<PFN_vkGetDeviceProcAddr>(
+            g_compositor_tracker.get_instance_proc_addr(instance, pName));
+    return reinterpret_cast<PFN_vkVoidFunction>(TrackedGetDeviceProcAddr);
+  }
+  if (pName != nullptr && std::strcmp(pName, "vkCreateImage") == 0) {
+    g_compositor_tracker.create_image_proc_addr =
+        reinterpret_cast<PFN_vkCreateImage>(
+            g_compositor_tracker.get_instance_proc_addr(instance, pName));
+    return reinterpret_cast<PFN_vkVoidFunction>(TrackedCreateImage);
+  }
+  if (pName != nullptr && std::strcmp(pName, "vkResetCommandPool") == 0) {
+    g_compositor_tracker.reset_command_pool_proc_addr =
+        reinterpret_cast<PFN_vkResetCommandPool>(
+            g_compositor_tracker.get_instance_proc_addr(instance, pName));
+    return reinterpret_cast<PFN_vkVoidFunction>(TrackedResetCommandPool);
+  }
+  return g_compositor_tracker.get_instance_proc_addr(instance, pName);
+}
+
+}  // namespace
+
+TEST_F(EmbedderTest,
+       VulkanCompositorImpellerReusesTransientAttachmentsAndRecyclesPools) {
+  // 800x600 test surface dimensions matching kWidth/kHeight in this file.
+  constexpr int kSurfaceWidth = 800;
+  constexpr int kSurfaceHeight = 600;
+  // Render 4 frames with avoid_backing_store_cache=true so
+  // MakeRenderTargetFromBackingStoreImpeller is invoked on every frame.
+  constexpr int kRenderedFrames = 4;
+  // Exactly 2 4x MSAA images (1 color + 1 depth-stencil) should be allocated
+  // and reused across all frames of the same size and format.
+  constexpr uint32_t kExpectedMsaaAttachmentAllocations = 2u;
+
+  g_compositor_tracker.Reset(kSurfaceWidth, kSurfaceHeight);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  context.SetVulkanInstanceProcAddressCallback(
+      [](void* user_data, FlutterVulkanInstanceHandle instance,
+         const char* name) -> void* {
+        if (name != nullptr &&
+            std::strcmp(name, "vkGetInstanceProcAddr") == 0) {
+          g_compositor_tracker.get_instance_proc_addr =
+              reinterpret_cast<PFN_vkGetInstanceProcAddr>(
+                  EmbedderTestContextVulkan::InstanceProcAddr(user_data,
+                                                              instance, name));
+          return reinterpret_cast<void*>(TrackedGetInstanceProcAddr);
+        }
+        return EmbedderTestContextVulkan::InstanceProcAddr(user_data, instance,
+                                                           name);
+      });
+
+  EmbedderConfigBuilder builder(context);
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetSurface(DlISize(kSurfaceWidth, kSurfaceHeight));
+  builder.SetCompositor(/*avoid_backing_store_cache=*/true);
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage);
+  builder.SetDartEntrypoint("render_gradient");
+
+  auto first_scene_future = context.GetNextSceneImage();
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  for (int i = 0; i < kRenderedFrames; ++i) {
+    std::future<sk_sp<SkImage>> rendered_scene_future =
+        (i == 0) ? std::move(first_scene_future) : context.GetNextSceneImage();
+
+    FlutterWindowMetricsEvent event = {};
+    event.struct_size = sizeof(event);
+    event.width = kSurfaceWidth;
+    event.height = kSurfaceHeight;
+    event.pixel_ratio = 1.0;
+    ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+              kSuccess);
+
+    auto rendered_scene = rendered_scene_future.get();
+    ASSERT_NE(rendered_scene, nullptr);
+    EXPECT_EQ(rendered_scene->width(), kSurfaceWidth);
+    EXPECT_EQ(rendered_scene->height(), kSurfaceHeight);
+  }
+
+  engine.reset();
+
+  EXPECT_EQ(g_compositor_tracker.msaa_image_create_count.load(),
+            kExpectedMsaaAttachmentAllocations);
+  EXPECT_GE(g_compositor_tracker.command_pool_reset_count.load(),
+            static_cast<uint32_t>(kRenderedFrames));
+}
+
 TEST_F(EmbedderTest, CreateInvalidBackingstoreVulkanImage) {
   fml::AutoResetWaitableEvent latch;
   auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();

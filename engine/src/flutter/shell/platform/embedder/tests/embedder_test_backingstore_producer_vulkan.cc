@@ -22,9 +22,10 @@ struct UserData {
 
 EmbedderTestBackingStoreProducerVulkan::EmbedderTestBackingStoreProducerVulkan(
     sk_sp<GrDirectContext> context,
-    RenderTargetType type)
+    RenderTargetType type,
+    fml::RefPtr<TestVulkanContext> test_vulkan_context)
     : EmbedderTestBackingStoreProducer(std::move(context), type),
-      test_vulkan_context_(nullptr) {}
+      test_vulkan_context_(std::move(test_vulkan_context)) {}
 
 EmbedderTestBackingStoreProducerVulkan::
     ~EmbedderTestBackingStoreProducerVulkan() = default;
