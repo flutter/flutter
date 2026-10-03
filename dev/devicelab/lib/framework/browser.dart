@@ -270,10 +270,131 @@ class Chrome {
     await _debugConnection?.page.reload(ignoreCache: ignoreCache);
   }
 
+  StreamSubscription<WipEvent>? _pageEventSubscription;
+
+  /// Logs page navigations, load events, uncaught JS exceptions, and renderer
+  /// crashes, so that a page load that never completes can be diagnosed from
+  /// the logs.
+  ///
+  /// This enables the Page, Runtime, and Inspector DevTools domains, which adds
+  /// instrumentation overhead to the page. Only use it for uncalibrated runs.
+  Future<void> logPageEvents() async {
+    final WipConnection debugConnection = _debugConnection!;
+    _pageEventSubscription = debugConnection.onNotification.listen((WipEvent event) {
+      final Map<String, dynamic> params = event.params ?? const <String, dynamic>{};
+      final String? message = switch (event.method) {
+        'Page.frameNavigated' => 'navigated to ${(params['frame'] as Map<String, dynamic>)['url']}',
+        'Page.loadEventFired' => 'load event fired',
+        'Runtime.consoleAPICalled' =>
+          'console.${params['type']}: ${_describeConsoleArgs(params['args'] as List<dynamic>)}',
+        'Runtime.exceptionThrown' =>
+          'uncaught exception: ${_describeException(params['exceptionDetails'] as Map<String, dynamic>)}',
+        'Log.entryAdded' => _describeLogEntry(params['entry'] as Map<String, dynamic>),
+        'Inspector.targetCrashed' => 'renderer process crashed',
+        'Inspector.detached' => 'DevTools session detached: ${params['reason']}',
+        _ => null,
+      };
+      if (message != null) {
+        print('[CHROME PAGE] $message');
+      }
+    });
+    for (final domain in <String>['Page', 'Runtime', 'Log', 'Inspector']) {
+      await debugConnection.sendCommand('$domain.enable');
+    }
+    // DDC loads 600+ library scripts per reload, which overflows the default
+    // 250-entry Resource Timing buffer.
+    await debugConnection.sendCommand('Page.addScriptToEvaluateOnNewDocument', <String, dynamic>{
+      'source': 'performance.setResourceTimingBufferSize(2000);',
+    });
+  }
+
+  static String _describeConsoleArgs(List<dynamic> args) {
+    return args
+        .map((dynamic arg) {
+          final map = arg as Map<String, dynamic>;
+          return '${map['value'] ?? map['description'] ?? map['type']}';
+        })
+        .join(' ');
+  }
+
+  static String _describeException(Map<String, dynamic> exceptionDetails) {
+    final exception = exceptionDetails['exception'] as Map<String, dynamic>?;
+    // The description of a JS Error includes its stack trace.
+    return '${exception?['description'] ?? exceptionDetails['text']}';
+  }
+
+  static String _describeLogEntry(Map<String, dynamic> entry) {
+    final url = entry['url'] as String?;
+    final suffix = url != null && url.isNotEmpty ? ' ($url)' : '';
+    return 'log.${entry['level']}: ${entry['text']}$suffix';
+  }
+
+  /// Describes the state of the page, for diagnosing a stalled page load.
+  ///
+  /// Distinguishes three cases: the page responds and its timers fire (the
+  /// app is idle, e.g. waiting on a request); the page responds but timers
+  /// don't fire (JavaScript is paused in the debugger, which DWDS keeps
+  /// attached under `flutter run`); the page doesn't respond at all (the
+  /// renderer main thread is blocked).
+  Future<String> describeState() async {
+    const timeout = Duration(seconds: 10);
+    Future<String> evaluate(String expression, {bool awaitPromise = false}) async {
+      final WipResponse response = await _debugConnection!
+          .sendCommand('Runtime.evaluate', <String, dynamic>{
+            'expression': expression,
+            'returnByValue': true,
+            'awaitPromise': awaitPromise,
+          })
+          .timeout(timeout);
+      return '${(response.result!['result'] as Map<String, dynamic>)['value']}';
+    }
+
+    const pageState = r'''
+(() => {
+  const loaded = new Set(performance.getEntriesByType('resource').map((e) => e.name));
+  const scripts = document.head ? Array.from(document.head.querySelectorAll('script')) : [];
+  const loader = window.$dartLoader?.loader;
+  return JSON.stringify({
+    href: location.href,
+    readyState: document.readyState,
+    msSinceNavigationStart: Math.round(performance.now()),
+    dwdsInitialized: Boolean(window.$dwdsInitialized),
+    dartMainExecuted: Boolean(window.$dartMainExecuted),
+    dartAppInstanceId: window.$dartAppInstanceId ?? null,
+    resourceCount: loaded.size,
+    scriptTagCount: scripts.length,
+    pendingScripts: scripts.map((s) => s.src).filter((src) => src && !loaded.has(src)),
+    lastLoadedResources: performance.getEntriesByType('resource').slice(-5).map((e) => e.name),
+    loader: loader ? {
+      attemptCount: loader.attemptCount,
+      numToLoad: loader.numToLoad,
+      numLoaded: loader.numLoaded,
+      numFailed: loader.numFailed,
+      queueLength: loader.queue.length,
+    } : null,
+  });
+})()''';
+    final lines = <String>[];
+    try {
+      lines.add('Page: ${await evaluate(pageState)}');
+      await evaluate('new Promise((resolve) => setTimeout(resolve, 100))', awaitPromise: true);
+      lines.add('Event loop: running.');
+    } on TimeoutException {
+      lines.add(
+        lines.isEmpty
+            ? 'Page did not respond within ${timeout.inSeconds}s; the renderer main thread is blocked.'
+            : 'Event loop: a 100ms timer did not fire within ${timeout.inSeconds}s; '
+                  'JavaScript is likely paused in the debugger.',
+      );
+    }
+    return lines.join('\n');
+  }
+
   /// Disconnects from the Chrome process without killing it.
   void disconnect() {
     _isStopped = true;
     _tracingSubscription?.cancel();
+    _pageEventSubscription?.cancel();
   }
 
   /// Stops the Chrome process.

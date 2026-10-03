@@ -181,6 +181,7 @@ class WebDevFS implements DevFS {
             firstConnection.complete(ConnectionResult(appConnection, debugConnection, vmService));
           }
         } on Exception catch (error, stackTrace) {
+          logger.printError('Error while waiting for debug connection: $error\n$stackTrace');
           if (!firstConnection.isCompleted) {
             firstConnection.completeError(error, stackTrace);
           }
