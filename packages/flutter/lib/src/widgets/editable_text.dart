@@ -63,6 +63,7 @@ import 'text_editing_intents.dart';
 import 'text_selection.dart';
 import 'text_selection_toolbar_anchors.dart';
 import 'ticker_provider.dart';
+import 'transitions.dart';
 import 'undo_history.dart';
 import 'view.dart';
 import 'widget_span.dart';
@@ -2588,6 +2589,38 @@ class EditableTextState extends State<EditableText>
       ? _WebClipboardStatusNotifier()
       : ClipboardStatusNotifier();
 
+  // Whether this state is currently listening to [clipboardStatus].
+  //
+  // The clipboard status is only used to decide whether to advertise a paste
+  // action, which only happens while the field has focus and can be pasted
+  // into. Listening lazily avoids probing the clipboard (which can surface
+  // platform privacy notices) when a text field is merely built or when the
+  // app resumes while the field is not focused.
+  bool _listeningToClipboardStatus = false;
+
+  bool get _shouldListenToClipboardStatus =>
+      _hasFocus && widget.selectionEnabled && !widget.readOnly;
+
+  void _updateClipboardStatusListening() {
+    if (_shouldListenToClipboardStatus == _listeningToClipboardStatus) {
+      return;
+    }
+    if (_shouldListenToClipboardStatus) {
+      _listeningToClipboardStatus = true;
+      // Adding the first listener checks the clipboard if the status is still
+      // unknown. If a previous status is already cached, refresh it explicitly
+      // since the clipboard may have changed while the field was not focused.
+      final wasUnknown = clipboardStatus.value == ClipboardStatus.unknown;
+      clipboardStatus.addListener(_onChangedClipboardStatus);
+      if (!wasUnknown) {
+        clipboardStatus.update();
+      }
+    } else {
+      _listeningToClipboardStatus = false;
+      clipboardStatus.removeListener(_onChangedClipboardStatus);
+    }
+  }
+
   /// Detects whether the Live Text input is enabled.
   ///
   /// See also:
@@ -3372,9 +3405,9 @@ class EditableTextState extends State<EditableText>
   void initState() {
     super.initState();
     _liveTextInputStatus?.addListener(_onChangedLiveTextInputStatus);
-    clipboardStatus.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
+    _updateClipboardStatusListening();
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(
       widget.spellCheckConfiguration,
@@ -3633,10 +3666,11 @@ class EditableTextState extends State<EditableText>
     if (widget.showCursor != oldWidget.showCursor) {
       _startOrStopCursorTimerIfNeeded();
     }
+    _updateClipboardStatusListening();
     final bool canPaste = widget.selectionControls is TextSelectionHandleControls
         ? pasteEnabled
         : widget.selectionControls?.canPaste(this) ?? false;
-    if (widget.selectionEnabled && pasteEnabled && canPaste) {
+    if (_listeningToClipboardStatus && pasteEnabled && canPaste) {
       clipboardStatus.update();
     }
   }
@@ -4529,7 +4563,13 @@ class EditableTextState extends State<EditableText>
   // the TextSelectionOverlay means the overlay never has to be recreated when
   // only the builder closure changes.
   Widget _contextMenuBuilder(BuildContext context) {
-    return widget.contextMenuBuilder!(context, this);
+    // The clipboard status may still be resolving when the menu is first
+    // shown, since it is only checked once the field is focused. Rebuild the
+    // menu when the status changes so the paste button reflects the result.
+    return ListenableBuilder(
+      listenable: clipboardStatus,
+      builder: (BuildContext context, Widget? _) => widget.contextMenuBuilder!(context, this),
+    );
   }
 
   TextSelectionOverlay _createSelectionOverlay() {
@@ -5005,6 +5045,7 @@ class EditableTextState extends State<EditableText>
     _openOrCloseInputConnectionIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
+    _updateClipboardStatusListening();
     if (_hasFocus) {
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance.addObserver(this);
