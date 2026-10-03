@@ -182,4 +182,108 @@ Future<void> testMain() async {
     expect(lines[1].descent, closeTo(raw.descent, 1e-3));
     expect(paragraph.height, closeTo(_scaledHeight + scaled.ascent + raw.descent, 1e-3));
   });
+
+  test('TextHeightBehavior is a no-op when forceStrutHeight is set', () {
+    // The strut is 1.0 * 10 = 10 tall; the text is four times bigger
+    final strutStyle = ui.StrutStyle(
+      fontFamily: 'Arial',
+      fontSize: 10,
+      height: 1.0,
+      forceStrutHeight: true,
+    );
+    final ui.Paragraph withoutBehavior = _layout(
+      _style(fontSize: 40, strutStyle: strutStyle),
+      'Hello',
+    );
+    final ui.Paragraph withBehavior = _layout(
+      _style(fontSize: 40, strutStyle: strutStyle, textHeightBehavior: _noFirstAscentNoLastDescent),
+      'Hello',
+    );
+    expect(withoutBehavior.height, closeTo(10.0, 1e-3));
+    expect(withBehavior.height, closeTo(withoutBehavior.height, 1e-3));
+
+    final ui.LineMetrics withoutBehaviorMetrics = withoutBehavior.computeLineMetrics().single;
+    final ui.LineMetrics withBehaviorMetrics = withBehavior.computeLineMetrics().single;
+    expect(withBehaviorMetrics.ascent, closeTo(withoutBehaviorMetrics.ascent, 1e-3));
+    expect(withBehaviorMetrics.descent, closeTo(withoutBehaviorMetrics.descent, 1e-3));
+
+    // Every line is exactly the strut
+    final ui.Paragraph twoLines = _layout(
+      _style(fontSize: 40, strutStyle: strutStyle, textHeightBehavior: _noFirstAscentNoLastDescent),
+      'Hello\nWorld',
+    );
+    expect(twoLines.height, closeTo(20.0, 1e-3));
+  });
+
+  test('StrutStyle.leading is kept when TextHeightBehavior reverts to unscaled metrics', () {
+    // The strut is 1.0 * 20 = 20 of font height plus 1.5 * 20 = 30 of leading (split evenly
+    // above and below), 50 in total
+    final forcedStrut = ui.StrutStyle(
+      fontFamily: 'Arial',
+      fontSize: _fontSize,
+      height: 1.0,
+      leading: 1.5,
+      forceStrutHeight: true,
+    );
+    final ui.Paragraph forcedWithoutBehavior = _layout(_style(strutStyle: forcedStrut), 'Hello');
+    final ui.Paragraph forcedWithBehavior = _layout(
+      _style(strutStyle: forcedStrut, textHeightBehavior: _noFirstAscentNoLastDescent),
+      'Hello',
+    );
+    expect(forcedWithoutBehavior.height, closeTo(50.0, 1e-3));
+    expect(forcedWithBehavior.height, closeTo(50.0, 1e-3));
+    expect(
+      forcedWithBehavior.alphabeticBaseline,
+      closeTo(forcedWithoutBehavior.alphabeticBaseline, 1e-3),
+    );
+
+    // Without forceStrutHeight the strut (leading included) is still the minimum line height, so
+    // the smaller text doesn't shrink the line
+    final strut = ui.StrutStyle(
+      fontFamily: 'Arial',
+      fontSize: _fontSize,
+      height: 1.0,
+      leading: 1.5,
+    );
+    final ui.Paragraph small = _layout(
+      _style(fontSize: 10, strutStyle: strut, textHeightBehavior: _noFirstAscentNoLastDescent),
+      'Hello',
+    );
+    expect(small.height, closeTo(50.0, 1e-3));
+  });
+
+  test('Placeholder and text respect StrutStyle leading and forceStrutHeight', () {
+    // StrutStyle.leading adds leading * fontSize (1.5 * 20 = 30.0) to the scaled strut height (20.0)
+    final strutLeadingBuilder = ui.ParagraphBuilder(
+      ui.ParagraphStyle(
+        fontFamily: 'Arial',
+        fontSize: 20,
+        strutStyle: ui.StrutStyle(
+          fontFamily: 'Arial',
+          fontSize: 20,
+          height: 1.0,
+          leading: 1.5,
+          forceStrutHeight: true,
+        ),
+      ),
+    )..addText('Hello');
+    final ui.Paragraph strutLeadingParagraph = strutLeadingBuilder.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+    expect(strutLeadingParagraph.height, closeTo(50.0, 1e-3));
+
+    // When forceStrutHeight is true, a taller placeholder does not expand the line height beyond the strut
+    final placeholderForceStrutBuilder = ui.ParagraphBuilder(
+      ui.ParagraphStyle(
+        strutStyle: ui.StrutStyle(
+          fontFamily: 'Arial',
+          fontSize: 10,
+          height: 10.0,
+          forceStrutHeight: true,
+        ),
+      ),
+    )..addPlaceholder(1000, 1000, ui.PlaceholderAlignment.bottom);
+    final ui.Paragraph placeholderForceStrut = placeholderForceStrutBuilder.build()
+      ..layout(const ui.ParagraphConstraints(width: 2000));
+    expect(placeholderForceStrut.height, closeTo(100.0, 1e-3));
+  });
 }
