@@ -32,13 +32,8 @@ class CanvasKitRenderer extends Renderer {
   FlutterFontCollection get fontCollection => _fontCollection;
 
   static Rasterizer _createRasterizer() {
-    if (configuration.canvasKitForceMultiSurfaceRasterizer || isSafari || isFirefox) {
-      return MultiSurfaceRasterizer(
-        (OnscreenCanvasProvider canvasProvider) => CkOnscreenSurface(canvasProvider),
-      );
-    }
-    return OffscreenCanvasRasterizer(
-      (OffscreenCanvasProvider canvasProvider) => CkOffscreenSurface(canvasProvider),
+    return SingleSurfaceRasterizer(
+      (OnscreenCanvasProvider canvasProvider) => CkOnscreenSurface(canvasProvider),
     );
   }
 

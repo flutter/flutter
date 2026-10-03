@@ -43,6 +43,12 @@ class TestRasterizer extends ViewRasterizer {
       await rasterizeCompleter!.future;
     }
   }
+
+  @override
+  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
+    await prepareToDraw();
+    await rasterize(<DisplayCanvas>[], <ui.Picture>[], recorder);
+  }
 }
 
 class FakeDisplayCanvas extends DisplayCanvas {
