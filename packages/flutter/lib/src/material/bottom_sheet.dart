@@ -95,9 +95,11 @@ class BottomSheet extends StatefulWidget {
     this.shape,
     this.clipBehavior,
     this.constraints,
+    this.bottomInset = 0.0,
     required this.onClosing,
     required this.builder,
-  }) : assert(elevation == null || elevation >= 0.0);
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(bottomInset >= 0.0 && bottomInset < double.infinity);
 
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
@@ -234,6 +236,23 @@ class BottomSheet extends StatefulWidget {
   /// the available space. Otherwise, no alignment is applied.
   final BoxConstraints? constraints;
 
+  /// Additional height below the sheet's layout bounds painted by its
+  /// [Material] surface.
+  ///
+  /// When non-zero, the sheet's [Material] background, surface tint, and
+  /// [shape] extend [bottomInset] logical pixels below the bottom edge of the
+  /// sheet, while the layout size, height [constraints] available to [builder],
+  /// drag-to-dismiss thresholds, hit testing, and accessibility bounds remain
+  /// restricted to the logical sheet above the inset.
+  ///
+  /// [Scaffold] sets this for persistent bottom sheets when avoiding the
+  /// onscreen keyboard. Custom presentations can also use this to extend a
+  /// bottom sheet's surface behind system insets (such as
+  /// [MediaQueryData.viewInsets] or [MediaQueryData.viewPadding]).
+  ///
+  /// Defaults to 0.0. Must be finite and non-negative.
+  final double bottomInset;
+
   @override
   State<BottomSheet> createState() => _BottomSheetState();
 
@@ -350,6 +369,7 @@ class _BottomSheetState extends State<BottomSheet> {
     final BottomSheetThemeData defaults = useMaterial3
         ? _BottomSheetDefaultsM3(context)
         : const BottomSheetThemeData();
+    final double bottomInset = widget.bottomInset;
     final BoxConstraints? constraints =
         widget.constraints ?? bottomSheetTheme.constraints ?? defaults.constraints;
     final Color? color =
@@ -386,28 +406,45 @@ class _BottomSheetState extends State<BottomSheet> {
       }
     }
 
-    Widget bottomSheet = Material(
+    final Widget content = NotificationListener<DraggableScrollableNotification>(
+      onNotification: extentChanged,
+      child: !showDragHandle
+          ? widget.builder(context)
+          : Stack(
+              alignment: Alignment.topCenter,
+              children: <Widget>[
+                dragHandle!,
+                Padding(
+                  padding: const EdgeInsets.only(top: kMinInteractiveDimension),
+                  child: widget.builder(context),
+                ),
+              ],
+            ),
+    );
+
+    Widget bottomSheet = _BottomSheetSurface(
       key: _childKey,
-      color: color,
-      elevation: elevation,
-      surfaceTintColor: surfaceTintColor,
-      shadowColor: shadowColor,
-      shape: shape,
-      clipBehavior: clipBehavior,
-      child: NotificationListener<DraggableScrollableNotification>(
-        onNotification: extentChanged,
-        child: !showDragHandle
-            ? widget.builder(context)
-            : Stack(
-                alignment: Alignment.topCenter,
-                children: <Widget>[
-                  dragHandle!,
-                  Padding(
-                    padding: const EdgeInsets.only(top: kMinInteractiveDimension),
-                    child: widget.builder(context),
-                  ),
-                ],
-              ),
+      bottom: bottomInset,
+      child: Material(
+        color: color,
+        elevation: elevation,
+        surfaceTintColor: surfaceTintColor,
+        shadowColor: shadowColor,
+        shape: shape,
+        clipBehavior: clipBehavior,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: bottomInset),
+          child: _BottomSheetContentClip(
+            enabled: bottomInset > 0.0,
+            animation: widget.animationController,
+            // Ink paints on its nearest Material. Keep that canvas inside the
+            // content clip so ink cannot bleed onto the extended background.
+            child: _BottomSheetContentMaterial(
+              color: color ?? Theme.of(context).canvasColor,
+              child: content,
+            ),
+          ),
+        ),
       ),
     );
 
@@ -427,6 +464,294 @@ class _BottomSheetState extends State<BottomSheet> {
             onVerticalDragEnd: _handleDragEnd,
             child: bottomSheet,
           );
+  }
+}
+
+class _BottomSheetContentMaterial extends Material {
+  const _BottomSheetContentMaterial({super.color, super.child})
+    : super(type: MaterialType.transparency);
+}
+
+// During dismissal an enclosing Align (such as in Scaffold's persistent bottom
+// sheet) may shrink the visible height of the sheet above the bottomInset edge.
+// Clip the sheet's contents at that visible height while allowing the Material
+// surface to continue into the bottomInset region underneath it.
+class _BottomSheetContentClip extends SingleChildRenderObjectWidget {
+  const _BottomSheetContentClip({
+    required this.enabled,
+    required this.animation,
+    required super.child,
+  });
+
+  final bool enabled;
+  final Animation<double>? animation;
+
+  @override
+  _RenderBottomSheetContentClip createRenderObject(BuildContext context) =>
+      _RenderBottomSheetContentClip(enabled, animation);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderBottomSheetContentClip renderObject) {
+    renderObject
+      ..enabled = enabled
+      ..animation = animation
+      .._handleClipChange();
+  }
+}
+
+class _RenderBottomSheetContentClip extends RenderProxyBox {
+  _RenderBottomSheetContentClip(this._enabled, this._animation);
+
+  bool get enabled => _enabled;
+  bool _enabled;
+  set enabled(bool value) {
+    if (_enabled == value) {
+      return;
+    }
+    _enabled = value;
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
+  Animation<double>? get animation => _animation;
+  Animation<double>? _animation;
+  set animation(Animation<double>? value) {
+    if (_animation == value) {
+      return;
+    }
+    if (attached) {
+      _animation?.removeListener(_handleAnimationChanged);
+      value?.addListener(_handleAnimationChanged);
+    }
+    _animation = value;
+    _handleAnimationChanged();
+  }
+
+  Rect? _lastClip;
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _animation?.addListener(_handleAnimationChanged);
+  }
+
+  @override
+  void detach() {
+    _animation?.removeListener(_handleAnimationChanged);
+    super.detach();
+  }
+
+  void _handleClipChange() {
+    if (_enabled) {
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
+
+  void _handleAnimationChanged() {
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+    _findSurface()?._handleClipChange();
+  }
+
+  _RenderBottomSheetSurface? _findSurface() {
+    for (RenderObject? node = parent; node != null; node = node.parent) {
+      if (node is _RenderBottomSheetSurface) {
+        return node;
+      }
+    }
+    return null;
+  }
+
+  Rect _clipRect() {
+    final _RenderBottomSheetSurface? surface = _findSurface();
+    final double visibleHeight = surface != null
+        ? math.min(size.height, surface._visibleHeight())
+        : size.height;
+    return Rect.fromLTWH(0.0, 0.0, size.width, visibleHeight);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (!_enabled) {
+      layer = null;
+      _lastClip = null;
+      super.paint(context, offset);
+      return;
+    }
+    final Rect clip = _clipRect();
+    if (_lastClip != clip) {
+      _lastClip = clip;
+      markNeedsSemanticsUpdate();
+    }
+    if (clip.height < size.height) {
+      layer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        clip,
+        super.paint,
+        oldLayer: layer as ClipRectLayer?,
+      );
+    } else {
+      layer = null;
+      super.paint(context, offset);
+    }
+  }
+
+  @override
+  Rect? describeApproximatePaintClip(RenderObject child) =>
+      _enabled ? _clipRect() : super.describeApproximatePaintClip(child);
+
+  @override
+  Rect? describeSemanticsClip(RenderBox? child) =>
+      _enabled ? _clipRect() : super.describeSemanticsClip(child);
+}
+
+// The Material is taller than the logical sheet. Its padding restores the
+// original content constraints, while this box preserves layout, drag distances,
+// hit testing and accessibility bounds. Only the decoration overflows.
+class _BottomSheetSurface extends SingleChildRenderObjectWidget {
+  const _BottomSheetSurface({super.key, required this.bottom, required super.child});
+
+  final double bottom;
+
+  @override
+  _RenderBottomSheetSurface createRenderObject(BuildContext context) =>
+      _RenderBottomSheetSurface(bottom);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderBottomSheetSurface renderObject) {
+    renderObject
+      ..bottom = bottom
+      .._handleClipChange();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('bottom', bottom, defaultValue: 0.0));
+  }
+}
+
+class _RenderBottomSheetSurface extends RenderProxyBox {
+  _RenderBottomSheetSurface(this._bottom);
+
+  double get bottom => _bottom;
+  double _bottom;
+  set bottom(double value) {
+    if (_bottom == value) {
+      return;
+    }
+    _bottom = value;
+    markNeedsLayout();
+    markNeedsSemanticsUpdate();
+  }
+
+  double? _lastVisibleHeight;
+
+  void _handleClipChange() {
+    if (_bottom > 0.0) {
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
+
+  double _visibleHeight() {
+    double visibleHeight = size.height;
+    var offsetY = 0.0;
+    for (RenderObject? node = this; node != null; node = node.parent) {
+      final RenderObject? parentNode = node.parent;
+      if (parentNode is! RenderProxyBox && parentNode is! RenderShiftedBox) {
+        break;
+      }
+      final Object? parentData = node.parentData;
+      if (parentData is BoxParentData) {
+        offsetY += parentData.offset.dy;
+      }
+      if (parentNode is RenderPositionedBox &&
+          parentNode.heightFactor != null &&
+          parentNode.heightFactor! < 1.0) {
+        visibleHeight = clampDouble(parentNode.size.height - offsetY, 0.0, visibleHeight);
+      }
+    }
+    return visibleHeight;
+  }
+
+  BoxConstraints _surfaceConstraints(BoxConstraints constraints) => constraints.copyWith(
+    minHeight: constraints.minHeight + _bottom,
+    maxHeight: constraints.maxHeight + _bottom,
+  );
+
+  Size _contentSize(BoxConstraints constraints, Size surfaceSize) =>
+      constraints.constrain(Size(surfaceSize.width, math.max(0.0, surfaceSize.height - _bottom)));
+
+  @override
+  double computeMinIntrinsicWidth(double height) => child!.getMinIntrinsicWidth(height + _bottom);
+
+  @override
+  double computeMaxIntrinsicWidth(double height) => child!.getMaxIntrinsicWidth(height + _bottom);
+
+  @override
+  double computeMinIntrinsicHeight(double width) =>
+      math.max(0.0, child!.getMinIntrinsicHeight(width) - _bottom);
+
+  @override
+  double computeMaxIntrinsicHeight(double width) =>
+      math.max(0.0, child!.getMaxIntrinsicHeight(width) - _bottom);
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) =>
+      child!.getDryBaseline(_surfaceConstraints(constraints), baseline);
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) =>
+      _contentSize(constraints, child!.getDryLayout(_surfaceConstraints(constraints)));
+
+  @override
+  void performLayout() {
+    child!.layout(_surfaceConstraints(constraints), parentUsesSize: true);
+    size = _contentSize(constraints, child!.size);
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (_bottom > 0.0 && position.dy >= _visibleHeight()) {
+      return false;
+    }
+    return super.hitTest(result, position: position);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_bottom > 0.0) {
+      final double visibleHeight = _visibleHeight();
+      if (_lastVisibleHeight != visibleHeight) {
+        _lastVisibleHeight = visibleHeight;
+        markNeedsSemanticsUpdate();
+      }
+    } else {
+      _lastVisibleHeight = null;
+    }
+    super.paint(context, offset);
+  }
+
+  @override
+  Rect get paintBounds => super.paintBounds.expandToInclude(child!.paintBounds);
+
+  @override
+  Rect? describeApproximatePaintClip(RenderObject child) => _bottom > 0.0
+      ? Offset.zero & Size(size.width, _visibleHeight())
+      : super.describeApproximatePaintClip(child);
+
+  @override
+  Rect? describeSemanticsClip(RenderBox? child) => _bottom > 0.0
+      ? Offset.zero & Size(size.width, _visibleHeight())
+      : super.describeSemanticsClip(child);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('bottom', bottom, defaultValue: 0.0));
   }
 }
 

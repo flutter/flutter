@@ -6,7 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -3257,6 +3257,212 @@ void main() {
     // approximately the same as the last dragged position, ensuring the
     // animation continues from the current visual offset.
     expect(yAfterUp, closeTo(yBeforeUp, 0.1));
+  });
+
+  group('BottomSheet.bottomInset', () {
+    testWidgets(
+      'extends Material surface without enlarging logical layout, hit test, or semantics',
+      (WidgetTester tester) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+        final AnimationController controller = BottomSheet.createAnimationController(tester)
+          ..value = 1.0;
+        addTearDown(controller.dispose);
+
+        const contentKey = ValueKey<String>('sheet content');
+        Color? builderMaterialColor;
+        var taps = 0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Align(
+              alignment: Alignment.topCenter,
+              heightFactor: 1.0,
+              child: Semantics(
+                container: true,
+                child: BottomSheet(
+                  animationController: controller,
+                  bottomInset: 120.0,
+                  backgroundColor: Colors.red,
+                  constraints: const BoxConstraints(maxWidth: 300.0, maxHeight: 150.0),
+                  onClosing: () {},
+                  builder: (BuildContext context) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        builderMaterialColor = Material.of(context).color;
+                        return SizedBox(
+                          key: contentKey,
+                          width: double.infinity,
+                          height: 100.0,
+                          child: GestureDetector(onTap: () => taps++, child: const Text('Action')),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(builderMaterialColor, Colors.red);
+        expect(tester.getSize(find.byKey(contentKey)), const Size(300.0, 100.0));
+        expect(tester.getSize(find.byType(BottomSheet)), const Size(800.0, 100.0));
+        final Finder outerMaterial = find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.byType(Material),
+        );
+        expect(outerMaterial, findsOneWidget);
+        expect(tester.getSize(outerMaterial), const Size(300.0, 220.0));
+        expect(tester.getSemantics(find.byType(BottomSheet)).rect.height, 100.0);
+
+        // Taps in the extended bottomInset area (y = 150) do not hit the sheet.
+        await tester.tapAt(const Offset(400.0, 150.0));
+        expect(taps, 0);
+
+        // Taps in the logical sheet area (y = 50) hit the sheet content.
+        await tester.tapAt(const Offset(400.0, 50.0));
+        expect(taps, 1);
+        semantics.dispose();
+      },
+    );
+
+    testWidgets(
+      'reclips content and semantics when enclosing Align heightFactor changes without animationController',
+      (WidgetTester tester) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+        try {
+          Widget buildWithHeightFactor(double heightFactor, Alignment alignment) {
+            return MaterialApp(
+              home: Scaffold(
+                body: Align(
+                  alignment: alignment,
+                  heightFactor: heightFactor,
+                  child: RepaintBoundary(
+                    child: Semantics(
+                      container: true,
+                      child: BottomSheet(
+                        enableDrag: false,
+                        bottomInset: 120.0,
+                        backgroundColor: Colors.red,
+                        onClosing: () {},
+                        builder: (BuildContext context) => Semantics(
+                          container: true,
+                          child: const SizedBox(
+                            width: 300.0,
+                            height: 100.0,
+                            child: Text('Content'),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildWithHeightFactor(1.0, Alignment.topCenter));
+          expect(tester.getSemantics(find.text('Content')).rect.height, 100.0);
+
+          await tester.pumpWidget(buildWithHeightFactor(0.4, Alignment.topCenter));
+          expect(tester.getSemantics(find.text('Content')).rect.height, 40.0);
+          final RenderBox surfaceBox = tester.renderObject(find.byType(BottomSheet));
+          final hitResult = BoxHitTestResult();
+          expect(surfaceBox.hitTest(hitResult, position: const Offset(400.0, 50.0)), isFalse);
+          expect(surfaceBox.hitTest(hitResult, position: const Offset(400.0, 20.0)), isTrue);
+
+          // Bottom-aligned heightFactor < 1.0 does not shift the bottom edge into bottomInset.
+          await tester.pumpWidget(buildWithHeightFactor(0.4, Alignment.bottomCenter));
+          expect(tester.getSemantics(find.text('Content')).rect.height, 100.0);
+        } finally {
+          semantics.dispose();
+        }
+      },
+    );
+
+    testWidgets('Material 2 default canvasColor is exposed via Material.of(context).color', (
+      WidgetTester tester,
+    ) async {
+      Color? builderMaterialColor;
+      final m2Theme = ThemeData(useMaterial3: false, canvasColor: Colors.amber);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: m2Theme,
+          home: Scaffold(
+            body: BottomSheet(
+              enableDrag: false,
+              bottomInset: 100.0,
+              onClosing: () {},
+              builder: (BuildContext context) {
+                return Builder(
+                  builder: (BuildContext innerContext) {
+                    builderMaterialColor = Material.of(innerContext).color;
+                    return const SizedBox(height: 80.0);
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(builderMaterialColor, Colors.amber);
+    });
+
+    testWidgets('preserves child state when bottomInset toggles between 0.0 and non-zero', (
+      WidgetTester tester,
+    ) async {
+      final focusNode = FocusNode();
+      final controller = TextEditingController(text: 'hello');
+      addTearDown(focusNode.dispose);
+      addTearDown(controller.dispose);
+
+      Widget buildSheet(double bottomInset) {
+        return MaterialApp(
+          home: Scaffold(
+            body: BottomSheet(
+              enableDrag: false,
+              bottomInset: bottomInset,
+              onClosing: () {},
+              builder: (BuildContext context) =>
+                  TextField(focusNode: focusNode, controller: controller),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildSheet(0.0));
+      final EditableTextState initialState = tester.state(find.byType(EditableText));
+
+      await tester.pumpWidget(buildSheet(100.0));
+      expect(tester.state(find.byType(EditableText)), same(initialState));
+
+      await tester.pumpWidget(buildSheet(0.0));
+      expect(tester.state(find.byType(EditableText)), same(initialState));
+    });
+
+    test('asserts bottomInset is non-negative and finite', () {
+      expect(
+        () => BottomSheet(bottomInset: -1.0, onClosing: () {}, builder: (_) => const SizedBox()),
+        throwsAssertionError,
+      );
+      expect(
+        () => BottomSheet(
+          bottomInset: double.infinity,
+          onClosing: () {},
+          builder: (_) => const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => BottomSheet(
+          bottomInset: double.nan,
+          onClosing: () {},
+          builder: (_) => const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+    });
   });
 }
 
