@@ -40,6 +40,9 @@ class IOSExternalTextureMetal final : public Texture {
   // |Texture|
   void OnTextureUnregistered() override;
 
+  // |Texture|
+  sk_sp<DlImage> CreateDlImage(impeller::AiksContext* aiks_context) override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(IOSExternalTextureMetal);
 };
 
