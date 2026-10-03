@@ -63,13 +63,10 @@ const double _kMaxBottomSheetScrimOpacity = 0.6;
 
 enum _ScaffoldSlot {
   body,
-  appBar,
   bodyScrim,
   bottomSheet,
   snackBar,
   materialBanner,
-  persistentFooter,
-  bottomNavigationBar,
   floatingActionButton,
   drawer,
   endDrawer,
@@ -891,102 +888,53 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier
   }
 }
 
-// Used to communicate the height of the Scaffold's bottomNavigationBar and
-// persistentFooterButtons to the LayoutBuilder which builds the Scaffold's body.
-//
-// Scaffold expects a _BodyBoxConstraints to be passed to the _BodyBuilder
-// widget's LayoutBuilder, see _ScaffoldLayout.performLayout(). The BoxConstraints
-// methods that construct new BoxConstraints objects, like copyWith() have not
-// been overridden here because we expect the _BodyBoxConstraintsObject to be
-// passed along unmodified to the LayoutBuilder. If that changes in the future
-// then _BodyBuilder will assert.
-class _BodyBoxConstraints extends BoxConstraints {
-  const _BodyBoxConstraints({
-    super.maxWidth,
-    super.maxHeight,
-    required this.bottomWidgetsHeight,
-    required this.appBarHeight,
-    required this.materialBannerHeight,
-  }) : assert(bottomWidgetsHeight >= 0),
-       assert(appBarHeight >= 0),
-       assert(materialBannerHeight >= 0);
-
-  final double bottomWidgetsHeight;
-  final double appBarHeight;
-  final double materialBannerHeight;
-
-  // RenderObject.layout() will only short-circuit its call to its performLayout
-  // method if the new layout constraints are not == to the current constraints.
-  // If the height of the bottom widgets has changed, even though the constraints'
-  // min and max values have not, we still want performLayout to happen.
-  @override
-  bool operator ==(Object other) {
-    if (super != other) {
-      return false;
-    }
-    return other is _BodyBoxConstraints &&
-        other.materialBannerHeight == materialBannerHeight &&
-        other.bottomWidgetsHeight == bottomWidgetsHeight &&
-        other.appBarHeight == appBarHeight;
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(super.hashCode, materialBannerHeight, bottomWidgetsHeight, appBarHeight);
+class _ScaffoldSidesMetrics {
+  double appBarHeight = 0.0;
+  Size materialBannerSize = Size.zero;
+  double bottomNavigationBarHeight = 0.0;
+  double persistentFooterHeight = 0.0;
 }
 
-// Used when Scaffold.extendBody is true to wrap the scaffold's body in a MediaQuery
-// whose padding accounts for the height of the bottomNavigationBar and/or the
-// persistentFooterButtons.
-//
-// The bottom widgets' height is passed along via the _BodyBoxConstraints parameter.
-// The constraints parameter is constructed in_ScaffoldLayout.performLayout().
-class _BodyBuilder extends StatelessWidget {
-  const _BodyBuilder({
-    required this.extendBody,
-    required this.extendBodyBehindAppBar,
-    required this.body,
-  });
+class _BodyPositionDelegate extends SingleChildLayoutDelegate {
+  _BodyPositionDelegate({required this.contentTop, required this.bodyHeight});
 
-  final Widget body;
-  final bool extendBody;
-  final bool extendBodyBehindAppBar;
+  final double contentTop;
+  final double bodyHeight;
 
   @override
-  Widget build(BuildContext context) {
-    if (!extendBody && !extendBodyBehindAppBar) {
-      return body;
-    }
-
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final bodyConstraints = constraints as _BodyBoxConstraints;
-        final MediaQueryData metrics = MediaQuery.of(context);
-
-        final double bottom = extendBody
-            ? math.max(metrics.padding.bottom, bodyConstraints.bottomWidgetsHeight)
-            : metrics.padding.bottom;
-
-        final double top = extendBodyBehindAppBar
-            ? math.max(
-                metrics.padding.top,
-                bodyConstraints.appBarHeight + bodyConstraints.materialBannerHeight,
-              )
-            : metrics.padding.top;
-
-        return MediaQuery(
-          data: metrics.copyWith(
-            padding: metrics.padding.copyWith(top: top, bottom: bottom),
-          ),
-          child: body,
-        );
-      },
-    );
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: bodyHeight);
   }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    return Offset(0.0, contentTop);
+  }
+
+  @override
+  bool shouldRelayout(_BodyPositionDelegate oldDelegate) {
+    return oldDelegate.contentTop != contentTop || oldDelegate.bodyHeight != bodyHeight;
+  }
+}
+
+class _EmptyWidget extends LeafRenderObjectWidget {
+  const _EmptyWidget();
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderEmptyWidget();
+}
+
+class _RenderEmptyWidget extends RenderBox {
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => constraints.smallest;
 }
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
+    required this.sidesMetrics,
     required this.minInsets,
     required this.minViewPadding,
     required this.textDirection,
@@ -1001,8 +949,14 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     required this.extendBody,
     required this.extendBodyBehindAppBar,
     required this.extendBodyBehindMaterialBanner,
+    required this.appBar,
+    required this.bottomNavigationBar,
+    required this.materialBanner,
+    required this.persistentFooterButtons,
+    required this.useOverlayLayout,
   }) : super(relayout: floatingActionButtonMoveAnimation);
 
+  final _ScaffoldSidesMetrics sidesMetrics;
   final bool extendBody;
   final bool extendBodyBehindAppBar;
   final EdgeInsets minInsets;
@@ -1019,6 +973,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final double? snackBarWidth;
 
   final bool extendBodyBehindMaterialBanner;
+  final Widget? appBar;
+  final Widget? bottomNavigationBar;
+  final Widget? materialBanner;
+  final List<Widget>? persistentFooterButtons;
+  final bool useOverlayLayout;
 
   @override
   void performLayout(Size size) {
@@ -1030,108 +989,58 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // so the app bar's shadow is drawn on top of the body.
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
-    final double bottom = size.height;
-    var contentTop = 0.0;
-    var bottomWidgetsHeight = 0.0;
-    var appBarHeight = 0.0;
 
-    if (hasChild(_ScaffoldSlot.appBar)) {
-      appBarHeight = layoutChild(_ScaffoldSlot.appBar, fullWidthConstraints).height;
-      contentTop = extendBodyBehindAppBar ? 0.0 : appBarHeight;
-      positionChild(_ScaffoldSlot.appBar, Offset.zero);
+    if (useOverlayLayout && hasChild(_ScaffoldSlot.body)) {
+      layoutChild(_ScaffoldSlot.body, BoxConstraints.tight(size));
+      positionChild(_ScaffoldSlot.body, Offset.zero);
     }
 
-    double? bottomNavigationBarTop;
-    if (hasChild(_ScaffoldSlot.bottomNavigationBar)) {
-      final double bottomNavigationBarHeight = layoutChild(
-        _ScaffoldSlot.bottomNavigationBar,
-        fullWidthConstraints,
-      ).height;
-      bottomWidgetsHeight += bottomNavigationBarHeight;
-      bottomNavigationBarTop = math.max(0.0, bottom - bottomWidgetsHeight);
-      positionChild(_ScaffoldSlot.bottomNavigationBar, Offset(0.0, bottomNavigationBarTop));
-    }
-
-    if (hasChild(_ScaffoldSlot.persistentFooter)) {
-      final footerConstraints = BoxConstraints(
-        maxWidth: fullWidthConstraints.maxWidth,
-        maxHeight: math.max(0.0, bottom - bottomWidgetsHeight - contentTop),
-      );
-      final double persistentFooterHeight = layoutChild(
-        _ScaffoldSlot.persistentFooter,
-        footerConstraints,
-      ).height;
-      bottomWidgetsHeight += persistentFooterHeight;
-      positionChild(
-        _ScaffoldSlot.persistentFooter,
-        Offset(0.0, math.max(0.0, bottom - bottomWidgetsHeight)),
-      );
-    }
+    final double appBarHeight = sidesMetrics.appBarHeight;
+    final double bottomWidgetsHeight =
+        sidesMetrics.bottomNavigationBarHeight + sidesMetrics.persistentFooterHeight;
+    final double? bottomNavigationBarTop = sidesMetrics.bottomNavigationBarHeight > 0.0
+        ? math.max(0.0, size.height - sidesMetrics.bottomNavigationBarHeight)
+        : null;
+    final double contentBottom = math.max(
+      0.0,
+      size.height - math.max(minInsets.bottom, bottomWidgetsHeight),
+    );
 
     Size materialBannerSize = Size.zero;
     if (hasChild(_ScaffoldSlot.materialBanner)) {
       materialBannerSize = layoutChild(_ScaffoldSlot.materialBanner, fullWidthConstraints);
       positionChild(_ScaffoldSlot.materialBanner, Offset(0.0, appBarHeight));
-
-      // Push content down only if elevation is 0.
-      if (!extendBodyBehindMaterialBanner) {
-        contentTop += materialBannerSize.height;
-      }
     }
 
-    // Set the content bottom to account for the greater of the height of any
-    // bottom-anchored material widgets or of the keyboard or other
-    // bottom-anchored system UI.
-    final double contentBottom = math.max(
-      0.0,
-      bottom - math.max(minInsets.bottom, bottomWidgetsHeight),
-    );
+    final Size effectiveMaterialBannerSize = hasChild(_ScaffoldSlot.materialBanner)
+        ? materialBannerSize
+        : sidesMetrics.materialBannerSize;
 
-    if (hasChild(_ScaffoldSlot.body)) {
-      double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
-
-      // When extendBody is true, the body is visible underneath the bottom widgets.
-      // This does not apply when the area is obscured by the device keyboard.
-      if (extendBody && minInsets.bottom <= bottomWidgetsHeight) {
-        bodyMaxHeight += bottomWidgetsHeight;
-        bodyMaxHeight = clampDouble(bodyMaxHeight, 0.0, looseConstraints.maxHeight - contentTop);
-        assert(bodyMaxHeight <= math.max(0.0, looseConstraints.maxHeight - contentTop));
-      } else {
-        bottomWidgetsHeight = 0.0;
-      }
-
-      final BoxConstraints bodyConstraints = _BodyBoxConstraints(
+    if (!useOverlayLayout && hasChild(_ScaffoldSlot.body)) {
+      final double bodyTop = !extendBodyBehindMaterialBanner ? materialBannerSize.height : 0.0;
+      final double bodyMaxHeight = math.max(0.0, contentBottom - bodyTop);
+      final bodyConstraints = BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: bodyMaxHeight,
-        materialBannerHeight: materialBannerSize.height,
-        bottomWidgetsHeight: bottomWidgetsHeight,
-        appBarHeight: appBarHeight,
       );
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
-      positionChild(_ScaffoldSlot.body, Offset(0.0, contentTop));
+      positionChild(_ScaffoldSlot.body, Offset(0.0, bodyTop));
     }
 
-    // The BottomSheet and the SnackBar are anchored to the bottom of the parent,
-    // they're as wide as the parent and are given their intrinsic height. The
-    // only difference is that SnackBar appears on the top side of the
-    // BottomNavigationBar while the BottomSheet is stacked on top of it.
-    //
-    // If all three elements are present then either the center of the FAB straddles
-    // the top edge of the BottomSheet or the bottom of the FAB is
-    // kFloatingActionButtonMargin above the SnackBar, whichever puts the FAB
-    // the farthest above the bottom of the parent. If only the FAB is has a
-    // non-zero height then it's inset from the parent's right and bottom edges
-    // by kFloatingActionButtonMargin.
+    final double contentTop =
+        (extendBodyBehindAppBar ? 0.0 : appBarHeight) +
+        (extendBodyBehindMaterialBanner ? 0.0 : effectiveMaterialBannerSize.height);
+    final double totalTopHeight =
+        appBarHeight + (extendBodyBehindMaterialBanner ? 0.0 : effectiveMaterialBannerSize.height);
 
-    Size bottomSheetSize = Size.zero;
     Size snackBarSize = Size.zero;
     if (hasChild(_ScaffoldSlot.bodyScrim)) {
       final bottomSheetScrimConstraints = BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
-        maxHeight: contentBottom,
+        maxHeight: math.max(0.0, contentBottom - totalTopHeight),
       );
       layoutChild(_ScaffoldSlot.bodyScrim, bottomSheetScrimConstraints);
-      positionChild(_ScaffoldSlot.bodyScrim, Offset.zero);
+      positionChild(_ScaffoldSlot.bodyScrim, Offset(0.0, totalTopHeight));
     }
 
     // Set the size of the SnackBar early if the behavior is fixed so
@@ -1140,6 +1049,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
     }
 
+    Size bottomSheetSize = Size.zero;
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
       final bottomSheetConstraints = BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
@@ -1169,7 +1079,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         minInsets: minInsets,
         scaffoldSize: size,
         snackBarSize: snackBarSize,
-        materialBannerSize: materialBannerSize,
+        materialBannerSize: effectiveMaterialBannerSize,
         textDirection: textDirection,
         minViewPadding: minViewPadding,
       );
@@ -1300,7 +1210,15 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation ||
         oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation ||
         oldDelegate.extendBody != extendBody ||
-        oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar;
+        oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar ||
+        oldDelegate.isSnackBarFloating != isSnackBarFloating ||
+        oldDelegate.snackBarWidth != snackBarWidth ||
+        oldDelegate.extendBodyBehindMaterialBanner != extendBodyBehindMaterialBanner ||
+        oldDelegate.appBar != appBar ||
+        oldDelegate.bottomNavigationBar != bottomNavigationBar ||
+        oldDelegate.materialBanner != materialBanner ||
+        oldDelegate.persistentFooterButtons != persistentFooterButtons ||
+        oldDelegate.useOverlayLayout != useOverlayLayout;
   }
 }
 
@@ -1757,7 +1675,7 @@ class Scaffold extends StatefulWidget {
   final bool extendBodyBehindAppBar;
 
   /// An app bar to display at the top of the scaffold.
-  final PreferredSizeWidget? appBar;
+  final Widget? appBar;
 
   /// The primary content of the scaffold.
   ///
@@ -2225,8 +2143,10 @@ class ScaffoldState extends State<Scaffold>
 
   /// The max height the [Scaffold.appBar] uses.
   ///
-  /// This is based on the appBar preferred height plus the top padding.
-  double? get appBarMaxHeight => _appBarMaxHeight;
+  /// This is based on the appBar preferred height plus the top padding,
+  /// or the measured height if [Scaffold.appBar] is not a [PreferredSizeWidget].
+  double? get appBarMaxHeight =>
+      _appBarMaxHeight ?? (_sidesMetrics.appBarHeight > 0.0 ? _sidesMetrics.appBarHeight : null);
   final RestorableBool _drawerOpened = RestorableBool(false);
   final RestorableBool _endDrawerOpened = RestorableBool(false);
 
@@ -2400,7 +2320,7 @@ class ScaffoldState extends State<Scaffold>
               child: StatefulBuilder(
                 key: _currentBottomSheetKey,
                 builder: (BuildContext context, StateSetter setState) {
-                  return widget.bottomSheet ?? const SizedBox.shrink();
+                  return widget.bottomSheet ?? const _EmptyWidget();
                 },
               ),
             ),
@@ -2990,6 +2910,8 @@ class ScaffoldState extends State<Scaffold>
   late AnimationController _bottomSheetScrimAnimationController;
   bool _showBodyScrim = false;
 
+  final _ScaffoldSidesMetrics _sidesMetrics = _ScaffoldSidesMetrics();
+
   /// Updates the state of the body scrim.
   ///
   /// This method is used to show or hide the body scrim and to set the animation value.
@@ -3004,6 +2926,225 @@ class ScaffoldState extends State<Scaffold>
     }
   }
 
+  Widget _buildSidesAndBody({
+    required BuildContext context,
+    required EdgeInsets minInsets,
+    required bool extendBodyBehindMaterialBanner,
+    required bool useOverlayLayout,
+  }) {
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+
+    if (widget.appBar == null) {
+      _sidesMetrics.appBarHeight = 0.0;
+    }
+    if (widget.bottomNavigationBar == null) {
+      _sidesMetrics.bottomNavigationBarHeight = 0.0;
+    }
+    if (_messengerMaterialBanner == null) {
+      _sidesMetrics.materialBannerSize = Size.zero;
+    }
+    if (widget.persistentFooterButtons == null) {
+      _sidesMetrics.persistentFooterHeight = 0.0;
+    }
+
+    if (!useOverlayLayout) {
+      return MediaQuery(
+        data: mediaQuery.copyWith(
+          viewInsets: _resizeToAvoidBottomInset
+              ? mediaQuery.viewInsets.copyWith(bottom: 0.0)
+              : mediaQuery.viewInsets,
+        ),
+        child: widget.body == null
+            ? const _EmptyWidget()
+            : KeyedSubtree(key: _bodyKey, child: widget.body!),
+      );
+    }
+
+    Widget? appBarWidget;
+    if (widget.appBar != null) {
+      Widget appBar = widget.appBar!;
+      if (_appBarMaxHeight != null) {
+        appBar = ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: _appBarMaxHeight!),
+          child: FlexibleSpaceBar.createSettings(currentExtent: _appBarMaxHeight!, child: appBar),
+        );
+      }
+      appBarWidget = ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: double.infinity),
+        child: MediaQuery(data: mediaQuery.removePadding(removeBottom: true), child: appBar),
+      );
+    }
+
+    Widget? bottomNavWidget;
+    if (widget.bottomNavigationBar != null) {
+      final MediaQueryData navMediaQuery = mediaQuery
+          .removePadding(removeTop: true)
+          .copyWith(
+            padding: !_resizeToAvoidBottomInset && mediaQuery.viewInsets.bottom != 0.0
+                ? mediaQuery.padding.copyWith(bottom: mediaQuery.viewPadding.bottom)
+                : null,
+          );
+      bottomNavWidget = ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: double.infinity),
+        child: MediaQuery(data: navMediaQuery, child: widget.bottomNavigationBar!),
+      );
+    }
+
+    Widget? bannerWidget;
+    if (_messengerMaterialBanner != null) {
+      final MediaQueryData bannerMediaQuery = mediaQuery
+          .removePadding(removeTop: widget.appBar != null, removeBottom: true)
+          .copyWith(
+            padding: !_resizeToAvoidBottomInset && mediaQuery.viewInsets.bottom != 0.0
+                ? mediaQuery.padding.copyWith(bottom: mediaQuery.viewPadding.bottom)
+                : null,
+          );
+      bannerWidget = ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: double.infinity),
+        child: MediaQuery(data: bannerMediaQuery, child: _messengerMaterialBanner!._widget),
+      );
+    }
+
+    Widget? footerWidget;
+    if (widget.persistentFooterButtons != null) {
+      final MediaQueryData footerMediaQuery = mediaQuery
+          .removePadding(removeTop: true, removeBottom: widget.bottomNavigationBar != null)
+          .copyWith(
+            padding: !_resizeToAvoidBottomInset && mediaQuery.viewInsets.bottom != 0.0
+                ? mediaQuery.padding.copyWith(bottom: mediaQuery.viewPadding.bottom)
+                : null,
+          );
+      footerWidget = ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: double.infinity),
+        child: MediaQuery(
+          data: footerMediaQuery,
+          child: Container(
+            decoration:
+                widget.persistentFooterDecoration ??
+                BoxDecoration(border: Border(top: Divider.createBorderSide(context, width: 1.0))),
+            child: SafeArea(
+              top: false,
+              child: IntrinsicHeight(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Align(
+                    alignment: widget.persistentFooterAlignment,
+                    child: OverflowBar(
+                      spacing: 8,
+                      overflowAlignment: OverflowBarAlignment.end,
+                      children: widget.persistentFooterButtons!,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return EdgeInsetsOverlay(
+      top: appBarWidget,
+      bottom: bottomNavWidget,
+      builder: (BuildContext context, BoxConstraints outerConstraints, EdgeInsets outerPadding) {
+        final double appBarHeight = outerPadding.top;
+        final double bottomNavHeight = outerPadding.bottom;
+        _sidesMetrics.appBarHeight = appBarHeight;
+        _sidesMetrics.bottomNavigationBarHeight = bottomNavHeight;
+
+        final Widget? bannerWithOffset = bannerWidget != null
+            ? Padding(
+                padding: EdgeInsets.only(top: appBarHeight),
+                child: bannerWidget,
+              )
+            : null;
+        final Widget? footerWithOffset = footerWidget != null
+            ? Padding(
+                padding: EdgeInsets.only(bottom: bottomNavHeight),
+                child: footerWidget,
+              )
+            : null;
+
+        return EdgeInsetsOverlay(
+          top: bannerWithOffset,
+          bottom: footerWithOffset,
+          builder:
+              (BuildContext context, BoxConstraints middleConstraints, EdgeInsets middlePadding) {
+                final double rawBannerHeight = middlePadding.top;
+                final double bannerHeight = rawBannerHeight > 0.0
+                    ? math.max(0.0, rawBannerHeight - appBarHeight)
+                    : 0.0;
+                _sidesMetrics.materialBannerSize = Size(middleConstraints.maxWidth, bannerHeight);
+
+                final double rawFooterHeight = middlePadding.bottom;
+                final double footerHeight = rawFooterHeight > 0.0
+                    ? math.max(0.0, rawFooterHeight - bottomNavHeight)
+                    : 0.0;
+                _sidesMetrics.persistentFooterHeight = footerHeight;
+
+                final double bottomWidgetsHeight = bottomNavHeight + footerHeight;
+                final double totalTopHeight =
+                    appBarHeight + (extendBodyBehindMaterialBanner ? 0.0 : bannerHeight);
+
+                final contentTop = widget.extendBodyBehindAppBar ? 0.0 : totalTopHeight;
+                final double contentBottom = math.max(
+                  0.0,
+                  middleConstraints.maxHeight - math.max(minInsets.bottom, bottomWidgetsHeight),
+                );
+
+                double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
+                if (widget.extendBody && minInsets.bottom <= bottomWidgetsHeight) {
+                  bodyMaxHeight += bottomWidgetsHeight;
+                  bodyMaxHeight = clampDouble(
+                    bodyMaxHeight,
+                    0.0,
+                    middleConstraints.maxHeight - contentTop,
+                  );
+                }
+
+                final effectiveBottomWidgetsHeight =
+                    (widget.extendBody && minInsets.bottom <= bottomWidgetsHeight)
+                    ? bottomWidgetsHeight
+                    : 0.0;
+
+                final double bodyPaddingTop = widget.extendBodyBehindAppBar
+                    ? math.max(mediaQuery.padding.top, appBarHeight + bannerHeight)
+                    : (widget.appBar != null ? 0.0 : mediaQuery.padding.top);
+
+                final double bodyPaddingBottom = widget.extendBody
+                    ? math.max(mediaQuery.padding.bottom, effectiveBottomWidgetsHeight)
+                    : (widget.bottomNavigationBar != null || widget.persistentFooterButtons != null
+                          ? 0.0
+                          : mediaQuery.padding.bottom);
+
+                final Widget bodyWidget = widget.body == null
+                    ? const _EmptyWidget()
+                    : MediaQuery(
+                        data: mediaQuery.copyWith(
+                          padding: mediaQuery.padding.copyWith(
+                            top: bodyPaddingTop,
+                            bottom: bodyPaddingBottom,
+                          ),
+                          viewInsets: _resizeToAvoidBottomInset
+                              ? mediaQuery.viewInsets.copyWith(bottom: 0.0)
+                              : mediaQuery.viewInsets,
+                        ),
+                        child: KeyedSubtree(key: _bodyKey, child: widget.body!),
+                      );
+
+                return CustomSingleChildLayout(
+                  delegate: _BodyPositionDelegate(
+                    contentTop: contentTop,
+                    bodyHeight: bodyMaxHeight,
+                  ),
+                  child: bodyWidget,
+                );
+              },
+        );
+      },
+    );
+  }
+
   @protected
   @override
   Widget build(BuildContext context) {
@@ -3012,24 +3153,74 @@ class ScaffoldState extends State<Scaffold>
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
+    if (widget.appBar != null) {
+      if (widget.appBar case final PreferredSizeWidget appBar) {
+        final double topPadding = widget.primary ? MediaQuery.paddingOf(context).top : 0.0;
+        _appBarMaxHeight = AppBar.preferredHeightFor(context, appBar.preferredSize) + topPadding;
+        assert(_appBarMaxHeight! >= 0.0 && _appBarMaxHeight!.isFinite);
+      } else {
+        _appBarMaxHeight = null;
+      }
+    } else {
+      _appBarMaxHeight = null;
+    }
+
+    var extendBodyBehindMaterialBanner = false;
+    if (_messengerMaterialBanner != null) {
+      final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
+      final double elevation =
+          _messengerMaterialBanner?._widget.elevation ?? bannerTheme.elevation ?? 0.0;
+      extendBodyBehindMaterialBanner = elevation != 0.0;
+    }
+
+    // The minimum insets for contents of the Scaffold to keep visible.
+    final EdgeInsets minInsets = MediaQuery.paddingOf(
+      context,
+    ).copyWith(bottom: _resizeToAvoidBottomInset ? MediaQuery.viewInsetsOf(context).bottom : 0.0);
+
+    // The minimum viewPadding for interactive elements positioned by the
+    // Scaffold to keep within safe interactive areas.
+    final EdgeInsets minViewPadding = MediaQuery.viewPaddingOf(context).copyWith(
+      bottom: _resizeToAvoidBottomInset && MediaQuery.viewInsetsOf(context).bottom != 0.0
+          ? 0.0
+          : null,
+    );
+
+    final bool hasOverlays =
+        widget.appBar != null ||
+        widget.bottomNavigationBar != null ||
+        widget.persistentFooterButtons != null;
+    final bool useOverlayLayout = hasOverlays || widget.extendBody || widget.extendBodyBehindAppBar;
+
+    final Widget sidesAndBody = _buildSidesAndBody(
+      context: context,
+      minInsets: minInsets,
+      extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
+      useOverlayLayout: useOverlayLayout,
+    );
+
     final children = <LayoutId>[];
     _addIfNonNull(
       children,
-      widget.body == null
-          ? null
-          : _BodyBuilder(
-              extendBody: widget.extendBody,
-              extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-              body: KeyedSubtree(key: _bodyKey, child: widget.body!),
-            ),
+      sidesAndBody,
       _ScaffoldSlot.body,
       removeLeftPadding: false,
-      removeTopPadding: widget.appBar != null,
+      removeTopPadding: false,
       removeRightPadding: false,
-      removeBottomPadding:
-          widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
-      removeBottomInset: _resizeToAvoidBottomInset,
+      removeBottomPadding: false,
     );
+    if (!useOverlayLayout && _messengerMaterialBanner != null) {
+      _addIfNonNull(
+        children,
+        _messengerMaterialBanner?._widget,
+        _ScaffoldSlot.materialBanner,
+        removeLeftPadding: false,
+        removeTopPadding: widget.appBar != null,
+        removeRightPadding: false,
+        removeBottomPadding: true,
+        maintainBottomViewPadding: !_resizeToAvoidBottomInset,
+      );
+    }
     if (_showBodyScrim) {
       _addIfNonNull(
         children,
@@ -3041,31 +3232,6 @@ class ScaffoldState extends State<Scaffold>
         removeBottomPadding: true,
       );
     }
-
-    if (widget.appBar != null) {
-      final double topPadding = widget.primary ? MediaQuery.paddingOf(context).top : 0.0;
-      _appBarMaxHeight =
-          AppBar.preferredHeightFor(context, widget.appBar!.preferredSize) + topPadding;
-      assert(_appBarMaxHeight! >= 0.0 && _appBarMaxHeight!.isFinite);
-      _addIfNonNull(
-        children,
-        ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: _appBarMaxHeight!),
-          child: FlexibleSpaceBar.createSettings(
-            currentExtent: _appBarMaxHeight!,
-            child: widget.appBar!,
-          ),
-        ),
-        _ScaffoldSlot.appBar,
-        removeLeftPadding: false,
-        removeTopPadding: false,
-        removeRightPadding: false,
-        removeBottomPadding: true,
-      );
-    }
-
-    var isSnackBarFloating = false;
-    double? snackBarWidth;
 
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
       final Widget stack = Stack(
@@ -3082,6 +3248,9 @@ class ScaffoldState extends State<Scaffold>
         removeBottomPadding: _resizeToAvoidBottomInset,
       );
     }
+
+    var isSnackBarFloating = false;
+    double? snackBarWidth;
 
     // SnackBar set by ScaffoldMessenger
     if (_messengerSnackBar != null) {
@@ -3100,72 +3269,6 @@ class ScaffoldState extends State<Scaffold>
         removeRightPadding: false,
         removeBottomPadding:
             widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
-        maintainBottomViewPadding: !_resizeToAvoidBottomInset,
-      );
-    }
-
-    var extendBodyBehindMaterialBanner = false;
-    // MaterialBanner set by ScaffoldMessenger
-    if (_messengerMaterialBanner != null) {
-      final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
-      final double elevation =
-          _messengerMaterialBanner?._widget.elevation ?? bannerTheme.elevation ?? 0.0;
-      extendBodyBehindMaterialBanner = elevation != 0.0;
-
-      _addIfNonNull(
-        children,
-        _messengerMaterialBanner?._widget,
-        _ScaffoldSlot.materialBanner,
-        removeLeftPadding: false,
-        removeTopPadding: widget.appBar != null,
-        removeRightPadding: false,
-        removeBottomPadding: true,
-        maintainBottomViewPadding: !_resizeToAvoidBottomInset,
-      );
-    }
-
-    if (widget.persistentFooterButtons != null) {
-      _addIfNonNull(
-        children,
-        Container(
-          decoration:
-              widget.persistentFooterDecoration ??
-              BoxDecoration(border: Border(top: Divider.createBorderSide(context, width: 1.0))),
-          child: SafeArea(
-            top: false,
-            child: IntrinsicHeight(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Align(
-                  alignment: widget.persistentFooterAlignment,
-                  child: OverflowBar(
-                    spacing: 8,
-                    overflowAlignment: OverflowBarAlignment.end,
-                    children: widget.persistentFooterButtons!,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        _ScaffoldSlot.persistentFooter,
-        removeLeftPadding: false,
-        removeTopPadding: true,
-        removeRightPadding: false,
-        removeBottomPadding: widget.bottomNavigationBar != null,
-        maintainBottomViewPadding: !_resizeToAvoidBottomInset,
-      );
-    }
-
-    if (widget.bottomNavigationBar != null) {
-      _addIfNonNull(
-        children,
-        widget.bottomNavigationBar,
-        _ScaffoldSlot.bottomNavigationBar,
-        removeLeftPadding: false,
-        removeTopPadding: true,
-        removeRightPadding: false,
-        removeBottomPadding: false,
         maintainBottomViewPadding: !_resizeToAvoidBottomInset,
       );
     }
@@ -3213,19 +3316,6 @@ class ScaffoldState extends State<Scaffold>
       _buildDrawer(children, textDirection);
     }
 
-    // The minimum insets for contents of the Scaffold to keep visible.
-    final EdgeInsets minInsets = MediaQuery.paddingOf(
-      context,
-    ).copyWith(bottom: _resizeToAvoidBottomInset ? MediaQuery.viewInsetsOf(context).bottom : 0.0);
-
-    // The minimum viewPadding for interactive elements positioned by the
-    // Scaffold to keep within safe interactive areas.
-    final EdgeInsets minViewPadding = MediaQuery.viewPaddingOf(context).copyWith(
-      bottom: _resizeToAvoidBottomInset && MediaQuery.viewInsetsOf(context).bottom != 0.0
-          ? 0.0
-          : null,
-    );
-
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
@@ -3238,6 +3328,7 @@ class ScaffoldState extends State<Scaffold>
                 actions: <Type, Action<Intent>>{DismissIntent: _DismissDrawerAction(context)},
                 child: CustomMultiChildLayout(
                   delegate: _ScaffoldLayout(
+                    sidesMetrics: _sidesMetrics,
                     extendBody: widget.extendBody,
                     extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
                     minInsets: minInsets,
@@ -3251,6 +3342,11 @@ class ScaffoldState extends State<Scaffold>
                     isSnackBarFloating: isSnackBarFloating,
                     extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
                     snackBarWidth: snackBarWidth,
+                    appBar: widget.appBar,
+                    bottomNavigationBar: widget.bottomNavigationBar,
+                    materialBanner: _messengerMaterialBanner?._widget,
+                    persistentFooterButtons: widget.persistentFooterButtons,
+                    useOverlayLayout: useOverlayLayout,
                   ),
                   children: children,
                 ),
