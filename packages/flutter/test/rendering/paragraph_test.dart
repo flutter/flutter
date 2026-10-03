@@ -1051,6 +1051,47 @@ void main() {
       expect(registrar.selectables.length, 0);
     });
 
+    test('keeps selectables and selection when text changes layout but not content', () {
+      // Regression test for https://github.com/flutter/flutter/issues/179527.
+      final registrar = TestSelectionRegistrar();
+      final renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'widget'), textDirection: TextDirection.ltr),
+      ];
+      InlineSpan buildText() {
+        return TextSpan(
+          children: <InlineSpan>[
+            const TextSpan(text: 'before the span'),
+            // A new WidgetSpan is not identical to the previous one, so the new
+            // text is considered to require a layout.
+            WidgetSpan(child: SizedBox.shrink(key: UniqueKey())),
+            const TextSpan(text: 'after the span'),
+          ],
+        );
+      }
+
+      final paragraph = RenderParagraph(
+        buildText(),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      _applyParentData(renderBoxes, paragraph.text);
+      layout(paragraph);
+      expect(registrar.selectables.length, 2);
+      final selectables = List<Selectable>.of(registrar.selectables);
+      selectionParagraph(paragraph, const TextPosition(offset: 2), const TextPosition(offset: 5));
+      final List<TextSelection> selections = paragraph.selections;
+      expect(selections.first, const TextSelection(baseOffset: 2, extentOffset: 5));
+
+      final InlineSpan newText = buildText();
+      expect(paragraph.text.compareTo(newText), RenderComparison.layout);
+      paragraph.text = newText;
+      pumpFrame();
+
+      expect(registrar.selectables, selectables);
+      expect(paragraph.selections, selections);
+    });
+
     test('paints selection highlight', () async {
       final registrar = TestSelectionRegistrar();
       const selectionColor = Color(0xAF6694e8);

@@ -431,14 +431,20 @@ class RenderParagraph extends RenderBox
         markNeedsPaint();
         markNeedsSemanticsUpdate();
       case RenderComparison.layout:
+        final String? oldPlainText = _lastSelectableFragments?.firstOrNull?.fullText;
         _textPainter.text = value;
         _overflowShader = null;
         _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
         markNeedsLayout();
-        _removeSelectionRegistrarSubscription();
-        _disposeSelectableFragments();
-        _updateSelectionRegistrarSubscription();
+        // The selectable fragments only depend on the plain text. Keep them,
+        // along with their selection, if the plain text did not change, for
+        // example when only a style or a [PlaceholderSpan] changed.
+        if (oldPlainText == null || oldPlainText != _textPainter.plainText) {
+          _removeSelectionRegistrarSubscription();
+          _disposeSelectableFragments();
+          _updateSelectionRegistrarSubscription();
+        }
     }
   }
 
