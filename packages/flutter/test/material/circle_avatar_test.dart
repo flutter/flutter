@@ -324,6 +324,41 @@ void main() {
       ),
     );
   });
+
+  testWidgets('Material2 - CircleAvatar default icon colors with dark theme', (
+    WidgetTester tester,
+  ) async {
+    final theme = ThemeData(
+      useMaterial3: false,
+      primaryColor: Colors.grey.shade800,
+      brightness: Brightness.dark,
+    );
+
+    await tester.pumpWidget(
+      wrap(
+        child: Theme(
+          data: theme,
+          child: const CircleAvatar(child: Icon(Icons.person)),
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(RawAvatar));
+    final child = box.child! as RenderDecoratedBox;
+    final decoration = child.decoration as BoxDecoration;
+    expect(decoration.color, equals(theme.primaryColorDark));
+
+    final IconTheme iconTheme = tester.widget(
+      find.descendant(of: find.byType(RawAvatar), matching: find.byType(IconTheme)),
+    );
+
+    expect(iconTheme.data.color, equals(theme.primaryTextTheme.titleLarge!.color));
+
+    final RenderParagraph paragraph = tester.renderObject(
+      find.descendant(of: find.byType(Icon), matching: find.byType(RichText)),
+    );
+    expect(paragraph.text.style!.color, equals(theme.primaryTextTheme.titleLarge!.color));
+  });
 }
 
 Widget wrap({required Widget child}) {
