@@ -111,6 +111,15 @@ bool APNGImageGenerator::GetPixels(const SkImageInfo& info,
                       << ") of APNG due to pixel buffer size overflow.";
       return false;
     }
+    if (pixels_bytes > ImageGenerator::kMaxDecodedImageBytes) {
+      FML_DLOG(ERROR) << "Failed to decode image at index " << image_index
+                      << " (frame index: " << frame_index
+                      << ") of APNG: frame pixel buffer size " << pixels_bytes
+                      << "B exceeds the maximum supported decoded image size "
+                         "of "
+                      << ImageGenerator::kMaxDecodedImageBytes << "B.";
+      return false;
+    }
     frame.pixels.resize(pixels_bytes);
     SkCodec::Result result = frame.codec->getPixels(
         frame.codec->getInfo(), frame.pixels.data(), frame_row_bytes);
@@ -316,6 +325,13 @@ std::unique_ptr<ImageGenerator> APNGImageGenerator::MakeFromData(
   }
 
   SkImageInfo image_info = default_image.value().codec->getInfo();
+  if (image_info.computeMinByteSize() > ImageGenerator::kMaxDecodedImageBytes) {
+    FML_DLOG(ERROR) << "APNG default image of size "
+                    << image_info.computeMinByteSize()
+                    << "B exceeds the maximum supported decoded image size of "
+                    << ImageGenerator::kMaxDecodedImageBytes << "B.";
+    return nullptr;
+  }
   return std::unique_ptr<APNGImageGenerator>(
       new APNGImageGenerator(data, image_info, std::move(default_image.value()),
                              animation_data->get_num_frames(), play_count,
