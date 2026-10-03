@@ -205,6 +205,14 @@ abstract class CkSurface extends Surface {
     }
     _currentDevicePixelRatio = devicePixelRatio;
     _currentSize = size;
+    _resizeCanvas(size);
+  }
+
+  /// Resizes the underlying canvas to [size] and recreates the Skia surface.
+  ///
+  /// Subclasses may override this if their underlying canvas type requires
+  /// re-allocation or context recreation instead of in-place dimension updates.
+  void _resizeCanvas(BitmapSize size) {
     _canvasProvider.resizeCanvas(canvas, size);
     _recreateSkSurface();
   }
@@ -347,6 +355,58 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   @override
   void _maybeAttachCanvasToDom() {
     // Do not attach the OffscreenCanvas to the DOM.
+  }
+
+  /// Resizes the offscreen canvas to [size], preserving fast in-place resizing
+  /// unless the browser's physical WebGL drawing buffer is clamped.
+  ///
+  /// For standard sizes, modifying `canvas.width` and `canvas.height` in-place
+  /// updates the drawing buffer without recreating the WebGL context or
+  /// churning GPU resources.
+  ///
+  /// However, when resizing an active context to very large dimensions
+  /// (e.g. 4960x7016, see https://github.com/flutter/flutter/issues/182476),
+  /// Chromium's `DrawingBuffer::Resize` may clamp `gl.drawingBufferWidth` or
+  /// `gl.drawingBufferHeight` down to fit within its GPU memory budget (WebGL
+  /// Spec Section 2.2).
+  ///
+  /// When a drawing buffer clamp is detected, we acquire a brand-new
+  /// [DomOffscreenCanvas] and recreate the WebGL context, allowing the browser
+  /// to allocate the full buffer upfront. If even the fresh canvas is clamped
+  /// (i.e. requested dimensions exceed hardware/driver limits), an
+  /// [UnsupportedError] is thrown rather than silently returning an image with
+  /// transparent unbacked pixels.
+  @override
+  void _resizeCanvas(BitmapSize size) {
+    if (!supportsWebGl) {
+      _canvasProvider.resizeCanvas(canvas, size);
+      _recreateSkSurface();
+      return;
+    }
+
+    _canvasProvider.resizeCanvas(canvas, size);
+    final WebGLContext gl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
+
+    if (gl.drawingBufferWidth >= size.width && gl.drawingBufferHeight >= size.height) {
+      _recreateSkSurface();
+      return;
+    }
+
+    final DomEventTarget oldCanvas = canvas;
+    final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
+      size,
+      onContextLost: onContextLost,
+    );
+    _canvasProvider.releaseCanvas(oldCanvas);
+    unawaited(recreateContextForCanvas(newCanvas));
+
+    final WebGLContext freshGl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
+    if (freshGl.drawingBufferWidth < size.width || freshGl.drawingBufferHeight < size.height) {
+      throw UnsupportedError(
+        'Requested image size (${size.width}x${size.height}) exceeds browser WebGL capabilities. '
+        'The physical drawing buffer was clamped to (${freshGl.drawingBufferWidth}x${freshGl.drawingBufferHeight}).',
+      );
+    }
   }
 
   @override

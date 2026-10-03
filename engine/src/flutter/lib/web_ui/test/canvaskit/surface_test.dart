@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -18,6 +20,7 @@ void testMain() {
     setUpCanvasKitTest();
     setUp(() {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+      CkSurface.debugForceGLFailure = false;
     });
 
     test('CkOnscreenSurface resizes correctly', () async {
@@ -149,6 +152,221 @@ void testMain() {
       // surface.
       surface.dispose();
       surface.dispose();
+      CkSurface.debugForceGLFailure = false;
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/182476
+    test('resizing CkOffscreenSurface to large dimensions renders across full bounds without clipping', () async {
+      final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+      await surface.initialized;
+
+      surface.setSize(const BitmapSize(100, 100));
+      surface.setSize(const BitmapSize(4960, 7016));
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      final paint = ui.Paint()..color = const ui.Color(0xFFFF0000);
+      canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 4960, 7016), paint);
+      final ui.Picture picture = recorder.endRecording();
+
+      await surface.rasterizeToCanvas(picture);
+
+      final SkImage snapshot = surface.skSurface!.makeImageSnapshot();
+      Uint8List? pixels;
+      try {
+        final imageInfo = SkImageInfo(
+          alphaType: canvasKit.AlphaType.Premul,
+          colorType: canvasKit.ColorType.RGBA_8888,
+          colorSpace: SkColorSpaceSRGB,
+          width: 4960,
+          height: 7016,
+        );
+        pixels = snapshot.readPixels(0, 0, imageInfo);
+      } finally {
+        snapshot.delete();
+      }
+
+      expect(pixels, isNotNull);
+
+      const sampleX = 4950;
+      const sampleY = 100;
+      const int pixelOffset = (sampleY * 4960 + sampleX) * 4;
+      final int r = pixels![pixelOffset];
+      final int g = pixels[pixelOffset + 1];
+      final int b = pixels[pixelOffset + 2];
+      final int a = pixels[pixelOffset + 3];
+
+      expect(
+        r,
+        255,
+        reason:
+            'Pixel at ($sampleX, $sampleY) should have red == 255, but got red == $r (rgba: [$r, $g, $b, $a])',
+      );
+      expect(
+        a,
+        255,
+        reason:
+            'Pixel at ($sampleX, $sampleY) should have alpha == 255, but got alpha == $a (rgba: [$r, $g, $b, $a])',
+      );
+
+      surface.dispose();
+    });
+
+    test('CkOffscreenSurface preserves canvas instance during non-clamped resize', () async {
+      final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+      await surface.initialized;
+
+      surface.setSize(const BitmapSize(50, 50));
+      final DomEventTarget originalCanvas = surface.canvas;
+
+      surface.setSize(const BitmapSize(150, 150));
+      expect(
+        identical(surface.canvas, originalCanvas),
+        isTrue,
+        reason: 'Non-clamped resize should perform in-place resize without recreating canvas',
+      );
+
+      surface.dispose();
+    });
+
+    test(
+      'CkOffscreenSurface throws UnsupportedError when requested size exceeds hardware limits',
+      () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+
+        final WebGLContext gl = (surface.canvas as DomOffscreenCanvas).getGlContext(2);
+        final int maxTextureSize = gl.getParameter(0x0D33); // GL_MAX_TEXTURE_SIZE
+        final int oversized = maxTextureSize + 1000;
+
+        expect(
+          () => surface.setSize(BitmapSize(oversized, oversized)),
+          throwsA(isA<UnsupportedError>()),
+        );
+
+        surface.dispose();
+      },
+    );
+
+    group('surface resizing stress tests', () {
+      test('rapid sequential resizing & ping-pong sizing does not leak or crash', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+
+        // Rapid ping-pong resizing between small (10x10) and large (5000x5000) dimensions.
+        for (var i = 0; i < 15; i++) {
+          surface.setSize(const BitmapSize(10, 10));
+          surface.setSize(const BitmapSize(5000, 5000));
+        }
+
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder);
+        final paint = ui.Paint()..color = const ui.Color(0xFF00FF00);
+        canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 5000, 5000), paint);
+        final ui.Picture picture = recorder.endRecording();
+
+        await surface.rasterizeToCanvas(picture);
+        expect(surface.skSurface, isNotNull);
+
+        // Verify pixel rendering reaches the bounds of the large surface after ping-ponging.
+        final SkImage snapshot = surface.skSurface!.makeImageSnapshot();
+        try {
+          final imageInfo = SkImageInfo(
+            alphaType: canvasKit.AlphaType.Premul,
+            colorType: canvasKit.ColorType.RGBA_8888,
+            colorSpace: SkColorSpaceSRGB,
+            width: 5000,
+            height: 5000,
+          );
+          final Uint8List? pixels = snapshot.readPixels(0, 0, imageInfo);
+          expect(pixels, isNotNull);
+          const sampleX = 4990;
+          const sampleY = 4990;
+          const int pixelOffset = (sampleY * 5000 + sampleX) * 4;
+          expect(pixels![pixelOffset + 1], 255, reason: 'Green channel should be 255 at corner');
+          expect(pixels[pixelOffset + 3], 255, reason: 'Alpha channel should be 255 at corner');
+        } finally {
+          snapshot.delete();
+        }
+
+        surface.dispose();
+
+        // Also verify CkOnscreenSurface rapid ping-pong resizing.
+        final onscreenSurface = CkOnscreenSurface(OnscreenCanvasProvider());
+        await onscreenSurface.initialized;
+        for (var i = 0; i < 15; i++) {
+          onscreenSurface.setSize(const BitmapSize(10, 10));
+          onscreenSurface.setSize(const BitmapSize(2000, 2000));
+        }
+
+        final recorder2 = ui.PictureRecorder();
+        final canvas2 = ui.Canvas(recorder2);
+        canvas2.drawRect(const ui.Rect.fromLTWH(0, 0, 2000, 2000), paint);
+        final ui.Picture picture2 = recorder2.endRecording();
+
+        await onscreenSurface.rasterizeToCanvas(picture2);
+        expect(onscreenSurface.skSurface, isNotNull);
+
+        onscreenSurface.dispose();
+      });
+
+      test('lifecycle & disposal during/after resize behaves cleanly and idempotently', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+
+        // Calling dispose immediately after setSize.
+        surface.setSize(const BitmapSize(500, 500));
+        surface.dispose();
+        expect(surface.skSurface, isNull);
+
+        // Calling dispose twice should be safe and idempotent.
+        surface.dispose();
+        expect(surface.skSurface, isNull);
+
+        // Verify CkOnscreenSurface behaves identically.
+        final onscreenSurface = CkOnscreenSurface(OnscreenCanvasProvider());
+        await onscreenSurface.initialized;
+        onscreenSurface.setSize(const BitmapSize(500, 500));
+        onscreenSurface.dispose();
+        expect(onscreenSurface.skSurface, isNull);
+        onscreenSurface.dispose();
+        expect(onscreenSurface.skSurface, isNull);
+      });
+
+      test('zero / minimum dimension boundary sizing followed by picture rasterization', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+
+        // Minimum dimension boundary: 1x1
+        surface.setSize(const BitmapSize(1, 1));
+        final recorder1 = ui.PictureRecorder();
+        final canvas1 = ui.Canvas(recorder1);
+        final paint1 = ui.Paint()..color = const ui.Color(0xFFFF0000);
+        canvas1.drawRect(const ui.Rect.fromLTWH(0, 0, 1, 1), paint1);
+        final ui.Picture picture1 = recorder1.endRecording();
+        await surface.rasterizeToCanvas(picture1);
+        expect(surface.skSurface, isNotNull);
+
+        final SkImage snapshot1 = surface.skSurface!.makeImageSnapshot();
+        try {
+          expect(snapshot1.width(), 1);
+          expect(snapshot1.height(), 1);
+        } finally {
+          snapshot1.delete();
+        }
+
+        // Zero dimension boundary: 0x0
+        surface.setSize(BitmapSize.zero);
+        final recorder0 = ui.PictureRecorder();
+        final canvas0 = ui.Canvas(recorder0);
+        final paint0 = ui.Paint()..color = const ui.Color(0xFF00FF00);
+        canvas0.drawRect(ui.Rect.zero, paint0);
+        final ui.Picture picture0 = recorder0.endRecording();
+        await surface.rasterizeToCanvas(picture0);
+        expect(surface.skSurface, isNotNull);
+
+        surface.dispose();
+      });
     });
   });
 }
