@@ -5,6 +5,7 @@
 import 'package:analysis_server_plugin/plugin.dart';
 import 'package:analysis_server_plugin/registry.dart';
 
+import 'src/rules/access_debug_members_only_in_asserts.dart';
 import 'src/rules/avoid_future_catch_error.dart';
 import 'src/rules/deprecation_syntax.dart';
 import 'src/rules/golden_test_tags.dart';
@@ -41,6 +42,7 @@ class FlutterAnalyzerPlugin extends Plugin {
       ..registerWarningRule(SkipTestComments())
       ..registerWarningRule(TabooDocumentation())
       // Package-specific lint rules (opt-in via diagnostics: in analysis_options.yaml).
+      ..registerLintRule(AccessDebugMembersOnlyInAsserts())
       ..registerLintRule(AvoidFutureCatchError())
       ..registerLintRule(NoDoubleClamp())
       ..registerLintRule(NoRuntimeTypeInToString())
