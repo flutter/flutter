@@ -15,6 +15,7 @@
 // ignore: unnecessary_library_directive
 library engine;
 
+export 'engine/address_bar_controller.dart';
 export 'engine/alarm_clock.dart';
 export 'engine/app_bootstrap.dart';
 export 'engine/arena.dart';
