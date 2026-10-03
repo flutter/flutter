@@ -9,6 +9,7 @@ library;
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/widgets/_accessibility_evaluations.dart';
 import 'package:flutter/src/widgets/accessibility_inspector.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -67,8 +68,7 @@ void main() {
     final Map<String, Object?> disabledResult = await callExtension(
       AccessibilityServiceExtensions.getSemanticsTree.extensionName,
     );
-    expect(disabledResult['error'], equals('Semantics not enabled.'));
-    expect(disabledResult['needsFrame'], isNull);
+    expect(disabledResult[AccessibilityInspectorKeys.error], equals('Semantics not enabled.'));
 
     // Calling enableSemantics enables semantics without returning the tree.
     // Ensure the returned map is mutable (required by BindingBase.registerServiceExtension).
@@ -84,8 +84,10 @@ void main() {
       AccessibilityServiceExtensions.getSemanticsTree.extensionName,
     );
 
-    expect(result1['error'], equals('rootSemanticsNode is null'));
-    expect(result1['needsFrame'], isTrue);
+    expect(
+      result1[AccessibilityInspectorKeys.error],
+      equals('rootSemanticsNode is null, needs a frame.'),
+    );
 
     // Pump a frame to build/flush the semantics tree.
     await tester.pump();
@@ -95,9 +97,10 @@ void main() {
       AccessibilityServiceExtensions.getSemanticsTree.extensionName,
     );
 
-    expect(result2['error'], isNull);
-    expect(result2['data'], isA<Map<String, Object?>>());
-    final nodes = result2['data']! as Map<String, Object?>;
+    expect(result2[AccessibilityInspectorKeys.error], isNull);
+    expect(result2[AccessibilityInspectorKeys.data], isA<Map<String, Object?>>());
+    expect(result2[AccessibilityInspectorKeys.issues], isA<List<Object?>>());
+    final nodes = result2[AccessibilityInspectorKeys.data]! as Map<String, Object?>;
     expect(nodes, isNotEmpty);
 
     Map<String, Object?> findNodeWithLabel(Map<String, Object?> nodes, String label) {
@@ -152,6 +155,139 @@ void main() {
     expect(disposeResult, isEmpty);
     expect(() => disposeResult['type'] = '_extensionType', returnsNormally);
 
+    AccessibilityInspector.instance.resetAllState();
+  }, semanticsEnabled: false);
+
+  testWidgets('ext.flutter.accessibility.getSemanticsTree detects accessibility issues', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Padding(
+          padding: const EdgeInsets.all(50.0),
+          child: Column(
+            children: <Widget>[
+              // Small tap target without a label.
+              SizedBox(
+                width: 20.0,
+                height: 20.0,
+                child: Semantics(onTap: () {}, child: const SizedBox(width: 20.0, height: 20.0)),
+              ),
+              // Unlabeled image.
+              Semantics(image: true, child: const SizedBox(width: 50.0, height: 50.0)),
+              // Accessible button with sufficient size and label.
+              SizedBox(
+                width: 48.0,
+                height: 48.0,
+                child: Semantics(
+                  button: true,
+                  label: 'Accessible Button',
+                  onTap: () {},
+                  child: const SizedBox(width: 48.0, height: 48.0),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final accessibilityExtensions = <String, ServiceExtensionCallback>{};
+    AccessibilityInspector.instance.initServiceExtensions(({
+      required String name,
+      required ServiceExtensionCallback callback,
+    }) {
+      accessibilityExtensions[name] = callback;
+    });
+
+    Future<Map<String, Object?>> callExtension(String name) async {
+      return json.decode(
+        json.encode(await accessibilityExtensions[name]!(const <String, String>{})),
+      ) as Map<String, Object?>;
+    }
+
+    await callExtension(AccessibilityServiceExtensions.enableSemantics.extensionName);
+    await tester.pump();
+
+    final Map<String, Object?> result = await callExtension(
+      AccessibilityServiceExtensions.getSemanticsTree.extensionName,
+    );
+
+    expect(result[AccessibilityInspectorKeys.error], isNull);
+    final nodes = result[AccessibilityInspectorKeys.data]! as Map<String, Object?>;
+    final List<Map<String, Object?>> issues =
+        (result[AccessibilityInspectorKeys.issues]! as List<Object?>).cast<Map<String, Object?>>();
+
+    final tapTargetIssues = <Map<String, Object?>>[];
+    final missingLabelIssues = <Map<String, Object?>>[];
+    final unlabeledLeafIssues = <Map<String, Object?>>[];
+
+    for (final issue in issues) {
+      switch (issue[AccessibilityInspectorKeys.rule] as String?) {
+        case final String rule when rule == AccessibilityEvaluationType.minimumTapTarget.name:
+          tapTargetIssues.add(issue);
+        case final String rule when rule == AccessibilityEvaluationType.labeledTapTarget.name:
+          missingLabelIssues.add(issue);
+        case final String rule when rule == AccessibilityEvaluationType.unlabeledLeafNode.name:
+          unlabeledLeafIssues.add(issue);
+      }
+    }
+
+    expect(tapTargetIssues, isNotEmpty);
+    expect(missingLabelIssues, isNotEmpty);
+    expect(unlabeledLeafIssues, isNotEmpty);
+
+    // The small unlabeled tap target node should have multiple issues recorded for its nodeId.
+    final Object? smallTapTargetNodeId = tapTargetIssues.first[AccessibilityInspectorKeys.nodeId];
+    expect(smallTapTargetNodeId, isNotNull);
+    expect(missingLabelIssues.first[AccessibilityInspectorKeys.nodeId], smallTapTargetNodeId);
+
+    final Iterable<String?> smallTapTargetRules = issues
+        .where(
+          (Map<String, Object?> issue) =>
+              issue[AccessibilityInspectorKeys.nodeId] == smallTapTargetNodeId,
+        )
+        .map((Map<String, Object?> issue) => issue[AccessibilityInspectorKeys.rule] as String?);
+    expect(
+      smallTapTargetRules,
+      containsAll(<String>[
+        AccessibilityEvaluationType.minimumTapTarget.name,
+        AccessibilityEvaluationType.labeledTapTarget.name,
+        AccessibilityEvaluationType.unlabeledLeafNode.name,
+      ]),
+    );
+
+    expect(
+      tapTargetIssues.first[AccessibilityInspectorKeys.description],
+      contains('expected tap target size'),
+    );
+    expect(
+      missingLabelIssues.first[AccessibilityInspectorKeys.description],
+      contains('expected tappable node to have semantic label'),
+    );
+    expect(
+      unlabeledLeafIssues.any(
+        (Map<String, Object?> issue) => (issue[AccessibilityInspectorKeys.description]! as String)
+            .contains('expected leaf semantics node to have a label, value, hint, or tooltip'),
+      ),
+      isTrue,
+    );
+
+    // Check accessible button has no issues.
+    final Map<String, Object?> accessibleButton = nodes.values
+        .map((Object? v) => v! as Map<String, Object?>)
+        .firstWhere((Map<String, Object?> node) => node['label'] == 'Accessible Button');
+    final Object? accessibleButtonId = accessibleButton['id'];
+    expect(
+      issues.where(
+        (Map<String, Object?> issue) =>
+            issue[AccessibilityInspectorKeys.nodeId] == accessibleButtonId,
+      ),
+      isEmpty,
+    );
+
+    await callExtension(AccessibilityServiceExtensions.disposeSemantics.extensionName);
     AccessibilityInspector.instance.resetAllState();
   }, semanticsEnabled: false);
 }
