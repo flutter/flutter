@@ -32,6 +32,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -256,7 +257,7 @@ public class FlutterFragment extends Fragment
     private String initialRoute = "/";
     private boolean handleDeeplinking = false;
     private String appBundlePath = null;
-    private FlutterShellArgs shellArgs = null;
+    private List<String> flutterEngineFlags = null;
     private RenderMode renderMode = RenderMode.surface;
     private TransparencyMode transparencyMode = TransparencyMode.transparent;
     private boolean shouldAttachEngineToActivity = true;
@@ -330,10 +331,22 @@ public class FlutterFragment extends Fragment
       return this;
     }
 
-    /** Any special configuration arguments for the Flutter engine */
+    /** Any special configuration arguments for the Flutter engine. */
     @NonNull
+    public NewEngineFragmentBuilder flutterEngineFlags(@NonNull List<String> flags) {
+      this.flutterEngineFlags = flags;
+      return this;
+    }
+
+    /**
+     * Any special configuration arguments for the Flutter engine.
+     *
+     * @deprecated Use {@link #flutterEngineFlags(List)} instead.
+     */
+    @NonNull
+    @Deprecated
     public NewEngineFragmentBuilder flutterShellArgs(@NonNull FlutterShellArgs shellArgs) {
-      this.shellArgs = shellArgs;
+      this.flutterEngineFlags = Arrays.asList(shellArgs.toArray());
       return this;
     }
 
@@ -459,8 +472,9 @@ public class FlutterFragment extends Fragment
           dartEntrypointArgs != null ? new ArrayList(dartEntrypointArgs) : null);
       // TODO(mattcarroll): determine if we should have an explicit FlutterTestFragment instead of
       // conflating.
-      if (null != shellArgs) {
-        args.putStringArray(ARG_FLUTTER_INITIALIZATION_ARGS, shellArgs.toArray());
+      if (null != flutterEngineFlags) {
+        args.putStringArray(
+            ARG_FLUTTER_INITIALIZATION_ARGS, flutterEngineFlags.toArray(new String[0]));
       }
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
@@ -1353,8 +1367,38 @@ public class FlutterFragment extends Fragment
    */
   @Override
   @NonNull
+  @SuppressWarnings("deprecation")
+  public List<String> getFlutterEngineFlags() {
+    if (FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+        FlutterFragment.class, this)) {
+      // If the user overrides getFlutterShellArgs(), we assume they want to
+      // use the deprecated method, and return the flags from there.
+      return Arrays.asList(getFlutterShellArgs().toArray());
+    }
+
+    String[] flutterShellArgsArray =
+        getArguments() != null
+            ? getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS)
+            : null;
+    return Arrays.asList(flutterShellArgsArray != null ? flutterShellArgsArray : new String[] {});
+  }
+
+  /**
+   * Returns the {@link FlutterShellArgs} that should be used when initializing Flutter.
+   *
+   * @deprecated Use {@link #getFlutterEngineFlags()} instead.
+   */
+  @Override
+  @NonNull
+  @Deprecated
   public FlutterShellArgs getFlutterShellArgs() {
-    String[] flutterShellArgsArray = getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS);
+    Log.w(
+        TAG,
+        "FlutterShellArgs is deprecated and will be removed in the next stable release. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-flags-release-mode for details.");
+    String[] flutterShellArgsArray =
+        getArguments() != null
+            ? getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS)
+            : null;
     return new FlutterShellArgs(
         flutterShellArgsArray != null ? flutterShellArgsArray : new String[] {});
   }

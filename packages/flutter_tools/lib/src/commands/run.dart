@@ -673,13 +673,8 @@ class RunCommand extends RunCommandBase {
         flutterProject: flutterProject,
         debuggingOptions: debuggingOptions,
         stayResident: stayResident,
-        fileSystem: globals.fs,
         analytics: globals.analytics,
-        logger: globals.logger,
-        terminal: globals.terminal,
-        platform: globals.platform,
-        outputPreferences: globals.outputPreferences,
-        systemClock: globals.systemClock,
+        toolContext: toolContext!,
         webDefines: extractWebDefines(),
       );
     }
@@ -705,15 +700,7 @@ class RunCommand extends RunCommandBase {
       androidWorkflow: android_workflow.androidWorkflow,
       deviceManager: globals.deviceManager,
       featureFlags: featureFlags,
-      fileSystem: globals.fs,
       java: globals.java,
-      logger: globals.logger,
-      outputPreferences: globals.outputPreferences,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      stdio: globals.stdio,
-      systemClock: globals.systemClock,
-      terminal: globals.terminal,
       toolContext: toolContext!,
     );
   }
