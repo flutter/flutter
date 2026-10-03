@@ -226,6 +226,7 @@ List<FlutterCommand> generateCommands({
         fileSystem: toolDependencies.toolContext.fs,
         platform: toolDependencies.toolContext.platform,
         git: toolDependencies.toolContext.git,
+        cache: toolDependencies.toolContext.cache,
       ),
     ],
     suppressAnalytics: !toolDependencies.analytics.okToSend,

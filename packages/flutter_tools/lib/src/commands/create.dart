@@ -301,6 +301,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         processManager: toolContext.processManager,
         platform: toolContext.platform,
         botDetector: toolContext.botDetector,
+        cache: toolContext.cache,
       );
 
   /// Fetches the code for a sample from the Flutter docs website.
@@ -1028,7 +1029,11 @@ Your $application code is in $relativeAppMain.
     final FlutterProject project = toolContext.projectFactory.fromDirectory(directory);
     final generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
-      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+      gradle.updateLocalProperties(
+        project: project,
+        requireAndroidSdk: false,
+        cache: toolContext.cache,
+      );
     }
 
     final organization =
@@ -1111,7 +1116,11 @@ Your $application code is in $relativeAppMain.
     final FlutterProject project = toolContext.projectFactory.fromDirectory(directory);
     final generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
-      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+      gradle.updateLocalProperties(
+        project: project,
+        requireAndroidSdk: false,
+        cache: toolContext.cache,
+      );
     }
 
     final projectName = templateContext['projectName'] as String?;

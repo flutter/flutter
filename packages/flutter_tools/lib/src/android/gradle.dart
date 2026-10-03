@@ -524,6 +524,7 @@ To fix this, you can either:
       analytics: _analytics,
       androidSdk: _androidSdk,
       buildInfo: androidBuildInfo.buildInfo,
+      cache: globals.cache,
       fileSystemUtils: _fileSystemUtils,
       logger: _logger,
     );

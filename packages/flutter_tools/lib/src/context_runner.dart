@@ -163,6 +163,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
         analytics: globals.analytics,
+        cache: globals.cache,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(globals.cocoaPods!, globals.userMessages),
       Config: () => Config(
@@ -172,6 +173,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
       ),
       CustomDevicesConfig: () => CustomDevicesConfig(
+        cache: globals.cache,
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,

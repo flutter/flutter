@@ -399,6 +399,7 @@ class ToolDependencies {
           platform: finalPlatform,
           xcodeProjectInterpreter: finalXcodeProjectInterpreter,
           analytics: finalAnalytics,
+          cache: finalCache,
         );
 
     final CocoaPodsValidator finalCocoapodsValidator =

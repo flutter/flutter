@@ -12,6 +12,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../base/version_range.dart';
@@ -1217,9 +1218,17 @@ void updateLocalProperties({
     changeIfNecessary('sdk.dir', fsUtils.escapePath(androidSdk.directory.path));
   }
 
-  if (cache != null) {
-    changeIfNecessary('flutter.sdk', fsUtils.escapePath(cache.flutterRoot));
-  }
+  changeIfNecessary(
+    'flutter.sdk',
+    fsUtils.escapePath(
+      cache?.flutterRoot ??
+          Cache.defaultFlutterRoot(
+            platform: const LocalPlatform(),
+            fileSystem: project.directory.fileSystem,
+            userMessages: UserMessages(),
+          ),
+    ),
+  );
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(
