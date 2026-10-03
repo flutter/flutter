@@ -576,5 +576,36 @@ TEST_P(AiksTest, VerticesGeometryWithMaskFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlendMultiply) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  auto image =
+      DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
+  auto size = image->GetSize();
+
+  paint.setColorSource(
+      DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
+
+  std::vector<DlPoint> positions = {
+      DlPoint(0, 0),           DlPoint(size.width, 0),
+      DlPoint(0, size.height), DlPoint(size.width, 0),
+      DlPoint(0, 0),           DlPoint(size.width, size.height),
+  };
+  std::vector<DlColor> colors = {
+      DlColor::kRed().modulateOpacity(0.5),
+      DlColor::kBlue().modulateOpacity(0.5),
+      DlColor::kGreen().modulateOpacity(0.5),
+      DlColor::kRed().modulateOpacity(0.5),
+      DlColor::kBlue().modulateOpacity(0.5),
+      DlColor::kGreen().modulateOpacity(0.5),
+  };
+
+  auto vertices =
+      MakeVertices(DlVertexMode::kTriangles, positions, {}, {}, colors);
+
+  builder.DrawVertices(vertices, DlBlendMode::kMultiply, paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

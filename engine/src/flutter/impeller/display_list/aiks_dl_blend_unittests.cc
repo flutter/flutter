@@ -954,5 +954,46 @@ TEST_P(AiksTest, EmulatedAdvancedBlendRestore) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, ColorFilterPorterDuffBlend) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  auto src_image =
+      DlImageImpeller::Make(CreateTextureForFixture("blend_mode_src.png"));
+  auto dst_image =
+      DlImageImpeller::Make(CreateTextureForFixture("blend_mode_dst.png"));
+
+  std::vector<DlBlendMode> blend_modes = {
+      DlBlendMode::kClear,   DlBlendMode::kSrc,      DlBlendMode::kDst,
+      DlBlendMode::kSrcOver, DlBlendMode::kDstOver,  DlBlendMode::kSrcIn,
+      DlBlendMode::kDstIn,   DlBlendMode::kSrcOut,   DlBlendMode::kDstOut,
+      DlBlendMode::kSrcATop, DlBlendMode::kDstATop,  DlBlendMode::kXor,
+      DlBlendMode::kPlus,    DlBlendMode::kModulate,
+  };
+
+  for (uint32_t i = 0; i < blend_modes.size(); ++i) {
+    builder.Save();
+    builder.Translate((i % 5) * 200, (i / 5) * 200);
+    builder.Scale(0.4, 0.4);
+    {
+      DlPaint dst_paint;
+      builder.DrawImage(dst_image, DlPoint(0, 0),
+                        DlImageSampling::kMipmapLinear, &dst_paint);
+    }
+    {
+      DlPaint src_paint;
+      // Use a translucent filter color so DlBlendColorFilter::Make does not
+      // simplify away modes like kDstIn, kDstOut, kSrcATop, or kXor.
+      src_paint.setColorFilter(DlColorFilter::MakeBlend(
+          DlColor::RGBA(0.9, 0.5, 0.0, 0.6), blend_modes[i]));
+      builder.DrawImage(src_image, DlPoint(0, 0),
+                        DlImageSampling::kMipmapLinear, &src_paint);
+    }
+    builder.Restore();
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

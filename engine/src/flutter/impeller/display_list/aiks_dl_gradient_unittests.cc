@@ -1042,5 +1042,123 @@ TEST_P(AiksTest, VerifyNonOptimizedGradient) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderRadialGradientWayManyColorsClamp) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  builder.Translate(100.0, 100.0);
+  auto color = DlColor(Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0}.ToARGB());
+  std::vector<DlColor> colors;
+  std::vector<Scalar> stops;
+  auto current_stop = 0.0;
+  for (int i = 0; i < 2000; i++) {
+    colors.push_back(color);
+    stops.push_back(current_stop);
+    current_stop += 1 / 2000.0;
+  }
+  stops[2000 - 1] = 1.0;
+
+  paint.setColorSource(DlColorSource::MakeRadial({100, 100}, 100, stops.size(),
+                                                 colors.data(), stops.data(),
+                                                 DlTileMode::kClamp));
+
+  builder.DrawRect(DlRect::MakeXYWH(0, 0, 600, 600), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderSweepGradientWayManyColorsClamp) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  builder.Translate(100.0, 100.0);
+  auto color = DlColor(Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0}.ToARGB());
+  std::vector<DlColor> colors;
+  std::vector<Scalar> stops;
+  auto current_stop = 0.0;
+  for (int i = 0; i < 2000; i++) {
+    colors.push_back(color);
+    stops.push_back(current_stop);
+    current_stop += 1 / 2000.0;
+  }
+  stops[2000 - 1] = 1.0;
+
+  paint.setColorSource(
+      DlColorSource::MakeSweep({100, 100}, 45, 135, stops.size(), colors.data(),
+                               stops.data(), DlTileMode::kClamp));
+
+  builder.DrawRect(DlRect::MakeXYWH(0, 0, 600, 600), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderConicalGradientWayManyColorsClamp) {
+  Scalar size = 256;
+  DisplayListBuilder builder;
+  DlPaint paint;
+  auto color = DlColor(Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0}.ToARGB());
+  std::vector<DlColor> colors;
+  std::vector<Scalar> stops;
+  auto current_stop = 0.0;
+  for (int i = 0; i < 2000; i++) {
+    colors.push_back(color);
+    stops.push_back(current_stop);
+    current_stop += 1 / 2000.0;
+  }
+  stops[2000 - 1] = 1.0;
+
+  // Cover all four ConicalKind variants: conical, radial, strip, and
+  // strip+radial.
+  std::array<std::tuple<DlPoint, float, DlPoint, float>, 4> kinds{
+      std::make_tuple(DlPoint(size / 4.f, size / 4.f), size / 4.f,
+                      DlPoint(size / 2.f, size / 2.f), size / 2.f),
+      std::make_tuple(DlPoint(size / 2.f, size / 2.f), size / 4.f,
+                      DlPoint(size / 2.f, size / 2.f), size / 2.f),
+      std::make_tuple(DlPoint(size / 8.f, size / 8.f), size / 8.f,
+                      DlPoint(size / 2.f, size / 2.f), size / 8.f),
+      std::make_tuple(DlPoint(size / 2.f, size / 2.f), size / 2.f,
+                      DlPoint(size / 2.f, size / 2.f), size / 2.f),
+  };
+
+  for (size_t i = 0; i < kinds.size(); i++) {
+    builder.Save();
+    builder.Translate((i % 2) * size, (i / 2) * size);
+    paint.setColorSource(DlColorSource::MakeConical(
+        /*start_center=*/std::get<2>(kinds[i]),
+        /*start_radius=*/std::get<3>(kinds[i]),
+        /*end_center=*/std::get<0>(kinds[i]),
+        /*end_radius=*/std::get<1>(kinds[i]),
+        /*stop_count=*/stops.size(),
+        /*colors=*/colors.data(),
+        /*stops=*/stops.data(),
+        /*tile_mode=*/DlTileMode::kClamp));
+    builder.DrawRect(DlRect::MakeXYWH(0, 0, size, size), paint);
+    builder.Restore();
+  }
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderDegenerateConicalGradient) {
+  Scalar size = 256;
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::kWhite());
+  builder.DrawRect(DlRect::MakeXYWH(0, 0, size, size), paint);
+
+  std::vector<DlColor> colors = {
+      DlColor(Color::MakeRGBA8(0xF4, 0x43, 0x36, 0xFF).ToARGB()),
+      DlColor(Color::MakeRGBA8(0x21, 0x96, 0xF3, 0xFF).ToARGB())};
+  std::vector<Scalar> stops = {0.0, 1.0};
+
+  // Equal centers and equal radii hit ConicalKind::kStripAndRadial.
+  paint.setColorSource(DlColorSource::MakeConical(
+      /*start_center=*/DlPoint(size / 2.f, size / 2.f),
+      /*start_radius=*/size / 2.f,
+      /*end_center=*/DlPoint(size / 2.f, size / 2.f),
+      /*end_radius=*/size / 2.f,
+      /*stop_count=*/stops.size(),
+      /*colors=*/colors.data(),
+      /*stops=*/stops.data(),
+      /*tile_mode=*/DlTileMode::kClamp));
+  builder.DrawRect(DlRect::MakeXYWH(0, 0, size, size), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

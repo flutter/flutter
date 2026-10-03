@@ -1182,5 +1182,128 @@ TEST_P(AiksTest, DisplayListToTextureWithMipGeneration) {
   EXPECT_FALSE(texture->NeedsMipmapGeneration());
 }
 
+TEST_P(AiksTest, CanRenderSrgbToLinearColorFilter) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  auto image =
+      DlImageImpeller::Make(CreateTextureForFixture("embarcadero.jpg"));
+
+  DlPaint unfiltered_paint;
+  builder.DrawImage(image, DlPoint(50, 50), DlImageSampling::kLinear,
+                    &unfiltered_paint);
+
+  DlPaint filtered_paint;
+  filtered_paint.setColorFilter(DlColorFilter::MakeSrgbToLinearGamma());
+  builder.DrawImage(image, DlPoint(500, 50), DlImageSampling::kLinear,
+                    &filtered_paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+namespace {
+Vector3 RGBToYUV(Vector3 rgb, YUVColorSpace yuv_color_space) {
+  Vector3 yuv;
+  switch (yuv_color_space) {
+    case YUVColorSpace::kBT601FullRange:
+      yuv.x = rgb.x * 0.299 + rgb.y * 0.587 + rgb.z * 0.114;
+      yuv.y = rgb.x * -0.169 + rgb.y * -0.331 + rgb.z * 0.5 + 0.5;
+      yuv.z = rgb.x * 0.5 + rgb.y * -0.419 + rgb.z * -0.081 + 0.5;
+      break;
+    case YUVColorSpace::kBT601LimitedRange:
+      yuv.x = rgb.x * 0.257 + rgb.y * 0.516 + rgb.z * 0.100 + 0.063;
+      yuv.y = rgb.x * -0.145 + rgb.y * -0.291 + rgb.z * 0.439 + 0.5;
+      yuv.z = rgb.x * 0.429 + rgb.y * -0.368 + rgb.z * -0.071 + 0.5;
+      break;
+  }
+  return yuv;
+}
+
+std::vector<std::shared_ptr<Texture>> CreateTestYUVTextures(
+    Context* context,
+    YUVColorSpace yuv_color_space) {
+  Vector3 red = {244.0 / 255.0, 67.0 / 255.0, 54.0 / 255.0};
+  Vector3 green = {76.0 / 255.0, 175.0 / 255.0, 80.0 / 255.0};
+  Vector3 blue = {33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0};
+  Vector3 white = {1.0, 1.0, 1.0};
+  std::vector<Vector3> yuvs{
+      RGBToYUV(red, yuv_color_space),
+      RGBToYUV(green, yuv_color_space),
+      RGBToYUV(blue, yuv_color_space),
+      RGBToYUV(white, yuv_color_space),
+  };
+  std::vector<uint8_t> y_data;
+  std::vector<uint8_t> uv_data;
+  for (int i = 0; i < 4; i++) {
+    auto yuv = yuvs[i];
+    uint8_t y = std::round(yuv.x * 255.0);
+    uint8_t u = std::round(yuv.y * 255.0);
+    uint8_t v = std::round(yuv.z * 255.0);
+    for (int j = 0; j < 16; j++) {
+      y_data.push_back(y);
+    }
+    for (int j = 0; j < 8; j++) {
+      uv_data.push_back(j % 2 == 0 ? u : v);
+    }
+  }
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+
+  TextureDescriptor y_texture_descriptor;
+  y_texture_descriptor.storage_mode = StorageMode::kHostVisible;
+  y_texture_descriptor.format = PixelFormat::kR8UNormInt;
+  y_texture_descriptor.size = {8, 8};
+  auto y_texture =
+      context->GetResourceAllocator()->CreateTexture(y_texture_descriptor);
+  auto y_mapping = std::make_shared<fml::DataMapping>(y_data);
+  auto y_mapping_buffer =
+      context->GetResourceAllocator()->CreateBufferWithCopy(*y_mapping);
+  blit_pass->AddCopy(DeviceBuffer::AsBufferView(y_mapping_buffer), y_texture);
+
+  TextureDescriptor uv_texture_descriptor;
+  uv_texture_descriptor.storage_mode = StorageMode::kHostVisible;
+  uv_texture_descriptor.format = PixelFormat::kR8G8UNormInt;
+  uv_texture_descriptor.size = {4, 4};
+  auto uv_texture =
+      context->GetResourceAllocator()->CreateTexture(uv_texture_descriptor);
+  auto uv_mapping = std::make_shared<fml::DataMapping>(uv_data);
+  auto uv_mapping_buffer =
+      context->GetResourceAllocator()->CreateBufferWithCopy(*uv_mapping);
+  blit_pass->AddCopy(DeviceBuffer::AsBufferView(uv_mapping_buffer), uv_texture);
+
+  if (!blit_pass->EncodeCommands() ||
+      !context->GetCommandQueue()->Submit({cmd_buffer}).ok()) {
+    FML_DLOG(ERROR) << "Could not copy contents into Y/UV texture.";
+  }
+
+  return {y_texture, uv_texture};
+}
+}  // namespace
+
+TEST_P(AiksTest, CanRenderYUVToRGBFilter) {
+  if (GetParam() != PlaygroundBackend::kMetal &&
+      GetParam() != PlaygroundBackend::kMetalSDF) {
+    GTEST_SKIP() << "YUV to RGB filter is only supported on Metal backends.";
+  }
+
+  AiksContext aiks_context(GetContext(), nullptr);
+  DisplayListBuilder builder;
+  YUVColorSpace yuv_color_spaces[2]{YUVColorSpace::kBT601FullRange,
+                                    YUVColorSpace::kBT601LimitedRange};
+  for (int i = 0; i < 2; i++) {
+    auto textures =
+        CreateTestYUVTextures(GetContext().get(), yuv_color_spaces[i]);
+    auto image = DlImageImpeller::MakeFromYUVTextures(
+        &aiks_context, textures[0], textures[1], yuv_color_spaces[i]);
+    ASSERT_TRUE(image);
+    DlPaint paint;
+    builder.DrawImageRect(image, DlRect::MakeSize(image->GetSize()),
+                          DlRect::MakeXYWH(100 + 400 * i, 100, 256, 256),
+                          DlImageSampling::kNearestNeighbor, &paint);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
