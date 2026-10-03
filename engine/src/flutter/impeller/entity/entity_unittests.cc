@@ -2277,6 +2277,81 @@ TEST_P(EntityTest, DecalSpecializationAppliedToMorphologyFilter) {
             expected_constants);
 }
 
+TEST_P(EntityTest, PrewarmedPipelinesMatchCommonOptions) {
+  ContentContext& content_context = GetContentContext();
+  PixelFormat default_format =
+      GetContext()->GetCapabilities()->GetDefaultColorFormat();
+
+  // Test that commonly used options retrieve valid pre-warmed pipelines.
+  ContentContextOptions options{
+      .sample_count = SampleCount::kCount4,
+      .color_attachment_pixel_format = default_format,
+  };
+  ContentContextOptions options_trianglestrip{
+      .sample_count = SampleCount::kCount4,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format = default_format,
+  };
+
+  // Glyph atlas (Text).
+  auto glyph_pipeline = content_context.GetGlyphAtlasPipeline(options);
+  ASSERT_TRUE(glyph_pipeline);
+
+  // Solid fill (Triangles and TriangleStrip).
+  auto solid_triangles = content_context.GetSolidFillPipeline(options);
+  auto solid_strip =
+      content_context.GetSolidFillPipeline(options_trianglestrip);
+  ASSERT_TRUE(solid_triangles);
+  ASSERT_TRUE(solid_strip);
+  EXPECT_NE(solid_triangles, solid_strip);
+
+  // Texture (TriangleStrip default and Triangle variant).
+  auto texture_strip =
+      content_context.GetTexturePipeline(options_trianglestrip);
+  auto texture_triangles = content_context.GetTexturePipeline(options);
+  ASSERT_TRUE(texture_strip);
+  ASSERT_TRUE(texture_triangles);
+  EXPECT_NE(texture_strip, texture_triangles);
+
+  // Texture strict src.
+  auto texture_strict =
+      content_context.GetTextureStrictSrcPipeline(options_trianglestrip);
+  ASSERT_TRUE(texture_strict);
+
+  // Clip pipelines (Stencil NonZero, Stencil Increment, and Cover Depth).
+  ContentContextOptions clip_stencil{
+      .sample_count = SampleCount::kCount4,
+      .blend_mode = BlendMode::kDst,
+      .stencil_mode = ContentContextOptions::StencilMode::kStencilNonZeroFill,
+      .primitive_type = PrimitiveType::kTriangle,
+      .color_attachment_pixel_format = default_format,
+      .depth_write_enabled = false,
+  };
+  ContentContextOptions clip_stencil_inc{
+      .sample_count = SampleCount::kCount4,
+      .blend_mode = BlendMode::kDst,
+      .stencil_mode = ContentContextOptions::StencilMode::kStencilIncrementAll,
+      .primitive_type = PrimitiveType::kTriangle,
+      .color_attachment_pixel_format = default_format,
+      .depth_write_enabled = false,
+  };
+  ContentContextOptions clip_cover{
+      .sample_count = SampleCount::kCount4,
+      .blend_mode = BlendMode::kDst,
+      .stencil_mode = ContentContextOptions::StencilMode::kCoverCompareInverted,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format = default_format,
+      .depth_write_enabled = true,
+  };
+
+  auto clip_p_stencil = content_context.GetClipPipeline(clip_stencil);
+  auto clip_p_stencil_inc = content_context.GetClipPipeline(clip_stencil_inc);
+  auto clip_p_cover = content_context.GetClipPipeline(clip_cover);
+  ASSERT_TRUE(clip_p_stencil);
+  ASSERT_TRUE(clip_p_stencil_inc);
+  ASSERT_TRUE(clip_p_cover);
+}
+
 // This doesn't really tell you if the hashes will have frequent
 // collisions, but since this type is only used to hash a bounded
 // set of options, we can just compare benchmarks.
