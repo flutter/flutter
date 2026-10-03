@@ -1569,6 +1569,12 @@ public class TextInputPluginTest {
 
     textInputPlugin.showTextInput(testView);
     assertFalse(testImm.isSoftInputVisible());
+    // The input connection must still be (re)started for TextInputType.none so that
+    // hardware key events (e.g. Ctrl+V paste from a physical keyboard) are dispatched
+    // to an active IME editor. Without it, Android's ViewRootImpl routes hardware key
+    // events to the IME first, which consumes editor shortcuts and the framework never
+    // receives them. See https://github.com/flutter/flutter/issues/182941.
+    assertEquals(1, testImm.getRestartCount(testView));
   }
 
   @Test
