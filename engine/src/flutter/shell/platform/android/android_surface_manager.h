@@ -242,7 +242,9 @@ class AndroidSurfaceManager {
   virtual bool PresentImage(const FlutterVulkanImage* image);
 
   /// Acquires the next swapchain image for an overlay surface.
-  virtual FlutterVulkanImage GetNextOverlayImage(ANativeWindow* overlay_window);
+  virtual FlutterVulkanImage GetNextOverlayImage(
+      ANativeWindow* overlay_window,
+      const FlutterFrameInfo* frame_info = nullptr);
 
   /// Presents the rendered image to the overlay swapchain.
   virtual bool PresentOverlayImage(ANativeWindow* overlay_window,
@@ -325,11 +327,14 @@ class AndroidSurfaceManager {
   void TeardownEGL();
   bool CreateOrUpdateOnscreenSurfaceLocked();
   void DestroyOnscreenSurfaceLocked();
-  bool CreateOrUpdateVulkanSurfaceLocked();
+  bool CreateOrUpdateVulkanSurfaceLocked(uint32_t fallback_width = 0,
+                                         uint32_t fallback_height = 0);
   void DestroyVulkanSurfaceLocked();
   void DestroyVulkanSwapchainLocked();
   bool CreateOrUpdateOverlayVulkanSurfaceLocked(ANativeWindow* window,
-                                                VulkanOverlaySurface& entry);
+                                                VulkanOverlaySurface& entry,
+                                                uint32_t fallback_width = 0,
+                                                uint32_t fallback_height = 0);
   void DestroyOverlayVulkanSurfaceLocked(VulkanOverlaySurface& entry);
   void DestroyOverlayVulkanSwapchainLocked(VulkanOverlaySurface& entry);
 

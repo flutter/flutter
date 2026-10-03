@@ -293,6 +293,21 @@ static jmethodID g_mutators_stack_push_transform = nullptr;
 static jmethodID g_mutators_stack_push_cliprect = nullptr;
 static jmethodID g_mutators_stack_push_cliprrect = nullptr;
 static jmethodID g_mutators_stack_push_opacity = nullptr;
+static jmethodID g_mutators_stack_push_clippath = nullptr;
+
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_path_class = nullptr;
+static jmethodID g_path_init = nullptr;
+static jmethodID g_path_set_fill_type = nullptr;
+static jmethodID g_path_move_to = nullptr;
+static jmethodID g_path_line_to = nullptr;
+static jmethodID g_path_quad_to = nullptr;
+static jmethodID g_path_conic_to = nullptr;
+static jmethodID g_path_cubic_to = nullptr;
+static jmethodID g_path_close = nullptr;
+static fml::jni::ScopedJavaGlobalRef<jobject>* g_path_fill_type_winding =
+    nullptr;
+static fml::jni::ScopedJavaGlobalRef<jobject>* g_path_fill_type_even_odd =
+    nullptr;
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_overlay_surface_class = nullptr;
 static jmethodID g_overlay_surface_get_id_method = nullptr;
@@ -376,6 +391,66 @@ bool AndroidJvmInvoker::RegisterJni(JNIEnv* env, jclass clazz) {
         g_mutators_stack_class->obj(), "pushClipRRect", "(FFFF[F)V");
     g_mutators_stack_push_opacity =
         env->GetMethodID(g_mutators_stack_class->obj(), "pushOpacity", "(F)V");
+    g_mutators_stack_push_clippath =
+        env->GetMethodID(g_mutators_stack_class->obj(), "pushClipPath",
+                         "(Landroid/graphics/Path;)V");
+  }
+  if (env->ExceptionCheck()) {
+    env->ExceptionClear();
+  }
+
+  jclass local_path_class = env->FindClass("android/graphics/Path");
+  if (local_path_class) {
+    g_path_class =
+        new fml::jni::ScopedJavaGlobalRef<jclass>(env, local_path_class);
+    env->DeleteLocalRef(local_path_class);
+    g_path_init = env->GetMethodID(g_path_class->obj(), "<init>", "()V");
+    g_path_set_fill_type =
+        env->GetMethodID(g_path_class->obj(), "setFillType",
+                         "(Landroid/graphics/Path$FillType;)V");
+    g_path_move_to = env->GetMethodID(g_path_class->obj(), "moveTo", "(FF)V");
+    g_path_line_to = env->GetMethodID(g_path_class->obj(), "lineTo", "(FF)V");
+    g_path_quad_to = env->GetMethodID(g_path_class->obj(), "quadTo", "(FFFF)V");
+    g_path_cubic_to =
+        env->GetMethodID(g_path_class->obj(), "cubicTo", "(FFFFFF)V");
+    g_path_close = env->GetMethodID(g_path_class->obj(), "close", "()V");
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+    // conicTo(float, float, float, float, float) was added in API 34.
+    g_path_conic_to =
+        env->GetMethodID(g_path_class->obj(), "conicTo", "(FFFFF)V");
+    if (g_path_conic_to == nullptr || env->ExceptionCheck()) {
+      env->ExceptionClear();
+      g_path_conic_to = nullptr;
+    }
+
+    jclass fill_type_cls = env->FindClass("android/graphics/Path$FillType");
+    if (fill_type_cls) {
+      jfieldID winding_id = env->GetStaticFieldID(
+          fill_type_cls, "WINDING", "Landroid/graphics/Path$FillType;");
+      if (winding_id) {
+        jobject winding_obj =
+            env->GetStaticObjectField(fill_type_cls, winding_id);
+        if (winding_obj) {
+          g_path_fill_type_winding =
+              new fml::jni::ScopedJavaGlobalRef<jobject>(env, winding_obj);
+          env->DeleteLocalRef(winding_obj);
+        }
+      }
+      jfieldID even_odd_id = env->GetStaticFieldID(
+          fill_type_cls, "EVEN_ODD", "Landroid/graphics/Path$FillType;");
+      if (even_odd_id) {
+        jobject even_odd_obj =
+            env->GetStaticObjectField(fill_type_cls, even_odd_id);
+        if (even_odd_obj) {
+          g_path_fill_type_even_odd =
+              new fml::jni::ScopedJavaGlobalRef<jobject>(env, even_odd_obj);
+          env->DeleteLocalRef(even_odd_obj);
+        }
+      }
+      env->DeleteLocalRef(fill_type_cls);
+    }
   }
   if (env->ExceptionCheck()) {
     env->ExceptionClear();
@@ -849,6 +924,177 @@ bool AndroidJvmInvoker::PushPlatformViewMutators(
             }
             break;
           }
+          case AndroidMutatorType::kClipPath: {
+            const auto& cp = m.GetClipPath();
+            jclass path_cls = g_path_class ? g_path_class->obj() : nullptr;
+            bool own_path_cls = false;
+            if (!path_cls) {
+              path_cls = env->FindClass("android/graphics/Path");
+              if (env->ExceptionCheck()) {
+                env->ExceptionClear();
+              }
+              own_path_cls = (path_cls != nullptr);
+            }
+            if (!path_cls) {
+              break;
+            }
+            jmethodID path_init =
+                g_path_init ? g_path_init
+                            : env->GetMethodID(path_cls, "<init>", "()V");
+            jobject j_path =
+                path_init ? env->NewObject(path_cls, path_init) : nullptr;
+            if (j_path) {
+              jmethodID set_fill_type =
+                  g_path_set_fill_type
+                      ? g_path_set_fill_type
+                      : env->GetMethodID(path_cls, "setFillType",
+                                         "(Landroid/graphics/Path$FillType;)V");
+              if (set_fill_type) {
+                jobject fill_obj = nullptr;
+                if (cp.fill_type == AndroidPathFillType::kEvenOdd) {
+                  fill_obj = g_path_fill_type_even_odd
+                                 ? g_path_fill_type_even_odd->obj()
+                                 : nullptr;
+                } else {
+                  fill_obj = g_path_fill_type_winding
+                                 ? g_path_fill_type_winding->obj()
+                                 : nullptr;
+                }
+                if (fill_obj) {
+                  env->CallVoidMethod(j_path, set_fill_type, fill_obj);
+                }
+              }
+
+              jmethodID move_to =
+                  g_path_move_to
+                      ? g_path_move_to
+                      : env->GetMethodID(path_cls, "moveTo", "(FF)V");
+              jmethodID line_to =
+                  g_path_line_to
+                      ? g_path_line_to
+                      : env->GetMethodID(path_cls, "lineTo", "(FF)V");
+              jmethodID quad_to =
+                  g_path_quad_to
+                      ? g_path_quad_to
+                      : env->GetMethodID(path_cls, "quadTo", "(FFFF)V");
+              jmethodID cubic_to =
+                  g_path_cubic_to
+                      ? g_path_cubic_to
+                      : env->GetMethodID(path_cls, "cubicTo", "(FFFFFF)V");
+              jmethodID close_id =
+                  g_path_close ? g_path_close
+                               : env->GetMethodID(path_cls, "close", "()V");
+              jmethodID conic_to = g_path_conic_to;
+
+              float cur_x = 0.0f;
+              float cur_y = 0.0f;
+              float start_x = 0.0f;
+              float start_y = 0.0f;
+              for (const auto& seg : cp.segments) {
+                switch (seg.verb) {
+                  case AndroidPathVerb::kMove: {
+                    float x = seg.points[0];
+                    float y = seg.points[1];
+                    if (move_to) {
+                      env->CallVoidMethod(j_path, move_to, x, y);
+                    }
+                    cur_x = start_x = x;
+                    cur_y = start_y = y;
+                    break;
+                  }
+                  case AndroidPathVerb::kLine: {
+                    float x = seg.points[0];
+                    float y = seg.points[1];
+                    if (line_to) {
+                      env->CallVoidMethod(j_path, line_to, x, y);
+                    }
+                    cur_x = x;
+                    cur_y = y;
+                    break;
+                  }
+                  case AndroidPathVerb::kQuad: {
+                    float cx = seg.points[0];
+                    float cy = seg.points[1];
+                    float x2 = seg.points[2];
+                    float y2 = seg.points[3];
+                    if (quad_to) {
+                      env->CallVoidMethod(j_path, quad_to, cx, cy, x2, y2);
+                    }
+                    cur_x = x2;
+                    cur_y = y2;
+                    break;
+                  }
+                  case AndroidPathVerb::kConic: {
+                    float cx = seg.points[0];
+                    float cy = seg.points[1];
+                    float x2 = seg.points[2];
+                    float y2 = seg.points[3];
+                    float w = seg.conic_weight;
+                    if (!std::isfinite(w) || w <= 0.0f) {
+                      w = 1.0f;
+                    }
+                    if (conic_to) {
+                      env->CallVoidMethod(j_path, conic_to, cx, cy, x2, y2, w);
+                    } else if (quad_to) {
+                      // Subdivide rational quadratic conic at t = 0.5 into 2
+                      // quadratic Bezier curves for API < 34 compatibility.
+                      float inv_one_plus_w = 1.0f / (1.0f + w);
+                      float q0x = (cur_x + w * cx) * inv_one_plus_w;
+                      float q0y = (cur_y + w * cy) * inv_one_plus_w;
+                      float q1x = (w * cx + x2) * inv_one_plus_w;
+                      float q1y = (w * cy + y2) * inv_one_plus_w;
+                      float mx = 0.5f * (q0x + q1x);
+                      float my = 0.5f * (q0y + q1y);
+                      env->CallVoidMethod(j_path, quad_to, q0x, q0y, mx, my);
+                      env->CallVoidMethod(j_path, quad_to, q1x, q1y, x2, y2);
+                    }
+                    cur_x = x2;
+                    cur_y = y2;
+                    break;
+                  }
+                  case AndroidPathVerb::kCubic: {
+                    float c1x = seg.points[0];
+                    float c1y = seg.points[1];
+                    float c2x = seg.points[2];
+                    float c2y = seg.points[3];
+                    float x3 = seg.points[4];
+                    float y3 = seg.points[5];
+                    if (cubic_to) {
+                      env->CallVoidMethod(j_path, cubic_to, c1x, c1y, c2x, c2y,
+                                          x3, y3);
+                    }
+                    cur_x = x3;
+                    cur_y = y3;
+                    break;
+                  }
+                  case AndroidPathVerb::kClose: {
+                    if (close_id) {
+                      env->CallVoidMethod(j_path, close_id);
+                    }
+                    cur_x = start_x;
+                    cur_y = start_y;
+                    break;
+                  }
+                }
+              }
+
+              jmethodID push_clippath = g_mutators_stack_push_clippath;
+              if (!push_clippath) {
+                jclass stack_cls = env->GetObjectClass(j_stack);
+                push_clippath = env->GetMethodID(stack_cls, "pushClipPath",
+                                                 "(Landroid/graphics/Path;)V");
+                env->DeleteLocalRef(stack_cls);
+              }
+              if (push_clippath) {
+                env->CallVoidMethod(j_stack, push_clippath, j_path);
+              }
+              env->DeleteLocalRef(j_path);
+            }
+            if (own_path_cls) {
+              env->DeleteLocalRef(path_cls);
+            }
+            break;
+          }
         }
       }
     }
@@ -1054,6 +1300,19 @@ bool AndroidJvmInvoker::InvokeVoidMethod(const std::string& method_name,
     jmethodID method = env->GetMethodID(clazz, method_name.c_str(), "(Z)V");
     if (method) {
       env->CallVoidMethod(java_object.obj(), method, static_cast<jboolean>(b));
+    }
+  } else if (signature == "(II)V") {
+    constexpr size_t kTwoIntFieldCount = 2;
+    if (payload.size() >= sizeof(int32_t) * kTwoIntFieldCount) {
+      int32_t val0 = 0;
+      int32_t val1 = 0;
+      memcpy(&val0, payload.data(), sizeof(int32_t));
+      memcpy(&val1, payload.data() + sizeof(int32_t), sizeof(int32_t));
+      jmethodID method = env->GetMethodID(clazz, method_name.c_str(), "(II)V");
+      if (method) {
+        env->CallVoidMethod(java_object.obj(), method, static_cast<jint>(val0),
+                            static_cast<jint>(val1));
+      }
     }
   } else if (signature == "(IIIII)V") {
     // 5 parameters for onDisplayOverlaySurface: id, x, y, width, height.

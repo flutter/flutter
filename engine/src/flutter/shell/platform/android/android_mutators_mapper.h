@@ -175,24 +175,81 @@ struct AndroidRoundedRect {
   }
 };
 
+/// @brief Fill rule for 2D vector path clipping operations.
+enum class AndroidPathFillType : uint32_t {
+  kNonZero = 0,
+  kEvenOdd = 1,
+};
+
+/// @brief Verb describing a path segment within an AndroidClipPath.
+enum class AndroidPathVerb : uint32_t {
+  kMove = 0,
+  kLine = 1,
+  kQuad = 2,
+  kConic = 3,
+  kCubic = 4,
+  kClose = 5,
+};
+
+/// @brief Single verb segment within an AndroidClipPath.
+///
+/// Coordinates are stored as flat pairs matching FlutterPathSegment:
+/// - kMove:  points[0..1] = (x, y)
+/// - kLine:  points[0..1] = (x, y)
+/// - kQuad:  points[0..1] = (cx, cy), points[2..3] = (x, y)
+/// - kConic: points[0..1] = (cx, cy), points[2..3] = (x, y), conic_weight
+/// - kCubic: points[0..1] = (c1x, c1y), points[2..3] = (c2x, c2y),
+///           points[4..5] = (x, y)
+/// - kClose: unused
+struct AndroidPathSegment {
+  AndroidPathVerb verb = AndroidPathVerb::kMove;
+  float points[6] = {0.0f};
+  float conic_weight = 1.0f;
+
+  bool operator==(const AndroidPathSegment& other) const;
+  bool operator!=(const AndroidPathSegment& other) const {
+    return !(*this == other);
+  }
+};
+
+/// @brief Representation of a 2D vector clipping path.
+struct AndroidClipPath {
+  AndroidPathFillType fill_type = AndroidPathFillType::kNonZero;
+  std::vector<AndroidPathSegment> segments;
+  AndroidMatrix3x3 accumulated_transform = AndroidMatrix3x3::Identity();
+
+  static AndroidClipPath FromFlutterPath(const FlutterPath& path);
+
+  bool operator==(const AndroidClipPath& other) const;
+  bool operator!=(const AndroidClipPath& other) const {
+    return !(*this == other);
+  }
+};
+
 /// @brief Type classification of an Android mutator operation.
 enum class AndroidMutatorType : uint32_t {
   kClipRect = 0,
   kClipRRect = 1,
   kTransform = 2,
   kOpacity = 3,
+  kClipPath = 4,
 };
 
 /// @brief Encapsulates a single mutator entry as a discriminated variant.
 struct AndroidMutator {
   AndroidMutatorType type = AndroidMutatorType::kTransform;
-  std::variant<AndroidRect, AndroidRoundedRect, AndroidMatrix3x3, float> data =
-      AndroidMatrix3x3::Identity();
+  std::variant<AndroidRect,
+               AndroidRoundedRect,
+               AndroidMatrix3x3,
+               float,
+               AndroidClipPath>
+      data = AndroidMatrix3x3::Identity();
 
   static AndroidMutator MakeClipRect(const AndroidRect& r);
   static AndroidMutator MakeClipRRect(const AndroidRoundedRect& rr);
   static AndroidMutator MakeTransform(const AndroidMatrix3x3& mat);
   static AndroidMutator MakeOpacity(float op);
+  static AndroidMutator MakeClipPath(const AndroidClipPath& path);
 
   const AndroidRect& GetRect() const { return std::get<AndroidRect>(data); }
   const AndroidRoundedRect& GetRRect() const {
@@ -202,6 +259,9 @@ struct AndroidMutator {
     return std::get<AndroidMatrix3x3>(data);
   }
   float GetOpacity() const { return std::get<float>(data); }
+  const AndroidClipPath& GetClipPath() const {
+    return std::get<AndroidClipPath>(data);
+  }
 
   bool operator==(const AndroidMutator& other) const;
   bool operator!=(const AndroidMutator& other) const {
@@ -226,6 +286,8 @@ class AndroidMutatorsStack {
   void PushClipRect(const FlutterRect& rect);
   void PushClipRRect(const AndroidRoundedRect& rrect);
   void PushClipRRect(const FlutterRoundedRect& rrect);
+  void PushClipPath(const AndroidClipPath& clip_path);
+  void PushClipPath(const FlutterPath& clip_path);
   void PushOpacity(float opacity);
 
   const std::vector<AndroidMutator>& GetMutators() const { return mutators_; }
@@ -244,6 +306,11 @@ class AndroidMutatorsStack {
   /// applying the platform view matrix to create Android Canvas clipping paths.
   const std::vector<AndroidRoundedRect>& GetFinalClipRRects() const {
     return final_clip_rrects_;
+  }
+
+  /// @brief Returns the local clip paths recorded in the stack.
+  const std::vector<AndroidClipPath>& GetFinalClipPaths() const {
+    return final_clip_paths_;
   }
 
   void Clear();
@@ -285,6 +352,7 @@ class AndroidMutatorsStack {
   float final_opacity_ = 1.0f;
   std::vector<AndroidRect> final_clip_rects_;
   std::vector<AndroidRoundedRect> final_clip_rrects_;
+  std::vector<AndroidClipPath> final_clip_paths_;
 };
 
 /// @brief Utility translator converting Flutter Embedder C-API mutations into
