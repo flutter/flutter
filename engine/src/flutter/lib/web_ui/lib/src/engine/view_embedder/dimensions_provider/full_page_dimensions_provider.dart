@@ -118,8 +118,9 @@ class FullPageDimensionsProvider extends DimensionsProvider {
   /// on-screen keyboard shrinks, keeps the `clientHeight` view, and the
   /// keyboard is reported as an inset.
   double _iOSHeight(DomVisualViewport viewport) {
-    final double docWidth = domDocument.documentElement!.clientWidth;
-    final double docHeight = domDocument.documentElement!.clientHeight;
+    final DomElement documentElement = domDocument.documentElement!;
+    final double docWidth = documentElement.clientWidth;
+    final double docHeight = documentElement.clientHeight;
     final double viewportHeight = viewport.height!;
     final bool sameOrientation = (viewport.width! - docWidth).abs() < 1;
     return sameOrientation && viewportHeight > docHeight ? viewportHeight : docHeight;
