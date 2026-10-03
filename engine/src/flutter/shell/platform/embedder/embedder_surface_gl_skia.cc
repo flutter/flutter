@@ -106,8 +106,12 @@ std::unique_ptr<Surface> EmbedderSurfaceGLSkia::CreateGPUSurface() {
 sk_sp<GrDirectContext> EmbedderSurfaceGLSkia::CreateResourceContext() const {
   auto callback = gl_dispatch_table_.gl_make_resource_current_callback;
   if (callback && callback()) {
-    if (auto context = ShellIOManager::CreateCompatibleResourceLoadingContext(
-            GrBackendApi::kOpenGL, GetGLInterface())) {
+    auto context = ShellIOManager::CreateCompatibleResourceLoadingContext(
+        GrBackendApi::kOpenGL, GetGLInterface());
+    if (gl_dispatch_table_.gl_clear_current_callback) {
+      gl_dispatch_table_.gl_clear_current_callback();
+    }
+    if (context) {
       return context;
     } else {
       FML_LOG(ERROR)
