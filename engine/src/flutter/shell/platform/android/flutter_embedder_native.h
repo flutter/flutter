@@ -282,7 +282,7 @@ class FlutterEmbedderNative {
 
   /// @brief Associates or clears the underlying ANativeWindow surface.
   /// Thread-safe and synchronizes against in-flight presentation.
-  void SetNativeWindow(ANativeWindow* window);
+  void SetNativeWindow(ANativeWindow* window, bool is_fake_window = false);
 
   /// @brief Returns the current ANativeWindow surface pointer.
   /// @warning Unsafe raw pointer return susceptible to concurrent lifecycle
@@ -1216,6 +1216,7 @@ class FlutterEmbedderNative {
   mutable std::mutex hardware_buffer_provider_mutex_;
   mutable std::mutex vulkan_texture_provider_mutex_;
   ANativeWindow* native_window_ = nullptr;
+  bool is_fake_window_ = false;
 
   mutable std::mutex java_object_mutex_;
   std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object_;

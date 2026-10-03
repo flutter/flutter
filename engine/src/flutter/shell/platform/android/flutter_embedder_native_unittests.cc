@@ -10099,6 +10099,7 @@ TEST(FlutterEmbedderNativeSurfaceTest,
   // 3. Once NotifySurfaceCreated attaches the surface, the first presented
   // frame routes OnFirstFrame exactly once.
   native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+  EXPECT_TRUE(native.GetSurfaceManager()->IsFakeWindow());
   EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
   EXPECT_EQ(first_frame_calls, 1);
 
@@ -10106,7 +10107,15 @@ TEST(FlutterEmbedderNativeSurfaceTest,
   EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
   EXPECT_EQ(first_frame_calls, 1);
 
+  // 5. Synthetic non-null fake window pointers must not invoke
+  // ANativeWindow_acquire or ANativeWindow_release.
+  auto* synthetic_window = reinterpret_cast<ANativeWindow*>(0x1234);
+  native.NotifySurfaceWindowChanged(synthetic_window, /*is_fake_window=*/true);
+  EXPECT_TRUE(native.GetSurfaceManager()->IsFakeWindow());
+  EXPECT_EQ(native.AcquireNativeWindow(), synthetic_window);
+
   native.NotifySurfaceDestroyed();
+  EXPECT_FALSE(native.GetSurfaceManager()->IsFakeWindow());
 }
 
 TEST(AndroidSurfaceManagerVulkanTest,
