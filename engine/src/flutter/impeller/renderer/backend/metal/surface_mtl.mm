@@ -17,10 +17,6 @@
 
 static_assert(__has_feature(objc_arc), "ARC must be enabled.");
 
-@protocol FlutterMetalDrawable <MTLDrawable>
-- (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer;
-@end
-
 namespace impeller {
 
 #pragma GCC diagnostic push
@@ -111,15 +107,18 @@ static std::optional<RenderTarget> WrapTextureWithRenderTarget(
 }
 
 std::unique_ptr<SurfaceMTL> SurfaceMTL::MakeFromMetalLayerDrawable(
+    PresentCallback present_callback,
     const std::shared_ptr<Context>& context,
     id<CAMetalDrawable> drawable,
     const std::shared_ptr<SwapchainTransientsMTL>& transients,
     std::optional<IRect> clip_rect) {
-  return SurfaceMTL::MakeFromTexture(context, drawable.texture, transients,
-                                     clip_rect, drawable);
+  return SurfaceMTL::MakeFromTexture(std::move(present_callback), context,
+                                     drawable.texture, transients, clip_rect,
+                                     drawable);
 }
 
 std::unique_ptr<SurfaceMTL> SurfaceMTL::MakeFromTexture(
+    PresentCallback present_callback,
     const std::shared_ptr<Context>& context,
     id<MTLTexture> texture,
     const std::shared_ptr<SwapchainTransientsMTL>& transients,
@@ -162,6 +161,7 @@ std::unique_ptr<SurfaceMTL> SurfaceMTL::MakeFromTexture(
   }
 
   return std::unique_ptr<SurfaceMTL>(new SurfaceMTL(
+      std::move(present_callback),              // present_callback
       context,                                  // context
       *render_target,                           // target
       render_target->GetRenderTargetTexture(),  // resolve_texture
@@ -173,7 +173,8 @@ std::unique_ptr<SurfaceMTL> SurfaceMTL::MakeFromTexture(
       ));
 }
 
-SurfaceMTL::SurfaceMTL(const std::weak_ptr<Context>& context,
+SurfaceMTL::SurfaceMTL(PresentCallback present_callback,
+                       const std::weak_ptr<Context>& context,
                        const RenderTarget& target,
                        std::shared_ptr<Texture> resolve_texture,
                        id<CAMetalDrawable> drawable,
@@ -182,6 +183,7 @@ SurfaceMTL::SurfaceMTL(const std::weak_ptr<Context>& context,
                        bool requires_blit,
                        std::optional<IRect> clip_rect)
     : Surface(target),
+      present_callback_(std::move(present_callback)),
       context_(context),
       resolve_texture_(std::move(resolve_texture)),
       drawable_(drawable),
@@ -269,45 +271,17 @@ bool SurfaceMTL::Present() const {
         ContextMTL::Cast(context.get())
             ->CreateMTLCommandBuffer("Present Waiter Command Buffer");
 
-    id<CAMetalDrawable> metal_drawable =
-        reinterpret_cast<id<CAMetalDrawable>>(drawable_);
-    if ([metal_drawable conformsToProtocol:@protocol(FlutterMetalDrawable)]) {
-      [(id<FlutterMetalDrawable>)metal_drawable
-          flutterPrepareForPresent:command_buffer];
-    }
-
-    // Intel iOS simulators do not seem to give backpressure on Metal drawable
-    // aquisition, which can result in Impeller running head of the GPU
-    // workload by dozens of frames. Slow this process down by blocking
-    // on submit until the last command buffer is at least scheduled.
+    id<CAMetalDrawable> drawable = drawable_;
+    [command_buffer commit];
 #if defined(FML_OS_IOS_SIMULATOR) && defined(FML_ARCH_CPU_X86_64)
-    constexpr bool alwaysWaitForScheduling = true;
+    [command_buffer waitUntilCompleted];
 #else
-    constexpr bool alwaysWaitForScheduling = false;
-#endif  // defined(FML_OS_IOS_SIMULATOR) && defined(FML_ARCH_CPU_X86_64)
-
-    // If the threads have been merged, or there is a pending frame capture,
-    // then block on cmd buffer scheduling to ensure that the
-    // transaction/capture work correctly.
-    if (present_with_transaction_ || [[NSThread currentThread] isMainThread] ||
-        [[MTLCaptureManager sharedCaptureManager] isCapturing] ||
-        alwaysWaitForScheduling) {
-      TRACE_EVENT0("flutter", "waitUntilScheduled");
-      [command_buffer commit];
-#if defined(FML_OS_IOS_SIMULATOR) && defined(FML_ARCH_CPU_X86_64)
-      [command_buffer waitUntilCompleted];
-#else
-      [command_buffer waitUntilScheduled];
-#endif  // defined(FML_OS_IOS_SIMULATOR) && defined(FML_ARCH_CPU_X86_64)
-      [drawable_ present];
+    [command_buffer waitUntilScheduled];
+#endif
+    if (present_callback_) {
+      return present_callback_(drawable);
     } else {
-      // The drawable may come from a FlutterMetalLayer, so it can't be
-      // presented through the command buffer.
-      id<CAMetalDrawable> drawable = drawable_;
-      [command_buffer addScheduledHandler:^(id<MTLCommandBuffer> buffer) {
-        [drawable present];
-      }];
-      [command_buffer commit];
+      [drawable present];
     }
   }
 

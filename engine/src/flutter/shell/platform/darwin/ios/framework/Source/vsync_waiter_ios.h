@@ -13,6 +13,8 @@
 
 @class FlutterVSyncClient;
 @class FlutterDisplayLinkManager;
+@class UIView;
+@class CALayer;
 
 namespace flutter {
 
@@ -44,10 +46,37 @@ class VsyncWaiterIOS final : public VsyncWaiter, public VariableRefreshRateRepor
   // Visible for testing.
   double GetMaxRefreshRateForTesting() const { return max_refresh_rate_; }
 
+  // The FlutterEngine sets this flag to true while an event is being dispatched
+  // to the framework.
+  void SetDispatchingEvent(bool dispatching_event);
+
+  // Notifies the waiter that Flutter view has been updated or attached.
+  void UpdateFlutterView(UIView* flutterView);
+
+  // Notifies the waiter that a frame has been submitted. Must be called on main thread.
+  void FrameSubmitted();
+
  private:
+  // This is called right before CA Commit from the layout trampoline view layout callback.
+  void OnBeforeCACommit();
+
   FlutterVSyncClient* client_;
   FlutterDisplayLinkManager* display_link_manager_;
   double max_refresh_rate_;
+
+  // True if client requested vsync. If false will cause the display link to pause
+  // on next tick.
+  bool waiting_for_vsync_ = false;
+  bool dispatching_event_ = false;
+
+  bool pending_vsync_after_event_dispatch_ = false;
+
+  // Whether content is expected for the current frame. This will cause the main
+  // thread being blocked right after the implicit CACommit until content is available.
+  bool waiting_for_content_ = false;
+
+  // The trampoline view used to hook into the layout cycle.
+  UIView* layout_trampoline_view_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterIOS);
 };

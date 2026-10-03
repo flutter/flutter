@@ -179,6 +179,7 @@ static void PrintWideGamutWarningOnce() {
     layer.contentsScale = screenScale;
     layer.rasterizationScale = screenScale;
     layer.framebufferOnly = flutter::Settings::kSurfaceDataAccessible ? NO : YES;
+    layer.presentsWithTransaction = YES;
     if (_isWideGamutEnabled && self.isWideGamutSupported) {
       fml::CFRef<CGColorSpaceRef> srgb(CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB));
       layer.colorspace = srgb;
