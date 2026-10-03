@@ -24,6 +24,8 @@ class ThreadHost;
 @property(readonly, nonatomic) BOOL enableEmbedderAPI;
 @property(readonly, nonatomic) BOOL allowHeadlessExecution;
 @property(nonatomic, readonly) NSMutableDictionary* pluginPublications;
+@property(nonatomic, readonly)
+    NSMutableDictionary<NSNumber*, id<NSObject>>* flutterViewControllerWillDeallocObservers;
 @property(nonatomic, strong) FlutterRestorationPlugin* restorationPlugin;
 
 - (flutter::Shell&)shell;

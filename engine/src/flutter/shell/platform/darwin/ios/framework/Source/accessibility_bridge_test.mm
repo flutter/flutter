@@ -5,6 +5,7 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#include "flutter/common/constants.h"
 #include <utility>
 
 #import "flutter/fml/message_loop.h"
@@ -23,8 +24,16 @@
 
 FLUTTER_ASSERT_ARC
 
+namespace {
+constexpr FlutterViewIdentifier kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
+}  // namespace
+
 @class MockPlatformView;
 __weak static MockPlatformView* gMockPlatformView = nil;
+
+@interface FlutterEngine ()
+- (FlutterTextInputPlugin*)textInputPlugin;
+@end
 
 @interface SemanticsObject (Test)
 - (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event;
@@ -99,7 +108,12 @@ class MockDelegate : public PlatformView::Delegate {
   void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
                                              int32_t node_id,
                                              SemanticsAction action,
-                                             fml::MallocMapping args) override {}
+                                             fml::MallocMapping args) override {
+    dispatched_semantics_action_calls_++;
+    last_dispatched_semantics_view_id_ = view_id;
+    last_dispatched_semantics_node_id_ = node_id;
+    last_dispatched_semantics_action_ = action;
+  }
   void OnPlatformViewSetSemanticsEnabled(bool enabled) override {}
   void OnPlatformViewSetAccessibilityFeatures(int32_t flags) override {}
   void OnPlatformViewRegisterTexture(std::shared_ptr<Texture> texture) override {}
@@ -120,6 +134,10 @@ class MockDelegate : public PlatformView::Delegate {
   }
 
   flutter::Settings settings_;
+  int dispatched_semantics_action_calls_ = 0;
+  int64_t last_dispatched_semantics_view_id_ = -1;
+  int32_t last_dispatched_semantics_node_id_ = -1;
+  SemanticsAction last_dispatched_semantics_action_ = SemanticsAction::kTap;
 };
 
 class MockIosDelegate : public AccessibilityBridge::IosDelegate {
@@ -504,7 +522,7 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
     id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
     StubLoadedView(mockFlutterViewController, mockFlutterView);
     std::string label = "some label";
-    flutterPlatformViewsController.flutterView = mockFlutterView;
+    [flutterPlatformViewsController attachToFlutterViewController:mockFlutterViewController];
 
     MockFlutterPlatformFactory* factory = [[MockFlutterPlatformFactory alloc] init];
     [flutterPlatformViewsController
@@ -1695,10 +1713,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
 
   OCMStub([flutterViewController engine]).andReturn(engine);
   OCMStub([engine binaryMessenger]).andReturn(messenger);
-  FlutterBinaryMessengerConnection connection = 123;
-  OCMStub([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
-                           binaryMessageHandler:[OCMArg any]])
-      .andReturn(connection);
 
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -1709,12 +1723,12 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   thread_task_runner->PostTask([&] {
     platform_view->SetOwnerViewController(flutterViewController);
     auto bridge =
-        std::make_unique<flutter::AccessibilityBridge>(/*view=*/nil,
+        std::make_unique<flutter::AccessibilityBridge>(/*view=*/flutterViewController,
                                                        /*platform_view=*/platform_view.get(),
                                                        /*platform_views_controller=*/nil);
     XCTAssertTrue(bridge.get());
-    OCMVerify([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
-                               binaryMessageHandler:[OCMArg isNotNil]]);
+    OCMVerify(never(), [messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                                        binaryMessageHandler:[OCMArg any]]);
 
     bridge->AccessibilityObjectDidBecomeFocused(123);
 
@@ -1729,6 +1743,115 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   latch.Wait();
 
   [engine stopMocking];
+}
+
+- (void)testAccessibilityBridgeUsesSharedEngineMessengerAndBoundViewIdentifier {
+  flutter::MockDelegate mock_delegate;
+  auto thread = std::make_unique<fml::Thread>("AccessibilityBridgeTest");
+  auto thread_task_runner = thread->GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+
+  id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  id sharedEngine = OCMClassMock([FlutterEngine class]);
+  id implicitFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([implicitFlutterViewController viewIdentifier])
+      .andReturn(flutter::kFlutterImplicitViewId);
+  OCMStub([implicitFlutterViewController engine]).andReturn(sharedEngine);
+  id secondaryFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([secondaryFlutterViewController viewIdentifier]).andReturn(kSecondaryFlutterViewId);
+  OCMStub([secondaryFlutterViewController engine]).andReturn(sharedEngine);
+  OCMStub([sharedEngine binaryMessenger]).andReturn(messenger);
+
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  fml::AutoResetWaitableEvent latch;
+  thread_task_runner->PostTask([&] {
+    platform_view->SetOwnerViewController(implicitFlutterViewController);
+    auto bridge = std::make_unique<flutter::AccessibilityBridge>(
+        /*view_controller=*/secondaryFlutterViewController,
+        /*platform_view=*/platform_view.get(),
+        /*platform_views_controller=*/nil);
+    XCTAssertTrue(bridge.get());
+
+    bridge->AccessibilityObjectDidBecomeFocused(123);
+    bridge->DispatchSemanticsAction(456, flutter::SemanticsAction::kTap);
+    latch.Signal();
+  });
+  latch.Wait();
+
+  NSDictionary<NSString*, id>* annotatedEvent = @{@"type" : @"didGainFocus", @"nodeId" : @123};
+  NSData* encodedMessage = [[FlutterStandardMessageCodec sharedInstance] encode:annotatedEvent];
+  OCMVerify(never(), [messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                                      binaryMessageHandler:[OCMArg any]]);
+  OCMVerify([messenger sendOnChannel:@"flutter/accessibility" message:encodedMessage]);
+
+  XCTAssertEqual(mock_delegate.dispatched_semantics_action_calls_, 1);
+  XCTAssertEqual(mock_delegate.last_dispatched_semantics_view_id_, kSecondaryFlutterViewId);
+  XCTAssertEqual(mock_delegate.last_dispatched_semantics_node_id_, 456);
+  XCTAssertEqual(mock_delegate.last_dispatched_semantics_action_, flutter::SemanticsAction::kTap);
+  [sharedEngine stopMocking];
+}
+
+- (void)testAccessibilityBridgeTextInputViewUsesSharedEngineTextInputPlugin {
+  flutter::MockDelegate mock_delegate;
+  auto thread = std::make_unique<fml::Thread>("AccessibilityBridgeTest");
+  auto thread_task_runner = thread->GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+
+  id sharedEngine = OCMClassMock([FlutterEngine class]);
+  id implicitFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([implicitFlutterViewController viewIdentifier])
+      .andReturn(flutter::kFlutterImplicitViewId);
+  OCMStub([implicitFlutterViewController engine]).andReturn(sharedEngine);
+
+  UITextField* textInputView = [[UITextField alloc] init];
+  id textInputPlugin = OCMClassMock([FlutterTextInputPlugin class]);
+  OCMStub([textInputPlugin textInputView]).andReturn(textInputView);
+  id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub([sharedEngine textInputPlugin]).andReturn(textInputPlugin);
+  OCMStub([sharedEngine binaryMessenger]).andReturn(messenger);
+  FlutterBinaryMessengerConnection connection = 123;
+  OCMStub([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                           binaryMessageHandler:[OCMArg any]])
+      .andReturn(connection);
+  id secondaryFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([secondaryFlutterViewController viewIdentifier]).andReturn(kSecondaryFlutterViewId);
+  OCMStub([secondaryFlutterViewController engine]).andReturn(sharedEngine);
+
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  fml::AutoResetWaitableEvent latch;
+  UIView<UITextInput>* resolvedTextInputView = nil;
+  thread_task_runner->PostTask([&] {
+    platform_view->SetOwnerViewController(implicitFlutterViewController);
+    auto bridge = std::make_unique<flutter::AccessibilityBridge>(
+        /*view_controller=*/secondaryFlutterViewController,
+        /*platform_view=*/platform_view.get(),
+        /*platform_views_controller=*/nil);
+    resolvedTextInputView = bridge->textInputView();
+    latch.Signal();
+  });
+  latch.Wait();
+
+  XCTAssertEqual(resolvedTextInputView, textInputView);
+  [textInputPlugin stopMocking];
+  [sharedEngine stopMocking];
 }
 
 - (void)testAnnouncesRouteChangesWhenNoNamesRoute {
@@ -2329,7 +2452,7 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   XCTAssertEqual([accessibility_notifications count], 0ul);
 }
 
-- (void)testAccessibilityMessageAfterDeletion {
+- (void)testAccessibilityBridgeDeletionDoesNotChangeMessageHandler {
   flutter::MockDelegate mock_delegate;
   auto thread = std::make_unique<fml::Thread>("AccessibilityBridgeTest");
   auto thread_task_runner = thread->GetTaskRunner();
@@ -2358,17 +2481,17 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   thread_task_runner->PostTask([&] {
     platform_view->SetOwnerViewController(flutterViewController);
     auto bridge =
-        std::make_unique<flutter::AccessibilityBridge>(/*view=*/nil,
+        std::make_unique<flutter::AccessibilityBridge>(/*view=*/flutterViewController,
                                                        /*platform_view=*/platform_view.get(),
                                                        /*platform_views_controller=*/nil);
     XCTAssertTrue(bridge.get());
-    OCMVerify([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
-                               binaryMessageHandler:[OCMArg isNotNil]]);
     bridge.reset();
     latch.Signal();
   });
   latch.Wait();
-  OCMVerify([messenger cleanUpConnection:connection]);
+  OCMVerify(never(), [messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                                      binaryMessageHandler:[OCMArg any]]);
+  OCMVerify(never(), [messenger cleanUpConnection:connection]);
   [engine stopMocking];
 }
 
@@ -2587,65 +2710,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   XCTAssertNil([rootObject _accessibilityHitTest:CGPointZero withEvent:nil]);
 }
 
-- (void)testAccessibilityChannelCallbackAfterBridgeDestruction {
-  flutter::MockDelegate mock_delegate;
-  // PlatformViewIOS/AccessibilityBridge need to be called on the platform thread.
-  // Since the platform thread and UI thread are merged; we use the test's main thread.
-  fml::MessageLoop::EnsureInitializedForCurrentThread();
-  auto thread_task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
-  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
-                               /*platform=*/thread_task_runner,
-                               /*raster=*/thread_task_runner,
-                               /*ui=*/thread_task_runner,
-                               /*io=*/thread_task_runner);
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*platform_views_controller=*/nil,
-      /*task_runners=*/runners,
-      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
 
-  id mockEngine = OCMClassMock([FlutterEngine class]);
-  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  id mockBinaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
-
-  OCMStub([mockFlutterViewController engine]).andReturn(mockEngine);
-  OCMStub([mockEngine binaryMessenger]).andReturn(mockBinaryMessenger);
-
-  // AccessibilityBridge destructor calls clearState, which reads viewIfLoaded on the view
-  // controller. Stub it so bridge.reset() below doesn't hit an unstubbed selector.
-  OCMStub([mockFlutterViewController viewIfLoaded]).andReturn(nil);
-
-  // Prevent SetOwnerViewController from taking the attachView path, which touches the real
-  // view/CALayer/IOSSurface mechanics and isn't relevant here, since we only care about the channel
-  // handler.
-  OCMStub([mockFlutterViewController isViewLoaded]).andReturn(NO);
-
-  __block FlutterBinaryMessageHandler capturedHandler = nil;
-  OCMStub([mockBinaryMessenger setMessageHandlerOnChannel:@"flutter/accessibility"
-                                     binaryMessageHandler:[OCMArg checkWithBlock:^BOOL(id obj) {
-                                       if (obj) {
-                                         capturedHandler = [obj copy];
-                                       }
-                                       return YES;
-                                     }]]);
-
-  platform_view->SetOwnerViewController(mockFlutterViewController);
-
-  auto bridge = std::make_unique<flutter::AccessibilityBridge>(
-      /*view_controller=*/mockFlutterViewController,
-      /*platform_view=*/platform_view.get(),
-      /*platform_views_controller=*/nil);
-
-  XCTAssertNotNil(capturedHandler);
-
-  // Destroy the AccessibilityBridge then invoke the message handler block to ensure no-op.
-  bridge.reset();
-  NSDictionary* event = @{@"type" : @"announce", @"data" : @{@"message" : @"test"}};
-  NSData* messageData = [[FlutterStandardMessageCodec sharedInstance] encode:event];
-  if (capturedHandler) {
-    capturedHandler(messageData, ^(NSData* reply){
-                    });
-  }
-}
 
 @end
