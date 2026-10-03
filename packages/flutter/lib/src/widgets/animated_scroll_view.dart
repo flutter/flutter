@@ -1287,6 +1287,8 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     for (final _ActiveItem item in _incomingItems.followedBy(_outgoingItems)) {
       item.controller!.dispose();
     }
+    _incomingItems.clear();
+    _outgoingItems.clear();
     super.dispose();
   }
 
@@ -1396,7 +1398,17 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     });
 
     controller.forward().then<void>((_) {
-      _removeActiveItemAt(_incomingItems, incomingItem.itemIndex)!.controller!.dispose();
+      // On the web this can run after the state is disposed, since microtasks
+      // are not flushed between onBeginFrame and onDrawFrame. The controller
+      // was already disposed in dispose() by then.
+      if (!mounted) {
+        return;
+      }
+      // removeItem may have already taken this item and its controller. Its
+      // itemIndex is stale after that, so look the item up by identity.
+      if (_incomingItems.remove(incomingItem)) {
+        incomingItem.controller!.dispose();
+      }
     });
   }
 
@@ -1440,6 +1452,12 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     });
 
     controller.reverse().then<void>((void value) {
+      // On the web this can run after the state is disposed, since microtasks
+      // are not flushed between onBeginFrame and onDrawFrame. The controller
+      // was already disposed in dispose() by then.
+      if (!mounted) {
+        return;
+      }
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex)!.controller!.dispose();
 
       // Decrement the incoming and outgoing item indices to account
