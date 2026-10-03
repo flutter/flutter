@@ -64,6 +64,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.RealObject;
 import org.robolectric.shadows.ShadowDialog;
 import org.robolectric.shadows.ShadowSurfaceView;
 
@@ -714,6 +715,38 @@ public class PlatformViewsController2Test {
   }
 
   @Test
+  @Config(
+      shadows = {
+        ShadowFlutterJNI.class,
+        ShadowPlatformTaskQueue.class,
+        ShadowRecordingTransaction.class
+      })
+  public void rasterTransactionIsNotMergedUntilSubmittedThroughFlutterJNI() {
+    ShadowRecordingTransaction.reset();
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterJNI jni = new FlutterJNI();
+    jni.setPlatformViewsController2(controller);
+    FlutterView flutterView = mock(FlutterView.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(mock(AttachedSurfaceControl.class));
+    controller.attachToView(flutterView);
+
+    // The raster thread creates the transaction, then keeps writing into it natively.
+    SurfaceControl.Transaction rasterTx = jni.createTransaction();
+
+    // A frame that ends while those writes are in flight must not merge it.
+    controller.swapTransactions();
+    controller.onEndFrame();
+    assertTrue(ShadowRecordingTransaction.merged.isEmpty());
+
+    // Once the raster thread submits it, the next frame merges it.
+    jni.submitTransaction(rasterTx);
+    controller.swapTransactions();
+    controller.onEndFrame();
+    assertEquals(Arrays.asList(rasterTx), ShadowRecordingTransaction.merged);
+  }
+
+  @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void swapTransactionsClosesDiscardedPlatformTransaction() {
     TransactionTrackingController controller = new TransactionTrackingController();
@@ -1284,6 +1317,24 @@ public class PlatformViewsController2Test {
     @Implementation
     public SurfaceHolder getHolder() {
       return holder;
+    }
+  }
+
+  /** Records every transaction merged into another, so tests can see what a frame picked up. */
+  @Implements(SurfaceControl.Transaction.class)
+  public static class ShadowRecordingTransaction {
+    static final List<SurfaceControl.Transaction> merged = new ArrayList<>();
+
+    @RealObject private SurfaceControl.Transaction realObject;
+
+    static void reset() {
+      merged.clear();
+    }
+
+    @Implementation
+    protected SurfaceControl.Transaction merge(SurfaceControl.Transaction other) {
+      merged.add(other);
+      return realObject;
     }
   }
 }

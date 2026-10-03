@@ -28,7 +28,11 @@ struct WrappedSurfaceTransaction {
   /// Java.
   bool owned = true;
 
-  constexpr bool operator==(const WrappedSurfaceTransaction& other) const {
+  /// Invoked after all native writes into a borrowed (non-owned) transaction
+  /// have completed, to hand the transaction back to Java for application.
+  std::function<void()> submit_callback;
+
+  bool operator==(const WrappedSurfaceTransaction& other) const {
     return other.tx == tx;
   }
 };
@@ -64,6 +68,18 @@ class SurfaceTransaction {
   SurfaceTransaction& operator=(const SurfaceTransaction&) = delete;
 
   explicit SurfaceTransaction(ASurfaceTransaction* transaction);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Wraps a transaction borrowed from Java.
+  ///
+  /// @param[in]  transaction      The borrowed transaction.
+  /// @param[in]  submit_callback  Invoked from `Apply` once all native writes
+  ///                              into the transaction have completed. This is
+  ///                              the point at which it is safe for Java to
+  ///                              merge, apply, or close the transaction.
+  ///
+  SurfaceTransaction(ASurfaceTransaction* transaction,
+                     std::function<void()> submit_callback);
 
   bool IsValid() const;
 

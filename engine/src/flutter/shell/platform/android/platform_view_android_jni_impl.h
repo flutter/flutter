@@ -130,6 +130,9 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
   // New Platform View Support.
   ASurfaceTransaction* createTransaction() override;
 
+  ASurfaceTransaction* createTransactionWithSubmitCallback(
+      std::function<void()>* out_submit_callback) override;
+
   void swapTransaction() override;
 
   std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>

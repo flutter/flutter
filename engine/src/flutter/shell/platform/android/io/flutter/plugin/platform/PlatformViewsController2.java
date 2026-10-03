@@ -769,16 +769,42 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return pendingPlatformTransaction;
   }
 
+  /**
+   * Allocates a transaction for the raster thread without making it visible to the platform thread.
+   *
+   * <p>The native caller continues to write into the transaction after this returns (setting the
+   * buffer and the completion callback). Publishing it here would let {@link #swapTransactions()}
+   * and {@link #onEndFrame()} merge and close it while those writes are in flight. The caller must
+   * call {@link #submitTransaction} once it is done writing.
+   */
   // Called from the raster thread through FlutterJNI.
   @RequiresApi(API_LEVELS.API_34)
-  public SurfaceControl.Transaction createTransaction() {
-    final SurfaceControl.Transaction tx = newTransaction();
-    // This lock protects the list, not AHBSwapchainImplVK::Present's later native writes.
-    // Those can race merging or GC freeing the transaction. Fix both hazards by retaining it
-    // natively and publishing only after the writes finish.
+  public SurfaceControl.Transaction createUnpublishedTransaction() {
+    return newTransaction();
+  }
+
+  /**
+   * Publishes a transaction returned by {@link #createUnpublishedTransaction()} now that the caller
+   * has finished writing into it.
+   */
+  // Called from the raster thread through FlutterJNI.
+  @RequiresApi(API_LEVELS.API_34)
+  public void submitTransaction(SurfaceControl.Transaction tx) {
+    if (tx == null) {
+      return;
+    }
     synchronized (transactionLock) {
       pendingRasterTransactions.add(tx);
     }
+  }
+
+  // Retained for tests that drive the controller directly, without the native JNI caller that
+  // would otherwise be responsible for calling submitTransaction.
+  @VisibleForTesting
+  @RequiresApi(API_LEVELS.API_34)
+  public SurfaceControl.Transaction createTransaction() {
+    final SurfaceControl.Transaction tx = createUnpublishedTransaction();
+    submitTransaction(tx);
     return tx;
   }
 
