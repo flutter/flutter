@@ -711,7 +711,19 @@ void FlutterEmbedderNative::HandleCompositorFramePresented() {
   if (!jni_router_ || !android_task_runners_) {
     return;
   }
-  bool is_first_frame = !first_frame_presented_.exchange(true);
+  bool is_first_frame = false;
+  if (surface_attached_.load()) {
+    is_first_frame = !first_frame_presented_.exchange(true);
+  }
+  std::string vm_service_uri;
+  if (is_first_frame) {
+    vm_service_uri = GetVmServiceUri();
+    if (vm_service_uri.empty()) {
+      if (auto default_vm_init = GetDefaultVMInit()) {
+        vm_service_uri = default_vm_init->GetVmServiceUri();
+      }
+    }
+  }
   bool is_surface_control = IsHcppEnabled();
   std::vector<int64_t> views_to_hide;
   bool should_show_overlay = false;
@@ -739,10 +751,18 @@ void FlutterEmbedderNative::HandleCompositorFramePresented() {
     return;
   }
   auto run_end_frame = [router = jni_router_, is_first_frame,
+                        vm_service_uri = std::move(vm_service_uri),
                         is_surface_control,
                         views_to_hide = std::move(views_to_hide),
                         should_show_overlay, should_hide_overlay]() {
     if (is_first_frame) {
+      if (!vm_service_uri.empty()) {
+#if FML_OS_ANDROID
+        __android_log_print(ANDROID_LOG_INFO, "flutter",
+                            "The Dart VM service is listening on %s",
+                            vm_service_uri.c_str());
+#endif
+      }
       router->RouteFirstFrame();
     }
     if (is_surface_control) {
@@ -1720,6 +1740,19 @@ void FlutterEmbedderNative::NotifySurfaceCreated(ANativeWindow* window,
     if (s_procs.ScheduleFrame) {
       s_procs.ScheduleFrame(engine);
     }
+  }
+  std::string vm_service_uri = GetVmServiceUri();
+  if (vm_service_uri.empty()) {
+    if (auto default_vm_init = GetDefaultVMInit()) {
+      vm_service_uri = default_vm_init->GetVmServiceUri();
+    }
+  }
+  if (!vm_service_uri.empty()) {
+#if FML_OS_ANDROID
+    __android_log_print(ANDROID_LOG_INFO, "flutter",
+                        "The Dart VM service is listening on %s",
+                        vm_service_uri.c_str());
+#endif
   }
 }
 
@@ -3823,12 +3856,13 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
       FlutterEngineGetProcAddresses(&procs);
       return procs;
     }();
-    if (surface_attached_) {
-      if (s_procs.NotifyCreated) {
-        s_procs.NotifyCreated(engine);
-      }
+    if (surface_attached_.load()) {
       if (s_procs.ScheduleFrame) {
         s_procs.ScheduleFrame(engine);
+      }
+    } else {
+      if (s_procs.NotifyDestroyed) {
+        s_procs.NotifyDestroyed(engine);
       }
     }
   }
@@ -3931,6 +3965,17 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::SpawnChild(
       child->RegisterImageDecoder(spawned_engine);
       child->RunInitializedEngine(spawned_engine);
       child->FlushPendingPlatformMessages();
+      if (!child->initialize_engine_fn_ && !child->surface_attached_.load()) {
+        static FlutterEngineProcTable s_procs = []() {
+          FlutterEngineProcTable procs = {};
+          procs.struct_size = sizeof(FlutterEngineProcTable);
+          FlutterEngineGetProcAddresses(&procs);
+          return procs;
+        }();
+        if (s_procs.NotifyDestroyed) {
+          s_procs.NotifyDestroyed(spawned_engine);
+        }
+      }
     }
   } else if (GetRouter()) {
     int64_t spawned_id =
