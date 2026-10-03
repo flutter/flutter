@@ -11,6 +11,10 @@ FLUTTER_ASSERT_ARC
 
 namespace {
 
+// The thickness, in points, of the frame reported for hidden nodes inside a
+// scrollable. See `-[SemanticsObject hiddenNodeFrame]`.
+constexpr CGFloat kHiddenNodeFrameExtent = 1.0;
+
 flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     UIAccessibilityScrollDirection direction) {
   // To describe the vertical scroll direction, UIAccessibilityScrollDirection uses the
@@ -715,9 +719,66 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   }
 
   if (self.node.flags.isHidden) {
+    CGRect hiddenFrame = [self hiddenNodeFrame];
+    if (!CGRectIsEmpty(hiddenFrame)) {
+      return hiddenFrame;
+    }
     return [super accessibilityFrame];
   }
   return [self globalRect];
+}
+
+
+// Returns the frame reported for a hidden node that lives inside a scrollable,
+// or CGRectZero if the node has no scrollable ancestor.
+//
+// Hidden nodes are off-screen items kept in the tree so that VoiceOver can
+// swipe to them, triggering `accessibilityScrollToVisible` and thus an implicit
+// scroll. Since iOS 27, VoiceOver skips elements with an empty frame, so a
+// hidden node reports a thin strip at the edge of the scrollable's viewport
+// closest to where the node actually is, which VoiceOver treats like a clipped
+// element.
+//
+// See also: https://github.com/flutter/flutter/issues/192774
+- (CGRect)hiddenNodeFrame {
+  SemanticsObject* scrollable = self.parent;
+  while (scrollable && ![scrollable isKindOfClass:[FlutterScrollableSemanticsObject class]]) {
+    scrollable = scrollable.parent;
+  }
+  if (!scrollable) {
+    return CGRectZero;
+  }
+  CGRect viewport = scrollable.accessibilityFrame;
+  if (CGRectIsEmpty(viewport)) {
+    return CGRectZero;
+  }
+
+  CGRect rect = [self globalRect];
+  BOOL isHorizontal = (scrollable.node.actions & flutter::kVerticalScrollSemanticsActions) == 0 &&
+                      (scrollable.node.actions & flutter::kHorizontalScrollSemanticsActions) != 0;
+  if (isHorizontal) {
+    CGFloat minY = MAX(CGRectGetMinY(rect), CGRectGetMinY(viewport));
+    CGFloat maxY = MIN(CGRectGetMaxY(rect), CGRectGetMaxY(viewport));
+    if (maxY <= minY) {
+      minY = CGRectGetMinY(viewport);
+      maxY = CGRectGetMaxY(viewport);
+    }
+    CGFloat x = CGRectGetMidX(rect) < CGRectGetMidX(viewport)
+                    ? CGRectGetMinX(viewport)
+                    : CGRectGetMaxX(viewport) - kHiddenNodeFrameExtent;
+    return CGRectMake(x, minY, kHiddenNodeFrameExtent, maxY - minY);
+  }
+
+  CGFloat minX = MAX(CGRectGetMinX(rect), CGRectGetMinX(viewport));
+  CGFloat maxX = MIN(CGRectGetMaxX(rect), CGRectGetMaxX(viewport));
+  if (maxX <= minX) {
+    minX = CGRectGetMinX(viewport);
+    maxX = CGRectGetMaxX(viewport);
+  }
+  CGFloat y = CGRectGetMidY(rect) < CGRectGetMidY(viewport)
+                  ? CGRectGetMinY(viewport)
+                  : CGRectGetMaxY(viewport) - kHiddenNodeFrameExtent;
+  return CGRectMake(minX, y, maxX - minX, kHiddenNodeFrameExtent);
 }
 
 - (CGRect)globalRect {
