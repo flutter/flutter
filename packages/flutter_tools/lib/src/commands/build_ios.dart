@@ -32,6 +32,8 @@ import '../ios/application_package.dart';
 import '../ios/code_signing.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../ios/xcodeproj.dart';
+import '../macos/cocoapods.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
@@ -981,9 +983,15 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       :Logger logger,
       :OperatingSystemUtils os,
       :Platform platform,
+      :ProcessUtils processUtils,
       :Terminal terminal,
     ) = _toolContext;
-    final AppleContext(:PlistParser plistParser) = _appleContext;
+    final AppleContext(
+      :CocoaPods cocoaPods,
+      :PlistParser plistParser,
+      :Xcode xcode,
+      :XcodeProjectInterpreter xcodeProjectInterpreter,
+    ) = _appleContext;
 
     defaultBuildMode = environmentType == EnvironmentType.simulator
         ? BuildMode.debug
@@ -1016,10 +1024,14 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     });
     final String? specifiedDeviceId =
         globalResults?[FlutterGlobalOptions.kDeviceIdOption] as String? ??
-        _toolContext.platform.environment['FLUTTER_DEVICE_ID'];
+        platform.environment['FLUTTER_DEVICE_ID'];
     final XcodeBuildResult result = await buildXcodeProject(
+      analytics: analytics,
       app: app,
       buildInfo: buildInfo,
+      plistParser: plistParser,
+      toolContext: _toolContext,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
       targetOverride: targetFile,
       environmentType: environmentType,
       codesign: shouldCodesign,
@@ -1030,6 +1042,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
           usingCISystem &&
           xcodeBuildAction == XcodeBuildAction.build &&
           await disablePortPublication,
+      verboseLogging:
+          logger.isVerbose || (globalResults?[FlutterGlobalOptions.kVerboseFlag] == true),
+      cocoaPods: cocoaPods,
+      xcode: xcode,
     );
     xcodeBuildResult = result;
 
@@ -1041,6 +1057,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         logger: logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
+        processUtils: processUtils,
+        xcode: xcode,
       );
       final presentParticiple = xcodeBuildAction == XcodeBuildAction.build
           ? 'building'
