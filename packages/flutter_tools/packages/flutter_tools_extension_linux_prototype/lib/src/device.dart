@@ -24,10 +24,13 @@ final class LinuxDeviceService extends DeviceService {
   }
 
   @override
-  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot}) async {
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async {
     if (deviceId != 'custom_linux_device') {
       return false;
     }
-    return Directory.fromUri(projectRoot.resolve('linux')).existsSync();
+    return Directory.fromUri(project.directory.resolve('linux')).existsSync();
   }
 }

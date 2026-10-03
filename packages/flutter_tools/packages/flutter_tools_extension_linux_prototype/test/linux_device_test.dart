@@ -29,27 +29,26 @@ void main() {
       final Directory tempDir = Directory.systemTemp.createTempSync('linux_device_test.');
       addTearDown(() => tempDir.deleteSync(recursive: true));
 
+      final project = ExtensionFlutterProject(
+        appName: 'test_app',
+        buildDirectory: tempDir.uri.resolve('build/'),
+        directory: tempDir.uri,
+      );
       final service = LinuxDeviceService();
 
       expect(
-        await service.isSupportedForProject(
-          deviceId: 'custom_linux_device',
-          projectRoot: tempDir.uri,
-        ),
+        await service.isSupportedForProject(deviceId: 'custom_linux_device', project: project),
         isFalse,
       );
 
       Directory.fromUri(tempDir.uri.resolve('linux')).createSync();
       expect(
-        await service.isSupportedForProject(
-          deviceId: 'custom_linux_device',
-          projectRoot: tempDir.uri,
-        ),
+        await service.isSupportedForProject(deviceId: 'custom_linux_device', project: project),
         isTrue,
       );
 
       expect(
-        await service.isSupportedForProject(deviceId: 'unknown_device', projectRoot: tempDir.uri),
+        await service.isSupportedForProject(deviceId: 'unknown_device', project: project),
         isFalse,
       );
     });

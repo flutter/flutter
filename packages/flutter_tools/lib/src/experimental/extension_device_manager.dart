@@ -44,7 +44,10 @@ final class ExtensionDeviceClient extends DeviceService {
   }
 
   @override
-  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot}) async {
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async {
     _logger.printTrace(
       'ExtensionDeviceClient checking project support for "$deviceId" via RPC '
       '("${DeviceService.isSupportedForProjectMethod}")...',
@@ -53,7 +56,7 @@ final class ExtensionDeviceClient extends DeviceService {
       final Object? rawResult = await connection
           .sendRequest(DeviceService.isSupportedForProjectMethod, <String, Object?>{
             DeviceService.deviceIdParam: deviceId,
-            DeviceService.projectRootParam: projectRoot.toString(),
+            DeviceService.projectParam: project.toMap(),
           })
           .timeout(const Duration(seconds: 5));
       if (rawResult case final bool supported) {
@@ -157,8 +160,8 @@ class ExtensionBackedDevice extends Device {
   Future<bool> isSupported() async => _targetDevice.isSupported;
 
   @override
-  Future<bool> isSupportedForProject(FlutterProject flutterProject) =>
-      _deviceService.isSupportedForProject(deviceId: id, projectRoot: flutterProject.directory.uri);
+  Future<bool> isSupportedForProject(FlutterProject flutterProject) => _deviceService
+      .isSupportedForProject(deviceId: id, project: flutterProject.toExtensionProject());
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.unknown;

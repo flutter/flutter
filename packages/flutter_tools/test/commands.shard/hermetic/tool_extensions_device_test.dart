@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionFlutterProject;
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 
 import '../../src/context.dart';
@@ -82,6 +83,44 @@ void main() {
   });
 
   group('Tool Extensions Device Integration - Enabled', () {
+    testUsingContext(
+      'FlutterProject.toExtensionProject extracts project and manifest metadata',
+      () async {
+        final localFs = LocalFileSystem.test(signals: LocalSignals.instance);
+        addTearDown(localFs.dispose);
+        final Directory tempDir = localFs.systemTempDirectory.createTempSync(
+          'flutter_tool_extensions_project_test.',
+        );
+        tempDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: sample_app
+version: 2.1.0+5
+workspace:
+  - packages/sub_pkg
+dependencies:
+  flutter:
+    sdk: flutter
+  path: ^1.9.0
+flutter:
+  module:
+    androidX: true
+''');
+
+        final projectFactory = FlutterProjectFactory(fileSystem: localFs, logger: testLogger);
+        final FlutterProject project = projectFactory.fromDirectory(tempDir);
+        final ExtensionFlutterProject extProject = project.toExtensionProject();
+
+        expect(extProject.appName, 'sample_app');
+        expect(extProject.appVersion, '2.1.0+5');
+        expect(extProject.directory, project.directory.uri);
+        expect(extProject.buildDirectory, project.buildDirectory.uri);
+        expect(extProject.dependencies, <String>{'flutter', 'path'});
+        expect(extProject.isEmpty, isFalse);
+        expect(extProject.isModule, isTrue);
+        expect(extProject.isPlugin, isFalse);
+        expect(extProject.workspace, <String>['packages/sub_pkg']);
+      },
+    );
+
     testUsingContext(
       'ExtensionDevices discovers custom device when feature flag enabled',
       () async {
