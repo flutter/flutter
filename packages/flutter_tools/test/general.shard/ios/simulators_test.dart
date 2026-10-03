@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
@@ -29,7 +31,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../../src/fakes.dart' show FakeLogger, FakePlistParser;
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -1679,6 +1681,157 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         Xcode: () => xcode,
       },
     );
+
+    group('waiting for the log stream', () {
+      final logStreamCommand = <Pattern>[
+        'xcrun',
+        'simctl',
+        'spawn',
+        'x',
+        'log',
+        'stream',
+        '--style',
+        'json',
+        '--predicate',
+        RegExp('.*'),
+      ];
+
+      late FakeProcessManager processManager;
+
+      setUp(() {
+        processManager = FakeProcessManager.empty();
+        testPlistParser.setProperty('CFBundleIdentifier', 'correct');
+      });
+
+      IOSSimulator buildDevice() => IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+        logger: logger,
+      );
+
+      IOSApp buildPackage() => PrebuiltIOSApp(
+        projectBundleId: 'correct',
+        bundleName: 'name',
+        uncompressedBundle: globals.fs.currentDirectory,
+        applicationPackage: globals.fs.currentDirectory,
+      );
+
+      testUsingContext(
+        'startApp waits for the log stream to be ready before launching the app',
+        () {
+          // Regression test for https://github.com/flutter/flutter/issues/181771.
+          fakeAsync((FakeAsync async) {
+            final logProcess = FakeStreamingProcess();
+            processManager.addCommand(FakeCommand(command: logStreamCommand, process: logProcess));
+
+            buildDevice().startApp(
+              buildPackage(),
+              prebuiltApplication: true,
+              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+            );
+            async.elapse(const Duration(seconds: 1));
+            expect(simControl.requests, isEmpty);
+
+            logProcess.write('Filtering the log data using "type == 1024"\n');
+            async.flushMicrotasks();
+            expect(simControl.requests, hasLength(1));
+            expect(processManager, hasNoRemainingExpectations);
+          });
+        },
+        overrides: <Type, Generator>{
+          PlistParser: () => testPlistParser,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Logger: () => logger,
+          Xcode: () => xcode,
+        },
+      );
+
+      testUsingContext(
+        'startApp finds the VM Service when the log reader is listened to before startApp',
+        () async {
+          // `flutter run` listens to the log reader to echo logs before it calls startApp.
+          final logProcess = FakeStreamingProcess();
+          processManager.addCommand(
+            FakeCommand(
+              command: logStreamCommand,
+              onRun: (_) => logProcess.write('Filtering the log data using "type == 1024"\n'),
+              process: logProcess,
+            ),
+          );
+          simControl = FakeSimControl(
+            onLaunch: () {
+              logProcess.write(
+                '"eventMessage" : "The Dart VM service is listening on http://127.0.0.1:1234/abcdef/"\n',
+              );
+            },
+          );
+          final IOSSimulator device = buildDevice();
+          final IOSApp package = buildPackage();
+          final echoedLines = <String>[];
+          device.getLogReader(app: package).logLines.listen(echoedLines.add);
+
+          final LaunchResult result = await device.startApp(
+            package,
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          );
+
+          expect(result.vmServiceUri, Uri.parse('http://127.0.0.1:1234/abcdef/'));
+          expect(echoedLines, <String>[
+            'The Dart VM service is listening on http://127.0.0.1:1234/abcdef/',
+          ]);
+          expect(processManager, hasNoRemainingExpectations);
+        },
+        overrides: <Type, Generator>{
+          PlistParser: () => testPlistParser,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Logger: () => logger,
+          Xcode: () => xcode,
+        },
+      );
+
+      testUsingContext(
+        'startApp throws without launching the app if the log stream never becomes ready',
+        () {
+          fakeAsync((FakeAsync async) {
+            processManager.addCommand(
+              FakeCommand(command: logStreamCommand, completer: Completer<void>()),
+            );
+
+            Object? error;
+            buildDevice()
+                .startApp(
+                  buildPackage(),
+                  prebuiltApplication: true,
+                  debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+                )
+                .then(
+                  (_) {},
+                  onError: (Object e) {
+                    error = e;
+                  },
+                );
+            async.elapse(const Duration(seconds: 30));
+
+            expect(error, isA<TimeoutException>());
+            expect(simControl.requests, isEmpty);
+            expect(processManager, hasNoRemainingExpectations);
+          });
+        },
+        overrides: <Type, Generator>{
+          PlistParser: () => testPlistParser,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Logger: () => logger,
+          Xcode: () => xcode,
+        },
+      );
+    });
   });
 
   group('IOSDevice.isSupportedForProject', () {
@@ -1797,7 +1950,11 @@ class FakeIosProject extends Fake implements IosProject {
 }
 
 class FakeSimControl extends Fake implements SimControl {
+  FakeSimControl({this.onLaunch});
+
   final requests = <LaunchRequest>[];
+
+  final void Function()? onLaunch;
 
   @override
   Future<RunResult> launch(
@@ -1805,6 +1962,7 @@ class FakeSimControl extends Fake implements SimControl {
     String appIdentifier, [
     List<String>? launchArgs,
   ]) async {
+    onLaunch?.call();
     requests.add(LaunchRequest(appIdentifier, launchArgs));
     return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
   }
@@ -1813,6 +1971,18 @@ class FakeSimControl extends Fake implements SimControl {
   Future<RunResult> install(String deviceId, String appPath) async {
     return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
   }
+}
+
+/// A [FakeProcess] that keeps running, and whose stdout is written by the test.
+class FakeStreamingProcess extends FakeProcess {
+  FakeStreamingProcess() : super(completer: Completer<void>());
+
+  final _stdoutController = StreamController<List<int>>();
+
+  @override
+  Stream<List<int>> get stdout => _stdoutController.stream;
+
+  void write(String output) => _stdoutController.add(utf8.encode(output));
 }
 
 class LaunchRequest {

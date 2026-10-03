@@ -403,7 +403,7 @@ class IOSSimulator extends Device {
   @override
   Future<CpuArch> get cpuArch async => _cpuArch;
 
-  final _logReaders = <IOSApp?, DeviceLogReader>{};
+  final _logReaders = <IOSApp?, _IOSSimulatorLogReader>{};
   _IOSSimulatorDevicePortForwarder? _portForwarder;
 
   @override
@@ -496,12 +496,21 @@ class IOSSimulator extends Device {
 
     ProtocolDiscovery? vmServiceDiscovery;
     if (debuggingOptions.debuggingEnabled) {
+      final _IOSSimulatorLogReader logReader = getLogReader(app: package);
       vmServiceDiscovery = ProtocolDiscovery.vmService(
-        getLogReader(app: package),
+        logReader,
         ipv6: debuggingOptions.ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         logger: globals.logger,
+      );
+      // Launch the app only after the log stream is ready; otherwise the
+      // Dart VM Service URL it logs on startup can be missed.
+      const timeout = Duration(seconds: 30);
+      await logReader._ready.future.timeout(
+        timeout,
+        onTimeout: () =>
+            throw TimeoutException('The iOS simulator log stream did not start.', timeout),
       );
     }
 
@@ -630,7 +639,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({covariant IOSApp? app, bool includePastLogs = false}) {
+  _IOSSimulatorLogReader getLogReader({covariant IOSApp? app, bool includePastLogs = false}) {
     assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');
     return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
   }
@@ -854,6 +863,12 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
     onCancel: _stop,
   );
 
+  /// Completes once the log stream is ready to deliver events, or has exited.
+  ///
+  /// `log stream` is ready once it prints its first line (a "Filtering the log
+  /// data using ..." header); events logged before that are dropped.
+  final _ready = Completer<void>();
+
   @override
   @visibleForTesting
   StreamController<String> get linesController => _linesController;
@@ -872,7 +887,12 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
     // Unified logging iOS 11 and greater (introduced in iOS 10).
     if (await device.sdkMajorVersion >= 11) {
       _deviceProcess = await launchDeviceUnifiedLogging(device, _appName);
-      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
+      _deviceProcess?.stdout.transform(utf8LineDecoder).listen((String line) {
+        if (!_ready.isCompleted) {
+          _ready.complete();
+        }
+        _onUnifiedLoggingLine(line);
+      });
       _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
     } else {
       // Fall back to syslog parsing.
@@ -894,6 +914,9 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
     // cleanup in the callback.
     unawaited(
       _deviceProcess?.exitCode.whenComplete(() {
+        if (!_ready.isCompleted) {
+          _ready.complete();
+        }
         if (_linesController.hasListener) {
           _linesController.close();
         }
