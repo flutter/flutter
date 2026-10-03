@@ -3112,6 +3112,13 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     return Future.delayed(Duration.zero);
   }
 
+  DomEvent touchDown({double? clientX, double? clientY}) => context.multiTouchDown(<_TouchDetails>[
+    _TouchDetails(pointer: 1, clientX: clientX, clientY: clientY),
+  ])[0];
+  DomEvent touchUp({double? clientX, double? clientY}) => context.multiTouchUp(<_TouchDetails>[
+    _TouchDetails(pointer: 1, clientX: clientX, clientY: clientY),
+  ])[0];
+
   void testWithSemantics(
     String description,
     Future<void> Function() body, {
@@ -3150,7 +3157,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
   test('Forwards to framework when semantics is off', () {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, false);
     expect(PointerBinding.clickDebouncer.isDebouncing, false);
-    binding.rootElement.dispatchEvent(context.primaryDown());
+    binding.rootElement.dispatchEvent(touchDown());
     expect(pointerPackets, <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down]);
     expect(PointerBinding.clickDebouncer.isDebouncing, false);
     expect(semanticsActions, isEmpty);
@@ -3166,9 +3173,9 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     final DomElement testElement = createDomElement('flt-semantics');
     view.dom.semanticsHost.appendChild(testElement);
 
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     await nextEventLoop();
-    testElement.dispatchEvent(context.primaryUp());
+    testElement.dispatchEvent(touchUp());
     expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
     expect(pointerPackets, <ui.PointerChange>[
@@ -3178,6 +3185,52 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     ]);
     expect(semanticsActions, isEmpty);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/188859
+  testWithSemantics('Forwards physical mouse input to the framework', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
+
+    testElement.dispatchEvent(context.mouseDown(button: 0, buttons: 1));
+    expect(
+      reason: 'A physical mouse must not start debouncing.',
+      PointerBinding.clickDebouncer.isDebouncing,
+      isFalse,
+    );
+
+    await nextEventLoop();
+    testElement.dispatchEvent(context.mouseUp(button: 0));
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+
+    expect(
+      reason:
+          'Pointer events reach the framework with real coordinates, so a '
+          'GestureDetector can report accurate Tap*Details.',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down, ui.PointerChange.up],
+    );
+
+    // The browser follows the pointer events with a DOM "click". It must not
+    // also be turned into a SemanticsAction.tap, or the tap would fire twice.
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+
+    expect(
+      reason:
+          'Because the DOM click event was deduped against the pointerup that '
+          'was just flushed.',
+      semanticsActions,
+      isEmpty,
+    );
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
+  }, skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows);
 
   testWithSemantics('Does not start debouncing if reset before scheduled execution', () async {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, isTrue);
@@ -3189,7 +3242,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     view.dom.semanticsHost.appendChild(testElement);
 
     // 1. Trigger _maybeStartDebouncing, which sets _isDebouncing = true and schedules _doStartDebouncing.
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
 
     // At this point, debouncing has been scheduled but hasn't started yet.
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
@@ -3225,7 +3278,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
 
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     // ClickDebouncer does not start debouncing right away.
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
     expect(PointerBinding.clickDebouncer.debugState, isNotNull);
@@ -3255,13 +3308,13 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     view.dom.semanticsHost.appendChild(testElement);
 
     // A `pointerdown` kicks off the debouncing process.
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
     expect(PointerBinding.clickDebouncer.debugState, isNotNull);
     expect(PointerBinding.clickDebouncer.debugState!.queue, hasLength(1));
 
     // A `pointerup` in the same event loop should not throw.
-    expect(() => testElement.dispatchEvent(context.primaryUp()), returnsNormally);
+    expect(() => testElement.dispatchEvent(touchUp()), returnsNormally);
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
     expect(PointerBinding.clickDebouncer.debugState, isNotNull);
     expect(PointerBinding.clickDebouncer.debugState!.queue, hasLength(2));
@@ -3296,7 +3349,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
 
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     expect(
       reason: 'Should start debouncing at first pointerdown',
       PointerBinding.clickDebouncer.isDebouncing,
@@ -3304,7 +3357,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     );
 
     await nextEventLoop();
-    testElement.dispatchEvent(context.primaryUp());
+    testElement.dispatchEvent(touchUp());
     expect(
       reason: 'Should still be debouncing after pointerup',
       PointerBinding.clickDebouncer.isDebouncing,
@@ -3345,7 +3398,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
 
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     expect(
       reason: 'Should start debouncing at first pointerdown',
       PointerBinding.clickDebouncer.isDebouncing,
@@ -3356,7 +3409,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     final DomElement newTarget = createDomElement('flt-semantics');
     newTarget.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(newTarget);
-    newTarget.dispatchEvent(context.primaryUp());
+    newTarget.dispatchEvent(touchUp());
 
     expect(
       reason: 'Should stop debouncing when target changes.',
@@ -3400,7 +3453,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     final DomElement testElement = createDomElement('flt-semantics');
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     expect(PointerBinding.clickDebouncer.isDebouncing, true);
 
     await nextEventLoop();
@@ -3420,7 +3473,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     final DomElement testElement = createDomElement('flt-semantics');
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     expect(PointerBinding.clickDebouncer.isDebouncing, true);
 
     await nextEventLoop();
@@ -3449,7 +3502,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
 
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
 
     // Simulate the user holding the pointer down for some time before releasing,
     // such that the pointerup event happens close to timer expiration. This
@@ -3458,7 +3511,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     // like a double-click, so the click event is deduped.
     await Future<void>.delayed(const Duration(milliseconds: 190));
 
-    testElement.dispatchEvent(context.primaryUp());
+    testElement.dispatchEvent(touchUp());
     expect(PointerBinding.clickDebouncer.isDebouncing, true);
     expect(reason: 'Timer has not expired yet', pointerPackets, isEmpty);
 
@@ -3502,7 +3555,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     view.dom.semanticsHost.appendChild(testElement);
 
     // Begin a long-press with a "pointerdown".
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
 
     // Expire the timer causing the debouncer to reset itself.
     await Future<void>.delayed(const Duration(milliseconds: 250));
@@ -3514,7 +3567,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     pointerPackets.clear();
 
     // Send a "pointerup" while the debouncer is not debouncing anything.
-    testElement.dispatchEvent(context.primaryUp());
+    testElement.dispatchEvent(touchUp());
 
     // A standalone "pointerup" should not start debouncing anything.
     expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
@@ -3547,7 +3600,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
       testElement.setAttribute('flt-tappable', '');
       view.dom.semanticsHost.appendChild(testElement);
 
-      testElement.dispatchEvent(context.primaryDown());
+      testElement.dispatchEvent(touchDown());
 
       // Simulate the user holding the pointer down for some time before releasing,
       // such that the pointerup event happens close to timer expiration. This
@@ -3556,7 +3609,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
       // correctly. The inverse situation was already tested in the previous test.
       await Future<void>.delayed(const Duration(milliseconds: 190));
 
-      testElement.dispatchEvent(context.primaryUp());
+      testElement.dispatchEvent(touchUp());
       expect(PointerBinding.clickDebouncer.isDebouncing, true);
       expect(reason: 'Timer has not expired yet', pointerPackets, isEmpty);
 
