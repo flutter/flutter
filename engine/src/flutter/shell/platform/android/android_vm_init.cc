@@ -67,7 +67,7 @@ static bool IsVivanteDevice() {
 AndroidRenderingAPI SelectRenderingAPI(
     const AndroidVMArgs& args,
     std::optional<bool> is_vivante,
-    std::optional<DeviceProperties> device_properties,
+    const std::optional<DeviceProperties>& device_properties,
     bool is_release_build) {
   TRACE_EVENT0("flutter", "SelectRenderingAPI");
 #if !SLIMPELLER
@@ -490,8 +490,9 @@ std::optional<AndroidVMArgs> AndroidVMInit::GetGlobalVMArgs() {
   return g_global_vm_args;
 }
 
-bool AndroidVMInit::Init(const AndroidVMArgs& args,
-                         std::optional<DeviceProperties> device_properties) {
+bool AndroidVMInit::Init(
+    const AndroidVMArgs& args,
+    const std::optional<DeviceProperties>& device_properties) {
   TRACE_EVENT0("flutter", "AndroidVMInit::Init");
   std::scoped_lock lock(mutex_);
   if (initialized_) {
@@ -500,7 +501,7 @@ bool AndroidVMInit::Init(const AndroidVMArgs& args,
   }
   vm_args_ = args;
   rendering_api_ =
-      SelectRenderingAPI(vm_args_, std::nullopt, std::move(device_properties));
+      SelectRenderingAPI(vm_args_, std::nullopt, device_properties);
 
   if (aot_data_ && aot_provider_) {
     aot_provider_->CollectAOTData(aot_data_);
