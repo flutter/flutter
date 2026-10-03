@@ -89,16 +89,10 @@ class FullPageDimensionsProvider extends DimensionsProvider {
       if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
         /// Chrome on iOS reports incorrect viewport.height when app
         /// starts in portrait orientation and the phone is rotated to
-        /// landscape.
-        ///
-        /// We instead use documentElement clientWidth/Height to read
-        /// accurate physical size. VisualViewport api is only used during
-        /// text editing to make sure inset is correctly reported to
-        /// framework.
-        final double docWidth = domDocument.documentElement!.clientWidth;
-        final double docHeight = domDocument.documentElement!.clientHeight;
-        windowInnerWidth = docWidth * devicePixelRatio;
-        windowInnerHeight = docHeight * devicePixelRatio;
+        /// landscape, so the size is read from documentElement instead. See
+        /// [_iOSHeight] for when the height comes from the visual viewport.
+        windowInnerWidth = domDocument.documentElement!.clientWidth * devicePixelRatio;
+        windowInnerHeight = _iOSHeight(viewport) * devicePixelRatio;
       } else {
         windowInnerWidth = viewport.width! * devicePixelRatio;
         windowInnerHeight = viewport.height! * devicePixelRatio;
@@ -110,6 +104,28 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     return ui.Size(windowInnerWidth, windowInnerHeight);
   }
 
+  /// The view height on iOS, in CSS pixels.
+  ///
+  /// This is normally `documentElement.clientHeight`. When the page scrolls,
+  /// iOS collapses the browser toolbar and the visible area grows, but
+  /// `clientHeight` keeps the toolbar-expanded height. In that case the view
+  /// uses the taller `visualViewport.height`, but only while the visual
+  /// viewport has the same width as the document, so a stale value from the
+  /// previous orientation during a rotation is ignored.
+  ///
+  /// The view never shrinks below `clientHeight`. A visual viewport that is
+  /// too short, as Chrome on iOS reports after rotating, or one that the
+  /// on-screen keyboard shrinks, keeps the `clientHeight` view, and the
+  /// keyboard is reported as an inset.
+  double _iOSHeight(DomVisualViewport viewport) {
+    final DomElement documentElement = domDocument.documentElement!;
+    final double docWidth = documentElement.clientWidth;
+    final double docHeight = documentElement.clientHeight;
+    final double viewportHeight = viewport.height!;
+    final bool sameOrientation = (viewport.width! - docWidth).abs() < 1;
+    return sameOrientation && viewportHeight > docHeight ? viewportHeight : docHeight;
+  }
+
   @override
   ViewPadding computeKeyboardInsets(double physicalHeight, bool isEditingOnMobile) {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
@@ -118,7 +134,9 @@ class FullPageDimensionsProvider extends DimensionsProvider {
 
     if (viewport != null) {
       if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs && !isEditingOnMobile) {
-        windowInnerHeight = domDocument.documentElement!.clientHeight * devicePixelRatio;
+        // Must match computePhysicalSize, or the difference would be reported
+        // as an open keyboard.
+        windowInnerHeight = _iOSHeight(viewport) * devicePixelRatio;
       } else {
         windowInnerHeight = viewport.height! * devicePixelRatio;
       }
