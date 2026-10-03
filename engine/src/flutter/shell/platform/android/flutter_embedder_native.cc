@@ -385,12 +385,52 @@ void FlutterEmbedderNative::InitializeRuntimeSubsystems(
 }
 
 void FlutterEmbedderNative::HandleCompositorBeginFrame() {
+  current_frame_platform_view_ids_.clear();
+  current_frame_overlay_count_ = 0;
   if (!jni_router_ || !android_task_runners_) {
     return;
   }
   if (!IsHcppEnabled()) {
-    android_task_runners_->GetPlatformTaskRunner()->PostTask(
-        [router = jni_router_]() { router->RouteBeginFrame(); });
+    auto platform_runner = android_task_runners_->GetPlatformTaskRunner();
+    if (!platform_runner) {
+      return;
+    }
+    if (platform_runner->RunsTasksOnCurrentThread()) {
+      jni_router_->RouteBeginFrame();
+      return;
+    }
+    if (is_image_view_surface_active_.load() && surface_attached_.load()) {
+      if (surface_manager_ && !surface_manager_->IsVulkanInitialized()) {
+        surface_manager_->BindOffscreenPbufferIfCurrent();
+      }
+      struct BeginFrameLatchState {
+        fml::AutoResetWaitableEvent done;
+      };
+      auto latch_state = std::make_shared<BeginFrameLatchState>();
+      platform_runner->PostTask([router = jni_router_, latch_state]() {
+        router->RouteBeginFrame();
+        latch_state->done.Signal();
+      });
+      // Poll every 16ms (one 60Hz frame interval) up to 60 iterations
+      // (~1 second max) for surface detachment.
+      constexpr int64_t kPlatformLatchWaitTimeoutMs = 16;
+      constexpr size_t kMaxWaitIterations = 60;
+      for (size_t iter = 0;
+           iter < kMaxWaitIterations &&
+           latch_state->done.WaitWithTimeout(
+               fml::TimeDelta::FromMilliseconds(kPlatformLatchWaitTimeoutMs));
+           ++iter) {
+        if (!surface_attached_.load()) {
+          break;
+        }
+      }
+      if (surface_manager_ && !surface_manager_->IsVulkanInitialized()) {
+        surface_manager_->MakeCurrent();
+      }
+    } else {
+      platform_runner->PostTask(
+          [router = jni_router_]() { router->RouteBeginFrame(); });
+    }
   }
 }
 
@@ -400,23 +440,78 @@ void FlutterEmbedderNative::HandleCompositorPlatformViewPresented(
     const FlutterSize& size,
     size_t mutations_count,
     const FlutterPlatformViewMutation** mutations) {
+  current_frame_platform_view_ids_.push_back(view_id);
   if (!jni_router_ || !android_task_runners_) {
     return;
   }
   int32_t x = static_cast<int32_t>(std::round(offset.x));
   int32_t y = static_cast<int32_t>(std::round(offset.y));
-  int32_t width = static_cast<int32_t>(std::round(size.width));
-  int32_t height = static_cast<int32_t>(std::round(size.height));
+  int32_t view_width = static_cast<int32_t>(std::round(size.width));
+  int32_t view_height = static_cast<int32_t>(std::round(size.height));
   AndroidMutatorsStack mutators_stack =
       AndroidMutatorsMapper::MapMutations(mutations, mutations_count);
+
+  // Determine whether the mutators stack includes the root device_pixel_ratio
+  // transform so that the logical size can be transformed by GetFinalMatrix()
+  // to obtain the physical bounding box of the FlutterMutatorView container.
+  constexpr float kDprEpsilon = 1e-4f;
+  constexpr float kScaleMatrixTolerance = 1e-2f;
+  constexpr float kSkewZeroTolerance = 1e-3f;
+  constexpr size_t kMaxRootTransformsToInspect = 2;
+  float dpr = GetViewportMetrics().device_pixel_ratio;
+  float effective_dpr = 1.0f;
+  if (dpr > 0.0f && std::abs(dpr - 1.0f) > kDprEpsilon) {
+    const auto& muts = mutators_stack.GetMutators();
+    size_t transform_idx = 0;
+    for (const auto& mut : muts) {
+      if (mut.type == AndroidMutatorType::kTransform) {
+        const auto& m = mut.GetMatrix();
+        if (std::abs(m.values[0] - dpr) < kScaleMatrixTolerance &&
+            std::abs(m.values[4] - dpr) < kScaleMatrixTolerance &&
+            std::abs(m.values[1]) < kSkewZeroTolerance &&
+            std::abs(m.values[3]) < kSkewZeroTolerance) {
+          effective_dpr = dpr;
+          break;
+        }
+        if (++transform_idx >= kMaxRootTransformsToInspect) {
+          break;
+        }
+      }
+    }
+  }
+  float logical_w = static_cast<float>(size.width) /
+                    (effective_dpr > 0.0f ? effective_dpr : 1.0f);
+  float logical_h = static_cast<float>(size.height) /
+                    (effective_dpr > 0.0f ? effective_dpr : 1.0f);
+  const AndroidMatrix3x3& final_matrix = mutators_stack.GetFinalMatrix();
+  float p0_x = 0.0f, p0_y = 0.0f;
+  float p1_x = 0.0f, p1_y = 0.0f;
+  float p2_x = 0.0f, p2_y = 0.0f;
+  float p3_x = 0.0f, p3_y = 0.0f;
+  final_matrix.TransformPoint(0.0f, 0.0f, &p0_x, &p0_y);
+  final_matrix.TransformPoint(logical_w, 0.0f, &p1_x, &p1_y);
+  final_matrix.TransformPoint(logical_w, logical_h, &p2_x, &p2_y);
+  final_matrix.TransformPoint(0.0f, logical_h, &p3_x, &p3_y);
+  float min_x = std::min({p0_x, p1_x, p2_x, p3_x});
+  float max_x = std::max({p0_x, p1_x, p2_x, p3_x});
+  float min_y = std::min({p0_y, p1_y, p2_y, p3_y});
+  float max_y = std::max({p0_y, p1_y, p2_y, p3_y});
+  int32_t width = static_cast<int32_t>(std::round(max_x - min_x));
+  int32_t height = static_cast<int32_t>(std::round(max_y - min_y));
+  if (width <= 0) {
+    width = view_width;
+  }
+  if (height <= 0) {
+    height = view_height;
+  }
 
   auto platform_runner = android_task_runners_->GetPlatformTaskRunner();
   if (!platform_runner) {
     return;
   }
   if (platform_runner->RunsTasksOnCurrentThread()) {
-    jni_router_->RoutePlatformViewMutators(view_id, x, y, width, height, width,
-                                           height, mutators_stack);
+    jni_router_->RoutePlatformViewMutators(
+        view_id, x, y, width, height, view_width, view_height, mutators_stack);
     return;
   }
   if (!IsHcppEnabled() && surface_attached_.load()) {
@@ -425,20 +520,22 @@ void FlutterEmbedderNative::HandleCompositorPlatformViewPresented(
     // convertToImageView() -> SetNativeWindow(FlutterImageView), the platform
     // thread can safely destroy the previous onscreen surface without
     // encountering EGL_BAD_ACCESS.
-    if (surface_manager_) {
+    if (surface_manager_ && !surface_manager_->IsVulkanInitialized()) {
       surface_manager_->BindOffscreenPbufferIfCurrent();
     }
     struct PlatformViewLatchState {
       fml::AutoResetWaitableEvent done;
     };
     auto latch_state = std::make_shared<PlatformViewLatchState>();
-    platform_runner->PostTask(
-        [router = jni_router_, view_id, x, y, width, height,
-         mutators_stack = std::move(mutators_stack), latch_state]() mutable {
-          router->RoutePlatformViewMutators(view_id, x, y, width, height, width,
-                                            height, mutators_stack);
-          latch_state->done.Signal();
-        });
+    platform_runner->PostTask([router = jni_router_, view_id, x, y, width,
+                               height, view_width, view_height,
+                               mutators_stack = std::move(mutators_stack),
+                               latch_state]() mutable {
+      router->RoutePlatformViewMutators(view_id, x, y, width, height,
+                                        view_width, view_height,
+                                        mutators_stack);
+      latch_state->done.Signal();
+    });
     // Poll every 16ms (one 60Hz frame interval) for surface detachment to
     // prevent deadlocking if the platform thread is concurrently tearing down
     // the surface. Note: WaitWithTimeout returns true if the timeout expired
@@ -454,15 +551,16 @@ void FlutterEmbedderNative::HandleCompositorPlatformViewPresented(
         break;
       }
     }
-    if (surface_manager_) {
+    if (surface_manager_ && !surface_manager_->IsVulkanInitialized()) {
       surface_manager_->MakeCurrent();
     }
   } else {
     platform_runner->PostTask(
-        [router = jni_router_, view_id, x, y, width, height,
-         mutators_stack = std::move(mutators_stack)]() mutable {
-          router->RoutePlatformViewMutators(view_id, x, y, width, height, width,
-                                            height, mutators_stack);
+        [router = jni_router_, view_id, x, y, width, height, view_width,
+         view_height, mutators_stack = std::move(mutators_stack)]() mutable {
+          router->RoutePlatformViewMutators(view_id, x, y, width, height,
+                                            view_width, view_height,
+                                            mutators_stack);
         });
   }
 }
@@ -471,7 +569,11 @@ void FlutterEmbedderNative::HandleCompositorOverlayPresented(
     size_t overlay_index,
     const FlutterPoint& offset,
     const FlutterSize& size) {
+  current_frame_overlay_count_++;
   if (!jni_router_ || !android_task_runners_) {
+    return;
+  }
+  if (IsHcppEnabled()) {
     return;
   }
   int32_t x = static_cast<int32_t>(std::round(offset.x));
@@ -506,6 +608,13 @@ void FlutterEmbedderNative::HandleCompositorOverlayPresented(
 }
 
 ANativeWindow* FlutterEmbedderNative::GetOverlayWindow(size_t overlay_index) {
+  // HCPP (PlatformViewsController2) maintains a single shared overlay surface
+  // backed by SurfaceControl. Returning nullptr for overlay_index > 0 causes
+  // EmbedderExternalViewEmbedder to coalesce multiple overlay layers into the
+  // single top-level HCPP overlay surface with difference clips.
+  if (IsHcppEnabled() && overlay_index > 0) {
+    return nullptr;
+  }
   if (!overlay_surface_state_) {
     return nullptr;
   }
@@ -593,23 +702,100 @@ ANativeWindow* FlutterEmbedderNative::GetOverlayWindow(size_t overlay_index) {
 }
 
 void FlutterEmbedderNative::HandleCompositorFramePresented() {
+  std::vector<int64_t> frame_views =
+      std::move(current_frame_platform_view_ids_);
+  current_frame_platform_view_ids_.clear();
+  size_t frame_overlays = current_frame_overlay_count_;
+  current_frame_overlay_count_ = 0;
+
   if (!jni_router_ || !android_task_runners_) {
     return;
   }
   bool is_first_frame = !first_frame_presented_.exchange(true);
   bool is_surface_control = IsHcppEnabled();
-  android_task_runners_->GetPlatformTaskRunner()->PostTask(
-      [router = jni_router_, is_first_frame, is_surface_control]() {
-        if (is_first_frame) {
-          router->RouteFirstFrame();
-        }
-        if (is_surface_control) {
-          router->RouteSwapPlatformViewTransactions();
-          router->RouteEndFrame();
-        } else {
-          router->RouteEndFrame();
-        }
-      });
+  std::vector<int64_t> views_to_hide;
+  bool should_show_overlay = false;
+  bool should_hide_overlay = false;
+  if (is_surface_control) {
+    std::unordered_set<int64_t> current_set(frame_views.begin(),
+                                            frame_views.end());
+    for (int64_t old_view_id : views_visible_last_frame_) {
+      if (current_set.find(old_view_id) == current_set.end()) {
+        views_to_hide.push_back(old_view_id);
+      }
+    }
+    views_visible_last_frame_ = std::move(current_set);
+    if (frame_overlays > 0) {
+      should_show_overlay = true;
+      overlay_layer_is_shown_ = true;
+    } else if (overlay_layer_is_shown_) {
+      should_hide_overlay = true;
+      overlay_layer_is_shown_ = false;
+    }
+  }
+
+  auto platform_runner = android_task_runners_->GetPlatformTaskRunner();
+  if (!platform_runner) {
+    return;
+  }
+  auto run_end_frame = [router = jni_router_, is_first_frame,
+                        is_surface_control,
+                        views_to_hide = std::move(views_to_hide),
+                        should_show_overlay, should_hide_overlay]() {
+    if (is_first_frame) {
+      router->RouteFirstFrame();
+    }
+    if (is_surface_control) {
+      for (int64_t old_view_id : views_to_hide) {
+        router->RouteHidePlatformView(old_view_id);
+      }
+      if (should_show_overlay) {
+        router->RouteShowOverlaySurface(0);
+      } else if (should_hide_overlay) {
+        router->RouteHideOverlaySurface(0);
+      }
+      router->RouteSwapPlatformViewTransactions();
+      router->RouteEndFrame();
+    } else {
+      router->RouteEndFrame();
+    }
+  };
+  if (platform_runner->RunsTasksOnCurrentThread()) {
+    run_end_frame();
+    return;
+  }
+  if (!is_surface_control &&
+      (is_image_view_surface_active_.load() || !frame_views.empty()) &&
+      surface_attached_.load()) {
+    if (surface_manager_ && !surface_manager_->IsVulkanInitialized()) {
+      surface_manager_->BindOffscreenPbufferIfCurrent();
+    }
+    struct EndFrameLatchState {
+      fml::AutoResetWaitableEvent done;
+    };
+    auto latch_state = std::make_shared<EndFrameLatchState>();
+    platform_runner->PostTask(
+        [run_end_frame = std::move(run_end_frame), latch_state]() mutable {
+          run_end_frame();
+          latch_state->done.Signal();
+        });
+    constexpr int64_t kPlatformLatchWaitTimeoutMs = 16;
+    constexpr size_t kMaxWaitIterations = 60;
+    for (size_t iter = 0;
+         iter < kMaxWaitIterations &&
+         latch_state->done.WaitWithTimeout(
+             fml::TimeDelta::FromMilliseconds(kPlatformLatchWaitTimeoutMs));
+         ++iter) {
+      if (!surface_attached_.load()) {
+        break;
+      }
+    }
+    if (surface_manager_ && !surface_manager_->IsVulkanInitialized()) {
+      surface_manager_->MakeCurrent();
+    }
+  } else {
+    platform_runner->PostTask(std::move(run_end_frame));
+  }
 }
 
 static bool HasCurrentEGLContext() {
@@ -1563,6 +1749,26 @@ void FlutterEmbedderNative::NotifySurfaceChanged(int32_t width,
     metrics.device_pixel_ratio = 1.0f;
   }
   SetViewportMetrics(metrics);
+  if (jni_delegate_ && android_task_runners_) {
+    if (auto invoker = jni_delegate_->GetJvmInvoker()) {
+      constexpr size_t kTwoIntFieldCount = 2;
+      std::vector<uint8_t> payload(sizeof(int32_t) * kTwoIntFieldCount);
+      memcpy(payload.data(), &width, sizeof(int32_t));
+      memcpy(payload.data() + sizeof(int32_t), &height, sizeof(int32_t));
+      auto platform_runner = android_task_runners_->GetPlatformTaskRunner();
+      if (platform_runner) {
+        if (platform_runner->RunsTasksOnCurrentThread()) {
+          invoker->InvokeVoidMethod("maybeResizeSurfaceView", "(II)V", payload);
+        } else {
+          platform_runner->PostTask(
+              [invoker = std::move(invoker), payload = std::move(payload)]() {
+                invoker->InvokeVoidMethod("maybeResizeSurfaceView", "(II)V",
+                                          payload);
+              });
+        }
+      }
+    }
+  }
   auto engine = GetEngine();
   if (engine && !initialize_engine_fn_) {
     ScheduleFrame();

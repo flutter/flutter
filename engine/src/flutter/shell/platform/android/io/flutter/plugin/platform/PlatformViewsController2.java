@@ -814,19 +814,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return new FlutterOverlaySurface(0, overlayerSurface);
   }
 
-  @RequiresApi(API_LEVELS.API_34)
-  public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
-    if (overlaySurfaceControl == null) {
-      return;
-    }
-    SurfaceControl.Transaction tx = platformTransaction();
-    tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
-    if (width > 0 && height > 0) {
-      tx = tx.setBufferSize(overlaySurfaceControl, width, height);
-    }
-    tx.setPosition(overlaySurfaceControl, x, y);
-  }
-
   public void destroyOverlaySurface() {
     if (overlayerSurface != null) {
       overlayerSurface.release();

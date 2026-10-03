@@ -9760,6 +9760,337 @@ TEST(FlutterEmbedderNativeTest, SpawnedEngineOutlivesParent) {
   VulkanQueueGuard::ResetForTesting();
 }
 
+TEST(AndroidMutatorsMapperClipPathTest,
+     MapsClipPathVerbsAndRoundTripsSerialization) {
+  FlutterPathSegment segments[6] = {};
+  // 0: MoveTo(10, 20)
+  segments[0].verb = kFlutterPathVerbMove;
+  segments[0].points[0] = {10.0, 20.0};
+
+  // 1: LineTo(50, 20)
+  segments[1].verb = kFlutterPathVerbLine;
+  segments[1].points[0] = {50.0, 20.0};
+
+  // 2: QuadTo(70, 20, 70, 40)
+  segments[2].verb = kFlutterPathVerbQuad;
+  segments[2].points[0] = {70.0, 20.0};
+  segments[2].points[1] = {70.0, 40.0};
+
+  // 3: ConicTo(70, 60, 50, 60, w=0.70710678)
+  constexpr double kInvSqrt2 = 0.70710678;
+  segments[3].verb = kFlutterPathVerbConic;
+  segments[3].points[0] = {70.0, 60.0};
+  segments[3].points[1] = {50.0, 60.0};
+  segments[3].conic_weight = kInvSqrt2;
+
+  // 4: CubicTo(30, 60, 10, 50, 10, 30)
+  segments[4].verb = kFlutterPathVerbCubic;
+  segments[4].points[0] = {30.0, 60.0};
+  segments[4].points[1] = {10.0, 50.0};
+  segments[4].points[2] = {10.0, 30.0};
+
+  // 5: Close
+  segments[5].verb = kFlutterPathVerbClose;
+
+  FlutterPath flutter_path = {};
+  flutter_path.struct_size = sizeof(FlutterPath);
+  flutter_path.fill_type = kFlutterPathFillTypeEvenOdd;
+  flutter_path.segments_count = 6;
+  flutter_path.segments = segments;
+
+  FlutterPlatformViewMutation tx_mutation = {};
+  tx_mutation.type = kFlutterPlatformViewMutationTypeTransformation;
+  tx_mutation.transformation = {
+      .scaleX = 1.0,
+      .skewX = 0.0,
+      .transX = 5.0,
+      .skewY = 0.0,
+      .scaleY = 1.0,
+      .transY = 15.0,
+      .pers0 = 0.0,
+      .pers1 = 0.0,
+      .pers2 = 1.0,
+  };
+
+  FlutterPlatformViewMutation path_mutation = {};
+  path_mutation.type = kFlutterPlatformViewMutationTypeClipPath;
+  path_mutation.clip_path = flutter_path;
+
+  const FlutterPlatformViewMutation* mutations[] = {&tx_mutation,
+                                                    &path_mutation};
+  FlutterPlatformView pv = {};
+  pv.struct_size = sizeof(FlutterPlatformView);
+  pv.identifier = 7;
+  pv.mutations_count = 2;
+  pv.mutations = mutations;
+
+  AndroidMutatorsStack stack = AndroidMutatorsMapper::MapPlatformView(pv);
+  ASSERT_EQ(stack.GetMutatorsCount(), 2u);
+  EXPECT_EQ(stack.GetMutators()[1].type, AndroidMutatorType::kClipPath);
+
+  ASSERT_EQ(stack.GetFinalClipPaths().size(), 1u);
+  const AndroidClipPath& stored_path = stack.GetFinalClipPaths()[0];
+  EXPECT_EQ(stored_path.fill_type, AndroidPathFillType::kEvenOdd);
+  EXPECT_FLOAT_EQ(stored_path.accumulated_transform.values[2], 5.0f);
+  EXPECT_FLOAT_EQ(stored_path.accumulated_transform.values[5], 15.0f);
+  ASSERT_EQ(stored_path.segments.size(), 6u);
+  EXPECT_EQ(stored_path.segments[0].verb, AndroidPathVerb::kMove);
+  EXPECT_FLOAT_EQ(stored_path.segments[0].points[0], 10.0f);
+  EXPECT_FLOAT_EQ(stored_path.segments[0].points[1], 20.0f);
+  EXPECT_EQ(stored_path.segments[3].verb, AndroidPathVerb::kConic);
+  EXPECT_NEAR(stored_path.segments[3].conic_weight,
+              static_cast<float>(kInvSqrt2), 1e-5f);
+
+  std::vector<uint8_t> bytes = stack.Serialize();
+  auto deserialized =
+      AndroidMutatorsStack::Deserialize(bytes.data(), bytes.size());
+  ASSERT_TRUE(deserialized.has_value());
+  EXPECT_EQ(*deserialized, stack);
+  EXPECT_EQ(deserialized->GetFinalClipPaths(), stack.GetFinalClipPaths());
+}
+
+TEST(
+    FlutterEmbedderNativeCompositorTest,
+    ScaledPlatformViewPassesTransformedContainerBoundsAndUnscaledInnerViewSize) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+
+  int32_t captured_x = -1;
+  int32_t captured_y = -1;
+  int32_t captured_width = -1;
+  int32_t captured_height = -1;
+  int32_t captured_view_width = -1;
+  int32_t captured_view_height = -1;
+
+  ON_CALL(*mock_invoker, PushPlatformViewMutators(_, _, _, _, _, _, _, _))
+      .WillByDefault([&](int64_t /*view_id*/, int32_t x, int32_t y,
+                         int32_t width, int32_t height, int32_t view_width,
+                         int32_t view_height, const std::vector<uint8_t>&) {
+        captured_x = x;
+        captured_y = y;
+        captured_width = width;
+        captured_height = height;
+        captured_view_width = view_width;
+        captured_view_height = view_height;
+        return true;
+      });
+
+  FlutterEmbedderNative native(mock_invoker);
+  EXPECT_TRUE(native.SetHcppEnabled(false));
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+
+  FlutterPlatformViewMutation scale_tx = {};
+  scale_tx.type = kFlutterPlatformViewMutationTypeTransformation;
+  scale_tx.transformation = {
+      .scaleX = 2.0,
+      .skewX = 0.0,
+      .transX = 100.0,
+      .skewY = 0.0,
+      .scaleY = 2.0,
+      .transY = 200.0,
+      .pers0 = 0.0,
+      .pers1 = 0.0,
+      .pers2 = 1.0,
+  };
+  const FlutterPlatformViewMutation* mutations[] = {&scale_tx};
+
+  FlutterPlatformView pv = {};
+  pv.struct_size = sizeof(FlutterPlatformView);
+  pv.identifier = 11;
+  pv.mutations_count = 1;
+  pv.mutations = mutations;
+
+  FlutterLayer pv_layer = {};
+  pv_layer.struct_size = sizeof(FlutterLayer);
+  pv_layer.type = kFlutterLayerContentTypePlatformView;
+  pv_layer.platform_view = &pv;
+  pv_layer.offset = FlutterPoint{100.0, 200.0};
+  pv_layer.size = FlutterSize{50.0, 80.0};
+
+  const FlutterLayer* layers[] = {&pv_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+
+  // Container width/height are scaled by 2x (100x160), while inner view
+  // dimensions remain unscaled (50x80).
+  EXPECT_EQ(captured_x, 100);
+  EXPECT_EQ(captured_y, 200);
+  EXPECT_EQ(captured_width, 100);
+  EXPECT_EQ(captured_height, 160);
+  EXPECT_EQ(captured_view_width, 50);
+  EXPECT_EQ(captured_view_height, 80);
+
+  native.NotifySurfaceDestroyed();
+}
+
+TEST(FlutterEmbedderNativeCompositorTest,
+     HcppPlatformViewHideDiffAndSingleOverlayVisibilityLifecycle) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  bool hcpp_enabled = true;
+  std::vector<int32_t> hidden_view_ids;
+  int show_overlay_calls = 0;
+  int hide_overlay_calls = 0;
+  int display_overlay_calls = 0;
+
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault([&](const std::string& method_name,
+                         const std::string& /*signature*/,
+                         const std::vector<uint8_t>& payload) {
+        if (method_name == "setHcppEnabled" && !payload.empty()) {
+          hcpp_enabled = (payload[0] != 0);
+        } else if ((method_name == "hidePlatformView2" ||
+                    method_name == "hidePlatformView") &&
+                   payload.size() >= sizeof(int32_t)) {
+          int32_t id = 0;
+          std::memcpy(&id, payload.data(), sizeof(int32_t));
+          hidden_view_ids.push_back(id);
+        } else if (method_name == "showOverlaySurface2") {
+          ++show_overlay_calls;
+        } else if (method_name == "hideOverlaySurface2") {
+          ++hide_overlay_calls;
+        } else if (method_name == "onDisplayOverlaySurface") {
+          ++display_overlay_calls;
+        }
+        return true;
+      });
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(Eq("isHcppEnabled"), _, _))
+      .WillByDefault([&](const std::string&, const std::string&,
+                         const std::vector<uint8_t>&) { return hcpp_enabled; });
+  ON_CALL(*mock_invoker, PushPlatformViewMutators(_, _, _, _, _, _, _, _))
+      .WillByDefault(Return(true));
+
+  FlutterEmbedderNative native(mock_invoker);
+  EXPECT_TRUE(native.SetHcppEnabled(true));
+  EXPECT_TRUE(native.IsHcppEnabled());
+  // In HCPP mode, overlay indices > 0 must return nullptr so multiple overlays
+  // coalesce into the single top-level HCPP overlay surface.
+  EXPECT_EQ(native.GetOverlayWindow(1), nullptr);
+
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+
+  FlutterPlatformView pv1 = {.struct_size = sizeof(FlutterPlatformView),
+                             .identifier = 1};
+  FlutterPlatformView pv2 = {.struct_size = sizeof(FlutterPlatformView),
+                             .identifier = 2};
+
+  FlutterBackingStore root_store = {};
+  root_store.struct_size = sizeof(FlutterBackingStore);
+  FlutterBackingStore overlay_store = {};
+  overlay_store.struct_size = sizeof(FlutterBackingStore);
+
+  FlutterLayer root_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &root_store,
+      .size = FlutterSize{100.0, 100.0},
+  };
+  FlutterLayer pv1_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypePlatformView,
+      .platform_view = &pv1,
+      .size = FlutterSize{40.0, 40.0},
+  };
+  FlutterLayer pv2_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypePlatformView,
+      .platform_view = &pv2,
+      .size = FlutterSize{40.0, 40.0},
+  };
+  FlutterLayer overlay_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &overlay_store,
+      .size = FlutterSize{100.0, 100.0},
+  };
+
+  // Frame 1: root + pv1 + pv2 + overlay
+  const FlutterLayer* frame1_layers[] = {&root_layer, &pv1_layer, &pv2_layer,
+                                         &overlay_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(frame1_layers, 4));
+
+  EXPECT_TRUE(hidden_view_ids.empty());
+  EXPECT_EQ(show_overlay_calls, 1);
+  EXPECT_EQ(hide_overlay_calls, 0);
+  EXPECT_EQ(display_overlay_calls, 0);
+
+  // Frame 2: root + pv1 only (pv2 and overlay removed)
+  const FlutterLayer* frame2_layers[] = {&root_layer, &pv1_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(frame2_layers, 2));
+
+  ASSERT_EQ(hidden_view_ids.size(), 1u);
+  EXPECT_EQ(hidden_view_ids[0], 2);
+  EXPECT_EQ(show_overlay_calls, 1);
+  EXPECT_EQ(hide_overlay_calls, 1);
+  EXPECT_EQ(display_overlay_calls, 0);
+
+  native.NotifySurfaceDestroyed();
+}
+
+TEST(FlutterEmbedderNativeSurfaceTest,
+     NotifySurfaceChangedInvokesMaybeResizeSurfaceView) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  int32_t resized_width = -1;
+  int32_t resized_height = -1;
+  int resize_calls = 0;
+
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault([&](const std::string& method_name,
+                         const std::string& signature,
+                         const std::vector<uint8_t>& payload) {
+        if (method_name == "maybeResizeSurfaceView" && signature == "(II)V" &&
+            payload.size() >= 2 * sizeof(int32_t)) {
+          std::memcpy(&resized_width, payload.data(), sizeof(int32_t));
+          std::memcpy(&resized_height, payload.data() + sizeof(int32_t),
+                      sizeof(int32_t));
+          ++resize_calls;
+        }
+        return true;
+      });
+
+  FlutterEmbedderNative native(mock_invoker);
+  constexpr int32_t kNewWidth = 1080;
+  constexpr int32_t kNewHeight = 2400;
+  native.NotifySurfaceChanged(kNewWidth, kNewHeight);
+
+  EXPECT_EQ(resize_calls, 1);
+  EXPECT_EQ(resized_width, kNewWidth);
+  EXPECT_EQ(resized_height, kNewHeight);
+}
+
+TEST(AndroidSurfaceManagerVulkanTest,
+     ClearAndPresentOnscreenSurfaceLazilyCreatesSwapchainForFakeWindow) {
+  VulkanQueueGuard::ResetForTesting();
+  auto owner = CreateFakeGroupVulkanDeviceOwner(0x8400);
+  auto surface_manager = AndroidSurfaceManager::Create(
+      AndroidRenderingAPI::kImpellerVulkan, owner);
+  ASSERT_NE(surface_manager, nullptr);
+  ASSERT_TRUE(surface_manager->IsVulkanInitialized());
+  EXPECT_TRUE(
+      surface_manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+
+  // Without calling GetNextImage first, vk_swapchain_ is not yet created.
+  // ClearAndPresentOnscreenSurface must lazily create the swapchain and
+  // present a cleared image.
+  EXPECT_TRUE(surface_manager->ClearAndPresentOnscreenSurface());
+
+  // Also verify GetNextOverlayImage uses FlutterFrameInfo dimensions on a fake
+  // overlay window.
+  auto* fake_overlay_window = reinterpret_cast<ANativeWindow*>(0x9001);
+  FlutterFrameInfo overlay_frame_info = {};
+  overlay_frame_info.struct_size = sizeof(FlutterFrameInfo);
+  overlay_frame_info.size = {320, 240};
+  FlutterVulkanImage overlay_img = surface_manager->GetNextOverlayImage(
+      fake_overlay_window, &overlay_frame_info);
+  EXPECT_NE(overlay_img.image, 0u);
+  EXPECT_TRUE(
+      surface_manager->PresentOverlayImage(fake_overlay_window, &overlay_img));
+
+  surface_manager.reset();
+  owner.reset();
+  VulkanQueueGuard::ResetForTesting();
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter

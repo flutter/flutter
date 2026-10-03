@@ -1307,12 +1307,6 @@ public class FlutterJNI {
   @UiThread
   public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
     ensureRunningOnMainThread();
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34
-        && platformViewsController2 != null
-        && platformViewsController2.isHcppEnabled()) {
-      platformViewsController2.onDisplayOverlaySurface(id, x, y, width, height);
-      return;
-    }
     if (platformViewsController == null) {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to position an overlay surface");

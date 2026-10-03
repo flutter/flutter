@@ -493,6 +493,10 @@ class FlutterEmbedderNative {
   ///        when no background layer is drawn.
   bool RequiresOnscreenClearanceWhenNoBackgroundLayer() const;
 
+  /// @brief Returns or creates the native window for the specified overlay
+  /// index.
+  ANativeWindow* GetOverlayWindow(size_t overlay_index);
+
   /// @brief Creates a SurfaceControl transaction for HC++.
   bool CreatePlatformViewTransaction() const;
 
@@ -1196,7 +1200,6 @@ class FlutterEmbedderNative {
   void HandleCompositorOverlayPresented(size_t overlay_index,
                                         const FlutterPoint& offset,
                                         const FlutterSize& size);
-  ANativeWindow* GetOverlayWindow(size_t overlay_index);
   void HandleCompositorFramePresented();
 
   std::mutex surface_mutex_;
@@ -1268,6 +1271,10 @@ class FlutterEmbedderNative {
   std::atomic<bool> surface_attached_{false};
   std::atomic<bool> first_frame_presented_{false};
   std::atomic<bool> is_image_view_surface_active_{false};
+  std::vector<int64_t> current_frame_platform_view_ids_;
+  size_t current_frame_overlay_count_ = 0;
+  std::unordered_set<int64_t> views_visible_last_frame_;
+  bool overlay_layer_is_shown_ = false;
 
   mutable std::mutex decoder_registration_mutex_;
   FLUTTER_API_SYMBOL(FlutterEngine) registered_engine_ = nullptr;
