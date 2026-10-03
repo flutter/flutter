@@ -30,6 +30,14 @@ void ShaderBundleData::AddUniformTexture(ShaderUniformTexture uniform_texture) {
   uniform_textures_.emplace_back(std::move(uniform_texture));
 }
 
+void ShaderBundleData::AddStorageBuffer(ShaderStorageBuffer storage_buffer) {
+  storage_buffers_.emplace_back(std::move(storage_buffer));
+}
+
+void ShaderBundleData::SetWorkgroupSize(WorkgroupSize workgroup_size) {
+  workgroup_size_ = workgroup_size;
+}
+
 void ShaderBundleData::AddInputDescription(InputDescription input) {
   inputs_.emplace_back(std::move(input));
 }
@@ -209,6 +217,26 @@ ShaderBundleData::CreateFlatbuffer() const {
     desc->binding = texture.binding;
     shader_bundle->uniform_textures.emplace_back(std::move(desc));
   }
+
+  for (const auto& storage_buffer : storage_buffers_) {
+    auto desc = std::make_unique<fb::shaderbundle::ShaderStorageBufferT>();
+    desc->name = storage_buffer.name;
+    if (desc->name.empty()) {
+      VALIDATION_LOG << "Storage buffer name cannot be empty.";
+      return nullptr;
+    }
+    desc->ext_res_0 = storage_buffer.ext_res_0;
+    desc->set = storage_buffer.set;
+    desc->binding = storage_buffer.binding;
+    desc->access = storage_buffer.writable
+                       ? fb::shaderbundle::StorageBufferAccess::kReadWrite
+                       : fb::shaderbundle::StorageBufferAccess::kRead;
+    shader_bundle->storage_buffers.emplace_back(std::move(desc));
+  }
+
+  shader_bundle->workgroup_size_x = workgroup_size_.x;
+  shader_bundle->workgroup_size_y = workgroup_size_.y;
+  shader_bundle->workgroup_size_z = workgroup_size_.z;
 
   for (const auto& input : inputs_) {
     auto desc = std::make_unique<fb::shaderbundle::ShaderInputT>();

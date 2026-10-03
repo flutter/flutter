@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "flutter/lib/gpu/export.h"
 #include "flutter/lib/gpu/shader.h"
@@ -80,13 +81,19 @@ class ShaderLibrary : public RefCountedDartWrappable<ShaderLibrary> {
 
   std::shared_ptr<fml::Mapping> payload_;
   ShaderMap shaders_;
+  // Compute shaders in the bundle that have no variant for the current
+  // backend (the OpenGL variants are optional for compute shaders). Kept so
+  // that `GetShader` can say why such a shader is missing.
+  std::unordered_set<std::string> unavailable_shaders_;
   // The stable library_id assigned at construction. Reloads keep this
   // value so the scoped registry slot a shader landed in remains the same.
   std::string library_id_;
 
-  explicit ShaderLibrary(std::shared_ptr<fml::Mapping> payload,
-                         ShaderMap shaders,
-                         std::string library_id = "");
+  explicit ShaderLibrary(
+      std::shared_ptr<fml::Mapping> payload,
+      ShaderMap shaders,
+      std::string library_id = "",
+      std::unordered_set<std::string> unavailable_shaders = {});
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderLibrary);
 };

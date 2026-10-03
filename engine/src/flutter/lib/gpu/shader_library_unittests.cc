@@ -245,6 +245,61 @@ TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferSkipsOptimizedOutStruct) {
   EXPECT_EQ(shader->GetUniformStruct("Dced"), nullptr);
 }
 
+// Serializes a bundle holding one compute shader with only the Metal and
+// Vulkan variants, the way impellerc bundles compute shaders.
+static std::shared_ptr<std::vector<uint8_t>> BuildComputeBundle() {
+  namespace fbs = impeller::fb::shaderbundle;
+
+  const auto make_variant = []() {
+    auto variant = std::make_unique<fbs::BackendShaderT>();
+    variant->stage = fbs::ShaderStage::kCompute;
+    variant->entrypoint = "main";
+    variant->shader = {0};
+    variant->workgroup_size_x = 64;
+    variant->workgroup_size_y = 1;
+    variant->workgroup_size_z = 1;
+    return variant;
+  };
+
+  auto shader = std::make_unique<fbs::ShaderT>();
+  shader->name = "compute";
+  shader->metal_ios = make_variant();
+  shader->metal_desktop = make_variant();
+  shader->vulkan = make_variant();
+
+  fbs::ShaderBundleT bundle;
+  bundle.format_version =
+      static_cast<uint32_t>(fbs::ShaderBundleFormatVersion::kVersion);
+  bundle.shaders.push_back(std::move(shader));
+
+  flatbuffers::FlatBufferBuilder builder;
+  builder.Finish(fbs::ShaderBundle::Pack(builder, &bundle),
+                 fbs::ShaderBundleIdentifier());
+  return std::make_shared<std::vector<uint8_t>>(
+      builder.GetBufferPointer(),
+      builder.GetBufferPointer() + builder.GetSize());
+}
+
+// A compute shader bundled without the OpenGL variants still loads on the
+// OpenGL ES backend: the library is created, and only the compute shader
+// itself is unavailable there.
+TEST(FlutterGpuShaderLibraryTest,
+     MakeFromFlatbufferLoadsComputeShaderWithoutGLVariant) {
+  auto bundle = BuildComputeBundle();
+
+  auto gles_library = ShaderLibrary::MakeFromFlatbuffer(
+      impeller::Context::BackendType::kOpenGLES,
+      CreateMappingFromVector(bundle), "test_bundle");
+  ASSERT_TRUE(gles_library);
+  EXPECT_FALSE(gles_library->FindShaderForTesting("compute"));
+
+  auto vulkan_library = ShaderLibrary::MakeFromFlatbuffer(
+      impeller::Context::BackendType::kVulkan, CreateMappingFromVector(bundle),
+      "test_bundle");
+  ASSERT_TRUE(vulkan_library);
+  EXPECT_TRUE(vulkan_library->FindShaderForTesting("compute"));
+}
+
 }  // namespace testing
 }  // namespace gpu
 }  // namespace flutter

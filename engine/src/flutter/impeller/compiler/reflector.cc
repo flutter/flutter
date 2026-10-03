@@ -160,29 +160,10 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
   // by the backend at pipeline creation (for example, to the device maximum).
   // Only meaningful for compute shaders.
   {
-    uint32_t workgroup_size_x = 0u;
-    uint32_t workgroup_size_y = 0u;
-    uint32_t workgroup_size_z = 0u;
-    if (execution_model == spv::ExecutionModel::ExecutionModelGLCompute) {
-      spirv_cross::SpecializationConstant spec_x, spec_y, spec_z;
-      compiler_->get_work_group_size_specialization_constants(spec_x, spec_y,
-                                                              spec_z);
-      const auto local_size = [&](spirv_cross::SpecializationConstant& spec,
-                                  uint32_t index) -> uint32_t {
-        // A non-zero id means this dimension is driven by a specialization
-        // constant; leave it as the runtime-resolved sentinel of 0.
-        return spec.id != 0
-                   ? 0u
-                   : compiler_->get_execution_mode_argument(
-                         spv::ExecutionMode::ExecutionModeLocalSize, index);
-      };
-      workgroup_size_x = local_size(spec_x, 0u);
-      workgroup_size_y = local_size(spec_y, 1u);
-      workgroup_size_z = local_size(spec_z, 2u);
-    }
-    root["workgroup_size_x"] = workgroup_size_x;
-    root["workgroup_size_y"] = workgroup_size_y;
-    root["workgroup_size_z"] = workgroup_size_z;
+    const auto workgroup_size = ReflectWorkgroupSize(execution_model);
+    root["workgroup_size_x"] = workgroup_size.x;
+    root["workgroup_size_y"] = workgroup_size.y;
+    root["workgroup_size_z"] = workgroup_size.z;
   }
 
   const auto shader_resources = compiler_->get_shader_resources();
@@ -608,6 +589,28 @@ std::shared_ptr<ShaderBundleData> Reflector::GenerateShaderBundleData() const {
     data->AddUniformTexture(uniform_texture);
   }
 
+  const auto storage_buffers =
+      compiler_->get_shader_resources().storage_buffers;
+  for (const auto& buffer : storage_buffers) {
+    ShaderBundleData::ShaderStorageBuffer storage_buffer;
+    storage_buffer.name = buffer.name;
+    storage_buffer.ext_res_0 = compiler_.GetExtendedMSLResourceBinding(
+        CompilerBackend::ExtendedResourceIndex::kPrimary, buffer.id);
+    storage_buffer.set = compiler_->get_decoration(
+        buffer.id, spv::Decoration::DecorationDescriptorSet);
+    storage_buffer.binding = compiler_->get_decoration(
+        buffer.id, spv::Decoration::DecorationBinding);
+    // A `readonly` buffer block carries `NonWritable` on every member (or on
+    // the variable itself); the buffer block flags hold the decorations common
+    // to all of them.
+    storage_buffer.writable = !compiler_->get_buffer_block_flags(buffer.id).get(
+        spv::Decoration::DecorationNonWritable);
+    data->AddStorageBuffer(storage_buffer);
+  }
+
+  data->SetWorkgroupSize(
+      ReflectWorkgroupSize(entrypoints.front().execution_model));
+
   // We only need to worry about storing vertex attributes.
   if (entrypoints.front().execution_model == spv::ExecutionModelVertex) {
     const auto inputs = compiler_->get_shader_resources().stage_inputs;
@@ -635,6 +638,30 @@ std::shared_ptr<ShaderBundleData> Reflector::GenerateShaderBundleData() const {
   }
 
   return data;
+}
+
+ShaderBundleData::WorkgroupSize Reflector::ReflectWorkgroupSize(
+    spv::ExecutionModel execution_model) const {
+  ShaderBundleData::WorkgroupSize workgroup_size;
+  if (execution_model != spv::ExecutionModel::ExecutionModelGLCompute) {
+    return workgroup_size;
+  }
+  spirv_cross::SpecializationConstant spec_x, spec_y, spec_z;
+  compiler_->get_work_group_size_specialization_constants(spec_x, spec_y,
+                                                          spec_z);
+  const auto local_size = [&](spirv_cross::SpecializationConstant& spec,
+                              uint32_t index) -> uint32_t {
+    // A non-zero id means this dimension is driven by a specialization
+    // constant; leave it as the runtime-resolved sentinel of 0.
+    return spec.id != 0
+               ? 0u
+               : compiler_->get_execution_mode_argument(
+                     spv::ExecutionMode::ExecutionModeLocalSize, index);
+  };
+  workgroup_size.x = local_size(spec_x, 0u);
+  workgroup_size.y = local_size(spec_y, 1u);
+  workgroup_size.z = local_size(spec_z, 2u);
+  return workgroup_size;
 }
 
 std::optional<uint32_t> Reflector::GetArrayElements(

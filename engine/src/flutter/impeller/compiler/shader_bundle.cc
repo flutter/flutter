@@ -200,6 +200,30 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
   return result;
 }
 
+bool ShaderBundleTargetSupportsShaderType(TargetPlatform platform,
+                                          SourceType type) {
+  switch (platform) {
+    case TargetPlatform::kOpenGLES:
+    case TargetPlatform::kOpenGLDesktop:
+      // Compute shaders are not bundled for the OpenGL targets yet: the GL
+      // output tiers the bundle emits do not cover the compute stage.
+      // Producing these variants is left to the OpenGL backend work.
+      return type != SourceType::kComputeShader;
+    case TargetPlatform::kMetalIOS:
+    case TargetPlatform::kMetalDesktop:
+    case TargetPlatform::kVulkan:
+      return true;
+    case TargetPlatform::kSkSL:
+    case TargetPlatform::kRuntimeStageMetal:
+    case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
+    case TargetPlatform::kRuntimeStageVulkan:
+    case TargetPlatform::kUnknown:
+      return false;
+  }
+  return false;
+}
+
 static std::unique_ptr<fb::shaderbundle::ShaderT> GenerateShaderFB(
     SourceOptions options,
     const std::string& shader_name,
@@ -219,17 +243,26 @@ static std::unique_ptr<fb::shaderbundle::ShaderT> GenerateShaderFB(
   if (!result->metal_desktop) {
     return nullptr;
   }
-  result->opengl_es =
-      GenerateShaderBackendFB(TargetPlatform::kOpenGLES, options, shader_name,
-                              shader_config, out_dependencies);
-  if (!result->opengl_es) {
-    return nullptr;
+  // The OpenGL variants are optional: a shader those targets cannot represent
+  // is bundled without them rather than failing the whole bundle. The runtime
+  // reports the missing variant only if the shader is used on that backend.
+  if (ShaderBundleTargetSupportsShaderType(TargetPlatform::kOpenGLES,
+                                           shader_config.type)) {
+    result->opengl_es =
+        GenerateShaderBackendFB(TargetPlatform::kOpenGLES, options, shader_name,
+                                shader_config, out_dependencies);
+    if (!result->opengl_es) {
+      return nullptr;
+    }
   }
-  result->opengl_desktop =
-      GenerateShaderBackendFB(TargetPlatform::kOpenGLDesktop, options,
-                              shader_name, shader_config, out_dependencies);
-  if (!result->opengl_desktop) {
-    return nullptr;
+  if (ShaderBundleTargetSupportsShaderType(TargetPlatform::kOpenGLDesktop,
+                                           shader_config.type)) {
+    result->opengl_desktop =
+        GenerateShaderBackendFB(TargetPlatform::kOpenGLDesktop, options,
+                                shader_name, shader_config, out_dependencies);
+    if (!result->opengl_desktop) {
+      return nullptr;
+    }
   }
   result->vulkan =
       GenerateShaderBackendFB(TargetPlatform::kVulkan, options, shader_name,
