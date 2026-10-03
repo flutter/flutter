@@ -1187,6 +1187,28 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+       commitContentWithData:(NSData*)data
+                    mimeType:(NSString*)mimeType
+                  withClient:(int)client {
+  // Matches the message the Android embedder sends. The data is an array of numbers because this
+  // channel uses the JSON codec, and `uri` is empty because the pasteboard has no equivalent of
+  // Android's content:// URI.
+  NSMutableArray<NSNumber*>* bytes = [NSMutableArray arrayWithCapacity:data.length];
+  const uint8_t* buffer = static_cast<const uint8_t*>(data.bytes);
+  for (NSUInteger i = 0; i < data.length; i++) {
+    [bytes addObject:@(buffer[i])];
+  }
+  [self.textInputChannel invokeMethod:@"TextInputClient.performAction"
+                            arguments:@[
+                              @(client), @"TextInputAction.commitContent", @{
+                                @"mimeType" : mimeType,
+                                @"uri" : @"",
+                                @"data" : bytes,
+                              }
+                            ]];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     showAutocorrectionPromptRectForStart:(NSUInteger)start
                                      end:(NSUInteger)end
                               withClient:(int)client {
