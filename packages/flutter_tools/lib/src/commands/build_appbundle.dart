@@ -14,7 +14,6 @@ import '../android/gradle_utils.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -148,7 +147,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Logger logger, :Platform platform, :Terminal terminal) = toolContext;
+    final ToolContext(:Logger logger, :Terminal terminal) = toolContext;
     if (_androidContext.androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
@@ -171,8 +170,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
         !getValue(CommonOptions.debugMode)) {
       final validator = DeferredComponentsPrebuildValidator(
         project.directory,
-        logger,
-        platform,
+        toolContext: toolContext,
         title: 'Deferred components prebuild validation',
         outputDir: project.buildDirectory.childDirectory(
           DeferredComponentsValidator.kDeferredComponentsTempDirectory,
