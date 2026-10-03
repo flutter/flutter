@@ -736,7 +736,7 @@ class IOSDevice extends Device {
               result: 'wireless debugging failed',
             ),
           );
-          return LaunchResult.failed();
+          return LaunchResult.failed(appInstalled: true);
         }
 
         // If Dart VM Service URL with the device IP is not found within 5 seconds,
@@ -783,7 +783,7 @@ class IOSDevice extends Device {
           if (installationResult != 0) {
             _printInstallError(bundle);
             await dispose();
-            return LaunchResult.failed();
+            return LaunchResult.failed(appInstalled: true);
           }
           localUri = await vmServiceDiscovery.uri;
         }
@@ -799,7 +799,7 @@ class IOSDevice extends Device {
             result: 'debugging failed',
           ),
         );
-        return LaunchResult.failed();
+        return LaunchResult.failed(appInstalled: true);
       }
       _analytics.send(
         Event.appleUsageEvent(
@@ -822,7 +822,7 @@ class IOSDevice extends Device {
           ),
         );
       }
-      return LaunchResult.failed();
+      return LaunchResult.failed(appInstalled: true);
     } finally {
       startAppStatus.stop();
 
