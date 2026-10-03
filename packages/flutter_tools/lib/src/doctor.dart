@@ -447,7 +447,9 @@ class Doctor {
         return ' [$formatted]';
       }();
 
-      final String leadingBox = result.coloredLeadingBox(_logger.terminal);
+      final String leadingBox = showColor
+          ? result.coloredLeadingBox(_logger.terminal)
+          : result.leadingBox;
       if (result.statusInfo != null) {
         _logger.printStatus(
           '$leadingBox ${validator.title} (${result.statusInfo})$executionDuration',
@@ -464,7 +466,9 @@ class Doctor {
         if (!message.isInformation || verbose) {
           var hangingIndent = 2;
           var indent = 4;
-          final String indicator = message.coloredIndicator(_logger.terminal);
+          final String indicator = showColor
+              ? message.coloredIndicator(_logger.terminal)
+              : message.indicator;
           for (final String line
               in '$indicator ${showPii ? message.message : message.piiStrippedMessage}'.split(
                 '\n',
