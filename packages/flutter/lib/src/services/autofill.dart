@@ -844,6 +844,15 @@ abstract class AutofillScope {
   TextInputConnection attach(TextInputClient trigger, TextInputConfiguration configuration);
 }
 
+// The configuration sent to the platform when an [AutofillClient] in an
+// [AutofillScope] attaches: the client's own configuration, plus the
+// configurations of every client in the scope under the `fields` key.
+//
+// Every constructor parameter of [TextInputConfiguration] must be forwarded
+// below. A parameter that is not forwarded silently falls back to its default
+// for every client in the scope (see
+// https://github.com/flutter/flutter/issues/192340), so this list must be kept
+// in sync with the [TextInputConfiguration] constructor.
 @immutable
 class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
@@ -852,16 +861,23 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   }) : super(
          viewId: currentClientConfiguration.viewId,
          inputType: currentClientConfiguration.inputType,
+         readOnly: currentClientConfiguration.readOnly,
          obscureText: currentClientConfiguration.obscureText,
          autocorrect: currentClientConfiguration.autocorrect,
          smartDashesType: currentClientConfiguration.smartDashesType,
          smartQuotesType: currentClientConfiguration.smartQuotesType,
          enableSuggestions: currentClientConfiguration.enableSuggestions,
+         enableInteractiveSelection: currentClientConfiguration.enableInteractiveSelection,
          inputAction: currentClientConfiguration.inputAction,
          textCapitalization: currentClientConfiguration.textCapitalization,
          keyboardAppearance: currentClientConfiguration.keyboardAppearance,
          actionLabel: currentClientConfiguration.actionLabel,
          autofillConfiguration: currentClientConfiguration.autofillConfiguration,
+         enableIMEPersonalizedLearning: currentClientConfiguration.enableIMEPersonalizedLearning,
+         allowedMimeTypes: currentClientConfiguration.allowedMimeTypes,
+         enableDeltaModel: currentClientConfiguration.enableDeltaModel,
+         hintLocales: currentClientConfiguration.hintLocales,
+         enableInlinePrediction: currentClientConfiguration.enableInlinePrediction,
        );
 
   final Iterable<TextInputConfiguration> allConfigurations;
