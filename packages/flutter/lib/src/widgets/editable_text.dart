@@ -2680,6 +2680,12 @@ class EditableTextState extends State<EditableText>
   bool get _shouldCreateInputConnection =>
       kIsWeb || defaultTargetPlatform == TargetPlatform.macOS || !widget.readOnly;
 
+  /// Whether navigation keys are left unhandled for the IME while composing.
+  bool get _shouldDeferToComposingIme =>
+      (kIsWeb || defaultTargetPlatform == TargetPlatform.iOS) &&
+      widget.selectionEnabled &&
+      _value.composing.isValid;
+
   // The time it takes for the floating cursor to snap to the text aligned
   // cursor position after the user has finished placing it.
   static const Duration _floatingCursorResetTime = Duration(milliseconds: 125);
@@ -5771,7 +5777,7 @@ class EditableTextState extends State<EditableText>
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _replaceTextAction,
     UpdateSelectionIntent: _updateSelectionAction,
-    DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
+    DirectionalFocusIntent: _ComposingDisablingDirectionalFocusAction(this),
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
 
     // Delete
@@ -5849,7 +5855,7 @@ class EditableTextState extends State<EditableText>
       ),
     ),
     ScrollToDocumentBoundaryIntent: _makeOverridable(
-      _WebComposingDisablingCallbackAction<ScrollToDocumentBoundaryIntent>(
+      _ComposingDisablingCallbackAction<ScrollToDocumentBoundaryIntent>(
         this,
         onInvoke: _scrollToDocumentBoundary,
       ),
@@ -6768,7 +6774,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent>
 
   @override
   bool get isActionEnabled {
-    if (kIsWeb && state.widget.selectionEnabled && state._value.composing.isValid) {
+    if (state._shouldDeferToComposingIme) {
       return false;
     }
 
@@ -6849,7 +6855,7 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
 
   @override
   bool get isActionEnabled {
-    if (kIsWeb && state.widget.selectionEnabled && state._value.composing.isValid) {
+    if (state._shouldDeferToComposingIme) {
       return false;
     }
 
@@ -6857,19 +6863,30 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
   }
 }
 
-class _WebComposingDisablingCallbackAction<T extends Intent> extends CallbackAction<T> {
-  _WebComposingDisablingCallbackAction(this.state, {required super.onInvoke});
+class _ComposingDisablingCallbackAction<T extends Intent> extends CallbackAction<T> {
+  _ComposingDisablingCallbackAction(this.state, {required super.onInvoke});
 
   final EditableTextState state;
 
   @override
   bool get isActionEnabled {
-    if (kIsWeb && state.widget.selectionEnabled && state._value.composing.isValid) {
+    if (state._shouldDeferToComposingIme) {
       return false;
     }
 
     return super.isActionEnabled;
   }
+}
+
+/// Disabled while composing, except on web, so that it does not consume the
+/// arrow keys left for the IME.
+class _ComposingDisablingDirectionalFocusAction extends DirectionalFocusAction {
+  _ComposingDisablingDirectionalFocusAction(this.state) : super.forTextField();
+
+  final EditableTextState state;
+
+  @override
+  bool get isActionEnabled => kIsWeb || !state._shouldDeferToComposingIme;
 }
 
 class _SelectAllAction extends ContextAction<SelectAllTextIntent> {
