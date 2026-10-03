@@ -1598,7 +1598,7 @@ enum FocusLifecyclePolicy {
 
   /// When the app is sent to the background, primary focus is reset to the root
   /// focus node. When the app returns to the foreground, primary focus is
-  /// restored to the the original node that had it before the app was
+  /// restored to the original node that had it before the app was
   /// backgrounded.
   suspendAndRestore,
 
