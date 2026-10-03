@@ -51,10 +51,32 @@ class TestWindowsApi : public testing::StubFlutterWindowsApi {
     return true;
   }
 
+  bool PluginRegistrarIsPlatformThread() override {
+    return is_platform_thread_;
+  }
+
+  void PluginRegistrarPostPlatformThreadTask(VoidCallback callback,
+                                             VoidCallback on_cancel,
+                                             void* user_data) override {
+    post_task_callback_ = callback;
+    post_task_on_cancel_ = on_cancel;
+    post_task_user_data_ = user_data;
+  }
+
+  void set_is_platform_thread(bool value) { is_platform_thread_ = value; }
+
+  VoidCallback post_task_callback() { return post_task_callback_; }
+  VoidCallback post_task_on_cancel() { return post_task_on_cancel_; }
+  void* post_task_user_data() { return post_task_user_data_; }
+
  private:
   int registered_delegate_count_ = 0;
   FlutterDesktopWindowProcCallback last_registered_delegate_ = nullptr;
   void* last_registered_user_data_ = nullptr;
+  bool is_platform_thread_ = false;
+  VoidCallback post_task_callback_ = nullptr;
+  VoidCallback post_task_on_cancel_ = nullptr;
+  void* post_task_user_data_ = nullptr;
 };
 
 // A test plugin that tries to access registrar state during destruction and
@@ -247,6 +269,73 @@ TEST(PluginRegistrarWindowsTest, StopsOnceHandled) {
   // The return value should propagate through.
   EXPECT_TRUE(handled);
   EXPECT_EQ(result, 7);
+}
+
+TEST(PluginRegistrarWindowsTest, IsPlatformThread) {
+  auto windows_api = std::make_unique<TestWindowsApi>();
+  EXPECT_CALL(*windows_api, PluginRegistrarGetView)
+      .WillRepeatedly(Return(nullptr));
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(std::move(windows_api));
+  auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
+  PluginRegistrarWindows registrar(
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
+
+  test_api->set_is_platform_thread(false);
+  EXPECT_FALSE(registrar.IsPlatformThread());
+
+  test_api->set_is_platform_thread(true);
+  EXPECT_TRUE(registrar.IsPlatformThread());
+}
+
+TEST(PluginRegistrarWindowsTest, PostPlatformThreadTask) {
+  auto windows_api = std::make_unique<TestWindowsApi>();
+  EXPECT_CALL(*windows_api, PluginRegistrarGetView)
+      .WillRepeatedly(Return(nullptr));
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(std::move(windows_api));
+  auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
+  PluginRegistrarWindows registrar(
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
+
+  bool called = false;
+  registrar.PostPlatformThreadTask([&called]() { called = true; });
+
+  // The stub should have received the task.
+  EXPECT_NE(test_api->post_task_callback(), nullptr);
+  EXPECT_NE(test_api->post_task_user_data(), nullptr);
+
+  // Simulate executing the callback.
+  test_api->post_task_callback()(test_api->post_task_user_data());
+  EXPECT_TRUE(called);
+}
+
+TEST(PluginRegistrarWindowsTest, PostPlatformThreadTaskNullCallback) {
+  auto windows_api = std::make_unique<TestWindowsApi>();
+  EXPECT_CALL(*windows_api, PluginRegistrarGetView)
+      .WillRepeatedly(Return(nullptr));
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(std::move(windows_api));
+  auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
+  PluginRegistrarWindows registrar(
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
+
+  // Posting a null callback should be a no-op.
+  registrar.PostPlatformThreadTask(nullptr);
+  EXPECT_EQ(test_api->post_task_callback(), nullptr);
+}
+
+TEST(PluginRegistrarWindowsTest, PostPlatformThreadTaskOnCancel) {
+  auto windows_api = std::make_unique<TestWindowsApi>();
+  EXPECT_CALL(*windows_api, PluginRegistrarGetView)
+      .WillRepeatedly(Return(nullptr));
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(std::move(windows_api));
+  auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
+  PluginRegistrarWindows registrar(
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
+
+  registrar.PostPlatformThreadTask([]() {});
+
+  // Verify the on_cancel callback is set and can clean up without crashing.
+  EXPECT_NE(test_api->post_task_on_cancel(), nullptr);
+  test_api->post_task_on_cancel()(test_api->post_task_user_data());
 }
 
 }  // namespace flutter
