@@ -1005,6 +1005,7 @@ void main() {
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
+            hasExpandedState: true,
           ),
         );
 
@@ -1496,6 +1497,8 @@ void main() {
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
+            isExpanded: true,
+            hasExpandedState: true,
           ),
         );
 
