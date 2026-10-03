@@ -867,6 +867,11 @@ class Cache {
     }
     return exists;
   }
+
+  /// Download a file from the given [url] and copy it to [location].
+  Future<void> downloadFile(String message, Uri url, Directory location) {
+    return _artifactUpdater.downloadFile(message, url, location);
+  }
 }
 
 /// Representation of a set of artifacts used by the tool.

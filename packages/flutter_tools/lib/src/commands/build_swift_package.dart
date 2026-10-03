@@ -82,6 +82,7 @@ class BuildSwiftPackage extends BuildSubCommand {
       _platformOption,
       _buildMode,
       _static,
+      _remote,
     ], verboseHelp: verboseHelp);
   }
 
@@ -109,6 +110,11 @@ class BuildSwiftPackage extends BuildSubCommand {
   static const _static = FlagOptionDescriptor(
     name: 'static',
     help: 'Build CocoaPods plugins as static frameworks.',
+  );
+
+  static const _remote = FlagOptionDescriptor(
+    name: 'remote',
+    help: 'Use a remote binary dependency for the Flutter framework.',
   );
 
   @override
@@ -167,6 +173,8 @@ class BuildSwiftPackage extends BuildSubCommand {
         if (buildModes.contains(mode.cliName)) await getBuildInfo(forcedBuildMode: mode),
     ];
   }
+
+  bool get useRemoteFlutterFramework => boolArg('remote');
 
   @override
   Future<void> validateCommand() async {
@@ -332,13 +340,16 @@ class BuildSwiftPackage extends BuildSubCommand {
         flutterIntegrationPackage: flutterIntegrationPackage,
         plugins: plugins,
         xcodeBuildConfiguration: xcodeBuildConfiguration,
+        buildMode: buildInfo.mode,
         xcframeworkOutput: xcframeworkOutput,
+        cacheDirectory: cacheDirectory,
       );
     }
     await flutterNativeIntegrationSwiftPackage.generateSwiftPackages(
       outputDirectory: outputDirectory,
       flutterIntegrationPackage: flutterIntegrationPackage,
       highestSupportedVersion: pluginSwiftDependencies.highestSupportedVersion,
+      useRemoteFlutterFramework: useRemoteFlutterFramework,
     );
     createSourcesSymlink(flutterIntegrationPackage, buildInfos.first.mode.uppercaseName);
 
@@ -364,11 +375,13 @@ class BuildSwiftPackage extends BuildSubCommand {
     required File codesignIdentityFile,
   }) async {
     logger.printStatus('Building for $xcodeBuildConfiguration...');
-    await flutterFrameworkDependency.generateArtifacts(
-      buildMode: buildInfo.mode,
-      xcframeworkOutput: xcframeworkOutput,
-      codesignIdentity: codesignIdentity,
-    );
+    if (!useRemoteFlutterFramework) {
+      await flutterFrameworkDependency.generateArtifacts(
+        buildMode: buildInfo.mode,
+        xcframeworkOutput: xcframeworkOutput,
+        codesignIdentity: codesignIdentity,
+      );
+    }
 
     await appAndNativeAssetsDependencies.generateArtifacts(
       buildInfo: buildInfo,
@@ -393,7 +406,9 @@ class BuildSwiftPackage extends BuildSubCommand {
     required Directory flutterIntegrationPackage,
     required List<Plugin> plugins,
     required String xcodeBuildConfiguration,
+    required BuildMode buildMode,
     required Directory xcframeworkOutput,
+    required Directory cacheDirectory,
   }) async {
     final Status status = logger.startProgress('   ├─Generating swift packages...');
     try {
@@ -402,7 +417,12 @@ class BuildSwiftPackage extends BuildSubCommand {
       );
       final Directory packagesForConfiguration = modeDirectory.childDirectory(_kPackages);
 
-      await flutterFrameworkDependency.generateSwiftPackage(packagesForConfiguration);
+      await flutterFrameworkDependency.generateSwiftPackage(
+        packagesForConfiguration,
+        cacheDirectory: cacheDirectory,
+        buildMode: buildMode,
+        remote: useRemoteFlutterFramework,
+      );
 
       await pluginRegistrant.generateSwiftPackage(
         modeDirectory: modeDirectory,
@@ -662,7 +682,12 @@ class FlutterFrameworkDependency {
 
   /// Creates a FlutterFramework swift package within the [packagesForConfiguration]. This swift
   /// package vends the Flutter xcframework.
-  Future<void> generateSwiftPackage(Directory packagesForConfiguration) async {
+  Future<void> generateSwiftPackage(
+    Directory packagesForConfiguration, {
+    required Directory cacheDirectory,
+    required BuildMode buildMode,
+    required bool remote,
+  }) async {
     final flutterFrameworkPackage = SwiftPackage(
       manifest: packagesForConfiguration
           .childDirectory(kFlutterGeneratedFrameworkSwiftPackageTargetName)
@@ -681,9 +706,11 @@ class FlutterFrameworkDependency {
           name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
           dependencies: [SwiftPackageTargetDependency.target(name: _targetPlatform.binaryName)],
         ),
-        SwiftPackageTarget.binaryTarget(
-          name: _targetPlatform.binaryName,
-          relativePath: '../../$_kFrameworks/${_targetPlatform.binaryName}.xcframework',
+        await binaryTarget(
+          cacheDirectory: cacheDirectory,
+          remote: remote,
+          platform: _targetPlatform,
+          mode: buildMode,
         ),
       ],
       templateRenderer: _utils.templateRenderer,
@@ -714,6 +741,120 @@ class FlutterFrameworkDependency {
     name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
     packageName: kFlutterGeneratedFrameworkSwiftPackageTargetName,
   );
+
+  /// Returns the [SwiftPackageTarget] for the Flutter framework.
+  ///
+  /// When [remote] is true, returns a remote binary target with the artifact zip URL and checksum.
+  /// Otherwise, returns a local binary target pointing to the copied XCFramework.
+  Future<SwiftPackageTarget> binaryTarget({
+    required bool remote,
+    required Directory cacheDirectory,
+    required FlutterDarwinPlatform platform,
+    required BuildMode mode,
+  }) async {
+    if (remote) {
+      final (:Uri url, :String checksum) = await _getRemoteArtifactUrlAndChecksum(
+        cacheDirectory: cacheDirectory,
+        platform: platform,
+        mode: mode,
+      );
+      return SwiftPackageTarget.remoteBinaryTarget(
+        name: platform.binaryName,
+        zipUrl: url.toString(),
+        zipChecksum: checksum,
+      );
+    }
+    return SwiftPackageTarget.binaryTarget(
+      name: platform.binaryName,
+      relativePath: '../../$_kFrameworks/${platform.binaryName}.xcframework',
+    );
+  }
+
+  /// Returns the remote URL and Swift package checksum for the Flutter framework artifact zip.
+  ///
+  /// Restores the checksum from the cache if the URL has not changed; otherwise, downloads the
+  /// artifact zip, computes the checksum, and caches it for subsequent runs.
+  Future<({Uri url, String checksum})> _getRemoteArtifactUrlAndChecksum({
+    required Directory cacheDirectory,
+    required FlutterDarwinPlatform platform,
+    required BuildMode mode,
+  }) async {
+    final String zipFileName = platform.artifactZip;
+    final Uri url = Uri.parse(
+      '${_utils.cache.storageBaseUrl}/flutter_infra_release/flutter/${_utils.cache.engineRevision}'
+      '/${platform.artifactName(mode)}/$zipFileName',
+    );
+    final File cachedChecksumFile = cacheDirectory
+        .childDirectory(mode.uppercaseName)
+        .childFile('flutter_framework_checksum.json');
+    String? checksum = _restoreChecksumFromCache(cachedChecksumFile: cachedChecksumFile, url: url);
+    if (checksum == null) {
+      checksum = await _downloadAndComputeChecksum(
+        url: url,
+        cacheDirectory: cacheDirectory,
+        artifactZip: zipFileName,
+        mode: mode,
+      );
+      _saveChecksumToCache(cachedChecksumFile: cachedChecksumFile, url: url, checksum: checksum);
+    }
+    return (url: url, checksum: checksum);
+  }
+
+  /// Returns the cached checksum from [cachedChecksumFile] if the file exists and the cached URL
+  /// matches [url]. Otherwise, returns null.
+  String? _restoreChecksumFromCache({required File cachedChecksumFile, required Uri url}) {
+    if (!cachedChecksumFile.existsSync()) {
+      return null;
+    }
+    try {
+      if (json.decode(cachedChecksumFile.readAsStringSync())
+          case {'url': final String cachedUrl, 'checksum': final String cachedChecksum}
+          when cachedUrl == url.toString() && cachedChecksum.isNotEmpty) {
+        return cachedChecksum;
+      }
+    } on Exception catch (e) {
+      _utils.logger.printTrace('Failed to read cached checksum: $e');
+    }
+    return null;
+  }
+
+  /// Downloads the framework artifact zip from [url] to a temporary directory in
+  /// [cacheDirectory] and computes its Swift package checksum.
+  Future<String> _downloadAndComputeChecksum({
+    required Uri url,
+    required Directory cacheDirectory,
+    required String artifactZip,
+    required BuildMode mode,
+  }) async {
+    final Directory destination = cacheDirectory.childDirectory('temp_$mode');
+    try {
+      await _utils.cache.downloadFile('Preparing remote Flutter framework...', url, destination);
+      final ProcessResult checksumResult = await _utils.processManager.run([
+        'swift',
+        'package',
+        'compute-checksum',
+        artifactZip,
+      ], workingDirectory: destination.path);
+      if (checksumResult.exitCode != 0) {
+        throwToolExit('Failed to compute checksum for $artifactZip: ${checksumResult.stderr}');
+      }
+      return checksumResult.stdout.toString().trim();
+    } finally {
+      ErrorHandlingFileSystem.deleteIfExists(destination, recursive: true);
+    }
+  }
+
+  /// Saves the [url] and [checksum] to [cachedChecksumFile] to avoid re-downloading on subsequent
+  /// runs.
+  void _saveChecksumToCache({
+    required File cachedChecksumFile,
+    required Uri url,
+    required String checksum,
+  }) {
+    cachedChecksumFile
+      ..createSync(recursive: true)
+      ..writeAsStringSync(json.encode({'url': url.toString(), 'checksum': checksum}));
+  }
 }
 
 /// Class that encapsulates logic needed to copy Flutter plugins that support SwiftPM and generate
@@ -1862,6 +2003,7 @@ class FlutterNativeIntegrationSwiftPackage {
     required Directory outputDirectory,
     required Directory flutterIntegrationPackage,
     required SwiftPackageSupportedPlatform highestSupportedVersion,
+    bool useRemoteFlutterFramework = false,
   }) async {
     final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
       _kFlutterNativeTools,
@@ -1872,6 +2014,7 @@ class FlutterNativeIntegrationSwiftPackage {
     await _generateSourceFiles(
       scriptsDirectory: scriptsDirectory,
       nativeToolsPackage: nativeToolsPackage,
+      useRemoteFlutterFramework: useRemoteFlutterFramework,
     );
 
     final integrationPackage = SwiftPackage(
@@ -1927,9 +2070,13 @@ class FlutterNativeIntegrationSwiftPackage {
   Future<void> _generateSourceFiles({
     required Directory scriptsDirectory,
     required Directory nativeToolsPackage,
+    required bool useRemoteFlutterFramework,
   }) async {
     await _generateScripts(scriptsDirectory);
-    await _generateToolsSources(nativeToolsPackage.childDirectory(_kSources));
+    await _generateToolsSources(
+      nativeToolsPackage.childDirectory(_kSources),
+      useRemoteFlutterFramework: useRemoteFlutterFramework,
+    );
     await _generatePluginsSources(
       pluginsDirectory: nativeToolsPackage.childDirectory(_kSwiftPlugins),
     );
@@ -1963,7 +2110,10 @@ class FlutterNativeIntegrationSwiftPackage {
 
   /// Generate source files for Swift package executable tools to be used for integrating SwiftPM
   /// into the [sourcesDirectory].
-  Future<void> _generateToolsSources(Directory sourcesDirectory) async {
+  Future<void> _generateToolsSources(
+    Directory sourcesDirectory, {
+    required bool useRemoteFlutterFramework,
+  }) async {
     final Template toolsTemplate = await Template.fromName(
       _utils.fileSystem.path.join('add_to_app', 'darwin', _kTools),
       fileSystem: _utils.fileSystem,
@@ -1971,7 +2121,9 @@ class FlutterNativeIntegrationSwiftPackage {
       logger: _utils.logger,
       templateRenderer: _utils.templateRenderer,
     );
-    toolsTemplate.render(sourcesDirectory, <String, Object>{}, printStatusWhenWriting: false);
+    toolsTemplate.render(sourcesDirectory, <String, Object>{
+      'useRemoteFlutterFramework': useRemoteFlutterFramework,
+    }, printStatusWhenWriting: false);
   }
 
   /// Generate source files for Swift package plugins to be used for integrating SwiftPM into the
