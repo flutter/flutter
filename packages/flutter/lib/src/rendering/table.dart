@@ -661,11 +661,30 @@ class RenderTable extends RenderBox {
   final Map<int, SemanticsNode> _cachedRows = <int, SemanticsNode>{};
   final Map<_Index, SemanticsNode> _cachedCells = <_Index, SemanticsNode>{};
 
+  // The geometry [assembleSemanticsNode] last derived for each child
+  // semantics node, keyed by the node itself.
+  //
+  // `cellRelativeOffset` is the child's position relative to its cell render
+  // object, which only changes when the child is laid out again, and
+  // `written` is the normalized transform this table wrote for the child.
+  // Together they let [assembleSemanticsNode] recompute the transform
+  // absolutely on every pass instead of guessing from the child's rect
+  // whether it is normalized yet.
+  //
+  // An entry only lives as long as the child appears in the `children`
+  // passed to [assembleSemanticsNode]; each pass drops the entries of
+  // children that were absent from it. A child that is present but skipped
+  // for one pass (for example because its slot has no laid out cell) keeps
+  // its entry, so an intact transform this table wrote stays recognizable.
+  final Map<SemanticsNode, ({Offset cellRelativeOffset, Offset written})> _childGeometry =
+      <SemanticsNode, ({Offset cellRelativeOffset, Offset written})>{};
+
   @override
   void clearSemantics() {
     super.clearSemantics();
     _cachedRows.clear();
     _cachedCells.clear();
+    _childGeometry.clear();
   }
 
   /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
@@ -680,6 +699,9 @@ class RenderTable extends RenderBox {
     Iterable<SemanticsNode> children,
   ) {
     final rows = <SemanticsNode>[];
+    // Children handed to this pass, used at the end to drop the geometry of
+    // children that are no longer part of this table's semantics subtree.
+    final seenChildren = <SemanticsNode>{};
 
     final rawCells = List<List<List<SemanticsNode>>>.generate(
       _rows,
@@ -717,16 +739,8 @@ class RenderTable extends RenderBox {
       return -1;
     }
 
-    void shiftTransform(SemanticsNode node, double dx, double dy) {
-      final Matrix4? previousTransform = node.transform;
-      final Offset offset =
-          (previousTransform != null ? MatrixUtils.getAsTranslation(previousTransform) : null) ??
-          Offset.zero;
-      final newTransform = Matrix4.translationValues(offset.dx + dx, offset.dy + dy, 0);
-      node.transform = newTransform;
-    }
-
     for (final child in children) {
+      seenChildren.add(child);
       if (_idToIndexMap.containsKey(child.id)) {
         final _Index index = _idToIndexMap[child.id]!;
         final int y = index.y;
@@ -789,47 +803,91 @@ class RenderTable extends RenderBox {
             );
         }
 
-        final double cellWidth = x == _columns - 1
+        // The cell's span, taken from the authoritative layout data on the
+        // cell render object's parent data. Slots resolved through the
+        // geometry heuristic (see findRowIndex/findColumnIndex) may not match
+        // their render object, and a slot with no child render object has no
+        // parent data, so a missing parent data falls back to a single cell.
+        final Object? slotParentData = _children[x + y * _columns]?.parentData;
+        final TableCellParentData? slotSpans = slotParentData is TableCellParentData
+            ? slotParentData
+            : null;
+        final int slotColSpan = math.max(slotSpans?.colSpan ?? 1, 1);
+        final int spanEndX = math.min(x + slotColSpan, _columns) - 1;
+
+        // Width covered by columns [x, spanEndX].
+        final double spanWidth = spanEndX == _columns - 1
             ? rowBox.width - _columnLefts!.elementAt(x)
-            : _columnLefts!.elementAt(x + 1) - _columnLefts!.elementAt(x);
+            : _columnLefts!.elementAt(spanEndX + 1) - _columnLefts!.elementAt(x);
 
         // Skip cell if it's invisible
-        if (cellWidth <= 0.0) {
+        if (spanWidth <= 0.0) {
           continue;
         }
         // Add wrapper transform
         if (addCellWrapper) {
-          // TODO(hm21): These wrapper bounds use a single column width and a
-          // single row height, so a cell spanning multiple columns or rows is
-          // clipped to one cell in the semantics tree. Make them span-aware,
-          // see https://github.com/flutter/flutter/issues/192849. The RTL
-          // handling in findColumnIndex is tracked separately in
+          final int slotRowSpan = math.max(slotSpans?.rowSpan ?? 1, 1);
+          final int spanEndY = math.min(y + slotRowSpan, _rows) - 1;
+          // Height covered by rows [y, spanEndY].
+          final double spanHeight = _rowTops[spanEndY + 1] - _rowTops[y];
+          // The wrapper covers the cell's whole span. The RTL handling of
+          // _columnLefts is tracked separately in
           // https://github.com/flutter/flutter/issues/192848.
           cell
             ..transform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0)
-            ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
+            ..rect = Rect.fromLTWH(0, 0, spanWidth, spanHeight);
         }
+
+        // Where the node the children are attached to sits in the table's
+        // coordinate space: the row, offset by the cell wrapper's transform
+        // when one was synthesized. Children are normalized into that space.
+        final parentOrigin = addCellWrapper
+            ? Offset(rowBox.left + _columnLefts!.elementAt(x), rowBox.top)
+            : Offset(rowBox.left, rowBox.top);
+        // The cell render object's offset is written by layout on every pass
+        // and is never rewritten by semantics, so it anchors the child's
+        // position in the table's coordinate space.
+        final Offset? cellOffset = slotSpans?.offset;
+
         for (final child in rawChildrens) {
           _idToIndexMap[child.id] = _Index(y, x);
 
-          // Shift child transform.
-          final Rect localRect = rectWithOffset(child);
-          // The rect should satisfy 0 <= localRect.top < localRect.bottom <= rowBox.height
-          final double dy = localRect.bottom > rowBox.height + precisionErrorTolerance
-              ? -_rowTops.elementAt(y)
-              : 0.0;
-
-          // if addCellWrapper is true, the rect is relative to the cell
-          // The rect should satisfy 0 <= localRect.left < localRect.right <= cellWidth
-          // if addCellWrapper is false, the rect is relative to the row
-          // The rect should satisfy _columnLefts!.elementAt(x) <= localRect.left < localRect.right <= _columnLefts!.elementAt(x+1)
-          final double dx = addCellWrapper
-              ? ((localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0)
-              : (localRect.right <= _columnLefts!.elementAt(x) ? _columnLefts!.elementAt(x) : 0.0);
-
-          if (dx != 0 || dy != 0) {
-            shiftTransform(child, dx, dy);
+          final Matrix4? childTransform = child.transform;
+          final Offset? currentOffset = childTransform == null
+              ? Offset.zero
+              : MatrixUtils.getAsTranslation(childTransform);
+          if (currentOffset == null || cellOffset == null) {
+            // Either the child's paint transform is not a pure translation, or
+            // its slot has no laid out cell to anchor to, so its position in
+            // the table cannot be derived from layout. Leave it untouched
+            // instead of flattening or guessing.
+            continue;
           }
+
+          // `currentOffset` is either the transform this pass's geometry just
+          // produced for the child, or the normalized transform an earlier
+          // pass wrote. `_childGeometry` tells the two apart, so the target
+          // transform is recomputed absolutely rather than inferred from where
+          // the child's rect falls: a child in a lower row overlaps the
+          // table's coordinate space with its row's, so no rect based test can
+          // distinguish the two states, and applying a conditional shift once
+          // per pass drifts.
+          final ({Offset cellRelativeOffset, Offset written})? geometry = _childGeometry[child];
+          final Offset inTableSpace;
+          if (geometry != null && geometry.written == currentOffset) {
+            // Our write is still in place, so rebuild the table space
+            // position from the cell's current, authoritative offset.
+            inTableSpace = cellOffset + geometry.cellRelativeOffset;
+          } else {
+            // The framework (re)computed this child's geometry this pass.
+            inTableSpace = currentOffset;
+          }
+
+          final Offset target = inTableSpace - parentOrigin;
+          if (target != currentOffset) {
+            child.transform = Matrix4.translationValues(target.dx, target.dy, 0);
+          }
+          _childGeometry[child] = (cellRelativeOffset: inTableSpace - cellOffset, written: target);
         }
 
         cell.indexInParent = x;
@@ -848,6 +906,12 @@ class RenderTable extends RenderBox {
 
       rows.add(newRow);
     }
+
+    // Drop the geometry of children that were not part of this pass. A child
+    // can leave the subtree while still being attached (for example when it
+    // is re-parented elsewhere), and its remembered transform would otherwise
+    // be mistaken for one this table still owns on a later pass.
+    _childGeometry.removeWhere((SemanticsNode child, _) => !seenChildren.contains(child));
 
     node.updateWith(config: config, childrenInInversePaintOrder: rows);
   }

@@ -49,6 +49,30 @@ class TestChildState extends State<TestChildWidget> {
   Widget build(BuildContext context) => toggle ? const SizedBox() : const Text('CRASHHH');
 }
 
+// Sets colSpan / rowSpan on TableCellParentData without the
+// Semantics(role: cell) node that TableCell adds, so that
+// RenderTable.assembleSemanticsNode synthesizes a cell wrapper for the
+// cell's children instead of reusing theirs.
+class RawSpan extends ParentDataWidget<TableCellParentData> {
+  const RawSpan({super.key, this.colSpan = 1, this.rowSpan = 1, required super.child});
+
+  final int colSpan;
+  final int rowSpan;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    final parentData = renderObject.parentData! as TableCellParentData;
+    if (parentData.colSpan != colSpan || parentData.rowSpan != rowSpan) {
+      parentData.colSpan = colSpan;
+      parentData.rowSpan = rowSpan;
+      renderObject.parent?.markNeedsLayout();
+    }
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => Table;
+}
+
 void main() {
   testWidgets('Table widget - empty', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(textDirection: TextDirection.ltr, child: Table()));
@@ -2312,6 +2336,496 @@ void main() {
         expect(a.parent!.childrenCount, 2);
         expect(a.indexInParent, 0);
         expect(b.indexInParent, 2);
+
+        handle.dispose();
+      });
+
+      testWidgets('synthesized cell wrappers cover their span', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/192849.
+        //
+        // TableCell wraps its child in Semantics(role: cell), so
+        // assembleSemanticsNode reuses that node for the cell. RawSpan sets
+        // colSpan / rowSpan without that node, forcing the table to synthesize
+        // a cell wrapper whose rect must cover the whole span, not a single
+        // column width and row height.
+        //
+        // Layout (LTR, four 100px columns, three 20px rows):
+        //   Row 0: | f0 | wide (colSpan: 2)  | none  | f3  |
+        //   Row 1: | big (colSpan: 2, rowSpan: 2) | none | f1 | tall (rowSpan: 2) |
+        //   Row 2: | none                   | none  | f2  | none |
+        final SemanticsHandle handle = tester.ensureSemantics();
+        final fillerLabel = ValueNotifier<String>('f0');
+        addTearDown(fillerLabel.dispose);
+
+        Widget buildTable() {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                children: <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20.0,
+                        child: ValueListenableBuilder<String>(
+                          valueListenable: fillerLabel,
+                          builder: (BuildContext context, String value, Widget? child) =>
+                              Text(value),
+                        ),
+                      ),
+                      const RawSpan(colSpan: 2, child: SizedBox(height: 20.0, child: Text('wide'))),
+                      TableCell.none,
+                      const SizedBox(height: 20.0),
+                    ],
+                  ),
+                  const TableRow(
+                    children: <Widget>[
+                      RawSpan(
+                        colSpan: 2,
+                        rowSpan: 2,
+                        child: SizedBox(height: 40.0, child: Text('big')),
+                      ),
+                      TableCell.none,
+                      SizedBox(height: 20.0),
+                      RawSpan(rowSpan: 2, child: SizedBox(height: 40.0, child: Text('tall'))),
+                    ],
+                  ),
+                  const TableRow(
+                    children: <Widget>[
+                      TableCell.none,
+                      TableCell.none,
+                      SizedBox(height: 20.0),
+                      TableCell.none,
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        Offset localOffset(SemanticsNode node) {
+          final Matrix4? transform = node.transform;
+          if (transform == null) {
+            return Offset.zero;
+          }
+          return MatrixUtils.getAsTranslation(transform)!;
+        }
+
+        SemanticsNode wrapperOf(String label) {
+          final SemanticsNode text = tester.getSemantics(find.text(label));
+          final SemanticsNode wrapper = text.parent!;
+          expect(
+            wrapper.role,
+            SemanticsRole.cell,
+            reason: 'The $label cell must be wrapped by a synthesized cell node.',
+          );
+          return wrapper;
+        }
+
+        void expectSpanGeometry() {
+          // colSpan = 2, rowSpan = 1 at row 0, column 1.
+          final SemanticsNode wide = wrapperOf('wide');
+          expect(wide.rect, const Rect.fromLTWH(0.0, 0.0, 200.0, 20.0));
+          expect(localOffset(wide), const Offset(100.0, 0.0));
+
+          // colSpan = 2, rowSpan = 2 at row 1, column 0.
+          final SemanticsNode big = wrapperOf('big');
+          expect(big.rect, const Rect.fromLTWH(0.0, 0.0, 200.0, 40.0));
+          expect(localOffset(big), Offset.zero);
+
+          // colSpan = 1, rowSpan = 2 at row 1, column 3.
+          final SemanticsNode tall = wrapperOf('tall');
+          expect(tall.rect, const Rect.fromLTWH(0.0, 0.0, 100.0, 40.0));
+          expect(localOffset(tall), const Offset(300.0, 0.0));
+
+          // The text nodes are normalized to the wrapper origin.
+          for (final label in <String>['wide', 'big', 'tall']) {
+            expect(
+              localOffset(tester.getSemantics(find.text(label))),
+              Offset.zero,
+              reason: 'The $label text must sit at the wrapper origin.',
+            );
+          }
+        }
+
+        await tester.pumpWidget(buildTable());
+        expectSpanGeometry();
+
+        // Changing a sibling cell reassembles the table's semantics while the
+        // spanning cells' own nodes are left untouched, so the geometry must
+        // be stable across repeated assemble passes.
+        fillerLabel.value = 'f0b';
+        await tester.pump();
+        expectSpanGeometry();
+
+        handle.dispose();
+      });
+
+      testWidgets('aligned cells keep their semantics position across reassembles', (
+        WidgetTester tester,
+      ) async {
+        // Regression test for https://github.com/flutter/flutter/issues/192849.
+        //
+        // assembleSemanticsNode normalizes every cell child out of the table's
+        // coordinate space into the space of the node it is attached to: the
+        // row, or a synthesized cell wrapper. The position of a cell that is
+        // not top aligned sits below the top of its row, so the normalized and
+        // the unnormalized position overlap in the table's coordinate space and
+        // a test against the child's rect cannot tell them apart. A child that
+        // is not recognized as normalized keeps its table space transform and
+        // ends up one row below where it is painted, and a child that is
+        // recognized as normalized more than once is shifted down again on
+        // every reassemble until it drifts away from the cell's layout offset.
+        // The target is therefore derived from the cell render object's layout
+        // offset on every pass, so it must equal the painted position and stay
+        // put while sibling cells trigger repeated reassembles.
+        //
+        // Layout (LTR, five 100px columns, rows of 20/100/60 pixels, cells
+        // middle aligned through the table's default alignment):
+        //   Row 0: | 20 | filler | 20 | 20 | 20 |
+        //   Row 1: | midWrap | midCell | spanWrap (rowSpan: 2) | spanCell (rowSpan: 2) | 100 |
+        //   Row 2: | 60 | 60 | none | none | 60 |
+        final SemanticsHandle handle = tester.ensureSemantics();
+        final fillerLabel = ValueNotifier<String>('f0');
+        addTearDown(fillerLabel.dispose);
+
+        Widget buildTable() {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                children: <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      const SizedBox(height: 20.0),
+                      SizedBox(
+                        height: 20.0,
+                        child: ValueListenableBuilder<String>(
+                          valueListenable: fillerLabel,
+                          builder: (BuildContext context, String value, Widget? child) =>
+                              Text(value),
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
+                    ],
+                  ),
+                  const TableRow(
+                    children: <Widget>[
+                      // No TableCell, so the text has no cell role and the
+                      // table synthesizes a wrapper around it.
+                      SizedBox(height: 20.0, child: Text('midWrap')),
+                      TableCell(child: SizedBox(height: 20.0, child: Text('midCell'))),
+                      RawSpan(rowSpan: 2, child: SizedBox(height: 80.0, child: Text('spanWrap'))),
+                      TableCell(rowSpan: 2, child: SizedBox(height: 80.0, child: Text('spanCell'))),
+                      SizedBox(height: 100.0),
+                    ],
+                  ),
+                  const TableRow(
+                    children: <Widget>[
+                      SizedBox(height: 60.0),
+                      SizedBox(height: 60.0),
+                      TableCell.none,
+                      TableCell.none,
+                      SizedBox(height: 60.0),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // The position of [node] in the table's coordinate space, which is the
+        // space the widget is painted in. The walk stops at the table because
+        // the table node itself is transformed into the physical pixel space
+        // of the semantics root, while the widget tree is laid out in logical
+        // pixels.
+        Offset semanticsOrigin(SemanticsNode node) {
+          Offset origin = Offset.zero;
+          SemanticsNode? current = node;
+          while (current != null && current.role != SemanticsRole.table) {
+            final Matrix4? transform = current.transform;
+            if (transform != null) {
+              origin += MatrixUtils.transformPoint(transform, Offset.zero);
+            }
+            current = current.parent;
+          }
+          return origin;
+        }
+
+        void expectSemanticsMatchesPaint() {
+          // The layout this test depends on: every cell is middle aligned in
+          // its row, so each one starts 60 pixels down from the top of the
+          // table, one row below the 20 pixel tall first row.
+          expect(tester.getRect(find.text('midWrap')).topLeft, const Offset(0.0, 60.0));
+          expect(tester.getRect(find.text('midCell')).topLeft, const Offset(100.0, 60.0));
+          expect(tester.getRect(find.text('spanWrap')).topLeft, const Offset(200.0, 60.0));
+          expect(tester.getRect(find.text('spanCell')).topLeft, const Offset(300.0, 60.0));
+
+          for (final label in <String>['midWrap', 'midCell', 'spanWrap', 'spanCell']) {
+            final Finder finder = find.text(label);
+            expect(
+              semanticsOrigin(tester.getSemantics(finder)),
+              tester.getRect(finder).topLeft,
+              reason: 'The $label semantics node must be where it is painted.',
+            );
+          }
+        }
+
+        await tester.pumpWidget(buildTable());
+        expectSemanticsMatchesPaint();
+
+        // Changing a sibling cell reassembles the table's semantics while the
+        // aligned cells' own nodes are left untouched, so their geometry must
+        // survive repeated assemble passes unchanged.
+        for (var pass = 1; pass <= 3; pass++) {
+          fillerLabel.value = 'f$pass';
+          await tester.pump();
+          expectSemanticsMatchesPaint();
+        }
+
+        handle.dispose();
+      });
+
+      testWidgets('aligned cells follow layout when rows are resized', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/192849.
+        //
+        // assembleSemanticsNode rewrites a child's transform from layout on
+        // every pass, but the framework only recomputes a child's own
+        // geometry when that child is dirtied. When a row grows, the cell
+        // render object moves with it while the child's semantics node keeps
+        // the transform the table wrote for its old position, so the pass has
+        // to re-derive the position from the cell's new layout offset instead
+        // of trusting the transform it finds.
+        //
+        // Layout (LTR, four 100px columns, default middle alignment):
+        //   Row 0: | driver | 40    | 40   | 40 |                 height = driver
+        //   Row 1: | driver | midWrap | midCell | spanWrap (rowSpan: 2) | height = driver
+        //   Row 2: | 40 | 40 | 40 | none |                            height = 40
+        // Row 1's top and the middle aligned cells' offset inside it both
+        // change when the driver grows, and the spanning wrapper's rect has
+        // to grow with rows 1 and 2.
+        final SemanticsHandle handle = tester.ensureSemantics();
+        final driver = ValueNotifier<double>(40.0);
+        addTearDown(driver.dispose);
+
+        Widget buildTable() {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                children: <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      // Changing the text marks the table's semantics dirty so
+                      // it is reassembled after the relayout.
+                      ValueListenableBuilder<double>(
+                        valueListenable: driver,
+                        builder: (BuildContext context, double value, Widget? child) =>
+                            SizedBox(height: value, child: Text('d${value.toInt()}')),
+                      ),
+                      const SizedBox(height: 40.0),
+                      const SizedBox(height: 40.0),
+                      const SizedBox(height: 40.0),
+                    ],
+                  ),
+                  TableRow(
+                    children: <Widget>[
+                      ValueListenableBuilder<double>(
+                        valueListenable: driver,
+                        builder: (BuildContext context, double value, Widget? child) =>
+                            SizedBox(height: value),
+                      ),
+                      const SizedBox(height: 20.0, child: Text('midWrap')),
+                      const TableCell(child: SizedBox(height: 20.0, child: Text('midCell'))),
+                      const RawSpan(
+                        rowSpan: 2,
+                        child: SizedBox(height: 20.0, child: Text('spanWrap')),
+                      ),
+                    ],
+                  ),
+                  const TableRow(
+                    children: <Widget>[
+                      SizedBox(height: 40.0),
+                      SizedBox(height: 40.0),
+                      SizedBox(height: 40.0),
+                      TableCell.none,
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // The position of [node] in the table's coordinate space, which is the
+        // space the widget is painted in. The walk stops at the table because
+        // the table node itself is transformed into the physical pixel space
+        // of the semantics root, while the widget tree is laid out in logical
+        // pixels.
+        Offset semanticsOrigin(SemanticsNode node) {
+          Offset origin = Offset.zero;
+          SemanticsNode? current = node;
+          while (current != null && current.role != SemanticsRole.table) {
+            final Matrix4? transform = current.transform;
+            if (transform != null) {
+              origin += MatrixUtils.transformPoint(transform, Offset.zero);
+            }
+            current = current.parent;
+          }
+          return origin;
+        }
+
+        Offset localOffset(SemanticsNode node) {
+          final Matrix4? transform = node.transform;
+          if (transform == null) {
+            return Offset.zero;
+          }
+          return MatrixUtils.getAsTranslation(transform)!;
+        }
+
+        void expectGeometry(double driverHeight) {
+          // The driver is row 0 and row 1, so row 1 starts driverHeight down
+          // the table, is driverHeight tall, and its middle aligned 20 pixel
+          // cells start (driverHeight - 20) / 2 into it.
+          final double middle = driverHeight + (driverHeight - 20.0) / 2.0;
+          expect(tester.getRect(find.text('midWrap')).topLeft, Offset(100.0, middle));
+          expect(tester.getRect(find.text('midCell')).topLeft, Offset(200.0, middle));
+
+          for (final label in <String>['midWrap', 'midCell', 'spanWrap']) {
+            final Finder finder = find.text(label);
+            expect(
+              semanticsOrigin(tester.getSemantics(finder)),
+              tester.getRect(finder).topLeft,
+              reason: 'The $label semantics node must be where it is painted.',
+            );
+          }
+
+          // The spanning wrapper covers rows 1 and 2, which are
+          // driverHeight + 40 pixels tall together.
+          final SemanticsNode spanWrapper = tester.getSemantics(find.text('spanWrap')).parent!;
+          expect(
+            spanWrapper.role,
+            SemanticsRole.cell,
+            reason: 'The spanWrap cell must be wrapped by a synthesized cell node.',
+          );
+          expect(spanWrapper.rect, Rect.fromLTWH(0.0, 0.0, 100.0, driverHeight + 40.0));
+          expect(localOffset(spanWrapper), const Offset(300.0, 0.0));
+        }
+
+        await tester.pumpWidget(buildTable());
+        expectGeometry(40.0);
+
+        // The rows move and the middle aligned cells move inside their row.
+        // Neither change dirties the aligned cells' own semantics nodes, so
+        // the reassemble has to repair the transforms it wrote earlier.
+        driver.value = 100.0;
+        await tester.pump();
+        expectGeometry(100.0);
+
+        driver.value = 40.0;
+        await tester.pump();
+        expectGeometry(40.0);
+
+        handle.dispose();
+      });
+
+      testWidgets('a cell that leaves and rejoins keeps the table in sync', (
+        WidgetTester tester,
+      ) async {
+        // Regression test for https://github.com/flutter/flutter/issues/192849.
+        //
+        // assembleSemanticsNode remembers the transform it wrote for each
+        // child so it can tell its own writes apart from the framework's.
+        // That bookkeeping only means something for children that are still
+        // part of the table: a cell whose content is removed takes its
+        // semantics node out of the tree, and a cell that comes back brings a
+        // node the table has never seen. The surviving cells must keep their
+        // positions across those passes, and the returning cell must be placed
+        // where it is painted.
+        final SemanticsHandle handle = tester.ensureSemantics();
+
+        Widget buildTable({required bool withC}) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                children: <TableRow>[
+                  const TableRow(
+                    children: <Widget>[
+                      SizedBox(height: 20.0, child: Text('a')),
+                      SizedBox(height: 20.0, child: Text('b')),
+                    ],
+                  ),
+                  TableRow(
+                    children: <Widget>[
+                      if (withC)
+                        const TableCell(child: SizedBox(height: 20.0, child: Text('c')))
+                      else
+                        const SizedBox(height: 20.0),
+                      const SizedBox(height: 40.0, child: Text('d')),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        Offset semanticsOrigin(SemanticsNode node) {
+          Offset origin = Offset.zero;
+          SemanticsNode? current = node;
+          while (current != null && current.role != SemanticsRole.table) {
+            final Matrix4? transform = current.transform;
+            if (transform != null) {
+              origin += MatrixUtils.transformPoint(transform, Offset.zero);
+            }
+            current = current.parent;
+          }
+          return origin;
+        }
+
+        void expectPositions(Iterable<String> labels) {
+          for (final label in labels) {
+            final Finder finder = find.text(label);
+            expect(
+              semanticsOrigin(tester.getSemantics(finder)),
+              tester.getRect(finder).topLeft,
+              reason: 'The $label semantics node must be where it is painted.',
+            );
+          }
+        }
+
+        const Iterable<String> all = <String>['a', 'b', 'c', 'd'];
+        const Iterable<String> withoutC = <String>['a', 'b', 'd'];
+
+        await tester.pumpWidget(buildTable(withC: true));
+        expectPositions(all);
+
+        // The cell's semantics node leaves the tree; the others are
+        // reassembled while it is gone.
+        await tester.pumpWidget(buildTable(withC: false));
+        expect(find.text('c'), findsNothing);
+        expectPositions(withoutC);
+
+        // A new node comes back for the same slot, while the table still
+        // holds geometry for the cells that never left.
+        await tester.pumpWidget(buildTable(withC: true));
+        expectPositions(all);
 
         handle.dispose();
       });
