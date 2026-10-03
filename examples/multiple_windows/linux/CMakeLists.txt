@@ -9,6 +9,29 @@ set(BINARY_NAME "multiple_windows")
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
 set(APPLICATION_ID "com.example.multiple_windows")
 
+set(_LINUX_GTK_VARIANT "$ENV{FLUTTER_LINUX_GTK}")
+if("${_LINUX_GTK_VARIANT}" STREQUAL "")
+  if(DEFINED LINUX_GTK_VARIANT)
+    set(_LINUX_GTK_VARIANT "${LINUX_GTK_VARIANT}")
+  else()
+    set(_LINUX_GTK_VARIANT "gtk3")
+  endif()
+endif()
+set(LINUX_GTK_VARIANT "${_LINUX_GTK_VARIANT}" CACHE STRING "Linux GTK runner variant" FORCE)
+set_property(CACHE LINUX_GTK_VARIANT PROPERTY STRINGS "gtk3" "gtk4")
+
+if("${LINUX_GTK_VARIANT}" STREQUAL "gtk4")
+  set(LINUX_GTK_PKG gtk4)
+  set(LINUX_GTK_DEFINE FLUTTER_LINUX_GTK4)
+elseif("${LINUX_GTK_VARIANT}" STREQUAL "gtk3")
+  set(LINUX_GTK_PKG gtk+-3.0)
+  set(LINUX_GTK_DEFINE FLUTTER_LINUX_GTK3)
+else()
+  message(FATAL_ERROR "Unsupported LINUX_GTK_VARIANT: ${LINUX_GTK_VARIANT}. Expected gtk3 or gtk4.")
+endif()
+
+message(STATUS "Configuring Linux runner for ${LINUX_GTK_VARIANT} (${LINUX_GTK_PKG})")
+
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
 cmake_policy(SET CMP0063 NEW)
@@ -52,7 +75,7 @@ add_subdirectory(${FLUTTER_MANAGED_DIR})
 
 # System-level dependencies.
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
+pkg_check_modules(GTK REQUIRED IMPORTED_TARGET ${LINUX_GTK_PKG})
 
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")

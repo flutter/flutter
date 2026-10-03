@@ -5,11 +5,65 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_PRIVATE_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_PRIVATE_H_
 
-#include "flutter/shell/platform/linux/fl_view_accessible.h"
+#include "flutter/shell/platform/linux/fl_compositor.h"
+#include "flutter/shell/platform/linux/fl_pointer_manager.h"
+#include "flutter/shell/platform/linux/fl_scrolling_manager.h"
+#include "flutter/shell/platform/linux/fl_touch_manager.h"
+#include "flutter/shell/platform/linux/fl_window_state_monitor.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_subsurface.h"
+#include "flutter/shell/platform/linux/fl_subsurface_egl.h"
+#include "flutter/shell/platform/linux/fl_view_gtk4_accessibility.h"
+#endif
+#if !FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_view_accessible.h"
+#include "flutter/shell/platform/linux/fl_view_renderer.h"
+#endif
 
 G_BEGIN_DECLS
 
+struct _FlView {
+  GtkBox parent_instance;
+
+  GtkWidget* event_box;
+  GtkGesture* zoom_gesture;
+  GtkGesture* rotate_gesture;
+  GtkWidget* render_area;
+  GdkGLContext* render_context;
+  FlEngine* engine;
+  FlCompositor* compositor;
+  FlutterViewId view_id;
+  GdkRGBA* background_color;
+  gboolean have_first_frame;
+  gboolean needs_frame_after_realize;
+  FlWindowStateMonitor* window_state_monitor;
+  FlScrollingManager* scrolling_manager;
+  FlPointerManager* pointer_manager;
+  FlTouchManager* touch_manager;
+#if !FLUTTER_LINUX_GTK4
+  // GTK3 retains the upstream renderer-owned OpenGL frame lifecycle.
+  FlViewRenderer* renderer;
+  FlViewAccessible* view_accessible;
+#endif
+  guint cursor_changed_cb_id;
+  guint on_pre_engine_restart_cb_id;
+  guint update_semantics_cb_id;
+  gboolean sized_to_content;
+#if FLUTTER_LINUX_GTK4
+  gboolean native_texture_ready;
+  guint native_texture_retry_source_id;
+  FlViewGtk4Accessibility* accessibility_backend;
+  GMutex subsurface_mutex;
+  FlSubsurface* subsurface;
+  FlSubsurfaceEGL* subsurface_egl;
+  gboolean subsurface_enabled;
+#endif
+  GCancellable* cancellable;
+};
+
+#if !FLUTTER_LINUX_GTK4
 /**
  * fl_view_get_accessible:
  * @view: an #FlView.
@@ -19,6 +73,19 @@ G_BEGIN_DECLS
  * Returns: an #FlViewAccessible.
  */
 FlViewAccessible* fl_view_get_accessible(FlView* view);
+void fl_view_input_gtk3_setup(FlView* view);
+#else
+GtkWidget* fl_view_gtk4_get_toplevel_window(FlView* view);
+void fl_view_gtk4_set_cursor(FlView* view, const gchar* cursor_name);
+gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event);
+void fl_view_gtk4_setup(FlView* view);
+void fl_view_gtk4_update_accessible_name(FlView* view);
+void fl_view_gtk4_update_accessible_tree(FlView* view);
+void fl_view_gtk4_setup_subsurface(FlView* view);
+void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height);
+void fl_view_gtk4_setup_rendering(FlView* view);
+void fl_view_gtk4_present_subsurface(FlView* view);
+#endif
 
 G_END_DECLS
 

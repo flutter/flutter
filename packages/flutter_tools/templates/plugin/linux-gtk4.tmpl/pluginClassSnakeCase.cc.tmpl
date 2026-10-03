@@ -1,0 +1,59 @@
+#include "include/{{projectName}}/{{pluginClassSnakeCase}}.h"
+
+#include <flutter_linux/flutter_linux.h>
+#include <gtk/gtk.h>
+#include <sys/utsname.h>
+
+#include <cstring>
+
+#include "messages.g.h"
+#include "{{pluginClassSnakeCase}}_private.h"
+
+#define {{pluginClassCapitalSnakeCase}}(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj), {{pluginClassSnakeCase}}_get_type(), \
+                              {{pluginClass}}))
+
+struct _{{pluginClass}} {
+  GObject parent_instance;
+};
+
+G_DEFINE_TYPE({{pluginClass}}, {{pluginClassSnakeCase}}, g_object_get_type())
+
+gchar* {{pluginClassSnakeCase}}_get_platform_version() {
+  struct utsname uname_data = {};
+  uname(&uname_data);
+  return g_strdup_printf("Linux %s", uname_data.version);
+}
+
+static {{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse *handle_get_platform_version(gpointer user_data) {
+  // The plugin instance is unused in this simple example, but more complex
+  // plugins may have plugin state to access here.
+  // {{pluginClass}}* self = {{pluginClassCapitalSnakeCase}}(user_data);
+
+  g_autofree gchar *version = {{pluginClassSnakeCase}}_get_platform_version();
+  return {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_new(version);
+}
+
+static void {{pluginClassSnakeCase}}_dispose(GObject* object) {
+  G_OBJECT_CLASS({{pluginClassSnakeCase}}_parent_class)->dispose(object);
+}
+
+static void {{pluginClassSnakeCase}}_class_init({{pluginClass}}Class* klass) {
+  G_OBJECT_CLASS(klass)->dispose = {{pluginClassSnakeCase}}_dispose;
+}
+
+static void {{pluginClassSnakeCase}}_init({{pluginClass}}* self) {}
+
+void {{pluginClassSnakeCase}}_register_with_registrar(FlPluginRegistrar* registrar) {
+  {{pluginClass}}* plugin = {{pluginClassCapitalSnakeCase}}(
+      g_object_new({{pluginClassSnakeCase}}_get_type(), nullptr));
+
+  static {{projectNameUpperCamelCase}}{{pluginClass}}ApiVTable api_vtable = {
+    .get_platform_version = handle_get_platform_version
+  };
+  {{projectName}}_{{pluginClassSnakeCase}}_api_set_method_handlers(
+    fl_plugin_registrar_get_messenger(registrar), nullptr,
+    &api_vtable, g_object_ref(plugin), g_object_unref);
+
+  g_object_unref(plugin);
+}

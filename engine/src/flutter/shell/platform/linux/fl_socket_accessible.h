@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_SOCKET_ACCESSIBLE_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_SOCKET_ACCESSIBLE_H_
 
-#include <gtk/gtk-a11y.h>
+#include "flutter/shell/platform/linux/fl_gtk_a11y_compat.h"
 
 G_BEGIN_DECLS
 

@@ -51,6 +51,10 @@ FlutterEngineDisplayId fl_display_monitor_get_display_id(
     FlDisplayMonitor* monitor,
     GdkMonitor* gdk_monitor);
 
+#if FLUTTER_LINUX_GTK4
+GListModel* fl_display_monitor_gtk4_get_monitors(GdkDisplay* display);
+#endif
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_DISPLAY_MONITOR_H_

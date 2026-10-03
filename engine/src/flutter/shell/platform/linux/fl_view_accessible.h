@@ -9,9 +9,8 @@
 #error "Only <flutter_linux/flutter_linux.h> can be included directly."
 #endif
 
-#include <atk/atk.h>
-
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_atk_compat.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
 G_BEGIN_DECLS

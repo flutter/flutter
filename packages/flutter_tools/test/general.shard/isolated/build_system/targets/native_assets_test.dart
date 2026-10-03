@@ -76,6 +76,50 @@ void main() {
     expect(const BuildHooks().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
+  testUsingContext(
+    'Linux GTK4 build hooks use the GTK4 CMake build directory',
+    () async {
+      final linuxEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{
+          kBuildMode: BuildMode.debug.cliName,
+          kTargetPlatform: getNameForTargetPlatform(TargetPlatform.linux_x64),
+          'FLUTTER_LINUX_GTK': 'gtk4',
+        },
+        outputDir: fileSystem.currentDirectory.childDirectory('ignored-output'),
+        inputs: <String, String>{},
+        artifacts: artifacts,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        logger: logger,
+      );
+
+      final Directory cmakeBuildDirectory = linuxEnvironment.rootBuildDir
+          .childDirectory('linux-gtk4')
+          .childDirectory('x64')
+          .childDirectory('debug');
+      await cmakeBuildDirectory.create(recursive: true);
+
+      await fileSystem.file('/toolchain/clang++').create(recursive: true);
+      await fileSystem.file('/toolchain/clang').create(recursive: true);
+      await fileSystem.file('/toolchain/llvm-ar').create(recursive: true);
+      await fileSystem.file('/toolchain/ld.lld').create(recursive: true);
+      await cmakeBuildDirectory.childFile('CMakeCache.txt').writeAsString('''
+CMAKE_CXX_COMPILER:FILEPATH=/toolchain/clang++
+CMAKE_AR:FILEPATH=/toolchain/llvm-ar
+CMAKE_LINKER:FILEPATH=/toolchain/ld.lld
+''');
+
+      final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
+      await BuildHooks(buildRunner: buildRunner).build(linuxEnvironment);
+      await LinkHooks(buildRunner: buildRunner).build(linuxEnvironment);
+
+      expect(linuxEnvironment.buildDir.childFile(BuildHooks.depFilename), exists);
+      expect(linuxEnvironment.buildDir.childFile(LinkHooks.depFilename), exists);
+    },
+    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
+  );
+
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
     writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 

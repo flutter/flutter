@@ -69,7 +69,16 @@ void fl_scrolling_manager_set_last_mouse_position(FlScrollingManager* self,
 }
 
 void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
+#if FLUTTER_LINUX_GTK4
+                                              GdkEvent* event,
+#else
                                               GdkEventScroll* scroll_event,
+#endif
+                                              gdouble event_x,
+                                              gdouble event_y,
+                                              gboolean position_valid,
+                                              gdouble scroll_delta_x,
+                                              gdouble scroll_delta_y,
                                               gint scale_factor) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
@@ -78,29 +87,15 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
     return;
   }
 
+#if !FLUTTER_LINUX_GTK4
   GdkEvent* event = reinterpret_cast<GdkEvent*>(scroll_event);
+#endif
 
   guint event_time = gdk_event_get_time(event);
-  gdouble event_x = 0.0, event_y = 0.0;
-  gdk_event_get_coords(event, &event_x, &event_y);
-  gdouble scroll_delta_x = 0.0, scroll_delta_y = 0.0;
-  GdkScrollDirection event_direction = GDK_SCROLL_SMOOTH;
-  if (gdk_event_get_scroll_direction(event, &event_direction)) {
-    if (event_direction == GDK_SCROLL_UP) {
-      scroll_delta_x = 0;
-      scroll_delta_y = -1;
-    } else if (event_direction == GDK_SCROLL_DOWN) {
-      scroll_delta_x = 0;
-      scroll_delta_y = 1;
-    } else if (event_direction == GDK_SCROLL_LEFT) {
-      scroll_delta_x = -1;
-      scroll_delta_y = 0;
-    } else if (event_direction == GDK_SCROLL_RIGHT) {
-      scroll_delta_x = 1;
-      scroll_delta_y = 0;
-    }
-  } else {
-    gdk_event_get_scroll_deltas(event, &scroll_delta_x, &scroll_delta_y);
+
+  if (position_valid) {
+    self->last_x = event_x * scale_factor;
+    self->last_y = event_y * scale_factor;
   }
 
   // The multiplier is taken from the Chromium source
@@ -109,16 +104,24 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
   scroll_delta_x *= kScrollOffsetMultiplier * scale_factor;
   scroll_delta_y *= kScrollOffsetMultiplier * scale_factor;
 
-  GdkDevice* device = gdk_event_get_source_device(event);
-  if (device != nullptr &&
-      gdk_device_get_source(device) == GDK_SOURCE_TOUCHPAD) {
+#if FLUTTER_LINUX_GTK4
+  GdkDevice* source_device = gdk_event_get_device(event);
+#else
+  GdkDevice* source_device = gdk_event_get_source_device(event);
+#endif
+  if (source_device != nullptr &&
+      gdk_device_get_source(source_device) == GDK_SOURCE_TOUCHPAD) {
     scroll_delta_x *= -1;
     scroll_delta_y *= -1;
+#if FLUTTER_LINUX_GTK4
+    if (gdk_scroll_event_is_stop(event)) {
+#else
     if (gdk_event_is_scroll_stop_event(event)) {
+#endif
       fl_engine_send_pointer_pan_zoom_event(
           engine, self->view_id, event_time * kMicrosecondsPerMillisecond,
-          event_x * scale_factor, event_y * scale_factor, kPanZoomEnd,
-          self->pan_x, self->pan_y, 0, 0);
+          self->last_x, self->last_y, kPanZoomEnd, self->pan_x, self->pan_y, 0,
+          0);
       self->pan_started = FALSE;
     } else {
       if (!self->pan_started) {
@@ -126,28 +129,25 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
         self->pan_y = 0;
         fl_engine_send_pointer_pan_zoom_event(
             engine, self->view_id, event_time * kMicrosecondsPerMillisecond,
-            event_x * scale_factor, event_y * scale_factor, kPanZoomStart, 0, 0,
-            0, 0);
+            self->last_x, self->last_y, kPanZoomStart, 0, 0, 0, 0);
         self->pan_started = TRUE;
       }
       self->pan_x += scroll_delta_x;
       self->pan_y += scroll_delta_y;
       fl_engine_send_pointer_pan_zoom_event(
           engine, self->view_id, event_time * kMicrosecondsPerMillisecond,
-          event_x * scale_factor, event_y * scale_factor, kPanZoomUpdate,
-          self->pan_x, self->pan_y, 1, 0);
+          self->last_x, self->last_y, kPanZoomUpdate, self->pan_x, self->pan_y,
+          1, 0);
     }
   } else {
-    self->last_x = event_x * scale_factor;
-    self->last_y = event_y * scale_factor;
     fl_engine_send_mouse_pointer_event(
         engine, self->view_id,
         FlutterPointerPhase::kMove /* arbitrary value, phase will be ignored as
                                       this is a discrete scroll event */
         ,
-        event_time * kMicrosecondsPerMillisecond, event_x * scale_factor,
-        event_y * scale_factor, kFlutterPointerDeviceKindMouse, scroll_delta_x,
-        scroll_delta_y, 0, 0, 0);
+        event_time * kMicrosecondsPerMillisecond, self->last_x, self->last_y,
+        kFlutterPointerDeviceKindMouse, scroll_delta_x, scroll_delta_y, 0, 0,
+        0);
   }
 }
 

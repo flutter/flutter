@@ -19,7 +19,26 @@ import 'icon_tree_shaker.dart';
 import 'native_assets.dart';
 
 /// The only files/subdirectories we care out.
-const _kLinuxArtifacts = <String>['libflutter_linux_gtk.so'];
+const _kLinuxArtifacts = <String>[
+  'libflutter_linux_gtk.so',
+  'libflutter_linux_gtk4.so',
+];
+
+const _kLinuxGtk3Artifact = 'libflutter_linux_gtk.so';
+const _kLinuxGtk4Artifact = 'libflutter_linux_gtk4.so';
+
+/// Select the artifact to unpack based on the project's GTK variant.
+/// Defaults to gtk3 for compatibility.
+String _linuxArtifactForGtkVariant(String? gtkVariant) {
+  switch (gtkVariant) {
+    case 'gtk3':
+      return _kLinuxGtk3Artifact;
+    case 'gtk4':
+      return _kLinuxGtk4Artifact;
+    default:
+      return _kLinuxGtk3Artifact;
+  }
+}
 
 const _kLinuxDepfile = 'linux_engine_sources.d';
 
@@ -71,11 +90,17 @@ class UnpackLinux extends Target {
         'ephemeral',
       ),
     );
+    // Determine which artifact(s) to unpack based on the project's GTK variant.
+    final String? linuxGtkVariant = environment.defines['FLUTTER_LINUX_GTK'];
+    final List<String> linuxArtifacts = <String>[
+      _linuxArtifactForGtkVariant(linuxGtkVariant),
+    ];
+
     final Depfile depfile = unpackDesktopArtifacts(
       fileSystem: environment.fileSystem,
       engineSourcePath: engineSourcePath,
       outputDirectory: outputDirectory,
-      artifacts: _kLinuxArtifacts,
+      artifacts: linuxArtifacts,
       clientSourcePaths: <String>[headersPath],
       icuDataPath: environment.artifacts.getArtifactPath(
         Artifact.icuData,

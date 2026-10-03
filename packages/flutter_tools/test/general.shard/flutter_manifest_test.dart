@@ -1558,6 +1558,42 @@ flutter:
     expect(flutterManifest!.defaultFlavor, 'prod');
   });
 
+  testWithoutContext('FlutterManifest can parse Linux GTK default', () async {
+    const manifest = '''
+name: test
+flutter:
+  config:
+    linux-gtk-default: gtk4
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.linuxGtkDefault, 'gtk4');
+  });
+
+  testWithoutContext('FlutterManifest fails on invalid Linux GTK default', () async {
+    const manifest = '''
+name: test
+flutter:
+  config:
+    linux-gtk-default: 3
+''';
+
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(
+      logger.errorText,
+      contains('The "linux-gtk-default" value under "flutter: config:" must be a string if set.'),
+    );
+  });
+
   testWithoutContext('FlutterManifest fails on invalid default flavor', () async {
     const manifest = '''
 name: test
