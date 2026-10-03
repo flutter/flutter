@@ -482,13 +482,23 @@ void main() {
     expect(child0.layoutOffset, 0.0);
     expect(child1.layoutOffset, 100.0);
 
-    // Re-assign itemExtentBuilder (same identity should still clear the cache).
+    // Re-assign itemExtentBuilder with same identity should not clear the cache.
     builderCallCount = 0;
-    currentExtent = 200.0;
     list.itemExtentBuilder = builder;
     pumpFrame();
 
-    // The cache should have been cleared and builder called to re-layout.
+    // Cache was not cleared.
+    expect(builderCallCount, 0);
+
+    // Assign a new builder to clear the cache.
+    currentExtent = 200.0;
+    list.itemExtentBuilder = (int index, SliverLayoutDimensions dimensions) {
+      builderCallCount++;
+      return currentExtent;
+    };
+    pumpFrame();
+
+    // The cache should have been cleared and new builder called to re-layout.
     expect(builderCallCount, greaterThan(0));
     expect(child0.layoutOffset, 0.0);
     expect(child1.layoutOffset, 200.0);
@@ -496,7 +506,7 @@ void main() {
     // Explicitly clear the cache.
     builderCallCount = 0;
     currentExtent = 50.0;
-    list.clearItemExtentCache();
+    list.reassemble();
     list.markNeedsLayout();
     pumpFrame();
 
@@ -538,11 +548,13 @@ void main() {
     );
     final childManager = TestRenderSliverBoxChildManager(children: children);
 
+    SliverLayoutDimensions? lastDimensions;
     var builderCallCount = 0;
     final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList((
       index,
       layoutDimensions,
     ) {
+      lastDimensions = layoutDimensions;
       builderCallCount++;
       return 100.0;
     });
@@ -562,18 +574,24 @@ void main() {
     layout(align);
 
     expect(builderCallCount, greaterThan(0));
+    expect(lastDimensions!.viewportMainAxisExtent, 600.0);
+    expect(lastDimensions!.crossAxisExtent, 800.0);
     builderCallCount = 0;
 
     // Resize viewport main axis.
     box.additionalConstraints = const BoxConstraints.tightFor(width: 800.0, height: 400.0);
     pumpFrame();
     expect(builderCallCount, greaterThan(0));
+    expect(lastDimensions!.viewportMainAxisExtent, 400.0);
+    expect(lastDimensions!.crossAxisExtent, 800.0);
 
     builderCallCount = 0;
     // Resize viewport cross axis.
     box.additionalConstraints = const BoxConstraints.tightFor(width: 400.0, height: 400.0);
     pumpFrame();
     expect(builderCallCount, greaterThan(0));
+    expect(lastDimensions!.viewportMainAxisExtent, 400.0);
+    expect(lastDimensions!.crossAxisExtent, 400.0);
   });
 
   test('RenderSliverVariedExtentList reverse: true', () {

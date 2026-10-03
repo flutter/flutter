@@ -260,14 +260,24 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     return index - 1;
   }
 
-  BoxConstraints _getChildConstraints(int index) {
-    double extent;
+  /// Returns the extent of the child at the given [index].
+  ///
+  /// This is used to determine the dimensions of the child when laying it out.
+  @protected
+  double? itemExtentOf(int index) {
     if (itemExtentBuilder == null) {
-      extent = itemExtent!;
-    } else {
-      extent = itemExtentBuilder!(index, layoutDimensions)!;
+      return itemExtent;
     }
-    return constraints.asBoxConstraints(minExtent: extent, maxExtent: extent);
+    return itemExtentBuilder!(index, layoutDimensions);
+  }
+
+  BoxConstraints _getChildConstraints(int index) {
+    final double? extent = itemExtentOf(index);
+    assert(
+      extent != null,
+      'The itemExtentBuilder must not return null for valid items being laid out.',
+    );
+    return constraints.asBoxConstraints(minExtent: extent!, maxExtent: extent);
   }
 
   /// The layout dimensions for the sliver.
@@ -549,7 +559,7 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   ///
   /// This is called when the [itemExtentBuilder] is assigned or when
   /// the layout dimensions change in a way that affects the item extents.
-  void clearItemExtentCache() {
+  void _clearItemExtentCache() {
     _itemExtentCache.clear();
     _itemOffsetCache.clear();
     _itemOffsetCache.add(0.0);
@@ -571,7 +581,8 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     return _itemOffsetCache[index];
   }
 
-  double? _getOrCreateItemExtent(int index) {
+  @override
+  double? itemExtentOf(int index) {
     if (index < _itemExtentCache.length) {
       return _itemExtentCache[index];
     }
@@ -588,8 +599,15 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   set itemExtentBuilder(ItemExtentBuilder value) {
     if (_itemExtentBuilder != value) {
       _itemExtentBuilder = value;
+      _clearItemExtentCache();
+      markNeedsLayout();
     }
-    clearItemExtentCache();
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    _clearItemExtentCache();
     markNeedsLayout();
   }
 
@@ -612,21 +630,13 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     if (_lastViewportMainAxisExtent != constraints.viewportMainAxisExtent ||
         _lastCrossAxisExtent != constraints.crossAxisExtent ||
         _lastPrecedingScrollExtent != constraints.precedingScrollExtent) {
-      clearItemExtentCache();
+      _clearItemExtentCache();
     }
     _lastViewportMainAxisExtent = constraints.viewportMainAxisExtent;
     _lastCrossAxisExtent = constraints.crossAxisExtent;
     _lastPrecedingScrollExtent = constraints.precedingScrollExtent;
 
     super.performLayout();
-
-    // Ensure the itemExtentBuilder is called at least once per frame with the latest
-    // layoutDimensions, so that listeners or tests tracking the latest scrollOffset get updated.
-    final int firstIndex = _findChildIndexForScrollOffset(
-      constraints.scrollOffset + constraints.cacheOrigin,
-      findMax: false,
-    );
-    itemExtentBuilder(firstIndex, layoutDimensions);
   }
 
   @override
@@ -719,15 +729,5 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
       }
       index++;
     }
-  }
-
-  @override
-  BoxConstraints _getChildConstraints(int index) {
-    final double? extent = _getOrCreateItemExtent(index);
-    assert(
-      extent != null,
-      'The itemExtentBuilder must not return null for valid items being laid out.',
-    );
-    return constraints.asBoxConstraints(minExtent: extent!, maxExtent: extent);
   }
 }

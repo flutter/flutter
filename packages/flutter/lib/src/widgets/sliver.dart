@@ -674,13 +674,11 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
   ///
   /// The extents returned by this builder are cached for layout performance.
   ///
-  /// The cache is cleared and the sliver is marked as needing layout whenever
-  /// the widget is rebuilt, so providing a new instance of the builder is not
-  /// necessary.
-  ///
-  /// Alternatively, if a global key is used, one can call
-  /// `(key.currentContext?.findRenderObject() as RenderSliverVariedExtentList).clearItemExtentCache()`
-  /// directly.
+  /// The cache is cleared when the widget is rebuilt with a new
+  /// [itemExtentBuilder] (where `oldWidget.itemExtentBuilder != newWidget.itemExtentBuilder`).
+  /// If the builder's implementation changes but its identity does not (for example,
+  /// if it is a method tear-off), the cache will not be cleared. Therefore,
+  /// providing a new builder function is necessary to invalidate the cache.
   final ItemExtentBuilder itemExtentBuilder;
 
   @override
