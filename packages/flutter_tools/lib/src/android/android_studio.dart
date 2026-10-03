@@ -314,9 +314,10 @@ class AndroidStudio {
     final Directory? configuredStudioDir = _configuredDir(config: config, fileSystem: fs);
 
     // Find all available Studio installations.
-    final studios = <AndroidStudio>[
-      ...allInstalled(plistParser: plistParser, toolContext: toolContext),
-    ];
+    final List<AndroidStudio> studios = allInstalled(
+      plistParser: plistParser,
+      toolContext: toolContext,
+    );
     if (studios.isEmpty) {
       return null;
     }
@@ -699,7 +700,7 @@ the configured path by running this command: flutter config --android-studio-dir
         _validationMessages.add('Failed to run Java: $e');
       }
       if (result != null && result.exitCode == 0) {
-        final versionLines = <String>[...result.stderr.split('\n')];
+        final List<String> versionLines = result.stderr.split('\n');
         final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         _validationMessages.add('Java version $javaVersion');
         _javaPath = javaPath;

@@ -14,7 +14,6 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/signals.dart';
 import '../base/version.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -176,6 +175,9 @@ class AndroidSdk {
 
       // in build-tools/$version/aapt
       for (File aaptBin in os.whichAll('aapt')) {
+        if (!aaptBin.existsSync()) {
+          continue;
+        }
         // Make sure we're using the aapt from the SDK.
         aaptBin = fs.file(aaptBin.resolveSymbolicLinksSync());
         final String dir = aaptBin.parent.parent.parent.path;
@@ -186,6 +188,9 @@ class AndroidSdk {
 
       // in platform-tools/adb
       for (File adbBin in os.whichAll('adb')) {
+        if (!adbBin.existsSync()) {
+          continue;
+        }
         // Make sure we're using the adb from the SDK.
         adbBin = fs.file(adbBin.resolveSymbolicLinksSync());
         final String dir = adbBin.parent.parent.path;
@@ -207,23 +212,17 @@ class AndroidSdk {
     return AndroidSdk(fs.directory(androidHomeDir), toolContext: toolContext);
   }
 
-  static bool validSdkDirectory(String dir, {FileSystem? fileSystem}) {
+  static bool validSdkDirectory(String dir, {required FileSystem fileSystem}) {
     return sdkDirectoryHasLicenses(dir, fileSystem: fileSystem) ||
         sdkDirectoryHasPlatformTools(dir, fileSystem: fileSystem);
   }
 
-  static bool sdkDirectoryHasPlatformTools(String dir, {FileSystem? fileSystem}) {
-    final FileSystem resolvedFileSystem =
-        fileSystem ??
-        LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks());
-    return resolvedFileSystem.isDirectorySync(resolvedFileSystem.path.join(dir, 'platform-tools'));
+  static bool sdkDirectoryHasPlatformTools(String dir, {required FileSystem fileSystem}) {
+    return fileSystem.isDirectorySync(fileSystem.path.join(dir, 'platform-tools'));
   }
 
-  static bool sdkDirectoryHasLicenses(String dir, {FileSystem? fileSystem}) {
-    final FileSystem resolvedFileSystem =
-        fileSystem ??
-        LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks());
-    return resolvedFileSystem.isDirectorySync(resolvedFileSystem.path.join(dir, 'licenses'));
+  static bool sdkDirectoryHasLicenses(String dir, {required FileSystem fileSystem}) {
+    return fileSystem.isDirectorySync(fileSystem.path.join(dir, 'licenses'));
   }
 
   List<AndroidSdkVersion> get sdkVersions {
