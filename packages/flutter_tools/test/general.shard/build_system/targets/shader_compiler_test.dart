@@ -326,6 +326,51 @@ void main() {
     },
   );
 
+  testWithoutContext(
+    'compileShader appends ANGLE compile time warning when multiple returns are present',
+    () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--runtime-stage-gles',
+            '--runtime-stage-gles3',
+            '--runtime-stage-vulkan',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputSpirvPath',
+            '--input=$fragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          stderr: "[WARNING] Fragment shader uses texture samplers alongside multiple 'return' statements.",
+          onRun: (_) {
+            fileSystem.file(outputPath).createSync(recursive: true);
+            fileSystem.file(outputSpirvPath).createSync(recursive: true);
+          },
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+      );
+
+      final bool result = await shaderCompiler.compileShader(
+        input: fileSystem.file(fragPath),
+        outputPath: outputPath,
+        targetPlatform: TargetPlatform.android,
+      );
+
+      expect(result, true);
+      expect(logger.statusText, contains('Shader Warning'));
+      expect(logger.statusText, contains("[WARNING] Fragment shader uses texture samplers alongside multiple 'return' statements.\nThis combination can also cause multi-second compile times on Windows/ANGLE."));
+    },
+  );
+
   testWithoutContext('DevelopmentShaderCompiler can compile for android non-impeller', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
