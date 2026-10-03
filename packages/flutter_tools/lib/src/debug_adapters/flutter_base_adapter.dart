@@ -145,6 +145,9 @@ abstract class FlutterBaseDebugAdapter
     );
   }
 
+  static const _isolateReadyTimeout = Duration(seconds: 5);
+  static const _isolateReadyPollInterval = Duration(milliseconds: 10);
+
   @override
   Future<void> debuggerConnected(vm.VM vmInfo) async {
     // Usually we'd capture the pid from the VM here and record it for
@@ -152,6 +155,120 @@ abstract class FlutterBaseDebugAdapter
     // device so it's not valid to terminate a process with that pid locally.
     // For attach, pids should never be collected as terminateRequest() should
     // not terminate the debugger.
+    final vm.VmService? service = vmService;
+    if (service != null && enableDebugger) {
+      await _waitForIsolatesReady(service, vmInfo);
+    }
+  }
+
+  /// Waits for existing isolates in [vmInfo] to become runnable and, when
+  /// launching with `--start-paused` (`!isAttach`), to reach their initial
+  /// pause state before `DartDebugAdapter._configureExistingIsolates` runs.
+  ///
+  /// On macOS, `FlutterTesterTestDevice` can emit `test.startedProcess` while
+  /// the `main` isolate is still transitioning from `IsolateStart`
+  /// (`runnable: false, pauseEvent: None`) through `IsolateRunnable`
+  /// (`runnable: true, pauseEvent: None`) to `PauseStart`. If
+  /// `_configureExistingIsolates` queries `getIsolate` during that window:
+  /// 1. Seeing `runnable: false` registers the isolate with `kIsolateStart`,
+  ///    leaving `IsolateManager._isolateRegistrations` uncompleted if
+  ///    `IsolateRunnable` was already emitted before `streamListen('Isolate')`,
+  ///    which deadlocks `handleEvent(PauseStart)`.
+  /// 2. Seeing `runnable: true` with `pauseEvent: None` triggers an immediate
+  ///    `readyToResumeThread` call before the isolate reaches `PauseStart`,
+  ///    causing DDS to clear its resume approvals prematurely and leave the
+  ///    isolate permanently paused at `PauseStart`.
+  Future<void> _waitForIsolatesReady(vm.VmService service, vm.VM vmInfo) async {
+    final stopwatch = Stopwatch()..start();
+    try {
+      final vm.VM latestVm = await service.getVM();
+      vmInfo.isolates = latestVm.isolates;
+    } on vm.RPCError {
+      // Fall back to the initial vmInfo snapshot if refreshing fails.
+    }
+
+    final List<vm.IsolateRef>? isolateRefs = vmInfo.isolates;
+    if (isolateRefs == null || isolateRefs.isEmpty) {
+      return;
+    }
+
+    for (final vm.IsolateRef isolateRef in isolateRefs) {
+      final String? isolateId = isolateRef.id;
+      if (isolateId == null) {
+        continue;
+      }
+      while (stopwatch.elapsed < _isolateReadyTimeout && !isTerminating) {
+        try {
+          final vm.Isolate isolate = await service.getIsolate(isolateId);
+          final bool isRunnable = isolate.runnable ?? false;
+          final String? pauseKind = isolate.pauseEvent?.kind;
+          final bool isPausedOrAttach =
+              isAttach || (pauseKind != null && pauseKind != vm.EventKind.kNone);
+          if (isRunnable && isPausedOrAttach) {
+            break;
+          }
+        } on vm.SentinelException {
+          break;
+        } on vm.RPCError {
+          break;
+        }
+        await Future<void>.delayed(_isolateReadyPollInterval);
+      }
+    }
+  }
+
+  /// Ensures that any existing isolates whose startup was already handled by
+  /// [isolateManager] are not left stuck at [vm.EventKind.kPauseStart].
+  ///
+  /// In `package:dds`, `IsolateManager.initialize()` issues an unawaited
+  /// `getIsolate` request on startup that can race with `PauseStart` and
+  /// overwrite the isolate's pause state in DDS, causing `readyToResume` to
+  /// return `Success` without forwarding `resume` to the VM.
+  Future<void> ensureIsolatesResumedFromPauseStart() async {
+    final vm.VmService? service = vmService;
+    if (service == null || !enableDebugger || isAttach || isTerminating) {
+      return;
+    }
+    try {
+      final vm.VM currentVm = await service.getVM();
+      final List<vm.IsolateRef>? isolateRefs = currentVm.isolates;
+      if (isolateRefs == null) {
+        return;
+      }
+      for (final vm.IsolateRef isolateRef in isolateRefs) {
+        final String? isolateId = isolateRef.id;
+        if (isolateId == null) {
+          continue;
+        }
+        try {
+          final vm.Isolate isolate = await service.getIsolate(isolateId);
+          if (isolate.pauseEvent?.kind != vm.EventKind.kPauseStart) {
+            continue;
+          }
+          final bool? startupHandled = isolateManager.threadForIsolate(isolate)?.startupHandled;
+          if (startupHandled == null) {
+            continue;
+          }
+          if (!startupHandled) {
+            await isolateManager.handleEvent(isolate.pauseEvent!);
+          }
+          final vm.Isolate refreshedIsolate = await service.getIsolate(isolateId);
+          if (refreshedIsolate.pauseEvent?.kind == vm.EventKind.kPauseStart) {
+            logger?.call(
+              'Isolate $isolateId remained at PauseStart after readyToResume; '
+              'sending explicit resume.',
+            );
+            await service.resume(isolateId);
+          }
+        } on vm.SentinelException {
+          // Isolate exited.
+        } on vm.RPCError {
+          // Ignore RPC errors if the isolate was concurrently resumed.
+        }
+      }
+    } on vm.RPCError {
+      // Ignore VM Service connection errors during shutdown.
+    }
   }
 
   /// Called by [disconnectRequest] to request that we forcefully shut down the app being run (or in the case of an attach, disconnect).
