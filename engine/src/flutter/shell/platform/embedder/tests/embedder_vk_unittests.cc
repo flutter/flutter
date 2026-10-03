@@ -764,13 +764,12 @@ TEST_F(EmbedderTest,
       EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage);
   builder.SetDartEntrypoint("render_gradient");
 
-  auto first_scene_future = context.GetNextSceneImage();
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
   for (int i = 0; i < kRenderedFrames; ++i) {
     std::future<sk_sp<SkImage>> rendered_scene_future =
-        (i == 0) ? std::move(first_scene_future) : context.GetNextSceneImage();
+        context.GetNextSceneImage();
 
     FlutterWindowMetricsEvent event = {};
     event.struct_size = sizeof(event);
