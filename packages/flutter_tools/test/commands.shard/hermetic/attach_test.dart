@@ -1111,6 +1111,7 @@ void main() {
     testUsingContext(
       'exits when multiple devices connected',
       () async {
+        terminal = FakeTerminal(stdinHasTerminal: false);
         final command = AttachCommand(toolContext: createToolContext(loggerOverride: testLogger));
         testDeviceManager.devices = <Device>[
           FakeAndroidDevice(id: 'xx1'),
@@ -1129,7 +1130,7 @@ void main() {
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         DeviceManager: () => testDeviceManager,
-        AnsiTerminal: () => FakeTerminal(stdinHasTerminal: false),
+        AnsiTerminal: () => terminal,
       },
     );
 
