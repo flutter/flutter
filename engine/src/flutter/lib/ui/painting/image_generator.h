@@ -27,7 +27,7 @@ namespace flutter {
 class ImageGenerator {
  public:
   /// Frame count value to denote infinite looping.
-  const static unsigned int kInfinitePlayCount =
+  constexpr static unsigned int kInfinitePlayCount =
       std::numeric_limits<unsigned int>::max();
 
   /// @brief  Info about a single frame in the context of a multi-frame image,

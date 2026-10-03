@@ -590,7 +590,7 @@ class PlatformView {
   ///             rendered before this call. The surface must remain valid till
   ///             the corresponding call to NotifyDestroyed.
   ///
-  void NotifyCreated();
+  virtual void NotifyCreated();
 
   //----------------------------------------------------------------------------
   /// @brief      Used by embedders to notify the shell that the platform view
