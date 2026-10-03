@@ -47,6 +47,7 @@ import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_bitcode_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
+import 'migrations/status_bar_appearance_migration.dart';
 import 'migrations/uiapplicationmain_deprecation_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
 import 'xcode_build_settings.dart';
@@ -299,6 +300,24 @@ Future<XcodeBuildResult> buildXcodeProject({
       'No Xcode build settings have been found. Please check possible errors above.',
     );
     return XcodeBuildResult(success: false);
+  }
+
+  final String? infoPlistBuildSetting = buildSettings['INFOPLIST_FILE'];
+  if (infoPlistBuildSetting != null && infoPlistBuildSetting.isNotEmpty) {
+    final String infoPlistPath = substituteXcodeVariables(infoPlistBuildSetting, buildSettings);
+    final String? sourceRoot = buildSettings['SRCROOT'];
+    if (globals.fs.path.isAbsolute(infoPlistPath) || sourceRoot != null) {
+      await StatusBarAppearanceMigration(
+        globals.fs.file(
+          globals.fs.path.isAbsolute(infoPlistPath)
+              ? infoPlistPath
+              : globals.fs.path.join(sourceRoot!, infoPlistPath),
+        ),
+        globals.logger,
+        xcode: globals.xcode!,
+        environmentType: environmentType,
+      ).migrate();
+    }
   }
 
   final String? targetBuildDirPath = buildSettings['TARGET_BUILD_DIR'];
