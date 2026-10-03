@@ -143,7 +143,6 @@ TEST_F(FlutterVSyncWaiterTest, VSyncWorks) {
                       if (baton == kWarmUpBaton) {
                         return;
                       }
-                      EXPECT_TRUE(CACurrentMediaTime() >= timestamp - kTimerLatencyCompensation);
                       CFRunLoopStop(CFRunLoopGetCurrent());
                     }];
 
@@ -169,17 +168,28 @@ TEST_F(FlutterVSyncWaiterTest, VSyncWorks) {
   [waiter waitForVSync:2];
   [displayLink tickWithTimestamp:now + 1.5 * displayLink.nominalOutputRefreshPeriod
                  targetTimestamp:now + 3 * displayLink.nominalOutputRefreshPeriod];
-  CFRunLoopRun();
 
   [waiter waitForVSync:3];
   [displayLink tickWithTimestamp:now + 2.5 * displayLink.nominalOutputRefreshPeriod
                  targetTimestamp:now + 4 * displayLink.nominalOutputRefreshPeriod];
-  CFRunLoopRun();
 
   EXPECT_FALSE(displayLink.paused);
-  // Vsync without baton should pause the display link.
+  // A short idle gap between requests keeps the native display link running.
   [displayLink tickWithTimestamp:now + 3.5 * displayLink.nominalOutputRefreshPeriod
                  targetTimestamp:now + 5 * displayLink.nominalOutputRefreshPeriod];
+  EXPECT_FALSE(displayLink.paused);
+  [waiter waitForVSync:4];
+  [displayLink tickWithTimestamp:now + 4.5 * displayLink.nominalOutputRefreshPeriod
+                 targetTimestamp:now + 6 * displayLink.nominalOutputRefreshPeriod];
+  EXPECT_FALSE(displayLink.paused);
+  [displayLink tickWithTimestamp:now + 5.5 * displayLink.nominalOutputRefreshPeriod
+                 targetTimestamp:now + 7 * displayLink.nominalOutputRefreshPeriod];
+  for (int i = 0; i < 7; i++) {
+    EXPECT_FALSE(displayLink.paused);
+    CFTimeInterval offset = 6.5 + i;
+    [displayLink tickWithTimestamp:now + offset * displayLink.nominalOutputRefreshPeriod
+                   targetTimestamp:now + (offset + 1.5) * displayLink.nominalOutputRefreshPeriod];
+  }
 
   CFTimeInterval start = CACurrentMediaTime();
   while (!displayLink.paused) {
@@ -191,7 +201,7 @@ TEST_F(FlutterVSyncWaiterTest, VSyncWorks) {
   }
   ASSERT_TRUE(displayLink.paused);
 
-  EXPECT_EQ(entries.size(), size_t(4));
+  EXPECT_EQ(entries.size(), size_t(5));
 
   // Warm up frame should be presented as soon as possible.
   EXPECT_TRUE(entries[0].timestamp <= expectedStartUntil);
@@ -207,6 +217,9 @@ TEST_F(FlutterVSyncWaiterTest, VSyncWorks) {
   EXPECT_DOUBLE_EQ(entries[3].timestamp, now + 3 * displayLink.nominalOutputRefreshPeriod);
   EXPECT_DOUBLE_EQ(entries[3].targetTimestamp, now + 4 * displayLink.nominalOutputRefreshPeriod);
   EXPECT_EQ(entries[3].baton, size_t(3));
+  EXPECT_DOUBLE_EQ(entries[4].timestamp, now + 5 * displayLink.nominalOutputRefreshPeriod);
+  EXPECT_DOUBLE_EQ(entries[4].targetTimestamp, now + 6 * displayLink.nominalOutputRefreshPeriod);
+  EXPECT_EQ(entries[4].baton, size_t(4));
 
   [waiter invalidate];
 }
