@@ -19,7 +19,6 @@ import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 
@@ -153,15 +152,7 @@ class ShaderCompiler {
     required this._artifacts,
     Platform? platform,
   }) : _fs = fileSystem,
-       _platform = platform ?? _lookupPlatform();
-
-  static Platform _lookupPlatform() {
-    try {
-      return globals.platform;
-    } on UnsupportedError {
-      return const LocalPlatform();
-    }
-  }
+       _platform = platform ?? const LocalPlatform();
 
   final ProcessManager _processManager;
   final Logger _logger;

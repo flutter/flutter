@@ -12,7 +12,6 @@ import 'base/logger.dart';
 import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
-import 'globals.dart' as globals;
 import 'ios/application_package.dart';
 import 'linux/application_package.dart';
 import 'macos/application_package.dart';
@@ -76,7 +75,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.tester:
-        return FlutterTesterApp.fromCurrentDirectory(globals.fs);
+        return FlutterTesterApp.fromCurrentDirectory(_fileSystem);
       case TargetPlatform.darwin:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
