@@ -6,18 +6,27 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
 import '../android/android_engine_cli_flags.dart';
-import '../android/android_workflow.dart' as android_workflow;
+import '../android/android_workflow.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/signals.dart';
+import '../base/terminal.dart';
+import '../base/time.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
+import '../context/android_context.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../project.dart';
@@ -35,7 +44,13 @@ import 'daemon.dart';
 
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  RunCommandBase({super.toolContext, required super.verboseHelp}) {
+  RunCommandBase({
+    required this.buildSystem,
+    required this.buildTargets,
+    required ToolContext super.toolContext,
+    required super.verboseHelp,
+    super.outputPreferences,
+  }) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
     usesWebDefineOption();
@@ -91,6 +106,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addTestFlag(verboseHelp: verboseHelp);
     usesAdbLogFilteringOption(hide: !verboseHelp);
   }
+
+  final BuildSystem buildSystem;
+  final BuildTargets buildTargets;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   bool get traceStartup => getValue(DebuggingOptionDescriptors.traceStartup);
   bool get traceSystrace => getValue(DebuggingOptionDescriptors.traceSystrace);
@@ -259,9 +280,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   }
 
   Future<WebDevServerConfig> webDevServerConfigCore() async {
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: fs,
+      logger: logger,
     );
 
     final int? webPort = getValue(WebOptions.webPort);
@@ -319,7 +341,16 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 }
 
 class RunCommand extends RunCommandBase {
-  RunCommand({super.toolContext, bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
+  RunCommand({
+    required this.appleContext,
+    required super.buildSystem,
+    required super.buildTargets,
+    required super.toolContext,
+    this._androidContext,
+    this._androidWorkflow,
+    this.deviceManager,
+    super.verboseHelp = false,
+  }) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
@@ -395,6 +426,11 @@ class RunCommand extends RunCommandBase {
             'intended for use in generating automated flutter benchmarks.',
       );
   }
+
+  final AndroidContext? _androidContext;
+  final AndroidWorkflow? _androidWorkflow;
+  final AppleContext appleContext;
+  final DeviceManager? deviceManager;
 
   @override
   final name = 'run';
@@ -510,20 +546,23 @@ class RunCommand extends RunCommandBase {
 
     String? androidEmbeddingVersion;
     final hostLanguage = <String>[];
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     if (anyAndroidDevices) {
-      final AndroidProject androidProject = FlutterProject.current().android;
+      final AndroidProject androidProject = projectFactory
+          .fromDirectory(fs.currentDirectory)
+          .android;
       if (androidProject.existsSync()) {
         hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
         androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
       }
     }
     if (anyIOSDevices) {
-      final IosProject iosProject = FlutterProject.current().ios;
+      final IosProject iosProject = projectFactory.fromDirectory(fs.currentDirectory).ios;
       if (iosProject.exists) {
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)
             .whereType<File>()
-            .where((File file) => globals.fs.path.extension(file.path) == '.swift');
+            .where((File file) => fs.path.extension(file.path) == '.swift');
         hostLanguage.add(swiftFiles.isNotEmpty ? 'swift' : 'objc');
       }
     }
@@ -568,6 +607,14 @@ class RunCommand extends RunCommandBase {
   bool get stayResident => boolArg('resident');
   bool get awaitFirstFrameWhenTracing => boolArg('await-first-frame-when-tracing');
 
+  /// Optional [HotRunnerConfig] passed to [HotRunner].
+  @protected
+  HotRunnerConfig? get hotRunnerConfig => null;
+
+  /// Optional [ProjectFileInvalidator] passed to [HotRunner].
+  @protected
+  ProjectFileInvalidator? get projectFileInvalidator => null;
+
   @override
   Future<void> validateCommand() async {
     if (runningWithPrebuiltApplication) {
@@ -584,7 +631,7 @@ class RunCommand extends RunCommandBase {
     }
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
     final webMode = webDevServerConfig != null;
-    if (globals.deviceManager!.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
+    if ((deviceManager?.hasSpecifiedAllDevices ?? false) && runningWithPrebuiltApplication) {
       throwToolExit(
         'Using "-d all" with "--${FlutterOptions.kUseApplicationBinary}" is not supported',
       );
@@ -609,12 +656,13 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
+    final Logger logger = toolContext.logger;
     final String? flavor = stringArg('flavor');
     final bool flavorsSupportedOnEveryDevice = devices!.every(
       (Device device) => device.supportsFlavors,
     );
     if (flavor != null && !flavorsSupportedOnEveryDevice) {
-      globals.printWarning(
+      logger.printWarning(
         '--flavor is only supported for Android, Linux, macOS, iOS, and Windows devices. '
         'Flavor-related features may not function properly and could '
         'behave differently in a future release.',
@@ -623,12 +671,12 @@ class RunCommand extends RunCommandBase {
 
     if (argResults!.wasParsed('build')) {
       if (boolArg('build')) {
-        globals.printWarning(
+        logger.printWarning(
           'The "--build" flag is deprecated and will be removed in a future release. '
           'Building is the default behavior, so this flag can be safely removed.',
         );
       } else {
-        globals.printWarning(
+        logger.printWarning(
           'The "--no-build" flag is deprecated and will be removed in a future release. '
           'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
         );
@@ -643,6 +691,9 @@ class RunCommand extends RunCommandBase {
     required String? applicationBinaryPath,
     required FlutterProject flutterProject,
   }) async {
+    final FileSystem fs = toolContext.fs;
+    final Analytics analytics = this.analytics;
+
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
     final webMode = webDevServerConfig != null;
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(
@@ -652,66 +703,82 @@ class RunCommand extends RunCommandBase {
     if (hotMode && !webMode) {
       return HotRunner(
         flutterDevices,
-        target: targetFile,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         debuggingOptions: debuggingOptions,
+        target: targetFile,
+        toolContext: toolContext,
+        xcode: appleContext.xcode,
+        analytics: analytics,
+        applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
         benchmarkMode: boolArg('benchmark'),
-        applicationBinary: applicationBinaryPath == null
-            ? null
-            : globals.fs.file(applicationBinaryPath),
-        projectRootPath: stringArg('project-root'),
-        dillOutputPath: stringArg('output-dill'),
-        stayResident: stayResident,
-        analytics: globals.analytics,
-        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
         dartBuilder: hookRunner,
-        logger: globals.logger,
+        dillOutputPath: stringArg('output-dill'),
+        hotRunnerConfig: hotRunnerConfig,
+        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        projectFileInvalidator: projectFileInvalidator,
+        projectRootPath: stringArg('project-root'),
+        stayResident: stayResident,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
         flutterDevices.single,
-        target: targetFile,
-        flutterProject: flutterProject,
+        analytics: analytics,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         debuggingOptions: debuggingOptions,
+        flutterProject: flutterProject,
         stayResident: stayResident,
-        fileSystem: globals.fs,
-        analytics: globals.analytics,
-        logger: globals.logger,
-        terminal: globals.terminal,
-        platform: globals.platform,
-        outputPreferences: globals.outputPreferences,
-        systemClock: globals.systemClock,
+        toolContext: toolContext,
+        target: targetFile,
         webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(
       flutterDevices,
-      target: targetFile,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
       debuggingOptions: debuggingOptions,
-      traceStartup: traceStartup,
+      target: targetFile,
+      toolContext: toolContext,
+      xcode: appleContext.xcode,
+      analytics: analytics,
+      applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
       awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
-      applicationBinary: applicationBinaryPath == null
-          ? null
-          : globals.fs.file(applicationBinaryPath),
-      stayResident: stayResident,
       dartBuilder: hookRunner,
+      stayResident: stayResident,
+      traceStartup: traceStartup,
     );
   }
 
   @visibleForTesting
   Daemon createMachineDaemon() {
+    final Analytics analytics = this.analytics;
     return Daemon.createMachineDaemon(
-      analytics: globals.analytics,
-      androidSdk: globals.androidSdk,
-      androidWorkflow: android_workflow.androidWorkflow,
-      deviceManager: globals.deviceManager,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
       featureFlags: featureFlags,
-      java: globals.java,
-      toolContext: toolContext!,
+      toolContext: toolContext,
+      xcode: appleContext.xcode,
+      analytics: analytics,
+      androidSdk: _androidContext?.androidSdk,
+      androidWorkflow: _androidWorkflow,
+      deviceManager: deviceManager,
+      java: _androidContext?.java,
     );
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :Signals signals,
+      :SystemClock systemClock,
+      :Terminal terminal,
+    ) = toolContext;
+    final ProcessInfo processInfo = this.processInfo;
+
     final BuildInfo buildInfo = await getBuildInfo();
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
@@ -732,15 +799,13 @@ class RunCommand extends RunCommandBase {
       try {
         app = await daemon.appDomain.startApp(
           devices!.first,
-          globals.fs.currentDirectory.path,
+          fs.currentDirectory.path,
           targetFile,
           route,
           debuggingOptions,
           hotMode,
           webDefines: extractWebDefines(),
-          applicationBinary: applicationBinaryPath == null
-              ? null
-              : globals.fs.file(applicationBinaryPath),
+          applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
           trackWidgetCreation: trackWidgetCreation,
           projectRootPath: stringArg('project-root'),
           packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
@@ -750,7 +815,7 @@ class RunCommand extends RunCommandBase {
       } on Exception catch (error) {
         throwToolExit(error.toString());
       }
-      final DateTime appStartedTime = globals.systemClock.now();
+      final DateTime appStartedTime = systemClock.now();
       final int result = await app.runner.waitForAppToFinish();
       if (result != 0) {
         throwToolExit(null, exitCode: result);
@@ -761,14 +826,14 @@ class RunCommand extends RunCommandBase {
         endTimeOverride: appStartedTime,
       );
     }
-    globals.terminal.usesTerminalUi = true;
+    terminal.usesTerminalUi = true;
 
     final BuildMode buildMode = getBuildMode();
     for (final Device device in devices!) {
       if (!await device.supportsRuntimeMode(buildMode)) {
         throwToolExit(
           '${buildMode.uppercaseFriendlyName}'
-          'mode is not supported by ${device.displayName}.',
+          ' mode is not supported by ${device.displayName}.',
         );
       }
       if (hotMode) {
@@ -785,9 +850,9 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          toolContext: toolContext!,
           buildInfo: buildInfo,
           target: targetFile,
+          toolContext: toolContext,
           userIdentifier: userIdentifier,
         ),
     ];
@@ -810,15 +875,15 @@ class RunCommand extends RunCommandBase {
     // This callback can't throw.
     unawaited(
       appStartedTimeRecorder.future.then<void>((_) {
-        appStartedTime = globals.systemClock.now();
+        appStartedTime = systemClock.now();
         if (stayResident) {
           handler =
               TerminalHandler(
                   runner,
-                  logger: globals.logger,
-                  terminal: globals.terminal,
-                  signals: globals.signals,
-                  processInfo: globals.processInfo,
+                  logger: logger,
+                  terminal: terminal,
+                  signals: signals,
+                  processInfo: processInfo,
                   reportReady: boolArg('report-ready'),
                   pidFile: stringArg('pid-file'),
                 )
@@ -847,7 +912,7 @@ class RunCommand extends RunCommandBase {
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
       try {
-        globals.terminal.singleCharMode = false;
+        terminal.singleCharMode = false;
       } on StdinException {
         // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
       }
