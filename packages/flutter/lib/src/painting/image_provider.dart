@@ -660,9 +660,7 @@ abstract class ImageProvider<T extends Object> {
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
   ///
-  /// For backwards-compatibility the default implementation of this method returns
-  /// an object that will cause [resolveStreamForKey] to consult [loadBuffer].
-  /// However, implementors of this interface should only override this method
+  /// Implementors of this interface should only override this method
   /// and not [loadBuffer], which is deprecated.
   ///
   /// The [decode] callback provides the logic to obtain the codec for the
@@ -671,11 +669,8 @@ abstract class ImageProvider<T extends Object> {
   /// See also:
   ///
   ///  * [ResizeImage], for modifying the key to account for cache dimensions.
-  // TODO(tvolkert): make abstract (https://github.com/flutter/flutter/issues/119209)
   @protected
-  ImageStreamCompleter loadImage(T key, ImageDecoderCallback decode) {
-    return _AbstractImageStreamCompleter();
-  }
+  ImageStreamCompleter loadImage(T key, ImageDecoderCallback decode);
 
   @override
   String toString() => '${objectRuntimeType(this, 'ImageConfiguration')}()';
