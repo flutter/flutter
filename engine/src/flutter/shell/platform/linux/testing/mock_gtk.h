@@ -23,6 +23,7 @@ class MockGtk {
               gdk_keymap_lookup_key,
               (GdkKeymap * keymap, const GdkKeymapKey* key));
   MOCK_METHOD(GdkWindowState, gdk_window_get_state, (GdkWindow * window));
+  MOCK_METHOD(void, gdk_gl_context_clear_current, ());
   MOCK_METHOD(int, gdk_window_get_width, (GdkWindow * window));
   MOCK_METHOD(int, gdk_window_get_height, (GdkWindow * window));
   MOCK_METHOD(void, gtk_window_new, (GtkWindow * window, GtkWindowType type));
