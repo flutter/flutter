@@ -472,6 +472,7 @@ class UpgradeCommandRunner {
       logger.printStatus('');
       await Pub(
         botDetector: _toolContext.botDetector,
+        cache: _toolContext.cache,
         fileSystem: fs,
         logger: logger,
         platform: _toolContext.platform,

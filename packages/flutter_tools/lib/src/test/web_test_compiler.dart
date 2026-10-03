@@ -140,7 +140,7 @@ class WebTestCompiler {
       fileSystem: fs,
       shutdownHooks: shutdownHooks,
       config: config,
-      targetPlatform: TargetPlatform.web_javascript,
+      targetPlatform: .web_javascript,
     );
 
     final CompilerOutput? output = await residentCompiler.recompile(

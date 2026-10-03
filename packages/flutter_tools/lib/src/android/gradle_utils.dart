@@ -414,8 +414,9 @@ OS:           Mac OS X 13.2.1 aarch64
 Future<String?> getKgpVersion(
   Directory androidDirectory,
   Logger logger,
-  ProcessManager processManager,
-) async {
+  ProcessManager processManager, {
+  Platform platform = const LocalPlatform(),
+}) async {
   // Maintainers of the kotlin dsl and the kotlin gradle plugin are different.
   //
   // Android Docs refer to the kotlin gradle plugin with either the full name or KGP.
@@ -429,9 +430,10 @@ Future<String?> getKgpVersion(
   // Instead the kgpVersion task is a custom flutter task dynamically added that can
   // print the kgp version if gradle can run successfully.
 
-  if (processManager.canRun('./gradlew', workingDirectory: androidDirectory.path)) {
+  final String gradlew = androidDirectory.childFile(getGradlewFileName(platform)).path;
+  if (processManager.canRun(gradlew, workingDirectory: androidDirectory.path)) {
     final ProcessResult command = await processManager.run(<String>[
-      './gradlew',
+      gradlew,
       'kgpVersion',
       '-q',
     ], workingDirectory: androidDirectory.path);

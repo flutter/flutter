@@ -541,7 +541,11 @@ mixin CreateBase on FlutterCommand {
 
     final platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
     if (androidPlatform) {
-      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+      gradle.updateLocalProperties(
+        project: project,
+        requireAndroidSdk: false,
+        cache: _context.cache,
+      );
       platformsForMigrateConfig.add(SupportedPlatform.android);
     }
     if (iosPlatform) {
