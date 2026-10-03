@@ -45,7 +45,9 @@ class CustomElementEmbeddingStrategy implements EmbeddingStrategy {
               // it receives, without canceling them.
               ..style
               .touchAction =
-          'none';
+          'none'
+      // Prevents unconsumed scroll from chaining into the host page.
+      ..style.setProperty('overscroll-behavior', 'contain');
 
     hostElement.appendChild(rootElement);
 

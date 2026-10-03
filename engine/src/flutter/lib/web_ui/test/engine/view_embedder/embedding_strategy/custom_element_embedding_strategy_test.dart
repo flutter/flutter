@@ -80,6 +80,11 @@ void doTests() {
         'none',
         reason: 'Should disable browser handling of touch events.',
       );
+      expect(
+        styleAfter.getPropertyValue('overscroll-behavior'),
+        'contain',
+        reason: 'Should not let unconsumed scroll chain into the host page.',
+      );
     });
   });
 }
