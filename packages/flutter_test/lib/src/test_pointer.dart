@@ -292,7 +292,6 @@ class TestPointer {
       pointer: pointer,
       position: newLocation,
       delta: delta,
-      buttons: _buttons,
     );
   }
 

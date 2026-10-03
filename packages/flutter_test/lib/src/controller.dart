@@ -1191,23 +1191,19 @@ abstract class WidgetController {
   /// exposed.
   ///
   /// The return value is a [TestGesture] object that can be used to continue the
-  /// hover (e.g. moving the pointer or pressing buttons).
+  /// hover (e.g. moving the pointer or dispatching a down event).
   ///
   /// By default, the gesture kind is [PointerDeviceKind.mouse].
   ///
-  /// The `buttons` argument specifies [PointerEvent.buttons] of the hover event.
-  /// It defaults to 0 (no buttons pressed), which is typical for hover gestures.
-  /// It can be set to non-zero values to simulate special scenarios, such as
-  /// hovering with stylus buttons pressed.
   ///
   /// See also:
   ///
   ///  * [press], which dispatches a pointer down sequence.
   ///  * [startHoverAt], which starts a hover gesture at a specific location.
+  /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
   Future<TestGesture> startHover(
     finders.FinderBase<Element> finder, {
     int? pointer,
-    int buttons = 0,
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.mouse,
   }) {
@@ -1215,7 +1211,6 @@ abstract class WidgetController {
     return startHoverAt(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'startHover'),
       pointer: pointer,
-      buttons: buttons,
       kind: kind,
       view: view,
     );
@@ -1224,30 +1219,24 @@ abstract class WidgetController {
   /// Dispatch a hover sequence at the given location.
   ///
   /// The return value is a [TestGesture] object that can be used to continue the
-  /// hover (e.g. moving the pointer or pressing buttons).
+  /// hover (e.g. moving the pointer or dispatching a down event).
   ///
   /// By default, the gesture kind is [PointerDeviceKind.mouse].
   ///
-  /// The `buttons` argument specifies [PointerEvent.buttons] of the hover event.
-  /// It defaults to 0 (no buttons pressed), which is typical for hover gestures.
-  /// It can be set to non-zero values to simulate special scenarios, such as
-  /// hovering with stylus buttons pressed.
+  /// See also:
+  ///
+  ///  * [startHover], which starts a hover gesture at the center of a widget.
   Future<TestGesture> startHoverAt(
     Offset location, {
     int? pointer,
-    int buttons = 0,
     PointerDeviceKind kind = PointerDeviceKind.mouse,
     FlutterView? view,
   }) {
-    assert(
-      kind == PointerDeviceKind.mouse || kind == PointerDeviceKind.stylus,
-      'Only mouse and stylus pointers can generate hover events.',
-    );
+    assert(kind != PointerDeviceKind.trackpad);
     return TestAsyncUtils.guard<TestGesture>(() async {
       final TestGesture gesture = await createGesture(
         pointer: pointer,
         kind: kind,
-        buttons: buttons,
       );
       await gesture.addPointer(location: location, view: view);
       await gesture.moveTo(location, view: view);
@@ -1914,10 +1903,12 @@ abstract class WidgetController {
     required PointerDeviceKind kind,
     required int buttons,
   }) {
+    final int p = pointer ?? _getNextPointer();
     return TestGesture(
       dispatcher: sendEventToBinding,
       kind: kind,
-      pointer: pointer ?? _getNextPointer(),
+      pointer: p,
+      device: kind == PointerDeviceKind.mouse ? p : null,
       buttons: buttons,
     );
   }
