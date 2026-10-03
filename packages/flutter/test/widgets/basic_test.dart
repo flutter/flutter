@@ -18,6 +18,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
+import 'semantics_tester.dart';
 
 void main() {
   group('RawImage', () {
@@ -390,6 +391,65 @@ void main() {
       expect(attributedHint.attributes.length, 1);
       expect(attributedHint.attributes[0] is SpellOutStringAttribute, isTrue);
       expect(attributedHint.attributes[0].range, const TextRange(start: 1, end: 2));
+    });
+
+    testWidgets('SemanticsTester distinguishes LocaleStringAttribute by locale', (
+      WidgetTester tester,
+    ) async {
+      final key = UniqueKey();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            key: key,
+            attributedValue: AttributedString(
+              'value',
+              attributes: <StringAttribute>[
+                LocaleStringAttribute(
+                  range: const TextRange(start: 0, end: 5),
+                  locale: const Locale('en', 'MX'),
+                ),
+              ],
+            ),
+            child: const Placeholder(),
+          ),
+        ),
+      );
+      final semantics = SemanticsTester(tester);
+
+      // A matching locale is found.
+      expect(
+        semantics.nodesWith(
+          attributedValue: AttributedString(
+            'value',
+            attributes: <StringAttribute>[
+              LocaleStringAttribute(
+                range: const TextRange(start: 0, end: 5),
+                locale: const Locale('en', 'MX'),
+              ),
+            ],
+          ),
+        ),
+        isNotEmpty,
+      );
+
+      // A differing locale (same string and range) must not match.
+      expect(
+        semantics.nodesWith(
+          attributedValue: AttributedString(
+            'value',
+            attributes: <StringAttribute>[
+              LocaleStringAttribute(
+                range: const TextRange(start: 0, end: 5),
+                locale: const Locale('en', 'US'),
+              ),
+            ],
+          ),
+        ),
+        isEmpty,
+      );
+
+      semantics.dispose();
     });
 
     testWidgets('Semantics does not merge role', (WidgetTester tester) async {
