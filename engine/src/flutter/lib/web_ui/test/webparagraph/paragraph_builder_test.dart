@@ -297,4 +297,88 @@ Future<void> testMain() async {
     expect(placeholderBoxes[1].toRect().width, 40 * 4.0);
     expect(placeholderBoxes[1].toRect().height, 45 * 4.0);
   });
+
+  test('StrutStyle with kTextHeightNone does not apply a height multiplier', () {
+    // `kTextHeightNone` on a StrutStyle means "no height multiplier", exactly like omitting
+    // `height`; it must not end up as a multiplier of 0.0.
+    Paragraph layout(double? strutHeight) {
+      final builder = ParagraphBuilder(
+        ParagraphStyle(
+          fontFamily: 'Arial',
+          fontSize: 10,
+          strutStyle: StrutStyle(fontFamily: 'Arial', fontSize: 10, height: strutHeight),
+        ),
+      )..addText('Hello');
+      return builder.build()..layout(const ParagraphConstraints(width: 1000));
+    }
+
+    final Paragraph withHeight = layout(2.0);
+    final Paragraph withNone = layout(kTextHeightNone);
+    final Paragraph withoutHeight = layout(null);
+    expect(withHeight.height, closeTo(20, 1e-3));
+    expect(withNone.height, closeTo(withoutHeight.height, 1e-3));
+    expect(withNone.height, isNot(closeTo(withHeight.height, 1e-3)));
+  });
+
+  test('StrutStyle applies to an empty paragraph', () {
+    // An empty paragraph is as tall as its strut (10 * 10 = 100), matching SkParagraph.
+    const double fontSize = 10;
+    const double strutHeight = 10;
+    final builder = ParagraphBuilder(
+      ParagraphStyle(
+        fontFamily: 'FlutterTest',
+        strutStyle: StrutStyle(fontFamily: 'FlutterTest', fontSize: fontSize, height: strutHeight),
+      ),
+    );
+    final Paragraph paragraph = builder.build()..layout(const ParagraphConstraints(width: 1000));
+    expect(paragraph.height, closeTo(100, 1e-3));
+  });
+
+  test('TextHeightBehavior applies to an empty paragraph like to a single line', () {
+    // With both flags off the only line (first and last at once) falls back to the unscaled font
+    // metrics, whether the paragraph has text, an empty string or no text at all.
+    const double fontSize = 7;
+    const double heightMultiplier = 11;
+    const textHeightBehavior = TextHeightBehavior(
+      applyHeightToFirstAscent: false,
+      applyHeightToLastDescent: false,
+    );
+
+    Paragraph layout({double? height, TextHeightBehavior? textHeightBehavior, String? text}) {
+      final builder = ParagraphBuilder(
+        ParagraphStyle(
+          fontFamily: 'FlutterTest',
+          fontSize: fontSize,
+          height: height,
+          textHeightBehavior: textHeightBehavior,
+        ),
+      );
+      if (text != null) {
+        builder.addText(text);
+      }
+      return builder.build()..layout(const ParagraphConstraints(width: 1000));
+    }
+
+    final Paragraph unscaled = layout(text: 'x');
+    final Paragraph scaled = layout(height: heightMultiplier, text: 'x');
+    expect(scaled.height, greaterThan(unscaled.height));
+
+    final Paragraph withText = layout(
+      height: heightMultiplier,
+      textHeightBehavior: textHeightBehavior,
+      text: 'x',
+    );
+    final Paragraph withEmptyString = layout(
+      height: heightMultiplier,
+      textHeightBehavior: textHeightBehavior,
+      text: '',
+    );
+    final Paragraph empty = layout(
+      height: heightMultiplier,
+      textHeightBehavior: textHeightBehavior,
+    );
+    expect(withText.height, closeTo(unscaled.height, 1e-3));
+    expect(withEmptyString.height, closeTo(unscaled.height, 1e-3));
+    expect(empty.height, closeTo(unscaled.height, 1e-3));
+  });
 }
