@@ -347,6 +347,20 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @override
   double get devicePixelRatio => context.devicePixelRatio;
 
+  /// Whether [pixels] is currently being moved by a drag synthesized from a
+  /// semantics scroll action.
+  ///
+  /// [Scrollable] sets this while it replays the drag sequence synthesized
+  /// for a semantics scroll action and resets it when the replay ends. While
+  /// it is true, [setPixels] does not move [pixels] further outside the range
+  /// from [minScrollExtent] to [maxScrollExtent] than it already is, so that
+  /// assistive technologies scroll exactly to the edge of the content instead
+  /// of overscrolling and bouncing back with physics like
+  /// [BouncingScrollPhysics]. The discarded distance is reported by
+  /// [didOverscrollBy], consistent with physics that reject out-of-range
+  /// values themselves, like [ClampingScrollPhysics].
+  bool semanticsScrollInProgress = false;
+
   /// Update the scroll position ([pixels]) to a given pixel value.
   ///
   /// This should only be called by the current [ScrollActivity], either during
@@ -370,7 +384,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       "A scrollable's position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.",
     );
     if (newPixels != pixels) {
-      final double overscroll = applyBoundaryConditions(newPixels);
+      double overscroll = applyBoundaryConditions(newPixels);
       assert(() {
         final double delta = newPixels - pixels;
         if (overscroll.abs() > delta.abs()) {
@@ -384,7 +398,18 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         return true;
       }());
       final double oldPixels = pixels;
-      _pixels = newPixels - overscroll;
+      double target = newPixels - overscroll;
+      if (semanticsScrollInProgress && haveDimensions) {
+        // A semantics scroll stops at the boundary instead of moving further
+        // out of range, no matter what the physics allowed. A position that
+        // is already out of range may still recover toward it.
+        final double lowerBound = oldPixels < minScrollExtent ? oldPixels : minScrollExtent;
+        final double upperBound = oldPixels > maxScrollExtent ? oldPixels : maxScrollExtent;
+        final double clamped = clampDouble(target, lowerBound, upperBound);
+        overscroll += target - clamped;
+        target = clamped;
+      }
+      _pixels = target;
       if (_pixels != oldPixels) {
         if (outOfRange) {
           context.setIgnorePointer(false);
