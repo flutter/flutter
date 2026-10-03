@@ -885,7 +885,7 @@ TEST(AndroidCompositorTest, VulkanOverlayBackingStoreWithDelegateSucceeds) {
 }
 
 TEST(AndroidCompositorTest,
-     RootBackingStorePresentedAfterPlatformViewAndOverlayVulkan) {
+     RootBackingStorePresentedBeforePlatformViewAndOverlayVulkan) {
   auto events = std::make_shared<std::vector<std::string>>();
   auto surface_manager = std::make_shared<OrderRecordingSurfaceManager>(
       AndroidRenderingAPI::kImpellerVulkan, events);
@@ -943,10 +943,15 @@ TEST(AndroidCompositorTest,
 
   EXPECT_TRUE(compositor->PresentLayers(layers, kLayerCount));
 
+  // For Vulkan, the root onscreen swapchain image is presented before
+  // OnPlatformViewPresented runs (see android_compositor.cc:269-273), because
+  // OnPlatformViewPresented on the first non-HCPP platform view frame invokes
+  // convertToImageView() -> SetNativeWindow(FlutterImageView), which replaces
+  // the active swapchain.
   const std::vector<std::string> expected_events = {
-      "GetOverlayWindow:0", "OnBeginFrame",        "OnPlatformViewPresented:1",
-      "GetOverlayWindow:0", "PresentOverlayImage", "OnOverlayPresented:0",
-      "PresentImage",       "OnFramePresented",
+      "GetOverlayWindow:0",        "OnBeginFrame",       "PresentImage",
+      "OnPlatformViewPresented:1", "GetOverlayWindow:0", "PresentOverlayImage",
+      "OnOverlayPresented:0",      "OnFramePresented",
   };
   EXPECT_EQ(*events, expected_events);
 
