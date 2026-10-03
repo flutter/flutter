@@ -37,6 +37,11 @@ void EmbedderExternalViewEmbedder::CollectView(int64_t view_id) {
   render_target_caches_.erase(view_id);
 }
 
+void EmbedderExternalViewEmbedder::Teardown() {
+  render_target_caches_.clear();
+  Reset();
+}
+
 void EmbedderExternalViewEmbedder::SetSurfaceTransformationCallback(
     SurfaceTransformationCallback surface_transformation_callback) {
   surface_transformation_callback_ = std::move(surface_transformation_callback);
