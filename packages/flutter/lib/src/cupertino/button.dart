@@ -94,6 +94,7 @@ class CupertinoButton extends StatefulWidget {
     this.mouseCursor,
     this.onLongPress,
     required this.onPressed,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(minimumSize == null || minSize == null),
        _style = _CupertinoButtonStyle.plain;
@@ -131,6 +132,7 @@ class CupertinoButton extends StatefulWidget {
     this.mouseCursor,
     this.onLongPress,
     required this.onPressed,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(minimumSize == null || minSize == null),
        _style = _CupertinoButtonStyle.tinted;
 
@@ -162,6 +164,7 @@ class CupertinoButton extends StatefulWidget {
     this.mouseCursor,
     this.onLongPress,
     required this.onPressed,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(minimumSize == null || minSize == null),
        _style = _CupertinoButtonStyle.filled;
@@ -291,6 +294,11 @@ class CupertinoButton extends StatefulWidget {
 
   final _CupertinoButtonStyle _style;
 
+  /// The behavior of the animation relative to the device's clock
+  ///
+  /// Defaults to [AnimationBehavior.normal]
+  final AnimationBehavior animationBehavior;
+
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set [onPressed] or [onLongPress] to a non-null value.
   bool get enabled => onPressed != null || onLongPress != null;
@@ -343,6 +351,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       duration: const Duration(milliseconds: 200),
       value: 0.0,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
     _opacityAnimation = _animationController
         .drive(CurveTween(curve: Curves.decelerate))

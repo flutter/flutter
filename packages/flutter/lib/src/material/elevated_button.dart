@@ -79,6 +79,7 @@ class ElevatedButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior,
     super.statesController,
+    super.animationBehavior,
     required super.child,
   }) : _addPadding = false;
 
@@ -104,6 +105,7 @@ class ElevatedButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior = Clip.none,
     super.statesController,
+    super.animationBehavior,
     Widget? icon,
     required Widget label,
     IconAlignment? iconAlignment,

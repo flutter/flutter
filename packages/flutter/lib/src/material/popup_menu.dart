@@ -559,6 +559,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
     super.height,
     super.labelTextStyle,
     super.mouseCursor,
+    this.animationBehavior = AnimationBehavior.normal,
     super.child,
     super.onTap,
   });
@@ -572,6 +573,9 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   /// When this popup menu item is selected, the checkmark will fade in or out
   /// as appropriate to represent the implied new state.
   final bool checked;
+
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
 
   /// The widget below this widget in the tree.
   ///
@@ -596,13 +600,18 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: _fadeDuration, vsync: this)
-      ..value = widget.checked ? 1.0 : 0.0
-      ..addListener(
-        () => setState(() {
-          /* animation changed */
-        }),
-      );
+    _controller =
+        AnimationController(
+            duration: _fadeDuration,
+            vsync: this,
+            animationBehavior: widget.animationBehavior,
+          )
+          ..value = widget.checked ? 1.0 : 0.0
+          ..addListener(
+            () => setState(() {
+              /* animation changed */
+            }),
+          );
   }
 
   @override

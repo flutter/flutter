@@ -96,6 +96,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
     required this.color,
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.child,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// Whether to show the overscroll glow on the side with negative scroll
@@ -154,6 +155,9 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// the child is usually the one provided as an argument to that method.
   final Widget? child;
 
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   @override
   State<GlowingOverscrollIndicator> createState() => _GlowingOverscrollIndicatorState();
 
@@ -169,6 +173,13 @@ class GlowingOverscrollIndicator extends StatefulWidget {
     };
     properties.add(MessageProperty('show', showDescription));
     properties.add(ColorProperty('color', color, showName: false));
+    properties.add(
+      EnumProperty<AnimationBehavior>(
+        'animationBehavior',
+        animationBehavior,
+        defaultValue: AnimationBehavior.normal,
+      ),
+    );
   }
 }
 
@@ -181,8 +192,18 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
   @override
   void initState() {
     super.initState();
-    _leadingController = _GlowController(vsync: this, color: widget.color, axis: widget.axis);
-    _trailingController = _GlowController(vsync: this, color: widget.color, axis: widget.axis);
+    _leadingController = _GlowController(
+      vsync: this,
+      color: widget.color,
+      axis: widget.axis,
+      animationBehavior: widget.animationBehavior,
+    );
+    _trailingController = _GlowController(
+      vsync: this,
+      color: widget.color,
+      axis: widget.axis,
+      animationBehavior: widget.animationBehavior,
+    );
     _leadingAndTrailingListener = Listenable.merge(<Listenable>[
       _leadingController!,
       _trailingController!,
@@ -325,11 +346,17 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
 enum _GlowState { idle, absorb, pull, recede }
 
 class _GlowController extends ChangeNotifier {
-  _GlowController({required TickerProvider vsync, required this._color, required this._axis}) {
+  _GlowController({
+    required TickerProvider vsync,
+    required this._color,
+    required this._axis,
+    AnimationBehavior animationBehavior = AnimationBehavior.normal,
+  }) {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
-    _glowController = AnimationController(vsync: vsync)..addStatusListener(_changePhase);
+    _glowController = AnimationController(vsync: vsync, animationBehavior: animationBehavior)
+      ..addStatusListener(_changePhase);
     _decelerator = CurvedAnimation(parent: _glowController, curve: Curves.decelerate)
       ..addListener(notifyListeners);
     _glowOpacity = _decelerator.drive(_glowOpacityTween);

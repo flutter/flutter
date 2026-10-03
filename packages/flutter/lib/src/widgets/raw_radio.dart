@@ -59,6 +59,7 @@ class RawRadio<T> extends StatefulWidget {
     required this.groupRegistry,
     required this.enabled,
     required this.builder,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(!enabled || groupRegistry != null, 'an enabled raw radio must have a registry');
 
   /// {@template flutter.widget.RawRadio.value}
@@ -127,12 +128,20 @@ class RawRadio<T> extends StatefulWidget {
   /// {@endtemplate}
   final RadioGroupRegistry<T>? groupRegistry;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
+
   @override
   State<RawRadio<T>> createState() => _RawRadioState<T>();
 }
 
 class _RawRadioState<T> extends State<RawRadio<T>>
     with TickerProviderStateMixin, ToggleableStateMixin, RadioClient<T> {
+  @override
+  AnimationBehavior get animationBehavior => widget.animationBehavior;
+
   @override
   FocusNode get focusNode => widget.focusNode;
 
