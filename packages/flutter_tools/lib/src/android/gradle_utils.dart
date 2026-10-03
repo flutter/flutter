@@ -12,6 +12,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../base/version_range.dart';
@@ -1171,6 +1172,7 @@ String getGradleVersionFor(String agpV) {
 /// If [requireAndroidSdk] is true (the default) and no Android SDK is found,
 /// this will fail with a [ToolExit].
 void updateLocalProperties({
+  Cache? cache,
   required FlutterProject project,
   Analytics? analytics,
   AndroidSdk? androidSdk,
@@ -1216,7 +1218,17 @@ void updateLocalProperties({
     changeIfNecessary('sdk.dir', fsUtils.escapePath(androidSdk.directory.path));
   }
 
-  changeIfNecessary('flutter.sdk', fsUtils.escapePath(Cache.flutterRoot!));
+  changeIfNecessary(
+    'flutter.sdk',
+    fsUtils.escapePath(
+      cache?.flutterRoot ??
+          Cache.defaultFlutterRoot(
+            platform: const LocalPlatform(),
+            fileSystem: project.directory.fileSystem,
+            userMessages: UserMessages(),
+          ),
+    ),
+  );
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(

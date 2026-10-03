@@ -10,14 +10,11 @@ import 'package:package_config/package_config_types.dart';
 
 import '../android/android_device.dart';
 import '../application_package.dart';
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/signals.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
@@ -26,7 +23,6 @@ import '../device.dart';
 import '../drive/drive_service.dart';
 import '../drive/import_validator.dart';
 import '../drive/web_driver_service.dart' show Browser;
-import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart'
@@ -57,13 +53,14 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
-    required ToolContext toolContext,
+    required super.buildSystem,
+    required super.buildTargets,
+    required super.toolContext,
     @visibleForTesting this._flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     super.verboseHelp = false,
-  }) : _toolContext = toolContext,
-       _fsUtils = FileSystemUtils(fileSystem: toolContext.fs, platform: toolContext.platform) {
+  }) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
 
@@ -196,11 +193,6 @@ class DriveCommand extends RunCommandBase {
   }
 
   FlutterDriverFactory? _flutterDriverFactory;
-  final FileSystemUtils _fsUtils;
-  final ToolContext _toolContext;
-
-  @override
-  ToolContext get toolContext => _toolContext;
 
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
@@ -249,7 +241,7 @@ class DriveCommand extends RunCommandBase {
     if (isWirelessIOSDevice &&
         localArgResults != null &&
         !localArgResults.wasParsed('publish-port')) {
-      _toolContext.logger.printTrace(
+      toolContext.logger.printTrace(
         'A wireless iOS device is being used. Changing `publish-port` to be enabled.',
       );
       return false;
@@ -263,8 +255,7 @@ class DriveCommand extends RunCommandBase {
     // are not passed.
     validatePrebuiltAndroidApplicationFlags();
 
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
-
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     if (userIdentifier != null) {
       final Device? device = await findTargetDevice();
       if (device is! AndroidDevice) {
@@ -310,13 +301,7 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :Terminal terminal,
-      :OutputPreferences outputPreferences,
-    ) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final String? testFile = _getTestFile();
     if (testFile == null) {
       throwToolExit(null);
@@ -350,10 +335,13 @@ class DriveCommand extends RunCommandBase {
     final web = webDevServerConfig != null;
 
     _flutterDriverFactory ??= FlutterDriverFactory(
-      toolContext: _toolContext,
+      analytics: analytics,
       applicationPackageFactory: ApplicationPackageFactory.instance!,
-      dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
+      dartSdkPath: toolContext.artifacts.getArtifactPath(.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
+      toolContext: toolContext,
     );
     final File packageConfigFile = findPackageConfigFileOrDefault(fs.currentDirectory);
 
@@ -438,7 +426,7 @@ class DriveCommand extends RunCommandBase {
       if (testResult != 0) {
         throwToolExit(null);
       }
-    } on Exception catch (_) {
+    } on Exception {
       // On exceptions, including ToolExit, take a screenshot on the device
       // unless a screenshot was already taken on test failure.
       if (!screenshotTaken && screenshot != null) {
@@ -483,7 +471,7 @@ class DriveCommand extends RunCommandBase {
   }
 
   void _registerScreenshotCallbacks(Device device, Directory screenshotDir) {
-    final ToolContext(:Logger logger, :Signals signals) = _toolContext;
+    final ToolContext(:Logger logger, :Signals signals) = toolContext;
     logger.printTrace('Registering signal handlers...');
     final tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
@@ -507,7 +495,7 @@ class DriveCommand extends RunCommandBase {
 
   void _unregisterScreenshotCallbacks() {
     if (screenshotTokens != null) {
-      final ToolContext(:Logger logger, :Signals signals) = _toolContext;
+      final ToolContext(:Logger logger, :Signals signals) = toolContext;
       logger.printTrace('Unregistering signal handlers...');
       for (final MapEntry<ProcessSignal, Object> entry in screenshotTokens!.entries) {
         signals.removeHandler(entry.key, entry.value);
@@ -517,7 +505,7 @@ class DriveCommand extends RunCommandBase {
   }
 
   String? _getTestFile() {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     if (argResults!['driver'] != null) {
       return stringArg('driver');
     }
@@ -563,10 +551,10 @@ class DriveCommand extends RunCommandBase {
     if (!device.supportsScreenshot) {
       return;
     }
-    final Logger logger = _toolContext.logger;
+    final ToolContext(:FileSystemUtils fileSystemUtils, :Logger logger) = toolContext;
     try {
       outputDirectory.createSync(recursive: true);
-      final File outputFile = _fsUtils.getUniqueFile(outputDirectory, 'drive', 'png');
+      final File outputFile = fileSystemUtils.getUniqueFile(outputDirectory, 'drive', 'png');
       await device.takeScreenshot(outputFile);
       logger.printStatus('Screenshot written to ${outputFile.path}');
     } on Exception catch (error) {

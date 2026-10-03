@@ -59,6 +59,7 @@ import 'reporting/unified_analytics.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'runner/local_engine.dart';
+import 'template.dart';
 import 'version.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
@@ -162,6 +163,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
         analytics: globals.analytics,
+        cache: globals.cache,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(globals.cocoaPods!, globals.userMessages),
       Config: () => Config(
@@ -171,6 +173,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
       ),
       CustomDevicesConfig: () => CustomDevicesConfig(
+        cache: globals.cache,
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
@@ -214,7 +217,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
       ),
       FlutterVersion: () =>
-          FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: globals.git),
+          FlutterVersion(fs: globals.fs, flutterRoot: globals.cache.flutterRoot, git: globals.git),
       Git: () => Git(currentPlatform: globals.platform, runProcessWith: globals.processUtils),
       GradleUtils: () => GradleUtils(
         operatingSystemUtils: globals.os,
@@ -247,7 +250,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         platform: globals.platform,
         fileSystem: globals.fs,
-        flutterRoot: Cache.flutterRoot!,
+        flutterRoot: globals.cache.flutterRoot,
       ),
       Logger: () => globals.platform.isWindows
           ? WindowsStdoutLogger(
@@ -293,9 +296,11 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         processManager: globals.processManager,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        cache: globals.cache,
       ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
+      TemplatePathProvider: () => TemplatePathProvider(cache: globals.cache),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
         userMessages: globals.userMessages,

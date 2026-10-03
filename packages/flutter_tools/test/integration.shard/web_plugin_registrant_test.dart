@@ -275,7 +275,7 @@ void main() {
 }
 
 Future<void> _createProject(Directory dir, List<String> createArgs) async {
-  Cache.flutterRoot = '../..';
+  globals.cache.flutterRoot = '../..';
   final command = CreateCommand(
     androidContext: FakeAndroidContext(),
     appleContext: FakeAppleContext(),

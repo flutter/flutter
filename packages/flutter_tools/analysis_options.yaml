@@ -14,8 +14,6 @@ plugins:
     path: ../../dev/flutter_analyzer_plugin
     diagnostics:
       avoid_future_catch_error: true
-  dependency_overrides:
-    analysis_server_plugin: ^0.3.22
 
 linter:
   rules:

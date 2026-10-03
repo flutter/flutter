@@ -60,21 +60,27 @@ class BuildCommand extends FlutterCommand {
       :ProcessManager processManager,
     ) = toolContext;
     final Xcode xcode = appleContext.xcode;
-
     final codesign = DarwinAddToAppCodesigning.fromContexts(
       appleContext: appleContext,
       toolContext: toolContext,
     );
-    final AndroidBuilder effectiveAndroidBuilder =
+    final AndroidBuilder builder =
         androidBuilder ??
-        AndroidGradleBuilder.fromContexts(
+        AndroidGradleBuilder(
           analytics: analytics,
-          androidContext: androidContext,
-          toolContext: toolContext,
+          androidStudio: androidContext.androidStudio,
+          artifacts: toolContext.artifacts,
+          fileSystem: toolContext.fs,
+          gradleUtils: androidContext.gradleUtils,
+          java: androidContext.java,
+          logger: toolContext.logger,
+          platform: toolContext.platform,
+          processManager: toolContext.processManager,
+          androidSdk: androidContext.androidSdk,
         );
     _addSubcommand(
       BuildAarCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: builder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -83,7 +89,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildApkCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: builder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -92,7 +98,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildAppBundleCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: builder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,

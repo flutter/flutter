@@ -58,7 +58,6 @@ void main() {
   late FakeToolContext toolContext;
 
   setUp(() {
-    Cache.flutterRoot = getFlutterRoot();
     fs = MemoryFileSystem.test(
       style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
