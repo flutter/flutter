@@ -1238,7 +1238,14 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   ScrollController? _parent;
 
   void setParent(ScrollController? value) {
-    _parent?.detach(this);
+    // _NestedScrollController.detach() calls setParent(null) on its positions,
+    // which reenters this method when _parent is one (e.g. a NestedScrollView
+    // nested in another's body). Clear _parent first so the reentrant call is
+    // a no-op.
+    // See https://github.com/flutter/flutter/issues/123590.
+    final ScrollController? oldParent = _parent;
+    _parent = null;
+    oldParent?.detach(this);
     _parent = value;
     _parent?.attach(this);
   }
