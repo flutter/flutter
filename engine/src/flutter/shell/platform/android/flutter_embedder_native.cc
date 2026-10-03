@@ -1587,9 +1587,12 @@ FlutterEmbedderNative::~FlutterEmbedderNative() {
   std::lock_guard<std::mutex> pres_lock(presentation_mutex_);
   std::lock_guard<std::mutex> surf_lock(surface_mutex_);
   if (native_window_) {
-    ANativeWindow_release(native_window_);
+    if (!is_fake_window_) {
+      ANativeWindow_release(native_window_);
+    }
     native_window_ = nullptr;
   }
+  is_fake_window_ = false;
   {
     std::scoped_lock lock(image_textures_mutex_);
     for (auto& [id, entry] : image_textures_) {
@@ -1690,24 +1693,26 @@ size_t FlutterEmbedderNative::GetEmbedderVersion() {
   return FLUTTER_ENGINE_VERSION;
 }
 
-void FlutterEmbedderNative::SetNativeWindow(ANativeWindow* window) {
+void FlutterEmbedderNative::SetNativeWindow(ANativeWindow* window,
+                                            bool is_fake_window) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetNativeWindow");
   {
     std::lock_guard<std::mutex> pres_lock(presentation_mutex_);
     std::lock_guard<std::mutex> surf_lock(surface_mutex_);
-    if (native_window_ != window) {
-      if (window) {
+    if (native_window_ != window || is_fake_window_ != is_fake_window) {
+      if (window && !is_fake_window) {
         ANativeWindow_acquire(window);
       }
-      if (native_window_) {
+      if (native_window_ && !is_fake_window_) {
         ANativeWindow_release(native_window_);
       }
       native_window_ = window;
+      is_fake_window_ = is_fake_window;
     }
   }
   if (surface_manager_) {
-    if (window) {
-      surface_manager_->SetNativeWindow(window);
+    if (window || is_fake_window) {
+      surface_manager_->SetNativeWindow(window, is_fake_window);
     } else {
       surface_manager_->ClearNativeWindow();
     }
@@ -1721,10 +1726,7 @@ void FlutterEmbedderNative::NotifySurfaceCreated(ANativeWindow* window,
                                                  bool is_fake_window) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::NotifySurfaceCreated");
   is_image_view_surface_active_.store(false);
-  SetNativeWindow(window);
-  if (is_fake_window && surface_manager_ && window) {
-    surface_manager_->SetNativeWindow(window, true);
-  }
+  SetNativeWindow(window, is_fake_window);
   surface_attached_ = true;
   auto engine = GetEngine();
   if (engine && !initialize_engine_fn_) {
@@ -1761,10 +1763,7 @@ void FlutterEmbedderNative::NotifySurfaceWindowChanged(ANativeWindow* window,
                                                        bool is_image_view) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::NotifySurfaceWindowChanged");
   is_image_view_surface_active_.store(is_image_view && (window != nullptr));
-  SetNativeWindow(window);
-  if (is_fake_window && surface_manager_ && window) {
-    surface_manager_->SetNativeWindow(window, true);
-  }
+  SetNativeWindow(window, is_fake_window);
   surface_attached_ = true;
   auto engine = GetEngine();
   if (engine && !initialize_engine_fn_) {
@@ -1824,7 +1823,7 @@ void FlutterEmbedderNative::NotifySurfaceDestroyed() {
     }
   }
   surface_attached_ = false;
-  SetNativeWindow(nullptr);
+  SetNativeWindow(nullptr, /*is_fake_window=*/false);
 }
 
 ANativeWindow* FlutterEmbedderNative::GetNativeWindow() {
@@ -1835,7 +1834,7 @@ ANativeWindow* FlutterEmbedderNative::GetNativeWindow() {
 ANativeWindow* FlutterEmbedderNative::AcquireNativeWindow() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::AcquireNativeWindow");
   std::lock_guard<std::mutex> lock(surface_mutex_);
-  if (native_window_) {
+  if (native_window_ && !is_fake_window_) {
     ANativeWindow_acquire(native_window_);
   }
   return native_window_;
@@ -1986,8 +1985,8 @@ bool FlutterEmbedderNative::PresentSoftware(const void* allocation,
   ANativeWindow* window = nullptr;
   {
     std::lock_guard<std::mutex> lock(surface_mutex_);
-    if (!native_window_) {
-      return false;
+    if (!native_window_ || is_fake_window_) {
+      return is_fake_window_;
     }
     window = native_window_;
     ANativeWindow_acquire(window);
