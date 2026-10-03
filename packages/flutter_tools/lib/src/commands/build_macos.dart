@@ -68,9 +68,7 @@ class BuildMacosCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = toolContext.logger;
-
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isMacOSEnabled) {
       throwToolExit(
@@ -82,18 +80,21 @@ class BuildMacosCommand extends BuildSubCommand {
     }
 
     await buildMacOS(
-      flutterProject: project,
+      analytics: analytics,
       buildInfo: buildInfo,
-      targetOverride: targetFile,
-      verboseLogging: logger.isVerbose || globalResults?[FlutterGlobalOptions.kVerboseFlag] == true,
       configOnly: configOnly,
+      featureFlags: featureFlags,
+      flutterProject: project,
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: fs,
         logger: logger,
         appFilenamePattern: 'App',
         analytics: analytics,
       ),
+      targetOverride: targetFile,
+      toolContext: toolContext,
       usingCISystem: usingCISystem,
+      verboseLogging: logger.isVerbose || globalResults?[FlutterGlobalOptions.kVerboseFlag] == true,
     );
     return FlutterCommandResult.success();
   }

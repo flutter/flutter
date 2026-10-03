@@ -10,6 +10,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../project.dart';
@@ -24,6 +25,7 @@ class MacOSDevice extends DesktopDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
+    required this._toolContext,
   }) : _processManager = processManager,
        _logger = logger,
        _operatingSystemUtils = operatingSystemUtils,
@@ -32,6 +34,7 @@ class MacOSDevice extends DesktopDevice {
   final ProcessManager _processManager;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
+  final ToolContext _toolContext;
 
   @override
   Future<bool> isSupported() async => true;
@@ -68,11 +71,12 @@ class MacOSDevice extends DesktopDevice {
     bool usingCISystem = false,
   }) async {
     await buildMacOS(
-      flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
+      flutterProject: FlutterProject.current(),
       targetOverride: mainPath,
-      verboseLogging: _logger.isVerbose,
+      toolContext: _toolContext,
       usingCISystem: usingCISystem,
+      verboseLogging: _logger.isVerbose,
     );
   }
 
@@ -108,6 +112,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
     required this._logger,
     required this._fileSystem,
     required this._operatingSystemUtils,
+    required this._toolContext,
   }) : super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
@@ -116,6 +121,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
+  final ToolContext _toolContext;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -137,6 +143,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
         logger: _logger,
         fileSystem: _fileSystem,
         operatingSystemUtils: _operatingSystemUtils,
+        toolContext: _toolContext,
       ),
     ];
   }
