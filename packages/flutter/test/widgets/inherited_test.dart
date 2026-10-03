@@ -33,7 +33,7 @@ class ValueInherited extends InheritedWidget {
 
 class ExpectFail extends StatefulWidget {
   const ExpectFail(this.onError, {super.key});
-  final VoidCallback onError;
+  final ValueChanged<Object> onError;
 
   @override
   ExpectFailState createState() => ExpectFailState();
@@ -46,7 +46,7 @@ class ExpectFailState extends State<ExpectFail> {
     try {
       context.dependOnInheritedWidgetOfExactType<TestInherited>(); // should fail
     } catch (e) {
-      widget.onError();
+      widget.onError(e);
     }
   }
 
@@ -532,13 +532,42 @@ void main() {
     var exceptionCaught = false;
 
     final parent = TestInherited(
-      child: ExpectFail(() {
+      child: ExpectFail((Object error) {
         exceptionCaught = true;
       }),
     );
     await tester.pumpWidget(parent);
 
     expect(exceptionCaught, isTrue);
+  });
+
+  testWidgets('initState() dependency on Inherited explains why initState() is too early', (
+    WidgetTester tester,
+  ) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/105705
+    Object? error;
+
+    final parent = TestInherited(
+      child: ExpectFail((Object caughtError) {
+        error = caughtError;
+      }),
+    );
+    await tester.pumpWidget(parent);
+
+    expect(error, isFlutterError);
+    final message = error.toString();
+    expect(
+      message,
+      contains(
+        'dependOnInheritedWidgetOfExactType<TestInherited>() or dependOnInheritedElement() '
+        'was called before ExpectFailState.initState() completed',
+      ),
+    );
+    // The error should explain that initState() runs only once for each State
+    // object, so a value it reads from an inherited widget is never updated.
+    expect(message, contains('calls initState() only once for each State object'));
+    expect(message, contains('is never updated when that inherited widget changes'));
+    expect(message, contains('can be placed in the didChangeDependencies method'));
   });
 
   testWidgets('InheritedNotifier', (WidgetTester tester) async {
