@@ -19,7 +19,6 @@ using fup_PointerSample = fuchsia::ui::pointerinjector::PointerSample;
 using fup_Target = fuchsia::ui::pointerinjector::Target;
 using fup_Viewport = fuchsia::ui::pointerinjector::Viewport;
 using fuv_ViewRef = fuchsia::ui::views::ViewRef;
-const auto fup_MAX_INJECT = fuchsia::ui::pointerinjector::MAX_INJECT;
 
 namespace {
 
@@ -187,58 +186,11 @@ void PointerInjectorDelegate::PointerInjectorEndpoint::InjectEvent(
 
   auto event = ExtractPointerEvent(std::move(request));
 
-  // Add the event to |injector_events_| and dispatch it to the view.
-  EnqueueEvent(std::move(event));
+  FML_CHECK(device_.is_bound());
 
-  DispatchPendingEvents();
-}
-
-void PointerInjectorDelegate::PointerInjectorEndpoint::DispatchPendingEvents() {
-  // Return if there is already a |fuchsia.ui.pointerinjector.Device.Inject|
-  // call in flight. The new pointer events will be dispatched once the
-  // in-progress call terminates.
-  if (injection_in_flight_) {
-    return;
-  }
-
-  // Dispatch the events present in |injector_events_|. Note that we recursively
-  // call |DispatchPendingEvents| in the callback passed to the
-  // |f.u.p.Device.Inject| call. This ensures that there is only one
-  // |f.u.p.Device.Inject| call at a time. If a new pointer event comes when
-  // there is a |f.u.p.Device.Inject| call in progress, it gets buffered in
-  // |injector_events_| and is picked up later.
-  if (!injector_events_.empty()) {
-    auto events = std::move(injector_events_.front());
-    injector_events_.pop();
-    injection_in_flight_ = true;
-
-    FML_CHECK(device_.is_bound());
-    FML_CHECK(events.size() <= fup_MAX_INJECT);
-
-    device_->Inject(std::move(events), [weak = weak_factory_.GetWeakPtr()] {
-      if (!weak) {
-        FML_LOG(WARNING) << "Use after free attempted.";
-        return;
-      }
-      weak->injection_in_flight_ = false;
-      weak->DispatchPendingEvents();
-    });
-  }
-}
-
-void PointerInjectorDelegate::PointerInjectorEndpoint::EnqueueEvent(
-    fup_Event event) {
-  // Add |event| in |injector_events_| keeping in mind that the vector size does
-  // not exceed |fup_MAX_INJECT|.
-  if (!injector_events_.empty() &&
-      injector_events_.back().size() < fup_MAX_INJECT) {
-    injector_events_.back().push_back(std::move(event));
-  } else {
-    std::vector<fup_Event> vec;
-    vec.reserve(fup_MAX_INJECT);
-    vec.push_back(std::move(event));
-    injector_events_.push(std::move(vec));
-  }
+  std::vector<fup_Event> events;
+  events.push_back(std::move(event));
+  device_->InjectEvents(std::move(events));
 }
 
 void PointerInjectorDelegate::PointerInjectorEndpoint::RegisterInjector(
@@ -282,9 +234,7 @@ void PointerInjectorDelegate::PointerInjectorEndpoint::RegisterInjector(
 }
 
 void PointerInjectorDelegate::PointerInjectorEndpoint::Reset() {
-  injection_in_flight_ = false;
   registered_ = false;
-  injector_events_ = {};
 }
 
 }  // namespace flutter_runner
