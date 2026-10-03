@@ -96,6 +96,23 @@ table ShaderUniformTexture {
   binding: uint64;
 }
 
+// How a shader accesses a storage buffer. Reflected from the `readonly`
+// qualifier (the SPIR-V `NonWritable` decoration) on the buffer block. A
+// `writeonly` buffer is recorded as `kReadWrite`, since it must be bound as a
+// writable buffer.
+enum StorageBufferAccess:byte {
+  kRead,
+  kReadWrite,
+}
+
+table ShaderStorageBuffer {
+  name: string;
+  ext_res_0: uint64;
+  set: uint64;
+  binding: uint64;
+  access: StorageBufferAccess = kReadWrite;
+}
+
 table BackendShader {
   stage: ShaderStage;
   entrypoint: string;
@@ -103,8 +120,24 @@ table BackendShader {
   uniform_structs: [ShaderUniformStruct];
   uniform_textures: [ShaderUniformTexture];
   shader: [ubyte];
+
+  // The fields below were added after format version 2. They are optional, so
+  // bundles written before they existed still parse and read back their
+  // defaults.
+
+  // The compute shader workgroup (threadgroup) size, from the shader's
+  // `local_size_x/y/z` layout qualifier. A value of 0 in any dimension means
+  // that dimension is sized by a specialization constant and is resolved by
+  // the backend at pipeline creation. All three are 0 for non-compute stages.
+  workgroup_size_x: uint32;
+  workgroup_size_y: uint32;
+  workgroup_size_z: uint32;
+  storage_buffers: [ShaderStorageBuffer];
 }
 
+// The backend variants of a single shader. The OpenGL ES and desktop OpenGL
+// variants may be absent for shaders those targets cannot represent (compute
+// shaders, for now). The Metal and Vulkan variants are always present.
 table Shader {
   name: string;
   metal_ios: BackendShader;

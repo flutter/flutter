@@ -1,0 +1,31 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// A compute shader for the Flutter GPU shader bundle tests. Each dimension of
+// the workgroup size is distinct, and the storage buffers cover every access
+// qualifier: `readonly`, `writeonly`, and unqualified (read-write).
+
+layout(local_size_x = 8, local_size_y = 4, local_size_z = 2) in;
+layout(std430) buffer;
+
+layout(binding = 0) readonly buffer InputData {
+  vec4 elements[];
+}
+input_data;
+
+layout(binding = 1) writeonly buffer OutputData {
+  vec4 elements[];
+}
+output_data;
+
+layout(binding = 2) buffer Accumulator {
+  vec4 elements[];
+}
+accumulator;
+
+void main() {
+  uint ident = gl_GlobalInvocationID.x;
+  output_data.elements[ident] = input_data.elements[ident] * 2.0;
+  accumulator.elements[ident] += input_data.elements[ident];
+}

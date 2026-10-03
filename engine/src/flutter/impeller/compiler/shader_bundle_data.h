@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_COMPILER_SHADER_BUNDLE_DATA_H_
 #define FLUTTER_IMPELLER_COMPILER_SHADER_BUNDLE_DATA_H_
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -48,6 +49,23 @@ class ShaderBundleData {
     size_t binding = 0u;
   };
 
+  struct ShaderStorageBuffer {
+    std::string name;
+    size_t ext_res_0 = 0u;
+    size_t set = 0u;
+    size_t binding = 0u;
+    // False when every member of the buffer block is `readonly`.
+    bool writable = true;
+  };
+
+  // The compute workgroup size. A 0 in any dimension means that dimension is
+  // sized by a specialization constant. All 0 for non-compute stages.
+  struct WorkgroupSize {
+    uint32_t x = 0u;
+    uint32_t y = 0u;
+    uint32_t z = 0u;
+  };
+
   ShaderBundleData(std::string entrypoint,
                    spv::ExecutionModel stage,
                    TargetPlatform target_platform);
@@ -57,6 +75,10 @@ class ShaderBundleData {
   void AddUniformStruct(ShaderUniformStruct uniform_struct);
 
   void AddUniformTexture(ShaderUniformTexture uniform_texture);
+
+  void AddStorageBuffer(ShaderStorageBuffer storage_buffer);
+
+  void SetWorkgroupSize(WorkgroupSize workgroup_size);
 
   void AddInputDescription(InputDescription input);
 
@@ -72,6 +94,8 @@ class ShaderBundleData {
   const TargetPlatform target_platform_;
   std::vector<ShaderUniformStruct> uniform_structs_;
   std::vector<ShaderUniformTexture> uniform_textures_;
+  std::vector<ShaderStorageBuffer> storage_buffers_;
+  WorkgroupSize workgroup_size_;
   std::vector<InputDescription> inputs_;
   std::shared_ptr<fml::Mapping> shader_;
   std::shared_ptr<fml::Mapping> sksl_;

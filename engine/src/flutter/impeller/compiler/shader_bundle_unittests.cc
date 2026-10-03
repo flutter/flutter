@@ -348,6 +348,204 @@ TEST(ShaderBundleTest, InjectsTargetDefinesDuringCompilation) {
   EXPECT_FALSE(bundle.has_value());
 }
 
+TEST(ShaderBundleTest, TargetSupportsShaderTypeSkipsOnlyGLCompute) {
+  for (const auto type :
+       {SourceType::kVertexShader, SourceType::kFragmentShader,
+        SourceType::kComputeShader}) {
+    EXPECT_TRUE(
+        ShaderBundleTargetSupportsShaderType(TargetPlatform::kMetalIOS, type));
+    EXPECT_TRUE(ShaderBundleTargetSupportsShaderType(
+        TargetPlatform::kMetalDesktop, type));
+    EXPECT_TRUE(
+        ShaderBundleTargetSupportsShaderType(TargetPlatform::kVulkan, type));
+  }
+  for (const auto platform :
+       {TargetPlatform::kOpenGLES, TargetPlatform::kOpenGLDesktop}) {
+    EXPECT_TRUE(ShaderBundleTargetSupportsShaderType(
+        platform, SourceType::kVertexShader));
+    EXPECT_TRUE(ShaderBundleTargetSupportsShaderType(
+        platform, SourceType::kFragmentShader));
+    EXPECT_FALSE(ShaderBundleTargetSupportsShaderType(
+        platform, SourceType::kComputeShader));
+  }
+}
+
+// A bundle with a compute shader next to a graphics shader.
+static std::string ComputeAndFragmentBundleConfig() {
+  const std::string fixtures_path = flutter::testing::GetFixturesPath();
+  return "{\"Compute\": {\"type\": \"compute\", \"file\": \"" + fixtures_path +
+         "/flutter_gpu_compute.comp\"}, \"UnlitFragment\": {\"type\": "
+         "\"fragment\", \"file\": \"" +
+         fixtures_path + "/flutter_gpu_unlit.frag\"}}";
+}
+
+// Checks the compute-specific reflection of one backend variant of
+// `flutter_gpu_compute.comp`.
+static void ExpectComputeReflection(
+    const fb::shaderbundle::BackendShaderT& backend) {
+  EXPECT_EQ(backend.stage, fb::shaderbundle::ShaderStage::kCompute);
+  EXPECT_EQ(backend.workgroup_size_x, 8u);
+  EXPECT_EQ(backend.workgroup_size_y, 4u);
+  EXPECT_EQ(backend.workgroup_size_z, 2u);
+
+  ASSERT_EQ(backend.storage_buffers.size(), 3u);
+  const auto* input = FindByName(backend.storage_buffers, "InputData");
+  const auto* output = FindByName(backend.storage_buffers, "OutputData");
+  const auto* accumulator = FindByName(backend.storage_buffers, "Accumulator");
+  ASSERT_NE(input, nullptr);
+  ASSERT_NE(output, nullptr);
+  ASSERT_NE(accumulator, nullptr);
+
+  EXPECT_EQ(input->set, 0u);
+  EXPECT_EQ(input->binding, 0u);
+  EXPECT_EQ(input->access, fb::shaderbundle::StorageBufferAccess::kRead);
+  EXPECT_EQ(output->set, 0u);
+  EXPECT_EQ(output->binding, 1u);
+  // A `writeonly` buffer still has to be bound writable.
+  EXPECT_EQ(output->access, fb::shaderbundle::StorageBufferAccess::kReadWrite);
+  EXPECT_EQ(accumulator->set, 0u);
+  EXPECT_EQ(accumulator->binding, 2u);
+  EXPECT_EQ(accumulator->access,
+            fb::shaderbundle::StorageBufferAccess::kReadWrite);
+
+  // Each storage buffer gets its own backend resource index.
+  EXPECT_NE(input->ext_res_0, output->ext_res_0);
+  EXPECT_NE(input->ext_res_0, accumulator->ext_res_0);
+  EXPECT_NE(output->ext_res_0, accumulator->ext_res_0);
+}
+
+TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferBuildsComputeShader) {
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kGLSL;
+
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateShaderBundleFlatbuffer(ComputeAndFragmentBundleConfig(), options);
+  ASSERT_TRUE(bundle.has_value());
+
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+  const auto& shaders = bundle->shaders;
+  const auto* compute = FindByName(shaders, "Compute");
+  const auto* fragment = FindByName(shaders, "UnlitFragment");
+  ASSERT_NE(compute, nullptr);
+  ASSERT_NE(fragment, nullptr);
+
+  // The compute shader is bundled for Metal and Vulkan only. The OpenGL
+  // variants are skipped rather than failing the bundle.
+  ASSERT_NE(compute->metal_ios, nullptr);
+  ASSERT_NE(compute->metal_desktop, nullptr);
+  ASSERT_NE(compute->vulkan, nullptr);
+  EXPECT_EQ(compute->opengl_es, nullptr);
+  EXPECT_EQ(compute->opengl_desktop, nullptr);
+
+  ExpectComputeReflection(*compute->metal_ios);
+  ExpectComputeReflection(*compute->metal_desktop);
+  ExpectComputeReflection(*compute->vulkan);
+
+  // Vulkan resources are addressed by their descriptor binding.
+  for (const auto& buffer : compute->vulkan->storage_buffers) {
+    EXPECT_EQ(buffer->ext_res_0, buffer->binding);
+  }
+
+  // Graphics shaders in the same bundle keep every backend variant, and carry
+  // no compute metadata.
+  ASSERT_NE(fragment->metal_ios, nullptr);
+  ASSERT_NE(fragment->metal_desktop, nullptr);
+  ASSERT_NE(fragment->opengl_es, nullptr);
+  ASSERT_NE(fragment->opengl_desktop, nullptr);
+  ASSERT_NE(fragment->vulkan, nullptr);
+  EXPECT_EQ(fragment->metal_desktop->workgroup_size_x, 0u);
+  EXPECT_EQ(fragment->metal_desktop->workgroup_size_y, 0u);
+  EXPECT_EQ(fragment->metal_desktop->workgroup_size_z, 0u);
+  EXPECT_TRUE(fragment->metal_desktop->storage_buffers.empty());
+}
+
+// Finds the storage buffer named `name` in a serialized backend shader.
+static const fb::shaderbundle::ShaderStorageBuffer* FindStorageBuffer(
+    const fb::shaderbundle::BackendShader& backend,
+    const std::string& name) {
+  if (backend.storage_buffers() == nullptr) {
+    return nullptr;
+  }
+  for (const auto* buffer : *backend.storage_buffers()) {
+    if (buffer->name() != nullptr && buffer->name()->str() == name) {
+      return buffer;
+    }
+  }
+  return nullptr;
+}
+
+TEST(ShaderBundleTest, ComputeMetadataRoundTripsThroughSerialization) {
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kGLSL;
+
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateShaderBundleFlatbuffer(ComputeAndFragmentBundleConfig(), options);
+  ASSERT_TRUE(bundle.has_value());
+
+  // Serialize the same way `GenerateShaderBundle` writes the bundle to disk.
+  flatbuffers::FlatBufferBuilder builder;
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+  builder.Finish(fb::shaderbundle::ShaderBundle::Pack(builder, &bundle.value()),
+                 fb::shaderbundle::ShaderBundleIdentifier());
+
+  // Read it back the way the Flutter GPU runtime does.
+  flatbuffers::Verifier verifier(builder.GetBufferPointer(), builder.GetSize());
+  ASSERT_TRUE(fb::shaderbundle::VerifyShaderBundleBuffer(verifier));
+  const auto* serialized =
+      fb::shaderbundle::GetShaderBundle(builder.GetBufferPointer());
+  ASSERT_NE(serialized, nullptr);
+  ASSERT_NE(serialized->shaders(), nullptr);
+
+  const fb::shaderbundle::Shader* compute = nullptr;
+  for (const auto* shader : *serialized->shaders()) {
+    if (shader->name() != nullptr && shader->name()->str() == "Compute") {
+      compute = shader;
+    }
+  }
+  ASSERT_NE(compute, nullptr);
+  EXPECT_EQ(compute->opengl_es(), nullptr);
+  EXPECT_EQ(compute->opengl_desktop(), nullptr);
+
+  for (const auto* backend :
+       {compute->metal_ios(), compute->metal_desktop(), compute->vulkan()}) {
+    ASSERT_NE(backend, nullptr);
+    EXPECT_EQ(backend->stage(), fb::shaderbundle::ShaderStage::kCompute);
+    EXPECT_EQ(backend->workgroup_size_x(), 8u);
+    EXPECT_EQ(backend->workgroup_size_y(), 4u);
+    EXPECT_EQ(backend->workgroup_size_z(), 2u);
+
+    ASSERT_NE(backend->storage_buffers(), nullptr);
+    EXPECT_EQ(backend->storage_buffers()->size(), 3u);
+    const auto* input = FindStorageBuffer(*backend, "InputData");
+    const auto* output = FindStorageBuffer(*backend, "OutputData");
+    const auto* accumulator = FindStorageBuffer(*backend, "Accumulator");
+    ASSERT_NE(input, nullptr);
+    ASSERT_NE(output, nullptr);
+    ASSERT_NE(accumulator, nullptr);
+    EXPECT_EQ(input->binding(), 0u);
+    EXPECT_EQ(input->access(), fb::shaderbundle::StorageBufferAccess::kRead);
+    EXPECT_EQ(output->binding(), 1u);
+    EXPECT_EQ(output->access(),
+              fb::shaderbundle::StorageBufferAccess::kReadWrite);
+    EXPECT_EQ(accumulator->binding(), 2u);
+    EXPECT_EQ(accumulator->access(),
+              fb::shaderbundle::StorageBufferAccess::kReadWrite);
+  }
+
+  // The object API reproduces the original metadata after unpacking.
+  std::unique_ptr<fb::shaderbundle::ShaderBundleT> unpacked(
+      serialized->UnPack());
+  ASSERT_NE(unpacked, nullptr);
+  const auto* unpacked_compute = FindByName(unpacked->shaders, "Compute");
+  ASSERT_NE(unpacked_compute, nullptr);
+  ASSERT_NE(unpacked_compute->metal_desktop, nullptr);
+  ASSERT_NE(unpacked_compute->vulkan, nullptr);
+  ExpectComputeReflection(*unpacked_compute->metal_desktop);
+  ExpectComputeReflection(*unpacked_compute->vulkan);
+}
+
 }  // namespace testing
 }  // namespace compiler
 }  // namespace impeller

@@ -246,6 +246,13 @@ class Reflector {
 
   std::shared_ptr<ShaderBundleData> GenerateShaderBundleData() const;
 
+  /// The compute workgroup (threadgroup) size declared by the shader's
+  /// `local_size_x/y/z` layout qualifier. A dimension sized by a
+  /// specialization constant is reported as 0, to be resolved by the backend
+  /// at pipeline creation. All dimensions are 0 for non-compute stages.
+  ShaderBundleData::WorkgroupSize ReflectWorkgroupSize(
+      spv::ExecutionModel execution_model) const;
+
   std::shared_ptr<fml::Mapping> InflateTemplate(std::string_view tmpl) const;
 
   std::optional<nlohmann::json::object_t> ReflectResource(

@@ -6,6 +6,8 @@
 
 #include <memory>
 #include <optional>
+#include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -173,10 +175,30 @@ static const impeller::fb::shaderbundle::BackendShader* GetShaderBackend(
   }
 }
 
+// Whether any backend variant of `shader` is a compute shader. The OpenGL
+// variants are optional for compute shaders, so a compute shader without a
+// variant for the current backend is expected rather than a malformed entry.
+static bool IsComputeShader(const impeller::fb::shaderbundle::Shader* shader) {
+  for (const auto* backend_shader :
+       {shader->metal_ios(), shader->metal_desktop(), shader->opengl_es(),
+        shader->opengl_desktop(), shader->vulkan()}) {
+    if (backend_shader != nullptr &&
+        backend_shader->stage() ==
+            impeller::fb::shaderbundle::ShaderStage::kCompute) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/// Parses the shaders in `payload` that have a variant for `backend_type`.
+/// The names of compute shaders bundled without such a variant are added to
+/// `out_unavailable_shaders`, so that requesting one can be reported.
 static ShaderLibrary::ShaderMap ParseShaderBundle(
     impeller::Context::BackendType backend_type,
     const std::shared_ptr<fml::Mapping>& payload,
-    const std::string& library_id) {
+    const std::string& library_id,
+    std::unordered_set<std::string>& out_unavailable_shaders) {
   ShaderLibrary::ShaderMap shader_map;
   if (payload == nullptr || !payload->GetMapping()) {
     return shader_map;
@@ -226,6 +248,12 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
     const impeller::fb::shaderbundle::BackendShader* backend_shader =
         GetShaderBackend(backend_type, bundled_shader);
     if (!backend_shader) {
+      if (IsComputeShader(bundled_shader)) {
+        // Compute shaders are bundled without the OpenGL variants. The missing
+        // variant is reported only if the shader is requested.
+        out_unavailable_shaders.insert(bundled_shader->name()->str());
+        continue;
+      }
       VALIDATION_LOG << "Failed to unpack shader \""
                      << bundled_shader->name()->c_str() << "\" from bundle.";
       continue;
@@ -377,12 +405,15 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
   if (library_id.empty()) {
     library_id = impeller::ShaderKey::MakeFallbackLibraryId();
   }
-  ShaderMap shader_map = ParseShaderBundle(backend_type, payload, library_id);
-  if (shader_map.empty()) {
+  std::unordered_set<std::string> unavailable_shaders;
+  ShaderMap shader_map =
+      ParseShaderBundle(backend_type, payload, library_id, unavailable_shaders);
+  if (shader_map.empty() && unavailable_shaders.empty()) {
     return nullptr;
   }
   return fml::MakeRefCounted<flutter::gpu::ShaderLibrary>(
-      std::move(payload), std::move(shader_map), std::move(library_id));
+      std::move(payload), std::move(shader_map), std::move(library_id),
+      std::move(unavailable_shaders));
 }
 
 std::string ShaderLibrary::ReloadFromAsset(
@@ -405,8 +436,10 @@ std::string ShaderLibrary::ReloadFromFlatbuffer(
   if (payload == nullptr || !payload->GetMapping()) {
     return "Empty shader bundle payload.";
   }
-  ShaderMap new_shaders = ParseShaderBundle(backend_type, payload, library_id_);
-  if (new_shaders.empty()) {
+  std::unordered_set<std::string> unavailable_shaders;
+  ShaderMap new_shaders = ParseShaderBundle(backend_type, payload, library_id_,
+                                            unavailable_shaders);
+  if (new_shaders.empty() && unavailable_shaders.empty()) {
     return "Shader bundle could not be parsed.";
   }
 
@@ -426,6 +459,7 @@ std::string ShaderLibrary::ReloadFromFlatbuffer(
     }
   }
   shaders_ = std::move(merged);
+  unavailable_shaders_ = std::move(unavailable_shaders);
   payload_ = std::move(payload);
   return "";
 }
@@ -439,6 +473,13 @@ fml::RefPtr<Shader> ShaderLibrary::GetShader(const std::string& shader_name,
                                              Dart_Handle shader_wrapper) {
   auto it = shaders_.find(shader_name);
   if (it == shaders_.end()) {
+    if (unavailable_shaders_.find(shader_name) != unavailable_shaders_.end()) {
+      VALIDATION_LOG << "Shader \"" << shader_name
+                     << "\" is a compute shader, and the shader bundle has no "
+                        "variant of it for the current rendering backend. "
+                        "Compute shaders are not yet supported on the OpenGL "
+                        "ES backend.";
+    }
     return nullptr;  // No matching shaders.
   }
   auto shader = it->second;
@@ -458,11 +499,14 @@ fml::RefPtr<Shader> ShaderLibrary::FindShaderForTesting(
   return it->second;
 }
 
-ShaderLibrary::ShaderLibrary(std::shared_ptr<fml::Mapping> payload,
-                             ShaderMap shaders,
-                             std::string library_id)
+ShaderLibrary::ShaderLibrary(
+    std::shared_ptr<fml::Mapping> payload,
+    ShaderMap shaders,
+    std::string library_id,
+    std::unordered_set<std::string> unavailable_shaders)
     : payload_(std::move(payload)),
       shaders_(std::move(shaders)),
+      unavailable_shaders_(std::move(unavailable_shaders)),
       library_id_(std::move(library_id)) {}
 
 ShaderLibrary::~ShaderLibrary() = default;

@@ -28,6 +28,17 @@ namespace compiler {
 std::vector<std::string_view> GetShaderBundleTargetPlatformDefines(
     TargetPlatform platform);
 
+/// @brief  Whether the shader bundle emits a `platform` variant for shaders of
+///         `type`. The Metal and Vulkan variants are produced for every shader
+///         type. The OpenGL ES and desktop OpenGL variants are skipped for
+///         compute shaders, which those targets cannot represent yet, instead
+///         of failing the whole bundle. Returns false for targets that are not
+///         part of a shader bundle.
+///
+/// @note   Exposed only for testing purposes.
+bool ShaderBundleTargetSupportsShaderType(TargetPlatform platform,
+                                          SourceType type);
+
 /// @brief  Parse a shader bundle configuration from a given JSON string.
 ///
 /// @note   Exposed only for testing purposes. Use `GenerateShaderBundle`
