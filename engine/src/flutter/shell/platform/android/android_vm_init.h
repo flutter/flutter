@@ -167,7 +167,7 @@ struct AndroidVMArgs {
 AndroidRenderingAPI SelectRenderingAPI(
     const AndroidVMArgs& args,
     std::optional<bool> is_vivante = std::nullopt,
-    std::optional<DeviceProperties> device_properties = std::nullopt,
+    const std::optional<DeviceProperties>& device_properties = std::nullopt,
     bool is_release_build =
 #ifdef FLUTTER_RELEASE
         true
@@ -357,8 +357,9 @@ class AndroidVMInit {
   static std::optional<AndroidVMArgs> GetGlobalVMArgs();
 
   /// @brief Initializes the global VM settings and configurations.
-  bool Init(const AndroidVMArgs& args,
-            std::optional<DeviceProperties> device_properties = std::nullopt);
+  bool Init(
+      const AndroidVMArgs& args,
+      const std::optional<DeviceProperties>& device_properties = std::nullopt);
 
   /// @brief Prefetches the default font collection.
   bool PrefetchDefaultFontManager();
