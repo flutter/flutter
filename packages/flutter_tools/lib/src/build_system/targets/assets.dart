@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:pool/pool.dart';
+import 'package:record_use/record_use.dart';
 
 import '../../artifacts.dart';
 import '../../asset.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
+import '../../convert.dart';
 import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../flutter_manifest.dart';
@@ -18,6 +20,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import '../tools/asset_transformer.dart';
+import '../tools/recorded_uses.dart';
 import '../tools/shader_compiler.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
@@ -88,11 +91,17 @@ Future<Depfile> copyAssets(
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
   );
+  final bool hasTransformers = assetBundle.entries.values.any(
+    (AssetBundleEntry entry) => entry.transformers.isNotEmpty,
+  );
   final assetTransformer = AssetTransformer(
     processManager: environment.processManager,
     fileSystem: environment.fileSystem,
     dartBinaryPath: environment.artifacts.getArtifactPath(Artifact.engineDartBinary),
     buildMode: buildMode,
+    recordedUses: hasTransformers && buildMode.isPrecompiled
+        ? _writeRecordedUses(environment)
+        : null,
   );
 
   final assetEntries = <String, AssetBundleEntry>{
@@ -266,6 +275,26 @@ Future<Depfile> copyAssets(
   final depfile = Depfile(inputs + assetBundle.additionalDependencies, outputs);
   return depfile;
 }
+
+/// Writes the recorded uses of the program compiled in [environment] to one
+/// file, for [AssetTransformer.recordedUsesEnvVar].
+///
+/// Returns null when no compiler wrote any.
+File? _writeRecordedUses(Environment environment) {
+  final Recordings? recordings;
+  try {
+    recordings = readRecordedUses(environment.buildDir);
+  } on FormatException catch (e) {
+    throwToolExit(e.message);
+  }
+  if (recordings == null) {
+    return null;
+  }
+  return environment.buildDir.childFile(_transformerRecordedUsesFileName)
+    ..writeAsStringSync(json.encode(recordings.toJson()));
+}
+
+const _transformerRecordedUsesFileName = 'recorded_uses_for_transformers.json';
 
 /// Copy the assets defined in the flutter manifest into a build directory.
 class CopyAssets extends Target {

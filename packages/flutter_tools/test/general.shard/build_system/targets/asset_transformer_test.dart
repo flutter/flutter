@@ -468,4 +468,74 @@ void main() {
       reason: 'Transformer did not clean up after itself.',
     );
   });
+
+  group('recorded uses', () {
+    Future<void> transform({
+      required BuildMode buildMode,
+      String? recordedUsesPath,
+      required Map<String, String> expectedEnvironment,
+    }) async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final artifacts = Artifacts.test();
+      final File asset = fileSystem.file('asset.txt')..createSync();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            artifacts.getArtifactPath(Artifact.engineDartBinary),
+            'run',
+            'my_transformer',
+            RegExp('--input=.*'),
+            RegExp('--output=.*'),
+          ],
+          environment: expectedEnvironment,
+          onRun: (List<String> args) {
+            final ArgResults parsedArgs =
+                (ArgParser()
+                      ..addOption('input')
+                      ..addOption('output'))
+                    .parse(args);
+            fileSystem.file(parsedArgs['input']).copySync(parsedArgs['output'] as String);
+          },
+        ),
+      ]);
+      final transformer = AssetTransformer(
+        processManager: processManager,
+        fileSystem: fileSystem,
+        dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
+        buildMode: buildMode,
+        recordedUses: recordedUsesPath == null ? null : fileSystem.file(recordedUsesPath),
+      );
+
+      final AssetTransformationResult result = await transformer.transformAsset(
+        asset: asset,
+        outputPath: 'output.txt',
+        workingDirectory: fileSystem.currentDirectory.path,
+        transformerEntries: <AssetTransformerEntry>[
+          const AssetTransformerEntry(package: 'my_transformer', args: <String>[]),
+        ],
+        logger: BufferLogger.test(),
+      );
+
+      expect(result.failure, isNull);
+      expect(processManager, hasNoRemainingExpectations);
+    }
+
+    testWithoutContext('are passed to transformers when given', () async {
+      await transform(
+        buildMode: BuildMode.release,
+        recordedUsesPath: 'build/recorded_uses.json',
+        expectedEnvironment: <String, String>{
+          AssetTransformer.buildModeEnvVar: 'release',
+          AssetTransformer.recordedUsesEnvVar: '/build/recorded_uses.json',
+        },
+      );
+    });
+
+    testWithoutContext('are not passed to transformers when absent', () async {
+      await transform(
+        buildMode: BuildMode.debug,
+        expectedEnvironment: <String, String>{AssetTransformer.buildModeEnvVar: 'debug'},
+      );
+    });
+  });
 }
