@@ -1056,6 +1056,23 @@ class IOSCoreDeviceControl {
       }
     }
   }
+
+  Future<Process> startScreenRecording({
+    required String deviceId,
+    required String destination,
+  }) async {
+    return _processUtils.start(<String>[
+      ..._xcode.xcrunCommand(),
+      'devicectl',
+      'device',
+      'capture',
+      'screen-record',
+      '--device',
+      deviceId,
+      '--destination',
+      destination,
+    ]);
+  }
 }
 
 class IOSCoreDevice {
