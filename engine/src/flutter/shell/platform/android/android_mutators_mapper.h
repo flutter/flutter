@@ -242,7 +242,7 @@ struct AndroidMutator {
                AndroidRoundedRect,
                AndroidMatrix3x3,
                float,
-               AndroidClipPath>
+               std::shared_ptr<const AndroidClipPath>>
       data = AndroidMatrix3x3::Identity();
 
   static AndroidMutator MakeClipRect(const AndroidRect& r);
@@ -260,7 +260,9 @@ struct AndroidMutator {
   }
   float GetOpacity() const { return std::get<float>(data); }
   const AndroidClipPath& GetClipPath() const {
-    return std::get<AndroidClipPath>(data);
+    static const AndroidClipPath kEmptyPath{};
+    const auto& ptr = std::get<std::shared_ptr<const AndroidClipPath>>(data);
+    return ptr ? *ptr : kEmptyPath;
   }
 
   bool operator==(const AndroidMutator& other) const;
@@ -268,6 +270,9 @@ struct AndroidMutator {
     return !(*this == other);
   }
 };
+
+static_assert(sizeof(AndroidMutator) <= 64,
+              "AndroidMutator must fit in 64 bytes");
 
 /// @brief Decoupled, C-ABI compliant representation of an Android Platform View
 /// Mutator Stack.

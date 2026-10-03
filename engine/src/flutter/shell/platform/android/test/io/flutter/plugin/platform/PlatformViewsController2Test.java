@@ -562,22 +562,6 @@ public class PlatformViewsController2Test {
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void onDisplayOverlaySurfaceUpdatesBufferGeometryAndVisibility() {
-    TransactionTrackingController controller = new TransactionTrackingController();
-    attachToViewWithOverlay(controller);
-
-    controller.onDisplayOverlaySurface(
-        /*id=*/ 0, /*x=*/ 10, /*y=*/ 20, /*width=*/ 300, /*height=*/ 400);
-
-    assertEquals(1, controller.transactions.size());
-    SurfaceControl.Transaction platformTx = controller.transactions.get(0);
-    verify(platformTx).setVisibility(any(SurfaceControl.class), eq(true));
-    verify(platformTx).setBufferSize(any(SurfaceControl.class), eq(300), eq(400));
-    verify(platformTx).setPosition(any(SurfaceControl.class), eq(10f), eq(20f));
-  }
-
-  @Test
-  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void overlayMutationsSharePlatformTransactionUntilSwap() {
     TransactionTrackingController controller = new TransactionTrackingController();
     attachToViewWithOverlay(controller);

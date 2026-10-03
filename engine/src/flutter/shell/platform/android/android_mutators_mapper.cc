@@ -787,7 +787,7 @@ AndroidMutator AndroidMutator::MakeClipPath(const AndroidClipPath& path) {
   TRACE_EVENT0("flutter", "AndroidMutator::MakeClipPath");
   AndroidMutator m;
   m.type = AndroidMutatorType::kClipPath;
-  m.data = path;
+  m.data = std::make_shared<const AndroidClipPath>(path);
   return m;
 }
 
@@ -810,8 +810,16 @@ bool AndroidMutator::operator==(const AndroidMutator& other) const {
       }
       return std::abs(op1 - op2) < 1e-5f;
     }
-    case AndroidMutatorType::kClipPath:
+    case AndroidMutatorType::kClipPath: {
+      const auto& lhs_ptr =
+          std::get<std::shared_ptr<const AndroidClipPath>>(data);
+      const auto& rhs_ptr =
+          std::get<std::shared_ptr<const AndroidClipPath>>(other.data);
+      if (lhs_ptr == rhs_ptr) {
+        return true;
+      }
       return GetClipPath() == other.GetClipPath();
+    }
   }
   return true;
 }
