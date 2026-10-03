@@ -377,6 +377,7 @@ extension type DomNavigator._(JSObject _) implements JSObject {
 @JS('Document')
 extension type DomDocument._(JSObject _) implements DomNode {
   external DomElement? get documentElement;
+  external DomWindow? get defaultView;
   external DomElement? querySelector(String selectors);
 
   @JS('querySelectorAll')

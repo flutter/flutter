@@ -25,6 +25,7 @@ extension type JsFlutterViewOptions._primary(JSObject _) implements JSObject {
 
   @JS('hostElement')
   external DomElement? get _hostElement;
+  external set hostElement(DomElement? value);
   DomElement get hostElement {
     assert(_hostElement != null, '`hostElement` passed to addView cannot be null.');
     return _hostElement!;
@@ -55,12 +56,24 @@ extension type JsViewConstraints._(JSObject _) implements JSObject {
 extension type FlutterApp._primary(JSObject _) implements JSObject {
   factory FlutterApp({
     required AddFlutterViewFn addView,
+    required MoveFlutterViewFn moveView,
     required RemoveFlutterViewFn removeView,
-  }) => FlutterApp._(addView: addView.toJS, removeView: ((int id) => removeView(id)).toJS);
-  external factory FlutterApp._({required JSFunction addView, required JSFunction removeView});
+  }) => FlutterApp._(
+    addView: addView.toJS,
+    moveView: ((int id, DomElement newHostElement) => moveView(id, newHostElement)).toJS,
+    removeView: ((int id) => removeView(id)).toJS,
+  );
+  external factory FlutterApp._({
+    required JSFunction addView,
+    required JSFunction moveView,
+    required JSFunction removeView,
+  });
 
   @JS('addView')
   external int addView(JsFlutterViewOptions options);
+
+  @JS('moveView')
+  external JsFlutterViewOptions? moveView(int id, DomElement newHostElement);
 
   @JS('removeView')
   external JsFlutterViewOptions? removeView(int id);
@@ -70,6 +83,13 @@ extension type FlutterApp._primary(JSObject _) implements JSObject {
 ///
 /// Returns the ID of the newly created view.
 typedef AddFlutterViewFn = int Function(JsFlutterViewOptions);
+
+/// Typedef for the function that tells the engine to move a view into a
+/// new host element (and possibly a new window/document).
+///
+/// Returns the updated configuration of the view, or `null` if no view with
+/// the given ID exists.
+typedef MoveFlutterViewFn = JsFlutterViewOptions? Function(int, DomElement);
 
 /// Typedef for the function that removes a view from the app.
 ///

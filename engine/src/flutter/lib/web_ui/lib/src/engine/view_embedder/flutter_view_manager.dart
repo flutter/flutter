@@ -27,11 +27,18 @@ class FlutterViewManager {
     sync: true,
   );
 
+  // The controller of the [onViewMoved] stream.
+  final StreamController<int> _onViewMovedController = StreamController<int>.broadcast(sync: true);
+
   /// A stream of viewIds that will fire when a view is created.
   Stream<int> get onViewCreated => _onViewCreatedController.stream;
 
   /// A stream of viewIds that will fire when a view is disposed.
   Stream<int> get onViewDisposed => _onViewDisposedController.stream;
+
+  /// A stream of viewIds that will fire when a view is moved to a new host
+  /// element (e.g. when entering Document Picture-in-Picture).
+  Stream<int> get onViewMoved => _onViewMovedController.stream;
 
   /// Exposes all the [EngineFlutterView]s registered so far.
   Iterable<EngineFlutterView> get views => _viewData.values;
@@ -49,6 +56,19 @@ class FlutterViewManager {
     );
     registerView(view, jsViewOptions: jsViewOptions);
     return view;
+  }
+
+  JsFlutterViewOptions? moveView(int viewId, DomElement newHostElement) {
+    final EngineFlutterView? view = _viewData[viewId];
+    final JsFlutterViewOptions options =
+        _jsViewOptions[viewId] ?? JsFlutterViewOptions(hostElement: newHostElement);
+    if (view == null) {
+      return null;
+    }
+    view.moveTo(newHostElement);
+    options.hostElement = newHostElement;
+    _onViewMovedController.add(viewId);
+    return options;
   }
 
   /// Stores a [view] and its (optional) [jsViewOptions], indexed by `viewId`.
