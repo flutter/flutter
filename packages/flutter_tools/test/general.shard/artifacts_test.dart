@@ -812,31 +812,24 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext(
-      'determines the target device name from the path',
-      () {
-        localEngineInfo = LocalEngineInfo(
-          targetOutPath: fileSystem.path.join(
-            fileSystem.currentDirectory.path,
-            'out',
-            'android_debug_unopt',
-          ),
-          hostOutPath: fileSystem.path.join(
-            fileSystem.currentDirectory.path,
-            'out',
-            'host_debug_unopt',
-          ),
-        );
+    testWithoutContext('determines the target device name from the path', () {
+      localEngineInfo = LocalEngineInfo(
+        targetOutPath: fileSystem.path.join(
+          fileSystem.currentDirectory.path,
+          'out',
+          'android_debug_unopt',
+        ),
+        hostOutPath: fileSystem.path.join(
+          fileSystem.currentDirectory.path,
+          'out',
+          'host_debug_unopt',
+        ),
+      );
 
-        expect(localEngineInfo.localTargetName, 'android_debug_unopt');
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(localEngineInfo.localTargetName, 'android_debug_unopt');
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'determines the target device name from the path when using a custom engine path',
       () {
         localEngineInfo = LocalEngineInfo(
@@ -854,11 +847,52 @@ void main() {
 
         expect(localEngineInfo.localHostName, 'host_debug_unopt');
       },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
     );
+
+    testWithoutContext('Artifacts.getLocalEngine constructs local engine artifacts', () {
+      final Platform platform = FakePlatform();
+      final cache = Cache(
+        rootOverride: fileSystem.directory('root')..createSync(),
+        fileSystem: fileSystem,
+        platform: platform,
+        logger: BufferLogger.test(),
+        osUtils: FakeOperatingSystemUtils(),
+        artifacts: <ArtifactSet>[],
+      );
+      final String targetEngine = fileSystem.path.join(
+        fileSystem.currentDirectory.path,
+        'out',
+        'android_debug_unopt',
+      );
+      final String hostEngine = fileSystem.path.join(
+        fileSystem.currentDirectory.path,
+        'out',
+        'host_debug_unopt',
+      );
+      final String webSdk = fileSystem.path.join(
+        fileSystem.currentDirectory.path,
+        'out',
+        'wasm_release',
+      );
+      final Artifacts localArtifacts = Artifacts.getLocalEngine(
+        EngineBuildPaths(targetEngine: targetEngine, hostEngine: hostEngine, webSdk: webSdk),
+        toolContext: FakeToolContext(
+          cache: cache,
+          fs: fileSystem,
+          os: FakeOperatingSystemUtils(),
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+        ),
+      );
+
+      expect(localArtifacts.usesLocalArtifacts, isTrue);
+      expect(localArtifacts.localEngineInfo?.localTargetName, 'android_debug_unopt');
+      expect(localArtifacts.localEngineInfo?.localHostName, 'host_debug_unopt');
+      expect(
+        localArtifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.android_arm64),
+        fileSystem.path.join(targetEngine, 'icudtl.dat'),
+      );
+    });
   });
 
   group('DeferredArtifacts', () {
