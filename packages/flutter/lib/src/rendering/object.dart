@@ -2206,7 +2206,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     child.parentData!.detach();
     child.parentData = null;
     child._parent = null;
-    child._semantics.invalidateParentData();
+    _RenderObjectSemantics.invalidateParentData(child);
     if (attached) {
       child.detach();
     }
@@ -3934,7 +3934,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     _semantics.markNeedsUpdate();
   }
 
-  late final _RenderObjectSemantics _semantics = _RenderObjectSemantics(this);
+  _RenderObjectSemantics? _semanticsInfo;
+  _RenderObjectSemantics get _semantics => _semanticsInfo ??= _RenderObjectSemantics(this);
 
   /// Called when collecting the semantics of this node.
   ///
@@ -5776,11 +5777,12 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// The semantics parents may no longer be ancestors in the render tree.
   /// Geometry updates must wait until the subtree is reached again when
   /// updating semantics, including when it is currently blocked.
-  void invalidateParentData() {
-    parentData = null;
-    renderObject.visitChildren((RenderObject child) {
-      child._semantics.invalidateParentData();
-    });
+  /// Only invalidates cached semantics to avoid creating new wrappers, but still
+  /// visits all children because a descendant may have cached semantics even if
+  /// its parent does not.
+  static void invalidateParentData(RenderObject renderObject) {
+    renderObject._semanticsInfo?.parentData = null;
+    renderObject.visitChildren(invalidateParentData);
   }
 
   void markNeedsBuild() {
