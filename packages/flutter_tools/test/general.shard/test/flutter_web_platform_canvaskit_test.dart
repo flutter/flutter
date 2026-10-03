@@ -100,11 +100,33 @@ void main() {
           expect(await response.readAsString(), contents);
         }
 
-        for (final path in <String>['canvaskit', 'canvaskit-other/canvaskit.js']) {
+        fileSystem
+            .directory(artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path)
+            .childFile('canvaskit.js')
+            .writeAsStringSync('outside the CanvasKit directory');
+        final File rootAsset = fileSystem.file(
+          fileSystem.path.join(fileSystem.path.rootPrefix(projectDirectory.path), 'canvaskit.js'),
+        )..writeAsStringSync('outside the web SDK directory');
+        final encodedSeparators = style == FileSystemStyle.windows
+            ? <String>['%5c', '%2f']
+            : <String>['%2f', '%5c'];
+
+        for (final path in <String>[
+          'canvaskit',
+          'canvaskit-other/canvaskit.js',
+          'canvaskit/../canvaskit.js',
+          'canvaskit/%2e%2e/canvaskit.js',
+          for (final encodedSeparator in encodedSeparators) ...<String>[
+            'canvaskit/%2e%2e${encodedSeparator}canvaskit.js',
+            'canvaskit/chromium/%2e%2e$encodedSeparator%2e%2e${encodedSeparator}canvaskit.js',
+            'canvaskit/chromium${encodedSeparator}canvaskit.js',
+          ],
+          'canvaskit/${Uri.encodeComponent(rootAsset.path)}',
+        ]) {
           final shelf.Response response = await server.handler!(
             shelf.Request('GET', Uri.parse('http://localhost/$path')),
           );
-          expect(response.statusCode, HttpStatus.notFound);
+          expect(response.statusCode, HttpStatus.notFound, reason: path);
         }
       } finally {
         await webPlatform.close();

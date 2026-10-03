@@ -508,7 +508,13 @@ window.\$dartLoader.loader.nextAttempt();
   /// cause test flakiness due to reliance on network.
   shelf.Response _localCanvasKitHandler(shelf.Request request) {
     final List<String> pathSegments = request.url.pathSegments;
-    if (pathSegments.length < 2 || pathSegments.first != 'canvaskit') {
+    // URI path segments are decoded, so encoded separators must be rejected.
+    if (pathSegments.length < 2 ||
+        pathSegments.first != 'canvaskit' ||
+        pathSegments.any(
+          (String segment) =>
+              segment == '.' || segment == '..' || segment.contains('/') || segment.contains(r'\'),
+        )) {
       return shelf.Response.notFound('Not a CanvasKit file request');
     }
 
