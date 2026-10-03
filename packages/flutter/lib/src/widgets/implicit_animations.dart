@@ -1065,7 +1065,7 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: _alignment!.evaluate(animation)!,
+      alignment: _alignment!.evaluate(animation),
       heightFactor: _heightFactorTween?.evaluate(animation),
       widthFactor: _widthFactorTween?.evaluate(animation),
       child: widget.child,
@@ -2418,7 +2418,7 @@ class _AnimatedFractionallySizedBoxState
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
-      alignment: _alignment!.evaluate(animation)!,
+      alignment: _alignment!.evaluate(animation),
       heightFactor: _heightFactorTween?.evaluate(animation),
       widthFactor: _widthFactorTween?.evaluate(animation),
       child: widget.child,
