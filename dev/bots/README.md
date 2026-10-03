@@ -12,8 +12,7 @@ The [LUCI](https://chromium.googlesource.com/infra/luci/luci-py/+/refs/heads/mai
 bots run the [`test.dart`](test.dart) script for each PR and submission. This
 does testing for the tools, for the framework, and (for submitted changes only)
 rebuilds and updates the main branch API docs [staging site](https://main-api.flutter.dev/).
-For tagged dev and beta builds, it also builds and deploys the gallery app to
-the app stores. It is configured by two `.ci.yaml` files:
+The CI is configured by two `.ci.yaml` files:
 
 - framework: [`.ci.yaml`](../../.ci.yaml)
 - engine: [`engine/src/flutter/.ci.yaml`](../../engine/src/flutter/.ci.yaml)
@@ -35,8 +34,6 @@ to Chromium's infra and the foundation to Flutter's infrastructure.
 To work on this infrastructure you will need:
 
 - [depot_tools](https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up)
-- Python package installer: `sudo apt-get install python-pip`
-- Python coverage package (only needed for `training_simulation`): `sudo pip install coverage`
 
 To run `prepare_package.dart` locally:
 

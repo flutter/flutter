@@ -31,15 +31,16 @@ To update an existing workflow please open a new bug using the [ticket queue pro
 *   workflow/old_pinned_version
 *   workflow/new_pinned_version
 
-## flutter/engine and flutter/flutter
+## flutter/flutter
 
-***flutter/engine*** please do not add any action workflows to this repository.
+***Engine*** (the `engine/` directory, formerly the separate flutter/engine
+repository): please do not add any action workflows to build or test the engine.
 The preferred way of building and testing is to use LUCI. This allows to plan
 for scalability, security and maintainability.
 
-***flutter/flutter*** the main use of workflows in this repo is to process bugs,
-projects, etc. Please do not use action workflows to build, run tests or release
-artifacts.
+***Framework and tool***: the main use of workflows in this repo is to process
+bugs, projects, etc. Please do not use action workflows to build, run tests or
+release artifacts.
 
 ## Checklist
 

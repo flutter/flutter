@@ -2,14 +2,14 @@
 
 Flutter is a series of connected repositories. Within each repository there are files (normally named `DEPS`) which determine which version of the other repositories the repository currently works with.
 
-The three relevant repositories for this document are:
+The two relevant repositories for this document are:
 
 - Flutter. The Flutter project: [flutter/flutter on GitHub](https://github.com/flutter/flutter)
 - Dart SDK. This is the language used for big parts of Flutter: [dart-lang/sdk on GitHub](https://github.com/dart-lang/sdk)
 
 ## Dart Autoroller
 
-Dart is now automatically rolled into the Flutter repository on a regular basis. See [Autorollers](Autorollers.md) for more information.
+Dart is now automatically rolled into the Flutter repository on a regular basis. The [Dart autoroller](https://autoroll.skia.org/r/dart-sdk-flutter) opens pull requests against flutter/flutter that update `dart_revision` in [DEPS](../../DEPS). If a roll causes a breakage, revert that pull request in flutter/flutter. See [Autorollers](Autorollers.md) for more information.
 
 ## Using dart_roll_helper.py to roll the version of Dart used by the engine
 
@@ -97,10 +97,8 @@ flutter test --local-engine=host_debug --local-engine-host=host_debug
 
 10. `git push origin <your_roll_branch_name>`
 
-11. Get a code review of the pull request done, check to make sure the [flutter engine build bot](https://build.chromium.org/p/client.flutter/console) is green and merge the pull request.
+11. Get a code review of the pull request done, check to make sure the presubmit checks are green and merge the pull request.
 
-12. Wait for the [flutter engine build bot](https://ci.chromium.org/p/flutter/g/engine/console) to build your change and go green.
+12. Once the pull request has landed, monitor the post-submit results on the [Flutter build dashboard](https://flutter-dashboard.appspot.com/#/build). If there is a failure, revert the Dart roll in flutter/flutter, debug the problem and fix it or file a P0 issue against Dart. Please monitor the [Flutter benchmarks](https://flutter-flutter-perf.skia.org/e/) (see [Dashboards](Dashboards.md)) and if any regressions are noticed please file P0 issues for all regressions **and revert the Dart roll**. The next roll is blocked until these issues/regressions are fixed.
 
-13. Once the bot cycles green, the [Autorollers](../infra/Autorollers.md) will roll the engine into the flutter/flutter repo. When this happens, monitor the flutter [build bots](https://flutter-dashboard.appspot.com/build.html). If there is a failure, revert the Dart roll in flutter/engine, debug the problem and fix it or file a P0 issue against Dart. Please monitor the [flutter benchmarks dashboard](https://flutter-dashboard.appspot.com/benchmarks.html) and if any regressions are noticed please file P0 issues for all regressions **and revert the Dart roll**. The next roll is blocked until these issues/regressions are fixed.
-
-14. When you are done please update the spreadsheet at [go/dart-flutter-rolls](https://goto.google.com/dart-flutter-rolls) with the git hash of the Dart revision that was rolled into the flutter engine. This hash will be used for rolling Dart into Google's internal code repository and would be picked as a potential candidate for a dev release. Also make sure you send an email to the next person on the list and make sure the person acknowledges picking up the roll baton.
+13. When you are done please update the spreadsheet at [go/dart-flutter-rolls](https://goto.google.com/dart-flutter-rolls) with the git hash of the Dart revision that was rolled into the Flutter repository. This hash will be used for rolling Dart into Google's internal code repository and would be picked as a potential candidate for a dev release. Also make sure you send an email to the next person on the list and make sure the person acknowledges picking up the roll baton.
