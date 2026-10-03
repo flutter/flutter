@@ -57,6 +57,8 @@ def main():
 
   classpath = [
       args.android_source_root,
+      os.path.join(args.android_source_root, 'debug'),
+      os.path.join(args.android_source_root, 'release'),
       android_jar_path,
       os.path.join(
           args.src_dir, 'flutter', 'third_party', 'android_embedding_dependencies', 'lib', '*'
@@ -70,6 +72,7 @@ def main():
       'io.flutter.embedding.android',
       'io.flutter.embedding.engine',
       'io.flutter.embedding.engine.dart',
+      'io.flutter.embedding.engine.flags',
       'io.flutter.embedding.engine.loader',
       'io.flutter.embedding.engine.mutatorsstack',
       'io.flutter.embedding.engine.plugins',

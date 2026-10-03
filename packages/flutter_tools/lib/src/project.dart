@@ -245,15 +245,15 @@ class FlutterProject {
     Directory? buildDirectory,
   ]) {
     final FileSystem fileSystem = directory.fileSystem;
-    logger ??= BufferLogger.test();
+    final Logger manifestLogger = logger ?? BufferLogger.test();
     final FlutterManifest manifest = FlutterProject._readManifest(
       directory.childFile(bundle.defaultManifestPath).path,
-      logger: logger,
+      logger: manifestLogger,
       fileSystem: fileSystem,
     );
     final FlutterManifest exampleManifest = FlutterProject._readManifest(
       FlutterProject._exampleDirectory(directory).childFile(bundle.defaultManifestPath).path,
-      logger: logger,
+      logger: manifestLogger,
       fileSystem: fileSystem,
     );
     return FlutterProject(
