@@ -121,6 +121,60 @@ void main() {
     },
   );
 
+  testWithoutContext(
+    'UnpackLinux copies libvmservice_snapshot.so in profile mode if present',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final artifacts = Artifacts.test();
+      setUpCacheDirectory(fileSystem, artifacts, mode: BuildMode.profile);
+
+      final String desktopPathForX64 = artifacts.getArtifactPath(
+        Artifact.linuxDesktopPath,
+        platform: TargetPlatform.linux_x64,
+        mode: BuildMode.profile,
+      );
+      fileSystem.file('$desktopPathForX64/libvmservice_snapshot.so').createSync(recursive: true);
+
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kBuildMode: 'profile'},
+        artifacts: artifacts,
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+      );
+      testEnvironment.buildDir.createSync(recursive: true);
+
+      await const UnpackLinux(TargetPlatform.linux_x64).build(testEnvironment);
+
+      expect(fileSystem.file('linux/flutter/ephemeral/libvmservice_snapshot.so'), exists);
+    },
+  );
+
+  testWithoutContext(
+    'UnpackLinux succeeds in profile mode when libvmservice_snapshot.so is absent',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final artifacts = Artifacts.test();
+      setUpCacheDirectory(fileSystem, artifacts, mode: BuildMode.profile);
+
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kBuildMode: 'profile'},
+        artifacts: artifacts,
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+      );
+      testEnvironment.buildDir.createSync(recursive: true);
+
+      await const UnpackLinux(TargetPlatform.linux_x64).build(testEnvironment);
+
+      expect(fileSystem.file('linux/flutter/ephemeral/libvmservice_snapshot.so'), isNot(exists));
+      expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'), exists);
+    },
+  );
+
   // Only required for the test below that still depends on the context.
   late FileSystem fileSystem;
 
@@ -325,16 +379,20 @@ flutter:
   });
 }
 
-void setUpCacheDirectory(FileSystem fileSystem, Artifacts artifacts) {
+void setUpCacheDirectory(
+  FileSystem fileSystem,
+  Artifacts artifacts, {
+  BuildMode mode = BuildMode.debug,
+}) {
   final String desktopPathForX64 = artifacts.getArtifactPath(
     Artifact.linuxDesktopPath,
     platform: TargetPlatform.linux_x64,
-    mode: BuildMode.debug,
+    mode: mode,
   );
   final String desktopPathForArm64 = artifacts.getArtifactPath(
     Artifact.linuxDesktopPath,
     platform: TargetPlatform.linux_arm64,
-    mode: BuildMode.debug,
+    mode: mode,
   );
   fileSystem.file('$desktopPathForX64/unrelated-stuff').createSync(recursive: true);
   fileSystem.file('$desktopPathForX64/libflutter_linux_gtk.so').createSync(recursive: true);
@@ -344,12 +402,12 @@ void setUpCacheDirectory(FileSystem fileSystem, Artifacts artifacts) {
   final String headersPathForX64 = artifacts.getArtifactPath(
     Artifact.linuxHeaders,
     platform: TargetPlatform.linux_x64,
-    mode: BuildMode.debug,
+    mode: mode,
   );
   final String headersPathForArm64 = artifacts.getArtifactPath(
     Artifact.linuxHeaders,
     platform: TargetPlatform.linux_arm64,
-    mode: BuildMode.debug,
+    mode: mode,
   );
   fileSystem.file('$headersPathForX64/foo.h').createSync(recursive: true);
   fileSystem.file('$headersPathForArm64/foo.h').createSync(recursive: true);
