@@ -286,4 +286,99 @@ Future<void> testMain() async {
       ..layout(const ui.ParagraphConstraints(width: 2000));
     expect(placeholderForceStrut.height, closeTo(100.0, 1e-3));
   });
+
+  test('Empty paragraph applies height, TextHeightBehavior, and StrutStyle', () {
+    final ui.Paragraph raw = _layout(_style());
+    final ui.Paragraph scaled = _layout(_style(height: _heightMultiplier));
+    expect(scaled.height, closeTo(_scaledHeight, 1e-3));
+    expect(
+      scaled.alphabeticBaseline,
+      closeTo(raw.alphabeticBaseline * (_scaledHeight / raw.height), 1e-3),
+    );
+
+    final ui.Paragraph reverted = _layout(
+      _style(height: _heightMultiplier, textHeightBehavior: _noFirstAscentNoLastDescent),
+    );
+    expect(reverted.height, closeTo(raw.height, 1e-3));
+    expect(reverted.alphabeticBaseline, closeTo(raw.alphabeticBaseline, 1e-3));
+
+    final strut = ui.StrutStyle(
+      fontFamily: 'Arial',
+      fontSize: _fontSize,
+      height: 1.0,
+      leading: 1.5,
+    );
+    expect(
+      _layout(
+        _style(fontSize: 10, strutStyle: strut, textHeightBehavior: _noFirstAscentNoLastDescent),
+      ).height,
+      closeTo(50.0, 1e-3),
+    );
+
+    final forcedStrut = ui.StrutStyle(
+      fontFamily: 'Arial',
+      fontSize: 10,
+      height: 1.0,
+      forceStrutHeight: true,
+    );
+    expect(
+      _layout(
+        _style(
+          fontSize: 40,
+          strutStyle: forcedStrut,
+          textHeightBehavior: _noFirstAscentNoLastDescent,
+        ),
+      ).height,
+      closeTo(10.0, 1e-3),
+    );
+  });
+
+  test('Empty paragraph mirrors SkParagraph half-leading quirks', () {
+    final ui.Paragraph raw = _layout(_style());
+    final ui.Paragraph scaled = _layout(_style(height: _heightMultiplier));
+    final double extraLeading = _scaledHeight - raw.height;
+
+    // Without a StrutStyle, TextHeightBehavior.leadingDistribution is ignored on empty paragraphs
+    final ui.Paragraph evenWithoutStrut = _layout(
+      _style(
+        height: _heightMultiplier,
+        textHeightBehavior: const ui.TextHeightBehavior(
+          leadingDistribution: ui.TextLeadingDistribution.even,
+        ),
+      ),
+    );
+    expect(evenWithoutStrut.alphabeticBaseline, closeTo(scaled.alphabeticBaseline, 1e-3));
+
+    // With an even StrutStyle, extra leading is stored as line leading and not stripped by
+    // TextHeightBehavior or absorbed by a taller non-forced strut
+    final evenStrut = ui.StrutStyle(
+      fontFamily: 'Arial',
+      fontSize: _fontSize,
+      leadingDistribution: ui.TextLeadingDistribution.even,
+    );
+    final ui.Paragraph emptyEven = _layout(
+      _style(
+        height: _heightMultiplier,
+        strutStyle: evenStrut,
+        textHeightBehavior: _noFirstAscentNoLastDescent,
+      ),
+    );
+    expect(emptyEven.height, closeTo(_scaledHeight, 1e-3));
+    expect(emptyEven.alphabeticBaseline, closeTo(raw.alphabeticBaseline + extraLeading / 2, 1e-3));
+
+    final tallEvenStrut = ui.StrutStyle(
+      fontFamily: 'Arial',
+      fontSize: _fontSize * 1.5,
+      leadingDistribution: ui.TextLeadingDistribution.even,
+    );
+    final ui.Paragraph strutOnly = _layout(_style(strutStyle: tallEvenStrut));
+    final ui.Paragraph strutAndHeight = _layout(
+      _style(height: _heightMultiplier, strutStyle: tallEvenStrut),
+    );
+    expect(strutAndHeight.height, closeTo(strutOnly.height + extraLeading, 1e-3));
+    expect(
+      strutAndHeight.alphabeticBaseline,
+      closeTo(strutOnly.alphabeticBaseline + extraLeading / 2, 1e-3),
+    );
+  });
 }
