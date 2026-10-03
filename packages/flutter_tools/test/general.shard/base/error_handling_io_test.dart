@@ -439,6 +439,80 @@ void main() {
         throwsToolExit(message: 'The flutter tool cannot access the file or directory'),
       );
     });
+
+    testWithoutContext('when path syntax is invalid (123)', () {
+      const kInvalidName = 123;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
+      );
+      final File file = fileSystem.file('bad:name');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', kInvalidName)),
+      );
+
+      const expectedMessage = 'The filename, directory name, or volume label syntax is incorrect.';
+      expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when directory is not empty (145)', () {
+      const kDirNotEmpty = 145;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
+      );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.delete,
+        FileSystemException('', directory.path, const OSError('', kDirNotEmpty)),
+      );
+
+      const expectedMessage = 'The directory is not empty.';
+      expect(() => directory.deleteSync(recursive: true), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when filename or extension is too long (206)', () {
+      const kFilenameExcedRange = 206;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
+      );
+      final File file = fileSystem.file('file');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', kFilenameExcedRange)),
+      );
+
+      const expectedMessage = 'The filename or extension is too long.';
+      expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
+    });
+
+    for (final errorCode in const <int>[4392, 4393]) {
+      testWithoutContext('when NTFS reparse point is invalid ($errorCode)', () {
+        final fileSystem = ErrorHandlingFileSystem(
+          delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+          platform: windowsPlatform,
+        );
+        final File file = fileSystem.file('file');
+
+        exceptionHandler.addError(
+          file,
+          FileSystemOp.read,
+          FileSystemException('', file.path, OSError('', errorCode)),
+        );
+
+        const expectedMessage =
+            'The file or directory contains an invalid NTFS reparse point (symbolic link or cloud storage placeholder).';
+        expect(() => file.readAsStringSync(), throwsToolExit(message: expectedMessage));
+      });
+    }
   });
 
   group('throws ToolExit on Linux', () {
@@ -729,6 +803,97 @@ void main() {
         throwsToolExit(message: 'The file or directory could not be found'),
       );
     });
+
+    testWithoutContext('when a path component is not a directory (enotdir / 20)', () {
+      const enotdir = 20;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+      final File file = fileSystem.file('file/subfile');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.open,
+        FileSystemException('', file.path, const OSError('', enotdir)),
+      );
+
+      const expectedMessage = 'A component of the path is not a directory.';
+      expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when path refers to a directory rather than a file (eisdir / 21)', () {
+      const eisdir = 21;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+      final File file = fileSystem.file('dir');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.read,
+        FileSystemException('', file.path, const OSError('', eisdir)),
+      );
+
+      const expectedMessage = 'The path refers to a directory rather than a file.';
+      expect(() => file.readAsStringSync(), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when filename or path is too long (enametoolong / 36)', () {
+      const enametoolong = 36;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+      final File file = fileSystem.file('file');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', enametoolong)),
+      );
+
+      const expectedMessage = 'The filename or path is too long.';
+      expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when directory is not empty (enotempty / 39)', () {
+      const enotempty = 39;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.delete,
+        FileSystemException('', directory.path, const OSError('', enotempty)),
+      );
+
+      const expectedMessage = 'The directory is not empty.';
+      expect(() => directory.deleteSync(recursive: true), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when operation is not supported by file system (eopnotsupp / 95)', () {
+      const eopnotsupp = 95;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+      final Link link = fileSystem.link('link');
+
+      exceptionHandler.addError(
+        link,
+        FileSystemOp.create,
+        FileSystemException('', link.path, const OSError('', eopnotsupp)),
+      );
+
+      const expectedMessage =
+          'The file system does not support this operation (such as symbolic links).';
+      expect(() => link.createSync('target'), throwsToolExit(message: expectedMessage));
+    });
   });
 
   group('throws ToolExit on macOS', () {
@@ -1016,6 +1181,97 @@ void main() {
         () => fileSystem.currentDirectory,
         throwsToolExit(message: 'The flutter tool cannot access the file or directory'),
       );
+    });
+
+    testWithoutContext('when a path component is not a directory (enotdir / 20)', () {
+      const enotdir = 20;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
+      );
+      final File file = fileSystem.file('file/subfile');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.open,
+        FileSystemException('', file.path, const OSError('', enotdir)),
+      );
+
+      const expectedMessage = 'A component of the path is not a directory.';
+      expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when path refers to a directory rather than a file (eisdir / 21)', () {
+      const eisdir = 21;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
+      );
+      final File file = fileSystem.file('dir');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.read,
+        FileSystemException('', file.path, const OSError('', eisdir)),
+      );
+
+      const expectedMessage = 'The path refers to a directory rather than a file.';
+      expect(() => file.readAsStringSync(), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when operation is not supported by file system (eopnotsupp / 45)', () {
+      const eopnotsupp = 45;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
+      );
+      final Link link = fileSystem.link('link');
+
+      exceptionHandler.addError(
+        link,
+        FileSystemOp.create,
+        FileSystemException('', link.path, const OSError('', eopnotsupp)),
+      );
+
+      const expectedMessage =
+          'The file system does not support this operation (such as symbolic links).';
+      expect(() => link.createSync('target'), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when filename or path is too long (enametoolong / 63)', () {
+      const enametoolong = 63;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
+      );
+      final File file = fileSystem.file('file');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', enametoolong)),
+      );
+
+      const expectedMessage = 'The filename or path is too long.';
+      expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when directory is not empty (enotempty / 66)', () {
+      const enotempty = 66;
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
+      );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.delete,
+        FileSystemException('', directory.path, const OSError('', enotempty)),
+      );
+
+      const expectedMessage = 'The directory is not empty.';
+      expect(() => directory.deleteSync(recursive: true), throwsToolExit(message: expectedMessage));
     });
   });
 
@@ -1950,6 +2206,53 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(attemptsLeft, 0);
       expect(memoryFileSystem.file('/file').readAsStringSync(), 'content');
     });
+
+    testWithoutContext(
+      'recovers from transient ERROR_DIR_NOT_EMPTY (145) during directory deletion',
+      () {
+        attemptsLeft = 2; // Fails 2 times, succeeds on 3rd
+        final memoryFileSystem = MemoryFileSystem.test(
+          opHandle: (String path, FileSystemOp op) {
+            if (path == '/dir' && op == FileSystemOp.delete) {
+              if (attemptsLeft > 0) {
+                attemptsLeft--;
+                throw const FileSystemException('', '/dir', OSError('', kSystemCodeDirNotEmpty));
+              }
+            }
+          },
+        );
+        fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
+        final Directory dir = fileSystem.directory('/dir')..createSync();
+
+        dir.deleteSync(recursive: true);
+        expect(attemptsLeft, 0);
+        expect(memoryFileSystem.directory('/dir').existsSync(), false);
+      },
+    );
+
+    testWithoutContext(
+      'fails after 5 transient ERROR_DIR_NOT_EMPTY (145) locks and throws ToolExit',
+      () {
+        attemptsLeft = 6; // Fails 6 times
+        final memoryFileSystem = MemoryFileSystem.test(
+          opHandle: (String path, FileSystemOp op) {
+            if (path == '/dir' && op == FileSystemOp.delete) {
+              if (attemptsLeft > 0) {
+                attemptsLeft--;
+                throw const FileSystemException('', '/dir', OSError('', kSystemCodeDirNotEmpty));
+              }
+            }
+          },
+        );
+        fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
+        final Directory dir = fileSystem.directory('/dir')..createSync();
+
+        expect(
+          () => dir.deleteSync(recursive: true),
+          throwsToolExit(message: 'The directory is not empty.'),
+        );
+      },
+    );
   });
 
   group('deleteIfExists with broken symlinks', () {
