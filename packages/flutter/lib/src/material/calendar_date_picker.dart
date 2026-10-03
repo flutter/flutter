@@ -1235,7 +1235,9 @@ class _DayState extends State<_Day> {
       if (widget.isSelectedDay) WidgetState.selected,
     };
 
-    _statesController.value = states;
+    for (final state in states) {
+      _statesController.update(state, true);
+    }
 
     final Color? dayForegroundColor = resolve<Color?>(
       (DatePickerThemeData? theme) =>
@@ -1568,7 +1570,11 @@ class _YearPickerState extends State<YearPicker> {
         assert(date.year == widget.lastDate.year);
         date = widget.calendarDelegate.getMonth(year, widget.lastDate.month);
       }
-      _statesController.value = states;
+
+      for (final state in states) {
+        _statesController.update(state, true);
+      }
+
       yearItem = InkWell(
         key: ValueKey<int>(year),
         onTap: () => widget.onChanged(date),
