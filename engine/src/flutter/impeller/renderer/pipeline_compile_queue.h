@@ -41,6 +41,20 @@ namespace impeller {
 class PipelineCompileQueue
     : public std::enable_shared_from_this<PipelineCompileQueue> {
  public:
+  //----------------------------------------------------------------------------
+  /// @brief      The scheduling priority of a compile job.
+  ///
+  ///             High priority jobs are always taken off the queue before
+  ///             normal priority jobs. This is used to ensure the small set of
+  ///             pipelines needed to render the first frame are compiled before
+  ///             the much larger set of pipelines that are merely likely to be
+  ///             needed at some point.
+  ///
+  enum class Priority {
+    kNormal,
+    kHigh,
+  };
+
   PipelineCompileQueue() = default;
 
   virtual ~PipelineCompileQueue();
@@ -51,6 +65,10 @@ class PipelineCompileQueue
 
   //----------------------------------------------------------------------------
   /// @brief      Post a compile job for the specified descriptor.
+  ///
+  ///             The scheduling priority of the job is derived from
+  ///             `PipelineDescriptor::IsHighPriority`, so callers do not need
+  ///             to specify it separately.
   ///
   /// @param[in]  desc  The description
   /// @param[in]  job   The job
@@ -106,13 +124,22 @@ class PipelineCompileQueue
   /// @brief      Add a compilation job to the pending queue for the specified
   ///             descriptor.
   ///
-  /// @param[in]  desc  The pipeline descriptor that identifies the job
-  /// @param[in]  job   The compilation job closure to add
+  ///             Duplicates are rejected regardless of which priority queue
+  ///             the existing job resides in. Because priority is not part of
+  ///             a descriptor's identity, the same descriptor must never be
+  ///             present in both queues; doing so would fulfill the same
+  ///             promise twice.
+  ///
+  /// @param[in]  desc      The pipeline descriptor that identifies the job
+  /// @param[in]  job       The compilation job closure to add
+  /// @param[in]  priority  The scheduling priority of the job
   ///
   /// @return     True if the job was successfully added to the queue, false
   ///             if a job for this descriptor already exists.
   ///
-  bool AddJob(const PipelineDescriptor& desc, const fml::closure& job);
+  bool AddJob(const PipelineDescriptor& desc,
+              const fml::closure& job,
+              Priority priority = Priority::kNormal);
 
   //----------------------------------------------------------------------------
   /// @brief      Check if there are any pending compilation jobs in the queue.
@@ -124,6 +151,13 @@ class PipelineCompileQueue
 
  private:
   Mutex pending_jobs_mutex_;
+  // Both queues use a linked hash map so that jobs are taken in insertion
+  // order within a given priority class.
+  absl::linked_hash_map<PipelineDescriptor,
+                        fml::closure,
+                        ComparableHash<PipelineDescriptor>,
+                        ComparableEqual<PipelineDescriptor>>
+      pending_high_priority_jobs_ IPLR_GUARDED_BY(pending_jobs_mutex_);
   absl::linked_hash_map<PipelineDescriptor,
                         fml::closure,
                         ComparableHash<PipelineDescriptor>,

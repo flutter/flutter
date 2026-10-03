@@ -26,10 +26,26 @@ class TestPipelineCompileQueue : public PipelineCompileQueue {
     return AddJob(desc, job);
   }
 
+  bool AddJobForTest(const PipelineDescriptor& desc,
+                     const fml::closure& job,
+                     Priority priority) {
+    return AddJob(desc, job, priority);
+  }
+
   bool HasPendingJobsForTest() { return HasPendingJobs(); }
 
   void DoOneJobForTest() { DoOneJob(); }
 };
+
+// Returns a descriptor that is unique with respect to ComparableHash and
+// ComparableEqual, which key off the label among other things.
+static PipelineDescriptor MakeDescriptor(const std::string& label,
+                                         bool high_priority = false) {
+  PipelineDescriptor desc;
+  desc.SetLabel(label);
+  desc.SetHighPriority(high_priority);
+  return desc;
+}
 
 TEST(PipelineCompileQueueTest, AddJobReturnsTrueForNewDescriptor) {
   TestPipelineCompileQueue queue;
@@ -114,6 +130,102 @@ TEST(PipelineCompileQueueTest, ExecutesJobsInInsertionOrder) {
   for (size_t i = 0; i < kJobCount; i++) {
     EXPECT_EQ(i, job_order[i]);
   }
+}
+
+TEST(PipelineCompileQueueTest, HighPriorityJobsAreExecutedFirst) {
+  auto queue = std::make_shared<TestPipelineCompileQueue>();
+
+  std::vector<std::string> job_order;
+  auto record = [&job_order](const std::string& name) {
+    return [&job_order, name] { job_order.push_back(name); };
+  };
+
+  // Insert normal priority jobs first so that ordering can only be explained
+  // by priority, not by insertion order.
+  ASSERT_TRUE(queue->AddJobForTest(MakeDescriptor("normal0"), record("normal0"),
+                                   PipelineCompileQueue::Priority::kNormal));
+  ASSERT_TRUE(queue->AddJobForTest(MakeDescriptor("normal1"), record("normal1"),
+                                   PipelineCompileQueue::Priority::kNormal));
+  ASSERT_TRUE(queue->AddJobForTest(MakeDescriptor("high0"), record("high0"),
+                                   PipelineCompileQueue::Priority::kHigh));
+  ASSERT_TRUE(queue->AddJobForTest(MakeDescriptor("high1"), record("high1"),
+                                   PipelineCompileQueue::Priority::kHigh));
+
+  for (size_t i = 0; i < 4u; i++) {
+    queue->DoOneJobForTest();
+  }
+
+  // High priority jobs first, and insertion order preserved within each class.
+  EXPECT_EQ(job_order,
+            (std::vector<std::string>{"high0", "high1", "normal0", "normal1"}));
+}
+
+TEST(PipelineCompileQueueTest, AddJobRejectsDuplicatesAcrossPriorities) {
+  TestPipelineCompileQueue queue;
+  // Priority is deliberately excluded from a descriptor's identity, so these
+  // two descriptors are the same key.
+  PipelineDescriptor normal_desc = MakeDescriptor("shared", false);
+  PipelineDescriptor high_desc = MakeDescriptor("shared", true);
+
+  EXPECT_TRUE(queue.AddJobForTest(
+      normal_desc, [] {}, PipelineCompileQueue::Priority::kNormal));
+  // Must be rejected even though it targets the other queue. Allowing this
+  // would fulfill the same promise twice.
+  EXPECT_FALSE(queue.AddJobForTest(
+      high_desc, [] {}, PipelineCompileQueue::Priority::kHigh));
+
+  // And the reverse direction.
+  TestPipelineCompileQueue other_queue;
+  EXPECT_TRUE(other_queue.AddJobForTest(
+      high_desc, [] {}, PipelineCompileQueue::Priority::kHigh));
+  EXPECT_FALSE(other_queue.AddJobForTest(
+      normal_desc, [] {}, PipelineCompileQueue::Priority::kNormal));
+}
+
+TEST(PipelineCompileQueueTest, FinishAllJobsDrainsHighPriorityJobs) {
+  auto queue = std::make_shared<TestPipelineCompileQueue>();
+  bool high_executed = false;
+  bool normal_executed = false;
+
+  queue->AddJobForTest(
+      MakeDescriptor("high"), [&high_executed] { high_executed = true; },
+      PipelineCompileQueue::Priority::kHigh);
+  queue->AddJobForTest(
+      MakeDescriptor("normal"), [&normal_executed] { normal_executed = true; },
+      PipelineCompileQueue::Priority::kNormal);
+
+  // Destruction must drain both queues. A job left behind would leave its
+  // promise unfulfilled and hang any thread that later waits on it.
+  queue.reset();
+
+  EXPECT_TRUE(high_executed);
+  EXPECT_TRUE(normal_executed);
+}
+
+TEST(PipelineCompileQueueTest, HasPendingJobsSeesHighPriorityJobs) {
+  TestPipelineCompileQueue queue;
+  EXPECT_FALSE(queue.HasPendingJobsForTest());
+
+  queue.AddJobForTest(
+      MakeDescriptor("high"), [] {}, PipelineCompileQueue::Priority::kHigh);
+  EXPECT_TRUE(queue.HasPendingJobsForTest());
+
+  queue.DoOneJobForTest();
+  EXPECT_FALSE(queue.HasPendingJobsForTest());
+}
+
+TEST(PipelineCompileQueueTest, PerformJobEagerlyTakesHighPriorityJobs) {
+  TestPipelineCompileQueue queue;
+  PipelineDescriptor desc = MakeDescriptor("high", true);
+  bool job_executed = false;
+
+  queue.AddJobForTest(
+      desc, [&job_executed] { job_executed = true; },
+      PipelineCompileQueue::Priority::kHigh);
+  queue.PerformJobEagerly(desc);
+
+  EXPECT_TRUE(job_executed);
+  EXPECT_FALSE(queue.HasPendingJobsForTest());
 }
 
 }  // namespace testing
