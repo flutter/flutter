@@ -299,30 +299,32 @@ final flavorUndefinedHandler = GradleHandledError(
         utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
-        final RunResult tasksRunResult = await processUtils.run(
-          <String>[gradleUtils!.getExecutable(project), 'app:tasks', '--all', '--console=auto'],
-          throwOnError: true,
-          workingDirectory: project.android.hostAppGradleRoot.path,
-          environment: java?.environment,
-        );
-        // Extract build types and product flavors.
-        final variants = <String>{};
-        for (final String task in tasksRunResult.stdout.split('\n')) {
-          final Match? match = _assembleTaskPattern.matchAsPrefix(task);
-          if (match != null) {
-            final String variant = match.group(1)!.toLowerCase();
-            if (!variant.endsWith('test')) {
-              variants.add(variant);
+        final productFlavors = <String>{};
+        if (gradleUtils != null) {
+          final RunResult tasksRunResult = await processUtils.run(
+            <String>[gradleUtils.getExecutable(project), 'app:tasks', '--all', '--console=auto'],
+            throwOnError: true,
+            workingDirectory: project.android.hostAppGradleRoot.path,
+            environment: java?.environment,
+          );
+          // Extract build types and product flavors.
+          final variants = <String>{};
+          for (final String task in tasksRunResult.stdout.split('\n')) {
+            final Match? match = _assembleTaskPattern.matchAsPrefix(task);
+            if (match != null) {
+              final String variant = match.group(1)!.toLowerCase();
+              if (!variant.endsWith('test')) {
+                variants.add(variant);
+              }
             }
           }
-        }
-        final productFlavors = <String>{};
-        for (final variant1 in variants) {
-          for (final variant2 in variants) {
-            if (variant2.startsWith(variant1) && variant2 != variant1) {
-              final String buildType = variant2.substring(variant1.length);
-              if (variants.contains(buildType)) {
-                productFlavors.add(variant1);
+          for (final variant1 in variants) {
+            for (final variant2 in variants) {
+              if (variant2.startsWith(variant1) && variant2 != variant1) {
+                final String buildType = variant2.substring(variant1.length);
+                if (variants.contains(buildType)) {
+                  productFlavors.add(variant1);
+                }
               }
             }
           }
