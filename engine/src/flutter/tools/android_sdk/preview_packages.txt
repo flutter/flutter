@@ -1,0 +1,4 @@
+platforms;android-37.2-beta1:platforms
+build-tools;37.0.0:build-tools
+cmdline-tools;latest:cmdline-tools
+platform-tools:platform-tools
