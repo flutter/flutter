@@ -1454,6 +1454,49 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(SizedBox), findsNothing);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192533
+  testWidgets('AnimatedList insertItem at the index of an item removed in the same frame', (
+    WidgetTester tester,
+  ) async {
+    final listKey = GlobalKey<AnimatedListState>();
+    final animations = <int, Animation<double>>{};
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList(
+          key: listKey,
+          initialItemCount: 1,
+          itemBuilder: (_, int index, Animation<double> animation) {
+            animations[index] = animation;
+            return const SizedBox(height: 40);
+          },
+        ),
+      ),
+    );
+
+    listKey.currentState!.insertItem(1, duration: const Duration(milliseconds: 100));
+    await tester.pump();
+
+    // The insert animation completes in the next frame. Before its .then runs,
+    // the item is removed and another item is inserted at its old index.
+    await tester.binding.delayed(const Duration(milliseconds: 150));
+    tester.binding.addPostFrameCallback((_) {
+      final AnimatedListState state = listKey.currentState!;
+      state.removeItem(1, (_, _) => const SizedBox(height: 40));
+      state.insertItem(0, duration: const Duration(seconds: 1));
+      state.insertItem(1, duration: const Duration(seconds: 1));
+    });
+    await _pumpWebStyleFrame(tester);
+
+    // The new item at index 1 is still animating.
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.takeException(), isNull);
+    expect(animations[1]!.value, moreOrLessEquals(0.5));
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }
 
 // Pumps one frame the way the web engine does: handleBeginFrame and
