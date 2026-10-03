@@ -332,12 +332,11 @@ class IOSDevice extends Device {
     required this._analytics,
     required this._xcode,
     required this._operatingSystemUtils,
-    ShutdownHooks? shutdownHooks,
+    required this._shutdownHooks,
     UserMessages? userMessages,
     this._templateRenderer = const MustacheTemplateRenderer(),
   }) : _iproxy = iProxy,
        _logger = logger,
-       _shutdownHooks = shutdownHooks ?? ShutdownHooks(),
        _userMessages = userMessages ?? UserMessages(),
        super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true) {
     if (!_platform.isMacOS) {
@@ -1145,7 +1144,7 @@ class IOSDevice extends Device {
           bundlePath: package.deviceBundlePath,
           bundleId: package.id,
           launchArguments: launchArguments,
-          shutdownHooks: shutdownHooks,
+          shutdownHooks: _shutdownHooks,
           mode: debuggingOptions.buildInfo.mode,
         );
 
@@ -1167,7 +1166,7 @@ class IOSDevice extends Device {
           bundlePath: package.deviceBundlePath,
           bundleId: package.id,
           launchArguments: launchArguments,
-          shutdownHooks: shutdownHooks,
+          shutdownHooks: _shutdownHooks,
         );
 
         if (launchSuccess) {

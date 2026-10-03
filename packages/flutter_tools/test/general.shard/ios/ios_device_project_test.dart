@@ -128,6 +128,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     devModeEnabled: true,
     isCoreDevice: false,
     operatingSystemUtils: FakeOperatingSystemUtils(),
+    shutdownHooks: FakeShutdownHooks(),
   );
 }
 

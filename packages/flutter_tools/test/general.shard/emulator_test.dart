@@ -357,13 +357,12 @@ iOS Simulator       • iOS Simulator • Apple        • android
           ),
         ]);
 
+        final logger = BufferLogger.test();
         final Emulator emulator = IOSEmulator(
           'ios',
           xcode: xcode,
-          processUtils: ProcessUtils(
-            logger: BufferLogger.test(),
-            processManager: fakeProcessManager,
-          ),
+          logger: logger,
+          processUtils: ProcessUtils(logger: logger, processManager: fakeProcessManager),
         );
         await emulator.launch();
         expect(fakeProcessManager, hasNoRemainingExpectations);

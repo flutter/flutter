@@ -74,10 +74,12 @@ class IOSSimulatorUtils {
     Platform? platform,
     this._plistParser,
     this._analytics,
-  }) : _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
+  }) : _processManager = processManager,
+       _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
        _xcode = xcode,
        _platform = platform ?? const LocalPlatform();
 
+  final ProcessManager _processManager;
   final SimControl _simControl;
   final Xcode _xcode;
   final OperatingSystemUtils _operatingSystemUtils;
@@ -118,6 +120,7 @@ class IOSSimulatorUtils {
             plistParser: _plistParser,
             analytics: _analytics,
             xcode: _xcode,
+            processManager: _processManager,
           );
         })
         .whereType<IOSSimulator>()
