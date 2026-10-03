@@ -1342,7 +1342,8 @@ Future<bool> _handleIssues(
   } else if (unableToFindArmDestination &&
       xcodeBuildExecution != null &&
       xcodeBuildExecution.environmentType == EnvironmentType.simulator &&
-      device != null) {
+      device != null &&
+      processUtils != null) {
     final bool simulatorSupportsIntel = await _simulatorSupportsIntel(
       device,
       processUtils: processUtils,
@@ -1366,14 +1367,14 @@ Future<bool> _handleIssues(
 
 Future<bool> _simulatorSupportsIntel(
   Device device, {
-  required ProcessUtils? processUtils,
+  required ProcessUtils processUtils,
   required Xcode? xcode,
 }) async {
   final Version? xcodeVersion = xcode?.currentVersion;
   if (xcodeVersion != null && xcodeVersion.major < 26) {
     return true;
   }
-  if (processUtils == null || xcode == null) {
+  if (xcode == null) {
     return true;
   }
   final String runtime = await device.sdkNameAndVersion;
