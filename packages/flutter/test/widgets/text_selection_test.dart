@@ -1446,6 +1446,62 @@ void main() {
     },
   );
 
+  testWidgets('preserves the selected character when dragging the end handle on iOS', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'abcdefgh');
+    final focusNode = FocusNode();
+    final selectionControls = _MockTextSelectionHandleControls();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SizedBox(
+          width: 300,
+          child: TestTextField(
+            controller: controller,
+            focusNode: focusNode,
+            selectionControls: selectionControls,
+            showSelectionHandles: true,
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    // Select exactly one character: "e".
+    controller.selection = const TextSelection(baseOffset: 4, extentOffset: 5);
+    await tester.pumpAndSettle();
+
+    final RenderEditable renderEditable = tester.allRenderObjects.whereType<RenderEditable>().first;
+
+    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+      controller.selection,
+    );
+    expect(endpoints, hasLength(2));
+
+    // The end handle is positioned at the second selection endpoint.
+    final Offset endHandlePosition = renderEditable.localToGlobal(endpoints.last.point);
+
+    // Drag the end handle right, past "f" and "g".
+    final Offset newPosition = textOffsetToPosition(tester, 7);
+
+    final TestGesture gesture = await tester.startGesture(endHandlePosition);
+    await tester.pump();
+
+    await gesture.moveTo(newPosition);
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // The original "e" must remain selected, resulting in "efg".
+    expect(controller.selection, const TextSelection(baseOffset: 4, extentOffset: 7));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
   group('SelectionOverlay', () {
     Future<SelectionOverlay> pumpApp(
       WidgetTester tester, {
