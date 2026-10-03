@@ -4,8 +4,6 @@
 
 // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
 // See: https://github.com/flutter/flutter/issues/177586
-// TODO(mattkae): refactor this example for better widget position tracking
-// This positioning logic is simpler than you might want in production. See https://github.com/flutter/flutter/issues/178829.
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 import 'package:flutter/material.dart';
@@ -14,14 +12,19 @@ import 'package:flutter/src/widgets/_window_positioner.dart';
 
 void main() {
   try {
+    WidgetsFlutterBinding.ensureInitialized();
     runWidget(
-      Window(
-        controller: WindowController(
-          size: const Size(800, 600),
-          constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-          title: 'Example Window',
-        ),
-        child: const MaterialApp(home: MyApp()),
+      WindowManager(
+        initialWindows: <WindowEntry>[
+          WindowEntry(
+            controller: WindowController(
+              size: const Size(800, 600),
+              constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+              title: 'Example Window',
+            ),
+            builder: (BuildContext context) => const MaterialApp(home: MyApp()),
+          ),
+        ],
       ),
     );
   } on UnsupportedError catch (e) {
@@ -45,69 +48,84 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final GlobalKey _key = GlobalKey();
-  TooltipWindowController? _tooltipController;
+  TooltipWindowController? _tooltip;
 
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[
-      Text(
-        key: _key,
-        'Hover Me',
-        style: const TextStyle(color: Colors.white),
-      ),
-    ];
+  bool get _isShowing => !(_tooltip?.isDestroyed ?? true);
 
-    if (_tooltipController != null) {
-      children.add(
-        TooltipWindow(
-          controller: _tooltipController!,
-          child: Container(
-            padding: const .all(8),
-            color: Colors.black,
-            child: const Text(
-              'This is a tooltip',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
+  // The anchorContext is below the NestedWindow, so NestedWindow.layoutInfoOf
+  // reports the geometry of the widget that the tooltip is anchored to.
+  void _showTooltip(BuildContext anchorContext) {
+    if (_isShowing) {
+      return;
+    }
+    final NestedWindowLayoutInfo info = NestedWindow.layoutInfoOf(
+      anchorContext,
+    );
+    setState(() {
+      _tooltip = TooltipWindowController(
+        parent: WindowScope.of(context),
+        anchorRect: info.anchorRect,
+        positioner: const WindowPositioner(
+          parentAnchor: WindowPositionerAnchor.right,
+          childAnchor: WindowPositionerAnchor.left,
         ),
       );
-    }
+    });
+  }
 
-    return MouseRegion(
-      onEnter: (_) => setState(
-        () => _tooltipController = TooltipWindowController(
-          parent: WindowScope.of(context),
-          anchorRect: _getAnchorRect()!,
-          positioner: const WindowPositioner(
-            parentAnchor: WindowPositionerAnchor.right,
-            childAnchor: WindowPositionerAnchor.left,
-          ),
-        ),
-      ),
-      onExit: (_) => setState(() {
-        _tooltipController?.destroy();
-        _tooltipController = null;
-      }),
-      cursor: SystemMouseCursors.click,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        color: _tooltipController != null ? Colors.blueAccent : Colors.blue,
-        padding: const .all(12),
-        child: Row(children: children),
+  void _hideTooltip() {
+    _tooltip?.destroy();
+  }
+
+  @override
+  void dispose() {
+    _tooltip?.destroy();
+    super.dispose();
+  }
+
+  Widget _buildTooltipContent(
+    BuildContext context,
+    TooltipWindowController tooltip,
+  ) {
+    return Container(
+      padding: const .all(8),
+      color: Colors.black,
+      child: const Text(
+        'This is a tooltip',
+        style: TextStyle(color: Colors.white),
       ),
     );
   }
 
-  Rect? _getAnchorRect() {
-    final RenderBox? renderBox =
-        _key.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final Offset position = renderBox.localToGlobal(Offset.zero);
-      final Size size = renderBox.size;
-      return position & size; // creates a Rect
-    }
-
-    return null;
+  @override
+  Widget build(BuildContext context) {
+    final TooltipWindowController? tooltip = _tooltip;
+    return Center(
+      child: NestedWindow(
+        controller: tooltip,
+        builder: _buildTooltipContent,
+        child: Builder(
+          builder: (BuildContext anchorContext) => MouseRegion(
+            onEnter: (_) => _showTooltip(anchorContext),
+            onExit: (_) => _hideTooltip(),
+            cursor: SystemMouseCursors.click,
+            child: ListenableBuilder(
+              listenable: Listenable.merge(<Listenable?>[tooltip]),
+              builder: (BuildContext context, Widget? child) =>
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    color: _isShowing ? Colors.blueAccent : Colors.blue,
+                    padding: const .all(12),
+                    child: child,
+                  ),
+              child: const Text(
+                'Hover Me',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

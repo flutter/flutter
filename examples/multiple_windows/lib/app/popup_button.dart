@@ -8,9 +8,20 @@
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'element_position_tracker.dart';
 import 'models.dart';
 import 'popup_window_content.dart';
+
+class _PopupDelegate with PopupWindowControllerDelegate {
+  _PopupDelegate(this.onDestroyed);
+
+  final VoidCallback onDestroyed;
+
+  @override
+  void onWindowDestroyed() {
+    super.onWindowDestroyed();
+    onDestroyed();
+  }
+}
 
 class PopupButton extends StatefulWidget {
   const PopupButton({super.key, required this.parentController});
@@ -22,87 +33,57 @@ class PopupButton extends StatefulWidget {
 }
 
 class _PopupButtonState extends State<PopupButton> {
-  WindowEntry? _popupWindowEntry;
-  ElementPositionTracker? _popupTracker;
-  final GlobalKey _popupButtonKey = GlobalKey();
+  PopupWindowController? _popup;
+  bool _disposing = false;
+
+  void _onPopupDestroyed(PopupWindowController popup) {
+    if (_disposing || _popup != popup) {
+      return;
+    }
+    setState(() {
+      _popup = null;
+    });
+  }
+
+  void _onPressed(BuildContext anchorContext, WindowSettings windowSettings) {
+    if (_popup != null) {
+      _popup!.destroy();
+      return;
+    }
+    final NestedWindowLayoutInfo info = NestedWindow.layoutInfoOf(anchorContext);
+    late final PopupWindowController popup;
+    popup = PopupWindowController(
+      anchorRect: info.anchorRect,
+      positioner: windowSettings.positioner,
+      parent: widget.parentController,
+      delegate: _PopupDelegate(() => _onPopupDestroyed(popup)),
+    );
+    setState(() {
+      _popup = popup;
+    });
+  }
 
   @override
   void dispose() {
-    _popupTracker?.dispose();
+    _disposing = true;
+    _popup?.destroy();
     super.dispose();
-  }
-
-  void _onPressed(WindowSettings windowSettings) {
-    // Toggle popup visibility.
-    if (_popupWindowEntry != null) {
-      _popupWindowEntry!.controller.destroy();
-      _popupTracker?.dispose();
-      setState(() {
-        _popupWindowEntry = null;
-        _popupTracker = null;
-      });
-    } else {
-      // Popup is not shown, show it.
-      final tracker = ElementPositionTracker(element: _popupButtonKey.currentContext!);
-      late final WindowEntry entry;
-      final controller = PopupWindowController(
-        anchorRect: tracker.getGlobalRect()!,
-        positioner: windowSettings.positioner,
-        delegate: _PopupWindowControllerDelegate(
-          onDestroyed: () {
-            tracker.dispose();
-            if (mounted) {
-              setState(() {
-                _popupWindowEntry = null;
-                _popupTracker = null;
-              });
-            }
-          },
-        ),
-        parent: widget.parentController,
-      );
-      entry = WindowEntry(
-        controller: controller,
-        builder: (BuildContext context) => PopupWindowContent(controller: controller),
-      );
-      tracker.onGlobalRectChange = (rect) {
-        controller.updatePosition(anchorRect: rect);
-      };
-      setState(() {
-        _popupWindowEntry = entry;
-        _popupTracker = tracker;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
-    return OutlinedButton(
-      key: _popupButtonKey,
-      onPressed: () => _onPressed(windowSettings),
-      child: ViewAnchor(
-        view: _popupWindowEntry != null
-            ? View(
-                view: _popupWindowEntry!.controller.rootView,
-                child: Builder(builder: _popupWindowEntry!.builder),
-              )
-            : null,
-        child: Text(_popupWindowEntry != null ? 'Hide Popup' : 'Show Popup'),
+    return NestedWindow(
+      controller: _popup,
+      builder: (BuildContext context, PopupWindowController popup) =>
+          PopupWindowContent(controller: popup),
+      child: Builder(
+        builder: (BuildContext anchorContext) => OutlinedButton(
+          onPressed: () => _onPressed(anchorContext, windowSettings),
+          child: Text(_popup != null ? 'Hide Popup' : 'Show Popup'),
+        ),
       ),
     );
   }
-}
-
-class _PopupWindowControllerDelegate extends PopupWindowControllerDelegate {
-  _PopupWindowControllerDelegate({required this.onDestroyed});
-
-  @override
-  void onWindowDestroyed() {
-    onDestroyed();
-    super.onWindowDestroyed();
-  }
-
-  final VoidCallback onDestroyed;
 }
