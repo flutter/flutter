@@ -1532,11 +1532,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// When [handlePointerEvent] is called directly, [pointerEventSource]
   /// is [TestBindingEventSource.device].
   ///
-  /// This means that pointer events triggered by the [WidgetController] (e.g.
-  /// via [WidgetController.tap]) will result in actual interactions with the
-  /// UI, but other pointer events such as those from physical taps will be
-  /// dropped. See also [shouldPropagateDevicePointerEvents] if this is
-  /// undesired.
+  /// In live tests, synthetic cancels for test-driven pointers are routed to
+  /// the framework even when delivered outside the test event scope (see
+  /// [LiveTestWidgetsFlutterBinding.handlePointerEvent]).
+  ///
+  /// For example, pointer events triggered by the [WidgetController] (e.g.
+  /// via [WidgetController.tap]) result in actual interactions with the UI,
+  /// while events from physical taps are dropped. See also
+  /// [shouldPropagateDevicePointerEvents] if this is undesired.
   TestBindingEventSource get pointerEventSource => _pointerEventSource;
   TestBindingEventSource _pointerEventSource = TestBindingEventSource.device;
 
@@ -3042,11 +3045,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.test], then
   /// the event is forwarded to [GestureBinding.dispatchEvent] as usual;
-  /// additionally, down pointers are painted on the screen.
+  /// additionally, down pointers are painted on the screen. If a pointer
+  /// driven by test code is cancelled by the framework, the synthetic cancel
+  /// is routed as a test event so recognizers receive it.
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.device], then
   /// the event, after being transformed to the local coordinate system, is
-  /// forwarded to [deviceEventDispatcher].
+  /// forwarded to [deviceEventDispatcher], unless
+  /// [shouldPropagateDevicePointerEvents] is true.
   @override
   void handlePointerEvent(PointerEvent event) {
     if (_testZone != null) {
@@ -3056,7 +3062,48 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     }
   }
 
+  // Track test-driven pointers so cancelPointer can identify synthetic cancels
+  // that must be delivered as test events.
+  final Set<int> _testSourcedPointers = <int>{};
+  final Set<int> _pendingTestPointerCancels = <int>{};
+
+  @override
+  void cancelPointer(int pointer) {
+    if (_testSourcedPointers.contains(pointer)) {
+      _pendingTestPointerCancels.add(pointer);
+    }
+    super.cancelPointer(pointer);
+  }
+
   void _handlePointerEvent(PointerEvent event) {
+    if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
+      _pendingTestPointerCancels.remove(event.pointer);
+      if (pointerEventSource == TestBindingEventSource.test) {
+        _testSourcedPointers.add(event.pointer);
+      } else {
+        _testSourcedPointers.remove(event.pointer);
+      }
+    }
+    final bool isPendingTestPointerCancel =
+        event is PointerCancelEvent && _pendingTestPointerCancels.remove(event.pointer);
+    // Mirror GestureBinding._hitTests lifecycle, which only clears on Up,
+    // Cancel, or PanZoomEnd.
+    final bool pointerDisengaged =
+        event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent;
+
+    if (pointerDisengaged) {
+      _testSourcedPointers.remove(event.pointer);
+    }
+
+    // cancelPointer delivers its synthetic cancel after the test event scope.
+    if (isPendingTestPointerCancel && pointerEventSource == TestBindingEventSource.device) {
+      withPointerEventSource(TestBindingEventSource.test, () => _dispatchPointerEvent(event));
+    } else {
+      _dispatchPointerEvent(event);
+    }
+  }
+
+  void _dispatchPointerEvent(PointerEvent event) {
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
         RenderView? target;
@@ -3212,6 +3259,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void postTest() {
+    _testSourcedPointers.clear();
+    _pendingTestPointerCancels.clear();
     super.postTest();
     assert(!_expectingFrame);
     assert(_pendingFrame == null);
