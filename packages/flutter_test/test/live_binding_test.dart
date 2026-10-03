@@ -322,6 +322,41 @@ void main() {
     },
   );
 
+  testWidgets('only synthetic cancels for test pointers are routed as test events', (
+    WidgetTester tester,
+  ) async {
+    final dispatcher = _RecordingDispatcher();
+    binding.deviceEventDispatcher = dispatcher;
+    addTearDown(() => binding.deviceEventDispatcher = null);
+
+    var cancelCount = 0;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: GestureDetector(
+          onTapCancel: () => cancelCount++,
+          child: const Text('Target'),
+        ),
+      ),
+    );
+
+    const pointer = 26;
+    final Offset position = tester.getCenter(find.text('Target'));
+    final TestGesture gesture = await tester.startGesture(position, pointer: pointer);
+
+    // Ordinary device events for this test-driven pointer remain device events.
+    binding.handlePointerEvent(PointerMoveEvent(pointer: pointer, position: position));
+    expect(dispatcher.events, hasLength(1));
+
+    binding.cancelPointer(pointer);
+    await tester.pump();
+
+    // The synthetic cancel is delivered to the recognizer instead.
+    expect(cancelCount, 1);
+    expect(dispatcher.events, hasLength(1));
+
+    await gesture.up();
+  });
+
   testWidgets('route pushed mid-gesture delivers cancel to test-sourced pointer', (
     WidgetTester tester,
   ) async {
