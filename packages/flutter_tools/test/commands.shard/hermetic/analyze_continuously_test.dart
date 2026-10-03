@@ -188,6 +188,58 @@ void main() {
     },
   );
 
+  testUsingContext(
+    'AnalysisServer does not throw when progress notifications arrive during or after dispose',
+    () async {
+      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
+        'flutter_analysis_test.',
+      );
+      createSampleProject(tempDir);
+
+      final process = MockLspServerProcess();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join('Artifact.engineDartSdkPath', 'bin', 'dart'),
+            'language-server',
+            '--dart-sdk',
+            'Artifact.engineDartSdkPath',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--suppress-analytics',
+          ],
+          process: process,
+        ),
+      ]);
+
+      final server = AnalysisServer(
+        'Artifact.engineDartSdkPath',
+        <String>[tempDir.path],
+        fileSystem: fileSystem,
+        platform: FakePlatform(),
+        processManager: processManager,
+        logger: logger,
+        terminal: terminal,
+        suppressAnalytics: true,
+      );
+
+      final analyzingEvents = <bool>[];
+      server.onAnalyzing.listen(analyzingEvents.add);
+
+      await server.start();
+
+      // Queue a progress notification immediately before calling dispose(), and
+      // send another progress notification after dispose() completes.
+      process.startSimulatedAnalysis();
+      await server.dispose();
+      process.endSimulatedAnalysis();
+      await pumpEventQueue();
+
+      expect(analyzingEvents, isEmpty);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
   testUsingContext('AnalysisServer handles non-ASCII project path', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test_’_dir.',

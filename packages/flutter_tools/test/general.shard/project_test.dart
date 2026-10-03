@@ -2645,9 +2645,14 @@ flutter:
   return FlutterProject.fromDirectory(directory);
 }
 
-FakeCommand createKgpVersionCommand(String kgpV) {
+FakeCommand createKgpVersionCommand(String kgpV, {String? gradlewPath}) {
+  gradlewPath ??= globals.fs.path.join(
+    'some_project',
+    'android',
+    gradle_utils.getGradlewFileName(globals.platform),
+  );
   return FakeCommand(
-    command: const <String>['./gradlew', 'kgpVersion', '-q'],
+    command: <String>[gradlewPath, 'kgpVersion', '-q'],
     stdout:
         '''
 KGP Version: $kgpV

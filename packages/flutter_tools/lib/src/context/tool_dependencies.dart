@@ -36,6 +36,8 @@ import '../custom_devices/custom_devices_config.dart';
 import '../device.dart';
 import '../doctor.dart';
 import '../emulator.dart';
+import '../experimental/extension_discovery.dart';
+import '../experimental/extension_manager.dart';
 import '../features.dart';
 import '../flutter_cache.dart';
 import '../flutter_device_manager.dart';
@@ -95,6 +97,7 @@ class ToolDependencies {
     required this.emulatorManager,
     required this.featureFlags,
     required this.toolContext,
+    this.extensionManager,
   });
 
   /// Telemetry and analytics reporter for command and feature usage.
@@ -123,6 +126,9 @@ class ToolDependencies {
 
   /// Manager for discovering, launching, and creating emulators.
   final EmulatorManager emulatorManager;
+
+  /// Manager for discovering and communicating with active tool extensions.
+  final ExtensionManager? extensionManager;
 
   /// Feature flags that govern tool capabilities and rollouts.
   final FeatureFlags featureFlags;
@@ -156,6 +162,7 @@ class ToolDependencies {
     DeviceManager? deviceManager,
     Doctor? doctor,
     EmulatorManager? emulatorManager,
+    List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
     FeatureFlags? featureFlags,
     FlutterVersion? flutterVersion,
     FileSystem? fs,
@@ -518,6 +525,13 @@ class ToolDependencies {
         windowsWorkflow ??
         WindowsWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
 
+    final extensionManager = ExtensionManager(
+      entryPoints: extensionEntryPoints,
+      featureFlags: finalFeatureFlags,
+      hostPlatform: finalOS.hostPlatform,
+      logger: finalLogger,
+    );
+
     final DeviceManager finalDeviceManager =
         deviceManager ??
         FlutterDeviceManager(
@@ -539,6 +553,7 @@ class ToolDependencies {
           windowsWorkflow: finalWindowsWorkflow,
           customDevicesConfig: finalCustomDevicesConfig,
           nativeAssetsBuilder: finalNativeAssetsBuilder,
+          extensionManager: extensionManager,
         );
 
     return ToolDependencies(
@@ -565,6 +580,7 @@ class ToolDependencies {
       deviceManager: finalDeviceManager,
       doctor: finalDoctor,
       emulatorManager: finalEmulatorManager,
+      extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
       toolContext: ToolContext(
         artifacts: finalArtifacts,
