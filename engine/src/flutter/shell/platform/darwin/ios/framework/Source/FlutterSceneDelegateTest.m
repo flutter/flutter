@@ -276,30 +276,34 @@
   [self setupMockApplication];
 
   id mockEngine = OCMClassMock([FlutterEngine class]);
+  id mockScene = OCMClassMock([UIWindowScene class]);
   FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
   id mockSceneDelegate = OCMPartialMock(sceneDelegate);
 
   id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
   OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
-  [mockSceneDelegate registerSceneLifeCycleWithFlutterEngine:mockEngine];
+  [mockSceneDelegate registerSceneLifeCycleWithFlutterEngine:mockEngine scene:mockScene];
 
-  OCMVerify(times(1), [mockLifecycleDelegate registerSceneLifeCycleWithFlutterEngine:mockEngine]);
+  OCMVerify(times(1), [mockLifecycleDelegate registerSceneLifeCycleWithFlutterEngine:mockEngine
+                                                                               scene:mockScene]);
 }
 
 - (void)testUnregisterSceneLifeCycleWithFlutterEngine {
   [self setupMockApplication];
 
   id mockEngine = OCMClassMock([FlutterEngine class]);
+  id mockScene = OCMClassMock([UIWindowScene class]);
   FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
   id mockSceneDelegate = OCMPartialMock(sceneDelegate);
 
   id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
   OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
-  [mockSceneDelegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine];
+  [mockSceneDelegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine scene:mockScene];
 
-  OCMVerify(times(1), [mockLifecycleDelegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine]);
+  OCMVerify(times(1), [mockLifecycleDelegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine
+                                                                                 scene:mockScene]);
 }
 
 - (NSDictionary*)setupMockApplication {

@@ -847,24 +847,36 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   [engine cleanUpConnection:connection];
 }
 
-- (void)testLifeCycleNotificationSceneWillConnect {
+- (void)testSingleSceneEngineRegistersWithSceneLifeCycleDelegate {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication supportsMultipleScenes]).andReturn(NO);
+
+  id mockLifeCycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   [engine run];
-  id mockScene = OCMClassMock([UIWindowScene class]);
-  id mockLifecycleProvider = OCMProtocolMock(@protocol(FlutterSceneLifeCycleProvider));
-  id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
-  OCMStub([mockScene delegate]).andReturn(mockLifecycleProvider);
-  OCMStub([mockLifecycleProvider sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
-  NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneWillConnectNotification
-                                    object:mockScene
-                                  userInfo:nil];
+  OCMVerify(times(1), [mockLifeCycleDelegate registerEngineForSingleScene:engine]);
+  [mockApplication stopMocking];
+  [mockLifeCycleDelegate stopMocking];
+}
 
-  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
-  OCMVerify(times(1), [mockLifecycleDelegate engine:engine
-                          receivedConnectNotificationFor:mockScene]);
+- (void)testMultiSceneEngineDoesNotRegisterWithSingleSceneLifeCycleDelegate {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication supportsMultipleScenes]).andReturn(YES);
+
+  id mockLifeCycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+
+  OCMVerify(times(0), [mockLifeCycleDelegate registerEngineForSingleScene:engine]);
+  [mockApplication stopMocking];
+  [mockLifeCycleDelegate stopMocking];
 }
 
 - (void)testSpawnsShareGpuContext {

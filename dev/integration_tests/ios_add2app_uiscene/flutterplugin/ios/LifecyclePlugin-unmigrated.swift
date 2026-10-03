@@ -6,7 +6,8 @@ import Flutter
 import UIKit
 
 public class MyPlugin: NSObject, FlutterPlugin {
-  var events = [String]()
+  public static var instance: MyPlugin?
+  public var events = [String]()
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(
@@ -14,6 +15,7 @@ public class MyPlugin: NSObject, FlutterPlugin {
       binaryMessenger: registrar.messenger()
     )
     let instance = MyPlugin()
+    MyPlugin.instance = instance
     registrar.addMethodCallDelegate(instance, channel: channel)
     registrar.addApplicationDelegate(instance)
   }
