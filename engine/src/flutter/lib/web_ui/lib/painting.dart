@@ -681,6 +681,8 @@ class ImageFilter {
     FragmentShader shader, {
     // ignore: avoid_unused_constructor_parameters
     FilterQuality filterQuality = FilterQuality.none,
+    // ignore: avoid_unused_constructor_parameters
+    bool unclippedInput = false,
   }) {
     throw UnsupportedError('ImageFilter.shader only supported with Impeller rendering engine.');
   }

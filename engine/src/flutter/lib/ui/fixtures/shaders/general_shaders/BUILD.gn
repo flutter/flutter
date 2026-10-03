@@ -14,6 +14,8 @@ if (enable_unittests) {
     "double_sampler_swapped.frag",
     "double_sampler.frag",
     "filter_shader_fractional_texel.frag",
+    "filter_shader_input_size.frag",
+    "filter_shader_mirror.frag",
     "filter_shader.frag",
     "functions.frag",
     "missing_size.frag",

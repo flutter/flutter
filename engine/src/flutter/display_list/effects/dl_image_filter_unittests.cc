@@ -922,6 +922,39 @@ TEST(DisplayListImageFilter, RuntimeEffectEqualityWithInputSampling) {
   EXPECT_NE(filter_a, filter_c);
 }
 
+TEST(DisplayListImageFilter, RuntimeEffectEqualityWithUnclippedInput) {
+  DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>());
+  DlRuntimeEffectImageFilter filter_b(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>());
+  DlRuntimeEffectImageFilter filter_c(
+      nullptr, {nullptr}, std::make_shared<std::vector<uint8_t>>(),
+      DlImageSampling::kNearestNeighbor, /*unclipped_input=*/true);
+
+  EXPECT_FALSE(filter_a.unclipped_input());
+  EXPECT_TRUE(filter_c.unclipped_input());
+  EXPECT_TRUE(filter_c.shared()->asRuntimeEffectFilter()->unclipped_input());
+  EXPECT_EQ(filter_a, filter_b);
+  EXPECT_NE(filter_a, filter_c);
+}
+
+TEST(DisplayListImageFilter, RuntimeEffectUnclippedInputGetInputDeviceBounds) {
+  DlRuntimeEffectImageFilter filter(
+      nullptr, {nullptr}, std::make_shared<std::vector<uint8_t>>(),
+      DlImageSampling::kNearestNeighbor, /*unclipped_input=*/true);
+
+  auto output_bounds = DlIRect::MakeLTRB(0, 0, 100, 100);
+  DlMatrix identity;
+  DlIRect input_bounds;
+  DlIRect* result =
+      filter.get_input_device_bounds(output_bounds, identity, input_bounds);
+
+  // The whole input is needed regardless of the output bounds, so no promise
+  // is made about the input bounds.
+  EXPECT_EQ(result, nullptr);
+  EXPECT_EQ(input_bounds, output_bounds);
+}
+
 TEST(DisplayListImageFilter, RuntimeEffectEqualityWithSamplers) {
   auto image_a =
       DlColorSource::MakeImage(nullptr, DlTileMode::kClamp, DlTileMode::kDecal);
