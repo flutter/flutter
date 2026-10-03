@@ -135,12 +135,6 @@ void main() {
       fs: MemoryFileSystem.test(),
       fakeFlutterVersion: fakeFlutterVersion,
     );
-
-    // Most, but not all, tests will run some variant of "pub get" after creation,
-    // which in turn will check for the presence of the Flutter SDK root. Without
-    // this field set consistently, the order of the tests becomes important *or*
-    // you need to remember to set it everywhere.
-    globals.cache.flutterRoot = '../..';
   });
 
   tearDown(() {

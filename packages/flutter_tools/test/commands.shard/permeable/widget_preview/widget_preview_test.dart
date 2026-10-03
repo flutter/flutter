@@ -205,12 +205,6 @@ void main() {
       fs: MemoryFileSystem.test(),
       fakeFlutterVersion: FakeFlutterVersion(),
     );
-
-    // Most, but not all, tests will run some variant of "pub get" after creation,
-    // which in turn will check for the presence of the Flutter SDK root. Without
-    // this field set consistently, the order of the tests becomes important *or*
-    // you need to remember to set it everywhere.
-    globals.cache.flutterRoot = fs.path.absolute('..', '..');
   });
 
   tearDown(() async {
@@ -234,7 +228,11 @@ void main() {
         buildTargets: const BuildTargetsImpl(),
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
-          cache: Cache.test(processManager: loggingProcessManager, platform: platform),
+          cache: Cache.test(
+            flutterRoot: fs.path.absolute('..', '..'),
+            processManager: loggingProcessManager,
+            platform: platform,
+          ),
           fs: fs,
           logger: logger,
           os: OperatingSystemUtils(

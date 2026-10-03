@@ -59,7 +59,6 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
-      globals.cache.flutterRoot = 'flutter';
     });
 
     setUp(() {

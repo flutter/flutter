@@ -45,8 +45,7 @@ void main() {
       sdk = FakeAndroidSdk();
       fakeProcessManager = FakeProcessManager.empty();
       fs = MemoryFileSystem.test();
-      cache = Cache.test(processManager: FakeProcessManager.any());
-      globals.cache.flutterRoot = '../..';
+      cache = Cache.test(flutterRoot: '../..', processManager: FakeProcessManager.any());
       sdk.licensesAvailable = true;
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       fs
