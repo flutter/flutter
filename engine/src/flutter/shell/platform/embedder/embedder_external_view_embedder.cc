@@ -250,12 +250,12 @@ class Layer {
   /// Adds Flutter contents to this layer.
   void AddFlutterContents(EmbedderExternalView* contents,
                           const DlRegion& contents_region) {
-    flutter_contents_.push_back(contents);
+    slices_.push_back({contents, {}});
     flutter_contents_region_ =
         DlRegion::MakeUnion(flutter_contents_region_, contents_region);
   }
 
-  bool has_flutter_contents() const { return !flutter_contents_.empty(); }
+  bool has_flutter_contents() const { return !slices_.empty(); }
 
   void SetRenderTarget(std::unique_ptr<EmbedderRenderTarget> target) {
     FML_DCHECK(render_target_ == nullptr);
@@ -353,11 +353,24 @@ class Layer {
 
     DlSkCanvasAdapter dl_canvas(canvas);
     bool clear_surface = true;
-    for (auto c : flutter_contents_) {
+    for (const auto& slice : slices_) {
       FML_DCHECK(render_target_->GetRenderTargetSize() ==
-                 c->GetRenderSurfaceSize());
-      c->Render(dl_canvas, clear_surface);
-      clear_surface = false;
+                 slice.view->GetRenderSurfaceSize());
+      if (clear_surface) {
+        dl_canvas.Clear(DlColor::kTransparent());
+        clear_surface = false;
+      }
+      if (!slice.difference_clips.empty()) {
+        dl_canvas.Save();
+        for (const auto& diff_clip : slice.difference_clips) {
+          dl_canvas.ClipRect(diff_clip, DlClipOp::kDifference,
+                             /*is_aa=*/false);
+        }
+        slice.view->Render(dl_canvas, false);
+        dl_canvas.Restore();
+      } else {
+        slice.view->Render(dl_canvas, false);
+      }
     }
     dl_canvas.Flush();
   }
@@ -367,11 +380,24 @@ class Layer {
   void RenderFlutterContentsImpeller(bool frame_boundary) {
     auto dl_builder = DisplayListBuilder();
     bool clear_surface = true;
-    for (auto c : flutter_contents_) {
+    for (const auto& slice : slices_) {
       FML_DCHECK(render_target_->GetRenderTargetSize() ==
-                 c->GetRenderSurfaceSize());
-      c->Render(dl_builder, clear_surface);
-      clear_surface = false;
+                 slice.view->GetRenderSurfaceSize());
+      if (clear_surface) {
+        dl_builder.Clear(DlColor::kTransparent());
+        clear_surface = false;
+      }
+      if (!slice.difference_clips.empty()) {
+        dl_builder.Save();
+        for (const auto& diff_clip : slice.difference_clips) {
+          dl_builder.ClipRect(diff_clip, DlClipOp::kDifference,
+                              /*is_aa=*/false);
+        }
+        slice.view->Render(dl_builder, false);
+        dl_builder.Restore();
+      } else {
+        slice.view->Render(dl_builder, false);
+      }
     }
     auto display_list = dl_builder.Build();
 
@@ -390,8 +416,13 @@ class Layer {
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
+  struct OverlaySlice {
+    EmbedderExternalView* view = nullptr;
+    std::vector<DlRect> difference_clips;
+  };
+
   std::vector<PlatformView> platform_views_;
-  std::vector<EmbedderExternalView*> flutter_contents_;
+  std::vector<OverlaySlice> slices_;
   DlRegion flutter_contents_region_;
   std::unique_ptr<EmbedderRenderTarget> render_target_;
   friend class LayerBuilder;
@@ -432,13 +463,67 @@ class LayerBuilder {
   /// Prepares the render targets for all layers that have Flutter contents.
   void PrepareBackingStore(const RenderTargetProvider& target_provider) {
     bool has_encountered_platform_view = false;
-    for (auto& layer : layers_) {
+    std::optional<size_t> first_overlay_layer_index;
+    size_t last_overlay_layer_index = 0;
+    bool coalesce_into_single_overlay = false;
+    for (size_t i = 0; i < layers_.size(); ++i) {
+      auto& layer = layers_[i];
       if (!layer.platform_views().empty()) {
         has_encountered_platform_view = true;
       }
       if (layer.has_flutter_contents()) {
         bool is_overlay = has_encountered_platform_view;
-        layer.SetRenderTarget(target_provider(frame_size_, is_overlay));
+        auto target = target_provider(frame_size_, is_overlay);
+        if (target != nullptr) {
+          layer.SetRenderTarget(std::move(target));
+          if (is_overlay && !first_overlay_layer_index.has_value()) {
+            first_overlay_layer_index = i;
+            last_overlay_layer_index = i;
+          } else if (is_overlay) {
+            last_overlay_layer_index = i;
+          }
+        } else if (is_overlay && first_overlay_layer_index.has_value()) {
+          // The embedder only supports a single top-level overlay surface (e.g.
+          // Android HCPP). Coalesce all overlay slices into the final overlay
+          // layer and apply difference clips for higher-Z platform views.
+          coalesce_into_single_overlay = true;
+          last_overlay_layer_index = i;
+        }
+      }
+    }
+
+    if (coalesce_into_single_overlay && first_overlay_layer_index.has_value()) {
+      size_t first_idx = *first_overlay_layer_index;
+      size_t last_idx = last_overlay_layer_index;
+      if (last_idx > first_idx) {
+        std::vector<Layer::OverlaySlice> combined_slices;
+        DlRegion combined_region;
+        for (size_t i = first_idx; i <= last_idx; ++i) {
+          if (!layers_[i].has_flutter_contents()) {
+            continue;
+          }
+          std::vector<DlRect> diff_clips;
+          for (size_t j = i + 1; j < layers_.size(); ++j) {
+            for (const auto& pv : layers_[j].platform_views()) {
+              diff_clips.push_back(ToDlRect(pv.clipped_frame));
+            }
+          }
+          for (auto& slice : layers_[i].slices_) {
+            slice.difference_clips.insert(slice.difference_clips.end(),
+                                          diff_clips.begin(), diff_clips.end());
+            combined_slices.push_back(std::move(slice));
+          }
+          combined_region = DlRegion::MakeUnion(
+              combined_region, layers_[i].flutter_contents_region_);
+          if (i < last_idx) {
+            layers_[i].slices_.clear();
+            layers_[i].flutter_contents_region_ = DlRegion();
+          }
+        }
+        layers_[last_idx].slices_ = std::move(combined_slices);
+        layers_[last_idx].flutter_contents_region_ = std::move(combined_region);
+        layers_[last_idx].render_target_ =
+            std::move(layers_[first_idx].render_target_);
       }
     }
   }

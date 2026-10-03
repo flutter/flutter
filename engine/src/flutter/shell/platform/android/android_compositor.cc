@@ -83,6 +83,12 @@ bool AndroidCompositor::CreateBackingStore(
     case AndroidRenderingAPI::kImpellerAutoselect: {
       if (surface_manager_->IsVulkanInitialized() ||
           surface_manager_->IsFakeWindow()) {
+        FlutterFrameInfo frame_info = {};
+        frame_info.struct_size = sizeof(FlutterFrameInfo);
+        frame_info.size.width =
+            static_cast<uint32_t>(std::round(config->size.width));
+        frame_info.size.height =
+            static_cast<uint32_t>(std::round(config->size.height));
         if (!is_overlay && backing_stores_created_in_frame_ == 0) {
           bool expected = false;
           if (!has_active_onscreen_vulkan_backing_store_
@@ -92,7 +98,7 @@ bool AndroidCompositor::CreateBackingStore(
                    "requested in a single frame.";
             return false;
           }
-          FlutterVulkanImage img = surface_manager_->GetNextImage(nullptr);
+          FlutterVulkanImage img = surface_manager_->GetNextImage(&frame_info);
           if (img.image == 0 && !surface_manager_->IsFakeWindow()) {
             has_active_onscreen_vulkan_backing_store_ = false;
             return false;
@@ -136,8 +142,8 @@ bool AndroidCompositor::CreateBackingStore(
                 << " but no overlay native window is available.";
             return false;
           }
-          FlutterVulkanImage img =
-              surface_manager_->GetNextOverlayImage(overlay_window);
+          FlutterVulkanImage img = surface_manager_->GetNextOverlayImage(
+              overlay_window, &frame_info);
           if (img.image == 0 && !surface_manager_->IsFakeWindow()) {
             FML_LOG(WARNING)
                 << "AndroidCompositor: failed to acquire overlay Vulkan image "
@@ -260,6 +266,54 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
   has_active_onscreen_vulkan_backing_store_ = false;
   const FlutterLayer* root_backing_store_layer = nullptr;
 
+  // Identify the root onscreen backing store layer first. For Vulkan, present
+  // the root swapchain image before OnPlatformViewPresented runs, because
+  // OnPlatformViewPresented on the first non-HCPP platform view frame invokes
+  // convertToImageView() -> SetNativeWindow(FlutterImageView), which replaces
+  // the active swapchain.
+  for (size_t i = 0; i < layers_count; ++i) {
+    const FlutterLayer* layer = layers[i];
+    if (layer == nullptr || layer->struct_size < sizeof(FlutterLayer)) {
+      continue;
+    }
+    if (layer->type == kFlutterLayerContentTypePlatformView) {
+      break;
+    }
+    if (layer->type == kFlutterLayerContentTypeBackingStore &&
+        layer->backing_store != nullptr) {
+      bool is_root = false;
+      if (layer->backing_store->type == kFlutterBackingStoreTypeVulkan) {
+        if (layer->backing_store->user_data != nullptr) {
+          auto* tracker = static_cast<VulkanBackingStoreTracker*>(
+              layer->backing_store->user_data);
+          is_root = tracker->is_onscreen;
+        } else {
+          is_root = true;
+        }
+      } else {
+        is_root = true;
+      }
+      if (is_root) {
+        root_backing_store_layer = layer;
+      }
+      break;
+    }
+  }
+
+  bool root_vulkan_presented_before_views = false;
+  if (root_backing_store_layer != nullptr &&
+      root_backing_store_layer->backing_store->type ==
+          kFlutterBackingStoreTypeVulkan) {
+    const FlutterBackingStore* bs = root_backing_store_layer->backing_store;
+    bool res = surface_manager_->PresentImage(bs->vulkan.image);
+    if (!res && !surface_manager_->IsFakeWindow()) {
+      present_success = false;
+    }
+    root_vulkan_presented_before_views = true;
+  }
+
+  ANativeWindow* window_before_present = surface_manager_->GetNativeWindow();
+
   for (size_t i = 0; i < layers_count; ++i) {
     const FlutterLayer* layer = layers[i];
     if (layer == nullptr || layer->struct_size < sizeof(FlutterLayer)) {
@@ -268,59 +322,39 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
 
     if (layer->type == kFlutterLayerContentTypeBackingStore) {
       if (layer->backing_store != nullptr) {
-        bool is_root = false;
-        // A backing store can ONLY be the root onscreen layer if NO platform
-        // view has been encountered yet in Z-order. Any backing store appearing
-        // after a platform view is an overlay layer.
-        if (root_backing_store_layer == nullptr && platform_views_count == 0) {
-          if (layer->backing_store->type == kFlutterBackingStoreTypeVulkan) {
-            if (layer->backing_store->user_data != nullptr) {
-              auto* tracker = static_cast<VulkanBackingStoreTracker*>(
-                  layer->backing_store->user_data);
-              is_root = tracker->is_onscreen;
-            } else {
-              is_root = true;
+        if (layer == root_backing_store_layer) {
+          continue;
+        }
+        ANativeWindow* overlay_window = nullptr;
+        if (delegate != nullptr) {
+          overlay_window = delegate->GetOverlayWindow(overlays_count);
+        }
+        if (layer->backing_store->type == kFlutterBackingStoreTypeOpenGL) {
+          if (overlay_window != nullptr) {
+            surface_manager_->BlitAndSwapOverlaySurface(
+                overlay_window, layer->backing_store->open_gl.framebuffer.name,
+                static_cast<size_t>(std::round(layer->size.width)),
+                static_cast<size_t>(std::round(layer->size.height)));
+          }
+        } else if (layer->backing_store->type ==
+                   kFlutterBackingStoreTypeVulkan) {
+          if (layer->backing_store->user_data != nullptr) {
+            auto* tracker = static_cast<VulkanBackingStoreTracker*>(
+                layer->backing_store->user_data);
+            if (tracker->overlay_window != nullptr) {
+              overlay_window = tracker->overlay_window;
             }
-          } else {
-            is_root = true;
+          }
+          if (overlay_window != nullptr || surface_manager_->IsFakeWindow()) {
+            surface_manager_->PresentOverlayImage(
+                overlay_window, layer->backing_store->vulkan.image);
           }
         }
-
-        if (is_root) {
-          root_backing_store_layer = layer;
-        } else {
-          ANativeWindow* overlay_window = nullptr;
-          if (delegate != nullptr) {
-            overlay_window = delegate->GetOverlayWindow(overlays_count);
-          }
-          if (layer->backing_store->type == kFlutterBackingStoreTypeOpenGL) {
-            if (overlay_window != nullptr) {
-              surface_manager_->BlitAndSwapOverlaySurface(
-                  overlay_window,
-                  layer->backing_store->open_gl.framebuffer.name,
-                  static_cast<size_t>(std::round(layer->size.width)),
-                  static_cast<size_t>(std::round(layer->size.height)));
-            }
-          } else if (layer->backing_store->type ==
-                     kFlutterBackingStoreTypeVulkan) {
-            if (layer->backing_store->user_data != nullptr) {
-              auto* tracker = static_cast<VulkanBackingStoreTracker*>(
-                  layer->backing_store->user_data);
-              if (tracker->overlay_window != nullptr) {
-                overlay_window = tracker->overlay_window;
-              }
-            }
-            if (overlay_window != nullptr || surface_manager_->IsFakeWindow()) {
-              surface_manager_->PresentOverlayImage(
-                  overlay_window, layer->backing_store->vulkan.image);
-            }
-          }
-          if (delegate != nullptr) {
-            delegate->OnOverlayPresented(overlays_count, layer->offset,
-                                         layer->size);
-          }
-          overlays_count++;
+        if (delegate != nullptr) {
+          delegate->OnOverlayPresented(overlays_count, layer->offset,
+                                       layer->size);
         }
+        overlays_count++;
       }
     } else if (layer->type == kFlutterLayerContentTypePlatformView) {
       platform_views_count++;
@@ -335,7 +369,13 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
     }
   }
 
-  if (root_backing_store_layer != nullptr) {
+  ANativeWindow* window_after_present = surface_manager_->GetNativeWindow();
+  bool window_switched_during_present =
+      (window_after_present != window_before_present &&
+       window_after_present != nullptr);
+
+  if (root_backing_store_layer != nullptr &&
+      !root_vulkan_presented_before_views) {
     const FlutterBackingStore* bs = root_backing_store_layer->backing_store;
     if (bs->type == kFlutterBackingStoreTypeSoftware) {
       bool res = surface_manager_->PresentSoftware(
@@ -359,21 +399,21 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
       if (!res && !surface_manager_->IsFakeWindow()) {
         present_success = false;
       }
-    } else if (bs->type == kFlutterBackingStoreTypeVulkan) {
-      bool res = surface_manager_->PresentImage(bs->vulkan.image);
-      if (!res && !surface_manager_->IsFakeWindow()) {
-        present_success = false;
-      }
     }
-  } else if (platform_views_count > 0 && surface_manager_->GetRenderingAPI() !=
-                                             AndroidRenderingAPI::kSoftware) {
+  }
+
+  if (platform_views_count > 0 &&
+      surface_manager_->GetRenderingAPI() != AndroidRenderingAPI::kSoftware &&
+      (root_backing_store_layer == nullptr ||
+       (root_vulkan_presented_before_views &&
+        window_switched_during_present))) {
     if (delegate != nullptr &&
         delegate->RequiresOnscreenClearanceWhenNoBackgroundLayer()) {
       // When a frame contains platform views (and optionally overlays) but no
-      // background Flutter layer, we still need to swap a transparent frame to
-      // the onscreen surface (which has been converted to FlutterImageView) so
-      // that FlutterView.acquireLatestImageViewFrame() succeeds in
-      // onEndFrame().
+      // background Flutter layer (or when Vulkan transitioned from
+      // FlutterSurfaceView to FlutterImageView mid-frame), swap a transparent
+      // frame to the onscreen FlutterImageView surface so that
+      // FlutterView.acquireLatestImageViewFrame() succeeds in onEndFrame().
       surface_manager_->ClearAndPresentOnscreenSurface();
     }
   }

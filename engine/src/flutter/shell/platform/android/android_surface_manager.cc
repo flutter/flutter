@@ -1263,7 +1263,9 @@ void AndroidSurfaceManager::TeardownVulkan() {
   owner_to_release.reset();
 }
 
-bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked() {
+bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked(
+    uint32_t fallback_width,
+    uint32_t fallback_height) {
   if (native_window_ == nullptr) {
     return true;
   }
@@ -1328,10 +1330,16 @@ bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked() {
   } else {
     int32_t w = ANativeWindow_getWidth(native_window_);
     int32_t h = ANativeWindow_getHeight(native_window_);
-    uint32_t target_w =
-        (w > 0) ? static_cast<uint32_t>(w) : caps.minImageExtent.width;
-    uint32_t target_h =
-        (h > 0) ? static_cast<uint32_t>(h) : caps.minImageExtent.height;
+    uint32_t min_w = (fallback_width > 0) ? fallback_width
+                                          : ((caps.minImageExtent.width > 0)
+                                                 ? caps.minImageExtent.width
+                                                 : 1u);
+    uint32_t min_h = (fallback_height > 0) ? fallback_height
+                                           : ((caps.minImageExtent.height > 0)
+                                                  ? caps.minImageExtent.height
+                                                  : 1u);
+    uint32_t target_w = (w > 0) ? static_cast<uint32_t>(w) : min_w;
+    uint32_t target_h = (h > 0) ? static_cast<uint32_t>(h) : min_h;
     target_extent.width = std::clamp(target_w, caps.minImageExtent.width,
                                      caps.maxImageExtent.width);
     target_extent.height = std::clamp(target_h, caps.minImageExtent.height,
@@ -1548,7 +1556,9 @@ void AndroidSurfaceManager::DestroyVulkanSurfaceLocked() {
 
 bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
     ANativeWindow* window,
-    VulkanOverlaySurface& entry) {
+    VulkanOverlaySurface& entry,
+    uint32_t fallback_width,
+    uint32_t fallback_height) {
   if (is_fake_window_) {
     return true;
   }
@@ -1602,12 +1612,16 @@ bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
     int32_t w = 100;
     int32_t h = 100;
 #endif
-    uint32_t fallback_w =
-        (caps.minImageExtent.width > 0) ? caps.minImageExtent.width : 1u;
-    uint32_t fallback_h =
-        (caps.minImageExtent.height > 0) ? caps.minImageExtent.height : 1u;
-    uint32_t target_w = (w > 0) ? static_cast<uint32_t>(w) : fallback_w;
-    uint32_t target_h = (h > 0) ? static_cast<uint32_t>(h) : fallback_h;
+    uint32_t min_w = (fallback_width > 0) ? fallback_width
+                                          : ((caps.minImageExtent.width > 0)
+                                                 ? caps.minImageExtent.width
+                                                 : 1u);
+    uint32_t min_h = (fallback_height > 0) ? fallback_height
+                                           : ((caps.minImageExtent.height > 0)
+                                                  ? caps.minImageExtent.height
+                                                  : 1u);
+    uint32_t target_w = (w > 0) ? static_cast<uint32_t>(w) : min_w;
+    uint32_t target_h = (h > 0) ? static_cast<uint32_t>(h) : min_h;
     extent.width = std::clamp(target_w, caps.minImageExtent.width,
                               caps.maxImageExtent.width);
     extent.height = std::clamp(target_h, caps.minImageExtent.height,
@@ -1650,15 +1664,16 @@ bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
   }
 
   VkCompositeAlphaFlagBitsKHR composite_alpha =
-      VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
-  if (!(caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)) {
-    composite_alpha = (caps.supportedCompositeAlpha &
-                       VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR)
-                          ? VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR
-                          : ((caps.supportedCompositeAlpha &
-                              VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
-                                 ? VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR
-                                 : VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR);
+      VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR;
+  if (!(caps.supportedCompositeAlpha &
+        VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR)) {
+    composite_alpha =
+        (caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
+            ? VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR
+            : ((caps.supportedCompositeAlpha &
+                VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
+                   ? VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR
+                   : VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR);
   }
 
   if (vk_device_wait_idle_fn_ != nullptr) {
@@ -1847,29 +1862,36 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextImage(
     return image;
   }
 
+  uint32_t fallback_w = (frame_info != nullptr &&
+                         frame_info->struct_size >= sizeof(FlutterFrameInfo))
+                            ? frame_info->size.width
+                            : 0;
+  uint32_t fallback_h = (frame_info != nullptr &&
+                         frame_info->struct_size >= sizeof(FlutterFrameInfo))
+                            ? frame_info->size.height
+                            : 0;
+
   // Handle surface lost recovery
   if (vk_surface_lost_) {
     vk_surface_lost_ = false;
     DestroyVulkanSurfaceLocked();
     if (native_window_ != nullptr) {
-      CreateOrUpdateVulkanSurfaceLocked();
+      CreateOrUpdateVulkanSurfaceLocked(fallback_w, fallback_h);
     } else {
       return image;
     }
   }
 
   // Revalidate extent using frame_info layout metrics
-  if (frame_info != nullptr &&
-      frame_info->struct_size >= sizeof(FlutterFrameInfo) &&
-      frame_info->size.width > 0 && frame_info->size.height > 0) {
-    if (frame_info->size.width != vk_swapchain_extent_.width ||
-        frame_info->size.height != vk_swapchain_extent_.height) {
+  if (fallback_w > 0 && fallback_h > 0) {
+    if (fallback_w != vk_swapchain_extent_.width ||
+        fallback_h != vk_swapchain_extent_.height) {
       vk_swapchain_out_of_date_ = true;
     }
   }
 
   if (vk_swapchain_out_of_date_ || vk_swapchain_ == VK_NULL_HANDLE) {
-    CreateOrUpdateVulkanSurfaceLocked();
+    CreateOrUpdateVulkanSurfaceLocked(fallback_w, fallback_h);
   }
 
   if (vk_swapchain_ == VK_NULL_HANDLE || vk_swapchain_images_.empty() ||
@@ -1891,7 +1913,7 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextImage(
   // leaves the buffer queue in an inconsistent ACQUIRED state on Android.
   if (res == VK_ERROR_OUT_OF_DATE_KHR) {
     vk_swapchain_out_of_date_ = true;
-    CreateOrUpdateVulkanSurfaceLocked();
+    CreateOrUpdateVulkanSurfaceLocked(fallback_w, fallback_h);
     if (vk_swapchain_ == VK_NULL_HANDLE || vk_swapchain_images_.empty() ||
         vk_acquire_fence_ == VK_NULL_HANDLE) {
       return image;
@@ -2049,7 +2071,8 @@ bool AndroidSurfaceManager::PresentImage(const FlutterVulkanImage* image) {
 }
 
 FlutterVulkanImage AndroidSurfaceManager::GetNextOverlayImage(
-    ANativeWindow* overlay_window) {
+    ANativeWindow* overlay_window,
+    const FlutterFrameInfo* frame_info) {
   std::lock_guard<std::mutex> lock(window_mutex_);
   FlutterVulkanImage image = {};
   image.struct_size = sizeof(FlutterVulkanImage);
@@ -2065,6 +2088,15 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextOverlayImage(
   if (overlay_window == nullptr || vk_device_ == VK_NULL_HANDLE) {
     return image;
   }
+
+  uint32_t fallback_w = (frame_info != nullptr &&
+                         frame_info->struct_size >= sizeof(FlutterFrameInfo))
+                            ? frame_info->size.width
+                            : 0;
+  uint32_t fallback_h = (frame_info != nullptr &&
+                         frame_info->struct_size >= sizeof(FlutterFrameInfo))
+                            ? frame_info->size.height
+                            : 0;
 
   auto& entry = overlay_vulkan_surfaces_[overlay_window];
   if (entry.surface_lost) {
@@ -2090,9 +2122,13 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextOverlayImage(
 #if FML_OS_ANDROID
         int32_t current_w = ANativeWindow_getWidth(overlay_window);
         int32_t current_h = ANativeWindow_getHeight(overlay_window);
-        if (current_w > 0 && current_h > 0 &&
-            (static_cast<uint32_t>(current_w) != entry.extent.width ||
-             static_cast<uint32_t>(current_h) != entry.extent.height)) {
+        uint32_t expected_w =
+            (current_w > 0) ? static_cast<uint32_t>(current_w) : fallback_w;
+        uint32_t expected_h =
+            (current_h > 0) ? static_cast<uint32_t>(current_h) : fallback_h;
+        if (expected_w > 0 && expected_h > 0 &&
+            (expected_w != entry.extent.width ||
+             expected_h != entry.extent.height)) {
           entry.swapchain_out_of_date = true;
         }
 #endif
@@ -2101,7 +2137,8 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextOverlayImage(
   }
 
   if (entry.swapchain_out_of_date || entry.swapchain == VK_NULL_HANDLE) {
-    if (!CreateOrUpdateOverlayVulkanSurfaceLocked(overlay_window, entry)) {
+    if (!CreateOrUpdateOverlayVulkanSurfaceLocked(overlay_window, entry,
+                                                  fallback_w, fallback_h)) {
       return image;
     }
   }
@@ -2120,7 +2157,8 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextOverlayImage(
 
   if (res == VK_ERROR_OUT_OF_DATE_KHR) {
     entry.swapchain_out_of_date = true;
-    if (!CreateOrUpdateOverlayVulkanSurfaceLocked(overlay_window, entry)) {
+    if (!CreateOrUpdateOverlayVulkanSurfaceLocked(overlay_window, entry,
+                                                  fallback_w, fallback_h)) {
       return image;
     }
     if (entry.swapchain == VK_NULL_HANDLE || entry.images.empty() ||
@@ -2524,6 +2562,10 @@ bool AndroidSurfaceManager::ClearAndPresentOnscreenSurface() {
       (rendering_api_ == AndroidRenderingAPI::kImpellerAutoselect &&
        IsVulkanInitialized())) {
     std::lock_guard<std::mutex> lock(window_mutex_);
+    if ((vk_swapchain_ == VK_NULL_HANDLE || vk_swapchain_out_of_date_) &&
+        native_window_ != nullptr) {
+      CreateOrUpdateVulkanSurfaceLocked(0, 0);
+    }
     if (vk_swapchain_ == VK_NULL_HANDLE || vk_swapchain_images_.empty()) {
       return false;
     }

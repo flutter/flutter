@@ -12,8 +12,10 @@
 #include "embedder.h"
 #include "embedder_asset_resolver.h"
 #include "embedder_engine.h"
+#include "embedder_external_view_embedder.h"
 #include "embedder_image_generator.h"
 #include "embedder_layers.h"
+#include "embedder_render_target_skia.h"
 #include "embedder_semantics_update.h"
 #include "flutter/common/constants.h"
 #include "flutter/flow/raster_cache.h"
@@ -6719,6 +6721,146 @@ TEST_F(EmbedderTest, EmbedderQueryVulkanDriverSupportProbeTable) {
             kSuccess);
   EXPECT_FALSE(is_known_bad);
 #endif
+}
+
+TEST_F(EmbedderTest,
+       EmbedderExternalViewEmbedderSingleOverlayCoalescingWithDifferenceClips) {
+  constexpr int kSurfaceWidth = 100;
+  constexpr int kSurfaceHeight = 100;
+
+  size_t render_target_requests = 0;
+  size_t overlay_requests = 0;
+  sk_sp<SkSurface> root_surface;
+  sk_sp<SkSurface> overlay_surface;
+
+  auto create_render_target =
+      [&](GrDirectContext* context,
+          const std::shared_ptr<impeller::AiksContext>& aiks_context,
+          const FlutterBackingStoreConfig& config)
+      -> std::unique_ptr<EmbedderRenderTarget> {
+    ++render_target_requests;
+    if (config.is_overlay) {
+      ++overlay_requests;
+      // Only allow a single overlay backing store; return nullptr for any
+      // subsequent overlay requests to simulate single-overlay mode (HCPP).
+      if (overlay_requests > 1) {
+        return nullptr;
+      }
+    }
+
+    auto info =
+        SkImageInfo::MakeN32Premul(config.size.width, config.size.height);
+    auto surface = SkSurfaces::Raster(info);
+    FlutterBackingStore store = {};
+    store.struct_size = sizeof(FlutterBackingStore);
+    store.type = kFlutterBackingStoreTypeSoftware;
+    store.user_data = reinterpret_cast<void*>(render_target_requests);
+    if (!config.is_overlay) {
+      root_surface = surface;
+    } else {
+      overlay_surface = surface;
+    }
+    return std::make_unique<EmbedderRenderTargetSkia>(
+        store, surface, []() {},
+        []() { return EmbedderRenderTarget::SetCurrentResult{true, false}; },
+        []() { return EmbedderRenderTarget::SetCurrentResult{true, false}; });
+  };
+
+  size_t presented_layer_count = 0;
+  size_t presented_backing_store_count = 0;
+  size_t presented_platform_view_count = 0;
+  auto present_callback =
+      [&](FlutterViewId view_id,
+          const std::vector<const FlutterLayer*>& layers) -> bool {
+    EXPECT_EQ(view_id, kFlutterImplicitViewId);
+    presented_layer_count = layers.size();
+    for (const auto* layer : layers) {
+      if (layer->type == kFlutterLayerContentTypeBackingStore) {
+        ++presented_backing_store_count;
+      } else if (layer->type == kFlutterLayerContentTypePlatformView) {
+        ++presented_platform_view_count;
+      }
+    }
+    return true;
+  };
+
+  std::unique_ptr<ExternalViewEmbedder> view_embedder =
+      std::make_unique<EmbedderExternalViewEmbedder>(
+          /*avoid_backing_store_cache=*/true, create_render_target,
+          present_callback);
+
+  view_embedder->BeginFrame(nullptr, nullptr);
+  view_embedder->PrepareFlutterView(DlISize(kSurfaceWidth, kSurfaceHeight),
+                                    1.0);
+
+  DlCanvas* root_canvas = view_embedder->GetRootCanvas();
+  ASSERT_NE(root_canvas, nullptr);
+  DlPaint green_paint;
+  green_paint.setColor(DlColor::kGreen());
+  root_canvas->DrawRect(DlRect::MakeXYWH(0.0f, 0.0f, 100.0f, 100.0f),
+                        green_paint);
+
+  // Platform view 1 at (10, 10, 40, 40).
+  MutatorsStack stack1;
+  stack1.PushTransform(DlMatrix::MakeTranslation({10.0f, 10.0f}));
+  auto params1 = std::make_unique<EmbeddedViewParams>(
+      DlMatrix::MakeTranslation({10.0f, 10.0f}), DlSize(40.0f, 40.0f), stack1);
+  view_embedder->PrerollCompositeEmbeddedView(1, std::move(params1));
+  DlCanvas* slice1_canvas = view_embedder->CompositeEmbeddedView(1);
+  ASSERT_NE(slice1_canvas, nullptr);
+
+  // Slice 1 (above PV 1, below PV 2): draw solid red across (0, 0, 100, 100).
+  DlPaint red_paint;
+  red_paint.setColor(DlColor::kRed());
+  slice1_canvas->DrawRect(DlRect::MakeXYWH(0.0f, 0.0f, 100.0f, 100.0f),
+                          red_paint);
+
+  // Platform view 2 at (30, 30, 40, 40), overlapping Slice 1.
+  MutatorsStack stack2;
+  stack2.PushTransform(DlMatrix::MakeTranslation({30.0f, 30.0f}));
+  auto params2 = std::make_unique<EmbeddedViewParams>(
+      DlMatrix::MakeTranslation({30.0f, 30.0f}), DlSize(40.0f, 40.0f), stack2);
+  view_embedder->PrerollCompositeEmbeddedView(2, std::move(params2));
+  DlCanvas* slice2_canvas = view_embedder->CompositeEmbeddedView(2);
+  ASSERT_NE(slice2_canvas, nullptr);
+
+  // Slice 2 (above PV 2): draw solid blue at (40, 40, 20, 20) inside PV 2.
+  DlPaint blue_paint;
+  blue_paint.setColor(DlColor::kBlue());
+  slice2_canvas->DrawRect(DlRect::MakeXYWH(40.0f, 40.0f, 20.0f, 20.0f),
+                          blue_paint);
+
+  auto dummy_surface = SkSurfaces::Raster(
+      SkImageInfo::MakeN32Premul(kSurfaceWidth, kSurfaceHeight));
+  SurfaceFrame::FramebufferInfo fb_info;
+  auto surface_frame = std::make_unique<SurfaceFrame>(
+      dummy_surface, fb_info, [](SurfaceFrame&, DlCanvas*) { return true; },
+      [](SurfaceFrame&) { return true; },
+      DlISize(kSurfaceWidth, kSurfaceHeight));
+
+  view_embedder->SubmitFlutterView(kFlutterImplicitViewId, nullptr, nullptr,
+                                   std::move(surface_frame));
+
+  // Verify 3 render target requests were made (root, overlay 1, and overlay 2
+  // which returned nullptr and coalesced into overlay 1).
+  EXPECT_EQ(render_target_requests, 3u);
+  EXPECT_EQ(presented_layer_count, 4u);
+  EXPECT_EQ(presented_backing_store_count, 2u);
+  EXPECT_EQ(presented_platform_view_count, 2u);
+  ASSERT_NE(overlay_surface, nullptr);
+
+  SkPixmap pixmap;
+  ASSERT_TRUE(overlay_surface->peekPixels(&pixmap));
+
+  // (20, 20) is in Slice 1 outside PV 2's bounds (30..70, 30..70) -> Red.
+  EXPECT_EQ(pixmap.getColor(20, 20), SK_ColorRED);
+
+  // (35, 35) is inside PV 2's bounds (30..70, 30..70) but outside Slice 2
+  // (40..60, 40..60) -> Transparent hole punched by difference clip.
+  EXPECT_EQ(pixmap.getColor(35, 35), SK_ColorTRANSPARENT);
+
+  // (50, 50) is inside Slice 2 (40..60, 40..60) which is above PV 2 -> Blue.
+  EXPECT_EQ(pixmap.getColor(50, 50), SK_ColorBLUE);
 }
 
 }  // namespace testing
