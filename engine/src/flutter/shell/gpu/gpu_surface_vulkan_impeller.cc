@@ -14,6 +14,7 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
 #include "impeller/renderer/render_target.h"
@@ -100,7 +101,20 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
           return true;
         },
-        [](const SurfaceFrame& surface_frame) { return true; }, size);
+        [impeller_context =
+             impeller_context_](const SurfaceFrame& surface_frame) {
+          if (impeller_context) {
+            auto& context_vk = impeller::ContextVK::Cast(*impeller_context);
+            if (auto pipeline_library = context_vk.GetPipelineLibrary()) {
+              impeller::PipelineLibraryVK::Cast(*pipeline_library)
+                  .DidAcquireSurfaceFrame();
+            }
+            context_vk.DisposeThreadLocalCachedResources();
+            context_vk.GetResourceAllocator()->DebugTraceMemoryStatistics();
+          }
+          return true;
+        },
+        size);
   }
 
   if (delegate_ == nullptr) {
