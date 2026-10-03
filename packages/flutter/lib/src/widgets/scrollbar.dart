@@ -20,6 +20,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -1416,6 +1417,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Offset? _lastDragUpdateOffset;
   double? _startDragThumbOffset;
   ScrollController? _cachedController;
+  late ScrollBehavior _scrollBehavior;
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
   late CurvedAnimation _fadeoutOpacityAnimation;
@@ -1499,6 +1501,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _scrollBehavior = ScrollConfiguration.of(context);
     assert(_debugScheduleCheckHasValidScrollPosition());
   }
 
@@ -2322,15 +2325,25 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
   }
 
-  // Returns the delta that should result from applying [event] with axis and
-  // direction taken into account.
+  // Returns the delta that should result from applying [event] with axis,
+  // direction, and any modifiers specified by the ScrollBehavior taken into
+  // account.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
     assert(_cachedController != null);
-    double delta = _cachedController!.position.axis == Axis.horizontal
-        ? event.scrollDelta.dx
-        : event.scrollDelta.dy;
+    final ScrollPosition position = _cachedController!.position;
+    final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
+    final bool flipAxes =
+        pressed.any(_scrollBehavior.pointerAxisModifiers.contains) &&
+        // Axes are only flipped for physical mouse wheel input. Trackpads
+        // already provide both directional axes directly.
+        event.kind == PointerDeviceKind.mouse;
+    final Axis axis = flipAxes ? flipAxis(position.axis) : position.axis;
+    double delta = switch (axis) {
+      Axis.horizontal => event.scrollDelta.dx,
+      Axis.vertical => event.scrollDelta.dy,
+    };
 
-    if (axisDirectionIsReversed(_cachedController!.position.axisDirection)) {
+    if (axisDirectionIsReversed(position.axisDirection)) {
       delta *= -1;
     }
     return delta;
