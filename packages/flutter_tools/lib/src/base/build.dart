@@ -184,11 +184,20 @@ class AOTSnapshotter {
       final minOSVersion = platform == TargetPlatform.ios
           ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
           : FlutterDarwinPlatform.macos.deploymentTarget().toString();
+
+      // sdkRoot is the SDK being built against (Xcode's SDKROOT for app
+      // builds), so xcrun reports that exact SDK's version.
+      if (sdkRoot == null) {
+        throw ArgumentError.notNull('sdkRoot');
+      }
+      final String sdkVersion = await _xcode.sdkVersion(sdkRoot);
+
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-macho-dylib',
         '--macho=$aotSharedLibrary',
         '--macho-object=$relocatableObject',
         '--macho-min-os-version=$minOSVersion',
+        '--macho-sdk-version=$sdkVersion',
         '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
         '--macho-install-name=@rpath/$frameworkName/$frameworkSnapshotName',
       ]);
