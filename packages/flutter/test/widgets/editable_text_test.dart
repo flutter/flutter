@@ -3694,7 +3694,55 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['readOnly'], isFalse);
   });
 
-  testWidgets('Sends "updateConfig" when obscureText is flipped', (WidgetTester tester) async {
+  testWidgets(
+    'Sends "updateConfig" when obscureText is flipped',
+    (WidgetTester tester) async {
+      var obscureText = true;
+      late StateSetter setState;
+      controller.text = 'Lorem';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter stateSetter) {
+              setState = stateSetter;
+              return EditableText(
+                obscureText: obscureText,
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+              );
+            },
+          ),
+        ),
+      );
+
+      // Interact with the field to establish the input connection.
+      final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+      await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+      await tester.pump();
+
+      expect(tester.testTextInput.setClientArgs!['obscureText'], isTrue);
+
+      tester.testTextInput.log.clear();
+
+      setState(() {
+        obscureText = false;
+      });
+      await tester.pump();
+
+      expect(tester.testTextInput.setClientArgs!['obscureText'], isFalse);
+      expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.updateConfig')));
+      expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.clearClient'))));
+    },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('Restarts text input connection when obscureText is flipped on web', (
+    WidgetTester tester,
+  ) async {
     var obscureText = true;
     late StateSetter setState;
     controller.text = 'Lorem';
@@ -3724,13 +3772,27 @@ void main() {
 
     expect(tester.testTextInput.setClientArgs!['obscureText'], isTrue);
 
+    tester.testTextInput.log.clear();
+
     setState(() {
       obscureText = false;
     });
     await tester.pump();
+    await tester.idle();
 
     expect(tester.testTextInput.setClientArgs!['obscureText'], isFalse);
-  });
+
+    expect(
+      tester.testTextInput.log,
+      containsAllInOrder(<Matcher>[
+        matchesMethodCall('TextInput.clearClient'),
+        matchesMethodCall('TextInput.setClient'),
+        matchesMethodCall('TextInput.show'),
+      ]),
+    );
+
+    expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.updateConfig'))));
+  }, skip: !kIsWeb);
 
   testWidgets('Sends "updateConfig" when keyboardType is changed', (WidgetTester tester) async {
     TextInputType keyboardType = TextInputType.text;
