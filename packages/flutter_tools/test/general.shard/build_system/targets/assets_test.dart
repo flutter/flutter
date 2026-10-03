@@ -64,6 +64,58 @@ flutter:
   });
 
   testUsingContext(
+    'tracks source files while copying to bundle_path across incremental builds',
+    () async {
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: example
+flutter:
+  assets:
+    - path: configs/dev.json
+      flavors: [dev]
+      bundle_path: assets/branch-config.json
+    - path: configs/prod.json
+      flavors: [prod]
+      bundle_path: assets/branch-config.json
+''');
+      fileSystem.file('configs/dev.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('dev');
+      fileSystem.file('configs/prod.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('prod');
+      final File output = environment.buildDir
+          .childDirectory('flutter_assets')
+          .childDirectory('assets')
+          .childFile('branch-config.json');
+      for (final flavor in <String>['dev', 'prod', 'dev']) {
+        environment.defines[kFlavor] = flavor;
+        await const CopyAssets().build(environment);
+        expect(output.readAsStringSync(), flavor);
+        final Depfile dependencies = environment.depFileService.parse(
+          environment.buildDir.childFile('flutter_assets.d'),
+        );
+        expect(
+          dependencies.inputs.map((File file) => file.path),
+          contains('/configs/$flavor.json'),
+        );
+        expect(
+          dependencies.inputs.map((File file) => file.path),
+          isNot(contains('/assets/branch-config.json')),
+        );
+        expect(dependencies.outputs.map((File file) => file.path), contains(output.path));
+      }
+      fileSystem.file('configs/dev.json').writeAsStringSync('updated');
+      await const CopyAssets().build(environment);
+      expect(output.readAsStringSync(), 'updated');
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
     'includes LICENSE file inputs in dependencies',
     () async {
       writePackageConfigFiles(
