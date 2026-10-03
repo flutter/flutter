@@ -226,8 +226,11 @@ class ExpansibleController extends ChangeNotifier {
 /// unique [PageStorageKey] must be specified as the [key], to enable the
 /// [Expansible] to save and restore its expanded state when it is scrolled
 /// in and out of view. The saved expansion state does not conflict with state
-/// saved by descendants (such as the scroll offset of a [Scrollable] in the
-/// body) that share the same [PageStorageKey] ancestors.
+/// saved by other kinds of widgets (such as the scroll offset of a [Scrollable]
+/// in the body) that share the same [PageStorageKey] ancestors. It does
+/// conflict with other [Expansible]s that share them, such as a nested or
+/// sibling [Expansible] without a [PageStorageKey] of its own, so each
+/// [Expansible] that saves its state needs its own key.
 ///
 /// Provide [headerBuilder] and [bodyBuilder] callbacks to
 /// build the header and body widgets. An additional [expansibleBuilder]
@@ -394,7 +397,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   // This collects the keys the same way as PageStorageBucket._allKeys and must
   // be kept in sync with it.
   // TODO(omar-alshyokh): Remove this once PageStorageBucket supports namespaces, https://github.com/flutter/flutter/issues/193699
-  Object? get _storageIdentifier {
+  Object? _computeStorageIdentifier() {
     final keys = <PageStorageKey<dynamic>>[];
     void addKey(Widget widget) {
       final Key? key = widget.key;
@@ -415,7 +418,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     _animationController = AnimationController(duration: _duration, vsync: this);
-    final Object? identifier = _storageIdentifier;
+    final Object? identifier = _computeStorageIdentifier();
     final bool? storedExpansionState = identifier == null
         ? null
         : PageStorage.maybeOf(context)?.readState(context, identifier: identifier) as bool?;
@@ -483,7 +486,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
           });
         });
       }
-      final Object? identifier = _storageIdentifier;
+      final Object? identifier = _computeStorageIdentifier();
       if (identifier != null) {
         PageStorage.maybeOf(context)
             ?.writeState(context, widget.controller.isExpanded, identifier: identifier);
@@ -526,6 +529,9 @@ class _ExpansibleStorageIdentifier {
 
   @override
   bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     return other is _ExpansibleStorageIdentifier && listEquals(other.keys, keys);
   }
 
