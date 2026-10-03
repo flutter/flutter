@@ -352,6 +352,66 @@ void main() {
       ),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192030.
+  testWidgets('Obstructed overlay child does not assert when the overlay is resized', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(1200, 800);
+
+    final overlayKey = GlobalKey<OverlayState>();
+    late final OverlayEntry bottomEntry;
+    final topEntry = OverlayEntry(
+      opaque: true,
+      builder: (BuildContext context) => const SizedBox(),
+    );
+    addTearDown(() {
+      bottomEntry
+        ..remove()
+        ..dispose();
+      topEntry
+        ..remove()
+        ..dispose();
+    });
+
+    var layoutCallbackCount = 0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            bottomEntry = OverlayEntry(
+              maintainState: true,
+              builder: (BuildContext context) {
+                return OverlayPortal.overlayChildLayoutBuilder(
+                  controller: controller1,
+                  overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+                    layoutCallbackCount += 1;
+                    return const SizedBox();
+                  },
+                  child: const SizedBox(),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(layoutCallbackCount, greaterThan(0));
+
+    // Obstruct the bottom entry with an opaque entry, which makes the theater
+    // skip laying it out.
+    overlayKey.currentState!.insert(topEntry);
+    await tester.pump();
+
+    // Resizing the theater must not trip any assertion, even though the
+    // obstructed entry's layout builder still has a pending frame callback.
+    tester.view.physicalSize = const Size(1100, 720);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _NullLeaf extends Widget {
