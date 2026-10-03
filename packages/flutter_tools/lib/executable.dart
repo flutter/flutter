@@ -53,6 +53,7 @@ import 'src/commands/widget_preview.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/devtools_launcher.dart';
+import 'src/experimental/extension_build_manager.dart';
 import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/experimental/templates.dart';
@@ -121,10 +122,16 @@ Future<void> main(List<String> args) async {
         logger: toolDependencies.toolContext.logger,
         featureFlags: featureFlags,
       );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: toolDependencies.toolContext.logger,
+      );
       return generateCommands(
         toolDependencies: toolDependencies,
         verboseHelp: verboseHelp,
         verbose: verbose,
+        extensionBuildManager: buildManager,
         extensionTemplateManager: templateManager,
       );
     },
@@ -227,6 +234,7 @@ List<FlutterCommand> generateCommands({
   required ToolDependencies toolDependencies,
   required bool verbose,
   required bool verboseHelp,
+  ExtensionBuildManager? extensionBuildManager,
   ExtensionTemplateManager? extensionTemplateManager,
 }) => <FlutterCommand>[
   AnalyzeCommand(
@@ -259,6 +267,7 @@ List<FlutterCommand> generateCommands({
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
     buildSystem: toolDependencies.buildSystem,
+    extensionBuildManager: extensionBuildManager,
     featureFlags: toolDependencies.featureFlags,
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: toolDependencies.toolContext,
