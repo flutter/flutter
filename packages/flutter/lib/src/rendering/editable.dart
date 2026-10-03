@@ -1586,28 +1586,30 @@ class RenderEditable extends RenderBox
   }
 
   TextRange? _getNextWord(int offset) {
+    var newOffset = offset;
     while (true) {
-      final TextRange range = _textPainter.getWordBoundary(TextPosition(offset: offset));
+      final TextRange range = _textPainter.getWordBoundary(TextPosition(offset: newOffset));
       if (!range.isValid || range.isCollapsed) {
         return null;
       }
       if (!_onlyWhitespace(range)) {
         return range;
       }
-      offset = range.end;
+      newOffset = range.end;
     }
   }
 
   TextRange? _getPreviousWord(int offset) {
-    while (offset >= 0) {
-      final TextRange range = _textPainter.getWordBoundary(TextPosition(offset: offset));
+    var newOffset = offset;
+    while (newOffset >= 0) {
+      final TextRange range = _textPainter.getWordBoundary(TextPosition(offset: newOffset));
       if (!range.isValid || range.isCollapsed) {
         return null;
       }
       if (!_onlyWhitespace(range)) {
         return range;
       }
-      offset = range.start - 1;
+      newOffset = range.start - 1;
     }
     return null;
   }

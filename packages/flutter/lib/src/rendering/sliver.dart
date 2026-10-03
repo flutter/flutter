@@ -1800,15 +1800,12 @@ abstract class RenderSliver extends RenderObject {
       }
       assert(p0.dx == p1.dx || p0.dy == p1.dy); // must be axis-aligned
       final double d = (p1 - p0).distance * 0.2;
-      final Offset temp;
       double dx1, dx2, dy1, dy2;
       switch (direction) {
         case GrowthDirection.forward:
           dx1 = dx2 = dy1 = dy2 = d;
         case GrowthDirection.reverse:
-          temp = p0;
-          p0 = p1;
-          p1 = temp;
+          (p0, p1) = (p1, p0);
           dx1 = dx2 = dy1 = dy2 = -d;
       }
       if (p0.dx == p1.dx) {
