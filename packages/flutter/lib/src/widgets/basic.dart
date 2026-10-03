@@ -1901,6 +1901,22 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The transform will be applied by re-rendering the child if [filterQuality] is null,
   /// otherwise it controls the quality of an [ImageFilter.matrix] applied to a bitmap
   /// rendering of the child.
+  ///
+  /// When [filterQuality] is null, the transform is applied directly to the
+  /// child's painting, so the child stays sharp at any scale and no extra
+  /// compositing layer is required. Whenever the transform changes, the child's
+  /// painting commands are re-recorded with the new transform, unless the child
+  /// is a repaint boundary (see [RenderObject.isRepaintBoundary]).
+  ///
+  /// When [filterQuality] is non-null, the child is always composited into its
+  /// own [ImageFilterLayer]: it is first rendered to an offscreen bitmap,
+  /// similar to a [Canvas.saveLayer] call, and the transform is then applied to
+  /// that bitmap. This costs extra memory and GPU time for every frame that is
+  /// rendered while the layer is present, and content that is scaled up or
+  /// rotated may look blurry or pixelated depending on [filterQuality]. This can
+  /// be worthwhile while a transform over a complex child is animating, but for
+  /// a transform that is not changing, leaving [filterQuality] null is usually
+  /// cheaper.
   /// {@endtemplate}
   final FilterQuality? filterQuality;
 
