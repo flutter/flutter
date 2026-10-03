@@ -13,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.annotation.TargetApi;
+import android.view.inputmethod.EditorInfo;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.MethodCall;
@@ -23,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
 
 @Config(shadows = {})
@@ -66,6 +68,34 @@ public class TextInputChannelTest {
     assertEquals(configuration.hintLocales.length, hintLocales.length);
     assertEquals(configuration.hintLocales[0], hintLocales[0]);
     assertEquals(configuration.hintLocales[1], hintLocales[1]);
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_24)
+  public void updateConfigForwardsParsedConfigurationToHandler()
+      throws JSONException, NoSuchFieldException {
+    TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+    TextInputChannel.TextInputMethodHandler mockHandler =
+        mock(TextInputChannel.TextInputMethodHandler.class);
+    textInputChannel.setTextInputMethodHandler(mockHandler);
+
+    JSONObject arguments = new JSONObject();
+
+    arguments.put("inputAction", "TextInputAction.done");
+    arguments.put("textCapitalization", "TextCapitalization.none");
+    JSONObject inputType = new JSONObject();
+    inputType.put("name", "TextInputType.text");
+    arguments.put("inputType", inputType);
+
+    MethodCall call = new MethodCall("TextInput.updateConfig", arguments);
+    MethodChannel.Result result = mock(MethodChannel.Result.class);
+    textInputChannel.parsingMethodHandler.onMethodCall(call, result);
+
+    ArgumentCaptor<TextInputChannel.Configuration> captor =
+        ArgumentCaptor.forClass(TextInputChannel.Configuration.class);
+    verify(mockHandler).updateConfig(captor.capture());
+    assertEquals(captor.getValue().inputAction.intValue(), EditorInfo.IME_ACTION_DONE);
+    verify(result).success(null);
   }
 
   @Test
