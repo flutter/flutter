@@ -61,9 +61,6 @@ ImageGeneratorRegistry::ImageGeneratorRegistry() : weak_factory_(this) {
 
   // todo(bdero): https://github.com/flutter/flutter/issues/82603
 #ifdef FML_OS_MACOSX
-  // SkImageGeneratorCG copies the complete ImageIO property dictionary while
-  // constructing a generator. Images with rich metadata can make that
-  // operation too expensive for the UI thread.
   AddFactory(
       [](sk_sp<SkData> buffer) {
         auto generator =
@@ -71,7 +68,11 @@ ImageGeneratorRegistry::ImageGeneratorRegistry() : weak_factory_(this) {
         return BuiltinSkiaImageGenerator::MakeFromGenerator(
             std::move(generator));
       },
-      0, ImageGeneratorFactoryExecution::kConcurrentTaskRunner);
+      0,
+      // SkImageGeneratorCG copies the complete ImageIO property dictionary
+      // while constructing a generator. Images with rich metadata can make that
+      // operation too expensive for the UI thread.
+      ImageGeneratorFactoryExecution::kConcurrentTaskRunner);
 #elif FML_OS_WIN
   AddFactory(
       [](sk_sp<SkData> buffer) {
@@ -134,16 +135,19 @@ void ImageGeneratorRegistry::ResolveGenerator(
                          buffer = std::move(buffer), concurrent_task_runner,
                          ui_task_runner,
                          callback = std::move(callback)]() mutable {
+    // Try to create a compatible generator on the UI or concurrent task runner.
     auto& factory = *(*factories)[index].callback;
     auto result = factory(buffer);
     if (result) {
-      ui_task_runner->PostTask([callback = std::move(callback),
-                                result = std::move(result)]() mutable {
-        callback(std::move(result));
-      });
+      // Pass the compatible generator to the callback on the UI task runner.
+      fml::TaskRunner::RunNowOrPostTask(ui_task_runner,
+                                        [callback = std::move(callback),
+                                         result = std::move(result)]() mutable {
+                                          callback(std::move(result));
+                                        });
       return;
     }
-    // Continue immediately when the next attempt is already on the UI runner.
+    // Otherwise, try again with the next factory.
     fml::TaskRunner::RunNowOrPostTask(
         ui_task_runner,
         [factories = std::move(factories), index, buffer = std::move(buffer),

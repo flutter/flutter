@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "flutter/fml/endianness.h"
-#include "flutter/lib/ui/painting/image_generator_registry_test.h"
+#include "flutter/lib/ui/painting/image_generator_registry_test_utils.h"
 #include "impeller/renderer/capabilities.h"
 
 #if IMPELLER_SUPPORTS_RENDERING

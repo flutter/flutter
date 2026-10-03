@@ -15,7 +15,7 @@
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 #include "flutter/lib/ui/painting/image_decoder_no_gl_unittests.h"
 #include "flutter/lib/ui/painting/image_decoder_skia.h"
-#include "flutter/lib/ui/painting/image_generator_registry_test.h"
+#include "flutter/lib/ui/painting/image_generator_registry_test_utils.h"
 #include "flutter/lib/ui/painting/multi_frame_codec.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"

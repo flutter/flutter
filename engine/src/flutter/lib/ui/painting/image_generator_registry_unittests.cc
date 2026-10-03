@@ -9,7 +9,7 @@
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/mapping.h"
-#include "flutter/lib/ui/painting/image_generator_registry_test.h"
+#include "flutter/lib/ui/painting/image_generator_registry_test_utils.h"
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/testing/post_task_sync.h"
 #include "flutter/testing/testing.h"
@@ -88,6 +88,7 @@ class FakeImageGenerator : public ImageGenerator {
 
 TEST_F(ShellTest, PositivePriorityTakesPrecedentOverDefaultGenerators) {
   const int fake_width = 1337;
+  // Fetch the generator and query for basic info.
   auto result = CreateTestImageGenerator(
       LoadValidImageFixture(), [&](ImageGeneratorRegistry& registry) {
         registry.AddFactory(
@@ -101,6 +102,7 @@ TEST_F(ShellTest, PositivePriorityTakesPrecedentOverDefaultGenerators) {
 }
 
 TEST_F(ShellTest, DefaultGeneratorsTakePrecedentOverNegativePriority) {
+  // Fetch the generator and query for basic info.
   auto result = CreateTestImageGenerator(
       LoadValidImageFixture(), [](ImageGeneratorRegistry& registry) {
         registry.AddFactory(
@@ -110,10 +112,13 @@ TEST_F(ShellTest, DefaultGeneratorsTakePrecedentOverNegativePriority) {
             -1);
       });
   ASSERT_TRUE(result);
+  // If the real width of the image pops out, then the default generator was
+  // returned rather than the fake one.
   ASSERT_EQ(result->GetInfo().width(), 3024);
 }
 
 TEST_F(ShellTest, DefaultGeneratorsTakePrecedentOverZeroPriority) {
+  // Fetch the generator and query for basic info.
   auto result = CreateTestImageGenerator(
       LoadValidImageFixture(), [](ImageGeneratorRegistry& registry) {
         registry.AddFactory(
@@ -123,12 +128,17 @@ TEST_F(ShellTest, DefaultGeneratorsTakePrecedentOverZeroPriority) {
             0);
       });
   ASSERT_TRUE(result);
+  // If the real width of the image pops out, then the default generator was
+  // returned rather than the fake one.
   ASSERT_EQ(result->GetInfo().width(), 3024);
 }
 
 TEST_F(ShellTest, ImageGeneratorsWithSamePriorityCascadeChronologically) {
+  // Feed empty data so that Skia's image generators will reject it, but ours
+  // won't.
   auto result = CreateTestImageGenerator(
       SkData::MakeEmpty(), [](ImageGeneratorRegistry& registry) {
+        // Add 2 factories with the same high priority.
         registry.AddFactory(
             [](const sk_sp<SkData>& buffer) {
               return std::make_unique<FakeImageGenerator>(1337);
@@ -210,7 +220,7 @@ TEST_F(ShellTest, UIFactoriesResolveWithoutIntermediateTasks) {
         });
 
     EXPECT_EQ(factory_order, (std::vector<int>{1, 2, 3}));
-    EXPECT_FALSE(callback_called);
+    EXPECT_TRUE(callback_called);
   });
   latch.Wait();
   EXPECT_TRUE(callback_called);

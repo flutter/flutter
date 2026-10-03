@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_GENERATOR_REGISTRY_TEST_H_
-#define FLUTTER_LIB_UI_PAINTING_IMAGE_GENERATOR_REGISTRY_TEST_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_GENERATOR_REGISTRY_TEST_UTILS_H_
+#define FLUTTER_LIB_UI_PAINTING_IMAGE_GENERATOR_REGISTRY_TEST_UTILS_H_
 
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
@@ -11,7 +11,9 @@
 
 namespace flutter::testing {
 
-// Waits for asynchronous resolution without blocking the registry's UI runner.
+// Creates a registry on a dedicated UI thread, optionally adds factories,
+// and blocks the calling thread until CreateCompatibleGenerator reports a
+// result.
 inline std::shared_ptr<ImageGenerator> CreateTestImageGenerator(
     const sk_sp<SkData>& buffer,
     const std::function<void(ImageGeneratorRegistry&)>& add_factories =
@@ -38,4 +40,4 @@ inline std::shared_ptr<ImageGenerator> CreateTestImageGenerator(
 
 }  // namespace flutter::testing
 
-#endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_GENERATOR_REGISTRY_TEST_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_GENERATOR_REGISTRY_TEST_UTILS_H_

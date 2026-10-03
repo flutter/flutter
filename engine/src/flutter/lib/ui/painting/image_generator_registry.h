@@ -26,7 +26,7 @@ using ImageGeneratorFactory =
     std::function<std::shared_ptr<ImageGenerator>(sk_sp<SkData> buffer)>;
 
 /// @brief  Controls where an image generator factory is invoked when resolving
-///         a generator asynchronously.
+///         a generator.
 enum class ImageGeneratorFactoryExecution {
   /// Invoke the factory on the UI task runner.
   kUITaskRunner,
@@ -63,12 +63,14 @@ class ImageGeneratorRegistry {
                   ImageGeneratorFactoryExecution execution =
                       ImageGeneratorFactoryExecution::kUITaskRunner);
 
-  /// @brief      Asynchronously walks the list of image generator factories in
+  /// @brief      Walks the list of image generator factories in
   ///             priority order. Factories registered for concurrent execution
   ///             are invoked on `concurrent_task_runner`; all other factories
   ///             are invoked on `ui_task_runner`. This method must be
   ///             called from `ui_task_runner`, where the registry is
-  ///             accessed. The callback is always posted to that runner.
+  ///             accessed. The callback runs on that runner and may be invoked
+  ///             synchronously if a UI factory accepts the data. If no factory
+  ///             accepts the data, the callback is posted to that runner.
   /// @param[in]  buffer                  The raw encoded image data.
   /// @param[in]  concurrent_task_runner  Runner for factories that may perform
   ///                                     expensive compatibility checks.
@@ -85,7 +87,8 @@ class ImageGeneratorRegistry {
 
  private:
   struct PrioritizedFactory {
-    // Snapshots share the registered callback, including its captured state.
+    // Copies of this PrioritizedFactory used by ResolveGenerator share the
+    // registered callback, including its captured state.
     std::shared_ptr<ImageGeneratorFactory> callback;
 
     int32_t priority = 0;
@@ -108,6 +111,8 @@ class ImageGeneratorRegistry {
     }
   };
 
+  // Recursively tries to create a generator for buffer from the ordered list of
+  // factories, starting at index. Passes the result (or nullptr) to callback.
   // Owns the factory snapshot so queued work can outlive the registry.
   static void ResolveGenerator(
       std::shared_ptr<const std::vector<PrioritizedFactory>> factories,
