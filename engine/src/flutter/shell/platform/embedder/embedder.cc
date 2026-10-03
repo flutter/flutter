@@ -5,9 +5,11 @@
 #define FML_USED_ON_EMBEDDER
 #define RAPIDJSON_HAS_STDSTRING 1
 
+#include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <string>
 #include <vector>
@@ -113,10 +115,11 @@ extern const intptr_t kPlatformStrongDillSize;
 #ifdef IMPELLER_SUPPORTS_RENDERING
 #include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"  // nogncheck
 #include "flutter/shell/platform/embedder/embedder_surface_vulkan_impeller.h"  // nogncheck
-#include "impeller/core/texture.h"                                // nogncheck
-#include "impeller/renderer/backend/vulkan/context_vk.h"          // nogncheck
-#include "impeller/renderer/backend/vulkan/driver_info_vk.h"      // nogncheck
-#include "impeller/renderer/backend/vulkan/formats_vk.h"          // nogncheck
+#include "impeller/core/texture.h"                            // nogncheck
+#include "impeller/renderer/backend/vulkan/context_vk.h"      // nogncheck
+#include "impeller/renderer/backend/vulkan/driver_info_vk.h"  // nogncheck
+#include "impeller/renderer/backend/vulkan/formats_vk.h"      // nogncheck
+#include "impeller/renderer/backend/vulkan/swapchain/swapchain_transients_vk.h"  // nogncheck
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"   // nogncheck
 #include "impeller/renderer/backend/vulkan/texture_vk.h"          // nogncheck
 #include "impeller/renderer/backend/vulkan/texture_wrapper_vk.h"  // nogncheck
@@ -1336,16 +1339,81 @@ MakeRenderTargetFromBackingStoreImpeller(
 #endif
 }
 
+#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
+struct VulkanBackingStoreTransientsCache {
+  // Maximum number of distinct (context, size, format) transient attachment
+  // pairs retained simultaneously. A capacity of 4 supports multi-layer and
+  // multi-view composition with distinct layer dimensions without per-frame
+  // reallocation while bounding peak memory during continuous window resizing.
+  static constexpr size_t kMaxCachedEntries = 4u;
+
+  struct Entry {
+    std::weak_ptr<impeller::Context> context;
+    impeller::ISize size;
+    impeller::PixelFormat format = impeller::PixelFormat::kUnknown;
+    std::shared_ptr<impeller::SwapchainTransientsVK> transients;
+  };
+
+  std::mutex mutex;
+  std::vector<Entry> entries;
+
+  std::shared_ptr<impeller::SwapchainTransientsVK> GetOrCreate(
+      const std::shared_ptr<impeller::Context>& current_context,
+      const impeller::TextureDescriptor& resolve_desc) {
+    std::scoped_lock lock(mutex);
+    entries.erase(std::remove_if(entries.begin(), entries.end(),
+                                 [](const Entry& entry) {
+                                   return entry.context.expired();
+                                 }),
+                  entries.end());
+    for (auto it = entries.begin(); it != entries.end(); ++it) {
+      if (it->context.lock() == current_context &&
+          it->size == resolve_desc.size && it->format == resolve_desc.format &&
+          it->transients) {
+        auto result = it->transients;
+        if (std::next(it) != entries.end()) {
+          Entry mru = std::move(*it);
+          entries.erase(it);
+          entries.push_back(std::move(mru));
+        }
+        return result;
+      }
+    }
+    auto transients = std::make_shared<impeller::SwapchainTransientsVK>(
+        current_context, resolve_desc, /*enable_msaa=*/true);
+    if (entries.size() >= kMaxCachedEntries) {
+      entries.erase(entries.begin());
+    }
+    entries.push_back(Entry{
+        .context = current_context,
+        .size = resolve_desc.size,
+        .format = resolve_desc.format,
+        .transients = transients,
+    });
+    return transients;
+  }
+};
+#else
+struct VulkanBackingStoreTransientsCache {};
+#endif
+
 static std::unique_ptr<flutter::EmbedderRenderTarget>
 MakeRenderTargetFromBackingStoreImpeller(
     FlutterBackingStore backing_store,
     const fml::closure& on_release,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     const FlutterBackingStoreConfig& config,
-    const FlutterVulkanBackingStore* vulkan) {
+    const FlutterVulkanBackingStore* vulkan,
+    const std::shared_ptr<VulkanBackingStoreTransientsCache>&
+        vulkan_transients_cache) {
 #if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
   if (!aiks_context || !aiks_context->GetContext()) {
     FML_LOG(ERROR) << "AiksContext or Impeller Context was null.";
+    return nullptr;
+  }
+
+  if (!vulkan_transients_cache) {
+    FML_LOG(ERROR) << "Vulkan backing store transients cache was null.";
     return nullptr;
   }
 
@@ -1396,22 +1464,19 @@ MakeRenderTargetFromBackingStoreImpeller(
 
   resolve_tex->SetLabel("ImpellerBackingStoreResolve");
 
-  impeller::TextureDescriptor msaa_tex_desc;
-  msaa_tex_desc.storage_mode = impeller::StorageMode::kDeviceTransient;
-  msaa_tex_desc.type = impeller::TextureType::kTexture2DMultisample;
-  msaa_tex_desc.sample_count = impeller::SampleCount::kCount4;
-  msaa_tex_desc.format = resolve_tex->GetTextureDescriptor().format;
-  msaa_tex_desc.size = size;
-  msaa_tex_desc.usage = impeller::TextureUsage::kRenderTarget;
-
-  auto msaa_tex =
-      aiks_context->GetContext()->GetResourceAllocator()->CreateTexture(
-          msaa_tex_desc);
+  auto transients = vulkan_transients_cache->GetOrCreate(
+      aiks_context->GetContext(), resolve_tex_desc);
+  auto msaa_tex = transients->GetMSAATexture();
   if (!msaa_tex) {
     FML_LOG(ERROR) << "Could not allocate MSAA color texture.";
     return nullptr;
   }
-  msaa_tex->SetLabel("ImpellerBackingStoreColorMSAA");
+
+  auto depth_stencil_tex = transients->GetDepthStencilTexture();
+  if (!depth_stencil_tex) {
+    FML_LOG(ERROR) << "Could not allocate depth/stencil texture.";
+    return nullptr;
+  }
 
   impeller::ColorAttachment color0;
   color0.texture = msaa_tex;
@@ -1426,7 +1491,9 @@ MakeRenderTargetFromBackingStoreImpeller(
       *aiks_context->GetContext(),
       *aiks_context->GetContext()->GetResourceAllocator(), size,
       /*msaa=*/true,
-      /*label=*/"ImpellerBackingStore");
+      /*label=*/"ImpellerBackingStore",
+      impeller::RenderTarget::kDefaultStencilAttachmentConfig,
+      depth_stencil_tex);
 
   if (!render_target_desc.GetDepthAttachment().has_value() ||
       !render_target_desc.GetStencilAttachment().has_value()) {
@@ -1524,7 +1591,9 @@ CreateEmbedderRenderTarget(
     const FlutterBackingStoreConfig& config,
     GrDirectContext* context,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
-    bool enable_impeller) {
+    bool enable_impeller,
+    const std::shared_ptr<VulkanBackingStoreTransientsCache>&
+        vulkan_transients_cache) {
   FlutterBackingStore backing_store = {};
   backing_store.struct_size = sizeof(backing_store);
 
@@ -1657,7 +1726,7 @@ CreateEmbedderRenderTarget(
       if (enable_impeller) {
         render_target = MakeRenderTargetFromBackingStoreImpeller(
             backing_store, collect_callback.Release(), aiks_context, config,
-            &backing_store.vulkan);
+            &backing_store.vulkan, vulkan_transients_cache);
         break;
       } else {
         auto skia_surface = MakeSkSurfaceFromBackingStore(
@@ -1711,16 +1780,18 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
   }
 
   FlutterCompositor captured_compositor = *compositor;
+  auto vulkan_transients_cache =
+      std::make_shared<VulkanBackingStoreTransientsCache>();
 
   flutter::EmbedderExternalViewEmbedder::CreateRenderTargetCallback
       create_render_target_callback =
-          [captured_compositor, enable_impeller](
+          [captured_compositor, enable_impeller, vulkan_transients_cache](
               GrDirectContext* context,
               const std::shared_ptr<impeller::AiksContext>& aiks_context,
               const auto& config) {
-            return CreateEmbedderRenderTarget(&captured_compositor, config,
-                                              context, aiks_context,
-                                              enable_impeller);
+            return CreateEmbedderRenderTarget(
+                &captured_compositor, config, context, aiks_context,
+                enable_impeller, vulkan_transients_cache);
           };
 
   flutter::EmbedderExternalViewEmbedder::PresentCallback present_callback;
