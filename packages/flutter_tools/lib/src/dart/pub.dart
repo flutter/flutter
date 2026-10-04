@@ -115,8 +115,7 @@ abstract class Pub {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-    Cache? cache,
-    String? flutterRoot,
+    required Cache cache,
     Stdio? stdio,
   }) {
     if (stdio != null) {
@@ -128,7 +127,6 @@ abstract class Pub {
         processManager: processManager,
         stdio: stdio,
         cache: cache,
-        flutterRoot: flutterRoot,
       );
     }
     return _DefaultPub(
@@ -138,7 +136,6 @@ abstract class Pub {
       platform: platform,
       processManager: processManager,
       cache: cache,
-      flutterRoot: flutterRoot,
     );
   }
 
@@ -230,12 +227,12 @@ class _DefaultPub implements Pub {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-    this._cache,
-    this._flutterRoot,
+    required this._cache,
   }) : _logger = logger,
        _platform = platform,
        _processManager = processManager,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+       _flutterRoot = null,
        _stdio = null {
     _git = Git(currentPlatform: platform, runProcessWith: _processUtils);
   }

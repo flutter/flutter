@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -790,6 +791,7 @@ exit code: 66
     // Intentionally not using pub.test to simulate a real environment, but
     // we are using non-inherited I/O to avoid printing to the console.
     final pub = Pub(
+      cache: Cache.test(flutterRoot: '', processManager: processManager),
       platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,

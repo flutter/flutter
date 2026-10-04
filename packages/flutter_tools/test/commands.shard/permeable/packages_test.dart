@@ -536,6 +536,7 @@ flutter:
       },
       overrides: <Type, Generator>{
         Pub: () => Pub(
+          cache: globals.cache,
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,

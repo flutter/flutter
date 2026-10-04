@@ -144,9 +144,13 @@ void testUsingContext(
                         if (initializeFlutterRoot &&
                             overrides[Cache] == null &&
                             (overrides[Platform] == null ||
-                                !globals.platform.environment.containsKey('FLUTTER_ROOT'))) {
+                                !globals.platform.environment.containsKey(
+                                  kFlutterRootEnvironmentVariableName,
+                                ))) {
                           // Provide a sane default for the flutterRoot directory. Individual
-                          // tests can override this in the test.
+                          // tests can override this in the test. Skipped when a Platform
+                          // override supplies FLUTTER_ROOT, so FlutterCache resolves it via
+                          // Cache.defaultFlutterRoot.
                           globals.cache.flutterRoot = getFlutterRoot();
                         }
                         return await testMethod();
