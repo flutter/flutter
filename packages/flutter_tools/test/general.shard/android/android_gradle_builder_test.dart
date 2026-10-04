@@ -137,7 +137,7 @@ void main() {
           AndroidSdk: () => AndroidSdk(
             fileSystem.directory(missingSdkPath()),
             java: FakeJava(),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           ),
           ProcessManager: () => processManager,
           ...overrides,
@@ -234,7 +234,7 @@ void main() {
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -325,7 +325,7 @@ void main() {
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -420,7 +420,7 @@ void main() {
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -511,7 +511,7 @@ void main() {
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -1490,7 +1490,7 @@ void main() {
             return AndroidSdk(
               fileSystem.directory(sdkPath()),
               java: FakeJava(),
-              toolContext: DelegatingToolContext(),
+              toolContext: const DelegatingToolContext(),
             );
           },
           AndroidStudio: () => FakeAndroidStudio(),
@@ -1561,7 +1561,7 @@ void main() {
             return AndroidSdk(
               fileSystem.directory(sdkPath()),
               java: FakeJava(),
-              toolContext: DelegatingToolContext(),
+              toolContext: const DelegatingToolContext(),
             );
           },
           AndroidStudio: () => FakeAndroidStudio(),
@@ -1625,7 +1625,7 @@ void main() {
             return AndroidSdk(
               fileSystem.directory(sdkPath()),
               java: FakeJava(),
-              toolContext: DelegatingToolContext(),
+              toolContext: const DelegatingToolContext(),
             );
           },
           AndroidStudio: () => FakeAndroidStudio(),
@@ -1643,7 +1643,7 @@ void main() {
           final sdk = AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
@@ -1713,7 +1713,7 @@ void main() {
             return AndroidSdk(
               fileSystem.directory(sdkPath()),
               java: FakeJava(),
-              toolContext: DelegatingToolContext(),
+              toolContext: const DelegatingToolContext(),
             );
           },
           AndroidStudio: () => FakeAndroidStudio(),
@@ -1731,7 +1731,7 @@ void main() {
           final sdk = AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
@@ -2227,7 +2227,7 @@ Gradle Crashed
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -3294,7 +3294,7 @@ Gradle Crashed
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -3398,7 +3398,7 @@ Gradle Crashed
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -3505,7 +3505,7 @@ Gradle Crashed
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
