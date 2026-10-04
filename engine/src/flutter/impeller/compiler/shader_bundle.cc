@@ -4,6 +4,7 @@
 
 #include "impeller/compiler/shader_bundle.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <sstream>
 
@@ -187,6 +188,21 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
   if (!bundle_data) {
     std::cerr << "Bundled shader information was nil for \"" << shader_name
               << "\"." << std::endl;
+    return nullptr;
+  }
+
+  // The runtime needs the workgroup size to dispatch on Metal and to validate
+  // it against device limits, so a bundled compute shader must declare it with
+  // a literal `local_size`.
+  if (const auto& workgroup_size = bundle_data->GetWorkgroupSize();
+      workgroup_size.has_value() &&
+      std::find(workgroup_size->begin(), workgroup_size->end(), 0u) !=
+          workgroup_size->end()) {
+    std::cerr << "Compute shader \"" << shader_name
+              << "\" sizes its workgroup with a specialization constant "
+                 "(local_size_x_id, local_size_y_id or local_size_z_id). "
+                 "Bundled compute shaders must declare a literal local_size."
+              << std::endl;
     return nullptr;
   }
 
