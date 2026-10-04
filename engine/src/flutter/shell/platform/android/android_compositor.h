@@ -49,6 +49,14 @@ class AndroidCompositorPlatformViewDelegate {
   /// Invoked after all layers in a frame have been presented.
   virtual void OnFramePresented() = 0;
 
+  /// Records the root OpenGL backing store FBO and dimensions for the current
+  /// frame so the delegate can re-present to a newly attached FlutterImageView
+  /// when convertToImageView() switches the native window during
+  /// OnFramePresented.
+  virtual void SetPendingRootOpenGLBackingStore(uint32_t fbo,
+                                                size_t width,
+                                                size_t height) {}
+
   /// Returns true if the onscreen surface requires an empty frame presentation
   /// when no background layer is drawn (i.e. FlutterView was converted to
   /// FlutterImageView in legacy Hybrid Composition).

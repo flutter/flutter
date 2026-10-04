@@ -892,6 +892,12 @@ class FlutterEmbedderNative {
                                                 void* egl_image,
                                                 void* egl_display = nullptr);
 
+  /// @brief Test helper to populate an AndroidHardwareBuffer on an
+  /// ImageTextureEntry.
+  void SetImageTextureCurrentBufferForTesting(
+      int64_t texture_id,
+      std::unique_ptr<AndroidHardwareBuffer> buffer);
+
   /// @brief Registers an opaque C-API response handle and assigns an integer
   /// ID.
   int32_t RegisterResponseHandle(
@@ -928,6 +934,11 @@ class FlutterEmbedderNative {
   using RunInitializedEngineFn =
       std::function<FlutterEngineResult(FLUTTER_API_SYMBOL(FlutterEngine))>;
   void SetRunInitializedEngineFnForTesting(RunInitializedEngineFn fn);
+
+  using RegisterExternalTextureFn =
+      std::function<FlutterEngineResult(FLUTTER_API_SYMBOL(FlutterEngine),
+                                        int64_t)>;
+  void SetRegisterExternalTextureFnForTesting(RegisterExternalTextureFn fn);
   ANativeWindow* GetOverlayWindowForTesting(size_t overlay_index);
 
   /// @brief Deinitializes a FlutterEngine instance via C-API
@@ -1201,6 +1212,22 @@ class FlutterEmbedderNative {
                                         const FlutterPoint& offset,
                                         const FlutterSize& size);
   void HandleCompositorFramePresented();
+  void SetPendingRootOpenGLBackingStore(uint32_t fbo,
+                                        size_t width,
+                                        size_t height);
+  void RegisterPendingExternalTextures(FLUTTER_API_SYMBOL(FlutterEngine)
+                                           engine) const;
+
+  struct PendingPlatformViewPresentation {
+    int64_t view_id = 0;
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    int32_t view_width = 0;
+    int32_t view_height = 0;
+    AndroidMutatorsStack mutators_stack;
+  };
 
   struct ImageTextureEntry {
     std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>> weak_entry;
@@ -1235,8 +1262,16 @@ class FlutterEmbedderNative {
   mutable DeinitializeEngineFn deinitialize_engine_fn_;
   mutable InitializeEngineFn initialize_engine_fn_;
   mutable RunInitializedEngineFn run_initialized_engine_fn_;
+  mutable RegisterExternalTextureFn register_external_texture_fn_;
   FlutterEngineAOTData aot_data_ = nullptr;
   size_t current_frame_overlay_count_ = 0;
+  bool pending_begin_frame_ = false;
+  uint32_t pending_root_gl_fbo_ = 0;
+  size_t pending_root_gl_width_ = 0;
+  size_t pending_root_gl_height_ = 0;
+  std::vector<PendingPlatformViewPresentation> pending_platform_views_;
+  std::vector<PlatformViewOverlay> pending_overlays_;
+  mutable std::mutex compositor_frame_mutex_;
   FLUTTER_API_SYMBOL(FlutterEngine) registered_engine_ = nullptr;
   FlutterImageDecoderRegistration decoder_registration_ = 0;
   std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object_;
@@ -1289,6 +1324,8 @@ class FlutterEmbedderNative {
       surface_textures_;
   mutable std::unordered_map<int64_t, uint32_t> surface_texture_gl_ids_;
   mutable std::unordered_set<int64_t> surface_texture_attached_;
+  mutable std::unordered_map<int64_t, std::unique_ptr<AndroidHardwareBuffer>>
+      surface_texture_vulkan_buffers_;
   std::unordered_map<int64_t, ImageTextureEntry> image_textures_;
   mutable std::unordered_map<int32_t,
                              const FlutterPlatformMessageResponseHandle*>

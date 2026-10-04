@@ -10619,6 +10619,270 @@ TEST(AndroidSurfaceManagerVulkanTest,
   VulkanQueueGuard::ResetForTesting();
 }
 
+TEST(FlutterEmbedderNativeImageTextureTest,
+     VulkanRendererConfigWiresExternalTextureCallback) {
+  VulkanQueueGuard::ResetForTesting();
+  FlutterEmbedderNative::ResetDefaults();
+  AndroidVMArgs vm_args;
+  vm_args.enable_impeller = true;
+  vm_args.requested_rendering_backend = "vulkan";
+  FlutterEmbedderNative::SetDefaultVMArgs(vm_args);
+
+  // 0x8500 is a unique pointer tag for the fake VulkanDeviceOwner handles.
+  auto owner = CreateFakeGroupVulkanDeviceOwner(0x8500);
+  auto native = std::make_unique<FlutterEmbedderNative>(owner);
+  owner.reset();
+  ASSERT_NE(native->GetSurfaceManager(), nullptr);
+  ASSERT_TRUE(native->GetSurfaceManager()->IsVulkanInitialized());
+
+  FlutterRendererConfig renderer_config = {};
+  native->PopulateRendererConfig(&renderer_config);
+  ASSERT_EQ(renderer_config.type, kVulkan);
+  ASSERT_NE(renderer_config.vulkan.external_texture_frame_callback, nullptr);
+
+  // 301 is a test external texture ID; 128x128 is a test frame extent.
+  constexpr int64_t kTextureId = 301;
+  constexpr size_t kWidth = 128;
+  constexpr size_t kHeight = 128;
+  FlutterVulkanExternalTexture frame_out = {};
+
+  // Unregistered texture returns false cleanly.
+  EXPECT_FALSE(renderer_config.vulkan.external_texture_frame_callback(
+      native.get(), kTextureId, kWidth, kHeight, &frame_out));
+
+  // Registered ImageTexture without a Java ImageConsumer returns false cleanly.
+  native->RegisterImageTexture(kTextureId, nullptr,
+                               /*reset_on_background=*/false);
+  EXPECT_FALSE(renderer_config.vulkan.external_texture_frame_callback(
+      native.get(), kTextureId, kWidth, kHeight, &frame_out));
+  native->UnregisterImageTexture(kTextureId);
+
+  native.reset();
+  FlutterEmbedderNative::ResetDefaults();
+  VulkanQueueGuard::ResetForTesting();
+}
+
+TEST(FlutterEmbedderNativeImageTextureTest,
+     PreLaunchRegisteredTexturesAreRegisteredWithEngineOnLaunch) {
+  auto native = std::make_unique<FlutterEmbedderNative>();
+  ASSERT_NE(native, nullptr);
+
+  // 201 and 202 are distinct external texture IDs registered before Launch().
+  constexpr int64_t kImageTextureId = 201;
+  constexpr int64_t kSurfaceTextureId = 202;
+  // 1 is a test engine ID passed to Launch().
+  constexpr int64_t kTestEngineId = 1;
+
+  std::vector<int64_t> registered_with_engine;
+  // 0xBEEF is a synthetic non-null FlutterEngine handle for testing.
+  auto mock_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xBEEF);
+
+  native->SetRegisterExternalTextureFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+          int64_t texture_identifier) -> FlutterEngineResult {
+        EXPECT_EQ(engine, mock_engine);
+        registered_with_engine.push_back(texture_identifier);
+        return kSuccess;
+      });
+
+  // Register both texture types before Launch() while engine_ is still nullptr.
+  native->RegisterImageTexture(kImageTextureId, nullptr,
+                               /*reset_on_background=*/false);
+  native->RegisterSurfaceTexture(kSurfaceTextureId,
+                                 fml::jni::ScopedJavaGlobalRef<jobject>());
+  EXPECT_TRUE(registered_with_engine.empty());
+
+  native->SetInitializeEngineFnForTesting(
+      [&](const FlutterRendererConfig* /*config*/,
+          const FlutterProjectArgs* /*args*/, void* /*user_data*/,
+          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        *engine_out = mock_engine;
+        return kSuccess;
+      });
+  native->SetRunInitializedEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_EQ(engine, mock_engine);
+        return kSuccess;
+      });
+  native->SetDeinitializeEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_EQ(engine, mock_engine);
+        return kSuccess;
+      });
+
+  EXPECT_EQ(native->Launch("main", "", {}, kTestEngineId), kSuccess);
+  ASSERT_EQ(registered_with_engine.size(), 2u);
+  EXPECT_NE(std::find(registered_with_engine.begin(),
+                      registered_with_engine.end(), kImageTextureId),
+            registered_with_engine.end());
+  EXPECT_NE(std::find(registered_with_engine.begin(),
+                      registered_with_engine.end(), kSurfaceTextureId),
+            registered_with_engine.end());
+}
+
+TEST(FlutterEmbedderNativeSurfaceTest,
+     NotifySurfaceDestroyedAndRecreatedResetsFirstFramePresented) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  int first_frame_calls = 0;
+  ON_CALL(*mock_invoker, OnFirstFrame()).WillByDefault([&]() {
+    ++first_frame_calls;
+    return true;
+  });
+
+  FlutterEmbedderNative native(mock_invoker);
+  JniRouter::SetEmbedderEnabled(true);
+
+  // 100.0 is a test root backing store layer dimension.
+  constexpr double kLayerSize = 100.0;
+  FlutterBackingStore root_store = {};
+  root_store.struct_size = sizeof(FlutterBackingStore);
+  FlutterLayer root_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &root_store,
+      .size = FlutterSize{kLayerSize, kLayerSize},
+  };
+  const FlutterLayer* layers[] = {&root_layer};
+
+  // Initial surface creation and first frame presentation fires OnFirstFrame.
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 1);
+
+  // Subsequent frame on the same surface does not fire OnFirstFrame again.
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 1);
+
+  // NotifySurfaceWindowChanged (e.g. convertToImageView) must NOT reset
+  // first_frame_presented_.
+  native.NotifySurfaceWindowChanged(nullptr, /*is_fake_window=*/true);
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 1);
+
+  // Destroying and recreating the surface resets first_frame_presented_ so the
+  // next presented frame fires OnFirstFrame again.
+  native.NotifySurfaceDestroyed();
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 2);
+
+  native.NotifySurfaceDestroyed();
+}
+
+TEST(
+    FlutterEmbedderNativeCompositorTest,
+    HybridCompositionCommitsBeginDisplayOverlayAndEndFrameInSinglePlatformTask) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  bool hcpp_enabled = false;
+  std::mutex events_mutex;
+  std::vector<std::string> ordered_events;
+  std::vector<std::thread::id> ui_commit_thread_ids;
+
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(Eq("isHcppEnabled"), _, _))
+      .WillByDefault([&](const std::string&, const std::string&,
+                         const std::vector<uint8_t>&) { return hcpp_enabled; });
+  // 7 is a synthetic overlay surface ID returned by createOverlaySurfaceId.
+  constexpr int64_t kOverlaySurfaceId = 7;
+  ON_CALL(*mock_invoker, InvokeIntMethod(Eq("createOverlaySurfaceId"), _, _))
+      .WillByDefault(
+          [&](const std::string&, const std::string&,
+              const std::vector<uint8_t>&) { return kOverlaySurfaceId; });
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault([&](const std::string& method_name,
+                         const std::string& /*signature*/,
+                         const std::vector<uint8_t>& payload) {
+        if (method_name == "setHcppEnabled" && !payload.empty()) {
+          hcpp_enabled = (payload[0] != 0);
+          return true;
+        }
+        if (method_name == "onBeginFrame" ||
+            method_name == "onDisplayOverlaySurface" ||
+            method_name == "onEndFrame") {
+          std::scoped_lock lock(events_mutex);
+          ordered_events.push_back(method_name);
+          ui_commit_thread_ids.push_back(std::this_thread::get_id());
+        }
+        return true;
+      });
+  ON_CALL(*mock_invoker, PushPlatformViewMutators(_, _, _, _, _, _, _, _))
+      .WillByDefault([&](int64_t, int32_t, int32_t, int32_t, int32_t, int32_t,
+                         int32_t, const std::vector<uint8_t>&) {
+        std::scoped_lock lock(events_mutex);
+        ordered_events.push_back("pushPlatformViewMutators");
+        ui_commit_thread_ids.push_back(std::this_thread::get_id());
+        return true;
+      });
+  ON_CALL(*mock_invoker, OnFirstFrame()).WillByDefault([&]() {
+    std::scoped_lock lock(events_mutex);
+    ordered_events.push_back("onFirstFrame");
+    ui_commit_thread_ids.push_back(std::this_thread::get_id());
+    return true;
+  });
+
+  FlutterEmbedderNative native(mock_invoker);
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(native.SetHcppEnabled(false));
+  EXPECT_FALSE(native.IsHcppEnabled());
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+
+  // 1 is a test platform view ID; 100.0 and 50.0 are test layer dimensions.
+  constexpr int64_t kPlatformViewId = 1;
+  constexpr double kRootSize = 100.0;
+  constexpr double kPvSize = 50.0;
+
+  FlutterBackingStore root_store = {};
+  root_store.struct_size = sizeof(FlutterBackingStore);
+  FlutterBackingStore overlay_store = {};
+  overlay_store.struct_size = sizeof(FlutterBackingStore);
+
+  FlutterPlatformView pv = {
+      .struct_size = sizeof(FlutterPlatformView),
+      .identifier = kPlatformViewId,
+  };
+
+  FlutterLayer root_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &root_store,
+      .size = FlutterSize{kRootSize, kRootSize},
+  };
+  FlutterLayer pv_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypePlatformView,
+      .platform_view = &pv,
+      .size = FlutterSize{kPvSize, kPvSize},
+  };
+  FlutterLayer overlay_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &overlay_store,
+      .size = FlutterSize{kRootSize, kRootSize},
+  };
+
+  // 3 layers: root backing store + platform view + overlay backing store.
+  constexpr size_t kLayerCount = 3;
+  const FlutterLayer* layers[kLayerCount] = {&root_layer, &pv_layer,
+                                             &overlay_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, kLayerCount));
+
+  std::scoped_lock lock(events_mutex);
+  const std::vector<std::string> expected_order = {
+      "onBeginFrame",
+      "pushPlatformViewMutators",
+      "onDisplayOverlaySurface",
+      "onEndFrame",
+      "onFirstFrame",
+  };
+  EXPECT_EQ(ordered_events, expected_order);
+  ASSERT_EQ(ui_commit_thread_ids.size(), expected_order.size());
+  for (size_t i = 1; i < ui_commit_thread_ids.size(); ++i) {
+    EXPECT_EQ(ui_commit_thread_ids[i], ui_commit_thread_ids[0]);
+  }
+
+  native.NotifySurfaceDestroyed();
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter
