@@ -128,30 +128,32 @@ Future<void> testMain() async {
           ui.TextStyle(
             fontFamily: 'RobotoVariable',
             fontSize: fontSize,
-            fontVariations: const <ui.FontVariation>[ui.FontVariation('wght', 400)],
+            fontVariations: const <ui.FontVariation>[.new('wght', 400.0)],
           ),
         )
         ..addText(
           'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz '
           '0123456789 ()*+,-.:@',
         );
-      return builder.build()..layout(const ui.ParagraphConstraints(width: 300));
+      return builder.build()..layout(const ui.ParagraphConstraints(width: 300.0));
     }
 
-    final ui.Paragraph paragraph = layoutParagraph(12);
+    final ui.Paragraph paragraph = layoutParagraph(12.0);
     addTearDown(paragraph.dispose);
 
-    final stopwatch = Stopwatch()..start();
-    double fontSizeSeed = 0;
+    // Approximate (sqrt(5) - 1) / 2 to avoid repeating cached glyph sizes.
+    const fractionalIncrement = 0.6180339887;
+    var fontSizeSeed = 0.0;
     var frame = 0;
-    while (frame < _maxFrames && stopwatch.elapsed < _maxTestTime) {
+    while (frame < _maxFrames) {
       final recorder = ui.PictureRecorder();
       final canvas = ui.Canvas(recorder);
-      for (var i = 0; i < 6; i++) {
+      // Draw six copies at scales between 0.8 and 12.8 to vary raster glyph sizes.
+      for (var index = 0; index < 6; index += 1) {
         canvas
           ..save()
-          ..translate(10.0 + i * 3, 10.0 + i * 40)
-          ..scale(0.8 + (frame * 0.6180339887 + i * 2) % 12)
+          ..translate(10.0 + index * 3.0, 10.0 + index * 40.0)
+          ..scale(0.8 + (frame * fractionalIncrement + index * 2.0) % 12.0)
           ..drawParagraph(paragraph, ui.Offset.zero)
           ..restore();
       }
@@ -159,18 +161,19 @@ Future<void> testMain() async {
       final sceneBuilder = ui.SceneBuilder()..addPicture(ui.Offset.zero, picture);
       try {
         final Future<void> renderFuture = renderScene(sceneBuilder.build());
+        // Yield to dispatch raster work; renderFuture synchronizes completion.
         await Future<void>.delayed(Duration.zero);
-        for (var i = 0; i < _paragraphsPerFrame; i++) {
-          fontSizeSeed += 0.6180339887;
-          layoutParagraph(4 + fontSizeSeed % 60).dispose();
+        for (var index = 0; index < _paragraphsPerFrame; index += 1) {
+          fontSizeSeed += fractionalIncrement;
+          layoutParagraph(4.0 + fontSizeSeed % 60.0).dispose();
         }
         await renderFuture;
       } finally {
         picture.dispose();
       }
-      frame++;
+      frame += 1;
     }
 
-    expect(frame, greaterThan(0));
-  }, timeout: const Timeout(Duration(minutes: 2)));
+    expect(frame, _maxFrames);
+  });
 }
