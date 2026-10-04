@@ -85,6 +85,9 @@ name: foo
             .file('bin/cache/flutter_web_sdk/flutter_js/flutter.js')
             .createSync(recursive: true);
         globals.fs
+            .file('bin/cache/flutter_web_sdk/flutter_js/flutter.js.map')
+            .createSync(recursive: true);
+        globals.fs
             .file('engine/src/flutter/txt/third_party/fonts/Roboto-Regular.ttf')
             .createSync(recursive: true);
 
@@ -1731,6 +1734,25 @@ _flutter.loader.load();
   );
 
   test(
+    'WebBuiltInAssets declares and copies the Flutter loader source map',
+    () => testbed.run(() async {
+      final File flutterJsMapInput = globals.fs.file(
+        'bin/cache/flutter_web_sdk/flutter_js/flutter.js.map',
+      )..createSync(recursive: true);
+      flutterJsMapInput.writeAsStringSync('source map', flush: true);
+      globals.fs.directory('bin/cache/flutter_web_sdk/canvaskit').createSync(recursive: true);
+
+      final target = WebBuiltInAssets(globals.fs);
+      expect(target.outputs, contains(const Source.pattern('{BUILD_DIR}/flutter.js.map')));
+      await target.build(environment);
+
+      final File flutterJsMapOutput = environment.outputDir.childFile('flutter.js.map');
+      expect(flutterJsMapOutput, exists);
+      expect(flutterJsMapOutput.readAsStringSync(), 'source map');
+    }),
+  );
+
+  test(
     'WebBuiltInAssets copies over canvaskit again if the web sdk changes',
     () => testbed.run(() async {
       final File canvasKitInput = globals.fs.file(
@@ -1813,17 +1835,25 @@ _flutter.loader.load();
     'hashAndRenameWebOutput renames the binary with its content hash and pairs the source map',
     () => testbed.run(() {
       const jsContent = 'console.log("hello");\n//# sourceMappingURL=main.dart.js.map\n';
+      const mapContent = '{"version":3,"sources":[]}';
       final File jsFile = environment.buildDir.childFile('main.dart.js')
         ..createSync(recursive: true)
         ..writeAsStringSync(jsContent);
       final File mapFile = environment.buildDir.childFile('main.dart.js.map')
         ..createSync(recursive: true)
-        ..writeAsStringSync('{"version":3,"sources":[]}');
+        ..writeAsStringSync(mapContent);
 
-      // The hash is computed from the compiler's output, before the
-      // sourceMappingURL comment is rewritten to the hashed map name.
+      final String expectedMapHash = crypto.sha256
+          .convert(utf8.encode(mapContent))
+          .toString()
+          .substring(0, 8);
+      final expectedMapBasename = 'main.dart.$expectedMapHash.js.map';
+      final rewrittenJsContent =
+          'console.log("hello");\n//# sourceMappingURL=$expectedMapBasename\n';
+      // The binary hash is computed after rewriting the sourceMappingURL
+      // comment so the filename hash matches the final on-disk file bytes.
       final String expectedHash = crypto.sha256
-          .convert(utf8.encode(jsContent))
+          .convert(utf8.encode(rewrittenJsContent))
           .toString()
           .substring(0, 8);
 
@@ -1833,25 +1863,30 @@ _flutter.loader.load();
       final File renamedFile = environment.buildDir.childFile(newBasename);
       expect(renamedFile, exists);
 
-      // The map shares the binary's hash so that '<binary>.map' resolves, and
-      // the binary's sourceMappingURL comment points at the renamed map.
+      // The map is hashed with its own content hash, and the binary's
+      // sourceMappingURL comment points at the renamed map.
       expect(mapFile, isNot(exists));
-      expect(environment.buildDir.childFile('$newBasename.map'), exists);
-      expect(renamedFile.readAsStringSync(), contains('sourceMappingURL=$newBasename.map'));
+      expect(environment.buildDir.childFile(expectedMapBasename), exists);
+      expect(renamedFile.readAsStringSync(), rewrittenJsContent);
     }),
   );
 
   test(
     'Dart2JSTarget buildFiles includes the renamed source map',
     () => testbed.run(() {
-      // Binary and map contents differ, as in a real build; the map name must
-      // still be discoverable from the binary name.
+      // Binary and map contents differ, as in a real build; the map name has
+      // its own content hash and must still be discoverable by buildFiles.
+      const mapContent = '{"version":3,"sources":["main.dart"]}';
       final File jsFile = environment.buildDir.childFile('main.dart.js')
         ..createSync(recursive: true)
         ..writeAsStringSync('console.log("hello");\n//# sourceMappingURL=main.dart.js.map\n');
       final File mapFile = environment.buildDir.childFile('main.dart.js.map')
         ..createSync(recursive: true)
-        ..writeAsStringSync('{"version":3,"sources":["main.dart"]}');
+        ..writeAsStringSync(mapContent);
+      final String expectedMapHash = crypto.sha256
+          .convert(utf8.encode(mapContent))
+          .toString()
+          .substring(0, 8);
       final String newBasename = hashAndRenameWebOutput(file: jsFile, sourceMapFile: mapFile);
 
       final target = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
@@ -1859,7 +1894,7 @@ _flutter.loader.load();
           .buildFiles(environment)
           .map((File f) => f.basename)
           .toList();
-      expect(files, containsAll(<String>[newBasename, '$newBasename.map']));
+      expect(files, containsAll(<String>[newBasename, 'main.dart.$expectedMapHash.js.map']));
     }),
   );
 
@@ -1947,16 +1982,18 @@ _flutter.loader.load();
       // Produce the mjs and its map with the real rename logic instead of
       // hand-picked names, so the discovery logic is tested against what the
       // build actually writes.
+      const mjsMapContent = '{"version":3,"sources":["main.dart"]}';
       final File mjsFile = environment.buildDir.childFile('main.dart.mjs')
         ..createSync(recursive: true)
         ..writeAsStringSync('export function main() {}\n//# sourceMappingURL=main.dart.mjs.map\n');
       final File mjsMapFile = environment.buildDir.childFile('main.dart.mjs.map')
         ..createSync(recursive: true)
-        ..writeAsStringSync('{"version":3,"sources":["main.dart"]}');
-      final String newMjsBasename = hashAndRenameWebOutput(
-        file: mjsFile,
-        sourceMapFile: mjsMapFile,
-      );
+        ..writeAsStringSync(mjsMapContent);
+      final String expectedMjsMapHash = crypto.sha256
+          .convert(utf8.encode(mjsMapContent))
+          .toString()
+          .substring(0, 8);
+      hashAndRenameWebOutput(file: mjsFile, sourceMapFile: mjsMapFile);
 
       final target = Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true),
@@ -1968,7 +2005,7 @@ _flutter.loader.load();
           .map((File f) => f.basename)
           .toList();
       expect(files, contains(mapFile.basename));
-      expect(files, contains('$newMjsBasename.map'));
+      expect(files, contains('main.dart.$expectedMjsMapHash.mjs.map'));
     }),
   );
 
@@ -2021,6 +2058,7 @@ _flutter.loader.load();
       final File stalePartMap = environment.buildDir.childFile('main.dart.js_1.part.js.map')
         ..createSync(recursive: true);
       const jsContent = 'console.log("hello");\n//# sourceMappingURL=main.dart.js.map\n';
+      const mapContent = '{"version":3,"sources":["main.dart"]}';
       final common = <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
@@ -2052,17 +2090,22 @@ _flutter.loader.load();
           ],
           onRun: (_) {
             environment.buildDir.childFile('main.dart.js').writeAsStringSync(jsContent);
-            environment.buildDir
-                .childFile('main.dart.js.map')
-                .writeAsStringSync('{"version":3,"sources":["main.dart"]}');
+            environment.buildDir.childFile('main.dart.js.map').writeAsStringSync(mapContent);
           },
         ),
       );
 
       await Dart2JSTarget(const JsCompilerConfig(webContentHash: true)).build(environment);
 
+      final String expectedMapHash = crypto.sha256
+          .convert(utf8.encode(mapContent))
+          .toString()
+          .substring(0, 8);
+      final expectedMapBasename = 'main.dart.$expectedMapHash.js.map';
+      final rewrittenJsContent =
+          'console.log("hello");\n//# sourceMappingURL=$expectedMapBasename\n';
       final String expectedHash = crypto.sha256
-          .convert(utf8.encode(jsContent))
+          .convert(utf8.encode(rewrittenJsContent))
           .toString()
           .substring(0, 8);
       final expectedBasename = 'main.dart.$expectedHash.js';
@@ -2071,7 +2114,7 @@ _flutter.loader.load();
       expect(stalePartJs, isNot(exists));
       expect(stalePartMap, isNot(exists));
       expect(environment.buildDir.childFile(expectedBasename), exists);
-      expect(environment.buildDir.childFile('$expectedBasename.map'), exists);
+      expect(environment.buildDir.childFile(expectedMapBasename), exists);
 
       final Depfile depfile = environment.depFileService.parse(
         environment.buildDir.childFile('dart2js.d'),
@@ -2339,34 +2382,89 @@ const mapName = "main.dart.js.map";
 console.log(mapName);
 //# sourceMappingURL=main.dart.js.map
 ''';
+      const mapContent = '{"version":3}';
       final File jsFile = environment.buildDir.childFile('main.dart.js')
         ..createSync(recursive: true)
         ..writeAsStringSync(jsContent);
       final File mapFile = environment.buildDir.childFile('main.dart.js.map')
         ..createSync(recursive: true)
-        ..writeAsStringSync('{"version":3}');
+        ..writeAsStringSync(mapContent);
 
+      final String expectedMapHash = crypto.sha256
+          .convert(utf8.encode(mapContent))
+          .toString()
+          .substring(0, 8);
       final String newBasename = hashAndRenameWebOutput(file: jsFile, sourceMapFile: mapFile);
       final File renamedJs = environment.buildDir.childFile(newBasename);
       expect(renamedJs.readAsStringSync(), contains('const mapName = "main.dart.js.map";'));
-      expect(renamedJs.readAsStringSync(), contains('//# sourceMappingURL=$newBasename.map'));
+      expect(
+        renamedJs.readAsStringSync(),
+        contains('//# sourceMappingURL=main.dart.$expectedMapHash.js.map'),
+      );
     }),
   );
 
   test(
     'hashAndRenameWebOutput supports non-dart compound extensions like worker.js.map',
     () => testbed.run(() {
+      const mapContent = '{"version":3}';
       final File workerJs = environment.buildDir.childFile('worker.js')
         ..createSync(recursive: true)
         ..writeAsStringSync('console.log("worker");\n//# sourceMappingURL=worker.js.map\n');
       final File workerMap = environment.buildDir.childFile('worker.js.map')
         ..createSync(recursive: true)
-        ..writeAsStringSync('{"version":3}');
+        ..writeAsStringSync(mapContent);
 
+      final String expectedMapHash = crypto.sha256
+          .convert(utf8.encode(mapContent))
+          .toString()
+          .substring(0, 8);
       final String newBasename = hashAndRenameWebOutput(file: workerJs, sourceMapFile: workerMap);
       expect(newBasename, matches(r'^worker\.[a-f0-9]{8}\.js$'));
       expect(workerMap.existsSync(), isFalse);
-      expect(environment.buildDir.childFile('$newBasename.map').existsSync(), isTrue);
+      expect(environment.buildDir.childFile('worker.$expectedMapHash.js.map').existsSync(), isTrue);
+    }),
+  );
+
+  test(
+    'hashAndRenameWebOutput with sourceMapFile produces matching hash and urlHashed: true in updatePrecacheManifest',
+    () => testbed.run(() {
+      final File jsFile = environment.outputDir.childFile('main.dart.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('console.log("hello");\n//# sourceMappingURL=main.dart.js.map\n');
+      final File mapFile = environment.outputDir.childFile('main.dart.js.map')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"version":3,"sources":["main.dart"]}');
+      final File mjsFile = environment.outputDir.childFile('main.dart.mjs')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('export function main() {}\n//# sourceMappingURL=main.dart.mjs.map\n');
+      final File mjsMapFile = environment.outputDir.childFile('main.dart.mjs.map')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"version":3,"sources":["main.dart"]}');
+
+      final String newJsBasename = hashAndRenameWebOutput(file: jsFile, sourceMapFile: mapFile);
+      final String newMjsBasename = hashAndRenameWebOutput(
+        file: mjsFile,
+        sourceMapFile: mjsMapFile,
+      );
+
+      final File manifestFile = updatePrecacheManifest(
+        environment.outputDir,
+        enabled: true,
+        useLocalCanvasKit: false,
+      )!;
+      final decoded = jsonDecode(manifestFile.readAsStringSync()) as Map<String, Object?>;
+      final List<Map<String, Object?>> entries = (decoded['entries']! as List<Object?>)
+          .cast<Map<String, Object?>>();
+
+      expect(entries, hasLength(2));
+      for (final entry in entries) {
+        final url = entry['url']! as String;
+        final hash = entry['hash']! as String;
+        expect(url, anyOf(newJsBasename, newMjsBasename));
+        expect(url, contains('.$hash.'));
+        expect(entry['urlHashed'], isTrue);
+      }
     }),
   );
 
@@ -3187,6 +3285,64 @@ _flutter.loader.load({
       expect(
         bootstrapFile.readAsStringSync(),
         contains('"assetManifest":"AssetManifest.bin.deadbeef.json"'),
+      );
+    }),
+  );
+
+  test(
+    'WebTemplatedFiles emits _flutter.supportsDart2Wasm from main.dart.support.js for dart2wasm builds and remains compatible with injectManifestBuildConfig',
+    () => testbed.run(() {
+      const supportExpression =
+          '(WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,95,1,120,0])))';
+      environment.buildDir.childFile('main.dart.support.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('$supportExpression\n');
+
+      final wasmTarget = Dart2WasmTarget(const WasmCompilerConfig(), const NoOpAnalytics());
+      final templatedWithWasm = WebTemplatedFiles(
+        <Map<String, Object?>>[],
+        compileTargets: <Dart2WebTarget>[wasmTarget],
+      );
+      expect(
+        templatedWithWasm.inputs,
+        contains(const Source.pattern('{BUILD_DIR}/main.dart.support.js', optional: true)),
+      );
+
+      final String wasmConfigString = templatedWithWasm.buildConfigString(environment);
+      expect(wasmConfigString, contains('_flutter.supportsDart2Wasm = $supportExpression;\n'));
+
+      // Verify --web-content-hash manifest injection succeeds alongside _flutter.supportsDart2Wasm.
+      final File bootstrapFile = environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(wasmConfigString);
+      const hashResult = WebAssetHashResult(
+        renamedFiles: <String, File>{},
+        assetManifestBinJson: 'AssetManifest.bin.deadbeef.json',
+      );
+      injectManifestBuildConfig(environment.outputDir, hashResult);
+      final String rewrittenBootstrap = bootstrapFile.readAsStringSync();
+      expect(rewrittenBootstrap, contains('"assetManifest":"AssetManifest.bin.deadbeef.json"'));
+      expect(rewrittenBootstrap, contains('_flutter.supportsDart2Wasm = $supportExpression;'));
+
+      // A dart2js-only build (including one with a dry-run Dart2WasmTarget) must not emit
+      // _flutter.supportsDart2Wasm or track main.dart.support.js in inputs even if a stale
+      // main.dart.support.js exists in buildDir.
+      final jsTarget = Dart2JSTarget(const JsCompilerConfig());
+      final dryRunWasmTarget = Dart2WasmTarget(
+        const WasmCompilerConfig(dryRun: true),
+        const NoOpAnalytics(),
+      );
+      final templatedWithJsOnly = WebTemplatedFiles(
+        <Map<String, Object?>>[],
+        compileTargets: <Dart2WebTarget>[jsTarget, dryRunWasmTarget],
+      );
+      expect(
+        templatedWithJsOnly.inputs,
+        isNot(contains(const Source.pattern('{BUILD_DIR}/main.dart.support.js', optional: true))),
+      );
+      expect(
+        templatedWithJsOnly.buildConfigString(environment),
+        isNot(contains('_flutter.supportsDart2Wasm')),
       );
     }),
   );

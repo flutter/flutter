@@ -39,7 +39,9 @@ class FirefoxEnvironment implements BrowserEnvironment {
   }
 
   @override
-  Future<void> cleanup() async {}
+  Future<void> cleanup() async {
+    await Firefox._stopLinuxDisplay();
+  }
 
   @override
   final String name = 'Firefox';
@@ -167,6 +169,7 @@ user_pref("security.sandbox.content.level", 0);
 
   Firefox._(this._process, this.remoteDebuggerUrl);
 
+  static Process? _xvfbProcess;
   static Future<String?>? _virtualDisplayFuture;
 
   /// Creates a virtual X display on Linux when `DISPLAY` is unset so headless
@@ -179,30 +182,84 @@ user_pref("security.sandbox.content.level", 0);
     if (existingDisplay != null && existingDisplay.isNotEmpty) {
       return Future<String?>.value(existingDisplay);
     }
-    return _virtualDisplayFuture ??= () async {
-      const display = ':99';
-      final socketFile = File('/tmp/.X11-unix/X99');
-      if (!socketFile.existsSync()) {
-        try {
-          await Process.start('Xvfb', <String>[
-            display,
-            '-screen',
-            '0',
-            '1280x800x24',
-            '-ac',
-            '-nolisten',
-            'tcp',
-          ], mode: ProcessStartMode.detached);
-          for (var i = 0; i < 10 && !socketFile.existsSync(); i++) {
-            await Future<void>.delayed(const Duration(milliseconds: 500));
+    return _virtualDisplayFuture ??= _startXvfb();
+  }
+
+  static Future<String?> _startXvfb() async {
+    Process? process;
+    final stderrBuffer = StringBuffer();
+    try {
+      process = await Process.start('Xvfb', <String>[
+        '-displayfd',
+        '1',
+        '-screen',
+        '0',
+        '1280x800x24',
+        '-ac',
+        '-nolisten',
+        'tcp',
+      ]);
+      process.stderr
+          .transform<String>(const Utf8Decoder(allowMalformed: true))
+          .listen(stderrBuffer.write);
+      final displayCompleter = Completer<String>();
+      process.stdout
+          .transform<String>(const Utf8Decoder(allowMalformed: true))
+          .transform<String>(const LineSplitter())
+          .listen(
+            (String line) {
+              final String trimmed = line.trim();
+              if (trimmed.isNotEmpty && !displayCompleter.isCompleted) {
+                displayCompleter.complete(trimmed);
+              }
+            },
+            onError: (Object error, StackTrace stackTrace) {
+              if (!displayCompleter.isCompleted) {
+                displayCompleter.completeError(error, stackTrace);
+              }
+            },
+            onDone: () {
+              if (!displayCompleter.isCompleted) {
+                displayCompleter.completeError(
+                  StateError(
+                    'Xvfb exited before reporting a display number. stderr:\n$stderrBuffer',
+                  ),
+                );
+              }
+            },
+          );
+      final String displayNumber = await displayCompleter.future.timeout(
+        const Duration(seconds: 10),
+      );
+      _xvfbProcess = process;
+      unawaited(
+        process.exitCode.then((_) {
+          if (identical(_xvfbProcess, process)) {
+            _xvfbProcess = null;
+            _virtualDisplayFuture = null;
           }
-        } on Object catch (error) {
-          print('[Firefox] Failed to start Xvfb on $display: $error');
-          return null;
-        }
-      }
-      return display;
-    }();
+        }),
+      );
+      return ':$displayNumber';
+    } on Object catch (error) {
+      print('[Firefox] Failed to start Xvfb: $error');
+      process?.kill();
+      _virtualDisplayFuture = null;
+      return null;
+    }
+  }
+
+  static Future<void> _stopLinuxDisplay() async {
+    if (_virtualDisplayFuture != null) {
+      await _virtualDisplayFuture;
+    }
+    final Process? process = _xvfbProcess;
+    _xvfbProcess = null;
+    _virtualDisplayFuture = null;
+    if (process != null) {
+      process.kill();
+      await process.exitCode;
+    }
   }
 
   static Future<void> printActualVersion(BrowserInstallation installation) async {
