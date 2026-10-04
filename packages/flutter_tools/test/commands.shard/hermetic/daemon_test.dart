@@ -27,6 +27,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -94,10 +95,10 @@ void main() {
     testUsingContext('daemon.version command should succeed', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'daemon.version'}),
@@ -113,10 +114,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         // Use the flutter_gallery project which has a known set of supported platforms.
         final String projectPath = globals.fs.path.join(
@@ -225,10 +226,10 @@ void main() {
     testUsingContext('printError should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       globals.printError('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
@@ -248,10 +249,10 @@ void main() {
     testUsingContext('printWarning should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       globals.printWarning('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
@@ -272,11 +273,11 @@ void main() {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           logToStdout: true,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         globals.printStatus('daemon.logMessage test');
         return Future<void>.value();
@@ -289,11 +290,11 @@ void main() {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           logToStdout: true,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         globals.printBox('This is the box message', title: 'Sample title');
         return Future<void>.value();
@@ -307,10 +308,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         notifyingLogger.notifyVerbose = false;
         globals.printTrace('daemon.logMessage test 1');
@@ -337,10 +338,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         expect(notifyingLogger.notifyVerbose, false);
 
@@ -361,10 +362,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         notifyingLogger.notifyVerbose = false;
 
@@ -383,10 +384,10 @@ void main() {
     testUsingContext('daemon.shutdown command should stop daemon', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'daemon.shutdown'}),
@@ -400,10 +401,10 @@ void main() {
     testUsingContext('app.restart without an appId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
 
       daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'app.restart'}));
@@ -417,10 +418,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
 
         daemonStreams.inputs.add(
@@ -439,10 +440,10 @@ void main() {
     testUsingContext('app.stop without appId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
 
       daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'app.stop'}));
@@ -454,10 +455,10 @@ void main() {
     testUsingContext('device.getDevices should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.getDevices'}),
@@ -470,10 +471,10 @@ void main() {
     testUsingContext('device.getDevices reports available devices', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -493,10 +494,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
 
         final discoverer = FakePollingDeviceDiscovery();
@@ -553,10 +554,10 @@ void main() {
     testUsingContext('device.discoverDevices should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.discoverDevices'}),
@@ -569,10 +570,10 @@ void main() {
     testUsingContext('device.discoverDevices reports available devices', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -591,10 +592,10 @@ void main() {
     testUsingContext('device.supportsRuntimeMode returns correct value', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -617,10 +618,10 @@ void main() {
     testUsingContext('device.logReader.start and .stop starts and stops log reader', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -673,10 +674,10 @@ void main() {
       testUsingContext('device.startApp and .stopApp starts and stops an app', () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -751,10 +752,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -823,10 +824,10 @@ void main() {
     testUsingContext('device.getDiagnostics returns correct value', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       final discoverer1 = FakePollingDeviceDiscovery();
       discoverer1.diagnostics = <String>['fake diagnostic 1', 'fake diagnostic 2'];
@@ -850,10 +851,10 @@ void main() {
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
 
       daemonStreams.inputs.add(
@@ -867,10 +868,10 @@ void main() {
     testUsingContext('emulator.launch coldboot parameter must be boolean', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       final params = <String, Object?>{'emulatorId': 'device', 'coldBoot': 1};
       daemonStreams.inputs.add(
@@ -884,10 +885,10 @@ void main() {
     testUsingContext('emulator.getEmulators should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.getEmulators'}),
@@ -903,10 +904,10 @@ void main() {
 
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
 
       // Respond to any requests from the daemon to expose a URL.
@@ -933,10 +934,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
 
         daemonStreams.inputs.add(
@@ -959,10 +960,10 @@ void main() {
     testUsingContext('devtools.serve command should return null fields if null returned', () async {
       daemon = Daemon(
         daemonConnection,
-        toolContext: DelegatingToolContext(),
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
-        fileSystem: globals.fs,
       );
 
       daemonStreams.inputs.add(
@@ -996,10 +997,10 @@ void main() {
 
           daemon = Daemon(
             daemonConnection,
-            toolContext: DelegatingToolContext(),
+            analytics: const NoOpAnalytics(),
+            toolContext: const DelegatingToolContext(),
             notifyingLogger: notifyingLogger,
             featureFlags: featureFlags,
-            fileSystem: globals.fs,
           );
           daemonStreams.inputs.add(
             DaemonMessage(<String, Object?>{
@@ -1081,10 +1082,10 @@ void main() {
 
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         daemonStreams.inputs.add(
           DaemonMessage(<String, Object?>{
@@ -1112,10 +1113,10 @@ void main() {
 
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         daemonStreams.inputs.add(
           DaemonMessage(<String, Object?>{
@@ -1139,10 +1140,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final ResidentRunner runner = FakeResidentRunner();
         final Device device = FakeAndroidDevice();
@@ -1184,10 +1185,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final runner = FakeRestartableResidentRunner();
         final startApp = Completer<void>();
@@ -1245,10 +1246,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final runner = FakeRestartableResidentRunner();
         final exitApp = Completer<void>();
@@ -1304,10 +1305,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final runner = FakeRestartableResidentRunner();
         final failStartup = Completer<void>();
@@ -1359,10 +1360,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
-          toolContext: DelegatingToolContext(),
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
-          fileSystem: globals.fs,
         );
         final exitApp = Completer<void>();
         var listenerFired = false;

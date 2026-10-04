@@ -73,5 +73,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("com.android.tools.build:gradle:$agpVersion")
-    testImplementation("io.mockk:mockk:1.13.16")
+    // MockK bundles Byte Buddy for inline mocking. Byte Buddy must support the
+    // JDK that runs the tests (Java 25 requires Byte Buddy >= 1.17.5).
+    testImplementation("io.mockk:mockk:1.14.11")
 }
