@@ -103,7 +103,6 @@ class BuildWindowsCommand extends BuildSubCommand {
         analytics: analytics,
       ),
       configOnly: configOnly,
-      flutterRoot: toolContext.cache.flutterRoot,
     );
     return FlutterCommandResult.success();
   }

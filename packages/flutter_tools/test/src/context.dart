@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
@@ -140,7 +141,10 @@ void testUsingContext(
                       overrides: overrides,
                       name: 'test-specific overrides',
                       body: () async {
-                        if (initializeFlutterRoot && overrides[Cache] == null) {
+                        if (initializeFlutterRoot &&
+                            overrides[Cache] == null &&
+                            (overrides[Platform] == null ||
+                                !globals.platform.environment.containsKey('FLUTTER_ROOT'))) {
                           // Provide a sane default for the flutterRoot directory. Individual
                           // tests can override this in the test.
                           globals.cache.flutterRoot = getFlutterRoot();
