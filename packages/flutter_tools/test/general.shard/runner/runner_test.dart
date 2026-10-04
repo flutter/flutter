@@ -1113,6 +1113,12 @@ class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManage
 
 class FakeCache extends Fake implements Cache {
   @override
+  String get flutterRoot => '/path/to/sdk/flutter';
+
+  @override
+  set flutterRoot(String? value) {}
+
+  @override
   Future<void> lock() async {}
 
   @override

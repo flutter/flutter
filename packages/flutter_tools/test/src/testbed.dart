@@ -15,8 +15,10 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -52,6 +54,13 @@ final _testbedDefaults = <Type, Generator>{
   Signals: () => FakeSignals(), // prevent registering actual signal handlers.
   Pub: () => const ThrowingPub(), // prevent accidental invocations of pub.
   BotDetector: () => const FakeBotDetector(true),
+  Cache: () => FlutterCache(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    platform: globals.platform,
+    osUtils: globals.os,
+    projectFactory: globals.projectFactory,
+  ),
   Config: () => Config.test(
     name: Config.kFlutterSettings,
     directory: globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.'),

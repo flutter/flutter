@@ -19,6 +19,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/user_messages.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../git.dart';
@@ -268,7 +269,14 @@ class _DefaultPub implements Pub {
   final String? _flutterRoot;
   late final Git _git;
 
-  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? '';
+  String get _flutterRootPath =>
+      _flutterRoot ??
+      _cache?.flutterRoot ??
+      Cache.defaultFlutterRoot(
+        fileSystem: _fileSystem,
+        platform: _platform,
+        userMessages: UserMessages(),
+      );
 
   @override
   Future<void> get({

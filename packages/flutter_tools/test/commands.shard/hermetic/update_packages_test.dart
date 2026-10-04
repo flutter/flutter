@@ -293,6 +293,37 @@ void main() {
           pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
           Pubspec.parse(kFlutterWorkspacePubspecYaml).dependencies,
         );
+        expect(pub.recordedPubGets, hasLength(3));
+        expect(pub.recordedPubGets.map((r) => r.offline), everyElement(isFalse));
+        expect(pub.recordedPubGets[0].enforceLockfile, isTrue);
+        expect(pub.recordedPubGets[1].enforceLockfile, isFalse);
+        expect(pub.recordedPubGets[2].enforceLockfile, isFalse);
+      },
+      overrides: <Type, Generator>{
+        Pub: () => pub,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => Cache.test(rootOverride: flutterSdk, processManager: processManager),
+      },
+    );
+
+    testUsingContext(
+      'updates packages --offline passes offline flag to pub get',
+      () async {
+        final command = UpdatePackagesCommand(
+          toolContext: const DelegatingToolContext(),
+          verboseHelp: false,
+        );
+        await createTestCommandRunner(command).run(<String>['update-packages', '--offline']);
+        expect(
+          pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
+          Pubspec.parse(kFlutterWorkspacePubspecYaml).dependencies,
+        );
+        expect(pub.recordedPubGets, hasLength(3));
+        expect(pub.recordedPubGets.map((r) => r.offline), everyElement(isTrue));
+        expect(pub.recordedPubGets[0].enforceLockfile, isTrue);
+        expect(pub.recordedPubGets[1].enforceLockfile, isFalse);
+        expect(pub.recordedPubGets[2].enforceLockfile, isFalse);
       },
       overrides: <Type, Generator>{
         Pub: () => pub,
@@ -598,7 +629,7 @@ dependencies:
         Pub: () => pub,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        Cache: () => Cache.test(processManager: processManager),
+        Cache: () => Cache.test(rootOverride: flutterSdk, processManager: processManager),
         Logger: () => logger,
       },
     );
@@ -636,6 +667,9 @@ class _FakePub extends Fake implements Pub {
     (pubspecs[project.directory.path] ??= <Pubspec>[]).add(pubspec);
   }
 
+  final recordedPubGets =
+      <({PubContext context, FlutterProject project, bool enforceLockfile, bool offline})>[];
+
   @override
   Future<void> get({
     required PubContext context,
@@ -648,6 +682,12 @@ class _FakePub extends Fake implements Pub {
     bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
+    recordedPubGets.add((
+      context: context,
+      project: project,
+      enforceLockfile: enforceLockfile,
+      offline: offline,
+    ));
     (pubspecs[project.directory.path] ??= <Pubspec>[]).add(
       Pubspec.parse(project.pubspecFile.readAsStringSync()),
     );

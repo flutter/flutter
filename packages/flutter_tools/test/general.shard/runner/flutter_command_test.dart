@@ -2225,6 +2225,8 @@ class FakeIoProcessSignal extends Fake implements io.ProcessSignal {
 class FakeCache extends Fake implements Cache {
   @override
   String get flutterRoot => '/path/to/sdk/flutter';
+  @override
+  set flutterRoot(String? value) {}
   List<Set<DevelopmentArtifact>> artifacts = <Set<DevelopmentArtifact>>[];
 
   @override
@@ -2324,6 +2326,8 @@ class DummyFlutterCommandWithPub extends FlutterCommand {
 class FakeLockTrackingCache extends Fake implements Cache {
   @override
   String get flutterRoot => '/path/to/sdk/flutter';
+  @override
+  set flutterRoot(String? value) {}
   bool isLockHeld = false;
 
   @override
