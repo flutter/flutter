@@ -1202,27 +1202,44 @@ class FlutterEmbedderNative {
                                         const FlutterSize& size);
   void HandleCompositorFramePresented();
 
-  std::mutex surface_mutex_;
-  std::mutex presentation_mutex_;
-  mutable std::mutex asset_provider_mutex_;
-  mutable std::mutex image_lru_mutex_;
-  mutable std::mutex window_metrics_provider_mutex_;
-  mutable std::mutex vsync_waiter_mutex_;
-  mutable std::mutex choreographer_provider_mutex_;
-  mutable std::mutex engine_mutex_;
-  mutable std::mutex font_provider_mutex_;
-  mutable std::mutex aot_provider_mutex_;
-  mutable std::mutex vm_init_mutex_;
-  mutable std::mutex hardware_buffer_provider_mutex_;
-  mutable std::mutex vulkan_texture_provider_mutex_;
+  struct ImageTextureEntry {
+    std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>> weak_entry;
+    bool reset_on_background = false;
+    uint32_t gl_texture_id = 0;
+    void* current_egl_image = nullptr;
+    void* current_egl_display = nullptr;
+    std::unique_ptr<AndroidHardwareBuffer> current_buffer;
+    jobject current_image = nullptr;
+    jobject current_hardware_buffer = nullptr;
+  };
+
+  struct OverlaySurfaceState {
+    std::mutex mutex;
+    std::vector<int32_t> surface_ids;
+  };
+
+  struct PendingPlatformMessage {
+    std::string channel;
+    std::vector<uint8_t> message;
+    int32_t response_id = 0;
+    bool has_data = false;
+  };
+
   ANativeWindow* native_window_ = nullptr;
-  bool is_fake_window_ = false;
-
-  mutable std::mutex java_object_mutex_;
+  SendWindowMetricsEventFn send_window_metrics_event_fn_;
+  NotifyDisplayUpdateFn notify_display_update_fn_;
+  NotifyVsyncFn notify_vsync_fn_;
+  SendPointerEventFn send_pointer_event_fn_;
+  SendPlatformMessageFn send_platform_message_fn_;
+  SendPlatformMessageResponseFn send_platform_message_response_fn_;
+  mutable DeinitializeEngineFn deinitialize_engine_fn_;
+  mutable InitializeEngineFn initialize_engine_fn_;
+  mutable RunInitializedEngineFn run_initialized_engine_fn_;
+  FlutterEngineAOTData aot_data_ = nullptr;
+  size_t current_frame_overlay_count_ = 0;
+  FLUTTER_API_SYMBOL(FlutterEngine) registered_engine_ = nullptr;
+  FlutterImageDecoderRegistration decoder_registration_ = 0;
   std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object_;
-
-  mutable std::mutex viewport_metrics_mutex_;
-  AndroidViewportMetrics cached_viewport_metrics_;
 
   std::shared_ptr<JvmInvoker> jvm_invoker_;
   std::shared_ptr<EmbedderImageLRU> image_lru_;
@@ -1236,11 +1253,8 @@ class FlutterEmbedderNative {
   std::shared_ptr<AndroidVMInit> vm_init_;
   std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider_;
   std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider_;
-  mutable std::mutex surface_control_provider_mutex_;
   std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider_;
-  mutable std::mutex engine_group_provider_mutex_;
   std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider_;
-  mutable std::mutex engine_group_mutex_;
   std::shared_ptr<AndroidEngineGroup> engine_group_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
   std::shared_ptr<JniDelegate> jni_delegate_;
@@ -1252,9 +1266,8 @@ class FlutterEmbedderNative {
   std::shared_ptr<AndroidSurfaceManager> surface_manager_;
   std::shared_ptr<CompositorDelegate> compositor_delegate_;
   std::shared_ptr<AndroidCompositor> compositor_;
-  FlutterRendererConfig renderer_config_{};
-  FlutterCompositor embedder_compositor_{};
-  FlutterProjectArgs project_args_{};
+  std::shared_ptr<OverlaySurfaceState> overlay_surface_state_ =
+      std::make_shared<OverlaySurfaceState>();
   std::string custom_entrypoint_storage_;
   std::string custom_library_url_storage_;
   std::vector<std::string> entrypoint_args_storage_;
@@ -1268,71 +1281,53 @@ class FlutterEmbedderNative {
   std::string persistent_cache_path_storage_;
   std::string log_tag_storage_;
   std::string initial_route_;
-  FlutterEngineAOTData aot_data_ = nullptr;
-  std::atomic<bool> surface_attached_{false};
-  std::atomic<bool> first_frame_presented_{false};
-  std::atomic<bool> is_image_view_surface_active_{false};
   std::vector<int64_t> current_frame_platform_view_ids_;
-  size_t current_frame_overlay_count_ = 0;
+  mutable std::vector<PendingPlatformMessage> pending_platform_messages_;
   std::unordered_set<int64_t> views_visible_last_frame_;
-  bool overlay_layer_is_shown_ = false;
-
-  mutable std::mutex decoder_registration_mutex_;
-  FLUTTER_API_SYMBOL(FlutterEngine) registered_engine_ = nullptr;
-  FlutterImageDecoderRegistration decoder_registration_ = 0;
-  SendWindowMetricsEventFn send_window_metrics_event_fn_;
-  NotifyDisplayUpdateFn notify_display_update_fn_;
-  NotifyVsyncFn notify_vsync_fn_;
-  SendPointerEventFn send_pointer_event_fn_;
-  SendPlatformMessageFn send_platform_message_fn_;
-  SendPlatformMessageResponseFn send_platform_message_response_fn_;
-  mutable DeinitializeEngineFn deinitialize_engine_fn_;
-  mutable InitializeEngineFn initialize_engine_fn_;
-  mutable RunInitializedEngineFn run_initialized_engine_fn_;
-
-  mutable std::mutex surface_textures_mutex_;
   std::unordered_map<int64_t,
                      std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>>>
       surface_textures_;
   mutable std::unordered_map<int64_t, uint32_t> surface_texture_gl_ids_;
   mutable std::unordered_set<int64_t> surface_texture_attached_;
-
-  struct ImageTextureEntry {
-    std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>> weak_entry;
-    bool reset_on_background = false;
-    uint32_t gl_texture_id = 0;
-    void* current_egl_image = nullptr;
-    void* current_egl_display = nullptr;
-    std::unique_ptr<AndroidHardwareBuffer> current_buffer;
-    jobject current_image = nullptr;
-    jobject current_hardware_buffer = nullptr;
-  };
-
-  mutable std::mutex image_textures_mutex_;
   std::unordered_map<int64_t, ImageTextureEntry> image_textures_;
-
-  struct OverlaySurfaceState {
-    std::mutex mutex;
-    std::vector<int32_t> surface_ids;
-  };
-  std::shared_ptr<OverlaySurfaceState> overlay_surface_state_ =
-      std::make_shared<OverlaySurfaceState>();
-
-  mutable std::mutex response_handles_mutex_;
   mutable std::unordered_map<int32_t,
                              const FlutterPlatformMessageResponseHandle*>
       response_handles_;
+  FlutterCompositor embedder_compositor_{};
+  FlutterRendererConfig renderer_config_{};
+  AndroidViewportMetrics cached_viewport_metrics_;
+  FlutterProjectArgs project_args_{};
+
+  std::mutex surface_mutex_;
+  std::mutex presentation_mutex_;
+  mutable std::mutex asset_provider_mutex_;
+  mutable std::mutex image_lru_mutex_;
+  mutable std::mutex window_metrics_provider_mutex_;
+  mutable std::mutex vsync_waiter_mutex_;
+  mutable std::mutex choreographer_provider_mutex_;
+  mutable std::mutex engine_mutex_;
+  mutable std::mutex font_provider_mutex_;
+  mutable std::mutex aot_provider_mutex_;
+  mutable std::mutex vm_init_mutex_;
+  mutable std::mutex hardware_buffer_provider_mutex_;
+  mutable std::mutex vulkan_texture_provider_mutex_;
+  mutable std::mutex java_object_mutex_;
+  mutable std::mutex viewport_metrics_mutex_;
+  mutable std::mutex surface_control_provider_mutex_;
+  mutable std::mutex engine_group_provider_mutex_;
+  mutable std::mutex engine_group_mutex_;
+  mutable std::mutex decoder_registration_mutex_;
+  mutable std::mutex surface_textures_mutex_;
+  mutable std::mutex image_textures_mutex_;
+  mutable std::mutex response_handles_mutex_;
+  mutable std::mutex pending_messages_mutex_;
   mutable std::atomic<int32_t> next_response_id_{1};
 
-  struct PendingPlatformMessage {
-    std::string channel;
-    std::vector<uint8_t> message;
-    int32_t response_id = 0;
-    bool has_data = false;
-  };
-
-  mutable std::mutex pending_messages_mutex_;
-  mutable std::vector<PendingPlatformMessage> pending_platform_messages_;
+  bool is_fake_window_ = false;
+  std::atomic<bool> surface_attached_{false};
+  std::atomic<bool> first_frame_presented_{false};
+  std::atomic<bool> is_image_view_surface_active_{false};
+  bool overlay_layer_is_shown_ = false;
 
   void FlushPendingPlatformMessages();
 

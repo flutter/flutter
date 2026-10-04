@@ -1325,7 +1325,13 @@ bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked(
   // 0xFFFFFFFF indicates the surface size will be determined by the swapchain
   constexpr uint32_t kUndefinedExtentDimension = 0xFFFFFFFF;
   VkExtent2D target_extent = {0, 0};
-  if (caps.currentExtent.width != kUndefinedExtentDimension) {
+  if (fallback_width > 0 && fallback_height > 0) {
+    target_extent.width = std::clamp(fallback_width, caps.minImageExtent.width,
+                                     caps.maxImageExtent.width);
+    target_extent.height =
+        std::clamp(fallback_height, caps.minImageExtent.height,
+                   caps.maxImageExtent.height);
+  } else if (caps.currentExtent.width != kUndefinedExtentDimension) {
     target_extent = caps.currentExtent;
   } else {
     int32_t w = ANativeWindow_getWidth(native_window_);
@@ -1346,10 +1352,15 @@ bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked(
                                       caps.maxImageExtent.height);
   }
 
+  VkSurfaceTransformFlagBitsKHR target_transform =
+      (caps.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
+          ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR
+          : caps.currentTransform;
+
   if (vk_swapchain_ != VK_NULL_HANDLE && !vk_swapchain_out_of_date_ &&
       vk_swapchain_extent_.width == target_extent.width &&
       vk_swapchain_extent_.height == target_extent.height &&
-      vk_surface_transform_ == caps.currentTransform) {
+      vk_surface_transform_ == target_transform) {
     return true;
   }
   vk_swapchain_extent_ = target_extent;
@@ -1422,7 +1433,7 @@ bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked(
       .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
       .queueFamilyIndexCount = 0,
       .pQueueFamilyIndices = nullptr,
-      .preTransform = caps.currentTransform,
+      .preTransform = target_transform,
       .compositeAlpha = composite_alpha,
       .presentMode = VK_PRESENT_MODE_FIFO_KHR,
       .clipped = VK_TRUE,
@@ -1459,7 +1470,7 @@ bool AndroidSurfaceManager::CreateOrUpdateVulkanSurfaceLocked(
   DestroyVulkanSwapchainLocked();
   vk_swapchain_ = new_swapchain;
   vk_swapchain_extent_ = target_extent;
-  vk_surface_transform_ = caps.currentTransform;
+  vk_surface_transform_ = target_transform;
   vk_swapchain_out_of_date_ = false;
   vk_swapchain_usage_ = image_usage;
 
@@ -1602,7 +1613,12 @@ bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
   // 0xFFFFFFFF indicates the surface size will be determined by the swapchain
   constexpr uint32_t kUndefinedExtentDimension = 0xFFFFFFFF;
   VkExtent2D extent = {0, 0};
-  if (caps.currentExtent.width != kUndefinedExtentDimension) {
+  if (fallback_width > 0 && fallback_height > 0) {
+    extent.width = std::clamp(fallback_width, caps.minImageExtent.width,
+                              caps.maxImageExtent.width);
+    extent.height = std::clamp(fallback_height, caps.minImageExtent.height,
+                               caps.maxImageExtent.height);
+  } else if (caps.currentExtent.width != kUndefinedExtentDimension) {
     extent = caps.currentExtent;
   } else {
 #if FML_OS_ANDROID
@@ -1628,10 +1644,15 @@ bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
                                caps.maxImageExtent.height);
   }
 
+  VkSurfaceTransformFlagBitsKHR target_transform =
+      (caps.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
+          ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR
+          : caps.currentTransform;
+
   if (entry.swapchain != VK_NULL_HANDLE && !entry.swapchain_out_of_date &&
       entry.extent.width == extent.width &&
       entry.extent.height == extent.height &&
-      entry.transform == caps.currentTransform) {
+      entry.transform == target_transform) {
     return true;
   }
 
@@ -1705,7 +1726,7 @@ bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
       .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
       .queueFamilyIndexCount = 0,
       .pQueueFamilyIndices = nullptr,
-      .preTransform = caps.currentTransform,
+      .preTransform = target_transform,
       .compositeAlpha = composite_alpha,
       .presentMode = VK_PRESENT_MODE_FIFO_KHR,
       .clipped = VK_TRUE,
@@ -1730,7 +1751,7 @@ bool AndroidSurfaceManager::CreateOrUpdateOverlayVulkanSurfaceLocked(
   DestroyOverlayVulkanSwapchainLocked(entry);
   entry.swapchain = new_swapchain;
   entry.extent = extent;
-  entry.transform = caps.currentTransform;
+  entry.transform = target_transform;
   entry.swapchain_out_of_date = false;
 
   uint32_t actual_image_count = 0;
@@ -1934,10 +1955,6 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextImage(
     return image;
   }
 
-  if (res == VK_SUBOPTIMAL_KHR) {
-    vk_swapchain_out_of_date_ = true;
-  }
-
   // 1-second timeout (1,000,000,000 ns) to ensure image is available
   constexpr uint64_t kFenceTimeoutNanoseconds = 1000000000ULL;
   vk_wait_for_fences_fn_(vk_device_, 1, &vk_acquire_fence_, VK_TRUE,
@@ -2060,7 +2077,7 @@ bool AndroidSurfaceManager::PresentImage(const FlutterVulkanImage* image) {
 
   VkResult res = vk_queue_present_khr_fn_(vk_queue_, &present_info);
   has_acquired_image_ = false;
-  if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
+  if (res == VK_ERROR_OUT_OF_DATE_KHR) {
     vk_swapchain_out_of_date_ = true;
   } else if (res == VK_ERROR_SURFACE_LOST_KHR) {
     FML_LOG(WARNING) << "vkQueuePresentKHR returned VK_ERROR_SURFACE_LOST_KHR ("
@@ -2104,12 +2121,21 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextOverlayImage(
     DestroyOverlayVulkanSurfaceLocked(entry);
   }
 
-  if (entry.swapchain != VK_NULL_HANDLE && !entry.swapchain_out_of_date &&
-      vk_get_physical_device_surface_capabilities_khr_fn_ != nullptr) {
+  if (fallback_w > 0 && fallback_h > 0) {
+    if (fallback_w != entry.extent.width || fallback_h != entry.extent.height) {
+      entry.swapchain_out_of_date = true;
+    }
+  } else if (entry.swapchain != VK_NULL_HANDLE &&
+             !entry.swapchain_out_of_date &&
+             vk_get_physical_device_surface_capabilities_khr_fn_ != nullptr) {
     VkSurfaceCapabilitiesKHR caps = {};
     if (vk_get_physical_device_surface_capabilities_khr_fn_(
             vk_physical_device_, entry.surface, &caps) == VK_SUCCESS) {
-      if (caps.currentTransform != entry.transform) {
+      VkSurfaceTransformFlagBitsKHR target_transform =
+          (caps.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
+              ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR
+              : caps.currentTransform;
+      if (target_transform != entry.transform) {
         entry.swapchain_out_of_date = true;
       }
       constexpr uint32_t kUndefinedExtentDimension = 0xFFFFFFFF;
@@ -2179,10 +2205,6 @@ FlutterVulkanImage AndroidSurfaceManager::GetNextOverlayImage(
 
   if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) {
     return image;
-  }
-
-  if (res == VK_SUBOPTIMAL_KHR) {
-    entry.swapchain_out_of_date = true;
   }
 
   // 1-second timeout (1,000,000,000 ns) to ensure image is available
@@ -2312,7 +2334,7 @@ bool AndroidSurfaceManager::PresentOverlayImage(
 
   VkResult res = vk_queue_present_khr_fn_(vk_queue_, &present_info);
   entry.has_acquired_image = false;
-  if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
+  if (res == VK_ERROR_OUT_OF_DATE_KHR) {
     entry.swapchain_out_of_date = true;
   } else if (res == VK_ERROR_SURFACE_LOST_KHR) {
     FML_LOG(WARNING) << "vkQueuePresentKHR returned VK_ERROR_SURFACE_LOST_KHR ("
