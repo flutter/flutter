@@ -312,7 +312,7 @@ void main() {
       'updates packages --offline passes offline flag to pub get',
       () async {
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command).run(<String>['update-packages', '--offline']);
