@@ -42,6 +42,7 @@ Future<void> buildLinux(
   String targetSysroot = '/',
   required Logger logger,
   bool configOnly = false,
+  String? flutterRoot,
 }) async {
   target ??= 'lib/main.dart';
   if (!linuxProject.cmakeFile.existsSync()) {
@@ -75,7 +76,7 @@ Future<void> buildLinux(
     environmentConfig['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
   writeGeneratedCmakeConfig(
-    globals.cache.flutterRoot,
+    flutterRoot ?? globals.cache.flutterRoot,
     linuxProject,
     buildInfo,
     environmentConfig,
