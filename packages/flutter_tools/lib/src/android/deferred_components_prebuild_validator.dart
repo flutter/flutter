@@ -10,7 +10,6 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/template.dart';
 import '../context/tool_context.dart';
-import '../isolated/mustache_template.dart';
 import '../project.dart';
 import '../template.dart';
 import 'deferred_components_validator.dart';
@@ -32,10 +31,10 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// change. This defaults to true.
   DeferredComponentsPrebuildValidator(
     Directory projectDir, {
+    required this._templateRenderer,
     required ToolContext toolContext,
     super.exitOnFail,
     super.outputDir,
-    this._templateRenderer = const MustacheTemplateRenderer(),
     this._templatesDir,
     super.title,
   }) : _toolContext = toolContext,
