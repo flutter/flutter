@@ -1981,26 +1981,9 @@ class _NestedCoordinatedSimulation extends Simulation {
       _startSegment();
       return;
     }
-    // Changing a waiting position must not restart the active physics.
-    // Reconsider only candidates owned by the newly configured position.
-    final double elapsed = _time - _segmentEpoch;
-    for (int phase = _phase + 1; phase < _phases.length; phase += 1) {
-      if (_phases[phase].outer != replacedOuter) {
-        continue;
-      }
-      _coherentSegments.remove(phase);
-      final Simulation? candidate = _createSegment(
-        replacedOuter,
-        pixels: _segmentStartPixels,
-        velocity: _segmentStartVelocity,
-      );
-      if (candidate != null &&
-          (candidate.x(elapsed) - _pixels).abs() <= precisionErrorTolerance &&
-          (candidate.dx(elapsed) - _velocity).abs() <= precisionErrorTolerance &&
-          candidate.isDone(elapsed) == _done) {
-        _coherentSegments[phase] = candidate;
-      }
-    }
+    // A waiting position's new physics will be used at the next boundary.
+    // Keep the active segment, but discard candidates created by its old physics.
+    _coherentSegments.removeWhere((phase, _) => _phases[phase].outer == replacedOuter);
   }
 
   bool get outerFinished => !_independentOuter && !_phases.skip(_phase).any((phase) => phase.outer);
@@ -2035,12 +2018,8 @@ class _NestedCoordinatedSimulation extends Simulation {
       velocity: _segmentStartVelocity,
       maxScrollExtent: newMax,
     );
-    bool agrees(Simulation candidate) =>
-        (candidate.x(elapsed) - _pixels).abs() <= precisionErrorTolerance &&
-        (candidate.dx(elapsed) - _velocity).abs() <= precisionErrorTolerance &&
-        candidate.isDone(elapsed) == _done;
     final Simulation? candidate = revised(_phase);
-    if (candidate == null || !agrees(candidate)) {
+    if (candidate == null || !_matchesState(candidate, elapsed)) {
       return false;
     }
     combinedMax = newMax;
@@ -2049,7 +2028,7 @@ class _NestedCoordinatedSimulation extends Simulation {
     // A bounds update must not make an already rejected candidate eligible.
     for (final int phase in _coherentSegments.keys.toList()) {
       final Simulation? replacement = revised(phase);
-      if (replacement != null && agrees(replacement)) {
+      if (replacement != null && _matchesState(replacement, elapsed)) {
         _coherentSegments[phase] = replacement;
       } else {
         _coherentSegments.remove(phase);
@@ -2057,6 +2036,11 @@ class _NestedCoordinatedSimulation extends Simulation {
     }
     return true;
   }
+
+  bool _matchesState(Simulation candidate, double elapsed) =>
+      (candidate.x(elapsed) - _pixels).abs() <= precisionErrorTolerance &&
+      (candidate.dx(elapsed) - _velocity).abs() <= precisionErrorTolerance &&
+      candidate.isDone(elapsed) == _done;
 
   Simulation? _createSegment(
     bool useOuter, {
@@ -2100,10 +2084,7 @@ class _NestedCoordinatedSimulation extends Simulation {
     _done = _segment!.isDone(0.0);
     for (int phase = _phase + 1; phase < _phases.length; phase += 1) {
       final Simulation? candidate = _createSegment(_phases[phase].outer);
-      if (candidate != null &&
-          (candidate.x(0.0) - _pixels).abs() <= precisionErrorTolerance &&
-          (candidate.dx(0.0) - _velocity).abs() <= precisionErrorTolerance &&
-          candidate.isDone(0.0) == _done) {
+      if (candidate != null && _matchesState(candidate, 0.0)) {
         _coherentSegments[phase] = candidate;
       }
     }
@@ -2135,10 +2116,7 @@ class _NestedCoordinatedSimulation extends Simulation {
             )
           : null;
       final double elapsed = _time - _segmentEpoch;
-      if (continuation != null &&
-          (continuation.x(elapsed) - _pixels).abs() <= precisionErrorTolerance &&
-          (continuation.dx(elapsed) - _velocity).abs() <= precisionErrorTolerance &&
-          continuation.isDone(elapsed) == _done) {
+      if (continuation != null && _matchesState(continuation, elapsed)) {
         _segment = continuation;
         _segmentStartPixels += shift;
       } else {

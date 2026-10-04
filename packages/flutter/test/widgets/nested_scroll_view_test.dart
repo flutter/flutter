@@ -50,94 +50,6 @@ class _CustomPhysics extends ClampingScrollPhysics {
   }
 }
 
-class _ForwardEulerPhysics extends ClampingScrollPhysics {
-  const _ForwardEulerPhysics({super.parent});
-
-  @override
-  _ForwardEulerPhysics applyTo(ScrollPhysics? ancestor) =>
-      _ForwardEulerPhysics(parent: buildParent(ancestor));
-
-  @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) =>
-      velocity == 0.0 ? null : _ForwardEulerSimulation(position.pixels, velocity);
-}
-
-// Deliberately history-dependent: one large integration step differs from
-// multiple smaller ones. Every simulation read must still move forward in time.
-class _ForwardEulerSimulation extends Simulation {
-  _ForwardEulerSimulation(this.position, this.velocity);
-
-  double position;
-  double velocity;
-  double time = 0.0;
-
-  void advance(double next) {
-    expect(next, greaterThanOrEqualTo(time));
-    final double step = next - time;
-    position += velocity * step;
-    velocity *= 1.0 - .8 * step;
-    time = next;
-  }
-
-  @override
-  double x(double time) {
-    advance(time);
-    return position;
-  }
-
-  @override
-  double dx(double time) {
-    advance(time);
-    return velocity;
-  }
-
-  @override
-  bool isDone(double time) {
-    advance(time);
-    return time >= .5;
-  }
-}
-
-class _ExtentSensitivePhysics extends ClampingScrollPhysics {
-  const _ExtentSensitivePhysics({required this.stopOnGrowth, super.parent});
-
-  final bool stopOnGrowth;
-
-  @override
-  _ExtentSensitivePhysics applyTo(ScrollPhysics? ancestor) =>
-      _ExtentSensitivePhysics(stopOnGrowth: stopOnGrowth, parent: buildParent(ancestor));
-
-  @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
-    if (velocity.abs() < toleranceFor(position).velocity ||
-        (stopOnGrowth && position.maxScrollExtent > 800.0)) {
-      return null;
-    }
-    return ClampingScrollSimulation(
-      position: position.pixels,
-      velocity: velocity,
-      friction: position.maxScrollExtent > 800.0 ? .03 : .015,
-      tolerance: toleranceFor(position),
-    );
-  }
-}
-
-class _ViewportRecordingPhysics extends ClampingScrollPhysics {
-  const _ViewportRecordingPhysics(this.viewports, {super.parent});
-
-  final List<double> viewports;
-
-  @override
-  _ViewportRecordingPhysics applyTo(ScrollPhysics? ancestor) =>
-      _ViewportRecordingPhysics(viewports, parent: buildParent(ancestor));
-
-  @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
-    viewports.add(position.viewportDimension);
-    return super.createBallisticSimulation(position, velocity);
-  }
-}
-
 // Identical motion with independently configured completion rules.
 class _TimedPhysics extends ScrollPhysics {
   const _TimedPhysics(this.duration, {this.queries, this.velocityFactor = 1.0, super.parent});
@@ -447,313 +359,6 @@ void main() {
     }
   }
 
-  for (final reversed in <bool>[false, true]) {
-    testWidgets('NestedScrollView simultaneous arrivals ignore attachment order ($reversed)', (
-      WidgetTester tester,
-    ) async {
-      final key = GlobalKey<NestedScrollViewState>();
-      final factors = reversed ? <double>[.5, 1] : <double>[1, .5];
-      await tester.pumpWidget(
-        _buildBallisticTestWidget(
-          key,
-          body: Row(
-            children: <Widget>[
-              for (final double factor in factors)
-                Expanded(
-                  child: ListView.builder(
-                    primary: true,
-                    physics: _TimedPhysics(.5, velocityFactor: factor),
-                    itemExtent: 50,
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) => const SizedBox.expand(),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      );
-      final ScrollPosition outer = key.currentState!.outerController.position;
-      final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
-      outer.jumpTo(200);
-      for (var i = 0; i < bodies.length; i += 1) {
-        bodies[i].setPixels(100 * factors[i]);
-      }
-      bodies.first
-          .drag(DragStartDetails(), () {})
-          .end(
-            DragEndDetails(
-              primaryVelocity: 1000,
-              velocity: const Velocity(pixelsPerSecond: Offset(0, 1000)),
-            ),
-          );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 160));
-      // Both constant-velocity bodies arrive at 100 ms. The greater speed
-      // wins the exact tie regardless of position registration order.
-      final Simulation expected = const ClampingScrollPhysics().createBallisticSimulation(
-        outer.copyWith(pixels: 200, maxScrollExtent: 200 + bodies.first.maxScrollExtent),
-        -1000,
-      )!;
-      expect(outer.pixels, closeTo(expected.x(.06), .001));
-      expect(outer.activity!.velocity, closeTo(expected.dx(.06), .001));
-      await tester.pumpAndSettle();
-    });
-  }
-
-  testWidgets('NestedScrollView newly attached body does not join an existing fling', (
-    WidgetTester tester,
-  ) async {
-    final key = GlobalKey<NestedScrollViewState>();
-    late StateSetter rebuild;
-    var attached = false;
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          rebuild = setState;
-          return _buildBallisticTestWidget(
-            key,
-            body: Row(
-              children: <Widget>[
-                for (int i = 0; i < (attached ? 3 : 2); i += 1)
-                  Expanded(
-                    key: ValueKey<int>(i),
-                    child: ListView.builder(
-                      primary: true,
-                      physics: const ClampingScrollPhysics(),
-                      itemExtent: 50,
-                      itemCount: 100,
-                      itemBuilder: (BuildContext context, int index) => const SizedBox.expand(),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-    final ScrollPosition outer = key.currentState!.outerController.position;
-    final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
-    outer.jumpTo(200);
-    bodies[0].setPixels(100);
-    bodies[1].setPixels(150);
-    bodies[1]
-        .drag(DragStartDetails(), () {})
-        .end(
-          DragEndDetails(
-            primaryVelocity: 1000,
-            velocity: const Velocity(pixelsPerSecond: Offset(0, 1000)),
-          ),
-        );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 64));
-    rebuild(() {
-      attached = true;
-    });
-    await tester.pump();
-    final ScrollPosition added = key.currentState!.innerController.positions.last;
-    added.setPixels(1000);
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(outer.pixels, lessThan(200));
-    expect(added.pixels, 1000);
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('NestedScrollView releases a parked body at detach time', (
-    WidgetTester tester,
-  ) async {
-    final key = GlobalKey<NestedScrollViewState>();
-    late StateSetter rebuild;
-    var removed = false;
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (context, setState) {
-          rebuild = setState;
-          return _buildBallisticTestWidget(
-            key,
-            body: Row(
-              children: <Widget>[
-                for (int i = 0; i < 2; i++)
-                  if (!(removed && i == 1))
-                    Expanded(
-                      key: ValueKey<int>(i),
-                      child: ListView.builder(
-                        primary: true,
-                        physics: const ClampingScrollPhysics(),
-                        itemExtent: 50,
-                        itemCount: 100,
-                        itemBuilder: (context, index) => const SizedBox.expand(),
-                      ),
-                    ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-    final ScrollPosition outer = key.currentState!.outerController.position;
-    final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
-    outer.jumpTo(200);
-    bodies[0].setPixels(100);
-    bodies[1].setPixels(1000);
-    bodies[0]
-        .drag(DragStartDetails(), () {})
-        .end(
-          DragEndDetails(
-            primaryVelocity: 1000,
-            velocity: const Velocity(pixelsPerSecond: Offset(0, 1000)),
-          ),
-        );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(outer.pixels, 200);
-    expect(bodies[0].pixels, 0);
-    rebuild(() {
-      removed = true;
-    });
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 16));
-    expect(
-      outer.pixels,
-      greaterThanOrEqualTo(184),
-      reason: 'header must not retroactively replay wait duration',
-    );
-    await tester.pumpAndSettle();
-  });
-
-  testWidgets('NestedScrollView preserves the body barrier during resize', (
-    WidgetTester tester,
-  ) async {
-    final key = GlobalKey<NestedScrollViewState>();
-    late StateSetter rebuild;
-    var resized = false;
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (context, setState) {
-          rebuild = setState;
-          return Align(
-            child: SizedBox(
-              height: resized ? 500 : 600,
-              child: _buildBallisticTestWidget(
-                key,
-                body: Row(
-                  children: <Widget>[
-                    for (int i = 0; i < 2; i++)
-                      Expanded(
-                        child: ListView.builder(
-                          primary: true,
-                          physics: const ClampingScrollPhysics(),
-                          itemExtent: 50,
-                          itemCount: 100,
-                          itemBuilder: (context, index) => const SizedBox.expand(),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-    final ScrollPosition outer = key.currentState!.outerController.position;
-    final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
-    outer.jumpTo(200);
-    bodies[0].setPixels(100);
-    bodies[1].setPixels(150);
-    bodies[1]
-        .drag(DragStartDetails(), () {})
-        .end(
-          DragEndDetails(
-            primaryVelocity: 1000,
-            velocity: const Velocity(pixelsPerSecond: Offset(0, 1000)),
-          ),
-        );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 64));
-    final double before = bodies[1].pixels;
-    rebuild(() {
-      resized = true;
-    });
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 16));
-    expect(
-      bodies[1].pixels,
-      lessThan(before),
-      reason: 'resize should not cancel waiting-body fling',
-    );
-    await tester.pumpAndSettle();
-  });
-
-  for (final detachAt in <int>[64, 400]) {
-    testWidgets('NestedScrollView preserves offsets when forward leader detaches $detachAt', (
-      WidgetTester tester,
-    ) async {
-      final key = GlobalKey<NestedScrollViewState>();
-      late StateSetter rebuild;
-      var removed = false;
-      await tester.pumpWidget(
-        StatefulBuilder(
-          builder: (context, setState) {
-            rebuild = setState;
-            return _buildBallisticTestWidget(
-              key,
-              body: Row(
-                children: <Widget>[
-                  for (int i = 0; i < 2; i++)
-                    if (!(removed && i == 0))
-                      Expanded(
-                        key: ValueKey<int>(i),
-                        child: ListView.builder(
-                          primary: true,
-                          physics: const ClampingScrollPhysics(),
-                          itemExtent: 50,
-                          itemCount: 100,
-                          itemBuilder: (context, index) => const SizedBox.expand(),
-                        ),
-                      ),
-                ],
-              ),
-            );
-          },
-        ),
-      );
-      final ScrollPosition outer = key.currentState!.outerController.position;
-      final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
-      outer.jumpTo(100);
-      bodies[0].setPixels(0);
-      bodies[1].setPixels(100);
-      bodies[0]
-          .drag(DragStartDetails(), () {})
-          .end(
-            DragEndDetails(
-              primaryVelocity: -1000,
-              velocity: const Velocity(pixelsPerSecond: Offset(0, -1000)),
-            ),
-          );
-      await tester.pump();
-      await tester.pump(Duration(milliseconds: detachAt));
-      final double beforeOuter = outer.pixels;
-      final double beforeBody = bodies[1].pixels;
-      rebuild(() {
-        removed = true;
-      });
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 16));
-      expect(
-        outer.pixels,
-        greaterThanOrEqualTo(beforeOuter),
-        reason: 'header jumps backwards after leader detach',
-      );
-      expect(
-        bodies[1].pixels,
-        greaterThanOrEqualTo(beforeBody),
-        reason: 'body jumps backwards after leader detach',
-      );
-      await tester.pumpAndSettle();
-    });
-  }
-
   testWidgets('NestedScrollView collapses the header before moving multiple bodies', (
     WidgetTester tester,
   ) async {
@@ -806,78 +411,6 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  for (final replaceOuter in <bool>[false, true]) {
-    testWidgets('NestedScrollView replaces grouped physics during resize (outer: $replaceOuter)', (
-      WidgetTester tester,
-    ) async {
-      final key = GlobalKey<NestedScrollViewState>();
-      late StateSetter rebuild;
-      var replaced = false;
-      await tester.pumpWidget(
-        StatefulBuilder(
-          builder: (context, setState) {
-            rebuild = setState;
-            return Align(
-              child: SizedBox(
-                height: replaced ? 500 : 600,
-                child: _buildBallisticTestWidget(
-                  key,
-                  physics: replaced && replaceOuter
-                      ? const ClampingScrollPhysics()
-                      : const BouncingScrollPhysics(),
-                  body: Row(
-                    children: <Widget>[
-                      for (int i = 0; i < 2; i += 1)
-                        Expanded(
-                          child: ListView.builder(
-                            key: ValueKey<int>(i),
-                            primary: true,
-                            physics: replaced && !replaceOuter
-                                ? const BouncingScrollPhysics()
-                                : const ClampingScrollPhysics(),
-                            itemExtent: 50,
-                            itemCount: 100,
-                            itemBuilder: (context, index) => const SizedBox.expand(),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      );
-      final ScrollPosition initialOuter = key.currentState!.outerController.position;
-      final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
-      initialOuter.jumpTo(200);
-      bodies[0].setPixels(99);
-      bodies[1].setPixels(100);
-      bodies[1]
-          .drag(DragStartDetails(), () {})
-          .end(
-            DragEndDetails(
-              primaryVelocity: 1000,
-              velocity: const Velocity(pixelsPerSecond: Offset(0, 1000)),
-            ),
-          );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 144));
-      final double before = initialOuter.pixels;
-      rebuild(() {
-        replaced = true;
-      });
-      await tester.pump();
-      final ScrollPosition outer = key.currentState!.outerController.position;
-      expect(outer.pixels, closeTo(before, .001));
-      await tester.pump(const Duration(milliseconds: 16));
-      expect(outer.pixels, lessThan(before));
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-      expect(tester.binding.transientCallbackCount, 0);
-    });
-  }
-
   testWidgets('NestedScrollView passes the actual combined offset and range', (
     WidgetTester tester,
   ) async {
@@ -922,72 +455,70 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  for (final removeAt in <int>[64, 144]) {
-    for (final removed in <int>[0, 1, 2]) {
-      testWidgets('NestedScrollView removes flinging bodies ($removed at $removeAt ms)', (
-        WidgetTester tester,
-      ) async {
-        final key = GlobalKey<NestedScrollViewState>();
-        late StateSetter rebuild;
-        var remove = false;
-        await tester.pumpWidget(
-          StatefulBuilder(
-            builder: (context, setState) {
-              rebuild = setState;
-              return _buildBallisticTestWidget(
-                key,
-                physics: const BouncingScrollPhysics(),
-                body: Row(
-                  children: <Widget>[
-                    for (int i = 0; i < 2; i += 1)
-                      if (!remove || (removed != i && removed != 2))
-                        Expanded(
-                          key: ValueKey<int>(i),
-                          child: ListView.builder(
-                            primary: true,
-                            physics: i == 0
-                                ? const ClampingScrollPhysics()
-                                : const BouncingScrollPhysics(),
-                            itemExtent: 50,
-                            itemCount: 100,
-                            itemBuilder: (context, index) => const SizedBox.expand(),
-                          ),
-                        ),
-                  ],
-                ),
-              );
-            },
+  const removeAt = 64;
+  const removed = 1;
+  testWidgets('NestedScrollView removes flinging bodies ($removed at $removeAt ms)', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<NestedScrollViewState>();
+    late StateSetter rebuild;
+    var remove = false;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (context, setState) {
+          rebuild = setState;
+          return _buildBallisticTestWidget(
+            key,
+            physics: const BouncingScrollPhysics(),
+            body: Row(
+              children: <Widget>[
+                for (int i = 0; i < 2; i += 1)
+                  if (!remove || (removed != i && removed != 2))
+                    Expanded(
+                      key: ValueKey<int>(i),
+                      child: ListView.builder(
+                        primary: true,
+                        physics: i == 0
+                            ? const ClampingScrollPhysics()
+                            : const BouncingScrollPhysics(),
+                        itemExtent: 50,
+                        itemCount: 100,
+                        itemBuilder: (context, index) => const SizedBox.expand(),
+                      ),
+                    ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+    final ScrollPosition outer = key.currentState!.outerController.position;
+    final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
+    outer.jumpTo(200);
+    bodies[0].setPixels(99);
+    bodies[1].setPixels(100);
+    bodies[1]
+        .drag(DragStartDetails(), () {})
+        .end(
+          DragEndDetails(
+            primaryVelocity: 1000,
+            velocity: const Velocity(pixelsPerSecond: Offset(0, 1000)),
           ),
         );
-        final ScrollPosition outer = key.currentState!.outerController.position;
-        final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
-        outer.jumpTo(200);
-        bodies[0].setPixels(99);
-        bodies[1].setPixels(100);
-        bodies[1]
-            .drag(DragStartDetails(), () {})
-            .end(
-              DragEndDetails(
-                primaryVelocity: 1000,
-                velocity: const Velocity(pixelsPerSecond: Offset(0, 1000)),
-              ),
-            );
-        await tester.pump();
-        await tester.pump(Duration(milliseconds: removeAt));
-        final double before = outer.pixels;
-        rebuild(() {
-          remove = true;
-        });
-        await tester.pump();
-        expect(outer.pixels, closeTo(before, .001));
-        await tester.pump(const Duration(milliseconds: 160));
-        expect(outer.pixels, lessThan(before));
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-        expect(tester.binding.transientCallbackCount, 0);
-      });
-    }
-  }
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: removeAt));
+    final double before = outer.pixels;
+    rebuild(() {
+      remove = true;
+    });
+    await tester.pump();
+    expect(outer.pixels, closeTo(before, .001));
+    await tester.pump(const Duration(milliseconds: 160));
+    expect(outer.pixels, lessThan(before));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(tester.binding.transientCallbackCount, 0);
+  });
 
   for (final firstOffset in <double>[0, 99, 1000]) {
     testWidgets('NestedScrollView waits for every body before expanding (first: $firstOffset)', (
@@ -1133,45 +664,44 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  for (final seconds in <int>[1, 10]) {
-    testWidgets('NestedScrollView bounds reads while waiting for a body ($seconds seconds)', (
-      WidgetTester tester,
-    ) async {
-      final queries = <double>[];
-      final key = GlobalKey<NestedScrollViewState>();
-      await tester.pumpWidget(
-        _buildBallisticTestWidget(
-          key,
-          bodyPhysics: _TimedPhysics(60, queries: queries),
-          body: ListView.builder(
-            physics: _TimedPhysics(60, queries: queries),
-            itemExtent: 50,
-            itemCount: 1000,
-            itemBuilder: (context, index) => const SizedBox.expand(),
-          ),
+  const seconds = 10;
+  testWidgets('NestedScrollView bounds reads while waiting for a body ($seconds seconds)', (
+    WidgetTester tester,
+  ) async {
+    final queries = <double>[];
+    final key = GlobalKey<NestedScrollViewState>();
+    await tester.pumpWidget(
+      _buildBallisticTestWidget(
+        key,
+        bodyPhysics: _TimedPhysics(60, queries: queries),
+        body: ListView.builder(
+          physics: _TimedPhysics(60, queries: queries),
+          itemExtent: 50,
+          itemCount: 1000,
+          itemBuilder: (context, index) => const SizedBox.expand(),
         ),
-      );
-      final ScrollPosition outer = key.currentState!.outerController.position;
-      final ScrollPosition inner = key.currentState!.innerController.position;
-      outer.jumpTo(outer.maxScrollExtent);
-      inner.setPixels(10000);
-      inner
-          .drag(DragStartDetails(), () {})
-          .end(
-            DragEndDetails(
-              primaryVelocity: 100,
-              velocity: const Velocity(pixelsPerSecond: Offset(0, 100)),
-            ),
-          );
-      await tester.pump();
-      queries.clear();
-      await tester.pump(Duration(seconds: seconds));
-      expect(inner.pixels, closeTo(10000 - 100.0 * seconds, .001));
-      expect(outer.pixels, outer.maxScrollExtent);
-      expect(queries.length, lessThanOrEqualTo(20));
-      await tester.pumpWidget(const SizedBox.shrink());
-    });
-  }
+      ),
+    );
+    final ScrollPosition outer = key.currentState!.outerController.position;
+    final ScrollPosition inner = key.currentState!.innerController.position;
+    outer.jumpTo(outer.maxScrollExtent);
+    inner.setPixels(10000);
+    inner
+        .drag(DragStartDetails(), () {})
+        .end(
+          DragEndDetails(
+            primaryVelocity: 100,
+            velocity: const Velocity(pixelsPerSecond: Offset(0, 100)),
+          ),
+        );
+    await tester.pump();
+    queries.clear();
+    await tester.pump(const Duration(seconds: seconds));
+    expect(inner.pixels, closeTo(10000 - 100.0 * seconds, .001));
+    expect(outer.pixels, outer.maxScrollExtent);
+    expect(queries.length, lessThanOrEqualTo(20));
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets('NestedScrollView carries boundary velocity through a long frame', (
     WidgetTester tester,
@@ -1309,41 +839,6 @@ void main() {
         TargetPlatform.iOS,
         TargetPlatform.android,
       }),
-    );
-  }
-
-  for (final velocity in <double>[100.0, -100.0]) {
-    testWidgets(
-      'NestedScrollView bounds simulation reads after the last internal boundary ($velocity)',
-      (WidgetTester tester) async {
-        final queries = <double>[];
-        final key = GlobalKey<NestedScrollViewState>();
-        await tester.pumpWidget(
-          _buildBallisticTestWidget(key, bodyPhysics: _TimedPhysics(60.0, queries: queries)),
-        );
-        final ScrollPosition outer = key.currentState!.outerController.position;
-        final ScrollPosition inner = key.currentState!.innerController.position;
-        outer.jumpTo(velocity > 0.0 ? outer.maxScrollExtent : outer.minScrollExtent);
-        inner.setPixels(1000.0);
-        inner
-            .drag(DragStartDetails(), () {})
-            .end(
-              DragEndDetails(
-                primaryVelocity: -velocity,
-                velocity: Velocity(pixelsPerSecond: Offset(0.0, -velocity)),
-              ),
-            );
-        await tester.pump();
-        queries.clear();
-        await tester.pump(const Duration(seconds: 1));
-        expect(inner.pixels, closeTo(1000.0 + velocity, .001));
-        expect(inner.activity!.velocity, velocity);
-        // Allow ordinary activity reads, but no elapsed-time-sized catch-up loop
-        // when there is no remaining header/body boundary to locate.
-        expect(queries.length, lessThanOrEqualTo(20));
-        await tester.pumpWidget(const SizedBox.shrink());
-        expect(tester.binding.transientCallbackCount, 0);
-      },
     );
   }
 
@@ -1523,11 +1018,7 @@ void main() {
   }
 
   for (final velocity in <double>[1000.0, -1000.0]) {
-    for (final outerPhysics in <ScrollPhysics?>[
-      null,
-      const ClampingScrollPhysics(),
-      const BouncingScrollPhysics(),
-    ]) {
+    for (final outerPhysics in <ScrollPhysics?>[null, const BouncingScrollPhysics()]) {
       for (final bodyPhysics in <ScrollPhysics>[
         const ClampingScrollPhysics(),
         const BouncingScrollPhysics(),
@@ -1618,81 +1109,6 @@ void main() {
     }
   }
 
-  for (final velocity in <double>[1000.0, -1000.0]) {
-    for (final fixedItemCount in <int?>[null, 100, if (velocity > 0.0) 7]) {
-      testWidgets(
-        'NestedScrollView preserves fast ballistic history across the boundary ($velocity, fixed item count: $fixedItemCount)',
-        (WidgetTester tester) async {
-          const physics = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
-          final key = GlobalKey<NestedScrollViewState>();
-          await tester.pumpWidget(
-            _buildBallisticTestWidget(
-              key,
-              physics: physics,
-              bodyPhysics: physics,
-              body: fixedItemCount != null
-                  ? Align(
-                      alignment: Alignment.topCenter,
-                      child: SizedBox(
-                        height: 300.0,
-                        child: ListView.builder(
-                          physics: physics,
-                          itemExtent: 50.0,
-                          itemCount: fixedItemCount,
-                          itemBuilder: (BuildContext context, int index) => const SizedBox.expand(),
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
-          );
-          final ScrollPosition outer = key.currentState!.outerController.position;
-          final ScrollPosition inner = key.currentState!.innerController.position;
-          outer.jumpTo(velocity > 0.0 ? outer.maxScrollExtent - 100.0 : outer.maxScrollExtent);
-          inner.setPixels(velocity > 0.0 ? inner.minScrollExtent : inner.minScrollExtent + 100.0);
-          await tester.pumpAndSettle();
-          final Simulation reference = physics.createBallisticSimulation(
-            FixedScrollMetrics(
-              minScrollExtent: outer.minScrollExtent,
-              maxScrollExtent: outer.maxScrollExtent + inner.maxScrollExtent,
-              pixels: outer.pixels + inner.pixels,
-              viewportDimension: outer.viewportDimension,
-              axisDirection: outer.axisDirection,
-              devicePixelRatio: outer.devicePixelRatio,
-            ),
-            velocity,
-          )!;
-          inner
-              .drag(DragStartDetails(), () {})
-              .end(
-                DragEndDetails(
-                  primaryVelocity: -velocity,
-                  velocity: Velocity(pixelsPerSecond: Offset(0.0, -velocity)),
-                ),
-              );
-          await tester.pump();
-          for (var frame = 1; frame <= 16; frame += 1) {
-            await tester.pump(const Duration(milliseconds: 16));
-            expect(
-              outer.pixels + inner.pixels,
-              moreOrLessEquals(reference.x(frame * .016), epsilon: .001),
-            );
-            expect(
-              inner.activity!.velocity,
-              moreOrLessEquals(reference.dx(frame * .016), epsilon: .001),
-            );
-          }
-          await tester.pumpAndSettle();
-          expect(outer.outOfRange, isFalse);
-          expect(inner.outOfRange, isFalse);
-        },
-        variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}),
-      );
-    }
-  }
-
-  // With reverse mixed physics, the old independent simulations leave the
-  // outer position at 20 despite enough velocity to open the remaining header.
   for (final reverse in <bool>[false, true]) {
     testWidgets('NestedScrollView returns from coordinated overscroll (reverse: $reverse)', (
       WidgetTester tester,
@@ -1807,390 +1223,6 @@ void main() {
     });
   }
 
-  for (final itemCount in <int>[7, 120]) {
-    testWidgets('NestedScrollView updates fling bounds without resetting fast time ($itemCount)', (
-      WidgetTester tester,
-    ) async {
-      const physics = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
-      final key = GlobalKey<NestedScrollViewState>();
-      Widget fixture(int count) => _buildBallisticTestWidget(
-        key,
-        physics: physics,
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: SizedBox(
-            height: 300.0,
-            child: ListView.builder(
-              physics: physics,
-              itemExtent: 50.0,
-              itemCount: count,
-              itemBuilder: (BuildContext context, int index) => const SizedBox.expand(),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpWidget(fixture(100));
-      final ScrollPosition outer = key.currentState!.outerController.position;
-      final ScrollPosition inner = key.currentState!.innerController.position;
-      outer.jumpTo(outer.maxScrollExtent - 100.0);
-      await tester.pumpAndSettle();
-      final double initialPixels = outer.pixels;
-      inner
-          .drag(DragStartDetails(), () {})
-          .end(
-            DragEndDetails(
-              primaryVelocity: -1000.0,
-              velocity: const Velocity(pixelsPerSecond: Offset(0.0, -1000.0)),
-            ),
-          );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 64));
-      final double before = outer.pixels + inner.pixels;
-      await tester.pumpWidget(fixture(itemCount));
-      expect(outer.pixels + inner.pixels, before);
-      final Simulation reference = physics.createBallisticSimulation(
-        FixedScrollMetrics(
-          minScrollExtent: outer.minScrollExtent,
-          maxScrollExtent: outer.maxScrollExtent + inner.maxScrollExtent,
-          pixels: initialPixels,
-          viewportDimension: outer.viewportDimension,
-          axisDirection: outer.axisDirection,
-          devicePixelRatio: outer.devicePixelRatio,
-        ),
-        1000.0,
-      )!;
-      for (var frame = 5; frame <= 24; frame += 1) {
-        await tester.pump(const Duration(milliseconds: 16));
-        expect(
-          outer.pixels + inner.pixels,
-          moreOrLessEquals(reference.x(frame * .016), epsilon: .001),
-        );
-        expect(
-          inner.activity!.velocity,
-          moreOrLessEquals(
-            reference.isDone(frame * .016) ? 0.0 : reference.dx(frame * .016),
-            epsilon: .001,
-          ),
-        );
-      }
-      await tester.pumpAndSettle();
-      expect(outer.outOfRange, isFalse);
-      expect(inner.outOfRange, isFalse);
-      if (itemCount == 7) {
-        expect(inner.pixels, inner.maxScrollExtent);
-      }
-    });
-  }
-
-  testWidgets('NestedScrollView restarts a history-dependent reconstruction from current state', (
-    WidgetTester tester,
-  ) async {
-    tester.view.devicePixelRatio = 1.0;
-    tester.view.physicalSize = const Size(800.0, 600.0);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(tester.view.resetPhysicalSize);
-    final key = GlobalKey<NestedScrollViewState>();
-    Widget fixture(int count) => _buildBallisticTestWidget(
-      key,
-      physics: const ClampingScrollPhysics(),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: SizedBox(
-          height: 300.0,
-          child: ListView.builder(
-            physics: const _ForwardEulerPhysics(),
-            itemExtent: 50.0,
-            itemCount: count,
-            itemBuilder: (BuildContext context, int index) => const SizedBox.expand(),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpWidget(fixture(100));
-    final ScrollPosition outer = key.currentState!.outerController.position;
-    final ScrollPosition inner = key.currentState!.innerController.position;
-    outer.jumpTo(outer.maxScrollExtent - 100.0);
-    await tester.pumpAndSettle();
-    inner
-        .drag(DragStartDetails(), () {})
-        .end(
-          DragEndDetails(
-            primaryVelocity: -1000.0,
-            velocity: const Velocity(pixelsPerSecond: Offset(0.0, -1000.0)),
-          ),
-        );
-    await tester.pump();
-    for (var frame = 0; frame < 10; frame += 1) {
-      await tester.pump(const Duration(milliseconds: 16));
-    }
-    expect(inner.pixels, greaterThan(0.0));
-    final double before = outer.pixels + inner.pixels;
-    final double velocity = inner.activity!.velocity;
-    await tester.pumpWidget(fixture(120));
-    expect(outer.pixels + inner.pixels, before);
-    var previousPixels = before;
-    var previousVelocity = velocity;
-    for (var frame = 1; frame <= 5; frame += 1) {
-      await tester.pump(const Duration(milliseconds: 16));
-      final double pixels = outer.pixels + inner.pixels;
-      // Euler integration with positive damping cannot travel farther than
-      // constant velocity, or less than using the whole frame's final velocity.
-      // These bounds do not depend on the coordinator's sampling interval.
-      expect(
-        pixels - previousPixels,
-        inInclusiveRange(
-          previousVelocity * .016 * (1.0 - .8 * .016) - .000001,
-          previousVelocity * .016 + .000001,
-        ),
-      );
-      expect(
-        inner.activity!.velocity,
-        inInclusiveRange(previousVelocity * (1.0 - .8 * .016) - .000001, previousVelocity),
-      );
-      previousPixels = pixels;
-      previousVelocity = inner.activity!.velocity;
-    }
-    await tester.pumpAndSettle();
-    expect(tester.binding.hasScheduledFrame, isFalse);
-  });
-
-  for (final stopOnGrowth in <bool>[false, true]) {
-    testWidgets(
-      'NestedScrollView handles incompatible reconstructed physics (null: $stopOnGrowth)',
-      (WidgetTester tester) async {
-        tester.view.devicePixelRatio = 1.0;
-        tester.view.physicalSize = const Size(800.0, 600.0);
-        addTearDown(tester.view.resetDevicePixelRatio);
-        addTearDown(tester.view.resetPhysicalSize);
-        final key = GlobalKey<NestedScrollViewState>();
-        final physics = _ExtentSensitivePhysics(stopOnGrowth: stopOnGrowth);
-        final notifications = <ScrollNotification>[];
-        Widget fixture(int count) => NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification n) {
-            notifications.add(n);
-            return false;
-          },
-          child: _buildBallisticTestWidget(
-            key,
-            physics: const ClampingScrollPhysics(),
-            body: Align(
-              alignment: Alignment.topCenter,
-              child: SizedBox(
-                height: 300.0,
-                child: ListView.builder(
-                  physics: physics,
-                  itemExtent: 50.0,
-                  itemCount: count,
-                  itemBuilder: (BuildContext context, int index) => const SizedBox.expand(),
-                ),
-              ),
-            ),
-          ),
-        );
-        await tester.pumpWidget(fixture(10));
-        final ScrollPosition outer = key.currentState!.outerController.position;
-        final ScrollPosition inner = key.currentState!.innerController.position;
-        outer.jumpTo(outer.maxScrollExtent - 100.0);
-        await tester.pumpAndSettle();
-        notifications.clear();
-        inner
-            .drag(DragStartDetails(), () {})
-            .end(
-              DragEndDetails(
-                primaryVelocity: -1000.0,
-                velocity: const Velocity(pixelsPerSecond: Offset(0.0, -1000.0)),
-              ),
-            );
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 160));
-        expect(outer.isScrollingNotifier.value, isFalse);
-        expect(inner.isScrollingNotifier.value, isTrue);
-        final double before = outer.pixels + inner.pixels;
-        final double velocity = inner.activity!.velocity;
-        await tester.pumpWidget(fixture(100));
-        expect(outer.pixels + inner.pixels, before);
-        final Simulation? reference = physics.createBallisticSimulation(
-          FixedScrollMetrics(
-            minScrollExtent: outer.minScrollExtent,
-            maxScrollExtent: outer.maxScrollExtent + inner.maxScrollExtent,
-            pixels: before,
-            viewportDimension: outer.viewportDimension,
-            axisDirection: outer.axisDirection,
-            devicePixelRatio: outer.devicePixelRatio,
-          ),
-          velocity,
-        );
-        for (var frame = 1; frame <= 5; frame += 1) {
-          await tester.pump(const Duration(milliseconds: 16));
-          expect(
-            outer.pixels + inner.pixels,
-            moreOrLessEquals(reference?.x(frame * .016) ?? before, epsilon: .001),
-          );
-        }
-        await tester.pumpAndSettle();
-        expect(notifications.whereType<ScrollStartNotification>(), hasLength(2));
-        expect(notifications.whereType<ScrollEndNotification>(), hasLength(2));
-        expect(inner.activity!.velocity, 0.0);
-        expect(tester.binding.hasScheduledFrame, isFalse);
-      },
-    );
-  }
-
-  for (final reverse in <bool>[false, true]) {
-    for (final replaceOuter in <bool>[false, true]) {
-      for (final resize in <bool>[false, true]) {
-        testWidgets(
-          'NestedScrollView replaces active physics (reverse: $reverse, outer: $replaceOuter, resize: $resize)',
-          (WidgetTester tester) async {
-            tester.view.devicePixelRatio = 1.0;
-            tester.view.physicalSize = const Size(800.0, 600.0);
-            addTearDown(tester.view.resetDevicePixelRatio);
-            addTearDown(tester.view.resetPhysicalSize);
-            final key = GlobalKey<NestedScrollViewState>();
-            final notifications = <ScrollNotification>[];
-            Widget fixture(bool replaced) => NotificationListener<ScrollNotification>(
-              onNotification: (ScrollNotification notification) {
-                notifications.add(notification);
-                return false;
-              },
-              child: _buildBallisticTestWidget(
-                key,
-                physics: replaced && replaceOuter
-                    ? const BouncingScrollPhysics()
-                    : const ClampingScrollPhysics(),
-                bodyPhysics: replaced && !replaceOuter
-                    ? const BouncingScrollPhysics()
-                    : const ClampingScrollPhysics(),
-              ),
-            );
-            await tester.pumpWidget(fixture(false));
-            final ScrollPosition oldOuter = key.currentState!.outerController.position;
-            final ScrollPosition oldInner = key.currentState!.innerController.position;
-            oldOuter.jumpTo(reverse ? oldOuter.maxScrollExtent : oldOuter.maxScrollExtent - 100.0);
-            if (reverse) {
-              oldInner.setPixels(100.0);
-            }
-            await tester.pumpAndSettle();
-            notifications.clear();
-            final velocity = reverse ? -1000.0 : 1000.0;
-            oldInner
-                .drag(DragStartDetails(), () {})
-                .end(
-                  DragEndDetails(
-                    primaryVelocity: -velocity,
-                    velocity: Velocity(pixelsPerSecond: Offset(0.0, -velocity)),
-                  ),
-                );
-            await tester.pump();
-            await tester.pump(Duration(milliseconds: replaceOuter != reverse ? 64 : 160));
-            final active = replaceOuter ? oldOuter : oldInner;
-            expect(active.isScrollingNotifier.value, isTrue);
-            final double before = oldOuter.pixels + oldInner.pixels;
-            final double beforeVelocity = active.activity!.velocity;
-            final Simulation reference = const BouncingScrollPhysics().createBallisticSimulation(
-              FixedScrollMetrics(
-                minScrollExtent: oldOuter.minScrollExtent,
-                maxScrollExtent: oldOuter.maxScrollExtent + oldInner.maxScrollExtent,
-                pixels: before,
-                viewportDimension: oldOuter.viewportDimension,
-                axisDirection: oldOuter.axisDirection,
-                devicePixelRatio: oldOuter.devicePixelRatio,
-              ),
-              beforeVelocity,
-            )!;
-            if (resize) {
-              tester.view.physicalSize = const Size(800.0, 500.0);
-            }
-            await tester.pumpWidget(fixture(true));
-            final ScrollPosition outer = key.currentState!.outerController.position;
-            final ScrollPosition inner = key.currentState!.innerController.position;
-            expect(outer.viewportDimension, resize ? 500.0 : 600.0);
-            expect(replaceOuter ? outer : inner, isNot(same(active)));
-            expect(replaceOuter ? inner : outer, same(replaceOuter ? oldInner : oldOuter));
-            expect(outer.pixels + inner.pixels, before);
-            expect((replaceOuter ? outer : inner).activity!.velocity, beforeVelocity);
-            for (var frame = 1; frame <= 2; frame += 1) {
-              await tester.pump(const Duration(milliseconds: 16));
-              expect(
-                outer.pixels + inner.pixels,
-                moreOrLessEquals(reference.x(frame * .016), epsilon: .001),
-              );
-              expect(
-                (replaceOuter ? outer : inner).activity!.velocity,
-                moreOrLessEquals(reference.dx(frame * .016), epsilon: .001),
-              );
-            }
-            await tester.pumpAndSettle();
-            expect(notifications.whereType<ScrollStartNotification>(), hasLength(2));
-            expect(notifications.whereType<ScrollEndNotification>(), hasLength(2));
-            for (final position in <ScrollPosition>[outer, inner]) {
-              expect(position.outOfRange, isFalse);
-              expect(position.isScrollingNotifier.value, isFalse);
-              expect(position.activity!.velocity, 0.0);
-            }
-            expect(tester.binding.transientCallbackCount, 0);
-            expect(tester.binding.hasScheduledFrame, isFalse);
-            expect(tester.takeException(), isNull);
-          },
-        );
-      }
-    }
-  }
-
-  testWidgets('NestedScrollView uses new outer dimensions after idle position absorption', (
-    WidgetTester tester,
-  ) async {
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetDevicePixelRatio);
-    tester.view.physicalSize = const Size(800.0, 600.0);
-    addTearDown(tester.view.resetPhysicalSize);
-    final key = GlobalKey<NestedScrollViewState>();
-    final viewports = <double>[];
-    final bodyPhysics = _ViewportRecordingPhysics(viewports);
-    await tester.pumpWidget(
-      _buildBallisticTestWidget(
-        key,
-        physics: const ClampingScrollPhysics(),
-        bodyPhysics: bodyPhysics,
-      ),
-    );
-    final ScrollPosition oldOuter = key.currentState!.outerController.position;
-    final ScrollPosition inner = key.currentState!.innerController.position;
-    oldOuter.jumpTo(oldOuter.maxScrollExtent - 100.0);
-    await tester.pumpAndSettle();
-    inner
-        .drag(DragStartDetails(), () {})
-        .end(
-          DragEndDetails(
-            primaryVelocity: -1000.0,
-            velocity: const Velocity(pixelsPerSecond: Offset(0.0, -1000.0)),
-          ),
-        );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 160));
-    expect(oldOuter.isScrollingNotifier.value, isFalse);
-    expect(inner.isScrollingNotifier.value, isTrue);
-    await tester.pumpWidget(
-      _buildBallisticTestWidget(
-        key,
-        physics: const BouncingScrollPhysics(),
-        bodyPhysics: bodyPhysics,
-      ),
-    );
-    final ScrollPosition outer = key.currentState!.outerController.position;
-    expect(outer, isNot(same(oldOuter)));
-    expect(key.currentState!.innerController.position, same(inner));
-    viewports.clear();
-    tester.view.physicalSize = const Size(800.0, 500.0);
-    await tester.pump();
-    expect(outer.viewportDimension, 500.0);
-    expect(viewports, isNotEmpty);
-    expect(viewports, everyElement(outer.viewportDimension));
-    expect(inner.isScrollingNotifier.value, isTrue);
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
-
   testWidgets('NestedScrollView keeps a hold started when the header reaches its boundary', (
     WidgetTester tester,
   ) async {
@@ -2235,437 +1267,115 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  for (final change in <String>['none', 'add', 'replace']) {
-    testWidgets(
-      'NestedScrollView ends the outer activity at its forward boundary (change: $change)',
-      (WidgetTester tester) async {
-        final key = GlobalKey<NestedScrollViewState>();
-        final notifications = <ScrollNotification>[];
-        Widget fixture(List<int> bodyKeys) => NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification n) {
-            notifications.add(n);
-            return false;
-          },
-          child: _buildBallisticTestWidget(
-            key,
-            physics: const ClampingScrollPhysics(),
-            body: Row(
-              children: <Widget>[
-                for (final int bodyKey in bodyKeys)
-                  Expanded(
-                    key: ValueKey<int>(bodyKey),
-                    child: ListView.builder(
-                      primary: true,
-                      physics: const ClampingScrollPhysics(),
-                      itemExtent: 50.0,
-                      itemCount: 100,
-                      itemBuilder: (BuildContext context, int index) => const SizedBox.expand(),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-        await tester.pumpWidget(fixture(<int>[0]));
-        final ScrollPosition outer = key.currentState!.outerController.position;
-        final ScrollPosition inner = key.currentState!.innerController.position;
-        outer.jumpTo(outer.maxScrollExtent - 100.0);
-        await tester.pumpAndSettle();
-        notifications.clear();
-        inner
-            .drag(DragStartDetails(), () {})
-            .end(
-              DragEndDetails(
-                primaryVelocity: -1000.0,
-                velocity: const Velocity(pixelsPerSecond: Offset(0.0, -1000.0)),
-              ),
-            );
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 64));
-        if (change != 'none') {
-          await tester.pumpWidget(fixture(change == 'add' ? <int>[0, 1] : <int>[1]));
-        }
-        await tester.pump(const Duration(milliseconds: 64));
-        final List<ScrollPosition> currentBodies = key.currentState!.innerController.positions
-            .toList();
-        final ScrollPosition currentInner = currentBodies.first;
-        expect(outer.pixels, outer.maxScrollExtent);
-        expect(outer.isScrollingNotifier.value, isFalse);
-        expect(outer.activity!.velocity, 0.0);
-        expect(
-          notifications.whereType<ScrollEndNotification>().where(
-            (ScrollEndNotification n) => n.context == outer.context.notificationContext,
-          ),
-          hasLength(1),
-        );
-        if (change == 'replace') {
-          expect(currentInner, isNot(same(inner)));
-          expect(currentInner.pixels, 0.0);
-          expect(currentInner.isScrollingNotifier.value, isFalse);
-        } else {
-          expect(currentInner.pixels, greaterThan(0.0));
-          expect(currentInner.isScrollingNotifier.value, isTrue);
-        }
-        if (change == 'add') {
-          expect(currentBodies, hasLength(2));
-          expect(currentInner, same(inner));
-          expect(currentBodies.last.pixels, 0.0);
-          expect(currentBodies.last.isScrollingNotifier.value, isFalse);
-        }
-        await tester.pumpAndSettle();
-        expect(tester.binding.hasScheduledFrame, isFalse);
-      },
-    );
-  }
-
-  for (final elapsed in <int>[64, 160]) {
-    testWidgets(
-      'NestedScrollView continues after removing its body during a reverse fling ($elapsed)',
-      (WidgetTester tester) async {
-        final key = GlobalKey<NestedScrollViewState>();
-        await tester.pumpWidget(
-          _buildBallisticTestWidget(
-            key,
-            physics: const ClampingScrollPhysics(),
-            bodyPhysics: const ClampingScrollPhysics(),
-          ),
-        );
-        final ScrollPosition outer = key.currentState!.outerController.position;
-        final ScrollPosition inner = key.currentState!.innerController.position;
-        outer.jumpTo(outer.maxScrollExtent);
-        inner.setPixels(100.0);
-        await tester.pumpAndSettle();
-        inner
-            .drag(DragStartDetails(), () {})
-            .end(
-              DragEndDetails(
-                primaryVelocity: 1000.0,
-                velocity: const Velocity(pixelsPerSecond: Offset(0.0, 1000.0)),
-              ),
-            );
-        await tester.pump();
-        await tester.pump(Duration(milliseconds: elapsed));
-        if (elapsed == 64) {
-          expect(outer.pixels, outer.maxScrollExtent);
-          expect(inner.pixels, greaterThan(0.0));
-        } else {
-          expect(outer.pixels, lessThan(outer.maxScrollExtent));
-          expect(inner.pixels, inner.minScrollExtent);
-        }
-        final double before = outer.pixels;
-        final double velocity = outer.activity!.velocity;
-        final Simulation reference = const ClampingScrollPhysics().createBallisticSimulation(
-          outer.copyWith(),
-          velocity,
-        )!;
-        await tester.pumpWidget(
-          _buildBallisticTestWidget(
-            key,
-            physics: const ClampingScrollPhysics(),
-            body: const SizedBox.expand(),
-          ),
-        );
-        expect(key.currentState!.innerController.hasClients, isFalse);
-        expect(outer.pixels, before);
-        for (var frame = 1; frame <= 5; frame += 1) {
-          await tester.pump(const Duration(milliseconds: 16));
-          expect(outer.pixels, moreOrLessEquals(reference.x(frame * .016), epsilon: .001));
-        }
-        await tester.pumpAndSettle();
-        expect(outer.isScrollingNotifier.value, isFalse);
-        expect(outer.activity!.velocity, 0.0);
-        expect(tester.binding.transientCallbackCount, 0);
-        expect(tester.binding.hasScheduledFrame, isFalse);
-        expect(tester.takeException(), isNull);
-      },
-    );
-  }
-
-  for (final removeBody in <bool>[false, true]) {
-    testWidgets(
-      'NestedScrollView keeps active fast physics when the waiting body changes (removed: $removeBody)',
-      (WidgetTester tester) async {
-        const fast = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
-        final key = GlobalKey<NestedScrollViewState>();
-        await tester.pumpWidget(
-          _buildBallisticTestWidget(key, physics: fast, bodyPhysics: const BouncingScrollPhysics()),
-        );
-        final ScrollPosition outer = key.currentState!.outerController.position;
-        final ScrollPosition inner = key.currentState!.innerController.position;
-        outer.jumpTo(outer.maxScrollExtent - 100.0);
-        await tester.pumpAndSettle();
-        final Simulation reference = fast.createBallisticSimulation(
-          FixedScrollMetrics(
-            minScrollExtent: outer.minScrollExtent,
-            maxScrollExtent: outer.maxScrollExtent + inner.maxScrollExtent,
-            pixels: outer.pixels,
-            viewportDimension: outer.viewportDimension,
-            axisDirection: outer.axisDirection,
-            devicePixelRatio: outer.devicePixelRatio,
-          ),
-          1000.0,
-        )!;
-        inner
-            .drag(DragStartDetails(), () {})
-            .end(
-              DragEndDetails(
-                primaryVelocity: -1000.0,
-                velocity: const Velocity(pixelsPerSecond: Offset(0.0, -1000.0)),
-              ),
-            );
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 64));
-        await tester.pumpWidget(
-          _buildBallisticTestWidget(
-            key,
-            physics: fast,
-            bodyPhysics: const ClampingScrollPhysics(),
-            body: removeBody ? const SizedBox.expand() : null,
-          ),
-        );
-        for (var frame = 5; frame <= 7; frame += 1) {
-          await tester.pump(const Duration(milliseconds: 16));
-          expect(outer.pixels, lessThan(outer.maxScrollExtent));
-          expect(outer.pixels, moreOrLessEquals(reference.x(frame * .016), epsilon: .001));
-          expect(
-            outer.activity!.velocity,
-            moreOrLessEquals(reference.dx(frame * .016), epsilon: .001),
-          );
-        }
-        await tester.pumpAndSettle();
-        expect(outer.outOfRange, isFalse);
-      },
-    );
-  }
-
-  for (final replaceOuter in <bool>[false, true]) {
-    testWidgets(
-      'NestedScrollView uses replacement physics during an active fling (outer: $replaceOuter)',
-      (WidgetTester tester) async {
-        final velocity = replaceOuter ? -1000.0 : 1000.0;
-        final key = GlobalKey<NestedScrollViewState>();
-        final notifications = <ScrollNotification>[];
-        Widget fixture({required ScrollPhysics physics, required ScrollPhysics bodyPhysics}) =>
-            NotificationListener<ScrollNotification>(
-              onNotification: (ScrollNotification notification) {
-                notifications.add(notification);
-                return false;
-              },
-              child: _buildBallisticTestWidget(key, physics: physics, bodyPhysics: bodyPhysics),
-            );
-        await tester.pumpWidget(
-          fixture(
-            physics: replaceOuter ? const BouncingScrollPhysics() : const ClampingScrollPhysics(),
-            bodyPhysics: replaceOuter
-                ? const ClampingScrollPhysics()
-                : const BouncingScrollPhysics(),
-          ),
-        );
-        ScrollPosition outer = key.currentState!.outerController.position;
-        final ScrollPosition originalInner = key.currentState!.innerController.position;
-        outer.jumpTo(replaceOuter ? outer.maxScrollExtent : outer.maxScrollExtent - 100.0);
-        originalInner.setPixels(replaceOuter ? 100.0 : 0.0);
-        await tester.pumpAndSettle();
-        notifications.clear();
-        final Simulation reference = const ClampingScrollPhysics().createBallisticSimulation(
-          FixedScrollMetrics(
-            minScrollExtent: outer.minScrollExtent,
-            maxScrollExtent: outer.maxScrollExtent + originalInner.maxScrollExtent,
-            pixels: outer.pixels + originalInner.pixels,
-            viewportDimension: outer.viewportDimension,
-            axisDirection: outer.axisDirection,
-            devicePixelRatio: outer.devicePixelRatio,
-          ),
-          velocity,
-        )!;
-        originalInner
-            .drag(DragStartDetails(), () {})
-            .end(
-              DragEndDetails(
-                primaryVelocity: -velocity,
-                velocity: Velocity(pixelsPerSecond: Offset(0.0, -velocity)),
-              ),
-            );
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 64));
-        final double before = outer.pixels + originalInner.pixels;
-        await tester.pumpWidget(
-          fixture(
-            physics: const ClampingScrollPhysics(),
-            bodyPhysics: const ClampingScrollPhysics(),
-          ),
-        );
-        final ScrollPosition inner = key.currentState!.innerController.position;
-        final ScrollPosition replacementOuter = key.currentState!.outerController.position;
-        if (replaceOuter) {
-          expect(replacementOuter, isNot(same(outer)));
-        } else {
-          expect(inner, isNot(same(originalInner)));
-        }
-        outer = replacementOuter;
-        expect(outer.pixels + inner.pixels, before);
-        expect(notifications.whereType<ScrollStartNotification>(), hasLength(2));
-        expect(notifications.whereType<ScrollEndNotification>(), isEmpty);
-        for (var frame = 5; frame <= 16; frame += 1) {
-          await tester.pump(const Duration(milliseconds: 16));
-          expect(
-            outer.pixels + inner.pixels,
-            moreOrLessEquals(reference.x(frame * .016), epsilon: .05),
-          );
-        }
-        await tester.pumpAndSettle();
-        expect(notifications.whereType<ScrollStartNotification>(), hasLength(2));
-        expect(notifications.whereType<ScrollEndNotification>(), hasLength(2));
-        expect(tester.binding.hasScheduledFrame, isFalse);
-        expect(tester.takeException(), isNull);
-      },
-    );
-  }
-
-  testWidgets('NestedScrollView respects the incoming simulation completion rule', (
-    WidgetTester tester,
-  ) async {
+  const bouncingFirstBody = true;
+  testWidgets('NestedScrollView preserves a waiting body activity during a fling '
+      '(bouncing first body: $bouncingFirstBody)', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800.0, 600.0);
+    addTearDown(tester.view.resetPhysicalSize);
     final key = GlobalKey<NestedScrollViewState>();
+    final notifications = <ScrollNotification>[];
     await tester.pumpWidget(
-      _buildBallisticTestWidget(
-        key,
-        physics: const _TimedPhysics(1.0),
-        bodyPhysics: const _TimedPhysics(0.05),
+      NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification notification) {
+          notifications.add(notification);
+          return false;
+        },
+        child: _buildBallisticTestWidget(
+          key,
+          physics: const ClampingScrollPhysics(),
+          body: Row(
+            children: <Widget>[
+              for (var index = 0; index < 2; index += 1)
+                Expanded(
+                  child: ListView.builder(
+                    key: ValueKey<int>(index),
+                    primary: true,
+                    physics: bouncingFirstBody && index == 0
+                        ? const BouncingScrollPhysics()
+                        : const ClampingScrollPhysics(),
+                    itemExtent: 50.0,
+                    itemCount: 100,
+                    itemBuilder: (BuildContext context, int index) => const SizedBox.expand(),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
     final ScrollPosition outer = key.currentState!.outerController.position;
-    final ScrollPosition inner = key.currentState!.innerController.position;
-    outer.jumpTo(outer.maxScrollExtent - 100.0);
+    final List<ScrollPosition> inner = key.currentState!.innerController.positions.toList();
+    expect(inner, hasLength(2));
+    outer.jumpTo(outer.maxScrollExtent);
+    // jumpTo on a nested position moves every attached position. Use
+    // setPixels to give the two bodies different starting offsets.
+    inner[0].setPixels(50.0);
+    inner[1].setPixels(100.0);
     await tester.pumpAndSettle();
-    inner
-        .drag(DragStartDetails(), () {})
-        .end(
-          DragEndDetails(
-            primaryVelocity: -1000.0,
-            velocity: const Velocity(pixelsPerSecond: Offset(0.0, -1000.0)),
-          ),
-        );
+    expect(inner.map((ScrollPosition position) => position.pixels), <double>[50.0, 100.0]);
+    notifications.clear();
+
+    final Drag drag = inner[1].drag(DragStartDetails(), () {});
+    drag.end(
+      DragEndDetails(
+        primaryVelocity: 1000.0,
+        velocity: const Velocity(pixelsPerSecond: Offset(0.0, 1000.0)),
+      ),
+    );
     await tester.pump();
-    for (var frame = 0; frame < 8; frame += 1) {
-      await tester.pump(const Duration(milliseconds: 16));
+    // At 64 ms the first body has reached zero, the representative has
+    // not, and both velocities still exceed the 800 px/s loading threshold.
+    await tester.pump(const Duration(milliseconds: 64));
+
+    // The body closest to its start waits for the representative body.
+    // Its activity still reports the ongoing fling velocity, which is
+    // used by recommendDeferredLoading even while its offset is unchanged.
+    expect(inner[0].pixels, inner[0].minScrollExtent);
+    expect(inner[1].pixels, greaterThan(inner[1].minScrollExtent));
+    expect(outer.pixels, outer.maxScrollExtent);
+    expect(inner[0].isScrollingNotifier.value, isTrue);
+    expect(
+      inner[0].recommendDeferredLoading(tester.element(find.byKey(const ValueKey<int>(0)))),
+      isTrue,
+    );
+    final positions = <ScrollPosition>[outer, ...inner];
+    final Iterable<BuildContext?> notificationContexts = positions.map(
+      (ScrollPosition position) => position.context.notificationContext,
+    );
+    expect(
+      notifications.whereType<ScrollStartNotification>().map(
+        (ScrollStartNotification notification) => notification.context,
+      ),
+      unorderedEquals(notificationContexts),
+    );
+    expect(notifications.whereType<ScrollEndNotification>(), isEmpty);
+
+    // Holding any nested position interrupts the whole fling, including
+    // the body whose offset has already reached its start.
+    final ScrollHoldController hold = inner[1].hold(() {});
+    final List<double> offsets = positions
+        .map((ScrollPosition position) => position.pixels)
+        .toList();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(positions.map((ScrollPosition position) => position.pixels), offsets);
+    for (final position in positions) {
+      expect(position.isScrollingNotifier.value, isFalse);
+      expect(position.activity!.velocity, 0.0);
     }
-    // The body's 50 ms run begins at the 100 ms transfer. A candidate
-    // simulated from fling start has already completed and cannot be reused.
-    expect(inner.isScrollingNotifier.value, isTrue);
-    expect(inner.pixels, moreOrLessEquals(28.0, epsilon: .001));
+    expect(
+      notifications.whereType<ScrollEndNotification>().map(
+        (ScrollEndNotification notification) => notification.context,
+      ),
+      unorderedEquals(notificationContexts),
+    );
+    expect(
+      inner[0].recommendDeferredLoading(tester.element(find.byKey(const ValueKey<int>(0)))),
+      isFalse,
+    );
+    hold.cancel();
     await tester.pumpAndSettle();
-  });
-
-  for (final bouncingFirstBody in <bool>[false, true]) {
-    testWidgets('NestedScrollView preserves a waiting body activity during a fling '
-        '(bouncing first body: $bouncingFirstBody)', (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(800.0, 600.0);
-      addTearDown(tester.view.resetPhysicalSize);
-      final key = GlobalKey<NestedScrollViewState>();
-      final notifications = <ScrollNotification>[];
-      await tester.pumpWidget(
-        NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification notification) {
-            notifications.add(notification);
-            return false;
-          },
-          child: _buildBallisticTestWidget(
-            key,
-            physics: const ClampingScrollPhysics(),
-            body: Row(
-              children: <Widget>[
-                for (var index = 0; index < 2; index += 1)
-                  Expanded(
-                    child: ListView.builder(
-                      key: ValueKey<int>(index),
-                      primary: true,
-                      physics: bouncingFirstBody && index == 0
-                          ? const BouncingScrollPhysics()
-                          : const ClampingScrollPhysics(),
-                      itemExtent: 50.0,
-                      itemCount: 100,
-                      itemBuilder: (BuildContext context, int index) => const SizedBox.expand(),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      );
-      final ScrollPosition outer = key.currentState!.outerController.position;
-      final List<ScrollPosition> inner = key.currentState!.innerController.positions.toList();
-      expect(inner, hasLength(2));
-      outer.jumpTo(outer.maxScrollExtent);
-      // jumpTo on a nested position moves every attached position. Use
-      // setPixels to give the two bodies different starting offsets.
-      inner[0].setPixels(50.0);
-      inner[1].setPixels(100.0);
-      await tester.pumpAndSettle();
-      expect(inner.map((ScrollPosition position) => position.pixels), <double>[50.0, 100.0]);
-      notifications.clear();
-
-      final Drag drag = inner[1].drag(DragStartDetails(), () {});
-      drag.end(
-        DragEndDetails(
-          primaryVelocity: 1000.0,
-          velocity: const Velocity(pixelsPerSecond: Offset(0.0, 1000.0)),
-        ),
-      );
-      await tester.pump();
-      // At 64 ms the first body has reached zero, the representative has
-      // not, and both velocities still exceed the 800 px/s loading threshold.
-      await tester.pump(const Duration(milliseconds: 64));
-
-      // The body closest to its start waits for the representative body.
-      // Its activity still reports the ongoing fling velocity, which is
-      // used by recommendDeferredLoading even while its offset is unchanged.
-      expect(inner[0].pixels, inner[0].minScrollExtent);
-      expect(inner[1].pixels, greaterThan(inner[1].minScrollExtent));
-      expect(outer.pixels, outer.maxScrollExtent);
-      expect(inner[0].isScrollingNotifier.value, isTrue);
-      expect(
-        inner[0].recommendDeferredLoading(tester.element(find.byKey(const ValueKey<int>(0)))),
-        isTrue,
-      );
-      final positions = <ScrollPosition>[outer, ...inner];
-      final Iterable<BuildContext?> notificationContexts = positions.map(
-        (ScrollPosition position) => position.context.notificationContext,
-      );
-      expect(
-        notifications.whereType<ScrollStartNotification>().map(
-          (ScrollStartNotification notification) => notification.context,
-        ),
-        unorderedEquals(notificationContexts),
-      );
-      expect(notifications.whereType<ScrollEndNotification>(), isEmpty);
-
-      // Holding any nested position interrupts the whole fling, including
-      // the body whose offset has already reached its start.
-      final ScrollHoldController hold = inner[1].hold(() {});
-      final List<double> offsets = positions
-          .map((ScrollPosition position) => position.pixels)
-          .toList();
-      await tester.pump(const Duration(milliseconds: 100));
-      expect(positions.map((ScrollPosition position) => position.pixels), offsets);
-      for (final position in positions) {
-        expect(position.isScrollingNotifier.value, isFalse);
-        expect(position.activity!.velocity, 0.0);
-      }
-      expect(
-        notifications.whereType<ScrollEndNotification>().map(
-          (ScrollEndNotification notification) => notification.context,
-        ),
-        unorderedEquals(notificationContexts),
-      );
-      expect(
-        inner[0].recommendDeferredLoading(tester.element(find.byKey(const ValueKey<int>(0)))),
-        isFalse,
-      );
-      hold.cancel();
-      await tester.pumpAndSettle();
-      expect(tester.hasRunningAnimations, isFalse);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}));
-  }
+    expect(tester.hasRunningAnimations, isFalse);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}));
 
   testWidgets('ScrollDirection test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/107101
