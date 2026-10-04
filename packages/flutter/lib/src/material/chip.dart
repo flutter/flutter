@@ -1216,6 +1216,20 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   @override
   void didUpdateWidget(RawChip oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.chipAnimationStyle != widget.chipAnimationStyle) {
+      selectController
+        ..duration = widget.chipAnimationStyle?.selectAnimation?.duration ?? _kSelectDuration
+        ..reverseDuration = widget.chipAnimationStyle?.selectAnimation?.reverseDuration;
+      avatarDrawerController
+        ..duration = widget.chipAnimationStyle?.avatarDrawerAnimation?.duration ?? _kDrawerDuration
+        ..reverseDuration = widget.chipAnimationStyle?.avatarDrawerAnimation?.reverseDuration;
+      deleteDrawerController
+        ..duration = widget.chipAnimationStyle?.deleteDrawerAnimation?.duration ?? _kDrawerDuration
+        ..reverseDuration = widget.chipAnimationStyle?.deleteDrawerAnimation?.reverseDuration;
+      enableController
+        ..duration = widget.chipAnimationStyle?.enableAnimation?.duration ?? _kDisableDuration
+        ..reverseDuration = widget.chipAnimationStyle?.enableAnimation?.reverseDuration;
+    }
     if (oldWidget.isEnabled != widget.isEnabled) {
       setState(() {
         statesController.update(WidgetState.disabled, !widget.isEnabled);
