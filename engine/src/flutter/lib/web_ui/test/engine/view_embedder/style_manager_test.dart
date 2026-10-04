@@ -29,7 +29,14 @@ void doTests() {
       );
       final Object expected = isFirefox
           ? 'rgb(0, 0, 0) 0px'
-          : anyOf('rgb(0, 0, 0) none 0px', '0px none rgb(0, 0, 0)');
+          : anyOf(<String>[
+              'rgb(0, 0, 0) none 0px',
+              '0px none rgb(0, 0, 0)',
+              // In WebKit, `:focus` does not match when the Safari window lacks
+              // OS-level WindowServer focus (`!domDocument.hasFocus()`), returning
+              // the initial unfocused outline width (`medium` = `3px`) with `none`.
+              if (isSafari && !domDocument.hasFocus()) '3px none rgb(0, 0, 0)',
+            ]);
 
       // Focus the element.
       flutterViewElement.focusWithoutScroll();
