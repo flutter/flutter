@@ -255,6 +255,7 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
   }
 
   if (delegate != nullptr) {
+    delegate->SetPendingRootOpenGLBackingStore(0, 0, 0);
     delegate->OnBeginFrame();
   }
 
@@ -385,14 +386,18 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
       }
     } else if (bs->type == kFlutterBackingStoreTypeOpenGL) {
       uint32_t fbo = bs->open_gl.framebuffer.name;
+      size_t root_width =
+          static_cast<size_t>(std::round(root_backing_store_layer->size.width));
+      size_t root_height = static_cast<size_t>(
+          std::round(root_backing_store_layer->size.height));
+      if (delegate != nullptr) {
+        delegate->SetPendingRootOpenGLBackingStore(fbo, root_width,
+                                                   root_height);
+      }
       bool res = false;
       if (fbo != 0) {
-        res = surface_manager_->BlitAndPresentOnscreenSurface(
-            fbo,
-            static_cast<size_t>(
-                std::round(root_backing_store_layer->size.width)),
-            static_cast<size_t>(
-                std::round(root_backing_store_layer->size.height)));
+        res = surface_manager_->BlitAndPresentOnscreenSurface(fbo, root_width,
+                                                              root_height);
       } else {
         res = surface_manager_->Present();
       }
