@@ -5,12 +5,16 @@
 import 'template.dart';
 
 class BadgeTemplate extends TokenTemplate {
-  const BadgeTemplate(super.blockName, super.fileName, super.tokens, {
+  const BadgeTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends BadgeThemeData {
   _${blockName}DefaultsM3(this.context) : super(
     smallSize: ${getToken("md.comp.badge.size")},

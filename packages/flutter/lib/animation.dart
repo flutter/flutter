@@ -47,7 +47,7 @@
 /// section). Before the animation triggers, the animation status is "dismissed"
 /// and the value is 0.0. As the value runs from 0.0 to 1.0 to fade in the
 /// widget, the status changes to "forward". When the widget is fully faded in
-/// at an animation value of 1.0 the status is "completed". When the animation
+/// at an animation value of 1.0, the status is "completed". When the animation
 /// triggers again to fade the widget back out, the animation status changes to
 /// "reverse" and the animation value runs back to 0.0. At that point the widget
 /// is fully faded out and the animation status switches back to "dismissed"
@@ -148,9 +148,9 @@
 ///
 /// See also:
 ///
-///  * [Introduction to animations](https://flutter.dev/docs/development/ui/animations)
+///  * [Introduction to animations](https://docs.flutter.dev/ui/animations)
 ///    on flutter.dev.
-///  * [Animations tutorial](https://flutter.dev/docs/development/ui/animations/tutorial)
+///  * [Animations tutorial](https://docs.flutter.dev/ui/animations/tutorial)
 ///    on flutter.dev.
 ///  * [Sample app](https://github.com/flutter/samples/tree/main/animations),
 ///    which showcases Flutter's animation features.
@@ -158,6 +158,8 @@
 ///    implicitly animate changes to their properties.
 ///  * [AnimatedWidget] and its subclasses, which are [Widget]s that take an
 ///    explicit [Animation] to animate their properties.
+///
+/// @docImport 'package:flutter/material.dart';
 library animation;
 
 // AnimationController can throw TickerCanceled

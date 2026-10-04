@@ -17,20 +17,17 @@ import '../utils.dart';
 Future<void> skpGeneratorTestsRunner() async {
   printProgress('${green}Running skp_generator from flutter/tests$reset');
   final Directory checkout = Directory.systemTemp.createTempSync('flutter_skp_generator.');
+  await runCommand('git', <String>[
+    '-c',
+    'core.longPaths=true',
+    'clone',
+    'https://github.com/flutter/tests.git',
+    '.',
+  ], workingDirectory: checkout.path);
+  final String skpGeneratorDir = path.join(checkout.path, 'skp_generator');
   await runCommand(
-    'git',
-    <String>[
-      '-c',
-      'core.longPaths=true',
-      'clone',
-      'https://github.com/flutter/tests.git',
-      '.',
-    ],
-    workingDirectory: checkout.path,
-  );
-  await runCommand(
-    './build.sh',
+    path.join(skpGeneratorDir, 'build.sh'),
     const <String>[],
-    workingDirectory: path.join(checkout.path, 'skp_generator'),
+    workingDirectory: skpGeneratorDir,
   );
 }

@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+const Color _black = Color(0xFF000000);
+const Color _grey = Color(0xFF9E9E9E);
+const Color _red = Color(0xFFFF0000);
 
 void main() {
   final TestWidgetsFlutterBinding binding = _GestureBindingSpy();
@@ -13,19 +17,16 @@ void main() {
   testWidgets('attach and detach correctly handle gesture', (_) async {
     expect(WidgetsBinding.instance, binding);
     final TextSelectionDelegate delegate = FakeEditableTextState();
-    final ViewportOffset offset = ViewportOffset.zero();
+    final offset = ViewportOffset.zero();
     addTearDown(offset.dispose);
-    final RenderEditable editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
+    final editable = RenderEditable(
+      backgroundCursorColor: _grey,
+      selectionColor: _black,
       textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
+      cursorColor: _red,
       offset: offset,
       textSelectionDelegate: delegate,
-      text: const TextSpan(
-        text: 'test',
-        style: TextStyle(height: 1.0, fontSize: 10.0),
-      ),
+      text: const TextSpan(text: 'test', style: TextStyle(height: 1.0, fontSize: 10.0)),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       selection: const TextSelection(
@@ -37,14 +38,12 @@ void main() {
     addTearDown(editable.dispose);
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
 
-    final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () {});
+    final owner = PipelineOwner(onNeedVisualUpdate: () {});
     addTearDown(owner.dispose);
-    final _PointerRouterSpy spy =
-        GestureBinding.instance.pointerRouter as _PointerRouterSpy;
+    final spy = GestureBinding.instance.pointerRouter as _PointerRouterSpy;
     editable.attach(owner);
     // This should register pointer into GestureBinding.instance.pointerRouter.
-    editable.handleEvent(const PointerDownEvent(),
-        BoxHitTestEntry(editable, const Offset(10, 10)));
+    editable.handleEvent(const PointerDownEvent(), BoxHitTestEntry(editable, const Offset(10, 10)));
     GestureBinding.instance.pointerRouter.route(const PointerDownEvent());
     expect(spy.routeCount, greaterThan(0));
     editable.detach();

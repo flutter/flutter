@@ -50,7 +50,9 @@ Future<void> main() async {
   try {
     // Verify that _kUnsynchronizedDemos and _kSkippedDemos identify
     // demos that actually exist.
-    final List<String> allDemoTitles = kAllGalleryDemos.map((GalleryDemo demo) => demo.title).toList();
+    final List<String> allDemoTitles = kAllGalleryDemos
+        .map((GalleryDemo demo) => demo.title)
+        .toList();
     if (!Set<String>.from(allDemoTitles).containsAll(_kUnsynchronizedDemoTitles)) {
       fail('Unrecognized demo titles in _kUnsynchronizedDemosTitles: $_kUnsynchronizedDemoTitles');
     }
@@ -60,7 +62,7 @@ Future<void> main() async {
 
     print('Starting app...');
     runApp(const GalleryApp(testMode: true));
-    final _LiveWidgetController controller = _LiveWidgetController(WidgetsBinding.instance);
+    final controller = _LiveWidgetController(WidgetsBinding.instance);
     for (final GalleryDemoCategory category in kAllGalleryDemoCategories) {
       print('Tapping "${category.name}" section...');
       await controller.tap(find.text(category.name));
@@ -71,7 +73,7 @@ Future<void> main() async {
         if (_kSkippedDemoTitles.contains(demo.title)) {
           continue;
         }
-        for (int i = 0; i < 2; i += 1) {
+        for (var i = 0; i < 2; i += 1) {
           print('Tapping "${demo.title}"...');
           await controller.tap(demoItem); // Launch the demo
           controller.frameSync = !_kUnsynchronizedDemoTitles.contains(demo.title);
@@ -84,23 +86,18 @@ Future<void> main() async {
       await controller.tap(find.byTooltip('Back'));
     }
     print('Finished successfully!');
-    _kTestChannel.invokeMethod<void>('success');
+    await _kTestChannel.invokeMethod<void>('success');
   } catch (error, stack) {
     print('Caught error: $error\n$stack');
-    _kTestChannel.invokeMethod<void>('failure');
+    await _kTestChannel.invokeMethod<void>('failure');
   }
 }
 
 final Finder backFinder = find.byElementPredicate(
-  (Element element) {
-    final Widget widget = element.widget;
-    if (widget is Tooltip) {
-      return widget.message == 'Back';
-    }
-    if (widget is CupertinoNavigationBarBackButton) {
-      return true;
-    }
-    return false;
+  (Element element) => switch (element.widget) {
+    Tooltip(message: 'Back') => true,
+    CupertinoNavigationBarBackButton() => true,
+    _ => false,
   },
   description: 'Material or Cupertino back button',
 );
@@ -112,7 +109,7 @@ class _LiveWidgetController extends LiveWidgetController {
   /// until there are no pending frames in the app under test.
   bool frameSync = true;
 
-  /// Waits until at the end of a frame the provided [condition] is [true].
+  /// Waits until at the end of a frame the provided [condition] is `true`.
   Future<void> _waitUntilFrame(bool Function() condition, [Completer<void>? completer]) {
     completer ??= Completer<void>();
     if (!condition()) {
@@ -139,16 +136,27 @@ class _LiveWidgetController extends LiveWidgetController {
 
   Future<void> scrollIntoView(FinderBase<Element> finder, {required double alignment}) async {
     final FinderBase<Element> target = await _waitForElement(finder);
-    await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: alignment);
+    await Scrollable.ensureVisible(
+      target.evaluate().single,
+      duration: const Duration(milliseconds: 100),
+      alignment: alignment,
+    );
   }
 
   @override
-  Future<void> tap(FinderBase<Element> finder, {
+  Future<void> tap(
+    FinderBase<Element> finder, {
     int? pointer,
     int buttons = kPrimaryButton,
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) async {
-    await super.tap(await _waitForElement(finder), pointer: pointer, buttons: buttons, warnIfMissed: warnIfMissed, kind: kind);
+    await super.tap(
+      await _waitForElement(finder),
+      pointer: pointer,
+      buttons: buttons,
+      warnIfMissed: warnIfMissed,
+      kind: kind,
+    );
   }
 }

@@ -13,31 +13,29 @@ import 'test_utils.dart';
 
 void main() {
   group('pass analyze template:', () {
-    final List<String> templates = <String>[
-      'app',
-      'module',
-      'package',
-      'plugin',
-      'plugin_ffi',
-      'skeleton',
-    ];
+    final templates = <String>['app', 'module', 'package', 'plugin', 'plugin_ffi'];
     late Directory tempDir;
 
     setUp(() {
-      tempDir = globals.fs.systemTempDirectory
-          .createTempSync('flutter_tools_analyze_all_template.');
+      tempDir = globals.fs.systemTempDirectory.createTempSync(
+        'flutter_tools_analyze_all_template.',
+      );
     });
 
     tearDown(() {
       tryToDelete(tempDir);
     });
 
-    for (final String template in templates) {
+    for (final template in templates) {
       testUsingContext('analysis for $template', () async {
-        final String projectPath = await createProject(tempDir,
-            arguments: <String>['--no-pub', '--template', template]);
-        final ProcessResult result = await globals.processManager
-            .run(<String>['flutter', 'analyze'], workingDirectory: projectPath);
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template', template],
+        );
+        final ProcessResult result = await globals.processManager.run(<String>[
+          'flutter',
+          'analyze',
+        ], workingDirectory: projectPath);
 
         expect(result, const ProcessResultMatcher());
       });

@@ -1,0 +1,80 @@
+import Foundation
+import Testing
+
+@testable import FlutterToolHelper
+
+/// A mock implementation of `FlutterProcessRunner` for testing.
+public class MockFlutterProcessManager: FlutterProcessRunner {
+  var expectedProcesses: [MockProcess] = []
+  var validateEnvironment: Bool = false
+
+  public func run(
+    executableURL: URL,
+    arguments: [String],
+    env: [String: String]?,
+    failOnError: Bool
+  ) throws {
+    let expectedProcess = expectedProcesses.remove(at: 0)
+    #expect(executableURL.path == expectedProcess.expectedURL)
+    #expect(arguments == expectedProcess.expectedArguments)
+    if validateEnvironment {
+      #expect(env == expectedProcess.expectedEnv)
+    }
+  }
+}
+
+public class MockProcess {
+  var expectedURL: String
+  var expectedArguments: [String]
+  var expectedEnv: [String: String]?
+
+  init(expectedURL: String, expectedArguments: [String], expectedEnv: [String : String]? = nil) {
+    self.expectedURL = expectedURL
+    self.expectedArguments = expectedArguments
+    self.expectedEnv = expectedEnv
+  }
+}
+
+/// A mock implementation of `FlutterToolsFileManager` for testing.
+class MockFileManager: FlutterToolsFileManager {
+  var filesExist: [String: Bool] = [:]
+  var filesRemoved: [String] = []
+  var symlinksCreated: [String: String] = [:]
+  var filesInDirectory: [String: [URL]] = [:]
+  var fileContents: [String: [Data]] = [:]
+
+  func destinationOfSymbolicLink(atPath path: String) throws -> String {
+    return "./Release"
+  }
+
+  func fileExists(atPath path: String) -> Bool {
+    return filesExist[path] ?? false
+  }
+
+  func contents(atPath path: String) -> Data? {
+    return fileContents[path]?.remove(at: 0)
+  }
+
+  func removeItem(at URL: URL) throws {
+    filesRemoved.append(URL.path)
+  }
+
+  func removeItem(atPath path: String) throws {
+    filesRemoved.append(path)
+  }
+
+  func createSymbolicLink(
+    atPath path: String,
+    withDestinationPath destPath: String
+  ) throws {
+    symlinksCreated.updateValue(destPath, forKey: path)
+  }
+
+  func contentsOfDirectory(
+    at url: URL,
+    includingPropertiesForKeys keys: [URLResourceKey]?,
+    options mask: FileManager.DirectoryEnumerationOptions
+  ) throws -> [URL] {
+    return filesInDirectory[url.path] ?? []
+  }
+}

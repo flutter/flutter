@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'filled_button.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -18,7 +21,7 @@ import 'theme.dart';
 /// The [style]'s properties override [FilledButton]'s default style,
 /// i.e. the [ButtonStyle] returned by [FilledButton.defaultStyleOf]. Only
 /// the style's non-null property values or resolved non-null
-/// [MaterialStateProperty] values are used.
+/// [WidgetStateProperty] values are used.
 ///
 /// See also:
 ///
@@ -27,8 +30,8 @@ import 'theme.dart';
 ///    for text buttons.
 ///  * [FilledButton.styleFrom], which converts simple values into a
 ///    [ButtonStyle] that's consistent with [FilledButton]'s defaults.
-///  * [MaterialStateProperty.resolve], "resolve" a material state property
-///    to a simple value based on a set of [MaterialState]s.
+///  * [WidgetStateProperty.resolve], "resolve" a material state property
+///    to a simple value based on a set of [WidgetState]s.
 ///  * [ThemeData.filledButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [FilledButton]s below the overall [Theme].
 @immutable
@@ -36,11 +39,11 @@ class FilledButtonThemeData with Diagnosticable {
   /// Creates an [FilledButtonThemeData].
   ///
   /// The [style] may be null.
-  const FilledButtonThemeData({ this.style });
+  const FilledButtonThemeData({this.style});
 
   /// Overrides for [FilledButton]'s default style.
   ///
-  /// Non-null properties or non-null resolved [MaterialStateProperty]
+  /// Non-null properties or non-null resolved [WidgetStateProperty]
   /// values override the [ButtonStyle] returned by
   /// [FilledButton.defaultStyleOf].
   ///
@@ -52,9 +55,7 @@ class FilledButtonThemeData with Diagnosticable {
     if (identical(a, b)) {
       return a;
     }
-    return FilledButtonThemeData(
-      style: ButtonStyle.lerp(a?.style, b?.style, t),
-    );
+    return FilledButtonThemeData(style: ButtonStyle.lerp(a?.style, b?.style, t));
   }
 
   @override
@@ -91,16 +92,12 @@ class FilledButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] for [FilledButton]s below the overall [Theme].
 class FilledButtonTheme extends InheritedTheme {
   /// Create a [FilledButtonTheme].
-  const FilledButtonTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const FilledButtonTheme({super.key, required this.data, required super.child});
 
   /// The configuration of this theme.
   final FilledButtonThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [FilledButtonThemeData] from the closest ancestor [FilledButtonTheme].
   ///
   /// If there is no enclosing [FilledButtonTheme] widget, then
   /// [ThemeData.filledButtonTheme] is used.
@@ -111,7 +108,8 @@ class FilledButtonTheme extends InheritedTheme {
   /// FilledButtonThemeData theme = FilledButtonTheme.of(context);
   /// ```
   static FilledButtonThemeData of(BuildContext context) {
-    final FilledButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<FilledButtonTheme>();
+    final FilledButtonTheme? buttonTheme = context
+        .dependOnInheritedWidgetOfExactType<FilledButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).filledButtonTheme;
   }
 

@@ -6,12 +6,15 @@ import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
-import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import '../windows/build_windows.dart';
 import '../windows/visual_studio.dart';
@@ -20,21 +23,38 @@ import 'build.dart';
 /// A command to build a windows desktop target through a build shell script.
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand({
-    required super.logger,
-    required OperatingSystemUtils operatingSystemUtils,
-    bool verboseHelp = false,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       super(verboseHelp: verboseHelp) {
+    required this.buildSystem,
+    required ToolContext super.toolContext,
+    required bool verboseHelp,
+    required this._featureFlags,
+    required this._visualStudio,
+  }) : super(
+         logger: toolContext.logger,
+         outputPreferences: toolContext.outputPreferences,
+         verboseHelp: verboseHelp,
+       ) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
+    usesFlavorOption();
+    argParser.addFlag(
+      'config-only',
+      help: 'Update the project configuration without performing a build.',
+    );
   }
 
-  final OperatingSystemUtils _operatingSystemUtils;
+  final BuildSystem buildSystem;
+  final FeatureFlags _featureFlags;
+
+  @visibleForTesting
+  FeatureFlags get featureFlags => _featureFlags;
 
   @override
-  final String name = 'windows';
+  ToolContext get toolContext => super.toolContext!;
 
   @override
-  bool get hidden => !featureFlags.isWindowsEnabled || !globals.platform.isWindows;
+  final name = 'windows';
+
+  @override
+  bool get hidden => !_featureFlags.isWindowsEnabled || !toolContext.platform.isWindows;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -44,38 +64,45 @@ class BuildWindowsCommand extends BuildSubCommand {
   @override
   String get description => 'Build a Windows desktop application.';
 
-  @visibleForTesting
-  VisualStudio? visualStudioOverride;
+  final VisualStudio _visualStudio;
+
+  bool get configOnly => boolArg('config-only');
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = this.logger;
+    final OperatingSystemUtils os = toolContext.os;
+    final Platform platform = toolContext.platform;
+
     final BuildInfo buildInfo = await getBuildInfo();
-    if (!featureFlags.isWindowsEnabled) {
-      throwToolExit('"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".');
+    if (!_featureFlags.isWindowsEnabled) {
+      throwToolExit(
+        '"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".',
+      );
     }
-    if (!globals.platform.isWindows) {
+    if (!platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
 
-    final String defaultTargetPlatform = (_operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64) ?
-            'windows-arm64' : 'windows-x64';
-    final TargetPlatform targetPlatform = getTargetPlatformForName(defaultTargetPlatform);
+    final defaultTargetPlatform = (os.hostPlatform == HostPlatform.windows_arm64)
+        ? 'windows-arm64'
+        : 'windows-x64';
+    final targetPlatform = TargetPlatform.fromName(defaultTargetPlatform);
 
-    displayNullSafetyMode(buildInfo);
     await buildWindows(
-      flutterProject.windows,
+      project.windows,
       buildInfo,
       targetPlatform,
       target: targetFile,
-      visualStudioOverride: visualStudioOverride,
+      visualStudioOverride: _visualStudio,
       sizeAnalyzer: SizeAnalyzer(
-        fileSystem: globals.fs,
-        logger: globals.logger,
+        fileSystem: fs,
+        logger: logger,
         appFilenamePattern: 'app.so',
-        flutterUsage: globals.flutterUsage,
         analytics: analytics,
       ),
+      configOnly: configOnly,
     );
     return FlutterCommandResult.success();
   }

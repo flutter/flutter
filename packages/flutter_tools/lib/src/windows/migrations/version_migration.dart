@@ -7,7 +7,7 @@ import '../../base/project_migrator.dart';
 import '../../cmake_project.dart';
 import 'utils.dart';
 
-const String _cmakeFileBefore = r'''
+const _cmakeFileBefore = r'''
 # Apply the standard set of build settings. This can be removed for applications
 # that need different build settings.
 apply_standard_settings(${BINARY_NAME})
@@ -15,7 +15,7 @@ apply_standard_settings(${BINARY_NAME})
 # Disable Windows macros that collide with C++ standard library functions.
 target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
 ''';
-const String _cmakeFileAfter = r'''
+const _cmakeFileAfter = r'''
 # Apply the standard set of build settings. This can be removed for applications
 # that need different build settings.
 apply_standard_settings(${BINARY_NAME})
@@ -31,7 +31,7 @@ target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=${FLUTT
 target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
 ''';
 
-const String _resourceFileBefore = '''
+const _resourceFileBefore = '''
 #ifdef FLUTTER_BUILD_NUMBER
 #define VERSION_AS_NUMBER FLUTTER_BUILD_NUMBER
 #else
@@ -44,7 +44,7 @@ const String _resourceFileBefore = '''
 #define VERSION_AS_STRING "1.0.0"
 #endif
 ''';
-const String _resourceFileAfter = '''
+const _resourceFileAfter = '''
 #if defined(FLUTTER_VERSION_MAJOR) && defined(FLUTTER_VERSION_MINOR) && defined(FLUTTER_VERSION_PATCH) && defined(FLUTTER_VERSION_BUILD)
 #define VERSION_AS_NUMBER FLUTTER_VERSION_MAJOR,FLUTTER_VERSION_MINOR,FLUTTER_VERSION_PATCH,FLUTTER_VERSION_BUILD
 #else
@@ -63,13 +63,14 @@ const String _resourceFileAfter = '''
 /// See https://github.com/flutter/flutter/issues/73652.
 class VersionMigration extends ProjectMigrator {
   VersionMigration(WindowsProject project, super.logger)
-    : _cmakeFile = project.runnerCmakeFile, _resourceFile = project.runnerResourceFile;
+    : _cmakeFile = project.runnerCmakeFile,
+      _resourceFile = project.runnerResourceFile;
 
   final File _cmakeFile;
   final File _resourceFile;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     // Skip this migration if the affected files do not exist. This indicates
     // the app has done non-trivial changes to its runner and this migration
     // might not work as expected if applied.
@@ -103,7 +104,9 @@ This indicates non-trivial changes have been made to the Windows runner in the
       _cmakeFileAfter,
     );
     if (originalCmakeContents != newCmakeContents) {
-      logger.printStatus('windows/runner/CMakeLists.txt does not define version information, updating.');
+      logger.printStatus(
+        'windows/runner/CMakeLists.txt does not define version information, updating.',
+      );
       _cmakeFile.writeAsStringSync(newCmakeContents);
     }
 

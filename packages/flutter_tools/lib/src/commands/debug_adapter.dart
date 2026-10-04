@@ -4,8 +4,10 @@
 
 import 'dart:async';
 
+import '../base/io.dart';
+import '../base/logger.dart';
+import '../context/tool_context.dart';
 import '../debug_adapters/server.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// This command will start up a Debug Adapter that communicates using the Debug Adapter Protocol (DAP).
@@ -23,25 +25,30 @@ import '../runner/flutter_command.dart';
 /// The DAP specification can be found at
 /// https://microsoft.github.io/debug-adapter-protocol/.
 class DebugAdapterCommand extends FlutterCommand {
-  DebugAdapterCommand({ bool verboseHelp = false}) : hidden = !verboseHelp {
+  DebugAdapterCommand({required super.toolContext, bool verboseHelp = false})
+    : hidden = !verboseHelp {
     usesIpv6Flag(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
-    argParser
-      .addFlag(
-        'test',
-        help: 'Whether to use the "flutter test" debug adapter to run tests'
-            ' and emit custom events for test progress/results.',
-      );
+    argParser.addFlag(
+      'test',
+      help:
+          'Whether to use the "flutter test" debug adapter to run tests'
+          ' and emit custom events for test progress/results.',
+    );
   }
 
   @override
-  final String name = 'debug-adapter';
+  ToolContext get toolContext => super.toolContext!;
+
+  @override
+  final name = 'debug-adapter';
 
   @override
   List<String> get aliases => const <String>['debug_adapter'];
 
   @override
-  final String description = 'Run a Debug Adapter Protocol (DAP) server to communicate with the Flutter tool.';
+  final description =
+      'Run a Debug Adapter Protocol (DAP) server to communicate with the Flutter tool.';
 
   @override
   final String category = FlutterCommandCategory.tools;
@@ -51,16 +58,18 @@ class DebugAdapterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final DapServer server = DapServer(
-      globals.stdio.stdin,
-      globals.stdio.stdout.nonBlocking,
-      fileSystem: globals.fs,
-      platform: globals.platform,
+    final Logger logger = toolContext.logger;
+    final Stdio stdio = toolContext.stdio;
+    final server = DapServer(
+      stdio.stdin,
+      stdio.stdout.nonBlocking,
+      fileSystem: toolContext.fs,
+      platform: toolContext.platform,
       ipv6: ipv6 ?? false,
       enableDds: enableDds,
       test: boolArg('test'),
       onError: (Object? e) {
-        globals.printError(
+        logger.printError(
           'Input could not be parsed as a Debug Adapter Protocol message.\n'
           'The "flutter debug-adapter" command is intended for use by tooling '
           'that communicates using the Debug Adapter Protocol.\n\n'

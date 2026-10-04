@@ -12,7 +12,12 @@ void main() {
   testWidgets('Exception handling in test harness - FlutterError', (WidgetTester tester) async {
     throw FlutterError('Who lives, who dies, who tells your story?');
   });
-  testWidgets('Exception handling in test harness - uncaught Future error', (WidgetTester tester) async {
-    Future<void>.error('Who lives, who dies, who tells your story?');
+  testWidgets('Exception handling in test harness - uncaught Future error', (
+    WidgetTester tester,
+  ) async {
+    Future<void>.error('Who lives, who dies, who tells your story?'); // ignore: unawaited_futures
+    // `ignore: unawaited_futures` is used instead of `unawaited(...)` (and placed
+    // after line 18) to preserve the exact stack trace line and column numbers
+    // matched by `exception_handling_expectation.txt`.
   });
 }

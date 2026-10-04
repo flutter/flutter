@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "تفصیل دیکھیں",
   "searchWebButtonLabel": "ویب تلاش کریں",
   "shareButtonLabel": "اشتراک کریں...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "صاف کریں",
+  "cancelButtonLabel": "منسوخ کریں",
+  "backButtonLabel": "Back",
+  "expansionTileExpandedHint": "سکیڑنے کے لیے دوبار تھپتھپائیں",
+  "expansionTileCollapsedHint": "پھیلانے کے لیے دوبار تھپتھپائیں",
+  "expansionTileExpandedTapHint": "سکیڑیں",
+  "expansionTileCollapsedTapHint": "مزید تفصیلات کے لیے پھیلائیں",
+  "expandedHint": "سکڑا ہوا",
+  "collapsedHint": "پھیلا ہوا"
 }

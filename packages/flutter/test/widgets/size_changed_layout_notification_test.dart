@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SizeChangedLayoutNotification test', (WidgetTester tester) async {
-    bool notified = false;
+    var notified = false;
 
     await tester.pumpWidget(
       Center(
@@ -15,12 +15,7 @@ void main() {
           onNotification: (LayoutChangedNotification notification) {
             throw Exception('Should not reach this point.');
           },
-          child: const SizeChangedLayoutNotifier(
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
-            ),
-          ),
+          child: const SizeChangedLayoutNotifier(child: SizedBox(width: 100.0, height: 100.0)),
         ),
       ),
     );
@@ -33,16 +28,22 @@ void main() {
             notified = true;
             return true;
           },
-          child: const SizeChangedLayoutNotifier(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-            ),
-          ),
+          child: const SizeChangedLayoutNotifier(child: SizedBox(width: 200.0, height: 100.0)),
         ),
       ),
     );
 
     expect(notified, isTrue);
+  });
+
+  testWidgets('SizeChangedLayoutNotifier does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(child: SizeChangedLayoutNotifier(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(SizeChangedLayoutNotifier)), Size.zero);
   });
 }

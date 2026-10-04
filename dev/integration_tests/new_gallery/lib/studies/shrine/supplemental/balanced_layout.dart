@@ -19,10 +19,7 @@ const int _deviationImprovementThreshold = 10;
 
 /// Height of a product image, paired with the product's id.
 class _TaggedHeightData {
-  const _TaggedHeightData({
-    required this.index,
-    required this.height,
-  });
+  const _TaggedHeightData({required this.index, required this.height});
 
   /// The id of the corresponding product.
   final int index;
@@ -35,7 +32,7 @@ class _TaggedHeightData {
 /// and add an empty element.
 /// Used for iteration.
 List<_TaggedHeightData> _toListAndAddEmpty(Set<_TaggedHeightData> set) {
-  final List<_TaggedHeightData> result = List<_TaggedHeightData>.from(set);
+  final result = List<_TaggedHeightData>.from(set);
   result.add(const _TaggedHeightData(index: _emptyElement, height: 0));
   return result;
 }
@@ -47,8 +44,9 @@ String _encodeParameters({
   required double largeImageWidth,
   required double smallImageWidth,
 }) {
-  final String productString =
-      <String>[for (final Product product in products) product.id.toString()].join(',');
+  final String productString = <String>[
+    for (final Product product in products) product.id.toString(),
+  ].join(',');
   return '$columnCount;$productString,$largeImageWidth,$smallImageWidth';
 }
 
@@ -59,9 +57,7 @@ List<List<Product>> _generateLayout({
 }) {
   return <List<Product>>[
     for (final List<int> column in layout)
-      <Product>[
-        for (final int index in column) products[index],
-      ]
+      <Product>[for (final int index in column) products[index]],
   ];
 }
 
@@ -70,11 +66,8 @@ List<List<Product>> _generateLayout({
 /// [_iterateUntilBalanced] moves and swaps objects between columns
 /// until their heights are sufficiently close to each other.
 /// This prevents the layout having significant, avoidable gaps at the bottom.
-void _iterateUntilBalanced(
-  List<Set<_TaggedHeightData>> columnObjects,
-  List<double> columnHeights,
-) {
-  int failedMoves = 0;
+void _iterateUntilBalanced(List<Set<_TaggedHeightData>> columnObjects, List<double> columnHeights) {
+  var failedMoves = 0;
   final int columnCount = columnObjects.length;
 
   // No need to rearrange a 1-column layout.
@@ -84,7 +77,7 @@ void _iterateUntilBalanced(
 
   while (true) {
     // Loop through all possible 2-combinations of columns.
-    for (int source = 0; source < columnCount; ++source) {
+    for (var source = 0; source < columnCount; ++source) {
       for (int target = source + 1; target < columnCount; ++target) {
         // Tries to find an object A from source column
         // and an object B from target column, such that switching them
@@ -93,7 +86,7 @@ void _iterateUntilBalanced(
         // A or B can be empty; in this case, moving an object from one
         // column to the other is the best choice.
 
-        bool success = false;
+        var success = false;
 
         final double bestHeight = (columnHeights[source] + columnHeights[target]) / 2;
         final double scoreLimit = (columnHeights[source] - bestHeight).abs();
@@ -104,14 +97,12 @@ void _iterateUntilBalanced(
         _TaggedHeightData? bestA, bestB;
         double? bestScore;
 
-        for (final _TaggedHeightData a in sourceObjects) {
-          for (final _TaggedHeightData b in targetObjects) {
+        for (final a in sourceObjects) {
+          for (final b in targetObjects) {
             if (a.index == _emptyElement && b.index == _emptyElement) {
               continue;
             } else {
-              final double score =
-                  (columnHeights[source] - a.height + b.height - bestHeight)
-                      .abs();
+              final double score = (columnHeights[source] - a.height + b.height - bestHeight).abs();
               if (score < scoreLimit - _deviationImprovementThreshold) {
                 success = true;
                 if (bestScore == null || score < bestScore) {
@@ -165,12 +156,14 @@ List<List<int>> _balancedDistribution({
 }) {
   assert(biases.length == columnCount);
 
-  final List<Set<_TaggedHeightData>> columnObjects = List<Set<_TaggedHeightData>>.generate(
-      columnCount, (int column) => <_TaggedHeightData>{});
+  final columnObjects = List<Set<_TaggedHeightData>>.generate(
+    columnCount,
+    (int column) => <_TaggedHeightData>{},
+  );
 
-  final List<double> columnHeights = List<double>.from(biases);
+  final columnHeights = List<double>.from(biases);
 
-  for (int i = 0; i < data.length; ++i) {
+  for (var i = 0; i < data.length; ++i) {
     final int column = i % columnCount;
     columnHeights[column] += data[i];
     columnObjects[column].add(_TaggedHeightData(index: i, height: data[i]));
@@ -205,13 +198,10 @@ List<List<Product>> balancedLayout({
 
   // Check if this layout is cached.
   if (LayoutCache.of(context).containsKey(encodedParameters)) {
-    return _generateLayout(
-      products: products,
-      layout: LayoutCache.of(context)[encodedParameters]!,
-    );
+    return _generateLayout(products: products, layout: LayoutCache.of(context)[encodedParameters]!);
   }
 
-  final List<double> productHeights = <double>[
+  final productHeights = <double>[
     for (final Product product in products)
       1 / product.assetAspectRatio * (largeImageWidth + smallImageWidth) / 2 +
           productCardAdditionalHeight,
@@ -230,10 +220,7 @@ List<List<Product>> balancedLayout({
 
   LayoutCache.of(context)[encodedParameters] = layout;
 
-  final List<List<Product>> result = _generateLayout(
-    products: products,
-    layout: layout,
-  );
+  final List<List<Product>> result = _generateLayout(products: products, layout: layout);
 
   return result;
 }

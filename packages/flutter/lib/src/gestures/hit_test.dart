@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/rendering.dart';
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -35,10 +37,23 @@ abstract interface class HitTestDispatcher {
 }
 
 /// An object that can handle events.
+///
+/// The type must implement [NativeHitTestTarget] if it represents a platform view.
+// TODO(hellohuanlin): Make RenderAndroidView and RenderAppKitView to extend NativeHitTestTarget.
+// See: https://github.com/flutter/flutter/issues/184440.
 abstract interface class HitTestTarget {
   /// Override this method to receive events.
   void handleEvent(PointerEvent event, HitTestEntry<HitTestTarget> entry);
 }
+
+/// A mixin that represents a hit test target backed by a platform view.
+///
+/// See also:
+///
+///   * [HitTestTarget].
+// TODO(hellohuanlin): Make RenderAndroidView and RenderAppKitView to extend NativeHitTestTarget.
+// See: https://github.com/flutter/flutter/issues/184440.
+mixin NativeHitTestTarget {}
 
 /// Data collected during a hit test about a specific [HitTestTarget].
 ///
@@ -101,7 +116,7 @@ class _OffsetTransformPart extends _TransformPart {
 
   @override
   Matrix4 multiply(Matrix4 rhs) {
-    return rhs.clone()..leftTranslate(offset.dx, offset.dy);
+    return rhs.clone()..leftTranslateByDouble(offset.dx, offset.dy, 0, 1);
   }
 }
 
@@ -109,9 +124,9 @@ class _OffsetTransformPart extends _TransformPart {
 class HitTestResult {
   /// Creates an empty hit test result.
   HitTestResult()
-     : _path = <HitTestEntry>[],
-       _transforms = <Matrix4>[Matrix4.identity()],
-       _localTransforms = <_TransformPart>[];
+    : _path = <HitTestEntry>[],
+      _transforms = <Matrix4>[Matrix4.identity()],
+      _localTransforms = <_TransformPart>[];
 
   /// Wraps `result` (usually a subtype of [HitTestResult]) to create a
   /// generic [HitTestResult].
@@ -120,9 +135,9 @@ class HitTestResult {
   /// added to the wrapped `result` (both share the same underlying data
   /// structure to store [HitTestEntry]s).
   HitTestResult.wrap(HitTestResult result)
-     : _path = result._path,
-       _transforms = result._transforms,
-       _localTransforms = result._localTransforms;
+    : _path = result._path,
+      _transforms = result._transforms,
+      _localTransforms = result._localTransforms;
 
   /// An unmodifiable list of [HitTestEntry] objects recorded during the hit test.
   ///
@@ -210,7 +225,7 @@ class HitTestResult {
   void pushTransform(Matrix4 transform) {
     assert(
       _debugVectorMoreOrLessEquals(transform.getRow(2), Vector4(0, 0, 1, 0)) &&
-      _debugVectorMoreOrLessEquals(transform.getColumn(2), Vector4(0, 0, 1, 0)),
+          _debugVectorMoreOrLessEquals(transform.getColumn(2), Vector4(0, 0, 1, 0)),
       'The third row and third column of a transform matrix for pointer '
       'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
       'point is directly under the pointing device. Did you forget to run the paint '
@@ -273,8 +288,12 @@ class HitTestResult {
     assert(_transforms.isNotEmpty);
   }
 
-  bool _debugVectorMoreOrLessEquals(Vector4 a, Vector4 b, { double epsilon = precisionErrorTolerance }) {
-    bool result = true;
+  bool _debugVectorMoreOrLessEquals(
+    Vector4 a,
+    Vector4 b, {
+    double epsilon = precisionErrorTolerance,
+  }) {
+    var result = true;
     assert(() {
       final Vector4 difference = a - b;
       result = difference.storage.every((double component) => component.abs() < epsilon);

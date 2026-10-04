@@ -20,15 +20,27 @@ import '../cupertino_localizations.dart';
 // bottom of this file, and used by the [_GlobalCupertinoLocalizationsDelegate.load]
 // method defined in `flutter_localizations/lib/src/cupertino_localizations.dart`.
 
+// TODO(goderbauer): Extend the generator to properly format the output.
+// dart format off
+
 /// The translations for Afrikaans (`af`).
+@Deprecated(
+  'Use CupertinoLocalizationAf from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Afrikaans.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationAf from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationAf({
     super.localeName = 'af',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -44,7 +56,16 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'vm.';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Terug';
+
+  @override
+  String get cancelButtonLabel => 'Kanselleer';
+
+  @override
+  String get clearButtonLabel => 'Vee uit';
+
+  @override
+  String get collapsedHint => 'Uitgevou';
 
   @override
   String get copyButtonLabel => 'Kopieer';
@@ -93,6 +114,21 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Ingevou';
+
+  @override
+  String get expansionTileCollapsedHint => 'dubbeltik om uit te vou';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Vou uit vir meer besonderhede';
+
+  @override
+  String get expansionTileExpandedHint => 'dubbeltik om in te vou';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Vou in';
 
   @override
   String get lookUpButtonLabel => 'Kyk op';
@@ -186,14 +222,23 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Amharic (`am`).
+@Deprecated(
+  'Use CupertinoLocalizationAm from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Amharic.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationAm from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationAm({
     super.localeName = 'am',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -209,7 +254,16 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ጥዋት';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'ተመለስ';
+
+  @override
+  String get cancelButtonLabel => 'ይቅር';
+
+  @override
+  String get clearButtonLabel => 'አጽዳ';
+
+  @override
+  String get collapsedHint => 'ተዘርግቷል';
 
   @override
   String get copyButtonLabel => 'ቅዳ';
@@ -258,6 +312,21 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'ተሰብስቧል';
+
+  @override
+  String get expansionTileCollapsedHint => 'ለመዘርጋት ድርብ ሁለቴ መታ ያድርጉ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'ለተጨማሪ ዝርዝሮች ይዘርጉ';
+
+  @override
+  String get expansionTileExpandedHint => 'ለመሰብሰብ ሁለቴ መታ ያድርጉ';
+
+  @override
+  String get expansionTileExpandedTapHint => 'ሰብስብ';
 
   @override
   String get lookUpButtonLabel => 'ይመልከቱ';
@@ -351,14 +420,23 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Arabic (`ar`).
+@Deprecated(
+  'Use CupertinoLocalizationAr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Arabic.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationAr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationAr({
     super.localeName = 'ar',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -374,7 +452,16 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ص';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'رجوع';
+
+  @override
+  String get cancelButtonLabel => 'الإلغاء';
+
+  @override
+  String get clearButtonLabel => 'محو';
+
+  @override
+  String get collapsedHint => 'موسَّع';
 
   @override
   String get copyButtonLabel => 'نسخ';
@@ -425,7 +512,22 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => r'$minute دقيقة​';
 
   @override
-  String get lookUpButtonLabel => 'النظر إلى أعلى';
+  String get expandedHint => 'مصغَّر';
+
+  @override
+  String get expansionTileCollapsedHint => 'انقر مرّتين للتوسيع';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'وسِّع المربّع لعرض مزيد من التفاصيل.';
+
+  @override
+  String get expansionTileExpandedHint => 'يُرجى النقر مرّتين للتصغير.';
+
+  @override
+  String get expansionTileExpandedTapHint => 'تصغير';
+
+  @override
+  String get lookUpButtonLabel => 'بحث عام';
 
   @override
   String get menuDismissLabel => 'إغلاق القائمة';
@@ -516,14 +618,23 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Assamese (`as`).
+@Deprecated(
+  'Use CupertinoLocalizationAs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Assamese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationAs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationAs({
     super.localeName = 'as',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -539,7 +650,16 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'পূৰ্বাহ্ন';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'উভতি যাওক';
+
+  @override
+  String get cancelButtonLabel => 'বাতিল কৰক';
+
+  @override
+  String get clearButtonLabel => 'মচক';
+
+  @override
+  String get collapsedHint => 'বিস্তাৰ কৰা আছে';
 
   @override
   String get copyButtonLabel => 'প্ৰতিলিপি কৰক';
@@ -578,16 +698,31 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String? get datePickerMinuteSemanticsLabelOne => '১মিনিট';
+  String? get datePickerMinuteSemanticsLabelOne => '১ মিনিট';
 
   @override
-  String get datePickerMinuteSemanticsLabelOther => r'$minuteমিনিট';
+  String get datePickerMinuteSemanticsLabelOther => r'$minute মিনিট';
 
   @override
   String? get datePickerMinuteSemanticsLabelTwo => null;
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'সংকোচন কৰা আছে';
+
+  @override
+  String get expansionTileCollapsedHint => 'বিস্তাৰ কৰিবলৈ দুবাৰ টিপক';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'অধিক সবিশেষ জানিবলৈ বিস্তাৰ কৰক';
+
+  @override
+  String get expansionTileExpandedHint => 'সংকোচন কৰিবলৈ দুবাৰ টিপক';
+
+  @override
+  String get expansionTileExpandedTapHint => 'সংকোচন কৰক';
 
   @override
   String get lookUpButtonLabel => 'ওপৰলৈ চাওক';
@@ -614,7 +749,7 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get searchWebButtonLabel => 'ৱেবত সন্ধান কৰক';
 
   @override
-  String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
+  String get selectAllButtonLabel => 'আটাইবোৰ বাছনি কৰক';
 
   @override
   String get shareButtonLabel => 'শ্বেয়াৰ কৰক…';
@@ -681,14 +816,23 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Azerbaijani (`az`).
+@Deprecated(
+  'Use CupertinoLocalizationAz from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Azerbaijani.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationAz from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationAz({
     super.localeName = 'az',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -704,7 +848,16 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Geri';
+
+  @override
+  String get cancelButtonLabel => 'Ləğv edin';
+
+  @override
+  String get clearButtonLabel => 'Silin';
+
+  @override
+  String get collapsedHint => 'Genişləndirildi';
 
   @override
   String get copyButtonLabel => 'Kopyalayın';
@@ -753,6 +906,21 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Yığcamlaşdırıldı';
+
+  @override
+  String get expansionTileCollapsedHint => 'genişləndirmək üçün iki dəfə toxunun';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Daha çox detallar üçün genişləndirin';
+
+  @override
+  String get expansionTileExpandedHint => 'yığcamlaşdırmaq üçün iki dəfə toxunun';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Yığcamlaşdırın';
 
   @override
   String get lookUpButtonLabel => 'Axtarın';
@@ -846,14 +1014,23 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Belarusian (`be`).
+@Deprecated(
+  'Use CupertinoLocalizationBe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Belarusian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationBe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationBe({
     super.localeName = 'be',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -869,7 +1046,16 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'раніцы';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Назад';
+
+  @override
+  String get cancelButtonLabel => 'Скасаваць';
+
+  @override
+  String get clearButtonLabel => 'Ачысціць';
+
+  @override
+  String get collapsedHint => 'Разгорнута';
 
   @override
   String get copyButtonLabel => 'Капіраваць';
@@ -918,6 +1104,21 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Згорнута';
+
+  @override
+  String get expansionTileCollapsedHint => 'двойчы націснуць, каб разгарнуць';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Разгарніце, каб даведацца больш';
+
+  @override
+  String get expansionTileExpandedHint => 'двойчы націснуць, каб згарнуць';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Згарнуць';
 
   @override
   String get lookUpButtonLabel => 'Знайсці';
@@ -1011,14 +1212,23 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Bulgarian (`bg`).
+@Deprecated(
+  'Use CupertinoLocalizationBg from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Bulgarian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationBg from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationBg({
     super.localeName = 'bg',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -1034,7 +1244,16 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Назад';
+
+  @override
+  String get cancelButtonLabel => 'Отказ';
+
+  @override
+  String get clearButtonLabel => 'Изчистване';
+
+  @override
+  String get collapsedHint => 'Разгънато';
 
   @override
   String get copyButtonLabel => 'Копиране';
@@ -1083,6 +1302,21 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Свито';
+
+  @override
+  String get expansionTileCollapsedHint => 'докоснете два пъти за разгъване';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Разгъване за още подробности';
+
+  @override
+  String get expansionTileExpandedHint => 'докоснете два пъти за свиване';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Свиване';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -1176,14 +1410,23 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Bengali Bangla (`bn`).
+@Deprecated(
+  'Use CupertinoLocalizationBn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Bengali Bangla.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationBn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationBn({
     super.localeName = 'bn',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -1199,7 +1442,16 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'ফিরে যান';
+
+  @override
+  String get cancelButtonLabel => 'বাতিল করুন';
+
+  @override
+  String get clearButtonLabel => 'মুছুন';
+
+  @override
+  String get collapsedHint => 'বড় করা হয়েছে';
 
   @override
   String get copyButtonLabel => 'কপি করুন';
@@ -1248,6 +1500,21 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'আড়াল করা হয়েছে';
+
+  @override
+  String get expansionTileCollapsedHint => 'বড় করে দেখতে ডবল ট্যাপ করুন';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'আরও বিবরণ পেতে বড় করে দেখুন';
+
+  @override
+  String get expansionTileExpandedHint => 'আড়াল করতে ডবল ট্যাপ করুন';
+
+  @override
+  String get expansionTileExpandedTapHint => 'আড়াল করুন';
 
   @override
   String get lookUpButtonLabel => 'লুক-আপ';
@@ -1340,15 +1607,222 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get todayLabel => 'আজ';
 }
 
+/// The translations for Tibetan (`bo`).
+@Deprecated(
+  'Use CupertinoLocalizationBo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
+class CupertinoLocalizationBo extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Tibetan.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationBo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
+  const CupertinoLocalizationBo({
+    super.localeName = 'bo',
+    required super.fullYearFormat,
+    required super.dayFormat,
+    required super.weekdayFormat,
+    required super.mediumDateFormat,
+    required super.singleDigitHourFormat,
+    required super.singleDigitMinuteFormat,
+    required super.doubleDigitMinuteFormat,
+    required super.singleDigitSecondFormat,
+    required super.decimalFormat,
+  });
+
+  @override
+  String get alertDialogLabel => 'གསལ་བརྡ།';
+
+  @override
+  String get anteMeridiemAbbreviation => 'སྔ་དྲོ';
+
+  @override
+  String get backButtonLabel => 'ཕྱིར་ལོག';
+
+  @override
+  String get cancelButtonLabel => 'ཕྱིར་འཐེན།';
+
+  @override
+  String get clearButtonLabel => 'གཙང་བཟོ།';
+
+  @override
+  String get collapsedHint => 'ཁྱབ་སྤེལ་ཟིན།';
+
+  @override
+  String get copyButtonLabel => 'བཤུས།';
+
+  @override
+  String get cutButtonLabel => 'གཅོད།';
+
+  @override
+  String get datePickerDateOrderString => 'ymd';
+
+  @override
+  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+
+  @override
+  String? get datePickerHourSemanticsLabelFew => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelMany => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelOne => r'$hour ཆུ་ཚོད།';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'$hour ཆུ་ཚོད།';
+
+  @override
+  String? get datePickerHourSemanticsLabelTwo => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelZero => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelFew => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelMany => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelOne => 'སྐར་མ། 1';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute སྐར་མ་དུ་མ།';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelTwo => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'ཕྱོགས་བསྡུས།';
+
+  @override
+  String get expansionTileCollapsedHint => 'ཁྱབ་སྤེལ་ཆེད་ཐེངས་གཉིས་གནོན།';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'ཞིབ་རྒྱས་ཆེད་ཁྱབ་སྤེལ།';
+
+  @override
+  String get expansionTileExpandedHint => 'ཕྱོགས་བསྡུའི་ཆེད་ཐེངས་གཉིས་གནོན།';
+
+  @override
+  String get expansionTileExpandedTapHint => 'ཕྱོགས་བསྡུ།';
+
+  @override
+  String get lookUpButtonLabel => 'འཚོལ་བ།';
+
+  @override
+  String get menuDismissLabel => 'ཐོ་གཞུང་འདོར་བ།';
+
+  @override
+  String get modalBarrierDismissLabel => 'འདོར་བ།';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'བརྗེས་ལེན་མ་རྙེད།';
+
+  @override
+  String get pasteButtonLabel => 'འཕོས་པ།';
+
+  @override
+  String get postMeridiemAbbreviation => 'ཕྱི་དྲོ།';
+
+  @override
+  String get searchTextFieldPlaceholderLabel => 'འཚོལ་བཤེར།';
+
+  @override
+  String get searchWebButtonLabel => 'དྲ་ཐོག་འཚོལ་བཤེར།';
+
+  @override
+  String get selectAllButtonLabel => 'ཚང་འདེམས།';
+
+  @override
+  String get shareButtonLabel => 'མཉམ་སྤྱོད།…';
+
+  @override
+  String get tabSemanticsLabelRaw => r'འཛར་གནོན་ $tabIndex ཡི $tabCount';
+
+  @override
+  String? get timerPickerHourLabelFew => null;
+
+  @override
+  String? get timerPickerHourLabelMany => null;
+
+  @override
+  String? get timerPickerHourLabelOne => 'ཆུ་ཚོད།';
+
+  @override
+  String get timerPickerHourLabelOther => 'ཆུ་ཚོད་དུ་མ།';
+
+  @override
+  String? get timerPickerHourLabelTwo => null;
+
+  @override
+  String? get timerPickerHourLabelZero => null;
+
+  @override
+  String? get timerPickerMinuteLabelFew => null;
+
+  @override
+  String? get timerPickerMinuteLabelMany => null;
+
+  @override
+  String? get timerPickerMinuteLabelOne => 'སྐར་མ།';
+
+  @override
+  String get timerPickerMinuteLabelOther => 'སྐར་མ།';
+
+  @override
+  String? get timerPickerMinuteLabelTwo => null;
+
+  @override
+  String? get timerPickerMinuteLabelZero => null;
+
+  @override
+  String? get timerPickerSecondLabelFew => null;
+
+  @override
+  String? get timerPickerSecondLabelMany => null;
+
+  @override
+  String? get timerPickerSecondLabelOne => 'སྐར་ཆ།';
+
+  @override
+  String get timerPickerSecondLabelOther => 'སྐར་ཆ།';
+
+  @override
+  String? get timerPickerSecondLabelTwo => null;
+
+  @override
+  String? get timerPickerSecondLabelZero => null;
+
+  @override
+  String get todayLabel => 'དེ་རིང་།';
+}
+
 /// The translations for Bosnian (`bs`).
+@Deprecated(
+  'Use CupertinoLocalizationBs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Bosnian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationBs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationBs({
     super.localeName = 'bs',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -1364,7 +1838,16 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'prijepodne';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Nazad';
+
+  @override
+  String get cancelButtonLabel => 'Otkaži';
+
+  @override
+  String get clearButtonLabel => 'Obriši';
+
+  @override
+  String get collapsedHint => 'Prošireno';
 
   @override
   String get copyButtonLabel => 'Kopiraj';
@@ -1413,6 +1896,21 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Suženo';
+
+  @override
+  String get expansionTileCollapsedHint => 'proširivanje dvostrukim dodirom';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Proširivanje za više detalja';
+
+  @override
+  String get expansionTileExpandedHint => 'sužavanje dvostrukim dodirom';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Sužavanje';
 
   @override
   String get lookUpButtonLabel => 'Pogled nagore';
@@ -1506,14 +2004,23 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Catalan Valencian (`ca`).
+@Deprecated(
+  'Use CupertinoLocalizationCa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Catalan Valencian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationCa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationCa({
     super.localeName = 'ca',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -1529,7 +2036,16 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Enrere';
+
+  @override
+  String get cancelButtonLabel => 'Cancel·la';
+
+  @override
+  String get clearButtonLabel => 'Esborra';
+
+  @override
+  String get collapsedHint => "S'ha desplegat";
 
   @override
   String get copyButtonLabel => 'Copia';
@@ -1578,6 +2094,21 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => "S'ha replegat";
+
+  @override
+  String get expansionTileCollapsedHint => 'fes doble toc per desplegar';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Desplega per obtenir més informació';
+
+  @override
+  String get expansionTileExpandedHint => 'fes doble toc per replegar';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Replega';
 
   @override
   String get lookUpButtonLabel => 'Mira amunt';
@@ -1671,14 +2202,23 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Czech (`cs`).
+@Deprecated(
+  'Use CupertinoLocalizationCs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Czech.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationCs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationCs({
     super.localeName = 'cs',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -1694,7 +2234,16 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Zpět';
+
+  @override
+  String get cancelButtonLabel => 'Zrušit';
+
+  @override
+  String get clearButtonLabel => 'Vymazat';
+
+  @override
+  String get collapsedHint => 'Rozbaleno';
 
   @override
   String get copyButtonLabel => 'Kopírovat';
@@ -1743,6 +2292,21 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Sbaleno';
+
+  @override
+  String get expansionTileCollapsedHint => 'dvojitým klepnutím rozbalíte';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Rozbalte pro další podrobnosti';
+
+  @override
+  String get expansionTileExpandedHint => 'dvojitým klepnutím sbalíte';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Sbalit';
 
   @override
   String get lookUpButtonLabel => 'Vyhledat';
@@ -1836,14 +2400,23 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Welsh (`cy`).
+@Deprecated(
+  'Use CupertinoLocalizationCy from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Welsh.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationCy from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationCy({
     super.localeName = 'cy',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -1859,7 +2432,16 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Nôl';
+
+  @override
+  String get cancelButtonLabel => 'Canslo';
+
+  @override
+  String get clearButtonLabel => 'Clirio';
+
+  @override
+  String get collapsedHint => "Wedi'i ehangu";
 
   @override
   String get copyButtonLabel => 'Copïo';
@@ -1908,6 +2490,21 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => r'$minute munud';
+
+  @override
+  String get expandedHint => "Wedi'i grebachu";
+
+  @override
+  String get expansionTileCollapsedHint => 'tapiwch ddwywaith i ehangu';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Ehangwch am ragor o fanylion';
+
+  @override
+  String get expansionTileExpandedHint => 'tapiwch ddwywaith i grebachu';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Crebachu';
 
   @override
   String get lookUpButtonLabel => 'Chwilio';
@@ -1961,54 +2558,63 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
   String? get timerPickerHourLabelZero => 'awr';
 
   @override
-  String? get timerPickerMinuteLabelFew => 'munud';
+  String? get timerPickerMinuteLabelFew => 'mun';
 
   @override
-  String? get timerPickerMinuteLabelMany => 'munud';
+  String? get timerPickerMinuteLabelMany => 'mun';
 
   @override
-  String? get timerPickerMinuteLabelOne => 'funud';
+  String? get timerPickerMinuteLabelOne => 'fun';
 
   @override
-  String get timerPickerMinuteLabelOther => 'munud';
+  String get timerPickerMinuteLabelOther => 'mun';
 
   @override
-  String? get timerPickerMinuteLabelTwo => 'funud';
+  String? get timerPickerMinuteLabelTwo => 'fun';
 
   @override
-  String? get timerPickerMinuteLabelZero => 'munud';
+  String? get timerPickerMinuteLabelZero => 'mun';
 
   @override
-  String? get timerPickerSecondLabelFew => 'eiliad';
+  String? get timerPickerSecondLabelFew => 'eil';
 
   @override
-  String? get timerPickerSecondLabelMany => 'eiliad';
+  String? get timerPickerSecondLabelMany => 'eil';
 
   @override
-  String? get timerPickerSecondLabelOne => 'eiliad';
+  String? get timerPickerSecondLabelOne => 'eil';
 
   @override
-  String get timerPickerSecondLabelOther => 'eiliad';
+  String get timerPickerSecondLabelOther => 'eil';
 
   @override
-  String? get timerPickerSecondLabelTwo => 'eiliad';
+  String? get timerPickerSecondLabelTwo => 'eil';
 
   @override
-  String? get timerPickerSecondLabelZero => 'eiliad';
+  String? get timerPickerSecondLabelZero => 'eil';
 
   @override
   String get todayLabel => 'Heddiw';
 }
 
 /// The translations for Danish (`da`).
+@Deprecated(
+  'Use CupertinoLocalizationDa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Danish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationDa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationDa({
     super.localeName = 'da',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2024,7 +2630,16 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Tilbage';
+
+  @override
+  String get cancelButtonLabel => 'Annuller';
+
+  @override
+  String get clearButtonLabel => 'Ryd';
+
+  @override
+  String get collapsedHint => 'Udvidet';
 
   @override
   String get copyButtonLabel => 'Kopiér';
@@ -2075,13 +2690,28 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get expandedHint => 'Skjult';
+
+  @override
+  String get expansionTileCollapsedHint => 'tryk to gange for at udvide';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Udvid for at få flere oplysninger';
+
+  @override
+  String get expansionTileExpandedHint => 'tryk to gange for at skjule';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Skjul';
+
+  @override
   String get lookUpButtonLabel => 'Slå op';
 
   @override
   String get menuDismissLabel => 'Luk menu';
 
   @override
-  String get modalBarrierDismissLabel => 'Afvis';
+  String get modalBarrierDismissLabel => 'Luk';
 
   @override
   String get noSpellCheckReplacementsLabel => 'Der blev ikke fundet nogen erstatninger';
@@ -2166,14 +2796,23 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for German (`de`).
+@Deprecated(
+  'Use CupertinoLocalizationDe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for German.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationDe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationDe({
     super.localeName = 'de',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2189,7 +2828,16 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Zurück';
+
+  @override
+  String get cancelButtonLabel => 'Abbrechen';
+
+  @override
+  String get clearButtonLabel => 'Löschen';
+
+  @override
+  String get collapsedHint => 'Maximiert';
 
   @override
   String get copyButtonLabel => 'Kopieren';
@@ -2238,6 +2886,21 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Minimiert';
+
+  @override
+  String get expansionTileCollapsedHint => 'Zum Maximieren doppeltippen';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Für weitere Details maximieren';
+
+  @override
+  String get expansionTileExpandedHint => 'Zum Minimieren doppeltippen';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Minimieren';
 
   @override
   String get lookUpButtonLabel => 'Nachschlagen';
@@ -2331,14 +2994,23 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for German, as used in Switzerland (`de_CH`).
+@Deprecated(
+  'Use CupertinoLocalizationDeCh from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationDeCh extends CupertinoLocalizationDe {
   /// Create an instance of the translation bundle for German, as used in Switzerland.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationDeCh from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationDeCh({
     super.localeName = 'de_CH',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2348,6 +3020,9 @@ class CupertinoLocalizationDeCh extends CupertinoLocalizationDe {
   });
 
   @override
+  String get clearButtonLabel => 'Clear';
+
+  @override
   String get selectAllButtonLabel => 'Alles auswählen';
 
   @override
@@ -2355,14 +3030,23 @@ class CupertinoLocalizationDeCh extends CupertinoLocalizationDe {
 }
 
 /// The translations for Modern Greek (`el`).
+@Deprecated(
+  'Use CupertinoLocalizationEl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Modern Greek.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEl({
     super.localeName = 'el',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2378,7 +3062,16 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'π.μ.';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Πίσω';
+
+  @override
+  String get cancelButtonLabel => 'Ακύρωση';
+
+  @override
+  String get clearButtonLabel => 'Διαγραφή';
+
+  @override
+  String get collapsedHint => 'Αναπτύχθηκε';
 
   @override
   String get copyButtonLabel => 'Αντιγραφή';
@@ -2427,6 +3120,21 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Συμπτύχθηκε';
+
+  @override
+  String get expansionTileCollapsedHint => 'πατήστε δύο φορές για ανάπτυξη';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Ανάπτυξη για περισσότερες λεπτομέρειες';
+
+  @override
+  String get expansionTileExpandedHint => 'πατήστε δύο φορές για σύμπτυξη';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Σύμπτυξη';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -2520,14 +3228,23 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for English (`en`).
+@Deprecated(
+  'Use CupertinoLocalizationEn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for English.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEn({
     super.localeName = 'en',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2543,7 +3260,16 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
+  String get backButtonLabel => 'Back';
+
+  @override
+  String get cancelButtonLabel => 'Cancel';
+
+  @override
   String get clearButtonLabel => 'Clear';
+
+  @override
+  String get collapsedHint => 'Expanded';
 
   @override
   String get copyButtonLabel => 'Copy';
@@ -2592,6 +3318,21 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansionTileExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -2685,14 +3426,23 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for English, as used in Australia (`en_AU`).
+@Deprecated(
+  'Use CupertinoLocalizationEnAu from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnAu extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in Australia.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnAu from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnAu({
     super.localeName = 'en_AU',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2700,6 +3450,12 @@ class CupertinoLocalizationEnAu extends CupertinoLocalizationEn {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'double-tap to collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'double-tap to expand';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -2715,14 +3471,23 @@ class CupertinoLocalizationEnAu extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in Canada (`en_CA`).
+@Deprecated(
+  'Use CupertinoLocalizationEnCa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnCa extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in Canada.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnCa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnCa({
     super.localeName = 'en_CA',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2739,14 +3504,23 @@ class CupertinoLocalizationEnCa extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).
+@Deprecated(
+  'Use CupertinoLocalizationEnGb from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnGb extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in the United Kingdom.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnGb from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnGb({
     super.localeName = 'en_GB',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2754,6 +3528,12 @@ class CupertinoLocalizationEnGb extends CupertinoLocalizationEn {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'double-tap to collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'double-tap to expand';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -2769,14 +3549,23 @@ class CupertinoLocalizationEnGb extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in Ireland (`en_IE`).
+@Deprecated(
+  'Use CupertinoLocalizationEnIe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnIe extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in Ireland.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnIe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnIe({
     super.localeName = 'en_IE',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2784,6 +3573,12 @@ class CupertinoLocalizationEnIe extends CupertinoLocalizationEn {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'double-tap to collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'double-tap to expand';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -2799,14 +3594,23 @@ class CupertinoLocalizationEnIe extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in India (`en_IN`).
+@Deprecated(
+  'Use CupertinoLocalizationEnIn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnIn extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in India.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnIn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnIn({
     super.localeName = 'en_IN',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2814,6 +3618,12 @@ class CupertinoLocalizationEnIn extends CupertinoLocalizationEn {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'double-tap to collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'double-tap to expand';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -2829,14 +3639,23 @@ class CupertinoLocalizationEnIn extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in New Zealand (`en_NZ`).
+@Deprecated(
+  'Use CupertinoLocalizationEnNz from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnNz extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in New Zealand.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnNz from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnNz({
     super.localeName = 'en_NZ',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2844,6 +3663,12 @@ class CupertinoLocalizationEnNz extends CupertinoLocalizationEn {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'double-tap to collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'double-tap to expand';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -2859,14 +3684,23 @@ class CupertinoLocalizationEnNz extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in Singapore (`en_SG`).
+@Deprecated(
+  'Use CupertinoLocalizationEnSg from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnSg extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in Singapore.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnSg from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnSg({
     super.localeName = 'en_SG',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2874,6 +3708,12 @@ class CupertinoLocalizationEnSg extends CupertinoLocalizationEn {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'double-tap to collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'double-tap to expand';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -2889,14 +3729,23 @@ class CupertinoLocalizationEnSg extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in South Africa (`en_ZA`).
+@Deprecated(
+  'Use CupertinoLocalizationEnZa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnZa extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in South Africa.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnZa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnZa({
     super.localeName = 'en_ZA',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2904,6 +3753,12 @@ class CupertinoLocalizationEnZa extends CupertinoLocalizationEn {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'double-tap to collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'double-tap to expand';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -2919,14 +3774,23 @@ class CupertinoLocalizationEnZa extends CupertinoLocalizationEn {
 }
 
 /// The translations for Spanish Castilian (`es`).
+@Deprecated(
+  'Use CupertinoLocalizationEs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Spanish Castilian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEs({
     super.localeName = 'es',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -2942,7 +3806,16 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'a. m.';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Atrás';
+
+  @override
+  String get cancelButtonLabel => 'Cancelar';
+
+  @override
+  String get clearButtonLabel => 'Borrar';
+
+  @override
+  String get collapsedHint => 'Desplegado';
 
   @override
   String get copyButtonLabel => 'Copiar';
@@ -2991,6 +3864,21 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Contraído';
+
+  @override
+  String get expansionTileCollapsedHint => 'toca dos veces para desplegar';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Desplegar para ver más detalles';
+
+  @override
+  String get expansionTileExpandedHint => 'toca dos veces para contraer';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Contraer';
 
   @override
   String get lookUpButtonLabel => 'Buscador visual';
@@ -3084,14 +3972,23 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
+@Deprecated(
+  'Use CupertinoLocalizationEs419 from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Latin America and the Caribbean.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEs419 from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEs419({
     super.localeName = 'es_419',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3099,6 +3996,18 @@ class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3129,14 +4038,23 @@ class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Argentina (`es_AR`).
+@Deprecated(
+  'Use CupertinoLocalizationEsAr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Argentina.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsAr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsAr({
     super.localeName = 'es_AR',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3144,6 +4062,18 @@ class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3174,14 +4104,23 @@ class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Bolivia (`es_BO`).
+@Deprecated(
+  'Use CupertinoLocalizationEsBo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Bolivia.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsBo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsBo({
     super.localeName = 'es_BO',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3189,6 +4128,18 @@ class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3219,14 +4170,23 @@ class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Chile (`es_CL`).
+@Deprecated(
+  'Use CupertinoLocalizationEsCl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Chile.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsCl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsCl({
     super.localeName = 'es_CL',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3234,6 +4194,18 @@ class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3264,14 +4236,23 @@ class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Colombia (`es_CO`).
+@Deprecated(
+  'Use CupertinoLocalizationEsCo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Colombia.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsCo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsCo({
     super.localeName = 'es_CO',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3279,6 +4260,18 @@ class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3309,14 +4302,23 @@ class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Costa Rica (`es_CR`).
+@Deprecated(
+  'Use CupertinoLocalizationEsCr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Costa Rica.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsCr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsCr({
     super.localeName = 'es_CR',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3324,6 +4326,18 @@ class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3354,14 +4368,23 @@ class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in the Dominican Republic (`es_DO`).
+@Deprecated(
+  'Use CupertinoLocalizationEsDo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in the Dominican Republic.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsDo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsDo({
     super.localeName = 'es_DO',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3369,6 +4392,18 @@ class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3399,14 +4434,23 @@ class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Ecuador (`es_EC`).
+@Deprecated(
+  'Use CupertinoLocalizationEsEc from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Ecuador.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsEc from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsEc({
     super.localeName = 'es_EC',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3414,6 +4458,18 @@ class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3444,14 +4500,23 @@ class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Guatemala (`es_GT`).
+@Deprecated(
+  'Use CupertinoLocalizationEsGt from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Guatemala.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsGt from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsGt({
     super.localeName = 'es_GT',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3459,6 +4524,18 @@ class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3489,14 +4566,23 @@ class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Honduras (`es_HN`).
+@Deprecated(
+  'Use CupertinoLocalizationEsHn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Honduras.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsHn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsHn({
     super.localeName = 'es_HN',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3504,6 +4590,18 @@ class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3534,14 +4632,23 @@ class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Mexico (`es_MX`).
+@Deprecated(
+  'Use CupertinoLocalizationEsMx from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Mexico.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsMx from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsMx({
     super.localeName = 'es_MX',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3549,6 +4656,18 @@ class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3579,14 +4698,23 @@ class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Nicaragua (`es_NI`).
+@Deprecated(
+  'Use CupertinoLocalizationEsNi from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Nicaragua.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsNi from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsNi({
     super.localeName = 'es_NI',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3594,6 +4722,18 @@ class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3624,14 +4764,23 @@ class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Panama (`es_PA`).
+@Deprecated(
+  'Use CupertinoLocalizationEsPa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Panama.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsPa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsPa({
     super.localeName = 'es_PA',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3639,6 +4788,18 @@ class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3669,14 +4830,23 @@ class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Peru (`es_PE`).
+@Deprecated(
+  'Use CupertinoLocalizationEsPe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Peru.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsPe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsPe({
     super.localeName = 'es_PE',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3684,6 +4854,18 @@ class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3714,14 +4896,23 @@ class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Puerto Rico (`es_PR`).
+@Deprecated(
+  'Use CupertinoLocalizationEsPr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Puerto Rico.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsPr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsPr({
     super.localeName = 'es_PR',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3729,6 +4920,18 @@ class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3759,14 +4962,23 @@ class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Paraguay (`es_PY`).
+@Deprecated(
+  'Use CupertinoLocalizationEsPy from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Paraguay.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsPy from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsPy({
     super.localeName = 'es_PY',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3774,6 +4986,18 @@ class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3804,14 +5028,23 @@ class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in El Salvador (`es_SV`).
+@Deprecated(
+  'Use CupertinoLocalizationEsSv from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in El Salvador.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsSv from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsSv({
     super.localeName = 'es_SV',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3819,6 +5052,18 @@ class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3849,14 +5094,23 @@ class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in the United States (`es_US`).
+@Deprecated(
+  'Use CupertinoLocalizationEsUs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in the United States.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsUs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsUs({
     super.localeName = 'es_US',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3864,6 +5118,18 @@ class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3894,14 +5160,23 @@ class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Uruguay (`es_UY`).
+@Deprecated(
+  'Use CupertinoLocalizationEsUy from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Uruguay.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsUy from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsUy({
     super.localeName = 'es_UY',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3909,6 +5184,18 @@ class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3939,14 +5226,23 @@ class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Venezuela (`es_VE`).
+@Deprecated(
+  'Use CupertinoLocalizationEsVe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Venezuela.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsVe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsVe({
     super.localeName = 'es_VE',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -3954,6 +5250,18 @@ class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'presiona dos veces para contraer';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para ver más detalles';
+
+  @override
+  String get expansionTileCollapsedHint => 'presiona dos veces para expandir';
 
   @override
   String get shareButtonLabel => 'Compartir…';
@@ -3984,14 +5292,23 @@ class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
 }
 
 /// The translations for Estonian (`et`).
+@Deprecated(
+  'Use CupertinoLocalizationEt from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Estonian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEt from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEt({
     super.localeName = 'et',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -4007,7 +5324,16 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Tagasi';
+
+  @override
+  String get cancelButtonLabel => 'Tühista';
+
+  @override
+  String get clearButtonLabel => 'Kustutamine';
+
+  @override
+  String get collapsedHint => 'Laiendatud';
 
   @override
   String get copyButtonLabel => 'Kopeeri';
@@ -4056,6 +5382,21 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Ahendatud';
+
+  @override
+  String get expansionTileCollapsedHint => 'topeltpuudutage laiendamiseks';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Laiendage lisateabe nägemiseks';
+
+  @override
+  String get expansionTileExpandedHint => 'topeltpuudutage ahendamiseks';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Ahenda';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -4149,14 +5490,23 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Basque (`eu`).
+@Deprecated(
+  'Use CupertinoLocalizationEu from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Basque.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEu from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEu({
     super.localeName = 'eu',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -4172,7 +5522,16 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Atzera';
+
+  @override
+  String get cancelButtonLabel => 'Utzi';
+
+  @override
+  String get clearButtonLabel => 'Garbitu';
+
+  @override
+  String get collapsedHint => 'Zabalduta';
 
   @override
   String get copyButtonLabel => 'Kopiatu';
@@ -4221,6 +5580,21 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Tolestuta';
+
+  @override
+  String get expansionTileCollapsedHint => 'zabaltzeko, sakatu birritan';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Zabaldu hau xehetasun gehiago lortzeko';
+
+  @override
+  String get expansionTileExpandedHint => 'tolesteko, sakatu birritan';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Tolestu';
 
   @override
   String get lookUpButtonLabel => 'Bilatu';
@@ -4314,14 +5688,23 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Persian (`fa`).
+@Deprecated(
+  'Use CupertinoLocalizationFa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Persian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationFa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationFa({
     super.localeName = 'fa',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -4337,10 +5720,19 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ق.ظ.';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'برگشتن';
 
   @override
-  String get copyButtonLabel => 'کپی';
+  String get cancelButtonLabel => 'لغو';
+
+  @override
+  String get clearButtonLabel => 'پاک کردن';
+
+  @override
+  String get collapsedHint => 'ازهم بازشده';
+
+  @override
+  String get copyButtonLabel => 'کپی کردن';
 
   @override
   String get cutButtonLabel => 'برش';
@@ -4388,13 +5780,28 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get expandedHint => 'جمع‌شده';
+
+  @override
+  String get expansionTileCollapsedHint => 'برای ازهم بازکردن، دو تک‌ضرب بزنید';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'ازهم بازکردن برای جزئیات بیشتر';
+
+  @override
+  String get expansionTileExpandedHint => 'برای جمع کردن، دو تک‌ضرب بزنید';
+
+  @override
+  String get expansionTileExpandedTapHint => 'جمع کردن';
+
+  @override
   String get lookUpButtonLabel => 'جستجو';
 
   @override
   String get menuDismissLabel => 'بستن منو';
 
   @override
-  String get modalBarrierDismissLabel => 'نپذیرفتن';
+  String get modalBarrierDismissLabel => 'بستن';
 
   @override
   String get noSpellCheckReplacementsLabel => 'جایگزینی پیدا نشد';
@@ -4479,14 +5886,23 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Finnish (`fi`).
+@Deprecated(
+  'Use CupertinoLocalizationFi from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Finnish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationFi from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationFi({
     super.localeName = 'fi',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -4502,7 +5918,16 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ap';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Takaisin';
+
+  @override
+  String get cancelButtonLabel => 'Peru';
+
+  @override
+  String get clearButtonLabel => 'Tyhjennä';
+
+  @override
+  String get collapsedHint => 'Laajennettu';
 
   @override
   String get copyButtonLabel => 'Kopioi';
@@ -4551,6 +5976,21 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Tiivistetty';
+
+  @override
+  String get expansionTileCollapsedHint => 'laajenna kaksoisnapauttamalla';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Katso lisätietoja laajentamalla';
+
+  @override
+  String get expansionTileExpandedHint => 'tiivistä kaksoisnapauttamalla';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Tiivistä';
 
   @override
   String get lookUpButtonLabel => 'Hae';
@@ -4644,14 +6084,23 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Filipino Pilipino (`fil`).
+@Deprecated(
+  'Use CupertinoLocalizationFil from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Filipino Pilipino.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationFil from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationFil({
     super.localeName = 'fil',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -4667,7 +6116,16 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Bumalik';
+
+  @override
+  String get cancelButtonLabel => 'Kanselahin';
+
+  @override
+  String get clearButtonLabel => 'I-clear';
+
+  @override
+  String get collapsedHint => 'Naka-expand';
 
   @override
   String get copyButtonLabel => 'Kopyahin';
@@ -4716,6 +6174,21 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Naka-collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'i-double tap para i-expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'I-expand para sa higit pang detalye';
+
+  @override
+  String get expansionTileExpandedHint => 'i-double tap para i-collapse';
+
+  @override
+  String get expansionTileExpandedTapHint => 'I-collapse';
 
   @override
   String get lookUpButtonLabel => 'Tumingin sa Itaas';
@@ -4809,14 +6282,23 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for French (`fr`).
+@Deprecated(
+  'Use CupertinoLocalizationFr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for French.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationFr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationFr({
     super.localeName = 'fr',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -4832,7 +6314,16 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Retour';
+
+  @override
+  String get cancelButtonLabel => 'Annuler';
+
+  @override
+  String get clearButtonLabel => 'Effacer';
+
+  @override
+  String get collapsedHint => 'Développé';
 
   @override
   String get copyButtonLabel => 'Copier';
@@ -4881,6 +6372,21 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Réduit';
+
+  @override
+  String get expansionTileCollapsedHint => 'appuyez deux fois pour développer';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Développer pour en savoir plus';
+
+  @override
+  String get expansionTileExpandedHint => 'appuyez deux fois pour réduire';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Réduire';
 
   @override
   String get lookUpButtonLabel => 'Recherche visuelle';
@@ -4974,14 +6480,23 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for French, as used in Canada (`fr_CA`).
+@Deprecated(
+  'Use CupertinoLocalizationFrCa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
   /// Create an instance of the translation bundle for French, as used in Canada.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationFrCa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationFrCa({
     super.localeName = 'fr_CA',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -4989,6 +6504,15 @@ class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'toucher deux fois pour réduire';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Développer le panneau pour plus de détails';
+
+  @override
+  String get expansionTileCollapsedHint => 'toucher deux fois pour développer';
 
   @override
   String get lookUpButtonLabel => 'Regarder en haut';
@@ -5018,15 +6542,222 @@ class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
   String get timerPickerMinuteLabelOther => 'min';
 }
 
+/// The translations for Irish (`ga`).
+@Deprecated(
+  'Use CupertinoLocalizationGa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
+class CupertinoLocalizationGa extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Irish.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationGa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
+  const CupertinoLocalizationGa({
+    super.localeName = 'ga',
+    required super.fullYearFormat,
+    required super.dayFormat,
+    required super.weekdayFormat,
+    required super.mediumDateFormat,
+    required super.singleDigitHourFormat,
+    required super.singleDigitMinuteFormat,
+    required super.doubleDigitMinuteFormat,
+    required super.singleDigitSecondFormat,
+    required super.decimalFormat,
+  });
+
+  @override
+  String get alertDialogLabel => 'Foláireamh';
+
+  @override
+  String get anteMeridiemAbbreviation => 'R.N.';
+
+  @override
+  String get backButtonLabel => 'Siar';
+
+  @override
+  String get cancelButtonLabel => 'Cealaigh';
+
+  @override
+  String get clearButtonLabel => 'Glan';
+
+  @override
+  String get collapsedHint => 'Leathnaithe';
+
+  @override
+  String get copyButtonLabel => 'Cóipeáil';
+
+  @override
+  String get cutButtonLabel => 'Gearr';
+
+  @override
+  String get datePickerDateOrderString => 'dmy';
+
+  @override
+  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+
+  @override
+  String? get datePickerHourSemanticsLabelFew => r'$hour a chlog';
+
+  @override
+  String? get datePickerHourSemanticsLabelMany => r'$hour a chlog';
+
+  @override
+  String? get datePickerHourSemanticsLabelOne => r'$hour a chlog';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'$hour a chlog';
+
+  @override
+  String? get datePickerHourSemanticsLabelTwo => r'$hour a chlog';
+
+  @override
+  String? get datePickerHourSemanticsLabelZero => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelFew => r'$minute nóiméad';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelMany => r'$minute nóiméad';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelOne => 'Aon nóiméad amháin';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute nóiméad';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelTwo => r'$minute nóiméad';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Laghdaithe';
+
+  @override
+  String get expansionTileCollapsedHint => 'tapáil faoi dhó chun leathnú';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Leathnaigh chun tuilleadh sonraí a fháil';
+
+  @override
+  String get expansionTileExpandedHint => 'tapáil faoi dhó chun laghdú';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Laghdaigh';
+
+  @override
+  String get lookUpButtonLabel => 'Cuardaigh';
+
+  @override
+  String get menuDismissLabel => 'Ruaig an roghchlár';
+
+  @override
+  String get modalBarrierDismissLabel => 'Ruaig';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'Níor Aimsíodh Aon Fhocal Oiriúnach le Cur ina Áit';
+
+  @override
+  String get pasteButtonLabel => 'Greamaigh';
+
+  @override
+  String get postMeridiemAbbreviation => 'I.N.';
+
+  @override
+  String get searchTextFieldPlaceholderLabel => 'Cuardaigh';
+
+  @override
+  String get searchWebButtonLabel => 'Cuardaigh an Gréasán';
+
+  @override
+  String get selectAllButtonLabel => 'Roghnaigh Gach Rud';
+
+  @override
+  String get shareButtonLabel => 'Comhroinn...';
+
+  @override
+  String get tabSemanticsLabelRaw => r'Cluaisín $tabIndex de $tabCount';
+
+  @override
+  String? get timerPickerHourLabelFew => 'uair an chloig';
+
+  @override
+  String? get timerPickerHourLabelMany => 'n-uair an chloig';
+
+  @override
+  String? get timerPickerHourLabelOne => 'uair an chloig';
+
+  @override
+  String get timerPickerHourLabelOther => 'uair an chloig';
+
+  @override
+  String? get timerPickerHourLabelTwo => 'uair an chloig';
+
+  @override
+  String? get timerPickerHourLabelZero => null;
+
+  @override
+  String? get timerPickerMinuteLabelFew => 'nóim.';
+
+  @override
+  String? get timerPickerMinuteLabelMany => 'nóim.';
+
+  @override
+  String? get timerPickerMinuteLabelOne => 'nóim.';
+
+  @override
+  String get timerPickerMinuteLabelOther => 'nóim.';
+
+  @override
+  String? get timerPickerMinuteLabelTwo => 'nóim.';
+
+  @override
+  String? get timerPickerMinuteLabelZero => null;
+
+  @override
+  String? get timerPickerSecondLabelFew => 'soic.';
+
+  @override
+  String? get timerPickerSecondLabelMany => 'soic.';
+
+  @override
+  String? get timerPickerSecondLabelOne => 'soic.';
+
+  @override
+  String get timerPickerSecondLabelOther => 'soic.';
+
+  @override
+  String? get timerPickerSecondLabelTwo => 'soic.';
+
+  @override
+  String? get timerPickerSecondLabelZero => null;
+
+  @override
+  String get todayLabel => 'Inniu';
+}
+
 /// The translations for Galician (`gl`).
+@Deprecated(
+  'Use CupertinoLocalizationGl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Galician.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationGl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationGl({
     super.localeName = 'gl',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -5042,7 +6773,16 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Atrás';
+
+  @override
+  String get cancelButtonLabel => 'Cancelar';
+
+  @override
+  String get clearButtonLabel => 'Borrar';
+
+  @override
+  String get collapsedHint => 'Despregado';
 
   @override
   String get copyButtonLabel => 'Copiar';
@@ -5093,13 +6833,28 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get expandedHint => 'Contraído';
+
+  @override
+  String get expansionTileCollapsedHint => 'tocar dúas veces para despregar';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Despregar para obter máis detalles';
+
+  @override
+  String get expansionTileExpandedHint => 'tocar dúas veces para contraer';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Contraer';
+
+  @override
   String get lookUpButtonLabel => 'Mirar cara arriba';
 
   @override
   String get menuDismissLabel => 'Pechar menú';
 
   @override
-  String get modalBarrierDismissLabel => 'Ignorar';
+  String get modalBarrierDismissLabel => 'Pechar';
 
   @override
   String get noSpellCheckReplacementsLabel => 'Non se encontrou ningunha substitución';
@@ -5184,14 +6939,23 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Swiss German Alemannic Alsatian (`gsw`).
+@Deprecated(
+  'Use CupertinoLocalizationGsw from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Swiss German Alemannic Alsatian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationGsw from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationGsw({
     super.localeName = 'gsw',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -5207,7 +6971,16 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Zurück';
+
+  @override
+  String get cancelButtonLabel => 'Abbrechen';
+
+  @override
+  String get clearButtonLabel => 'Löschen';
+
+  @override
+  String get collapsedHint => 'Maximiert';
 
   @override
   String get copyButtonLabel => 'Kopieren';
@@ -5256,6 +7029,21 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Minimiert';
+
+  @override
+  String get expansionTileCollapsedHint => 'Zum Maximieren doppeltippen';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Für weitere Details maximieren';
+
+  @override
+  String get expansionTileExpandedHint => 'Zum Minimieren doppeltippen';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Minimieren';
 
   @override
   String get lookUpButtonLabel => 'Nachschlagen';
@@ -5349,14 +7137,23 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Gujarati (`gu`).
+@Deprecated(
+  'Use CupertinoLocalizationGu from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Gujarati.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationGu from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationGu({
     super.localeName = 'gu',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -5372,7 +7169,16 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'પાછળ';
+
+  @override
+  String get cancelButtonLabel => 'રદ કરો';
+
+  @override
+  String get clearButtonLabel => 'સાફ કરો';
+
+  @override
+  String get collapsedHint => 'મોટી કરી';
 
   @override
   String get copyButtonLabel => 'કૉપિ કરો';
@@ -5421,6 +7227,21 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'નાની કરી';
+
+  @override
+  String get expansionTileCollapsedHint => 'મોટી કરવા માટે બે વાર ટૅપ કરો';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'વધુ વિગતો માટે મોટી કરો';
+
+  @override
+  String get expansionTileExpandedHint => 'નાની કરવા માટે બે વાર ટૅપ કરો';
+
+  @override
+  String get expansionTileExpandedTapHint => 'નાની કરો';
 
   @override
   String get lookUpButtonLabel => 'શોધો';
@@ -5514,14 +7335,23 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Hebrew (`he`).
+@Deprecated(
+  'Use CupertinoLocalizationHe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Hebrew.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationHe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationHe({
     super.localeName = 'he',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -5537,7 +7367,16 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'למסך הקודם';
+
+  @override
+  String get cancelButtonLabel => 'ביטול';
+
+  @override
+  String get clearButtonLabel => 'ניקוי';
+
+  @override
+  String get collapsedHint => 'מורחב';
 
   @override
   String get copyButtonLabel => 'העתקה';
@@ -5586,6 +7425,21 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'מכווץ';
+
+  @override
+  String get expansionTileCollapsedHint => 'כדי להרחיב, יש ללחוץ לחיצה כפולה';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'ניתן להרחיב להצגת פרטים נוספים';
+
+  @override
+  String get expansionTileExpandedHint => 'כדי לכווץ, יש ללחוץ לחיצה כפולה';
+
+  @override
+  String get expansionTileExpandedTapHint => 'כיווץ';
 
   @override
   String get lookUpButtonLabel => 'חיפוש';
@@ -5679,14 +7533,23 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Hindi (`hi`).
+@Deprecated(
+  'Use CupertinoLocalizationHi from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Hindi.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationHi from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationHi({
     super.localeName = 'hi',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -5702,7 +7565,16 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'वापस जाएं';
+
+  @override
+  String get cancelButtonLabel => 'रद्द करें';
+
+  @override
+  String get clearButtonLabel => 'हटाएं';
+
+  @override
+  String get collapsedHint => 'बड़ा किया गया';
 
   @override
   String get copyButtonLabel => 'कॉपी करें';
@@ -5751,6 +7623,21 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'छोटा किया गया';
+
+  @override
+  String get expansionTileCollapsedHint => 'बड़ा करने के लिए दो बार टैप करें';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'ज़्यादा जानने के लिए बड़ा करें';
+
+  @override
+  String get expansionTileExpandedHint => 'छोटा करने के लिए दो बार टैप करें';
+
+  @override
+  String get expansionTileExpandedTapHint => 'छोटा करें';
 
   @override
   String get lookUpButtonLabel => 'लुक अप बटन';
@@ -5844,14 +7731,23 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Croatian (`hr`).
+@Deprecated(
+  'Use CupertinoLocalizationHr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Croatian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationHr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationHr({
     super.localeName = 'hr',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -5867,7 +7763,16 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'prijepodne';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Natrag';
+
+  @override
+  String get cancelButtonLabel => 'Odustani';
+
+  @override
+  String get clearButtonLabel => 'Izbriši';
+
+  @override
+  String get collapsedHint => 'Prošireno';
 
   @override
   String get copyButtonLabel => 'Kopiraj';
@@ -5916,6 +7821,21 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Sažeto';
+
+  @override
+  String get expansionTileCollapsedHint => 'dvaput dodirnite za proširivanje';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Proširite da biste saznali više';
+
+  @override
+  String get expansionTileExpandedHint => 'dvaput dodirnite za sažimanje';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Sažmi';
 
   @override
   String get lookUpButtonLabel => 'Pogled prema gore';
@@ -6009,14 +7929,23 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Hungarian (`hu`).
+@Deprecated(
+  'Use CupertinoLocalizationHu from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Hungarian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationHu from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationHu({
     super.localeName = 'hu',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -6032,7 +7961,16 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'de.';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Vissza';
+
+  @override
+  String get cancelButtonLabel => 'Mégse';
+
+  @override
+  String get clearButtonLabel => 'Törlés';
+
+  @override
+  String get collapsedHint => 'Kibontva';
 
   @override
   String get copyButtonLabel => 'Másolás';
@@ -6081,6 +8019,21 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Összecsukva';
+
+  @override
+  String get expansionTileCollapsedHint => 'duplán koppintva kibonthatja';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Bontsa ki a további részletek megtekintéséhez';
+
+  @override
+  String get expansionTileExpandedHint => 'duplán koppintva összecsukhatja';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Összecsukás';
 
   @override
   String get lookUpButtonLabel => 'Felfelé nézés';
@@ -6174,14 +8127,23 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Armenian (`hy`).
+@Deprecated(
+  'Use CupertinoLocalizationHy from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Armenian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationHy from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationHy({
     super.localeName = 'hy',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -6197,7 +8159,16 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Հետ';
+
+  @override
+  String get cancelButtonLabel => 'Չեղարկել';
+
+  @override
+  String get clearButtonLabel => 'Մաքրել';
+
+  @override
+  String get collapsedHint => 'Ծավալված է';
 
   @override
   String get copyButtonLabel => 'Պատճենել';
@@ -6246,6 +8217,21 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Ծալված է';
+
+  @override
+  String get expansionTileCollapsedHint => 'կրկնակի հպեք ծավալելու համար';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'ծավալեք՝ մանրամասները տեսնելու համար';
+
+  @override
+  String get expansionTileExpandedHint => 'կրկնակի հպեք ծալելու համար';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Ծալել';
 
   @override
   String get lookUpButtonLabel => 'Փնտրել';
@@ -6339,14 +8325,23 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Indonesian (`id`).
+@Deprecated(
+  'Use CupertinoLocalizationId from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Indonesian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationId from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationId({
     super.localeName = 'id',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -6362,7 +8357,16 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Kembali';
+
+  @override
+  String get cancelButtonLabel => 'Batal';
+
+  @override
+  String get clearButtonLabel => 'Hapus';
+
+  @override
+  String get collapsedHint => 'Diluaskan';
 
   @override
   String get copyButtonLabel => 'Salin';
@@ -6411,6 +8415,21 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Diciutkan';
+
+  @override
+  String get expansionTileCollapsedHint => 'ketuk dua kali untuk meluaskan';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Luaskan untuk mengetahui detail selengkapnya';
+
+  @override
+  String get expansionTileExpandedHint => 'ketuk dua kali untuk menciutkan';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Ciutkan';
 
   @override
   String get lookUpButtonLabel => 'Cari';
@@ -6504,14 +8523,23 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Icelandic (`is`).
+@Deprecated(
+  'Use CupertinoLocalizationIs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Icelandic.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationIs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationIs({
     super.localeName = 'is',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -6527,7 +8555,16 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'f.h.';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Til baka';
+
+  @override
+  String get cancelButtonLabel => 'Hætta við';
+
+  @override
+  String get clearButtonLabel => 'Hreinsa';
+
+  @override
+  String get collapsedHint => 'Stækkað';
 
   @override
   String get copyButtonLabel => 'Afrita';
@@ -6576,6 +8613,21 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Minnkað';
+
+  @override
+  String get expansionTileCollapsedHint => 'ýttu tvisvar til að stækka';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Stækka til að sjá frekari upplýsingar';
+
+  @override
+  String get expansionTileExpandedHint => 'ýttu tvisvar til að minnka';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Minnka';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -6669,14 +8721,23 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Italian (`it`).
+@Deprecated(
+  'Use CupertinoLocalizationIt from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Italian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationIt from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationIt({
     super.localeName = 'it',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -6692,7 +8753,16 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Indietro';
+
+  @override
+  String get cancelButtonLabel => 'Annulla';
+
+  @override
+  String get clearButtonLabel => 'Cancella';
+
+  @override
+  String get collapsedHint => 'Espanso';
 
   @override
   String get copyButtonLabel => 'Copia';
@@ -6741,6 +8811,21 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Compresso';
+
+  @override
+  String get expansionTileCollapsedHint => 'Tocca due volte per espandere';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'espandere e visualizzare altri dettagli';
+
+  @override
+  String get expansionTileExpandedHint => 'tocca due volte per comprimere';
+
+  @override
+  String get expansionTileExpandedTapHint => 'comprimere';
 
   @override
   String get lookUpButtonLabel => 'Cerca';
@@ -6834,14 +8919,23 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Japanese (`ja`).
+@Deprecated(
+  'Use CupertinoLocalizationJa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Japanese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationJa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationJa({
     super.localeName = 'ja',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -6857,7 +8951,16 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => '戻る';
+
+  @override
+  String get cancelButtonLabel => 'キャンセル';
+
+  @override
+  String get clearButtonLabel => '消去';
+
+  @override
+  String get collapsedHint => '開きました';
 
   @override
   String get copyButtonLabel => 'コピー';
@@ -6906,6 +9009,21 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => '閉じました';
+
+  @override
+  String get expansionTileCollapsedHint => '開くにはダブルタップします';
+
+  @override
+  String get expansionTileCollapsedTapHint => '開いて詳細を表示';
+
+  @override
+  String get expansionTileExpandedHint => 'ダブルタップすると閉じます';
+
+  @override
+  String get expansionTileExpandedTapHint => '閉じる';
 
   @override
   String get lookUpButtonLabel => '調べる';
@@ -6999,14 +9117,23 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Georgian (`ka`).
+@Deprecated(
+  'Use CupertinoLocalizationKa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Georgian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationKa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationKa({
     super.localeName = 'ka',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -7022,7 +9149,16 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'უკან';
+
+  @override
+  String get cancelButtonLabel => 'გაუქმება';
+
+  @override
+  String get clearButtonLabel => 'გასუფთავება';
+
+  @override
+  String get collapsedHint => 'გაფართოებულია';
 
   @override
   String get copyButtonLabel => 'კოპირება';
@@ -7071,6 +9207,21 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'ჩაკეცილია';
+
+  @override
+  String get expansionTileCollapsedHint => 'გასაფართოებლად ორჯერ შეეხეთ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'მეტი დეტალებისთვის გააფართოეთ';
+
+  @override
+  String get expansionTileExpandedHint => 'ორმაგად შეეხეთ ჩასაკეცად';
+
+  @override
+  String get expansionTileExpandedTapHint => 'ჩაკეცვა';
 
   @override
   String get lookUpButtonLabel => 'აიხედეთ ზემოთ';
@@ -7164,14 +9315,23 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Kazakh (`kk`).
+@Deprecated(
+  'Use CupertinoLocalizationKk from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Kazakh.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationKk from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationKk({
     super.localeName = 'kk',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -7187,7 +9347,16 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'түстен кейін';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Артқа';
+
+  @override
+  String get cancelButtonLabel => 'Бас тарту';
+
+  @override
+  String get clearButtonLabel => 'Өшіру';
+
+  @override
+  String get collapsedHint => 'Жайылды';
 
   @override
   String get copyButtonLabel => 'Көшіру';
@@ -7236,6 +9405,21 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Жиылды';
+
+  @override
+  String get expansionTileCollapsedHint => 'жаю үшін екі рет түртіңіз';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Толық мәлімет алу үшін жайыңыз.';
+
+  @override
+  String get expansionTileExpandedHint => 'жию үшін екі рет түртіңіз';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Жию';
 
   @override
   String get lookUpButtonLabel => 'Іздеу';
@@ -7329,14 +9513,23 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Khmer Central Khmer (`km`).
+@Deprecated(
+  'Use CupertinoLocalizationKm from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Khmer Central Khmer.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationKm from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationKm({
     super.localeName = 'km',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -7352,7 +9545,16 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'ថយក្រោយ';
+
+  @override
+  String get cancelButtonLabel => 'បោះបង់';
+
+  @override
+  String get clearButtonLabel => 'សម្អាត';
+
+  @override
+  String get collapsedHint => 'បាន​ពង្រីក';
 
   @override
   String get copyButtonLabel => 'ចម្លង';
@@ -7401,6 +9603,21 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'បាន​បង្រួម';
+
+  @override
+  String get expansionTileCollapsedHint => 'ចុចពីរដង ដើម្បីពង្រីក';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'ពង្រីក​ដើម្បីទទួលបាន​ព័ត៌មានលម្អិត​បន្ថែម';
+
+  @override
+  String get expansionTileExpandedHint => 'ចុចពីរដង ដើម្បីបង្រួម';
+
+  @override
+  String get expansionTileExpandedTapHint => 'បង្រួម';
 
   @override
   String get lookUpButtonLabel => 'រកមើល';
@@ -7494,14 +9711,23 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Kannada (`kn`).
+@Deprecated(
+  'Use CupertinoLocalizationKn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Kannada.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationKn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationKn({
     super.localeName = 'kn',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -7517,10 +9743,19 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => '\u{cac}\u{cc6}\u{cb3}\u{cbf}\u{c97}\u{ccd}\u{c97}\u{cc6}';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => '\u{cb9}\u{cbf}\u{c82}\u{ca6}\u{cc6}';
 
   @override
-  String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+  String get cancelButtonLabel => '\u{cb0}\u{ca6}\u{ccd}\u{ca6}\u{cc1}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get clearButtonLabel => '\u{ca4}\u{cc6}\u{cb0}\u{cb5}\u{cc1}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get collapsedHint => '\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+
+  @override
+  String get copyButtonLabel => '\u{c95}\u{cbe}\u{caa}\u{cbf}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -7566,6 +9801,21 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+
+  @override
+  String get expansionTileCollapsedHint => '\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cb2}\u{cc1}\u{20}\u{ca1}\u{cac}\u{cb2}\u{ccd}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get expansionTileCollapsedTapHint => '\u{c87}\u{ca8}\u{ccd}\u{ca8}\u{cb7}\u{ccd}\u{c9f}\u{cc1}\u{20}\u{cb5}\u{cbf}\u{cb5}\u{cb0}\u{c97}\u{cb3}\u{cbf}\u{c97}\u{cbe}\u{c97}\u{cbf}\u{20}\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get expansionTileExpandedHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cb2}\u{cc1}\u{20}\u{ca1}\u{cac}\u{cb2}\u{ccd}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get expansionTileExpandedTapHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get lookUpButtonLabel => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{ca8}\u{ccb}\u{ca1}\u{cbf}';
@@ -7659,14 +9909,23 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Korean (`ko`).
+@Deprecated(
+  'Use CupertinoLocalizationKo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Korean.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationKo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationKo({
     super.localeName = 'ko',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -7682,19 +9941,28 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => '오전';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => '뒤로';
+
+  @override
+  String get cancelButtonLabel => '취소';
+
+  @override
+  String get clearButtonLabel => '삭제';
+
+  @override
+  String get collapsedHint => '펼침';
 
   @override
   String get copyButtonLabel => '복사';
 
   @override
-  String get cutButtonLabel => '잘라냄';
+  String get cutButtonLabel => '잘라내기';
 
   @override
   String get datePickerDateOrderString => 'ymd';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => 'date_dayPeriod_time';
 
   @override
   String? get datePickerHourSemanticsLabelFew => null;
@@ -7731,6 +9999,21 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => '접힘';
+
+  @override
+  String get expansionTileCollapsedHint => '두 번 탭하여 펼치기';
+
+  @override
+  String get expansionTileCollapsedTapHint => '자세히 알아보려면 펼치기';
+
+  @override
+  String get expansionTileExpandedHint => '두 번 탭하여 접기';
+
+  @override
+  String get expansionTileExpandedTapHint => '접기';
 
   @override
   String get lookUpButtonLabel => '찾기';
@@ -7824,14 +10107,23 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Kirghiz Kyrgyz (`ky`).
+@Deprecated(
+  'Use CupertinoLocalizationKy from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Kirghiz Kyrgyz.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationKy from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationKy({
     super.localeName = 'ky',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -7847,7 +10139,16 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'түшкө чейин';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Артка';
+
+  @override
+  String get cancelButtonLabel => 'Токтотуу';
+
+  @override
+  String get clearButtonLabel => 'Тазалоо';
+
+  @override
+  String get collapsedHint => 'Жайылып көрсөтүлдү';
 
   @override
   String get copyButtonLabel => 'Көчүрүү';
@@ -7896,6 +10197,21 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Жыйыштырылды';
+
+  @override
+  String get expansionTileCollapsedHint => 'жайып көрсөтүү үчүн эки жолу таптаңыз';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Толук маалымат алуу үчүн жайып көрүңүз';
+
+  @override
+  String get expansionTileExpandedHint => 'жыйыштыруу үчүн эки жолу таптаңыз';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Жыйыштыруу';
 
   @override
   String get lookUpButtonLabel => 'Издөө';
@@ -7989,14 +10305,23 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Lao (`lo`).
+@Deprecated(
+  'Use CupertinoLocalizationLo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Lao.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationLo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationLo({
     super.localeName = 'lo',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -8012,7 +10337,16 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ກ່ອນທ່ຽງ';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'ກັບຄືນ';
+
+  @override
+  String get cancelButtonLabel => 'ຍົກເລີກ';
+
+  @override
+  String get clearButtonLabel => 'ລຶບລ້າງ';
+
+  @override
+  String get collapsedHint => 'ຂະຫຍາຍແລ້ວ';
 
   @override
   String get copyButtonLabel => 'ສຳເນົາ';
@@ -8061,6 +10395,21 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'ຫຍໍ້ລົງແລ້ວ';
+
+  @override
+  String get expansionTileCollapsedHint => 'ແຕະສອງເທື່ອເພື່ອຂະຫຍາຍ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'ຂະຫຍາຍສຳລັບຂໍ້ມູນເພີ່ມເຕີມ';
+
+  @override
+  String get expansionTileExpandedHint => 'ແຕະສອງເທື່ອເພື່ອຫຍໍ້ລົງ';
+
+  @override
+  String get expansionTileExpandedTapHint => 'ຫຍໍ້ລົງ';
 
   @override
   String get lookUpButtonLabel => 'ຊອກຫາຂໍ້ມູນ';
@@ -8154,14 +10503,23 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Lithuanian (`lt`).
+@Deprecated(
+  'Use CupertinoLocalizationLt from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Lithuanian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationLt from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationLt({
     super.localeName = 'lt',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -8177,7 +10535,16 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'priešpiet';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Atgal';
+
+  @override
+  String get cancelButtonLabel => 'Atšaukti';
+
+  @override
+  String get clearButtonLabel => 'Išvalyti';
+
+  @override
+  String get collapsedHint => 'Išskleista';
 
   @override
   String get copyButtonLabel => 'Kopijuoti';
@@ -8226,6 +10593,21 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Sutraukta';
+
+  @override
+  String get expansionTileCollapsedHint => 'dukart palieskite, kad išskleistumėte';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Išskleiskite, jei reikia daugiau išsamios informacijos';
+
+  @override
+  String get expansionTileExpandedHint => 'dukart palieskite, kad sutrauktumėte';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Sutraukti';
 
   @override
   String get lookUpButtonLabel => 'Ieškoti';
@@ -8319,14 +10701,23 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Latvian (`lv`).
+@Deprecated(
+  'Use CupertinoLocalizationLv from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Latvian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationLv from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationLv({
     super.localeName = 'lv',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -8342,7 +10733,16 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'priekšpusdienā';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Atpakaļ';
+
+  @override
+  String get cancelButtonLabel => 'Atcelt';
+
+  @override
+  String get clearButtonLabel => 'Notīrīt';
+
+  @override
+  String get collapsedHint => 'Izvērsts';
 
   @override
   String get copyButtonLabel => 'Kopēt';
@@ -8391,6 +10791,21 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => r'$minute minūtes';
+
+  @override
+  String get expandedHint => 'Sakļauts';
+
+  @override
+  String get expansionTileCollapsedHint => 'dubultskāriens, lai izvērstu';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Izvērst, lai iegūtu plašāku informāciju';
+
+  @override
+  String get expansionTileExpandedHint => 'dubultskāriens, lai sakļautu';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Sakļaut';
 
   @override
   String get lookUpButtonLabel => 'Meklēt';
@@ -8484,14 +10899,23 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Macedonian (`mk`).
+@Deprecated(
+  'Use CupertinoLocalizationMk from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Macedonian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationMk from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationMk({
     super.localeName = 'mk',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -8507,7 +10931,16 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ПРЕТПЛАДНЕ';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Назад';
+
+  @override
+  String get cancelButtonLabel => 'Откажи';
+
+  @override
+  String get clearButtonLabel => 'Избриши';
+
+  @override
+  String get collapsedHint => 'Проширено';
 
   @override
   String get copyButtonLabel => 'Копирај';
@@ -8556,6 +10989,21 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Собрано';
+
+  @override
+  String get expansionTileCollapsedHint => 'допри двапати за проширување';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'проширување за повеќе детали';
+
+  @override
+  String get expansionTileExpandedHint => 'допрете двапати за собирање';
+
+  @override
+  String get expansionTileExpandedTapHint => 'собирање';
 
   @override
   String get lookUpButtonLabel => 'Погледнете нагоре';
@@ -8649,14 +11097,23 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Malayalam (`ml`).
+@Deprecated(
+  'Use CupertinoLocalizationMl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Malayalam.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationMl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationMl({
     super.localeName = 'ml',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -8672,7 +11129,16 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'മടങ്ങുക';
+
+  @override
+  String get cancelButtonLabel => 'റദ്ദാക്കുക';
+
+  @override
+  String get clearButtonLabel => 'മായ്ക്കുക';
+
+  @override
+  String get collapsedHint => 'വികസിപ്പിച്ചു';
 
   @override
   String get copyButtonLabel => 'പകർത്തുക';
@@ -8721,6 +11187,21 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'ചുരുക്കി';
+
+  @override
+  String get expansionTileCollapsedHint => 'വികസിപ്പിക്കാൻ ഡബിൾ ടാപ്പ് ചെയ്യുക';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'കൂടുതൽ വിശദാംശങ്ങൾക്ക് വികസിപ്പിക്കുക';
+
+  @override
+  String get expansionTileExpandedHint => 'ചുരുക്കാൻ ഡബിൾ ടാപ്പ് ചെയ്യുക';
+
+  @override
+  String get expansionTileExpandedTapHint => 'ചുരുക്കുക';
 
   @override
   String get lookUpButtonLabel => 'മുകളിലേക്ക് നോക്കുക';
@@ -8814,14 +11295,23 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Mongolian (`mn`).
+@Deprecated(
+  'Use CupertinoLocalizationMn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Mongolian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationMn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationMn({
     super.localeName = 'mn',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -8837,7 +11327,16 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ӨГЛӨӨ';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Буцах';
+
+  @override
+  String get cancelButtonLabel => 'Цуцлах';
+
+  @override
+  String get clearButtonLabel => 'Арилгах';
+
+  @override
+  String get collapsedHint => 'Дэлгэсэн';
 
   @override
   String get copyButtonLabel => 'Хуулах';
@@ -8886,6 +11385,21 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Хураасан';
+
+  @override
+  String get expansionTileCollapsedHint => 'дэлгэхийн тулд хоёр товшино уу';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Илүү дэлгэрэнгүй авах бол дэлгэнэ үү';
+
+  @override
+  String get expansionTileExpandedHint => 'хураахын тулд хоёр товшино уу';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Хураах';
 
   @override
   String get lookUpButtonLabel => 'Дээшээ харах';
@@ -8979,14 +11493,23 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Marathi (`mr`).
+@Deprecated(
+  'Use CupertinoLocalizationMr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Marathi.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationMr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationMr({
     super.localeName = 'mr',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -9002,7 +11525,16 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'मागे जा';
+
+  @override
+  String get cancelButtonLabel => 'रद्द करा';
+
+  @override
+  String get clearButtonLabel => 'साफ करा';
+
+  @override
+  String get collapsedHint => 'विस्तार केले';
 
   @override
   String get copyButtonLabel => 'कॉपी करा';
@@ -9051,6 +11583,21 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'कोलॅप्स केले';
+
+  @override
+  String get expansionTileCollapsedHint => 'विस्तार करण्‍यासाठी दोनदा टॅप करा';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'आणखी तपशिलांसाठी विस्तार करा';
+
+  @override
+  String get expansionTileExpandedHint => 'कोलॅप्स करण्यासाठी दोनदा टॅप करा';
+
+  @override
+  String get expansionTileExpandedTapHint => 'कोलॅप्स करा';
 
   @override
   String get lookUpButtonLabel => 'शोध घ्या';
@@ -9144,14 +11691,23 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Malay (`ms`).
+@Deprecated(
+  'Use CupertinoLocalizationMs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Malay.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationMs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationMs({
     super.localeName = 'ms',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -9167,7 +11723,16 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'PG';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Kembali';
+
+  @override
+  String get cancelButtonLabel => 'Batal';
+
+  @override
+  String get clearButtonLabel => 'Kosongkan';
+
+  @override
+  String get collapsedHint => 'Dikembangkan';
 
   @override
   String get copyButtonLabel => 'Salin';
@@ -9216,6 +11781,21 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Dikuncupkan';
+
+  @override
+  String get expansionTileCollapsedHint => 'ketik dua kali untuk kembangkan';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Kembangkan untuk mendapatkan butiran lanjut';
+
+  @override
+  String get expansionTileExpandedHint => 'ketik dua kali untuk kuncupkan';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Kuncupkan';
 
   @override
   String get lookUpButtonLabel => 'Lihat ke Atas';
@@ -9309,14 +11889,23 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Burmese (`my`).
+@Deprecated(
+  'Use CupertinoLocalizationMy from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Burmese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationMy from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationMy({
     super.localeName = 'my',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -9332,7 +11921,16 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'နောက်သို့';
+
+  @override
+  String get cancelButtonLabel => 'မလုပ်တော့';
+
+  @override
+  String get clearButtonLabel => 'ဖယ်ရှားရန်';
+
+  @override
+  String get collapsedHint => 'ဖြန့်ထားသည်';
 
   @override
   String get copyButtonLabel => 'မိတ္တူကူးရန်';
@@ -9381,6 +11979,21 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'ခေါက်ထားသည်';
+
+  @override
+  String get expansionTileCollapsedHint => 'ဖြန့်ရန် နှစ်ချက်တို့ပါ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'အသေးစိတ်အတွက် ဖြန့်ရန်';
+
+  @override
+  String get expansionTileExpandedHint => 'ခေါက်ရန် နှစ်ချက်တို့ပါ';
+
+  @override
+  String get expansionTileExpandedTapHint => 'ခေါက်ရန်';
 
   @override
   String get lookUpButtonLabel => 'အပေါ်ကြည့်ရန်';
@@ -9474,14 +12087,23 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Norwegian Bokmål (`nb`).
+@Deprecated(
+  'Use CupertinoLocalizationNb from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Norwegian Bokmål.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationNb from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationNb({
     super.localeName = 'nb',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -9497,7 +12119,16 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Tilbake';
+
+  @override
+  String get cancelButtonLabel => 'Avbryt';
+
+  @override
+  String get clearButtonLabel => 'Slett';
+
+  @override
+  String get collapsedHint => 'Vises';
 
   @override
   String get copyButtonLabel => 'Kopiér';
@@ -9546,6 +12177,21 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Skjules';
+
+  @override
+  String get expansionTileCollapsedHint => 'dobbelttrykk for å vise';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Vis for å se mer informasjon';
+
+  @override
+  String get expansionTileExpandedHint => 'dobbelttrykk for å skjule';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Skjul';
 
   @override
   String get lookUpButtonLabel => 'Slå opp';
@@ -9639,14 +12285,23 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Nepali (`ne`).
+@Deprecated(
+  'Use CupertinoLocalizationNe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Nepali.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationNe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationNe({
     super.localeName = 'ne',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -9659,16 +12314,25 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get alertDialogLabel => 'अलर्ट';
 
   @override
-  String get anteMeridiemAbbreviation => 'पूर्वाह्न';
+  String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'पछाडि';
 
   @override
-  String get copyButtonLabel => 'प्रतिलिपि गर्नुहोस्';
+  String get cancelButtonLabel => 'रद्द गर्नुहोस्';
 
   @override
-  String get cutButtonLabel => 'काट्नुहोस्';
+  String get clearButtonLabel => 'हटाउनुहोस्';
+
+  @override
+  String get collapsedHint => 'एक्स्पान्ड गरियो';
+
+  @override
+  String get copyButtonLabel => 'कपी गर्नुहोस्';
+
+  @override
+  String get cutButtonLabel => 'कट गर्नुहोस्';
 
   @override
   String get datePickerDateOrderString => 'mdy';
@@ -9713,6 +12377,21 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get expandedHint => 'कोल्याप्स गरियो';
+
+  @override
+  String get expansionTileCollapsedHint => 'एक्स्पान्ड गर्न डबल ट्याप गर्नुहोस्';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'थप विवरण हेर्न एक्स्पान्ड गर्नुहोस्';
+
+  @override
+  String get expansionTileExpandedHint => 'कोल्याप्स गर्न डबल ट्याप गर्नुहोस्';
+
+  @override
+  String get expansionTileExpandedTapHint => 'कोल्याप्स गर्नुहोस्';
+
+  @override
   String get lookUpButtonLabel => 'माथितिर हेर्नुहोस्';
 
   @override
@@ -9725,10 +12404,10 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get noSpellCheckReplacementsLabel => 'बदल्नु पर्ने कुनै पनि कुरा भेटिएन';
 
   @override
-  String get pasteButtonLabel => 'टाँस्नुहोस्';
+  String get pasteButtonLabel => 'पेस्ट गर्नुहोस्';
 
   @override
-  String get postMeridiemAbbreviation => 'अपराह्न';
+  String get postMeridiemAbbreviation => 'PM';
 
   @override
   String get searchTextFieldPlaceholderLabel => 'खोज्नुहोस्';
@@ -9804,14 +12483,23 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Dutch Flemish (`nl`).
+@Deprecated(
+  'Use CupertinoLocalizationNl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Dutch Flemish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationNl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationNl({
     super.localeName = 'nl',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -9827,7 +12515,16 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'am';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Terug';
+
+  @override
+  String get cancelButtonLabel => 'Annuleren';
+
+  @override
+  String get clearButtonLabel => 'Wissen';
+
+  @override
+  String get collapsedHint => 'Uitgevouwen';
 
   @override
   String get copyButtonLabel => 'Kopiëren';
@@ -9876,6 +12573,21 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Samengevouwen';
+
+  @override
+  String get expansionTileCollapsedHint => 'dubbeltik om uit te vouwen';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Uitvouwen voor meer informatie';
+
+  @override
+  String get expansionTileExpandedHint => 'dubbeltik om samen te vouwen';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Samenvouwen';
 
   @override
   String get lookUpButtonLabel => 'Opzoeken';
@@ -9969,14 +12681,23 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Norwegian (`no`).
+@Deprecated(
+  'Use CupertinoLocalizationNo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Norwegian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationNo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationNo({
     super.localeName = 'no',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -9992,7 +12713,16 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Tilbake';
+
+  @override
+  String get cancelButtonLabel => 'Avbryt';
+
+  @override
+  String get clearButtonLabel => 'Slett';
+
+  @override
+  String get collapsedHint => 'Vises';
 
   @override
   String get copyButtonLabel => 'Kopiér';
@@ -10041,6 +12771,21 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Skjules';
+
+  @override
+  String get expansionTileCollapsedHint => 'dobbelttrykk for å vise';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Vis for å se mer informasjon';
+
+  @override
+  String get expansionTileExpandedHint => 'dobbelttrykk for å skjule';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Skjul';
 
   @override
   String get lookUpButtonLabel => 'Slå opp';
@@ -10134,14 +12879,23 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Oriya (`or`).
+@Deprecated(
+  'Use CupertinoLocalizationOr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Oriya.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationOr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationOr({
     super.localeName = 'or',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -10157,16 +12911,25 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Back';
+
+  @override
+  String get cancelButtonLabel => 'ବାତିଲ କରନ୍ତୁ';
+
+  @override
+  String get clearButtonLabel => 'ଖାଲି କରନ୍ତୁ';
+
+  @override
+  String get collapsedHint => 'ବିସ୍ତାର କରାଯାଇଛି';
 
   @override
   String get copyButtonLabel => 'କପି କରନ୍ତୁ';
 
   @override
-  String get cutButtonLabel => 'କଟ୍ କରନ୍ତୁ';
+  String get cutButtonLabel => 'କଟ କରନ୍ତୁ';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => 'dmy';
 
   @override
   String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
@@ -10178,10 +12941,10 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String? get datePickerHourSemanticsLabelMany => null;
 
   @override
-  String? get datePickerHourSemanticsLabelOne => r'$hourଟା';
+  String? get datePickerHourSemanticsLabelOne => r'$hourଟା ସମୟରେ';
 
   @override
-  String get datePickerHourSemanticsLabelOther => r'$hourଟା';
+  String get datePickerHourSemanticsLabelOther => r'$hourଟା ସମୟରେ';
 
   @override
   String? get datePickerHourSemanticsLabelTwo => null;
@@ -10196,16 +12959,31 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String? get datePickerMinuteSemanticsLabelOne => '1 ମିନିଟ୍';
+  String? get datePickerMinuteSemanticsLabelOne => '1 ମିନିଟ';
 
   @override
-  String get datePickerMinuteSemanticsLabelOther => r'$minute ମିନିଟ୍';
+  String get datePickerMinuteSemanticsLabelOther => r'$minute ମିନିଟ';
 
   @override
   String? get datePickerMinuteSemanticsLabelTwo => null;
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'ସଙ୍କୁଚିତ କରାଯାଇଛି';
+
+  @override
+  String get expansionTileCollapsedHint => 'ବିସ୍ତାର କରିବା ପାଇଁ ଦୁଇଥର ଟାପ କରନ୍ତୁ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'ଅଧିକ ବିବରଣୀ ପାଇଁ ବିସ୍ତାର କରନ୍ତୁ';
+
+  @override
+  String get expansionTileExpandedHint => 'ସଙ୍କୁଚିତ କରିବା ପାଇଁ ଦୁଇଥର ଟାପ କରନ୍ତୁ';
+
+  @override
+  String get expansionTileExpandedTapHint => 'ସଙ୍କୁଚିତ କରନ୍ତୁ';
 
   @override
   String get lookUpButtonLabel => 'ଉପରକୁ ଦେଖନ୍ତୁ';
@@ -10226,19 +13004,19 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholderLabel => 'ସନ୍ଧାନ କରନ୍ତୁ';
+  String get searchTextFieldPlaceholderLabel => 'ସର୍ଚ୍ଚ କରନ୍ତୁ';
 
   @override
   String get searchWebButtonLabel => 'ୱେବ ସର୍ଚ୍ଚ କରନ୍ତୁ';
 
   @override
-  String get selectAllButtonLabel => 'ସମସ୍ତ ଚୟନ କରନ୍ତୁ';
+  String get selectAllButtonLabel => 'ସବୁ ଚୟନ କରନ୍ତୁ';
 
   @override
-  String get shareButtonLabel => 'ସେୟାର୍ କରନ୍ତୁ...';
+  String get shareButtonLabel => 'ସେୟାର କରନ୍ତୁ...';
 
   @override
-  String get tabSemanticsLabelRaw => r'$tabCountର $tabIndex ଟାବ୍';
+  String get tabSemanticsLabelRaw => r'$tabCountର $tabIndex ଟାବ';
 
   @override
   String? get timerPickerHourLabelFew => null;
@@ -10265,10 +13043,10 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String? get timerPickerMinuteLabelMany => null;
 
   @override
-  String? get timerPickerMinuteLabelOne => 'ମିନିଟ୍';
+  String? get timerPickerMinuteLabelOne => 'ମିନିଟ';
 
   @override
-  String get timerPickerMinuteLabelOther => 'ମିନିଟ୍';
+  String get timerPickerMinuteLabelOther => 'ମିନିଟ';
 
   @override
   String? get timerPickerMinuteLabelTwo => null;
@@ -10299,14 +13077,23 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Panjabi Punjabi (`pa`).
+@Deprecated(
+  'Use CupertinoLocalizationPa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Panjabi Punjabi.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationPa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationPa({
     super.localeName = 'pa',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -10322,7 +13109,16 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'ਪਿੱਛੇ';
+
+  @override
+  String get cancelButtonLabel => 'ਰੱਦ ਕਰੋ';
+
+  @override
+  String get clearButtonLabel => 'ਕਲੀਅਰ ਕਰੋ';
+
+  @override
+  String get collapsedHint => 'ਵਿਸਤਾਰ ਕੀਤਾ ਗਿਆ';
 
   @override
   String get copyButtonLabel => 'ਕਾਪੀ ਕਰੋ';
@@ -10371,6 +13167,21 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'ਸਮੇਟਿਆ ਗਿਆ';
+
+  @override
+  String get expansionTileCollapsedHint => 'ਵਿਸਤਾਰ ਕਰਨ ਲਈ ਡਬਲ ਟੈਪ ਕਰੋ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'ਹੋਰ ਵੇਰਵਿਆਂ ਲਈ ਵਿਸਤਾਰ ਕਰੋ';
+
+  @override
+  String get expansionTileExpandedHint => 'ਸਮੇਟਣ ਲਈ ਡਬਲ ਟੈਪ ਕਰੋ';
+
+  @override
+  String get expansionTileExpandedTapHint => 'ਸਮੇਟੋ';
 
   @override
   String get lookUpButtonLabel => 'ਖੋਜੋ';
@@ -10464,14 +13275,23 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Polish (`pl`).
+@Deprecated(
+  'Use CupertinoLocalizationPl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Polish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationPl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationPl({
     super.localeName = 'pl',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -10487,7 +13307,16 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Wstecz';
+
+  @override
+  String get cancelButtonLabel => 'Anuluj';
+
+  @override
+  String get clearButtonLabel => 'Wyczyść';
+
+  @override
+  String get collapsedHint => 'Rozwinięto';
 
   @override
   String get copyButtonLabel => 'Kopiuj';
@@ -10536,6 +13365,21 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Zwinięto';
+
+  @override
+  String get expansionTileCollapsedHint => 'kliknij dwukrotnie, aby rozwinąć';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Rozwiń, aby wyświetlić więcej informacji';
+
+  @override
+  String get expansionTileExpandedHint => 'kliknij dwukrotnie, aby zwinąć';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Zwiń';
 
   @override
   String get lookUpButtonLabel => 'Sprawdź';
@@ -10629,14 +13473,23 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Portuguese (`pt`).
+@Deprecated(
+  'Use CupertinoLocalizationPt from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Portuguese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationPt from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationPt({
     super.localeName = 'pt',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -10652,7 +13505,16 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Voltar';
+
+  @override
+  String get cancelButtonLabel => 'Cancelar';
+
+  @override
+  String get clearButtonLabel => 'Limpar';
+
+  @override
+  String get collapsedHint => 'Aberto.';
 
   @override
   String get copyButtonLabel => 'Copiar';
@@ -10701,6 +13563,21 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Fechado.';
+
+  @override
+  String get expansionTileCollapsedHint => 'Toque duas vezes para abrir';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Abra para mostrar mais detalhes';
+
+  @override
+  String get expansionTileExpandedHint => 'toque duas vezes para fechar';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Feche';
 
   @override
   String get lookUpButtonLabel => 'Pesquisar';
@@ -10794,14 +13671,23 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Portuguese, as used in Portugal (`pt_PT`).
+@Deprecated(
+  'Use CupertinoLocalizationPtPt from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
   /// Create an instance of the translation bundle for Portuguese, as used in Portugal.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationPtPt from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationPtPt({
     super.localeName = 'pt_PT',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -10809,6 +13695,27 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => 'toque duas vezes para reduzir';
+
+  @override
+  String get collapsedHint => 'Expandido';
+
+  @override
+  String get expandedHint => 'Reduzido';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expandir para obter mais detalhes';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Reduzir';
+
+  @override
+  String get expansionTileCollapsedHint => 'toque duas vezes para expandir';
+
+  @override
+  String get backButtonLabel => 'Anterior';
 
   @override
   String get shareButtonLabel => 'Partilhar…';
@@ -10842,14 +13749,23 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
 }
 
 /// The translations for Romanian Moldavian Moldovan (`ro`).
+@Deprecated(
+  'Use CupertinoLocalizationRo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Romanian Moldavian Moldovan.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationRo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationRo({
     super.localeName = 'ro',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -10865,7 +13781,16 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Înapoi';
+
+  @override
+  String get cancelButtonLabel => 'Anulați';
+
+  @override
+  String get clearButtonLabel => 'Ștergeți';
+
+  @override
+  String get collapsedHint => 'Extins';
 
   @override
   String get copyButtonLabel => 'Copiați';
@@ -10914,6 +13839,21 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Restrâns';
+
+  @override
+  String get expansionTileCollapsedHint => 'atingeți de două ori pentru a extinde';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Extindeți pentru mai multe detalii';
+
+  @override
+  String get expansionTileExpandedHint => 'atingeți de două ori pentru a restrânge';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Restrângeți';
 
   @override
   String get lookUpButtonLabel => 'Privire în sus';
@@ -11007,14 +13947,23 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Russian (`ru`).
+@Deprecated(
+  'Use CupertinoLocalizationRu from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Russian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationRu from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationRu({
     super.localeName = 'ru',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -11030,7 +13979,16 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'АМ';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Назад';
+
+  @override
+  String get cancelButtonLabel => 'Отмена';
+
+  @override
+  String get clearButtonLabel => 'Очистить';
+
+  @override
+  String get collapsedHint => 'Развернуто';
 
   @override
   String get copyButtonLabel => 'Копировать';
@@ -11079,6 +14037,21 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Свернуто';
+
+  @override
+  String get expansionTileCollapsedHint => 'нажмите дважды, чтобы развернуть';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Развернуть дополнительные сведения';
+
+  @override
+  String get expansionTileExpandedHint => 'нажмите дважды, чтобы свернуть';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Свернуть';
 
   @override
   String get lookUpButtonLabel => 'Найти';
@@ -11172,14 +14145,23 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Sinhala Sinhalese (`si`).
+@Deprecated(
+  'Use CupertinoLocalizationSi from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Sinhala Sinhalese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSi from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSi({
     super.localeName = 'si',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -11195,7 +14177,16 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'පෙ.ව.';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Back';
+
+  @override
+  String get cancelButtonLabel => 'අවලංගු කරන්න';
+
+  @override
+  String get clearButtonLabel => 'හිස් කරන්න';
+
+  @override
+  String get collapsedHint => 'දිග හරින ලදි';
 
   @override
   String get copyButtonLabel => 'පිටපත් කරන්න';
@@ -11244,6 +14235,21 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'හකුළන ලදි';
+
+  @override
+  String get expansionTileCollapsedHint => 'විහිදුවීමට දෙවරක් තට්ටු කරන්න';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'වැඩි විස්තර සඳහා පුළුල් කරන්න';
+
+  @override
+  String get expansionTileExpandedHint => 'හැකිළවීමට දෙවරක් තට්ටු කරන්න';
+
+  @override
+  String get expansionTileExpandedTapHint => 'හකුළන්න';
 
   @override
   String get lookUpButtonLabel => 'උඩ බලන්න';
@@ -11337,14 +14343,23 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Slovak (`sk`).
+@Deprecated(
+  'Use CupertinoLocalizationSk from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Slovak.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSk from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSk({
     super.localeName = 'sk',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -11360,7 +14375,16 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Späť';
+
+  @override
+  String get cancelButtonLabel => 'Zrušiť';
+
+  @override
+  String get clearButtonLabel => 'Vymazať';
+
+  @override
+  String get collapsedHint => 'Rozbalené';
 
   @override
   String get copyButtonLabel => 'Kopírovať';
@@ -11409,6 +14433,21 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Zbalené';
+
+  @override
+  String get expansionTileCollapsedHint => 'rozbalíte dvojitým klepnutím';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Rozbaliť a zobraziť ďalšie podrobnosti';
+
+  @override
+  String get expansionTileExpandedHint => 'zbalíte dvojitým klepnutím';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Zbaliť';
 
   @override
   String get lookUpButtonLabel => 'Pohľad nahor';
@@ -11502,14 +14541,23 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Slovenian (`sl`).
+@Deprecated(
+  'Use CupertinoLocalizationSl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Slovenian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSl({
     super.localeName = 'sl',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -11525,7 +14573,16 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'DOP.';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Nazaj';
+
+  @override
+  String get cancelButtonLabel => 'Prekliči';
+
+  @override
+  String get clearButtonLabel => 'Počisti';
+
+  @override
+  String get collapsedHint => 'Razširjeno';
 
   @override
   String get copyButtonLabel => 'Kopiraj';
@@ -11574,6 +14631,21 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Strnjeno';
+
+  @override
+  String get expansionTileCollapsedHint => 'za razširitev se dvakrat dotaknite';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Razširitev za več podrobnosti';
+
+  @override
+  String get expansionTileExpandedHint => 'za strnitev se dvakrat dotaknite';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Strni';
 
   @override
   String get lookUpButtonLabel => 'Pogled gor';
@@ -11667,14 +14739,23 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Albanian (`sq`).
+@Deprecated(
+  'Use CupertinoLocalizationSq from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Albanian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSq from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSq({
     super.localeName = 'sq',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -11690,7 +14771,16 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'paradite';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Prapa';
+
+  @override
+  String get cancelButtonLabel => 'Anulo';
+
+  @override
+  String get clearButtonLabel => 'Pastro';
+
+  @override
+  String get collapsedHint => 'U zgjerua';
 
   @override
   String get copyButtonLabel => 'Kopjo';
@@ -11739,6 +14829,21 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'U palos';
+
+  @override
+  String get expansionTileCollapsedHint => 'trokit dy herë për ta zgjeruar';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Zgjero për më shumë detaje';
+
+  @override
+  String get expansionTileExpandedHint => 'trokit dy herë për ta palosur';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Palos';
 
   @override
   String get lookUpButtonLabel => 'Kërko';
@@ -11832,14 +14937,23 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Serbian (`sr`).
+@Deprecated(
+  'Use CupertinoLocalizationSr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Serbian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSr({
     super.localeName = 'sr',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -11855,7 +14969,16 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'пре подне';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Назад';
+
+  @override
+  String get cancelButtonLabel => 'Откажи';
+
+  @override
+  String get clearButtonLabel => 'Обриши';
+
+  @override
+  String get collapsedHint => 'Проширено је';
 
   @override
   String get copyButtonLabel => 'Копирај';
@@ -11904,6 +15027,21 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Скупљено је';
+
+  @override
+  String get expansionTileCollapsedHint => 'двапут додирните да бисте проширили';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Проширите за још детаља';
+
+  @override
+  String get expansionTileExpandedHint => 'двапут додирните да бисте скупили';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Скупите';
 
   @override
   String get lookUpButtonLabel => 'Поглед нагоре';
@@ -11997,14 +15135,23 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Serbian, using the Cyrillic script (`sr_Cyrl`).
+@Deprecated(
+  'Use CupertinoLocalizationSrCyrl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSrCyrl extends CupertinoLocalizationSr {
   /// Create an instance of the translation bundle for Serbian, using the Cyrillic script.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSrCyrl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSrCyrl({
     super.localeName = 'sr_Cyrl',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -12015,14 +15162,23 @@ class CupertinoLocalizationSrCyrl extends CupertinoLocalizationSr {
 }
 
 /// The translations for Serbian, using the Latin script (`sr_Latn`).
+@Deprecated(
+  'Use CupertinoLocalizationSrLatn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   /// Create an instance of the translation bundle for Serbian, using the Latin script.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSrLatn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSrLatn({
     super.localeName = 'sr_Latn',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -12036,6 +15192,18 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
 
   @override
   String get anteMeridiemAbbreviation => 'pre podne';
+
+  @override
+  String get backButtonLabel => 'Nazad';
+
+  @override
+  String get cancelButtonLabel => 'Otkaži';
+
+  @override
+  String get clearButtonLabel => 'Obriši';
+
+  @override
+  String get collapsedHint => 'Prošireno je';
 
   @override
   String get copyButtonLabel => 'Kopiraj';
@@ -12060,6 +15228,21 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuta';
+
+  @override
+  String get expandedHint => 'Skupljeno je';
+
+  @override
+  String get expansionTileCollapsedHint => 'dvaput dodirnite da biste proširili';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Proširite za još detalja';
+
+  @override
+  String get expansionTileExpandedHint => 'dvaput dodirnite da biste skupili';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Skupite';
 
   @override
   String get lookUpButtonLabel => 'Pogled nagore';
@@ -12126,14 +15309,23 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
 }
 
 /// The translations for Swedish (`sv`).
+@Deprecated(
+  'Use CupertinoLocalizationSv from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Swedish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSv from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSv({
     super.localeName = 'sv',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -12149,7 +15341,16 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'FM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Tillbaka';
+
+  @override
+  String get cancelButtonLabel => 'Avbryt';
+
+  @override
+  String get clearButtonLabel => 'Rensa';
+
+  @override
+  String get collapsedHint => 'Utökades';
 
   @override
   String get copyButtonLabel => 'Kopiera';
@@ -12198,6 +15399,21 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Komprimerades';
+
+  @override
+  String get expansionTileCollapsedHint => 'dubbeltryck för att utöka';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Utöka för mer information';
+
+  @override
+  String get expansionTileExpandedHint => 'dubbeltryck för att komprimera';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Komprimera';
 
   @override
   String get lookUpButtonLabel => 'Titta upp';
@@ -12291,14 +15507,23 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Swahili (`sw`).
+@Deprecated(
+  'Use CupertinoLocalizationSw from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Swahili.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSw from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSw({
     super.localeName = 'sw',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -12314,7 +15539,16 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Nyuma';
+
+  @override
+  String get cancelButtonLabel => 'Ghairi';
+
+  @override
+  String get clearButtonLabel => 'Futa';
+
+  @override
+  String get collapsedHint => 'Imepanuliwa';
 
   @override
   String get copyButtonLabel => 'Nakili';
@@ -12363,6 +15597,21 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Imekunjwa';
+
+  @override
+  String get expansionTileCollapsedHint => 'gusa mara mbili ili upanue';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Panua ili upate maelezo zaidi';
+
+  @override
+  String get expansionTileExpandedHint => 'gusa mara mbili ili ukunje';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Kunja';
 
   @override
   String get lookUpButtonLabel => 'Tafuta';
@@ -12456,14 +15705,23 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Tamil (`ta`).
+@Deprecated(
+  'Use CupertinoLocalizationTa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Tamil.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationTa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationTa({
     super.localeName = 'ta',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -12479,7 +15737,16 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'பின்செல்';
+
+  @override
+  String get cancelButtonLabel => 'ரத்துசெய்';
+
+  @override
+  String get clearButtonLabel => 'அழி';
+
+  @override
+  String get collapsedHint => 'விரிவாக்கப்பட்டது';
 
   @override
   String get copyButtonLabel => 'நகலெடு';
@@ -12528,6 +15795,21 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'சுருக்கப்பட்டது';
+
+  @override
+  String get expansionTileCollapsedHint => 'விரிவாக்க இருமுறை தட்டுங்கள்';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'கூடுதல் விவரங்களுக்கு விரிவாக்கலாம்';
+
+  @override
+  String get expansionTileExpandedHint => 'சுருக்க இருமுறை தட்டவும்';
+
+  @override
+  String get expansionTileExpandedTapHint => 'சுருக்கும்';
 
   @override
   String get lookUpButtonLabel => 'தேடு';
@@ -12621,14 +15903,23 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Telugu (`te`).
+@Deprecated(
+  'Use CupertinoLocalizationTe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Telugu.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationTe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationTe({
     super.localeName = 'te',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -12644,7 +15935,16 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Back';
+
+  @override
+  String get cancelButtonLabel => 'రద్దు చేయండి';
+
+  @override
+  String get clearButtonLabel => 'క్లియర్ చేయండి';
+
+  @override
+  String get collapsedHint => 'విస్తరించబడింది';
 
   @override
   String get copyButtonLabel => 'కాపీ చేయి';
@@ -12695,6 +15995,21 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get expandedHint => 'కుదించబడింది';
+
+  @override
+  String get expansionTileCollapsedHint => 'విస్తరించడానికి డబుల్ ట్యాప్ చేయండి';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'మరిన్ని వివరాల కోసం విస్తరించండి';
+
+  @override
+  String get expansionTileExpandedHint => 'కుదించడానికి డబుల్ ట్యాప్ చేయండి';
+
+  @override
+  String get expansionTileExpandedTapHint => 'కుదించండి';
+
+  @override
   String get lookUpButtonLabel => 'వెతకండి';
 
   @override
@@ -12713,7 +16028,7 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholderLabel => 'సెర్చ్ చేయి';
+  String get searchTextFieldPlaceholderLabel => 'సెర్చ్';
 
   @override
   String get searchWebButtonLabel => 'వెబ్‌లో సెర్చ్ చేయండి';
@@ -12786,14 +16101,23 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Thai (`th`).
+@Deprecated(
+  'Use CupertinoLocalizationTh from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Thai.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationTh from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationTh({
     super.localeName = 'th',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -12809,7 +16133,16 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'กลับ';
+
+  @override
+  String get cancelButtonLabel => 'ยกเลิก';
+
+  @override
+  String get clearButtonLabel => 'ล้าง';
+
+  @override
+  String get collapsedHint => 'ขยาย';
 
   @override
   String get copyButtonLabel => 'คัดลอก';
@@ -12858,6 +16191,21 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'ยุบ';
+
+  @override
+  String get expansionTileCollapsedHint => 'แตะสองครั้งเพื่อขยาย';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'ขยายเพื่อดูรายละเอียดเพิ่มเติม';
+
+  @override
+  String get expansionTileExpandedHint => 'แตะสองครั้งเพื่อยุบ';
+
+  @override
+  String get expansionTileExpandedTapHint => 'ยุบ';
 
   @override
   String get lookUpButtonLabel => 'ค้นหา';
@@ -12951,14 +16299,23 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Tagalog (`tl`).
+@Deprecated(
+  'Use CupertinoLocalizationTl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Tagalog.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationTl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationTl({
     super.localeName = 'tl',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -12974,7 +16331,16 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Bumalik';
+
+  @override
+  String get cancelButtonLabel => 'Kanselahin';
+
+  @override
+  String get clearButtonLabel => 'I-clear';
+
+  @override
+  String get collapsedHint => 'Naka-expand';
 
   @override
   String get copyButtonLabel => 'Kopyahin';
@@ -13023,6 +16389,21 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Naka-collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'i-double tap para i-expand';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'I-expand para sa higit pang detalye';
+
+  @override
+  String get expansionTileExpandedHint => 'i-double tap para i-collapse';
+
+  @override
+  String get expansionTileExpandedTapHint => 'I-collapse';
 
   @override
   String get lookUpButtonLabel => 'Tumingin sa Itaas';
@@ -13116,14 +16497,23 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Turkish (`tr`).
+@Deprecated(
+  'Use CupertinoLocalizationTr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Turkish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationTr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationTr({
     super.localeName = 'tr',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -13139,7 +16529,16 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ÖÖ';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Geri';
+
+  @override
+  String get cancelButtonLabel => 'İptal';
+
+  @override
+  String get clearButtonLabel => 'Temizle';
+
+  @override
+  String get collapsedHint => 'Genişletildi';
 
   @override
   String get copyButtonLabel => 'Kopyala';
@@ -13188,6 +16587,21 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Daraltıldı';
+
+  @override
+  String get expansionTileCollapsedHint => 'genişletmek için iki kez dokunun';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Daha fazla ayrıntı için genişletin';
+
+  @override
+  String get expansionTileExpandedHint => 'daraltmak için iki kez dokunun';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Daralt';
 
   @override
   String get lookUpButtonLabel => 'Ara';
@@ -13280,15 +16694,222 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get todayLabel => 'Bugün';
 }
 
+/// The translations for Uighur Uyghur (`ug`).
+@Deprecated(
+  'Use CupertinoLocalizationUg from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
+class CupertinoLocalizationUg extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Uighur Uyghur.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationUg from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
+  const CupertinoLocalizationUg({
+    super.localeName = 'ug',
+    required super.fullYearFormat,
+    required super.dayFormat,
+    required super.weekdayFormat,
+    required super.mediumDateFormat,
+    required super.singleDigitHourFormat,
+    required super.singleDigitMinuteFormat,
+    required super.doubleDigitMinuteFormat,
+    required super.singleDigitSecondFormat,
+    required super.decimalFormat,
+  });
+
+  @override
+  String get alertDialogLabel => 'ئاگاھلاندۇرۇش';
+
+  @override
+  String get anteMeridiemAbbreviation => 'چۈشتىن بۇرۇن';
+
+  @override
+  String get backButtonLabel => 'قايتىش';
+
+  @override
+  String get cancelButtonLabel => 'بىكار قىلىش';
+
+  @override
+  String get clearButtonLabel => 'تازىلاش';
+
+  @override
+  String get collapsedHint => 'يېيىلدى';
+
+  @override
+  String get copyButtonLabel => 'كۆچۈرۈش';
+
+  @override
+  String get cutButtonLabel => 'كېسىش';
+
+  @override
+  String get datePickerDateOrderString => 'ymd';
+
+  @override
+  String get datePickerDateTimeOrderString => 'date_dayPeriod_time';
+
+  @override
+  String? get datePickerHourSemanticsLabelFew => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelMany => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelOne => r'سائەت $hour';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'سائەت $hour';
+
+  @override
+  String? get datePickerHourSemanticsLabelTwo => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelZero => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelFew => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelMany => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelOne => '1 مىنۇت';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute مىنۇت';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelTwo => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'يىغىلدى';
+
+  @override
+  String get expansionTileCollapsedHint => 'يېيىش ئۈچۈن قوش چېكىڭ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'تېخىمۇ كۆپ تەپسىلاتلار ئۈچۈن يېيىڭ';
+
+  @override
+  String get expansionTileExpandedHint => 'يىغىش ئۈچۈن قوش چېكىڭ';
+
+  @override
+  String get expansionTileExpandedTapHint => 'يىغىش';
+
+  @override
+  String get lookUpButtonLabel => 'ئىزدەش';
+
+  @override
+  String get menuDismissLabel => 'تىزىملىكنى بىكار قىلىش';
+
+  @override
+  String get modalBarrierDismissLabel => 'بىكار قىلىش';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'ئالماشتۇرىدىغان مەزمۇن تېپىلمىدى';
+
+  @override
+  String get pasteButtonLabel => 'چاپلاش';
+
+  @override
+  String get postMeridiemAbbreviation => 'چۈشتىن كېيىن';
+
+  @override
+  String get searchTextFieldPlaceholderLabel => 'ئىزدەش';
+
+  @override
+  String get searchWebButtonLabel => 'توردا ئىزدەش';
+
+  @override
+  String get selectAllButtonLabel => 'ھەممىنى تاللاش';
+
+  @override
+  String get shareButtonLabel => 'ھەمبەھرلەش...';
+
+  @override
+  String get tabSemanticsLabelRaw => r'بەتكۈچ $tabIndex جەمئىي $tabCount';
+
+  @override
+  String? get timerPickerHourLabelFew => null;
+
+  @override
+  String? get timerPickerHourLabelMany => null;
+
+  @override
+  String? get timerPickerHourLabelOne => 'سائەت';
+
+  @override
+  String get timerPickerHourLabelOther => 'سائەت';
+
+  @override
+  String? get timerPickerHourLabelTwo => null;
+
+  @override
+  String? get timerPickerHourLabelZero => null;
+
+  @override
+  String? get timerPickerMinuteLabelFew => null;
+
+  @override
+  String? get timerPickerMinuteLabelMany => null;
+
+  @override
+  String? get timerPickerMinuteLabelOne => 'مىنۇت';
+
+  @override
+  String get timerPickerMinuteLabelOther => 'مىنۇت';
+
+  @override
+  String? get timerPickerMinuteLabelTwo => null;
+
+  @override
+  String? get timerPickerMinuteLabelZero => null;
+
+  @override
+  String? get timerPickerSecondLabelFew => null;
+
+  @override
+  String? get timerPickerSecondLabelMany => null;
+
+  @override
+  String? get timerPickerSecondLabelOne => 'سېكۇنت';
+
+  @override
+  String get timerPickerSecondLabelOther => 'سېكۇنت';
+
+  @override
+  String? get timerPickerSecondLabelTwo => null;
+
+  @override
+  String? get timerPickerSecondLabelZero => null;
+
+  @override
+  String get todayLabel => 'بۈگۈن';
+}
+
 /// The translations for Ukrainian (`uk`).
+@Deprecated(
+  'Use CupertinoLocalizationUk from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Ukrainian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationUk from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationUk({
     super.localeName = 'uk',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -13304,7 +16925,16 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'дп';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Назад';
+
+  @override
+  String get cancelButtonLabel => 'Скасувати';
+
+  @override
+  String get clearButtonLabel => 'Очистити';
+
+  @override
+  String get collapsedHint => 'Розгорнуто';
 
   @override
   String get copyButtonLabel => 'Копіювати';
@@ -13353,6 +16983,21 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Згорнуто';
+
+  @override
+  String get expansionTileCollapsedHint => 'двічі торкніться, щоб розгорнути';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Розгорнути й дізнатися більше';
+
+  @override
+  String get expansionTileExpandedHint => 'двічі торкніться, щоб згорнути';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Згорнути';
 
   @override
   String get lookUpButtonLabel => 'Шукати';
@@ -13446,14 +17091,23 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Urdu (`ur`).
+@Deprecated(
+  'Use CupertinoLocalizationUr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Urdu.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationUr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationUr({
     super.localeName = 'ur',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -13469,7 +17123,16 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Back';
+
+  @override
+  String get cancelButtonLabel => 'منسوخ کریں';
+
+  @override
+  String get clearButtonLabel => 'صاف کریں';
+
+  @override
+  String get collapsedHint => 'پھیلا ہوا';
 
   @override
   String get copyButtonLabel => 'کاپی کریں';
@@ -13518,6 +17181,21 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'سکڑا ہوا';
+
+  @override
+  String get expansionTileCollapsedHint => 'پھیلانے کے لیے دوبار تھپتھپائیں';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'مزید تفصیلات کے لیے پھیلائیں';
+
+  @override
+  String get expansionTileExpandedHint => 'سکیڑنے کے لیے دوبار تھپتھپائیں';
+
+  @override
+  String get expansionTileExpandedTapHint => 'سکیڑیں';
 
   @override
   String get lookUpButtonLabel => 'تفصیل دیکھیں';
@@ -13611,14 +17289,23 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Uzbek (`uz`).
+@Deprecated(
+  'Use CupertinoLocalizationUz from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Uzbek.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationUz from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationUz({
     super.localeName = 'uz',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -13634,7 +17321,16 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Orqaga';
+
+  @override
+  String get cancelButtonLabel => 'Bekor qilish';
+
+  @override
+  String get clearButtonLabel => 'Tozalash';
+
+  @override
+  String get collapsedHint => 'Yoyilgan';
 
   @override
   String get copyButtonLabel => 'Nusxa olish';
@@ -13683,6 +17379,21 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Yigʻilgan';
+
+  @override
+  String get expansionTileCollapsedHint => 'yoyish uchun ikki marta bosing';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Batafsil koʻrish uchun yoying';
+
+  @override
+  String get expansionTileExpandedHint => 'yigʻish uchun ikki marta bosing';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Yigʻish';
 
   @override
   String get lookUpButtonLabel => 'Tepaga qarang';
@@ -13776,14 +17487,23 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Vietnamese (`vi`).
+@Deprecated(
+  'Use CupertinoLocalizationVi from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Vietnamese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationVi from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationVi({
     super.localeName = 'vi',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -13799,7 +17519,16 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'SÁNG';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Quay lại';
+
+  @override
+  String get cancelButtonLabel => 'Huỷ';
+
+  @override
+  String get clearButtonLabel => 'Xoá';
+
+  @override
+  String get collapsedHint => 'Đã mở rộng';
 
   @override
   String get copyButtonLabel => 'Sao chép';
@@ -13848,6 +17577,21 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Đã thu gọn';
+
+  @override
+  String get expansionTileCollapsedHint => 'nhấn đúp để mở rộng';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Mở rộng để xem thêm chi tiết';
+
+  @override
+  String get expansionTileExpandedHint => 'nhấn đúp để thu gọn';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Thu gọn';
 
   @override
   String get lookUpButtonLabel => 'Tra cứu';
@@ -13941,14 +17685,23 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Chinese (`zh`).
+@Deprecated(
+  'Use CupertinoLocalizationZh from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Chinese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationZh from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationZh({
     super.localeName = 'zh',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -13964,7 +17717,16 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => '上午';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => '返回';
+
+  @override
+  String get cancelButtonLabel => '取消';
+
+  @override
+  String get clearButtonLabel => '清除';
+
+  @override
+  String get collapsedHint => '已展开';
 
   @override
   String get copyButtonLabel => '复制';
@@ -14013,6 +17775,21 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => '已收起';
+
+  @override
+  String get expansionTileCollapsedHint => '点按两次即可展开';
+
+  @override
+  String get expansionTileCollapsedTapHint => '展开查看更多详情';
+
+  @override
+  String get expansionTileExpandedHint => '点按两次即可收起';
+
+  @override
+  String get expansionTileExpandedTapHint => '收起';
 
   @override
   String get lookUpButtonLabel => '查询';
@@ -14106,14 +17883,23 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
+@Deprecated(
+  'Use CupertinoLocalizationZhHans from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationZhHans extends CupertinoLocalizationZh {
   /// Create an instance of the translation bundle for Chinese, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationZhHans from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationZhHans({
     super.localeName = 'zh_Hans',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -14124,14 +17910,23 @@ class CupertinoLocalizationZhHans extends CupertinoLocalizationZh {
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
+@Deprecated(
+  'Use CupertinoLocalizationZhHant from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   /// Create an instance of the translation bundle for Chinese, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationZhHant from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationZhHant({
     super.localeName = 'zh_Hant',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -14142,6 +17937,9 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
 
   @override
   String get alertDialogLabel => '通知';
+
+  @override
+  String get collapsedHint => '已展開';
 
   @override
   String get copyButtonLabel => '複製';
@@ -14163,6 +17961,21 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute 分鐘';
+
+  @override
+  String get expandedHint => '已收合';
+
+  @override
+  String get expansionTileCollapsedHint => '㩒兩下就可以展開';
+
+  @override
+  String get expansionTileCollapsedTapHint => '展開就可以查看詳情';
+
+  @override
+  String get expansionTileExpandedHint => '㩒兩下就可以收合';
+
+  @override
+  String get expansionTileExpandedTapHint => '收合';
 
   @override
   String get lookUpButtonLabel => '查詢';
@@ -14208,14 +18021,23 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
+@Deprecated(
+  'Use CupertinoLocalizationZhHantHk from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationZhHantHk extends CupertinoLocalizationZhHant {
   /// Create an instance of the translation bundle for Chinese, as used in Hong Kong, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationZhHantHk from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationZhHantHk({
     super.localeName = 'zh_Hant_HK',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -14226,14 +18048,23 @@ class CupertinoLocalizationZhHantHk extends CupertinoLocalizationZhHant {
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
+@Deprecated(
+  'Use CupertinoLocalizationZhHantTw from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
   /// Create an instance of the translation bundle for Chinese, as used in Taiwan, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationZhHantTw from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationZhHantTw({
     super.localeName = 'zh_Hant_TW',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -14241,6 +18072,15 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get expansionTileExpandedHint => '輕觸兩下即可收合';
+
+  @override
+  String get expansionTileCollapsedTapHint => '展開更多詳細資料';
+
+  @override
+  String get expansionTileCollapsedHint => '輕觸兩下即可展開';
 
   @override
   String get noSpellCheckReplacementsLabel => '找不到替代文字';
@@ -14261,7 +18101,7 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
   String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
 
   @override
-  String get alertDialogLabel => '快訊';
+  String get alertDialogLabel => '警告';
 
   @override
   String? get timerPickerMinuteLabelOne => '分';
@@ -14274,14 +18114,23 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
 }
 
 /// The translations for Zulu (`zu`).
+@Deprecated(
+  'Use CupertinoLocalizationZu from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Zulu.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationZu from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationZu({
     super.localeName = 'zu',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -14297,7 +18146,16 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get clearButtonLabel => 'Clear';
+  String get backButtonLabel => 'Emuva';
+
+  @override
+  String get cancelButtonLabel => 'Khansela';
+
+  @override
+  String get clearButtonLabel => 'Sula';
+
+  @override
+  String get collapsedHint => 'Kunwetshiwe';
 
   @override
   String get copyButtonLabel => 'Kopisha';
@@ -14346,6 +18204,21 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get expandedHint => 'Kugoqiwe';
+
+  @override
+  String get expansionTileCollapsedHint => 'Thepha kabili ukuze unwebe';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Nweba ukuze uthole imininingwane eyengeziwe';
+
+  @override
+  String get expansionTileExpandedHint => 'thepha kabili ukuze ugoqe';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Goqa';
 
   @override
   String get lookUpButtonLabel => 'Bheka Phezulu';
@@ -14449,6 +18322,10 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
 /// See also:
 ///
 ///  * [getCupertinoTranslation], whose documentation describes these values.
+@Deprecated(
+  'Use kCupertinoSupportedLanguages from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <String>[
   'af', // Afrikaans
   'am', // Amharic
@@ -14458,6 +18335,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'be', // Belarusian
   'bg', // Bulgarian
   'bn', // Bengali Bangla
+  'bo', // Tibetan
   'bs', // Bosnian
   'ca', // Catalan Valencian
   'cs', // Czech
@@ -14473,6 +18351,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'fi', // Finnish
   'fil', // Filipino Pilipino
   'fr', // French
+  'ga', // Irish
   'gl', // Galician
   'gsw', // Swiss German Alemannic Alsatian
   'gu', // Gujarati
@@ -14522,6 +18401,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'th', // Thai
   'tl', // Tagalog
   'tr', // Turkish
+  'ug', // Uighur Uyghur
   'uk', // Ukrainian
   'ur', // Urdu
   'uz', // Uzbek
@@ -14548,6 +18428,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `be` - Belarusian
 ///  * `bg` - Bulgarian
 ///  * `bn` - Bengali Bangla
+///  * `bo` - Tibetan
 ///  * `bs` - Bosnian
 ///  * `ca` - Catalan Valencian
 ///  * `cs` - Czech
@@ -14563,6 +18444,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `fi` - Finnish
 ///  * `fil` - Filipino Pilipino
 ///  * `fr` - French (plus one country variation)
+///  * `ga` - Irish
 ///  * `gl` - Galician
 ///  * `gsw` - Swiss German Alemannic Alsatian
 ///  * `gu` - Gujarati
@@ -14612,6 +18494,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
 ///  * `tr` - Turkish
+///  * `ug` - Uighur Uyghur
 ///  * `uk` - Ukrainian
 ///  * `ur` - Urdu
 ///  * `uz` - Uzbek
@@ -14622,10 +18505,15 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///
 /// Generally speaking, this method is only intended to be used by
 /// [GlobalCupertinoLocalizations.delegate].
+@Deprecated(
+  'Use getCupertinoTranslation from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 GlobalCupertinoLocalizations? getCupertinoTranslation(
   Locale locale,
   intl.DateFormat fullYearFormat,
   intl.DateFormat dayFormat,
+  intl.DateFormat weekdayFormat,
   intl.DateFormat mediumDateFormat,
   intl.DateFormat singleDigitHourFormat,
   intl.DateFormat singleDigitMinuteFormat,
@@ -14635,268 +18523,274 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
 ) {
   switch (locale.languageCode) {
     case 'af':
-      return CupertinoLocalizationAf(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationAf(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'am':
-      return CupertinoLocalizationAm(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationAm(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ar':
-      return CupertinoLocalizationAr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationAr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'as':
-      return CupertinoLocalizationAs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationAs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'az':
-      return CupertinoLocalizationAz(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationAz(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'be':
-      return CupertinoLocalizationBe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationBe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'bg':
-      return CupertinoLocalizationBg(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationBg(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'bn':
-      return CupertinoLocalizationBn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationBn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'bo':
+      return CupertinoLocalizationBo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'bs':
-      return CupertinoLocalizationBs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationBs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ca':
-      return CupertinoLocalizationCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'cs':
-      return CupertinoLocalizationCs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationCs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'cy':
-      return CupertinoLocalizationCy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationCy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'da':
-      return CupertinoLocalizationDa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationDa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'de': {
       switch (locale.countryCode) {
         case 'CH':
-          return CupertinoLocalizationDeCh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationDeCh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
       }
-      return CupertinoLocalizationDe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationDe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     }
     case 'el':
-      return CupertinoLocalizationEl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationEl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'en': {
       switch (locale.countryCode) {
         case 'AU':
-          return CupertinoLocalizationEnAu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEnAu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'CA':
-          return CupertinoLocalizationEnCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEnCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'GB':
-          return CupertinoLocalizationEnGb(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEnGb(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'IE':
-          return CupertinoLocalizationEnIe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEnIe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'IN':
-          return CupertinoLocalizationEnIn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEnIn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'NZ':
-          return CupertinoLocalizationEnNz(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEnNz(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'SG':
-          return CupertinoLocalizationEnSg(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEnSg(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'ZA':
-          return CupertinoLocalizationEnZa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEnZa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
       }
-      return CupertinoLocalizationEn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationEn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     }
     case 'es': {
       switch (locale.countryCode) {
         case '419':
-          return CupertinoLocalizationEs419(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEs419(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'AR':
-          return CupertinoLocalizationEsAr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsAr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'BO':
-          return CupertinoLocalizationEsBo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsBo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'CL':
-          return CupertinoLocalizationEsCl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsCl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'CO':
-          return CupertinoLocalizationEsCo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsCo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'CR':
-          return CupertinoLocalizationEsCr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsCr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'DO':
-          return CupertinoLocalizationEsDo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsDo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'EC':
-          return CupertinoLocalizationEsEc(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsEc(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'GT':
-          return CupertinoLocalizationEsGt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsGt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'HN':
-          return CupertinoLocalizationEsHn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsHn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'MX':
-          return CupertinoLocalizationEsMx(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsMx(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'NI':
-          return CupertinoLocalizationEsNi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsNi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'PA':
-          return CupertinoLocalizationEsPa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsPa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'PE':
-          return CupertinoLocalizationEsPe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsPe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'PR':
-          return CupertinoLocalizationEsPr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsPr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'PY':
-          return CupertinoLocalizationEsPy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsPy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'SV':
-          return CupertinoLocalizationEsSv(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsSv(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'US':
-          return CupertinoLocalizationEsUs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsUs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'UY':
-          return CupertinoLocalizationEsUy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsUy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'VE':
-          return CupertinoLocalizationEsVe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationEsVe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
       }
-      return CupertinoLocalizationEs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationEs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     }
     case 'et':
-      return CupertinoLocalizationEt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationEt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'eu':
-      return CupertinoLocalizationEu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationEu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'fa':
-      return CupertinoLocalizationFa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationFa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'fi':
-      return CupertinoLocalizationFi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationFi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'fil':
-      return CupertinoLocalizationFil(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationFil(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'fr': {
       switch (locale.countryCode) {
         case 'CA':
-          return CupertinoLocalizationFrCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationFrCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
       }
-      return CupertinoLocalizationFr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationFr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     }
+    case 'ga':
+      return CupertinoLocalizationGa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'gl':
-      return CupertinoLocalizationGl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationGl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'gsw':
-      return CupertinoLocalizationGsw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationGsw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'gu':
-      return CupertinoLocalizationGu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationGu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'he':
-      return CupertinoLocalizationHe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationHe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'hi':
-      return CupertinoLocalizationHi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationHi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'hr':
-      return CupertinoLocalizationHr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationHr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'hu':
-      return CupertinoLocalizationHu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationHu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'hy':
-      return CupertinoLocalizationHy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationHy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'id':
-      return CupertinoLocalizationId(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationId(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'is':
-      return CupertinoLocalizationIs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationIs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'it':
-      return CupertinoLocalizationIt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationIt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ja':
-      return CupertinoLocalizationJa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationJa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ka':
-      return CupertinoLocalizationKa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationKa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'kk':
-      return CupertinoLocalizationKk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationKk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'km':
-      return CupertinoLocalizationKm(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationKm(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'kn':
-      return CupertinoLocalizationKn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationKn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ko':
-      return CupertinoLocalizationKo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationKo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ky':
-      return CupertinoLocalizationKy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationKy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'lo':
-      return CupertinoLocalizationLo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationLo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'lt':
-      return CupertinoLocalizationLt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationLt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'lv':
-      return CupertinoLocalizationLv(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationLv(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'mk':
-      return CupertinoLocalizationMk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationMk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ml':
-      return CupertinoLocalizationMl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationMl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'mn':
-      return CupertinoLocalizationMn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationMn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'mr':
-      return CupertinoLocalizationMr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationMr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ms':
-      return CupertinoLocalizationMs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationMs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'my':
-      return CupertinoLocalizationMy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationMy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'nb':
-      return CupertinoLocalizationNb(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationNb(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ne':
-      return CupertinoLocalizationNe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationNe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'nl':
-      return CupertinoLocalizationNl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationNl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'no':
-      return CupertinoLocalizationNo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationNo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'or':
-      return CupertinoLocalizationOr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationOr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'pa':
-      return CupertinoLocalizationPa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationPa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'pl':
-      return CupertinoLocalizationPl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationPl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'pt': {
       switch (locale.countryCode) {
         case 'PT':
-          return CupertinoLocalizationPtPt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationPtPt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
       }
-      return CupertinoLocalizationPt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationPt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     }
     case 'ro':
-      return CupertinoLocalizationRo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationRo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ru':
-      return CupertinoLocalizationRu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationRu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'si':
-      return CupertinoLocalizationSi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sk':
-      return CupertinoLocalizationSk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sl':
-      return CupertinoLocalizationSl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sq':
-      return CupertinoLocalizationSq(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSq(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sr': {
       switch (locale.scriptCode) {
         case 'Cyrl': {
-          return CupertinoLocalizationSrCyrl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationSrCyrl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         }
         case 'Latn': {
-          return CupertinoLocalizationSrLatn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationSrLatn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         }
       }
-      return CupertinoLocalizationSr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     }
     case 'sv':
-      return CupertinoLocalizationSv(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSv(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sw':
-      return CupertinoLocalizationSw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationSw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ta':
-      return CupertinoLocalizationTa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationTa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'te':
-      return CupertinoLocalizationTe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationTe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'th':
-      return CupertinoLocalizationTh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationTh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'tl':
-      return CupertinoLocalizationTl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationTl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'tr':
-      return CupertinoLocalizationTr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationTr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'ug':
+      return CupertinoLocalizationUg(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'uk':
-      return CupertinoLocalizationUk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationUk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ur':
-      return CupertinoLocalizationUr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationUr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'uz':
-      return CupertinoLocalizationUz(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationUz(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'vi':
-      return CupertinoLocalizationVi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationVi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'zh': {
       switch (locale.scriptCode) {
         case 'Hans': {
-          return CupertinoLocalizationZhHans(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationZhHans(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         }
         case 'Hant': {
           switch (locale.countryCode) {
             case 'HK':
-              return CupertinoLocalizationZhHantHk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+              return CupertinoLocalizationZhHantHk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
             case 'TW':
-              return CupertinoLocalizationZhHantTw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+              return CupertinoLocalizationZhHantTw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
           }
-          return CupertinoLocalizationZhHant(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationZhHant(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         }
       }
       switch (locale.countryCode) {
         case 'HK':
-          return CupertinoLocalizationZhHantHk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationZhHantHk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         case 'TW':
-          return CupertinoLocalizationZhHantTw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          return CupertinoLocalizationZhHantTw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
       }
-      return CupertinoLocalizationZh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationZh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     }
     case 'zu':
-      return CupertinoLocalizationZu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      return CupertinoLocalizationZu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
   }
   assert(false, 'getCupertinoTranslation() called for unsupported locale "$locale"');
   return null;

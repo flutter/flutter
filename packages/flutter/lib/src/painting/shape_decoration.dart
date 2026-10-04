@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -69,13 +72,8 @@ class ShapeDecoration extends Decoration {
   ///
   /// The [color] and [gradient] properties are mutually exclusive, one (or
   /// both) of them must be null.
-  const ShapeDecoration({
-    this.color,
-    this.image,
-    this.gradient,
-    this.shadows,
-    required this.shape,
-  }) : assert(!(color != null && gradient != null));
+  const ShapeDecoration({this.color, this.image, this.gradient, this.shadows, required this.shape})
+    : assert(!(color != null && gradient != null));
 
   /// Creates a shape decoration configured to match a [BoxDecoration].
   ///
@@ -184,22 +182,20 @@ class ShapeDecoration extends Decoration {
 
   @override
   ShapeDecoration? lerpFrom(Decoration? a, double t) {
-    if (a is BoxDecoration) {
-      return ShapeDecoration.lerp(ShapeDecoration.fromBoxDecoration(a), this, t);
-    } else if (a == null || a is ShapeDecoration) {
-      return ShapeDecoration.lerp(a as ShapeDecoration?, this, t);
-    }
-    return super.lerpFrom(a, t) as ShapeDecoration?;
+    return switch (a) {
+      BoxDecoration() => ShapeDecoration.lerp(ShapeDecoration.fromBoxDecoration(a), this, t),
+      ShapeDecoration? _ => ShapeDecoration.lerp(a, this, t),
+      _ => super.lerpFrom(a, t) as ShapeDecoration?,
+    };
   }
 
   @override
   ShapeDecoration? lerpTo(Decoration? b, double t) {
-    if (b is BoxDecoration) {
-      return ShapeDecoration.lerp(this, ShapeDecoration.fromBoxDecoration(b), t);
-    } else if (b == null || b is ShapeDecoration) {
-      return ShapeDecoration.lerp(this, b as ShapeDecoration?, t);
-    }
-    return super.lerpTo(b, t) as ShapeDecoration?;
+    return switch (b) {
+      BoxDecoration() => ShapeDecoration.lerp(this, ShapeDecoration.fromBoxDecoration(b), t),
+      ShapeDecoration? _ => ShapeDecoration.lerp(this, b, t),
+      _ => super.lerpTo(b, t) as ShapeDecoration?,
+    };
   }
 
   /// Linearly interpolate between two shapes.
@@ -232,9 +228,26 @@ class ShapeDecoration extends Decoration {
         return b;
       }
     }
+    // A ShapeDecoration's color and gradient are mutually exclusive (see the
+    // assert in the constructor). When interpolating between a decoration that
+    // uses a color and one that uses a gradient, represent the color as a
+    // uniform-color gradient (built from the other side's gradient) so the two
+    // can be interpolated smoothly as gradients, rather than producing both a
+    // color and a gradient at the same time.
+    // See https://github.com/flutter/flutter/issues/93953
+    Gradient? aGradient = a?.gradient;
+    Gradient? bGradient = b?.gradient;
+    if (aGradient == null && bGradient != null && a?.color != null) {
+      aGradient = bGradient.fromColor(a!.color!);
+    } else if (bGradient == null && aGradient != null && b?.color != null) {
+      bGradient = aGradient.fromColor(b!.color!);
+    }
+    final Gradient? gradient = Gradient.lerp(aGradient, bGradient, t);
     return ShapeDecoration(
-      color: Color.lerp(a?.color, b?.color, t),
-      gradient: Gradient.lerp(a?.gradient, b?.gradient, t),
+      // color and gradient are mutually exclusive, so only fall back to a color
+      // when the interpolation did not produce a gradient.
+      color: gradient == null ? Color.lerp(a?.color, b?.color, t) : null,
+      gradient: gradient,
       image: DecorationImage.lerp(a?.image, b?.image, t),
       shadows: BoxShadow.lerpList(a?.shadows, b?.shadows, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t)!,
@@ -249,22 +262,17 @@ class ShapeDecoration extends Decoration {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ShapeDecoration
-        && other.color == color
-        && other.gradient == gradient
-        && other.image == image
-        && listEquals<BoxShadow>(other.shadows, shadows)
-        && other.shape == shape;
+    return other is ShapeDecoration &&
+        other.color == color &&
+        other.gradient == gradient &&
+        other.image == image &&
+        listEquals<BoxShadow>(other.shadows, shadows) &&
+        other.shape == shape;
   }
 
   @override
-  int get hashCode => Object.hash(
-    color,
-    gradient,
-    image,
-    shape,
-    shadows == null ? null : Object.hashAll(shadows!),
-  );
+  int get hashCode =>
+      Object.hash(color, gradient, image, shape, shadows == null ? null : Object.hashAll(shadows!));
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -273,17 +281,24 @@ class ShapeDecoration extends Decoration {
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
     properties.add(DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
-    properties.add(IterableProperty<BoxShadow>('shadows', shadows, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
+    properties.add(
+      IterableProperty<BoxShadow>(
+        'shadows',
+        shadows,
+        defaultValue: null,
+        style: DiagnosticsTreeStyle.whitespace,
+      ),
+    );
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape));
   }
 
   @override
-  bool hitTest(Size size, Offset position, { TextDirection? textDirection }) {
-    return shape.getOuterPath(Offset.zero & size, textDirection: textDirection).contains(position);
+  bool hitTest(Size size, Offset position, {TextDirection? textDirection}) {
+    return shape.hitTest(Offset.zero & size, position, textDirection: textDirection);
   }
 
   @override
-  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
     assert(onChanged != null || image == null);
     return _ShapeDecorationPainter(this, onChanged!);
   }
@@ -291,8 +306,7 @@ class ShapeDecoration extends Decoration {
 
 /// An object that paints a [ShapeDecoration] into a canvas.
 class _ShapeDecorationPainter extends BoxPainter {
-  _ShapeDecorationPainter(this._decoration, VoidCallback onChanged)
-    : super(onChanged);
+  _ShapeDecorationPainter(this._decoration, VoidCallback onChanged) : super(onChanged);
 
   final ShapeDecoration _decoration;
 
@@ -325,7 +339,10 @@ class _ShapeDecorationPainter extends BoxPainter {
       }
     }
     if (_decoration.gradient != null) {
-      _interiorPaint!.shader = _decoration.gradient!.createShader(rect, textDirection: textDirection);
+      _interiorPaint!.shader = _decoration.gradient!.createShader(
+        rect,
+        textDirection: textDirection,
+      );
     }
     if (_decoration.shadows != null) {
       if (_shadowCount == null) {
@@ -343,12 +360,16 @@ class _ShapeDecorationPainter extends BoxPainter {
       } else {
         _shadowPaths = <Path>[
           ..._decoration.shadows!.map((BoxShadow shadow) {
-            return _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius), textDirection: textDirection);
+            return _decoration.shape.getOuterPath(
+              rect.shift(shadow.offset).inflate(shadow.spreadRadius),
+              textDirection: textDirection,
+            );
           }),
         ];
       }
     }
-    if (!_decoration.shape.preferPaintInterior && (_interiorPaint != null || _shadowCount != null)) {
+    if (!_decoration.shape.preferPaintInterior &&
+        (_interiorPaint != null || _shadowCount != null)) {
       _outerPath = _decoration.shape.getOuterPath(rect, textDirection: textDirection);
     }
     if (_decoration.image != null) {
@@ -371,7 +392,7 @@ class _ShapeDecorationPainter extends BoxPainter {
     bool debugHandleDisabledShadowStart(Canvas canvas, BoxShadow boxShadow, Path path) {
       if (debugDisableShadows && boxShadow.blurStyle == BlurStyle.outer) {
         canvas.save();
-        final Path clipPath = Path();
+        final clipPath = Path();
         clipPath.fillType = PathFillType.evenOdd;
         clipPath.addRect(Rect.largest);
         clipPath.addPath(path, Offset.zero);
@@ -379,22 +400,41 @@ class _ShapeDecorationPainter extends BoxPainter {
       }
       return true;
     }
+
     bool debugHandleDisabledShadowEnd(Canvas canvas, BoxShadow boxShadow) {
       if (debugDisableShadows && boxShadow.blurStyle == BlurStyle.outer) {
         canvas.restore();
       }
       return true;
     }
+
     if (_shadowCount != null) {
       if (_decoration.shape.preferPaintInterior) {
-        for (int index = 0; index < _shadowCount!; index += 1) {
-          assert(debugHandleDisabledShadowStart(canvas, _decoration.shadows![index], _decoration.shape.getOuterPath(_shadowBounds[index], textDirection: textDirection)));
-          _decoration.shape.paintInterior(canvas, _shadowBounds[index], _shadowPaints[index], textDirection: textDirection);
+        for (var index = 0; index < _shadowCount!; index += 1) {
+          assert(
+            debugHandleDisabledShadowStart(
+              canvas,
+              _decoration.shadows![index],
+              _decoration.shape.getOuterPath(_shadowBounds[index], textDirection: textDirection),
+            ),
+          );
+          _decoration.shape.paintInterior(
+            canvas,
+            _shadowBounds[index],
+            _shadowPaints[index],
+            textDirection: textDirection,
+          );
           assert(debugHandleDisabledShadowEnd(canvas, _decoration.shadows![index]));
         }
       } else {
-        for (int index = 0; index < _shadowCount!; index += 1) {
-          assert(debugHandleDisabledShadowStart(canvas, _decoration.shadows![index], _shadowPaths[index]));
+        for (var index = 0; index < _shadowCount!; index += 1) {
+          assert(
+            debugHandleDisabledShadowStart(
+              canvas,
+              _decoration.shadows![index],
+              _shadowPaths[index],
+            ),
+          );
           canvas.drawPath(_shadowPaths[index], _shadowPaints[index]);
           assert(debugHandleDisabledShadowEnd(canvas, _decoration.shadows![index]));
         }
@@ -405,11 +445,29 @@ class _ShapeDecorationPainter extends BoxPainter {
   void _paintInterior(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_interiorPaint != null) {
       if (_decoration.shape.preferPaintInterior) {
-        _decoration.shape.paintInterior(canvas, rect, _interiorPaint!, textDirection: textDirection);
+        // When border is filled, the rect is reduced to avoid anti-aliasing
+        // rounding error leaking the background color around the clipped shape.
+        final Rect adjustedRect = _adjustedRectOnOutlinedBorder(rect);
+        _decoration.shape.paintInterior(
+          canvas,
+          adjustedRect,
+          _interiorPaint!,
+          textDirection: textDirection,
+        );
       } else {
         canvas.drawPath(_outerPath, _interiorPaint!);
       }
     }
+  }
+
+  Rect _adjustedRectOnOutlinedBorder(Rect rect) {
+    if (_decoration.shape is OutlinedBorder && _decoration.color != null) {
+      final BorderSide side = (_decoration.shape as OutlinedBorder).side;
+      if (side.color.alpha == 255 && side.style == BorderStyle.solid) {
+        return rect.deflate(side.strokeInset / 2);
+      }
+    }
+    return rect;
   }
 
   DecorationImagePainter? _imagePainter;

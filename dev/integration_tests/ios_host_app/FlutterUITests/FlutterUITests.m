@@ -126,6 +126,30 @@ static const CGFloat kStandardTimeOut = 60.0;
     XCTAssertTrue([app.navigationBars[@"Flutter iOS Demos Home"] waitForExistenceWithTimeout:kStandardTimeOut]);
 }
 
+- (void)testResize {
+  XCUIApplication *app = self.app;
+
+  [self waitForAndTapElement:app.buttons[@"Dynamic Content Resizing"]];
+  XCUIElement *flutterView = app.otherElements[@"flutter_view"];
+
+  CGRect flutterViewFrame = flutterView.frame;
+  CGSize flutterViewSize = flutterViewFrame.size;
+
+  XCTAssertTrue(flutterViewSize.height == 100);
+
+  [self waitForAndTapElement: app.otherElements[@"flutter_view"]];
+
+  XCUIElement *flutterViewPostClick = app.otherElements[@"flutter_view"];
+  CGRect flutterViewFramePostClick = flutterViewPostClick.frame;
+  CGSize flutterViewSizePostClick = flutterViewFramePostClick.size;
+
+  XCTAssertTrue(flutterViewSizePostClick.height == 200);
+
+  // Back navigation.
+  [app.navigationBars[@"Dynamic Content Resizing"].buttons[@"Flutter iOS Demos Home"] tap];
+  XCTAssertTrue([app.navigationBars[@"Flutter iOS Demos Home"] waitForExistenceWithTimeout:kStandardTimeOut]);
+}
+
 - (void)waitForAndTapElement:(XCUIElement *)element {
     NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
     [self expectationForPredicate:hittable evaluatedWithObject:element handler:nil];

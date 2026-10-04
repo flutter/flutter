@@ -14,26 +14,22 @@ Future<void> main() async {
   await task(() async {
     try {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-
         section('check main plugin file exists');
-        final File pluginMainKotlinFile = File(
+        final pluginMainKotlinFile = File(
           path.join(
             pluginProject.rootPath,
             'android',
             'src',
             'main',
             'kotlin',
-            path.join(
-              'com',
-              'example',
-              'aaa',
-              'AaaPlugin.kt',
-            ),
+            path.join('com', 'example', 'aaa', 'AaaPlugin.kt'),
           ),
         );
 
         if (!pluginMainKotlinFile.existsSync()) {
-          throw TaskResult.failure("Expected ${pluginMainKotlinFile.path} to exist, but it doesn't");
+          throw TaskResult.failure(
+            "Expected ${pluginMainKotlinFile.path} to exist, but it doesn't",
+          );
         }
 
         section('add java 8 feature');
@@ -87,19 +83,15 @@ class AaaPlugin: FlutterPlugin, MethodCallHandler {
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
             'build',
-            options: <String>[
-              'apk',
-              '--debug',
-              '--target-platform=android-arm',
-            ],
+            options: <String>['apk', '--debug', '--target-platform=android-arm'],
           );
         });
-
       });
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     }
   });

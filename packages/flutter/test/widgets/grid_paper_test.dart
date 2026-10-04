@@ -14,4 +14,14 @@ void main() {
     final List<Layer> layers2 = tester.layers;
     expect(layers1, equals(layers2));
   });
+
+  testWidgets('GridPaper does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: SizedBox.shrink(child: GridPaper())),
+      ),
+    );
+    expect(tester.getSize(find.byType(GridPaper)), Size.zero);
+  });
 }

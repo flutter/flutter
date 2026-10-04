@@ -9,13 +9,10 @@ import 'package:package_config/package_config.dart';
 
 import '../base/version.dart';
 
-final RegExp _languageVersion = RegExp(r'\/\/\s*@dart\s*=\s*([0-9])\.([0-9]+)');
-final RegExp _declarationEnd = RegExp('(import)|(library)|(part)');
-const String _blockCommentStart = '/*';
-const String _blockCommentEnd = '*/';
-
-/// The first language version where null safety was available by default.
-final LanguageVersion nullSafeVersion = LanguageVersion(2, 12);
+final _languageVersion = RegExp(r'\/\/\s*@dart\s*=\s*([0-9])\.([0-9]+)');
+final _declarationEnd = RegExp('(import)|(library)|(part)');
+const _blockCommentStart = '/*';
+const _blockCommentEnd = '*/';
 
 LanguageVersion? _currentLanguageVersion;
 
@@ -26,7 +23,9 @@ LanguageVersion currentLanguageVersion(FileSystem fileSystem, String flutterRoot
   }
   // Either reading the file or parsing the version could fail on a corrupt Dart SDK.
   // let it crash so it shows up in crash logging.
-  final File versionFile = fileSystem.file(fileSystem.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'version'));
+  final File versionFile = fileSystem.file(
+    fileSystem.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'version'),
+  );
   if (!versionFile.existsSync() && _inUnitTest()) {
     return LanguageVersion(2, 12);
   }
@@ -47,20 +46,27 @@ bool _inUnitTest() {
 /// for language declarations other than library, part, or import.
 ///
 /// The specification for the language version tag is defined at:
-/// https://github.com/dart-lang/language/blob/master/accepted/future-releases/language-versioning/feature-specification.md#individual-library-language-version-override
+/// https://github.com/dart-lang/language/blob/main/accepted/2.8/language-versioning/feature-specification.md#individual-library-language-version-override
 LanguageVersion determineLanguageVersion(File file, Package? package, String flutterRoot) {
-  int blockCommentDepth = 0;
+  var blockCommentDepth = 0;
   // If reading the file fails, default to a null-safe version. The
   // command will likely fail later in the process with a better error
   // message.
   List<String> lines;
+  // If the file is missing, check existsSync() defensively first. Calling
+  // readAsLinesSync on a missing file inside our wrapped ErrorHandlingFileSystem
+  // throws a fatal ToolExit which would escape the FileSystemException catch
+  // block and crash the process prematurely.
+  if (!file.existsSync()) {
+    return currentLanguageVersion(file.fileSystem, flutterRoot);
+  }
   try {
     lines = file.readAsLinesSync();
   } on FileSystemException {
     return currentLanguageVersion(file.fileSystem, flutterRoot);
   }
 
-  for (final String line in lines) {
+  for (final line in lines) {
     final String trimmedLine = line.trim();
     if (trimmedLine.isEmpty) {
       continue;
@@ -71,7 +77,7 @@ LanguageVersion determineLanguageVersion(File file, Package? package, String flu
     // the same line. This does not handle the case of invalid
     // block comment combinations like `*/ /*` since that will cause
     // a compilation error anyway.
-    bool sawBlockComment = false;
+    var sawBlockComment = false;
     final int startMatches = _blockCommentStart.allMatches(trimmedLine).length;
     final int endMatches = _blockCommentEnd.allMatches(trimmedLine).length;
     if (startMatches > 0) {

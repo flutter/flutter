@@ -1,0 +1,34 @@
+// Import the correct Flutter module and UI framework for each platform
+#if os(iOS)
+import Flutter
+import UIKit
+#elseif os(macOS)
+import FlutterMacOS
+import Cocoa
+#endif
+
+public class {{pluginClass}}: NSObject, FlutterPlugin, {{pluginClass}}Api {
+  public static func register(with registrar: FlutterPluginRegistrar) {
+    // The registrar's `messenger` is a method on iOS and a property on macOS.
+    // Use a compile-time condition to handle this difference.
+    #if os(iOS)
+      let messenger = registrar.messenger()
+    #elseif os(macOS)
+      let messenger = registrar.messenger
+    #endif
+
+    let instance = {{pluginClass}}()
+    {{pluginClass}}ApiSetup.setUp(binaryMessenger: messenger, api: instance)
+  }
+
+  public func getPlatformVersion() throws -> String {
+    // Use compile-time conditions to return the correct OS version string.
+    #if os(iOS)
+      return "iOS " + UIDevice.current.systemVersion
+    #elseif os(macOS)
+      return "macOS " + ProcessInfo.processInfo.operatingSystemVersionString
+    #else
+      return "Unsupported platform"
+    #endif
+  }
+}

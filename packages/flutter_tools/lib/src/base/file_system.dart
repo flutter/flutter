@@ -2,15 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
 
 import 'common.dart';
 import 'io.dart';
+import 'logger.dart';
 import 'platform.dart';
 import 'process.dart';
 import 'signals.dart';
+import 'terminal.dart';
 
 // package:file/local.dart must not be exported. This exposes LocalFileSystem,
 // which we override to ensure that temporary directories are cleaned up when
@@ -29,11 +33,7 @@ class FileNotFoundException implements IOException {
 
 /// Various convenience file system methods.
 class FileSystemUtils {
-  FileSystemUtils({
-    required FileSystem fileSystem,
-    required Platform platform,
-  }) : _fileSystem = fileSystem,
-       _platform = platform;
+  FileSystemUtils({required this._fileSystem, required this._platform});
 
   final FileSystem _fileSystem;
 
@@ -49,10 +49,10 @@ class FileSystemUtils {
   /// directory.
   Directory getUniqueDirectory(Directory dir, String baseName) {
     final FileSystem fs = dir.fileSystem;
-    int i = 1;
+    var i = 1;
 
     while (true) {
-      final String name = '${baseName}_${i.toString().padLeft(2, '0')}';
+      final name = '${baseName}_${i.toString().padLeft(2, '0')}';
       final Directory directory = fs.directory(_fileSystem.path.join(dir.path, name));
       if (!directory.existsSync()) {
         return directory;
@@ -65,7 +65,17 @@ class FileSystemUtils {
   ///
   /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
   /// path unchanged.
-  String escapePath(String path) => _platform.isWindows ? path.replaceAll(r'\', r'\\') : path;
+  String escapePath(String path) {
+    if (_platform.isWindows) {
+      path = path.replaceAll(r'\', r'\\');
+      if (path.startsWith(RegExp('[a-z]:'))) {
+        // ensure that the drive letter is upper case see
+        // https://youtrack.jetbrains.com/issue/IDEA-329756/Importing-symlinked-Gradle-included-build-fails#focus=Comments-27-11721320.0-0
+        return path[0].toUpperCase() + path.substring(1);
+      }
+    }
+    return path;
+  }
 
   /// Returns true if the file system [entity] has not been modified since the
   /// latest modification to [referenceFile].
@@ -73,22 +83,25 @@ class FileSystemUtils {
   /// Returns true, if [entity] does not exist.
   ///
   /// Returns false, if [entity] exists, but [referenceFile] does not.
-  bool isOlderThanReference({
-    required FileSystemEntity entity,
-    required File referenceFile,
-  }) {
+  bool isOlderThanReference({required FileSystemEntity entity, required File referenceFile}) {
     if (!entity.existsSync()) {
       return true;
     }
-    return referenceFile.existsSync()
-        && referenceFile.statSync().modified.isAfter(entity.statSync().modified);
+    if (!referenceFile.existsSync()) {
+      return false;
+    }
+
+    final DateTime referenceModified = referenceFile.statSync().modified;
+    final DateTime entityModified = entity.statSync().modified;
+
+    return referenceModified.isAfter(entityModified);
   }
 
   /// Return the absolute path of the user's home directory.
   String? get homeDirPath {
     String? path = _platform.isWindows
-      ? _platform.environment['USERPROFILE']
-      : _platform.environment['HOME'];
+        ? _platform.environment['USERPROFILE']
+        : _platform.environment['HOME'];
     if (path != null) {
       path = _fileSystem.path.absolute(path);
     }
@@ -153,6 +166,7 @@ void copyDirectory(
         shouldCopyFile: shouldCopyFile,
         onFileCopied: onFileCopied,
         followLinks: followLinks,
+        shouldCopyDirectory: shouldCopyDirectory,
       );
     } else {
       throw Exception('${entity.path} is neither File nor Directory, was ${entity.runtimeType}');
@@ -162,10 +176,10 @@ void copyDirectory(
 
 File _getUniqueFile(Directory dir, String baseName, String ext) {
   final FileSystem fs = dir.fileSystem;
-  int i = 1;
+  var i = 1;
 
   while (true) {
-    final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
+    final name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
     final File file = fs.file(dir.fileSystem.path.join(dir.path, name));
     if (!file.existsSync()) {
       file.createSync(recursive: true);
@@ -194,9 +208,14 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   }) : this(signals, fatalSignals, ShutdownHooks());
 
   Directory? _systemTemp;
-  final Map<ProcessSignal, Object> _signalTokens = <ProcessSignal, Object>{};
+  final _signalTokens = <ProcessSignal, Object>{};
 
   final ShutdownHooks shutdownHooks;
+
+  // Indicates that `dispose()` has been invoked or some shutdown hook has executed,
+  // resulting in the underlying temporary directory being cleaned up.
+  bool get disposed => _disposed;
+  var _disposed = false;
 
   Future<void> dispose() async {
     _tryToDeleteTemp();
@@ -210,6 +229,7 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   final List<ProcessSignal> _fatalSignals;
 
   void _tryToDeleteTemp() {
+    _disposed = true;
     try {
       if (_systemTemp?.existsSync() ?? false) {
         _systemTemp?.deleteSync(recursive: true);
@@ -229,8 +249,9 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   Directory get systemTempDirectory {
     if (_systemTemp == null) {
       if (!superSystemTempDirectory.existsSync()) {
-        throwToolExit('Your system temp directory (${superSystemTempDirectory.path}) does not exist. '
-          'Did you set an invalid override in your environment? See issue https://github.com/flutter/flutter/issues/74042 for more context.'
+        throwToolExit(
+          'Your system temp directory (${superSystemTempDirectory.path}) does not exist. '
+          'Did you set an invalid override in your environment? See issue https://github.com/flutter/flutter/issues/74042 for more context.',
         );
       }
       _systemTemp = superSystemTempDirectory.createTempSync('flutter_tools.')
@@ -238,19 +259,14 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
       // Make sure that the temporary directory is cleaned up if the tool is
       // killed by a signal.
       for (final ProcessSignal signal in _fatalSignals) {
-        final Object token = _signals.addHandler(
-          signal,
-          (ProcessSignal _) {
-            _tryToDeleteTemp();
-          },
-        );
+        final Object token = _signals.addHandler(signal, (ProcessSignal _) {
+          _tryToDeleteTemp();
+        });
         _signalTokens[signal] = token;
       }
       // Make sure that the temporary directory is cleaned up when the tool
       // exits normally.
-      shutdownHooks.addShutdownHook(
-        _tryToDeleteTemp,
-      );
+      shutdownHooks.addShutdownHook(_tryToDeleteTemp);
     }
     return _systemTemp!;
   }
@@ -258,4 +274,68 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   // This only exist because the memory file system does not support a systemTemp that does not exists #74042
   @visibleForTesting
   Directory get superSystemTempDirectory => super.systemTempDirectory;
+}
+
+extension FileSystemLocking on FileSystem {
+  /// Runs [scope] while holding an exclusive file lock on the file at [lockPath].
+  ///
+  /// The lock is released after [scope] completes, even if it throws.
+  ///
+  /// If the lock cannot be acquired immediately, it will retry every 50ms.
+  Future<T> runLocked<T>({
+    required String lockPath,
+    required FutureOr<T> Function() scope,
+    Logger? logger,
+    String? traceMessage,
+    String? warningMessage,
+  }) async {
+    final File lockFile = file(lockPath);
+    var printed = false;
+    RandomAccessFile? openedFile;
+    while (true) {
+      try {
+        lockFile.parent.createSync(recursive: true);
+        openedFile = lockFile.openSync(mode: FileMode.write);
+        openedFile.lockSync();
+        break;
+      } on UnimplementedError {
+        logger?.printTrace(traceMessage ?? 'Locking not supported (UnimplementedError).');
+        break;
+      } on UnsupportedError {
+        logger?.printTrace(traceMessage ?? 'Locking not supported (UnsupportedError).');
+        break;
+      } on FileSystemException catch (e) {
+        final lockFailed = openedFile != null;
+        if (openedFile != null) {
+          try {
+            openedFile.closeSync();
+          } on FileSystemException catch (_) {}
+          openedFile = null;
+        }
+        if (!printed) {
+          final details = lockFailed ? '' : ' (Error: $e)';
+          logger?.printTrace(
+            traceMessage ?? 'Waiting to obtain lock of directory: ${lockFile.path}$details',
+          );
+          logger?.printWarning(
+            warningMessage ?? 'Waiting for another flutter command to release the lock...',
+            color: TerminalColor.grey,
+            fatal: false,
+          );
+          printed = true;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+    }
+
+    try {
+      return await scope();
+    } finally {
+      if (openedFile != null) {
+        try {
+          openedFile.closeSync();
+        } on FileSystemException {} // ignore: empty_catches
+      }
+    }
+  }
 }

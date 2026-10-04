@@ -9,10 +9,12 @@
 /* Begin PBXBuildFile section */
 		4AF9D63425F74F0694CAB07D /* libPods-Host.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E20960BD8B505D605FE82853 /* libPods-Host.a */; };
 		74F97866215AB9E8005A0F04 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 74F97865215AB9E8005A0F04 /* AppDelegate.m */; };
+		74F97878215AB9EA005A0F04 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 74F97877215AB9EA005A0F04 /* SceneDelegate.m */; };
 		74F9786E215AB9E9005A0F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 74F9786D215AB9E9005A0F04 /* Assets.xcassets */; };
 		74F97871215AB9E9005A0F04 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 74F9786F215AB9E9005A0F04 /* LaunchScreen.storyboard */; };
 		74F97874215AB9E9005A0F04 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 74F97873215AB9E9005A0F04 /* main.m */; };
 		7E06ECD9FAEFCA4A0ED04D6E /* libPods-FlutterUITests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 327E8CC22A494E7D7155FB58 /* libPods-FlutterUITests.a */; };
+		F2D997DE2EA8BCB0002FC7EC /* DynamicResizingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F2D997DD2EA8BCB0002FC7EC /* DynamicResizingViewController.m */; };
 		F7C2661424AC18D00085742D /* DualFlutterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F7C2660E24AC18D00085742D /* DualFlutterViewController.m */; };
 		F7C2661524AC18D00085742D /* FullScreenViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F7C2660F24AC18D00085742D /* FullScreenViewController.m */; };
 		F7C2661624AC18D00085742D /* HybridViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F7C2661124AC18D00085742D /* HybridViewController.m */; };
@@ -38,6 +40,8 @@
 		74F97861215AB9E8005A0F04 /* Host.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Host.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		74F97864215AB9E8005A0F04 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		74F97865215AB9E8005A0F04 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		74F97876215AB9EA005A0F04 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
+		74F97877215AB9EA005A0F04 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
 		74F9786D215AB9E9005A0F04 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		74F97870215AB9E9005A0F04 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		74F97872215AB9E9005A0F04 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -45,6 +49,8 @@
 		8E6751F293967EE3DFF4178A /* Pods-FlutterUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlutterUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-FlutterUITests/Pods-FlutterUITests.release.xcconfig"; sourceTree = "<group>"; };
 		91B7D4263BFD246A27391225 /* Pods-Host.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Host.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Host/Pods-Host.debug.xcconfig"; sourceTree = "<group>"; };
 		E20960BD8B505D605FE82853 /* libPods-Host.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Host.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F2D997DC2EA8BCB0002FC7EC /* DynamicResizingViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DynamicResizingViewController.h; sourceTree = "<group>"; };
+		F2D997DD2EA8BCB0002FC7EC /* DynamicResizingViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DynamicResizingViewController.m; sourceTree = "<group>"; };
 		F7C2660E24AC18D00085742D /* DualFlutterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DualFlutterViewController.m; sourceTree = "<group>"; };
 		F7C2660F24AC18D00085742D /* FullScreenViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FullScreenViewController.m; sourceTree = "<group>"; };
 		F7C2661024AC18D00085742D /* HybridViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HybridViewController.h; sourceTree = "<group>"; };
@@ -103,6 +109,8 @@
 		74F97863215AB9E8005A0F04 /* Host */ = {
 			isa = PBXGroup;
 			children = (
+				F2D997DC2EA8BCB0002FC7EC /* DynamicResizingViewController.h */,
+				F2D997DD2EA8BCB0002FC7EC /* DynamicResizingViewController.m */,
 				F7C2661724AC18DD0085742D /* MainViewController.h */,
 				F7C2661A24AC18DD0085742D /* MainViewController.m */,
 				F7C2661924AC18DD0085742D /* NativeViewController.h */,
@@ -115,6 +123,8 @@
 				F7C2661124AC18D00085742D /* HybridViewController.m */,
 				74F97864215AB9E8005A0F04 /* AppDelegate.h */,
 				74F97865215AB9E8005A0F04 /* AppDelegate.m */,
+				74F97876215AB9EA005A0F04 /* SceneDelegate.h */,
+				74F97877215AB9EA005A0F04 /* SceneDelegate.m */,
 				74F9786D215AB9E9005A0F04 /* Assets.xcassets */,
 				74F9786F215AB9E9005A0F04 /* LaunchScreen.storyboard */,
 				74F97872215AB9E9005A0F04 /* Info.plist */,
@@ -284,9 +294,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-FlutterUITests/Pods-FlutterUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-FlutterUITests/Pods-FlutterUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -305,6 +319,8 @@
 				"${SRCROOT}/../hello/.ios/Flutter/flutter_export_environment.sh",
 			);
 			name = "[CP-User] Run Flutter Build hello Script";
+			outputPaths = (
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/../hello/.ios/Flutter/flutter_export_environment.sh\"\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build";
@@ -317,9 +333,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Host/Pods-Host-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Host/Pods-Host-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -338,6 +358,8 @@
 				"${SRCROOT}/../hello/.ios/Flutter/flutter_export_environment.sh",
 			);
 			name = "[CP-User] Run Flutter Build hello Script";
+			outputPaths = (
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/../hello/.ios/Flutter/flutter_export_environment.sh\"\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build";
@@ -372,12 +394,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				F7C2661524AC18D00085742D /* FullScreenViewController.m in Sources */,
+				F2D997DE2EA8BCB0002FC7EC /* DynamicResizingViewController.m in Sources */,
 				F7C2661424AC18D00085742D /* DualFlutterViewController.m in Sources */,
 				F7C2661C24AC18DD0085742D /* MainViewController.m in Sources */,
 				74F97874215AB9E9005A0F04 /* main.m in Sources */,
 				F7C2661624AC18D00085742D /* HybridViewController.m in Sources */,
 				F7C2661B24AC18DD0085742D /* NativeViewController.m in Sources */,
 				74F97866215AB9E8005A0F04 /* AppDelegate.m in Sources */,
+				74F97878215AB9EA005A0F04 /* SceneDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -462,7 +486,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -515,7 +539,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;

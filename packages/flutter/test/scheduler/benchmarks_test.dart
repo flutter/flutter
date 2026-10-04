@@ -17,7 +17,9 @@ class TestBinding extends LiveTestWidgetsFlutterBinding {
   void handleBeginFrame(Duration? rawTimeStamp) {
     handleBeginFrameMicrotaskRun = false;
     framesBegun += 1;
-    Future<void>.microtask(() { handleBeginFrameMicrotaskRun = true; });
+    Future<void>.microtask(() {
+      handleBeginFrameMicrotaskRun = true;
+    });
     super.handleBeginFrame(rawTimeStamp);
   }
 
@@ -41,7 +43,7 @@ void main() {
   test('test pumpBenchmark() only runs one frame', () async {
     await benchmarkWidgets(
       (WidgetTester tester) async {
-        const Key root = Key('root');
+        const root = Key('root');
         binding.attachRootWidget(binding.wrapWithDefaultView(Container(key: root)));
         await tester.pump();
 

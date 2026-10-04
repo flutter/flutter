@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+const _kBlue = Color(0xFF0000FF);
+
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),
   Text('bar', textDirection: TextDirection.ltr),
@@ -16,116 +18,122 @@ const List<Widget> fooBarTexts = <Text>[
 void main() {
   group('image', () {
     testWidgets('finds Image widgets', (WidgetTester tester) async {
-      await tester
-          .pumpWidget(_boilerplate(Image(image: FileImage(File('test')))));
+      addTearDown(imageCache.clear);
+      await tester.pumpWidget(_boilerplate(Image(image: FileImage(File('test')))));
       expect(find.image(FileImage(File('test'))), findsOneWidget);
     });
 
     testWidgets('finds Button widgets with Image', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(ElevatedButton(
-        onPressed: null,
-        child: Image(image: FileImage(File('test'))),
-      )));
-      expect(find.widgetWithImage(ElevatedButton, FileImage(File('test'))),
-          findsOneWidget);
+      addTearDown(imageCache.clear);
+      await tester.pumpWidget(
+        _boilerplate(TestButton(child: Image(image: FileImage(File('test'))))),
+      );
+      expect(find.widgetWithImage(TestButton, FileImage(File('test'))), findsOneWidget);
     });
   });
 
   group('text', () {
     testWidgets('finds Text widgets', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(
-        const Text('test'),
-      ));
+      await tester.pumpWidget(_boilerplate(const Text('test')));
       expect(find.text('test'), findsOneWidget);
     });
 
     testWidgets('finds Text.rich widgets', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(const Text.rich(
-        TextSpan(
-          text: 't',
-          children: <TextSpan>[
-            TextSpan(text: 'e'),
-            TextSpan(text: 'st'),
-          ],
+      await tester.pumpWidget(
+        _boilerplate(
+          const Text.rich(
+            TextSpan(
+              text: 't',
+              children: <TextSpan>[
+                TextSpan(text: 'e'),
+                TextSpan(text: 'st'),
+              ],
+            ),
+          ),
         ),
-      )));
+      );
 
       expect(find.text('test'), findsOneWidget);
     });
 
     group('findRichText', () {
-      testWidgets('finds RichText widgets when enabled',
-          (WidgetTester tester) async {
-        await tester.pumpWidget(_boilerplate(RichText(
-          text: const TextSpan(
-            text: 't',
-            children: <TextSpan>[
-              TextSpan(text: 'est'),
-            ],
+      testWidgets('finds RichText widgets when enabled', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            RichText(
+              text: const TextSpan(
+                text: 't',
+                children: <TextSpan>[TextSpan(text: 'est')],
+              ),
+            ),
           ),
-        )));
+        );
 
         expect(find.text('test', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('finds Text widgets once when enabled',
-          (WidgetTester tester) async {
+      testWidgets('finds Text widgets once when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(const Text('test2')));
 
         expect(find.text('test2', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('does not find RichText widgets when disabled',
-          (WidgetTester tester) async {
-        await tester.pumpWidget(_boilerplate(RichText(
-          text: const TextSpan(
-            text: 't',
-            children: <TextSpan>[
-              TextSpan(text: 'est'),
-            ],
+      testWidgets('does not find RichText widgets when disabled', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            RichText(
+              text: const TextSpan(
+                text: 't',
+                children: <TextSpan>[TextSpan(text: 'est')],
+              ),
+            ),
           ),
-        )));
+        );
 
         expect(find.text('test'), findsNothing);
       });
 
-      testWidgets(
-          'does not find Text and RichText separated by semantics widgets twice',
-          (WidgetTester tester) async {
+      testWidgets('does not find Text and RichText separated by semantics widgets twice', (
+        WidgetTester tester,
+      ) async {
         // If rich: true found both Text and RichText, this would find two widgets.
-        await tester.pumpWidget(_boilerplate(
-          const Text('test', semanticsLabel: 'foo'),
-        ));
+        await tester.pumpWidget(_boilerplate(const Text('test', semanticsLabel: 'foo')));
 
         expect(find.text('test'), findsOneWidget);
       });
 
-      testWidgets('finds Text.rich widgets when enabled',
-          (WidgetTester tester) async {
-        await tester.pumpWidget(_boilerplate(const Text.rich(
-          TextSpan(
-            text: 't',
-            children: <TextSpan>[
-              TextSpan(text: 'est'),
-              TextSpan(text: '3'),
-            ],
+      testWidgets('finds Text.rich widgets when enabled', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            const Text.rich(
+              TextSpan(
+                text: 't',
+                children: <TextSpan>[
+                  TextSpan(text: 'est'),
+                  TextSpan(text: '3'),
+                ],
+              ),
+            ),
           ),
-        )));
+        );
 
         expect(find.text('test3', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('finds Text.rich widgets when disabled',
-          (WidgetTester tester) async {
-        await tester.pumpWidget(_boilerplate(const Text.rich(
-          TextSpan(
-            text: 't',
-            children: <TextSpan>[
-              TextSpan(text: 'est'),
-              TextSpan(text: '3'),
-            ],
+      testWidgets('finds Text.rich widgets when disabled', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            const Text.rich(
+              TextSpan(
+                text: 't',
+                children: <TextSpan>[
+                  TextSpan(text: 'est'),
+                  TextSpan(text: '3'),
+                ],
+              ),
+            ),
           ),
-        )));
+        );
 
         expect(find.text('test3'), findsOneWidget);
       });
@@ -134,9 +142,7 @@ void main() {
 
   group('textContaining', () {
     testWidgets('finds Text widgets', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(
-        const Text('this is a test'),
-      ));
+      await tester.pumpWidget(_boilerplate(const Text('this is a test')));
       expect(find.textContaining(RegExp(r'test')), findsOneWidget);
       expect(find.textContaining('test'), findsOneWidget);
       expect(find.textContaining('a'), findsOneWidget);
@@ -144,107 +150,126 @@ void main() {
     });
 
     testWidgets('finds Text.rich widgets', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(const Text.rich(
-        TextSpan(
-          text: 'this',
-          children: <TextSpan>[
-            TextSpan(text: 'is'),
-            TextSpan(text: 'a'),
-            TextSpan(text: 'test'),
-          ],
+      await tester.pumpWidget(
+        _boilerplate(
+          const Text.rich(
+            TextSpan(
+              text: 'this',
+              children: <TextSpan>[
+                TextSpan(text: 'is'),
+                TextSpan(text: 'a'),
+                TextSpan(text: 'test'),
+              ],
+            ),
+          ),
         ),
-      )));
+      );
 
       expect(find.textContaining(RegExp(r'isatest')), findsOneWidget);
       expect(find.textContaining('isatest'), findsOneWidget);
     });
 
     testWidgets('finds EditableText widgets', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: _boilerplate(TextField(
-            controller: TextEditingController()..text = 'this is test',
-          )),
+      final controller = TextEditingController()..text = 'this is test';
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: _boilerplate(
+            EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: const TextStyle(),
+              cursorColor: const Color(0xFF000000),
+              backgroundCursorColor: _kBlue,
+            ),
+          ),
         ),
-      ));
+      );
 
       expect(find.textContaining(RegExp(r'test')), findsOneWidget);
       expect(find.textContaining('test'), findsOneWidget);
     });
 
     group('findRichText', () {
-      testWidgets('finds RichText widgets when enabled',
-          (WidgetTester tester) async {
-        await tester.pumpWidget(_boilerplate(RichText(
-          text: const TextSpan(
-            text: 't',
-            children: <TextSpan>[
-              TextSpan(text: 'est'),
-            ],
+      testWidgets('finds RichText widgets when enabled', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            RichText(
+              text: const TextSpan(
+                text: 't',
+                children: <TextSpan>[TextSpan(text: 'est')],
+              ),
+            ),
           ),
-        )));
+        );
 
         expect(find.textContaining('te', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('finds Text widgets once when enabled',
-          (WidgetTester tester) async {
+      testWidgets('finds Text widgets once when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(const Text('test2')));
 
         expect(find.textContaining('tes', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('does not find RichText widgets when disabled',
-          (WidgetTester tester) async {
-        await tester.pumpWidget(_boilerplate(RichText(
-          text: const TextSpan(
-            text: 't',
-            children: <TextSpan>[
-              TextSpan(text: 'est'),
-            ],
+      testWidgets('does not find RichText widgets when disabled', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            RichText(
+              text: const TextSpan(
+                text: 't',
+                children: <TextSpan>[TextSpan(text: 'est')],
+              ),
+            ),
           ),
-        )));
+        );
 
         expect(find.textContaining('te'), findsNothing);
       });
 
-      testWidgets(
-          'does not find Text and RichText separated by semantics widgets twice',
-          (WidgetTester tester) async {
+      testWidgets('does not find Text and RichText separated by semantics widgets twice', (
+        WidgetTester tester,
+      ) async {
         // If rich: true found both Text and RichText, this would find two widgets.
-        await tester.pumpWidget(_boilerplate(
-          const Text('test', semanticsLabel: 'foo'),
-        ));
+        await tester.pumpWidget(_boilerplate(const Text('test', semanticsLabel: 'foo')));
 
         expect(find.textContaining('tes'), findsOneWidget);
       });
 
-      testWidgets('finds Text.rich widgets when enabled',
-          (WidgetTester tester) async {
-        await tester.pumpWidget(_boilerplate(const Text.rich(
-          TextSpan(
-            text: 't',
-            children: <TextSpan>[
-              TextSpan(text: 'est'),
-              TextSpan(text: '3'),
-            ],
+      testWidgets('finds Text.rich widgets when enabled', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            const Text.rich(
+              TextSpan(
+                text: 't',
+                children: <TextSpan>[
+                  TextSpan(text: 'est'),
+                  TextSpan(text: '3'),
+                ],
+              ),
+            ),
           ),
-        )));
+        );
 
         expect(find.textContaining('t3', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('finds Text.rich widgets when disabled',
-          (WidgetTester tester) async {
-        await tester.pumpWidget(_boilerplate(const Text.rich(
-          TextSpan(
-            text: 't',
-            children: <TextSpan>[
-              TextSpan(text: 'est'),
-              TextSpan(text: '3'),
-            ],
+      testWidgets('finds Text.rich widgets when disabled', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _boilerplate(
+            const Text.rich(
+              TextSpan(
+                text: 't',
+                children: <TextSpan>[
+                  TextSpan(text: 'est'),
+                  TextSpan(text: '3'),
+                ],
+              ),
+            ),
           ),
-        )));
+        );
 
         expect(find.textContaining('t3'), findsOneWidget);
       });
@@ -252,76 +277,333 @@ void main() {
   });
 
   group('semantics', () {
-    testWidgets('Throws StateError if semantics are not enabled',
-        (WidgetTester tester) async {
+    testWidgets('Throws StateError if semantics are not enabled', (WidgetTester tester) async {
       expect(() => find.bySemanticsLabel('Add'), throwsStateError);
     }, semanticsEnabled: false);
 
-    testWidgets('finds Semantically labeled widgets',
-        (WidgetTester tester) async {
+    testWidgets('finds Semantically labeled widgets', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
-      await tester.pumpWidget(_boilerplate(
-        Semantics(
-          label: 'Add',
-          button: true,
-          child: const TextButton(
-            onPressed: null,
-            child: Text('+'),
+      await tester.pumpWidget(
+        _boilerplate(
+          Semantics(
+            label: 'Add',
+            button: true,
+            child: const TestButton(child: Text('+')),
           ),
         ),
-      ));
+      );
       expect(find.bySemanticsLabel('Add'), findsOneWidget);
       semanticsHandle.dispose();
     });
 
-    testWidgets('finds Semantically labeled widgets by RegExp',
-        (WidgetTester tester) async {
+    testWidgets('finds Semantically labeled widgets by RegExp', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
-      await tester.pumpWidget(_boilerplate(
-        Semantics(
-          container: true,
-          child: const Row(children: <Widget>[
-            Text('Hello'),
-            Text('World'),
-          ]),
+      await tester.pumpWidget(
+        _boilerplate(
+          Semantics(
+            container: true,
+            child: const Row(children: <Widget>[Text('Hello'), Text('World')]),
+          ),
         ),
-      ));
+      );
       expect(find.bySemanticsLabel('Hello'), findsNothing);
       expect(find.bySemanticsLabel(RegExp(r'^Hello')), findsOneWidget);
       semanticsHandle.dispose();
     });
 
-    testWidgets('finds Semantically labeled widgets without explicit Semantics',
-        (WidgetTester tester) async {
+    testWidgets('finds Semantically labeled widgets without explicit Semantics', (
+      WidgetTester tester,
+    ) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
-      await tester
-          .pumpWidget(_boilerplate(const SimpleCustomSemanticsWidget('Foo')));
+      await tester.pumpWidget(_boilerplate(const SimpleCustomSemanticsWidget('Foo')));
       expect(find.bySemanticsLabel('Foo'), findsOneWidget);
       semanticsHandle.dispose();
+    });
+
+    testWidgets('Throws StateError if semantics are not enabled (bySemanticsIdentifier)', (
+      WidgetTester tester,
+    ) async {
+      expect(
+        () => find.bySemanticsIdentifier('Add'),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Semantics are not enabled'),
+          ),
+        ),
+      );
+    }, semanticsEnabled: false);
+
+    testWidgets('finds Semantically labeled widgets by identifier', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Semantics(
+            identifier: 'Add',
+            button: true,
+            child: const TestButton(child: Text('+')),
+          ),
+        ),
+      );
+      expect(find.bySemanticsIdentifier('Add'), findsOneWidget);
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('finds Semantically labeled widgets by identifier RegExp', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      // list of elements with a prefixed identifier
+      await tester.pumpWidget(
+        _boilerplate(
+          Row(
+            children: <Widget>[
+              Semantics(identifier: 'item-1', child: const Text('Item 1')),
+              Semantics(identifier: 'item-2', child: const Text('Item 2')),
+            ],
+          ),
+        ),
+      );
+      expect(find.bySemanticsIdentifier('item'), findsNothing);
+      expect(find.bySemanticsIdentifier(RegExp(r'^item-')), findsNWidgets(2));
+      semanticsHandle.dispose();
+    });
+
+    testWidgets(
+      'bySemanticsIdentifier contains given semantics identifier string in the error message',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+        late TestFailure failure;
+        try {
+          expect(find.bySemanticsIdentifier('custom-identifier'), findsOneWidget);
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+
+        expect(failure, isNotNull);
+        expect(
+          failure.message,
+          contains(
+            'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics identifier named "custom-identifier"',
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'bySemanticsIdentifier contains given semantics identifier RegExp in the error message',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+        late TestFailure failure;
+        try {
+          expect(find.bySemanticsIdentifier(RegExp(r'^item-')), findsOneWidget);
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+
+        expect(failure, isNotNull);
+        expect(
+          failure.message,
+          contains(
+            'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics identifier matching the pattern "^item-"',
+          ),
+        );
+      },
+    );
+
+    testWidgets('bySemanticsLabel contains given label string in the error message', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+      late TestFailure failure;
+      try {
+        expect(find.bySemanticsLabel('label'), findsOneWidget);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(
+        failure.message,
+        contains(
+          'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics label named "label"',
+        ),
+      );
+    });
+
+    testWidgets('bySemanticsLabel contains given label RegExp in the error message', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+      late TestFailure failure;
+      try {
+        expect(find.bySemanticsLabel(RegExp(r'^item-')), findsOneWidget);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(
+        failure.message,
+        contains(
+          'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics label matching the pattern "^item-"',
+        ),
+      );
+    });
+  });
+
+  group('byTooltip', () {
+    testWidgets('finds widgets by tooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(const Tooltip(message: 'Tooltip Message', child: Text('+'))),
+      );
+      expect(find.byTooltip('Tooltip Message'), findsOneWidget);
+    });
+
+    testWidgets('finds widgets by tooltip - RawTooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          RawTooltip(
+            semanticsTooltip: 'Tooltip Message',
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text('Tooltip Message'),
+            child: const Text('+'),
+          ),
+        ),
+      );
+      expect(find.byTooltip('Tooltip Message'), findsOneWidget);
+    });
+
+    testWidgets('finds widgets with tooltip by RegExp', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(const Tooltip(message: 'Tooltip Message', child: Text('+'))),
+      );
+      expect(find.byTooltip('Tooltip'), findsNothing);
+      expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);
+    });
+
+    testWidgets('finds widgets with tooltip by RegExp - RawTooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          RawTooltip(
+            semanticsTooltip: 'Tooltip Message',
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text('Tooltip Message'),
+            child: const Text('+'),
+          ),
+        ),
+      );
+      expect(find.byTooltip('Tooltip'), findsNothing);
+      expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);
+    });
+
+    testWidgets('finds widgets by rich text tooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          const Tooltip(
+            richMessage: TextSpan(
+              children: <InlineSpan>[
+                TextSpan(text: 'Tooltip '),
+                TextSpan(text: 'Message'),
+              ],
+            ),
+            child: Text('+'),
+          ),
+        ),
+      );
+      expect(find.byTooltip('Tooltip Message'), findsOneWidget);
+    });
+
+    testWidgets('finds widgets with rich text tooltip by RegExp', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          const Tooltip(
+            richMessage: TextSpan(
+              children: <InlineSpan>[
+                TextSpan(text: 'Tooltip '),
+                TextSpan(text: 'Message'),
+              ],
+            ),
+            child: Text('+'),
+          ),
+        ),
+      );
+      expect(find.byTooltip('Tooltip M'), findsNothing);
+      expect(find.byTooltip(RegExp(r'^Tooltip M')), findsOneWidget);
+    });
+
+    testWidgets('finds empty string with tooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(const Tooltip(message: '', child: Text('+'))));
+      expect(find.byTooltip(''), findsOneWidget);
+
+      await tester.pumpWidget(
+        _boilerplate(
+          const Tooltip(
+            richMessage: TextSpan(children: <InlineSpan>[TextSpan(text: '')]),
+            child: Text('+'),
+          ),
+        ),
+      );
+      expect(find.byTooltip(''), findsOneWidget);
+
+      await tester.pumpWidget(_boilerplate(const Tooltip(message: '', child: Text('+'))));
+      expect(find.byTooltip(RegExp(r'^$')), findsOneWidget);
+
+      await tester.pumpWidget(
+        _boilerplate(
+          const Tooltip(
+            richMessage: TextSpan(children: <InlineSpan>[TextSpan(text: '')]),
+            child: Text('+'),
+          ),
+        ),
+      );
+      expect(find.byTooltip(RegExp(r'^$')), findsOneWidget);
     });
   });
 
   group('hitTestable', () {
-    testWidgets('excludes non-hit-testable widgets',
-        (WidgetTester tester) async {
+    Future<void> tapAndCheckHitTestWarning(
+      WidgetTester tester,
+      Finder finder, {
+      bool shouldWarn = false,
+    }) async {
+      WidgetController.hitTestWarningShouldBeFatal = true;
+      FlutterError? tapError;
+      try {
+        await tester.tap(finder);
+      } on FlutterError catch (e) {
+        tapError = e;
+      }
+      expect(tapError, shouldWarn ? isNotNull : isNull);
+      WidgetController.hitTestWarningShouldBeFatal = false;
+    }
+
+    testWidgets('excludes non-hit-testable widgets', (WidgetTester tester) async {
       await tester.pumpWidget(
-        _boilerplate(IndexedStack(
-          sizing: StackFit.expand,
-          children: <Widget>[
-            GestureDetector(
-              key: const ValueKey<int>(0),
-              behavior: HitTestBehavior.opaque,
-              onTap: () {},
-              child: const SizedBox.expand(),
-            ),
-            GestureDetector(
-              key: const ValueKey<int>(1),
-              behavior: HitTestBehavior.opaque,
-              onTap: () {},
-              child: const SizedBox.expand(),
-            ),
-          ],
-        )),
+        _boilerplate(
+          IndexedStack(
+            sizing: StackFit.expand,
+            children: <Widget>[
+              GestureDetector(
+                key: const ValueKey<int>(0),
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: const SizedBox.expand(),
+              ),
+              GestureDetector(
+                key: const ValueKey<int>(1),
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: const SizedBox.expand(),
+              ),
+            ],
+          ),
+        ),
       );
       expect(find.byType(GestureDetector), findsOneWidget);
       expect(find.byType(GestureDetector, skipOffstage: false), findsNWidgets(2));
@@ -329,30 +611,372 @@ void main() {
       expect(hitTestable, findsOneWidget);
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/100758
+    testWidgets(
+      'GestureDetector inside Transform is tappable and hit testable and warnIfMissed will not warn if button is not missed',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+
+        await tester.pumpWidget(
+          Center(
+            child: _ButtonWithTransform(
+              onTap: () {
+                tapCount++;
+              },
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(tester, find.byType(_ButtonWithTransform));
+
+        expect(find.byType(_ButtonWithTransform).hitTestable(), findsOneWidget);
+
+        expect(tapCount, 1);
+      },
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/99302
+    testWidgets(
+      'GestureDetector inside AnimatedScale is tappable and hit testable and warnIfMissed will not warn if button is not missed',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+
+        await tester.pumpWidget(
+          Center(
+            child: _ButtonWithAnimatedScale(
+              onTap: () {
+                tapCount++;
+              },
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(tester, find.byType(_ButtonWithAnimatedScale));
+
+        expect(find.byType(_ButtonWithAnimatedScale).hitTestable(), findsOneWidget);
+
+        expect(tapCount, 1);
+      },
+    );
+
+    testWidgets(
+      'GestureDetector inside IgnorePointer is tappable and hit testable and warnIfMissed will not warn when ignoring is false',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+
+        await tester.pumpWidget(
+          Center(
+            child: _ButtonWithIgnorePointer(
+              onTap: () {
+                tapCount++;
+              },
+              ignoring: false,
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(tester, find.byType(_ButtonWithIgnorePointer));
+
+        expect(find.byType(_ButtonWithIgnorePointer).hitTestable(), findsOneWidget);
+
+        expect(tapCount, 1);
+      },
+    );
+
+    testWidgets(
+      'GestureDetector inside IgnorePointer is not tappable or hit testable and warnIfMissed will warn when ignoring is true',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+
+        await tester.pumpWidget(
+          Center(
+            child: _ButtonWithIgnorePointer(
+              onTap: () {
+                tapCount++;
+              },
+              ignoring: true,
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(
+          tester,
+          find.byType(_ButtonWithIgnorePointer),
+          shouldWarn: true,
+        );
+
+        expect(find.byType(_ButtonWithIgnorePointer).hitTestable(), findsNothing);
+
+        expect(tapCount, 0);
+      },
+    );
+
+    testWidgets(
+      'GestureDetector inside AbsorbPointer is not hit testable and warnIfMissed will warn',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: AbsorbPointer(
+                child: GestureDetector(
+                  onTap: () {
+                    tapCount++;
+                  },
+                  child: const Text('Target'),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(tester, find.text('Target'), shouldWarn: true);
+        expect(find.text('Target').hitTestable(), findsNothing);
+        expect(tapCount, 0);
+      },
+    );
+
+    testWidgets(
+      'GestureDetector obscured by another widget in a Stack is not hit testable and warnIfMissed will warn',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Stack(
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: () {
+                      tapCount++;
+                    },
+                    child: const Text('Target'),
+                  ),
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(color: const Color(0xFF000000), width: 100, height: 100),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(tester, find.text('Target'), shouldWarn: true);
+        expect(find.text('Target').hitTestable(), findsNothing);
+        expect(tapCount, 0);
+      },
+    );
+
+    testWidgets(
+      'GestureDetector inside Visibility(visible: false) is not hit testable and warnIfMissed will warn',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Visibility(
+                visible: false,
+                child: GestureDetector(
+                  onTap: () {
+                    tapCount++;
+                  },
+                  child: const Text('Target'),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(
+          tester,
+          find.text('Target', skipOffstage: false),
+          shouldWarn: true,
+        );
+        expect(find.text('Target', skipOffstage: false).hitTestable(), findsNothing);
+        expect(tapCount, 0);
+      },
+    );
+
+    testWidgets('GestureDetector inside Offstage is not hit testable and warnIfMissed will warn', (
+      WidgetTester tester,
+    ) async {
+      var tapCount = 0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Offstage(
+              child: GestureDetector(
+                onTap: () {
+                  tapCount++;
+                },
+                child: const Text('Target'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tapAndCheckHitTestWarning(
+        tester,
+        find.text('Target', skipOffstage: false),
+        shouldWarn: true,
+      );
+      expect(find.text('Target', skipOffstage: false).hitTestable(), findsNothing);
+      expect(tapCount, 0);
+    });
+
+    testWidgets(
+      'GestureDetector off-screen in a ScrollView is not hit testable and warnIfMissed will warn',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: ListView(
+              children: <Widget>[
+                const SizedBox(height: 2000), // Push the target off-screen
+                GestureDetector(
+                  onTap: () {
+                    tapCount++;
+                  },
+                  child: const Text('Target'),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(
+          tester,
+          find.text('Target', skipOffstage: false),
+          shouldWarn: true,
+        );
+        expect(find.text('Target', skipOffstage: false).hitTestable(), findsNothing);
+        expect(tapCount, 0);
+      },
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/67743.
+    testWidgets('tapping directly on a Sliver produces an error', (WidgetTester tester) async {
+      var sliverToBoxAdapterTapped = 0;
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SafeArea(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: GestureDetector(
+                    onTap: () {
+                      sliverToBoxAdapterTapped++;
+                    },
+                    child: Container(
+                      color: _kBlue,
+                      padding: const EdgeInsets.all(16.0),
+                      child: const Text('Sliver Grid Header', style: TextStyle(fontSize: 28)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(
+        () => tester.tap(find.byType(SliverToBoxAdapter)),
+        throwsA(
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('whose corresponding render object is not a RenderBox'),
+          ),
+        ),
+      );
+      expect(sliverToBoxAdapterTapped, 0);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/67743.
+    testWidgets('tapping by filtering by .hitTestable excludes Slivers', (
+      WidgetTester tester,
+    ) async {
+      var sliverToBoxAdapterTapped = 0;
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SafeArea(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: GestureDetector(
+                    onTap: () {
+                      sliverToBoxAdapterTapped++;
+                    },
+                    child: Container(
+                      color: _kBlue,
+                      padding: const EdgeInsets.all(16.0),
+                      child: const Text('Sliver Grid Header', style: TextStyle(fontSize: 28)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(
+        () => tester.tap(find.byType(SliverToBoxAdapter).hitTestable()),
+        throwsA(
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            stringContainsInOrder(<String>[
+              'considering only hit-testable widgets with a RenderBox',
+              'could not find any matching widgets',
+            ]),
+          ),
+        ),
+      );
+      expect(sliverToBoxAdapterTapped, 0);
+    });
   });
 
   group('text range finders', () {
     testWidgets('basic text span test', (WidgetTester tester) async {
       await tester.pumpWidget(
-        _boilerplate(const IndexedStack(
-          sizing: StackFit.expand,
-          children: <Widget>[
-            Text.rich(TextSpan(
-              text: 'sub',
-              children: <InlineSpan>[
-                TextSpan(text: 'stringsub'),
-                TextSpan(text: 'stringsub'),
-                TextSpan(text: 'stringsub'),
-              ],
-            )),
-            Text('substringsub'),
-          ],
-        )),
+        _boilerplate(
+          const IndexedStack(
+            sizing: StackFit.expand,
+            children: <Widget>[
+              Text.rich(
+                TextSpan(
+                  text: 'sub',
+                  children: <InlineSpan>[
+                    TextSpan(text: 'stringsub'),
+                    TextSpan(text: 'stringsub'),
+                    TextSpan(text: 'stringsub'),
+                  ],
+                ),
+              ),
+              Text('substringsub'),
+            ],
+          ),
+        ),
       );
 
-      expect(find.textRange.ofSubstring('substringsub'), findsExactly(2)); // Pattern skips overlapping matches.
-      expect(find.textRange.ofSubstring('substringsub').first.evaluate().single.textRange, const TextRange(start: 0, end: 12));
-      expect(find.textRange.ofSubstring('substringsub').last.evaluate().single.textRange, const TextRange(start: 18, end: 30));
+      expect(
+        find.textRange.ofSubstring('substringsub'),
+        findsExactly(2),
+      ); // Pattern skips overlapping matches.
+      expect(
+        find.textRange.ofSubstring('substringsub').first.evaluate().single.textRange,
+        const TextRange(start: 0, end: 12),
+      );
+      expect(
+        find.textRange.ofSubstring('substringsub').last.evaluate().single.textRange,
+        const TextRange(start: 18, end: 30),
+      );
 
       expect(
         find.textRange.ofSubstring('substringsub').first.evaluate().single.renderObject,
@@ -364,25 +988,38 @@ void main() {
 
     testWidgets('basic text span test', (WidgetTester tester) async {
       await tester.pumpWidget(
-        _boilerplate(const IndexedStack(
-          sizing: StackFit.expand,
-          children: <Widget>[
-            Text.rich(TextSpan(
-              text: 'sub',
-              children: <InlineSpan>[
-                TextSpan(text: 'stringsub'),
-                TextSpan(text: 'stringsub'),
-                TextSpan(text: 'stringsub'),
-              ],
-            )),
-            Text('substringsub'),
-          ],
-        )),
+        _boilerplate(
+          const IndexedStack(
+            sizing: StackFit.expand,
+            children: <Widget>[
+              Text.rich(
+                TextSpan(
+                  text: 'sub',
+                  children: <InlineSpan>[
+                    TextSpan(text: 'stringsub'),
+                    TextSpan(text: 'stringsub'),
+                    TextSpan(text: 'stringsub'),
+                  ],
+                ),
+              ),
+              Text('substringsub'),
+            ],
+          ),
+        ),
       );
 
-      expect(find.textRange.ofSubstring('substringsub'), findsExactly(2)); // Pattern skips overlapping matches.
-      expect(find.textRange.ofSubstring('substringsub').first.evaluate().single.textRange, const TextRange(start: 0, end: 12));
-      expect(find.textRange.ofSubstring('substringsub').last.evaluate().single.textRange, const TextRange(start: 18, end: 30));
+      expect(
+        find.textRange.ofSubstring('substringsub'),
+        findsExactly(2),
+      ); // Pattern skips overlapping matches.
+      expect(
+        find.textRange.ofSubstring('substringsub').first.evaluate().single.textRange,
+        const TextRange(start: 0, end: 12),
+      );
+      expect(
+        find.textRange.ofSubstring('substringsub').last.evaluate().single.textRange,
+        const TextRange(start: 18, end: 30),
+      );
 
       expect(
         find.textRange.ofSubstring('substringsub').first.evaluate().single.renderObject,
@@ -409,15 +1046,20 @@ void main() {
     });
 
     testWidgets('finds only static text for now', (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final controller = TextEditingController(text: 'text');
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         _boilerplate(
           EditableText(
-            controller: TextEditingController(text: 'text'),
-            focusNode: FocusNode(),
+            controller: controller,
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: const Color(0x00000000),
             backgroundCursorColor: const Color(0x00000000),
-          )
+          ),
         ),
       );
 
@@ -428,51 +1070,51 @@ void main() {
   testWidgets('ChainedFinders chain properly', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     await tester.pumpWidget(
-      _boilerplate(Column(
-        children: <Widget>[
-          Container(
-            key: key1,
-            child: const Text('1'),
-          ),
-          const Text('2'),
-        ],
-      )),
+      _boilerplate(
+        Column(
+          children: <Widget>[
+            Container(key: key1, child: const Text('1')),
+            const Text('2'),
+          ],
+        ),
+      ),
     );
 
     // Get the text back. By correctly chaining the descendant finder's
     // candidates, it should find 1 instead of 2. If the _LastFinder wasn't
     // correctly chained after the descendant's candidates, the last element
     // with a Text widget would have been 2.
-    final Text text = find
-        .descendant(
-          of: find.byKey(key1),
-          matching: find.byType(Text),
-        )
-        .last
-        .evaluate()
-        .single
-        .widget as Text;
+    final text =
+        find
+                .descendant(of: find.byKey(key1), matching: find.byType(Text))
+                .last
+                .evaluate()
+                .single
+                .widget
+            as Text;
 
     expect(text.data, '1');
   });
 
   testWidgets('finds multiple subtypes', (WidgetTester tester) async {
-    await tester.pumpWidget(_boilerplate(
-      Row(children: <Widget>[
-        const Column(children: <Widget>[
-          Text('Hello'),
-          Text('World'),
-        ]),
-        Column(children: <Widget>[
-          Image(image: FileImage(File('test'))),
-        ]),
-        const Column(children: <Widget>[
-          SimpleGenericWidget<int>(child: Text('one')),
-          SimpleGenericWidget<double>(child: Text('pi')),
-          SimpleGenericWidget<String>(child: Text('two')),
-        ]),
-      ]),
-    ));
+    addTearDown(imageCache.clear);
+    await tester.pumpWidget(
+      _boilerplate(
+        Row(
+          children: <Widget>[
+            const Column(children: <Widget>[Text('Hello'), Text('World')]),
+            Column(children: <Widget>[Image(image: FileImage(File('test')))]),
+            const Column(
+              children: <Widget>[
+                SimpleGenericWidget<int>(child: Text('one')),
+                SimpleGenericWidget<double>(child: Text('pi')),
+                SimpleGenericWidget<String>(child: Text('two')),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
 
     expect(find.bySubtype<Row>(), findsOneWidget);
     expect(find.bySubtype<Column>(), findsNWidgets(3));
@@ -485,8 +1127,7 @@ void main() {
     expect(find.bySubtype<SimpleGenericWidget<Object>>(), findsNWidgets(3));
 
     // Finds all widgets.
-    final int totalWidgetCount =
-        find.byWidgetPredicate((_) => true).evaluate().length;
+    final int totalWidgetCount = find.byWidgetPredicate((_) => true).evaluate().length;
     expect(find.bySubtype<Widget>(), findsNWidgets(totalWidgetCount));
   });
 
@@ -494,16 +1135,22 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
-      const String customDescription = 'custom description';
+      const customDescription = 'custom description';
       late TestFailure failure;
       try {
-        expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
+        expect(
+          find.byElementPredicate((_) => false, description: customDescription),
+          findsOneWidget,
+        );
       } on TestFailure catch (e) {
         failure = e;
       }
 
       expect(failure, isNotNull);
-      expect(failure.message, contains('Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with $customDescription'));
+      expect(
+        failure.message,
+        contains('Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with $customDescription'),
+      );
     });
   });
 
@@ -511,64 +1158,74 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
-      const String customDescription = 'custom description';
+      const customDescription = 'custom description';
       late TestFailure failure;
       try {
-        expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);
+        expect(
+          find.byWidgetPredicate((_) => false, description: customDescription),
+          findsOneWidget,
+        );
       } on TestFailure catch (e) {
         failure = e;
       }
 
       expect(failure, isNotNull);
-      expect(failure.message, contains('Actual: _WidgetPredicateWidgetFinder:<Found 0 widgets with $customDescription'));
+      expect(
+        failure.message,
+        contains('Actual: _WidgetPredicateWidgetFinder:<Found 0 widgets with $customDescription'),
+      );
     });
   });
 
   group('find.descendant', () {
     testWidgets('finds one descendant', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: fooBarTexts),
-        ],
-      ));
+      await tester.pumpWidget(
+        const Row(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[Column(children: fooBarTexts)],
+        ),
+      );
 
-      expect(find.descendant(
-        of: find.widgetWithText(Row, 'foo'),
-        matching: find.text('bar'),
-      ), findsOneWidget);
+      expect(
+        find.descendant(of: find.widgetWithText(Row, 'foo'), matching: find.text('bar')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('finds two descendants with different ancestors', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: fooBarTexts),
-          Column(children: fooBarTexts),
-        ],
-      ));
+      await tester.pumpWidget(
+        const Row(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[
+            Column(children: fooBarTexts),
+            Column(children: fooBarTexts),
+          ],
+        ),
+      );
 
-      expect(find.descendant(
-        of: find.widgetWithText(Column, 'foo'),
-        matching: find.text('bar'),
-      ), findsNWidgets(2));
+      expect(
+        find.descendant(of: find.widgetWithText(Column, 'foo'), matching: find.text('bar')),
+        findsNWidgets(2),
+      );
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
-          Text('bar', textDirection: TextDirection.ltr),
-        ],
-      ));
+      await tester.pumpWidget(
+        const Row(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[
+            Column(children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
+            Text('bar', textDirection: TextDirection.ltr),
+          ],
+        ),
+      );
 
       late TestFailure failure;
       try {
-        expect(find.descendant(
-          of: find.widgetWithText(Column, 'foo'),
-          matching: find.text('bar'),
-        ), findsOneWidget);
+        expect(
+          find.descendant(of: find.widgetWithText(Column, 'foo'), matching: find.text('bar')),
+          findsOneWidget,
+        );
       } on TestFailure catch (e) {
         failure = e;
       }
@@ -585,52 +1242,47 @@ void main() {
 
   group('find.ancestor', () {
     testWidgets('finds one ancestor', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: fooBarTexts),
-        ],
-      ));
+      await tester.pumpWidget(
+        const Row(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[Column(children: fooBarTexts)],
+        ),
+      );
 
-      expect(find.ancestor(
-        of: find.text('bar'),
-        matching: find.widgetWithText(Row, 'foo'),
-      ), findsOneWidget);
+      expect(
+        find.ancestor(of: find.text('bar'), matching: find.widgetWithText(Row, 'foo')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('finds two matching ancestors, one descendant', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
-          child: Row(
-            children: <Widget>[
-              Row(children: fooBarTexts),
-            ],
-          ),
+          child: Row(children: <Widget>[Row(children: fooBarTexts)]),
         ),
       );
 
-      expect(find.ancestor(
-        of: find.text('bar'),
-        matching: find.byType(Row),
-      ), findsNWidgets(2));
+      expect(find.ancestor(of: find.text('bar'), matching: find.byType(Row)), findsNWidgets(2));
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
-          Text('bar', textDirection: TextDirection.ltr),
-        ],
-      ));
+      await tester.pumpWidget(
+        const Row(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[
+            Column(children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
+            Text('bar', textDirection: TextDirection.ltr),
+          ],
+        ),
+      );
 
       late TestFailure failure;
       try {
-        expect(find.ancestor(
-          of: find.text('bar'),
-          matching: find.widgetWithText(Column, 'foo'),
-        ), findsOneWidget);
+        expect(
+          find.ancestor(of: find.text('bar'), matching: find.widgetWithText(Column, 'foo')),
+          findsOneWidget,
+        );
       } on TestFailure catch (e) {
         failure = e;
       }
@@ -645,32 +1297,35 @@ void main() {
     });
 
     testWidgets('Root not matched by default', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: fooBarTexts),
-        ],
-      ));
+      await tester.pumpWidget(
+        const Row(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[Column(children: fooBarTexts)],
+        ),
+      );
 
-      expect(find.ancestor(
-        of: find.byType(Column),
-        matching: find.widgetWithText(Column, 'foo'),
-      ), findsNothing);
+      expect(
+        find.ancestor(of: find.byType(Column), matching: find.widgetWithText(Column, 'foo')),
+        findsNothing,
+      );
     });
 
     testWidgets('Match the root', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: fooBarTexts),
-        ],
-      ));
+      await tester.pumpWidget(
+        const Row(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[Column(children: fooBarTexts)],
+        ),
+      );
 
-      expect(find.descendant(
-        of: find.byType(Column),
-        matching: find.widgetWithText(Column, 'foo'),
-        matchRoot: true,
-      ), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(Column),
+          matching: find.widgetWithText(Column, 'foo'),
+          matchRoot: true,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('is fast in deep tree', (WidgetTester tester) async {
@@ -678,23 +1333,17 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: _deepWidgetTree(
-            depth: 1000,
+            depth: 500,
             child: Row(
               children: <Widget>[
-                _deepWidgetTree(
-                  depth: 1000,
-                  child: const Column(children: fooBarTexts),
-                ),
+                _deepWidgetTree(depth: 500, child: const Column(children: fooBarTexts)),
               ],
             ),
           ),
         ),
       );
 
-      expect(find.ancestor(
-        of: find.text('bar'),
-        matching: find.byType(Row),
-      ), findsOneWidget);
+      expect(find.ancestor(of: find.text('bar'), matching: find.byType(Row)), findsOneWidget);
     });
   });
 
@@ -712,9 +1361,9 @@ void main() {
         child: Semantics(
           container: true,
           textField: true,
-          onSetText: (_) { },
-          onPaste: () { },
-          onLongPress: () { },
+          onSetText: (_) {},
+          onPaste: () {},
+          onLongPress: () {},
           value: 'value2',
           hint: 'hint2',
           label: 'label2',
@@ -728,20 +1377,20 @@ void main() {
             child: Semantics(
               container: true,
               readOnly: true,
-              onLongPress: () { },
+              onLongPress: () {},
               value: 'value4',
               hint: 'hint4',
               label: 'label4',
               child: Semantics(
                 container: true,
-                onLongPress: () { },
+                onLongPress: () {},
                 onCopy: () {},
                 value: 'value5',
                 hint: 'hint5',
-                label: 'label5'
+                label: 'label5',
               ),
             ),
-          )
+          ),
         ),
       ),
     );
@@ -773,7 +1422,12 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _AncestorSemanticsFinder:<Found 2 SemanticsNodes with action "SemanticsAction.copy" that are ancestors of SemanticsNodes with label "label4"'));
+        expect(
+          failure.message,
+          contains(
+            'Actual: _AncestorSemanticsFinder:<Found 2 SemanticsNodes with action "SemanticsAction.copy" that are ancestors of SemanticsNodes with label "label4"',
+          ),
+        );
       });
     });
 
@@ -804,58 +1458,59 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _DescendantSemanticsFinder:<Found 1 SemanticsNode with action "SemanticsAction.copy" descending from SemanticsNode with label "label4"'));
+        expect(
+          failure.message,
+          contains(
+            'Actual: _DescendantSemanticsFinder:<Found 1 SemanticsNode with action "SemanticsAction.copy" descending from SemanticsNode with label "label4"',
+          ),
+        );
       });
     });
 
     group('byPredicate', () {
       testWidgets('finds nodes matching given predicate', (WidgetTester tester) async {
-        final RegExp replaceRegExp = RegExp(r'^[^\d]+');
+        final replaceRegExp = RegExp(r'^[^\d]+');
         await tester.pumpWidget(semanticsTree);
 
-        final SemanticsFinder finder = find.semantics.byPredicate(
-          (SemanticsNode node) {
-            final int labelNum = int.tryParse(node.label.replaceAll(replaceRegExp, '')) ?? -1;
-            return labelNum > 1;
-          },
-        );
+        final SemanticsFinder finder = find.semantics.byPredicate((SemanticsNode node) {
+          final int labelNum = int.tryParse(node.label.replaceAll(replaceRegExp, '')) ?? -1;
+          return labelNum > 1;
+        });
 
         expect(finder, findsExactly(4));
       });
 
       testWidgets('fails with default message', (WidgetTester tester) async {
         late TestFailure failure;
-        final RegExp replaceRegExp = RegExp(r'^[^\d]+');
+        final replaceRegExp = RegExp(r'^[^\d]+');
         await tester.pumpWidget(semanticsTree);
 
-        final SemanticsFinder finder = find.semantics.byPredicate(
-          (SemanticsNode node) {
-            final int labelNum = int.tryParse(node.label.replaceAll(replaceRegExp, '')) ?? -1;
-            return labelNum > 1;
-          },
-        );
+        final SemanticsFinder finder = find.semantics.byPredicate((SemanticsNode node) {
+          final int labelNum = int.tryParse(node.label.replaceAll(replaceRegExp, '')) ?? -1;
+          return labelNum > 1;
+        });
         try {
           expect(finder, findsExactly(5));
         } on TestFailure catch (e) {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 4 matching semantics predicate'));
+        expect(
+          failure.message,
+          contains('Actual: _PredicateSemanticsFinder:<Found 4 matching semantics predicate'),
+        );
       });
 
       testWidgets('fails with given message', (WidgetTester tester) async {
         late TestFailure failure;
-        const String expected = 'custom error message';
-        final RegExp replaceRegExp = RegExp(r'^[^\d]+');
+        const expected = 'custom error message';
+        final replaceRegExp = RegExp(r'^[^\d]+');
         await tester.pumpWidget(semanticsTree);
 
-        final SemanticsFinder finder = find.semantics.byPredicate(
-          (SemanticsNode node) {
-            final int labelNum = int.tryParse(node.label.replaceAll(replaceRegExp, '')) ?? -1;
-            return labelNum > 1;
-          },
-          describeMatch: (_) => expected,
-        );
+        final SemanticsFinder finder = find.semantics.byPredicate((SemanticsNode node) {
+          final int labelNum = int.tryParse(node.label.replaceAll(replaceRegExp, '')) ?? -1;
+          return labelNum > 1;
+        }, describeMatch: (_) => expected);
         try {
           expect(finder, findsExactly(5));
         } on TestFailure catch (e) {
@@ -897,7 +1552,10 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 1 SemanticsNode with label "label3"'));
+        expect(
+          failure.message,
+          contains('Actual: _PredicateSemanticsFinder:<Found 1 SemanticsNode with label "label3"'),
+        );
       });
     });
 
@@ -932,7 +1590,10 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 1 SemanticsNode with value "value3"'));
+        expect(
+          failure.message,
+          contains('Actual: _PredicateSemanticsFinder:<Found 1 SemanticsNode with value "value3"'),
+        );
       });
     });
 
@@ -967,7 +1628,10 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 1 SemanticsNode with hint "hint3"'));
+        expect(
+          failure.message,
+          contains('Actual: _PredicateSemanticsFinder:<Found 1 SemanticsNode with hint "hint3"'),
+        );
       });
     });
 
@@ -992,7 +1656,12 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 3 SemanticsNodes with action "SemanticsAction.copy"'));
+        expect(
+          failure.message,
+          contains(
+            'Actual: _PredicateSemanticsFinder:<Found 3 SemanticsNodes with action "SemanticsAction.copy"',
+          ),
+        );
       });
     });
 
@@ -1023,7 +1692,12 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 4 SemanticsNodes with any of the following actions: [SemanticsAction.paste, SemanticsAction.longPress]:'));
+        expect(
+          failure.message,
+          contains(
+            'Actual: _PredicateSemanticsFinder:<Found 4 SemanticsNodes with any of the following actions: [SemanticsAction.paste, SemanticsAction.longPress]:',
+          ),
+        );
       });
     });
 
@@ -1048,7 +1722,12 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('_PredicateSemanticsFinder:<Found 3 SemanticsNodes with flag "SemanticsFlag.isReadOnly":'));
+        expect(
+          failure.message,
+          contains(
+            '_PredicateSemanticsFinder:<Found 3 SemanticsNodes with flag "SemanticsFlag.isReadOnly":',
+          ),
+        );
       });
     });
 
@@ -1079,109 +1758,124 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 2 SemanticsNodes with any of the following flags: [SemanticsFlag.isHeader, SemanticsFlag.isTextField]:'));
+        expect(
+          failure.message,
+          contains(
+            'Actual: _PredicateSemanticsFinder:<Found 2 SemanticsNodes with any of the following flags: [SemanticsFlag.isHeader, SemanticsFlag.isTextField]:',
+          ),
+        );
       });
     });
 
     group('scrollable', () {
       testWidgets('can find node that can scroll up', (WidgetTester tester) async {
-        final ScrollController controller = ScrollController();
-        await tester.pumpWidget(MaterialApp(
-          home: SingleChildScrollView(
-            controller: controller,
-            child: const SizedBox(width: 100, height: 1000),
+        final controller = ScrollController();
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(width: 100, height: 1000),
+            ),
           ),
-        ));
+        );
 
-        expect(find.semantics.scrollable(), containsSemantics(
-          hasScrollUpAction: true,
-          hasScrollDownAction: false,
-        ));
+        expect(
+          find.semantics.scrollable(),
+          isSemantics(hasScrollUpAction: true, hasScrollDownAction: false),
+        );
       });
 
       testWidgets('can find node that can scroll down', (WidgetTester tester) async {
-        final ScrollController controller = ScrollController(initialScrollOffset: 400);
-        await tester.pumpWidget(MaterialApp(
-          home: SingleChildScrollView(
-            controller: controller,
-            child: const SizedBox(width: 100, height: 1000),
+        final controller = ScrollController(initialScrollOffset: 400);
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(width: 100, height: 1000),
+            ),
           ),
-        ));
+        );
 
-        expect(find.semantics.scrollable(), containsSemantics(
-          hasScrollUpAction: false,
-          hasScrollDownAction: true,
-        ));
+        expect(
+          find.semantics.scrollable(),
+          isSemantics(hasScrollUpAction: false, hasScrollDownAction: true),
+        );
       });
 
       testWidgets('can find node that can scroll left', (WidgetTester tester) async {
-        final ScrollController controller = ScrollController();
-        await tester.pumpWidget(MaterialApp(
-          home: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            controller: controller,
-            child: const SizedBox(width: 1000, height: 100),
+        final controller = ScrollController();
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              controller: controller,
+              child: const SizedBox(width: 1000, height: 100),
+            ),
           ),
-        ));
+        );
 
-        expect(find.semantics.scrollable(), containsSemantics(
-          hasScrollLeftAction: true,
-          hasScrollRightAction: false,
-        ));
+        expect(
+          find.semantics.scrollable(),
+          isSemantics(hasScrollLeftAction: true, hasScrollRightAction: false),
+        );
       });
 
       testWidgets('can find node that can scroll right', (WidgetTester tester) async {
-        final ScrollController controller = ScrollController(initialScrollOffset: 200);
-        await tester.pumpWidget(MaterialApp(
-          home: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            controller: controller,
-            child: const SizedBox(width: 1000, height: 100),
+        final controller = ScrollController(initialScrollOffset: 200);
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              controller: controller,
+              child: const SizedBox(width: 1000, height: 100),
+            ),
           ),
-        ));
+        );
 
-        expect(find.semantics.scrollable(), containsSemantics(
-          hasScrollLeftAction: false,
-          hasScrollRightAction: true,
-        ));
+        expect(
+          find.semantics.scrollable(),
+          isSemantics(hasScrollLeftAction: false, hasScrollRightAction: true),
+        );
       });
 
-      testWidgets('can exclusively find node that scrolls horizontally', (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
-          home: Column(
-            children: <Widget>[
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(width: 1000, height: 100),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: SizedBox(width: 100, height: 1000),
+      testWidgets('can exclusively find node that scrolls horizontally', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          const TestWidgetsApp(
+            home: Column(
+              children: <Widget>[
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(width: 1000, height: 100),
                 ),
-              ),
-            ],
-          )
-        ));
+                Expanded(child: SingleChildScrollView(child: SizedBox(width: 100, height: 1000))),
+              ],
+            ),
+          ),
+        );
 
         expect(find.semantics.scrollable(axis: Axis.horizontal), findsOne);
       });
 
       testWidgets('can exclusively find node that scrolls vertically', (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
-          home: Column(
-            children: <Widget>[
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(width: 1000, height: 100),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: SizedBox(width: 100, height: 1000),
+        await tester.pumpWidget(
+          const TestWidgetsApp(
+            home: Column(
+              children: <Widget>[
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(width: 1000, height: 100),
                 ),
-              ),
-            ],
-          )
-        ));
+                Expanded(child: SingleChildScrollView(child: SizedBox(width: 100, height: 1000))),
+              ],
+            ),
+          ),
+        );
 
         expect(find.semantics.scrollable(axis: Axis.vertical), findsOne);
       });
@@ -1191,16 +1885,18 @@ void main() {
   group('FinderBase', () {
     group('describeMatch', () {
       test('is used for Finder and results', () {
-        const String expected = 'Fake finder describe match';
-        final _FakeFinder finder = _FakeFinder(describeMatchCallback: (_) {
-          return expected;
-        });
+        const expected = 'Fake finder describe match';
+        final finder = _FakeFinder(
+          describeMatchCallback: (_) {
+            return expected;
+          },
+        );
 
         expect(finder.evaluate().toString(), contains(expected));
         expect(finder.toString(describeSelf: true), contains(expected));
       });
 
-      for (int i = 0; i < 4; i++) {
+      for (var i = 0; i < 4; i++) {
         test('gets expected plurality for $i when reporting results from find', () {
           final Plurality expected = switch (i) {
             0 => Plurality.zero,
@@ -1208,12 +1904,13 @@ void main() {
             _ => Plurality.many,
           };
           late final Plurality actual;
-          final _FakeFinder finder = _FakeFinder(
+          final finder = _FakeFinder(
             describeMatchCallback: (Plurality plurality) {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback: (_) => Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback: (_) =>
+                Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.evaluate().toString();
 
@@ -1227,12 +1924,13 @@ void main() {
             _ => Plurality.many,
           };
           late final Plurality actual;
-          final _FakeFinder finder = _FakeFinder(
+          final finder = _FakeFinder(
             describeMatchCallback: (Plurality plurality) {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback: (_) => Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback: (_) =>
+                Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.toString();
 
@@ -1242,12 +1940,13 @@ void main() {
         test('always gets many when describing finder', () {
           const Plurality expected = Plurality.many;
           late final Plurality actual;
-          final _FakeFinder finder = _FakeFinder(
+          final finder = _FakeFinder(
             describeMatchCallback: (Plurality plurality) {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback: (_) => Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback: (_) =>
+                Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.toString(describeSelf: true);
 
@@ -1257,9 +1956,9 @@ void main() {
     });
 
     test('findInCandidates gets allCandidates', () {
-      final List<String> expected = <String>['Test1', 'Test2', 'Test3', 'Test4'];
+      final expected = <String>['Test1', 'Test2', 'Test3', 'Test4'];
       late final List<String> actual;
-      final _FakeFinder finder = _FakeFinder(
+      final finder = _FakeFinder(
         allCandidatesCallback: () => expected,
         findInCandidatesCallback: (Iterable<String> candidates) {
           actual = candidates.toList();
@@ -1272,15 +1971,15 @@ void main() {
     });
 
     test('allCandidates calculated for each find', () {
-      const int expectedCallCount = 3;
-      int actualCallCount = 0;
-      final _FakeFinder finder = _FakeFinder(
+      const expectedCallCount = 3;
+      var actualCallCount = 0;
+      final finder = _FakeFinder(
         allCandidatesCallback: () {
           actualCallCount++;
           return <String>['test'];
         },
       );
-      for (int i = 0; i < expectedCallCount; i++) {
+      for (var i = 0; i < expectedCallCount; i++) {
         finder.evaluate();
       }
 
@@ -1288,15 +1987,15 @@ void main() {
     });
 
     test('allCandidates only called once while caching', () {
-      int actualCallCount = 0;
-      final _FakeFinder finder = _FakeFinder(
+      var actualCallCount = 0;
+      final finder = _FakeFinder(
         allCandidatesCallback: () {
           actualCallCount++;
           return <String>['test'];
         },
       );
       finder.runCached(() {
-        for (int i = 0; i < 5; i++) {
+        for (var i = 0; i < 5; i++) {
           finder.evaluate();
           finder.tryEvaluate();
           final FinderResult<String> _ = finder.found;
@@ -1308,17 +2007,13 @@ void main() {
 
     group('tryFind', () {
       test('returns false if no results', () {
-        final _FakeFinder finder = _FakeFinder(
-          findInCandidatesCallback: (_) => <String>[],
-        );
+        final finder = _FakeFinder(findInCandidatesCallback: (_) => <String>[]);
 
         expect(finder.tryEvaluate(), false);
       });
 
       test('returns true if results are available', () {
-        final _FakeFinder finder = _FakeFinder(
-          findInCandidatesCallback: (_) => <String>['Results'],
-        );
+        final finder = _FakeFinder(findInCandidatesCallback: (_) => <String>['Results']);
 
         expect(finder.tryEvaluate(), true);
       });
@@ -1326,14 +2021,14 @@ void main() {
 
     group('found', () {
       test('throws before any calls to evaluate or tryEvaluate', () {
-        final _FakeFinder finder = _FakeFinder();
+        final finder = _FakeFinder();
 
         expect(finder.hasFound, false);
         expect(() => finder.found, throwsAssertionError);
       });
 
       test('has same results as evaluate after call to evaluate', () {
-        final _FakeFinder finder = _FakeFinder();
+        final finder = _FakeFinder();
         final FinderResult<String> expected = finder.evaluate();
 
         expect(finder.hasFound, true);
@@ -1341,13 +2036,24 @@ void main() {
       });
 
       test('has expected results after call to tryFind', () {
-        final Iterable<String> expected = Iterable<String>.generate(10, (int i) => i.toString());
-        final _FakeFinder finder = _FakeFinder(findInCandidatesCallback: (_) => expected);
+        final expected = Iterable<String>.generate(10, (int i) => i.toString());
+        final finder = _FakeFinder(findInCandidatesCallback: (_) => expected);
         finder.tryEvaluate();
-
 
         expect(finder.hasFound, true);
         expect(finder.found, orderedEquals(expected));
+      });
+    });
+
+    group('first and last', () {
+      test('describes first correctly', () {
+        final finder = _FakeFinder();
+        expect(finder.first.toString(describeSelf: true), contains('(ignoring all but first)'));
+      });
+
+      test('describes last correctly', () {
+        final finder = _FakeFinder();
+        expect(finder.last.toString(describeSelf: true), contains('(ignoring all but last)'));
       });
     });
   });
@@ -1356,7 +2062,11 @@ void main() {
 Widget _boilerplate(Widget child) {
   return Directionality(
     textDirection: TextDirection.ltr,
-    child: child,
+    child: Navigator(
+      onGenerateRoute: (RouteSettings settings) {
+        return TestRoute<void>(builder: (BuildContext context) => child);
+      },
+    ),
   );
 }
 
@@ -1366,8 +2076,7 @@ class SimpleCustomSemanticsWidget extends LeafRenderObjectWidget {
   final String label;
 
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      SimpleCustomSemanticsRenderObject(label);
+  RenderObject createRenderObject(BuildContext context) => SimpleCustomSemanticsRenderObject(label);
 }
 
 class SimpleCustomSemanticsRenderObject extends RenderBox {
@@ -1393,8 +2102,7 @@ class SimpleCustomSemanticsRenderObject extends RenderBox {
 }
 
 class SimpleGenericWidget<T> extends StatelessWidget {
-  const SimpleGenericWidget({required Widget child, super.key})
-      : _child = child;
+  const SimpleGenericWidget({required this._child, super.key});
 
   final Widget _child;
 
@@ -1406,11 +2114,111 @@ class SimpleGenericWidget<T> extends StatelessWidget {
 
 /// Wraps [child] in [depth] layers of [SizedBox]
 Widget _deepWidgetTree({required int depth, required Widget child}) {
-  Widget tree = child;
-  for (int i = 0; i < depth; i += 1) {
+  var tree = child;
+  for (var i = 0; i < depth; i += 1) {
     tree = SizedBox(child: tree);
   }
   return tree;
+}
+
+class TestRoute<T> extends PageRoute<T> {
+  TestRoute({
+    this.child,
+    this.builder,
+    RouteSettings super.settings = const RouteSettings(),
+    this.barrierColor,
+    this.maintainState = false,
+    this.transitionDuration = Duration.zero,
+    this.reverseTransitionDuration = Duration.zero,
+    this.transitionsBuilder,
+    super.fullscreenDialog,
+    super.allowSnapshotting,
+  }) : assert(child != null || builder != null, 'Either child or builder must be provided.');
+
+  final Widget? child;
+  final WidgetBuilder? builder;
+  final PageTransitionsBuilder? transitionsBuilder;
+
+  @override
+  final Duration transitionDuration;
+
+  @override
+  final Duration reverseTransitionDuration;
+
+  @override
+  final Color? barrierColor;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  final bool maintainState;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return child ?? builder?.call(context) ?? const SizedBox.shrink();
+  }
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (transitionsBuilder == null) {
+      return child;
+    }
+
+    return transitionsBuilder!.buildTransitions<T>(
+      this,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
+    );
+  }
+}
+
+class TestButton extends StatelessWidget {
+  const TestButton({
+    required this.child,
+    this.focusNode,
+    this.autofocus = false,
+    this.onPressed,
+    this.behavior,
+    super.key,
+  });
+
+  final bool autofocus;
+  final FocusNode? focusNode;
+  final VoidCallback? onPressed;
+  final Widget child;
+  final HitTestBehavior? behavior;
+
+  void _onFocus() => focusNode?.requestFocus();
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'button',
+      button: true,
+      enabled: onPressed != null,
+      onTap: onPressed,
+      onFocus: _onFocus,
+      focusable: true,
+      child: FocusableActionDetector(
+        enabled: onPressed != null,
+        focusNode: focusNode,
+        autofocus: autofocus,
+        child: GestureDetector(behavior: behavior, onTap: onPressed, child: child),
+      ),
+    );
+  }
 }
 
 class _FakeFinder extends FinderBase<String> {
@@ -1424,24 +2232,73 @@ class _FakeFinder extends FinderBase<String> {
   final DescribeMatchCallback? describeMatchCallback;
   final Iterable<String> Function(Iterable<String> candidates)? findInCandidatesCallback;
 
-
   @override
   Iterable<String> get allCandidates {
-    return allCandidatesCallback?.call() ?? <String>[
-      'String 1', 'String 2', 'String 3',
-    ];
+    return allCandidatesCallback?.call() ?? <String>['String 1', 'String 2', 'String 3'];
   }
 
   @override
   String describeMatch(Plurality plurality) {
-    return describeMatchCallback?.call(plurality) ?? switch (plurality) {
-      Plurality.one => 'String',
-      Plurality.many || Plurality.zero => 'Strings',
-    };
+    return describeMatchCallback?.call(plurality) ??
+        switch (plurality) {
+          Plurality.one => 'String',
+          Plurality.many || Plurality.zero => 'Strings',
+        };
   }
 
   @override
   Iterable<String> findInCandidates(Iterable<String> candidates) {
     return findInCandidatesCallback?.call(candidates) ?? candidates;
+  }
+}
+
+class _ButtonWithTransform extends StatelessWidget {
+  const _ButtonWithTransform({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Transform.scale(
+    scale: 1.1,
+    child: GestureDetector(
+      onTap: onTap,
+      child: Container(width: 40, height: 40, color: const Color(0xffff0000)),
+    ),
+  );
+}
+
+class _ButtonWithAnimatedScale extends StatelessWidget {
+  const _ButtonWithAnimatedScale({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: 0.9,
+      duration: const Duration(milliseconds: 200),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(width: 40, height: 40, color: const Color(0xffff0000)),
+      ),
+    );
+  }
+}
+
+class _ButtonWithIgnorePointer extends StatelessWidget {
+  const _ButtonWithIgnorePointer({required this.onTap, required this.ignoring});
+
+  final VoidCallback onTap;
+  final bool ignoring;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: ignoring,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(width: 40, height: 40, color: const Color(0xffff0000)),
+      ),
+    );
   }
 }

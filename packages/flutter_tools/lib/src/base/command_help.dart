@@ -8,24 +8,21 @@ import 'logger.dart';
 import 'platform.dart';
 import 'terminal.dart';
 
-const String fire = '🔥';
-const int maxLineWidth = 84;
+const fire = '🔥';
+const maxLineWidth = 84;
 
 /// Encapsulates the help text construction and printing.
 class CommandHelp {
   CommandHelp({
-    required Logger logger,
-    required AnsiTerminal terminal,
-    required Platform platform,
-    required OutputPreferences outputPreferences,
-  }) : _logger = logger,
-       _terminal = terminal,
-       _platform = platform,
-       _outputPreferences = outputPreferences;
+    required this._logger,
+    required this._terminal,
+    required this._platform,
+    required this._outputPreferences,
+  });
 
   final Logger _logger;
 
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
 
   final Platform _platform;
 
@@ -47,21 +44,13 @@ class CommandHelp {
     'debugDumpLayerTree',
   );
 
-  late final CommandHelpOption M = _makeOption(
-    'M',
-    'Write SkSL shaders to a unique file in the project directory.',
-  );
-
   late final CommandHelpOption P = _makeOption(
     'P',
     'Toggle performance overlay.',
     'WidgetsApp.showPerformanceOverlay',
   );
 
-  late final CommandHelpOption R = _makeOption(
-    'R',
-    'Hot restart.',
-  );
+  late final CommandHelpOption R = _makeOption('R', 'Hot restart.');
 
   late final CommandHelpOption S = _makeOption(
     'S',
@@ -87,10 +76,7 @@ class CommandHelp {
     'debugBrightnessOverride',
   );
 
-  late final CommandHelpOption c = _makeOption(
-    'c',
-    'Clear the screen',
-  );
+  late final CommandHelpOption c = _makeOption('c', 'Clear the screen');
 
   late final CommandHelpOption d = _makeOption(
     'd',
@@ -103,15 +89,9 @@ class CommandHelp {
     'debugDumpFocusTree',
   );
 
-  late final CommandHelpOption g = _makeOption(
-    'g',
-    'Run source code generators.'
-  );
+  late final CommandHelpOption g = _makeOption('g', 'Run source code generators.');
 
-  late final CommandHelpOption hWithDetails = _makeOption(
-    'h',
-    'Repeat this help message.',
-  );
+  late final CommandHelpOption hWithDetails = _makeOption('h', 'Repeat this help message.');
 
   late final CommandHelpOption hWithoutDetails = _makeOption(
     'h',
@@ -124,15 +104,7 @@ class CommandHelp {
     'WidgetsApp.showWidgetInspectorOverride',
   );
 
-  late final CommandHelpOption j = _makeOption(
-    'j',
-    'Dump frame raster stats for the current frame. (Unsupported for web)',
-  );
-
-  late final CommandHelpOption k = _makeOption(
-    'k',
-    'Toggle CanvasKit rendering.',
-  );
+  late final CommandHelpOption k = _makeOption('k', 'Toggle CanvasKit rendering.');
 
   late final CommandHelpOption o = _makeOption(
     'o',
@@ -151,15 +123,9 @@ class CommandHelp {
     'Quit (terminate the application on the device).',
   );
 
-  late final CommandHelpOption r = _makeOption(
-    'r',
-    'Hot reload. $fire$fire$fire',
-  );
+  late final CommandHelpOption r = _makeOption('r', 'Hot reload. $fire$fire$fire');
 
-  late final CommandHelpOption s = _makeOption(
-    's',
-    'Save a screenshot to flutter.png.',
-  );
+  late final CommandHelpOption s = _makeOption('s', 'Save a screenshot to flutter.png.');
 
   late final CommandHelpOption t = _makeOption(
     't',
@@ -167,10 +133,7 @@ class CommandHelp {
     'debugDumpRenderTree',
   );
 
-  late final CommandHelpOption v = _makeOption(
-    'v',
-    'Open Flutter DevTools.',
-  );
+  late final CommandHelpOption v = _makeOption('v', 'Open Flutter DevTools.');
 
   late final CommandHelpOption w = _makeOption(
     'w',
@@ -181,9 +144,7 @@ class CommandHelp {
   // When updating the list above, see the notes above the list regarding order
   // and tests.
 
-  CommandHelpOption _makeOption(String key, String description, [
-    String inParenthesis = '',
-  ]) {
+  CommandHelpOption _makeOption(String key, String description, [String inParenthesis = '']) {
     return CommandHelpOption(
       key,
       description,
@@ -202,14 +163,11 @@ class CommandHelpOption {
     this.key,
     this.description, {
     this.inParenthesis = '',
-    required Logger logger,
-    required Terminal terminal,
-    required Platform platform,
-    required OutputPreferences outputPreferences,
-  }) : _logger = logger,
-       _terminal = terminal,
-       _platform = platform,
-       _outputPreferences = outputPreferences;
+    required this._logger,
+    required this._terminal,
+    required this._platform,
+    required this._outputPreferences,
+  });
 
   final Logger _logger;
 
@@ -221,8 +179,10 @@ class CommandHelpOption {
 
   /// The key associated with this command.
   final String key;
+
   /// A description of what this command does.
   final String description;
+
   /// Text shown in parenthesis to give the context.
   final String inParenthesis;
 
@@ -232,22 +192,19 @@ class CommandHelpOption {
 
   @override
   String toString() {
-    final StringBuffer message = StringBuffer();
+    final message = StringBuffer();
     message.writeAll(<String>[_terminal.bolden(key), description], ' ');
     if (!_hasTextInParenthesis) {
       return message.toString();
     }
 
-    bool wrap = false;
-    final int maxWidth = math.max(
-      _outputPreferences.wrapColumn,
-      maxLineWidth,
-    );
+    var wrap = false;
+    final int maxWidth = math.max(_outputPreferences.wrapColumn, maxLineWidth);
     final int adjustedMessageLength = _platform.stdoutSupportsAnsi
-      ? _rawMessageLength + 1
-      : message.length;
+        ? _rawMessageLength + 1
+        : message.length;
     int width = maxWidth - adjustedMessageLength;
-    final String parentheticalText = '($inParenthesis)';
+    final parentheticalText = '($inParenthesis)';
     if (width < parentheticalText.length) {
       width = maxWidth;
       wrap = true;

@@ -1,0 +1,39 @@
+import Foundation
+import Testing
+
+@testable import FlutterPluginTool
+@testable import FlutterToolHelper
+
+@Test(
+  "Extract command line arguments",
+  arguments: [
+    (["/", "Debug"], "Invalid arguments: [/, Debug]"),
+    (
+      [
+        "/path/to/SwiftPackages...", "Dummy",
+        "/path/to/SwiftPackages/FlutterNativeIntegration",
+      ], "Invalid build mode: Dummy"
+    ),
+    (
+      ["/path/to/SwiftPackages...", "Debug", "/path/to/SwiftPackages/Other"],
+      "Invalid package path: /path/to/SwiftPackages/Other"
+    ),
+  ]
+)
+func extractArgumentsThrowsError(
+  arguments: [String],
+  expectedErrorMessage: String
+) async throws {
+  #expect(throws: XcodeErrorAndExit.error([expectedErrorMessage])) {
+    try FlutterPluginTool.extractArguments(arguments: arguments)
+  }
+}
+
+@Test
+func extractArgumentsSuccess() async throws {
+  let (buildMode, packagePath) = try FlutterPluginTool.extractArguments(
+    arguments: ["", "Debug", "/path/to/SwiftPackages/FlutterNativeIntegration"]
+  )
+  #expect(buildMode == "Debug")
+  #expect(packagePath == "/path/to/SwiftPackages/FlutterNativeIntegration")
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<!-- Copyright 2014 The Flutter Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file. -->
+<html>
+<head>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+  <style>
+    body { margin: 0; overflow: hidden; background-color: white; touch-action: none; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    #label { position: absolute; top: 10px; left: 10px; font-size: 20px; font-family: sans-serif; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div id='label'>pixel count: 0</div>
+  <canvas id='canvas'></canvas>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const label = document.getElementById('label');
+    let pixelCount = 0;
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+    function drawPixel(x, y) {
+      ctx.fillStyle = 'black';
+      ctx.fillRect(x, y, 2, 2);
+      pixelCount++;
+      label.innerText = 'pixel count: ' + pixelCount;
+    }
+    function handleTouch(e) {
+      e.preventDefault();
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const touch = e.changedTouches[i];
+        drawPixel(touch.clientX, touch.clientY);
+      }
+    }
+    canvas.addEventListener('touchstart', handleTouch, {passive: false});
+    canvas.addEventListener('touchmove', handleTouch, {passive: false});
+  </script>
+</body>
+</html>

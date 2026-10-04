@@ -8,23 +8,41 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 import 'package:flutter_tools/src/project_validator_result.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 class ProjectValidatorDummy extends ProjectValidator {
   @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger? logger, FileSystem? fileSystem}) async {
+  Future<List<ProjectValidatorResult>> start(
+    FlutterProject project, {
+    Logger? logger,
+    FileSystem? fileSystem,
+  }) async {
     return <ProjectValidatorResult>[
-      const ProjectValidatorResult(name: 'pass', value: 'value', status: StatusProjectValidator.success),
-      const ProjectValidatorResult(name: 'fail', value: 'my error', status: StatusProjectValidator.error),
-      const ProjectValidatorResult(name: 'pass two', value: 'pass', warning: 'my warning', status: StatusProjectValidator.warning),
+      const ProjectValidatorResult(
+        name: 'pass',
+        value: 'value',
+        status: StatusProjectValidator.success,
+      ),
+      const ProjectValidatorResult(
+        name: 'fail',
+        value: 'my error',
+        status: StatusProjectValidator.error,
+      ),
+      const ProjectValidatorResult(
+        name: 'pass two',
+        value: 'pass',
+        warning: 'my warning',
+        status: StatusProjectValidator.warning,
+      ),
     ];
   }
 
@@ -39,10 +57,22 @@ class ProjectValidatorDummy extends ProjectValidator {
 
 class ProjectValidatorSecondDummy extends ProjectValidator {
   @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger? logger, FileSystem? fileSystem}) async {
+  Future<List<ProjectValidatorResult>> start(
+    FlutterProject project, {
+    Logger? logger,
+    FileSystem? fileSystem,
+  }) async {
     return <ProjectValidatorResult>[
-      const ProjectValidatorResult(name: 'second', value: 'pass', status: StatusProjectValidator.success),
-      const ProjectValidatorResult(name: 'other fail', value: 'second fail', status: StatusProjectValidator.error),
+      const ProjectValidatorResult(
+        name: 'second',
+        value: 'pass',
+        status: StatusProjectValidator.success,
+      ),
+      const ProjectValidatorResult(
+        name: 'other fail',
+        value: 'second fail',
+        status: StatusProjectValidator.error,
+      ),
     ];
   }
 
@@ -57,7 +87,11 @@ class ProjectValidatorSecondDummy extends ProjectValidator {
 
 class ProjectValidatorCrash extends ProjectValidator {
   @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger? logger, FileSystem? fileSystem}) async {
+  Future<List<ProjectValidatorResult>> start(
+    FlutterProject project, {
+    Logger? logger,
+    FileSystem? fileSystem,
+  }) async {
     throw Exception('my exception');
   }
 
@@ -72,39 +106,51 @@ class ProjectValidatorCrash extends ProjectValidator {
 
 void main() {
   late FileSystem fileSystem;
-  late Terminal terminal;
   late ProcessManager processManager;
   late Platform platform;
 
   group('analyze --suggestions command', () {
-
     setUp(() {
+      Cache.disableLocking();
       fileSystem = MemoryFileSystem.test();
-      terminal = Terminal.test();
+      fileSystem
+          .directory('/Users/bkonyi/flutter/widget_preview_analysis_server/bin/cache')
+          .createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: foo_project
+environment:
+  sdk: ^3.7.0-0
+''');
       processManager = FakeProcessManager.empty();
       platform = FakePlatform();
     });
 
-    testUsingContext('success, error and warning', () async {
-      final BufferLogger loggerTest = BufferLogger.test();
-      final AnalyzeCommand command = AnalyzeCommand(
-        artifacts: Artifacts.test(),
-        fileSystem: fileSystem,
-        logger: loggerTest,
-        platform: platform,
-        terminal: terminal,
-        processManager: processManager,
+    tearDown(() {
+      Cache.enableLocking();
+    });
+
+    testWithoutContext('success, error and warning', () async {
+      final loggerTest = BufferLogger.test();
+      final command = AnalyzeCommand(
         allProjectValidators: <ProjectValidator>[
           ProjectValidatorDummy(),
-          ProjectValidatorSecondDummy()
+          ProjectValidatorSecondDummy(),
         ],
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: loggerTest,
+          platform: platform,
+          processManager: processManager,
+        ),
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['analyze', '--suggestions', './']);
+      await runner.run(<String>['analyze', '--suggestions', '--no-pub', './']);
 
-      const String expected = '\n'
+      const expected =
+          '\n'
           '┌──────────────────────────────────────────┐\n'
           '│ First Dummy                              │\n'
           '│ [✓] pass: value                          │\n'
@@ -118,43 +164,44 @@ void main() {
       expect(loggerTest.statusText, contains(expected));
     });
 
-    testUsingContext('crash', () async {
-      final BufferLogger loggerTest = BufferLogger.test();
-      final AnalyzeCommand command = AnalyzeCommand(
+    testWithoutContext('crash', () async {
+      final loggerTest = BufferLogger.test();
+      final command = AnalyzeCommand(
+        allProjectValidators: <ProjectValidator>[ProjectValidatorCrash()],
+        suppressAnalytics: true,
+        toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
-          fileSystem: fileSystem,
+          fs: fileSystem,
           logger: loggerTest,
           platform: platform,
-          terminal: terminal,
           processManager: processManager,
-          allProjectValidators: <ProjectValidator>[
-            ProjectValidatorCrash(),
-          ],
-          suppressAnalytics: true,
+        ),
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['analyze', '--suggestions', './']);
+      await runner.run(<String>['analyze', '--suggestions', '--no-pub', './']);
 
-      const String expected = '[☠] Exception: my exception: #0      ProjectValidatorCrash.start';
+      const expected = '[☠] Exception: my exception: #0      ProjectValidatorCrash.start';
 
       expect(loggerTest.statusText, contains(expected));
     });
 
-    testUsingContext('--watch and --suggestions not compatible together', () async {
-      final BufferLogger loggerTest = BufferLogger.test();
-      final AnalyzeCommand command = AnalyzeCommand(
-        artifacts: Artifacts.test(),
-        fileSystem: fileSystem,
-        logger: loggerTest,
-        platform: platform,
-        terminal: terminal,
-        processManager: processManager,
+    testWithoutContext('--watch and --suggestions not compatible together', () async {
+      final loggerTest = BufferLogger.test();
+      final command = AnalyzeCommand(
         allProjectValidators: <ProjectValidator>[],
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: loggerTest,
+          platform: platform,
+          processManager: processManager,
+        ),
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
-      Future<void> result () => runner.run(<String>['analyze', '--suggestions', '--watch']);
+      Future<void> result() =>
+          runner.run(<String>['analyze', '--suggestions', '--watch', '--no-pub']);
 
       expect(result, throwsToolExit(message: 'flag --watch is not compatible with --suggestions'));
     });

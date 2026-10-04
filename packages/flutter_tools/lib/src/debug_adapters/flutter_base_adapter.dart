@@ -4,18 +4,21 @@
 
 import 'dart:async';
 
-import 'package:dds/dap.dart' hide PidTracker;
+import 'package:dap_adapters/dap_adapters.dart' hide PidTracker;
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
+import '../base/utils.dart';
 import '../cache.dart';
+import '../convert.dart';
 import 'flutter_adapter_args.dart';
 import 'mixins.dart';
 
 /// A base DAP Debug Adapter for Flutter applications and tests.
-abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments, FlutterAttachRequestArguments>
+abstract class FlutterBaseDebugAdapter
+    extends DartDebugAdapter<FlutterLaunchRequestArguments, FlutterAttachRequestArguments>
     with PidTracker {
   FlutterBaseDebugAdapter(
     super.channel, {
@@ -26,12 +29,9 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
     super.enableAuthCodes,
     super.logger,
     super.onError,
-  }) : flutterSdkRoot = Cache.flutterRoot!,
-      // Always disable in the DAP layer as it's handled in the spawned
-      // 'flutter' process.
-      super(enableDds: false) {
-        configureOrgDartlangSdkMappings();
-      }
+  }) : flutterSdkRoot = Cache.flutterRoot! {
+    configureOrgDartlangSdkMappings();
+  }
 
   FileSystem fileSystem;
   Platform platform;
@@ -45,13 +45,37 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
   /// the same as what is passed to the base class, which is always provided 'false'.
   final bool enableFlutterDds;
 
-  @override
-  final FlutterLaunchRequestArguments Function(Map<String, Object?> obj)
-      parseLaunchArgs = FlutterLaunchRequestArguments.fromJson;
+  /// Whether the adapter is currently waiting for the debugger to initialize.
+  bool waitingForDebugger = false;
+
+  /// A completer that completes with an error if debugger initialization fails
+  /// (for example, if the session terminates early).
+  ///
+  /// A dummy error handler is attached to the future to prevent unhandled
+  /// asynchronous exceptions if it completes before any listeners are active.
+  final Completer<void> debuggerInitializationFailedCompleter = Completer<void>()
+    ..future.then<void>((_) {}, onError: (Object _) {});
 
   @override
-  final FlutterAttachRequestArguments Function(Map<String, Object?> obj)
-      parseAttachArgs = FlutterAttachRequestArguments.fromJson;
+  void handleSessionTerminate([String exitSuffix = '']) {
+    isTerminating = true;
+    if (waitingForDebugger && !debuggerInitializationFailedCompleter.isCompleted) {
+      final String suffix = exitSuffix.trim();
+      final message = suffix.isNotEmpty
+          ? 'Session terminated before debugger initialized: $suffix'
+          : 'Session terminated before debugger initialized';
+      debuggerInitializationFailedCompleter.completeError(DebugAdapterException(message));
+    }
+    super.handleSessionTerminate(exitSuffix);
+  }
+
+  @override
+  final FlutterLaunchRequestArguments Function(Map<String, Object?> obj) parseLaunchArgs =
+      FlutterLaunchRequestArguments.fromJson;
+
+  @override
+  final FlutterAttachRequestArguments Function(Map<String, Object?> obj) parseAttachArgs =
+      FlutterAttachRequestArguments.fromJson;
 
   /// Whether the VM Service closing should be used as a signal to terminate the debug session.
   ///
@@ -97,12 +121,28 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
     orgDartlangSdkMappings.clear();
 
     // 'dart:ui' maps to /flutter/lib/ui
-    final String flutterRoot = fileSystem.path.join(flutterSdkRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui');
+    final String flutterRoot = fileSystem.path.join(
+      flutterSdkRoot,
+      'bin',
+      'cache',
+      'pkg',
+      'sky_engine',
+      'lib',
+      'ui',
+    );
     orgDartlangSdkMappings[flutterRoot] = Uri.parse('org-dartlang-sdk:///flutter/lib/ui');
 
-    // The rest of the Dart SDK maps to /third_party/dart/sdk
-    final String dartRoot = fileSystem.path.join(flutterSdkRoot, 'bin', 'cache', 'pkg', 'sky_engine');
-    orgDartlangSdkMappings[dartRoot] = Uri.parse('org-dartlang-sdk:///third_party/dart/sdk');
+    // The rest of the Dart SDK maps to /flutter/third_party/dart/sdk
+    final String dartRoot = fileSystem.path.join(
+      flutterSdkRoot,
+      'bin',
+      'cache',
+      'pkg',
+      'sky_engine',
+    );
+    orgDartlangSdkMappings[dartRoot] = Uri.parse(
+      'org-dartlang-sdk:///flutter/third_party/dart/sdk',
+    );
   }
 
   @override
@@ -132,29 +172,31 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
     required List<String> processArgs,
     required Map<String, String>? env,
   }) async {
-    final Process process = await (
-      String executable,
-      List<String> processArgs, {
-      required Map<String, String>? env,
-    }) async {
-      logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
-      final Process process = await Process.start(
-        executable,
-        processArgs,
-        workingDirectory: args.cwd,
-        environment: env,
-      );
-      pidsToTerminate.add(process.pid);
-      return process;
-    }(executable, processArgs, env: env);
+    final Process process =
+        await (
+          String executable,
+          List<String> processArgs, {
+          required Map<String, String>? env,
+        }) async {
+          logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
+          final Process process = await Process.start(
+            executable,
+            processArgs,
+            workingDirectory: args.cwd,
+            environment: env,
+          );
+          pidsToTerminate.add(process.pid);
+          return process;
+        }(executable, processArgs, env: env);
     this.process = process;
 
-    process.stdout.transform(ByteToLineTransformer()).listen(handleStdout);
-    process.stderr.listen(handleStderr);
+    process.stdout.transformWithCallSite(ByteToLineTransformer()).listen(handleStdout);
+    // Use permissive decoder for debugger stderr which may contain invalid UTF-8
+    process.stderr.transformWithCallSite(utf8AllowMalformed.decoder).listen(handleStderr);
     unawaited(process.exitCode.then(handleExitCode));
   }
 
   void handleExitCode(int code);
-  void handleStderr(List<int> data);
+  void handleStderr(String data);
   void handleStdout(String data);
 }

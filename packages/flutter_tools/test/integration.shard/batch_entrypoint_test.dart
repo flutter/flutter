@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('windows')
+library;
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -9,6 +12,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
+import 'test_data/tools_entrypoint_env.dart';
 import 'test_utils.dart';
 
 final String flutterRootPath = getFlutterRoot();
@@ -26,7 +30,7 @@ Future<void> main() async {
     // the Dart SDK update.
     dartSdkStamp.deleteSync();
     final Future<String> runFuture = runDartBatch();
-    final Timer timer = Timer(const Duration(minutes: 5), () {
+    final timer = Timer(const Duration(minutes: 5), () {
       // This print is useful for people debugging this test. Normally we would
       // avoid printing in a test but this is an exception because it's useful
       // ambient information.
@@ -36,7 +40,7 @@ Future<void> main() async {
         'Historically this is a sign that 7-Zip zip extraction is waiting for '
         'the user to confirm they would like to overwrite files. '
         "This likely means the test isn't a flake and will fail. "
-        'See: https://github.com/flutter/flutter/issues/132592'
+        'See: https://github.com/flutter/flutter/issues/132592',
       );
     });
 
@@ -52,27 +56,35 @@ Future<void> main() async {
     // Do not assert on the exact unzipping method, as this could change on CI
     expect(output, contains(RegExp(r'Expanding downloaded archive with (.*)...')));
     expect(output, isNot(contains('Use the -Force parameter' /* Luke */)));
-  },
-  skip: !platform.isWindows); // [intended] Only Windows uses the batch entrypoint
+  });
+
+  // Regresion test for https://github.com/flutter/flutter/issues/171024.
+  test('shared.bat does not rebuild the flutter tool on a no-op pub upgrade', () async {
+    setupToolsEntrypointNewerPubpsec();
+
+    // Run flutter --version, observe we rebuild the tool.
+    ProcessResult result = await processManager.run(<String>[flutterBatch.path, '--version']);
+    expect(result.stderr, contains('Building flutter tool'));
+
+    // Now do it again.
+    result = await processManager.run(<String>[flutterBatch.path, '--version']);
+    expect(result.stderr, isNot(contains('Building flutter tool...')));
+  });
 }
 
 Future<String> runDartBatch() async {
-  String output = '';
-  final Process process = await processManager.start(
-    <String>[
-      dartBatch.path
-    ],
-  );
-  final Future<Object?> stdoutFuture = process.stdout
-    .transform<String>(utf8.decoder)
-    .forEach((String str) {
-      output += str;
-    });
-  final Future<Object?> stderrFuture = process.stderr
-    .transform<String>(utf8.decoder)
-    .forEach((String str) {
-      output += str;
-    });
+  var output = '';
+  final Process process = await processManager.start(<String>[dartBatch.path]);
+  final Future<Object?> stdoutFuture = process.stdout.transform<String>(utf8.decoder).forEach((
+    String str,
+  ) {
+    output += str;
+  });
+  final Future<Object?> stderrFuture = process.stderr.transform<String>(utf8.decoder).forEach((
+    String str,
+  ) {
+    output += str;
+  });
 
   // Wait for the output to complete
   await Future.wait(<Future<Object?>>[stdoutFuture, stderrFuture]);
@@ -80,8 +92,9 @@ Future<String> runDartBatch() async {
   expect(
     await process.exitCode,
     0,
-    reason: 'child process exited with code ${await process.exitCode}, and '
-    'output:\n$output',
+    reason:
+        'child process exited with code ${await process.exitCode}, and '
+        'output:\n$output',
   );
 
   // Check the Dart tool prints the expected output.
@@ -93,17 +106,19 @@ Future<String> runDartBatch() async {
 
 // The executable batch entrypoint for the Dart binary.
 File get dartBatch {
-  return flutterRoot
-    .childDirectory('bin')
-    .childFile('dart.bat')
-    .absolute;
+  return flutterRoot.childDirectory('bin').childFile('dart.bat').absolute;
+}
+
+// The executable batch entrypoint for the Flutter binary.
+File get flutterBatch {
+  return flutterRoot.childDirectory('bin').childFile('flutter.bat').absolute;
 }
 
 // The Dart SDK's stamp file.
 File get dartSdkStamp {
   return flutterRoot
-    .childDirectory('bin')
-    .childDirectory('cache')
-    .childFile('engine-dart-sdk.stamp')
-    .absolute;
+      .childDirectory('bin')
+      .childDirectory('cache')
+      .childFile('engine-dart-sdk.stamp')
+      .absolute;
 }

@@ -9,16 +9,31 @@ void main() {
   test('applyGrowthDirectionToAxisDirection produces expected AxisDirection', () {
     expect(AxisDirection.values.length, 4);
     for (final AxisDirection axisDirection in AxisDirection.values) {
-      expect(applyGrowthDirectionToAxisDirection(axisDirection, GrowthDirection.forward), axisDirection);
+      expect(
+        applyGrowthDirectionToAxisDirection(axisDirection, GrowthDirection.forward),
+        axisDirection,
+      );
     }
-    expect(applyGrowthDirectionToAxisDirection(AxisDirection.up, GrowthDirection.reverse), AxisDirection.down);
-    expect(applyGrowthDirectionToAxisDirection(AxisDirection.down, GrowthDirection.reverse), AxisDirection.up);
-    expect(applyGrowthDirectionToAxisDirection(AxisDirection.left, GrowthDirection.reverse), AxisDirection.right);
-    expect(applyGrowthDirectionToAxisDirection(AxisDirection.right, GrowthDirection.reverse), AxisDirection.left);
+    expect(
+      applyGrowthDirectionToAxisDirection(AxisDirection.up, GrowthDirection.reverse),
+      AxisDirection.down,
+    );
+    expect(
+      applyGrowthDirectionToAxisDirection(AxisDirection.down, GrowthDirection.reverse),
+      AxisDirection.up,
+    );
+    expect(
+      applyGrowthDirectionToAxisDirection(AxisDirection.left, GrowthDirection.reverse),
+      AxisDirection.right,
+    );
+    expect(
+      applyGrowthDirectionToAxisDirection(AxisDirection.right, GrowthDirection.reverse),
+      AxisDirection.left,
+    );
   });
 
   test('SliverConstraints are the same when copied', () {
-    const SliverConstraints original = SliverConstraints(
+    const original = SliverConstraints(
       axisDirection: AxisDirection.down,
       growthDirection: GrowthDirection.forward,
       userScrollDirection: ScrollDirection.idle,
@@ -41,7 +56,7 @@ void main() {
   });
 
   test('SliverConstraints normalizedGrowthDirection is inferred from AxisDirection and GrowthDirection', () {
-    const SliverConstraints a = SliverConstraints(
+    const a = SliverConstraints(
       axisDirection: AxisDirection.down,
       growthDirection: GrowthDirection.forward,
       userScrollDirection: ScrollDirection.idle,
@@ -66,7 +81,7 @@ void main() {
       crossAxisExtent: 40.0,
       viewportMainAxisExtent: 30.0,
     );
-    const SliverConstraints d = SliverConstraints(
+    const d = SliverConstraints(
       axisDirection: AxisDirection.up,
       growthDirection: GrowthDirection.reverse,
       userScrollDirection: ScrollDirection.forward,

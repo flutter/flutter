@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scroll_position.dart';
+library;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
@@ -10,6 +13,7 @@ import 'focus_scope.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
+import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_delegate.dart';
 import 'scroll_notification.dart';
@@ -57,18 +61,43 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
     this.verticalDetails = const ScrollableDetails.vertical(),
     this.horizontalDetails = const ScrollableDetails.horizontal(),
     required this.delegate,
+    @Deprecated(
+      'Use scrollCacheExtent instead. '
+      'This feature was deprecated after v3.41.0-0.0.pre.',
+    )
     this.cacheExtent,
+    @Deprecated(
+      'Use scrollCacheExtent instead. '
+      'This feature was deprecated after v3.41.0-0.0.pre.',
+    )
+    this.cacheExtentStyle,
+    this.scrollCacheExtent,
     this.diagonalDragBehavior = DiagonalDragBehavior.none,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+    this.keyboardDismissBehavior,
     this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
   });
 
   /// A delegate that provides the children for the [TwoDimensionalScrollView].
   final TwoDimensionalChildDelegate delegate;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
+  )
   final double? cacheExtent;
+
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
+  )
+  final CacheExtentStyle? cacheExtentStyle;
+
+  /// {@macro flutter.rendering.RenderViewportBase.scrollCacheExtent}
+  final ScrollCacheExtent? scrollCacheExtent;
 
   /// Whether scrolling gestures should lock to one axes, allow free movement
   /// in both axes, or be evaluated on a weighted scale.
@@ -105,7 +134,15 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
   final DragStartBehavior dragStartBehavior;
 
   /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
-  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
+  ///
+  /// If [keyboardDismissBehavior] is null then it will fallback to the inherited
+  /// [ScrollBehavior.getKeyboardDismissBehavior].
+  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
+
+  /// {@macro flutter.widgets.scrollable.hitTestBehavior}
+  ///
+  /// This value applies to both axes.
+  final HitTestBehavior hitTestBehavior;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -129,11 +166,11 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(
       axisDirectionToAxis(verticalDetails.direction) == Axis.vertical,
-      'TwoDimensionalScrollView.verticalDetails are not Axis.vertical.'
+      'TwoDimensionalScrollView.verticalDetails are not Axis.vertical.',
     );
     assert(
       axisDirectionToAxis(horizontalDetails.direction) == Axis.horizontal,
-      'TwoDimensionalScrollView.horizontalDetails are not Axis.horizontal.'
+      'TwoDimensionalScrollView.horizontalDetails are not Axis.horizontal.',
     );
 
     ScrollableDetails mainAxisDetails = switch (mainAxis) {
@@ -141,11 +178,10 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
       Axis.horizontal => horizontalDetails,
     };
 
-    final bool effectivePrimary = primary
-      ?? mainAxisDetails.controller == null && PrimaryScrollController.shouldInherit(
-        context,
-        mainAxis,
-      );
+    final bool effectivePrimary =
+        primary ??
+        mainAxisDetails.controller == null &&
+            PrimaryScrollController.shouldInherit(context, mainAxis);
 
     if (effectivePrimary) {
       // Using PrimaryScrollController for mainAxis.
@@ -153,15 +189,13 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
         mainAxisDetails.controller == null,
         'TwoDimensionalScrollView.primary was explicitly set to true, but a '
         'ScrollController was provided in the ScrollableDetails of the '
-        'TwoDimensionalScrollView.mainAxis.'
+        'TwoDimensionalScrollView.mainAxis.',
       );
-      mainAxisDetails = mainAxisDetails.copyWith(
-        controller: PrimaryScrollController.of(context),
-      );
+      mainAxisDetails = mainAxisDetails.copyWith(controller: PrimaryScrollController.of(context));
     }
 
-    final TwoDimensionalScrollable scrollable = TwoDimensionalScrollable(
-      horizontalDetails : switch (mainAxis) {
+    final scrollable = TwoDimensionalScrollable(
+      horizontalDetails: switch (mainAxis) {
         Axis.horizontal => mainAxisDetails,
         Axis.vertical => horizontalDetails,
       },
@@ -172,20 +206,27 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
       diagonalDragBehavior: diagonalDragBehavior,
       viewportBuilder: buildViewport,
       dragStartBehavior: dragStartBehavior,
+      hitTestBehavior: hitTestBehavior,
     );
 
     final Widget scrollableResult = effectivePrimary
-      // Further descendant ScrollViews will not inherit the same PrimaryScrollController
-      ? PrimaryScrollController.none(child: scrollable)
-      : scrollable;
+        // Further descendant ScrollViews will not inherit the same PrimaryScrollController
+        ? PrimaryScrollController.none(child: scrollable)
+        : scrollable;
 
-    if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
+    final ScrollViewKeyboardDismissBehavior effectiveKeyboardDismissBehavior =
+        keyboardDismissBehavior ??
+        ScrollConfiguration.of(context).getKeyboardDismissBehavior(context);
+
+    if (effectiveKeyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
       return NotificationListener<ScrollUpdateNotification>(
         child: scrollableResult,
         onNotification: (ScrollUpdateNotification notification) {
-          final FocusScopeNode focusScope = FocusScope.of(context);
-          if (notification.dragDetails != null && focusScope.hasFocus) {
-            focusScope.unfocus();
+          final FocusScopeNode currentScope = FocusScope.of(context);
+          if (notification.dragDetails != null &&
+              !currentScope.hasPrimaryFocus &&
+              currentScope.hasFocus) {
+            FocusManager.instance.primaryFocus?.unfocus();
           }
           return false;
         },
@@ -198,9 +239,21 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<Axis>('mainAxis', mainAxis));
-    properties.add(EnumProperty<DiagonalDragBehavior>('diagonalDragBehavior', diagonalDragBehavior));
-    properties.add(FlagProperty('primary', value: primary, ifTrue: 'using primary controller', showName: true));
-    properties.add(DiagnosticsProperty<ScrollableDetails>('verticalDetails', verticalDetails, showName: false));
-    properties.add(DiagnosticsProperty<ScrollableDetails>('horizontalDetails', horizontalDetails, showName: false));
+    properties.add(
+      EnumProperty<DiagonalDragBehavior>('diagonalDragBehavior', diagonalDragBehavior),
+    );
+    properties.add(
+      FlagProperty('primary', value: primary, ifTrue: 'using primary controller', showName: true),
+    );
+    properties.add(
+      DiagnosticsProperty<ScrollableDetails>('verticalDetails', verticalDetails, showName: false),
+    );
+    properties.add(
+      DiagnosticsProperty<ScrollableDetails>(
+        'horizontalDetails',
+        horizontalDetails,
+        showName: false,
+      ),
+    );
   }
 }

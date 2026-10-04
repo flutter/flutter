@@ -1,0 +1,206 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:ffi';
+
+import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
+import 'package:ui/ui.dart' as ui;
+
+class SkwasmPaint implements ui.Paint {
+  SkwasmPaint();
+
+  /// Creates the C++ side paint object based on the current state of this
+  /// paint object, and returns it with ownership.
+  ///
+  /// It is the responsibility of the caller to dispose of the returned handle
+  /// when it's no longer needed.
+  PaintHandle toRawPaint({ui.TileMode defaultBlurTileMode = ui.TileMode.decal}) {
+    final PaintHandle rawPaint = paintCreate(
+      isAntiAlias,
+      blendMode.index,
+      _colorValue,
+      style.index,
+      strokeWidth,
+      strokeCap.index,
+      strokeJoin.index,
+      strokeMiterLimit,
+      invertColors,
+    );
+
+    final EngineColorFilter? localColorFilter = _colorFilter;
+    if (localColorFilter != null) {
+      final backendFilter = localColorFilter.backendFilter as SkwasmColorFilter;
+      paintSetColorFilter(rawPaint, backendFilter.handle);
+    }
+
+    final ShaderHandle? shaderHandle =
+        (_shader?.getBackendShader(filterQuality) as SkwasmShader?)?.handle;
+    if (shaderHandle != null) {
+      paintSetShader(rawPaint, shaderHandle);
+    }
+
+    final localMaskFilter = maskFilter as EngineMaskFilter?;
+    if (localMaskFilter != null) {
+      final backendFilter = localMaskFilter.backendFilter as SkwasmMaskFilter;
+      paintSetMaskFilter(rawPaint, backendFilter.handle);
+    }
+
+    final ui.ImageFilter? filter = imageFilter;
+    if (filter != null) {
+      final EngineImageFilter engineFilter;
+      if (filter is ui.ColorFilter) {
+        engineFilter = EngineColorFilterImageFilter(colorFilter: filter as EngineColorFilter);
+      } else {
+        engineFilter = filter as EngineImageFilter;
+      }
+      final backendFilter = engineFilter.getBackendFilter(
+        defaultBlurTileMode: defaultBlurTileMode,
+      ) as SkwasmImageFilter;
+      final ImageFilterHandle nativeHandle = backendFilter.nativeFilter;
+      if (nativeHandle != nullptr) {
+        paintSetImageFilter(rawPaint, nativeHandle);
+      }
+    }
+
+    return rawPaint;
+  }
+
+  @override
+  ui.BlendMode blendMode = _kBlendModeDefault;
+
+  // Must be kept in sync with the default in paint.cc.
+  static const ui.BlendMode _kBlendModeDefault = ui.BlendMode.srcOver;
+
+  @override
+  ui.PaintingStyle style = ui.PaintingStyle.fill;
+
+  @override
+  double strokeWidth = 0.0;
+
+  @override
+  ui.StrokeCap strokeCap = ui.StrokeCap.butt;
+
+  @override
+  ui.StrokeJoin strokeJoin = ui.StrokeJoin.miter;
+
+  @override
+  bool isAntiAlias = true;
+
+  @override
+  ui.Color get color => ui.Color(_colorValue);
+  @override
+  set color(ui.Color value) {
+    _colorValue = value.value;
+  }
+
+  static const int _kColorDefault = 0xFF000000;
+  int _colorValue = _kColorDefault;
+
+  @override
+  double strokeMiterLimit = _kStrokeMiterLimitDefault;
+  static const double _kStrokeMiterLimitDefault = 4.0;
+
+  @override
+  ui.Shader? get shader => _shader;
+
+  @override
+  set shader(ui.Shader? uiShader) {
+    _shader = uiShader as EngineShader?;
+  }
+
+  EngineShader? _shader;
+
+  @override
+  ui.FilterQuality filterQuality = ui.FilterQuality.none;
+
+  @override
+  ui.ImageFilter? imageFilter;
+
+  @override
+  ui.ColorFilter? get colorFilter => _colorFilter;
+
+  @override
+  set colorFilter(ui.ColorFilter? filter) {
+    _colorFilter = filter as EngineColorFilter?;
+  }
+
+  EngineColorFilter? _colorFilter;
+
+  @override
+  ui.MaskFilter? maskFilter;
+
+  @override
+  bool invertColors = false;
+
+  @override
+  String toString() {
+    var resultString = 'Paint()';
+
+    assert(() {
+      final result = StringBuffer();
+      var semicolon = '';
+      result.write('Paint(');
+      if (style == ui.PaintingStyle.stroke) {
+        result.write('$style');
+        if (strokeWidth != 0.0) {
+          result.write(' ${strokeWidth.toStringAsFixed(1)}');
+        } else {
+          result.write(' hairline');
+        }
+        if (strokeCap != ui.StrokeCap.butt) {
+          result.write(' $strokeCap');
+        }
+        if (strokeJoin == ui.StrokeJoin.miter) {
+          if (strokeMiterLimit != _kStrokeMiterLimitDefault) {
+            result.write(' $strokeJoin up to ${strokeMiterLimit.toStringAsFixed(1)}');
+          }
+        } else {
+          result.write(' $strokeJoin');
+        }
+        semicolon = '; ';
+      }
+      if (!isAntiAlias) {
+        result.write('${semicolon}antialias off');
+        semicolon = '; ';
+      }
+      if (color != const ui.Color(_kColorDefault)) {
+        result.write('$semicolon$color');
+        semicolon = '; ';
+      }
+      if (blendMode.index != _kBlendModeDefault.index) {
+        result.write('$semicolon$blendMode');
+        semicolon = '; ';
+      }
+      if (colorFilter != null) {
+        result.write('${semicolon}colorFilter: $colorFilter');
+        semicolon = '; ';
+      }
+      if (maskFilter != null) {
+        result.write('${semicolon}maskFilter: $maskFilter');
+        semicolon = '; ';
+      }
+      if (filterQuality != ui.FilterQuality.none) {
+        result.write('${semicolon}filterQuality: $filterQuality');
+        semicolon = '; ';
+      }
+      if (shader != null) {
+        result.write('${semicolon}shader: $shader');
+        semicolon = '; ';
+      }
+      if (imageFilter != null) {
+        result.write('${semicolon}imageFilter: $imageFilter');
+        semicolon = '; ';
+      }
+      if (invertColors) {
+        result.write('${semicolon}invert: $invertColors');
+      }
+      result.write(')');
+      resultString = result.toString();
+      return true;
+    }());
+
+    return resultString;
+  }
+}

@@ -12,7 +12,7 @@ enum UndoDirection {
   undo,
 
   /// Perform a redo action.
-  redo
+  redo,
 }
 
 /// A low-level interface to the system's undo manager.
@@ -21,7 +21,7 @@ enum UndoDirection {
 /// [UndoManagerClient] and set it as the [client] on [UndoManager].
 ///
 /// The [setUndoState] method can be used to update the system's undo manager
-/// using the [canUndo] and [canRedo] parameters.
+/// using the `canUndo` and `canRedo` parameters.
 ///
 /// When the system undo or redo button is tapped, the current
 /// [UndoManagerClient] will receive [UndoManagerClient.handlePlatformUndo]
@@ -79,7 +79,7 @@ class UndoManager {
 
   Future<dynamic> _handleUndoManagerInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
-    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+    final args = methodCall.arguments as List<dynamic>;
     if (method == 'UndoManagerClient.handleUndo') {
       assert(_currentClient != null, 'There must be a current UndoManagerClient.');
       _currentClient!.handlePlatformUndo(_toUndoDirection(args[0] as String));
@@ -91,17 +91,33 @@ class UndoManager {
   }
 
   void _setUndoState({bool canUndo = false, bool canRedo = false}) {
-    _channel.invokeMethod<void>(
-      'UndoManager.setUndoState',
-      <String, bool>{'canUndo': canUndo, 'canRedo': canRedo}
-    );
+    _channel
+        .invokeMethod<void>('UndoManager.setUndoState', <String, bool>{
+          'canUndo': canUndo,
+          'canRedo': canRedo,
+        })
+        .then(
+          (_) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while sending the UndoManager.setUndoState event'),
+              ),
+            );
+          },
+        );
   }
 
   UndoDirection _toUndoDirection(String direction) {
     return switch (direction) {
       'undo' => UndoDirection.undo,
       'redo' => UndoDirection.redo,
-      _ => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown undo direction: $direction')]),
+      _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Unknown undo direction: $direction'),
+      ]),
     };
   }
 }

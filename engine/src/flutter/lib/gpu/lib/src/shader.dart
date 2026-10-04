@@ -1,0 +1,117 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ignore_for_file: public_member_api_docs
+
+part of flutter_gpu;
+
+/// Bumped whenever any shader library hot reloads. [UniformSlot] caches
+/// reflection indices against this epoch, since a reload replaces the
+/// shaders' reflection data in place and invalidates cached indices.
+int _shaderReloadEpoch = 0;
+
+const int _kSlotIndexUnresolved = -2;
+
+base class UniformSlot {
+  UniformSlot._(this.shader, this.uniformName);
+  final Shader shader;
+  final String uniformName;
+
+  // Reflection indices for the name-free bind path, resolved through one
+  // native call on first use and cached until a shader hot reload. -1
+  // means the shader has no struct/texture with this slot's name.
+  int _structIndex = _kSlotIndexUnresolved;
+  int _textureIndex = _kSlotIndexUnresolved;
+  int _epoch = _shaderReloadEpoch;
+
+  void _syncEpoch() {
+    if (_epoch != _shaderReloadEpoch) {
+      _structIndex = _kSlotIndexUnresolved;
+      _textureIndex = _kSlotIndexUnresolved;
+      _epoch = _shaderReloadEpoch;
+    }
+  }
+
+  int get _resolvedStructIndex {
+    _syncEpoch();
+    if (_structIndex == _kSlotIndexUnresolved) {
+      _structIndex = shader._getUniformStructIndex(uniformName);
+    }
+    return _structIndex;
+  }
+
+  int get _resolvedTextureIndex {
+    _syncEpoch();
+    if (_textureIndex == _kSlotIndexUnresolved) {
+      _textureIndex = shader._getUniformTextureIndex(uniformName);
+    }
+    return _textureIndex;
+  }
+
+  /// The reflected total size of a shader's uniform struct by name.
+  ///
+  /// Returns [null] if the shader does not contain a uniform struct with the
+  /// given name.
+  int? get sizeInBytes {
+    int size = shader._getUniformStructSize(uniformName);
+    return size < 0 ? null : size;
+  }
+
+  /// Get the reflected offset of a named member in the uniform struct.
+  ///
+  /// Returns [null] if the shader does not contain a uniform struct with the
+  /// given name, or if the uniform struct does not contain a member with the
+  /// given name.
+  int? getMemberOffsetInBytes(String memberName) {
+    int offset = shader._getUniformMemberOffset(uniformName, memberName);
+    return offset < 0 ? null : offset;
+  }
+}
+
+base class Shader extends NativeFieldWrapperClass1 {
+  // [Shader] handles are instantiated when interacting with a [ShaderLibrary].
+  Shader._();
+
+  // Memoized so per-draw lookups return the same slot instance, whose
+  // cached reflection indices make repeat binds name-free.
+  final Map<String, UniformSlot> _uniformSlots = <String, UniformSlot>{};
+
+  UniformSlot getUniformSlot(String uniformName) {
+    return _uniformSlots[uniformName] ??= UniformSlot._(this, uniformName);
+  }
+
+  @Native<Int Function(Pointer<Void>, Handle)>(
+    symbol: 'InternalFlutterGpu_Shader_GetUniformStructSize',
+  )
+  external int _getUniformStructSize(String uniformStructName);
+
+  @Native<Int Function(Pointer<Void>, Handle, Handle)>(
+    symbol: 'InternalFlutterGpu_Shader_GetUniformMemberOffset',
+  )
+  external int _getUniformMemberOffset(
+    String uniformStructName,
+    String memberName,
+  );
+
+  @Native<Int Function(Pointer<Void>, Handle)>(
+    symbol: 'InternalFlutterGpu_Shader_GetUniformStructIndex',
+  )
+  external int _getUniformStructIndex(String uniformStructName);
+
+  @Native<Int Function(Pointer<Void>, Handle)>(
+    symbol: 'InternalFlutterGpu_Shader_GetUniformTextureIndex',
+  )
+  external int _getUniformTextureIndex(String uniformTextureName);
+
+  /// Test-only. Whether this shader is currently marked dirty (will be
+  /// evicted and re-registered with the impeller shader library on next
+  /// pipeline build). Used by tests to assert that reload dedupe keeps
+  /// unchanged shaders clean.
+  bool get debugIsDirty => _debugIsDirty();
+
+  @Native<Bool Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Shader_DebugIsDirty',
+  )
+  external bool _debugIsDirty();
+}

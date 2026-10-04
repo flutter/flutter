@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import '../../gallery_localizations.dart';
 
 // BEGIN cupertinoContextMenuDemo
@@ -17,34 +18,27 @@ class CupertinoContextMenuDemo extends StatelessWidget {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,
-        middle: Text(
-          galleryLocalizations.demoCupertinoContextMenuTitle,
-        ),
+        middle: Text(galleryLocalizations.demoCupertinoContextMenuTitle),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: CupertinoContextMenu(
                 actions: <Widget>[
                   CupertinoContextMenuAction(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: Text(
-                      galleryLocalizations.demoCupertinoContextMenuActionOne,
-                    ),
+                    child: Text(galleryLocalizations.demoCupertinoContextMenuActionOne),
                   ),
                   CupertinoContextMenuAction(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: Text(
-                      galleryLocalizations.demoCupertinoContextMenuActionTwo,
-                    ),
+                    child: Text(galleryLocalizations.demoCupertinoContextMenuActionTwo),
                   ),
                 ],
                 child: const FlutterLogo(size: 250),
@@ -57,9 +51,7 @@ class CupertinoContextMenuDemo extends StatelessWidget {
             child: Text(
               galleryLocalizations.demoCupertinoContextMenuActionText,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.black,
-              ),
+              style: const TextStyle(color: Colors.black),
             ),
           ),
         ],

@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Lihat ke Atas",
   "searchWebButtonLabel": "Buat carian pada Web",
   "shareButtonLabel": "Kongsi...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Kosongkan",
+  "cancelButtonLabel": "Batal",
+  "backButtonLabel": "Kembali",
+  "expansionTileExpandedHint": "ketik dua kali untuk kuncupkan",
+  "expansionTileCollapsedHint": "ketik dua kali untuk kembangkan",
+  "expansionTileExpandedTapHint": "Kuncupkan",
+  "expansionTileCollapsedTapHint": "Kembangkan untuk mendapatkan butiran lanjut",
+  "expandedHint": "Dikuncupkan",
+  "collapsedHint": "Dikembangkan"
 }

@@ -3,13 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Router state restoration without RouteInformationProvider', (WidgetTester tester) async {
-    final UniqueKey router = UniqueKey();
-    _TestRouterDelegate delegate() => tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
+  testWidgets('Router state restoration without RouteInformationProvider', (
+    WidgetTester tester,
+  ) async {
+    final router = UniqueKey();
+    _TestRouterDelegate delegate() =>
+        tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
 
     await tester.pumpWidget(_TestWidget(routerKey: router));
     expect(find.text('Current config: null'), findsOneWidget);
@@ -41,10 +44,15 @@ void main() {
     expect(delegate().restoredRoutePaths, <String>['/foo', '/foo']);
   });
 
-  testWidgets('Router state restoration with RouteInformationProvider', (WidgetTester tester) async {
-    final UniqueKey router = UniqueKey();
-    _TestRouterDelegate delegate() => tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
-    _TestRouteInformationProvider provider() => tester.widget<Router<Object?>>(find.byKey(router)).routeInformationProvider! as _TestRouteInformationProvider;
+  testWidgets('Router state restoration with RouteInformationProvider', (
+    WidgetTester tester,
+  ) async {
+    final router = UniqueKey();
+    _TestRouterDelegate delegate() =>
+        tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
+    _TestRouteInformationProvider provider() =>
+        tester.widget<Router<Object?>>(find.byKey(router)).routeInformationProvider!
+            as _TestRouteInformationProvider;
 
     await tester.pumpWidget(_TestWidget(routerKey: router, withInformationProvider: true));
     expect(find.text('Current config: /home'), findsOneWidget);

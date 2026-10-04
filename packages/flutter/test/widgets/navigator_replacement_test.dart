@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'observer_tester.dart';
 
 void main() {
   testWidgets('Back during pushReplacement', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: const Material(child: Text('home')),
-      routes: <String, WidgetBuilder>{
-        '/a': (BuildContext context) => const Material(child: Text('a')),
-        '/b': (BuildContext context) => const Material(child: Text('b')),
-      },
-    ));
+    await tester.pumpWidget(
+      _buildApp(
+        home: const Text('home'),
+        routes: <String, WidgetBuilder>{
+          '/a': (BuildContext context) => const Text('a'),
+          '/b': (BuildContext context) => const Text('b'),
+        },
+      ),
+    );
 
     final NavigatorState navigator = tester.state(find.byType(Navigator));
     navigator.pushNamed('/a');
@@ -43,12 +45,12 @@ void main() {
 
   group('pushAndRemoveUntil', () {
     testWidgets('notifies appropriately', (WidgetTester tester) async {
-      final TestObserver observer = TestObserver();
-      final Widget myApp = MaterialApp(
-        home: const Material(child: Text('home')),
+      final observer = TestObserver();
+      final Widget myApp = _buildApp(
+        home: const Text('home'),
         routes: <String, WidgetBuilder>{
-          '/a': (BuildContext context) => const Material(child: Text('a')),
-          '/b': (BuildContext context) => const Material(child: Text('b')),
+          '/a': (BuildContext context) => const Text('a'),
+          '/b': (BuildContext context) => const Text('b'),
         },
         navigatorObservers: <NavigatorObserver>[observer],
       );
@@ -56,15 +58,18 @@ void main() {
       await tester.pumpWidget(myApp);
 
       final NavigatorState navigator = tester.state(find.byType(Navigator));
-      final List<String> log = <String>[];
+      final log = <String>[];
       observer
         ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
-          log.add('${route!.settings.name} pushed, previous route: ${previousRoute!.settings.name}');
+          log.add(
+            '${route!.settings.name} pushed, previous route: ${previousRoute!.settings.name}',
+          );
         }
         ..onRemoved = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
-          log.add('${route!.settings.name} removed, previous route: ${previousRoute?.settings.name}');
+          log.add(
+            '${route!.settings.name} removed, previous route: ${previousRoute?.settings.name}',
+          );
         };
-
 
       navigator.pushNamed('/a');
       await tester.pumpAndSettle();
@@ -80,12 +85,15 @@ void main() {
       expect(find.text('home', skipOffstage: false), findsNothing);
       expect(find.text('a', skipOffstage: false), findsNothing);
       expect(find.text('b', skipOffstage: false), findsOneWidget);
-      expect(log, equals(<String>[
-        '/a pushed, previous route: /',
-        '/b pushed, previous route: /a',
-        '/a removed, previous route: null',
-        '/ removed, previous route: null',
-      ]));
+      expect(
+        log,
+        equals(<String>[
+          '/a pushed, previous route: /',
+          '/b pushed, previous route: /a',
+          '/a removed, previous route: null',
+          '/ removed, previous route: null',
+        ]),
+      );
 
       log.clear();
 
@@ -103,19 +111,22 @@ void main() {
       expect(find.text('home', skipOffstage: false), findsNothing);
       expect(find.text('a', skipOffstage: false), findsOneWidget);
       expect(find.text('b', skipOffstage: false), findsOneWidget);
-      expect(log, equals(<String>[
-        '/ pushed, previous route: /b',
-        '/a pushed, previous route: /',
-        '/ removed, previous route: /b',
-      ]));
+      expect(
+        log,
+        equals(<String>[
+          '/ pushed, previous route: /b',
+          '/a pushed, previous route: /',
+          '/ removed, previous route: /b',
+        ]),
+      );
     });
 
     testWidgets('triggers page transition animation for pushed route', (WidgetTester tester) async {
-      final Widget myApp = MaterialApp(
-        home: const Material(child: Text('home')),
+      final Widget myApp = _buildApp(
+        home: const Text('home'),
         routes: <String, WidgetBuilder>{
-          '/a': (BuildContext context) => const Material(child: Text('a')),
-          '/b': (BuildContext context) => const Material(child: Text('b')),
+          '/a': (BuildContext context) => const Text('a'),
+          '/b': (BuildContext context) => const Text('b'),
         },
       );
 
@@ -139,94 +150,124 @@ void main() {
       expect(find.text('b'), findsOneWidget);
     });
 
-    testWidgets('Hero transition triggers when preceding route contains hero, and predicate route does not', (WidgetTester tester) async {
-      const String kHeroTag = 'hero';
-      final Widget myApp = MaterialApp(
-        initialRoute: '/',
-        routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => const Material(child: Text('home')),
-          '/a': (BuildContext context) => const Material(child: Hero(
-            tag: kHeroTag,
-            child: Text('a'),
-          )),
-          '/b': (BuildContext context) => const Material(child: Padding(
-            padding: EdgeInsets.all(100.0),
-            child: Hero(
-              tag: kHeroTag,
-              child: Text('b'),
+    testWidgets(
+      'Hero transition triggers when preceding route contains hero, and predicate route does not',
+      (WidgetTester tester) async {
+        const kHeroTag = 'hero';
+        final Widget myApp = _buildApp(
+          initialRoute: '/',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) => const Text('home'),
+            '/a': (BuildContext context) => const Hero(tag: kHeroTag, child: Text('a')),
+            '/b': (BuildContext context) => const Padding(
+              padding: EdgeInsets.all(100.0),
+              child: Hero(tag: kHeroTag, child: Text('b')),
             ),
-          )),
-        },
-      );
+          },
+        );
 
-      await tester.pumpWidget(myApp);
-      final NavigatorState navigator = tester.state(find.byType(Navigator));
+        await tester.pumpWidget(myApp);
+        final NavigatorState navigator = tester.state(find.byType(Navigator));
 
-      navigator.pushNamed('/a');
-      await tester.pumpAndSettle();
+        navigator.pushNamed('/a');
+        await tester.pumpAndSettle();
 
-      navigator.pushNamedAndRemoveUntil('/b', ModalRoute.withName('/'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 16));
+        navigator.pushNamedAndRemoveUntil('/b', ModalRoute.withName('/'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 16));
 
-      expect(find.text('b'), isOnstage);
+        expect(find.text('b'), isOnstage);
 
-      // 'b' text is heroing to its new location
-      final Offset bOffset = tester.getTopLeft(find.text('b'));
-      expect(bOffset.dx, greaterThan(0.0));
-      expect(bOffset.dx, lessThan(100.0));
-      expect(bOffset.dy, greaterThan(0.0));
-      expect(bOffset.dy, lessThan(100.0));
+        // 'b' text is heroing to its new location
+        final Offset bOffset = tester.getTopLeft(find.text('b'));
+        expect(bOffset.dx, greaterThan(0.0));
+        expect(bOffset.dx, lessThan(100.0));
+        expect(bOffset.dy, greaterThan(0.0));
+        expect(bOffset.dy, lessThan(100.0));
 
-      await tester.pump(const Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
 
-      expect(find.text('a'), findsNothing);
-      expect(find.text('b'), isOnstage);
-    });
+        expect(find.text('a'), findsNothing);
+        expect(find.text('b'), isOnstage);
+      },
+    );
 
-    testWidgets('Hero transition does not trigger when preceding route does not contain hero, but predicate route does', (WidgetTester tester) async {
-      const String kHeroTag = 'hero';
-      final Widget myApp = MaterialApp(
-        theme: ThemeData(
-          pageTransitionsTheme: const PageTransitionsTheme(
-            builders: <TargetPlatform, PageTransitionsBuilder>{
-              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-            },
-          ),
-        ),
-        initialRoute: '/',
-        routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => const Material(child: Hero(
-            tag:kHeroTag,
-            child: Text('home'),
-          )),
-          '/a': (BuildContext context) => const Material(child: Text('a')),
-          '/b': (BuildContext context) => const Material(child: Padding(
-            padding: EdgeInsets.all(100.0),
-            child: Hero(
-              tag: kHeroTag,
-              child: Text('b'),
+    testWidgets(
+      'Hero transition does not trigger when preceding route does not contain hero, but predicate route does',
+      (WidgetTester tester) async {
+        const kHeroTag = 'hero';
+        final Widget myApp = _buildApp(
+          initialRoute: '/',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) => const Hero(tag: kHeroTag, child: Text('home')),
+            '/a': (BuildContext context) => const Text('a'),
+            '/b': (BuildContext context) => const Padding(
+              padding: EdgeInsets.all(100.0),
+              child: Hero(tag: kHeroTag, child: Text('b')),
             ),
-          )),
-        },
-      );
+          },
+        );
 
-      await tester.pumpWidget(myApp);
-      final NavigatorState navigator = tester.state(find.byType(Navigator));
+        await tester.pumpWidget(myApp);
+        final NavigatorState navigator = tester.state(find.byType(Navigator));
 
-      navigator.pushNamed('/a');
-      await tester.pumpAndSettle();
+        navigator.pushNamed('/a');
+        await tester.pumpAndSettle();
 
-      navigator.pushNamedAndRemoveUntil('/b', ModalRoute.withName('/'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 16));
+        navigator.pushNamedAndRemoveUntil('/b', ModalRoute.withName('/'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 16));
 
-      expect(find.text('b'), isOnstage);
+        expect(find.text('b'), isOnstage);
 
-      // 'b' text is sliding in from the right, no hero transition
-      final Offset bOffset = tester.getTopLeft(find.text('b'));
-      expect(bOffset.dx, 100.0);
-      expect(bOffset.dy, greaterThan(100.0));
-    });
+        // 'b' text is sliding in from the right, no hero transition
+        final Offset bOffset = tester.getTopLeft(find.text('b'));
+        expect(bOffset.dx, 100.0);
+        expect(bOffset.dy, greaterThan(100.0));
+      },
+    );
   });
+}
+
+/// Builds a [TestWidgetsApp] for navigator replacement tests.
+Widget _buildApp({
+  Widget? home,
+  String? initialRoute,
+  Map<String, WidgetBuilder> routes = const <String, WidgetBuilder>{},
+  List<NavigatorObserver> navigatorObservers = const <NavigatorObserver>[],
+}) {
+  return TestWidgetsApp(
+    home: home,
+    initialRoute: initialRoute,
+    routes: routes,
+    pageRouteBuilder: _pageRouteBuilder,
+    navigatorObservers: <NavigatorObserver>[HeroController(), ...navigatorObservers],
+    textStyle: const TextStyle(color: Color(0xFF000000), fontSize: 14.0),
+  );
+}
+
+/// Creates a page route with the transition used by the replacement tests.
+PageRoute<T> _pageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
+  return PageRouteBuilder<T>(
+    settings: settings,
+    pageBuilder: (
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+    ) => builder(context),
+    transitionsBuilder:
+        (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) {
+          return SlideTransition(
+            position: animation.drive(
+              Tween<Offset>(begin: const Offset(0.0, 0.25), end: Offset.zero),
+            ),
+            child: child,
+          );
+        },
+  );
 }

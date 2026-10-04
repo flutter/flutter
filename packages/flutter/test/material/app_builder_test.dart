@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
     final Widget app = MaterialApp(
       home: const Placeholder(),
       builder: (BuildContext context, Widget? child) {
@@ -17,24 +17,14 @@ void main() {
         return const Placeholder();
       },
     );
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.rtl,
-        child: app,
-      ),
-    );
+    await tester.pumpWidget(Directionality(textDirection: TextDirection.rtl, child: app));
     expect(log, <String>['build']);
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: app,
-      ),
-    );
+    await tester.pumpWidget(Directionality(textDirection: TextDirection.ltr, child: app));
     expect(log, <String>['build']);
   });
 
   testWidgets("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -45,10 +35,7 @@ void main() {
           },
         ),
         builder: (BuildContext context, Widget? child) {
-          return Directionality(
-            textDirection: TextDirection.rtl,
-            child: child!,
-          );
+          return Directionality(textDirection: TextDirection.rtl, child: child!);
         },
       ),
     );

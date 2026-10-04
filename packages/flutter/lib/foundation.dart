@@ -9,16 +9,24 @@
 /// framework.
 library foundation;
 
-export 'package:meta/meta.dart' show
-  factory,
-  immutable,
-  mustCallSuper,
-  nonVirtual,
-  optionalTypeArgs,
-  protected,
-  required,
-  visibleForOverriding,
-  visibleForTesting;
+export 'dart:ui' show VoidCallback;
+
+export 'package:listen/listen.dart' show ChangeNotifier, Listenable, ValueListenable, ValueNotifier;
+export 'package:meta/meta.dart'
+    show
+        RecordUse,
+        awaitNotRequired,
+        factory,
+        immutable,
+        internal,
+        mustBeConst,
+        mustCallSuper,
+        nonVirtual,
+        optionalTypeArgs,
+        protected,
+        required,
+        visibleForOverriding,
+        visibleForTesting;
 
 export 'src/foundation/annotations.dart';
 export 'src/foundation/assertions.dart';
@@ -26,12 +34,12 @@ export 'src/foundation/basic_types.dart';
 export 'src/foundation/binding.dart';
 export 'src/foundation/bitfield.dart';
 export 'src/foundation/capabilities.dart';
-export 'src/foundation/change_notifier.dart';
 export 'src/foundation/collections.dart';
 export 'src/foundation/consolidate_response.dart';
 export 'src/foundation/constants.dart';
 export 'src/foundation/debug.dart';
 export 'src/foundation/diagnostics.dart';
+export 'src/foundation/error_dumper.dart';
 export 'src/foundation/isolates.dart';
 export 'src/foundation/key.dart';
 export 'src/foundation/licenses.dart';

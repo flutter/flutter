@@ -18,7 +18,7 @@
   "cutButtonLabel": "Изрязване",
   "copyButtonLabel": "Копиране",
   "pasteButtonLabel": "Поставяне",
-  "clearButtonLabel": "Clear",
+  "clearButtonLabel": "Изчистване",
   "selectAllButtonLabel": "Избиране на всички",
   "tabSemanticsLabel": "Раздел $tabIndex от $tabCount",
   "modalBarrierDismissLabel": "Отхвърляне",
@@ -27,5 +27,13 @@
   "menuDismissLabel": "Отхвърляне на менюто",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Търсене в мрежата",
-  "shareButtonLabel": "Споделяне..."
+  "shareButtonLabel": "Споделяне...",
+  "cancelButtonLabel": "Отказ",
+  "backButtonLabel": "Назад",
+  "expansionTileExpandedHint": "докоснете два пъти за свиване",
+  "expansionTileCollapsedHint": "докоснете два пъти за разгъване",
+  "expansionTileExpandedTapHint": "Свиване",
+  "expansionTileCollapsedTapHint": "Разгъване за още подробности",
+  "expandedHint": "Свито",
+  "collapsedHint": "Разгънато"
 }

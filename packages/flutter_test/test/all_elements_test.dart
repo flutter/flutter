@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('collectAllElements goes in LTR DFS', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    await tester.pumpWidget(Directionality(
-      key: key,
-      textDirection: TextDirection.ltr,
-      child: Row(
-        children: <Widget>[
-          RichText(text: const TextSpan(text: 'a')),
-          RichText(text: const TextSpan(text: 'b')),
-        ],
+    await tester.pumpWidget(
+      Directionality(
+        key: key,
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: <Widget>[
+            RichText(text: const TextSpan(text: 'a')),
+            RichText(text: const TextSpan(text: 'b')),
+          ],
+        ),
       ),
-    ));
+    );
 
     final List<Element> elements = collectAllElementsFrom(
       key.currentContext! as Element,

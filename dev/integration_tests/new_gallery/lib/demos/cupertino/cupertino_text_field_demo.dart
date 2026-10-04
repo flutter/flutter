@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+
 import '../../gallery_localizations.dart';
 
 // BEGIN cupertinoTextFieldDemo
@@ -61,20 +62,12 @@ class CupertinoTextFieldDemo extends StatelessWidget {
             CupertinoTextField(
               textInputAction: TextInputAction.done,
               restorationId: 'pin_number_text_field',
-              prefix: const Icon(
-                CupertinoIcons.padlock_solid,
-                size: 28,
-              ),
+              prefix: const Icon(CupertinoIcons.padlock_solid, size: 28),
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
               clearButtonMode: OverlayVisibilityMode.editing,
               keyboardType: TextInputType.number,
               decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    width: 0,
-                    color: CupertinoColors.inactiveGray,
-                  ),
-                ),
+                border: Border(bottom: BorderSide(width: 0, color: CupertinoColors.inactiveGray)),
               ),
               placeholder: localizations.demoCupertinoTextFieldPIN,
             ),

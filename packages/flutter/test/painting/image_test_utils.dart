@@ -23,7 +23,12 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  void resolveStreamForKey(ImageConfiguration config, ImageStream stream, TestImageProvider key, ImageErrorListener handleError) {
+  void resolveStreamForKey(
+    ImageConfiguration config,
+    ImageStream stream,
+    TestImageProvider key,
+    ImageErrorListener handleError,
+  ) {
     configuration = config;
     super.resolveStreamForKey(config, stream, key, handleError);
   }
@@ -40,7 +45,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   ImageInfo complete() {
-    final ImageInfo imageInfo = ImageInfo(image: testImage);
+    final imageInfo = ImageInfo(image: testImage);
     _completer.complete(imageInfo);
     return imageInfo;
   }

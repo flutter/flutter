@@ -35,53 +35,56 @@ void main() {
         fakePlatform.environment['BOT'] = 'false';
         fakePlatform.environment['TRAVIS'] = 'true';
 
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
         );
 
         expect(await botDetector.isRunningOnBot, isFalse);
-        expect(persistentToolState.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isNull);
       });
 
       testWithoutContext('does not cache BOT environment variable', () async {
         fakePlatform.environment['BOT'] = 'true';
 
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
         );
 
         expect(await botDetector.isRunningOnBot, isTrue);
-        expect(persistentToolState.isRunningOnBot, isTrue);
+        expect(persistentToolState.isRunningOnBot, isNull);
 
         fakePlatform.environment['BOT'] = 'false';
 
         expect(await botDetector.isRunningOnBot, isFalse);
-        expect(persistentToolState.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isNull);
       });
 
       testWithoutContext('returns false unconditionally if FLUTTER_HOST is set', () async {
         fakePlatform.environment['FLUTTER_HOST'] = 'foo';
         fakePlatform.environment['TRAVIS'] = 'true';
 
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
         );
 
         expect(await botDetector.isRunningOnBot, isFalse);
-        expect(persistentToolState.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isNull);
       });
 
       testWithoutContext('returns false with and without a terminal attached', () async {
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
-            FakeRequest(azureUrl, responseError: const SocketException('HTTP connection timed out')),
+            FakeRequest(
+              azureUrl,
+              responseError: const SocketException('HTTP connection timed out'),
+            ),
           ]),
           persistentToolState: persistentToolState,
         );
@@ -97,18 +100,18 @@ void main() {
         fakePlatform.environment['TRAVIS'] = 'true';
         fakePlatform.environment['FLUTTER_ANALYTICS_LOG_FILE'] = '/some/file';
 
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
         );
 
         expect(await botDetector.isRunningOnBot, isFalse);
-        expect(persistentToolState.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isNull);
       });
 
       testWithoutContext('returns true when azure metadata is reachable', () async {
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
@@ -119,64 +122,153 @@ void main() {
       });
 
       testWithoutContext('caches azure bot detection results across instances', () async {
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
         );
 
         expect(await botDetector.isRunningOnBot, isTrue);
-        expect(await BotDetector(
-          platform: fakePlatform,
-          httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
-          persistentToolState: persistentToolState,
-        ).isRunningOnBot, isTrue);
+        expect(
+          await BotDetector(
+            platform: fakePlatform,
+            httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
+            persistentToolState: persistentToolState,
+          ).isRunningOnBot,
+          isTrue,
+        );
       });
 
       testWithoutContext('returns true when running on borg', () async {
         fakePlatform.environment['BORG_ALLOC_DIR'] = 'true';
 
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
         );
 
         expect(await botDetector.isRunningOnBot, isTrue);
-        expect(persistentToolState.isRunningOnBot, isTrue);
+        expect(persistentToolState.isRunningOnBot, isNull);
       });
+
+      testWithoutContext('returns true when running on Azure DevOps (TF_BUILD is set)', () async {
+        fakePlatform.environment['TF_BUILD'] = 'True';
+
+        final botDetector = BotDetector(
+          platform: fakePlatform,
+          httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
+          persistentToolState: persistentToolState,
+        );
+
+        expect(await botDetector.isRunningOnBot, isTrue);
+        expect(persistentToolState.isRunningOnBot, isNull);
+      });
+
+      testWithoutContext('overrides cached false when CI environment variable is set at runtime without mutating cache', () async {
+        // Simulate an image bake where isRunningOnBot evaluated to false and cached to disk:
+        persistentToolState.setIsRunningOnBot(false);
+        expect(persistentToolState.isRunningOnBot, isFalse);
+
+        fakePlatform.environment['GITHUB_ACTIONS'] = 'true';
+
+        final botDetector = BotDetector(
+          platform: fakePlatform,
+          httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
+          persistentToolState: persistentToolState,
+        );
+
+        expect(await botDetector.isRunningOnBot, isTrue);
+        expect(persistentToolState.isRunningOnBot, isFalse);
+      });
+
+      testWithoutContext(
+        'running with CI=true does not poison persistentToolState for subsequent runs',
+        () async {
+          persistentToolState.setIsRunningOnBot(false);
+          expect(persistentToolState.isRunningOnBot, isFalse);
+
+          // Invocation 1: Ran in a subshell or test runner with CI=true
+          fakePlatform.environment['CI'] = 'true';
+          final botDetector1 = BotDetector(
+            platform: fakePlatform,
+            httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
+            persistentToolState: persistentToolState,
+          );
+          expect(await botDetector1.isRunningOnBot, isTrue);
+          expect(persistentToolState.isRunningOnBot, isFalse);
+
+          // Invocation 2: Normal interactive terminal run (no CI variable)
+          fakePlatform.environment.clear();
+          final botDetector2 = BotDetector(
+            platform: fakePlatform,
+            httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
+            persistentToolState: persistentToolState,
+          );
+          expect(await botDetector2.isRunningOnBot, isFalse);
+        },
+      );
+
+      testWithoutContext(
+        'returns cached false when no bot environment variables are set',
+        () async {
+          persistentToolState.setIsRunningOnBot(false);
+          expect(persistentToolState.isRunningOnBot, isFalse);
+
+          final botDetector = BotDetector(
+            platform: fakePlatform,
+            httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
+            persistentToolState: persistentToolState,
+          );
+
+          expect(await botDetector.isRunningOnBot, isFalse);
+          expect(persistentToolState.isRunningOnBot, isFalse);
+        },
+      );
     });
   });
 
   group('AzureDetector', () {
     testWithoutContext('isRunningOnAzure returns false when connection times out', () async {
-      final AzureDetector azureDetector = AzureDetector(
+      final azureDetector = AzureDetector(
         httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
           FakeRequest(azureUrl, responseError: const SocketException('HTTP connection timed out')),
-        ],
-      ));
+        ]),
+      );
 
       expect(await azureDetector.isRunningOnAzure, isFalse);
     });
 
     testWithoutContext('isRunningOnAzure returns false when OsError is thrown', () async {
-      final AzureDetector azureDetector = AzureDetector(
+      final azureDetector = AzureDetector(
         httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
           FakeRequest(azureUrl, responseError: const OSError('Connection Refused', 111)),
-        ],
-      ));
+        ]),
+      );
 
       expect(await azureDetector.isRunningOnAzure, isFalse);
     });
 
     testWithoutContext('isRunningOnAzure returns true when azure metadata is reachable', () async {
-      final AzureDetector azureDetector = AzureDetector(
-        httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
-          FakeRequest(azureUrl),
-        ],
-      ));
+      final azureDetector = AzureDetector(
+        httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[FakeRequest(azureUrl)]),
+      );
 
       expect(await azureDetector.isRunningOnAzure, isTrue);
     });
+    testWithoutContext(
+      'isRunningOnAzure returns false when an unexpected exception is thrown',
+      () async {
+        final azureDetector = AzureDetector(
+          httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
+            FakeRequest(
+              azureUrl,
+              responseError: ArgumentError('No host specified in URI http:///e2gerror.php'),
+            ),
+          ]),
+        );
+        expect(await azureDetector.isRunningOnAzure, isFalse);
+      },
+    );
   });
 }

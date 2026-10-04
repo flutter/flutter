@@ -3,22 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestScrollPhysics extends ScrollPhysics {
-  const TestScrollPhysics({
-    required this.name,
-    super.parent,
-  });
+  const TestScrollPhysics({required this.name, super.parent});
   final String name;
 
   @override
   TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return TestScrollPhysics(
-      name: name,
-      parent: parent?.applyTo(ancestor) ?? ancestor!,
-    );
+    return TestScrollPhysics(name: name, parent: parent?.applyTo(ancestor) ?? ancestor!);
   }
 
   TestScrollPhysics get namedParent => parent! as TestScrollPhysics;
@@ -33,14 +27,25 @@ class TestScrollPhysics extends ScrollPhysics {
   }
 }
 
-
 void main() {
+  const kBlueColor = Color(0xFF0000FF);
+
+  test('ScrollPhysics.allowSelectionEdgeScrolling', () {
+    expect(const BouncingScrollPhysics().allowSelectionEdgeScrolling, isTrue);
+    expect(const PageScrollPhysics().allowSelectionEdgeScrolling, isFalse);
+    // Resolves through the parent chain so wrapped page physics still count.
+    expect(
+      const ClampingScrollPhysics(parent: PageScrollPhysics()).allowSelectionEdgeScrolling,
+      isFalse,
+    );
+  });
+
   test('ScrollPhysics applyTo()', () {
-    const TestScrollPhysics a = TestScrollPhysics(name: 'a');
-    const TestScrollPhysics b = TestScrollPhysics(name: 'b');
-    const TestScrollPhysics c = TestScrollPhysics(name: 'c');
-    const TestScrollPhysics d = TestScrollPhysics(name: 'd');
-    const TestScrollPhysics e = TestScrollPhysics(name: 'e');
+    const a = TestScrollPhysics(name: 'a');
+    const b = TestScrollPhysics(name: 'b');
+    const c = TestScrollPhysics(name: 'c');
+    const d = TestScrollPhysics(name: 'd');
+    const e = TestScrollPhysics(name: 'e');
 
     expect(a.parent, null);
     expect(b.parent, null);
@@ -65,9 +70,13 @@ void main() {
     const ScrollPhysics never = NeverScrollableScrollPhysics();
     const ScrollPhysics always = AlwaysScrollableScrollPhysics();
     const ScrollPhysics page = PageScrollPhysics();
-    const ScrollPhysics bounceDesktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+    const ScrollPhysics bounceDesktop = BouncingScrollPhysics(
+      decelerationRate: ScrollDecelerationRate.fast,
+    );
 
-    String types(ScrollPhysics? value) => value!.parent == null ? '${value.runtimeType}' : '${value.runtimeType} ${types(value.parent)}';
+    String types(ScrollPhysics? value) => value!.parent == null
+        ? '${value.runtimeType}'
+        : '${value.runtimeType} ${types(value.parent)}';
 
     expect(
       types(bounce.applyTo(clamp.applyTo(never.applyTo(always.applyTo(page))))),
@@ -96,7 +105,7 @@ void main() {
 
     expect(
       bounceDesktop.applyTo(always),
-      (BouncingScrollPhysics x) => x.decelerationRate == ScrollDecelerationRate.fast
+      (BouncingScrollPhysics x) => x.decelerationRate == ScrollDecelerationRate.fast,
     );
   });
 
@@ -110,9 +119,9 @@ void main() {
       devicePixelRatio: 3.0,
     );
 
-    const BouncingScrollPhysics bounce = BouncingScrollPhysics();
-    const ClampingScrollPhysics clamp = ClampingScrollPhysics();
-    const PageScrollPhysics page = PageScrollPhysics();
+    const bounce = BouncingScrollPhysics();
+    const clamp = ClampingScrollPhysics();
+    const page = PageScrollPhysics();
 
     // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
     // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
@@ -147,11 +156,15 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double lessOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(lessOverscrolledPosition, 10.0);
+      final double lessOverscrollApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        lessOverscrolledPosition,
+        10.0,
+      );
 
-      final double moreOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(moreOverscrolledPosition, 10.0);
+      final double moreOverscrollApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        moreOverscrolledPosition,
+        10.0,
+      );
 
       expect(lessOverscrollApplied, greaterThan(1.0));
       expect(lessOverscrollApplied, lessThan(20.0));
@@ -160,10 +173,7 @@ void main() {
       expect(moreOverscrollApplied, lessThan(20.0));
 
       // Scrolling from a more overscrolled position meets more resistance.
-      expect(
-        lessOverscrollApplied.abs(),
-        greaterThan(moreOverscrollApplied.abs()),
-      );
+      expect(lessOverscrollApplied.abs(), greaterThan(moreOverscrollApplied.abs()));
     });
 
     test('easing an overscroll still has resistance', () {
@@ -176,8 +186,10 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double easingApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
+      final double easingApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        overscrolledPosition,
+        -10.0,
+      );
 
       expect(easingApplied, lessThan(-1.0));
       expect(easingApplied, greaterThan(-10.0));
@@ -193,14 +205,8 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      expect(
-        physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, 10.0),
-        10.0,
-      );
-      expect(
-        physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, -10.0),
-        -10.0,
-      );
+      expect(physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, 10.0), 10.0);
+      expect(physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, -10.0), -10.0);
     });
 
     test('easing an overscroll meets less resistance than tensioning', () {
@@ -213,16 +219,20 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double easingApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
-      final double tensioningApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
+      final double easingApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        overscrolledPosition,
+        -10.0,
+      );
+      final double tensioningApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        overscrolledPosition,
+        10.0,
+      );
 
       expect(easingApplied.abs(), greaterThan(tensioningApplied.abs()));
     });
 
     test('no easing resistance for ScrollDecelerationRate.fast', () {
-      const BouncingScrollPhysics desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+      const desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
       final ScrollMetrics overscrolledPosition = FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
@@ -232,10 +242,8 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double easingApplied =
-          desktop.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
-      final double tensioningApplied =
-          desktop.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
+      final double easingApplied = desktop.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
+      final double tensioningApplied = desktop.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
 
       expect(tensioningApplied.abs(), lessThan(easingApplied.abs()));
       expect(easingApplied, -10);
@@ -260,11 +268,15 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double smallListOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(smallListOverscrolledPosition, 10.0);
+      final double smallListOverscrollApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        smallListOverscrolledPosition,
+        10.0,
+      );
 
-      final double bigListOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(bigListOverscrolledPosition, 10.0);
+      final double bigListOverscrollApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        bigListOverscrolledPosition,
+        10.0,
+      );
 
       expect(smallListOverscrollApplied, equals(bigListOverscrollApplied));
 
@@ -273,8 +285,8 @@ void main() {
     });
 
     test('frictionFactor', () {
-      const BouncingScrollPhysics mobile = BouncingScrollPhysics();
-      const BouncingScrollPhysics desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+      const mobile = BouncingScrollPhysics();
+      const desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
 
       expect(desktop.frictionFactor(0), 0.26);
       expect(mobile.frictionFactor(0), 0.52);
@@ -288,7 +300,7 @@ void main() {
   });
 
   test('ClampingScrollPhysics assertion test', () {
-    const ClampingScrollPhysics physics = ClampingScrollPhysics();
+    const physics = ClampingScrollPhysics();
     const double pixels = 500;
     final ScrollMetrics position = FixedScrollMetrics(
       pixels: pixels,
@@ -318,8 +330,8 @@ void main() {
       // in Flutter web 0.0 sometimes just appears as 0. or 0
       expect(
         error.toStringDeep(),
-        matches(RegExp(
-          r'''
+        matches(
+          RegExp(r'''
 FlutterError
    ClampingScrollPhysics\.applyBoundaryConditions\(\) was called
    redundantly\.
@@ -332,24 +344,21 @@ FlutterError
      ClampingScrollPhysics
    The position object in question was\:
      FixedScrollMetrics\(500(\.\d*)?..\[0(\.\d*)?\]..500(\.\d*)?\)
-''',
-          multiLine: true,
-        )),
+''', multiLine: true),
+        ),
       );
     }
   });
 
   testWidgets('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/47850
-    await tester.pumpWidget(Material(
-      child: Directionality(
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: NestedScrollView(
           physics: const PageScrollPhysics(),
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              SliverToBoxAdapter(child: Container(height: 300, color: Colors.blue)),
-            ];
+            return <Widget>[SliverToBoxAdapter(child: Container(height: 300, color: kBlueColor))];
           },
           body: ListView.builder(
             itemBuilder: (BuildContext context, int index) {
@@ -359,7 +368,254 @@ FlutterError
           ),
         ),
       ),
-    ));
+    );
     await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });
+
+  group('BouncingScrollPhysics selects correct spring for createBallisticSimulation', () {
+    test('on leading edge overscroll', () {
+      const physics = BouncingScrollPhysics();
+
+      final ScrollMetrics metrics = FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -500.0,
+        viewportDimension: 500.0,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 1.0,
+      );
+
+      final Simulation simStationary = physics.createBallisticSimulation(metrics, 0.0)!;
+      final Simulation simMoving = physics.createBallisticSimulation(metrics, -100.0)!;
+
+      expect(simStationary, isA<BouncingScrollSimulation>());
+      expect(simMoving, isA<BouncingScrollSimulation>());
+
+      // Stationary simulation should follow the expected spring trajectory.
+      expect(simStationary.x(0.1), closeTo(-185.7511436536831, 0.01));
+      expect(simStationary.x(0.2), closeTo(-69.00628466755506, 0.01));
+      expect(simStationary.x(0.3), closeTo(-25.635736232654022, 0.01));
+      expect(simStationary.x(0.4), closeTo(-9.523639409892818, 0.01));
+
+      final double xStationary = simStationary.x(0.2);
+      final double xMoving = simMoving.x(0.2);
+
+      // Stationary and moving simulations should produce different positions.
+      expect(xStationary, isNot(closeTo(xMoving, precisionErrorTolerance)));
+    });
+
+    test('on trailing edge overscroll', () {
+      const physics = BouncingScrollPhysics();
+
+      final ScrollMetrics metrics = FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: 1500.0,
+        viewportDimension: 500.0,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 1.0,
+      );
+
+      final Simulation simStationary = physics.createBallisticSimulation(metrics, 0.0)!;
+      final Simulation simMoving = physics.createBallisticSimulation(metrics, -100.0)!;
+
+      expect(simStationary, isA<BouncingScrollSimulation>());
+      expect(simMoving, isA<BouncingScrollSimulation>());
+
+      // Stationary simulation should follow the expected spring trajectory.
+      expect(simStationary.x(0.1), closeTo(1185.7511436536831, 0.01));
+      expect(simStationary.x(0.2), closeTo(1069.006284667555, 0.01));
+      expect(simStationary.x(0.3), closeTo(1025.635736232654, 0.01));
+      expect(simStationary.x(0.4), closeTo(1009.5236394098928, 0.01));
+
+      final double xStationary = simStationary.x(0.2);
+      final double xMoving = simMoving.x(0.2);
+
+      // Stationary and moving simulations should produce different positions.
+      expect(xStationary, isNot(closeTo(xMoving, precisionErrorTolerance)));
+    });
+  });
+
+  testWidgets('ScrollPhysics updates position when shouldUpdate returns true', (
+    WidgetTester tester,
+  ) async {
+    var physicsValue = 0;
+
+    Widget buildScrollable() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          physics: ReactiveScrollPhysics(value: physicsValue),
+          itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+          itemCount: 10,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildScrollable());
+
+    ScrollableState scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition firstPosition = scrollable.position;
+    expect((firstPosition.physics as ReactiveScrollPhysics).value, 0);
+
+    // When the physics is updated with an identical runtimeType and shouldUpdate
+    // returns false, the ScrollPosition is not recreated.
+    await tester.pumpWidget(buildScrollable());
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    expect(scrollable.position, same(firstPosition));
+    expect((scrollable.position.physics as ReactiveScrollPhysics).value, 0);
+
+    // When the physics is updated with an identical runtimeType but shouldUpdate
+    // returns true, the ScrollPosition is recreated with the updated physics.
+    physicsValue = 1;
+    await tester.pumpWidget(buildScrollable());
+
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition secondPosition = scrollable.position;
+    expect(secondPosition, isNot(same(firstPosition)));
+    expect((secondPosition.physics as ReactiveScrollPhysics).value, 1);
+  });
+
+  testWidgets('BouncingScrollPhysics updates position when decelerationRate changes', (
+    WidgetTester tester,
+  ) async {
+    ScrollDecelerationRate decelerationRate = ScrollDecelerationRate.normal;
+
+    Widget buildScrollable() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          physics: BouncingScrollPhysics(decelerationRate: decelerationRate),
+          itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+          itemCount: 10,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildScrollable());
+
+    ScrollableState scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition firstPosition = scrollable.position;
+    expect(
+      (firstPosition.physics as BouncingScrollPhysics).decelerationRate,
+      ScrollDecelerationRate.normal,
+    );
+
+    // Identical configuration should not recreate ScrollPosition.
+    await tester.pumpWidget(buildScrollable());
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    expect(scrollable.position, same(firstPosition));
+    expect(
+      (scrollable.position.physics as BouncingScrollPhysics).decelerationRate,
+      ScrollDecelerationRate.normal,
+    );
+
+    // Different decelerationRate should recreate ScrollPosition.
+    decelerationRate = ScrollDecelerationRate.fast;
+    await tester.pumpWidget(buildScrollable());
+
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition secondPosition = scrollable.position;
+    expect(secondPosition, isNot(same(firstPosition)));
+    expect(
+      (secondPosition.physics as BouncingScrollPhysics).decelerationRate,
+      ScrollDecelerationRate.fast,
+    );
+  });
+
+  testWidgets(
+    'ScrollPhysics.shouldUpdate handles parent change to physics with covariant parameter without TypeError',
+    (WidgetTester tester) async {
+      ScrollPhysics parentPhysics = const ClampingScrollPhysics();
+
+      Widget buildScrollable() {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView.builder(
+            physics: _TestWrapperPhysics(parent: parentPhysics),
+            itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+            itemCount: 10,
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildScrollable());
+
+      final ScrollableState scrollable1 = tester.state<ScrollableState>(find.byType(Scrollable));
+      final ScrollPosition firstPosition = scrollable1.position;
+
+      parentPhysics = const _CovariantParentPhysics();
+
+      await tester.pumpWidget(buildScrollable());
+
+      final ScrollableState scrollable2 = tester.state<ScrollableState>(find.byType(Scrollable));
+      final ScrollPosition secondPosition = scrollable2.position;
+
+      expect(secondPosition, isNot(same(firstPosition)));
+    },
+  );
+
+  test('ScrollPhysics.shouldUpdate returns false immediately for identical instances', () {
+    const ScrollPhysics physics = BouncingScrollPhysics();
+
+    expect(physics.shouldUpdate(physics), isFalse);
+  });
+
+  test('ScrollPhysics.shouldUpdate evaluates non-identical instances correctly', () {
+    const ScrollPhysics physicsB1 = BouncingScrollPhysics(parent: ClampingScrollPhysics());
+    const ScrollPhysics physicsB2 = BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
+
+    expect(identical(physicsB1, physicsB2), isFalse);
+    expect(physicsB1.shouldUpdate(physicsB2), isTrue);
+
+    const ScrollPhysics physicsC1 = BouncingScrollPhysics();
+    const ScrollPhysics physicsC2 = BouncingScrollPhysics(parent: ClampingScrollPhysics());
+
+    expect(identical(physicsC1, physicsC2), isFalse);
+    expect(physicsC1.shouldUpdate(physicsC2), isTrue);
+
+    expect(identical(physicsB1, physicsC2), isTrue);
+    expect(physicsB1.shouldUpdate(physicsC2), isFalse);
+  });
+}
+
+class ReactiveScrollPhysics extends ScrollPhysics {
+  const ReactiveScrollPhysics({required this.value, super.parent});
+  final int value;
+
+  @override
+  ReactiveScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return ReactiveScrollPhysics(value: value, parent: buildParent(ancestor));
+  }
+
+  @override
+  bool shouldUpdate(covariant ReactiveScrollPhysics old) {
+    if (value != old.value) {
+      return true;
+    }
+    return super.shouldUpdate(old);
+  }
+}
+
+class _TestWrapperPhysics extends ScrollPhysics {
+  const _TestWrapperPhysics({super.parent});
+
+  @override
+  _TestWrapperPhysics applyTo(ScrollPhysics? ancestor) {
+    return _TestWrapperPhysics(parent: buildParent(ancestor));
+  }
+}
+
+class _CovariantParentPhysics extends ScrollPhysics {
+  const _CovariantParentPhysics({super.parent});
+
+  @override
+  _CovariantParentPhysics applyTo(ScrollPhysics? ancestor) {
+    return _CovariantParentPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  bool shouldUpdate(covariant _CovariantParentPhysics old) {
+    return super.shouldUpdate(old);
+  }
 }

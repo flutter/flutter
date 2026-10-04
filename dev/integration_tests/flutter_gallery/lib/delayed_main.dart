@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'gallery/app.dart';
 
 Object? createGarbage() {
-  final List<dynamic> garbage = <dynamic>[];
-  for (int index = 0; index < 1000; index += 1) {
-    final List<int> moreGarbage = List<int>.filled(1000, index);
+  final garbage = <dynamic>[];
+  for (var index = 0; index < 1000; index += 1) {
+    final moreGarbage = List<int>.filled(1000, index);
     if (index.isOdd) {
       garbage.add(moreGarbage);
     }
@@ -20,8 +20,8 @@ Object? createGarbage() {
 Future<void> main() async {
   // Create some garbage, and simulate some delays between that could be
   // plugin or network call related.
-  final List<dynamic> garbage = <dynamic>[];
-  for (int index = 0; index < 20; index += 1) {
+  final garbage = <dynamic>[];
+  for (var index = 0; index < 20; index += 1) {
     final Object? moreGarbage = createGarbage();
     if (index.isOdd) {
       garbage.add(moreGarbage);

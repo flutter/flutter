@@ -3,26 +3,31 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart' show FakeToolContext, TestFeatureFlags;
 
 void main() {
   testWithoutContext('binds on ipv4 normally', () async {
-    final FakeServerSocket socket = FakeServerSocket();
-    final BufferLogger logger = BufferLogger.test();
+    final socket = FakeServerSocket();
+    final logger = BufferLogger.test();
 
-    int bindCalledTimes = 0;
-    final List<Object?> bindAddresses = <Object?>[];
-    final List<int> bindPorts = <int>[];
+    var bindCalledTimes = 0;
+    final bindAddresses = <Object?>[];
+    final bindPorts = <int>[];
 
-    final DaemonServer server = DaemonServer(
+    final server = DaemonServer(
+      analytics: const NoOpAnalytics(),
+      toolContext: FakeToolContext(),
       port: 123,
       logger: logger,
+      featureFlags: TestFeatureFlags(),
       bind: (Object? address, int port) async {
         bindCalledTimes++;
         bindAddresses.add(address);
@@ -37,16 +42,19 @@ void main() {
   });
 
   testWithoutContext('binds on ipv6 if ipv4 failed normally', () async {
-    final FakeServerSocket socket = FakeServerSocket();
-    final BufferLogger logger = BufferLogger.test();
+    final socket = FakeServerSocket();
+    final logger = BufferLogger.test();
 
-    int bindCalledTimes = 0;
-    final List<Object?> bindAddresses = <Object?>[];
-    final List<int> bindPorts = <int>[];
+    var bindCalledTimes = 0;
+    final bindAddresses = <Object?>[];
+    final bindPorts = <int>[];
 
-    final DaemonServer server = DaemonServer(
+    final server = DaemonServer(
+      analytics: const NoOpAnalytics(),
+      toolContext: FakeToolContext(),
       port: 123,
       logger: logger,
+      featureFlags: TestFeatureFlags(),
       bind: (Object? address, int port) async {
         bindCalledTimes++;
         bindAddresses.add(address);
@@ -71,7 +79,7 @@ class FakeServerSocket extends Fake implements ServerSocket {
   int get port => 1;
 
   bool closeCalled = false;
-  final StreamController<Socket> controller = StreamController<Socket>();
+  final controller = StreamController<Socket>();
 
   @override
   StreamSubscription<Socket> listen(
@@ -84,8 +92,12 @@ class FakeServerSocket extends Fake implements ServerSocket {
     scheduleMicrotask(() {
       controller.close();
     });
-    return controller.stream.listen(onData,
-        onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    return controller.stream.listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
   }
 
   @override

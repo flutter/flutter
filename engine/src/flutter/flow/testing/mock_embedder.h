@@ -1,0 +1,72 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef FLUTTER_FLOW_TESTING_MOCK_EMBEDDER_H_
+#define FLUTTER_FLOW_TESTING_MOCK_EMBEDDER_H_
+
+#include "flutter/flow/embedded_views.h"
+
+namespace flutter {
+namespace testing {
+
+class MockViewEmbedder : public ExternalViewEmbedder {
+ public:
+  MockViewEmbedder();
+
+  ~MockViewEmbedder();
+
+  void AddCanvas(DlCanvas* canvas);
+
+  // |ExternalViewEmbedder|
+  DlCanvas* GetRootCanvas() override;
+
+  // |ExternalViewEmbedder|
+  void CancelFrame() override;
+
+  // |ExternalViewEmbedder|
+  void BeginFrame(GrDirectContext* context,
+                  const fml::RefPtr<fml::RasterThreadMerger>&
+                      raster_thread_merger) override;
+
+  // |ExternalViewEmbedder|
+  void PrepareFlutterView(DlISize frame_size,
+                          double device_pixel_ratio) override;
+
+  // |ExternalViewEmbedder|
+  void PrerollCompositeEmbeddedView(
+      int64_t view_id,
+      std::unique_ptr<EmbeddedViewParams> params) override;
+
+  // |ExternalViewEmbedder|
+  DlCanvas* CompositeEmbeddedView(int64_t view_id) override;
+
+  // |ExternalViewEmbedder|
+  void PushClipRectToVisitedPlatformViews(const DlRect& clip_rect) override;
+
+  // |ExternalViewEmbedder|
+  void PushClipRRectToVisitedPlatformViews(
+      const DlRoundRect& clip_rrect) override;
+
+  // |ExternalViewEmbedder|
+  void PushClipRSuperellipseToVisitedPlatformViews(
+      const DlRoundSuperellipse& clip_rse) override;
+
+  // |ExternalViewEmbedder|
+  void PushClipPathToVisitedPlatformViews(const DlPath& clip_path) override;
+
+  std::vector<int64_t> prerolled_views() const { return prerolled_views_; }
+  std::vector<int64_t> painted_views() const { return painted_views_; }
+  std::vector<Mutator> pushed_clips() const { return pushed_clips_; }
+
+ private:
+  std::deque<DlCanvas*> contexts_;
+  std::vector<int64_t> prerolled_views_;
+  std::vector<int64_t> painted_views_;
+  std::vector<Mutator> pushed_clips_;
+};
+
+}  // namespace testing
+}  // namespace flutter
+
+#endif  // FLUTTER_FLOW_TESTING_MOCK_EMBEDDER_H_

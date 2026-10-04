@@ -10,6 +10,7 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,7 +19,8 @@ import 'package:integration_test/integration_test.dart';
 import 'package:integration_test_example/main.dart' as app;
 
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final IntegrationTestWidgetsFlutterBinding binding =
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('verify text', (WidgetTester tester) async {
     // Build our app.
@@ -31,8 +33,7 @@ void main() {
     expect(
       find.byWidgetPredicate(
         (Widget widget) =>
-            widget is Text &&
-            widget.data!.startsWith('Platform: ${Platform.operatingSystem}'),
+            widget is Text && widget.data!.startsWith('Platform: ${Platform.operatingSystem}'),
       ),
       findsOneWidget,
     );

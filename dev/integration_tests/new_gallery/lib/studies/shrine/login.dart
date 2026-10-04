@@ -18,10 +18,7 @@ import 'theme.dart';
 const double _horizontalPadding = 24.0;
 
 double desktopLoginScreenMainAreaWidth({required BuildContext context}) {
-  return min(
-    360 * reducedTextScale(context),
-    MediaQuery.of(context).size.width - 2 * _horizontalPadding,
-  );
+  return min(360 * reducedTextScale(context), MediaQuery.widthOf(context) - 2 * _horizontalPadding);
 }
 
 class LoginPage extends StatelessWidget {
@@ -62,9 +59,7 @@ class LoginPage extends StatelessWidget {
                 child: ListView(
                   restorationId: 'login_list_view',
                   physics: const ClampingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: _horizontalPadding,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
                   children: const <Widget>[
                     SizedBox(height: 80),
                     _ShrineLogo(),
@@ -91,16 +86,10 @@ class _ShrineLogo extends StatelessWidget {
         children: <Widget>[
           const FadeInImagePlaceholder(
             image: AssetImage('packages/shrine_images/diamond.png'),
-            placeholder: SizedBox(
-              width: 34,
-              height: 34,
-            ),
+            placeholder: SizedBox(width: 34, height: 34),
           ),
           const SizedBox(height: 16),
-          Text(
-            'SHRINE',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Text('SHRINE', style: Theme.of(context).textTheme.headlineSmall),
         ],
       ),
     );
@@ -120,9 +109,7 @@ class _UsernameTextField extends StatelessWidget {
       cursorColor: colorScheme.onSurface,
       decoration: InputDecoration(
         labelText: GalleryLocalizations.of(context)!.shrineLoginUsernameLabel,
-        labelStyle: TextStyle(
-          letterSpacing: letterSpacingOrNone(mediumLetterSpacing),
-        ),
+        labelStyle: TextStyle(letterSpacing: letterSpacingOrNone(mediumLetterSpacing)),
       ),
     );
   }
@@ -141,9 +128,7 @@ class _PasswordTextField extends StatelessWidget {
       obscureText: true,
       decoration: InputDecoration(
         labelText: GalleryLocalizations.of(context)!.shrineLoginPasswordLabel,
-        labelStyle: TextStyle(
-          letterSpacing: letterSpacingOrNone(mediumLetterSpacing),
-        ),
+        labelStyle: TextStyle(letterSpacing: letterSpacingOrNone(mediumLetterSpacing)),
       ),
     );
   }
@@ -203,8 +188,7 @@ class _CancelAndNextButtons extends StatelessWidget {
               padding: buttonTextPadding,
               child: Text(
                 GalleryLocalizations.of(context)!.shrineNextButtonCaption,
-                style: TextStyle(
-                    letterSpacing: letterSpacingOrNone(largeLetterSpacing)),
+                style: TextStyle(letterSpacing: letterSpacingOrNone(largeLetterSpacing)),
               ),
             ),
           ),

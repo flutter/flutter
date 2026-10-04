@@ -1,0 +1,104 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import { supportsDart2Wasm as defaultSupportsDart2Wasm } from './supports_dart2wasm.js';
+
+/** @type {import("./types").WasmAllowList} */
+export const defaultWasmSupport = {
+  "blink": true,
+  "gecko": false,
+  "webkit": false,
+  "unknown": false,
+}
+
+/**
+ * @returns {import("./types").BrowserEngine}
+ */
+const getBrowserEngine = () => {
+  if ((navigator.vendor === 'Google Inc.') ||
+    (navigator.userAgent.includes('Edg/'))) {
+    return "blink";
+  }
+  if (navigator.vendor === "Apple Computer, Inc.") {
+    return "webkit";
+  }
+  if (navigator.vendor === "" && navigator.userAgent.includes('Firefox')) {
+    return "gecko";
+  }
+  return "unknown";
+}
+
+/** @type {import("./types").BrowserEngine} */
+const browserEngine = getBrowserEngine();
+
+const hasImageCodecs = () => {
+  if (typeof ImageDecoder === "undefined") {
+    return false;
+  }
+  // TODO(yjbanov): https://github.com/flutter/flutter/issues/122761
+  // Frequently, when a browser launches an API that other browsers already
+  // support, there are subtle incompatibilities that may cause apps to crash if,
+  // we blindly adopt the new implementation. This check prevents us from picking
+  // up potentially incompatible implementations of ImageDecoder API. Instead,
+  // when a new browser engine launches the API, we'll evaluate it and enable it
+  // explicitly.
+  return browserEngine === "blink";
+}
+
+const hasChromiumBreakIterators = () => {
+  return (typeof Intl.v8BreakIterator !== "undefined") &&
+    (typeof Intl.Segmenter !== "undefined");
+}
+
+const hasTextCluster = () => {
+  return (typeof window.TextCluster !== "undefined");
+}
+
+const getFirefoxVersion = () => {
+  const match = navigator.userAgent.match(/firefox\/(\d+)/i);
+  return match ? parseInt(match[1], 10) : -1;
+}
+
+const supportsDart2Wasm = () => {
+  // Firefox < 147 has a SpiderMonkey Ion WasmGC compilation bug that breaks dart2wasm builds.
+  // See: https://github.com/flutter/flutter/issues/186619
+  //      https://bugzilla.mozilla.org/show_bug.cgi?id=2006811
+  if (browserEngine === "gecko" && getFirefoxVersion() < 147) return false;
+
+  return window._flutter?.supportsDart2Wasm ?? defaultSupportsDart2Wasm();
+}
+
+const detectWebGLVersion = () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+
+  if (canvas.getContext('webgl2') != null) {
+    return 2;
+  }
+  if (canvas.getContext('webgl') != null) {
+    return 1;
+  }
+  return -1;
+}
+
+const isChromeExtension = () => {
+  // Checks for the presence of the Chrome extension ID.
+  // See: https://developer.chrome.com/docs/extensions/reference/api/runtime
+  return window.chrome && chrome.runtime && chrome.runtime.id;
+}
+
+/** @type {import("./types").BrowserEnvironment} */
+export const browserEnvironment = {
+  browserEngine: browserEngine,
+  hasImageCodecs: hasImageCodecs(),
+  hasChromiumBreakIterators: hasChromiumBreakIterators(),
+  hasTextCluster: hasTextCluster(),
+  get supportsDart2Wasm() {
+    return supportsDart2Wasm();
+  },
+  crossOriginIsolated: window.crossOriginIsolated,
+  webGLVersion: detectWebGLVersion(),
+  isChromeExtension: isChromeExtension(),
+};

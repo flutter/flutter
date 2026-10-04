@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 class TestParentData {
-  TestParentData({ this.top, this.right, this.bottom, this.left });
+  TestParentData({this.top, this.right, this.bottom, this.left});
 
   final double? top;
   final double? right;
@@ -24,19 +23,19 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
   );
   expect(element, isNotNull);
   expect(element.renderObject, isA<RenderStack>());
-  final RenderStack renderObject = element.renderObject as RenderStack;
+  final renderObject = element.renderObject as RenderStack;
   try {
     RenderObject? child = renderObject.firstChild;
-    for (final TestParentData expected in expectedParentData) {
+    for (final expected in expectedParentData) {
       expect(child, isA<RenderDecoratedBox>());
-      final RenderDecoratedBox decoratedBox = child! as RenderDecoratedBox;
+      final decoratedBox = child! as RenderDecoratedBox;
       expect(decoratedBox.parentData, isA<StackParentData>());
-      final StackParentData parentData = decoratedBox.parentData! as StackParentData;
+      final parentData = decoratedBox.parentData! as StackParentData;
       expect(parentData.top, equals(expected.top));
       expect(parentData.right, equals(expected.right));
       expect(parentData.bottom, equals(expected.bottom));
       expect(parentData.left, equals(expected.left));
-      final StackParentData? decoratedBoxParentData = decoratedBox.parentData as StackParentData?;
+      final decoratedBoxParentData = decoratedBox.parentData as StackParentData?;
       child = decoratedBoxParentData?.nextSibling;
     }
     expect(child, isNull);
@@ -55,11 +54,7 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           DecoratedBox(decoration: kBoxDecorationA),
-          Positioned(
-            top: 10.0,
-            left: 10.0,
-            child: DecoratedBox(decoration: kBoxDecorationB),
-          ),
+          Positioned(top: 10.0, left: 10.0, child: DecoratedBox(decoration: kBoxDecorationB)),
           DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
@@ -75,16 +70,8 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Positioned(
-            bottom: 5.0,
-            right: 7.0,
-            child: DecoratedBox(decoration: kBoxDecorationA),
-          ),
-          Positioned(
-            top: 10.0,
-            left: 10.0,
-            child: DecoratedBox(decoration: kBoxDecorationB),
-          ),
+          Positioned(bottom: 5.0, right: 7.0, child: DecoratedBox(decoration: kBoxDecorationA)),
+          Positioned(top: 10.0, left: 10.0, child: DecoratedBox(decoration: kBoxDecorationB)),
           DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
@@ -96,24 +83,16 @@ void main() {
       kNonPositioned,
     ]);
 
-    const DecoratedBox kDecoratedBoxA = DecoratedBox(decoration: kBoxDecorationA);
-    const DecoratedBox kDecoratedBoxB = DecoratedBox(decoration: kBoxDecorationB);
-    const DecoratedBox kDecoratedBoxC = DecoratedBox(decoration: kBoxDecorationC);
+    const kDecoratedBoxA = DecoratedBox(decoration: kBoxDecorationA);
+    const kDecoratedBoxB = DecoratedBox(decoration: kBoxDecorationB);
+    const kDecoratedBoxC = DecoratedBox(decoration: kBoxDecorationC);
 
     await tester.pumpWidget(
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Positioned(
-            bottom: 5.0,
-            right: 7.0,
-            child: kDecoratedBoxA,
-          ),
-          Positioned(
-            top: 10.0,
-            left: 10.0,
-            child: kDecoratedBoxB,
-          ),
+          Positioned(bottom: 5.0, right: 7.0, child: kDecoratedBoxA),
+          Positioned(top: 10.0, left: 10.0, child: kDecoratedBoxB),
           kDecoratedBoxC,
         ],
       ),
@@ -129,16 +108,8 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Positioned(
-            bottom: 6.0,
-            right: 8.0,
-            child: kDecoratedBoxA,
-          ),
-          Positioned(
-            left: 10.0,
-            right: 10.0,
-            child: kDecoratedBoxB,
-          ),
+          Positioned(bottom: 6.0, right: 8.0, child: kDecoratedBoxA),
+          Positioned(left: 10.0, right: 10.0, child: kDecoratedBoxB),
           kDecoratedBoxC,
         ],
       ),
@@ -155,11 +126,7 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           kDecoratedBoxA,
-          Positioned(
-            left: 11.0,
-            right: 12.0,
-            child: Container(child: kDecoratedBoxB),
-          ),
+          Positioned(left: 11.0, right: 12.0, child: Container(child: kDecoratedBoxB)),
           kDecoratedBoxC,
         ],
       ),
@@ -176,16 +143,8 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           kDecoratedBoxA,
-          Positioned(
-            right: 10.0,
-            child: Container(child: kDecoratedBoxB),
-          ),
-          const DummyWidget(
-            child: Positioned(
-              top: 8.0,
-              child: kDecoratedBoxC,
-            ),
-          ),
+          Positioned(right: 10.0, child: Container(child: kDecoratedBoxB)),
+          const DummyWidget(child: Positioned(top: 8.0, child: kDecoratedBoxC)),
         ],
       ),
     );
@@ -208,16 +167,12 @@ void main() {
       ),
     );
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(right: 10.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(right: 10.0)]);
 
     flipStatefulWidget(tester);
     await tester.pump();
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(right: 10.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(right: 10.0)]);
 
     await tester.pumpWidget(
       const Stack(
@@ -231,25 +186,21 @@ void main() {
       ),
     );
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(top: 7.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(top: 7.0)]);
 
     flipStatefulWidget(tester);
     await tester.pump();
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(top: 7.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(top: 7.0)]);
 
-    await tester.pumpWidget(
-      const Stack(textDirection: TextDirection.ltr),
-    );
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr));
 
     checkTree(tester, <TestParentData>[]);
   });
 
-  testWidgets('ParentData overwrite with custom ParentDataWidget subclasses', (WidgetTester tester) async {
+  testWidgets('ParentData overwrite with custom ParentDataWidget subclasses', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -391,11 +342,7 @@ void main() {
         child: DummyWidget(
           child: Row(
             children: <Widget>[
-              Positioned(
-                top: 6.0,
-                left: 7.0,
-                child: DecoratedBox(decoration: kBoxDecorationB),
-              ),
+              Positioned(top: 6.0, left: 7.0, child: DecoratedBox(decoration: kBoxDecorationB)),
             ],
           ),
         ),
@@ -419,9 +366,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(
-      const Stack(textDirection: TextDirection.ltr),
-    );
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr));
     checkTree(tester, <TestParentData>[]);
   });
 
@@ -441,9 +386,7 @@ void main() {
       ),
     );
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(top: 10.0, left: 10.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(top: 10.0, left: 10.0)]);
 
     await tester.pumpWidget(
       Stack(
@@ -461,9 +404,7 @@ void main() {
       ),
     );
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(top: 10.0, left: 10.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(top: 10.0, left: 10.0)]);
 
     await tester.pumpWidget(
       Stack(
@@ -478,27 +419,23 @@ void main() {
       ),
     );
 
-    checkTree(tester, <TestParentData>[
-      TestParentData(top: 10.0, left: 10.0),
-    ]);
+    checkTree(tester, <TestParentData>[TestParentData(top: 10.0, left: 10.0)]);
   });
 
   testWidgets('Parent data invalid ancestor', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Row(
-        children: <Widget>[
-          Stack(
-            textDirection: TextDirection.ltr,
-            children: <Widget>[
-              Expanded(
-                child: Container(),
-              ),
-            ],
-          ),
-        ],
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: <Widget>[
+            Stack(
+              textDirection: TextDirection.ltr,
+              children: <Widget>[Expanded(child: Container())],
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -518,21 +455,16 @@ void main() {
     );
   });
 
-  testWidgets('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      OneAncestorWidget(
-        child: Container(),
-      ),
-    );
-    DummyParentData parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
+  testWidgets('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(OneAncestorWidget(child: Container()));
+    var parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, isNull);
 
     await tester.pumpWidget(
       OneAncestorWidget(
-        child: TestParentDataWidget(
-          string: 'Foo',
-          child: Container(),
-        ),
+        child: TestParentDataWidget(string: 'Foo', child: Container()),
       ),
     );
     parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
@@ -540,10 +472,7 @@ void main() {
 
     await tester.pumpWidget(
       AnotherAncestorWidget(
-        child: TestParentDataWidget(
-          string: 'Bar',
-          child: Container(),
-        ),
+        child: TestParentDataWidget(string: 'Bar', child: Container()),
       ),
     );
     parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
@@ -566,24 +495,20 @@ class SubclassPositioned extends Positioned {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData! as StackParentData;
+    final parentData = renderObject.parentData! as StackParentData;
     parentData.bottom = bottom;
   }
 }
 
 class CustomPositionedWidget extends ParentDataWidget<StackParentData> {
-  const CustomPositionedWidget({
-    super.key,
-    required this.bottom,
-    required super.child,
-  });
+  const CustomPositionedWidget({super.key, required this.bottom, required super.child});
 
   final double bottom;
 
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData! as StackParentData;
+    final parentData = renderObject.parentData! as StackParentData;
     parentData.bottom = bottom;
   }
 
@@ -592,18 +517,14 @@ class CustomPositionedWidget extends ParentDataWidget<StackParentData> {
 }
 
 class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
-  const TestParentDataWidget({
-    super.key,
-    required this.string,
-    required super.child,
-  });
+  const TestParentDataWidget({super.key, required this.string, required super.child});
 
   final String string;
 
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is DummyParentData);
-    final DummyParentData parentData = renderObject.parentData! as DummyParentData;
+    final parentData = renderObject.parentData! as DummyParentData;
     parentData.string = string;
   }
 
@@ -616,20 +537,14 @@ class DummyParentData extends ParentData {
 }
 
 class OneAncestorWidget extends SingleChildRenderObjectWidget {
-  const OneAncestorWidget({
-    super.key,
-    required Widget super.child,
-  });
+  const OneAncestorWidget({super.key, required Widget super.child});
 
   @override
   RenderOne createRenderObject(BuildContext context) => RenderOne();
 }
 
 class AnotherAncestorWidget extends SingleChildRenderObjectWidget {
-  const AnotherAncestorWidget({
-    super.key,
-    required Widget super.child,
-  });
+  const AnotherAncestorWidget({super.key, required Widget super.child});
 
   @override
   RenderAnother createRenderObject(BuildContext context) => RenderAnother();
@@ -654,7 +569,7 @@ class RenderAnother extends RenderProxyBox {
 }
 
 class DummyWidget extends StatelessWidget {
-  const DummyWidget({ super.key, required this.child });
+  const DummyWidget({super.key, required this.child});
 
   final Widget child;
 

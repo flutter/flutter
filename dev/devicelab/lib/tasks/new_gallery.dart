@@ -8,15 +8,15 @@ import 'perf_tests.dart';
 class NewGalleryPerfTest extends PerfTest {
   NewGalleryPerfTest({
     String timelineFileName = 'transitions',
-    String dartDefine = '',
+    super.dartDefine = '',
     super.enableImpeller,
     super.timeoutSeconds,
     super.forceOpenGLES,
   }) : super(
-    '${flutterDirectory.path}/dev/integration_tests/new_gallery',
-    'test_driver/transitions_perf.dart',
-    timelineFileName,
-    dartDefine: dartDefine,
-    createPlatforms: <String>['android', 'ios', 'web']
-  );
+         '${flutterDirectory.path}/dev/integration_tests/new_gallery',
+         'test_driver/transitions_perf.dart',
+         timelineFileName,
+         createPlatforms: <String>['android', 'ios', 'web', 'macos', 'windows'],
+         enableMergedPlatformThread: true,
+       );
 }

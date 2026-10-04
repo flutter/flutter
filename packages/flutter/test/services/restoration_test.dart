@@ -22,20 +22,24 @@ void main() {
 
   group('RestorationManager', () {
     testWidgets('root bucket retrieval', (WidgetTester tester) async {
-      final List<MethodCall> callsToEngine = <MethodCall>[];
-      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
+      final callsToEngine = <MethodCall>[];
+      final result = Completer<Map<dynamic, dynamic>>();
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
+        MethodCall call,
+      ) {
         callsToEngine.add(call);
         return result.future;
       });
 
-      final RestorationManager manager = RestorationManager();
+      final manager = RestorationManager();
       addTearDown(manager.dispose);
       final Future<RestorationBucket?> rootBucketFuture = manager.rootBucket;
       RestorationBucket? rootBucket;
-      rootBucketFuture.then((RestorationBucket? bucket) {
-        rootBucket = bucket;
-      });
+      unawaited(
+        rootBucketFuture.then((RestorationBucket? bucket) {
+          rootBucket = bucket;
+        }),
+      );
       expect(rootBucketFuture, isNotNull);
       expect(rootBucket, isNull);
 
@@ -62,46 +66,54 @@ void main() {
 
       // Accessing the root bucket again completes synchronously with same bucket.
       RestorationBucket? synchronousBucket;
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        synchronousBucket = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          synchronousBucket = bucket;
+        }),
+      );
       expect(synchronousBucket, isNotNull);
       expect(synchronousBucket, same(rootBucket));
     });
 
     testWidgets('root bucket received from engine before retrieval', (WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);
-      final List<MethodCall> callsToEngine = <MethodCall>[];
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) async {
+      final callsToEngine = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
+        MethodCall call,
+      ) async {
         callsToEngine.add(call);
         return null;
       });
-      final RestorationManager manager = RestorationManager();
+      final manager = RestorationManager();
       addTearDown(manager.dispose);
 
       await _pushDataFromEngine(_createEncodedRestorationData1());
 
       RestorationBucket? rootBucket;
-      manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket);
+      unawaited(manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket));
       // Root bucket is available synchronously.
       expect(rootBucket, isNotNull);
       // Engine was never asked.
       expect(callsToEngine, isEmpty);
     });
 
-    testWidgets('root bucket received while engine retrieval is pending', (WidgetTester tester) async {
+    testWidgets('root bucket received while engine retrieval is pending', (
+      WidgetTester tester,
+    ) async {
       SystemChannels.restoration.setMethodCallHandler(null);
-      final List<MethodCall> callsToEngine = <MethodCall>[];
-      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
+      final callsToEngine = <MethodCall>[];
+      final result = Completer<Map<dynamic, dynamic>>();
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
+        MethodCall call,
+      ) {
         callsToEngine.add(call);
         return result.future;
       });
-      final RestorationManager manager = RestorationManager();
+      final manager = RestorationManager();
       addTearDown(manager.dispose);
 
       RestorationBucket? rootBucket;
-      manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket);
+      unawaited(manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket));
       expect(rootBucket, isNull);
       expect(callsToEngine.single.method, 'get');
 
@@ -113,30 +125,36 @@ void main() {
       await tester.pump();
 
       RestorationBucket? rootBucket2;
-      manager.rootBucket.then((RestorationBucket? bucket) => rootBucket2 = bucket);
+      unawaited(manager.rootBucket.then((RestorationBucket? bucket) => rootBucket2 = bucket));
       expect(rootBucket2, isNotNull);
       expect(rootBucket2, same(rootBucket));
       expect(rootBucket2!.read<int>('value1'), 10);
       expect(rootBucket2!.contains('foo'), isFalse);
     });
 
-    testWidgets('root bucket is properly replaced when new data is available', (WidgetTester tester) async {
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) async {
+    testWidgets('root bucket is properly replaced when new data is available', (
+      WidgetTester tester,
+    ) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
+        MethodCall call,
+      ) async {
         return _createEncodedRestorationData1();
       });
-      final RestorationManager manager = RestorationManager();
+      final manager = RestorationManager();
       addTearDown(manager.dispose);
       RestorationBucket? rootBucket;
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucket = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucket = bucket;
+        }),
+      );
       await tester.pump();
       expect(rootBucket, isNotNull);
       expect(rootBucket!.read<int>('value1'), 10);
       final RestorationBucket child = rootBucket!.claimChild('child1', debugOwner: null);
       expect(child.read<int>('another value'), 22);
 
-      bool rootReplaced = false;
+      var rootReplaced = false;
       RestorationBucket? newRoot;
       manager.addListener(() {
         rootReplaced = true;
@@ -162,24 +180,31 @@ void main() {
       expect(newChild.read<String>('bar'), 'Hello');
     });
 
-    testWidgets('returns null as root bucket when restoration is disabled', (WidgetTester tester) async {
-      final List<MethodCall> callsToEngine = <MethodCall>[];
-      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call)  {
+    testWidgets('returns null as root bucket when restoration is disabled', (
+      WidgetTester tester,
+    ) async {
+      final callsToEngine = <MethodCall>[];
+      final result = Completer<Map<dynamic, dynamic>>();
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
+        MethodCall call,
+      ) {
         callsToEngine.add(call);
         return result.future;
       });
-      int listenerCount = 0;
-      final RestorationManager manager = RestorationManager()..addListener(() {
-        listenerCount++;
-      });
+      var listenerCount = 0;
+      final manager = RestorationManager()
+        ..addListener(() {
+          listenerCount++;
+        });
       addTearDown(manager.dispose);
       RestorationBucket? rootBucket;
-      bool rootBucketResolved = false;
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucketResolved = true;
-        rootBucket = bucket;
-      });
+      var rootBucketResolved = false;
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucketResolved = true;
+          rootBucket = bucket;
+        }),
+      );
       await tester.pump();
       expect(rootBucketResolved, isFalse);
       expect(listenerCount, 0);
@@ -192,35 +217,43 @@ void main() {
       // Switch to non-null.
       await _pushDataFromEngine(_createEncodedRestorationData1());
       expect(listenerCount, 1);
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucket = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucket = bucket;
+        }),
+      );
       expect(rootBucket, isNotNull);
 
       // Switch to null again.
       await _pushDataFromEngine(_packageRestorationData(enabled: false));
       expect(listenerCount, 2);
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucket = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucket = bucket;
+        }),
+      );
       expect(rootBucket, isNull);
     });
 
     testWidgets('flushData', (WidgetTester tester) async {
-      final List<MethodCall> callsToEngine = <MethodCall>[];
-      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
+      final callsToEngine = <MethodCall>[];
+      final result = Completer<Map<dynamic, dynamic>>();
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
+        MethodCall call,
+      ) {
         callsToEngine.add(call);
         return result.future;
       });
 
-      final RestorationManager manager = RestorationManager();
+      final manager = RestorationManager();
       addTearDown(manager.dispose);
       final Future<RestorationBucket?> rootBucketFuture = manager.rootBucket;
       RestorationBucket? rootBucket;
-      rootBucketFuture.then((RestorationBucket? bucket) {
-        rootBucket = bucket;
-      });
+      unawaited(
+        rootBucketFuture.then((RestorationBucket? bucket) {
+          rootBucket = bucket;
+        }),
+      );
       result.complete(_createEncodedRestorationData1());
       await tester.pump();
       expect(rootBucket, isNotNull);
@@ -244,19 +277,23 @@ void main() {
     });
 
     testWidgets('isReplacing', (WidgetTester tester) async {
-      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
+      final result = Completer<Map<dynamic, dynamic>>();
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
+        MethodCall call,
+      ) {
         return result.future;
       });
 
-      final TestRestorationManager manager = TestRestorationManager();
+      final manager = TestRestorationManager();
       addTearDown(manager.dispose);
       expect(manager.isReplacing, isFalse);
 
       RestorationBucket? rootBucket;
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucket = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucket = bucket;
+        }),
+      );
       result.complete(_createEncodedRestorationData1());
       await tester.idle();
       expect(rootBucket, isNotNull);
@@ -269,9 +306,11 @@ void main() {
 
       manager.receiveDataFromEngine(enabled: true, data: null);
       RestorationBucket? rootBucket2;
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucket2 = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucket2 = bucket;
+        }),
+      );
       expect(rootBucket2, isNotNull);
       expect(rootBucket2, isNot(same(rootBucket)));
       expect(manager.isReplacing, isTrue);
@@ -286,9 +325,11 @@ void main() {
 
       manager.receiveDataFromEngine(enabled: false, data: null);
       RestorationBucket? rootBucket3;
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucket3 = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucket3 = bucket;
+        }),
+      );
       expect(rootBucket3, isNull);
       expect(manager.isReplacing, isFalse);
       await tester.idle();
@@ -308,15 +349,14 @@ void main() {
     expect(debugIsSerializableForRestoration(12.43), isTrue);
     expect(debugIsSerializableForRestoration('Hello World'), isTrue);
     expect(debugIsSerializableForRestoration(<int>[12, 13, 14]), isTrue);
-    expect(debugIsSerializableForRestoration(<String, int>{'v1' : 10, 'v2' : 23}), isTrue);
-    expect(debugIsSerializableForRestoration(<String, dynamic>{
-      'hello': <int>[12, 12, 12],
-      'world': <int, bool>{
-        1: true,
-        2: false,
-        4: true,
-      },
-    }), isTrue);
+    expect(debugIsSerializableForRestoration(<String, int>{'v1': 10, 'v2': 23}), isTrue);
+    expect(
+      debugIsSerializableForRestoration(<String, dynamic>{
+        'hello': <int>[12, 12, 12],
+        'world': <int, bool>{1: true, 2: false, 4: true},
+      }),
+      isTrue,
+    );
   });
 }
 
@@ -324,21 +364,16 @@ Future<void> _pushDataFromEngine(Map<dynamic, dynamic> data) async {
   await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
     'flutter/restoration',
     const StandardMethodCodec().encodeMethodCall(MethodCall('push', data)),
-    (_) { },
+    (_) {},
   );
 }
 
 Map<dynamic, dynamic> _createEncodedRestorationData1() {
-  final Map<String, dynamic> data = <String, dynamic>{
-    valuesMapKey: <String, dynamic>{
-      'value1' : 10,
-      'value2' : 'Hello',
-    },
+  final data = <String, dynamic>{
+    valuesMapKey: <String, dynamic>{'value1': 10, 'value2': 'Hello'},
     childrenMapKey: <String, dynamic>{
-      'child1' : <String, dynamic>{
-        valuesMapKey : <String, dynamic>{
-          'another value': 22,
-        },
+      'child1': <String, dynamic>{
+        valuesMapKey: <String, dynamic>{'another value': 22},
       },
     },
   };
@@ -346,15 +381,11 @@ Map<dynamic, dynamic> _createEncodedRestorationData1() {
 }
 
 Map<dynamic, dynamic> _createEncodedRestorationData2() {
-  final Map<String, dynamic> data = <String, dynamic>{
-    valuesMapKey: <String, dynamic>{
-      'foo' : 33,
-    },
+  final data = <String, dynamic>{
+    valuesMapKey: <String, dynamic>{'foo': 33},
     childrenMapKey: <String, dynamic>{
-      'childFoo' : <String, dynamic>{
-        valuesMapKey : <String, dynamic>{
-          'bar': 'Hello',
-        },
+      'childFoo': <String, dynamic>{
+        valuesMapKey: <String, dynamic>{'bar': 'Hello'},
       },
     },
   };

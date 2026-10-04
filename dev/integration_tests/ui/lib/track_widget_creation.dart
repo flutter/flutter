@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
+
 import 'package:flutter/widgets.dart';
 
 void main() {
-  final Set<Widget> widgets = <Widget>{};
+  final widgets = <Widget>{};
   widgets.add(const Text('same'));
   widgets.add(const Text('same'));
 

@@ -3,24 +3,31 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/macos.dart';
 import '../cache.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
+import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
+import '../ios/plist_parser.dart';
+import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
-import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
+import '../macos/xcode.dart';
+import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'build_ios_framework.dart';
+import 'darwin_add_to_app.dart';
 
 /// Produces a .framework for integration into a host macOS app. The .framework
 /// contains the Flutter engine and framework code as well as plugins. It can
@@ -28,19 +35,19 @@ import 'build_ios_framework.dart';
 /// managers.
 class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   BuildMacOSFrameworkCommand({
-    super.flutterVersion,
+    required super.appleContext,
     required super.buildSystem,
+    required super.codesign,
+    required super.toolContext,
     required super.verboseHelp,
-    required super.logger,
-    super.cache,
-    super.platform,
   });
 
   @override
-  final String name = 'macos-framework';
+  final name = 'macos-framework';
 
   @override
-  final String description = 'Produces .xcframeworks for a Flutter project '
+  final description =
+      'Produces .xcframeworks for a Flutter project '
       'and its plugins for integration into existing, plain macOS Xcode projects.\n'
       'This can only be run on macOS hosts.';
 
@@ -50,14 +57,20 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   };
 
   @override
+  bool get regeneratePlatformSpecificToolingDuringVerify => false;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
-    final String outputArgument = stringArg('output') ??
-        globals.fs.path.join(
-          globals.fs.currentDirectory.path,
-          'build',
-          'macos',
-          'framework',
-        );
+    final ToolContext(
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+    ) = toolContext;
+
+    final String outputArgument =
+        getValue(BuildFrameworkCommand.output) ??
+        fs.path.join(fs.currentDirectory.path, getBuildDirectory(config, fs), 'macos', 'framework');
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');
@@ -67,58 +80,91 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       throwToolExit('Project does not support macOS');
     }
 
-    final Directory outputDirectory =
-        globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
+    final Directory outputDirectory = fs.directory(
+      fs.path.absolute(fs.path.normalize(outputArgument)),
+    );
 
     final List<BuildInfo> buildInfos = await getBuildInfos();
-    displayNullSafetyMode(buildInfos.first);
 
-    for (final BuildInfo buildInfo in buildInfos) {
-      globals.printStatus('Building macOS frameworks in ${buildInfo.mode.cliName} mode...');
-      final String xcodeBuildConfiguration = sentenceCase(buildInfo.mode.cliName);
+    final String? codesignIdentity = await getCodesignIdentity(
+      buildInfo: buildInfos.first,
+      outputDirectory: outputDirectory,
+      xcodeProject: project.macos,
+    );
+
+    for (final buildInfo in buildInfos) {
+      logger.printStatus('Building macOS frameworks in ${buildInfo.mode.cliName} mode...');
+      // Create the build-mode specific metadata.
+      //
+      // This normally would be done in the verifyAndRun step of FlutterCommand, but special "meta"
+      // build commands (like flutter build ios-framework) make multiple builds, and do not have a
+      // single "buildInfo", so the step has to be done manually for each build.
+      //
+      // See regeneratePlatformSpecificToolingDurifyVerify.
+      await regeneratePlatformSpecificToolingIfApplicable(
+        project,
+        releaseMode: buildInfo.mode.isRelease,
+      );
+
+      final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {
         modeDirectory.deleteSync(recursive: true);
       }
 
-      if (boolArg('cocoapods')) {
-        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
+      if (getValue(BuildFrameworkCommand.cocoapods)) {
+        produceFlutterPodspec(
+          buildInfo.mode,
+          modeDirectory,
+          force: getValue(BuildFrameworkCommand.force),
+        );
       } else {
-        await _produceFlutterFramework(buildInfo, modeDirectory);
+        await _produceFlutterFramework(buildInfo, modeDirectory, codesignIdentity);
       }
 
       final Directory buildOutput = modeDirectory.childDirectory('macos');
 
       // Build aot, create App.framework. Make XCFrameworks.
-      await _produceAppFramework(buildInfo, modeDirectory, buildOutput);
+      await _produceAppFramework(buildInfo, modeDirectory, buildOutput, codesignIdentity);
 
       // Build and copy plugins.
-      await processPodsIfNeeded(project.macos, getMacOSBuildDirectory(), buildInfo.mode);
-      if (boolArg('plugins') && hasPlugins(project)) {
-        await _producePlugins(xcodeBuildConfiguration, buildOutput, modeDirectory);
+      if (getValue(BuildFrameworkCommand.plugins)) {
+        await processPodsIfNeeded(
+          project.macos,
+          getMacOSBuildDirectory(config: config, fileSystem: fs),
+          buildInfo.mode,
+          forceCocoaPodsOnly: true,
+        );
+        if (hasPlugins(project)) {
+          await _producePlugins(
+            xcodeBuildConfiguration,
+            buildOutput,
+            modeDirectory,
+            buildInfo.mode,
+            codesignIdentity,
+          );
+        }
       }
 
-      globals.logger.printStatus(' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
+      logger.printStatus(' └─Moving to ${fs.path.relative(modeDirectory.path)}');
 
-      // Copy the native assets.
-      final Directory nativeAssetsDirectory = globals.fs
-          .directory(getBuildDirectory())
-          .childDirectory('native_assets/macos/');
-      if (await nativeAssetsDirectory.exists()) {
-        final ProcessResult rsyncResult = await globals.processManager.run(<Object>[
-          'rsync',
-          '-av',
-          '--filter',
-          '- .DS_Store',
-          '--filter',
-          '- native_assets.yaml',
-          nativeAssetsDirectory.path,
-          modeDirectory.path,
-        ]);
-        if (rsyncResult.exitCode != 0) {
-          throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
-        }
+      // Package native assets.
+      final Iterable<String> frameworkNames = BuildFrameworkCommand.findCodeAssetFrameworkNames(
+        buildOutput,
+      );
+      for (final frameworkName in frameworkNames) {
+        final Directory frameworkDirectory = buildOutput
+            .childDirectory('native_assets')
+            .childDirectory(frameworkName);
+        await BuildFrameworkCommand.produceXCFramework(
+          <Directory>[frameworkDirectory],
+          frameworkName.replaceAll('.framework', ''),
+          modeDirectory,
+          processManager,
+          codesignIdentity,
+          buildInfo.mode,
+        );
       }
 
       // Delete the intermediaries since they would have been copied into our
@@ -128,14 +174,18 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       }
     }
 
-    globals.printStatus('Frameworks written to ${outputDirectory.path}.');
+    logger.printStatus('Frameworks written to ${outputDirectory.path}.');
 
     if (hasPlugins(project)) {
       // Apps do not generate a FlutterPluginRegistrant.framework. Users will need
       // to copy GeneratedPluginRegistrant.swift to their project manually.
       final File pluginRegistrantImplementation = project.macos.pluginRegistrantImplementation;
-      pluginRegistrantImplementation.copySync(outputDirectory.childFile(pluginRegistrantImplementation.basename).path);
-      globals.printStatus('\nCopy ${globals.fs.path.basename(pluginRegistrantImplementation.path)} into your project.');
+      pluginRegistrantImplementation.copySync(
+        outputDirectory.childFile(pluginRegistrantImplementation.basename).path,
+      );
+      logger.printStatus(
+        '\nCopy ${fs.path.basename(pluginRegistrantImplementation.path)} into your project.',
+      );
     }
 
     return FlutterCommandResult.success();
@@ -145,7 +195,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   /// vendored framework caching.
   @visibleForTesting
   void produceFlutterPodspec(BuildMode mode, Directory modeDirectory, {bool force = false}) {
-    final Status status = globals.logger.startProgress(' ├─Creating FlutterMacOS.podspec...');
+    final Status status = logger.startProgress(' ├─Creating FlutterMacOS.podspec...');
     try {
       final GitTagVersion gitTagVersion = flutterVersion.gitTagVersion;
       if (!force &&
@@ -154,7 +204,8 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
               gitTagVersion.z == null ||
               gitTagVersion.commits != 0)) {
         throwToolExit(
-            '--cocoapods is only supported on the beta or stable channel. Detected version is ${flutterVersion.frameworkVersion}');
+          '--cocoapods is only supported on the beta or stable channel. Detected version is ${flutterVersion.frameworkVersion}',
+        );
       }
 
       // Podspecs use semantic versioning, which don't support hotfixes.
@@ -168,11 +219,13 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         throwToolExit('Could not find license at ${license.path}');
       }
       final String licenseSource = license.readAsStringSync();
-      final String artifactsMode = mode == BuildMode.debug ? 'darwin-x64' : 'darwin-x64-${mode.cliName}';
+      final String artifactsMode = FlutterDarwinPlatform.macos.artifactName(mode);
+      final String frameworkName = FlutterDarwinPlatform.macos.frameworkName;
 
-      final String podspecContents = '''
+      final podspecContents =
+          '''
 Pod::Spec.new do |s|
-  s.name                  = 'FlutterMacOS'
+  s.name                  = '${FlutterDarwinPlatform.macos.binaryName}'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
   s.summary               = 'A UI toolkit for beautiful and fast apps.'
   s.description           = <<-DESC
@@ -186,15 +239,16 @@ $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/FlutterMacOS.framework.zip' }
-  s.documentation_url     = 'https://flutter.dev/docs'
-  s.osx.deployment_target = '10.14'
-  s.vendored_frameworks   = 'FlutterMacOS.framework'
-  s.prepare_command       = 'unzip FlutterMacOS.framework -d FlutterMacOS.framework'
+  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/$frameworkName.zip' }
+  s.documentation_url     = 'https://docs.flutter.dev'
+  s.osx.deployment_target = '12.0'
+  s.vendored_frameworks   = '$frameworkName'
+  s.prepare_command       = 'unzip $frameworkName -d $frameworkName'
 end
 ''';
 
-      final File podspec = modeDirectory.childFile('FlutterMacOS.podspec')..createSync(recursive: true);
+      final File podspec = modeDirectory.childFile('FlutterMacOS.podspec')
+        ..createSync(recursive: true);
       podspec.writeAsStringSync(podspecContents);
     } finally {
       status.stop();
@@ -205,33 +259,41 @@ end
     BuildInfo buildInfo,
     Directory outputBuildDirectory,
     Directory macosBuildOutput,
+    String? codesignIdentity,
   ) async {
-    final Status status = globals.logger.startProgress(
-      ' ├─Building App.xcframework...',
-    );
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
+
+    final Status status = logger.startProgress(' ├─Building App.xcframework...');
     try {
-      final Environment environment = Environment(
-        projectDir: globals.fs.currentDirectory,
+      final environment = Environment(
+        projectDir: fs.currentDirectory,
+        packageConfigPath: packageConfigPath(),
         outputDir: macosBuildOutput,
         buildDir: project.dartTool.childDirectory('flutter_build'),
-        cacheDir: globals.cache.getRoot(),
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        cacheDir: cache.getRoot(),
+        flutterRootDir: fs.directory(Cache.flutterRoot),
         defines: <String, String>{
           kTargetFile: targetFile,
-          kTargetPlatform: getNameForTargetPlatform(TargetPlatform.darwin),
-          kDarwinArchs: defaultMacOSArchsForEnvironment(globals.artifacts!)
-              .map((DarwinArch e) => e.name)
+          kTargetPlatform: TargetPlatform.darwin.getName(),
+          kDarwinArchs: defaultMacOSArchsForEnvironment(artifacts)
+              .map((CpuArch e) => e.darwinArchName)
               .join(' '),
           ...buildInfo.toBuildSystemEnvironment(),
         },
-        artifacts: globals.artifacts!,
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        usage: globals.flutterUsage,
-        analytics: globals.analytics,
-        engineVersion: globals.artifacts!.isLocalEngine ? null : globals.flutterVersion.engineRevision,
+        artifacts: artifacts,
+        fileSystem: fs,
+        logger: logger,
+        processManager: processManager,
+        platform: platform,
+        analytics: analytics,
+        engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
         generateDartPluginRegistry: true,
       );
       Target target;
@@ -247,7 +309,7 @@ end
       final BuildResult result = await buildSystem.build(target, environment);
       if (!result.success) {
         for (final ExceptionMeasurement measurement in result.exceptions.values) {
-          globals.printError(measurement.exception.toString());
+          logger.printError(measurement.exception.toString());
         }
         throwToolExit('The App.xcframework build failed.');
       }
@@ -260,7 +322,9 @@ end
       <Directory>[appFramework],
       'App',
       outputBuildDirectory,
-      globals.processManager,
+      processManager,
+      codesignIdentity,
+      buildInfo.mode,
     );
     appFramework.deleteSync(recursive: true);
   }
@@ -268,29 +332,39 @@ end
   Future<void> _produceFlutterFramework(
     BuildInfo buildInfo,
     Directory modeDirectory,
+    String? codesignIdentity,
   ) async {
-    final Status status = globals.logger.startProgress(
-      ' ├─Copying FlutterMacOS.xcframework...',
-    );
-    final String engineCacheFlutterFrameworkDirectory = globals.artifacts!.getArtifactPath(
+    final ToolContext(
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+    ) = toolContext;
+
+    final Status status = logger.startProgress(' ├─Copying FlutterMacOS.xcframework...');
+    final String engineCacheFlutterFrameworkDirectory = artifacts.getArtifactPath(
       Artifact.flutterMacOSXcframework,
       platform: TargetPlatform.darwin,
       mode: buildInfo.mode,
     );
-    final String flutterFrameworkFileName = globals.fs.path.basename(
-      engineCacheFlutterFrameworkDirectory,
-    );
-    final Directory flutterFrameworkCopy = modeDirectory.childDirectory(
-      flutterFrameworkFileName,
-    );
+    final String flutterFrameworkFileName = fs.path.basename(engineCacheFlutterFrameworkDirectory);
+    final Directory flutterFrameworkCopy = modeDirectory.childDirectory(flutterFrameworkFileName);
 
     try {
       // Copy xcframework engine cache framework to mode directory.
       copyDirectory(
-        globals.fs.directory(engineCacheFlutterFrameworkDirectory),
+        fs.directory(engineCacheFlutterFrameworkDirectory),
         flutterFrameworkCopy,
         followLinks: false,
       );
+      if (codesignIdentity != null) {
+        await DarwinAddToAppCodesigning.codesignFlutterXCFramework(
+          codesignIdentity: codesignIdentity,
+          xcframework: flutterFrameworkCopy,
+          processManager: processManager,
+          buildMode: buildInfo.mode,
+        );
+      }
     } finally {
       status.stop();
     }
@@ -300,24 +374,34 @@ end
     String xcodeBuildConfiguration,
     Directory buildOutput,
     Directory modeDirectory,
+    BuildMode mode,
+    String? codesignIdentity,
   ) async {
-    final Status status = globals.logger.startProgress(' ├─Building plugins...');
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+    ) = toolContext;
+    final AppleContext(:PlistParser plistParser, :Xcode xcode) = appleContext;
+
+    final Status status = logger.startProgress(' ├─Building plugins...');
     try {
-      final List<String> pluginsBuildCommand = <String>[
-        ...globals.xcode!.xcrunCommand(),
+      final pluginsBuildCommand = <String>[
+        ...xcode.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
         '-sdk',
-        'macosx',
+        XcodeSdk.MacOSX.platformName,
         '-configuration',
         xcodeBuildConfiguration,
         'SYMROOT=${buildOutput.path}',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
-        if (boolArg('static')) 'MACH_O_TYPE=staticlib',
+        if (getValue(BuildFrameworkCommand.staticFrameworks)) 'MACH_O_TYPE=staticlib',
       ];
 
-      final RunResult buildPluginsResult = await globals.processUtils.run(
+      final RunResult buildPluginsResult = await processUtils.run(
         pluginsBuildCommand,
         workingDirectory: project.macos.hostAppRoot.childDirectory('Pods').path,
       );
@@ -328,25 +412,30 @@ end
 
       final Directory buildConfiguration = buildOutput.childDirectory(xcodeBuildConfiguration);
 
-      final Iterable<Directory> products = buildConfiguration.listSync(followLinks: false).whereType<Directory>();
-      for (final Directory builtProduct in products) {
+      final Iterable<Directory> products = buildConfiguration
+          .listSync(followLinks: false)
+          .whereType<Directory>();
+      for (final builtProduct in products) {
         for (final FileSystemEntity podProduct in builtProduct.listSync(followLinks: false)) {
           final String podFrameworkName = podProduct.basename;
-          if (globals.fs.path.extension(podFrameworkName) != '.framework') {
+          if (fs.path.extension(podFrameworkName) != '.framework') {
             continue;
           }
-          final String binaryName = globals.fs.path.basenameWithoutExtension(podFrameworkName);
+          final String binaryName = fs.path.basenameWithoutExtension(podFrameworkName);
 
           await BuildFrameworkCommand.produceXCFramework(
-            <Directory>[
-              podProduct as Directory,
-            ],
+            <Directory>[podProduct as Directory],
             binaryName,
             modeDirectory,
-            globals.processManager,
+            processManager,
+            codesignIdentity,
+            mode,
           );
         }
       }
+
+      // Copy vendored frameworks from CocoaPods plugins.
+      await copyVendoredFrameworks(modeDirectory, project.macos.hostAppRoot, plistParser);
     } finally {
       status.stop();
     }

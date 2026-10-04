@@ -4,5 +4,15 @@
   "reorderItemUp": "Flyt op",
   "reorderItemDown": "Flyt ned",
   "reorderItemLeft": "Flyt til venstre",
-  "reorderItemRight": "Flyt til højre"
+  "reorderItemRight": "Flyt til højre",
+  "copyButtonLabel": "Kopiér",
+  "cutButtonLabel": "Klip",
+  "lookUpButtonLabel": "Slå op",
+  "searchWebButtonLabel": "Søg på nettet",
+  "shareButtonLabel": "Del",
+  "pasteButtonLabel": "Indsæt",
+  "selectAllButtonLabel": "Markér alt",
+  "searchResultsFound": "Søgeresultater fundet",
+  "noResultsFound": "Der blev ikke fundet nogen resultater",
+  "radioButtonUnselectedLabel": "Ikke valgt"
 }

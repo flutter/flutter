@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'grid_tile.dart';
+/// @docImport 'icon_button.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -63,12 +67,12 @@ class GridTileBar extends StatelessWidget {
       decoration = BoxDecoration(color: backgroundColor);
     }
 
-    final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
+    final padding = EdgeInsetsDirectional.only(
       start: leading != null ? 8.0 : 16.0,
       end: trailing != null ? 8.0 : 16.0,
     );
 
-    final ThemeData darkTheme = ThemeData.dark();
+    final darkTheme = ThemeData.dark();
     return Container(
       padding: padding,
       decoration: decoration,

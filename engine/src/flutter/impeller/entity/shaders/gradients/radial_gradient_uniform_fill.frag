@@ -1,0 +1,78 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+precision mediump float;
+
+#include <impeller/color.glsl>
+#include <impeller/dithering.glsl>
+#include <impeller/gradient.glsl>
+#include <impeller/texture.glsl>
+#include <impeller/types.glsl>
+
+uniform FragInfo {
+  highp vec2 center;
+  float radius;
+  float tile_mode;
+  float alpha;
+  float colors_length;
+  vec4 decal_border_color;
+}
+frag_info;
+
+// Keep this large array in a dedicated uniform block to avoid size and
+// alignment limits on some graphics APIs and hardware platforms. Do not add any
+// new fields to this block.
+uniform ColorsInfo {
+  vec4 colors[256];
+}
+colors_info;
+
+// Keep this large array in a dedicated uniform block to avoid size and
+// alignment limits on some graphics APIs and hardware platforms. Do not add any
+// new fields to this block.
+uniform StopPairsInfo {
+  vec4 stop_pairs[128];
+}
+stop_pairs_info;
+
+highp in vec2 v_position;
+
+out vec4 frag_color;
+
+void main() {
+  float len = length(v_position - frag_info.center);
+  float t = len / frag_info.radius;
+
+  vec4 result_color = vec4(0);
+  if ((t < 0.0 || t > 1.0) && frag_info.tile_mode == kTileModeDecal) {
+    result_color = frag_info.decal_border_color;
+  } else {
+    t = IPFloatTile(t, frag_info.tile_mode);
+
+    vec2 prev_stop = stop_pairs_info.stop_pairs[0].xy;
+    bool even = false;
+    for (int i = 1; i < frag_info.colors_length; i++) {
+      // stop_pairs[i/2].xy = values for stop i
+      // stop_pairs[i/2].zw = values for stop i+1
+      vec2 cur_stop = even ? stop_pairs_info.stop_pairs[i / 2].xy
+                           : stop_pairs_info.stop_pairs[i / 2].zw;
+      even = !even;
+      // stop.x == t value
+      // stop.y == inverse_delta to next stop
+      if (t >= prev_stop.x && t <= cur_stop.x) {
+        if (cur_stop.y > 1000.0) {
+          result_color = colors_info.colors[i];
+        } else {
+          float ratio = (t - prev_stop.x) * cur_stop.y;
+          result_color =
+              mix(colors_info.colors[i - 1], colors_info.colors[i], ratio);
+        }
+        break;
+      }
+      prev_stop = cur_stop;
+    }
+  }
+
+  frag_color = IPPremultiply(result_color) * frag_info.alpha;
+}

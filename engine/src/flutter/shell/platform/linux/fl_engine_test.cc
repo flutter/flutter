@@ -1,0 +1,1210 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Included first as it collides with the X11 headers.
+#include "flutter/shell/platform/linux/testing/linux_test.h"
+#include "gtest/gtest.h"
+
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_framebuffer.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
+#include "flutter/shell/platform/linux/testing/mock_epoxy.h"
+#include "flutter/shell/platform/linux/testing/mock_renderable.h"
+
+// MOCK_ENGINE_PROC is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
+class FlEngineTest : public flutter::testing::LinuxTest {};
+
+// Checks notifying display updates works.
+TEST_F(FlEngineTest, NotifyDisplayUpdate) {
+  StartEngine();
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->NotifyDisplayUpdate = MOCK_ENGINE_PROC(
+      NotifyDisplayUpdate,
+      ([&called](auto engine, FlutterEngineDisplaysUpdateType update_type,
+                 const FlutterEngineDisplay* displays, size_t displays_length) {
+        called = true;
+        EXPECT_EQ(update_type, kFlutterEngineDisplaysUpdateTypeStartup);
+        EXPECT_EQ(displays_length, 2u);
+
+        EXPECT_EQ(displays[0].display_id, 1u);
+        EXPECT_EQ(displays[0].refresh_rate, 60);
+        EXPECT_EQ(displays[0].width, 1024u);
+        EXPECT_EQ(displays[0].height, 768u);
+        EXPECT_EQ(displays[0].device_pixel_ratio, 1.0);
+
+        EXPECT_EQ(displays[1].display_id, 2u);
+        EXPECT_EQ(displays[1].refresh_rate, 120);
+        EXPECT_EQ(displays[1].width, 3840u);
+        EXPECT_EQ(displays[1].height, 2160u);
+        EXPECT_EQ(displays[1].device_pixel_ratio, 2.0);
+
+        return kSuccess;
+      }));
+
+  FlutterEngineDisplay displays[2] = {
+      {
+          .struct_size = sizeof(FlutterEngineDisplay),
+          .display_id = 1,
+          .single_display = false,
+          .refresh_rate = 60.0,
+          .width = 1024,
+          .height = 768,
+          .device_pixel_ratio = 1.0,
+      },
+      {
+          .struct_size = sizeof(FlutterEngineDisplay),
+          .display_id = 2,
+          .single_display = false,
+          .refresh_rate = 120.0,
+          .width = 3840,
+          .height = 2160,
+          .device_pixel_ratio = 2.0,
+      }};
+  fl_engine_notify_display_update(engine, displays, 2);
+
+  EXPECT_TRUE(called);
+}
+
+// Checks asking the engine to render a frame works.
+TEST_F(FlEngineTest, ScheduleFrame) {
+  StartEngine();
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->ScheduleFrame =
+      MOCK_ENGINE_PROC(ScheduleFrame, ([&called](auto engine) {
+                         called = true;
+                         return kSuccess;
+                       }));
+
+  fl_engine_schedule_frame(engine);
+
+  EXPECT_TRUE(called);
+}
+
+// Checks sending window metrics events works.
+TEST_F(FlEngineTest, WindowMetrics) {
+  StartEngine();
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->SendWindowMetricsEvent = MOCK_ENGINE_PROC(
+      SendWindowMetricsEvent,
+      ([&called](auto engine, const FlutterWindowMetricsEvent* event) {
+        called = true;
+        EXPECT_EQ(event->display_id, 99u);
+        EXPECT_EQ(event->view_id, 1);
+        EXPECT_EQ(event->width, 800u);
+        EXPECT_EQ(event->height, 600u);
+        EXPECT_TRUE(event->has_constraints);
+        EXPECT_EQ(event->min_width_constraint, 800u);
+        EXPECT_EQ(event->min_height_constraint, 600u);
+        EXPECT_EQ(event->max_width_constraint, 3840u);
+        EXPECT_EQ(event->max_height_constraint, 2160u);
+        EXPECT_EQ(event->pixel_ratio, 2.0);
+
+        return kSuccess;
+      }));
+
+  fl_engine_send_window_metrics_event(engine, 99, 1, 800, 600, 3840, 2160, 2.0);
+
+  EXPECT_TRUE(called);
+}
+
+// Checks sending mouse pointer events works.
+TEST_F(FlEngineTest, MousePointer) {
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&called](auto engine, const FlutterPointerEvent* events,
+                 size_t events_count) {
+        called = true;
+        EXPECT_EQ(events_count, static_cast<size_t>(1));
+        EXPECT_EQ(events[0].view_id, 1);
+        EXPECT_EQ(events[0].phase, kDown);
+        EXPECT_EQ(events[0].timestamp, static_cast<size_t>(1234567890));
+        EXPECT_EQ(events[0].x, 800);
+        EXPECT_EQ(events[0].y, 600);
+        EXPECT_EQ(events[0].device, static_cast<int32_t>(0));
+        EXPECT_EQ(events[0].signal_kind, kFlutterPointerSignalKindScroll);
+        EXPECT_EQ(events[0].scroll_delta_x, 1.2);
+        EXPECT_EQ(events[0].scroll_delta_y, -3.4);
+        EXPECT_EQ(events[0].device_kind, kFlutterPointerDeviceKindMouse);
+        EXPECT_EQ(events[0].buttons, kFlutterPointerButtonMouseSecondary);
+
+        return kSuccess;
+      }));
+
+  StartEngine();
+  fl_engine_send_mouse_pointer_event(engine, 1, kDown, 1234567890, 800, 600,
+                                     kFlutterPointerDeviceKindMouse, 1.2, -3.4,
+                                     kFlutterPointerButtonMouseSecondary, 0, 0);
+
+  EXPECT_TRUE(called);
+}
+
+// Checks sending mouse pointer events includes device state.
+TEST_F(FlEngineTest, MousePointerDeviceState) {
+  bool device_state_sent = false;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&device_state_sent](auto engine, const FlutterPointerEvent* events,
+                            size_t events_count) {
+        device_state_sent = true;
+        EXPECT_EQ(events_count, static_cast<size_t>(1));
+        EXPECT_DOUBLE_EQ(events[0].pressure, 0.5);
+        EXPECT_DOUBLE_EQ(events[0].pressure_min, 0.0);
+        EXPECT_DOUBLE_EQ(events[0].pressure_max, 1.0);
+        EXPECT_DOUBLE_EQ(events[0].rotation, G_PI / 2.0);
+
+        return kSuccess;
+      }));
+
+  StartEngine();
+  fl_engine_send_mouse_pointer_event(
+      engine, 1, kDown, 1234567890, 800, 600, kFlutterPointerDeviceKindMouse,
+      1.2, -3.4, kFlutterPointerButtonMouseSecondary, 90.0, 0.5);
+
+  EXPECT_TRUE(device_state_sent);
+}
+
+// Checks sending pan/zoom events works.
+TEST_F(FlEngineTest, PointerPanZoom) {
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&called](auto engine, const FlutterPointerEvent* events,
+                 size_t events_count) {
+        called = true;
+        EXPECT_EQ(events_count, static_cast<size_t>(1));
+        EXPECT_EQ(events[0].view_id, 1);
+        EXPECT_EQ(events[0].phase, kPanZoomUpdate);
+        EXPECT_EQ(events[0].timestamp, static_cast<size_t>(1234567890));
+        EXPECT_EQ(events[0].x, 800);
+        EXPECT_EQ(events[0].y, 600);
+        EXPECT_EQ(events[0].device, static_cast<int32_t>(1));
+        EXPECT_EQ(events[0].signal_kind, kFlutterPointerSignalKindNone);
+        EXPECT_EQ(events[0].pan_x, 1.5);
+        EXPECT_EQ(events[0].pan_y, 2.5);
+        EXPECT_EQ(events[0].scale, 3.5);
+        EXPECT_EQ(events[0].rotation, 4.5);
+        EXPECT_EQ(events[0].device_kind, kFlutterPointerDeviceKindTrackpad);
+        EXPECT_EQ(events[0].buttons, 0);
+
+        return kSuccess;
+      }));
+
+  StartEngine();
+  fl_engine_send_pointer_pan_zoom_event(engine, 1, 1234567890, 800, 600,
+                                        kPanZoomUpdate, 1.5, 2.5, 3.5, 4.5);
+
+  EXPECT_TRUE(called);
+}
+
+// Checks dispatching a semantics action works.
+TEST_F(FlEngineTest, DispatchSemanticsAction) {
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
+      SendSemanticsAction,
+      ([&called](auto engine, const FlutterSendSemanticsActionInfo* info) {
+        EXPECT_EQ(info->view_id, static_cast<int64_t>(456));
+        EXPECT_EQ(info->node_id, static_cast<uint64_t>(42));
+        EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
+        EXPECT_EQ(info->data_length, static_cast<size_t>(4));
+        EXPECT_EQ(info->data[0], 't');
+        EXPECT_EQ(info->data[1], 'e');
+        EXPECT_EQ(info->data[2], 's');
+        EXPECT_EQ(info->data[3], 't');
+        called = true;
+
+        return kSuccess;
+      }));
+
+  StartEngine();
+  g_autoptr(GBytes) data = g_bytes_new_static("test", 4);
+  fl_engine_dispatch_semantics_action(engine, 456, 42,
+                                      kFlutterSemanticsActionTap, data);
+
+  EXPECT_TRUE(called);
+}
+
+// Checks sending platform messages works.
+TEST_F(FlEngineTest, PlatformMessage) {
+  bool called = false;
+  FlutterEngineSendPlatformMessageFnPtr old_handler =
+      fl_engine_get_embedder_api(engine)->SendPlatformMessage;
+  fl_engine_get_embedder_api(engine)->SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage,
+      ([&called, old_handler](auto engine,
+                              const FlutterPlatformMessage* message) {
+        if (strcmp(message->channel, "test") != 0) {
+          return old_handler(engine, message);
+        }
+
+        called = true;
+
+        EXPECT_EQ(message->message_size, static_cast<size_t>(4));
+        EXPECT_EQ(message->message[0], 't');
+        EXPECT_EQ(message->message[1], 'e');
+        EXPECT_EQ(message->message[2], 's');
+        EXPECT_EQ(message->message[3], 't');
+
+        return kSuccess;
+      }));
+
+  StartEngine();
+  g_autoptr(GBytes) message = g_bytes_new_static("test", 4);
+  fl_engine_send_platform_message(engine, "test", message, nullptr, nullptr,
+                                  nullptr);
+
+  EXPECT_TRUE(called);
+}
+
+// Checks sending platform message responses works.
+TEST_F(FlEngineTest, PlatformMessageResponse) {
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->SendPlatformMessageResponse =
+      MOCK_ENGINE_PROC(
+          SendPlatformMessageResponse,
+          ([&called](auto engine,
+                     const FlutterPlatformMessageResponseHandle* handle,
+                     const uint8_t* data, size_t data_length) {
+            called = true;
+
+            EXPECT_EQ(
+                handle,
+                reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(
+                    42));
+            EXPECT_EQ(data_length, static_cast<size_t>(4));
+            EXPECT_EQ(data[0], 't');
+            EXPECT_EQ(data[1], 'e');
+            EXPECT_EQ(data[2], 's');
+            EXPECT_EQ(data[3], 't');
+
+            return kSuccess;
+          }));
+
+  g_autoptr(GError) error = nullptr;
+  StartEngine();
+  g_autoptr(GBytes) response = g_bytes_new_static("test", 4);
+  EXPECT_TRUE(fl_engine_send_platform_message_response(
+      engine, reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(42),
+      response, &error));
+  EXPECT_EQ(error, nullptr);
+
+  EXPECT_TRUE(called);
+}
+
+// Checks settings handler sends settings on startup.
+TEST_F(FlEngineTest, SettingsHandler) {
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage,
+      ([&called](auto engine, const FlutterPlatformMessage* message) {
+        called = true;
+
+        EXPECT_STREQ(message->channel, "flutter/settings");
+
+        g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
+        g_autoptr(GBytes) data =
+            g_bytes_new(message->message, message->message_size);
+        g_autoptr(GError) error = nullptr;
+        g_autoptr(FlValue) settings = fl_message_codec_decode_message(
+            FL_MESSAGE_CODEC(codec), data, &error);
+        EXPECT_NE(settings, nullptr);
+        EXPECT_EQ(error, nullptr);
+
+        FlValue* text_scale_factor =
+            fl_value_lookup_string(settings, "textScaleFactor");
+        EXPECT_NE(text_scale_factor, nullptr);
+        EXPECT_EQ(fl_value_get_type(text_scale_factor), FL_VALUE_TYPE_FLOAT);
+
+        FlValue* always_use_24hr_format =
+            fl_value_lookup_string(settings, "alwaysUse24HourFormat");
+        EXPECT_NE(always_use_24hr_format, nullptr);
+        EXPECT_EQ(fl_value_get_type(always_use_24hr_format),
+                  FL_VALUE_TYPE_BOOL);
+
+        FlValue* platform_brightness =
+            fl_value_lookup_string(settings, "platformBrightness");
+        EXPECT_NE(platform_brightness, nullptr);
+        EXPECT_EQ(fl_value_get_type(platform_brightness), FL_VALUE_TYPE_STRING);
+
+        return kSuccess;
+      }));
+
+  StartEngine();
+
+  EXPECT_TRUE(called);
+}
+
+void on_pre_engine_restart_cb(FlEngine* engine, gpointer user_data) {
+  int* count = reinterpret_cast<int*>(user_data);
+  *count += 1;
+}
+
+// Checks restarting the engine invokes the correct callback.
+TEST_F(FlEngineTest, OnPreEngineRestart) {
+  OnPreEngineRestartCallback callback;
+  void* callback_user_data;
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize, ([&callback, &callback_user_data, &called](
+                       size_t version, const FlutterRendererConfig* config,
+                       const FlutterProjectArgs* args, void* user_data,
+                       FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        called = true;
+        callback = args->on_pre_engine_restart_callback;
+        callback_user_data = user_data;
+
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  StartEngine();
+
+  EXPECT_TRUE(called);
+  EXPECT_NE(callback, nullptr);
+
+  // The following call has no effect but should not crash.
+  callback(callback_user_data);
+
+  int count = 0;
+
+  // Set handler so that:
+  //
+  //  * When the engine restarts, count += 1;
+  //  * When the engine is freed, count += 10.
+  g_signal_connect(engine, "on-pre-engine-restart",
+                   G_CALLBACK(on_pre_engine_restart_cb), &count);
+
+  callback(callback_user_data);
+  EXPECT_EQ(count, 1);
+}
+
+TEST_F(FlEngineTest, DartEntrypointArgs) {
+  GPtrArray* args_array = g_ptr_array_new();
+  g_ptr_array_add(args_array, const_cast<char*>("arg_one"));
+  g_ptr_array_add(args_array, const_cast<char*>("arg_two"));
+  g_ptr_array_add(args_array, const_cast<char*>("arg_three"));
+  g_ptr_array_add(args_array, nullptr);
+  gchar** args = reinterpret_cast<gchar**>(g_ptr_array_free(args_array, false));
+
+  fl_dart_project_set_dart_entrypoint_arguments(project, args);
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize, ([&called, &set_args = args](
+                       size_t version, const FlutterRendererConfig* config,
+                       const FlutterProjectArgs* args, void* user_data,
+                       FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        called = true;
+        EXPECT_NE(set_args, args->dart_entrypoint_argv);
+        EXPECT_EQ(args->dart_entrypoint_argc, 3);
+
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  StartEngine();
+
+  EXPECT_TRUE(called);
+}
+
+TEST_F(FlEngineTest, EngineId) {
+  int64_t engine_id;
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&engine_id](size_t version, const FlutterRendererConfig* config,
+                    const FlutterProjectArgs* args, void* user_data,
+                    FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        engine_id = args->engine_id;
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  StartEngine();
+  EXPECT_TRUE(engine_id != 0);
+
+  EXPECT_EQ(fl_engine_for_id(engine_id), engine);
+}
+
+TEST_F(FlEngineTest, UIIsolateDefaultThreadPolicy) {
+  fl_dart_project_set_ui_thread_policy(project, FL_UI_THREAD_POLICY_DEFAULT);
+
+  bool same_task_runner = false;
+
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&same_task_runner](size_t version, const FlutterRendererConfig* config,
+                           const FlutterProjectArgs* args, void* user_data,
+                           FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        same_task_runner = args->custom_task_runners->platform_task_runner ==
+                           args->custom_task_runners->ui_task_runner;
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  StartEngine();
+  EXPECT_TRUE(same_task_runner);
+}
+
+TEST_F(FlEngineTest, UIIsolateOnPlatformTaskRunner) {
+  fl_dart_project_set_ui_thread_policy(
+      project, FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD);
+
+  bool same_task_runner = false;
+
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&same_task_runner](size_t version, const FlutterRendererConfig* config,
+                           const FlutterProjectArgs* args, void* user_data,
+                           FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        same_task_runner = args->custom_task_runners->platform_task_runner ==
+                           args->custom_task_runners->ui_task_runner;
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  StartEngine();
+  EXPECT_TRUE(same_task_runner);
+}
+
+TEST_F(FlEngineTest, UIIsolateOnSeparateThread) {
+  fl_dart_project_set_ui_thread_policy(
+      project, FL_UI_THREAD_POLICY_RUN_ON_SEPARATE_THREAD);
+
+  bool separate_thread = false;
+
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&separate_thread](size_t version, const FlutterRendererConfig* config,
+                          const FlutterProjectArgs* args, void* user_data,
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        separate_thread = args->custom_task_runners->ui_task_runner == nullptr;
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  StartEngine();
+  EXPECT_TRUE(separate_thread);
+}
+
+TEST_F(FlEngineTest, Locales) {
+  g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
+  g_setenv("LANGUAGE", "de:en_US", TRUE);
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([&called](auto engine, const FlutterLocale** locales,
+                                size_t locales_count) {
+        called = true;
+
+        EXPECT_EQ(locales_count, static_cast<size_t>(4));
+
+        EXPECT_STREQ(locales[0]->language_code, "de");
+        EXPECT_STREQ(locales[0]->country_code, nullptr);
+        EXPECT_STREQ(locales[0]->script_code, nullptr);
+        EXPECT_STREQ(locales[0]->variant_code, nullptr);
+
+        EXPECT_STREQ(locales[1]->language_code, "en");
+        EXPECT_STREQ(locales[1]->country_code, "US");
+        EXPECT_STREQ(locales[1]->script_code, nullptr);
+        EXPECT_STREQ(locales[1]->variant_code, nullptr);
+
+        EXPECT_STREQ(locales[2]->language_code, "en");
+        EXPECT_STREQ(locales[2]->country_code, nullptr);
+        EXPECT_STREQ(locales[2]->script_code, nullptr);
+        EXPECT_STREQ(locales[2]->variant_code, nullptr);
+
+        EXPECT_STREQ(locales[3]->language_code, "C");
+        EXPECT_STREQ(locales[3]->country_code, nullptr);
+        EXPECT_STREQ(locales[3]->script_code, nullptr);
+        EXPECT_STREQ(locales[3]->variant_code, nullptr);
+
+        return kSuccess;
+      }));
+
+  StartEngine();
+
+  EXPECT_TRUE(called);
+
+  if (initial_language) {
+    g_setenv("LANGUAGE", initial_language, TRUE);
+  } else {
+    g_unsetenv("LANGUAGE");
+  }
+}
+
+TEST_F(FlEngineTest, CLocale) {
+  g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
+  g_setenv("LANGUAGE", "C", TRUE);
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([&called](auto engine, const FlutterLocale** locales,
+                                size_t locales_count) {
+        called = true;
+
+        EXPECT_EQ(locales_count, static_cast<size_t>(1));
+
+        EXPECT_STREQ(locales[0]->language_code, "C");
+        EXPECT_STREQ(locales[0]->country_code, nullptr);
+        EXPECT_STREQ(locales[0]->script_code, nullptr);
+        EXPECT_STREQ(locales[0]->variant_code, nullptr);
+
+        return kSuccess;
+      }));
+
+  StartEngine();
+
+  EXPECT_TRUE(called);
+
+  if (initial_language) {
+    g_setenv("LANGUAGE", initial_language, TRUE);
+  } else {
+    g_unsetenv("LANGUAGE");
+  }
+}
+
+TEST_F(FlEngineTest, DuplicateLocale) {
+  g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
+  g_setenv("LANGUAGE", "en:en", TRUE);
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([&called](auto engine, const FlutterLocale** locales,
+                                size_t locales_count) {
+        called = true;
+
+        EXPECT_EQ(locales_count, static_cast<size_t>(2));
+
+        EXPECT_STREQ(locales[0]->language_code, "en");
+        EXPECT_STREQ(locales[0]->country_code, nullptr);
+        EXPECT_STREQ(locales[0]->script_code, nullptr);
+        EXPECT_STREQ(locales[0]->variant_code, nullptr);
+
+        EXPECT_STREQ(locales[1]->language_code, "C");
+        EXPECT_STREQ(locales[1]->country_code, nullptr);
+        EXPECT_STREQ(locales[1]->script_code, nullptr);
+        EXPECT_STREQ(locales[1]->variant_code, nullptr);
+
+        return kSuccess;
+      }));
+
+  StartEngine();
+
+  EXPECT_TRUE(called);
+
+  if (initial_language) {
+    g_setenv("LANGUAGE", initial_language, TRUE);
+  } else {
+    g_unsetenv("LANGUAGE");
+  }
+}
+
+TEST_F(FlEngineTest, EmptyLocales) {
+  g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
+  g_setenv("LANGUAGE", "de:: :en_US", TRUE);
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([&called](auto engine, const FlutterLocale** locales,
+                                size_t locales_count) {
+        called = true;
+
+        EXPECT_EQ(locales_count, static_cast<size_t>(4));
+
+        EXPECT_STREQ(locales[0]->language_code, "de");
+        EXPECT_STREQ(locales[0]->country_code, nullptr);
+        EXPECT_STREQ(locales[0]->script_code, nullptr);
+        EXPECT_STREQ(locales[0]->variant_code, nullptr);
+
+        EXPECT_STREQ(locales[1]->language_code, "en");
+        EXPECT_STREQ(locales[1]->country_code, "US");
+        EXPECT_STREQ(locales[1]->script_code, nullptr);
+        EXPECT_STREQ(locales[1]->variant_code, nullptr);
+
+        EXPECT_STREQ(locales[2]->language_code, "en");
+        EXPECT_STREQ(locales[2]->country_code, nullptr);
+        EXPECT_STREQ(locales[2]->script_code, nullptr);
+        EXPECT_STREQ(locales[2]->variant_code, nullptr);
+
+        EXPECT_STREQ(locales[3]->language_code, "C");
+        EXPECT_STREQ(locales[3]->country_code, nullptr);
+        EXPECT_STREQ(locales[3]->script_code, nullptr);
+        EXPECT_STREQ(locales[3]->variant_code, nullptr);
+
+        return kSuccess;
+      }));
+
+  StartEngine();
+
+  EXPECT_TRUE(called);
+
+  if (initial_language) {
+    g_setenv("LANGUAGE", initial_language, TRUE);
+  } else {
+    g_unsetenv("LANGUAGE");
+  }
+}
+
+static void add_view_cb(GObject* object,
+                        GAsyncResult* result,
+                        gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  gboolean r = fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_TRUE(r);
+  EXPECT_EQ(error, nullptr);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+TEST_F(FlEngineTest, AddView) {
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->AddView = MOCK_ENGINE_PROC(
+      AddView, ([&called](auto engine, const FlutterAddViewInfo* info) {
+        called = true;
+        EXPECT_EQ(info->view_metrics->width, 123u);
+        EXPECT_EQ(info->view_metrics->height, 456u);
+        EXPECT_TRUE(info->view_metrics->has_constraints);
+        EXPECT_EQ(info->view_metrics->min_width_constraint, 123u);
+        EXPECT_EQ(info->view_metrics->min_height_constraint, 456u);
+        EXPECT_EQ(info->view_metrics->max_width_constraint, 888u);
+        EXPECT_EQ(info->view_metrics->max_height_constraint, 999u);
+        EXPECT_EQ(info->view_metrics->pixel_ratio, 2.0);
+
+        FlutterAddViewResult result;
+        result.struct_size = sizeof(FlutterAddViewResult);
+        result.added = true;
+        result.user_data = info->user_data;
+        info->add_view_callback(&result);
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  FlutterViewId view_id =
+      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 888, 999,
+                         2.0, nullptr, add_view_cb, loop);
+  EXPECT_GT(view_id, 0);
+  EXPECT_TRUE(called);
+
+  // Blocks here until add_view_cb is called.
+  g_main_loop_run(loop);
+}
+
+static void add_view_error_cb(GObject* object,
+                              GAsyncResult* result,
+                              gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  gboolean r = fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_FALSE(r);
+  EXPECT_NE(error, nullptr);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+TEST_F(FlEngineTest, AddViewError) {
+  fl_engine_get_embedder_api(engine)->AddView = MOCK_ENGINE_PROC(
+      AddView, ([](auto engine, const FlutterAddViewInfo* info) {
+        FlutterAddViewResult result;
+        result.struct_size = sizeof(FlutterAddViewResult);
+        result.added = false;
+        result.user_data = info->user_data;
+        info->add_view_callback(&result);
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  FlutterViewId view_id =
+      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 123, 456,
+                         2.0, nullptr, add_view_error_cb, loop);
+  EXPECT_GT(view_id, 0);
+
+  // Blocks here until add_view_error_cb is called.
+  g_main_loop_run(loop);
+}
+
+static void add_view_engine_error_cb(GObject* object,
+                                     GAsyncResult* result,
+                                     gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  gboolean r = fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_FALSE(r);
+  EXPECT_NE(error, nullptr);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+TEST_F(FlEngineTest, AddViewEngineError) {
+  fl_engine_get_embedder_api(engine)->AddView = MOCK_ENGINE_PROC(
+      AddView, ([](auto engine, const FlutterAddViewInfo* info) {
+        return kInvalidArguments;
+      }));
+
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  FlutterViewId view_id =
+      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 123, 456,
+                         2.0, nullptr, add_view_engine_error_cb, loop);
+  EXPECT_GT(view_id, 0);
+
+  // Blocks here until remove_view_engine_error_cb is called.
+  g_main_loop_run(loop);
+}
+
+static void remove_view_cb(GObject* object,
+                           GAsyncResult* result,
+                           gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  gboolean r = fl_engine_remove_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_TRUE(r);
+  EXPECT_EQ(error, nullptr);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+TEST_F(FlEngineTest, RemoveView) {
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->RemoveView = MOCK_ENGINE_PROC(
+      RemoveView, ([&called](auto engine, const FlutterRemoveViewInfo* info) {
+        called = true;
+        EXPECT_EQ(info->view_id, 123);
+
+        FlutterRemoveViewResult result;
+        result.struct_size = sizeof(FlutterRemoveViewResult);
+        result.removed = true;
+        result.user_data = info->user_data;
+        info->remove_view_callback(&result);
+
+        return kSuccess;
+      }));
+
+  fl_engine_remove_view(engine, 123, nullptr, remove_view_cb, loop);
+  EXPECT_TRUE(called);
+
+  // Blocks here until remove_view_cb is called.
+  g_main_loop_run(loop);
+}
+
+static void remove_view_error_cb(GObject* object,
+                                 GAsyncResult* result,
+                                 gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  gboolean r = fl_engine_remove_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_FALSE(r);
+  EXPECT_NE(error, nullptr);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+TEST_F(FlEngineTest, RemoveViewError) {
+  fl_engine_get_embedder_api(engine)->RemoveView = MOCK_ENGINE_PROC(
+      RemoveView, ([](auto engine, const FlutterRemoveViewInfo* info) {
+        FlutterRemoveViewResult result;
+        result.struct_size = sizeof(FlutterRemoveViewResult);
+        result.removed = false;
+        result.user_data = info->user_data;
+        info->remove_view_callback(&result);
+
+        return kSuccess;
+      }));
+
+  fl_engine_remove_view(engine, 123, nullptr, remove_view_error_cb, loop);
+
+  // Blocks here until remove_view_error_cb is called.
+  g_main_loop_run(loop);
+}
+
+static void remove_view_engine_error_cb(GObject* object,
+                                        GAsyncResult* result,
+                                        gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  gboolean r = fl_engine_remove_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_FALSE(r);
+  EXPECT_NE(error, nullptr);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+TEST_F(FlEngineTest, RemoveViewEngineError) {
+  fl_engine_get_embedder_api(engine)->RemoveView = MOCK_ENGINE_PROC(
+      RemoveView, ([](auto engine, const FlutterRemoveViewInfo* info) {
+        return kInvalidArguments;
+      }));
+
+  fl_engine_remove_view(engine, 123, nullptr, remove_view_engine_error_cb,
+                        loop);
+
+  // Blocks here until remove_view_engine_error_cb is called.
+  g_main_loop_run(loop);
+}
+
+TEST_F(FlEngineTest, SendKeyEvent) {
+  StartEngine();
+
+  bool called;
+  fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
+      SendKeyEvent,
+      ([&called](auto engine, const FlutterKeyEvent* event,
+                 FlutterKeyEventCallback callback, void* user_data) {
+        called = true;
+        EXPECT_EQ(event->timestamp, 1234);
+        EXPECT_EQ(event->type, kFlutterKeyEventTypeUp);
+        EXPECT_EQ(event->physical, static_cast<uint64_t>(42));
+        EXPECT_EQ(event->logical, static_cast<uint64_t>(123));
+        EXPECT_TRUE(event->synthesized);
+        EXPECT_EQ(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
+        callback(TRUE, user_data);
+        return kSuccess;
+      }));
+
+  FlutterKeyEvent event = {.struct_size = sizeof(FlutterKeyEvent),
+                           .timestamp = 1234,
+                           .type = kFlutterKeyEventTypeUp,
+                           .physical = 42,
+                           .logical = 123,
+                           .character = nullptr,
+                           .synthesized = true,
+                           .device_type = kFlutterKeyEventDeviceTypeKeyboard};
+  fl_engine_send_key_event(
+      engine, &event, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        gboolean handled;
+        g_autoptr(GError) error = nullptr;
+        EXPECT_TRUE(fl_engine_send_key_event_finish(FL_ENGINE(object), result,
+                                                    &handled, &error));
+        EXPECT_EQ(error, nullptr);
+        EXPECT_TRUE(handled);
+        g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+      },
+      loop);
+
+  g_main_loop_run(loop);
+  EXPECT_TRUE(called);
+}
+
+TEST_F(FlEngineTest, SendKeyEventNotHandled) {
+  StartEngine();
+
+  bool called;
+  fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
+      SendKeyEvent,
+      ([&called](auto engine, const FlutterKeyEvent* event,
+                 FlutterKeyEventCallback callback, void* user_data) {
+        called = true;
+        callback(FALSE, user_data);
+        return kSuccess;
+      }));
+
+  FlutterKeyEvent event = {.struct_size = sizeof(FlutterKeyEvent),
+                           .timestamp = 1234,
+                           .type = kFlutterKeyEventTypeUp,
+                           .physical = 42,
+                           .logical = 123,
+                           .character = nullptr,
+                           .synthesized = true,
+                           .device_type = kFlutterKeyEventDeviceTypeKeyboard};
+  fl_engine_send_key_event(
+      engine, &event, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        gboolean handled;
+        g_autoptr(GError) error = nullptr;
+        EXPECT_TRUE(fl_engine_send_key_event_finish(FL_ENGINE(object), result,
+                                                    &handled, &error));
+        EXPECT_EQ(error, nullptr);
+        EXPECT_FALSE(handled);
+        g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+      },
+      loop);
+
+  g_main_loop_run(loop);
+  EXPECT_TRUE(called);
+}
+
+TEST_F(FlEngineTest, SendKeyEventError) {
+  g_autoptr(GError) error = nullptr;
+  // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.Assign)
+  StartEngine();
+
+  bool called;
+  fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
+      SendKeyEvent,
+      ([&called](auto engine, const FlutterKeyEvent* event,
+                 FlutterKeyEventCallback callback, void* user_data) {
+        called = true;
+        return kInvalidArguments;
+      }));
+
+  FlutterKeyEvent event = {.struct_size = sizeof(FlutterKeyEvent),
+                           .timestamp = 1234,
+                           .type = kFlutterKeyEventTypeUp,
+                           .physical = 42,
+                           .logical = 123,
+                           .character = nullptr,
+                           .synthesized = true,
+                           .device_type = kFlutterKeyEventDeviceTypeKeyboard};
+  fl_engine_send_key_event(
+      engine, &event, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        gboolean handled;
+        g_autoptr(GError) error = nullptr;
+        EXPECT_FALSE(fl_engine_send_key_event_finish(FL_ENGINE(object), result,
+                                                     &handled, &error));
+        EXPECT_NE(error, nullptr);
+        EXPECT_STREQ(error->message, "Failed to send key event");
+        g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+      },
+      loop);
+
+  g_main_loop_run(loop);
+  EXPECT_TRUE(called);
+}
+
+TEST_F(FlEngineTest, EnableImpellerDefault) {
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&called](size_t version, const FlutterRendererConfig* config,
+                 const FlutterProjectArgs* args, void* user_data,
+                 FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        called = true;
+        bool has_impeller_switch = false;
+        for (int i = 0; i < args->command_line_argc; i++) {
+          if (strcmp(args->command_line_argv[i], "--enable-impeller") == 0) {
+            has_impeller_switch = true;
+          }
+        }
+        EXPECT_TRUE(has_impeller_switch);
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  StartEngine();
+  EXPECT_TRUE(called);
+}
+
+TEST_F(FlEngineTest, DisableImpeller) {
+  fl_dart_project_set_enable_impeller(project, FALSE);
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&called](size_t version, const FlutterRendererConfig* config,
+                 const FlutterProjectArgs* args, void* user_data,
+                 FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        called = true;
+        bool has_impeller_switch = false;
+        for (int i = 0; i < args->command_line_argc; i++) {
+          if (strcmp(args->command_line_argv[i], "--enable-impeller") == 0) {
+            has_impeller_switch = true;
+          }
+        }
+        EXPECT_FALSE(has_impeller_switch);
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+  EXPECT_TRUE(called);
+}
+
+TEST_F(FlEngineTest, EnableFlutterGpuDefault) {
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&called](size_t version, const FlutterRendererConfig* config,
+                 const FlutterProjectArgs* args, void* user_data,
+                 FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        called = true;
+        bool has_flutter_gpu_switch = false;
+        for (int i = 0; i < args->command_line_argc; i++) {
+          if (strcmp(args->command_line_argv[i], "--enable-flutter-gpu") == 0) {
+            has_flutter_gpu_switch = true;
+          }
+        }
+        EXPECT_FALSE(has_flutter_gpu_switch);
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  StartEngine();
+  EXPECT_TRUE(called);
+}
+
+TEST_F(FlEngineTest, EnableFlutterGpu) {
+  fl_dart_project_set_enable_flutter_gpu(project, TRUE);
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&called](size_t version, const FlutterRendererConfig* config,
+                 const FlutterProjectArgs* args, void* user_data,
+                 FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        called = true;
+        bool has_flutter_gpu_switch = false;
+        for (int i = 0; i < args->command_line_argc; i++) {
+          if (strcmp(args->command_line_argv[i], "--enable-flutter-gpu") == 0) {
+            has_flutter_gpu_switch = true;
+          }
+        }
+        EXPECT_TRUE(has_flutter_gpu_switch);
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+  EXPECT_TRUE(called);
+}
+
+namespace {
+
+// Helper to start the engine with Impeller enabled, create an OpenGL backing
+// store, verify its target and texture presence, and collect it.
+void test_impeller_backing_store(FlEngine* engine,
+                                 FlDartProject* project,
+                                 uint32_t expected_target,
+                                 bool expect_texture) {
+  FlutterCompositor compositor = {};
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&compositor](size_t version, const FlutterRendererConfig* config,
+                     const FlutterProjectArgs* args, void* user_data,
+                     FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        if (args->compositor != nullptr) {
+          compositor = *args->compositor;
+        }
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  fl_dart_project_set_enable_impeller(project, TRUE);
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+  ASSERT_NE(compositor.create_backing_store_callback, nullptr);
+
+  FlutterBackingStoreConfig config = {
+      .struct_size = sizeof(FlutterBackingStoreConfig),
+      .size = {.width = 800.0, .height = 600.0},
+  };
+  FlutterBackingStore backing_store = {};
+  EXPECT_TRUE(compositor.create_backing_store_callback(&config, &backing_store,
+                                                       compositor.user_data));
+  EXPECT_EQ(backing_store.type, kFlutterBackingStoreTypeOpenGL);
+  EXPECT_EQ(backing_store.open_gl.type, kFlutterOpenGLTargetTypeFramebuffer);
+  EXPECT_EQ(backing_store.open_gl.framebuffer.target, expected_target);
+
+  FlFramebuffer* fb =
+      FL_FRAMEBUFFER(backing_store.open_gl.framebuffer.user_data);
+  EXPECT_NE(fb, nullptr);
+  if (expect_texture) {
+    EXPECT_NE(fl_framebuffer_get_texture_id(fb), 0u);
+  } else {
+    EXPECT_EQ(fl_framebuffer_get_texture_id(fb), 0u);
+  }
+
+  EXPECT_TRUE(compositor.collect_backing_store_callback(&backing_store,
+                                                        compositor.user_data));
+}
+
+}  // namespace
+
+TEST_F(FlEngineTest, CreateOpenGLBackingStoreWithImpellerMSAA) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
+  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
+      .WillByDefault(::testing::Return(false));
+  ON_CALL(epoxy, glGetIntegerv(GL_MAX_SAMPLES, ::testing::_))
+      .WillByDefault(::testing::SetArgPointee<1>(4));
+
+  EXPECT_CALL(epoxy, glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4,
+                                                      GL_RGBA8, 800, 600));
+  EXPECT_CALL(epoxy, glRenderbufferStorageMultisample(
+                         GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, 800, 600));
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                        GL_RENDERBUFFER, ::testing::_));
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                        GL_RENDERBUFFER, ::testing::_));
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                        GL_RENDERBUFFER, ::testing::_));
+
+  test_impeller_backing_store(engine, project, GL_RGBA8,
+                              /*expect_texture=*/false);
+}
+
+TEST_F(FlEngineTest, CreateOpenGLBackingStoreWithImpellerMSAAAndBgraExtension) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
+  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
+      .WillByDefault(::testing::Return(false));
+  ON_CALL(epoxy, epoxy_has_gl_extension(
+                     ::testing::StrEq("GL_EXT_texture_format_BGRA8888")))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(epoxy, glGetIntegerv(GL_MAX_SAMPLES, ::testing::_))
+      .WillByDefault(::testing::SetArgPointee<1>(4));
+
+  // GL_EXT_texture_format_BGRA8888 only defines BGRA for textures, not
+  // renderbuffers. When explicit offscreen MSAA is used without
+  // GL_EXT_multisampled_render_to_texture, a multisample renderbuffer is
+  // created which must use GL_RGBA8.
+  EXPECT_CALL(epoxy, glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4,
+                                                      GL_RGBA8, 800, 600));
+  EXPECT_CALL(epoxy, glRenderbufferStorageMultisample(
+                         GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, 800, 600));
+
+  test_impeller_backing_store(engine, project, GL_RGBA8,
+                              /*expect_texture=*/false);
+}
+
+TEST_F(FlEngineTest, CreateOpenGLBackingStoreWithImplicitMSAAAndBgraExtension) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
+      .WillByDefault(::testing::Return(false));
+  ON_CALL(epoxy, epoxy_has_gl_extension(
+                     ::testing::StrEq("GL_EXT_texture_format_BGRA8888")))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(epoxy, epoxy_has_gl_extension(
+                     ::testing::StrEq("GL_EXT_multisampled_render_to_texture")))
+      .WillByDefault(::testing::Return(true));
+
+  test_impeller_backing_store(engine, project, GL_BGRA8_EXT,
+                              /*expect_texture=*/true);
+}
+
+TEST_F(FlEngineTest, ChildObjects) {
+  // Check objects exist before engine started.
+  EXPECT_NE(fl_engine_get_binary_messenger(engine), nullptr);
+  EXPECT_NE(fl_engine_get_display_monitor(engine), nullptr);
+  EXPECT_NE(fl_engine_get_task_runner(engine), nullptr);
+  EXPECT_NE(fl_engine_get_keyboard_manager(engine), nullptr);
+  EXPECT_NE(fl_engine_get_mouse_cursor_handler(engine), nullptr);
+}
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

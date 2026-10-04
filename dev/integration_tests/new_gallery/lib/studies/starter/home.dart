@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final bool isDesktop = isDisplayDesktop(context);
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    final SafeArea body = SafeArea(
+    final body = SafeArea(
       child: Padding(
         padding: isDesktop
             ? const EdgeInsets.symmetric(horizontal: 72, vertical: 48)
@@ -28,20 +28,12 @@ class HomePage extends StatelessWidget {
           children: <Widget>[
             SelectableText(
               localizations.starterAppGenericHeadline,
-              style: textTheme.displaySmall!.copyWith(
-                color: colorScheme.onSecondary,
-              ),
+              style: textTheme.displaySmall!.copyWith(color: colorScheme.onSecondary),
             ),
             const SizedBox(height: 10),
-            SelectableText(
-              localizations.starterAppGenericSubtitle,
-              style: textTheme.titleMedium,
-            ),
+            SelectableText(localizations.starterAppGenericSubtitle, style: textTheme.titleMedium),
             const SizedBox(height: 48),
-            SelectableText(
-              localizations.starterAppGenericBody,
-              style: textTheme.bodyLarge,
-            ),
+            SelectableText(localizations.starterAppGenericBody, style: textTheme.bodyLarge),
           ],
         ),
       ),
@@ -54,9 +46,7 @@ class HomePage extends StatelessWidget {
           const VerticalDivider(width: 1),
           Expanded(
             child: Scaffold(
-              appBar: const AdaptiveAppBar(
-                isDesktop: true,
-              ),
+              appBar: const AdaptiveAppBar(isDesktop: true),
               body: body,
               floatingActionButton: FloatingActionButton.extended(
                 heroTag: 'Extended Add',
@@ -81,10 +71,7 @@ class HomePage extends StatelessWidget {
           heroTag: 'Add',
           onPressed: () {},
           tooltip: localizations.starterAppTooltipAdd,
-          child: Icon(
-            Icons.add,
-            color: Theme.of(context).colorScheme.onSecondary,
-          ),
+          child: Icon(Icons.add, color: Theme.of(context).colorScheme.onSecondary),
         ),
       );
     }
@@ -92,10 +79,7 @@ class HomePage extends StatelessWidget {
 }
 
 class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const AdaptiveAppBar({
-    super.key,
-    this.isDesktop = false,
-  });
+  const AdaptiveAppBar({super.key, this.isDesktop = false});
 
   final bool isDesktop;
 
@@ -110,9 +94,7 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return AppBar(
       automaticallyImplyLeading: !isDesktop,
-      title: isDesktop
-          ? null
-          : SelectableText(localizations.starterAppGenericTitle),
+      title: isDesktop ? null : SelectableText(localizations.starterAppGenericTitle),
       bottom: isDesktop
           ? PreferredSize(
               preferredSize: const Size.fromHeight(26),
@@ -170,10 +152,7 @@ class _ListDrawerState extends State<ListDrawer> {
         child: ListView(
           children: <Widget>[
             ListTile(
-              title: SelectableText(
-                localizations.starterAppTitle,
-                style: textTheme.titleLarge,
-              ),
+              title: SelectableText(localizations.starterAppTitle, style: textTheme.titleLarge),
               subtitle: SelectableText(
                 localizations.starterAppGenericSubtitle,
                 style: textTheme.bodyMedium,
@@ -184,9 +163,7 @@ class _ListDrawerState extends State<ListDrawer> {
               return ListTile(
                 selected: i == selectedItem,
                 leading: const Icon(Icons.favorite),
-                title: Text(
-                  localizations.starterAppDrawerItem(i + 1),
-                ),
+                title: Text(localizations.starterAppDrawerItem(i + 1)),
                 onTap: () {
                   setState(() {
                     selectedItem = i;

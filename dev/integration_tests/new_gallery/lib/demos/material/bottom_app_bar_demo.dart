@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
 import '../../gallery_localizations.dart';
 
 // BEGIN bottomAppBarDemo
@@ -15,8 +16,7 @@ class BottomAppBarDemo extends StatefulWidget {
   State createState() => _BottomAppBarDemoState();
 }
 
-class _BottomAppBarDemoState extends State<BottomAppBarDemo>
-    with RestorationMixin {
+class _BottomAppBarDemoState extends State<BottomAppBarDemo> with RestorationMixin {
   final RestorableBool _showFab = RestorableBool(true);
   final RestorableBool _showNotch = RestorableBool(true);
   final RestorableInt _currentFabLocation = RestorableInt(0);
@@ -78,9 +78,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo>
         padding: const EdgeInsets.only(bottom: 88),
         children: <Widget>[
           SwitchListTile(
-            title: Text(
-              localizations.demoFloatingButtonTitle,
-            ),
+            title: Text(localizations.demoFloatingButtonTitle),
             value: _showFab.value,
             onChanged: _onShowFabChanged,
           ),
@@ -94,33 +92,25 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo>
             child: Text(localizations.bottomAppBarPosition),
           ),
           RadioListTile<int>(
-            title: Text(
-              localizations.bottomAppBarPositionDockedEnd,
-            ),
+            title: Text(localizations.bottomAppBarPositionDockedEnd),
             value: 0,
             groupValue: _currentFabLocation.value,
             onChanged: _onFabLocationChanged,
           ),
           RadioListTile<int>(
-            title: Text(
-              localizations.bottomAppBarPositionDockedCenter,
-            ),
+            title: Text(localizations.bottomAppBarPositionDockedCenter),
             value: 1,
             groupValue: _currentFabLocation.value,
             onChanged: _onFabLocationChanged,
           ),
           RadioListTile<int>(
-            title: Text(
-              localizations.bottomAppBarPositionFloatingEnd,
-            ),
+            title: Text(localizations.bottomAppBarPositionFloatingEnd),
             value: 2,
             groupValue: _currentFabLocation.value,
             onChanged: _onFabLocationChanged,
           ),
           RadioListTile<int>(
-            title: Text(
-              localizations.bottomAppBarPositionFloatingCenter,
-            ),
+            title: Text(localizations.bottomAppBarPositionFloatingCenter),
             value: 3,
             groupValue: _currentFabLocation.value,
             onChanged: _onFabLocationChanged,
@@ -148,10 +138,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo>
 }
 
 class _DemoBottomAppBar extends StatelessWidget {
-  const _DemoBottomAppBar({
-    required this.fabLocation,
-    this.shape,
-  });
+  const _DemoBottomAppBar({required this.fabLocation, this.shape});
 
   final FloatingActionButtonLocation fabLocation;
   final NotchedShape? shape;
@@ -189,7 +176,7 @@ class _DemoBottomAppBar extends StatelessWidget {
                 tooltip: localizations.starterAppTooltipFavorite,
                 icon: const Icon(Icons.favorite),
                 onPressed: () {},
-              )
+              ),
             ],
           ),
         ),

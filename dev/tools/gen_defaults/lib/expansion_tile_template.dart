@@ -5,12 +5,16 @@
 import 'template.dart';
 
 class ExpansionTileTemplate extends TokenTemplate {
-  const ExpansionTileTemplate(super.blockName, super.fileName, super.tokens, {
+  const ExpansionTileTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ExpansionTileThemeData {
   _${blockName}DefaultsM3(this.context);
 

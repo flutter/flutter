@@ -1,7 +1,7 @@
 # Material and Cupertino Libraries Localizations
 
 The `.arb` files in this directory contain localized values (primarily
-strings) used by the Material and Cupertino libraries.  The
+strings) used by the Material and Cupertino libraries. The
 `generated_material_localizations.dart` and
 `generated_cupertino_localizations.dart` files combine all of the
 localizations into a single Map that is linked with the rest of
@@ -9,8 +9,7 @@ flutter_localizations package.
 
 If you're looking for information about internationalizing Flutter
 apps in general, see the
-[Internationalizing Flutter Apps](https://flutter.dev/tutorials/internationalization/) tutorial.
-
+[Internationalizing Flutter Apps](https://flutter.dev/to/internationalization) tutorial.
 
 ### Translations for one locale: .arb files
 
@@ -80,7 +79,6 @@ to write.
 },
 ```
 
-
 ### Values with Parameters, Plurals
 
 A few of material translations contain `$variable` tokens. The
@@ -100,7 +98,6 @@ MaterialLocalizations.of(context).aboutListTileTitle(yourAppTitle)
 
 The names of the `$variable` tokens must match the names of the
 `MaterialLocalizations` method parameters.
-
 
 Plurals are handled similarly, with a lookup method that includes a
 quantity parameter. For example `selectedRowCountTitle` returns a
@@ -149,18 +146,19 @@ section in the Material spec. The Material theme uses the
 `TextTheme`, see
 [Typography.geometryThemeFor](https://api.flutter.dev/flutter/material/Typography/geometryThemeFor.html).
 
-
-### 'generated_*_localizations.dart': all of the localizations
+### 'generated\_\*\_localizations.dart': all of the localizations
 
 All of the localizations are combined in a single file per library
 using the gen_localizations script.
 
 You can see what that script would generate by running:
+
 ```dart
 dart dev/tools/localization/bin/gen_localizations.dart
 ```
 
 Actually update the generated files with:
+
 ```dart
 dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 ```
@@ -172,10 +170,10 @@ class implementations use these to lookup localized resource values.
 
 The gen_localizations script must be run by hand after .arb files have
 been updated. The script optionally takes parameters
+
 1. The path to this directory,
 2. The file name prefix (the file name less the locale
-suffix) for the .arb files in this directory.
-
+   suffix) for the .arb files in this directory.
 
 ### Special handling for the Kannada (kn) translations
 
@@ -211,12 +209,11 @@ Google contributes translations for all the languages supported by
 this package. (Googlers, for more details see <go/flutter-l10n>.)
 
 If you have feedback about the translations please
-[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=2_bug.yml).
-
+[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=02_bug.yml).
 
 ### See Also
 
-The [Internationalizing Flutter Apps](https://flutter.dev/tutorials/internationalization/)
+The [Internationalizing Flutter Apps](https://flutter.dev/to/internationalization)
 tutorial describes how to use the internationalization APIs in an
 ordinary Flutter app.
 

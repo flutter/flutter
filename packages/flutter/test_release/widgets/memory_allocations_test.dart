@@ -13,22 +13,21 @@ void main() {
     assert(!ma.hasListeners);
   });
 
-  testWidgets(
-    '$FlutterMemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
-    (WidgetTester tester) async {
-      ObjectEvent? receivedEvent;
-      ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
+  testWidgets('$FlutterMemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.', (
+    WidgetTester tester,
+  ) async {
+    ObjectEvent? receivedEvent;
+    ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
 
-      ma.addListener(listener);
-      expect(ma.hasListeners, isFalse);
+    ma.addListener(listener);
+    expect(ma.hasListeners, isFalse);
 
-      await _activateFlutterObjects(tester);
-      expect(receivedEvent, isNull);
-      expect(ma.hasListeners, isFalse);
+    await _activateFlutterObjects(tester);
+    expect(receivedEvent, isNull);
+    expect(ma.hasListeners, isFalse);
 
-      ma.removeListener(listener);
-    },
-  );
+    ma.removeListener(listener);
+  });
 }
 
 class _TestLeafRenderObjectWidget extends LeafRenderObjectWidget {
@@ -56,22 +55,27 @@ class _TestRenderObject extends RenderObject {
 }
 
 class _TestElement extends RenderTreeRootElement with RootElementMixin {
-  _TestElement(): super(_TestLeafRenderObjectWidget());
+  _TestElement() : super(_TestLeafRenderObjectWidget());
 
   void makeInactive() {
     assignOwner(BuildOwner(focusManager: FocusManager()));
     mount(null, null);
+    // ignore: invalid_use_of_visible_for_overriding_member
     deactivate();
   }
 
   @override
-  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) {}
 
   @override
-  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) { }
+  void moveRenderObjectChild(
+    covariant RenderObject child,
+    covariant Object? oldSlot,
+    covariant Object? newSlot,
+  ) {}
 
   @override
-  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) {}
 }
 
 class _MyStatefulWidget extends StatefulWidget {
@@ -90,8 +94,10 @@ class _MyStatefulWidgetState extends State<_MyStatefulWidget> {
 
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<void> _activateFlutterObjects(WidgetTester tester) async {
-  final _TestElement element = _TestElement();
-  element.makeInactive(); element.unmount();
+  final element = _TestElement();
+  element.makeInactive();
+  // ignore: invalid_use_of_visible_for_overriding_member
+  element.unmount();
 
   // Create and dispose State:
   await tester.pumpWidget(const _MyStatefulWidget());

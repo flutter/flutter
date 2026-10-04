@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'events.dart';
+library;
 
 import 'dart:async';
 
@@ -73,16 +75,20 @@ class _GestureArena {
 
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     if (members.isEmpty) {
       buffer.write('<empty>');
     } else {
-      buffer.write(members.map<String>((GestureArenaMember member) {
-        if (member == eagerWinner) {
-          return '$member (eager winner)';
-        }
-        return '$member';
-      }).join(', '));
+      buffer.write(
+        members
+            .map<String>((GestureArenaMember member) {
+              if (member == eagerWinner) {
+                return '$member (eager winner)';
+              }
+              return '$member';
+            })
+            .join(', '),
+      );
     }
     if (isOpen) {
       buffer.write(' [open]');
@@ -103,7 +109,7 @@ class _GestureArena {
 ///
 /// The first member to accept or the last member to not reject wins.
 ///
-/// See <https://flutter.dev/gestures/#gesture-disambiguation> for more
+/// See <https://flutter.dev/to/gesture-disambiguation> for more
 /// information about the role this class plays in the gesture system.
 ///
 /// To debug problems with gestures, consider using
@@ -166,7 +172,7 @@ class GestureArenaManager {
       assert(_debugLogDiagnostic(pointer, 'Winner: ${state.members.first}'));
       state.members.first.acceptGesture(pointer);
       // Give all the other members the bad news.
-      for (int i = 1; i < state.members.length; i++) {
+      for (var i = 1; i < state.members.length; i++) {
         state.members[i].rejectGesture(pointer);
       }
     }
@@ -234,6 +240,9 @@ class GestureArenaManager {
         }
       case GestureDisposition.rejected:
         assert(_debugLogDiagnostic(pointer, 'Rejecting: $member'));
+        if (state.eagerWinner == member) {
+          state.eagerWinner = null;
+        }
         state.members.remove(member);
         member.rejectGesture(pointer);
         if (!state.isOpen) {
@@ -282,12 +291,14 @@ class GestureArenaManager {
     member.acceptGesture(pointer);
   }
 
-  bool _debugLogDiagnostic(int pointer, String message, [ _GestureArena? state ]) {
+  bool _debugLogDiagnostic(int pointer, String message, [_GestureArena? state]) {
     assert(() {
       if (debugPrintGestureArenaDiagnostics) {
         final int? count = state?.members.length;
-        final String s = count != 1 ? 's' : '';
-        debugPrint('Gesture arena ${pointer.toString().padRight(4)} ❙ $message${ count != null ? " with $count member$s." : ""}');
+        final s = count != 1 ? 's' : '';
+        debugPrint(
+          'Gesture arena ${pointer.toString().padRight(4)} ❙ $message${count != null ? " with $count member$s." : ""}',
+        );
       }
       return true;
     }());

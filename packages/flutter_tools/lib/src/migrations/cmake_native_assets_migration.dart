@@ -9,7 +9,7 @@ import '../cmake_project.dart';
 /// Adds the snippet to the CMake file that copies the native assets.
 ///
 /// ```cmake
-/// # Copy the native assets provided by the build.dart from all packages.
+/// # Copy the native assets provided by the hook/build.dart from all packages.
 /// set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
 /// install(DIRECTORY "${NATIVE_ASSETS_DIR}"
 ///    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
@@ -17,13 +17,13 @@ import '../cmake_project.dart';
 /// ```
 class CmakeNativeAssetsMigration extends ProjectMigrator {
   CmakeNativeAssetsMigration(CmakeBasedProject project, this.os, super.logger)
-      : _cmakeFile = project.managedCmakeFile;
+    : _cmakeFile = project.managedCmakeFile;
 
   final File _cmakeFile;
   final String os;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     if (!_cmakeFile.existsSync()) {
       logger.printTrace('CMake project not found, skipping install() NATIVE_ASSETS_DIR migration.');
       return;
@@ -36,9 +36,10 @@ class CmakeNativeAssetsMigration extends ProjectMigrator {
       return;
     }
 
-    final String copyNativeAssetsCommand = '''
+    final copyNativeAssetsCommand =
+        '''
 
-# Copy the native assets provided by the build.dart from all packages.
+# Copy the native assets provided by the hook/build.dart from all packages.
 set(NATIVE_ASSETS_DIR "\${PROJECT_BUILD_DIR}native_assets/$os/")
 install(DIRECTORY "\${NATIVE_ASSETS_DIR}"
   DESTINATION "\${INSTALL_BUNDLE_LIB_DIR}"
@@ -46,11 +47,11 @@ install(DIRECTORY "\${NATIVE_ASSETS_DIR}"
 ''';
 
     // Insert the new command after the bundled libraries loop.
-    const String bundleLibrariesCommandEnd = r'''
+    const bundleLibrariesCommandEnd = r'''
 endforeach(bundled_library)
 ''';
 
-    String newProjectContents = originalProjectContents;
+    var newProjectContents = originalProjectContents;
 
     newProjectContents = originalProjectContents.replaceFirst(
       bundleLibrariesCommandEnd,

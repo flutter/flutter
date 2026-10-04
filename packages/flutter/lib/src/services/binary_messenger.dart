@@ -2,8 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter_test/flutter_test.dart';
+library;
+
 import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
 
 export 'dart:typed_data' show ByteData;
 export 'dart:ui' show PlatformMessageResponseCallback;
@@ -49,9 +55,13 @@ abstract class BinaryMessenger {
     'Instead of calling this method, use ServicesBinding.instance.channelBuffers.push. '
     'In tests, consider using tester.binding.defaultBinaryMessenger.handlePlatformMessage '
     'or TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage. '
-    'This feature was deprecated after v3.9.0-19.0.pre.'
+    'This feature was deprecated after v3.9.0-19.0.pre.',
   )
-  Future<void> handlePlatformMessage(String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback);
+  Future<void> handlePlatformMessage(
+    String channel,
+    ByteData? data,
+    ui.PlatformMessageResponseCallback? callback,
+  );
 
   /// Send a binary message to the platform plugins on the given channel.
   ///

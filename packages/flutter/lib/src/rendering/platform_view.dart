@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
+import 'dart:async';
+import 'dart:ui' as ui show SemanticsHitTestBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -29,17 +34,13 @@ enum PlatformViewHitTestBehavior {
   transparent,
 }
 
-enum _PlatformViewState {
-  uninitialized,
-  resizing,
-  ready,
-}
+enum _PlatformViewState { uninitialized, resizing, ready }
 
 bool _factoryTypesSetEquals<T>(Set<Factory<T>>? a, Set<Factory<T>>? b) {
   if (a == b) {
     return true;
   }
-  if (a == null ||  b == null) {
+  if (a == null || b == null) {
     return false;
   }
   return setEquals(_factoriesTypeSet(a), _factoriesTypeSet(b));
@@ -79,10 +80,13 @@ class RenderAndroidView extends PlatformViewRenderBox {
     required AndroidViewController viewController,
     required PlatformViewHitTestBehavior hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-    Clip clipBehavior = Clip.hardEdge,
+    this._clipBehavior = Clip.hardEdge,
   }) : _viewController = viewController,
-       _clipBehavior = clipBehavior,
-       super(controller: viewController, hitTestBehavior: hitTestBehavior, gestureRecognizers: gestureRecognizers) {
+       super(
+         controller: viewController,
+         hitTestBehavior: hitTestBehavior,
+         gestureRecognizers: gestureRecognizers,
+       ) {
     _viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
     updateGestureRecognizers(gestureRecognizers);
     _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
@@ -163,7 +167,13 @@ class RenderAndroidView extends PlatformViewRenderBox {
     // Android virtual displays cannot have a zero size.
     // Trying to size it to 0 crashes the app, which was happening when starting the app
     // with a locked screen (see: https://github.com/flutter/flutter/issues/20456).
-    if (_state == _PlatformViewState.resizing || size.isEmpty) {
+    //
+    // Don't ask for the size before the first layout either. The controller can be swapped
+    // while a route transition is in flight, and reading the size of a render box that has
+    // not been laid out throws out of this future, where nothing can catch it.
+    // performResize() sizes the platform view once layout has run.
+    // See https://github.com/flutter/flutter/issues/190833.
+    if (_state == _PlatformViewState.resizing || !hasSize || size.isEmpty) {
       return;
     }
 
@@ -196,7 +206,12 @@ class RenderAndroidView extends PlatformViewRenderBox {
   void _setOffset() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!_isDisposed) {
-        if (attached) {
+        // Don't send an offset if not laid out. For example, a RenderBox that
+        // is attached while a route transition is in flight has no position on
+        // screen yet, and asking for one throws out of this frame callback,
+        // where nothing can catch it.
+        // See https://github.com/flutter/flutter/issues/190833.
+        if (attached && hasSize) {
           await _viewController.setOffset(localToGlobal(Offset.zero));
         }
         // Schedule a new post frame callback.
@@ -207,7 +222,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_viewController.textureId == null || _currentTextureSize == null) {
+    if ((_viewController.textureId == null && !_viewController.requiresViewComposition) ||
+        _currentTextureSize == null) {
       return;
     }
 
@@ -219,8 +235,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
     // To prevent unwanted scaling artifacts while resizing, clip the texture.
     // This guarantees that the size of the texture frame we're painting is always
     // _currentAndroidTextureSize.
-    final bool isTextureLargerThanWidget = _currentTextureSize!.width > size.width ||
-                                           _currentTextureSize!.height > size.height;
+    final bool isTextureLargerThanWidget =
+        _currentTextureSize!.width > size.width || _currentTextureSize!.height > size.height;
     if (isTextureLargerThanWidget && clipBehavior != Clip.none) {
       _clipRectLayer.layer = context.pushClipRect(
         true,
@@ -251,10 +267,16 @@ class RenderAndroidView extends PlatformViewRenderBox {
       return;
     }
 
-    context.addLayer(TextureLayer(
-      rect: offset & _currentTextureSize!,
-      textureId: _viewController.textureId!,
-    ));
+    if (_viewController.requiresViewComposition) {
+      context.addLayer(
+        PlatformViewLayer(rect: offset & _currentTextureSize!, viewId: _viewController.viewId),
+      );
+      return;
+    }
+
+    context.addLayer(
+      TextureLayer(rect: offset & _currentTextureSize!, textureId: _viewController.textureId!),
+    );
   }
 
   @override
@@ -266,6 +288,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
     if (_viewController.isCreated) {
       config.platformViewId = _viewController.viewId;
+      // Platform views should allow pointer events to pass through to the
+      // underlying platform view content.
+      config.hitTestBehavior = ui.SemanticsHitTestBehavior.transparent;
     }
   }
 }
@@ -278,13 +303,12 @@ class RenderAndroidView extends PlatformViewRenderBox {
 abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> extends RenderBox {
   /// Creates a render object for a platform view.
   RenderDarwinPlatformView({
-    required T viewController,
+    required this._viewController,
     required this.hitTestBehavior,
-      required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-  }) : _viewController = viewController {
+    required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+  }) {
     updateGestureRecognizers(gestureRecognizers);
   }
-
 
   /// The unique identifier of the platform view controlled by this controller.
   T get viewController => _viewController;
@@ -293,7 +317,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
     if (_viewController == value) {
       return;
     }
-    final bool needsSemanticsUpdate = _viewController.id != value.id;
+    final needsSemanticsUpdate = _viewController.id != value.id;
     _viewController = value;
     markNeedsPaint();
     if (needsSemanticsUpdate) {
@@ -327,14 +351,11 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.addLayer(PlatformViewLayer(
-      rect: offset & size,
-      viewId: _viewController.id,
-    ));
+    context.addLayer(PlatformViewLayer(rect: offset & size, viewId: _viewController.id));
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset? position }) {
+  bool hitTest(BoxHitTestResult result, {Offset? position}) {
     if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position!)) {
       return false;
     }
@@ -347,6 +368,13 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 
   // This is registered as a global PointerRoute while the render object is attached.
   void _handleGlobalPointerEvent(PointerEvent event) {
+    // Don't receive pointer events if not laid out. For example, a RenderBox
+    // that is offscreen could be attached but not laid out, and in that case it
+    // should not be interactive with a pointer.
+    // See https://github.com/flutter/flutter/issues/83481.
+    if (!hasSize) {
+      return;
+    }
     if (event is! PointerDownEvent) {
       return;
     }
@@ -364,10 +392,13 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
   }
 
   @override
-  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     config.platformViewId = _viewController.id;
+    // Platform views should allow pointer events to pass through to the
+    // underlying platform view content.
+    config.hitTestBehavior = ui.SemanticsHitTestBehavior.transparent;
   }
 
   @override
@@ -404,13 +435,14 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 ///
 ///  * [UiKitView], which is a widget that is used to show a UIView.
 ///  * [PlatformViewsService], which is a service for controlling platform views.
-class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
+class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController>
+    with NativeHitTestTarget {
   /// Creates a render object for an iOS UIView.
   RenderUiKitView({
-      required super.viewController,
-      required super.hitTestBehavior,
-      required super.gestureRecognizers,
-    });
+    required super.viewController,
+    required super.hitTestBehavior,
+    required super.gestureRecognizers,
+  });
 
   /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
   @override
@@ -420,7 +452,10 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
       'There were multiple gesture recognizer factories for the same type, there must only be a single '
       'gesture recognizer factory for each gesture recognizer type.',
     );
-    if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
+    if (_factoryTypesSetEquals(
+      gestureRecognizers,
+      _gestureRecognizer?.gestureRecognizerFactories,
+    )) {
       return;
     }
     _gestureRecognizer?.dispose();
@@ -473,29 +508,25 @@ class RenderAppKitView extends RenderDarwinPlatformView<AppKitViewController> {
 // When the team wins a gesture the recognizer notifies the engine that it should release
 // the touch sequence to the embedded UIView.
 class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _UiKitViewGestureRecognizer(
-    this.controller,
-    this.gestureRecognizerFactories
-  ) {
-    team = GestureArenaTeam()
-      ..captain = this;
-    _gestureRecognizers = gestureRecognizerFactories.map(
-      (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
-        gestureRecognizer.team = team;
-        // The below gesture recognizers requires at least one non-empty callback to
-        // compete in the gesture arena.
-        // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
-        if (gestureRecognizer is LongPressGestureRecognizer) {
-          gestureRecognizer.onLongPress ??= (){};
-        } else if (gestureRecognizer is DragGestureRecognizer) {
-          gestureRecognizer.onDown ??= (_){};
-        } else if (gestureRecognizer is TapGestureRecognizer) {
-          gestureRecognizer.onTapDown ??= (_){};
-        }
-        return gestureRecognizer;
-      },
-    ).toSet();
+  _UiKitViewGestureRecognizer(this.controller, this.gestureRecognizerFactories) {
+    team = GestureArenaTeam()..captain = this;
+    _gestureRecognizers = gestureRecognizerFactories.map((
+      Factory<OneSequenceGestureRecognizer> recognizerFactory,
+    ) {
+      final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+      gestureRecognizer.team = team;
+      // The below gesture recognizers requires at least one non-empty callback to
+      // compete in the gesture arena.
+      // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
+      if (gestureRecognizer is LongPressGestureRecognizer) {
+        gestureRecognizer.onLongPress ??= () {};
+      } else if (gestureRecognizer is DragGestureRecognizer) {
+        gestureRecognizer.onDown ??= (_) {};
+      } else if (gestureRecognizer is TapGestureRecognizer) {
+        gestureRecognizer.onTapDown ??= (_) {};
+      }
+      return gestureRecognizer;
+    }).toSet();
   }
 
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
@@ -518,7 +549,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'UIKit view';
 
   @override
-  void didStopTrackingLastPointer(int pointer) { }
+  void didStopTrackingLastPointer(int pointer) {}
 
   @override
   void handleEvent(PointerEvent event) {
@@ -551,31 +582,44 @@ typedef _HandlePointerEvent = Future<void> Function(PointerEvent event);
 class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _PlatformViewGestureRecognizer(
     _HandlePointerEvent handlePointerEvent,
-    this.gestureRecognizerFactories
-  ) {
-    team = GestureArenaTeam()
-      ..captain = this;
-    _gestureRecognizers = gestureRecognizerFactories.map(
-      (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
-        gestureRecognizer.team = team;
-        // The below gesture recognizers requires at least one non-empty callback to
-        // compete in the gesture arena.
-        // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
-        if (gestureRecognizer is LongPressGestureRecognizer) {
-          gestureRecognizer.onLongPress ??= (){};
-        } else if (gestureRecognizer is DragGestureRecognizer) {
-          gestureRecognizer.onDown ??= (_){};
-        } else if (gestureRecognizer is TapGestureRecognizer) {
-          gestureRecognizer.onTapDown ??= (_){};
-        }
-        return gestureRecognizer;
-      },
-    ).toSet();
+    this.gestureRecognizerFactories, {
+    this.onRejectGesture,
+  }) {
+    team = GestureArenaTeam()..captain = this;
+    _gestureRecognizers = gestureRecognizerFactories.map((
+      Factory<OneSequenceGestureRecognizer> recognizerFactory,
+    ) {
+      final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+      gestureRecognizer.team = team;
+      // The below gesture recognizers requires at least one non-empty callback to
+      // compete in the gesture arena.
+      // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
+      if (gestureRecognizer is LongPressGestureRecognizer) {
+        gestureRecognizer.onLongPress ??= () {};
+      } else if (gestureRecognizer is DragGestureRecognizer) {
+        gestureRecognizer.onDown ??= (_) {};
+      } else if (gestureRecognizer is TapGestureRecognizer) {
+        gestureRecognizer.onTapDown ??= (_) {};
+      }
+      return gestureRecognizer;
+    }).toSet();
     _handlePointerEvent = handlePointerEvent;
   }
 
+  final void Function(int? gestureId)? onRejectGesture;
+
   late _HandlePointerEvent _handlePointerEvent;
+
+  // Maps active pointer IDs to the embedderId of the pointer down event.
+  //
+  // On Android, the engine assigns each MotionEvent a unique motionEventId tracked by
+  // MotionEventTracker, which is passed to the framework as PointerEvent.embedderId.
+  //
+  // When Flutter wins the gesture arena, this embedderId is passed as `gestureId` to the
+  // platform side to correlate with the active MotionEvent sequence via MotionEventTracker.
+  // If the gestureId is invalid or does not match (e.g. on non-Android embedders), the
+  // optimization safely degrades to standard buffered touch dispatch.
+  final Map<int, int> _gestureIds = <int, int>{};
 
   // Maps a pointer to a list of its cached pointer events.
   // Before the arena for a pointer is resolved all events are cached here, if we win the arena
@@ -595,6 +639,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
+    _gestureIds[event.pointer] = event.embedderId;
     super.addAllowedPointer(event);
     for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
@@ -605,7 +650,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'Platform view';
 
   @override
-  void didStopTrackingLastPointer(int pointer) { }
+  void didStopTrackingLastPointer(int pointer) {}
 
   @override
   void handleEvent(PointerEvent event) {
@@ -625,13 +670,17 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
+    final int? gestureId = _gestureIds[pointer];
     stopTrackingPointer(pointer);
     cachedEvents.remove(pointer);
+    if (gestureId != null && gestureId != 0) {
+      onRejectGesture?.call(gestureId);
+    }
   }
 
   void _cacheEvent(PointerEvent event) {
     if (!cachedEvents.containsKey(event.pointer)) {
-      cachedEvents[event.pointer] = <PointerEvent> [];
+      cachedEvents[event.pointer] = <PointerEvent>[];
     }
     cachedEvents[event.pointer]!.add(event);
   }
@@ -642,11 +691,13 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void stopTrackingPointer(int pointer) {
+    _gestureIds.remove(pointer);
     super.stopTrackingPointer(pointer);
     forwardedPointers.remove(pointer);
   }
 
   void reset() {
+    _gestureIds.clear();
     forwardedPointers.forEach(super.stopTrackingPointer);
     forwardedPointers.clear();
     cachedEvents.keys.forEach(super.stopTrackingPointer);
@@ -665,8 +716,8 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     required PlatformViewController controller,
     required PlatformViewHitTestBehavior hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-  }) :  assert(controller.viewId > -1),
-        _controller = controller {
+  }) : assert(controller.viewId > -1),
+       _controller = controller {
     this.hitTestBehavior = hitTestBehavior;
     updateGestureRecognizers(gestureRecognizers);
   }
@@ -674,6 +725,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   /// The controller for this render object.
   PlatformViewController get controller => _controller;
   PlatformViewController _controller;
+
   /// Setting this value to a new value will result in a repaint.
   set controller(covariant PlatformViewController controller) {
     assert(controller.viewId > -1);
@@ -681,7 +733,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     if (_controller == controller) {
       return;
     }
-    final bool needsSemanticsUpdate = _controller.viewId != controller.viewId;
+    final needsSemanticsUpdate = _controller.viewId != controller.viewId;
     _controller = controller;
     markNeedsPaint();
     if (needsSemanticsUpdate) {
@@ -706,7 +758,15 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
-    _updateGestureRecognizersWithCallBack(gestureRecognizers, _controller.dispatchPointerEvent);
+    _updateGestureRecognizersWithCallBack(
+      gestureRecognizers,
+      _controller.dispatchPointerEvent,
+      onRejectGesture: (int? gestureId) {
+        if (gestureId != null) {
+          _controller.rejectGesture(gestureId: gestureId).ignore();
+        }
+      },
+    );
   }
 
   @override
@@ -726,10 +786,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.addLayer(PlatformViewLayer(
-      rect: offset & size,
-      viewId: _controller.viewId,
-    ));
+    context.addLayer(PlatformViewLayer(rect: offset & size, viewId: _controller.viewId));
   }
 
   @override
@@ -737,12 +794,14 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     config.platformViewId = _controller.viewId;
+    // Platform views should allow pointer events to pass through to the
+    // underlying platform view content.
+    config.hitTestBehavior = ui.SemanticsHitTestBehavior.transparent;
   }
 }
 
 /// The Mixin handling the pointer events and gestures of a platform view render box.
 mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
-
   /// How to behave during hit testing.
   // Changing _hitTestBehavior might affect which objects are considered hovered over.
   set hitTestBehavior(PlatformViewHitTestBehavior value) {
@@ -753,32 +812,44 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
       }
     }
   }
+
   PlatformViewHitTestBehavior? _hitTestBehavior;
 
   _HandlePointerEvent? _handlePointerEvent;
 
-  /// {@macro flutter.rendering.RenderAndroidView.updateGestureRecognizers}
+  /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
-  void _updateGestureRecognizersWithCallBack(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers, _HandlePointerEvent handlePointerEvent) {
+  void _updateGestureRecognizersWithCallBack(
+    Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+    _HandlePointerEvent handlePointerEvent, {
+    void Function(int? gestureId)? onRejectGesture,
+  }) {
     assert(
       _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
       'There were multiple gesture recognizer factories for the same type, there must only be a single '
       'gesture recognizer factory for each gesture recognizer type.',
     );
-    if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
+    if (_factoryTypesSetEquals(
+      gestureRecognizers,
+      _gestureRecognizer?.gestureRecognizerFactories,
+    )) {
       return;
     }
     _gestureRecognizer?.dispose();
-    _gestureRecognizer = _PlatformViewGestureRecognizer(handlePointerEvent, gestureRecognizers);
+    _gestureRecognizer = _PlatformViewGestureRecognizer(
+      handlePointerEvent,
+      gestureRecognizers,
+      onRejectGesture: onRejectGesture,
+    );
     _handlePointerEvent = handlePointerEvent;
   }
 
   _PlatformViewGestureRecognizer? _gestureRecognizer;
 
   @override
-  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
     if (_hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position)) {
       return false;
     }
@@ -796,7 +867,7 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   PointerExitEventListener? get onExit => null;
 
   @override
-  MouseCursor get cursor => MouseCursor.uncontrolled;
+  MouseCursor get cursor => kIsWeb ? MouseCursor.defer : MouseCursor.uncontrolled;
 
   @override
   bool get validForMouseTracker => true;

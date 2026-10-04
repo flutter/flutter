@@ -5,13 +5,17 @@
 import 'template.dart';
 
 class NavigationRailTemplate extends TokenTemplate {
-  const NavigationRailTemplate(super.blockName, super.fileName, super.tokens, {
+  const NavigationRailTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
     super.textThemePrefix = '_textTheme.',
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends NavigationRailThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(

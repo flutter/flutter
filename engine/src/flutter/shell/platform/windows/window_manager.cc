@@ -1,0 +1,294 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "flutter/shell/platform/windows/window_manager.h"
+
+#include <dwmapi.h>
+#include <optional>
+#include <vector>
+
+#include "embedder.h"
+#include "flutter/shell/platform/common/windowing.h"
+#include "flutter/shell/platform/windows/flutter_windows_engine.h"
+#include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
+#include "flutter/shell/platform/windows/host_window.h"
+#include "fml/logging.h"
+#include "shell/platform/windows/client_wrapper/include/flutter/flutter_view.h"
+#include "shell/platform/windows/flutter_windows_view.h"
+#include "shell/platform/windows/host_window.h"
+#include "shell/platform/windows/host_window_popup.h"
+#include "shell/platform/windows/host_window_tooltip.h"
+
+namespace flutter {
+
+WindowManager::WindowManager(FlutterWindowsEngine* engine) : engine_(engine) {}
+
+void WindowManager::Initialize(const WindowingInitRequest* request) {
+  on_message_ = request->on_message;
+  isolate_ = Isolate::Current();
+}
+
+FlutterViewId WindowManager::CreateRegularWindow(
+    const RegularWindowCreationRequest* request) {
+  auto window = HostWindow::CreateRegularWindow(
+      this, engine_, request->preferred_size, request->preferred_constraints,
+      request->title, request->sized_to_content, request->resizable);
+  if (!window || !window->GetWindowHandle()) {
+    FML_LOG(ERROR) << "Failed to create host window";
+    return -1;
+  }
+  FlutterViewId const view_id = window->view_controller_->view()->view_id();
+  active_windows_[window->GetWindowHandle()] = std::move(window);
+  return view_id;
+}
+
+FlutterViewId WindowManager::CreateDialogWindow(
+    const DialogWindowCreationRequest* request) {
+  auto window = HostWindow::CreateDialogWindow(
+      this, engine_, request->preferred_size, request->preferred_constraints,
+      request->title, request->parent_or_null, request->sized_to_content,
+      request->resizable);
+  if (!window || !window->GetWindowHandle()) {
+    FML_LOG(ERROR) << "Failed to create host window";
+    return -1;
+  }
+  FlutterViewId const view_id = window->view_controller_->view()->view_id();
+  active_windows_[window->GetWindowHandle()] = std::move(window);
+  return view_id;
+}
+
+FlutterViewId WindowManager::CreateTooltipWindow(
+    const TooltipWindowCreationRequest* request) {
+  auto window = HostWindow::CreateTooltipWindow(
+      this, engine_, request->preferred_constraints,
+      request->get_position_callback, request->parent);
+  if (!window || !window->GetWindowHandle()) {
+    FML_LOG(ERROR) << "Failed to create host window";
+    return -1;
+  }
+  FlutterViewId const view_id = window->view_controller_->view()->view_id();
+  active_windows_[window->GetWindowHandle()] = std::move(window);
+  return view_id;
+}
+
+FlutterViewId WindowManager::CreatePopupWindow(
+    const PopupWindowCreationRequest* request) {
+  auto window = HostWindow::CreatePopupWindow(
+      this, engine_, request->preferred_constraints,
+      request->get_position_callback, request->parent);
+  if (!window || !window->GetWindowHandle()) {
+    FML_LOG(ERROR) << "Failed to create host window";
+    return -1;
+  }
+  FlutterViewId const view_id = window->view_controller_->view()->view_id();
+  active_windows_[window->GetWindowHandle()] = std::move(window);
+  return view_id;
+}
+
+void WindowManager::OnPreEngineRestart() {
+  // The isolate state will be completely lost after a hot restart, so notifying
+  // the isolate about destroying windows does not have any benefits. On the
+  // contrary it can cause the old isolate to shut down the application because
+  // all windows will be destroyed.
+  on_message_ = nullptr;
+  OnEngineShutdown();
+}
+
+void WindowManager::OnEngineShutdown() {
+  // Destroy the windows before clearing |on_message_| so the WM_DESTROY
+  // round-trip reaches the isolate. Otherwise per-view Dart controllers
+  // never observe destruction and may issue follow-up FFI calls (e.g.
+  // updatePosition) with stale handles after the engine is torn down.
+  //
+  // Destroying single window may result in removal of child entries from the
+  // map so this loop is safer than iterating over the map.
+  while (!active_windows_.empty()) {
+    auto it = active_windows_.begin();
+    // This will destroy the window, which will in turn remove the
+    // HostWindow from map when handling WM_NCDESTROY inside
+    // HandleMessage.
+    InternalFlutterWindows_WindowManager_OnDestroyWindow(it->first);
+  }
+
+  // Don't send any more messages to isolate.
+  on_message_ = nullptr;
+}
+
+std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
+                                                    UINT message,
+                                                    WPARAM wparam,
+                                                    LPARAM lparam) {
+  if (message == WM_DESTROY) {
+    // Destroying parent HWND will transitively destroy child HWND, including
+    // the FlutterView HWND. That causes a problem because the raster thread
+    // may require the Flutterview HWND to be alive until Engine RemoveView
+    // completes. To ensure that the FlutterView HWND is removed from the
+    // parent window. The FlutterView HWND will be destroyed later inside
+    // FlutterWindow::Destroy.
+    HostWindow* window = HostWindow::GetThisFromHandle(hwnd);
+    if (window) {
+      auto handle = window->GetFlutterViewWindowHandle();
+      ShowWindow(handle, SW_HIDE);
+      SetParent(handle, nullptr);
+    }
+  }
+
+  if (message == WM_NCDESTROY) {
+    active_windows_.erase(hwnd);
+    return std::nullopt;
+  }
+
+  HostWindow* host_window = HostWindow::GetThisFromHandle(hwnd);
+  FlutterWindowsView* view =
+      host_window ? host_window->view_controller_->view() : nullptr;
+
+  if (!view) {
+    FML_LOG(WARNING) << "Received message for unknown view";
+    return std::nullopt;
+  }
+
+  WindowsMessage message_struct = {.view_id = view->view_id(),
+                                   .hwnd = hwnd,
+                                   .message = message,
+                                   .wParam = wparam,
+                                   .lParam = lparam,
+                                   .result = 0,
+                                   .handled = false};
+
+  // Not initialized yet.
+  if (!isolate_ || on_message_ == nullptr) {
+    return std::nullopt;
+  }
+
+  IsolateScope scope(*isolate_);
+  on_message_(&message_struct);
+  if (message_struct.handled) {
+    return message_struct.result;
+  } else {
+    return std::nullopt;
+  }
+}
+
+}  // namespace flutter
+
+void InternalFlutterWindows_WindowManager_Initialize(
+    int64_t engine_id,
+    const flutter::WindowingInitRequest* request) {
+  flutter::FlutterWindowsEngine* engine =
+      flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
+  engine->window_manager()->Initialize(request);
+}
+
+FlutterViewId InternalFlutterWindows_WindowManager_CreateRegularWindow(
+    int64_t engine_id,
+    const flutter::RegularWindowCreationRequest* request) {
+  flutter::FlutterWindowsEngine* engine =
+      flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
+  return engine->window_manager()->CreateRegularWindow(request);
+}
+
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreateDialogWindow(
+    int64_t engine_id,
+    const flutter::DialogWindowCreationRequest* request) {
+  flutter::FlutterWindowsEngine* engine =
+      flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
+  return engine->window_manager()->CreateDialogWindow(request);
+}
+
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreateTooltipWindow(
+    int64_t engine_id,
+    const flutter::TooltipWindowCreationRequest* request) {
+  flutter::FlutterWindowsEngine* engine =
+      flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
+  return engine->window_manager()->CreateTooltipWindow(request);
+}
+
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreatePopupWindow(
+    int64_t engine_id,
+    const flutter::PopupWindowCreationRequest* request) {
+  flutter::FlutterWindowsEngine* engine =
+      flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
+  return engine->window_manager()->CreatePopupWindow(request);
+}
+
+HWND InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+    int64_t engine_id,
+    FlutterViewId view_id) {
+  flutter::FlutterWindowsEngine* engine =
+      flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
+  flutter::FlutterWindowsView* view = engine->view(view_id);
+  if (view == nullptr) {
+    return nullptr;
+  } else {
+    return GetAncestor(view->GetWindowHandle(), GA_ROOT);
+  }
+}
+
+flutter::ActualWindowSize
+InternalFlutterWindows_WindowManager_GetWindowContentSize(HWND hwnd) {
+  return flutter::HostWindow::GetWindowContentSize(hwnd);
+}
+
+void InternalFlutterWindows_WindowManager_SetWindowSize(
+    HWND hwnd,
+    const flutter::WindowSizeRequest* size) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  if (window) {
+    window->SetContentSize(*size);
+  }
+}
+
+void InternalFlutterWindows_WindowManager_OnDestroyWindow(HWND hwnd) {
+  DestroyWindow(hwnd);
+}
+
+void InternalFlutterWindows_WindowManager_SetWindowConstraints(
+    HWND hwnd,
+    const flutter::WindowConstraints* constraints) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  if (window) {
+    window->SetConstraints(*constraints);
+  }
+}
+
+void InternalFlutterWindows_WindowManager_SetFullscreen(
+    HWND hwnd,
+    const flutter::FullscreenRequest* request) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  const std::optional<FlutterEngineDisplayId> display_id =
+      request->has_display_id
+          ? std::optional<FlutterEngineDisplayId>(request->display_id)
+          : std::nullopt;
+  if (window) {
+    window->SetFullscreen(request->fullscreen, display_id);
+  }
+}
+
+bool InternalFlutterWindows_WindowManager_GetFullscreen(HWND hwnd) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  if (window) {
+    return window->GetFullscreen();
+  }
+
+  return false;
+}
+
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_UpdateTooltipPosition(HWND hwnd) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  flutter::HostWindowTooltip* tooltip_window =
+      reinterpret_cast<flutter::HostWindowTooltip*>(window);
+  tooltip_window->UpdatePosition();
+}
+
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_UpdatePopupPosition(HWND hwnd) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  flutter::HostWindowPopup* popup_window =
+      reinterpret_cast<flutter::HostWindowPopup*>(window);
+  popup_window->UpdatePosition();
+}

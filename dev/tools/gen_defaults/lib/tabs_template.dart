@@ -5,14 +5,18 @@
 import 'template.dart';
 
 class TabsTemplate extends TokenTemplate {
-  const TabsTemplate(super.blockName, super.fileName, super.tokens, {
+  const TabsTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
     super.textThemePrefix = '_textTheme.',
   });
 
   @override
-  String generate() => '''
-class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
+  String generate() =>
+      '''
+class _${blockName}PrimaryDefaultsM3 extends TabBarThemeData {
   _${blockName}PrimaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.label);
 
@@ -45,27 +49,27 @@ class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
   TextStyle? get unselectedLabelStyle => ${textStyle("md.comp.primary-navigation-tab.with-label-text.label-text")};
 
   @override
-  MaterialStateProperty<Color?> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+  WidgetStateProperty<Color?> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return ${componentColor('md.comp.primary-navigation-tab.active.pressed.state-layer')};
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return ${componentColor('md.comp.primary-navigation-tab.active.hover.state-layer')};
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return ${componentColor('md.comp.primary-navigation-tab.active.focus.state-layer')};
         }
         return null;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return ${componentColor('md.comp.primary-navigation-tab.inactive.pressed.state-layer')};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${componentColor('md.comp.primary-navigation-tab.inactive.hover.state-layer')};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${componentColor('md.comp.primary-navigation-tab.inactive.focus.state-layer')};
       }
       return null;
@@ -91,7 +95,7 @@ class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
   static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 2);
 }
 
-class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
+class _${blockName}SecondaryDefaultsM3 extends TabBarThemeData {
   _${blockName}SecondaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.tab);
 
@@ -124,27 +128,27 @@ class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
   TextStyle? get unselectedLabelStyle => ${textStyle("md.comp.secondary-navigation-tab.label-text")};
 
   @override
-  MaterialStateProperty<Color?> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
+  WidgetStateProperty<Color?> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
           return ${componentColor('md.comp.secondary-navigation-tab.pressed.state-layer')};
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return ${componentColor('md.comp.secondary-navigation-tab.hover.state-layer')};
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(WidgetState.focused)) {
           return ${componentColor('md.comp.secondary-navigation-tab.focus.state-layer')};
         }
         return null;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return ${componentColor('md.comp.secondary-navigation-tab.pressed.state-layer')};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${componentColor('md.comp.secondary-navigation-tab.hover.state-layer')};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${componentColor('md.comp.secondary-navigation-tab.focus.state-layer')};
       }
       return null;
@@ -160,5 +164,4 @@ class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
   static double indicatorWeight = ${getToken('md.comp.secondary-navigation-tab.active-indicator.height')};
 }
 ''';
-
 }

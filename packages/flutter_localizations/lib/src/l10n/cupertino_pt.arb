@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Pesquisar",
   "searchWebButtonLabel": "Pesquisar na Web",
   "shareButtonLabel": "Compartilhar…",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Limpar",
+  "cancelButtonLabel": "Cancelar",
+  "backButtonLabel": "Voltar",
+  "expansionTileExpandedHint": "toque duas vezes para fechar",
+  "expansionTileCollapsedHint": "Toque duas vezes para abrir",
+  "expansionTileExpandedTapHint": "Feche",
+  "expansionTileCollapsedTapHint": "Abra para mostrar mais detalhes",
+  "expandedHint": "Fechado.",
+  "collapsedHint": "Aberto."
 }

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Rotated box control test', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
     final Key rotatedBoxKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -20,20 +20,16 @@ void main() {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               GestureDetector(
-                onTap: () { log.add('left'); },
-                child: Container(
-                  width: 100.0,
-                  height: 40.0,
-                  color: Colors.blue[500],
-                ),
+                onTap: () {
+                  log.add('left');
+                },
+                child: Container(width: 100.0, height: 40.0, color: const Color(0xFF0000FF)),
               ),
               GestureDetector(
-                onTap: () { log.add('right'); },
-                child: Container(
-                  width: 75.0,
-                  height: 65.0,
-                  color: Colors.blue[500],
-                ),
+                onTap: () {
+                  log.add('right');
+                },
+                child: Container(width: 75.0, height: 65.0, color: const Color(0xFF0000FF)),
               ),
             ],
           ),
@@ -52,5 +48,17 @@ void main() {
     await tester.tapAt(const Offset(380.0, 320.0));
     expect(log, equals(<String>['right']));
     log.clear();
+  });
+
+  testWidgets('RotatedBox does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: RotatedBox(quarterTurns: 1)),
+      ),
+    );
+    expect(tester.getSize(find.byType(RotatedBox)), Size.zero);
   });
 }

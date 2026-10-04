@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../../../layout/adaptive.dart';
 import '../colors.dart';
 import '../data.dart';
@@ -25,14 +26,10 @@ class _SettingsViewState extends State<SettingsView> {
           restorationId: 'settings_list_view',
           shrinkWrap: true,
           children: <Widget>[
-            for (final String title
-                in DummyDataService.getSettingsTitles(context)) ...<Widget>[
+            for (final String title in DummyDataService.getSettingsTitles(context)) ...<Widget>[
               _SettingsItem(title),
-              const Divider(
-                color: RallyColors.dividerColor,
-                height: 1,
-              )
-            ]
+              const Divider(color: RallyColors.dividerColor, height: 1),
+            ],
           ],
         ),
       ),
@@ -48,10 +45,7 @@ class _SettingsItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      style: TextButton.styleFrom(
-        foregroundColor: Colors.white,
-        padding: EdgeInsets.zero,
-      ),
+      style: TextButton.styleFrom(foregroundColor: Colors.white, padding: EdgeInsets.zero),
       onPressed: () {
         Navigator.of(context).restorablePushNamed(rally_route.loginRoute);
       },

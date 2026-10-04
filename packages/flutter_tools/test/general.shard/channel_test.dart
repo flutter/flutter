@@ -5,23 +5,29 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/channel.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/version.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_process_manager.dart';
-import '../src/fakes.dart' show FakeFlutterVersion;
+import '../src/fakes.dart';
 import '../src/test_flutter_command_runner.dart';
 
 void main() {
   group('channel', () {
     late FakeProcessManager fakeProcessManager;
+    late BufferLogger logger;
+    late MemoryFileSystem fileSystem;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
+      logger = BufferLogger.test();
+      fileSystem = MemoryFileSystem.test();
     });
 
     setUpAll(() {
@@ -33,49 +39,76 @@ void main() {
         FakeCommand(
           command: <String>['git', 'branch', '-r'],
           stdout:
-            '  origin/branch-1\n'
-            '  origin/branch-2\n'
-            '  origin/master\n'
-            '  origin/main\n'
-            '  origin/stable\n'
-            '  origin/beta',
+              '  origin/branch-1\n'
+              '  origin/branch-2\n'
+              '  origin/master\n'
+              '  origin/main\n'
+              '  origin/stable\n'
+              '  origin/beta',
         ),
       ]);
-      final ChannelCommand command = ChannelCommand();
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(args);
-      expect(testLogger.errorText, hasLength(0));
+      expect(logger.errorText, hasLength(0));
       // The bots may return an empty list of channels (network hiccup?)
       // and when run locally the list of branches might be different
       // so we check for the header text rather than any specific channel name.
-      expect(
-        testLogger.statusText,
-        containsIgnoringWhitespace('Flutter channels:'),
-      );
+      expect(logger.statusText, containsIgnoringWhitespace('Flutter channels:'));
     }
 
-    testUsingContext('list', () async {
+    testWithoutContext('usage (--help) explains how to use channel', () async {
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: FakeProcessManager.empty(),
+      );
+
+      // Required because otherwise command.usage fails as it is not hooked up.
+      createTestCommandRunner(command);
+
+      // TODO(matanlurey): https://github.com/flutter/flutter/issues/158532
+      //
+      // <Command>.usage is checked instead of log output because by default
+      // every command emits usage directly to stdout (via print) instead of
+      // to the interfaces provided. It would be a much larger refactor to
+      // change how every command works:
+      expect(
+        command.usage,
+        stringContainsInOrder(<String>[
+          'List or switch Flutter channels',
+          'Common commands:',
+          'List Flutter channels',
+          "Switch to Flutter's main channel.",
+        ]),
+      );
+    });
+
+    testWithoutContext('list', () async {
       await simpleChannelTest(<String>['channel']);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => fakeProcessManager,
-      FileSystem: () => MemoryFileSystem.test(),
     });
 
-    testUsingContext('verbose list', () async {
+    testWithoutContext('verbose list', () async {
       await simpleChannelTest(<String>['channel', '-v']);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => fakeProcessManager,
-      FileSystem: () => MemoryFileSystem.test(),
     });
 
-    testUsingContext('sorted by stability', () async {
-      final ChannelCommand command = ChannelCommand();
+    testWithoutContext('sorted by stability', () async {
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['git', 'branch', '-r'],
-          stdout: 'origin/beta\n'
+          stdout:
+              'origin/beta\n'
               'origin/master\n'
               'origin/main\n'
               'origin/stable\n',
@@ -84,8 +117,9 @@ void main() {
 
       await runner.run(<String>['channel']);
       expect(fakeProcessManager, hasNoRemainingExpectations);
-      expect(testLogger.errorText, hasLength(0));
-      expect(testLogger.statusText,
+      expect(logger.errorText, hasLength(0));
+      expect(
+        logger.statusText,
         'Flutter channels:\n'
         '* master (latest development branch, for contributors)\n'
         '  main (latest development branch, follows master channel)\n'
@@ -94,13 +128,14 @@ void main() {
       );
 
       // clear buffer for next process
-      testLogger.clear();
+      logger.clear();
 
       // Extra branches.
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['git', 'branch', '-r'],
-          stdout: 'origin/beta\n'
+          stdout:
+              'origin/beta\n'
               'origin/master\n'
               'origin/dependabot/bundler\n'
               'origin/main\n'
@@ -111,8 +146,9 @@ void main() {
 
       await runner.run(<String>['channel']);
       expect(fakeProcessManager, hasNoRemainingExpectations);
-      expect(testLogger.errorText, hasLength(0));
-      expect(testLogger.statusText,
+      expect(logger.errorText, hasLength(0));
+      expect(
+        logger.statusText,
         'Flutter channels:\n'
         '* master (latest development branch, for contributors)\n'
         '  main (latest development branch, follows master channel)\n'
@@ -121,13 +157,14 @@ void main() {
       );
 
       // clear buffer for next process
-      testLogger.clear();
+      logger.clear();
 
       // Missing branches.
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['git', 'branch', '-r'],
-          stdout: 'origin/master\n'
+          stdout:
+              'origin/master\n'
               'origin/dependabot/bundler\n'
               'origin/v1.4.5-hotfixes\n'
               'origin/stable\n'
@@ -137,28 +174,25 @@ void main() {
 
       await runner.run(<String>['channel']);
       expect(fakeProcessManager, hasNoRemainingExpectations);
-      expect(testLogger.errorText, hasLength(0));
+      expect(logger.errorText, hasLength(0));
       // check if available official channels are in order of stability
-      int prev = -1;
-      int next = -1;
+      var prev = -1;
+      var next = -1;
       for (final String branch in kOfficialChannels) {
-        next = testLogger.statusText.indexOf(branch);
+        next = logger.statusText.indexOf(branch);
         if (next != -1) {
           expect(prev < next, isTrue);
           prev = next;
         }
       }
-
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => fakeProcessManager,
-      FileSystem: () => MemoryFileSystem.test(),
     });
 
-    testUsingContext('ignores lines with unexpected output', () async {
+    testWithoutContext('ignores lines with unexpected output', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['git', 'branch', '-r'],
-          stdout: 'origin/beta\n'
+          stdout:
+              'origin/beta\n'
               'origin/stable\n'
               'upstream/beta\n'
               'upstream/stable\n'
@@ -166,40 +200,49 @@ void main() {
         ),
       );
 
-      final ChannelCommand command = ChannelCommand();
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+        flutterVersion: FakeFlutterVersion(branch: 'beta'),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
-      expect(testLogger.errorText, hasLength(0));
-      expect(testLogger.statusText,
+      expect(logger.errorText, hasLength(0));
+      expect(
+        logger.statusText,
         'Flutter channels:\n'
         '* beta (updated monthly, recommended for experienced users)\n'
-        '  stable (updated quarterly, for new users and for production app releases)\n'
+        '  stable (updated quarterly, for new users and for production app releases)\n',
       );
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => fakeProcessManager,
-      FileSystem: () => MemoryFileSystem.test(),
-      FlutterVersion: () => FakeFlutterVersion(branch: 'beta'),
     });
 
-    testUsingContext('handles custom branches', () async {
+    testWithoutContext('handles custom branches', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['git', 'branch', '-r'],
-          stdout: 'origin/beta\n'
+          stdout:
+              'origin/beta\n'
               'origin/stable\n'
               'origin/foo',
         ),
       );
 
-      final ChannelCommand command = ChannelCommand();
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+        flutterVersion: FakeFlutterVersion(branch: 'foo'),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
-      expect(testLogger.errorText, hasLength(0));
-      expect(testLogger.statusText,
+      expect(logger.errorText, hasLength(0));
+      expect(
+        logger.statusText,
         'Flutter channels:\n'
         '  beta (updated monthly, recommended for experienced users)\n'
         '  stable (updated quarterly, for new users and for production app releases)\n'
@@ -207,77 +250,70 @@ void main() {
         '\n'
         'Currently not on an official channel.\n',
       );
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => fakeProcessManager,
-      FileSystem: () => MemoryFileSystem.test(),
-      FlutterVersion: () => FakeFlutterVersion(branch: 'foo'),
     });
 
-    testUsingContext('removes duplicates', () async {
+    testWithoutContext('removes duplicates', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['git', 'branch', '-r'],
-          stdout: 'origin/beta\n'
+          stdout:
+              'origin/beta\n'
               'origin/stable\n'
               'upstream/beta\n'
               'upstream/stable\n',
         ),
       );
 
-      final ChannelCommand command = ChannelCommand();
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+        flutterVersion: FakeFlutterVersion(branch: 'beta'),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
-      expect(testLogger.errorText, hasLength(0));
-      expect(testLogger.statusText,
+      expect(logger.errorText, hasLength(0));
+      expect(
+        logger.statusText,
         'Flutter channels:\n'
         '* beta (updated monthly, recommended for experienced users)\n'
-        '  stable (updated quarterly, for new users and for production app releases)\n'
+        '  stable (updated quarterly, for new users and for production app releases)\n',
       );
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => fakeProcessManager,
-      FileSystem: () => MemoryFileSystem.test(),
-      FlutterVersion: () => FakeFlutterVersion(branch: 'beta'),
     });
 
-    testUsingContext('can switch channels', () async {
+    testWithoutContext('can switch channels', () async {
       fakeProcessManager.addCommands(const <FakeCommand>[
-        FakeCommand(
-          command: <String>['git', 'fetch'],
-        ),
-        FakeCommand(
-          command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
-        ),
-        FakeCommand(
-          command: <String>['git', 'checkout', 'beta', '--']
-        ),
+        FakeCommand(command: <String>['git', 'fetch']),
+        FakeCommand(command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta']),
+        FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
         FakeCommand(
           command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
         ),
       ]);
 
-      final ChannelCommand command = ChannelCommand();
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel', 'beta']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         containsIgnoringWhitespace("Switching to flutter channel 'beta'..."),
       );
-      expect(testLogger.errorText, hasLength(0));
+      expect(logger.errorText, hasLength(0));
 
       fakeProcessManager.addCommands(const <FakeCommand>[
-        FakeCommand(
-          command: <String>['git', 'fetch'],
-        ),
+        FakeCommand(command: <String>['git', 'fetch']),
         FakeCommand(
           command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/stable'],
         ),
-        FakeCommand(
-          command: <String>['git', 'checkout', 'stable', '--'],
-        ),
+        FakeCommand(command: <String>['git', 'checkout', 'stable', '--']),
         FakeCommand(
           command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
         ),
@@ -286,67 +322,112 @@ void main() {
       await runner.run(<String>['channel', 'stable']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => fakeProcessManager,
     });
 
-    testUsingContext('switching channels prompts to run flutter upgrade', () async {
+    testWithoutContext('can switch channels with --force', () async {
       fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['git', 'fetch']),
+        FakeCommand(command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta']),
+        FakeCommand(command: <String>['git', 'checkout', '-f', 'beta', '--']),
         FakeCommand(
-          command: <String>['git', 'fetch'],
+          command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
         ),
+      ]);
+
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['channel', '--force', 'beta']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(
+        logger.statusText,
+        containsIgnoringWhitespace("Switching to flutter channel 'beta'..."),
+      );
+      expect(logger.errorText, hasLength(0));
+    });
+
+    testWithoutContext('can switch channels with -f when branch does not exist locally', () async {
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['git', 'fetch']),
         FakeCommand(
           command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
+          exitCode: 1,
         ),
         FakeCommand(
-            command: <String>['git', 'checkout', 'beta', '--']
+          command: <String>['git', 'checkout', '-f', '--track', '-b', 'beta', 'origin/beta'],
         ),
         FakeCommand(
           command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
         ),
       ]);
 
-      final ChannelCommand command = ChannelCommand();
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['channel', '-f', 'beta']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(
+        logger.statusText,
+        containsIgnoringWhitespace("Switching to flutter channel 'beta'..."),
+      );
+      expect(logger.errorText, hasLength(0));
+    });
+
+    testWithoutContext('switching channels prompts to run flutter upgrade', () async {
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['git', 'fetch']),
+        FakeCommand(command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta']),
+        FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
+        FakeCommand(
+          command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
+        ),
+      ]);
+
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel', 'beta']);
 
       expect(
-        testLogger.statusText,
+        logger.statusText,
         containsIgnoringWhitespace("Successfully switched to flutter channel 'beta'."),
       );
       expect(
-        testLogger.statusText,
+        logger.statusText,
         containsIgnoringWhitespace(
           "To ensure that you're on the latest build "
-          "from this channel, run 'flutter upgrade'"),
+          "from this channel, run 'flutter upgrade'",
+        ),
       );
-      expect(testLogger.errorText, hasLength(0));
+      expect(logger.errorText, hasLength(0));
       expect(fakeProcessManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => fakeProcessManager,
     });
 
     // This verifies that bug https://github.com/flutter/flutter/issues/21134
     // doesn't return.
-    testUsingContext('removes version stamp file when switching channels', () async {
+    testWithoutContext('removes version stamp file when switching channels', () async {
       fakeProcessManager.addCommands(const <FakeCommand>[
-        FakeCommand(
-          command: <String>['git', 'fetch'],
-        ),
-        FakeCommand(
-          command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
-        ),
-        FakeCommand(
-          command: <String>['git', 'checkout', 'beta', '--']
-        ),
+        FakeCommand(command: <String>['git', 'fetch']),
+        FakeCommand(command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta']),
+        FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
         FakeCommand(
           command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
         ),
       ]);
 
-      final File versionCheckFile = globals.cache.getStampFileFor(
+      final testCache = Cache.test(fileSystem: fileSystem, processManager: fakeProcessManager);
+      final File versionCheckFile = testCache.getStampFileFor(
         VersionCheckStamp.flutterVersionCheckStampFile,
       );
 
@@ -360,17 +441,94 @@ void main() {
         }
       ''');
 
-      final ChannelCommand command = ChannelCommand();
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel', 'beta']);
 
-      expect(testLogger.statusText, isNot(contains('A new version of Flutter')));
-      expect(testLogger.errorText, hasLength(0));
+      expect(logger.statusText, isNot(contains('A new version of Flutter')));
+      expect(logger.errorText, hasLength(0));
       expect(versionCheckFile.existsSync(), isFalse);
       expect(fakeProcessManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => fakeProcessManager,
     });
+
+    testWithoutContext(
+      'resolves dependencies from the injected ToolContext rather than the Zone',
+      () async {
+        final contextLogger = BufferLogger.test();
+        final localFs = MemoryFileSystem.test();
+        final localFakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['git', 'branch', '-r'],
+            stdout:
+                'origin/beta\n'
+                'origin/master\n'
+                'origin/main\n'
+                'origin/stable\n',
+          ),
+        ]);
+        final processUtils = ProcessUtils(
+          processManager: localFakeProcessManager,
+          logger: contextLogger,
+        );
+        final fakePlatform = FakePlatform();
+        final git = Git(currentPlatform: fakePlatform, runProcessWith: processUtils);
+
+        final toolContext = FakeToolContext(
+          fs: localFs,
+          logger: contextLogger,
+          platform: fakePlatform,
+          processManager: localFakeProcessManager,
+          processUtils: processUtils,
+          git: git,
+          flutterVersion: FakeFlutterVersion(),
+        );
+
+        final command = ChannelCommand(toolContext: toolContext);
+        expect(command.toolContext, same(toolContext));
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+
+        await runner.run(<String>['channel']);
+
+        // Verify that the output went to the injected logger
+        expect(contextLogger.statusText, contains('Flutter channels:'));
+        expect(contextLogger.statusText, contains('* master'));
+        expect(localFakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
   });
+}
+
+ChannelCommand createChannelCommand({
+  FileSystem? fs,
+  Logger? logger,
+  Platform? platform,
+  ProcessManager? processManager,
+  ProcessUtils? processUtils,
+  Git? git,
+  FlutterVersion? flutterVersion,
+  bool verboseHelp = false,
+}) {
+  final FileSystem resolvedFs = fs ?? MemoryFileSystem.test();
+  final Platform resolvedPlatform = platform ?? FakePlatform();
+  final ProcessManager resolvedProcessManager = processManager ?? FakeProcessManager.any();
+  final Logger resolvedLogger = logger ?? BufferLogger.test();
+  final ProcessUtils resolvedProcessUtils =
+      processUtils ?? ProcessUtils(processManager: resolvedProcessManager, logger: resolvedLogger);
+  return ChannelCommand(
+    toolContext: FakeToolContext(
+      fs: resolvedFs,
+      logger: resolvedLogger,
+      platform: resolvedPlatform,
+      processManager: resolvedProcessManager,
+      processUtils: resolvedProcessUtils,
+      git: git ?? Git(currentPlatform: resolvedPlatform, runProcessWith: resolvedProcessUtils),
+      flutterVersion: flutterVersion ?? FakeFlutterVersion(),
+      cache: Cache.test(fileSystem: resolvedFs, processManager: resolvedProcessManager),
+    ),
+    verboseHelp: verboseHelp,
+  );
 }

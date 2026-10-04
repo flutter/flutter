@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'flutter_features.dart';
+library;
+
+import 'package:meta/meta.dart';
+
 import 'base/context.dart';
 
 /// The current [FeatureFlags] implementation.
@@ -9,170 +14,344 @@ FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
 
 /// The interface used to determine if a particular [Feature] is enabled.
 ///
-/// The rest of the tools code should use this class instead of looking up
-/// features directly. To facilitate rolls to google3 and other clients, all
-/// flags should be provided with a default implementation here. Clients that
-/// use this class should extent instead of implement, so that new flags are
-/// picked up automatically.
+/// This class is extended in google3. Whenever a new flag is added,
+/// google3 must also be updated using a g3fix.
+///
+/// See also:
+///
+/// * [FlutterFeatureFlags], Flutter's implementation of this class.
+/// * https://github.com/flutter/flutter/blob/main/docs/contributing/Feature-flags.md,
+///   docs on feature flags and how to add or use them.
 abstract class FeatureFlags {
   /// const constructor so that subclasses can be const.
   const FeatureFlags();
 
   /// Whether flutter desktop for linux is enabled.
-  bool get isLinuxEnabled => false;
+  bool get isLinuxEnabled;
 
   /// Whether flutter desktop for macOS is enabled.
-  bool get isMacOSEnabled => false;
+  bool get isMacOSEnabled;
 
   /// Whether flutter web is enabled.
-  bool get isWebEnabled => false;
+  bool get isWebEnabled;
 
   /// Whether flutter desktop for Windows is enabled.
-  bool get isWindowsEnabled => false;
+  bool get isWindowsEnabled;
 
   /// Whether android is enabled.
-  bool get isAndroidEnabled => true;
+  bool get isAndroidEnabled;
 
   /// Whether iOS is enabled.
-  bool get isIOSEnabled => true;
+  bool get isIOSEnabled;
 
   /// Whether fuchsia is enabled.
-  bool get isFuchsiaEnabled => true;
+  bool get isFuchsiaEnabled;
 
   /// Whether custom devices are enabled.
-  bool get areCustomDevicesEnabled => false;
+  bool get areCustomDevicesEnabled;
 
   /// Whether animations are used in the command line interface.
-  bool get isCliAnimationEnabled => true;
+  bool get isCliAnimationEnabled;
 
   /// Whether native assets compilation and bundling is enabled.
-  bool get isNativeAssetsEnabled => false;
+  bool get isNativeAssetsEnabled;
 
-  /// Whether native assets compilation and bundling is enabled.
-  bool get isPreviewDeviceEnabled => true;
+  /// Whether dart data assets building and bundling is enabled.
+  bool get isDartDataAssetsEnabled => false;
+
+  /// Whether record use experiment is enabled.
+  bool get isRecordUseEnabled;
+
+  /// Whether Swift Package Manager dependency management is enabled.
+  bool get isSwiftPackageManagerEnabled;
+
+  /// Whether to stop writing the `{FLUTTER_ROOT}/version` file.
+  ///
+  /// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
+  bool get isOmitLegacyVersionFileEnabled;
+
+  /// Whether desktop windowing is enabled.
+  bool get isWindowingEnabled;
+
+  /// Whether physical iOS devices are debugging with LLDB.
+  bool get isLLDBDebuggingEnabled;
+
+  /// Whether UIScene migration is enabled.
+  bool get isUISceneMigrationEnabled;
+
+  /// Whether riscv64 support is enabled.
+  bool get isRiscv64SupportEnabled;
+
+  /// Whether to only build for arm64 when targeting macOS.
+  bool get isMacOSArm64OnlyEnabled;
+
+  /// Whether the HCPP platform view rendering mode is enabled by default.
+  bool get isHcppEnabled;
+
+  /// Whether support for tool extensions is enabled.
+  bool get isToolExtensionsEnabled;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
   bool isEnabled(Feature feature);
-}
 
-/// All current Flutter feature flags.
-const List<Feature> allFeatures = <Feature>[
-  flutterWebFeature,
-  flutterLinuxDesktopFeature,
-  flutterMacOSDesktopFeature,
-  flutterWindowsDesktopFeature,
-  flutterAndroidFeature,
-  flutterIOSFeature,
-  flutterFuchsiaFeature,
-  flutterCustomDevicesFeature,
-  cliAnimation,
-  nativeAssets,
-  previewDevice,
-];
+  /// All current Flutter feature flags.
+  List<Feature> get allFeatures => const <Feature>[
+    flutterWebFeature,
+    flutterLinuxDesktopFeature,
+    flutterMacOSDesktopFeature,
+    flutterWindowsDesktopFeature,
+    flutterAndroidFeature,
+    flutterIOSFeature,
+    flutterFuchsiaFeature,
+    flutterCustomDevicesFeature,
+    cliAnimation,
+    nativeAssets,
+    dartDataAssets,
+    recordUse,
+    swiftPackageManager,
+    omitLegacyVersionFile,
+    windowingFeature,
+    lldbDebugging,
+    uiSceneMigration,
+    riscv64,
+    macOSArm64Only,
+    hcpp,
+    toolExtensionsFeature,
+  ];
+
+  /// All current Flutter feature flags that can be configured.
+  ///
+  /// [Feature.configSetting] is not `null`.
+  Iterable<Feature> get allConfigurableFeatures {
+    return allFeatures.where((Feature feature) => feature.configSetting != null);
+  }
+
+  /// All Flutter feature flags that are enabled.
+  // This member is overridden in google3.
+  Iterable<Feature> get allEnabledFeatures {
+    return allFeatures.where(isEnabled);
+  }
+}
 
 /// All current Flutter feature flags that can be configured.
 ///
 /// [Feature.configSetting] is not `null`.
-Iterable<Feature> get allConfigurableFeatures => allFeatures.where((Feature feature) => feature.configSetting != null);
+Iterable<Feature> get allConfigurableFeatures => featureFlags.allConfigurableFeatures;
 
 /// The [Feature] for flutter web.
-const Feature flutterWebFeature = Feature.fullyEnabled(
+const flutterWebFeature = Feature.fullyEnabled(
   name: 'Flutter for web',
   configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
 );
 
 /// The [Feature] for macOS desktop.
-const Feature flutterMacOSDesktopFeature = Feature.fullyEnabled(
+const flutterMacOSDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
 );
 
 /// The [Feature] for Linux desktop.
-const Feature flutterLinuxDesktopFeature = Feature.fullyEnabled(
+const flutterLinuxDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
 );
 
 /// The [Feature] for Windows desktop.
-const Feature flutterWindowsDesktopFeature = Feature.fullyEnabled(
+const flutterWindowsDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
 );
 
 /// The [Feature] for Android devices.
-const Feature flutterAndroidFeature = Feature.fullyEnabled(
+const flutterAndroidFeature = Feature.fullyEnabled(
   name: 'Flutter for Android',
   configSetting: 'enable-android',
 );
 
 /// The [Feature] for iOS devices.
-const Feature flutterIOSFeature = Feature.fullyEnabled(
+const flutterIOSFeature = Feature.fullyEnabled(
   name: 'Flutter for iOS',
   configSetting: 'enable-ios',
 );
 
 /// The [Feature] for Fuchsia support.
-const Feature flutterFuchsiaFeature = Feature(
+const flutterFuchsiaFeature = Feature(
   name: 'Flutter for Fuchsia',
   configSetting: 'enable-fuchsia',
   environmentOverride: 'FLUTTER_FUCHSIA',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
+  master: FeatureChannelSetting(available: true),
 );
 
-const Feature flutterCustomDevicesFeature = Feature(
+const flutterCustomDevicesFeature = Feature(
   name: 'early support for custom device types',
   configSetting: 'enable-custom-devices',
   environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-  ),
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
-
-const String kCliAnimationsFeatureName = 'cli-animations';
 
 /// The [Feature] for CLI animations.
 ///
 /// The TERM environment variable set to "dumb" turns this off.
-const Feature cliAnimation = Feature.fullyEnabled(
+const cliAnimation = Feature.fullyEnabled(
   name: 'animations in the command line interface',
-  configSetting: kCliAnimationsFeatureName,
+  configSetting: 'cli-animations',
 );
 
 /// Enable native assets compilation and bundling.
-const Feature nativeAssets = Feature(
+const nativeAssets = Feature(
   name: 'native assets compilation and bundling',
   configSetting: 'enable-native-assets',
   environmentOverride: 'FLUTTER_NATIVE_ASSETS',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
-/// Enable Flutter preview prebuilt device.
-const Feature previewDevice = Feature(
-  name: 'Flutter preview prebuilt device',
-  configSetting: 'enable-flutter-preview',
-  environmentOverride: 'FLUTTER_PREVIEW_DEVICE',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-  ),
+/// Enable Dart data assets building and bundling.
+const dartDataAssets = Feature(
+  name: 'Dart data assets building and bundling',
+  configSetting: 'enable-dart-data-assets',
+  environmentOverride: 'FLUTTER_DART_DATA_ASSETS',
+  master: FeatureChannelSetting(available: true),
+);
+
+/// Enable record use experiment.
+const recordUse = Feature(
+  name: 'record use experiment',
+  configSetting: 'enable-record-use',
+  environmentOverride: 'FLUTTER_RECORD_USE',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
+);
+
+/// Warning printed when Swift Package Manager is disabled in configuration.
+const kSwiftPackageManagerDisabledWarning =
+    'Enabling Swift Package Manager will be required in a future version of Flutter.';
+
+/// Enable Swift Package Manager as a darwin dependency manager.
+const swiftPackageManager = Feature(
+  name: 'support for Swift Package Manager for iOS and macOS',
+  configSetting: 'enable-swift-package-manager',
+  environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
+  warningMessageOnDisable: kSwiftPackageManagerDisabledWarning,
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
+);
+
+/// Whether to continue writing the `{FLUTTER_ROOT}/version` legacy file.
+///
+/// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
+const omitLegacyVersionFile = Feature.fullyEnabled(
+  name: 'stops writing the legacy version file',
+  configSetting: 'omit-legacy-version-file',
+  extraHelpText:
+      'If set, the file {FLUTTER_ROOT}/version is no longer written as part of '
+      'the flutter tool execution; a newer file format has existed for some '
+      'time in {FLUTTER_ROOT}/bin/cache/flutter.version.json.',
+);
+
+/// Whether desktop windowing is enabled.
+///
+/// See: https://github.com/flutter/flutter/issues/30701.
+const windowingFeature = Feature(
+  name: 'support for windowing on macOS, Linux, and Windows',
+  configSetting: 'enable-windowing',
+  environmentOverride: 'FLUTTER_WINDOWING',
+  runtimeId: 'windowing',
+  master: FeatureChannelSetting(available: true),
+);
+
+/// Enable LLDB debugging for physical iOS devices. When LLDB debugging is off,
+/// Xcode debugging is used instead.
+///
+/// Requires iOS 17+ and Xcode 26+. If those requirements are not met, the previous
+/// default debugging method is used instead.
+const lldbDebugging = Feature(
+  name: 'support for debugging with LLDB for physical iOS devices',
+  extraHelpText:
+      'If LLDB debugging is off, Xcode debugging is used instead. '
+      'Only available for iOS 17 or newer devices. Requires Xcode 26 or greater.',
+  configSetting: 'enable-lldb-debugging',
+  environmentOverride: 'FLUTTER_LLDB_DEBUGGING',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
+);
+
+/// Enable UIScene lifecycle migration for iOS apps. When enabled, if possible the tool will
+/// attempt to auto-migrate the app. Otherwise, it will print a warning with instructions on how to
+/// migrate manually.
+const uiSceneMigration = Feature(
+  name: 'support for migrating to UIScene lifecycle',
+  extraHelpText:
+      'If enabled, Flutter will migrate your app to iOS UIScene lifecycle if possible or '
+      'otherwise instruct you to migrate manually.',
+  configSetting: 'enable-uiscene-migration',
+  environmentOverride: 'FLUTTER_UISCENE_MIGRATION',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
+);
+
+/// The [Feature] for building code targetting riscv64 architecture
+const riscv64 = Feature(
+  name: 'support for riscv64 architecture',
+  configSetting: 'enable-riscv64',
+  environmentOverride: 'FLUTTER_RISCV64',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+/// Whether to only build for arm64 when targeting macOS.
+const macOSArm64Only = Feature(
+  name: 'building arm64 architecture only for non-debug macOS builds',
+  extraHelpText:
+      'If enabled, macOS release and profile builds generate Apple Silicon binaries instead of universal binaries. '
+      'This feature is disabled by default, but will default to enabled in a future release, before Intel Mac support is eventually discontinued. '
+      'See https://flutter.dev/go/macos-intel-deprecation for details.',
+  configSetting: 'enable-macos-arm64-only',
+  environmentOverride: 'FLUTTER_MACOS_ARM64_ONLY',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+/// Whether the HCPP (Hybrid Composition++) platform view rendering mode is used
+/// by default on Android.
+///
+/// This is the default only: it is baked into the Android manifest of the
+/// artifact the tool builds, and an explicit
+/// `io.flutter.embedding.android.EnableHcpp` entry in the app's manifest, or an
+/// explicit `--[no-]enable-hcpp`, takes priority over it.
+const hcpp = Feature(
+  name: 'the HCPP platform view rendering mode',
+  extraHelpText:
+      'HCPP requires the Impeller rendering backend, and Android API 34 or above. '
+      "Devices that do not support it fall back to each platform view's developer-chosen mode.",
+  configSetting: 'enable-hcpp',
+  environmentOverride: 'FLUTTER_ENABLE_HCPP',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+/// Enable tool extensions feature.
+const toolExtensionsFeature = Feature(
+  name: 'support for tool extensions',
+  configSetting: 'enable-tool-extensions',
+  environmentOverride: 'FLUTTER_TOOL_EXTENSIONS',
+  master: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
@@ -189,30 +368,25 @@ class Feature {
     required this.name,
     this.environmentOverride,
     this.configSetting,
+    this.runtimeId,
     this.extraHelpText,
+    this.warningMessageOnDisable,
     this.master = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
-    this.stable = const FeatureChannelSetting()
+    this.stable = const FeatureChannelSetting(),
   });
 
   /// Creates a [Feature] that is fully enabled across channels.
-  const Feature.fullyEnabled(
-      {required this.name,
-      this.environmentOverride,
-      this.configSetting,
-      this.extraHelpText})
-      : master = const FeatureChannelSetting(
-          available: true,
-          enabledByDefault: true,
-        ),
-        beta = const FeatureChannelSetting(
-          available: true,
-          enabledByDefault: true,
-        ),
-        stable = const FeatureChannelSetting(
-          available: true,
-          enabledByDefault: true,
-        );
+  const Feature.fullyEnabled({
+    required this.name,
+    this.environmentOverride,
+    this.configSetting,
+    this.runtimeId,
+    this.extraHelpText,
+    this.warningMessageOnDisable,
+  }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
+       beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
+       stable = const FeatureChannelSetting(available: true, enabledByDefault: true);
 
   /// The user visible name for this feature.
   final String name;
@@ -240,18 +414,29 @@ class Feature {
   /// If not provided, defaults to `null` meaning there is no config setting.
   final String? configSetting;
 
+  /// The unique identifier for this feature at runtime.
+  ///
+  /// If not `null`, the Flutter framework's enabled feature flags will
+  /// contain this value if this feature is enabled.
+  final String? runtimeId;
+
   /// Additional text to add to the end of the help message.
   ///
   /// If not provided, defaults to `null` meaning there is no additional text.
   final String? extraHelpText;
+
+  /// A warning to print when this feature is explicitly disabled.
+  ///
+  /// If not provided, defaults to `null` meaning there is no warning.
+  final String? warningMessageOnDisable;
 
   /// A help message for the `flutter config` command, or null if unsupported.
   String? generateHelpMessage() {
     if (configSetting == null) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer('Enable or disable $name.');
-    final List<String> channels = <String>[
+    final buffer = StringBuffer('Enable or disable $name.');
+    final channels = <String>[
       if (master.available) 'master',
       if (beta.available) 'beta',
       if (stable.available) 'stable',
@@ -279,11 +464,9 @@ class Feature {
 }
 
 /// A description of the conditions to enable a feature for a particular channel.
-class FeatureChannelSetting {
-  const FeatureChannelSetting({
-    this.available = false,
-    this.enabledByDefault = false,
-  });
+@immutable
+final class FeatureChannelSetting {
+  const FeatureChannelSetting({this.available = false, this.enabledByDefault = false});
 
   /// Whether the feature is available on this channel.
   ///
@@ -295,4 +478,19 @@ class FeatureChannelSetting {
   ///
   /// If not provided, defaults to `false`.
   final bool enabledByDefault;
+
+  @override
+  bool operator ==(Object other) {
+    return other is FeatureChannelSetting &&
+        available == other.available &&
+        enabledByDefault == other.enabledByDefault;
+  }
+
+  @override
+  int get hashCode => Object.hash(available, enabledByDefault);
+
+  @override
+  String toString() {
+    return 'FeatureChannelSetting <available: $available, enabledByDefault: $enabledByDefault>';
+  }
 }

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dropdown_menu.dart';
+/// @docImport 'text_field.dart';
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
@@ -15,7 +19,7 @@ import 'theme.dart';
 /// Overrides the default values of visual properties for descendant [DropdownMenu] widgets.
 ///
 /// Descendant widgets obtain the current [DropdownMenuThemeData] object with
-/// [DropdownMenuTheme.of]. Instances of [DropdownMenuTheme] can
+/// [DropdownMenuTheme.of]. Instances of [DropdownMenuThemeData] can
 /// be customized with [DropdownMenuThemeData.copyWith].
 ///
 /// Typically a [DropdownMenuTheme] is specified as part of the overall [Theme] with
@@ -30,9 +34,16 @@ class DropdownMenuThemeData with Diagnosticable {
   /// in a [DropdownMenuTheme] widget.
   const DropdownMenuThemeData({
     this.textStyle,
-    this.inputDecorationTheme,
+    // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+    Object? inputDecorationTheme,
     this.menuStyle,
-  });
+    this.disabledColor,
+  }) : assert(
+         inputDecorationTheme == null ||
+             (inputDecorationTheme is InputDecorationTheme ||
+                 inputDecorationTheme is InputDecorationThemeData),
+       ),
+       _inputDecorationTheme = inputDecorationTheme;
 
   /// Overrides the default value for [DropdownMenu.textStyle].
   final TextStyle? textStyle;
@@ -40,7 +51,17 @@ class DropdownMenuThemeData with Diagnosticable {
   /// The input decoration theme for the [TextField]s in a [DropdownMenu].
   ///
   /// If this is null, the [DropdownMenu] provides its own defaults.
-  final InputDecorationTheme? inputDecorationTheme;
+  // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+  InputDecorationThemeData? get inputDecorationTheme {
+    if (_inputDecorationTheme == null) {
+      return null;
+    }
+    return _inputDecorationTheme is InputDecorationTheme
+        ? _inputDecorationTheme.data
+        : _inputDecorationTheme as InputDecorationThemeData;
+  }
+
+  final Object? _inputDecorationTheme;
 
   /// Overrides the menu's default style in a [DropdownMenu].
   ///
@@ -48,17 +69,24 @@ class DropdownMenuThemeData with Diagnosticable {
   /// property.
   final MenuStyle? menuStyle;
 
+  /// The color used for disabled DropdownMenu.
+  /// This color is applied to the text of the selected item on TextField.
+  final Color? disabledColor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DropdownMenuThemeData copyWith({
     TextStyle? textStyle,
-    InputDecorationTheme? inputDecorationTheme,
+    // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+    Object? inputDecorationTheme,
     MenuStyle? menuStyle,
+    Color? disabledColor,
   }) {
     return DropdownMenuThemeData(
       textStyle: textStyle ?? this.textStyle,
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
       menuStyle: menuStyle ?? this.menuStyle,
+      disabledColor: disabledColor ?? this.disabledColor,
     );
   }
 
@@ -71,15 +99,12 @@ class DropdownMenuThemeData with Diagnosticable {
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
       menuStyle: MenuStyle.lerp(a?.menuStyle, b?.menuStyle, t),
+      disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
     );
   }
 
   @override
-  int get hashCode => Object.hash(
-    textStyle,
-    inputDecorationTheme,
-    menuStyle,
-  );
+  int get hashCode => Object.hash(textStyle, inputDecorationTheme, menuStyle, disabledColor);
 
   @override
   bool operator ==(Object other) {
@@ -89,18 +114,26 @@ class DropdownMenuThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DropdownMenuThemeData
-        && other.textStyle == textStyle
-        && other.inputDecorationTheme == inputDecorationTheme
-        && other.menuStyle == menuStyle;
+    return other is DropdownMenuThemeData &&
+        other.textStyle == textStyle &&
+        other.inputDecorationTheme == inputDecorationTheme &&
+        other.menuStyle == menuStyle &&
+        other.disabledColor == disabledColor;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<InputDecorationThemeData>(
+        'inputDecorationThemeData',
+        inputDecorationTheme,
+        defaultValue: null,
+      ),
+    );
     properties.add(DiagnosticsProperty<MenuStyle>('menuStyle', menuStyle, defaultValue: null));
+    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
   }
 }
 
@@ -111,17 +144,13 @@ class DropdownMenuThemeData with Diagnosticable {
 class DropdownMenuTheme extends InheritedTheme {
   /// Creates a [DropdownMenuTheme] that controls visual parameters for
   /// descendant [DropdownMenu]s.
-  const DropdownMenuTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const DropdownMenuTheme({super.key, required this.data, required super.child});
 
   /// Specifies the visual properties used by descendant [DropdownMenu]
   /// widgets.
   final DropdownMenuThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [DropdownMenuThemeData] from the closest ancestor [DropdownMenuTheme].
   ///
   /// If there is no enclosing [DropdownMenuTheme] widget, then
   /// [ThemeData.dropdownMenuTheme] is used.

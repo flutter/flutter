@@ -14,9 +14,9 @@ void main() {
 }
 
 Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-  selectionControlsRoute : (BuildContext context) => const SelectionControlsPage(),
-  popupControlsRoute : (BuildContext context) => const PopupControlsPage(),
-  textFieldRoute : (BuildContext context) => const TextFieldPage(),
+  selectionControlsRoute: (BuildContext context) => const SelectionControlsPage(),
+  popupControlsRoute: (BuildContext context) => const PopupControlsPage(),
+  textFieldRoute: (BuildContext context) => const TextFieldPage(),
   headingsRoute: (BuildContext context) => const HeadingsPage(),
 };
 
@@ -41,7 +41,7 @@ class TestApp extends StatelessWidget {
               }).toList(),
             ),
           );
-        }
+        },
       ),
     );
   }

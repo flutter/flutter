@@ -37,5 +37,13 @@
   "lookUpButtonLabel": "Ieškoti",
   "searchWebButtonLabel": "Ieškoti žiniatinklyje",
   "shareButtonLabel": "Bendrinti...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Išvalyti",
+  "cancelButtonLabel": "Atšaukti",
+  "backButtonLabel": "Atgal",
+  "expansionTileExpandedHint": "dukart palieskite, kad sutrauktumėte",
+  "expansionTileCollapsedHint": "dukart palieskite, kad išskleistumėte",
+  "expansionTileExpandedTapHint": "Sutraukti",
+  "expansionTileCollapsedTapHint": "Išskleiskite, jei reikia daugiau išsamios informacijos",
+  "expandedHint": "Sutraukta",
+  "collapsedHint": "Išskleista"
 }

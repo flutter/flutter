@@ -7,7 +7,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -31,54 +32,65 @@ void main() {
     fileSystem = MemoryFileSystem.test();
   });
 
-  testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
-    fileSystem.file('pubspec.yaml')
-      ..createSync()
-      ..writeAsStringSync(r'''
+  testUsingContext(
+    'IOSDevice.isSupportedForProject is true on module project',
+    () async {
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: example
 flutter:
   module: {}
   ''');
-    fileSystem.file('.packages').writeAsStringSync('\n');
-    final FlutterProject flutterProject =
-      FlutterProject.fromDirectory(fileSystem.currentDirectory);
-    final IOSDevice device = setUpIOSDevice(fileSystem);
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(
+        fileSystem.currentDirectory,
+      );
+      final IOSDevice device = setUpIOSDevice(fileSystem);
 
-    expect(device.isSupportedForProject(flutterProject), true);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-  });
+      expect(device.isSupportedForProject(flutterProject), true);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 
-  testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').writeAsStringSync('\n');
-    fileSystem.directory('ios').createSync();
-    final FlutterProject flutterProject =
-      FlutterProject.fromDirectory(fileSystem.currentDirectory);
-    final IOSDevice device = setUpIOSDevice(fileSystem);
+  testUsingContext(
+    'IOSDevice.isSupportedForProject is true with editable host app',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.directory('ios').createSync();
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(
+        fileSystem.currentDirectory,
+      );
+      final IOSDevice device = setUpIOSDevice(fileSystem);
 
-    expect(device.isSupportedForProject(flutterProject), true);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-  });
+      expect(device.isSupportedForProject(flutterProject), true);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 
+  testUsingContext(
+    'IOSDevice.isSupportedForProject is false with no host app and no module',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      fileSystem.file('pubspec.yaml').createSync();
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(
+        fileSystem.currentDirectory,
+      );
+      final IOSDevice device = setUpIOSDevice(fileSystem);
 
-  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').writeAsStringSync('\n');
-    final FlutterProject flutterProject =
-      FlutterProject.fromDirectory(fileSystem.currentDirectory);
-    final IOSDevice device = setUpIOSDevice(fileSystem);
-
-    expect(device.isSupportedForProject(flutterProject), false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-  });
+      expect(device.isSupportedForProject(flutterProject), false);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 }
 
 IOSDevice setUpIOSDevice(FileSystem fileSystem) {
@@ -88,7 +100,10 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
   return IOSDevice(
     'test',
     fileSystem: fileSystem,
+    fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: platform),
     logger: logger,
+    processUtils: ProcessUtils(processManager: processManager, logger: logger),
+    xcode: null,
     iosDeploy: IOSDeploy(
       platform: platform,
       logger: logger,
@@ -96,13 +111,15 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
       artifacts: Artifacts.test(),
       cache: Cache.test(processManager: processManager),
     ),
+    analytics: FakeAnalytics(),
     iMobileDevice: IMobileDevice.test(processManager: processManager),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
+    coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
     xcodeDebug: FakeXcodeDebug(),
     platform: platform,
     name: 'iPhone 1',
     sdkVersion: '13.3',
-    cpuArchitecture: DarwinArch.arm64,
+    cpuArch: .arm64,
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     connectionInterface: DeviceConnectionInterface.attached,
     isConnected: true,
@@ -115,3 +132,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
 class FakeXcodeDebug extends Fake implements XcodeDebug {}
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
+
+class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
+
+class FakeAnalytics extends Fake implements Analytics {}

@@ -105,7 +105,7 @@ class StackFrame {
     // This RegExp is only partially correct for flutter run/test differences.
     // https://github.com/flutter/flutter/issues/52685
     final bool hasPackage = line.startsWith('package');
-    final RegExp parser = hasPackage
+    final parser = hasPackage
         ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$')
         : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
 
@@ -115,9 +115,9 @@ class StackFrame {
       return null;
     }
 
-    String package = '<unknown>';
-    String packageScheme = '<unknown>';
-    String packagePath = '<unknown>';
+    var package = '<unknown>';
+    var packageScheme = '<unknown>';
+    var packagePath = '<unknown>';
 
     if (hasPackage) {
       packageScheme = 'package';
@@ -167,8 +167,8 @@ class StackFrame {
     final List<String> classAndMethod = match.group(1)!.split('.');
     final String className = classAndMethod.length > 1 ? classAndMethod.first : '<unknown>';
     final String method = classAndMethod.length > 1
-      ? classAndMethod.skip(1).join('.')
-      : classAndMethod.single;
+        ? classAndMethod.skip(1).join('.')
+        : classAndMethod.single;
 
     return StackFrame(
       number: -1,
@@ -183,35 +183,36 @@ class StackFrame {
     );
   }
 
+  /// The async-gap marker emitted by `package:stack_trace` between Dart-VM
+  /// stack chains. Older versions of this parser asserted on this line; it is
+  /// now treated as equivalent to the VM's `<asynchronous suspension>` marker
+  /// so that already-mangled stacks (e.g. those carried by `ParallelWaitError`
+  /// or by stacks that pass through the test runner) round-trip cleanly.
+  static const String _packageStackTraceAsyncGap =
+      '===== asynchronous gap ===========================';
+
   /// Parses a single [StackFrame] from a single line of a [StackTrace].
   ///
   /// Returns null if format is not as expected.
   static StackFrame? fromStackTraceLine(String line) {
-    if (line == '<asynchronous suspension>') {
+    if (line == '<asynchronous suspension>' || line == _packageStackTraceAsyncGap) {
       return asynchronousSuspension;
     } else if (line == '...') {
       return stackOverFlowElision;
     }
-
-    assert(
-      line != '===== asynchronous gap ===========================',
-      'Got a stack frame from package:stack_trace, where a vm or web frame was expected. '
-      'This can happen if FlutterError.demangleStackTrace was not set in an environment '
-      'that propagates non-standard stack traces to the framework, such as during tests.',
-    );
 
     // Web frames.
     if (!line.startsWith('#')) {
       return _tryParseWebFrame(line);
     }
 
-    final RegExp parser = RegExp(r'^#(\d+) +(.+) \((.+?):?(\d+){0,1}:?(\d+){0,1}\)$');
+    final parser = RegExp(r'^#(\d+) +(.+) \((.+?):?(\d+){0,1}:?(\d+){0,1}\)$');
     Match? match = parser.firstMatch(line);
     assert(match != null, 'Expected $line to match $parser.');
     match = match!;
 
-    bool isConstructor = false;
-    String className = '';
+    var isConstructor = false;
+    var className = '';
     String method = match.group(2)!.replaceAll('.<anonymous closure>', '');
     if (method.startsWith('new')) {
       final List<String> methodParts = method.split(' ');
@@ -219,7 +220,7 @@ class StackFrame {
       className = methodParts.length > 1 ? method.split(' ')[1] : '<unknown>';
       method = '';
       if (className.contains('.')) {
-        final List<String> parts  = className.split('.');
+        final List<String> parts = className.split('.');
         className = parts[0];
         method = parts[1];
       }
@@ -231,7 +232,7 @@ class StackFrame {
     }
 
     final Uri packageUri = Uri.parse(match.group(3)!);
-    String package = '<unknown>';
+    var package = '<unknown>';
     String packagePath = packageUri.path;
     if (packageUri.scheme == 'dart' || packageUri.scheme == 'package') {
       package = packageUri.pathSegments[0];
@@ -306,16 +307,17 @@ class StackFrame {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is StackFrame
-        && other.number == number
-        && other.package == package
-        && other.line == line
-        && other.column == column
-        && other.className == className
-        && other.method == method
-        && other.source == source;
+    return other is StackFrame &&
+        other.number == number &&
+        other.package == package &&
+        other.line == line &&
+        other.column == column &&
+        other.className == className &&
+        other.method == method &&
+        other.source == source;
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'StackFrame')}(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
+  String toString() =>
+      '${objectRuntimeType(this, 'StackFrame')}(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
 }

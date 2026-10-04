@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -35,7 +36,8 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   Future<void> _summarizeStats() async {
     final double? framesProduced = await channel.invokeMethod('getProducedFrameRate');
     final double? framesConsumed = await channel.invokeMethod('getConsumedFrameRate');
-    _summary = '''
+    _summary =
+        '''
 Produced: ${framesProduced?.toStringAsFixed(1)}fps
 Consumed: ${framesConsumed?.toStringAsFixed(1)}fps
 Widget builds: $_widgetBuilds''';
@@ -49,7 +51,7 @@ Widget builds: $_widgetBuilds''';
         _summary = 'Producing texture frames at .5x speed...';
         _state = FrameState.slow;
         _icon = Icons.stop;
-        channel.invokeMethod<void>('start', _flutterFrameRate ~/ 2);
+        await channel.invokeMethod<void>('start', _flutterFrameRate ~/ 2);
       case FrameState.slow:
         debugPrint('Stopping .5x speed test...');
         await channel.invokeMethod<void>('stop');
@@ -62,7 +64,7 @@ Widget builds: $_widgetBuilds''';
         _summary = 'Producing texture frames at 2x speed...';
         _state = FrameState.fast;
         _icon = Icons.stop;
-        channel.invokeMethod<void>('start', (_flutterFrameRate * 2).toInt());
+        await channel.invokeMethod<void>('start', (_flutterFrameRate * 2).toInt());
       case FrameState.fast:
         debugPrint('Stopping 2x speed test...');
         await channel.invokeMethod<void>('stop');
@@ -92,18 +94,20 @@ Widget builds: $_widgetBuilds''';
     await Future<void>.delayed(const Duration(milliseconds: 3000));
     debugPrint('Calibrating...');
     late DateTime startTime;
-    int tickCount = 0;
+    var tickCount = 0;
     Ticker? ticker;
     ticker = createTicker((Duration time) {
       tickCount += 1;
-      if (tickCount == calibrationTickCount) { // about 10 seconds
+      if (tickCount == calibrationTickCount) {
+        // about 10 seconds
         final Duration elapsed = DateTime.now().difference(startTime);
         ticker?.stop();
         ticker?.dispose();
         setState(() {
           _flutterFrameRate = tickCount * 1000 / elapsed.inMilliseconds;
           debugPrint('Calibrated: frame rate ${_flutterFrameRate.toStringAsFixed(1)}fps.');
-          _summary = '''
+          _summary =
+              '''
 Flutter frame rate is ${_flutterFrameRate.toStringAsFixed(1)}fps.
 Press play to produce texture frames.''';
           _icon = Icons.play_arrow;
@@ -132,30 +136,23 @@ Press play to produce texture frames.''';
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const SizedBox(
-                width: 300.0,
-                height: 200.0,
-                child: Texture(textureId: 0),
-              ),
+              const SizedBox(width: 300.0, height: 200.0, child: Texture(textureId: 0)),
               Container(
                 width: 300.0,
                 height: 60.0,
                 color: Colors.grey,
-                child: Center(
-                  child: Text(
-                    _summary,
-                    key: const ValueKey<String>('summary'),
-                  ),
-                ),
+                child: Center(child: Text(_summary, key: const ValueKey<String>('summary'))),
               ),
             ],
           ),
         ),
-        floatingActionButton: _icon == null ? null : FloatingActionButton(
-          key: const ValueKey<String>('fab'),
-          onPressed: _nextState,
-          child: Icon(_icon),
-        ),
+        floatingActionButton: _icon == null
+            ? null
+            : FloatingActionButton(
+                key: const ValueKey<String>('fab'),
+                onPressed: _nextState,
+                child: Icon(_icon),
+              ),
       ),
     );
   }

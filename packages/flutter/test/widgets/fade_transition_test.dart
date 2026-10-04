@@ -9,20 +9,17 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('FadeTransition', (WidgetTester tester) async {
     final DebugPrintCallback oldPrint = debugPrint;
-    final List<String> log = <String>[];
-    debugPrint = (String? message, { int? wrapWidth }) {
+    final log = <String>[];
+    debugPrint = (String? message, {int? wrapWidth}) {
       log.add(message!);
     };
     debugPrintBuildScope = true;
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(seconds: 2),
     );
     addTearDown(controller.dispose);
-    await tester.pumpWidget(FadeTransition(
-      opacity: controller,
-      child: const Placeholder(),
-    ));
+    await tester.pumpWidget(FadeTransition(opacity: controller, child: const Placeholder()));
     expect(log, hasLength(2));
     expect(log.last, 'buildScope finished');
     await tester.pump();
@@ -32,5 +29,49 @@ void main() {
     expect(log, hasLength(2));
     debugPrint = oldPrint;
     debugPrintBuildScope = false;
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/157312
+  testWidgets('No exception when calling markNeedsPaint during opacity changes', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey key = GlobalKey();
+    final controller = AnimationController(
+      vsync: const TestVSync(),
+      value: 1,
+      duration: const Duration(seconds: 2),
+    );
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      FadeTransition(
+        opacity: controller,
+        child: Placeholder(key: key),
+      ),
+    );
+    controller.value = 0.5;
+    key.currentContext?.findRenderObject()?.markNeedsPaint();
+    controller.value = 0;
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('FadeTransition does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = AnimationController(
+      vsync: const TestVSync(),
+      value: 1,
+      duration: const Duration(seconds: 2),
+    );
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: FadeTransition(opacity: controller, child: const Placeholder()),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(FadeTransition)), Size.zero);
   });
 }

@@ -32,4 +32,31 @@ void main() {
 
     await driver.close();
   }, timeout: Timeout.none);
+
+  test('Windows app template Utf8FromUtf16 handles nullptr', () async {
+    final FlutterDriver driver = await FlutterDriver.connect(printCommunication: true);
+    final String result = await driver.requestData('verifyNullStringConversion');
+
+    expect(result, equals('success'));
+
+    await driver.close();
+  }, timeout: Timeout.none);
+
+  test('Windows app template Utf8FromUtf16 handles empty string', () async {
+    final FlutterDriver driver = await FlutterDriver.connect(printCommunication: true);
+    final String result = await driver.requestData('verifyEmptyStringConversion');
+
+    expect(result, equals('success'));
+
+    await driver.close();
+  }, timeout: Timeout.none);
+
+  test('Windows app template Utf8FromUtf16 handles invalid UTF-16', () async {
+    final FlutterDriver driver = await FlutterDriver.connect(printCommunication: true);
+    final String result = await driver.requestData('verifyInvalidUtf16Conversion');
+
+    expect(result, equals('success'));
+
+    await driver.close();
+  }, timeout: Timeout.none);
 }

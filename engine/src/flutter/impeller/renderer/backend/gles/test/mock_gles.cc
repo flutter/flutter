@@ -1,0 +1,856 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include <memory>
+
+#include "GLES3/gl3.h"
+#include "fml/logging.h"
+#include "impeller/base/thread_safety.h"
+#include "impeller/renderer/backend/gles/proc_table_gles.h"
+#include "impeller/renderer/backend/gles/test/mock_gles.h"
+
+namespace impeller {
+namespace testing {
+
+// OpenGLES is not thread safe.
+//
+// This mutex is used to ensure that only one test is using the mock at a time.
+static std::mutex g_test_lock;
+
+static std::weak_ptr<MockGLES> g_mock_gles;
+
+static std::vector<const char*> g_extensions;
+
+static const char* g_version;
+static const char* g_renderer;
+static std::string g_extensions_string;
+
+template <typename T, typename U>
+struct CheckSameSignature : std::false_type {};
+
+template <typename Ret, typename... Args>
+struct CheckSameSignature<Ret(Args...), Ret(Args...)> : std::true_type {};
+
+// This is a stub function that does nothing/records nothing.
+void doNothing() {}
+
+auto const kMockVendor = "MockGLES";
+const auto kMockShadingLanguageVersion = "GLSL ES 1.0";
+auto const kExtensions = std::vector<const char*>{
+    "GL_KHR_debug"  //
+};
+
+namespace {
+
+template <typename T>
+struct function_traits;
+
+template <typename C, typename Ret, typename... Args>
+struct function_traits<Ret (C::*)(Args...)> {
+  using return_type = Ret;
+};
+
+template <typename Func, typename... Args>
+auto CallMockMethod(Func func, Args&&... args) {
+  if (auto mock_gles = g_mock_gles.lock()) {
+    if (mock_gles->GetImpl()) {
+      return (mock_gles->GetImpl()->*func)(std::forward<Args>(args)...);
+    }
+  }
+  return typename function_traits<Func>::return_type();
+}
+}  // namespace
+
+const unsigned char* mockGetString(GLenum name) {
+  switch (name) {
+    case GL_VENDOR:
+      return reinterpret_cast<const unsigned char*>(kMockVendor);
+    case GL_RENDERER:
+      return reinterpret_cast<const unsigned char*>(g_renderer);
+    case GL_VERSION:
+      return reinterpret_cast<const unsigned char*>(g_version);
+    case GL_EXTENSIONS:
+      return reinterpret_cast<const unsigned char*>(
+          g_extensions_string.c_str());
+    case GL_SHADING_LANGUAGE_VERSION:
+      return reinterpret_cast<const unsigned char*>(
+          kMockShadingLanguageVersion);
+    default:
+      return reinterpret_cast<const unsigned char*>("");
+  }
+}
+
+static_assert(CheckSameSignature<decltype(mockGetString),  //
+                                 decltype(glGetString)>::value);
+
+const unsigned char* mockGetStringi(GLenum name, GLuint index) {
+  switch (name) {
+    case GL_EXTENSIONS:
+      return reinterpret_cast<const unsigned char*>(g_extensions[index]);
+    default:
+      return reinterpret_cast<const unsigned char*>("");
+  }
+}
+
+static_assert(CheckSameSignature<decltype(mockGetStringi),  //
+                                 decltype(glGetStringi)>::value);
+
+void mockGetIntegerv(GLenum name, int* value) {
+  switch (name) {
+    case GL_NUM_EXTENSIONS: {
+      *value = g_extensions.size();
+    } break;
+    case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:
+      // Minimum default; a registered mock may overwrite it.
+      *value = 8;
+      CallMockMethod(&IMockGLESImpl::GetIntegerv, name, value);
+      break;
+    case GL_MAX_LABEL_LENGTH_KHR:
+      *value = 64;
+      break;
+    case GL_MAX_TEXTURE_SIZE:
+      *value = 4096;
+      break;
+    default:
+      CallMockMethod(&IMockGLESImpl::GetIntegerv, name, value);
+      break;
+  }
+}
+
+static_assert(CheckSameSignature<decltype(mockGetIntegerv),  //
+                                 decltype(glGetIntegerv)>::value);
+
+GLenum mockGetError() {
+  return GL_NO_ERROR;
+}
+
+static_assert(CheckSameSignature<decltype(mockGetError),  //
+                                 decltype(glGetError)>::value);
+
+void mockPopDebugGroupKHR() {}
+
+static_assert(CheckSameSignature<decltype(mockPopDebugGroupKHR),  //
+                                 decltype(glPopDebugGroupKHR)>::value);
+
+void mockPushDebugGroupKHR(GLenum source,
+                           GLuint id,
+                           GLsizei length,
+                           const GLchar* message) {}
+
+static_assert(CheckSameSignature<decltype(mockPushDebugGroupKHR),  //
+                                 decltype(glPushDebugGroupKHR)>::value);
+
+void mockGenQueriesEXT(GLsizei n, GLuint* ids) {
+  CallMockMethod(&IMockGLESImpl::GenQueriesEXT, n, ids);
+}
+
+static_assert(CheckSameSignature<decltype(mockGenQueriesEXT),  //
+                                 decltype(glGenQueriesEXT)>::value);
+
+void mockBeginQueryEXT(GLenum target, GLuint id) {
+  CallMockMethod(&IMockGLESImpl::BeginQueryEXT, target, id);
+}
+
+static_assert(CheckSameSignature<decltype(mockBeginQueryEXT),  //
+                                 decltype(glBeginQueryEXT)>::value);
+
+void mockEndQueryEXT(GLuint id) {
+  CallMockMethod(&IMockGLESImpl::EndQueryEXT, id);
+}
+
+static_assert(CheckSameSignature<decltype(mockEndQueryEXT),  //
+                                 decltype(glEndQueryEXT)>::value);
+
+void mockGetQueryObjectuivEXT(GLuint id, GLenum target, GLuint* result) {
+  CallMockMethod(&IMockGLESImpl::GetQueryObjectuivEXT, id, target, result);
+}
+
+static_assert(CheckSameSignature<decltype(mockGetQueryObjectuivEXT),  //
+                                 decltype(glGetQueryObjectuivEXT)>::value);
+
+void mockGetQueryObjectui64vEXT(GLuint id, GLenum target, GLuint64* result) {
+  CallMockMethod(&IMockGLESImpl::GetQueryObjectui64vEXT, id, target, result);
+}
+
+static_assert(CheckSameSignature<decltype(mockGetQueryObjectui64vEXT),  //
+                                 decltype(glGetQueryObjectui64vEXT)>::value);
+
+void mockDeleteQueriesEXT(GLsizei size, const GLuint* queries) {
+  CallMockMethod(&IMockGLESImpl::DeleteQueriesEXT, size, queries);
+}
+
+void mockDeleteTextures(GLsizei size, const GLuint* queries) {
+  CallMockMethod(&IMockGLESImpl::DeleteTextures, size, queries);
+}
+
+static_assert(CheckSameSignature<decltype(mockDeleteQueriesEXT),  //
+                                 decltype(glDeleteQueriesEXT)>::value);
+
+void mockUniform1fv(GLint location, GLsizei count, const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::Uniform1fv, location, count, value);
+}
+// Uniform1fv is already here, adding others
+void mockUniform2fv(GLint location, GLsizei count, const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::Uniform2fv, location, count, value);
+}
+static_assert(CheckSameSignature<decltype(mockUniform2fv),  //
+                                 decltype(glUniform2fv)>::value);
+
+void mockUniform3fv(GLint location, GLsizei count, const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::Uniform3fv, location, count, value);
+}
+static_assert(CheckSameSignature<decltype(mockUniform3fv),  //
+                                 decltype(glUniform3fv)>::value);
+
+void mockUniform4fv(GLint location, GLsizei count, const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::Uniform4fv, location, count, value);
+}
+static_assert(CheckSameSignature<decltype(mockUniform4fv),  //
+                                 decltype(glUniform4fv)>::value);
+
+void mockUniformMatrix2fv(GLint location,
+                          GLsizei count,
+                          GLboolean transpose,
+                          const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::UniformMatrix2fv, location, count, transpose,
+                 value);
+}
+static_assert(CheckSameSignature<decltype(mockUniformMatrix2fv),  //
+                                 decltype(glUniformMatrix2fv)>::value);
+
+void mockUniformMatrix3fv(GLint location,
+                          GLsizei count,
+                          GLboolean transpose,
+                          const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::UniformMatrix3fv, location, count, transpose,
+                 value);
+}
+static_assert(CheckSameSignature<decltype(mockUniformMatrix3fv),  //
+                                 decltype(glUniformMatrix3fv)>::value);
+
+void mockUniformMatrix4fv(GLint location,
+                          GLsizei count,
+                          GLboolean transpose,
+                          const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::UniformMatrix4fv, location, count, transpose,
+                 value);
+}
+static_assert(CheckSameSignature<decltype(mockUniformMatrix4fv),  //
+                                 decltype(glUniformMatrix4fv)>::value);
+
+void mockGenTextures(GLsizei n, GLuint* textures) {
+  CallMockMethod(&IMockGLESImpl::GenTextures, n, textures);
+}
+
+static_assert(CheckSameSignature<decltype(mockGenTextures),  //
+                                 decltype(glGenTextures)>::value);
+
+void mockGenBuffers(GLsizei n, GLuint* buffers) {
+  CallMockMethod(&IMockGLESImpl::GenBuffers, n, buffers);
+}
+
+void mockBufferSubData(GLenum target,
+                       GLintptr offset,
+                       GLsizeiptr size,
+                       const void* data) {
+  CallMockMethod(&IMockGLESImpl::BufferSubData, target, offset, size, data);
+}
+
+static_assert(CheckSameSignature<decltype(mockBufferSubData),  //
+                                 decltype(glBufferSubData)>::value);
+
+static_assert(CheckSameSignature<decltype(mockGenTextures),  //
+                                 decltype(glGenTextures)>::value);
+
+void mockObjectLabelKHR(GLenum identifier,
+                        GLuint name,
+                        GLsizei length,
+                        const GLchar* label) {
+  CallMockMethod(&IMockGLESImpl::ObjectLabelKHR, identifier, name, length,
+                 label);
+}
+static_assert(CheckSameSignature<decltype(mockObjectLabelKHR),  //
+                                 decltype(glObjectLabelKHR)>::value);
+
+void mockTexSubImage2D(GLenum target,
+                       GLint level,
+                       GLint xoffset,
+                       GLint yoffset,
+                       GLsizei width,
+                       GLsizei height,
+                       GLenum format,
+                       GLenum type,
+                       const void* pixels) {
+  CallMockMethod(&IMockGLESImpl::TexSubImage2D, target, level, xoffset, yoffset,
+                 width, height, format, type, pixels);
+}
+static_assert(CheckSameSignature<decltype(mockTexSubImage2D),  //
+                                 decltype(glTexSubImage2D)>::value);
+
+void mockTexImage2D(GLenum target,
+                    GLint level,
+                    GLint internalformat,
+                    GLsizei width,
+                    GLsizei height,
+                    GLint border,
+                    GLenum format,
+                    GLenum type,
+                    const void* pixels) {
+  CallMockMethod(&IMockGLESImpl::TexImage2D, target, level, internalformat,
+                 width, height, border, format, type, pixels);
+}
+static_assert(CheckSameSignature<decltype(mockTexImage2D),  //
+                                 decltype(glTexImage2D)>::value);
+
+void mockBindTexture(GLenum target, GLuint texture) {
+  CallMockMethod(&IMockGLESImpl::BindTexture, target, texture);
+}
+static_assert(CheckSameSignature<decltype(mockBindTexture),  //
+                                 decltype(glBindTexture)>::value);
+
+void mockBindBufferRange(GLenum target,
+                         GLuint index,
+                         GLuint buffer,
+                         GLintptr offset,
+                         GLsizeiptr size) {
+  CallMockMethod(&IMockGLESImpl::BindBufferRange, target, index, buffer, offset,
+                 size);
+}
+static_assert(CheckSameSignature<decltype(mockBindBufferRange),  //
+                                 decltype(glBindBufferRange)>::value);
+
+void mockGetProgramiv(GLuint program, GLenum pname, GLint* params) {
+  CallMockMethod(&IMockGLESImpl::GetProgramiv, program, pname, params);
+}
+static_assert(CheckSameSignature<decltype(mockGetProgramiv),  //
+                                 decltype(glGetProgramiv)>::value);
+
+void mockGetActiveUniformBlockiv(GLuint program,
+                                 GLuint uniformBlockIndex,
+                                 GLenum pname,
+                                 GLint* params) {
+  CallMockMethod(&IMockGLESImpl::GetActiveUniformBlockiv, program,
+                 uniformBlockIndex, pname, params);
+}
+static_assert(CheckSameSignature<decltype(mockGetActiveUniformBlockiv),  //
+                                 decltype(glGetActiveUniformBlockiv)>::value);
+
+void mockGetActiveUniformBlockName(GLuint program,
+                                   GLuint uniformBlockIndex,
+                                   GLsizei bufSize,
+                                   GLsizei* length,
+                                   GLchar* uniformBlockName) {
+  CallMockMethod(&IMockGLESImpl::GetActiveUniformBlockName, program,
+                 uniformBlockIndex, bufSize, length, uniformBlockName);
+}
+static_assert(CheckSameSignature<decltype(mockGetActiveUniformBlockName),  //
+                                 decltype(glGetActiveUniformBlockName)>::value);
+
+GLuint mockGetUniformBlockIndex(GLuint program,
+                                const GLchar* uniformBlockName) {
+  return CallMockMethod(&IMockGLESImpl::GetUniformBlockIndex, program,
+                        uniformBlockName);
+}
+static_assert(CheckSameSignature<decltype(mockGetUniformBlockIndex),  //
+                                 decltype(glGetUniformBlockIndex)>::value);
+
+GLboolean mockIsTexture(GLuint texture) {
+  return CallMockMethod(&IMockGLESImpl::IsTexture, texture);
+}
+
+static_assert(CheckSameSignature<decltype(mockIsTexture),  //
+                                 decltype(glIsTexture)>::value);
+
+GLboolean mockIsProgram(GLuint program) {
+  return CallMockMethod(&IMockGLESImpl::IsProgram, program);
+}
+
+static_assert(CheckSameSignature<decltype(mockIsProgram),  //
+                                 decltype(glIsProgram)>::value);
+
+GLenum mockCheckFramebufferStatus(GLenum target) {
+  return CallMockMethod(&IMockGLESImpl::CheckFramebufferStatus, target);
+}
+
+static_assert(CheckSameSignature<decltype(mockCheckFramebufferStatus),  //
+                                 decltype(glCheckFramebufferStatus)>::value);
+
+void mockGenFramebuffers(GLsizei n, GLuint* ids) {
+  return CallMockMethod(&IMockGLESImpl::GenFramebuffers, n, ids);
+}
+
+static_assert(CheckSameSignature<decltype(mockGenFramebuffers),  //
+                                 decltype(glGenFramebuffers)>::value);
+
+void mockBindFramebuffer(GLenum target, GLuint framebuffer) {
+  return CallMockMethod(&IMockGLESImpl::BindFramebuffer, target, framebuffer);
+}
+
+static_assert(CheckSameSignature<decltype(mockBindFramebuffer),  //
+                                 decltype(glBindFramebuffer)>::value);
+
+void mockReadPixels(GLint x,
+                    GLint y,
+                    GLsizei width,
+                    GLsizei height,
+                    GLenum format,
+                    GLenum type,
+                    void* data) {
+  return CallMockMethod(&IMockGLESImpl::ReadPixels, x, y, width, height, format,
+                        type, data);
+}
+
+void mockDiscardFramebufferEXT(GLenum target,
+                               GLsizei numAttachments,
+                               const GLenum* attachments) {
+  return CallMockMethod(&IMockGLESImpl::DiscardFramebufferEXT, target,
+                        numAttachments, attachments);
+}
+
+void mockViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
+  return CallMockMethod(&IMockGLESImpl::Viewport, x, y, width, height);
+}
+
+static_assert(CheckSameSignature<decltype(mockDiscardFramebufferEXT),  //
+                                 decltype(glDiscardFramebufferEXT)>::value);
+
+void mockInvalidateFramebuffer(GLenum target,
+                               GLsizei numAttachments,
+                               const GLenum* attachments) {
+  return CallMockMethod(&IMockGLESImpl::InvalidateFramebuffer, target,
+                        numAttachments, attachments);
+}
+
+static_assert(CheckSameSignature<decltype(mockInvalidateFramebuffer),  //
+                                 decltype(glInvalidateFramebuffer)>::value);
+
+void mockDrawArrays(GLenum mode, GLint first, GLsizei count) {
+  CallMockMethod(&IMockGLESImpl::DrawArrays, mode, first, count);
+}
+
+static_assert(CheckSameSignature<decltype(mockDrawArrays),  //
+                                 decltype(glDrawArrays)>::value);
+
+void mockDrawElements(GLenum mode,
+                      GLsizei count,
+                      GLenum type,
+                      const void* indices) {
+  CallMockMethod(&IMockGLESImpl::DrawElements, mode, count, type, indices);
+}
+
+static_assert(CheckSameSignature<decltype(mockDrawElements),  //
+                                 decltype(glDrawElements)>::value);
+
+void mockDrawArraysInstanced(GLenum mode,
+                             GLint first,
+                             GLsizei count,
+                             GLsizei instancecount) {
+  CallMockMethod(&IMockGLESImpl::DrawArraysInstanced, mode, first, count,
+                 instancecount);
+}
+
+static_assert(CheckSameSignature<decltype(mockDrawArraysInstanced),  //
+                                 decltype(glDrawArraysInstanced)>::value);
+
+void mockDrawElementsInstanced(GLenum mode,
+                               GLsizei count,
+                               GLenum type,
+                               const void* indices,
+                               GLsizei instancecount) {
+  CallMockMethod(&IMockGLESImpl::DrawElementsInstanced, mode, count, type,
+                 indices, instancecount);
+}
+
+static_assert(CheckSameSignature<decltype(mockDrawElementsInstanced),  //
+                                 decltype(glDrawElementsInstanced)>::value);
+
+void mockVertexAttribDivisor(GLuint index, GLuint divisor) {
+  CallMockMethod(&IMockGLESImpl::VertexAttribDivisor, index, divisor);
+}
+
+static_assert(CheckSameSignature<decltype(mockVertexAttribDivisor),  //
+                                 decltype(glVertexAttribDivisor)>::value);
+
+GLuint mockCreateShader(GLenum type) {
+  return CallMockMethod(&IMockGLESImpl::CreateShader, type);
+}
+
+static_assert(CheckSameSignature<decltype(mockCreateShader),  //
+                                 decltype(glCreateShader)>::value);
+
+GLuint mockCreateProgram() {
+  return CallMockMethod(&IMockGLESImpl::CreateProgram);
+}
+
+static_assert(CheckSameSignature<decltype(mockCreateProgram),  //
+                                 decltype(glCreateProgram)>::value);
+
+void mockGetShaderiv(GLuint shader, GLenum pname, GLint* params) {
+  CallMockMethod(&IMockGLESImpl::GetShaderiv, shader, pname, params);
+}
+
+static_assert(CheckSameSignature<decltype(mockGetShaderiv),  //
+                                 decltype(glGetShaderiv)>::value);
+
+void mockFramebufferTexture2D(GLenum target,
+                              GLenum attachment,
+                              GLenum textarget,
+                              GLuint texture,
+                              GLint level) {
+  CallMockMethod(&IMockGLESImpl::FramebufferTexture2D, target, attachment,
+                 textarget, texture, level);
+}
+
+static_assert(CheckSameSignature<decltype(mockFramebufferTexture2D),  //
+                                 decltype(glFramebufferTexture2D)>::value);
+
+void mockActiveTexture(GLenum texture) {
+  CallMockMethod(&IMockGLESImpl::ActiveTexture, texture);
+}
+
+static_assert(CheckSameSignature<decltype(mockActiveTexture),  //
+                                 decltype(glActiveTexture)>::value);
+
+void mockUniform1i(GLint location, GLint v0) {
+  CallMockMethod(&IMockGLESImpl::Uniform1i, location, v0);
+}
+
+static_assert(CheckSameSignature<decltype(mockUniform1i),  //
+                                 decltype(glUniform1i)>::value);
+
+void mockGetActiveUniform(GLuint program,
+                          GLuint index,
+                          GLsizei bufSize,
+                          GLsizei* length,
+                          GLint* size,
+                          GLenum* type,
+                          GLchar* name) {
+  CallMockMethod(&IMockGLESImpl::GetActiveUniform, program, index, bufSize,
+                 length, size, type, name);
+}
+
+static_assert(CheckSameSignature<decltype(mockGetActiveUniform),  //
+                                 decltype(glGetActiveUniform)>::value);
+
+GLint mockGetUniformLocation(GLuint program, const GLchar* name) {
+  return CallMockMethod(&IMockGLESImpl::GetUniformLocation, program, name);
+}
+
+static_assert(CheckSameSignature<decltype(mockGetUniformLocation),  //
+                                 decltype(glGetUniformLocation)>::value);
+
+void mockTexParameteri(GLenum target, GLenum pname, GLint param) {
+  CallMockMethod(&IMockGLESImpl::TexParameteri, target, pname, param);
+}
+
+static_assert(CheckSameSignature<decltype(mockTexParameteri),  //
+                                 decltype(glTexParameteri)>::value);
+
+void mockUseProgram(GLuint program) {
+  CallMockMethod(&IMockGLESImpl::UseProgram, program);
+}
+
+static_assert(CheckSameSignature<decltype(mockUseProgram),  //
+                                 decltype(glUseProgram)>::value);
+
+void mockEnable(GLenum cap) {
+  CallMockMethod(&IMockGLESImpl::Enable, cap);
+}
+
+static_assert(CheckSameSignature<decltype(mockEnable),  //
+                                 decltype(glEnable)>::value);
+
+void mockDisable(GLenum cap) {
+  CallMockMethod(&IMockGLESImpl::Disable, cap);
+}
+
+static_assert(CheckSameSignature<decltype(mockDisable),  //
+                                 decltype(glDisable)>::value);
+
+void mockScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
+  CallMockMethod(&IMockGLESImpl::Scissor, x, y, width, height);
+}
+
+static_assert(CheckSameSignature<decltype(mockScissor),  //
+                                 decltype(glScissor)>::value);
+
+void mockColorMask(GLboolean red,
+                   GLboolean green,
+                   GLboolean blue,
+                   GLboolean alpha) {
+  CallMockMethod(&IMockGLESImpl::ColorMask, red, green, blue, alpha);
+}
+
+static_assert(CheckSameSignature<decltype(mockColorMask),  //
+                                 decltype(glColorMask)>::value);
+
+void mockBlendFuncSeparate(GLenum sfactorRGB,
+                           GLenum dfactorRGB,
+                           GLenum sfactorAlpha,
+                           GLenum dfactorAlpha) {
+  CallMockMethod(&IMockGLESImpl::BlendFuncSeparate, sfactorRGB, dfactorRGB,
+                 sfactorAlpha, dfactorAlpha);
+}
+
+static_assert(CheckSameSignature<decltype(mockBlendFuncSeparate),  //
+                                 decltype(glBlendFuncSeparate)>::value);
+
+void mockBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha) {
+  CallMockMethod(&IMockGLESImpl::BlendEquationSeparate, modeRGB, modeAlpha);
+}
+
+static_assert(CheckSameSignature<decltype(mockBlendEquationSeparate),  //
+                                 decltype(glBlendEquationSeparate)>::value);
+
+void mockDepthFunc(GLenum func) {
+  CallMockMethod(&IMockGLESImpl::DepthFunc, func);
+}
+
+static_assert(CheckSameSignature<decltype(mockDepthFunc),  //
+                                 decltype(glDepthFunc)>::value);
+
+void mockDepthMask(GLboolean flag) {
+  CallMockMethod(&IMockGLESImpl::DepthMask, flag);
+}
+
+static_assert(CheckSameSignature<decltype(mockDepthMask),  //
+                                 decltype(glDepthMask)>::value);
+
+void mockStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask) {
+  CallMockMethod(&IMockGLESImpl::StencilFuncSeparate, face, func, ref, mask);
+}
+
+static_assert(CheckSameSignature<decltype(mockStencilFuncSeparate),  //
+                                 decltype(glStencilFuncSeparate)>::value);
+
+void mockStencilOpSeparate(GLenum face,
+                           GLenum sfail,
+                           GLenum dpfail,
+                           GLenum dppass) {
+  CallMockMethod(&IMockGLESImpl::StencilOpSeparate, face, sfail, dpfail,
+                 dppass);
+}
+
+static_assert(CheckSameSignature<decltype(mockStencilOpSeparate),  //
+                                 decltype(glStencilOpSeparate)>::value);
+
+void mockStencilMaskSeparate(GLenum face, GLuint mask) {
+  CallMockMethod(&IMockGLESImpl::StencilMaskSeparate, face, mask);
+}
+
+static_assert(CheckSameSignature<decltype(mockStencilMaskSeparate),  //
+                                 decltype(glStencilMaskSeparate)>::value);
+
+// static
+IPLR_NO_THREAD_SAFETY_ANALYSIS std::shared_ptr<MockGLES> MockGLES::Init(
+    std::unique_ptr<MockGLESImpl> impl,
+    const std::optional<std::vector<const char*>>& extensions,
+    const char* version_string,
+    const char* renderer_string) {
+  FML_CHECK(g_test_lock.try_lock())
+      << "MockGLES is already being used by another test.";
+  g_extensions = extensions.value_or(kExtensions);
+  g_extensions_string.clear();
+  for (const auto& ext : g_extensions) {
+    if (!g_extensions_string.empty()) {
+      g_extensions_string += " ";
+    }
+    g_extensions_string += ext;
+  }
+  g_version = version_string;
+  g_renderer = renderer_string;
+  auto mock_gles = std::shared_ptr<MockGLES>(new MockGLES());
+  mock_gles->impl_ = std::move(impl);
+  g_mock_gles = mock_gles;
+  return mock_gles;
+}
+
+IPLR_NO_THREAD_SAFETY_ANALYSIS std::shared_ptr<MockGLES> MockGLES::Init(
+    const std::optional<std::vector<const char*>>& extensions,
+    const char* version_string,
+    ProcTableGLES::Resolver resolver,
+    const char* renderer_string) {
+  // If we cannot obtain a lock, MockGLES is already being used elsewhere.
+  FML_CHECK(g_test_lock.try_lock())
+      << "MockGLES is already being used by another test.";
+  g_extensions = extensions.value_or(kExtensions);
+  g_extensions_string.clear();
+  for (const auto& ext : g_extensions) {
+    if (!g_extensions_string.empty()) {
+      g_extensions_string += " ";
+    }
+    g_extensions_string += ext;
+  }
+  g_version = version_string;
+  g_renderer = renderer_string;
+  auto mock_gles = std::shared_ptr<MockGLES>(new MockGLES(std::move(resolver)));
+  g_mock_gles = mock_gles;
+  return mock_gles;
+}
+
+const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
+  if (strcmp(name, "glPopDebugGroupKHR") == 0) {
+    return reinterpret_cast<void*>(&mockPopDebugGroupKHR);
+  } else if (strcmp(name, "glPushDebugGroupKHR") == 0) {
+    return reinterpret_cast<void*>(&mockPushDebugGroupKHR);
+  } else if (strcmp(name, "glGetString") == 0) {
+    return reinterpret_cast<void*>(&mockGetString);
+  } else if (strcmp(name, "glGetStringi") == 0) {
+    return reinterpret_cast<void*>(&mockGetStringi);
+  } else if (strcmp(name, "glGetIntegerv") == 0) {
+    return reinterpret_cast<void*>(&mockGetIntegerv);
+  } else if (strcmp(name, "glGetError") == 0) {
+    return reinterpret_cast<void*>(&mockGetError);
+  } else if (strcmp(name, "glGenQueriesEXT") == 0) {
+    return reinterpret_cast<void*>(&mockGenQueriesEXT);
+  } else if (strcmp(name, "glBeginQueryEXT") == 0) {
+    return reinterpret_cast<void*>(&mockBeginQueryEXT);
+  } else if (strcmp(name, "glEndQueryEXT") == 0) {
+    return reinterpret_cast<void*>(&mockEndQueryEXT);
+  } else if (strcmp(name, "glDeleteQueriesEXT") == 0) {
+    return reinterpret_cast<void*>(&mockDeleteQueriesEXT);
+  } else if (strcmp(name, "glDeleteTextures") == 0) {
+    return reinterpret_cast<void*>(&mockDeleteTextures);
+  } else if (strcmp(name, "glGetQueryObjectui64vEXT") == 0) {
+    return reinterpret_cast<void*>(mockGetQueryObjectui64vEXT);
+  } else if (strcmp(name, "glGetQueryObjectuivEXT") == 0) {
+    return reinterpret_cast<void*>(mockGetQueryObjectuivEXT);
+  } else if (strcmp(name, "glUniform1fv") == 0) {
+    return reinterpret_cast<void*>(mockUniform1fv);
+  } else if (strcmp(name, "glUniform2fv") == 0) {
+    return reinterpret_cast<void*>(mockUniform2fv);
+  } else if (strcmp(name, "glUniform3fv") == 0) {
+    return reinterpret_cast<void*>(mockUniform3fv);
+  } else if (strcmp(name, "glUniform4fv") == 0) {
+    return reinterpret_cast<void*>(mockUniform4fv);
+  } else if (strcmp(name, "glUniformMatrix2fv") == 0) {
+    return reinterpret_cast<void*>(mockUniformMatrix2fv);
+  } else if (strcmp(name, "glUniformMatrix3fv") == 0) {
+    return reinterpret_cast<void*>(mockUniformMatrix3fv);
+  } else if (strcmp(name, "glUniformMatrix4fv") == 0) {
+    return reinterpret_cast<void*>(mockUniformMatrix4fv);
+  } else if (strcmp(name, "glGenTextures") == 0) {
+    return reinterpret_cast<void*>(mockGenTextures);
+  } else if (strcmp(name, "glTexSubImage2D") == 0) {
+    return reinterpret_cast<void*>(mockTexSubImage2D);
+  } else if (strcmp(name, "glTexImage2D") == 0) {
+    return reinterpret_cast<void*>(mockTexImage2D);
+  } else if (strcmp(name, "glBindTexture") == 0) {
+    return reinterpret_cast<void*>(mockBindTexture);
+  } else if (strcmp(name, "glObjectLabelKHR") == 0) {
+    return reinterpret_cast<void*>(mockObjectLabelKHR);
+  } else if (strcmp(name, "glGenBuffers") == 0) {
+    return reinterpret_cast<void*>(mockGenBuffers);
+  } else if (strcmp(name, "glBufferSubData") == 0) {
+    return reinterpret_cast<void*>(mockBufferSubData);
+  } else if (strcmp(name, "glIsTexture") == 0) {
+    return reinterpret_cast<void*>(mockIsTexture);
+  } else if (strcmp(name, "glIsProgram") == 0) {
+    return reinterpret_cast<void*>(mockIsProgram);
+  } else if (strcmp(name, "glCheckFramebufferStatus") == 0) {
+    return reinterpret_cast<void*>(mockCheckFramebufferStatus);
+  } else if (strcmp(name, "glReadPixels") == 0) {
+    return reinterpret_cast<void*>(mockReadPixels);
+  } else if (strcmp(name, "glGenFramebuffers") == 0) {
+    return reinterpret_cast<void*>(mockGenFramebuffers);
+  } else if (strcmp(name, "glBindFramebuffer") == 0) {
+    return reinterpret_cast<void*>(mockBindFramebuffer);
+  } else if (strcmp(name, "glDiscardFramebufferEXT") == 0) {
+    return reinterpret_cast<void*>(mockDiscardFramebufferEXT);
+  } else if (strcmp(name, "glInvalidateFramebuffer") == 0) {
+    return reinterpret_cast<void*>(mockInvalidateFramebuffer);
+  } else if (strcmp(name, "glViewport") == 0) {
+    return reinterpret_cast<void*>(mockViewport);
+  } else if (strcmp(name, "glDrawArrays") == 0) {
+    return reinterpret_cast<void*>(mockDrawArrays);
+  } else if (strcmp(name, "glDrawElements") == 0) {
+    return reinterpret_cast<void*>(mockDrawElements);
+  } else if (strcmp(name, "glDrawArraysInstanced") == 0) {
+    return reinterpret_cast<void*>(mockDrawArraysInstanced);
+  } else if (strcmp(name, "glDrawElementsInstanced") == 0) {
+    return reinterpret_cast<void*>(mockDrawElementsInstanced);
+  } else if (strcmp(name, "glVertexAttribDivisor") == 0) {
+    return reinterpret_cast<void*>(mockVertexAttribDivisor);
+  } else if (strcmp(name, "glBindBufferRange") == 0) {
+    return reinterpret_cast<void*>(mockBindBufferRange);
+  } else if (strcmp(name, "glGetProgramiv") == 0) {
+    return reinterpret_cast<void*>(mockGetProgramiv);
+  } else if (strcmp(name, "glGetActiveUniformBlockiv") == 0) {
+    return reinterpret_cast<void*>(mockGetActiveUniformBlockiv);
+  } else if (strcmp(name, "glGetActiveUniformBlockName") == 0) {
+    return reinterpret_cast<void*>(mockGetActiveUniformBlockName);
+  } else if (strcmp(name, "glGetUniformBlockIndex") == 0) {
+    return reinterpret_cast<void*>(mockGetUniformBlockIndex);
+  } else if (strcmp(name, "glCreateShader") == 0) {
+    return reinterpret_cast<void*>(mockCreateShader);
+  } else if (strcmp(name, "glCreateProgram") == 0) {
+    return reinterpret_cast<void*>(mockCreateProgram);
+  } else if (strcmp(name, "glGetShaderiv") == 0) {
+    return reinterpret_cast<void*>(mockGetShaderiv);
+  } else if (strcmp(name, "glFramebufferTexture2D") == 0) {
+    return reinterpret_cast<void*>(mockFramebufferTexture2D);
+  } else if (strcmp(name, "glActiveTexture") == 0) {
+    return reinterpret_cast<void*>(mockActiveTexture);
+  } else if (strcmp(name, "glUniform1i") == 0) {
+    return reinterpret_cast<void*>(mockUniform1i);
+  } else if (strcmp(name, "glGetActiveUniform") == 0) {
+    return reinterpret_cast<void*>(mockGetActiveUniform);
+  } else if (strcmp(name, "glGetUniformLocation") == 0) {
+    return reinterpret_cast<void*>(mockGetUniformLocation);
+  } else if (strcmp(name, "glTexParameteri") == 0) {
+    return reinterpret_cast<void*>(mockTexParameteri);
+  } else if (strcmp(name, "glUseProgram") == 0) {
+    return reinterpret_cast<void*>(mockUseProgram);
+  } else if (strcmp(name, "glEnable") == 0) {
+    return reinterpret_cast<void*>(mockEnable);
+  } else if (strcmp(name, "glDisable") == 0) {
+    return reinterpret_cast<void*>(mockDisable);
+  } else if (strcmp(name, "glScissor") == 0) {
+    return reinterpret_cast<void*>(mockScissor);
+  } else if (strcmp(name, "glColorMask") == 0) {
+    return reinterpret_cast<void*>(mockColorMask);
+  } else if (strcmp(name, "glBlendFuncSeparate") == 0) {
+    return reinterpret_cast<void*>(mockBlendFuncSeparate);
+  } else if (strcmp(name, "glBlendEquationSeparate") == 0) {
+    return reinterpret_cast<void*>(mockBlendEquationSeparate);
+  } else if (strcmp(name, "glDepthFunc") == 0) {
+    return reinterpret_cast<void*>(mockDepthFunc);
+  } else if (strcmp(name, "glDepthMask") == 0) {
+    return reinterpret_cast<void*>(mockDepthMask);
+  } else if (strcmp(name, "glStencilFuncSeparate") == 0) {
+    return reinterpret_cast<void*>(mockStencilFuncSeparate);
+  } else if (strcmp(name, "glStencilOpSeparate") == 0) {
+    return reinterpret_cast<void*>(mockStencilOpSeparate);
+  } else if (strcmp(name, "glStencilMaskSeparate") == 0) {
+    return reinterpret_cast<void*>(mockStencilMaskSeparate);
+  } else {
+    return reinterpret_cast<void*>(&doNothing);
+  }
+};
+
+const ProcTableGLES::Resolver kMockResolverGLESWithoutInstancing =
+    [](const char* name) -> void* {
+  // Hide the hardware instancing entry points so the OpenGL ES backend takes
+  // its emulation path. The proc table retries these names with the "EXT"
+  // suffix stripped, so both spellings are rejected here.
+  if (strcmp(name, "glDrawArraysInstancedEXT") == 0 ||
+      strcmp(name, "glDrawArraysInstanced") == 0 ||
+      strcmp(name, "glDrawElementsInstancedEXT") == 0 ||
+      strcmp(name, "glDrawElementsInstanced") == 0 ||
+      strcmp(name, "glVertexAttribDivisorEXT") == 0 ||
+      strcmp(name, "glVertexAttribDivisor") == 0) {
+    return nullptr;
+  }
+  return kMockResolverGLES(name);
+};
+
+MockGLES::MockGLES(ProcTableGLES::Resolver resolver)
+    : proc_table_(std::move(resolver)) {}
+
+MockGLES::~MockGLES() {
+  g_test_lock.unlock();
+}
+
+}  // namespace testing
+}  // namespace impeller

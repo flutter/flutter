@@ -7,14 +7,14 @@ import '../../base/project_migrator.dart';
 import '../../cmake_project.dart';
 import 'utils.dart';
 
-const String _before = r'''
+const _before = r'''
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
   });
 
   return true;
 ''';
-const String _after = r'''
+const _after = r'''
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
   });
@@ -39,7 +39,7 @@ class ShowWindowMigration extends ProjectMigrator {
   final File _file;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     // Skip this migration if the affected file does not exist. This indicates
     // the app has done non-trivial changes to its runner and this migration
     // might not work as expected if applied.
@@ -56,15 +56,11 @@ This indicates non-trivial changes have been made to the Windows runner in the
 
     // Migrate the windows/runner/flutter_window.cpp file.
     final String originalContents = _file.readAsStringSync();
-    final String newContents = replaceFirst(
-      originalContents,
-      _before,
-      _after,
-    );
+    final String newContents = replaceFirst(originalContents, _before, _after);
     if (originalContents != newContents) {
       logger.printStatus(
         'windows/runner/flutter_window.cpp does not ensure the show window '
-        'callback is called, updating.'
+        'callback is called, updating.',
       );
       _file.writeAsStringSync(newContents);
     }

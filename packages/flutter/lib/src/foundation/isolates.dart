@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+/// @docImport 'dart:isolate';
+///
+/// @docImport 'package:flutter/scheduler.dart';
+library;
+
 import 'dart:async';
 
-import '_isolates_io.dart'
-  if (dart.library.js_util) '_isolates_web.dart' as isolates;
+import '_isolates_io.dart' if (dart.library.js_interop) '_isolates_web.dart' as isolates;
 
 /// Signature for the callback passed to [compute].
 ///
@@ -16,15 +21,19 @@ typedef ComputeCallback<M, R> = FutureOr<R> Function(M message);
 /// The signature of [compute], which spawns an isolate, runs `callback` on
 /// that isolate, passes it `message`, and (eventually) returns the value
 /// returned by `callback`.
-typedef ComputeImpl = Future<R> Function<M, R>(ComputeCallback<M, R> callback, M message, { String? debugLabel });
+typedef ComputeImpl = Future<R> Function<M, R>(
+  ComputeCallback<M, R> callback,
+  M message, {
+  String? debugLabel,
+});
 
 /// Asynchronously runs the given [callback] - with the provided [message] -
 /// in the background and completes with the result.
 ///
 /// {@template flutter.foundation.compute.usecase}
 /// This is useful for operations that take longer than a few milliseconds, and
-/// which would therefore risk skipping frames. For tasks that will only take a
-/// few milliseconds, consider [SchedulerBinding.scheduleTask] instead.
+/// which would therefore risk skipping frames. For tasks that will only take up
+/// to a millisecond, consider [SchedulerBinding.scheduleTask] instead.
 /// {@endtemplate}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=5AxWC49ZMzs}

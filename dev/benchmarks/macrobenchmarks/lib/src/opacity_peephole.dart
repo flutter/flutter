@@ -44,18 +44,24 @@ int _green(double v) => _red(1 - v);
 int _blue(double v) => 0;
 
 class OpacityPeepholeCase {
-  OpacityPeepholeCase.forValue({required String route, required String name, required ValueBuilder builder})
-      : this.forAnimation(
-    route: route,
-    name: name,
-    builder: (Animation<double> animation) => AnimatedBuilder(
-      animation: animation,
-      builder: (BuildContext context, Widget? child) => builder(animation.value),
-    ),
-  );
+  OpacityPeepholeCase.forValue({
+    required String route,
+    required String name,
+    required ValueBuilder builder,
+  }) : this.forAnimation(
+         route: route,
+         name: name,
+         builder: (Animation<double> animation) => AnimatedBuilder(
+           animation: animation,
+           builder: (BuildContext context, Widget? child) => builder(animation.value),
+         ),
+       );
 
-  OpacityPeepholeCase.forAnimation({required this.route, required this.name, required AnimationBuilder builder})
-      : animationBuilder = builder;
+  OpacityPeepholeCase.forAnimation({
+    required this.route,
+    required this.name,
+    required AnimationBuilder builder,
+  }) : animationBuilder = builder;
 
   final String route;
   final String name;
@@ -80,7 +86,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
           color: Color.fromARGB(255, _red(v), _green(v), _blue(v)),
         ),
       );
-    }
+    },
   ),
   // Tests that a column of Opacity widgets can individually hand their values down to simple children
   OpacityPeepholeCase.forValue(
@@ -108,32 +114,32 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
   ),
   // Tests that an Opacity can hand value down to a cached child
   OpacityPeepholeCase.forValue(
-      route: kOpacityPeepholeOpacityOfCachedChildRouteName,
-      name: 'Opacity of Cached Child',
-      builder: (double v) {
-        // ChildV starts as a constant so the same color pattern always appears and the child will be cached
-        double childV = 0;
-        return Opacity(
-          opacity: _opacity(v),
-          child: RepaintBoundary(
-            child: SizedBox(
-              width: 300,
-              height: 400,
-              child: Stack(
-                children: <Widget>[
-                  for (double i = 0; i < 100; i += 10, childV = 1 - childV)
-                    Positioned.fromRelativeRect(
-                      rect: RelativeRect.fromLTRB(i, i, i, i),
-                      child: Container(
-                        color: Color.fromARGB(255, _red(childV), _green(childV), _blue(childV)),
-                      ),
+    route: kOpacityPeepholeOpacityOfCachedChildRouteName,
+    name: 'Opacity of Cached Child',
+    builder: (double v) {
+      // ChildV starts as a constant so the same color pattern always appears and the child will be cached
+      double childV = 0;
+      return Opacity(
+        opacity: _opacity(v),
+        child: RepaintBoundary(
+          child: SizedBox(
+            width: 300,
+            height: 400,
+            child: Stack(
+              children: <Widget>[
+                for (double i = 0; i < 100; i += 10, childV = 1 - childV)
+                  Positioned.fromRelativeRect(
+                    rect: RelativeRect.fromLTRB(i, i, i, i),
+                    child: Container(
+                      color: Color.fromARGB(255, _red(childV), _green(childV), _blue(childV)),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           ),
-        );
-      }
+        ),
+      );
+    },
   ),
   // Tests that an Opacity can hand a value down to a Column of simple non-overlapping children
   OpacityPeepholeCase.forValue(
@@ -167,8 +173,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
     route: kOpacityPeepholeGridOfOpacityRouteName,
     name: 'Grid of Opacity',
     builder: (double v) {
-      double rowV = v;
-      double colV = rowV;
+      var rowV = v;
+      var colV = rowV;
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -200,8 +206,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
     route: kOpacityPeepholeOpacityOfGridRouteName,
     name: 'Opacity of Grid',
     builder: (double v) {
-      double rowV = v;
-      double colV = rowV;
+      var rowV = v;
+      var colV = rowV;
       return Opacity(
         opacity: _opacity(v),
         child: SizedBox(
@@ -232,8 +238,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
     route: kOpacityPeepholeOpacityOfColOfRowsRouteName,
     name: 'Opacity of Column of Rows',
     builder: (double v) {
-      double rowV = v;
-      double colV = v;
+      var rowV = v;
+      var colV = v;
       return Opacity(
         opacity: _opacity(v),
         child: Column(
@@ -277,11 +283,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
         child: const SizedBox(
           width: 300,
           height: 400,
-          child: Center(
-            child: Text('Hello, World',
-              style: TextStyle(fontSize: 48),
-            ),
-          ),
+          child: Center(child: Text('Hello, World', style: TextStyle(fontSize: 48))),
         ),
       );
     },
@@ -295,8 +297,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
         child: SizedBox.expand(
           child: CustomPaint(
             painter: RectGridPainter((Canvas canvas, Size size) {
-              const int numRows = 10;
-              const int numCols = 7;
+              const numRows = 10;
+              const numCols = 7;
               const double rectWidth = 30;
               const double rectHeight = 30;
               final double hGap = (size.width - numCols * rectWidth) / (numCols + 1);
@@ -304,14 +306,14 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
               final double gap = min(hGap, vGap);
               final double xOffset = (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
               final double yOffset = (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
-              final Paint rectPaint = Paint();
-              for (int r = 0; r < numRows; r++, v = 1 - v) {
+              final rectPaint = Paint();
+              for (var r = 0; r < numRows; r++, v = 1 - v) {
                 final double y = yOffset + r * (rectHeight + gap);
-                double cv = v;
-                for (int c = 0; c < numCols; c++, cv = 1 - cv) {
+                var cv = v;
+                for (var c = 0; c < numCols; c++, cv = 1 - cv) {
                   final double x = xOffset + c * (rectWidth + gap);
                   rectPaint.color = Color.fromRGBO(_red(cv), _green(cv), _blue(cv), _opacity(cv));
-                  final Rect rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
+                  final rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
                   canvas.drawRect(rect, rectPaint);
                 }
               }
@@ -330,8 +332,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
         child: SizedBox.expand(
           child: CustomPaint(
             painter: RectGridPainter((Canvas canvas, Size size) {
-              const int numRows = 10;
-              const int numCols = 7;
+              const numRows = 10;
+              const numCols = 7;
               const double rectWidth = 30;
               const double rectHeight = 30;
               final double hGap = (size.width - numCols * rectWidth) / (numCols + 1);
@@ -339,16 +341,16 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
               final double gap = min(hGap, vGap);
               final double xOffset = (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
               final double yOffset = (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
-              final Paint rectPaint = Paint();
-              final Paint layerPaint = Paint();
-              for (int r = 0; r < numRows; r++, v = 1 - v) {
+              final rectPaint = Paint();
+              final layerPaint = Paint();
+              for (var r = 0; r < numRows; r++, v = 1 - v) {
                 final double y = yOffset + r * (rectHeight + gap);
-                double cv = v;
-                for (int c = 0; c < numCols; c++, cv = 1 - cv) {
+                var cv = v;
+                for (var c = 0; c < numCols; c++, cv = 1 - cv) {
                   final double x = xOffset + c * (rectWidth + gap);
                   rectPaint.color = Color.fromRGBO(_red(cv), _green(cv), _blue(cv), 1.0);
                   layerPaint.color = Color.fromRGBO(255, 255, 255, _opacity(cv));
-                  final Rect rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
+                  final rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
                   canvas.saveLayer(null, layerPaint);
                   canvas.drawRect(rect, rectPaint);
                   canvas.restore();
@@ -369,8 +371,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
         child: SizedBox.expand(
           child: CustomPaint(
             painter: RectGridPainter((Canvas canvas, Size size) {
-              const int numRows = 10;
-              const int numCols = 7;
+              const numRows = 10;
+              const numCols = 7;
               const double rectWidth = 30;
               const double rectHeight = 30;
               final double hGap = (size.width - numCols * rectWidth) / (numCols + 1);
@@ -378,17 +380,17 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
               final double gap = min(hGap, vGap);
               final double xOffset = (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
               final double yOffset = (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
-              final Paint rectPaint = Paint();
-              final Paint layerPaint = Paint();
-              for (int r = 0; r < numRows; r++, v = 1 - v) {
+              final rectPaint = Paint();
+              final layerPaint = Paint();
+              for (var r = 0; r < numRows; r++, v = 1 - v) {
                 final double y = yOffset + r * (rectHeight + gap);
                 layerPaint.color = Color.fromRGBO(255, 255, 255, _opacity(v));
                 canvas.saveLayer(null, layerPaint);
-                double cv = v;
-                for (int c = 0; c < numCols; c++, cv = 1 - cv) {
+                var cv = v;
+                for (var c = 0; c < numCols; c++, cv = 1 - cv) {
                   final double x = xOffset + c * (rectWidth + gap);
                   rectPaint.color = Color.fromRGBO(_red(cv), _green(cv), _blue(cv), 1.0);
-                  final Rect rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
+                  final rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
                   canvas.drawRect(rect, rectPaint);
                 }
                 canvas.restore();
@@ -414,8 +416,7 @@ class RectGridPainter extends CustomPainter {
 }
 
 Map<String, WidgetBuilder> opacityPeepholeRoutes = <String, WidgetBuilder>{
-  for (OpacityPeepholeCase variant in allOpacityPeepholeCases)
-    variant.route: variant.buildPage,
+  for (OpacityPeepholeCase variant in allOpacityPeepholeCases) variant.route: variant.buildPage,
 };
 
 class VariantPage extends StatefulWidget {
@@ -448,12 +449,8 @@ class VariantPageState extends State<VariantPage> with SingleTickerProviderState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.variant.name),
-      ),
-      body: Center(
-        child: widget.variant.animationBuilder(_controller),
-      ),
+      appBar: AppBar(title: Text(widget.variant.name)),
+      body: Center(child: widget.variant.animationBuilder(_controller)),
     );
   }
 }

@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Titta upp",
   "searchWebButtonLabel": "Sök på webben",
   "shareButtonLabel": "Dela …",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Rensa",
+  "cancelButtonLabel": "Avbryt",
+  "backButtonLabel": "Tillbaka",
+  "expansionTileExpandedHint": "dubbeltryck för att komprimera",
+  "expansionTileCollapsedHint": "dubbeltryck för att utöka",
+  "expansionTileExpandedTapHint": "Komprimera",
+  "expansionTileCollapsedTapHint": "Utöka för mer information",
+  "expandedHint": "Komprimerades",
+  "collapsedHint": "Utökades"
 }

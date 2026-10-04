@@ -8,16 +8,15 @@ import '../common.dart';
 
 const int _kNumIterations = 100000;
 
-void main() {
-  assert(false,
-      "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+Future<void> execute() async {
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
+  final printer = BenchmarkResultPrinter();
 
-  const StandardMethodCodec codec = StandardMethodCodec();
-  final Stopwatch watch = Stopwatch();
-  const String methodName = 'something';
+  const codec = StandardMethodCodec();
+  final watch = Stopwatch();
+  const methodName = 'something';
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMethodCall(const MethodCall(methodName));
   }
   watch.stop();
@@ -31,7 +30,7 @@ void main() {
 
   watch.reset();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMethodCall(const MethodCall(methodName, 12345));
   }
   watch.stop();
@@ -46,9 +45,8 @@ void main() {
   watch.reset();
 
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
-    codec.encodeMethodCall(
-        const MethodCall(methodName, 'This is a performance test.'));
+  for (var i = 0; i < _kNumIterations; i += 1) {
+    codec.encodeMethodCall(const MethodCall(methodName, 'This is a performance test.'));
   }
   watch.stop();
 
@@ -61,9 +59,10 @@ void main() {
 
   watch.reset();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
-    codec.encodeMethodCall(const MethodCall(
-        methodName, <Object>[1234, 'This is a performance test.', 1.25, true]));
+  for (var i = 0; i < _kNumIterations; i += 1) {
+    codec.encodeMethodCall(
+      const MethodCall(methodName, <Object>[1234, 'This is a performance test.', 1.25, true]),
+    );
   }
   watch.stop();
 
@@ -76,13 +75,15 @@ void main() {
 
   watch.reset();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
-    codec.encodeMethodCall(const MethodCall(methodName, <String, Object>{
-      'integer': 1234,
-      'string': 'This is a performance test.',
-      'float': 1.25,
-      'boolean': true,
-    }));
+  for (var i = 0; i < _kNumIterations; i += 1) {
+    codec.encodeMethodCall(
+      const MethodCall(methodName, <String, Object>{
+        'integer': 1234,
+        'string': 'This is a performance test.',
+        'float': 1.25,
+        'boolean': true,
+      }),
+    );
   }
   watch.stop();
 

@@ -2,35 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart';
+import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/native_assets_manifest.dart';
 
 import '../../../src/common.dart';
 
 void main() {
   test('framework name', () {
+    expect(frameworkUri('libfoo.dylib', <String>{}), equals(Uri.file('foo.framework/foo')));
+    expect(frameworkUri('foo', <String>{}), equals(Uri.file('foo.framework/foo')));
+    expect(frameworkUri('foo_foo', <String>{}), equals(Uri.file('foo_foo.framework/foo_foo')));
+    expect(frameworkUri('foo-foo', <String>{}), equals(Uri.file('foo-foo.framework/foo-foo')));
+    expect(frameworkUri(r'foo$foo', <String>{}), equals(Uri.file('foofoo.framework/foofoo')));
+    expect(frameworkUri('foo.foo', <String>{}), equals(Uri.file('foo.foo.framework/foo.foo')));
     expect(
-      frameworkUri('libfoo.dylib', <String>{}),
-      equals(Uri.file('foo.framework/foo')),
-    );
-    expect(
-      frameworkUri('foo', <String>{}),
-      equals(Uri.file('foo.framework/foo')),
-    );
-    expect(
-      frameworkUri('foo_foo', <String>{}),
-      equals(Uri.file('foo_foo.framework/foo_foo')),
-    );
-    expect(
-      frameworkUri('foo-foo', <String>{}),
-      equals(Uri.file('foo-foo.framework/foo-foo')),
-    );
-    expect(
-      frameworkUri(r'foo$foo', <String>{}),
-      equals(Uri.file('foofoo.framework/foofoo')),
-    );
-    expect(
-      frameworkUri('foo.foo', <String>{}),
-      equals(Uri.file('foofoo.framework/foofoo')),
+      frameworkUri('foo.1.2.3', <String>{}),
+      equals(Uri.file('foo.1.2.3.framework/foo.1.2.3')),
     );
     expect(
       frameworkUri('libatoolongfilenameforaframework.dylib', <String>{}),
@@ -39,11 +30,8 @@ void main() {
   });
 
   test('framework name conflicts', () {
-    final Set<String> alreadyTakenNames = <String>{};
-    expect(
-      frameworkUri('libfoo.dylib', alreadyTakenNames),
-      equals(Uri.file('foo.framework/foo')),
-    );
+    final alreadyTakenNames = <String>{};
+    expect(frameworkUri('libfoo.dylib', alreadyTakenNames), equals(Uri.file('foo.framework/foo')));
     expect(
       frameworkUri('libfoo.dylib', alreadyTakenNames),
       equals(Uri.file('foo1.framework/foo1')),
@@ -64,5 +52,247 @@ void main() {
       frameworkUri('libatoolongfilenameforaframework.dylib', alreadyTakenNames),
       equals(Uri.file('atoolongfilenameforaframework2.framework/atoolongfilenameforaframework2')),
     );
+  });
+
+  group('parseOtoolArchitectureSections', () {
+    test('single architecture', () {
+      expect(
+        parseOtoolArchitectureSections('''
+/build/native_assets/ios/buz.framework/buz (architecture x86_64):
+@rpath/libfoo.dylib
+'''),
+        <Architecture, List<String>>{
+          Architecture.x64: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
+
+    test('single architecture but not specified', () {
+      expect(
+        parseOtoolArchitectureSections('''
+/build/native_assets/ios/buz.framework/buz:
+@rpath/libfoo.dylib
+'''),
+        <Architecture?, List<String>>{
+          null: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
+
+    test('multiple architectures', () {
+      expect(
+        parseOtoolArchitectureSections('''
+/build/native_assets/ios/buz.framework/buz (architecture x86_64):
+@rpath/libfoo.dylib
+/build/native_assets/ios/buz.framework/buz (architecture arm64):
+@rpath/libbar.dylib
+'''),
+        <Architecture, List<String>>{
+          Architecture.x64: <String>['@rpath/libfoo.dylib'],
+          Architecture.arm64: <String>['@rpath/libbar.dylib'],
+        },
+      );
+    });
+
+    test('multiple lines in section', () {
+      expect(
+        parseOtoolArchitectureSections('''
+/build/native_assets/ios/buz.framework/buz (architecture x86_64):
+@rpath/libfoo.dylib
+@rpath/libbar.dylib
+'''),
+        <Architecture, List<String>>{
+          Architecture.x64: <String>['@rpath/libfoo.dylib', '@rpath/libbar.dylib'],
+        },
+      );
+    });
+
+    test('trim each line in section', () {
+      expect(
+        parseOtoolArchitectureSections('''
+/build/native_assets/ios/buz.framework/buz (architecture x86_64):
+  @rpath/libfoo.dylib
+'''),
+        <Architecture, List<String>>{
+          Architecture.x64: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
+  });
+
+  test('fatAssetTargetLocations ignores cross-architecture conflicts', () {
+    final asset1 = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'my_package',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libmy_asset.dylib'),
+      ),
+      os: OS.macOS,
+      architecture: Architecture.arm64,
+    );
+    final asset2 = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'my_package',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libmy_asset.dylib'),
+      ),
+      os: OS.macOS,
+      architecture: Architecture.x64,
+    );
+
+    final Map<Uri, List<FlutterCodeAsset>> result = fatAssetTargetLocationsMacOS(<FlutterCodeAsset>[
+      asset1,
+      asset2,
+    ], null);
+
+    expect(result.length, equals(1));
+    final Uri path = result.keys.single;
+    expect(path.path, equals('my_asset.framework/my_asset'));
+    expect(result[path]!.length, equals(2));
+  });
+
+  test('fatAssetTargetLocations handles conflicts between different assets', () {
+    final assetA1 = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'package_a',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libfoo.dylib'),
+      ),
+      os: OS.macOS,
+      architecture: Architecture.arm64,
+    );
+    final assetB1 = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'package_b',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libfoo.dylib'),
+      ),
+      os: OS.macOS,
+      architecture: Architecture.arm64,
+    );
+    final assetA2 = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'package_a',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libfoo.dylib'),
+      ),
+      os: OS.macOS,
+      architecture: Architecture.x64,
+    );
+    final assetB2 = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'package_b',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libfoo.dylib'),
+      ),
+      os: OS.macOS,
+      architecture: Architecture.x64,
+    );
+
+    final Map<Uri, List<FlutterCodeAsset>> result = fatAssetTargetLocationsMacOS(<FlutterCodeAsset>[
+      assetA1,
+      assetB1,
+      assetA2,
+      assetB2,
+    ], null);
+
+    expect(result.length, equals(2));
+
+    final Uri pathA = result.keys.firstWhere((Uri k) => k.path == 'foo.framework/foo');
+    final Uri pathB = result.keys.firstWhere((Uri k) => k.path == 'foo1.framework/foo1');
+
+    expect(result[pathA]!.length, equals(2));
+    expect(result[pathA]!.contains(assetA1), isTrue);
+    expect(result[pathA]!.contains(assetA2), isTrue);
+
+    expect(result[pathB]!.length, equals(2));
+    expect(result[pathB]!.contains(assetB1), isTrue);
+    expect(result[pathB]!.contains(assetB2), isTrue);
+  });
+
+  // The manifest entry is the string the Dart VM passes to `dlopen`, and dyld
+  // recognizes a library it has already loaded by the name it is opened with.
+  // If that name is not the framework's install name, dyld has to fall back on
+  // the file's identity on disk, which a rebuild changes underneath a running
+  // debug instance. The asset then gets mapped a second time. See
+  // https://github.com/flutter/flutter/issues/190799.
+  test('macOS manifest entry is the framework install name', () {
+    final asset = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'my_package',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libmy_asset.dylib'),
+      ),
+      os: OS.macOS,
+      architecture: Architecture.arm64,
+    );
+    final assets = <FlutterCodeAsset>[asset];
+
+    final Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> manifest =
+        assetTargetLocationsMacOS(assets, null);
+    expect(
+      (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).path,
+      equals('@rpath/my_asset.framework/my_asset'),
+    );
+
+    // The framework itself is still bundled without the install name prefix.
+    final Map<Uri, List<FlutterCodeAsset>> bundled = fatAssetTargetLocationsMacOS(assets, null);
+    expect(bundled.keys.single.path, equals('my_asset.framework/my_asset'));
+  });
+
+  test('macOS flutter tester manifest entry is the host path', () {
+    final asset = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'my_package',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libmy_asset.dylib'),
+      ),
+      os: OS.macOS,
+      architecture: Architecture.arm64,
+    );
+
+    // The tester loads the dylib from where it was built instead of from a
+    // bundle, and its install name is set to that same absolute path.
+    final Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> manifest =
+        assetTargetLocationsMacOS(<FlutterCodeAsset>[
+          asset,
+        ], Uri.parse('file:///build/native_assets/macos/'));
+    expect(
+      (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).path,
+      equals(Uri.parse('file:///build/native_assets/macos/libmy_asset.dylib').toFilePath()),
+    );
+  });
+
+  test('iOS manifest entry is the framework install name', () {
+    final asset = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'my_package',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libmy_asset.dylib'),
+      ),
+      os: OS.iOS,
+      architecture: Architecture.arm64,
+    );
+    final assets = <FlutterCodeAsset>[asset];
+
+    final Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> manifest = assetTargetLocationsIOS(
+      assets,
+    );
+    expect(
+      (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).path,
+      equals('@rpath/my_asset.framework/my_asset'),
+    );
+
+    final Map<Uri, List<FlutterCodeAsset>> bundled = fatAssetTargetLocationsIOS(assets);
+    expect(bundled.keys.single.path, equals('my_asset.framework/my_asset'));
   });
 }

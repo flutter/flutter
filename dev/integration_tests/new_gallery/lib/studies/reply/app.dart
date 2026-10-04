@@ -28,16 +28,25 @@ class ReplyApp extends StatefulWidget {
 
   static Route<void> createComposeRoute(RouteSettings settings) {
     return PageRouteBuilder<void>(
-      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
-          const ComposePage(),
-      transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-        return FadeThroughTransition(
-          fillColor: Theme.of(context).cardColor,
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          child: child,
-        );
-      },
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => const ComposePage(),
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) {
+            return FadeThroughTransition(
+              fillColor: Theme.of(context).cardColor,
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              child: child,
+            );
+          },
       settings: settings,
     );
   }
@@ -66,18 +75,17 @@ class _ReplyAppState extends State<ReplyApp> with RestorationMixin {
   @override
   Widget build(BuildContext context) {
     final ThemeMode galleryThemeMode = GalleryOptions.of(context).themeMode;
-    final bool isDark = galleryThemeMode == ThemeMode.system
-        ? Theme.of(context).brightness == Brightness.dark
+    final isDark = galleryThemeMode == ThemeMode.system
+        ? Theme.brightnessOf(context) == Brightness.dark
         : galleryThemeMode == ThemeMode.dark;
 
-    final ThemeData replyTheme =
-        isDark ? _buildReplyDarkTheme(context) : _buildReplyLightTheme(context);
+    final ThemeData replyTheme = isDark
+        ? _buildReplyDarkTheme(context)
+        : _buildReplyLightTheme(context);
 
     return MultiProvider(
       providers: <SingleChildWidget>[
-        ChangeNotifierProvider<EmailStore>.value(
-          value: _appState.value,
-        ),
+        ChangeNotifierProvider<EmailStore>.value(value: _appState.value),
       ],
       child: MaterialApp(
         navigatorKey: rootNavKey,
@@ -89,17 +97,13 @@ class _ReplyAppState extends State<ReplyApp> with RestorationMixin {
         supportedLocales: GalleryLocalizations.supportedLocales,
         locale: GalleryOptions.of(context).locale,
         initialRoute: ReplyApp.homeRoute,
-        onGenerateRoute: (RouteSettings settings) {
-          switch (settings.name) {
-            case ReplyApp.homeRoute:
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) => const AdaptiveNav(),
-                settings: settings,
-              );
-            case ReplyApp.composeRoute:
-              return ReplyApp.createComposeRoute(settings);
-          }
-          return null;
+        onGenerateRoute: (RouteSettings settings) => switch (settings.name) {
+          ReplyApp.homeRoute => MaterialPageRoute<void>(
+            builder: (BuildContext context) => const AdaptiveNav(),
+            settings: settings,
+          ),
+          ReplyApp.composeRoute => ReplyApp.createComposeRoute(settings),
+          _ => null,
         },
       ),
     );
@@ -114,23 +118,19 @@ class _RestorableEmailState extends RestorableListenable<EmailStore> {
 
   @override
   EmailStore fromPrimitives(Object? data) {
-    final EmailStore appState = EmailStore();
-    final Map<String, dynamic> appData = Map<String, dynamic>.from(data! as Map<dynamic, dynamic>);
+    final appState = EmailStore();
+    final appData = Map<String, dynamic>.from(data! as Map<dynamic, dynamic>);
     appState.selectedEmailId = appData['selectedEmailId'] as int;
     appState.onSearchPage = appData['onSearchPage'] as bool;
 
     // The index of the MailboxPageType enum is restored.
-    final int mailboxPageIndex = appData['selectedMailboxPage'] as int;
+    final mailboxPageIndex = appData['selectedMailboxPage'] as int;
     appState.selectedMailboxPage = MailboxPageType.values[mailboxPageIndex];
 
-    final List<dynamic> starredEmailIdsList = appData['starredEmailIds'] as List<dynamic>;
-    appState.starredEmailIds = <int>{
-      ...starredEmailIdsList.map<int>((dynamic id) => id as int),
-    };
-    final List<dynamic> trashEmailIdsList = appData['trashEmailIds'] as List<dynamic>;
-    appState.trashEmailIds = <int>{
-      ...trashEmailIdsList.map<int>((dynamic id) => id as int),
-    };
+    final starredEmailIdsList = appData['starredEmailIds'] as List<dynamic>;
+    appState.starredEmailIds = <int>{...starredEmailIdsList.map<int>((dynamic id) => id as int)};
+    final trashEmailIdsList = appData['trashEmailIds'] as List<dynamic>;
+    appState.trashEmailIds = <int>{...trashEmailIdsList.map<int>((dynamic id) => id as int)};
     return appState;
   }
 
@@ -149,9 +149,9 @@ class _RestorableEmailState extends RestorableListenable<EmailStore> {
 }
 
 ThemeData _buildReplyLightTheme(BuildContext context) {
-  final ThemeData base = ThemeData.light();
+  final base = ThemeData();
   return base.copyWith(
-    bottomAppBarTheme: const BottomAppBarTheme(color: ReplyColors.blue700),
+    bottomAppBarTheme: const BottomAppBarThemeData(color: ReplyColors.blue700),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: ReplyColors.blue700,
       modalBackgroundColor: Colors.white.withOpacity(0.7),
@@ -159,15 +159,13 @@ ThemeData _buildReplyLightTheme(BuildContext context) {
     navigationRailTheme: NavigationRailThemeData(
       backgroundColor: ReplyColors.blue700,
       selectedIconTheme: const IconThemeData(color: ReplyColors.orange500),
-      selectedLabelTextStyle:
-          GoogleFonts.workSansTextTheme().headlineSmall!.copyWith(
-                color: ReplyColors.orange500,
-              ),
+      selectedLabelTextStyle: GoogleFonts.workSansTextTheme().headlineSmall!.copyWith(
+        color: ReplyColors.orange500,
+      ),
       unselectedIconTheme: const IconThemeData(color: ReplyColors.blue200),
-      unselectedLabelTextStyle:
-          GoogleFonts.workSansTextTheme().headlineSmall!.copyWith(
-                color: ReplyColors.blue200,
-              ),
+      unselectedLabelTextStyle: GoogleFonts.workSansTextTheme().headlineSmall!.copyWith(
+        color: ReplyColors.blue200,
+      ),
     ),
     canvasColor: ReplyColors.white50,
     cardColor: ReplyColors.white50,
@@ -191,11 +189,9 @@ ThemeData _buildReplyLightTheme(BuildContext context) {
 }
 
 ThemeData _buildReplyDarkTheme(BuildContext context) {
-  final ThemeData base = ThemeData.dark();
+  final base = ThemeData.dark();
   return base.copyWith(
-    bottomAppBarTheme: const BottomAppBarTheme(
-      color: ReplyColors.darkBottomAppBarBackground,
-    ),
+    bottomAppBarTheme: const BottomAppBarThemeData(color: ReplyColors.darkBottomAppBarBackground),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: ReplyColors.darkDrawerBackground,
       modalBackgroundColor: Colors.black.withOpacity(0.7),
@@ -203,15 +199,13 @@ ThemeData _buildReplyDarkTheme(BuildContext context) {
     navigationRailTheme: NavigationRailThemeData(
       backgroundColor: ReplyColors.darkBottomAppBarBackground,
       selectedIconTheme: const IconThemeData(color: ReplyColors.orange300),
-      selectedLabelTextStyle:
-          GoogleFonts.workSansTextTheme().headlineSmall!.copyWith(
-                color: ReplyColors.orange300,
-              ),
+      selectedLabelTextStyle: GoogleFonts.workSansTextTheme().headlineSmall!.copyWith(
+        color: ReplyColors.orange300,
+      ),
       unselectedIconTheme: const IconThemeData(color: ReplyColors.greyLabel),
-      unselectedLabelTextStyle:
-          GoogleFonts.workSansTextTheme().headlineSmall!.copyWith(
-                color: ReplyColors.greyLabel,
-              ),
+      unselectedLabelTextStyle: GoogleFonts.workSansTextTheme().headlineSmall!.copyWith(
+        color: ReplyColors.greyLabel,
+      ),
     ),
     canvasColor: ReplyColors.black900,
     cardColor: ReplyColors.darkCardBackground,
@@ -233,11 +227,7 @@ ThemeData _buildReplyDarkTheme(BuildContext context) {
   );
 }
 
-ChipThemeData _buildChipTheme(
-  Color primaryColor,
-  Color chipBackground,
-  Brightness brightness,
-) {
+ChipThemeData _buildChipTheme(Color primaryColor, Color chipBackground, Brightness brightness) {
   return ChipThemeData(
     backgroundColor: primaryColor.withOpacity(0.12),
     disabledColor: primaryColor.withOpacity(0.87),
@@ -246,10 +236,8 @@ ChipThemeData _buildChipTheme(
     padding: const EdgeInsets.all(4),
     shape: const StadiumBorder(),
     labelStyle: GoogleFonts.workSansTextTheme().bodyMedium!.copyWith(
-          color: brightness == Brightness.dark
-              ? ReplyColors.white50
-              : ReplyColors.black900,
-        ),
+      color: brightness == Brightness.dark ? ReplyColors.white50 : ReplyColors.black900,
+    ),
     secondaryLabelStyle: GoogleFonts.workSansTextTheme().bodyMedium,
     brightness: brightness,
   );

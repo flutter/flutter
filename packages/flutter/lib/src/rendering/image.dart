@@ -10,9 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'box.dart';
 import 'object.dart';
 
-export 'package:flutter/painting.dart' show
-  BoxFit,
-  ImageRepeat;
+export 'package:flutter/painting.dart' show BoxFit, ImageRepeat;
 
 /// An image in the render tree.
 ///
@@ -24,42 +22,28 @@ export 'package:flutter/painting.dart' show
 class RenderImage extends RenderBox {
   /// Creates a render box that displays an image.
   ///
-  /// The [textDirection] argument must not be null if [alignment] will need
-  /// resolving or if [matchTextDirection] is true.
+  /// The [_textDirection] argument must not be null if [_alignment] will need
+  /// resolving or if [_matchTextDirection] is true.
   RenderImage({
-    ui.Image? image,
+    this._image,
     this.debugImageLabel,
-    double? width,
-    double? height,
-    double scale = 1.0,
-    Color? color,
-    Animation<double>? opacity,
-    BlendMode? colorBlendMode,
-    BoxFit? fit,
-    AlignmentGeometry alignment = Alignment.center,
-    ImageRepeat repeat = ImageRepeat.noRepeat,
-    Rect? centerSlice,
-    bool matchTextDirection = false,
-    TextDirection? textDirection,
-    bool invertColors = false,
-    bool isAntiAlias = false,
-    FilterQuality filterQuality = FilterQuality.low,
-  }) : _image = image,
-       _width = width,
-       _height = height,
-       _scale = scale,
-       _color = color,
-       _opacity = opacity,
-       _colorBlendMode = colorBlendMode,
-       _fit = fit,
-       _alignment = alignment,
-       _repeat = repeat,
-       _centerSlice = centerSlice,
-       _matchTextDirection = matchTextDirection,
-       _invertColors = invertColors,
-       _textDirection = textDirection,
-       _isAntiAlias = isAntiAlias,
-       _filterQuality = filterQuality {
+    this._width,
+    this._height,
+    this._scale = 1.0,
+    this._color,
+    this._opacity,
+    this._colorBlendMode,
+    this._fit,
+    this._alignment = Alignment.center,
+    this._repeat = ImageRepeat.noRepeat,
+    this._centerSlice,
+    this._matchTextDirection = false,
+    this._textDirection,
+    this._invertColors = false,
+    this._isAntiAlias = false,
+    this._filterQuality = FilterQuality.medium,
+    this._blendMode = BlendMode.srcOver,
+  }) {
     _updateColorFilter();
   }
 
@@ -188,9 +172,7 @@ class RenderImage extends RenderBox {
 
   /// Used to set the filterQuality of the image.
   ///
-  /// Use the [FilterQuality.low] quality setting to scale the image, which corresponds to
-  /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
-  /// to nearest-neighbor.
+  /// Defaults to [FilterQuality.medium].
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {
@@ -200,7 +182,6 @@ class RenderImage extends RenderBox {
     _filterQuality = value;
     markNeedsPaint();
   }
-
 
   /// Used to combine [color] with this image.
   ///
@@ -218,6 +199,24 @@ class RenderImage extends RenderBox {
     }
     _colorBlendMode = value;
     _updateColorFilter();
+    markNeedsPaint();
+  }
+
+  /// Used to combine the image with the destination when painting onto the
+  /// canvas. This is forwarded to [paintImage].
+  ///
+  /// Defaults to [BlendMode.srcOver].
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  BlendMode get blendMode => _blendMode;
+  BlendMode _blendMode;
+  set blendMode(BlendMode value) {
+    if (value == _blendMode) {
+      return;
+    }
+    _blendMode = value;
     markNeedsPaint();
   }
 
@@ -354,19 +353,15 @@ class RenderImage extends RenderBox {
   Size _sizeForConstraints(BoxConstraints constraints) {
     // Folds the given |width| and |height| into |constraints| so they can all
     // be treated uniformly.
-    constraints = BoxConstraints.tightFor(
-      width: _width,
-      height: _height,
-    ).enforce(constraints);
+    constraints = BoxConstraints.tightFor(width: _width, height: _height).enforce(constraints);
 
     if (_image == null) {
       return constraints.smallest;
     }
 
-    return constraints.constrainSizeAndAttemptToPreserveAspectRatio(Size(
-      _image!.width.toDouble() / _scale,
-      _image!.height.toDouble() / _scale,
-    ));
+    return constraints.constrainSizeAndAttemptToPreserveAspectRatio(
+      Size(_image!.width.toDouble() / _scale, _image!.height.toDouble() / _scale),
+    );
   }
 
   @override
@@ -449,6 +444,7 @@ class RenderImage extends RenderBox {
       invertColors: invertColors,
       filterQuality: _filterQuality,
       isAntiAlias: _isAntiAlias,
+      blendMode: _blendMode,
     );
   }
 
@@ -470,12 +466,19 @@ class RenderImage extends RenderBox {
     properties.add(DiagnosticsProperty<Animation<double>?>('opacity', opacity, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null),
+    );
     properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
-    properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
+    properties.add(
+      FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'),
+    );
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
+    properties.add(
+      EnumProperty<BlendMode>('blendMode', blendMode, defaultValue: BlendMode.srcOver),
+    );
   }
 }

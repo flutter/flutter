@@ -15,13 +15,12 @@ class BenchPathRecording extends RawRecorder {
   static const String benchmarkName = 'bench_path_recording';
 
   @override
-  Future<void> setUpAll() async {
-  }
+  Future<void> setUpAll() async {}
 
   @override
   void body(Profile profile) {
     profile.record('recordPathConstruction', () {
-      for (int i = 1; i <= 10; i++) {
+      for (var i = 1; i <= 10; i++) {
         recording.createPaths();
       }
     }, reported: true);

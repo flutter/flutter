@@ -14,22 +14,21 @@ void main() {
   });
 
   test('DataTableThemeData copyWith dataRowHeight', () {
-    const DataTableThemeData themeData = DataTableThemeData(
-      dataRowMinHeight: 10,
-      dataRowMaxHeight: 10,
-    );
+    const themeData = DataTableThemeData(dataRowMinHeight: 10, dataRowMaxHeight: 10);
     expect(themeData, themeData.copyWith());
-    expect(themeData.copyWith(dataRowMinHeight: 20, dataRowMaxHeight: 20),
-           themeData.copyWith(dataRowHeight: 20));
+    expect(
+      themeData.copyWith(dataRowMinHeight: 20, dataRowMaxHeight: 20),
+      themeData.copyWith(dataRowHeight: 20),
+    );
   });
 
   test('DataTableThemeData lerp special cases', () {
-    const DataTableThemeData data = DataTableThemeData();
+    const data = DataTableThemeData();
     expect(identical(DataTableThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('DataTableThemeData defaults', () {
-    const DataTableThemeData themeData = DataTableThemeData();
+    const themeData = DataTableThemeData();
     expect(themeData.decoration, null);
     expect(themeData.dataRowColor, null);
     expect(themeData.dataRowHeight, null);
@@ -47,7 +46,7 @@ void main() {
     expect(themeData.dataRowCursor, null);
     expect(themeData.headingRowAlignment, null);
 
-    const DataTableTheme theme = DataTableTheme(data: DataTableThemeData(), child: SizedBox());
+    const theme = DataTableTheme(data: DataTableThemeData(), child: SizedBox());
     expect(theme.data.decoration, null);
     expect(theme.data.dataRowColor, null);
     expect(theme.data.dataRowHeight, null);
@@ -67,32 +66,32 @@ void main() {
   });
 
   testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const DataTableThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
   testWidgets('DataTableThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     DataTableThemeData(
       decoration: const BoxDecoration(color: Color(0xfffffff0)),
-      dataRowColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) => const Color(0xfffffff1),
+      dataRowColor: WidgetStateProperty.resolveWith<Color>(
+        (Set<WidgetState> states) => const Color(0xfffffff1),
       ),
       dataRowMinHeight: 41.0,
       dataRowMaxHeight: 42.0,
       dataTextStyle: const TextStyle(fontSize: 12.0),
-      headingRowColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) => const Color(0xfffffff2),
+      headingRowColor: WidgetStateProperty.resolveWith<Color>(
+        (Set<WidgetState> states) => const Color(0xfffffff2),
       ),
       headingRowHeight: 52.0,
-      headingTextStyle:  const TextStyle(fontSize: 14.0),
+      headingTextStyle: const TextStyle(fontSize: 14.0),
       horizontalMargin: 3.0,
       columnSpacing: 4.0,
       dividerThickness: 5.0,
@@ -103,11 +102,11 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
-    expect(description[0], 'decoration: BoxDecoration(color: Color(0xfffffff0))');
+    expect(description[0], 'decoration: BoxDecoration(color: ${const Color(0xfffffff0)})');
     expect(description[1], "dataRowColor: Instance of '_WidgetStatePropertyWith<Color>'");
     expect(description[2], 'dataRowMinHeight: 41.0');
     expect(description[3], 'dataRowMaxHeight: 42.0');
@@ -125,18 +124,25 @@ void main() {
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
-    const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
-    const MaterialStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
-    const double minMaxDataRowHeight = 41.0;
-    const TextStyle dataTextStyle = TextStyle(fontSize: 12.5);
-    const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
-    const double headingRowHeight = 52.0;
-    const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
-    const double horizontalMargin = 3.0;
-    const double columnSpacing = 4.0;
-    const double dividerThickness = 5.0;
-    const MaterialStateProperty<MouseCursor> headingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.grab);
-    const MaterialStateProperty<MouseCursor> dataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
+    const decoration = BoxDecoration(color: Color(0xfffffff0));
+    const WidgetStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(
+      Color(0xfffffff1),
+    );
+    const minMaxDataRowHeight = 41.0;
+    const dataTextStyle = TextStyle(fontSize: 12.5);
+    const WidgetStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(
+      Color(0xfffffff2),
+    );
+    const headingRowHeight = 52.0;
+    const headingTextStyle = TextStyle(fontSize: 14.5);
+    const horizontalMargin = 3.0;
+    const columnSpacing = 4.0;
+    const dividerThickness = 5.0;
+    const WidgetStateProperty<MouseCursor> headingCellCursor =
+        MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.grab);
+    const WidgetStateProperty<MouseCursor> dataRowCursor = MaterialStatePropertyAll<MouseCursor>(
+      SystemMouseCursors.forbidden,
+    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -162,19 +168,13 @@ void main() {
             sortColumnIndex: 0,
             showCheckboxColumn: false,
             columns: <DataColumn>[
-              DataColumn(
-                label: const Text('A'),
-                onSort: (int columnIndex, bool ascending) {},
-              ),
+              DataColumn(label: const Text('A'), onSort: (int columnIndex, bool ascending) {}),
               const DataColumn(label: Text('B')),
             ],
             rows: <DataRow>[
               DataRow(
-                cells: const <DataCell>[
-                  DataCell(Text('Data')),
-                  DataCell(Text('Data 2')),
-                ],
-                onSelectChanged: (bool? value) { },
+                cells: const <DataCell>[DataCell(Text('Data')), DataCell(Text('Data 2'))],
+                onSelectChanged: (bool? value) {},
               ),
             ],
           ),
@@ -182,60 +182,79 @@ void main() {
       ),
     );
 
-    final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container));
+    final Finder tableContainerFinder = find.ancestor(
+      of: find.byType(Table),
+      matching: find.byType(Container),
+    );
     expect(tester.widgetList<Container>(tableContainerFinder).first.decoration, decoration);
 
-    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+    final TextStyle dataRowTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('Data'))
+        .text
+        .style!;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
-    expect(_tableRowBoxDecoration(tester: tester, index: 1).color, dataRowColor.resolve(<MaterialState>{}));
+    expect(
+      _tableRowBoxDecoration(tester: tester, index: 1).color,
+      dataRowColor.resolve(<WidgetState>{}),
+    );
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, dividerThickness);
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxDataRowHeight);
 
-    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+    final TextStyle headingRowTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('A'))
+        .text
+        .style!;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
-    expect(_tableRowBoxDecoration(tester: tester, index: 0).color, headingRowColor.resolve(<MaterialState>{}));
+    expect(
+      _tableRowBoxDecoration(tester: tester, index: 0).color,
+      headingRowColor.resolve(<WidgetState>{}),
+    );
 
     expect(tester.getSize(_findFirstContainerFor('A')).height, headingRowHeight);
     expect(tester.getTopLeft(find.text('A')).dx, horizontalMargin);
-    expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, columnSpacing);
+    expect(
+      tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx,
+      columnSpacing,
+    );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
     await gesture.addPointer(location: tester.getCenter(find.text('A')));
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
 
     await gesture.moveTo(tester.getCenter(find.text('Data')));
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden,
+    );
   });
 
-  testWidgets('DataTable is themeable - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
-    const double dataRowHeight = 51.0;
+  testWidgets('DataTable is themeable - separate test for deprecated dataRowHeight', (
+    WidgetTester tester,
+  ) async {
+    const dataRowHeight = 51.0;
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          dataTableTheme: const DataTableThemeData(
-            dataRowHeight: dataRowHeight,
-          ),
-        ),
+        theme: ThemeData(dataTableTheme: const DataTableThemeData(dataRowHeight: dataRowHeight)),
         home: Scaffold(
           body: DataTable(
             sortColumnIndex: 0,
             columns: <DataColumn>[
-              DataColumn(
-                label: const Text('A'),
-                onSort: (int columnIndex, bool ascending) {},
-              ),
+              DataColumn(label: const Text('A'), onSort: (int columnIndex, bool ascending) {}),
               const DataColumn(label: Text('B')),
             ],
             rows: const <DataRow>[
-              DataRow(cells: <DataCell>[
-                DataCell(Text('Data')),
-                DataCell(Text('Data 2')),
-              ]),
+              DataRow(cells: <DataCell>[DataCell(Text('Data')), DataCell(Text('Data 2'))]),
             ],
           ),
         ),
@@ -246,31 +265,44 @@ void main() {
   });
 
   testWidgets('DataTable properties are taken over the theme values', (WidgetTester tester) async {
-    const BoxDecoration themeDecoration = BoxDecoration(color: Color(0xfffffff1));
-    const MaterialStateProperty<Color> themeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff0));
-    const double minMaxThemeDataRowHeight = 50.0;
-    const TextStyle themeDataTextStyle = TextStyle(fontSize: 11.5);
-    const MaterialStateProperty<Color> themeHeadingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
-    const double themeHeadingRowHeight = 51.0;
-    const TextStyle themeHeadingTextStyle = TextStyle(fontSize: 13.5);
-    const double themeHorizontalMargin = 2.0;
-    const double themeColumnSpacing = 3.0;
-    const double themeDividerThickness = 4.0;
-    const MaterialStateProperty<MouseCursor> themeHeadingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy);
-    const MaterialStateProperty<MouseCursor> themeDataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy);
+    const themeDecoration = BoxDecoration(color: Color(0xfffffff1));
+    const WidgetStateProperty<Color> themeDataRowColor = MaterialStatePropertyAll<Color>(
+      Color(0xfffffff0),
+    );
+    const minMaxThemeDataRowHeight = 50.0;
+    const themeDataTextStyle = TextStyle(fontSize: 11.5);
+    const WidgetStateProperty<Color> themeHeadingRowColor = MaterialStatePropertyAll<Color>(
+      Color(0xfffffff1),
+    );
+    const themeHeadingRowHeight = 51.0;
+    const themeHeadingTextStyle = TextStyle(fontSize: 13.5);
+    const themeHorizontalMargin = 2.0;
+    const themeColumnSpacing = 3.0;
+    const themeDividerThickness = 4.0;
+    const WidgetStateProperty<MouseCursor> themeHeadingCellCursor =
+        MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy);
+    const WidgetStateProperty<MouseCursor> themeDataRowCursor =
+        MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy);
 
-    const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
-    const MaterialStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
-    const double minMaxDataRowHeight = 51.0;
-    const TextStyle dataTextStyle = TextStyle(fontSize: 12.5);
-    const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
-    const double headingRowHeight = 52.0;
-    const TextStyle headingTextStyle = TextStyle(fontSize: 14.5);
-    const double horizontalMargin = 3.0;
-    const double columnSpacing = 4.0;
-    const double dividerThickness = 5.0;
-    const MaterialStateProperty<MouseCursor> headingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
-    const MaterialStateProperty<MouseCursor> dataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
+    const decoration = BoxDecoration(color: Color(0xfffffff0));
+    const WidgetStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(
+      Color(0xfffffff1),
+    );
+    const minMaxDataRowHeight = 51.0;
+    const dataTextStyle = TextStyle(fontSize: 12.5);
+    const WidgetStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(
+      Color(0xfffffff2),
+    );
+    const headingRowHeight = 52.0;
+    const headingTextStyle = TextStyle(fontSize: 14.5);
+    const horizontalMargin = 3.0;
+    const columnSpacing = 4.0;
+    const dividerThickness = 5.0;
+    const WidgetStateProperty<MouseCursor> headingCellCursor =
+        MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
+    const WidgetStateProperty<MouseCursor> dataRowCursor = MaterialStatePropertyAll<MouseCursor>(
+      SystemMouseCursors.forbidden,
+    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -318,10 +350,7 @@ void main() {
               DataRow(
                 mouseCursor: dataRowCursor,
                 onSelectChanged: (bool? selected) {},
-                cells: const <DataCell>[
-                  DataCell(Text('Data')),
-                  DataCell(Text('Data 2')),
-                ],
+                cells: const <DataCell>[DataCell(Text('Data')), DataCell(Text('Data 2'))],
               ),
             ],
           ),
@@ -329,97 +358,133 @@ void main() {
       ),
     );
 
-    final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container));
+    final Finder tableContainerFinder = find.ancestor(
+      of: find.byType(Table),
+      matching: find.byType(Container),
+    );
     expect(tester.widget<Container>(tableContainerFinder).decoration, decoration);
 
-    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+    final TextStyle dataRowTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('Data'))
+        .text
+        .style!;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
-    expect(_tableRowBoxDecoration(tester: tester, index: 1).color, dataRowColor.resolve(<MaterialState>{}));
+    expect(
+      _tableRowBoxDecoration(tester: tester, index: 1).color,
+      dataRowColor.resolve(<WidgetState>{}),
+    );
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, dividerThickness);
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxDataRowHeight);
 
-    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+    final TextStyle headingRowTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('A'))
+        .text
+        .style!;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
-    expect(_tableRowBoxDecoration(tester: tester, index: 0).color, headingRowColor.resolve(<MaterialState>{}));
+    expect(
+      _tableRowBoxDecoration(tester: tester, index: 0).color,
+      headingRowColor.resolve(<WidgetState>{}),
+    );
 
     expect(tester.getSize(_findFirstContainerFor('A')).height, headingRowHeight);
     expect(tester.getTopLeft(find.text('A')).dx, horizontalMargin);
-    expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, columnSpacing);
+    expect(
+      tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx,
+      columnSpacing,
+    );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
     await gesture.addPointer(location: tester.getCenter(find.text('A')));
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), headingCellCursor.resolve(<MaterialState>{}));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      headingCellCursor.resolve(<WidgetState>{}),
+    );
 
     await gesture.moveTo(tester.getCenter(find.text('Data')));
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), dataRowCursor.resolve(<MaterialState>{}));
-  });
-
-  testWidgets('DataTable properties are taken over the theme values - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
-    const double themeDataRowHeight = 50.0;
-    const double dataRowHeight = 51.0;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          dataTableTheme: const DataTableThemeData(
-            dataRowHeight: themeDataRowHeight,
-          ),
-        ),
-        home: Scaffold(
-          body: DataTable(
-            dataRowHeight: dataRowHeight,
-            sortColumnIndex: 0,
-            columns: <DataColumn>[
-              DataColumn(
-                label: const Text('A'),
-                onSort: (int columnIndex, bool ascending) {},
-              ),
-              const DataColumn(label: Text('B')),
-            ],
-            rows: const <DataRow>[
-              DataRow(cells: <DataCell>[
-                DataCell(Text('Data')),
-                DataCell(Text('Data 2')),
-              ]),
-            ],
-          ),
-        ),
-      ),
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      dataRowCursor.resolve(<WidgetState>{}),
     );
-
-    expect(tester.getSize(_findFirstContainerFor('Data')).height, dataRowHeight);
   });
 
-  testWidgets('Local DataTableTheme can override global DataTableTheme', (WidgetTester tester) async {
-    const BoxDecoration globalThemeDecoration = BoxDecoration(color: Color(0xfffffff1));
-    const MaterialStateProperty<Color> globalThemeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff0));
-    const double minMaxGlobalThemeDataRowHeight = 50.0;
-    const TextStyle globalThemeDataTextStyle = TextStyle(fontSize: 11.5);
-    const MaterialStateProperty<Color> globalThemeHeadingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
-    const double globalThemeHeadingRowHeight = 51.0;
-    const TextStyle globalThemeHeadingTextStyle = TextStyle(fontSize: 13.5);
-    const double globalThemeHorizontalMargin = 2.0;
-    const double globalThemeColumnSpacing = 3.0;
-    const double globalThemeDividerThickness = 4.0;
-    const MaterialStateProperty<MouseCursor> globalHeadingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.allScroll);
-    const MaterialStateProperty<MouseCursor> globalDataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.allScroll);
+  testWidgets(
+    'DataTable properties are taken over the theme values - separate test for deprecated dataRowHeight',
+    (WidgetTester tester) async {
+      const themeDataRowHeight = 50.0;
+      const dataRowHeight = 51.0;
 
-    const BoxDecoration localThemeDecoration = BoxDecoration(color: Color(0xfffffff0));
-    const MaterialStateProperty<Color> localThemeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
-    const double minMaxLocalThemeDataRowHeight = 51.0;
-    const TextStyle localThemeDataTextStyle = TextStyle(fontSize: 12.5);
-    const MaterialStateProperty<Color> localThemeHeadingRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
-    const double localThemeHeadingRowHeight = 52.0;
-    const TextStyle localThemeHeadingTextStyle = TextStyle(fontSize: 14.5);
-    const double localThemeHorizontalMargin = 3.0;
-    const double localThemeColumnSpacing = 4.0;
-    const double localThemeDividerThickness = 5.0;
-    const MaterialStateProperty<MouseCursor> localHeadingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.move);
-    const MaterialStateProperty<MouseCursor> localDataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.move);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            dataTableTheme: const DataTableThemeData(dataRowHeight: themeDataRowHeight),
+          ),
+          home: Scaffold(
+            body: DataTable(
+              dataRowHeight: dataRowHeight,
+              sortColumnIndex: 0,
+              columns: <DataColumn>[
+                DataColumn(label: const Text('A'), onSort: (int columnIndex, bool ascending) {}),
+                const DataColumn(label: Text('B')),
+              ],
+              rows: const <DataRow>[
+                DataRow(cells: <DataCell>[DataCell(Text('Data')), DataCell(Text('Data 2'))]),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getSize(_findFirstContainerFor('Data')).height, dataRowHeight);
+    },
+  );
+
+  testWidgets('Local DataTableTheme can override global DataTableTheme', (
+    WidgetTester tester,
+  ) async {
+    const globalThemeDecoration = BoxDecoration(color: Color(0xfffffff1));
+    const WidgetStateProperty<Color> globalThemeDataRowColor = MaterialStatePropertyAll<Color>(
+      Color(0xfffffff0),
+    );
+    const minMaxGlobalThemeDataRowHeight = 50.0;
+    const globalThemeDataTextStyle = TextStyle(fontSize: 11.5);
+    const WidgetStateProperty<Color> globalThemeHeadingRowColor = MaterialStatePropertyAll<Color>(
+      Color(0xfffffff1),
+    );
+    const globalThemeHeadingRowHeight = 51.0;
+    const globalThemeHeadingTextStyle = TextStyle(fontSize: 13.5);
+    const globalThemeHorizontalMargin = 2.0;
+    const globalThemeColumnSpacing = 3.0;
+    const globalThemeDividerThickness = 4.0;
+    const WidgetStateProperty<MouseCursor> globalHeadingCellCursor =
+        MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.allScroll);
+    const WidgetStateProperty<MouseCursor> globalDataRowCursor =
+        MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.allScroll);
+
+    const localThemeDecoration = BoxDecoration(color: Color(0xfffffff0));
+    const WidgetStateProperty<Color> localThemeDataRowColor = MaterialStatePropertyAll<Color>(
+      Color(0xfffffff1),
+    );
+    const minMaxLocalThemeDataRowHeight = 51.0;
+    const localThemeDataTextStyle = TextStyle(fontSize: 12.5);
+    const WidgetStateProperty<Color> localThemeHeadingRowColor = MaterialStatePropertyAll<Color>(
+      Color(0xfffffff2),
+    );
+    const localThemeHeadingRowHeight = 52.0;
+    const localThemeHeadingTextStyle = TextStyle(fontSize: 14.5);
+    const localThemeHorizontalMargin = 3.0;
+    const localThemeColumnSpacing = 4.0;
+    const localThemeDividerThickness = 5.0;
+    const WidgetStateProperty<MouseCursor> localHeadingCellCursor =
+        MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.move);
+    const WidgetStateProperty<MouseCursor> localDataRowCursor =
+        MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.move);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -461,19 +526,13 @@ void main() {
               showCheckboxColumn: false,
               sortColumnIndex: 0,
               columns: <DataColumn>[
-                DataColumn(
-                  label: const Text('A'),
-                  onSort: (int columnIndex, bool ascending) {},
-                ),
+                DataColumn(label: const Text('A'), onSort: (int columnIndex, bool ascending) {}),
                 const DataColumn(label: Text('B')),
               ],
               rows: <DataRow>[
                 DataRow(
                   onSelectChanged: (bool? selected) {},
-                  cells: const <DataCell>[
-                    DataCell(Text('Data')),
-                    DataCell(Text('Data 2')),
-                  ],
+                  cells: const <DataCell>[DataCell(Text('Data')), DataCell(Text('Data 2'))],
                 ),
               ],
             ),
@@ -482,102 +541,122 @@ void main() {
       ),
     );
 
-    final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container));
-    expect(tester.widgetList<Container>(tableContainerFinder).first.decoration, localThemeDecoration);
+    final Finder tableContainerFinder = find.ancestor(
+      of: find.byType(Table),
+      matching: find.byType(Container),
+    );
+    expect(
+      tester.widgetList<Container>(tableContainerFinder).first.decoration,
+      localThemeDecoration,
+    );
 
-    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+    final TextStyle dataRowTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('Data'))
+        .text
+        .style!;
     expect(dataRowTextStyle.fontSize, localThemeDataTextStyle.fontSize);
-    expect(_tableRowBoxDecoration(tester: tester, index: 1).color, localThemeDataRowColor.resolve(<MaterialState>{}));
-    expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, localThemeDividerThickness);
+    expect(
+      _tableRowBoxDecoration(tester: tester, index: 1).color,
+      localThemeDataRowColor.resolve(<WidgetState>{}),
+    );
+    expect(
+      _tableRowBoxDecoration(tester: tester, index: 1).border!.top.width,
+      localThemeDividerThickness,
+    );
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxLocalThemeDataRowHeight);
 
-    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+    final TextStyle headingRowTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('A'))
+        .text
+        .style!;
     expect(headingRowTextStyle.fontSize, localThemeHeadingTextStyle.fontSize);
-    expect(_tableRowBoxDecoration(tester: tester, index: 0).color, localThemeHeadingRowColor.resolve(<MaterialState>{}));
+    expect(
+      _tableRowBoxDecoration(tester: tester, index: 0).color,
+      localThemeHeadingRowColor.resolve(<WidgetState>{}),
+    );
 
     expect(tester.getSize(_findFirstContainerFor('A')).height, localThemeHeadingRowHeight);
     expect(tester.getTopLeft(find.text('A')).dx, localThemeHorizontalMargin);
-    expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, localThemeColumnSpacing);
+    expect(
+      tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx,
+      localThemeColumnSpacing,
+    );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
     await gesture.addPointer(location: tester.getCenter(find.text('A')));
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), localHeadingCellCursor.resolve(<MaterialState>{}));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      localHeadingCellCursor.resolve(<WidgetState>{}),
+    );
 
     await gesture.moveTo(tester.getCenter(find.text('Data')));
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), localDataRowCursor.resolve(<MaterialState>{}));
-  });
-
-  testWidgets('Local DataTableTheme can override global DataTableTheme - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
-    const double globalThemeDataRowHeight = 50.0;
-    const double localThemeDataRowHeight = 51.0;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          dataTableTheme: const DataTableThemeData(
-            dataRowHeight: globalThemeDataRowHeight,
-          ),
-        ),
-        home: Scaffold(
-          body: DataTableTheme(
-            data: const DataTableThemeData(
-              dataRowHeight: localThemeDataRowHeight,
-            ),
-            child: DataTable(
-              sortColumnIndex: 0,
-              columns: <DataColumn>[
-                DataColumn(
-                  label: const Text('A'),
-                  onSort: (int columnIndex, bool ascending) {},
-                ),
-                const DataColumn(label: Text('B')),
-              ],
-              rows: const <DataRow>[
-                DataRow(cells: <DataCell>[
-                  DataCell(Text('Data')),
-                  DataCell(Text('Data 2')),
-                ]),
-              ],
-            ),
-          ),
-        ),
-      ),
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      localDataRowCursor.resolve(<WidgetState>{}),
     );
-
-    expect(tester.getSize(_findFirstContainerFor('Data')).height, localThemeDataRowHeight);
   });
+
+  testWidgets(
+    'Local DataTableTheme can override global DataTableTheme - separate test for deprecated dataRowHeight',
+    (WidgetTester tester) async {
+      const globalThemeDataRowHeight = 50.0;
+      const localThemeDataRowHeight = 51.0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            dataTableTheme: const DataTableThemeData(dataRowHeight: globalThemeDataRowHeight),
+          ),
+          home: Scaffold(
+            body: DataTableTheme(
+              data: const DataTableThemeData(dataRowHeight: localThemeDataRowHeight),
+              child: DataTable(
+                sortColumnIndex: 0,
+                columns: <DataColumn>[
+                  DataColumn(label: const Text('A'), onSort: (int columnIndex, bool ascending) {}),
+                  const DataColumn(label: Text('B')),
+                ],
+                rows: const <DataRow>[
+                  DataRow(cells: <DataCell>[DataCell(Text('Data')), DataCell(Text('Data 2'))]),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getSize(_findFirstContainerFor('Data')).height, localThemeDataRowHeight);
+    },
+  );
 
   // This is a regression test for https://github.com/flutter/flutter/issues/143340.
-  testWidgets('DataColumn label can be centered with DataTableTheme.headingRowAlignment', (WidgetTester tester) async {
-    const double horizontalMargin = 24.0;
+  testWidgets('DataColumn label can be centered with DataTableTheme.headingRowAlignment', (
+    WidgetTester tester,
+  ) async {
+    const horizontalMargin = 24.0;
 
-    Widget buildTable({ MainAxisAlignment? headingRowAlignment, bool sortEnabled = false }) {
+    Widget buildTable({MainAxisAlignment? headingRowAlignment, bool sortEnabled = false}) {
       return MaterialApp(
         theme: ThemeData(
-          dataTableTheme: DataTableThemeData(
-            headingRowAlignment: headingRowAlignment,
-          ),
+          dataTableTheme: DataTableThemeData(headingRowAlignment: headingRowAlignment),
         ),
         home: Material(
           child: DataTable(
             columns: <DataColumn>[
               DataColumn(
-                onSort: sortEnabled
-                  ? (int columnIndex, bool ascending) { }
-                  : null,
+                onSort: sortEnabled ? (int columnIndex, bool ascending) {} : null,
                 label: const Text('Header'),
               ),
             ],
             rows: const <DataRow>[
-              DataRow(
-                cells: <DataCell>[
-                  DataCell(Text('Data')),
-                ],
-              ),
+              DataRow(cells: <DataCell>[DataCell(Text('Data'))]),
             ],
           ),
         ),
@@ -605,7 +684,9 @@ void main() {
     expect(headerTopLeft.dx, equals(horizontalMargin));
 
     // Test mainAxisAlignment.center with sort arrow.
-    await tester.pumpWidget(buildTable(headingRowAlignment: MainAxisAlignment.center, sortEnabled: true));
+    await tester.pumpWidget(
+      buildTable(headingRowAlignment: MainAxisAlignment.center, sortEnabled: true),
+    );
     await tester.pumpAndSettle();
 
     headerCenter = tester.getCenter(find.text('Header'));

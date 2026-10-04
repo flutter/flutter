@@ -41,11 +41,7 @@ enum CupertinoUserInterfaceLevelData {
 class CupertinoUserInterfaceLevel extends InheritedWidget {
   /// Creates a [CupertinoUserInterfaceLevel] to change descendant Cupertino widget's
   /// visual level.
-  const CupertinoUserInterfaceLevel({
-    super.key,
-    required CupertinoUserInterfaceLevelData data,
-    required super.child,
-  }) : _data = data;
+  const CupertinoUserInterfaceLevel({super.key, required this._data, required super.child});
 
   final CupertinoUserInterfaceLevelData _data;
 
@@ -64,7 +60,8 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   ///  * [maybeOf], which is similar, but will return null if no
   ///    [CupertinoUserInterfaceLevel] encloses the given context.
   static CupertinoUserInterfaceLevelData of(BuildContext context) {
-    final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
+    final CupertinoUserInterfaceLevel? query = context
+        .dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
     if (query != null) {
       return query._data;
     }
@@ -93,7 +90,8 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   ///  * [of], which is similar, but will throw an exception if no
   ///    [CupertinoUserInterfaceLevel] encloses the given context.
   static CupertinoUserInterfaceLevelData? maybeOf(BuildContext context) {
-    final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
+    final CupertinoUserInterfaceLevel? query = context
+        .dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
     return query?._data;
   }
 

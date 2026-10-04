@@ -7,10 +7,10 @@ import 'project.dart';
 
 class HotReloadConstProject extends Project {
   @override
-  final String pubspec = '''
+  final pubspec = '''
   name: test
   environment:
-    sdk: '>=3.2.0-0 <4.0.0'
+    sdk: ^3.7.0-0
 
   dependencies:
     flutter:
@@ -18,7 +18,7 @@ class HotReloadConstProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final main = r'''
   import 'package:flutter/material.dart';
   import 'package:flutter/scheduler.dart';
   import 'package:flutter/services.dart';

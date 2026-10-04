@@ -2,23 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'base/config.dart';
+import 'package:meta/meta.dart';
+
 import 'base/platform.dart';
 import 'features.dart';
+import 'flutter_features_config.dart';
 import 'version.dart';
 
-class FlutterFeatureFlags implements FeatureFlags {
-  FlutterFeatureFlags({
-    required FlutterVersion flutterVersion,
-    required Config config,
-    required Platform platform,
-  }) : _flutterVersion = flutterVersion,
-       _config = config,
-       _platform = platform;
-
-  final FlutterVersion _flutterVersion;
-  final Config _config;
-  final Platform _platform;
+@visibleForTesting
+mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
+  @protected
+  Platform get platform;
 
   @override
   bool get isLinuxEnabled => isEnabled(flutterLinuxDesktopFeature);
@@ -46,7 +40,7 @@ class FlutterFeatureFlags implements FeatureFlags {
 
   @override
   bool get isCliAnimationEnabled {
-    if (_platform.environment['TERM'] == 'dumb') {
+    if (platform.environment['TERM'] == 'dumb') {
       return false;
     }
     return isEnabled(cliAnimation);
@@ -56,27 +50,64 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isNativeAssetsEnabled => isEnabled(nativeAssets);
 
   @override
-  bool get isPreviewDeviceEnabled => isEnabled(previewDevice);
+  bool get isDartDataAssetsEnabled => isEnabled(dartDataAssets);
+
+  @override
+  bool get isRecordUseEnabled => isEnabled(recordUse);
+
+  @override
+  bool get isSwiftPackageManagerEnabled => isEnabled(swiftPackageManager);
+
+  @override
+  bool get isOmitLegacyVersionFileEnabled => isEnabled(omitLegacyVersionFile);
+
+  @override
+  bool get isWindowingEnabled => isEnabled(windowingFeature);
+
+  @override
+  bool get isLLDBDebuggingEnabled => isEnabled(lldbDebugging);
+
+  @override
+  bool get isUISceneMigrationEnabled => isEnabled(uiSceneMigration);
+
+  @override
+  bool get isRiscv64SupportEnabled => isEnabled(riscv64);
+
+  @override
+  bool get isMacOSArm64OnlyEnabled => isEnabled(macOSArm64Only);
+
+  @override
+  bool get isHcppEnabled => isEnabled(hcpp);
+
+  @override
+  bool get isToolExtensionsEnabled => isEnabled(toolExtensionsFeature);
+}
+
+interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {
+  FlutterFeatureFlags({
+    required this._flutterVersion,
+    required this._featuresConfig,
+    required this.platform,
+  });
+
+  final FlutterVersion _flutterVersion;
+  final FlutterFeaturesConfig _featuresConfig;
+
+  @override
+  @protected
+  final Platform platform;
 
   @override
   bool isEnabled(Feature feature) {
     final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
+
+    // If unavailable, then no setting can enable this feature.
     if (!featureSetting.available) {
       return false;
     }
-    bool isEnabled = featureSetting.enabledByDefault;
-    if (feature.configSetting != null) {
-      final bool? configOverride = _config.getValue(feature.configSetting!) as bool?;
-      if (configOverride != null) {
-        isEnabled = configOverride;
-      }
-    }
-    if (feature.environmentOverride != null) {
-      if (_platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
-        isEnabled = true;
-      }
-    }
-    return isEnabled;
+
+    // Otherwise, read it from environment variable > project manifest > global config
+    return _featuresConfig.isEnabled(feature) ?? featureSetting.enabledByDefault;
   }
 }

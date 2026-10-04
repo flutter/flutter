@@ -1,0 +1,88 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "impeller/geometry/gradient.h"
+
+#include <algorithm>
+
+#include "flutter/fml/logging.h"
+
+namespace impeller {
+
+// TODO(b-luk): this should use a platform specific max texture size.
+// https://github.com/flutter/flutter/issues/191820
+static constexpr uint32_t kMaxGradientTextureSize = 1024;
+
+GradientData CreateGradientBuffer(const std::vector<Color>& colors,
+                                  const std::vector<Scalar>& stops) {
+  FML_DCHECK(stops.size() == colors.size());
+
+  uint32_t texture_size;
+  if (stops.size() == 2) {
+    texture_size = colors.size();
+  } else {
+    auto minimum_delta = 1.0;
+    // Avoid creating textures that are absurdly large due to stops that are
+    // very close together.
+    auto minimum_allowable_delta = 1.0 / (kMaxGradientTextureSize - 1.0);
+    for (size_t i = 1; i < stops.size(); i++) {
+      auto value = stops[i] - stops[i - 1];
+      if (value <= minimum_allowable_delta) {
+        minimum_delta = minimum_allowable_delta;
+        break;
+      }
+      if (value < minimum_delta) {
+        minimum_delta = value;
+      }
+    }
+    texture_size = static_cast<uint32_t>(std::round(1.0 / minimum_delta)) + 1;
+  }
+  GradientData result;
+  if (texture_size == colors.size() &&
+      colors.size() <= kMaxGradientTextureSize) {
+    result.colors = colors;
+  } else {
+    result.colors.reserve(texture_size);
+    Color previous_color = colors[0];
+    auto previous_stop = 0.0;
+    auto previous_color_index = 0;
+
+    // The first index is always equal to the first color, exactly.
+    result.colors.push_back(previous_color);
+
+    for (auto i = 1u; i < texture_size - 1; i++) {
+      auto scaled_i = i / (texture_size - 1.0);
+      Color next_color = colors[previous_color_index + 1];
+      auto next_stop = stops[previous_color_index + 1];
+      // We're almost exactly equal to the next stop.
+      if (ScalarNearlyEqual(scaled_i, next_stop)) {
+        result.colors.push_back(next_color);
+
+        previous_color = next_color;
+        previous_stop = next_stop;
+        previous_color_index += 1;
+      } else if (scaled_i < next_stop) {
+        // We're still between the current stop and the next stop.
+        auto t = (scaled_i - previous_stop) / (next_stop - previous_stop);
+        auto mixed_color = Color::Lerp(previous_color, next_color, t);
+
+        result.colors.push_back(mixed_color);
+      } else {
+        // We've passed the next stop. Advance to the next stop interval.
+        // Decrement `i` to re-evaluate the current texel against the new
+        // interval. When there are overlapping or zero-delta stops, this branch
+        // evaluates repeatedly until the overlap is passed.
+        previous_color = next_color;
+        previous_stop = next_stop;
+        previous_color_index += 1;
+        i--;
+      }
+    }
+    // The last index is always equal to the last color, exactly.
+    result.colors.push_back(colors.back());
+  }
+  return result;
+}
+
+}  // namespace impeller

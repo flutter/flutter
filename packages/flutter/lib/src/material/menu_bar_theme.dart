@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'menu_button_theme.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'menu_anchor.dart';
@@ -11,6 +14,7 @@ import 'theme.dart';
 
 // Examples can assume:
 // late Widget child;
+// late BuildContext context;
 
 /// A data class that [MenuBarTheme] uses to define the visual properties of
 /// [MenuBar] widgets.
@@ -20,7 +24,7 @@ import 'theme.dart';
 /// [MenuButtonThemeData] instead.
 ///
 /// Descendant widgets obtain the current [MenuBarThemeData] object using
-/// `MenuBarTheme.of(context)`.
+/// [MenuBarTheme.of].
 ///
 /// Typically, a [MenuBarThemeData] is specified as part of the overall [Theme]
 /// with [ThemeData.menuBarTheme]. Otherwise, [MenuTheme] can be used to
@@ -73,11 +77,7 @@ class MenuBarThemeData extends MenuThemeData {
 class MenuBarTheme extends InheritedTheme {
   /// Creates a theme that controls the configurations for [MenuBar] and
   /// [MenuItemButton] in its widget subtree.
-  const MenuBarTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const MenuBarTheme({super.key, required this.data, required super.child});
 
   /// The properties to set for [MenuBar] in this widget's descendants.
   final MenuBarThemeData data;
@@ -89,16 +89,7 @@ class MenuBarTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return MenuTheme(
-  ///     data: const MenuThemeData(
-  ///       style: MenuStyle(
-  ///         backgroundColor: MaterialStatePropertyAll<Color?>(Colors.red),
-  ///       ),
-  ///     ),
-  ///     child: child,
-  ///   );
-  /// }
+  /// MenuBarThemeData theme = MenuBarTheme.of(context);
   /// ```
   static MenuBarThemeData of(BuildContext context) {
     final MenuBarTheme? menuBarTheme = context.dependOnInheritedWidgetOfExactType<MenuBarTheme>();

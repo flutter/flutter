@@ -11,6 +11,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
+import '../context/tool_context.dart';
 import '../project.dart';
 import '../project_validator.dart';
 import '../runner/flutter_command.dart';
@@ -23,93 +24,103 @@ import 'validate_project.dart';
 
 class AnalyzeCommand extends FlutterCommand {
   AnalyzeCommand({
+    required this._allProjectValidators,
+    required this._suppressAnalytics,
+    required super.toolContext,
     bool verboseHelp = false,
     this.workingDirectory,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Terminal terminal,
-    required Logger logger,
-    required ProcessManager processManager,
-    required Artifacts artifacts,
-    required List<ProjectValidator> allProjectValidators,
-    required bool suppressAnalytics,
-  }) : _artifacts = artifacts,
-       _fileSystem = fileSystem,
-       _processManager = processManager,
-       _logger = logger,
-       _terminal = terminal,
-       _allProjectValidators = allProjectValidators,
-       _platform = platform,
-       _suppressAnalytics = suppressAnalytics {
-    argParser.addFlag('flutter-repo',
-        negatable: false,
-        help: 'Include all the examples and tests from the Flutter repository.',
-        hide: !verboseHelp);
-    argParser.addFlag('current-package',
-        help: 'Analyze the current project, if applicable.', defaultsTo: true);
-    argParser.addFlag('dartdocs',
-        negatable: false,
-        help: '(deprecated) List every public member that is lacking documentation. '
-              'This command will be removed in a future version of Flutter.',
-        hide: !verboseHelp);
-    argParser.addFlag('watch',
-        help: 'Run analysis continuously, watching the filesystem for changes.',
-        negatable: false);
-    argParser.addOption('write',
-        valueHelp: 'file',
-        help: 'Also output the results to a file. This is useful with "--watch" '
-              'if you want a file to always contain the latest results.');
-    argParser.addOption('dart-sdk',
-        valueHelp: 'path-to-sdk',
-        help: 'The path to the Dart SDK.',
-        hide: !verboseHelp);
-    argParser.addOption('protocol-traffic-log',
-        valueHelp: 'path-to-protocol-traffic-log',
-        help: 'The path to write the request and response protocol. This is '
-              'only intended to be used for debugging the tooling.',
-        hide: !verboseHelp);
-    argParser.addFlag('suggestions',
-        help: 'Show suggestions about the current flutter project.'
+  }) {
+    argParser.addFlag(
+      'flutter-repo',
+      negatable: false,
+      help: 'Include all the examples and tests from the Flutter repository.',
+      hide: !verboseHelp,
     );
-    argParser.addFlag('machine',
-        negatable: false,
-        help: 'Dumps a JSON with a subset of relevant data about the tool, project, '
-              'and environment.',
-        hide: !verboseHelp,
+    argParser.addFlag(
+      'current-package',
+      help: 'Analyze the current project, if applicable.',
+      defaultsTo: true,
     );
+    argParser.addFlag(
+      'dartdocs',
+      negatable: false,
+      help:
+          '(deprecated) List every public member that is lacking documentation. '
+          'This command will be removed in a future version of Flutter.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'watch',
+      help: 'Run analysis continuously, watching the filesystem for changes.',
+      negatable: false,
+    );
+    argParser.addOption(
+      'write',
+      valueHelp: 'file',
+      help:
+          'Also output the results to a file. This is useful with "--watch" '
+          'if you want a file to always contain the latest results.',
+    );
+    argParser.addOption(
+      'dart-sdk',
+      valueHelp: 'path-to-sdk',
+      help: 'The path to the Dart SDK.',
+      hide: !verboseHelp,
+    );
+    argParser.addOption(
+      'protocol-traffic-log',
+      valueHelp: 'path-to-protocol-traffic-log',
+      help:
+          'The path to write the request and response protocol. This is '
+          'only intended to be used for debugging the tooling.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag('suggestions', help: 'Show suggestions about the current flutter project.');
+    addMachineOutputFlag(verboseHelp: verboseHelp);
 
     // Hidden option to enable a benchmarking mode.
-    argParser.addFlag('benchmark',
-        negatable: false,
-        hide: !verboseHelp,
-        help: 'Also output the analysis time.');
+    argParser.addFlag(
+      'benchmark',
+      negatable: false,
+      hide: !verboseHelp,
+      help: 'Also output the analysis time.',
+    );
+    argParser.addFlag('plugins', defaultsTo: true, help: 'Whether to enable analyzer plugins.');
 
     usesPubOption();
 
     // Not used by analyze --watch
-    argParser.addFlag('congratulate',
-        help: 'Show output even when there are no errors, warnings, hints, or lints. '
-              'Ignored if "--watch" is specified.',
-        defaultsTo: true);
-    argParser.addFlag('preamble',
-        defaultsTo: true,
-        help: 'When analyzing the flutter repository, display the number of '
-              'files that will be analyzed.\n'
-              'Ignored if "--watch" is specified.');
-    argParser.addFlag('fatal-infos',
-        help: 'Treat info level issues as fatal.',
-        defaultsTo: true);
-    argParser.addFlag('fatal-warnings',
-        help: 'Treat warning level issues as fatal.',
-        defaultsTo: true);
+    argParser.addFlag(
+      'congratulate',
+      help:
+          'Show output even when there are no errors, warnings, hints, or lints. '
+          'Ignored if "--watch" is specified.',
+      defaultsTo: true,
+    );
+    argParser.addFlag(
+      'preamble',
+      defaultsTo: true,
+      help:
+          'When analyzing the flutter repository, display the number of '
+          'files that will be analyzed.\n'
+          'Ignored if "--watch" is specified.',
+    );
+    argParser.addFlag('fatal-infos', help: 'Treat info level issues as fatal.', defaultsTo: true);
+    argParser.addFlag(
+      'fatal-warnings',
+      help: 'Treat warning level issues as fatal.',
+      defaultsTo: true,
+    );
 
-    argParser.addFlag('android',
+    argParser.addFlag(
+      'android',
       negatable: false,
       help: 'Analyze Android sub-project. Used by internal tools only.',
       hide: !verboseHelp,
     );
 
-    argParser.addFlag('ios',
+    argParser.addFlag(
+      'ios',
       negatable: false,
       help: 'Analyze iOS Xcode sub-project. Used by internal tools only.',
       hide: !verboseHelp,
@@ -119,21 +130,26 @@ class AnalyzeCommand extends FlutterCommand {
       argParser.addSeparator('Usage: flutter analyze --android [arguments]');
     }
 
-    argParser.addFlag('list-build-variants',
+    argParser.addFlag(
+      'list-build-variants',
       negatable: false,
-      help: 'Print out a list of available build variants for the '
+      help:
+          'Print out a list of available build variants for the '
           'Android sub-project.',
       hide: !verboseHelp,
     );
 
-    argParser.addFlag('output-app-link-settings',
+    argParser.addFlag(
+      'output-app-link-settings',
       negatable: false,
-      help: 'Output a JSON with Android app link settings into a file. '
+      help:
+          'Output a JSON with Android app link settings into a file. '
           'The "--build-variant" must also be set.',
       hide: !verboseHelp,
     );
 
-    argParser.addOption('build-variant',
+    argParser.addOption(
+      'build-variant',
       help: 'Sets the Android build variant to be analyzed.',
       valueHelp: 'build variant',
       hide: !verboseHelp,
@@ -143,26 +159,32 @@ class AnalyzeCommand extends FlutterCommand {
       argParser.addSeparator('Usage: flutter analyze --ios [arguments]');
     }
 
-    argParser.addFlag('list-build-options',
-      help: 'Print out a list of available build options for the '
+    argParser.addFlag(
+      'list-build-options',
+      help:
+          'Print out a list of available build options for the '
           'iOS Xcode sub-project.',
       hide: !verboseHelp,
     );
 
-    argParser.addFlag('output-universal-link-settings',
+    argParser.addFlag(
+      'output-universal-link-settings',
       negatable: false,
-      help: 'Output a JSON with iOS Xcode universal link settings into a file. '
+      help:
+          'Output a JSON with iOS Xcode universal link settings into a file. '
           'The "--configuration" and "--target" must be set.',
       hide: !verboseHelp,
     );
 
-    argParser.addOption('configuration',
+    argParser.addOption(
+      'configuration',
       help: 'Sets the iOS build configuration to be analyzed.',
       valueHelp: 'configuration',
       hide: !verboseHelp,
     );
 
-    argParser.addOption('target',
+    argParser.addOption(
+      'target',
       help: 'Sets the iOS build target to be analyzed.',
       valueHelp: 'target',
       hide: !verboseHelp,
@@ -172,14 +194,11 @@ class AnalyzeCommand extends FlutterCommand {
   /// The working directory for testing analysis using dartanalyzer.
   final Directory? workingDirectory;
 
-  final Artifacts _artifacts;
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final Terminal _terminal;
-  final ProcessManager _processManager;
-  final Platform _platform;
   final List<ProjectValidator> _allProjectValidators;
   final bool _suppressAnalytics;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => 'analyze';
@@ -201,18 +220,19 @@ class AnalyzeCommand extends FlutterCommand {
     }
 
     // Or we're not in a project directory.
-    if (!_fileSystem.file('pubspec.yaml').existsSync()) {
+    if (!toolContext.fs.file('pubspec.yaml').existsSync()) {
       return false;
     }
 
     // Don't run pub if asking for machine output.
-    if (boolArg('machine')) {
+    if (outputMachineFormat) {
       return false;
     }
 
-    // Don't run pub if asking for android analysis.
+    // Android analyze needs to process resource, i.e. evaluating build
+    // settings and assets, and thus needs to run pub.
     if (boolArg('android')) {
-      return false;
+      return true;
     }
 
     return super.shouldRunPub;
@@ -220,11 +240,22 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final Artifacts artifacts = toolContext.artifacts;
+    final FileSystem fileSystem = toolContext.fs;
+    final Logger logger = toolContext.logger;
+    final Platform platform = toolContext.platform;
+    final ProcessManager processManager = toolContext.processManager;
+    final FlutterProjectFactory projectFactory = toolContext.projectFactory;
+    final Terminal terminal = toolContext.terminal;
+
     if (boolArg('android')) {
       final AndroidAnalyzeOption option;
       final String? buildVariant;
-      if (argResults!['list-build-variants'] as bool && argResults!['output-app-link-settings'] as bool) {
-        throwToolExit('Only one of "--list-build-variants" or "--output-app-link-settings" can be provided');
+      if (argResults!['list-build-variants'] as bool &&
+          argResults!['output-app-link-settings'] as bool) {
+        throwToolExit(
+          'Only one of "--list-build-variants" or "--output-app-link-settings" can be provided',
+        );
       }
       if (argResults!['list-build-variants'] as bool) {
         option = AndroidAnalyzeOption.listBuildVariant;
@@ -238,28 +269,33 @@ class AnalyzeCommand extends FlutterCommand {
       } else {
         throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
       }
-      final Set<String> items = findDirectories(argResults!, _fileSystem);
+      final Set<String> items = findDirectories(argResults!, fileSystem);
       final String directoryPath;
-      if (items.isEmpty) { // user did not specify any path
-        directoryPath = _fileSystem.currentDirectory.path;
-      } else if (items.length > 1) { // if the user sends more than one path
+      if (items.isEmpty) {
+        // user did not specify any path
+        directoryPath = fileSystem.currentDirectory.path;
+      } else if (items.length > 1) {
+        // if the user sends more than one path
         throwToolExit('The Android analyze can process only one directory path');
       } else {
         directoryPath = items.first;
       }
       await AndroidAnalyze(
-        fileSystem: _fileSystem,
+        fileSystem: fileSystem,
         option: option,
         userPath: directoryPath,
         buildVariant: buildVariant,
-        logger: _logger,
+        logger: logger,
       ).analyze();
     } else if (boolArg('ios')) {
       final IOSAnalyzeOption option;
       final String? configuration;
       final String? target;
-      if (argResults!['list-build-options'] as bool && argResults!['output-universal-link-settings'] as bool) {
-        throwToolExit('Only one of "--list-build-options" or "--output-universal-link-settings" can be provided');
+      if (argResults!['list-build-options'] as bool &&
+          argResults!['output-universal-link-settings'] as bool) {
+        throwToolExit(
+          'Only one of "--list-build-options" or "--output-universal-link-settings" can be provided',
+        );
       }
       if (argResults!['list-build-options'] as bool) {
         option = IOSAnalyzeOption.listBuildOptions;
@@ -278,21 +314,23 @@ class AnalyzeCommand extends FlutterCommand {
       } else {
         throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
       }
-      final Set<String> items = findDirectories(argResults!, _fileSystem);
+      final Set<String> items = findDirectories(argResults!, fileSystem);
       final String directoryPath;
-      if (items.isEmpty) { // user did not specify any path
-        directoryPath = _fileSystem.currentDirectory.path;
-      } else if (items.length > 1) { // if the user sends more than one path
+      if (items.isEmpty) {
+        // user did not specify any path
+        directoryPath = fileSystem.currentDirectory.path;
+      } else if (items.length > 1) {
+        // if the user sends more than one path
         throwToolExit('The iOS analyze can process only one directory path');
       } else {
         directoryPath = items.first;
       }
       await IOSAnalyze(
-        project: FlutterProject.fromDirectory(_fileSystem.directory(directoryPath)),
+        project: projectFactory.fromDirectory(fileSystem.directory(directoryPath)),
         option: option,
         configuration: configuration,
         target: target,
-        logger: _logger,
+        logger: logger,
       ).analyze();
     } else if (boolArg('suggestions')) {
       final String directoryPath;
@@ -300,11 +338,13 @@ class AnalyzeCommand extends FlutterCommand {
         throwToolExit('flag --watch is not compatible with --suggestions');
       }
       if (workingDirectory == null) {
-        final Set<String> items = findDirectories(argResults!, _fileSystem);
-        if (items.isEmpty) { // user did not specify any path
-          directoryPath = _fileSystem.currentDirectory.path;
-          _logger.printTrace('Showing suggestions for current directory: $directoryPath');
-        } else if (items.length > 1) { // if the user sends more than one path
+        final Set<String> items = findDirectories(argResults!, fileSystem);
+        if (items.isEmpty) {
+          // user did not specify any path
+          directoryPath = fileSystem.currentDirectory.path;
+          logger.printTrace('Showing suggestions for current directory: $directoryPath');
+        } else if (items.length > 1) {
+          // if the user sends more than one path
           throwToolExit('The suggestions flag can process only one directory path');
         } else {
           directoryPath = items.first;
@@ -313,37 +353,39 @@ class AnalyzeCommand extends FlutterCommand {
         directoryPath = workingDirectory!.path;
       }
       return ValidateProject(
-        fileSystem: _fileSystem,
-        logger: _logger,
         allProjectValidators: _allProjectValidators,
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        projectFactory: projectFactory,
         userPath: directoryPath,
-        processManager: _processManager,
-        machine: boolArg('machine'),
+        machine: outputMachineFormat,
       ).run();
     } else if (boolArg('watch')) {
       await AnalyzeContinuously(
         argResults!,
         runner!.getRepoPackages(),
-        fileSystem: _fileSystem,
-        logger: _logger,
-        platform: _platform,
-        processManager: _processManager,
-        terminal: _terminal,
-        artifacts: _artifacts,
+        artifacts: artifacts,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        shutdownHooks: toolContext.shutdownHooks,
         suppressAnalytics: _suppressAnalytics,
+        terminal: terminal,
       ).analyze();
     } else {
       await AnalyzeOnce(
         argResults!,
         runner!.getRepoPackages(),
-        workingDirectory: workingDirectory,
-        fileSystem: _fileSystem,
-        logger: _logger,
-        platform: _platform,
-        processManager: _processManager,
-        terminal: _terminal,
-        artifacts: _artifacts,
+        artifacts: artifacts,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
         suppressAnalytics: _suppressAnalytics,
+        terminal: terminal,
+        workingDirectory: workingDirectory,
       ).analyze();
     }
     return FlutterCommandResult.success();

@@ -15,7 +15,7 @@ private interface can be accessed by the test.
 
 The tests are run like so:
 
-```shell
+```sh
 dart run bin/test_private.dart
 ```
 

@@ -15,6 +15,7 @@ class TestGestureArenaMember extends GestureArenaMember {
     expect(key, equals(primaryKey));
     acceptRan = true;
   }
+
   bool rejectRan = false;
 
   @override
@@ -63,7 +64,7 @@ class GestureTester {
 
 void main() {
   test('Should win by accepting', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.arena.close(primaryKey);
@@ -73,7 +74,7 @@ void main() {
   });
 
   test('Should win by sweep', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.arena.close(primaryKey);
@@ -83,7 +84,7 @@ void main() {
   });
 
   test('Should win on release after hold sweep release', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.arena.close(primaryKey);
@@ -97,7 +98,7 @@ void main() {
   });
 
   test('Should win on sweep after hold release sweep', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.arena.close(primaryKey);
@@ -111,7 +112,7 @@ void main() {
   });
 
   test('Only first winner should win', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.arena.close(primaryKey);
@@ -122,7 +123,7 @@ void main() {
   });
 
   test('Only first winner should win, regardless of order', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.arena.close(primaryKey);
@@ -133,7 +134,7 @@ void main() {
   });
 
   test('Win before close is delayed to close', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.expectNothing();
@@ -144,7 +145,7 @@ void main() {
   });
 
   test('Win before close is delayed to close, and only first winner should win', () {
-    final GestureTester tester = GestureTester();
+    final tester = GestureTester();
     tester.addFirst();
     tester.addSecond();
     tester.expectNothing();
@@ -155,15 +156,64 @@ void main() {
     tester.expectFirstWin();
   });
 
-  test('Win before close is delayed to close, and only first winner should win, regardless of order', () {
-    final GestureTester tester = GestureTester();
-    tester.addFirst();
-    tester.addSecond();
-    tester.expectNothing();
-    tester.secondEntry.resolve(GestureDisposition.accepted);
-    tester.firstEntry.resolve(GestureDisposition.accepted);
-    tester.expectNothing();
-    tester.arena.close(primaryKey);
-    tester.expectSecondWin();
-  });
+  test(
+    'Win before close is delayed to close, and only first winner should win, regardless of order',
+    () {
+      final tester = GestureTester();
+      tester.addFirst();
+      tester.addSecond();
+      tester.expectNothing();
+      tester.secondEntry.resolve(GestureDisposition.accepted);
+      tester.firstEntry.resolve(GestureDisposition.accepted);
+      tester.expectNothing();
+      tester.arena.close(primaryKey);
+      tester.expectSecondWin();
+    },
+  );
+
+  test(
+    'Eager winner should be cleared when the eager winner rejects while arena is still open',
+    () {
+      final arena = GestureArenaManager();
+      final memberA = TestGestureArenaMember();
+      final memberB = TestGestureArenaMember();
+      final memberC = TestGestureArenaMember();
+
+      final GestureArenaEntry entryA = arena.add(primaryKey, memberA);
+      arena.add(primaryKey, memberB);
+      arena.add(primaryKey, memberC);
+
+      // A accepts while arena is open, becoming the eager winner.
+      entryA.resolve(GestureDisposition.accepted);
+      expect(memberA.acceptRan, isFalse); // Not yet resolved, arena still open.
+      expect(memberA.rejectRan, isFalse);
+
+      // A then gets rejected while arena is still open.
+      // Without the fix: eagerWinner still points to A (stale reference).
+      // With the fix: eagerWinner is cleared.
+      entryA.resolve(GestureDisposition.rejected);
+      expect(memberA.rejectRan, isTrue);
+      expect(memberA.acceptRan, isFalse);
+
+      // Close the arena. _tryToResolveArena sees members = [B, C].
+      // Without the fix: eagerWinner (A) is non-null → _resolveInFavorOf(A)
+      //   → A.acceptGesture() called again on an already-rejected member,
+      //   → B and C incorrectly rejected. Assert fires in debug mode.
+      // With the fix: eagerWinner is null, arena stays unresolved.
+      arena.close(primaryKey);
+
+      // Verify A was NOT incorrectly accepted again by a stale eager winner.
+      expect(memberA.acceptRan, isFalse);
+      // B and C should NOT have been prematurely rejected by stale eager winner.
+      expect(memberB.rejectRan, isFalse);
+      expect(memberC.rejectRan, isFalse);
+
+      // Force resolution via sweep. B should win as the first remaining member.
+      arena.sweep(primaryKey);
+      expect(memberB.acceptRan, isTrue);
+      expect(memberB.rejectRan, isFalse);
+      expect(memberC.rejectRan, isTrue);
+      expect(memberC.acceptRan, isFalse);
+    },
+  );
 }

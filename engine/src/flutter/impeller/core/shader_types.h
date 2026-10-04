@@ -1,0 +1,429 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef FLUTTER_IMPELLER_CORE_SHADER_TYPES_H_
+#define FLUTTER_IMPELLER_CORE_SHADER_TYPES_H_
+
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <optional>
+#include <string_view>
+#include <vector>
+
+#include "flutter/fml/hash_combine.h"
+#include "flutter/fml/logging.h"
+#include "impeller/core/runtime_types.h"
+#include "impeller/geometry/half.h"
+#include "impeller/geometry/matrix.h"
+
+namespace impeller {
+
+enum class ShaderStage {
+  kUnknown,
+  kVertex,
+  kFragment,
+  kCompute,
+};
+
+constexpr ShaderStage ToShaderStage(RuntimeShaderStage stage) {
+  switch (stage) {
+    case RuntimeShaderStage::kVertex:
+      return ShaderStage::kVertex;
+    case RuntimeShaderStage::kFragment:
+      return ShaderStage::kFragment;
+    case RuntimeShaderStage::kCompute:
+      return ShaderStage::kCompute;
+  }
+  FML_UNREACHABLE();
+}
+
+enum class ShaderType {
+  kUnknown,
+  kVoid,
+  kBoolean,
+  kSignedByte,
+  kUnsignedByte,
+  kSignedShort,
+  kUnsignedShort,
+  kSignedInt,
+  kUnsignedInt,
+  kSignedInt64,
+  kUnsignedInt64,
+  kAtomicCounter,
+  kHalfFloat,
+  kFloat,
+  kDouble,
+  kStruct,
+  kImage,
+  kSampledImage,
+  kSampler,
+};
+
+// This is a separate type from ShaderType because ShaderType is used for
+// OpenGLES's attrib type which doesn't map to things like vec4.
+enum class ShaderFloatType {
+  kFloat,
+  kVec2,
+  kVec3,
+  kVec4,
+  kMat2,
+  kMat3,
+  kMat4,
+};
+
+struct ShaderStructMemberMetadata {
+  ShaderType type;
+  std::string name;
+  size_t offset;
+  size_t size;
+  size_t byte_length;
+  std::optional<size_t> array_elements;
+  std::optional<ShaderFloatType> float_type;
+};
+
+/// @brief Derive the `ShaderFloatType` from the base `ShaderType` and
+///        the (vec_size, columns) dimensions reported by SPIR-V Cross.
+///
+/// `vec_size` is the component count of a single column (the vector length
+/// for non-matrix types, the row count for matrices). `columns` is 1 for
+/// vectors and N for an NxN matrix. Returns `std::nullopt` for non-float
+/// types and for shapes that don't map to a `ShaderFloatType`.
+constexpr std::optional<ShaderFloatType> DeriveShaderFloatType(ShaderType type,
+                                                               size_t vec_size,
+                                                               size_t columns) {
+  if (type != ShaderType::kFloat) {
+    return std::nullopt;
+  }
+  if (columns == 1) {
+    switch (vec_size) {
+      case 1:
+        return ShaderFloatType::kFloat;
+      case 2:
+        return ShaderFloatType::kVec2;
+      case 3:
+        return ShaderFloatType::kVec3;
+      case 4:
+        return ShaderFloatType::kVec4;
+      default:
+        return std::nullopt;
+    }
+  }
+  if (vec_size == columns) {
+    switch (vec_size) {
+      case 2:
+        return ShaderFloatType::kMat2;
+      case 3:
+        return ShaderFloatType::kMat3;
+      case 4:
+        return ShaderFloatType::kMat4;
+      default:
+        return std::nullopt;
+    }
+  }
+  return std::nullopt;
+}
+
+struct ShaderMetadata {
+  // This must match the uniform name in the shader program.
+  std::string name;
+  std::vector<ShaderStructMemberMetadata> members;
+};
+
+/// @brief The `ext_res_0` / `texture_index` stamped on a resource slot whose
+///        backing the shader compiler dead-code-eliminated.
+///
+/// SPIRV-Cross returns `~0u` from `get_automatic_msl_resource_binding` for a
+/// resource dropped from the compiled Metal shader, so a slot carrying this
+/// value has no argument-table index. It must be skipped, never bound: Metal's
+/// `setFragment/VertexTexture:atIndex:` has no bounds check and crashes on an
+/// out-of-range index. The GLES backend already skips optimized-out bindings.
+inline constexpr uint32_t kOptimizedOutBinding =
+    std::numeric_limits<uint32_t>::max();
+
+/// @brief Metadata required to bind a buffer.
+///
+/// OpenGL binding requires the usage of the separate shader metadata struct.
+struct ShaderUniformSlot {
+  /// @brief The name of the uniform slot.
+  const char* name;
+
+  /// @brief `ext_res_0` is the Metal binding value.
+  size_t ext_res_0;
+
+  /// @brief The Vulkan descriptor set index.
+  size_t set;
+
+  /// @brief The Vulkan binding value.
+  size_t binding;
+};
+
+/// @brief Metadata required to bind a combined texture and sampler.
+///
+/// OpenGL binding requires the usage of the separate shader metadata struct.
+struct SampledImageSlot {
+  /// @brief The name of the uniform slot.
+  const char* name;
+
+  /// @brief `ext_res_0` is the Metal binding value.
+  size_t texture_index;
+
+  /// @brief The Vulkan descriptor set index.
+  size_t set;
+
+  /// @brief The Vulkan binding value.
+  size_t binding;
+};
+
+/// @brief  The format of a single vertex attribute, combining its scalar kind,
+///         bit width, and component count.
+///
+///         Each backend maps these values to its own native vertex format, so
+///         this is the shared vocabulary for vertex inputs. The values are
+///         currently derived from a reflected `ShaderStageIOSlot` (see
+///         `ShaderStageIOSlot::GetVertexAttributeFormat`), so only the kinds
+///         that reflection produces are reachable.
+enum class VertexAttributeFormat {
+  /// Not a valid vertex attribute (a matrix input, an unsupported scalar kind,
+  /// or a component count outside 1 to 4).
+  kInvalid,
+
+  kFloat32,
+  kFloat32x2,
+  kFloat32x3,
+  kFloat32x4,
+
+  kFloat16,
+  kFloat16x2,
+  kFloat16x3,
+  kFloat16x4,
+
+  kSInt8,
+  kSInt8x2,
+  kSInt8x3,
+  kSInt8x4,
+
+  kUInt8,
+  kUInt8x2,
+  kUInt8x3,
+  kUInt8x4,
+
+  kSInt16,
+  kSInt16x2,
+  kSInt16x3,
+  kSInt16x4,
+
+  kUInt16,
+  kUInt16x2,
+  kUInt16x3,
+  kUInt16x4,
+
+  kSInt32,
+  kSInt32x2,
+  kSInt32x3,
+  kSInt32x4,
+
+  kUInt32,
+  kUInt32x2,
+  kUInt32x3,
+  kUInt32x4,
+};
+
+struct ShaderStageIOSlot {
+  const char* name;
+  size_t location;
+  size_t set;
+  size_t binding;
+  ShaderType type;
+  size_t bit_width;
+  size_t vec_size;
+  size_t columns;
+  size_t offset;
+  bool relaxed_precision;
+
+  constexpr size_t GetHash() const {
+    return fml::HashCombine(name, location, set, binding, type, bit_width,
+                            vec_size, columns, offset, relaxed_precision);
+  }
+
+  constexpr bool operator==(const ShaderStageIOSlot& other) const {
+    return name == other.name &&                         //
+           location == other.location &&                 //
+           set == other.set &&                           //
+           binding == other.binding &&                   //
+           type == other.type &&                         //
+           bit_width == other.bit_width &&               //
+           vec_size == other.vec_size &&                 //
+           columns == other.columns &&                   //
+           offset == other.offset &&                     //
+           relaxed_precision == other.relaxed_precision  //
+        ;
+  }
+
+  /// @brief  Derives the flat vertex attribute format from this slot's scalar
+  ///         type, bit width, and component count.
+  ///
+  ///         Returns `kInvalid` for matrices, component counts outside 1 to 4,
+  ///         mismatched bit widths, and scalar kinds that are not valid vertex
+  ///         inputs (boolean, 64-bit integers, and doubles).
+  constexpr VertexAttributeFormat GetVertexAttributeFormat() const {
+    if (columns != 1u || vec_size < 1u || vec_size > 4u) {
+      return VertexAttributeFormat::kInvalid;
+    }
+    auto pick = [vec_size = vec_size](
+                    VertexAttributeFormat x1, VertexAttributeFormat x2,
+                    VertexAttributeFormat x3, VertexAttributeFormat x4) {
+      switch (vec_size) {
+        case 1:
+          return x1;
+        case 2:
+          return x2;
+        case 3:
+          return x3;
+        case 4:
+          return x4;
+        default:
+          return VertexAttributeFormat::kInvalid;
+      }
+    };
+    switch (type) {
+      case ShaderType::kFloat:
+        return bit_width == 32u ? pick(VertexAttributeFormat::kFloat32,
+                                       VertexAttributeFormat::kFloat32x2,
+                                       VertexAttributeFormat::kFloat32x3,
+                                       VertexAttributeFormat::kFloat32x4)
+                                : VertexAttributeFormat::kInvalid;
+      case ShaderType::kHalfFloat:
+        return bit_width == 16u ? pick(VertexAttributeFormat::kFloat16,
+                                       VertexAttributeFormat::kFloat16x2,
+                                       VertexAttributeFormat::kFloat16x3,
+                                       VertexAttributeFormat::kFloat16x4)
+                                : VertexAttributeFormat::kInvalid;
+      case ShaderType::kSignedByte:
+        return bit_width == 8u ? pick(VertexAttributeFormat::kSInt8,
+                                      VertexAttributeFormat::kSInt8x2,
+                                      VertexAttributeFormat::kSInt8x3,
+                                      VertexAttributeFormat::kSInt8x4)
+                               : VertexAttributeFormat::kInvalid;
+      case ShaderType::kUnsignedByte:
+        return bit_width == 8u ? pick(VertexAttributeFormat::kUInt8,
+                                      VertexAttributeFormat::kUInt8x2,
+                                      VertexAttributeFormat::kUInt8x3,
+                                      VertexAttributeFormat::kUInt8x4)
+                               : VertexAttributeFormat::kInvalid;
+      case ShaderType::kSignedShort:
+        return bit_width == 16u ? pick(VertexAttributeFormat::kSInt16,
+                                       VertexAttributeFormat::kSInt16x2,
+                                       VertexAttributeFormat::kSInt16x3,
+                                       VertexAttributeFormat::kSInt16x4)
+                                : VertexAttributeFormat::kInvalid;
+      case ShaderType::kUnsignedShort:
+        return bit_width == 16u ? pick(VertexAttributeFormat::kUInt16,
+                                       VertexAttributeFormat::kUInt16x2,
+                                       VertexAttributeFormat::kUInt16x3,
+                                       VertexAttributeFormat::kUInt16x4)
+                                : VertexAttributeFormat::kInvalid;
+      case ShaderType::kSignedInt:
+        return bit_width == 32u ? pick(VertexAttributeFormat::kSInt32,
+                                       VertexAttributeFormat::kSInt32x2,
+                                       VertexAttributeFormat::kSInt32x3,
+                                       VertexAttributeFormat::kSInt32x4)
+                                : VertexAttributeFormat::kInvalid;
+      case ShaderType::kUnsignedInt:
+        return bit_width == 32u ? pick(VertexAttributeFormat::kUInt32,
+                                       VertexAttributeFormat::kUInt32x2,
+                                       VertexAttributeFormat::kUInt32x3,
+                                       VertexAttributeFormat::kUInt32x4)
+                                : VertexAttributeFormat::kInvalid;
+      case ShaderType::kUnknown:
+      case ShaderType::kVoid:
+      case ShaderType::kBoolean:
+      case ShaderType::kSignedInt64:
+      case ShaderType::kUnsignedInt64:
+      case ShaderType::kAtomicCounter:
+      case ShaderType::kDouble:
+      case ShaderType::kStruct:
+      case ShaderType::kImage:
+      case ShaderType::kSampledImage:
+      case ShaderType::kSampler:
+        return VertexAttributeFormat::kInvalid;
+    }
+    FML_UNREACHABLE();
+  }
+};
+
+/// @brief  Whether a vertex buffer binding advances its read position once
+///         per vertex or once per instance.
+///
+///         An instance-rate binding supplies per-instance data (such as a
+///         per-instance model transform) to an instanced draw. It maps to
+///         `MTLVertexStepFunctionPerInstance`, `VK_VERTEX_INPUT_RATE_INSTANCE`,
+///         and a `glVertexAttribDivisor` of 1.
+enum class VertexInputRate {
+  /// The binding is read once per vertex. This is the default.
+  kVertex,
+  /// The binding is read once per instance.
+  kInstance,
+};
+
+struct ShaderStageBufferLayout {
+  size_t stride;
+  size_t binding;
+  /// The rate at which this binding advances during a draw. Defaults to
+  /// per-vertex; an instanced draw reads per-instance bindings once per
+  /// instance.
+  VertexInputRate input_rate = VertexInputRate::kVertex;
+
+  constexpr size_t GetHash() const {
+    return fml::HashCombine(stride, binding, input_rate);
+  }
+
+  constexpr bool operator==(const ShaderStageBufferLayout& other) const {
+    return stride == other.stride &&    //
+           binding == other.binding &&  //
+           input_rate == other.input_rate;
+  }
+};
+
+// These enum values were chosen to match the same values
+// in the VK Descriptor Type enum.
+enum class DescriptorType {
+  kSampler = 0,
+  kSampledImage = 1,
+  kImage = 2,
+  kUniformBuffer = 6,
+  kStorageBuffer = 7,
+  kInputAttachment = 10,
+};
+
+struct DescriptorSetLayout {
+  uint32_t binding;
+  DescriptorType descriptor_type;
+  ShaderStage shader_stage;
+};
+
+template <size_t Size>
+struct Padding {
+ private:
+  uint8_t pad_[Size];
+};
+
+/// @brief Struct used for padding uniform buffer array elements.
+template <typename T,
+          size_t Size,
+          class = std::enable_if_t<std::is_standard_layout_v<T>>>
+struct Padded {
+  T value;
+  Padding<Size> _PADDING_;
+
+  Padded(T p_value) : value(p_value) {};  // NOLINT(google-explicit-constructor)
+};
+
+inline constexpr Vector4 ToVector(Color color) {
+  return {color.red, color.green, color.blue, color.alpha};
+}
+
+}  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_CORE_SHADER_TYPES_H_

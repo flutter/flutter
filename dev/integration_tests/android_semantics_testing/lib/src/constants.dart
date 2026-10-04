@@ -25,11 +25,22 @@ class AndroidClassName {
 
   /// The default className for buttons.
   static const String button = 'android.widget.Button';
+
+  /// The class name used for menu items.
+  static const String menuItem = 'android.view.MenuItem';
+
+  /// The class name used for spinners (combobox/menu).
+  static const String spinner = 'android.widget.Spinner';
+
+  /// The class name used for list views.
+  static const String listView = 'android.widget.ListView';
+
+  /// The class name used for radio groups.
+  static const String radioGroup = 'android.widget.RadioGroup';
 }
 
 /// Action constants which correspond to `AccessibilityAction` in Android.
 enum AndroidSemanticsAction {
-
   /// Matches `AccessibilityAction.ACTION_FOCUS`.
   focus(_kFocusIndex),
 

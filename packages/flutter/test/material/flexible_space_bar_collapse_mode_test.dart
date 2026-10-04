@@ -23,17 +23,11 @@ void main() {
                 expandedHeight: expandedAppbarHeight,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    key: appbarContainerKey,
-                  ),
+                  background: Container(key: appbarContainerKey),
                   collapseMode: CollapseMode.none,
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 10000.0,
-                ),
-              ),
+              SliverToBoxAdapter(child: Container(height: 10000.0)),
             ],
           ),
         ),
@@ -47,7 +41,7 @@ void main() {
 
     expect(topBeforeScroll.dy, equals(0.0));
     expect(topAfterScroll.dy, equals(0.0));
-  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.fuchsia }));
+  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.fuchsia}));
 
   testWidgets('FlexibleSpaceBar collapse mode pin', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -61,17 +55,11 @@ void main() {
                 expandedHeight: expandedAppbarHeight,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    key: appbarContainerKey,
-                  ),
+                  background: Container(key: appbarContainerKey),
                   collapseMode: CollapseMode.pin,
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 10000.0,
-                ),
-              ),
+              SliverToBoxAdapter(child: Container(height: 10000.0)),
             ],
           ),
         ),
@@ -85,7 +73,7 @@ void main() {
 
     expect(topBeforeScroll.dy, equals(0.0));
     expect(topAfterScroll.dy, equals(-100.0));
-  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.fuchsia }));
+  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.fuchsia}));
 
   testWidgets('FlexibleSpaceBar collapse mode parallax', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -98,17 +86,9 @@ void main() {
               SliverAppBar(
                 expandedHeight: expandedAppbarHeight,
                 pinned: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    key: appbarContainerKey,
-                  ),
-                ),
+                flexibleSpace: FlexibleSpaceBar(background: Container(key: appbarContainerKey)),
               ),
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 10000.0,
-                ),
-              ),
+              SliverToBoxAdapter(child: Container(height: 10000.0)),
             ],
           ),
         ),
@@ -123,7 +103,7 @@ void main() {
     expect(topBeforeScroll.dy, equals(0.0));
     expect(topAfterScroll.dy, lessThan(10.0));
     expect(topAfterScroll.dy, greaterThan(-50.0));
-  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.fuchsia }));
+  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.fuchsia}));
 }
 
 Future<void> slowDrag(WidgetTester tester, Key widget, Offset offset) async {

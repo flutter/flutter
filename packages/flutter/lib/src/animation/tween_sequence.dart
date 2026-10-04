@@ -50,18 +50,17 @@ class TweenSequence<T> extends Animatable<T> {
   /// There's a small cost associated with building a [TweenSequence] so it's
   /// best to reuse one, rather than rebuilding it on every frame, when that's
   /// possible.
-  TweenSequence(List<TweenSequenceItem<T>> items)
-      : assert(items.isNotEmpty) {
+  TweenSequence(List<TweenSequenceItem<T>> items) : assert(items.isNotEmpty) {
     _items.addAll(items);
 
-    double totalWeight = 0.0;
+    var totalWeight = 0.0;
     for (final TweenSequenceItem<T> item in _items) {
       totalWeight += item.weight;
     }
     assert(totalWeight > 0.0);
 
-    double start = 0.0;
-    for (int i = 0; i < _items.length; i += 1) {
+    var start = 0.0;
+    for (var i = 0; i < _items.length; i += 1) {
       final double end = i == _items.length - 1 ? 1.0 : start + _items[i].weight / totalWeight;
       _intervals.add(_Interval(start, end));
       start = end;
@@ -83,7 +82,7 @@ class TweenSequence<T> extends Animatable<T> {
     if (t == 1.0) {
       return _evaluateAt(t, _items.length - 1);
     }
-    for (int index = 0; index < _items.length; index++) {
+    for (var index = 0; index < _items.length; index++) {
       if (_intervals[index].contains(t)) {
         return _evaluateAt(t, index);
       }
@@ -123,10 +122,7 @@ class TweenSequenceItem<T> {
   /// Construct a TweenSequenceItem.
   ///
   /// The [weight] must be greater than 0.0.
-  const TweenSequenceItem({
-    required this.tween,
-    required this.weight,
-  }) : assert(weight > 0.0);
+  const TweenSequenceItem({required this.tween, required this.weight}) : assert(weight > 0.0);
 
   /// Defines the value of the [TweenSequence] for the interval within the
   /// animation's duration indicated by [weight] and this item's position

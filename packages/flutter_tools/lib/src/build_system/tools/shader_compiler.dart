@@ -10,32 +10,43 @@ import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
 import '../../artifacts.dart';
+import '../../base/common.dart';
 import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
+import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
+import '../../globals.dart' as globals;
 import '../build_system.dart';
+import '../depfile.dart';
 
 /// A wrapper around [ShaderCompiler] to support hot reload of shader sources.
 class DevelopmentShaderCompiler {
   DevelopmentShaderCompiler({
-    required ShaderCompiler shaderCompiler,
+    required this._shaderCompiler,
     required FileSystem fileSystem,
+    required Logger logger,
     @visibleForTesting math.Random? random,
-  }) : _shaderCompiler = shaderCompiler,
-       _fileSystem = fileSystem,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _depfileService = DepfileService(fileSystem: fileSystem, logger: logger),
        _random = random ?? math.Random();
 
   final ShaderCompiler _shaderCompiler;
   final FileSystem _fileSystem;
+  final Logger _logger;
+  final DepfileService _depfileService;
   final Pool _compilationPool = Pool(4);
   final math.Random _random;
 
+  final _dependencies = <String, List<File>>{};
+  final _lastCompiledTime = <String, DateTime>{};
+
   late TargetPlatform _targetPlatform;
-  bool _debugConfigured = false;
+  var _debugConfigured = false;
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
@@ -52,8 +63,10 @@ class DevelopmentShaderCompiler {
   Future<DevFSContent?> recompileShader(DevFSContent inputShader) async {
     assert(_debugConfigured);
     final File output = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.temp');
+    final File depfile = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.d');
+    final startTime = DateTime.now();
     late File inputFile;
-    bool cleanupInput = false;
+    var cleanupInput = false;
     Uint8List result;
     PoolResource? resource;
     try {
@@ -70,19 +83,63 @@ class DevelopmentShaderCompiler {
         outputPath: output.path,
         targetPlatform: _targetPlatform,
         fatal: false,
+        depfilePath: depfile.path,
       );
       if (!success) {
         return null;
       }
       result = output.readAsBytesSync();
+
+      if (inputShader is DevFSFileContent) {
+        try {
+          if (depfile.existsSync()) {
+            final Depfile parsedDepfile = _depfileService.parse(depfile);
+            _dependencies[inputShader.file.path] = parsedDepfile.inputs;
+            _lastCompiledTime[inputShader.file.path] = startTime;
+          }
+        } on Exception catch (e) {
+          _logger.printTrace('Error parsing depfile: $e');
+        }
+      }
     } finally {
       resource?.release();
       ErrorHandlingFileSystem.deleteIfExists(output);
+      ErrorHandlingFileSystem.deleteIfExists(depfile);
       if (cleanupInput) {
         ErrorHandlingFileSystem.deleteIfExists(inputFile);
       }
     }
     return DevFSByteContent(result);
+  }
+
+  /// Returns true if any of the tracker dependencies of the [shaderContent]
+  /// have been modified since it was last compiled.
+  bool areDependenciesModified(DevFSContent shaderContent) {
+    if (shaderContent is! DevFSFileContent) {
+      return false;
+    }
+    final String path = shaderContent.file.path;
+    final List<File>? deps = _dependencies[path];
+    final DateTime? lastCompiled = _lastCompiledTime[path];
+    if (deps == null || lastCompiled == null) {
+      return false;
+    }
+    for (final File dep in deps) {
+      try {
+        if (!dep.existsSync()) {
+          return true;
+        }
+        if (dep.statSync().modified.isAfter(lastCompiled)) {
+          return true;
+        }
+      } on FileSystemException catch (e) {
+        _logger.printTrace(
+          'Error checking shader dependency modification time for ${dep.path}: $e',
+        );
+        return true;
+      }
+    }
+    return false;
   }
 }
 
@@ -90,34 +147,50 @@ class DevelopmentShaderCompiler {
 /// impellerc.
 class ShaderCompiler {
   ShaderCompiler({
-    required ProcessManager processManager,
-    required Logger logger,
+    required this._processManager,
+    required this._logger,
     required FileSystem fileSystem,
-    required Artifacts artifacts,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _fs = fileSystem,
-       _artifacts = artifacts;
+    required this._artifacts,
+    Platform? platform,
+  }) : _fs = fileSystem,
+       _platform = platform ?? _lookupPlatform();
+
+  static Platform _lookupPlatform() {
+    try {
+      return globals.platform;
+    } on UnsupportedError {
+      return const LocalPlatform();
+    }
+  }
 
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fs;
   final Artifacts _artifacts;
+  final Platform _platform;
+  bool _hasLoggedSecurityBlockError = false;
+  final Set<String> _loggedWarningShaders = <String>{};
 
   List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
     switch (targetPlatform) {
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android:
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
-        return <String>['--sksl', '--runtime-stage-gles', '--runtime-stage-vulkan'];
+        return <String>[
+          '--sksl',
+          '--runtime-stage-gles',
+          '--runtime-stage-gles3',
+          '--runtime-stage-vulkan',
+        ];
 
       case TargetPlatform.ios:
+        return <String>['--runtime-stage-metal'];
       case TargetPlatform.darwin:
         return <String>['--sksl', '--runtime-stage-metal'];
 
@@ -129,14 +202,18 @@ class ShaderCompiler {
       case TargetPlatform.web_javascript:
         return <String>['--sksl'];
 
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
   /// The [Source] inputs that targets using this should depend on.
   ///
   /// See [Target.inputs].
-  static const List<Source> inputs = <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/tools/shader_compiler.dart'),
+  static const inputs = <Source>[
+    Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/tools/shader_compiler.dart',
+    ),
     Source.hostArtifact(HostArtifact.impellerc),
   ];
 
@@ -153,10 +230,9 @@ class ShaderCompiler {
     required String outputPath,
     required TargetPlatform targetPlatform,
     bool fatal = true,
+    String? depfilePath,
   }) async {
-    final File impellerc = _fs.file(
-      _artifacts.getHostArtifact(HostArtifact.impellerc),
-    );
+    final File impellerc = _fs.file(_artifacts.getHostArtifact(HostArtifact.impellerc));
     if (!impellerc.existsSync()) {
       throw ShaderCompilerException._(
         'The impellerc utility is missing at "${impellerc.path}". '
@@ -165,47 +241,197 @@ class ShaderCompiler {
     }
 
     final String shaderLibPath = _fs.path.join(impellerc.parent.absolute.path, 'shader_lib');
-    final List<String> cmd = <String>[
+    List<String> makeImpellercCommand(List<String> targets) => <String>[
       impellerc.path,
-      ..._shaderTargetsFromTargetPlatform(targetPlatform),
+      ...targets,
       '--iplr',
-      if (targetPlatform == TargetPlatform.web_javascript)
-        '--json',
+      if (targetPlatform == TargetPlatform.web_javascript) '--json',
       '--sl=$outputPath',
       '--spirv=$outputPath.spirv',
       '--input=${input.path}',
       '--input-type=frag',
       '--include=${input.parent.path}',
       '--include=$shaderLibPath',
+      if (depfilePath != null) '--depfile=$depfilePath',
     ];
-    _logger.printTrace('shaderc command: $cmd');
-    final Process impellercProcess = await _processManager.start(cmd);
-    final int code = await impellercProcess.exitCode;
-    if (code != 0) {
-      final String stdout = await utf8.decodeStream(impellercProcess.stdout);
-      final String stderr = await utf8.decodeStream(impellercProcess.stderr);
-      _logger.printTrace(stdout);
-      _logger.printError(stderr);
+
+    try {
+      var failure = false;
+      var retryWithoutSksl = false;
+
+      final List<String> shaderTargets = _shaderTargetsFromTargetPlatform(targetPlatform);
+      final List<String> cmd = makeImpellercCommand(shaderTargets);
+      _logger.printTrace('impellerc command: $cmd');
+      ProcessResult result = await _runCommand(cmd);
+      if (result.exitCode != 0) {
+        // Maybe retry impellerc command without --sksl.
+        if (!(shaderTargets.length > 1 && shaderTargets.contains('--sksl'))) {
+          // The original command did not target sksl or targeted only sksl, so
+          // we can't retry without --sksl.
+          _logger.printError('impellerc failure: ${result.stderr}');
+          failure = true;
+        } else {
+          retryWithoutSksl = true;
+        }
+      }
+
+      if (retryWithoutSksl) {
+        shaderTargets.remove('--sksl');
+        final List<String> retryCmd = makeImpellercCommand(shaderTargets);
+        _logger.printTrace('Retrying impellerc command without sksl: $retryCmd');
+        final ProcessResult retryResult = await _runCommand(retryCmd);
+        if (retryResult.exitCode != 0) {
+          // Retry failed.
+          _logger.printError('impellerc failure: ${retryResult.stderr}');
+          result = retryResult;
+          failure = true;
+        } else {
+          // Retry succeeded. Don't fail, but log a warning message and the sksl
+          // compiler error.
+          // The "warning: " prefix must be used to make these non-fatal log
+          // messages appear in the console when building with the Xcode backend.
+          _logger.printError(
+            'warning: Shader `${input.path}` is incompatible with SkSL. This '
+            'shader will not load when running with the Skia backend.',
+          );
+          _logger.printError('impellerc failure: ${result.stderr}');
+        }
+      }
+
+      if (failure) {
+        if (fatal) {
+          final String? hint = _getHelpfulHint(result, input, outputPath, impellerc.path);
+          final message =
+              'Shader compilation of "${input.path}" to "$outputPath" '
+              'failed with exit code ${result.exitCode}.'
+              '${hint != null ? '\n$hint' : ''}';
+          throw ShaderCompilerException._(
+            message,
+            stdout: result.stdout as String?,
+            stderr: result.stderr as String?,
+          );
+        }
+        return false;
+      }
+      final String? stderr = (result.stderr as String?)?.trim();
+      if (stderr != null && stderr.isNotEmpty) {
+        if (_loggedWarningShaders.add(input.path)) {
+          _logger.printBox(stderr, title: 'Shader Warning');
+        }
+      }
+    } on _SecurityPolicyBlockException catch (_) {
+      _logSecurityBlockError(impellerc.path);
       if (fatal) {
-        throw ShaderCompilerException._(
-          'Shader compilation of "${input.path}" to "$outputPath" '
-          'failed with exit code $code.\n'
-          'impellerc stdout:\n$stdout\n'
-          'impellerc stderr:\n$stderr',
-        );
+        throwToolExit('Impeller shader compiler was blocked by security policy.', exitCode: 1);
       }
       return false;
     }
     ErrorHandlingFileSystem.deleteIfExists(_fs.file('$outputPath.spirv'));
     return true;
   }
+
+  String? _getHelpfulHint(
+    ProcessResult result,
+    File input,
+    String outputPath,
+    String impellercPath,
+  ) {
+    final int exitCode = result.exitCode;
+    if (_platform.isMacOS && exitCode == -9) {
+      return 'The shader compiler (impellerc) may have been blocked by macOS Gatekeeper or run out of memory (OOM).\n'
+          'To resolve Gatekeeper issues, try running:\n'
+          '  xattr -d com.apple.quarantine "$impellercPath"';
+    }
+
+    final bool isWindowsAbort = _platform.isWindows && exitCode == 3;
+    final bool isPosixAbort = (_platform.isMacOS || _platform.isLinux) && exitCode == -6;
+
+    if (isWindowsAbort || isPosixAbort) {
+      var hint = 'The shader compiler (impellerc) aborted during compilation.';
+      if (_platform.isWindows) {
+        final bool hasNonAscii =
+            RegExp(r'[^\x00-\x7F]').hasMatch(input.path) ||
+            RegExp(r'[^\x00-\x7F]').hasMatch(outputPath);
+        if (hasNonAscii) {
+          hint +=
+              '\nWarning: The path contains non-ASCII characters, which is known to cause crashes on Windows.\n'
+              'Try moving your project to a path containing only ASCII characters.';
+        }
+      }
+      return hint;
+    }
+    return null;
+  }
+
+  Future<ProcessResult> _runCommand(List<String> command) async {
+    try {
+      return await _processManager.run(
+        command,
+        stdoutEncoding: utf8AllowMalformed,
+        stderrEncoding: utf8AllowMalformed,
+      );
+    } on ProcessException catch (e) {
+      if (_isBlockedBySecurityPolicy(e)) {
+        throw _SecurityPolicyBlockException(e);
+      }
+      rethrow;
+    }
+  }
+
+  bool _isBlockedBySecurityPolicy(ProcessException exception) {
+    if (!_platform.isWindows) {
+      return false;
+    }
+    const winErrorAccessDisabledByPolicy = 1260;
+    const winErrorSystemIntegrityPolicyViolation = 4551;
+    return exception.errorCode == winErrorAccessDisabledByPolicy ||
+        exception.errorCode == winErrorSystemIntegrityPolicyViolation;
+  }
+
+  void _logSecurityBlockError(String impellercPath) {
+    if (_hasLoggedSecurityBlockError) {
+      return;
+    }
+    _hasLoggedSecurityBlockError = true;
+    _logger.printError(
+      '------------------------------------------------------------------------\n'
+      'Error: The Impeller shader compiler (impellerc) was blocked by system\n'
+      'security policies (e.g., Windows Application Control or AppLocker).\n'
+      '\n'
+      'To resolve this, please contact your system administrator to allowlist\n'
+      'the binary at:\n'
+      '  $impellercPath\n'
+      '------------------------------------------------------------------------',
+    );
+  }
+}
+
+class _SecurityPolicyBlockException implements Exception {
+  _SecurityPolicyBlockException(this.cause);
+  final ProcessException cause;
 }
 
 class ShaderCompilerException implements Exception {
-  ShaderCompilerException._(this.message);
+  ShaderCompilerException._(this.message, {this.stdout, this.stderr});
 
   final String message;
+  final String? stdout;
+  final String? stderr;
 
   @override
-  String toString() => 'ShaderCompilerException: $message\n\n';
+  String toString() {
+    final buffer = StringBuffer();
+    buffer.write('ShaderCompilerException: $message\n');
+    final String? stdout = this.stdout;
+    if (stdout != null && stdout.trim().isNotEmpty) {
+      buffer.writeln('Stdout:');
+      buffer.writeln(stdout.trim());
+    }
+    final String? stderr = this.stderr;
+    if (stderr != null && stderr.trim().isNotEmpty) {
+      buffer.writeln('Stderr:');
+      buffer.writeln(stderr.trim());
+    }
+    return buffer.toString();
+  }
 }

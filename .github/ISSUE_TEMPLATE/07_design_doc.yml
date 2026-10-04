@@ -1,0 +1,33 @@
+name: Share a Flutter design document
+description: As a contributor, I would like to share a design document or RFC.
+labels: ['design doc']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your interest in contributing to Flutter!
+
+        Please ensure that you are following the [Flutter RFC Process](https://github.com/flutter/rfc/blob/main/rfc/000.0002-flutter-rfc-review-process.md)
+        and our [Design Documents guide](https://github.com/flutter/flutter/blob/main/docs/contributing/Design-Documents.md)
+        when sharing a design document.
+
+        Please fill out the sections below to the best of your ability.
+  - type: input
+    id: document_link
+    attributes:
+      label: RFC Pull Request Link
+      description: |
+        Insert the link to your RFC pull request in flutter/rfc (e.g. "https://github.com/flutter/rfc/pull/...").
+        For details on the RFC process, see:
+        https://github.com/flutter/rfc/blob/main/rfc/000.0002-flutter-rfc-review-process.md
+        and https://github.com/flutter/flutter/blob/main/docs/contributing/Design-Documents.md
+    validations:
+      required: true
+  - type: textarea
+    id: proposal_description
+    attributes:
+      label: What problem are you solving?
+      description: |
+        Please provide a brief description of the problem you are solving.
+    validations:
+      required: true

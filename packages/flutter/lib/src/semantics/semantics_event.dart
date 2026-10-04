@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -46,11 +49,8 @@ abstract class SemanticsEvent {
   ///
   /// [nodeId] is the unique identifier of the semantics node associated with
   /// the event, or null if the event is not associated with a semantics node.
-  Map<String, dynamic> toMap({ int? nodeId }) {
-    final Map<String, dynamic> event = <String, dynamic>{
-      'type': type,
-      'data': getDataMap(),
-    };
+  Map<String, dynamic> toMap({int? nodeId}) {
+    final event = <String, dynamic>{'type': type, 'data': getDataMap()};
     if (nodeId != null) {
       event['nodeId'] = nodeId;
     }
@@ -63,10 +63,10 @@ abstract class SemanticsEvent {
 
   @override
   String toString() {
-    final List<String> pairs = <String>[];
+    final pairs = <String>[];
     final Map<String, dynamic> dataMap = getDataMap();
     final List<String> sortedKeys = dataMap.keys.toList()..sort();
-    for (final String key in sortedKeys) {
+    for (final key in sortedKeys) {
       pairs.add('$key: ${dataMap[key]}');
     }
     return '${objectRuntimeType(this, 'SemanticsEvent')}(${pairs.join(', ')})';
@@ -83,11 +83,27 @@ abstract class SemanticsEvent {
 ///
 /// When possible, prefer using mechanisms like [Semantics] to implicitly
 /// trigger announcements over using this event.
+///
+/// ### Android
+/// Android has [deprecated announcement events][1] due to its disruptive
+/// behavior with TalkBack forcing it to clear its speech queue and speak the
+/// provided text. Instead, use mechanisms like [Semantics] to implicitly
+/// trigger announcements.
+///
+/// [1]: https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)
+///
 class AnnounceSemanticsEvent extends SemanticsEvent {
+  /// Constructs an event that triggers an announcement by the platform
+  /// for the provided view.
+  const AnnounceSemanticsEvent(
+    this.message,
+    this.textDirection,
+    this.viewId, {
+    this.assertiveness = Assertiveness.polite,
+  }) : super('announce');
 
-  /// Constructs an event that triggers an announcement by the platform.
-  const AnnounceSemanticsEvent(this.message, this.textDirection, {this.assertiveness = Assertiveness.polite})
-    : super('announce');
+  /// The view that this announcement is on.
+  final int viewId;
 
   /// The message to announce.
   final String message;
@@ -105,11 +121,11 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
 
   @override
   Map<String, dynamic> getDataMap() {
-    return <String, dynamic> {
+    return <String, dynamic>{
+      'viewId': viewId,
       'message': message,
       'textDirection': textDirection.index,
-      if (assertiveness != Assertiveness.polite)
-        'assertiveness': assertiveness.index,
+      if (assertiveness != Assertiveness.polite) 'assertiveness': assertiveness.index,
     };
   }
 }
@@ -126,9 +142,7 @@ class TooltipSemanticsEvent extends SemanticsEvent {
 
   @override
   Map<String, dynamic> getDataMap() {
-    return <String, dynamic>{
-      'message': message,
-    };
+    return <String, dynamic>{'message': message};
   }
 }
 
@@ -159,7 +173,7 @@ class TapSemanticEvent extends SemanticsEvent {
 /// An event to move the accessibility focus.
 ///
 /// Using this API is generally not recommended, as it may break a users' expectation of
-/// how a11y focus works and therefore should be just very carefully.
+/// how a11y focus works and therefore should be used very carefully.
 ///
 /// One possible use case:
 /// For example, the currently focused rendering object is replaced by another rendering

@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'form_section.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'theme.dart';
 
 // Content padding determined via SwiftUI's `Form` view in the iOS 14.2 SDK.
-const EdgeInsetsGeometry _kDefaultPadding =
-    EdgeInsetsDirectional.fromSTEB(20.0, 6.0, 6.0, 6.0);
+const EdgeInsetsGeometry _kDefaultPadding = EdgeInsetsDirectional.fromSTEB(20.0, 6.0, 6.0, 6.0);
 
 /// An iOS-style form row.
 ///
@@ -113,7 +115,7 @@ class CupertinoFormRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final CupertinoThemeData theme = CupertinoTheme.of(context);
     final TextStyle textStyle = theme.textTheme.textStyle.copyWith(
-      color: CupertinoDynamicColor.maybeResolve(theme.textTheme.textStyle.color, context)
+      color: CupertinoDynamicColor.maybeResolve(theme.textTheme.textStyle.color, context),
     );
 
     return Padding(
@@ -123,26 +125,16 @@ class CupertinoFormRow extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              if (prefix != null)
-                DefaultTextStyle(
-                  style: textStyle,
-                  child: prefix!,
-                ),
+              if (prefix != null) DefaultTextStyle(style: textStyle, child: prefix!),
               Flexible(
-                child: Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: child,
-                ),
+                child: Align(alignment: AlignmentDirectional.centerEnd, child: child),
               ),
             ],
           ),
           if (helper != null)
             Align(
               alignment: AlignmentDirectional.centerStart,
-              child: DefaultTextStyle(
-                style: textStyle,
-                child: helper!,
-              ),
+              child: DefaultTextStyle(style: textStyle, child: helper!),
             ),
           if (error != null)
             Align(

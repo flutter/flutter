@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../../gallery_localizations.dart';
 
 // BEGIN snackbarsDemo
@@ -22,19 +23,19 @@ class SnackbarsDemo extends StatelessWidget {
         child: ElevatedButton(
           onPressed: () {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(localizations.demoSnackbarsText),
-              action: SnackBarAction(
-                label: localizations.demoSnackbarsActionButtonLabel,
-                onPressed: () {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(
-                    localizations.demoSnackbarsAction,
-                  )));
-                },
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(localizations.demoSnackbarsText),
+                action: SnackBarAction(
+                  label: localizations.demoSnackbarsActionButtonLabel,
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text(localizations.demoSnackbarsAction)));
+                  },
+                ),
               ),
-            ));
+            );
           },
           child: Text(localizations.demoSnackbarsButtonLabel),
         ),

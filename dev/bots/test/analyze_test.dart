@@ -7,17 +7,13 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../analyze.dart';
-import '../custom_rules/analyze.dart';
-import '../custom_rules/no_double_clamp.dart';
-import '../custom_rules/no_stop_watches.dart';
-import '../custom_rules/render_box_intrinsics.dart';
 import '../utils.dart';
 import 'common.dart';
 
 typedef AsyncVoidCallback = Future<void> Function();
 
-Future<String> capture(AsyncVoidCallback callback, { bool shouldHaveErrors = false }) async {
-  final StringBuffer buffer = StringBuffer();
+Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = false}) async {
+  final buffer = StringBuffer();
   final PrintCallback oldPrint = print;
   try {
     print = (Object? line) {
@@ -27,7 +23,11 @@ Future<String> capture(AsyncVoidCallback callback, { bool shouldHaveErrors = fal
     expect(
       hasError,
       shouldHaveErrors,
-      reason: buffer.isEmpty ? '(No output to report.)' : hasError ? 'Unexpected errors:\n$buffer' : 'Unexpected success:\n$buffer',
+      reason: buffer.isEmpty
+          ? '(No output to report.)'
+          : hasError
+          ? 'Unexpected errors:\n$buffer'
+          : 'Unexpected success:\n$buffer',
     );
   } finally {
     print = oldPrint;
@@ -43,64 +43,36 @@ Future<String> capture(AsyncVoidCallback callback, { bool shouldHaveErrors = fal
 
 void main() {
   final String testRootPath = path.join('test', 'analyze-test-input', 'root');
-  final String dartName = Platform.isWindows ? 'dart.exe' : 'dart';
-  final String dartPath = path.canonicalize(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', dartName));
+  final dartName = Platform.isWindows ? 'dart.exe' : 'dart';
+  final String dartPath = path.canonicalize(
+    path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', dartName),
+  );
 
-  test('analyze.dart - verifyDeprecations', () async {
-    final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
-    final String lines = <String>[
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice does not match required pattern. There might be a missing space character at the end of the line.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:25: Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "Also bad grammar".',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:29: Deprecation notice does not match required pattern.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:32: Deprecation notice does not match required pattern.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:37: Deprecation notice does not match required pattern. It might be missing the line saying "This feature was deprecated after...".',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:41: Deprecation notice does not match required pattern. There might not be an explanatory message.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:48: End of deprecation notice does not match required pattern.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:51: Unexpected deprecation notice indent.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:70: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:76: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:99: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
-      ]
-      .map((String line) {
-        return line
-          .replaceAll('/', Platform.isWindows ? r'\' : '/')
-          .replaceAll('STYLE_GUIDE_URL', 'https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo')
-          .replaceAll('RELEASES_URL', 'https://flutter.dev/docs/development/tools/sdk/releases');
-      })
-      .join('\n');
-    expect(result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '║ See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n'
-    );
-  });
-
-  test('analyze.dart - verifyGoldenTags', () async {
-    final List<String> result = (await capture(() => verifyGoldenTags(testRootPath, minimumMatches: 6), shouldHaveErrors: true)).split('\n');
-    const String noTag = "Files containing golden tests must be tagged using @Tags(<String>['reduced-test-set']) "
-                         'at the top of the file before import statements.';
-    const String missingTag = "Files containing golden tests must be tagged with 'reduced-test-set'.";
-    final List<String> lines = <String>[
-        '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
-        '║ test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
-      ]
-      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
-      .toList();
-    expect(result.length, 4 + lines.length, reason: 'output had unexpected number of lines:\n${result.join('\n')}');
-    expect(result[0], '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════');
-    expect(result.getRange(1, result.length - 3).toSet(), lines.toSet());
-    expect(result[result.length - 3], '║ See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter');
-    expect(result[result.length - 2], '╚═══════════════════════════════════════════════════════════════════════════════');
-    expect(result[result.length - 1], ''); // trailing newline
+  test('matchesErrorsInFile matcher basic test', () async {
+    final String result = await capture(() async {
+      foundError(<String>[
+        'meta.dart:5: error #1',
+        'meta.dart:5: error #2',
+        'meta.dart:6: error #3',
+        '',
+        'Error summary',
+      ]);
+    }, shouldHaveErrors: true);
+    final fixture = File(path.join(testRootPath, 'packages', 'foo', 'meta.dart'));
+    expect(result, matchesErrorsInFile(fixture, endsWith: <String>['', 'Error summary']));
   });
 
   test('analyze.dart - verifyNoMissingLicense', () async {
-    final String result = await capture(() => verifyNoMissingLicense(testRootPath, checkMinimums: false), shouldHaveErrors: true);
-    final String file = 'test/analyze-test-input/root/packages/foo/foo.dart'
-      .replaceAll('/', Platform.isWindows ? r'\' : '/');
-    expect(result,
+    final String result = await capture(
+      () => verifyNoMissingLicense(testRootPath, checkMinimums: false),
+      shouldHaveErrors: true,
+    );
+    final String file = 'test/analyze-test-input/root/packages/foo/foo.dart'.replaceAll(
+      '/',
+      Platform.isWindows ? r'\' : '/',
+    );
+    expect(
+      result,
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '║ The following file does not have the right license header for dart files:\n'
       '║   $file\n'
@@ -109,50 +81,38 @@ void main() {
       '║ // Use of this source code is governed by a BSD-style license that can be\n'
       '║ // found in the LICENSE file.\n'
       '║ ...followed by a blank line.\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n',
     );
   });
 
   test('analyze.dart - verifyNoTrailingSpaces', () async {
-    final String result = await capture(() => verifyNoTrailingSpaces(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
-    final String lines = <String>[
-        '║ test/analyze-test-input/root/packages/foo/spaces.txt:5: trailing U+0020 space character',
-        '║ test/analyze-test-input/root/packages/foo/spaces.txt:9: trailing blank line',
-      ]
-      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
-      .join('\n');
-    expect(result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    final String result = await capture(
+      () => verifyNoTrailingSpaces(testRootPath, minimumMatches: 2),
+      shouldHaveErrors: true,
     );
-  });
-
-  test('analyze.dart - verifySpacesAfterFlowControlStatements', () async {
-    final String result = await capture(() => verifySpacesAfterFlowControlStatements(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
     final String lines = <String>[
-        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:11: no space after flow control statement',
-        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:18: no space after flow control statement',
-        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:25: no space after flow control statement',
-        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:29: no space after flow control statement',
-        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:35: no space after flow control statement',
-      ]
-      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
-      .join('\n');
-    expect(result,
+      '║ test/analyze-test-input/root/packages/foo/spaces.txt:5: trailing U+0020 space character',
+      '║ test/analyze-test-input/root/packages/foo/spaces.txt:9: trailing blank line',
+    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).join('\n');
+    expect(
+      result,
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n',
     );
   });
 
   test('analyze.dart - verifyNoBinaries - positive', () async {
-    final String result = await capture(() => verifyNoBinaries(
-      testRootPath,
-      legacyBinaries: <Hash256>{const Hash256(0x39A050CD69434936, 0, 0, 0)},
-    ), shouldHaveErrors: !Platform.isWindows);
+    final String result = await capture(
+      () => verifyNoBinaries(
+        testRootPath,
+        legacyBinaries: <Hash256>{const Hash256(0x39A050CD69434936, 0, 0, 0)},
+      ),
+      shouldHaveErrors: !Platform.isWindows,
+    );
     if (!Platform.isWindows) {
-      expect(result,
+      expect(
+        result,
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
         '║ test/analyze-test-input/root/packages/foo/serviceaccount.enc:0: file is not valid UTF-8\n'
         '║ All files in this repository must be UTF-8. In particular, images and other binaries\n'
@@ -161,136 +121,188 @@ void main() {
         '║ to which you need access, you should consider how to fetch it from another repository;\n'
         '║ for example, the "assets-for-api-docs" repository is used for images in API docs.\n'
         '║ To add assets to flutter_tools templates, see the instructions in the wiki:\n'
-        '║ https://github.com/flutter/flutter/wiki/Managing-template-image-assets\n'
-        '╚═══════════════════════════════════════════════════════════════════════════════\n'
+        '║ https://github.com/flutter/flutter/blob/main/docs/tool/Managing-template-image-assets.md\n'
+        '╚═══════════════════════════════════════════════════════════════════════════════\n',
       );
     }
   });
 
   test('analyze.dart - verifyInternationalizations - comparison fails', () async {
-    final String result = await capture(() => verifyInternationalizations(testRootPath, dartPath), shouldHaveErrors: true);
-    final String genLocalizationsScript = path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart');
-    expect(result,
-        contains('$dartName $genLocalizationsScript --cupertino'));
-    expect(result,
-        contains('$dartName $genLocalizationsScript --material'));
-    final String generatedFile = path.join(testRootPath, 'packages', 'flutter_localizations',
-        'lib', 'src', 'l10n', 'generated_material_localizations.dart');
-    expect(result,
-        contains('The contents of $generatedFile are different from that produced by gen_localizations.'));
-    expect(result,
-        contains(r'Did you forget to run gen_localizations.dart after updating a .arb file?'));
+    final String result = await capture(
+      () => verifyInternationalizations(testRootPath, dartPath),
+      shouldHaveErrors: true,
+    );
+    final String genLocalizationsScript = path.join(
+      'dev',
+      'tools',
+      'localization',
+      'bin',
+      'gen_localizations.dart',
+    );
+    expect(result, contains('$dartName $genLocalizationsScript --cupertino'));
+    expect(result, contains('$dartName $genLocalizationsScript --material'));
+    final String generatedFile = path.join(
+      testRootPath,
+      'packages',
+      'flutter_localizations',
+      'lib',
+      'src',
+      'l10n',
+      'generated_material_localizations.dart',
+    );
+    expect(
+      result,
+      contains(
+        'The contents of $generatedFile are different from that produced by gen_localizations.',
+      ),
+    );
+    expect(
+      result,
+      contains(r'Did you forget to run gen_localizations.dart after updating a .arb file?'),
+    );
   });
 
   test('analyze.dart - verifyNoBinaries - negative', () async {
-    await capture(() => verifyNoBinaries(
-      testRootPath,
-      legacyBinaries: <Hash256>{
-        const Hash256(0xA8100AE6AA1940D0, 0xB663BB31CD466142, 0xEBBDBD5187131B92, 0xD93818987832EB89), // sha256("\xff")
-        const Hash256(0x155644D3F13D98BF, 0, 0, 0),
-      },
-    ));
-  });
-
-  test('analyze.dart - verifyNullInitializedDebugExpensiveFields', () async {
-    final String result = await capture(() => verifyNullInitializedDebugExpensiveFields(
-      testRootPath,
-      minimumMatches: 1,
-    ), shouldHaveErrors: true);
-
-    expect(result, contains(':15'));
-    expect(result, isNot(contains(':12')));
-  });
-
-  test('analyze.dart - verifyTabooDocumentation', () async {
-    final String result = await capture(() => verifyTabooDocumentation(
-      testRootPath,
-      minimumMatches: 1,
-    ), shouldHaveErrors: true);
-
-    expect(result, isNot(contains(':19')));
-    expect(result, contains(':20'));
-    expect(result, contains(':21'));
-  });
-
-  test('analyze.dart - clampDouble', () async {
-    final String result = await capture(() => analyzeWithRules(
-      testRootPath,
-      <AnalyzeRule>[noDoubleClamp],
-      includePaths: <String>['packages/flutter/lib'],
-    ), shouldHaveErrors: true);
-    final String lines = <String>[
-        '║ packages/flutter/lib/bar.dart:37: input.clamp(0.0, 2)',
-        '║ packages/flutter/lib/bar.dart:38: input.toDouble().clamp(0, 2)',
-        '║ packages/flutter/lib/bar.dart:42: nullableInt?.clamp(0, 2.0)',
-        '║ packages/flutter/lib/bar.dart:43: nullableDouble?.clamp(0, 2)',
-        '║ packages/flutter/lib/bar.dart:48: nullableInt?.clamp',
-        '║ packages/flutter/lib/bar.dart:50: nullableDouble?.clamp',
-      ]
-      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
-      .join('\n');
-    expect(result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '║ \n'
-      '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    await capture(
+      () => verifyNoBinaries(
+        testRootPath,
+        legacyBinaries: <Hash256>{
+          const Hash256(
+            0xA8100AE6AA1940D0,
+            0xB663BB31CD466142,
+            0xEBBDBD5187131B92,
+            0xD93818987832EB89,
+          ), // sha256("\xff")
+          const Hash256(0x155644D3F13D98BF, 0, 0, 0),
+        },
+      ),
     );
   });
 
-  test('analyze.dart - stopwatch', () async {
-    final String result = await capture(() => analyzeWithRules(
-      testRootPath,
-      <AnalyzeRule>[noStopwatches],
-      includePaths: <String>['packages/flutter/lib'],
-    ), shouldHaveErrors: true);
-    final String lines = <String>[
-      '║ packages/flutter/lib/stopwatch.dart:18: Stopwatch()',
-      '║ packages/flutter/lib/stopwatch.dart:19: Stopwatch()',
-      '║ packages/flutter/lib/stopwatch.dart:24: StopwatchAtHome()',
-      '║ packages/flutter/lib/stopwatch.dart:27: StopwatchAtHome.new',
-      '║ packages/flutter/lib/stopwatch.dart:30: StopwatchAtHome.create',
-      '║ packages/flutter/lib/stopwatch.dart:36: externallib.MyStopwatch.create()',
-      '║ packages/flutter/lib/stopwatch.dart:40: externallib.MyStopwatch.new',
-      '║ packages/flutter/lib/stopwatch.dart:45: externallib.stopwatch',
-      '║ packages/flutter/lib/stopwatch.dart:46: externallib.createMyStopwatch()',
-      '║ packages/flutter/lib/stopwatch.dart:47: externallib.createStopwatch()',
-      '║ packages/flutter/lib/stopwatch.dart:48: externallib.createMyStopwatch'
-    ]
-      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
-      .join('\n');
-    expect(result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '║ \n'
-      '║ Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.\n'
-      '║ A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n'
-    );
+  test('analyze.dart - help flag', () async {
+    final String result = await capture(() async {
+      await run(<String>['-h']);
+    });
+    expect(result, contains('Usage: dart dev/bots/analyze.dart [arguments]'));
+    expect(result, contains('Options:'));
+    expect(result, contains('Available rules:'));
   });
 
-  test('analyze.dart - RenderBox intrinsics', () async {
-    final String result = await capture(() => analyzeWithRules(
-      testRootPath,
-      <AnalyzeRule>[renderBoxIntrinsicCalculation],
-      includePaths: <String>['packages/flutter/lib'],
-    ), shouldHaveErrors: true);
-    final String lines = <String>[
-      '║ packages/flutter/lib/renderbox_intrinsics.dart:12: computeMaxIntrinsicWidth(). Consider calling getMaxIntrinsicWidth instead.',
-      '║ packages/flutter/lib/renderbox_intrinsics.dart:16: f = computeMaxIntrinsicWidth. Consider calling getMaxIntrinsicWidth instead.',
-      '║ packages/flutter/lib/renderbox_intrinsics.dart:23: computeDryBaseline(). Consider calling getDryBaseline instead.',
-      '║ packages/flutter/lib/renderbox_intrinsics.dart:24: computeDryLayout(). Consider calling getDryLayout instead.',
-      '║ packages/flutter/lib/renderbox_intrinsics.dart:31: computeDistanceToActualBaseline(). Consider calling getDistanceToBaseline, or getDistanceToActualBaseline instead.',
-      '║ packages/flutter/lib/renderbox_intrinsics.dart:36: computeMaxIntrinsicHeight(). Consider calling getMaxIntrinsicHeight instead.',
-    ]
-      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
-      .join('\n');
-    expect(result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '║ \n'
-      '║ Typically the get* methods should be used to obtain the intrinsics of a RenderBox.\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n'
-    );
+  test('analyze.dart - --only flag', () async {
+    final executed = <String>[];
+    final dummyValidations = <Validation>[
+      Validation('rule1', 'Rule 1', () async {
+        executed.add('rule1');
+      }),
+      Validation('rule2', 'Rule 2', () async {
+        executed.add('rule2');
+      }),
+    ];
+
+    await capture(() async {
+      await run(<String>['--only=rule1'], validationsForTesting: dummyValidations);
+    });
+
+    expect(executed, <String>['rule1']);
+  });
+
+  test('analyze.dart - --skip flag', () async {
+    final executed = <String>[];
+    final dummyValidations = <Validation>[
+      Validation('rule1', 'Rule 1', () async {
+        executed.add('rule1');
+      }),
+      Validation('rule2', 'Rule 2', () async {
+        executed.add('rule2');
+      }),
+    ];
+
+    await capture(() async {
+      await run(<String>['--skip=rule1'], validationsForTesting: dummyValidations);
+    });
+
+    expect(executed, <String>['rule2']);
+  });
+
+  test('analyze.dart - --only and --skip mutually exclusive', () async {
+    final dummyValidations = <Validation>[Validation('rule1', 'Rule 1', () async {})];
+
+    final String result = await capture(() async {
+      await run(<String>['--only=rule1', '--skip=rule1'], validationsForTesting: dummyValidations);
+    }, shouldHaveErrors: true);
+
+    expect(result, contains('Cannot use both --only and --skip at the same time.'));
+  });
+
+  test('analyze.dart - invalid rule name', () async {
+    final dummyValidations = <Validation>[Validation('rule1', 'Rule 1', () async {})];
+
+    final String result = await capture(() async {
+      await run(<String>['--only=invalid'], validationsForTesting: dummyValidations);
+    }, shouldHaveErrors: true);
+
+    expect(result, contains('Unknown rule "invalid" passed to --only.'));
+  });
+
+  test('analyze.dart - --only flag with multiple comma-separated values', () async {
+    final executed = <String>[];
+    final dummyValidations = <Validation>[
+      Validation('rule1', 'Rule 1', () async {
+        executed.add('rule1');
+      }),
+      Validation('rule2', 'Rule 2', () async {
+        executed.add('rule2');
+      }),
+      Validation('rule3', 'Rule 3', () async {
+        executed.add('rule3');
+      }),
+    ];
+
+    await capture(() async {
+      await run(<String>['--only=rule1,rule3'], validationsForTesting: dummyValidations);
+    });
+
+    expect(executed, <String>['rule1', 'rule3']);
+  });
+
+  test('analyze.dart - --skip flag with multiple comma-separated values', () async {
+    final executed = <String>[];
+    final dummyValidations = <Validation>[
+      Validation('rule1', 'Rule 1', () async {
+        executed.add('rule1');
+      }),
+      Validation('rule2', 'Rule 2', () async {
+        executed.add('rule2');
+      }),
+      Validation('rule3', 'Rule 3', () async {
+        executed.add('rule3');
+      }),
+    ];
+
+    await capture(() async {
+      await run(<String>['--skip=rule1,rule3'], validationsForTesting: dummyValidations);
+    });
+
+    expect(executed, <String>['rule2']);
+  });
+
+  test('analyze.dart - --only flag passed multiple times errors', () async {
+    final dummyValidations = <Validation>[Validation('rule1', 'Rule 1', () async {})];
+
+    final String result = await capture(() async {
+      await run(<String>['--only=rule1', '--only=rule1'], validationsForTesting: dummyValidations);
+    }, shouldHaveErrors: true);
+
+    expect(result, contains('The --only argument must not be used more than once.'));
+  });
+
+  test('analyze.dart - --skip flag passed multiple times errors', () async {
+    final dummyValidations = <Validation>[Validation('rule1', 'Rule 1', () async {})];
+
+    final String result = await capture(() async {
+      await run(<String>['--skip=rule1', '--skip=rule1'], validationsForTesting: dummyValidations);
+    }, shouldHaveErrors: true);
+
+    expect(result, contains('The --skip argument must not be used more than once.'));
   });
 }

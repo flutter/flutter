@@ -10,14 +10,12 @@ import '../common.dart';
 TimelineEvent newGPUTraceEvent(double ms) => TimelineEvent(<String, dynamic>{
   'name': 'GPUStart',
   'ph': 'b',
-  'args': <String, String>{
-    'FrameTimeMS': ms.toString()
-  },
+  'args': <String, String>{'FrameTimeMS': ms.toString()},
 });
 
 void main() {
   test('Can process GPU frame times.', () {
-    final GpuSumarizer summarizer = GpuSumarizer(<TimelineEvent>[
+    final summarizer = GpuSumarizer(<TimelineEvent>[
       newGPUTraceEvent(4.233),
       newGPUTraceEvent(7.22),
       newGPUTraceEvent(9.1),

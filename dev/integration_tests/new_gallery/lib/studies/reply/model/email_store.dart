@@ -15,7 +15,8 @@ class EmailStore with ChangeNotifier {
       sender: 'Google Express',
       time: '15 minutes ago',
       subject: 'Package shipped!',
-      message: 'Cucumber Mask Facial has shipped.\n\n'
+      message:
+          'Cucumber Mask Facial has shipped.\n\n'
           "Keep an eye out for a package to arrive between this Thursday and next Tuesday. If for any reason you don't receive your package before the end of next week, please reach out to us for details on your shipment.\n\n"
           'As always, thank you for shopping with us and we hope you love our specially formulated Cucumber Mask!',
       avatar: '$_avatarsLocation/avatar_express.png',
@@ -104,8 +105,7 @@ class EmailStore with ChangeNotifier {
       sender: 'Allison Trabucco',
       time: '4 hrs ago',
       subject: 'Free money',
-      message:
-          "You've been selected as a winner in our latest raffle! To claim your prize, click on the link.",
+      message: "You've been selected as a winner in our latest raffle! To claim your prize, click on the link.",
       avatar: '$_avatarsLocation/avatar_3.jpg',
       recipients: 'Jeff',
       inboxType: InboxType.spam,
@@ -144,24 +144,20 @@ class EmailStore with ChangeNotifier {
       sender: 'Sandra Adams',
       time: '2 hrs ago',
       subject: '(No subject)',
-      message: 'Hey,\n\n'
+      message:
+          'Hey,\n\n'
           'Wanted to email and see what you thought of',
       avatar: '$_avatarsLocation/avatar_2.jpg',
       recipients: 'Jeff',
     ),
   ];
 
-  List<Email> get _allEmails => <Email>[
-        ..._inbox,
-        ..._outbox,
-        ..._drafts,
-      ];
+  List<Email> get _allEmails => <Email>[..._inbox, ..._outbox, ..._drafts];
 
   List<Email> get inboxEmails {
     return _inbox.where((Email email) {
       if (email is InboxEmail) {
-        return email.inboxType == InboxType.normal &&
-            !trashEmailIds.contains(email.id);
+        return email.inboxType == InboxType.normal && !trashEmailIds.contains(email.id);
       }
       return false;
     }).toList();
@@ -170,15 +166,13 @@ class EmailStore with ChangeNotifier {
   List<Email> get spamEmails {
     return _inbox.where((Email email) {
       if (email is InboxEmail) {
-        return email.inboxType == InboxType.spam &&
-            !trashEmailIds.contains(email.id);
+        return email.inboxType == InboxType.spam && !trashEmailIds.contains(email.id);
       }
       return false;
     }).toList();
   }
 
-  Email get currentEmail =>
-      _allEmails.firstWhere((Email email) => email.id == _selectedEmailId);
+  Email get currentEmail => _allEmails.firstWhere((Email email) => email.id == _selectedEmailId);
 
   List<Email> get outboxEmails =>
       _outbox.where((Email email) => !trashEmailIds.contains(email.id)).toList();
@@ -194,9 +188,7 @@ class EmailStore with ChangeNotifier {
   bool get isCurrentEmailStarred => starredEmailIds.contains(currentEmail.id);
 
   List<Email> get starredEmails {
-    return _allEmails
-        .where((Email email) => starredEmailIds.contains(email.id))
-        .toList();
+    return _allEmails.where((Email email) => starredEmailIds.contains(email.id)).toList();
   }
 
   void starEmail(int id) {
@@ -212,9 +204,7 @@ class EmailStore with ChangeNotifier {
   Set<int> trashEmailIds = <int>{7, 8};
 
   List<Email> get trashEmails {
-    return _allEmails
-        .where((Email email) => trashEmailIds.contains(email.id))
-        .toList();
+    return _allEmails.where((Email email) => trashEmailIds.contains(email.id)).toList();
   }
 
   void deleteEmail(int id) {

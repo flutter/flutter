@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+
 import 'logical_key_data.dart';
 
 import 'physical_key_data.dart';
 
 String _injectDictionary(String template, Map<String, String> dictionary) {
-  String result = template;
+  var result = template;
   for (final String key in dictionary.keys) {
     result = result.replaceAll('@@@$key@@@', dictionary[key] ?? '@@@$key@@@');
   }

@@ -30,7 +30,7 @@ class RenderDots extends RenderConstrainedBox {
     final Canvas canvas = context.canvas;
     canvas.drawRect(offset & size, Paint()..color = const Color(0xFF0000FF));
 
-    final Paint paint = Paint()..color = const Color(0xFF00FF00);
+    final paint = Paint()..color = const Color(0xFF00FF00);
     for (final Offset point in _dots.values) {
       canvas.drawCircle(point, 50.0, paint);
     }
@@ -40,7 +40,7 @@ class RenderDots extends RenderConstrainedBox {
 }
 
 class Dots extends SingleChildRenderObjectWidget {
-  const Dots({ super.key, super.child });
+  const Dots({super.key, super.child});
 
   @override
   RenderDots createRenderObject(BuildContext context) => RenderDots();
@@ -50,11 +50,7 @@ void main() {
   runApp(
     const Directionality(
       textDirection: TextDirection.ltr,
-      child: Dots(
-        child: Center(
-          child: Text('Touch me!'),
-        ),
-      ),
+      child: Dots(child: Center(child: Text('Touch me!'))),
     ),
   );
 }

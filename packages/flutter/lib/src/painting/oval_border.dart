@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'box_border.dart';
+/// @docImport 'box_decoration.dart';
+/// @docImport 'shape_decoration.dart';
+library;
+
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -23,13 +28,13 @@ import 'circle_border.dart';
 ///  * [Border], which, when used with [BoxDecoration], can also describe an oval.
 class OvalBorder extends CircleBorder {
   /// Create an oval border.
-  const OvalBorder({ super.side, super.eccentricity = 1.0 });
+  const OvalBorder({super.side, super.eccentricity = 1.0});
 
   @override
   ShapeBorder scale(double t) => OvalBorder(side: side.scale(t), eccentricity: eccentricity);
 
   @override
-  OvalBorder copyWith({ BorderSide? side, double? eccentricity }) {
+  OvalBorder copyWith({BorderSide? side, double? eccentricity}) {
     return OvalBorder(side: side ?? this.side, eccentricity: eccentricity ?? this.eccentricity);
   }
 

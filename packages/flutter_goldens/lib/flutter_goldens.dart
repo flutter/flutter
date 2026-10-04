@@ -2,60 +2,115 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async' show FutureOr;
-import 'dart:io' as io show OSError, SocketException;
+// We use `print` for logging here.
+// ignore_for_file: avoid_print
+
+/// @docImport 'dart:io';
+library;
+
+import 'dart:async' show Completer, FutureOr;
+import 'dart:io' as io show HttpClient, OSError, SocketException;
+import 'dart:ui' as ui;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import 'skia_client.dart';
 export 'skia_client.dart';
 
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
-// https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
+// https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md
 
 // If you are trying to debug this package, you may like to use the golden test
 // titled "Inconsequential golden test" in this file:
 //   /packages/flutter/test/widgets/basic_test.dart
 
-// TODO(ianh): sort the parameters and arguments in this file so they use a consistent order througout.
+// TODO(ianh): sort the parameters and arguments in this file so they use a consistent order throughout.
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
 bool _isMainBranch(String? branch) {
-  return branch == 'main'
-      || branch == 'master';
+  return branch == 'main' || branch == 'master';
 }
-
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
-/// works for the current test. _Which_ FlutterGoldenFileComparator is
+/// works for the current test. _Which_ [FlutterGoldenFileComparator] is
 /// instantiated is based on the current testing environment.
 ///
 /// When set, the `namePrefix` is prepended to the names of all gold images.
+///
+/// This function assumes the [goldenFileComparator] has been set to a
+/// [LocalFileComparator], which happens in the bootstrap code used when running
+/// tests using `flutter test`. This should not be called when running a test
+/// using `flutter run`, as in that environment, the [goldenFileComparator] is a
+/// [TrivialComparator].
+///
+/// An [HttpClient] is created when this method is called. That client is used
+/// to communicate with the Skia Gold servers. Any [HttpOverrides] set in this
+/// will affect whether this is effective or not. For example, if the current
+/// override provides a mock client that always fails, then all calls to gold
+/// comparison functions will fail.
 Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePrefix}) async {
+  assert(
+    goldenFileComparator is LocalFileComparator,
+    'The flutter_goldens package should be used from a flutter_test_config.dart '
+    'file, which is only invoked when using "flutter test". The "flutter test" '
+    'bootstrap logic sets "goldenFileComparator" to a LocalFileComparator. It '
+    'appears in this instance however that the "goldenFileComparator" is a '
+    '${goldenFileComparator.runtimeType}.\n'
+    'See also: https://flutter.dev/to/flutter-test-docs',
+  );
   const Platform platform = LocalPlatform();
   const FileSystem fs = LocalFileSystem();
+  const ProcessManager process = LocalProcessManager();
+  final httpClient = io.HttpClient();
   if (FlutterPostSubmitFileComparator.isForEnvironment(platform)) {
-    goldenFileComparator = await FlutterPostSubmitFileComparator.fromDefaultComparator(platform, namePrefix: namePrefix, log: print, fs: fs);
-  } else if (FlutterPreSubmitFileComparator.isForEnvironment(platform)) {
-    goldenFileComparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(platform, namePrefix: namePrefix, log: print, fs: fs);
-  } else if (FlutterSkippingFileComparator.isForEnvironment(platform)) {
-    goldenFileComparator = FlutterSkippingFileComparator.fromDefaultComparator(
-      'Golden file testing is not executed on Cirrus, or LUCI environments '
-      'outside of flutter/flutter, or in test shards that are not configured '
-      'for using goldctl.',
+    goldenFileComparator = await FlutterPostSubmitFileComparator.fromLocalFileComparator(
+      localFileComparator: goldenFileComparator as LocalFileComparator,
+      platform: platform,
       namePrefix: namePrefix,
       log: print,
       fs: fs,
+      process: process,
+      httpClient: httpClient,
+    );
+  } else if (FlutterPreSubmitFileComparator.isForEnvironment(platform)) {
+    goldenFileComparator = await FlutterPreSubmitFileComparator.fromLocalFileComparator(
+      localFileComparator: goldenFileComparator as LocalFileComparator,
+      platform: platform,
+      namePrefix: namePrefix,
+      log: print,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
+    );
+  } else if (FlutterSkippingFileComparator.isForEnvironment(platform)) {
+    goldenFileComparator = FlutterSkippingFileComparator.fromLocalFileComparator(
+      localFileComparator: goldenFileComparator as LocalFileComparator,
+      'Golden file testing is not executed on LUCI environments outside of '
+      'flutter, or in test shards that are not configured for using goldctl.',
+      platform: platform,
+      namePrefix: namePrefix,
+      log: print,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
     );
   } else {
-    goldenFileComparator = await FlutterLocalFileComparator.fromDefaultComparator(platform, log: print, fs: fs);
+    goldenFileComparator = await FlutterLocalFileComparator.fromLocalFileComparator(
+      localFileComparator: goldenFileComparator as LocalFileComparator,
+      platform: platform,
+      log: print,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
+    );
   }
   await testMain();
 }
@@ -100,15 +155,12 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// information and files for interacting with the [skiaClient]. When testing
   /// locally, the [basedir] will also contain any diffs from failed tests, or
   /// goldens generated from newly introduced tests.
-  ///
-  /// The [platform] parameter is useful in tests, where the default
-  /// platform can be replaced by a mock instance.
   @visibleForTesting
   FlutterGoldenFileComparator(
     this.basedir,
     this.skiaClient, {
     required this.fs,
-    this.platform = const LocalPlatform(),
+    required this.platform,
     this.namePrefix,
     required this.log,
   });
@@ -124,8 +176,8 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// The file system used to perform file access.
   final FileSystem fs;
 
-  /// A wrapper for the [dart:io.Platform] API.
-  @visibleForTesting
+  /// The environment (current working directory, identity of the OS,
+  /// environment variables, etc).
   final Platform platform;
 
   /// The prefix that is added to all golden names.
@@ -148,38 +200,24 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   ///
   /// The optional [suffix] argument is used by the
   /// [FlutterPostSubmitFileComparator] and the [FlutterPreSubmitFileComparator].
-  /// These [FlutterGoldenFileComparators] randomize their base directories to
+  /// These [FlutterGoldenFileComparator]s randomize their base directories to
   /// maintain thread safety while using the `goldctl` tool.
   @protected
   @visibleForTesting
   static Directory getBaseDirectory(
-    LocalFileComparator defaultComparator,
-    Platform platform, {
+    LocalFileComparator defaultComparator, {
+    required Platform platform,
     String? suffix,
     required FileSystem fs,
   }) {
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
-    Directory comparisonRoot;
+    final Directory comparisonRoot = switch (suffix) {
+      null => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'skia_goldens')),
+      _ => fs.systemTempDirectory.createTempSync(suffix),
+    };
 
-    if (suffix != null) {
-      comparisonRoot = fs.systemTempDirectory.createTempSync(suffix);
-    } else {
-      comparisonRoot = flutterRoot.childDirectory(
-        fs.path.join(
-          'bin',
-          'cache',
-          'pkg',
-          'skia_goldens',
-        )
-      );
-    }
-
-    final Directory testDirectory = fs.directory(defaultComparator.basedir);
-    final String testDirectoryRelativePath = fs.path.relative(
-      testDirectory.path,
-      from: flutterRoot.path,
-    );
-    return comparisonRoot.childDirectory(testDirectoryRelativePath);
+    final String testPath = fs.directory(defaultComparator.basedir).path;
+    return comparisonRoot.childDirectory(fs.path.relative(testPath, from: flutterRoot.path));
   }
 
   /// Returns the golden [File] identified by the given [Uri].
@@ -196,14 +234,15 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     assert(
       golden.toString().split('.').last == 'png',
       'Golden files in the Flutter framework must end with the file extension '
-      '.png.'
+      '.png.',
     );
-    return Uri.parse(<String>[
-      if (namePrefix != null)
-        namePrefix!,
-      basedir.pathSegments[basedir.pathSegments.length - 2],
-      golden.toString(),
-    ].join('.'));
+    return Uri.parse(
+      <String>[
+        ?namePrefix,
+        basedir.pathSegments[basedir.pathSegments.length - 2],
+        golden.toString(),
+      ].join('.'),
+    );
   }
 }
 
@@ -227,43 +266,56 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
   /// Creates a [FlutterPostSubmitFileComparator] that will test golden file
   /// images against Skia Gold.
   ///
-  /// The [fs] and [platform] parameters are useful in tests, where the default
-  /// file system and platform can be replaced by mock instances.
+  /// The [fs] parameter is useful in tests, where the default
+  /// file system can be replaced by mock instances.
   FlutterPostSubmitFileComparator(
     super.basedir,
     super.skiaClient, {
     required super.fs,
-    super.platform,
+    required super.platform,
     super.namePrefix,
     required super.log,
   });
 
   /// Creates a new [FlutterPostSubmitFileComparator] that mirrors the relative
-  /// path resolution of the default [goldenFileComparator].
+  /// path resolution of the provided `localFileComparator`.
   ///
-  /// The [goldens] and [defaultComparator] parameters are visible for testing
-  /// purposes only.
-  static Future<FlutterPostSubmitFileComparator> fromDefaultComparator(
-    final Platform platform, {
+  /// The [goldens] parameter is visible for testing purposes only.
+  static Future<FlutterPostSubmitFileComparator> fromLocalFileComparator({
     SkiaGoldClient? goldens,
-    LocalFileComparator? defaultComparator,
+    required LocalFileComparator localFileComparator,
+    required Platform platform,
     String? namePrefix,
     required LogCallback log,
     required FileSystem fs,
+    required ProcessManager process,
+    required io.HttpClient httpClient,
   }) async {
-
-    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
-      defaultComparator,
-      platform,
+      localFileComparator,
+      platform: platform,
       suffix: 'flutter_goldens_postsubmit.',
       fs: fs,
     );
     baseDirectory.createSync(recursive: true);
 
-    goldens ??= SkiaGoldClient(baseDirectory, log: log);
+    goldens ??= SkiaGoldClient(
+      baseDirectory,
+      log: log,
+      platform: platform,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
+    );
     await goldens.auth();
-    return FlutterPostSubmitFileComparator(baseDirectory.uri, goldens, namePrefix: namePrefix, log: log, fs: fs);
+    return FlutterPostSubmitFileComparator(
+      baseDirectory.uri,
+      goldens,
+      platform: platform,
+      namePrefix: namePrefix,
+      log: log,
+      fs: fs,
+    );
   }
 
   @override
@@ -272,20 +324,31 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
-
-    return skiaClient.imgtestAdd(golden.path, goldenFile);
+    try {
+      return await skiaClient.imgtestAdd(golden.path, goldenFile);
+    } on SkiaException catch (e) {
+      // Convert SkiaException -> TestFailure so that this class implements the
+      // contract of GoldenFileComparator, and matchesGoldenFile() converts the
+      // TestFailure into a standard reported test error (with a better stack
+      // trace, for example).
+      //
+      // https://github.com/flutter/flutter/issues/162621
+      throw TestFailure('$e');
+    }
   }
 
   /// Decides based on the current environment if goldens tests should be
   /// executed through Skia Gold.
   static bool isForEnvironment(Platform platform) {
-    final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
-      && platform.environment.containsKey('GOLDCTL')
-      // Luci tryjob environments contain this value to inform the [FlutterPreSubmitComparator].
-      && !platform.environment.containsKey('GOLD_TRYJOB')
-      // Only run on main branch.
-      && _isMainBranch(platform.environment['GIT_BRANCH']);
-
+    final bool luciPostSubmit =
+        platform.environment.containsKey('SWARMING_TASK_ID') &&
+        platform.environment.containsKey('GOLDCTL')
+        // Luci tryjob environments contain this value to inform the [FlutterPreSubmitComparator].
+        &&
+        !platform.environment.containsKey('GOLD_TRYJOB')
+        // Only run on main branch.
+        &&
+        _isMainBranch(platform.environment['GIT_BRANCH']);
     return luciPostSubmit;
   }
 }
@@ -308,13 +371,13 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   /// Creates a [FlutterPreSubmitFileComparator] that will test golden file
   /// images against baselines requested from Flutter Gold.
   ///
-  /// The [fs] and [platform] parameters are useful in tests, where the default
-  /// file system and platform can be replaced by mock instances.
+  /// The [fs] parameter is useful in tests, where the default
+  /// file system can be replaced by mock instances.
   FlutterPreSubmitFileComparator(
     super.basedir,
     super.skiaClient, {
     required super.fs,
-    super.platform,
+    required super.platform,
     super.namePrefix,
     required super.log,
   });
@@ -322,36 +385,45 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   /// Creates a new [FlutterPreSubmitFileComparator] that mirrors the
   /// relative path resolution of the default [goldenFileComparator].
   ///
-  /// The [goldens] and [defaultComparator] parameters are visible for testing
-  /// purposes only.
-  static Future<FlutterGoldenFileComparator> fromDefaultComparator(
-    final Platform platform, {
+  /// The [goldens] parameter is visible for testing purposes only.
+  static Future<FlutterGoldenFileComparator> fromLocalFileComparator({
     SkiaGoldClient? goldens,
-    LocalFileComparator? defaultComparator,
+    required LocalFileComparator localFileComparator,
+    required Platform platform,
     Directory? testBasedir,
     String? namePrefix,
     required LogCallback log,
     required FileSystem fs,
+    required ProcessManager process,
+    required io.HttpClient httpClient,
   }) async {
-
-    defaultComparator ??= goldenFileComparator as LocalFileComparator;
-    final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
-      defaultComparator,
-      platform,
-      suffix: 'flutter_goldens_presubmit.',
-      fs: fs,
-    );
+    final Directory baseDirectory =
+        testBasedir ??
+        FlutterGoldenFileComparator.getBaseDirectory(
+          localFileComparator,
+          platform: platform,
+          suffix: 'flutter_goldens_presubmit.',
+          fs: fs,
+        );
 
     if (!baseDirectory.existsSync()) {
       baseDirectory.createSync(recursive: true);
     }
 
-    goldens ??= SkiaGoldClient(baseDirectory, log: log);
+    goldens ??= SkiaGoldClient(
+      baseDirectory,
+      platform: platform,
+      log: log,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
+    );
 
     await goldens.auth();
     return FlutterPreSubmitFileComparator(
       baseDirectory.uri,
-      goldens, platform: platform,
+      goldens,
+      platform: platform,
       namePrefix: namePrefix,
       log: log,
       fs: fs,
@@ -375,11 +447,13 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   /// Decides based on the current environment if goldens tests should be
   /// executed as pre-submit tests with Skia Gold.
   static bool isForEnvironment(Platform platform) {
-    final bool luciPreSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
-      && platform.environment.containsKey('GOLDCTL')
-      && platform.environment.containsKey('GOLD_TRYJOB')
-      // Only run on the main branch
-      && _isMainBranch(platform.environment['GIT_BRANCH']);
+    final bool luciPreSubmit =
+        platform.environment.containsKey('SWARMING_TASK_ID') &&
+        platform.environment.containsKey('GOLDCTL') &&
+        platform.environment.containsKey('GOLD_TRYJOB')
+        // Only run on the main branch
+        &&
+        _isMainBranch(platform.environment['GIT_BRANCH']);
     return luciPreSubmit;
   }
 }
@@ -387,7 +461,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 /// A [FlutterGoldenFileComparator] for testing conditions that do not execute
 /// golden file tests.
 ///
-/// Currently, this comparator is used on Cirrus, or in Luci environments when executing tests
+/// Currently, this comparator is used on Luci environments when executing tests
 /// outside of the flutter/flutter repository.
 ///
 /// See also:
@@ -408,6 +482,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
     super.skiaClient,
     this.reason, {
     super.namePrefix,
+    required super.platform,
     required super.log,
     required super.fs,
   });
@@ -416,18 +491,35 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   final String reason;
 
   /// Creates a new [FlutterSkippingFileComparator] that mirrors the
-  /// relative path resolution of the default [goldenFileComparator].
-  static FlutterSkippingFileComparator fromDefaultComparator(
+  /// relative path resolution of the given [localFileComparator].
+  static FlutterSkippingFileComparator fromLocalFileComparator(
     String reason, {
-    LocalFileComparator? defaultComparator,
+    required LocalFileComparator localFileComparator,
     String? namePrefix,
+    required Platform platform,
     required LogCallback log,
     required FileSystem fs,
+    required ProcessManager process,
+    required io.HttpClient httpClient,
   }) {
-    defaultComparator ??= goldenFileComparator as LocalFileComparator;
-    final Uri basedir = defaultComparator.basedir;
-    final SkiaGoldClient skiaClient = SkiaGoldClient(fs.directory(basedir), log: log);
-    return FlutterSkippingFileComparator(basedir, skiaClient, reason, namePrefix: namePrefix, log: log, fs: fs);
+    final Uri basedir = localFileComparator.basedir;
+    final skiaClient = SkiaGoldClient(
+      fs.directory(basedir),
+      platform: platform,
+      log: log,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
+    );
+    return FlutterSkippingFileComparator(
+      basedir,
+      skiaClient,
+      reason,
+      namePrefix: namePrefix,
+      platform: platform,
+      log: log,
+      fs: fs,
+    );
   }
 
   @override
@@ -442,13 +534,11 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   /// Decides, based on the current environment, if this comparator should be
   /// used.
   ///
-  /// If we are in a CI environment, LUCI or Cirrus, but are not using the other
+  /// If we are in a CI environment, i.e. LUCI, but are not using the other
   /// comparators, we skip. Otherwise we would fallback to the local comparator,
   /// for which failures cannot be resolved in a CI environment.
   static bool isForEnvironment(Platform platform) {
-    return platform.environment.containsKey('SWARMING_TASK_ID')
-      // Some builds are still being run on Cirrus, we should skip these.
-      || platform.environment.containsKey('CIRRUS_CI');
+    return platform.environment.containsKey('SWARMING_TASK_ID');
   }
 }
 
@@ -457,7 +547,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
 ///
 /// This comparator utilizes the [SkiaGoldClient] to request baseline images for
 /// the given device under test for comparison. This comparator is initialized
-/// when conditions for all other [FlutterGoldenFileComparators] have not been
+/// when conditions for all other [FlutterGoldenFileComparator]s have not been
 /// met, see the `isForEnvironment` method for each one listed below.
 ///
 /// The [FlutterLocalFileComparator] is intended to run on local machines and
@@ -482,33 +572,34 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   /// Creates a [FlutterLocalFileComparator] that will test golden file
   /// images against baselines requested from Flutter Gold.
   ///
-  /// The [fs] and [platform] parameters are useful in tests, where the default
-  /// file system and platform can be replaced by mock instances.
+  /// The [fs] parameter is useful in tests, where the default
+  /// file system can be replaced by mock instances.
   FlutterLocalFileComparator(
     super.basedir,
     super.skiaClient, {
     required super.fs,
-    super.platform,
+    required super.platform,
     required super.log,
   });
 
   /// Creates a new [FlutterLocalFileComparator] that mirrors the
-  /// relative path resolution of the default [goldenFileComparator].
+  /// relative path resolution of the given [localFileComparator].
   ///
-  /// The [goldens], [defaultComparator], and [baseDirectory] parameters are
+  /// The [goldens] and [baseDirectory] parameters are
   /// visible for testing purposes only.
-  static Future<FlutterGoldenFileComparator> fromDefaultComparator(
-    final Platform platform, {
+  static Future<FlutterGoldenFileComparator> fromLocalFileComparator({
     SkiaGoldClient? goldens,
-    LocalFileComparator? defaultComparator,
+    required LocalFileComparator localFileComparator,
+    required Platform platform,
     Directory? baseDirectory,
     required LogCallback log,
     required FileSystem fs,
+    required ProcessManager process,
+    required io.HttpClient httpClient,
   }) async {
-    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
-      defaultComparator,
-      platform,
+      localFileComparator,
+      platform: platform,
       fs: fs,
     );
 
@@ -516,7 +607,14 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       baseDirectory.createSync(recursive: true);
     }
 
-    goldens ??= SkiaGoldClient(baseDirectory, log: log);
+    goldens ??= SkiaGoldClient(
+      baseDirectory,
+      platform: platform,
+      log: log,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
+    );
     try {
       // Check if we can reach Gold.
       await goldens.getExpectationForTest('');
@@ -526,6 +624,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
         goldens,
         'OSError occurred, could not reach Gold. '
         'Switching to FlutterSkippingGoldenFileComparator.',
+        platform: platform,
         log: log,
         fs: fs,
       );
@@ -535,6 +634,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
         goldens,
         'SocketException occurred, could not reach Gold. '
         'Switching to FlutterSkippingGoldenFileComparator.',
+        platform: platform,
         log: log,
         fs: fs,
       );
@@ -544,36 +644,50 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
         goldens,
         'FormatException occurred, could not reach Gold. '
         'Switching to FlutterSkippingGoldenFileComparator.',
+        platform: platform,
         log: log,
         fs: fs,
       );
     }
 
-    return FlutterLocalFileComparator(baseDirectory.uri, goldens, log: log, fs: fs);
+    return FlutterLocalFileComparator(
+      baseDirectory.uri,
+      goldens,
+      platform: platform,
+      log: log,
+      fs: fs,
+    );
   }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
-    late String? testExpectation;
-    testExpectation = await skiaClient.getExpectationForTest(testName);
+    final String? testExpectation = await skiaClient.getExpectationForTest(testName);
 
     if (testExpectation == null || testExpectation.isEmpty) {
       log(
         'No expectations provided by Skia Gold for test: $golden. '
         'This may be a new test. If this is an unexpected result, check '
         'https://flutter-gold.skia.org.\n'
-        'Validate image output found at $basedir'
+        'Validate image output found at $basedir',
       );
-      update(golden, imageBytes);
+      await update(golden, imageBytes);
       return true;
     }
 
-    ComparisonResult result;
     final List<int> goldenBytes = await skiaClient.getImageBytes(testExpectation);
 
-    result = await GoldenFileComparator.compareLists(
+    if (skiaClient.isBrowserTest) {
+      return _fuzzyCompareWeb(
+        actualBytes: imageBytes,
+        expectedBytes: goldenBytes,
+        golden: golden,
+        testName: testName,
+      );
+    }
+
+    final ComparisonResult result = await GoldenFileComparator.compareLists(
       imageBytes,
       goldenBytes,
     );
@@ -585,6 +699,254 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
 
     final String error = await generateFailureOutput(result, golden, basedir);
     result.dispose();
+    throw FlutterError(error);
+  }
+
+  /// Computes the Manhattan distance (L1 norm) between two RGBA pixels.
+  ///
+  /// Calculates `|r1 - r2| + |g1 - g2| + |b1 - b2| + |a1 - a2|`. The result
+  /// ranges from `0` (identical colors) to `1020` (maximum difference, e.g.
+  /// solid black vs solid white with full opacity difference).
+  static int _colorDelta(int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2) {
+    return (r1 - r2).abs() + (g1 - g2).abs() + (b1 - b2).abs() + (a1 - a2).abs();
+  }
+
+  /// Converts a raw RGBA8888 byte buffer of dimension [width] x [height] into
+  /// an uncompressed [ui.Image].
+  static Future<ui.Image> _createImageFromPixels(ByteData bytes, int width, int height) {
+    final completer = Completer<ui.Image>();
+    ui.decodeImageFromPixels(
+      bytes.buffer.asUint8List(),
+      width,
+      height,
+      ui.PixelFormat.rgba8888,
+      completer.complete,
+    );
+    return completer.future;
+  }
+
+  /// Performs a tolerance-aware fuzzy comparison between [actualBytes] and
+  /// [expectedBytes] for web browser golden tests.
+  ///
+  /// Browser raster engines, font renderers, and GPU backends exhibit slight
+  /// cross-platform rasterization variations (e.g. subpixel antialiasing and
+  /// glyph rounding). To accommodate these without false positives:
+  ///
+  /// 1. Pixels whose Manhattan color delta is within `maxColorDelta` pass.
+  /// 2. If the direct pixel mismatches, a 3x3 neighborhood search in the expected
+  ///    image is performed to allow for 1-pixel subpixel layout shifts.
+  /// 3. The test passes if the overall differing pixel ratio is <= `maxDifferentPixelsRate`.
+  ///
+  /// If the comparison fails, failure artifacts (`actual.png`, `expected.png`,
+  /// `diff.png`) are written to disk and a [FlutterError] is thrown.
+  Future<bool> _fuzzyCompareWeb({
+    required Uint8List actualBytes,
+    required List<int> expectedBytes,
+    required Uri golden,
+    required String testName,
+  }) async {
+    if (listEquals(actualBytes, expectedBytes)) {
+      return true;
+    }
+
+    final ui.Codec actualCodec = await ui.instantiateImageCodec(actualBytes);
+    final ui.Image actualImage = (await actualCodec.getNextFrame()).image;
+    actualCodec.dispose();
+
+    final ui.Codec expectedCodec = await ui.instantiateImageCodec(
+      Uint8List.fromList(expectedBytes),
+    );
+    final ui.Image expectedImage = (await expectedCodec.getNextFrame()).image;
+    expectedCodec.dispose();
+
+    ui.Image? diffImage;
+    try {
+      final ByteData? actualRgba = await actualImage.toByteData();
+      final ByteData? expectedRgba = await expectedImage.toByteData();
+
+      final int width = actualImage.width;
+      final int height = actualImage.height;
+      final int expectedWidth = expectedImage.width;
+      final int expectedHeight = expectedImage.height;
+
+      // Maximum allowed Manhattan color delta across RGBA channels (7 per RGB channel = 21)
+      // to tolerate subtle antialiasing differences.
+      const int maxColorDelta = 7 * 3;
+      // Maximum proportion of differing pixels allowed (10%) to absorb perimeter antialiasing fringes.
+      const maxDifferentPixelsRate = 0.1;
+
+      if (width != expectedWidth ||
+          height != expectedHeight ||
+          actualRgba == null ||
+          expectedRgba == null) {
+        final diffBytes = ByteData(width * height * 4);
+        for (var i = 0; i < width * height * 4; i += 4) {
+          diffBytes.setUint8(i, 255);
+          diffBytes.setUint8(i + 1, 0);
+          diffBytes.setUint8(i + 2, 127);
+          diffBytes.setUint8(i + 3, 255);
+        }
+        diffImage = await _createImageFromPixels(diffBytes, width, height);
+        final ByteData? diffPngData = await diffImage.toByteData(format: ui.ImageByteFormat.png);
+        final Uint8List diffPngBytes = diffPngData!.buffer.asUint8List();
+
+        await _writeFailureAndThrow(
+          golden: golden,
+          testName: testName,
+          actualBytes: actualBytes,
+          expectedBytes: Uint8List.fromList(expectedBytes),
+          diffPngBytes: diffPngBytes,
+          diffPixelCount: width * height,
+          totalPixels: width * height,
+          maxDifferentPixelsRate: maxDifferentPixelsRate,
+          customMessage:
+              'Image dimensions do not match (actual: ${width}x$height, expected: ${expectedWidth}x$expectedHeight).',
+        );
+        return false;
+      }
+
+      final Uint8List actualPixels = actualRgba.buffer.asUint8List(
+        actualRgba.offsetInBytes,
+        actualRgba.lengthInBytes,
+      );
+      final Uint8List expectedPixels = expectedRgba.buffer.asUint8List(
+        expectedRgba.offsetInBytes,
+        expectedRgba.lengthInBytes,
+      );
+
+      final int totalPixels = width * height;
+      var diffPixelCount = 0;
+      final diffBytes = ByteData(width * height * 4);
+
+      for (var y = 0; y < height; y += 1) {
+        for (var x = 0; x < width; x += 1) {
+          final int offset = (y * width + x) * 4;
+          final int r1 = actualPixels[offset];
+          final int g1 = actualPixels[offset + 1];
+          final int b1 = actualPixels[offset + 2];
+          final int a1 = actualPixels[offset + 3];
+
+          var pixelMatched = false;
+
+          // Check direct pixel first
+          final int r2 = expectedPixels[offset];
+          final int g2 = expectedPixels[offset + 1];
+          final int b2 = expectedPixels[offset + 2];
+          final int a2 = expectedPixels[offset + 3];
+          if (_colorDelta(r1, g1, b1, a1, r2, g2, b2, a2) <= maxColorDelta) {
+            pixelMatched = true;
+          } else {
+            // Search 3x3 neighborhood in expected image
+            neighborhoodSearch:
+            for (var dy = -1; dy <= 1; dy += 1) {
+              final int ny = y + dy;
+              if (ny < 0 || ny >= height) {
+                continue;
+              }
+              for (var dx = -1; dx <= 1; dx += 1) {
+                final int nx = x + dx;
+                if (nx < 0 || nx >= width) {
+                  continue;
+                }
+                final int neighborOffset = (ny * width + nx) * 4;
+                final int nr2 = expectedPixels[neighborOffset];
+                final int ng2 = expectedPixels[neighborOffset + 1];
+                final int nb2 = expectedPixels[neighborOffset + 2];
+                final int na2 = expectedPixels[neighborOffset + 3];
+                if (_colorDelta(r1, g1, b1, a1, nr2, ng2, nb2, na2) <= maxColorDelta) {
+                  pixelMatched = true;
+                  break neighborhoodSearch;
+                }
+              }
+            }
+          }
+
+          if (pixelMatched) {
+            diffBytes.setUint8(offset, r1);
+            diffBytes.setUint8(offset + 1, g1);
+            diffBytes.setUint8(offset + 2, b1);
+            diffBytes.setUint8(offset + 3, a1);
+          } else {
+            diffPixelCount += 1;
+            // Highlight mismatched pixels with bright Magenta (#FF007F) for clear visual diffing.
+            diffBytes.setUint8(offset, 255);
+            diffBytes.setUint8(offset + 1, 0);
+            diffBytes.setUint8(offset + 2, 127);
+            diffBytes.setUint8(offset + 3, 255);
+          }
+        }
+      }
+
+      final double diffRate = totalPixels == 0 ? 0.0 : diffPixelCount / totalPixels;
+      if (diffRate <= maxDifferentPixelsRate) {
+        return true;
+      }
+
+      diffImage = await _createImageFromPixels(diffBytes, width, height);
+      final ByteData? diffPngData = await diffImage.toByteData(format: ui.ImageByteFormat.png);
+      final Uint8List diffPngBytes = diffPngData!.buffer.asUint8List();
+
+      await _writeFailureAndThrow(
+        golden: golden,
+        testName: testName,
+        actualBytes: actualBytes,
+        expectedBytes: Uint8List.fromList(expectedBytes),
+        diffPngBytes: diffPngBytes,
+        diffPixelCount: diffPixelCount,
+        totalPixels: totalPixels,
+        maxDifferentPixelsRate: maxDifferentPixelsRate,
+      );
+      return false;
+    } finally {
+      actualImage.dispose();
+      expectedImage.dispose();
+      diffImage?.dispose();
+    }
+  }
+
+  /// Writes failure artifacts (`actual.png`, `expected.png`, `diff.png`) to the
+  /// golden cache failure directory and throws a formatted [FlutterError].
+  Future<void> _writeFailureAndThrow({
+    required Uri golden,
+    required String testName,
+    required Uint8List actualBytes,
+    required Uint8List expectedBytes,
+    required Uint8List diffPngBytes,
+    required int diffPixelCount,
+    required int totalPixels,
+    required double maxDifferentPixelsRate,
+    String? customMessage,
+  }) async {
+    final Directory failureDir;
+    if (platform.environment.containsKey(_kFlutterRootKey)) {
+      failureDir = fs
+          .directory(platform.environment[_kFlutterRootKey])
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_goldens_cache')
+          .childDirectory('failures')
+          .childDirectory(testName);
+    } else {
+      failureDir = fs.directory(basedir).childDirectory('failures').childDirectory(testName);
+    }
+
+    failureDir.createSync(recursive: true);
+    final File actualFile = failureDir.childFile('actual.png');
+    final File expectedFile = failureDir.childFile('expected.png');
+    final File diffFile = failureDir.childFile('diff.png');
+
+    actualFile.writeAsBytesSync(actualBytes, flush: true);
+    expectedFile.writeAsBytesSync(expectedBytes, flush: true);
+    diffFile.writeAsBytesSync(diffPngBytes, flush: true);
+
+    final double diffRate = totalPixels == 0 ? 0.0 : diffPixelCount / totalPixels;
+    final error =
+        'Golden comparison failed for test "$golden".\n'
+        '${customMessage != null ? '$customMessage\n' : ''}'
+        'Pixel difference: ${(diffRate * 100).toStringAsFixed(2)}% ($diffPixelCount / $totalPixels pixels differed, max allowed: ${(maxDifferentPixelsRate * 100).toStringAsFixed(1)}%).\n'
+        'Failure artifacts written to:\n'
+        '  actual:   ${actualFile.uri}\n'
+        '  expected: ${expectedFile.uri}\n'
+        '  diff:     ${diffFile.uri}';
     throw FlutterError(error);
   }
 }

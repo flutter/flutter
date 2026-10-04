@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # For details regarding the *Flutter Fix* feature, see
-# https://flutter.dev/docs/development/tools/flutter-fix
+# https://flutter.dev/to/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -20,10 +20,737 @@
 #     * Actions: fix_actions.yaml
 #     * BuildContext: fix_build_context.yaml
 #     * Element: fix_element.yaml
+#     * Expansible: (in this file)
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
-  # Changes made in TBD
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: ''
+      inClass: 'Viewport'
+    oneOf:
+      - if: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.viewport'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.viewport({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.viewport'"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+          - kind: 'removeParameter'
+            name: 'cacheExtentStyle'
+      - if: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.pixel'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.pixel'"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+          - kind: 'removeParameter'
+            name: 'cacheExtentStyle'
+      - if: "cacheExtent != '' && cacheExtentStyle == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == ''"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+      cacheExtentStyle:
+        kind: 'fragment'
+        value: 'arguments[cacheExtentStyle]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: ''
+      inClass: 'ShrinkWrappingViewport'
+    oneOf:
+      - if: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.viewport'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.viewport({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.viewport'"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+          - kind: 'removeParameter'
+            name: 'cacheExtentStyle'
+      - if: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.pixel'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.pixel'"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+          - kind: 'removeParameter'
+            name: 'cacheExtentStyle'
+      - if: "cacheExtent != '' && cacheExtentStyle == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == ''"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+      cacheExtentStyle:
+        kind: 'fragment'
+        value: 'arguments[cacheExtentStyle]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: ''
+      inClass: 'TwoDimensionalViewport'
+    oneOf:
+      - if: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.viewport'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.viewport({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.viewport'"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+          - kind: 'removeParameter'
+            name: 'cacheExtentStyle'
+      - if: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.pixel'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.pixel'"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+          - kind: 'removeParameter'
+            name: 'cacheExtentStyle'
+      - if: "cacheExtent != '' && cacheExtentStyle == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == ''"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+      cacheExtentStyle:
+        kind: 'fragment'
+        value: 'arguments[cacheExtentStyle]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: ''
+      inClass: 'ScrollView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: ''
+      inClass: 'ListView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: 'builder'
+      inClass: 'ListView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: 'separated'
+      inClass: 'ListView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: 'custom'
+      inClass: 'ListView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: ''
+      inClass: 'GridView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: 'builder'
+      inClass: 'GridView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: 'custom'
+      inClass: 'GridView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: 'count'
+      inClass: 'GridView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: 'extent'
+      inClass: 'GridView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: ''
+      inClass: 'ReorderableListView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: 'builder'
+      inClass: 'ReorderableListView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: ''
+      inClass: 'TwoDimensionalScrollView'
+    oneOf:
+      - if: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.viewport'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.viewport({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.viewport'"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+          - kind: 'removeParameter'
+            name: 'cacheExtentStyle'
+      - if: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.pixel'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.pixel'"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+          - kind: 'removeParameter'
+            name: 'cacheExtentStyle'
+      - if: "cacheExtent != '' && cacheExtentStyle == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == ''"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+      cacheExtentStyle:
+        kind: 'fragment'
+        value: 'arguments[cacheExtentStyle]'
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: ''
+      inClass: 'RenderTwoDimensionalViewport'
+    oneOf:
+      - if: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.viewport'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.viewport({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.viewport'"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+          - kind: 'removeParameter'
+            name: 'cacheExtentStyle'
+      - if: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.pixel'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == 'CacheExtentStyle.pixel'"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+          - kind: 'removeParameter'
+            name: 'cacheExtentStyle'
+      - if: "cacheExtent != '' && cacheExtentStyle == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'scrollCacheExtent'
+            style: optional_named
+            argumentValue:
+              expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+              requiredIf: "cacheExtent != '' && cacheExtentStyle == ''"
+          - kind: 'removeParameter'
+            name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+      cacheExtentStyle:
+        kind: 'fragment'
+        value: 'arguments[cacheExtentStyle]'
+
+
+
+  # Change made in https://github.com/flutter/flutter/pull/135218
+  - title: "Migrate to 'scrollCacheExtent'"
+    date: 2026-02-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: ''
+      inClass: 'CustomScrollView'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'scrollCacheExtent'
+        style: optional_named
+        argumentValue:
+          expression: 'ScrollCacheExtent.pixels({% cacheExtent %})'
+          requiredIf: "cacheExtent != ''"
+      - kind: 'removeParameter'
+        name: 'cacheExtent'
+    variables:
+      cacheExtent:
+        kind: 'fragment'
+        value: 'arguments[cacheExtent]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/177895
+  - title: "Migrate 'axisAlignment' to 'alignment'"
+    date: 2025-11-20
+    element:
+      uris: [ 'widgets.dart' ]
+      constructor: ''
+      inClass: 'SizeTransition'
+    oneOf:
+      - if: "axis == '' && axisAlignment != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'alignment'
+            style: optional_named
+            argumentValue:
+              expression: 'AlignmentDirectional(-1.0, {% axisAlignment %})'
+              requiredIf: "axis == '' && axisAlignment != ''"
+          - kind: 'removeParameter'
+            name: 'axisAlignment'
+      - if: "axis == 'Axis.vertical' && axisAlignment != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'alignment'
+            style: optional_named
+            argumentValue:
+              expression: 'AlignmentDirectional(-1.0, {% axisAlignment %})'
+              requiredIf: "axis == 'Axis.vertical' && axisAlignment != ''"
+          - kind: 'removeParameter'
+            name: 'axisAlignment'
+      - if: "axis == 'Axis.horizontal' && axisAlignment != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'alignment'
+            style: optional_named
+            argumentValue:
+              expression: 'AlignmentDirectional({% axisAlignment %}, -1.0)'
+              requiredIf: "axis == 'Axis.horizontal' && axisAlignment != ''"
+          - kind: 'removeParameter'
+            name: 'axisAlignment'
+    variables:
+      axisAlignment:
+        kind: fragment
+        value: 'arguments[axisAlignment]'
+      axis:
+        kind: fragment
+        value: 'arguments[axis]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/177966
+  - title: "Migrate animation parameters to 'animationStyle'"
+    date: 2025-04-01
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'Expansible'
+    oneOf:
+      - if: "duration != '' && curve != '' && reverseCurve != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(duration: {% duration %}, curve: {% curve %}, reverseCurve: {% reverseCurve %})'
+              requiredIf: "duration != '' && curve != '' && reverseCurve != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+      - if: "duration != '' && curve != '' && reverseCurve == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(duration: {% duration %}, curve: {% curve %})'
+              requiredIf: "duration != '' && curve != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+      - if: "duration != '' && curve == '' && reverseCurve != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(duration: {% duration %}, reverseCurve: {% reverseCurve %})'
+              requiredIf: "duration != '' && reverseCurve != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+      - if: "duration == '' && curve != '' && reverseCurve != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(curve: {% curve %}, reverseCurve: {% reverseCurve %})'
+              requiredIf: "curve != '' && reverseCurve != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+      - if: "duration != '' && curve == '' && reverseCurve == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(duration: {% duration %})'
+              requiredIf: "duration != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+      - if: "duration == '' && curve != '' && reverseCurve == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(curve: {% curve %})'
+              requiredIf: "curve != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+      - if: "duration == '' && curve == '' && reverseCurve != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(reverseCurve: {% reverseCurve %})'
+              requiredIf: "reverseCurve != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+    variables:
+      duration:
+        kind: 'fragment'
+        value: 'arguments[duration]'
+      curve:
+        kind: 'fragment'
+        value: 'arguments[curve]'
+      reverseCurve:
+        kind: 'fragment'
+        value: 'arguments[reverseCurve]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/139260
   - title: "Migrate to focusNode.enclosingScope!"
     date: 2023-11-29
     element:
@@ -104,7 +831,7 @@ transforms:
   - title: "Remove 'vsync'"
     date: 2023-01-30
     element:
-      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       constructor: ''
       inClass: 'AnimatedSize'
     changes:
@@ -115,7 +842,7 @@ transforms:
   - title: "Migrate to 'boldTextOf'"
     date: 2022-10-28
     element:
-      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'boldTextOverride'
       inClass: 'MediaQuery'
     changes:
@@ -847,7 +1574,7 @@ transforms:
       - kind: 'rename'
         newName: 'insertRenderObjectChild'
 
-  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  # Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   - title: "Migrate to 'clipBehavior'"
     date: 2020-08-20
     element:
@@ -855,10 +1582,10 @@ transforms:
       field: 'clipToSize'
       inClass: 'ListWheelViewport'
     changes:
-    - kind: 'rename'
-      newName: 'clipBehavior'
+      - kind: 'rename'
+        newName: 'clipBehavior'
 
-  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  # Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   - title: "Migrate to 'clipBehavior'"
     date: 2020-08-20
     element:
@@ -866,28 +1593,28 @@ transforms:
       constructor: ''
       inClass: 'ListWheelViewport'
     oneOf:
-    - if: "clipToSize == 'true'"
-      changes:
-      - kind: 'addParameter'
-        index: 13
-        name: 'clipBehavior'
-        style: optional_named
-        argumentValue:
-          expression: 'Clip.hardEdge'
-          requiredIf: "clipToSize == 'true'"
-      - kind: 'removeParameter'
-        name: 'clipToSize'
-    - if: "clipToSize == 'false'"
-      changes:
-      - kind: 'addParameter'
-        index: 13
-        name: 'clipBehavior'
-        style: optional_named
-        argumentValue:
-          expression: 'Clip.none'
-          requiredIf: "clipToSize == 'false'"
-      - kind: 'removeParameter'
-        name: 'clipToSize'
+      - if: "clipToSize == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 13
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.hardEdge'
+              requiredIf: "clipToSize == 'true'"
+          - kind: 'removeParameter'
+            name: 'clipToSize'
+      - if: "clipToSize == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 13
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.none'
+              requiredIf: "clipToSize == 'false'"
+          - kind: 'removeParameter'
+            name: 'clipToSize'
     variables:
       clipToSize:
         kind: 'fragment'
@@ -938,7 +1665,18 @@ transforms:
       method: 'buildViewportChrome'
       inClass: 'ScrollBehavior'
     changes:
-    - kind: 'rename'
-      newName: 'buildOverscrollIndicator'
+      - kind: 'rename'
+        newName: 'buildOverscrollIndicator'
+
+  # Changes made in https://github.com/flutter/flutter/pull/157725
+  - title: "Migrate to 'markForComplete'"
+    date: 2025-02-10
+    element:
+      uris: [ 'widgets.dart' ]
+      method: 'markForRemove'
+      inClass: 'RouteTransitionRecord'
+    changes:
+      - kind: 'rename'
+        newName: 'markForComplete'
 
 # Before adding a new fix: read instructions at the top of this file.

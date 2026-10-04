@@ -7,14 +7,10 @@ import 'package:path/path.dart' as path;
 import '../run_command.dart';
 import '../utils.dart';
 
-Future<void> analyzeRunner(String flutterRoot) async {
+Future<void> analyzeRunner() async {
   printProgress('${green}Running analysis testing$reset');
-  await runCommand(
-    'dart',
-    <String>[
-      '--enable-asserts',
-      path.join(flutterRoot, 'dev', 'bots', 'analyze.dart'),
-    ],
-    workingDirectory: flutterRoot,
-  );
+  await runCommand('dart', <String>[
+    '--enable-asserts',
+    path.join(flutterRoot, 'dev', 'bots', 'analyze.dart'),
+  ], workingDirectory: flutterRoot);
 }

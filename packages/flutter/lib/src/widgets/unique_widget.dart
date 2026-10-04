@@ -22,9 +22,7 @@ abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWid
   ///
   /// The [key] argument is required because it identifies the unique inflated
   /// instance of this widget.
-  const UniqueWidget({
-    required GlobalKey<T> key,
-  }) : super(key: key);
+  const UniqueWidget({required GlobalKey<T> super.key});
 
   @override
   T createState();
@@ -33,7 +31,7 @@ abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWid
   ///
   /// Might be null if the widget is not currently in the tree.
   T? get currentState {
-    final GlobalKey<T> globalKey = key! as GlobalKey<T>;
+    final globalKey = key! as GlobalKey<T>;
     return globalKey.currentState;
   }
 }

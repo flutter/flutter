@@ -1,0 +1,201 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_
+#define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_
+
+#include <cstddef>
+
+#include "impeller/base/backend_cast.h"
+#include "impeller/core/formats.h"
+#include "impeller/core/shader_types.h"
+#include "impeller/geometry/size.h"
+#include "impeller/renderer/capabilities.h"
+
+namespace impeller {
+
+class ProcTableGLES;
+
+//------------------------------------------------------------------------------
+/// @brief      The Vulkan layers and extensions wrangler.
+///
+class CapabilitiesGLES final
+    : public Capabilities,
+      public BackendCast<CapabilitiesGLES, Capabilities> {
+ public:
+  explicit CapabilitiesGLES(const ProcTableGLES& gl);
+
+  CapabilitiesGLES(const CapabilitiesGLES&) = delete;
+
+  CapabilitiesGLES(CapabilitiesGLES&&) = delete;
+
+  CapabilitiesGLES& operator=(const CapabilitiesGLES&) = delete;
+
+  CapabilitiesGLES& operator=(CapabilitiesGLES&&) = delete;
+
+  // Must be at least 8.
+  size_t max_combined_texture_image_units = 8;
+
+  // Must be at least 16.
+  size_t max_cube_map_texture_size = 16;
+
+  // Must be at least 16.
+  size_t max_fragment_uniform_vectors = 16;
+
+  // Must be at least 1.
+  size_t max_renderbuffer_size = 1;
+
+  // Must be at least 8.
+  size_t max_texture_image_units = 8;
+
+  // Must be at least 64.
+  ISize max_texture_size = ISize{64, 64};
+
+  // Must be at least 8.
+  size_t max_varying_vectors = 8;
+
+  // Must be at least 8.
+  size_t max_vertex_attribs = 8;
+
+  // May be 0.
+  size_t max_vertex_texture_image_units = 0;
+
+  // Must be at least 128.
+  size_t max_vertex_uniform_vectors = 128;
+
+  // Must be at least display size.
+  ISize max_viewport_dims;
+
+  // May be 0.
+  size_t num_compressed_texture_formats = 0;
+
+  // May be 0.
+  size_t num_shader_binary_formats = 0;
+
+  size_t GetMaxTextureUnits(ShaderStage stage) const;
+
+  bool IsANGLE() const;
+
+  /// Whether uploads must reset a stale shared-context texture binding.
+  bool NeedsTextureUploadRebind() const;
+
+  /// @brief Whether this is an ES GL variant or (if false) desktop GL.
+  bool IsES() const;
+
+  // |Capabilities|
+  /// Always false. Rendering into a non-zero mip level is not yet implemented
+  /// on the GLES backend; see SupportsFramebufferRenderMipmap in the .cc file.
+  bool SupportsFramebufferRenderMipmap() const override;
+
+  /// @brief Whether GL_TEXTURE_MAX_LEVEL can be set to bound a texture's
+  /// sampled
+  ///        mip range. Core on desktop GL and ES 3.0+; on ES 2.0 it requires
+  ///        the GL_APPLE_texture_max_level extension. Without it a partial mip
+  ///        chain cannot be made mipmap complete and samples as black.
+  bool SupportsTextureMaxLevel() const;
+
+  /// @brief Whether 2D array textures (`GL_TEXTURE_2D_ARRAY`, `sampler2DArray`)
+  ///        are available. Core on desktop GL 3.0+ and OpenGL ES 3.0+, and also
+  ///        available below them through GL_EXT_texture_array (desktop GL 2.x)
+  ///        or GL_NV_texture_array (OpenGL ES 2.0). When absent, callers must
+  ///        fall back to a texture atlas.
+  // |Capabilities|
+  bool SupportsTextureArrays() const override;
+
+  // |Capabilities|
+  bool SupportsOffscreenMSAA() const override;
+
+  // |Capabilities|
+  bool SupportsImplicitResolvingMSAA() const override;
+
+  // |Capabilities|
+  bool SupportsSSBO() const override;
+
+  // |Capabilities|
+  bool SupportsTextureToTextureBlits() const override;
+
+  // |Capabilities|
+  bool SupportsFramebufferFetch() const override;
+
+  // |Capabilities|
+  bool SupportsCompute() const override;
+
+  // |Capabilities|
+  bool SupportsComputeSubgroups() const override;
+
+  // |Capabilities|
+  bool SupportsReadFromResolve() const override;
+
+  // |Capabilities|
+  bool SupportsDecalSamplerAddressMode() const override;
+
+  // |Capabilities|
+  bool SupportsDeviceTransientTextures() const override;
+
+  // |Capabilities|
+  bool SupportsTriangleFan() const override;
+
+  // |Capabilities|
+  bool SupportsPrimitiveRestart() const override;
+
+  // |Capabilities|
+  bool Supports32BitPrimitiveIndices() const override;
+
+  // |Capabilities|
+  bool SupportsManuallyMippedTextures() const override;
+
+  // |Capabilities|
+  bool SupportsExtendedRangeFormats() const override;
+
+  // |Capabilities|
+  bool SupportsTextureCompression(
+      CompressedTextureFamily family) const override;
+
+  // |Capabilities|
+  PixelFormat GetDefaultColorFormat() const override;
+
+  // |Capabilities|
+  PixelFormat GetDefaultStencilFormat() const override;
+
+  // |Capabilities|
+  PixelFormat GetDefaultDepthStencilFormat() const override;
+
+  // |Capabilities|
+  PixelFormat GetDefaultGlyphAtlasFormat() const override;
+
+  // |Capabilities|
+  ISize GetMaximumRenderPassAttachmentSize() const override;
+
+  // |Capabilities|
+  uint32_t GetMaxSamplerAnisotropy() const override;
+
+  // |Capabilities|
+  size_t GetMinimumUniformAlignment() const override;
+
+  // |Capabilities|
+  bool NeedsPartitionedHostBuffer() const override;
+
+ private:
+  bool supports_texture_to_texture_blits_ = false;
+  bool supports_framebuffer_fetch_ = false;
+  bool supports_decal_sampler_address_mode_ = false;
+  bool supports_offscreen_msaa_ = false;
+  bool supports_implicit_msaa_ = false;
+  bool supports_32bit_primitive_indices_ = false;
+  bool supports_texture_max_level_ = false;
+  bool supports_texture_array_ = false;
+  bool needs_texture_upload_rebind_ = false;
+  bool is_angle_ = false;
+  bool is_es_ = false;
+  bool supports_texture_compression_bc_ = false;
+  bool supports_texture_compression_etc2_ = false;
+  bool supports_texture_compression_astc_ = false;
+  bool supports_texture_compression_astc_hdr_ = false;
+  uint32_t max_sampler_anisotropy_ = 1;
+  PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
+};
+
+}  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_

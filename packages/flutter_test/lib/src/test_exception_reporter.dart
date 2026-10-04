@@ -32,11 +32,14 @@ void _defaultTestExceptionReporter(FlutterErrorDetails errorDetails, String test
   // but the test package does, that's how the test package tracks errors. So really we could
   // get the same effect here by calling that error handler directly or indeed just throwing.
   // However, we call registerException because that's the semantically correct thing...
-  String additional = '';
+  var additional = '';
   if (testDescription.isNotEmpty) {
     additional = '\nThe test description was: $testDescription';
   }
-  test_package.registerException('Test failed. See exception logs above.$additional', _emptyStackTrace);
+  test_package.registerException(
+    'Test failed. See exception logs above.$additional',
+    _emptyStackTrace,
+  );
 }
 
 final StackTrace _emptyStackTrace = stack_trace.Chain(const <stack_trace.Trace>[]);

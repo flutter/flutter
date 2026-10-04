@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'navigation_bar.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
 import 'navigation_drawer.dart';
 import 'theme.dart';
 
@@ -19,9 +21,8 @@ import 'theme.dart';
 /// widgets.
 ///
 /// Descendant widgets obtain the current [NavigationDrawerThemeData] object
-/// using `NavigationDrawerTheme.of(context)`. Instances of
-/// [NavigationDrawerThemeData] can be customized with
-/// [NavigationDrawerThemeData.copyWith].
+/// using [NavigationDrawerTheme.of]. Instances of [NavigationDrawerThemeData]
+/// can be customized with [NavigationDrawerThemeData.copyWith].
 ///
 /// Typically a [NavigationDrawerThemeData] is specified as part of the
 /// overall [Theme] with [ThemeData.navigationDrawerTheme]. Alternatively, a
@@ -82,14 +83,14 @@ class NavigationDrawerThemeData with Diagnosticable {
   /// [NavigationDestination] labels.
   ///
   /// You can use this to specify a different style when the label is selected.
-  final MaterialStateProperty<TextStyle?>? labelTextStyle;
+  final WidgetStateProperty<TextStyle?>? labelTextStyle;
 
   /// The theme to merge with the default icon theme for
   /// [NavigationDestination] icons.
   ///
   /// You can use this to specify a different icon theme when the icon is
   /// selected.
-  final MaterialStateProperty<IconThemeData?>? iconTheme;
+  final WidgetStateProperty<IconThemeData?>? iconTheme;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -102,8 +103,8 @@ class NavigationDrawerThemeData with Diagnosticable {
     Color? indicatorColor,
     ShapeBorder? indicatorShape,
     Size? indicatorSize,
-    MaterialStateProperty<TextStyle?>? labelTextStyle,
-    MaterialStateProperty<IconThemeData?>? iconTheme,
+    WidgetStateProperty<TextStyle?>? labelTextStyle,
+    WidgetStateProperty<IconThemeData?>? iconTheme,
   }) {
     return NavigationDrawerThemeData(
       tileHeight: tileHeight ?? this.tileHeight,
@@ -124,7 +125,11 @@ class NavigationDrawerThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static NavigationDrawerThemeData? lerp(NavigationDrawerThemeData? a, NavigationDrawerThemeData? b, double t) {
+  static NavigationDrawerThemeData? lerp(
+    NavigationDrawerThemeData? a,
+    NavigationDrawerThemeData? b,
+    double t,
+  ) {
     if (identical(a, b)) {
       return a;
     }
@@ -137,26 +142,34 @@ class NavigationDrawerThemeData with Diagnosticable {
       indicatorColor: Color.lerp(a?.indicatorColor, b?.indicatorColor, t),
       indicatorShape: ShapeBorder.lerp(a?.indicatorShape, b?.indicatorShape, t),
       indicatorSize: Size.lerp(a?.indicatorSize, a?.indicatorSize, t),
-      labelTextStyle: MaterialStateProperty.lerp<TextStyle?>(
-          a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
-      iconTheme: MaterialStateProperty.lerp<IconThemeData?>(
-          a?.iconTheme, b?.iconTheme, t, IconThemeData.lerp),
+      labelTextStyle: WidgetStateProperty.lerp<TextStyle?>(
+        a?.labelTextStyle,
+        b?.labelTextStyle,
+        t,
+        TextStyle.lerp,
+      ),
+      iconTheme: WidgetStateProperty.lerp<IconThemeData?>(
+        a?.iconTheme,
+        b?.iconTheme,
+        t,
+        IconThemeData.lerp,
+      ),
     );
   }
 
   @override
   int get hashCode => Object.hash(
-        tileHeight,
-        backgroundColor,
-        elevation,
-        shadowColor,
-        surfaceTintColor,
-        indicatorColor,
-        indicatorShape,
-        indicatorSize,
-        labelTextStyle,
-        iconTheme,
-      );
+    tileHeight,
+    backgroundColor,
+    elevation,
+    shadowColor,
+    surfaceTintColor,
+    indicatorColor,
+    indicatorShape,
+    indicatorSize,
+    labelTextStyle,
+    iconTheme,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -182,27 +195,30 @@ class NavigationDrawerThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(DoubleProperty('tileHeight', tileHeight, defaultValue: null));
-    properties.add(
-        ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(DoubleProperty('tileHeight', tileHeight, defaultValue: null));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
-    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor,
-        defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
+    properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: null));
     properties.add(
-        ColorProperty('indicatorColor', indicatorColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>(
-        'indicatorShape', indicatorShape,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<Size>('indicatorSize', indicatorSize,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>(
-        'labelTextStyle', labelTextStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>(
-        'iconTheme', iconTheme,
-        defaultValue: null));
+      DiagnosticsProperty<ShapeBorder>('indicatorShape', indicatorShape, defaultValue: null),
+    );
+    properties.add(DiagnosticsProperty<Size>('indicatorSize', indicatorSize, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<WidgetStateProperty<TextStyle?>>(
+        'labelTextStyle',
+        labelTextStyle,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<WidgetStateProperty<IconThemeData?>>(
+        'iconTheme',
+        iconTheme,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
@@ -219,25 +235,27 @@ class NavigationDrawerThemeData with Diagnosticable {
 class NavigationDrawerTheme extends InheritedTheme {
   /// Creates a navigation rail theme that controls the
   /// [NavigationDrawerThemeData] properties for a [NavigationDrawer].
-  const NavigationDrawerTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const NavigationDrawerTheme({super.key, required this.data, required super.child});
 
   /// Specifies the background color, label text style, icon theme, and label
   /// type values for descendant [NavigationDrawer] widgets.
   final NavigationDrawerThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [NavigationDrawerThemeData] from the closest
+  /// ancestor [NavigationDrawerTheme].
   ///
   /// If there is no enclosing [NavigationDrawerTheme] widget, then
   /// [ThemeData.navigationDrawerTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// NavigationDrawerThemeData theme = NavigationDrawerTheme.of(context);
+  /// ```
   static NavigationDrawerThemeData of(BuildContext context) {
-    final NavigationDrawerTheme? navigationDrawerTheme =
-        context.dependOnInheritedWidgetOfExactType<NavigationDrawerTheme>();
-    return navigationDrawerTheme?.data ??
-        Theme.of(context).navigationDrawerTheme;
+    final NavigationDrawerTheme? navigationDrawerTheme = context
+        .dependOnInheritedWidgetOfExactType<NavigationDrawerTheme>();
+    return navigationDrawerTheme?.data ?? Theme.of(context).navigationDrawerTheme;
   }
 
   @override
@@ -246,6 +264,5 @@ class NavigationDrawerTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(NavigationDrawerTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(NavigationDrawerTheme oldWidget) => data != oldWidget.data;
 }

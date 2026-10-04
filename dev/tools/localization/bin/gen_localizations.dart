@@ -73,6 +73,8 @@ String generateArbBasedLocalizationSubclasses({
   required String factoryArguments,
   required String supportedLanguagesConstant,
   required String supportedLanguagesDocMacro,
+  String? deprecatedReplacementPackage,
+  Set<String>? generatedClassNames,
 }) {
   assert(generatedClassPrefix.isNotEmpty);
   assert(baseClass.isNotEmpty);
@@ -82,23 +84,25 @@ String generateArbBasedLocalizationSubclasses({
   assert(supportedLanguagesConstant.isNotEmpty);
   assert(supportedLanguagesDocMacro.isNotEmpty);
   generateConstructorForCountrySubClass ??= generateConstructor;
-  final StringBuffer output = StringBuffer();
-  output.writeln(generateHeader('dart dev/tools/localization/bin/gen_localizations.dart --overwrite'));
+  final output = StringBuffer();
+  output.writeln(
+    generateHeader('dart dev/tools/localization/bin/gen_localizations.dart --overwrite'),
+  );
 
-  final StringBuffer supportedLocales = StringBuffer();
+  final supportedLocales = StringBuffer();
 
-  final Map<String, List<LocaleInfo>> languageToLocales = <String, List<LocaleInfo>>{};
-  final Map<String, Set<String>> languageToScriptCodes = <String, Set<String>>{};
+  final languageToLocales = <String, List<LocaleInfo>>{};
+  final languageToScriptCodes = <String, Set<String>>{};
   // Used to calculate if there are any corresponding countries for a given language and script.
-  final Map<LocaleInfo, Set<String>> languageAndScriptToCountryCodes = <LocaleInfo, Set<String>>{};
-  final Set<String> allResourceIdentifiers = <String>{};
+  final languageAndScriptToCountryCodes = <LocaleInfo, Set<String>>{};
+  final allResourceIdentifiers = <String>{};
   for (final LocaleInfo locale in localeToResources.keys.toList()..sort()) {
     if (locale.scriptCode != null) {
       languageToScriptCodes[locale.languageCode] ??= <String>{};
       languageToScriptCodes[locale.languageCode]!.add(locale.scriptCode!);
     }
     if (locale.countryCode != null && locale.scriptCode != null) {
-      final LocaleInfo key = LocaleInfo.fromString('${locale.languageCode}_${locale.scriptCode}');
+      final key = LocaleInfo.fromString('${locale.languageCode}_${locale.scriptCode}');
       languageAndScriptToCountryCodes[key] ??= <String>{};
       languageAndScriptToCountryCodes[key]!.add(locale.countryCode!);
     }
@@ -133,44 +137,57 @@ String generateArbBasedLocalizationSubclasses({
 
   final List<String> allKeys = allResourceIdentifiers.toList()..sort();
   final List<String> languageCodes = languageToLocales.keys.toList()..sort();
-  final LocaleInfo canonicalLocale = LocaleInfo.fromString('en');
-  for (final String languageName in languageCodes) {
-    final LocaleInfo languageLocale = LocaleInfo.fromString(languageName);
-    output.writeln(generateClassDeclaration(languageLocale, generatedClassPrefix, baseClass));
+  final canonicalLocale = LocaleInfo.fromString('en');
+  for (final languageName in languageCodes) {
+    final languageLocale = LocaleInfo.fromString(languageName);
+    generatedClassNames?.add('$generatedClassPrefix${languageLocale.camelCase()}');
+    output.writeln(
+      generateClassDeclaration(
+        languageLocale,
+        generatedClassPrefix,
+        baseClass,
+        deprecatedReplacementPackage: deprecatedReplacementPackage,
+      ),
+    );
     output.writeln(generateConstructor(languageLocale));
 
     final Map<String, String> languageResources = localeToResources[languageLocale]!;
-    for (final String key in allKeys) {
-      final Map<String, dynamic>? attributes = localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
+    for (final key in allKeys) {
+      final attributes = localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
       output.writeln(generateGetter(key, languageResources[key], attributes, languageLocale));
     }
     output.writeln('}');
-    int countryCodeCount = 0;
-    int scriptCodeCount = 0;
+    var countryCodeCount = 0;
+    var scriptCodeCount = 0;
     if (languageToScriptCodes.containsKey(languageName)) {
       scriptCodeCount = languageToScriptCodes[languageName]!.length;
       // Language has scriptCodes, so we need to properly fallback countries to corresponding
       // script default values before language default values.
       for (final String scriptCode in languageToScriptCodes[languageName]!) {
-        final LocaleInfo scriptBaseLocale = LocaleInfo.fromString('${languageName}_$scriptCode');
-        output.writeln(generateClassDeclaration(
-          scriptBaseLocale,
-          generatedClassPrefix,
-          '$generatedClassPrefix${languageLocale.camelCase()}',
-        ));
+        final scriptBaseLocale = LocaleInfo.fromString('${languageName}_$scriptCode');
+        generatedClassNames?.add('$generatedClassPrefix${scriptBaseLocale.camelCase()}');
+        output.writeln(
+          generateClassDeclaration(
+            scriptBaseLocale,
+            generatedClassPrefix,
+            '$generatedClassPrefix${languageLocale.camelCase()}',
+            deprecatedReplacementPackage: deprecatedReplacementPackage,
+          ),
+        );
         output.writeln(generateConstructorForCountrySubClass(scriptBaseLocale));
         final Map<String, String> scriptResources = localeToResources[scriptBaseLocale]!;
         for (final String key in scriptResources.keys.toList()..sort()) {
           if (languageResources[key] == scriptResources[key]) {
             continue;
           }
-          final Map<String, dynamic>? attributes = localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
+          final attributes =
+              localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
           output.writeln(generateGetter(key, scriptResources[key], attributes, languageLocale));
         }
         output.writeln('}');
 
         final List<LocaleInfo> localeCodes = languageToLocales[languageName]!..sort();
-        for (final LocaleInfo locale in localeCodes) {
+        for (final locale in localeCodes) {
           if (locale.originalString == languageName) {
             continue;
           }
@@ -181,68 +198,103 @@ String generateArbBasedLocalizationSubclasses({
             continue;
           }
           countryCodeCount += 1;
-          output.writeln(generateClassDeclaration(
-            locale,
-            generatedClassPrefix,
-            '$generatedClassPrefix${scriptBaseLocale.camelCase()}',
-          ));
+          generatedClassNames?.add('$generatedClassPrefix${locale.camelCase()}');
+          output.writeln(
+            generateClassDeclaration(
+              locale,
+              generatedClassPrefix,
+              '$generatedClassPrefix${scriptBaseLocale.camelCase()}',
+              deprecatedReplacementPackage: deprecatedReplacementPackage,
+            ),
+          );
           output.writeln(generateConstructorForCountrySubClass(locale));
           final Map<String, String> localeResources = localeToResources[locale]!;
           for (final String key in localeResources.keys) {
             // When script fallback contains the key, we compare to it instead of language fallback.
-            if (scriptResources.containsKey(key) ? scriptResources[key] == localeResources[key] : languageResources[key] == localeResources[key]) {
+            if (scriptResources.containsKey(key)
+                ? scriptResources[key] == localeResources[key]
+                : languageResources[key] == localeResources[key]) {
               continue;
             }
-            final Map<String, dynamic>? attributes = localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
+            final attributes =
+                localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
             output.writeln(generateGetter(key, localeResources[key], attributes, languageLocale));
           }
-         output.writeln('}');
+          output.writeln('}');
         }
       }
     } else {
       // No scriptCode. Here, we do not compare against script default (because it
       // doesn't exist).
       final List<LocaleInfo> localeCodes = languageToLocales[languageName]!..sort();
-      for (final LocaleInfo locale in localeCodes) {
+      for (final locale in localeCodes) {
         if (locale.originalString == languageName) {
           continue;
         }
         countryCodeCount += 1;
         final Map<String, String> localeResources = localeToResources[locale]!;
-        output.writeln(generateClassDeclaration(
-          locale,
-          generatedClassPrefix,
-          '$generatedClassPrefix${languageLocale.camelCase()}',
-        ));
+        generatedClassNames?.add('$generatedClassPrefix${locale.camelCase()}');
+        output.writeln(
+          generateClassDeclaration(
+            locale,
+            generatedClassPrefix,
+            '$generatedClassPrefix${languageLocale.camelCase()}',
+            deprecatedReplacementPackage: deprecatedReplacementPackage,
+          ),
+        );
         output.writeln(generateConstructorForCountrySubClass(locale));
         for (final String key in localeResources.keys) {
           if (languageResources[key] == localeResources[key]) {
             continue;
           }
-          final Map<String, dynamic>? attributes = localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
+          final attributes =
+              localeToResourceAttributes[canonicalLocale]![key] as Map<String, dynamic>?;
           output.writeln(generateGetter(key, localeResources[key], attributes, languageLocale));
         }
-       output.writeln('}');
+        output.writeln('}');
       }
     }
 
-    final String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'}';
+    final scriptCodeMessage = scriptCodeCount == 0
+        ? ''
+        : ' and $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'}';
     if (countryCodeCount == 0) {
       if (scriptCodeCount == 0) {
         supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)}');
       } else {
-        supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'})');
+        supportedLocales.writeln(
+          '///  * `$languageName` - ${describeLocale(languageName)} (plus $scriptCodeCount script${scriptCodeCount == 1 ? '' : 's'})',
+        );
       }
-
     } else if (countryCodeCount == 1) {
-      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus one country variation$scriptCodeMessage)');
+      supportedLocales.writeln(
+        '///  * `$languageName` - ${describeLocale(languageName)} (plus one country variation$scriptCodeMessage)',
+      );
     } else {
-      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $countryCodeCount country variations$scriptCodeMessage)');
+      supportedLocales.writeln(
+        '///  * `$languageName` - ${describeLocale(languageName)} (plus $countryCodeCount country variations$scriptCodeMessage)',
+      );
     }
   }
 
   // Generate the factory function. Given a Locale it returns the corresponding
   // base class implementation.
+  final supportedLanguagesDeprecation = deprecatedReplacementPackage != null
+      ? '''
+@Deprecated(
+  'Use $supportedLanguagesConstant from $deprecatedReplacementPackage instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
+'''
+      : '';
+  final factoryDeprecation = deprecatedReplacementPackage != null
+      ? '''
+@Deprecated(
+  'Use $factoryName from $deprecatedReplacementPackage instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
+'''
+      : '';
   output.writeln('''
 
 /// The set of supported languages, as language code strings.
@@ -256,7 +308,7 @@ String generateArbBasedLocalizationSubclasses({
 /// See also:
 ///
 ///  * [$factoryName], whose documentation describes these values.
-final Set<String> $supportedLanguagesConstant = HashSet<String>.from(const <String>[
+${supportedLanguagesDeprecation}final Set<String> $supportedLanguagesConstant = HashSet<String>.from(const <String>[
 ${languageCodes.map<String>((String value) => "  '$value', // ${describeLocale(value)}").toList().join('\n')}
 ]);
 
@@ -274,15 +326,18 @@ $supportedLocales/// {@endtemplate}
 ///
 /// Generally speaking, this method is only intended to be used by
 /// [$baseClass.delegate].
-$factoryDeclaration
+$factoryDeprecation$factoryDeclaration
   switch (locale.languageCode) {''');
   for (final String language in languageToLocales.keys) {
     // Only one instance of the language.
     if (languageToLocales[language]!.length == 1) {
-      output.writeln('''
+      output.writeln(
+        '''
     case '$language':
-      return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${languageToLocales[language]![0].camelCase()}($factoryArguments);''');
-    } else if (!languageToScriptCodes.containsKey(language)) { // Does not distinguish between scripts. Switch on countryCode directly.
+      return ${callsFactoryWithConst ? 'const ' : ''}$generatedClassPrefix${languageToLocales[language]![0].camelCase()}($factoryArguments);''',
+      );
+    } else if (!languageToScriptCodes.containsKey(language)) {
+      // Does not distinguish between scripts. Switch on countryCode directly.
       output.writeln('''
     case '$language': {
       switch (locale.countryCode) {''');
@@ -292,21 +347,24 @@ $factoryDeclaration
         }
         assert(locale.length > 1);
         final String countryCode = locale.countryCode!;
-        output.writeln('''
+        output.writeln(
+          '''
         case '$countryCode':
-          return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
+          return ${callsFactoryWithConst ? 'const ' : ''}$generatedClassPrefix${locale.camelCase()}($factoryArguments);''',
+        );
       }
       output.writeln('''
       }
-      return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${LocaleInfo.fromString(language).camelCase()}($factoryArguments);
+      return ${callsFactoryWithConst ? 'const ' : ''}$generatedClassPrefix${LocaleInfo.fromString(language).camelCase()}($factoryArguments);
     }''');
-    } else { // Language has scriptCode, add additional switch logic.
-      bool hasCountryCode = false;
+    } else {
+      // Language has scriptCode, add additional switch logic.
+      var hasCountryCode = false;
       output.writeln('''
     case '$language': {
       switch (locale.scriptCode) {''');
       for (final String scriptCode in languageToScriptCodes[language]!) {
-        final LocaleInfo scriptLocale = LocaleInfo.fromString('${language}_$scriptCode');
+        final scriptLocale = LocaleInfo.fromString('${language}_$scriptCode');
         output.writeln('''
         case '$scriptCode': {''');
         if (languageAndScriptToCountryCodes.containsKey(scriptLocale)) {
@@ -325,9 +383,11 @@ $factoryDeclaration
               continue;
             }
             final String countryCode = locale.countryCode!;
-            output.writeln('''
+            output.writeln(
+              '''
             case '$countryCode':
-              return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
+              return ${callsFactoryWithConst ? 'const ' : ''}$generatedClassPrefix${locale.camelCase()}($factoryArguments);''',
+            );
           }
         }
         // Return a fallback locale that matches scriptCode, but not countryCode.
@@ -339,7 +399,7 @@ $factoryDeclaration
           }''');
           }
           output.writeln('''
-          return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${scriptLocale.camelCase()}($factoryArguments);
+          return ${callsFactoryWithConst ? 'const ' : ''}$generatedClassPrefix${scriptLocale.camelCase()}($factoryArguments);
         }''');
         } else {
           // Not Explicitly defined, fallback to first locale with the same language and
@@ -353,7 +413,7 @@ $factoryDeclaration
           }''');
             }
             output.writeln('''
-          return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${scriptLocale.camelCase()}($factoryArguments);
+          return ${callsFactoryWithConst ? 'const ' : ''}$generatedClassPrefix${scriptLocale.camelCase()}($factoryArguments);
         }''');
             break;
           }
@@ -362,7 +422,7 @@ $factoryDeclaration
       output.writeln('''
       }''');
       if (hasCountryCode) {
-      output.writeln('''
+        output.writeln('''
       switch (locale.countryCode) {''');
         for (final LocaleInfo locale in languageToLocales[language]!) {
           if (locale.originalString == language) {
@@ -373,15 +433,17 @@ $factoryDeclaration
             continue;
           }
           final String countryCode = locale.countryCode!;
-          output.writeln('''
+          output.writeln(
+            '''
         case '$countryCode':
-          return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
+          return ${callsFactoryWithConst ? 'const ' : ''}$generatedClassPrefix${locale.camelCase()}($factoryArguments);''',
+          );
         }
         output.writeln('''
       }''');
       }
       output.writeln('''
-      return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${LocaleInfo.fromString(language).camelCase()}($factoryArguments);
+      return ${callsFactoryWithConst ? 'const ' : ''}$generatedClassPrefix${LocaleInfo.fromString(language).camelCase()}($factoryArguments);
     }''');
     }
   }
@@ -400,17 +462,12 @@ $factoryDeclaration
 ///
 /// Used by [generateGetter] below.
 String generateType(Map<String, dynamic>? attributes) {
-  bool optional = false;
-  String type = 'String';
-  if (attributes != null) {
-    optional = attributes.containsKey('optional');
-    switch (attributes['x-flutter-type'] as String?) {
-      case 'icuShortTimePattern':
-        type = 'TimeOfDayFormat';
-      case 'scriptCategory':
-        type = 'ScriptCategory';
-    }
-  }
+  final bool optional = attributes?.containsKey('optional') ?? false;
+  final String type = switch (attributes?['x-flutter-type']) {
+    'icuShortTimePattern' => 'TimeOfDayFormat',
+    'scriptCategory' => 'ScriptCategory',
+    _ => 'String',
+  };
   return type + (optional ? '?' : '');
 }
 
@@ -477,7 +534,7 @@ String? generateValue(String? value, Map<String, dynamic>? attributes, LocaleInf
           throw Exception(
             '"$value" is not one of the ICU short time patterns supported '
             'by the material library. Here is the list of supported '
-            'patterns:\n  ${_icuTimeOfDayToEnum.keys.join('\n  ')}'
+            'patterns:\n  ${_icuTimeOfDayToEnum.keys.join('\n  ')}',
           );
         }
         return _icuTimeOfDayToEnum[value];
@@ -486,23 +543,28 @@ String? generateValue(String? value, Map<String, dynamic>? attributes, LocaleInf
           throw Exception(
             '"$value" is not one of the scriptCategory values supported '
             'by the material library. Here is the list of supported '
-            'values:\n  ${_scriptCategoryToEnum.keys.join('\n  ')}'
+            'values:\n  ${_scriptCategoryToEnum.keys.join('\n  ')}',
           );
         }
         return _scriptCategoryToEnum[value];
     }
   }
-  return  generateEncodedString(locale.languageCode, value);
+  return generateEncodedString(locale.languageCode, value);
 }
 
 /// Combines [generateType], [generateKey], and [generateValue] to return
 /// the source of getters for the GlobalMaterialLocalizations subclass.
 /// The locale is the locale for which the getter is being generated.
-String generateGetter(String key, String? value, Map<String, dynamic>? attributes, LocaleInfo locale) {
+String generateGetter(
+  String key,
+  String? value,
+  Map<String, dynamic>? attributes,
+  LocaleInfo locale,
+) {
   final String type = generateType(attributes);
   key = generateKey(key, attributes);
   final String? generatedValue = generateValue(value, attributes, locale);
-      return '''
+  return '''
 
   @override
   $type get $key => $generatedValue;''';
@@ -516,10 +578,10 @@ void main(List<String> rawArgs) {
   // is the 2nd command line argument, lc is a language code and cc is the country
   // code. In most cases both codes are just two characters.
 
-  final Directory directory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
-  final RegExp widgetsFilenameRE = RegExp(r'widgets_(\w+)\.arb$');
-  final RegExp materialFilenameRE = RegExp(r'material_(\w+)\.arb$');
-  final RegExp cupertinoFilenameRE = RegExp(r'cupertino_(\w+)\.arb$');
+  final directory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
+  final widgetsFilenameRE = RegExp(r'widgets_(\w+)\.arb$');
+  final materialFilenameRE = RegExp(r'material_(\w+)\.arb$');
+  final cupertinoFilenameRE = RegExp(r'cupertino_(\w+)\.arb$');
 
   try {
     validateEnglishLocalizations(File(path.join(directory.path, 'widgets_en.arb')));
@@ -542,22 +604,22 @@ void main(List<String> rawArgs) {
   precacheLanguageAndRegionTags();
 
   // Maps of locales to resource key/value pairs for Widgets ARBs.
-  final Map<LocaleInfo, Map<String, String>> widgetsLocaleToResources = <LocaleInfo, Map<String, String>>{};
+  final widgetsLocaleToResources = <LocaleInfo, Map<String, String>>{};
   // Maps of locales to resource key/attributes pairs for Widgets ARBs.
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
-  final Map<LocaleInfo, Map<String, dynamic>> widgetsLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
+  final widgetsLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
   // Maps of locales to resource key/value pairs for Material ARBs.
-  final Map<LocaleInfo, Map<String, String>> materialLocaleToResources = <LocaleInfo, Map<String, String>>{};
+  final materialLocaleToResources = <LocaleInfo, Map<String, String>>{};
   // Maps of locales to resource key/attributes pairs for Material ARBs.
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
-  final Map<LocaleInfo, Map<String, dynamic>> materialLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
+  final materialLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
   // Maps of locales to resource key/value pairs for Cupertino ARBs.
-  final Map<LocaleInfo, Map<String, String>> cupertinoLocaleToResources = <LocaleInfo, Map<String, String>>{};
+  final cupertinoLocaleToResources = <LocaleInfo, Map<String, String>>{};
   // Maps of locales to resource key/attributes pairs for Cupertino ARBs.
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
-  final Map<LocaleInfo, Map<String, dynamic>> cupertinoLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
+  final cupertinoLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
   loadMatchingArbsIntoBundleMaps(
     directory: directory,
@@ -579,9 +641,21 @@ void main(List<String> rawArgs) {
   );
 
   try {
-    validateLocalizations(widgetsLocaleToResources, widgetsLocaleToResourceAttributes, removeUndefined: options.removeUndefined);
-    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes, removeUndefined: options.removeUndefined);
-    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes, removeUndefined: options.removeUndefined);
+    validateLocalizations(
+      widgetsLocaleToResources,
+      widgetsLocaleToResourceAttributes,
+      removeUndefined: options.removeUndefined,
+    );
+    validateLocalizations(
+      materialLocaleToResources,
+      materialLocaleToResourceAttributes,
+      removeUndefined: options.removeUndefined,
+    );
+    validateLocalizations(
+      cupertinoLocaleToResources,
+      cupertinoLocaleToResourceAttributes,
+      removeUndefined: options.removeUndefined,
+    );
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }
@@ -593,61 +667,96 @@ void main(List<String> rawArgs) {
 
   final String? widgetsLocalizations = options.writeToFile || !options.cupertinoOnly
       ? generateArbBasedLocalizationSubclasses(
-        localeToResources: widgetsLocaleToResources,
-        localeToResourceAttributes: widgetsLocaleToResourceAttributes,
-        generatedClassPrefix: 'WidgetsLocalization',
-        baseClass: 'GlobalWidgetsLocalizations',
-        generateHeader: generateWidgetsHeader,
-        generateConstructor: generateWidgetsConstructor,
-        generateConstructorForCountrySubClass: generateWidgetsConstructorForCountrySubclass,
-        factoryName: widgetsFactoryName,
-        factoryDeclaration: widgetsFactoryDeclaration,
-        callsFactoryWithConst: true,
-        factoryArguments: widgetsFactoryArguments,
-        supportedLanguagesConstant: widgetsSupportedLanguagesConstant,
-        supportedLanguagesDocMacro: widgetsSupportedLanguagesDocMacro,
-      )
+          localeToResources: widgetsLocaleToResources,
+          localeToResourceAttributes: widgetsLocaleToResourceAttributes,
+          generatedClassPrefix: 'WidgetsLocalization',
+          baseClass: 'GlobalWidgetsLocalizations',
+          generateHeader: generateWidgetsHeader,
+          generateConstructor: generateWidgetsConstructor,
+          generateConstructorForCountrySubClass: generateWidgetsConstructorForCountrySubclass,
+          factoryName: widgetsFactoryName,
+          factoryDeclaration: widgetsFactoryDeclaration,
+          callsFactoryWithConst: true,
+          factoryArguments: widgetsFactoryArguments,
+          supportedLanguagesConstant: widgetsSupportedLanguagesConstant,
+          supportedLanguagesDocMacro: widgetsSupportedLanguagesDocMacro,
+        )
       : null;
+  final materialGeneratedClasses = <String>{};
   final String? materialLocalizations = options.writeToFile || !options.cupertinoOnly
       ? generateArbBasedLocalizationSubclasses(
-        localeToResources: materialLocaleToResources,
-        localeToResourceAttributes: materialLocaleToResourceAttributes,
-        generatedClassPrefix: 'MaterialLocalization',
-        baseClass: 'GlobalMaterialLocalizations',
-        generateHeader: generateMaterialHeader,
-        generateConstructor: generateMaterialConstructor,
-        factoryName: materialFactoryName,
-        factoryDeclaration: materialFactoryDeclaration,
-        callsFactoryWithConst: false,
-        factoryArguments: materialFactoryArguments,
-        supportedLanguagesConstant: materialSupportedLanguagesConstant,
-        supportedLanguagesDocMacro: materialSupportedLanguagesDocMacro,
-      )
+          localeToResources: materialLocaleToResources,
+          localeToResourceAttributes: materialLocaleToResourceAttributes,
+          generatedClassPrefix: 'MaterialLocalization',
+          baseClass: 'GlobalMaterialLocalizations',
+          generateHeader: generateMaterialHeader,
+          generateConstructor: generateMaterialConstructor,
+          factoryName: materialFactoryName,
+          factoryDeclaration: materialFactoryDeclaration,
+          callsFactoryWithConst: false,
+          factoryArguments: materialFactoryArguments,
+          supportedLanguagesConstant: materialSupportedLanguagesConstant,
+          supportedLanguagesDocMacro: materialSupportedLanguagesDocMacro,
+          deprecatedReplacementPackage: 'package:material_ui/material_ui.dart',
+          generatedClassNames: materialGeneratedClasses,
+        )
       : null;
+  final cupertinoGeneratedClasses = <String>{};
   final String? cupertinoLocalizations = options.writeToFile || !options.materialOnly
       ? generateArbBasedLocalizationSubclasses(
-        localeToResources: cupertinoLocaleToResources,
-        localeToResourceAttributes: cupertinoLocaleToResourceAttributes,
-        generatedClassPrefix: 'CupertinoLocalization',
-        baseClass: 'GlobalCupertinoLocalizations',
-        generateHeader: generateCupertinoHeader,
-        generateConstructor: generateCupertinoConstructor,
-        factoryName: cupertinoFactoryName,
-        factoryDeclaration: cupertinoFactoryDeclaration,
-        callsFactoryWithConst: false,
-        factoryArguments: cupertinoFactoryArguments,
-        supportedLanguagesConstant: cupertinoSupportedLanguagesConstant,
-        supportedLanguagesDocMacro: cupertinoSupportedLanguagesDocMacro,
-      )
+          localeToResources: cupertinoLocaleToResources,
+          localeToResourceAttributes: cupertinoLocaleToResourceAttributes,
+          generatedClassPrefix: 'CupertinoLocalization',
+          baseClass: 'GlobalCupertinoLocalizations',
+          generateHeader: generateCupertinoHeader,
+          generateConstructor: generateCupertinoConstructor,
+          factoryName: cupertinoFactoryName,
+          factoryDeclaration: cupertinoFactoryDeclaration,
+          callsFactoryWithConst: false,
+          factoryArguments: cupertinoFactoryArguments,
+          supportedLanguagesConstant: cupertinoSupportedLanguagesConstant,
+          supportedLanguagesDocMacro: cupertinoSupportedLanguagesDocMacro,
+          deprecatedReplacementPackage: 'package:cupertino_ui/cupertino_ui.dart',
+          generatedClassNames: cupertinoGeneratedClasses,
+        )
       : null;
 
   if (options.writeToFile) {
-    final File widgetsLocalizationsFile = File(path.join(directory.path, 'generated_widgets_localizations.dart'));
+    final widgetsLocalizationsFile = File(
+      path.join(directory.path, 'generated_widgets_localizations.dart'),
+    );
     widgetsLocalizationsFile.writeAsStringSync(widgetsLocalizations!, flush: true);
-    final File materialLocalizationsFile = File(path.join(directory.path, 'generated_material_localizations.dart'));
+    final materialLocalizationsFile = File(
+      path.join(directory.path, 'generated_material_localizations.dart'),
+    );
     materialLocalizationsFile.writeAsStringSync(materialLocalizations!, flush: true);
-    final File cupertinoLocalizationsFile = File(path.join(directory.path, 'generated_cupertino_localizations.dart'));
+    final cupertinoLocalizationsFile = File(
+      path.join(directory.path, 'generated_cupertino_localizations.dart'),
+    );
     cupertinoLocalizationsFile.writeAsStringSync(cupertinoLocalizations!, flush: true);
+
+    final fixDataDir = Directory(path.join(directory.parent.parent.path, 'fix_data'));
+    fixDataDir.createSync(recursive: true);
+    File(path.join(fixDataDir.path, 'fix_material_localizations.yaml')).writeAsStringSync(
+      generateLocalizationFixData(
+        baseClass: 'GlobalMaterialLocalizations',
+        supportedLanguagesConstant: materialSupportedLanguagesConstant,
+        factoryName: materialFactoryName,
+        generatedClassNames: materialGeneratedClasses,
+        replacementPackageUri: 'package:material_ui/material_ui.dart',
+      ),
+      flush: true,
+    );
+    File(path.join(fixDataDir.path, 'fix_cupertino_localizations.yaml')).writeAsStringSync(
+      generateLocalizationFixData(
+        baseClass: 'GlobalCupertinoLocalizations',
+        supportedLanguagesConstant: cupertinoSupportedLanguagesConstant,
+        factoryName: cupertinoFactoryName,
+        generatedClassNames: cupertinoGeneratedClasses,
+        replacementPackageUri: 'package:cupertino_ui/cupertino_ui.dart',
+      ),
+      flush: true,
+    );
   } else {
     if (options.cupertinoOnly) {
       stdout.write(cupertinoLocalizations);
@@ -661,4 +770,86 @@ void main(List<String> rawArgs) {
       stdout.write(cupertinoLocalizations);
     }
   }
+}
+
+String generateLocalizationFixData({
+  required String baseClass,
+  required String supportedLanguagesConstant,
+  required String factoryName,
+  required Set<String> generatedClassNames,
+  required String replacementPackageUri,
+}) {
+  final buffer = StringBuffer('''
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# THIS FILE IS GENERATED. DO NOT EDIT BY HAND.
+#
+# This file is generated by:
+#   dart dev/tools/localization/bin/gen_localizations.dart --overwrite
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/to/flutter-fix
+
+# Every fix must be tested. See the
+# flutter/packages/flutter_localizations/test_fixes/README.md file for
+# instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+version: 1
+transforms:
+  - title: "Migrate to '$replacementPackageUri'"
+    date: 2026-09-17
+    element:
+      uris: ['flutter_localizations.dart']
+      class: '$baseClass'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['$replacementPackageUri']
+          class: '$baseClass'
+
+  - title: "Migrate to '$replacementPackageUri'"
+    date: 2026-09-17
+    element:
+      uris: ['flutter_localizations.dart']
+      variable: '$supportedLanguagesConstant'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['$replacementPackageUri']
+          variable: '$supportedLanguagesConstant'
+
+  - title: "Migrate to '$replacementPackageUri'"
+    date: 2026-09-17
+    element:
+      uris: ['flutter_localizations.dart']
+      function: '$factoryName'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['$replacementPackageUri']
+          function: '$factoryName'
+''');
+
+  for (final className in generatedClassNames) {
+    buffer.write('''
+
+  - title: "Migrate to '$replacementPackageUri'"
+    date: 2026-09-17
+    element:
+      uris: ['flutter_localizations.dart']
+      class: '$className'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['$replacementPackageUri']
+          class: '$className'
+''');
+  }
+
+  return buffer.toString();
 }

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+library;
+
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'navigator.dart';
@@ -17,7 +20,7 @@ import 'overlay.dart';
 /// This example shows how to use a GestureDetector to show a context menu
 /// anywhere in a widget subtree that receives a right click or long press.
 ///
-/// ** See code in examples/api/lib/material/context_menu/context_menu_controller.0.dart **
+/// ** See code in examples/api/lib/widgets/context_menu/context_menu_controller.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -26,12 +29,15 @@ import 'overlay.dart';
 ///     be disabled and Flutter-rendered context menus to appear.
 class ContextMenuController {
   /// Creates a context menu that can be shown with [show].
-  ContextMenuController({
-    this.onRemove,
-  });
+  ContextMenuController({this.onRemove});
 
   /// Called when this menu is removed.
   final VoidCallback? onRemove;
+
+  /// The builder for the context menu.
+  ///
+  /// This is static because only one context menu can be displayed at one time.
+  static WidgetBuilder? _contextMenuBuilder;
 
   /// The currently shown instance, if any.
   static ContextMenuController? _shownInstance;
@@ -49,24 +55,33 @@ class ContextMenuController {
     required WidgetBuilder contextMenuBuilder,
     Widget? debugRequiredFor,
   }) {
+    if (isShown) {
+      // Update the currently-shown menu in-place by swapping the builder
+      // and captured themes and rebuilding the existing overlay entry.
+      _contextMenuBuilder = contextMenuBuilder;
+      _menuOverlayEntry?.markNeedsBuild();
+      return;
+    }
+
     removeAny();
     final OverlayState overlayState = Overlay.of(
       context,
       rootOverlay: true,
       debugRequiredFor: debugRequiredFor,
     );
-    final CapturedThemes capturedThemes = InheritedTheme.capture(
-      from: context,
-      to: Navigator.maybeOf(context)?.context,
-    );
+    _contextMenuBuilder = contextMenuBuilder;
 
     _menuOverlayEntry = OverlayEntry(
       builder: (BuildContext context) {
-        return capturedThemes.wrap(contextMenuBuilder(context));
+        final CapturedThemes capturedThemes = InheritedTheme.capture(
+          from: context,
+          to: Navigator.maybeOf(context)?.context,
+        );
+        return capturedThemes.wrap(_contextMenuBuilder!(context));
       },
     );
-    overlayState.insert(_menuOverlayEntry!);
     _shownInstance = this;
+    overlayState.insert(_menuOverlayEntry!);
   }
 
   /// Remove the currently shown context menu from the UI.
@@ -83,6 +98,7 @@ class ContextMenuController {
     _menuOverlayEntry?.remove();
     _menuOverlayEntry?.dispose();
     _menuOverlayEntry = null;
+    _contextMenuBuilder = null;
     if (_shownInstance != null) {
       _shownInstance!.onRemove?.call();
       _shownInstance = null;
@@ -95,7 +111,7 @@ class ContextMenuController {
   /// Cause the underlying [OverlayEntry] to rebuild during the next pipeline
   /// flush.
   ///
-  /// It's necessary to call this function if the output of [contextMenuBuilder]
+  /// It's necessary to call this function if the output of `contextMenuBuilder`
   /// has changed.
   ///
   /// Errors if the context menu is not currently shown.

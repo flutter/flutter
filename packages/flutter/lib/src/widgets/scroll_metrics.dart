@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'scroll_position.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -60,7 +68,8 @@ mixin ScrollMetrics {
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
       maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
       pixels: pixels ?? (hasPixels ? this.pixels : null),
-      viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
+      viewportDimension:
+          viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
@@ -80,6 +89,10 @@ mixin ScrollMetrics {
   ///
   /// This value is typically greater than or equal to
   /// [minScrollExtent]. It can be infinity, if the scroll is unbounded.
+  ///
+  /// For scrollables that lazily construct their contents, such as
+  /// [ListView.builder], this value can be an estimate that changes as more
+  /// children are laid out.
   double get maxScrollExtent;
 
   /// Whether the [minScrollExtent] and the [maxScrollExtent] properties are available.
@@ -126,10 +139,12 @@ mixin ScrollMetrics {
   double get extentInside {
     assert(minScrollExtent <= maxScrollExtent);
     return viewportDimension
-      // "above" overscroll value
-      - clampDouble(minScrollExtent - pixels, 0, viewportDimension)
-      // "below" overscroll value
-      - clampDouble(pixels - maxScrollExtent, 0, viewportDimension);
+        // "above" overscroll value
+        -
+        clampDouble(minScrollExtent - pixels, 0, viewportDimension)
+        // "below" overscroll value
+        -
+        clampDouble(pixels - maxScrollExtent, 0, viewportDimension);
   }
 
   /// The quantity of content conceptually "below" the viewport in the scrollable.
@@ -161,16 +176,13 @@ mixin ScrollMetrics {
 class FixedScrollMetrics with ScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [Scrollable] viewport.
   FixedScrollMetrics({
-    required double? minScrollExtent,
-    required double? maxScrollExtent,
-    required double? pixels,
-    required double? viewportDimension,
+    required this._minScrollExtent,
+    required this._maxScrollExtent,
+    required this._pixels,
+    required this._viewportDimension,
     required this.axisDirection,
     required this.devicePixelRatio,
-  }) : _minScrollExtent = minScrollExtent,
-       _maxScrollExtent = maxScrollExtent,
-       _pixels = pixels,
-       _viewportDimension = viewportDimension;
+  });
 
   @override
   double get minScrollExtent => _minScrollExtent!;

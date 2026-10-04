@@ -5,7 +5,7 @@
   "backButtonTooltip": "Geri",
   "closeButtonTooltip": "Bağlayın",
   "deleteButtonTooltip": "Silin",
-  "nextMonthTooltip": "Növbəti ay",
+  "nextMonthTooltip": "Gələn ay",
   "previousMonthTooltip": "Keçən ay",
   "nextPageTooltip": "Növbəti səhifə",
   "firstPageTooltip": "Birinci səhifə",
@@ -144,7 +144,7 @@
   "menuDismissLabel": "Menyunu qapadın",
   "lookUpButtonLabel": "Axtarın",
   "searchWebButtonLabel": "Vebdə axtarın",
-  "shareButtonLabel": "Paylaşın...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Paylaşın",
+  "clearButtonTooltip": "Mətni silin",
+  "selectedDateLabel": "Seçilib"
 }

@@ -7,9 +7,9 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_validator.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -24,10 +24,7 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
-    platform = FakePlatform(
-      operatingSystem: 'macos',
-      environment: <String, String>{},
-    );
+    platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
     chromeLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
@@ -61,15 +58,19 @@ void main() {
     expect(result.type, ValidationType.missing);
   });
 
-  testWithoutContext('WebValidator does not warn about CHROME_EXECUTABLE unless it cant find chrome ', () async {
-    fakeProcessManager.excludedExecutables.add(kMacOSExecutable);
+  testWithoutContext(
+    'WebValidator does not warn about CHROME_EXECUTABLE unless it cant find chrome ',
+    () async {
+      fakeProcessManager.excludedExecutables.add(kMacOSExecutable);
 
-    final ValidationResult result = await webValidator.validate();
+      final ValidationResult result = await webValidator.validate();
 
-    expect(result.messages, const <ValidationMessage>[
-      ValidationMessage.hint(
-          'Cannot find Chrome. Try setting CHROME_EXECUTABLE to a Chrome executable.'),
-    ]);
-    expect(result.type, ValidationType.missing);
-  });
+      expect(result.messages, const <ValidationMessage>[
+        ValidationMessage.hint(
+          'Cannot find Chrome. Try setting CHROME_EXECUTABLE to a Chrome executable.',
+        ),
+      ]);
+      expect(result.type, ValidationType.missing);
+    },
+  );
 }

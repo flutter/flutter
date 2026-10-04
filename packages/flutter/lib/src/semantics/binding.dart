@@ -2,9 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'semantics.dart';
+library;
+
+import 'dart:ui'
+    as ui
+    show AccessibilityFeatures, Rect, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'debug.dart';
@@ -21,8 +29,23 @@ mixin SemanticsBinding on BindingBase {
     platformDispatcher
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsActionEvent = _handleSemanticsActionEvent
-      ..onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
+      ..onAccessibilityFeaturesChanged = () {
+        // TODO(chunhtai): Web should not notify accessibility feature changes during updateSemantics
+        // https://github.com/flutter/flutter/issues/158399
+        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+          SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+            handleAccessibilityFeaturesChanged();
+          }, debugLabel: 'SemanticsBinding.handleAccessibilityFeaturesChanged');
+        } else {
+          handleAccessibilityFeaturesChanged();
+        }
+      };
     _handleSemanticsEnabledChanged();
+    addSemanticsEnabledListener(_handleFrameworkSemanticsEnabledChanged);
+    // Ensure the initial value is set.
+    if (semanticsEnabled) {
+      _handleFrameworkSemanticsEnabledChanged();
+    }
   }
 
   /// The current [SemanticsBinding], if one has been created.
@@ -44,7 +67,10 @@ mixin SemanticsBinding on BindingBase {
     assert(_semanticsEnabled.value == (_outstandingHandles > 0));
     return _semanticsEnabled.value;
   }
-  late final ValueNotifier<bool> _semanticsEnabled = ValueNotifier<bool>(platformDispatcher.semanticsEnabled);
+
+  late final ValueNotifier<bool> _semanticsEnabled = ValueNotifier<bool>(
+    platformDispatcher.semanticsEnabled,
+  );
 
   /// Adds a `listener` to be called when [semanticsEnabled] changes.
   ///
@@ -66,6 +92,37 @@ mixin SemanticsBinding on BindingBase {
   void removeSemanticsEnabledListener(VoidCallback listener) {
     _semanticsEnabled.removeListener(listener);
   }
+
+  final ObserverList<ValueSetter<ui.SemanticsActionEvent>> _semanticsActionListeners =
+      ObserverList<ValueSetter<ui.SemanticsActionEvent>>();
+
+  /// Adds a listener that is called for every [ui.SemanticsActionEvent] received.
+  ///
+  /// The listeners are called before [performSemanticsAction] is invoked.
+  ///
+  /// To remove the listener, call [removeSemanticsActionListener].
+  void addSemanticsActionListener(ValueSetter<ui.SemanticsActionEvent> listener) {
+    _semanticsActionListeners.add(listener);
+  }
+
+  /// Removes a listener previously added with [addSemanticsActionListener].
+  void removeSemanticsActionListener(ValueSetter<ui.SemanticsActionEvent> listener) {
+    _semanticsActionListeners.remove(listener);
+  }
+
+  /// Returns the global rect for the semantics node with the given [nodeId] in
+  /// the view with the given [viewId].
+  ///
+  /// The rect is in the global coordinate space of the view's render tree, in
+  /// logical pixels. This is useful for widgets that react to semantics actions
+  /// and need the on-screen position of the semantics node that received the
+  /// action.
+  ///
+  /// Asserts in non-release builds and returns null if the view is unknown,
+  /// the view has no semantics owner, or the node cannot be found. Callers
+  /// should only invoke this in response to a semantics action, in which case
+  /// all three lookups are expected to succeed.
+  ui.Rect? getRectOfSemanticsNodeInViewCoordinates(int viewId, int nodeId) => null;
 
   /// The number of clients registered to listen for semantics.
   ///
@@ -114,9 +171,22 @@ mixin SemanticsBinding on BindingBase {
   void _handleSemanticsActionEvent(ui.SemanticsActionEvent action) {
     final Object? arguments = action.arguments;
     final ui.SemanticsActionEvent decodedAction = arguments is ByteData
-      ? action.copyWith(arguments: const StandardMessageCodec().decodeMessage(arguments))
-      : action;
+        ? action.copyWith(arguments: const StandardMessageCodec().decodeMessage(arguments))
+        : action;
+    // Listeners may get added/removed while the iteration is in progress. Since the list cannot
+    // be modified while iterating, we are creating a local copy for the iteration.
+    final List<ValueSetter<ui.SemanticsActionEvent>> localListeners = _semanticsActionListeners
+        .toList(growable: false);
+    for (final listener in localListeners) {
+      if (_semanticsActionListeners.contains(listener)) {
+        listener(decodedAction);
+      }
+    }
     performSemanticsAction(decodedAction);
+  }
+
+  void _handleFrameworkSemanticsEnabledChanged() {
+    platformDispatcher.setSemanticsTreeEnabled(semanticsEnabled);
   }
 
   /// Called whenever the platform requests an action to be performed on a
@@ -128,13 +198,13 @@ mixin SemanticsBinding on BindingBase {
   ///
   /// Bindings that mixin the [SemanticsBinding] must implement this method and
   /// perform the given `action` on the [SemanticsNode] specified by
-  /// [SemanticsActionEvent.nodeId].
+  /// [ui.SemanticsActionEvent.nodeId].
   ///
   /// See [dart:ui.PlatformDispatcher.onSemanticsActionEvent].
   @protected
   void performSemanticsAction(ui.SemanticsActionEvent action);
 
-  /// The currently active set of [AccessibilityFeatures].
+  /// The currently active set of [ui.AccessibilityFeatures].
   ///
   /// This is set when the binding is first initialized and updated whenever a
   /// flag is changed.
@@ -192,15 +262,7 @@ mixin SemanticsBinding on BindingBase {
 /// To obtain a [SemanticsHandle], call [SemanticsBinding.ensureSemantics].
 class SemanticsHandle {
   SemanticsHandle._(this._onDispose) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/semantics.dart',
-        className: '$SemanticsHandle',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('semantics', 'SemanticsHandle', this));
   }
 
   final VoidCallback _onDispose;
@@ -211,12 +273,7 @@ class SemanticsHandle {
   /// framework will stop generating semantics information.
   @mustCallSuper
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
-
+    assert(debugMaybeDispatchDisposed(this));
     _onDispose();
   }
 }

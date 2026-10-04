@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
@@ -15,7 +14,6 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
 import 'build_system/tools/asset_transformer.dart';
-import 'build_system/tools/scene_importer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
@@ -30,10 +28,6 @@ class BundleBuilder {
   ///
   /// The default `mainPath` is `lib/main.dart`.
   /// The default `manifestPath` is `pubspec.yaml`.
-  ///
-  /// If [buildNativeAssets], native assets are built and the mapping for native
-  /// assets lookup at runtime is embedded in the kernel file, otherwise an
-  /// empty native assets mapping is embedded in the kernel file.
   Future<void> build({
     required TargetPlatform platform,
     required BuildInfo buildInfo,
@@ -43,8 +37,7 @@ class BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
-    bool buildNativeAssets = true,
-    @visibleForTesting BuildSystem? buildSystem,
+    BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath;
@@ -53,28 +46,27 @@ class BundleBuilder {
     buildSystem ??= globals.buildSystem;
 
     // If the precompiled flag was not passed, force us into debug mode.
-    final Environment environment = Environment(
+    final environment = Environment(
       projectDir: project.directory,
+      packageConfigPath: buildInfo.packageConfigPath,
       outputDir: globals.fs.directory(assetDirPath),
       buildDir: project.dartTool.childDirectory('flutter_build'),
       cacheDir: globals.cache.getRoot(),
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      engineVersion: globals.artifacts!.isLocalEngine
+      engineVersion: globals.artifacts!.usesLocalArtifacts
           ? null
           : globals.flutterVersion.engineRevision,
       defines: <String, String>{
         // used by the KernelSnapshot target
-        kTargetPlatform: getNameForTargetPlatform(platform),
+        kTargetPlatform: platform.getName(),
         kTargetFile: mainPath,
         kDeferredComponents: 'false',
         ...buildInfo.toBuildSystemEnvironment(),
-        if (!buildNativeAssets) kNativeAssets: 'false'
       },
       artifacts: globals.artifacts!,
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
-      usage: globals.flutterUsage,
       analytics: globals.analytics,
       platform: globals.platform,
       generateDartPluginRegistry: true,
@@ -86,15 +78,16 @@ class BundleBuilder {
 
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
-          stackTrace: measurement.fatal
+        globals.printError(
+          'Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
               ? measurement.stackTrace
               : null,
         );
       }
       throwToolExit('Failed to build bundle.');
     }
-    final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+    final depfile = Depfile(result.inputFiles, result.outputFiles);
     final File outputDepfile = globals.fs.file(depfilePath);
     if (!outputDepfile.parent.existsSync()) {
       outputDepfile.parent.createSync(recursive: true);
@@ -115,18 +108,17 @@ class BundleBuilder {
 Future<AssetBundle?> buildAssets({
   required String manifestPath,
   String? assetDirPath,
-  String? packagesPath,
-  TargetPlatform? targetPlatform,
+  required String packageConfigPath,
+  required TargetPlatform targetPlatform,
   String? flavor,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= globals.fs.path.absolute('.packages');
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
     manifestPath: manifestPath,
-    packagesPath: packagesPath,
+    packageConfigPath: packageConfigPath,
     targetPlatform: targetPlatform,
     flavor: flavor,
   );
@@ -147,6 +139,7 @@ Future<void> writeBundle(
   required Artifacts artifacts,
   required Logger logger,
   required Directory projectDir,
+  required BuildMode buildMode,
 }) async {
   if (bundleDir.existsSync()) {
     try {
@@ -154,34 +147,28 @@ Future<void> writeBundle(
     } on FileSystemException catch (err) {
       logger.printWarning(
         'Failed to clean up asset directory ${bundleDir.path}: $err\n'
-        'To clean build artifacts, use the command "flutter clean".'
+        'To clean build artifacts, use the command "flutter clean".',
       );
     }
   }
   bundleDir.createSync(recursive: true);
 
-  final ShaderCompiler shaderCompiler = ShaderCompiler(
+  final shaderCompiler = ShaderCompiler(
     processManager: processManager,
     logger: logger,
     fileSystem: fileSystem,
     artifacts: artifacts,
   );
 
-  final SceneImporter sceneImporter = SceneImporter(
-    processManager: processManager,
-    logger: logger,
-    fileSystem: fileSystem,
-    artifacts: artifacts,
-  );
-
-  final AssetTransformer assetTransformer = AssetTransformer(
+  final assetTransformer = AssetTransformer(
     processManager: processManager,
     fileSystem: fileSystem,
     dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
+    buildMode: buildMode,
   );
 
   // Limit number of open files to avoid running out of file descriptors.
-  final Pool pool = Pool(64);
+  final pool = Pool(64);
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
       final PoolResource resource = await pool.request();
@@ -195,35 +182,53 @@ Future<void> writeBundle(
         file.parent.createSync(recursive: true);
         final DevFSContent devFSContent = entry.value.content;
         if (devFSContent is DevFSFileContent) {
-          final File input = devFSContent.file as File;
-          bool doCopy = true;
+          final input = devFSContent.file as File;
+          var doCopy = true;
           switch (entry.value.kind) {
-          case AssetKind.regular:
-            if (entry.value.transformers.isEmpty) {
-              break;
-            }
-            final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
-              asset: input,
-              outputPath: file.path,
-              workingDirectory: projectDir.path,
-              transformerEntries: entry.value.transformers,
-            );
-            doCopy = false;
-            if (failure != null) {
-              throwToolExit(failure.message);
-            }
+            case AssetKind.regular:
+              if (entry.value.transformers.isEmpty) {
+                break;
+              }
+              final AssetTransformationResult result = await assetTransformer.transformAsset(
+                asset: input,
+                outputPath: file.path,
+                workingDirectory: projectDir.path,
+                transformerEntries: entry.value.transformers,
+                logger: logger,
+              );
+              doCopy = false;
+              if (result.failure != null) {
+                throwToolExit(
+                  'User-defined transformation of asset "${entry.key}" failed.\n'
+                  '${result.failure!.message}',
+                );
+              }
             case AssetKind.font:
               break;
             case AssetKind.shader:
+              var inputToCompiler = input;
+              if (entry.value.transformers.isNotEmpty) {
+                final transformedShaderSourcePath = '${file.path}.transformed';
+                final AssetTransformationResult result = await assetTransformer.transformAsset(
+                  asset: inputToCompiler,
+                  outputPath: transformedShaderSourcePath,
+                  workingDirectory: projectDir.path,
+                  transformerEntries: entry.value.transformers,
+                  logger: logger,
+                );
+                if (result.failure != null) {
+                  throwToolExit(
+                    'User-defined transformation of shader "${entry.key}" failed.\n'
+                    '${result.failure!.message}',
+                  );
+                }
+                inputToCompiler = fileSystem.file(transformedShaderSourcePath);
+              }
+
               doCopy = !await shaderCompiler.compileShader(
-                input: input,
+                input: inputToCompiler,
                 outputPath: file.path,
                 targetPlatform: targetPlatform,
-              );
-            case AssetKind.model:
-              doCopy = !await sceneImporter.importScene(
-                input: input,
-                outputPath: file.path,
               );
           }
           if (doCopy) {
@@ -235,5 +240,6 @@ Future<void> writeBundle(
       } finally {
         resource.release();
       }
-    }));
+    }),
+  );
 }

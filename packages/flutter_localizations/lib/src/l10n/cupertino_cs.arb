@@ -28,7 +28,7 @@
   "cutButtonLabel": "Vyjmout",
   "copyButtonLabel": "Kopírovat",
   "pasteButtonLabel": "Vložit",
-  "clearButtonLabel": "Clear",
+  "clearButtonLabel": "Vymazat",
   "selectAllButtonLabel": "Vybrat vše",
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zavřít",
@@ -37,5 +37,13 @@
   "menuDismissLabel": "Zavřít nabídku",
   "lookUpButtonLabel": "Vyhledat",
   "searchWebButtonLabel": "Vyhledávat na webu",
-  "shareButtonLabel": "Sdílet…"
+  "shareButtonLabel": "Sdílet…",
+  "cancelButtonLabel": "Zrušit",
+  "backButtonLabel": "Zpět",
+  "expansionTileExpandedHint": "dvojitým klepnutím sbalíte",
+  "expansionTileCollapsedHint": "dvojitým klepnutím rozbalíte",
+  "expansionTileExpandedTapHint": "Sbalit",
+  "expansionTileCollapsedTapHint": "Rozbalte pro další podrobnosti",
+  "expandedHint": "Sbaleno",
+  "collapsedHint": "Rozbaleno"
 }

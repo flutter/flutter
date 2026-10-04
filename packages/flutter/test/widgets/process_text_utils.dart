@@ -18,16 +18,13 @@ class MockProcessTextHandler {
     if (call.method == 'ProcessText.queryTextActions') {
       // Simulate that only the Android engine will return a non-null result.
       if (defaultTargetPlatform == TargetPlatform.android) {
-        return <String, String>{
-          fakeAction1Id: fakeAction1Label,
-          fakeAction2Id: fakeAction2Label,
-        };
+        return <String, String>{fakeAction1Id: fakeAction1Label, fakeAction2Id: fakeAction2Label};
       }
     }
     if (call.method == 'ProcessText.processTextAction') {
-      final List<dynamic> args = call.arguments as List<dynamic>;
-      final String actionId = args[0] as String;
-      final String textToProcess = args[1] as String;
+      final args = call.arguments as List<dynamic>;
+      final actionId = args[0] as String;
+      final textToProcess = args[1] as String;
       lastCalledActionId = actionId;
       lastTextToProcess = textToProcess;
 

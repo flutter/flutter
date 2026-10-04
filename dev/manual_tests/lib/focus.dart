@@ -6,14 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(const MaterialApp(
-    title: 'Focus Demo',
-    home: FocusDemo(),
-  ));
+  runApp(const MaterialApp(title: 'Focus Demo', home: FocusDemo()));
 }
 
 class DemoButton extends StatefulWidget {
-  const DemoButton({super.key, required this.name, this.canRequestFocus = true, this.autofocus = false});
+  const DemoButton({
+    super.key,
+    required this.name,
+    this.canRequestFocus = true,
+    this.autofocus = false,
+  });
 
   final String name;
   final bool canRequestFocus;
@@ -25,8 +27,8 @@ class DemoButton extends StatefulWidget {
 
 class _DemoButtonState extends State<DemoButton> {
   late final FocusNode focusNode = FocusNode(
-      debugLabel: widget.name,
-      canRequestFocus: widget.canRequestFocus,
+    debugLabel: widget.name,
+    canRequestFocus: widget.canRequestFocus,
   );
 
   @override
@@ -53,11 +55,11 @@ class _DemoButtonState extends State<DemoButton> {
       focusNode: focusNode,
       autofocus: widget.autofocus,
       style: ButtonStyle(
-        overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused)) {
+        overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+          if (states.contains(WidgetState.focused)) {
             return Colors.red.withOpacity(0.25);
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return Colors.blue.withOpacity(0.25);
           }
           return Colors.transparent;
@@ -97,8 +99,8 @@ class _FocusDemoState extends State<FocusDemo> {
       print('Keys down: ${HardwareKeyboard.instance.logicalKeysPressed}');
       if (event.logicalKey == LogicalKeyboardKey.tab) {
         debugDumpFocusTree();
-        if (HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.shiftLeft)
-            || HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.shiftRight)) {
+        if (HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.shiftLeft) ||
+            HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.shiftRight)) {
           print('Moving to previous.');
           node.previousFocus();
           return KeyEventResult.handled;
@@ -108,20 +110,15 @@ class _FocusDemoState extends State<FocusDemo> {
           return KeyEventResult.handled;
         }
       }
-      if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-        node.focusInDirection(TraversalDirection.left);
-        return KeyEventResult.handled;
-      }
-      if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-        node.focusInDirection(TraversalDirection.right);
-        return KeyEventResult.handled;
-      }
-      if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-        node.focusInDirection(TraversalDirection.up);
-        return KeyEventResult.handled;
-      }
-      if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-        node.focusInDirection(TraversalDirection.down);
+      final TraversalDirection? direction = switch (event.logicalKey) {
+        LogicalKeyboardKey.arrowLeft => TraversalDirection.left,
+        LogicalKeyboardKey.arrowRight => TraversalDirection.right,
+        LogicalKeyboardKey.arrowUp => TraversalDirection.up,
+        LogicalKeyboardKey.arrowDown => TraversalDirection.down,
+        _ => null,
+      };
+      if (direction != null) {
+        node.focusInDirection(direction);
         return KeyEventResult.handled;
       }
     }
@@ -141,65 +138,57 @@ class _FocusDemoState extends State<FocusDemo> {
         child: DefaultTextStyle(
           style: textTheme.headlineMedium!,
           child: Scaffold(
-            appBar: AppBar(
-              title: const Text('Focus Demo'),
-            ),
-            floatingActionButton: FloatingActionButton(
-              child: const Text('+'),
-              onPressed: () {},
-            ),
+            appBar: AppBar(title: const Text('Focus Demo')),
+            floatingActionButton: FloatingActionButton(child: const Text('+'), onPressed: () {}),
             body: Center(
-              child: Builder(builder: (BuildContext context) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        DemoButton(
-                          name: 'One',
-                          autofocus: true,
-                        ),
-                      ],
-                    ),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        DemoButton(name: 'Two'),
-                        DemoButton(
-                          name: 'Three',
-                          canRequestFocus: false,
-                        ),
-                      ],
-                    ),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        DemoButton(name: 'Four'),
-                        DemoButton(name: 'Five'),
-                        DemoButton(name: 'Six'),
-                      ],
-                    ),
-                    OutlinedButton(onPressed: () => print('pressed'), child: const Text('PRESS ME')),
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: TextField(
-                        decoration: InputDecoration(labelText: 'Enter Text', filled: true),
+              child: Builder(
+                builder: (BuildContext context) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[DemoButton(name: 'One', autofocus: true)],
                       ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Enter Text',
-                          filled: false,
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          DemoButton(name: 'Two'),
+                          DemoButton(name: 'Three', canRequestFocus: false),
+                        ],
+                      ),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          DemoButton(name: 'Four'),
+                          DemoButton(name: 'Five'),
+                          DemoButton(name: 'Six'),
+                        ],
+                      ),
+                      OutlinedButton(
+                        onPressed: () => print('pressed'),
+                        child: const Text('PRESS ME'),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: TextField(
+                          decoration: InputDecoration(labelText: 'Enter Text', filled: true),
                         ),
                       ),
-                    ),
-                  ],
-                );
-              }),
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: TextField(
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Enter Text',
+                            filled: false,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),

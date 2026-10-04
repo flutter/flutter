@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'message_codecs.dart';
+library;
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -50,7 +55,7 @@ class PlatformViewsRegistry {
 
     // We can safely assume that a Flutter application will not require more
     // than MAX_INT32 platform views during its lifetime.
-    const int MAX_INT32 = 0x7FFFFFFF;
+    const MAX_INT32 = 0x7FFFFFFF;
     assert(_nextPlatformViewId <= MAX_INT32);
     return _nextPlatformViewId++;
   }
@@ -74,12 +79,14 @@ class PlatformViewsService {
   Future<void> _onMethodCall(MethodCall call) {
     switch (call.method) {
       case 'viewFocused':
-        final int id = call.arguments as int;
+        final id = call.arguments as int;
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]!();
         }
       default:
-        throw UnimplementedError("${call.method} was invoked but isn't implemented by PlatformViewsService");
+        throw UnimplementedError(
+          "${call.method} was invoked but isn't implemented by PlatformViewsService",
+        );
     }
     return Future<void>.value();
   }
@@ -121,9 +128,9 @@ class PlatformViewsService {
   /// null.
   /// {@endtemplate}
   ///
-  /// This attempts to use the newest and most efficient platform view
-  /// implementation when possible. In cases where that is not supported, it
-  /// falls back to using Virtual Display.
+  /// This attempts to use the TLHC implementation when possible.
+  /// In cases where that is not supported, it falls back to using
+  /// Virtual Display.
   static AndroidViewController initAndroidView({
     required int id,
     required String viewType,
@@ -134,7 +141,7 @@ class PlatformViewsService {
   }) {
     assert(creationParams == null || creationParamsCodec != null);
 
-    final TextureAndroidViewController controller = TextureAndroidViewController._(
+    final controller = TextureAndroidViewController._(
       viewId: id,
       viewType: viewType,
       layoutDirection: layoutDirection,
@@ -148,10 +155,12 @@ class PlatformViewsService {
 
   /// {@macro flutter.services.PlatformViewsService.initAndroidView}
   ///
-  /// This attempts to use the newest and most efficient platform view
+  /// This attempts to use the "Texture Layer Hybrid Composition (TLHC)" platform view
   /// implementation when possible. In cases where that is not supported, it
-  /// falls back to using Hybrid Composition, which is the mode used by
+  /// falls back to using "Hybrid Composition", which is the mode used by
   /// [initExpensiveAndroidView].
+  // Fallback logic for TLHC or HC lives in
+  // engine/src/flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java
   static SurfaceAndroidViewController initSurfaceAndroidView({
     required int id,
     required String viewType,
@@ -162,7 +171,7 @@ class PlatformViewsService {
   }) {
     assert(creationParams == null || creationParamsCodec != null);
 
-    final SurfaceAndroidViewController controller = SurfaceAndroidViewController._(
+    final controller = SurfaceAndroidViewController._(
       viewId: id,
       viewType: viewType,
       layoutDirection: layoutDirection,
@@ -178,9 +187,10 @@ class PlatformViewsService {
   /// When this factory is used, the Android view and Flutter widgets are
   /// composed at the Android view hierarchy level.
   ///
-  /// Using this method has a performance cost on devices running Android 9 or
-  /// earlier, or on underpowered devices. In most situations, you should use
+  /// Using this method has a performance cost on devices running Android 9 (api 28)
+  /// or earlier, or on underpowered devices. In most situations, you should use
   /// [initAndroidView] or [initSurfaceAndroidView] instead.
+  /// Always creates a "Hybrid Composition (HC)" view.
   static ExpensiveAndroidViewController initExpensiveAndroidView({
     required int id,
     required String viewType,
@@ -189,7 +199,35 @@ class PlatformViewsService {
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
   }) {
-    final ExpensiveAndroidViewController controller = ExpensiveAndroidViewController._(
+    final controller = ExpensiveAndroidViewController._(
+      viewId: id,
+      viewType: viewType,
+      layoutDirection: layoutDirection,
+      creationParams: creationParams,
+      creationParamsCodec: creationParamsCodec,
+    );
+
+    _instance._focusCallbacks[id] = onFocus ?? () {};
+    return controller;
+  }
+
+  /// {@macro flutter.services.PlatformViewsService.initAndroidView}
+  ///
+  /// When this factory is used, the Android view and Flutter widgets are
+  /// composed at the Android view hierarchy level.
+  ///
+  /// This functionality is only supported on Android devices running Vulkan on
+  /// API 34 or newer.
+  /// Always creates a "Hybrid Composition++ (HCPP)" view.
+  static HybridAndroidViewController initHybridAndroidView({
+    required int id,
+    required String viewType,
+    required TextDirection layoutDirection,
+    dynamic creationParams,
+    MessageCodec<dynamic>? creationParamsCodec,
+    VoidCallback? onFocus,
+  }) {
+    final controller = HybridAndroidViewController._(
       viewId: id,
       viewType: viewType,
       layoutDirection: layoutDirection,
@@ -219,6 +257,7 @@ class PlatformViewsService {
   static Future<UiKitViewController> initUiKitView({
     required int id,
     required String viewType,
+    UiKitViewGestureBlockingPolicy gestureBlockingPolicy = .fallbackToPluginDefault,
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
@@ -226,19 +265,23 @@ class PlatformViewsService {
   }) async {
     assert(creationParams == null || creationParamsCodec != null);
 
+    final String gestureBlockingPolicyValue = switch (gestureBlockingPolicy) {
+      UiKitViewGestureBlockingPolicy.eager => 'eager',
+      UiKitViewGestureBlockingPolicy.waitUntilTouchesEnded => 'waitUntilTouchesEnded',
+      UiKitViewGestureBlockingPolicy.fallbackToPluginDefault => 'fallbackToPluginDefault',
+      UiKitViewGestureBlockingPolicy.doNotBlockGesture => 'doNotBlockGesture',
+    };
+
     // TODO(amirh): pass layoutDirection once the system channel supports it.
     // https://github.com/flutter/flutter/issues/133682
-    final Map<String, dynamic> args = <String, dynamic>{
+    final args = <String, dynamic>{
       'id': id,
       'viewType': viewType,
+      'gestureBlockingPolicy': gestureBlockingPolicyValue,
     };
     if (creationParams != null) {
       final ByteData paramsByteData = creationParamsCodec!.encodeMessage(creationParams)!;
-      args['params'] = Uint8List.view(
-        paramsByteData.buffer,
-        0,
-        paramsByteData.lengthInBytes,
-      );
+      args['params'] = Uint8List.view(paramsByteData.buffer, 0, paramsByteData.lengthInBytes);
     }
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
     if (onFocus != null) {
@@ -274,17 +317,10 @@ class PlatformViewsService {
 
     // TODO(amirh): pass layoutDirection once the system channel supports it.
     // https://github.com/flutter/flutter/issues/133682
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': id,
-      'viewType': viewType,
-    };
+    final args = <String, dynamic>{'id': id, 'viewType': viewType};
     if (creationParams != null) {
       final ByteData paramsByteData = creationParamsCodec!.encodeMessage(creationParams)!;
-      args['params'] = Uint8List.view(
-        paramsByteData.buffer,
-        0,
-        paramsByteData.lengthInBytes,
-      );
+      args['params'] = Uint8List.view(paramsByteData.buffer, 0, paramsByteData.lengthInBytes);
     }
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
     if (onFocus != null) {
@@ -299,10 +335,7 @@ class PlatformViewsService {
 /// A Dart version of Android's [MotionEvent.PointerProperties](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties).
 class AndroidPointerProperties {
   /// Creates an [AndroidPointerProperties] object.
-  const AndroidPointerProperties({
-    required this.id,
-    required this.toolType,
-  });
+  const AndroidPointerProperties({required this.id, required this.toolType});
 
   /// See Android's [MotionEvent.PointerProperties#id](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties.html#id).
   final int id;
@@ -532,21 +565,14 @@ class AndroidMotionEvent {
   }
 }
 
-enum _AndroidViewState {
-  waitingForSize,
-  creating,
-  created,
-  disposed,
-}
+enum _AndroidViewState { waitingForSize, creating, created, disposed }
 
 // Helper for converting PointerEvents into AndroidMotionEvents.
 class _AndroidMotionEventConverter {
   _AndroidMotionEventConverter();
 
-  final Map<int, AndroidPointerCoords> pointerPositions =
-      <int, AndroidPointerCoords>{};
-  final Map<int, AndroidPointerProperties> pointerProperties =
-      <int, AndroidPointerProperties>{};
+  final Map<int, AndroidPointerCoords> pointerPositions = <int, AndroidPointerCoords>{};
+  final Map<int, AndroidPointerProperties> pointerProperties = <int, AndroidPointerProperties>{};
   final Set<int> usedAndroidPointerIds = <int>{};
 
   late PointTransformer pointTransformer;
@@ -557,7 +583,7 @@ class _AndroidMotionEventConverter {
     if (pointerProperties.isEmpty) {
       downTimeMillis = event.timeStamp.inMilliseconds;
     }
-    int androidPointerId = 0;
+    var androidPointerId = 0;
     while (usedAndroidPointerIds.contains(androidPointerId)) {
       androidPointerId++;
     }
@@ -601,38 +627,62 @@ class _AndroidMotionEventConverter {
   }
 
   AndroidMotionEvent? toAndroidMotionEvent(PointerEvent event) {
-    final List<int> pointers = pointerPositions.keys.toList();
+    // Android orders the pointers within a MotionEvent by Android pointer id, and
+    // the engine pairs the coordinates sent from here with the pointers of the
+    // original MotionEvent by array position. `pointerPositions` is keyed by
+    // Flutter pointer and iterates in insertion order, which stops matching
+    // Android's order as soon as a released Android pointer id is recycled by
+    // [handlePointerDownEvent]. The action index and the batching check below
+    // are relative to this order as well.
+    // See https://github.com/flutter/flutter/issues/191105.
+    final List<int> pointers = pointerPositions.keys.toList()
+      ..sort((int a, int b) => pointerProperties[a]!.id.compareTo(pointerProperties[b]!.id));
     final int pointerIdx = pointers.indexOf(event.pointer);
     final int numPointers = pointers.length;
 
-    // This value must match the value in engine's FlutterView.java.
+    // These values must match the values in the engine's AndroidTouchProcessor.java.
     // This flag indicates whether the original Android pointer events were batched together.
-    const int kPointerDataFlagBatched = 1;
+    const kPointerDataFlagBatched = 1;
+    // This flag indicates that this event is part of a group of events representing a change
+    // that affects multiple pointers.
+    const kPointerDataFlagMultiple = 2;
+
+    // Mask for extracting the flag value from the event's platformData
+    const kPointerDataFlagMask = 0xff;
+    const kPointerDataMultiplePointerCountShift = 8;
 
     // Android MotionEvent objects can batch information on multiple pointers.
     // Flutter breaks these such batched events into multiple PointerEvent objects.
     // When there are multiple active pointers we accumulate the information for all pointers
     // as we get PointerEvents, and only send it to the embedded Android view when
     // we see the last pointer. This way we achieve the same batching as Android.
-    if (event.platformData == kPointerDataFlagBatched ||
-        (isSinglePointerAction(event) && pointerIdx < numPointers - 1)) {
+    final int platformDataFlag = event.platformData & kPointerDataFlagMask;
+    if (platformDataFlag == kPointerDataFlagBatched) {
       return null;
     }
+    if (platformDataFlag == kPointerDataFlagMultiple) {
+      final int originalPointerCount = event.platformData >> kPointerDataMultiplePointerCountShift;
+      if (pointerIdx != originalPointerCount - 1) {
+        return null;
+      }
+    }
 
-    final int action;
-    if (event is PointerDownEvent) {
-      action = numPointers == 1
-          ? AndroidViewController.kActionDown
-          : AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerDown);
-    } else if (event is PointerUpEvent) {
-      action = numPointers == 1
-          ? AndroidViewController.kActionUp
-          : AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerUp);
-    } else if (event is PointerMoveEvent) {
-      action = AndroidViewController.kActionMove;
-    } else if (event is PointerCancelEvent) {
-      action = AndroidViewController.kActionCancel;
-    } else {
+    final int? action = switch (event) {
+      PointerDownEvent() when numPointers == 1 => AndroidViewController.kActionDown,
+      PointerUpEvent() when numPointers == 1 => AndroidViewController.kActionUp,
+      PointerDownEvent() => AndroidViewController.pointerAction(
+        pointerIdx,
+        AndroidViewController.kActionPointerDown,
+      ),
+      PointerUpEvent() => AndroidViewController.pointerAction(
+        pointerIdx,
+        AndroidViewController.kActionPointerUp,
+      ),
+      PointerMoveEvent() => AndroidViewController.kActionMove,
+      PointerCancelEvent() => AndroidViewController.kActionCancel,
+      _ => null,
+    };
+    if (action == null) {
       return null;
     }
 
@@ -644,9 +694,7 @@ class _AndroidMotionEventConverter {
       pointerProperties: pointers
           .map<AndroidPointerProperties>((int i) => pointerProperties[i]!)
           .toList(),
-      pointerCoords: pointers
-          .map<AndroidPointerCoords>((int i) => pointerPositions[i]!)
-          .toList(),
+      pointerCoords: pointers.map<AndroidPointerCoords>((int i) => pointerPositions[i]!).toList(),
       metaState: 0,
       buttonState: 0,
       xPrecision: 1.0,
@@ -661,29 +709,28 @@ class _AndroidMotionEventConverter {
 
   static int sourceFor(PointerEvent event) {
     return switch (event.kind) {
-      PointerDeviceKind.touch          => AndroidViewController.kInputDeviceSourceTouchScreen,
-      PointerDeviceKind.trackpad       => AndroidViewController.kInputDeviceSourceTouchPad,
-      PointerDeviceKind.mouse          => AndroidViewController.kInputDeviceSourceMouse,
-      PointerDeviceKind.stylus         => AndroidViewController.kInputDeviceSourceStylus,
+      PointerDeviceKind.touch => AndroidViewController.kInputDeviceSourceTouchScreen,
+      PointerDeviceKind.trackpad => AndroidViewController.kInputDeviceSourceTouchPad,
+      PointerDeviceKind.mouse => AndroidViewController.kInputDeviceSourceMouse,
+      PointerDeviceKind.stylus => AndroidViewController.kInputDeviceSourceStylus,
       PointerDeviceKind.invertedStylus => AndroidViewController.kInputDeviceSourceStylus,
-      PointerDeviceKind.unknown        => AndroidViewController.kInputDeviceSourceUnknown,
+      PointerDeviceKind.unknown => AndroidViewController.kInputDeviceSourceUnknown,
     };
   }
 
-
   AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
-    return AndroidPointerProperties(id: pointerId, toolType: switch (event.kind) {
-      PointerDeviceKind.touch          => AndroidPointerProperties.kToolTypeFinger,
-      PointerDeviceKind.trackpad       => AndroidPointerProperties.kToolTypeFinger,
-      PointerDeviceKind.mouse          => AndroidPointerProperties.kToolTypeMouse,
-      PointerDeviceKind.stylus         => AndroidPointerProperties.kToolTypeStylus,
-      PointerDeviceKind.invertedStylus => AndroidPointerProperties.kToolTypeEraser,
-      PointerDeviceKind.unknown        => AndroidPointerProperties.kToolTypeUnknown,
-    });
+    return AndroidPointerProperties(
+      id: pointerId,
+      toolType: switch (event.kind) {
+        PointerDeviceKind.touch => AndroidPointerProperties.kToolTypeFinger,
+        PointerDeviceKind.trackpad => AndroidPointerProperties.kToolTypeFinger,
+        PointerDeviceKind.mouse => AndroidPointerProperties.kToolTypeMouse,
+        PointerDeviceKind.stylus => AndroidPointerProperties.kToolTypeStylus,
+        PointerDeviceKind.invertedStylus => AndroidPointerProperties.kToolTypeEraser,
+        PointerDeviceKind.unknown => AndroidPointerProperties.kToolTypeUnknown,
+      },
+    );
   }
-
-  bool isSinglePointerAction(PointerEvent event) =>
-      event is! PointerDownEvent && event is! PointerUpEvent;
 }
 
 class _CreationParams {
@@ -699,14 +746,14 @@ class _CreationParams {
 abstract class AndroidViewController extends PlatformViewController {
   AndroidViewController._({
     required this.viewId,
-    required String viewType,
-    required TextDirection layoutDirection,
+    required this._viewType,
+    required this._layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
-  })  : assert(creationParams == null || creationParamsCodec != null),
-        _viewType = viewType,
-        _layoutDirection = layoutDirection,
-        _creationParams = creationParams == null ? null : _CreationParams(creationParams, creationParamsCodec!);
+  }) : assert(creationParams == null || creationParamsCodec != null),
+       _creationParams = creationParams == null
+           ? null
+           : _CreationParams(creationParams, creationParamsCodec!);
 
   /// Action code for when a primary pointer touched the screen.
   ///
@@ -766,8 +813,7 @@ abstract class AndroidViewController extends PlatformViewController {
   final String _viewType;
 
   // Helps convert PointerEvents to AndroidMotionEvents.
-  final _AndroidMotionEventConverter _motionEventConverter =
-      _AndroidMotionEventConverter();
+  final _AndroidMotionEventConverter _motionEventConverter = _AndroidMotionEventConverter();
 
   TextDirection _layoutDirection;
 
@@ -811,7 +857,10 @@ abstract class AndroidViewController extends PlatformViewController {
   @override
   Future<void> create({Size? size, Offset? position}) async {
     assert(_state != _AndroidViewState.disposed, 'trying to create a disposed Android view');
-    assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
+    assert(
+      _state == _AndroidViewState.waitingForSize,
+      'Android view is already sized. View id: $viewId',
+    );
 
     if (_createRequiresSize && size == null) {
       // Wait for a setSize call.
@@ -884,10 +933,7 @@ abstract class AndroidViewController extends PlatformViewController {
   /// See [AndroidViewController.dispatchPointerEvent] for sending a
   /// [PointerEvent].
   Future<void> sendMotionEvent(AndroidMotionEvent event) async {
-    await SystemChannels.platform_views.invokeMethod<dynamic>(
-      'touch',
-      event._asList(viewId),
-    );
+    await SystemChannels.platform_views.invokeMethod<dynamic>('touch', event._asList(viewId));
   }
 
   /// Converts a given point from the global coordinate system in logical pixels
@@ -940,8 +986,7 @@ abstract class AndroidViewController extends PlatformViewController {
       return;
     }
 
-    await SystemChannels.platform_views
-        .invokeMethod<void>('setDirection', <String, dynamic>{
+    await SystemChannels.platform_views.invokeMethod<void>('setDirection', <String, dynamic>{
       'id': viewId,
       'direction': _getAndroidDirection(layoutDirection),
     });
@@ -970,8 +1015,7 @@ abstract class AndroidViewController extends PlatformViewController {
 
     _motionEventConverter.updatePointerPositions(event);
 
-    final AndroidMotionEvent? androidEvent =
-        _motionEventConverter.toAndroidMotionEvent(event);
+    final AndroidMotionEvent? androidEvent = _motionEventConverter.toAndroidMotionEvent(event);
 
     if (event is PointerUpEvent) {
       _motionEventConverter.handlePointerUpEvent(event);
@@ -1014,13 +1058,13 @@ abstract class AndroidViewController extends PlatformViewController {
 /// This controller is created from the [PlatformViewsService.initSurfaceAndroidView] factory,
 /// and is defined for backward compatibility.
 class SurfaceAndroidViewController extends AndroidViewController {
-    SurfaceAndroidViewController._({
+  SurfaceAndroidViewController._({
     required super.viewId,
     required super.viewType,
     required super.layoutDirection,
     super.creationParams,
     super.creationParamsCodec,
-  })  : super._();
+  }) : super._();
 
   // By default, assume the implementation will be texture-based.
   _AndroidViewControllerInternals _internals = _TextureAndroidViewControllerInternals();
@@ -1030,7 +1074,10 @@ class SurfaceAndroidViewController extends AndroidViewController {
 
   @override
   Future<bool> _sendCreateMessage({required Size size, Offset? position}) async {
-    assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
+    assert(
+      !size.isEmpty,
+      'trying to create $TextureAndroidViewController without setting a valid size.',
+    );
 
     final dynamic response = await _AndroidViewControllerInternals.sendCreateMessage(
       viewId: viewId,
@@ -1076,10 +1123,16 @@ class SurfaceAndroidViewController extends AndroidViewController {
   Future<void> setOffset(Offset off) {
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
+
+  @override
+  Future<void> rejectGesture({int? gestureId}) {
+    return _internals.rejectGesture(viewId: viewId, gestureId: gestureId);
+  }
 }
 
 /// Controls an Android view that is composed using the Android view hierarchy.
 /// This controller is created from the [PlatformViewsService.initExpensiveAndroidView] factory.
+// "Hybrid Composition" controller.
 class ExpensiveAndroidViewController extends AndroidViewController {
   ExpensiveAndroidViewController._({
     required super.viewId,
@@ -1087,7 +1140,7 @@ class ExpensiveAndroidViewController extends AndroidViewController {
     required super.layoutDirection,
     super.creationParams,
     super.creationParamsCodec,
-  })  : super._();
+  }) : super._();
 
   final _AndroidViewControllerInternals _internals = _HybridAndroidViewControllerInternals();
 
@@ -1130,16 +1183,18 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   Future<void> setOffset(Offset off) {
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
+
+  @override
+  Future<void> rejectGesture({int? gestureId}) {
+    return _internals.rejectGesture(viewId: viewId, gestureId: gestureId);
+  }
 }
 
-/// Controls an Android view that is rendered as a texture.
-/// This is typically used by [AndroidView] to display a View in the Android view hierarchy.
-///
-/// The platform view is created by calling [create] with an initial size.
-///
-/// The controller is typically created with [PlatformViewsService.initAndroidView].
-class TextureAndroidViewController extends AndroidViewController {
-  TextureAndroidViewController._({
+/// Controls an Android view that is composed using the Android view hierarchy.
+/// This controller is created from the [PlatformViewsService.initHybridAndroidView] factory.
+// "HCPP"
+class HybridAndroidViewController extends AndroidViewController {
+  HybridAndroidViewController._({
     required super.viewId,
     required super.viewType,
     required super.layoutDirection,
@@ -1147,24 +1202,27 @@ class TextureAndroidViewController extends AndroidViewController {
     super.creationParamsCodec,
   }) : super._();
 
-  final _TextureAndroidViewControllerInternals _internals = _TextureAndroidViewControllerInternals();
+  final _AndroidViewControllerInternals _internals = _Hybrid2AndroidViewControllerInternals();
+
+  /// Perform a runtime check to determine if HCPP mode is supported on the
+  /// current device.
+  static Future<bool> checkIfSupported() =>
+      _Hybrid2AndroidViewControllerInternals.checkIfSurfaceControlEnabled();
 
   @override
-  bool get _createRequiresSize => true;
+  bool get _createRequiresSize => false;
 
   @override
-  Future<void> _sendCreateMessage({required Size size, Offset? position}) async {
-    assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
-
-    _internals.textureId = await _AndroidViewControllerInternals.sendCreateMessage(
+  Future<void> _sendCreateMessage({required Size? size, Offset? position}) async {
+    await _AndroidViewControllerInternals.sendCreateMessage(
       viewId: viewId,
       viewType: _viewType,
-      hybrid: false,
+      hybrid: true,
       layoutDirection: _layoutDirection,
       creationParams: _creationParams,
-      size: size,
       position: position,
-    ) as int;
+      useNewController: true,
+    );
   }
 
   @override
@@ -1191,6 +1249,100 @@ class TextureAndroidViewController extends AndroidViewController {
   Future<void> setOffset(Offset off) {
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
+
+  @override
+  Future<void> sendMotionEvent(AndroidMotionEvent event) async {
+    await SystemChannels.platform_views_2.invokeMethod<dynamic>('touch', event._asList(viewId));
+  }
+
+  @override
+  Future<void> rejectGesture({int? gestureId}) {
+    return _internals.rejectGesture(viewId: viewId, gestureId: gestureId);
+  }
+}
+
+/// Controls an Android view that is rendered as a texture.
+/// This is typically used by [AndroidView] to display a View in the Android view hierarchy.
+///
+/// The platform view is created by calling [create] with an initial size.
+///
+/// The controller is typically created with [PlatformViewsService.initAndroidView].
+// "TLHC" or "VD"
+class TextureAndroidViewController extends AndroidViewController {
+  TextureAndroidViewController._({
+    required super.viewId,
+    required super.viewType,
+    required super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+  }) : super._();
+
+  _AndroidViewControllerInternals _internals = _TextureAndroidViewControllerInternals();
+
+  @override
+  bool get _createRequiresSize => true;
+
+  @override
+  Future<void> _sendCreateMessage({required Size size, Offset? position}) async {
+    assert(
+      !size.isEmpty,
+      'trying to create $TextureAndroidViewController without setting a valid size.',
+    );
+
+    final dynamic response = await _AndroidViewControllerInternals.sendCreateMessage(
+      viewId: viewId,
+      viewType: _viewType,
+      hybrid: false,
+      layoutDirection: _layoutDirection,
+      creationParams: _creationParams,
+      size: size,
+      position: position,
+    );
+    if (response is int) {
+      (_internals as _TextureAndroidViewControllerInternals).textureId = response;
+    } else {
+      _internals = _Hybrid2AndroidViewControllerInternals();
+    }
+  }
+
+  @override
+  int? get textureId {
+    if (_internals.requiresViewComposition) {
+      return null;
+    }
+    return _internals.textureId;
+  }
+
+  @override
+  bool get requiresViewComposition {
+    return _internals.requiresViewComposition;
+  }
+
+  @override
+  Future<void> _sendDisposeMessage() {
+    return _internals.sendDisposeMessage(viewId: viewId);
+  }
+
+  @override
+  Future<Size> _sendResizeMessage(Size size) {
+    if (_internals.requiresViewComposition) {
+      return Future<Size>.value(size);
+    }
+    return _internals.setSize(size, viewId: viewId, viewState: _state);
+  }
+
+  @override
+  Future<void> setOffset(Offset off) {
+    if (_internals.requiresViewComposition) {
+      return Future<void>.value();
+    }
+    return _internals.setOffset(off, viewId: viewId, viewState: _state);
+  }
+
+  @override
+  Future<void> rejectGesture({int? gestureId}) {
+    return _internals.rejectGesture(viewId: viewId, gestureId: gestureId);
+  }
 }
 
 // The base class for an implementation of AndroidViewController.
@@ -1205,32 +1357,33 @@ abstract class _AndroidViewControllerInternals {
   // on the native side, the return type is different. Callers should cast
   // depending on the possible return types for their arguments.
   static Future<dynamic> sendCreateMessage({
-      required int viewId,
-      required String viewType,
-      required TextDirection layoutDirection,
-      required bool hybrid,
-      bool hybridFallback = false,
-      _CreationParams? creationParams,
-      Size? size,
-      Offset? position}) {
-    final Map<String, dynamic> args = <String, dynamic>{
+    required int viewId,
+    required String viewType,
+    required TextDirection layoutDirection,
+    required bool hybrid,
+    bool hybridFallback = false,
+    bool useNewController = false,
+    _CreationParams? creationParams,
+    Size? size,
+    Offset? position,
+  }) {
+    final args = <String, dynamic>{
       'id': viewId,
       'viewType': viewType,
       'direction': AndroidViewController._getAndroidDirection(layoutDirection),
       if (hybrid) 'hybrid': hybrid,
-      if (size != null) 'width': size.width,
-      if (size != null) 'height': size.height,
+      'width': ?size?.width,
+      'height': ?size?.height,
       if (hybridFallback) 'hybridFallback': hybridFallback,
-      if (position != null) 'left': position.dx,
-      if (position != null) 'top': position.dy,
+      'left': ?position?.dx,
+      'top': ?position?.dy,
     };
     if (creationParams != null) {
       final ByteData paramsByteData = creationParams.codec.encodeMessage(creationParams.data)!;
-      args['params'] = Uint8List.view(
-        paramsByteData.buffer,
-        0,
-        paramsByteData.lengthInBytes,
-      );
+      args['params'] = Uint8List.view(paramsByteData.buffer, 0, paramsByteData.lengthInBytes);
+    }
+    if (useNewController) {
+      return SystemChannels.platform_views_2.invokeMethod<dynamic>('create', args);
     }
     return SystemChannels.platform_views.invokeMethod<dynamic>('create', args);
   }
@@ -1239,11 +1392,7 @@ abstract class _AndroidViewControllerInternals {
 
   bool get requiresViewComposition;
 
-  Future<Size> setSize(
-    Size size, {
-    required int viewId,
-    required _AndroidViewState viewState,
-  });
+  Future<Size> setSize(Size size, {required int viewId, required _AndroidViewState viewState});
 
   Future<void> setOffset(
     Offset offset, {
@@ -1252,12 +1401,19 @@ abstract class _AndroidViewControllerInternals {
   });
 
   Future<void> sendDisposeMessage({required int viewId});
+
+  Future<void> rejectGesture({required int viewId, int? gestureId}) {
+    return SystemChannels.platform_views.invokeMethod<void>('rejectGesture', <String, dynamic>{
+      'id': viewId,
+      'gestureId': ?gestureId,
+    });
+  }
 }
 
 // An AndroidViewController implementation for views whose contents are
 // displayed via a texture rather than directly in a native view.
 //
-// This is used for both Virtual Display and Texture Layer Hybrid Composition.
+// This is used for both Virtual Display (VD) and Texture Layer Hybrid Composition (TLHC).
 class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInternals {
   _TextureAndroidViewControllerInternals();
 
@@ -1276,17 +1432,18 @@ class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInter
     required int viewId,
     required _AndroidViewState viewState,
   }) async {
-    assert(viewState != _AndroidViewState.waitingForSize, 'Android view must have an initial size. View id: $viewId');
+    assert(
+      viewState != _AndroidViewState.waitingForSize,
+      'Android view must have an initial size. View id: $viewId',
+    );
     assert(!size.isEmpty);
 
-    final Map<Object?, Object?>? meta = await SystemChannels.platform_views.invokeMapMethod<Object?, Object?>(
-      'resize',
-      <String, dynamic>{
-        'id': viewId,
-        'width': size.width,
-        'height': size.height,
-      },
-    );
+    final Map<Object?, Object?>? meta = await SystemChannels.platform_views
+        .invokeMapMethod<Object?, Object?>('resize', <String, dynamic>{
+          'id': viewId,
+          'width': size.width,
+          'height': size.height,
+        });
     assert(meta != null);
     assert(meta!.containsKey('width'));
     assert(meta!.containsKey('height'));
@@ -1312,20 +1469,16 @@ class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInter
 
     _offset = offset;
 
-    await SystemChannels.platform_views.invokeMethod<void>(
-      'offset',
-      <String, dynamic>{
-        'id': viewId,
-        'top': offset.dy,
-        'left': offset.dx,
-      },
-    );
+    await SystemChannels.platform_views.invokeMethod<void>('offset', <String, dynamic>{
+      'id': viewId,
+      'top': offset.dy,
+      'left': offset.dx,
+    });
   }
 
   @override
   Future<void> sendDisposeMessage({required int viewId}) {
-    return SystemChannels
-        .platform_views.invokeMethod<void>('dispose', <String, dynamic>{
+    return SystemChannels.platform_views.invokeMethod<void>('dispose', <String, dynamic>{
       'id': viewId,
       'hybrid': false,
     });
@@ -1346,11 +1499,7 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
   bool get requiresViewComposition => true;
 
   @override
-  Future<Size> setSize(
-    Size size, {
-    required int viewId,
-    required _AndroidViewState viewState,
-  }) {
+  Future<Size> setSize(Size size, {required int viewId, required _AndroidViewState viewState}) {
     throw UnimplementedError('Not supported for hybrid composition.');
   }
 
@@ -1372,16 +1521,65 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
   }
 }
 
+// The HCPP platform view controller.
+//
+// This is only supported via an opt in on Impeller Android.
+class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInternals {
+  // Determine if HCPP can be used.
+  static Future<bool> checkIfSurfaceControlEnabled() async {
+    return (await SystemChannels.platform_views_2.invokeMethod<bool>(
+      'isSurfaceControlEnabled',
+      <String, Object?>{},
+    ))!;
+  }
+
+  @override
+  int get textureId {
+    throw UnimplementedError('Not supported for hybrid composition.');
+  }
+
+  @override
+  bool get requiresViewComposition => true;
+
+  @override
+  Future<Size> setSize(Size size, {required int viewId, required _AndroidViewState viewState}) {
+    throw UnimplementedError('Not supported for hybrid composition.');
+  }
+
+  @override
+  Future<void> setOffset(
+    Offset offset, {
+    required int viewId,
+    required _AndroidViewState viewState,
+  }) {
+    throw UnimplementedError('Not supported for hybrid composition.');
+  }
+
+  @override
+  Future<void> sendDisposeMessage({required int viewId}) {
+    return SystemChannels.platform_views_2.invokeMethod<void>('dispose', <String, dynamic>{
+      'id': viewId,
+      'hybrid': true,
+    });
+  }
+
+  @override
+  Future<void> rejectGesture({required int viewId, int? gestureId}) {
+    return SystemChannels.platform_views_2.invokeMethod<void>('rejectGesture', <String, dynamic>{
+      'id': viewId,
+      'gestureId': ?gestureId,
+    });
+  }
+}
+
 /// Base class for iOS and macOS view controllers.
 ///
 /// View controllers are used to create and interact with the UIView or NSView
 /// underlying a platform view.
 abstract class DarwinPlatformViewController {
   /// Public default for subclasses to override.
-  DarwinPlatformViewController(
-    this.id,
-    TextDirection layoutDirection,
-  ) : _layoutDirection = layoutDirection;
+  DarwinPlatformViewController(this.id, TextDirection layoutDirection)
+    : _layoutDirection = layoutDirection;
 
   /// The unique identifier of the iOS view controlled by this controller.
   ///
@@ -1395,7 +1593,10 @@ abstract class DarwinPlatformViewController {
 
   /// Sets the layout direction for the iOS UIView.
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
-    assert(!_debugDisposed, 'trying to set a layout direction for a disposed iOS UIView. View id: $id');
+    assert(
+      !_debugDisposed,
+      'trying to set a layout direction for a disposed iOS UIView. View id: $id',
+    );
 
     if (layoutDirection == _layoutDirection) {
       return;
@@ -1412,9 +1613,7 @@ abstract class DarwinPlatformViewController {
   /// Calling this method releases the delayed events to the embedded UIView and makes it consume
   /// any following touch events for the pointers involved in the active gesture.
   Future<void> acceptGesture() {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': id,
-    };
+    final args = <String, dynamic>{'id': id};
     return SystemChannels.platform_views.invokeMethod('acceptGesture', args);
   }
 
@@ -1424,9 +1623,7 @@ abstract class DarwinPlatformViewController {
   /// Calling this method drops the buffered touch events and prevents any future touch events for
   /// the pointers that are part of the active touch sequence from arriving to the embedded view.
   Future<void> rejectGesture() {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': id,
-    };
+    final args = <String, dynamic>{'id': id};
     return SystemChannels.platform_views.invokeMethod('rejectGesture', args);
   }
 
@@ -1442,24 +1639,80 @@ abstract class DarwinPlatformViewController {
   }
 }
 
+/// How touch event callbacks and gesture recognizers of a platform view are blocked.
+///
+/// This replaces the engine's `FlutterPlatformViewGestureRecognizersBlockingPolicy` enum in `FlutterPlugin.h`.
+///
+/// In iOS, a gesture recognizer (`UIGestureRecognizer`) is an object that decouples the logic for
+/// recognizing a sequence of touches (like a tap, pinch, or swipe) and acting on that recognition.
+///
+/// When a Flutter app embeds an iOS platform view (like a `WKWebView`), both the Flutter framework
+/// and the native iOS view receive touch events. To prevent both systems from simultaneously reacting
+/// to the same touch (e.g., a scroll gesture scrolling both a Flutter `ListView` and a native
+/// `UIScrollView`), Flutter needs a mechanism to "block" the native view's gesture recognizers when
+/// it determines that the Flutter framework should handle the gesture.
+///
+/// Flutter uses two mechanisms to achieve this:
+/// 1. **Synchronous Blocking (Hit Testing):** During the initial touch (`UIResponder.touchesBegan`),
+///    Flutter performs a synchronous hit test. If the touch lands on a Flutter widget that is
+///    visually on top of the platform view, Flutter immediately blocks the native view from
+///    receiving the touch.
+/// 2. **Asynchronous Blocking (Gesture Arena):** If the touch lands directly on the platform view,
+///    both Flutter and the native view begin tracking the gesture. Flutter's gesture arena resolves
+///    which system wins. If Flutter wins (e.g., the user is scrolling a Flutter `ListView` that
+///    contains the platform view), Flutter asynchronously cancels the native view's gesture recognizers.
+///
+/// The default policy ([fallbackToPluginDefault], which typically resolves to [eager]) works for most
+/// use cases. However, some native views (either from Apple or 3rd party) may have bugs where
+/// their internal gesture recognizers get stuck in a stale state if they are aggressively canceled by
+/// Flutter's asynchronous blocking. In these specific cases, you might need to change the policy to
+/// [doNotBlockGesture] or [waitUntilTouchesEnded] to work around the native view's bugs.
+///
+/// For more details, see: https://flutter.dev/go/ios-platform-view-touch-gesture-blocking.
+enum UiKitViewGestureBlockingPolicy {
+  /// Flutter blocks all the UIGestureRecognizers on the platform view as soon as it
+  /// decides they should be blocked.
+  ///
+  /// This policy employs a dual blocking strategy: synchronous blocking via hitTest results and
+  /// asynchronous blocking managed through the framework’s gesture arena.
+  /// With this policy, only the `touchesBegan` method for all the UIGestureRecognizers is guaranteed
+  /// to be called.
+  eager,
+
+  /// Flutter blocks all the UIGestureRecognizers on the platform view only after touchesEnded was invoked.
+  ///
+  /// This results in the platform view's UIGestureRecognizers seeing the entire touch sequence,
+  /// but never recognizing the gesture (and never invoking actions).
+  /// Using this policy may cause the platform view to incorrectly receive touch events
+  /// that should have been blocked.
+  waitUntilTouchesEnded,
+
+  /// Causes iOS engine to block all the UIGestureRecognizers on the platform view if it deems
+  /// the hittest shouldn't be handled by the Flutter framework.
+  ///
+  /// Unlike [eager], this policy does not rely on Flutter's gesture arena. This is a workaround
+  /// to address a few bugs related to platform view's gesture recognizers being stuck in a stale state.
+  /// See: https://github.com/flutter/flutter/issues/175099.
+  /// Using this policy may cause the platform view to incorrectly recognize a gesture that should
+  /// have been blocked.
+  doNotBlockGesture,
+
+  /// Fallback to use the policy set by the `registerViewFactory` engine API in FlutterPlugin.h.
+  fallbackToPluginDefault,
+}
+
 /// Controller for an iOS platform view.
 ///
 /// View controllers create and interact with the underlying UIView.
 ///
 /// Typically created with [PlatformViewsService.initUiKitView].
 class UiKitViewController extends DarwinPlatformViewController {
-  UiKitViewController._(
-    super.id,
-    super.layoutDirection,
-  );
+  UiKitViewController._(super.id, super.layoutDirection);
 }
 
 /// Controller for a macOS platform view.
 class AppKitViewController extends DarwinPlatformViewController {
-  AppKitViewController._(
-    super.id,
-    super.layoutDirection,
-  );
+  AppKitViewController._(super.id, super.layoutDirection);
 }
 
 /// An interface for controlling a single platform view.
@@ -1505,4 +1758,20 @@ abstract class PlatformViewController {
 
   /// Clears the view's focus on the platform side.
   Future<void> clearFocus();
+
+  /// Informs the platform view that Flutter has won the gesture arena for an active
+  /// touch sequence.
+  ///
+  /// On Android, this serves as a latency hint. When Flutter wins the gesture arena for a
+  /// sequence (such as when a parent scroll view begins scrolling), subsequent touch move
+  /// events request unbuffered dispatch on the native view to eliminate touch lag during
+  /// Flutter-driven gestures.
+  ///
+  /// On other platforms, or if unbuffered dispatch is not supported, this is a no-op.
+  /// (On iOS, platform view touch rejection uses `DarwinPlatformViewController.rejectGesture`.)
+  ///
+  /// The optional [gestureId] identifies the specific gesture (e.g., its `embedderId`
+  /// matching a MotionEvent tracked by `MotionEventTracker` on Android) that was rejected
+  /// by the arena.
+  Future<void> rejectGesture({int? gestureId}) async {}
 }

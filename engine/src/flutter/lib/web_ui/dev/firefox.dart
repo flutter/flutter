@@ -1,0 +1,282 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:path/path.dart' as path;
+import 'package:test_api/backend.dart';
+import 'package:test_core/src/util/io.dart';
+
+import 'browser.dart';
+import 'browser_process.dart';
+import 'common.dart';
+import 'environment.dart';
+import 'firefox_installer.dart';
+import 'package_lock.dart';
+
+/// Provides an environment for the desktop Firefox.
+class FirefoxEnvironment implements BrowserEnvironment {
+  late final BrowserInstallation _installation;
+
+  @override
+  Future<Browser> launchBrowserInstance(Uri url, {bool debug = false}) async {
+    await Firefox.printActualVersion(_installation);
+    return Firefox(url, _installation, debug: debug);
+  }
+
+  @override
+  Runtime get packageTestRuntime => Runtime.firefox;
+
+  @override
+  Future<void> prepare() async {
+    _installation = await getOrInstallFirefox(
+      packageLock.firefoxLock.version,
+      infoLog: isCi ? stdout : DevNull(),
+    );
+  }
+
+  @override
+  Future<void> cleanup() async {
+    await Firefox._stopLinuxDisplay();
+  }
+
+  @override
+  final String name = 'Firefox';
+
+  @override
+  String get packageTestConfigurationYamlFile => 'dart_test_firefox.yaml';
+}
+
+/// Runs desktop Firefox.
+///
+/// Most of the communication with the browser is expected to happen via HTTP,
+/// so this exposes a bare-bones API. The browser starts as soon as the class is
+/// constructed, and is killed when [close] is called.
+///
+/// Any errors starting or running the process are reported through [onExit].
+class Firefox extends Browser {
+  /// Starts a new instance of Firefox open to the given [url], which may be a
+  /// [Uri] or a [String].
+  factory Firefox(Uri url, BrowserInstallation installation, {bool debug = false}) {
+    final remoteDebuggerCompleter = Completer<Uri>.sync();
+    return Firefox._(
+      BrowserProcess(() async {
+        // Using a profile on opening will prevent popups related to profiles.
+        final profile =
+            '''
+user_pref("browser.shell.checkDefaultBrowser", false);
+user_pref("dom.disable_open_during_load", false);
+user_pref("dom.max_script_run_time", 0);
+user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
+user_pref("browser.aboutwelcome.enabled", false);
+// Ensure WebGL is enabled, using the hardware GPU when available and allowing
+// fallback to software rendering when no GPU is present.
+user_pref("webgl.force-enabled", true);
+user_pref("webgl.disabled", false);
+user_pref("webgl.disable-fail-if-major-performance-caveat", true);
+${isCi ? '''
+// GPU-less Linux CI containers require software WebRender and disabled content
+// sandboxes to initialize Mesa llvmpipe (swrast) in headless mode.
+user_pref("gfx.webrender.software", true);
+user_pref("security.sandbox.content.level", 0);
+''' : ''}''';
+
+        final temporaryProfileDirectory = Directory(
+          path.join(environment.webUiDartToolDir.path, 'firefox_profile'),
+        );
+
+        // A good source of various Firefox Command Line options:
+        // https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#Browser
+        //
+        if (temporaryProfileDirectory.existsSync()) {
+          temporaryProfileDirectory.deleteSync(recursive: true);
+        }
+        temporaryProfileDirectory.createSync(recursive: true);
+        File(path.join(temporaryProfileDirectory.path, 'prefs.js')).writeAsStringSync(profile);
+
+        // Policies
+
+        final executable = File(installation.executable);
+        // The FIREFOX_EXECUTABLE path points to a symlink to the downloaded CIPD package. So we
+        // need to create the policies file in the same directory as the actual executable.
+        final resolved = File(executable.resolveSymbolicLinksSync());
+
+        final policiesDir = Directory(path.join(resolved.parent.absolute.path, 'distribution'));
+        policiesDir.createSync(recursive: true);
+        final policiesFile = File(path.join(policiesDir.path, 'policies.json'));
+        policiesFile.writeAsStringSync('''
+{
+  "policies": {
+    "DisableAppUpdate": true
+  }
+}
+''');
+
+        final args = <String>[
+          url.toString(),
+          '--profile',
+          temporaryProfileDirectory.path,
+          if (!debug) '--headless',
+          '-width $kMaxScreenshotWidth',
+          '-height $kMaxScreenshotHeight',
+          '-new-window',
+          '-new-instance',
+          '--start-debugger-server $kDevtoolsPort',
+        ];
+
+        final String? linuxDisplay = await _ensureLinuxDisplay();
+        final Process process = await Process.start(
+          installation.executable,
+          args,
+          environment: <String, String>{
+            ...Platform.environment,
+            if (linuxDisplay != null) 'DISPLAY': linuxDisplay,
+            if (!debug) 'MOZ_HEADLESS': '1',
+            if (isCi) ...<String, String>{
+              'LIBGL_ALWAYS_SOFTWARE': '1',
+              'MOZ_DISABLE_CONTENT_SANDBOX': '1',
+              'MOZ_DISABLE_GPU_SANDBOX': '1',
+              'MOZ_DISABLE_RDD_SANDBOX': '1',
+              'MOZ_DISABLE_SOCKET_PROCESS_SANDBOX': '1',
+            },
+          },
+        );
+        process.stdout
+            .transform<String>(const Utf8Decoder(allowMalformed: true))
+            .listen((String string) => print('[Firefox:stdout] $string'));
+        process.stderr
+            .transform<String>(const Utf8Decoder(allowMalformed: true))
+            .listen((String string) => print('[Firefox:stderr] $string'));
+
+        remoteDebuggerCompleter.complete(
+          getRemoteDebuggerUrl(Uri.parse('http://localhost:$kDevtoolsPort')),
+        );
+
+        unawaited(
+          process.exitCode.then((_) {
+            temporaryProfileDirectory.deleteSync(recursive: true);
+          }),
+        );
+
+        return process;
+      }),
+      remoteDebuggerCompleter.future,
+    );
+  }
+
+  Firefox._(this._process, this.remoteDebuggerUrl);
+
+  static Process? _xvfbProcess;
+  static Future<String?>? _virtualDisplayFuture;
+
+  /// Creates a virtual X display on Linux when `DISPLAY` is unset so headless
+  /// Firefox can initialize WebGL.
+  static Future<String?> _ensureLinuxDisplay() {
+    if (!Platform.isLinux) {
+      return Future<String?>.value();
+    }
+    final String? existingDisplay = Platform.environment['DISPLAY'];
+    if (existingDisplay != null && existingDisplay.isNotEmpty) {
+      return Future<String?>.value(existingDisplay);
+    }
+    return _virtualDisplayFuture ??= _startXvfb();
+  }
+
+  static Future<String?> _startXvfb() async {
+    Process? process;
+    final stderrBuffer = StringBuffer();
+    try {
+      process = await Process.start('Xvfb', <String>[
+        '-displayfd',
+        '1',
+        '-screen',
+        '0',
+        '1280x800x24',
+        '-ac',
+        '-nolisten',
+        'tcp',
+      ]);
+      process.stderr
+          .transform<String>(const Utf8Decoder(allowMalformed: true))
+          .listen(stderrBuffer.write);
+      final displayCompleter = Completer<String>();
+      process.stdout
+          .transform<String>(const Utf8Decoder(allowMalformed: true))
+          .transform<String>(const LineSplitter())
+          .listen(
+            (String line) {
+              final String trimmed = line.trim();
+              if (trimmed.isNotEmpty && !displayCompleter.isCompleted) {
+                displayCompleter.complete(trimmed);
+              }
+            },
+            onError: (Object error, StackTrace stackTrace) {
+              if (!displayCompleter.isCompleted) {
+                displayCompleter.completeError(error, stackTrace);
+              }
+            },
+            onDone: () {
+              if (!displayCompleter.isCompleted) {
+                displayCompleter.completeError(
+                  StateError(
+                    'Xvfb exited before reporting a display number. stderr:\n$stderrBuffer',
+                  ),
+                );
+              }
+            },
+          );
+      final String displayNumber = await displayCompleter.future.timeout(
+        const Duration(seconds: 10),
+      );
+      _xvfbProcess = process;
+      unawaited(
+        process.exitCode.then((_) {
+          if (identical(_xvfbProcess, process)) {
+            _xvfbProcess = null;
+            _virtualDisplayFuture = null;
+          }
+        }),
+      );
+      return ':$displayNumber';
+    } on Object catch (error) {
+      print('[Firefox] Failed to start Xvfb: $error');
+      process?.kill();
+      _virtualDisplayFuture = null;
+      return null;
+    }
+  }
+
+  static Future<void> _stopLinuxDisplay() async {
+    if (_virtualDisplayFuture != null) {
+      await _virtualDisplayFuture;
+    }
+    final Process? process = _xvfbProcess;
+    _xvfbProcess = null;
+    _virtualDisplayFuture = null;
+    if (process != null) {
+      process.kill();
+      await process.exitCode;
+    }
+  }
+
+  static Future<void> printActualVersion(BrowserInstallation installation) async {
+    final ProcessResult result = await Process.run(installation.executable, ['--version']);
+    // Example:
+    // "Browser: Mozilla Firefox 141.0"
+    print('Browser: ${result.stdout}');
+  }
+
+  final BrowserProcess _process;
+
+  @override
+  final Future<Uri> remoteDebuggerUrl;
+
+  @override
+  Future<void> get onExit => _process.onExit;
+
+  @override
+  Future<void> close() => _process.close();
+}

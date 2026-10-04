@@ -16,16 +16,13 @@ void main() {
 class ShowLicenses extends StatelessWidget {
   const ShowLicenses({super.key});
 
-  Widget _buildTestResultWidget(
-    BuildContext context,
-    AsyncSnapshot<List<LicenseEntry>> snapshot,
-  ) {
-    final List<LicenseEntry> entries = snapshot.data  ?? <LicenseEntry>[];
-    String flutterPackage = '';
-    final List<String> flutterParagraphs = <String>[];
-    String enginePackage = '';
-    final List<String> engineParagraphs = <String>[];
-    for (final LicenseEntry entry in entries) {
+  Widget _buildTestResultWidget(BuildContext context, AsyncSnapshot<List<LicenseEntry>> snapshot) {
+    final List<LicenseEntry> entries = snapshot.data ?? <LicenseEntry>[];
+    var flutterPackage = '';
+    final flutterParagraphs = <String>[];
+    var enginePackage = '';
+    final engineParagraphs = <String>[];
+    for (final entry in entries) {
       if (entry.packages.contains('flutter')) {
         flutterPackage = 'flutter';
         flutterParagraphs.addAll(
@@ -34,13 +31,11 @@ class ShowLicenses extends StatelessWidget {
       }
       if (entry.packages.contains('engine')) {
         enginePackage = 'engine';
-        engineParagraphs.addAll(
-          entry.paragraphs.map<String>((LicenseParagraph para) => para.text),
-        );
+        engineParagraphs.addAll(entry.paragraphs.map<String>((LicenseParagraph para) => para.text));
       }
     }
 
-    final List<Widget> result = <Widget>[];
+    final result = <Widget>[];
     result.addAll(<Widget>[
       const Text('License Check Test', key: ValueKey<String>('Header')),
       Text(flutterPackage, key: const ValueKey<String>('FlutterPackage')),
@@ -51,9 +46,7 @@ class ShowLicenses extends StatelessWidget {
       Text('${engineParagraphs.length}', key: const ValueKey<String>('EngineCount')),
     ]);
 
-    return ListView(
-      children: result,
-    );
+    return ListView(children: result);
   }
 
   @override

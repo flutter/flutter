@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,9 +11,9 @@ import 'restoration.dart';
 
 void main() {
   test('root bucket values', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
+    final bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
     expect(bucket.restorationId, 'root');
     expect(bucket.debugOwner, manager);
@@ -64,11 +63,11 @@ void main() {
   });
 
   test('child bucket values', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rootRawData = _createRawDataSet();
-    final Object debugOwner = Object();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rootRawData);
-    final RestorationBucket child = RestorationBucket.child(
+    final debugOwner = Object();
+    final root = RestorationBucket.root(manager: manager, rawData: rootRawData);
+    final child = RestorationBucket.child(
       restorationId: 'child1',
       parent: root,
       debugOwner: debugOwner,
@@ -87,7 +86,12 @@ void main() {
     expect(manager.updateScheduled, isTrue);
     expect(child.read<int>('foo'), 44);
     manager.doSerialization();
-    expect((((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>)['foo'], 44);
+    expect(
+      (((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1']
+              as Map<String, dynamic>)[valuesMapKey]
+          as Map<String, dynamic>)['foo'],
+      44,
+    );
     expect(manager.updateScheduled, isFalse);
 
     // Can add a new value.
@@ -95,7 +99,12 @@ void main() {
     expect(manager.updateScheduled, isTrue);
     expect(child.read<bool>('value3'), true);
     manager.doSerialization();
-    expect((((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>)['value3'], true);
+    expect(
+      (((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1']
+              as Map<String, dynamic>)[valuesMapKey]
+          as Map<String, dynamic>)['value3'],
+      true,
+    );
     expect(manager.updateScheduled, isFalse);
 
     // Can remove existing value.
@@ -103,7 +112,11 @@ void main() {
     expect(manager.updateScheduled, isTrue);
     expect(child.read<int>('foo'), isNull); // Does not exist anymore.
     manager.doSerialization();
-    expect(((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>).containsKey('foo'), isFalse);
+    expect(
+      ((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)
+          .containsKey('foo'),
+      isFalse,
+    );
     expect(manager.updateScheduled, isFalse);
 
     // Removing non-existing value is no-op.
@@ -115,17 +128,28 @@ void main() {
     expect(manager.updateScheduled, isTrue);
     expect(child.read<int>('value4'), null);
     manager.doSerialization();
-    expect((((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>).containsKey('value4'), isTrue);
-    expect((((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>)['value4'], null);
+    expect(
+      (((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1']
+                  as Map<String, dynamic>)[valuesMapKey]
+              as Map<String, dynamic>)
+          .containsKey('value4'),
+      isTrue,
+    );
+    expect(
+      (((rootRawData[childrenMapKey] as Map<String, dynamic>)['child1']
+              as Map<String, dynamic>)[valuesMapKey]
+          as Map<String, dynamic>)['value4'],
+      null,
+    );
     expect(manager.updateScheduled, isFalse);
   });
 
   test('claim child with existing data', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
+    final bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final Object debugOwner = Object();
+    final debugOwner = Object();
     final RestorationBucket child = bucket.claimChild('child1', debugOwner: debugOwner);
 
     expect(manager.updateScheduled, isFalse);
@@ -136,18 +160,23 @@ void main() {
     child.write('bar', 44);
     expect(manager.updateScheduled, isTrue);
     manager.doSerialization();
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<String, dynamic>)['bar'], 44);
+    expect(
+      (((rawData[childrenMapKey] as Map<String, dynamic>)['child1']
+              as Map<String, dynamic>)[valuesMapKey]
+          as Map<String, dynamic>)['bar'],
+      44,
+    );
     expect(manager.updateScheduled, isFalse);
   });
 
   test('claim child with no existing data', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
+    final bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
     expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('child2'), isFalse);
 
-    final Object debugOwner = Object();
+    final debugOwner = Object();
     final RestorationBucket child = bucket.claimChild('child2', debugOwner: debugOwner);
 
     expect(manager.updateScheduled, isTrue);
@@ -160,13 +189,18 @@ void main() {
 
     expect(manager.updateScheduled, isFalse);
     expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('child2'), isTrue);
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child2'] as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>)['foo'], 55);
+    expect(
+      (((rawData[childrenMapKey] as Map<String, dynamic>)['child2']
+              as Map<String, dynamic>)[valuesMapKey]
+          as Map<Object?, Object?>)['foo'],
+      55,
+    );
   });
 
   test('claim child that is already claimed throws if not given up', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
+    final bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child1 = bucket.claimChild('child1', debugOwner: 'FirstClaim');
 
@@ -184,24 +218,26 @@ void main() {
     // child1 is not given up before running finalizers.
     expect(
       () => manager.doSerialization(),
-      throwsA(isFlutterError.having(
-        (FlutterError error) => error.message,
-        'message',
-        equals(
-          'Multiple owners claimed child RestorationBuckets with the same IDs.\n'
-          'The following IDs were claimed multiple times from the parent RestorationBucket(restorationId: root, owner: MockManager):\n'
-          ' * "child1" was claimed by:\n'
-          '   * SecondClaim\n'
-          '   * FirstClaim (current owner)',
+      throwsA(
+        isFlutterError.having(
+          (FlutterError error) => error.message,
+          'message',
+          equals(
+            'Multiple owners claimed child RestorationBuckets with the same IDs.\n'
+            'The following IDs were claimed multiple times from the parent RestorationBucket(restorationId: root, owner: MockManager):\n'
+            ' * "child1" was claimed by:\n'
+            '   * SecondClaim\n'
+            '   * FirstClaim (current owner)',
+          ),
         ),
-      )),
+      ),
     );
   });
 
   test('claim child that is already claimed does not throw if given up', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
+    final bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child1 = bucket.claimChild('child1', debugOwner: 'FirstClaim');
 
@@ -221,14 +257,25 @@ void main() {
     child1.dispose();
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>).containsKey('foo'), isFalse);
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>)['bar'], 55);
+    expect(
+      (((rawData[childrenMapKey] as Map<String, dynamic>)['child1']
+                  as Map<String, dynamic>)[valuesMapKey]
+              as Map<Object?, Object?>)
+          .containsKey('foo'),
+      isFalse,
+    );
+    expect(
+      (((rawData[childrenMapKey] as Map<String, dynamic>)['child1']
+              as Map<String, dynamic>)[valuesMapKey]
+          as Map<Object?, Object?>)['bar'],
+      55,
+    );
   });
 
   test('claiming a claimed child twice and only giving it up once throws', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
+    final bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child1 = bucket.claimChild('child1', debugOwner: 'FirstClaim');
     expect(child1.restorationId, 'child1');
@@ -242,9 +289,9 @@ void main() {
   });
 
   test('unclaiming and then claiming same id gives fresh bucket', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket bucket = RestorationBucket.root(manager: manager, rawData: rawData);
+    final bucket = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child1 = bucket.claimChild('child1', debugOwner: 'FirstClaim');
     expect(manager.updateScheduled, isFalse);
@@ -256,9 +303,9 @@ void main() {
   });
 
   test('cleans up raw data if last value/child is dropped', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     expect(rawData.containsKey(childrenMapKey), isTrue);
     final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner');
@@ -276,9 +323,9 @@ void main() {
   });
 
   test('dispose deletes data', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
     child1.claimChild('child1OfChild1', debugOwner: 'owner1.1');
@@ -308,9 +355,9 @@ void main() {
   });
 
   test('rename is no-op if same id', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
 
@@ -323,12 +370,12 @@ void main() {
   });
 
   test('rename to unused id', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
-    final Object rawChildData = (rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Object;
+    final rawChildData = (rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Object;
     expect(rawChildData, isNotNull);
 
     expect(manager.updateScheduled, isFalse);
@@ -345,9 +392,9 @@ void main() {
   });
 
   test('rename to used id throws if id is not given up', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
     final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner1');
@@ -363,17 +410,17 @@ void main() {
   });
 
   test('rename to used id does not throw if id is given up', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
     final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner1');
     manager.doSerialization();
 
-    final Object rawChild1Data = (rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Object;
+    final rawChild1Data = (rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Object;
     expect(rawChild1Data, isNotNull);
-    final Object rawChild2Data = (rawData[childrenMapKey] as Map<String, dynamic>)['child2'] as Object;
+    final rawChild2Data = (rawData[childrenMapKey] as Map<String, dynamic>)['child2'] as Object;
     expect(rawChild2Data, isNotNull);
 
     expect(child1.restorationId, 'child1');
@@ -393,11 +440,11 @@ void main() {
   });
 
   test('renaming a to be added child', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final Object rawChild1Data = (rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Object;
+    final rawChild1Data = (rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Object;
     expect(rawChild1Data, isNotNull);
 
     final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
@@ -417,9 +464,9 @@ void main() {
   });
 
   test('adopt is no-op if same parent', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
 
@@ -429,11 +476,11 @@ void main() {
   });
 
   test('adopt fresh child', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final RestorationBucket child = RestorationBucket.empty(restorationId: 'fresh-child', debugOwner: 'owner1');
+    final child = RestorationBucket.empty(restorationId: 'fresh-child', debugOwner: 'owner1');
 
     root.adoptChild(child);
     expect(manager.updateScheduled, isTrue);
@@ -444,16 +491,21 @@ void main() {
     expect(manager.updateScheduled, isFalse);
 
     expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('fresh-child'), isTrue);
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['fresh-child'] as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>)['value'], 22);
+    expect(
+      (((rawData[childrenMapKey] as Map<String, dynamic>)['fresh-child']
+              as Map<String, dynamic>)[valuesMapKey]
+          as Map<Object?, Object?>)['value'],
+      22,
+    );
 
     child.write('bar', 'blabla');
     expect(manager.updateScheduled, isTrue);
   });
 
   test('adopt child that already had a parent', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
     final RestorationBucket childOfChild = child.claimChild('childOfChild', debugOwner: 'owner2');
@@ -463,7 +515,10 @@ void main() {
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
 
-    final Object childOfChildData = (((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[childrenMapKey] as Map<Object?, Object?>)['childOfChild']!;
+    final Object childOfChildData =
+        (((rawData[childrenMapKey] as Map<String, dynamic>)['child1']
+                as Map<String, dynamic>)[childrenMapKey]
+            as Map<Object?, Object?>)['childOfChild']!;
     expect(childOfChildData, isNotEmpty);
 
     root.adoptChild(childOfChild);
@@ -471,14 +526,18 @@ void main() {
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
 
-    expect(((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>).containsKey(childrenMapKey), isFalse); // child1 has no children anymore.
+    expect(
+      ((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)
+          .containsKey(childrenMapKey),
+      isFalse,
+    ); // child1 has no children anymore.
     expect((rawData[childrenMapKey] as Map<String, dynamic>)['childOfChild'], childOfChildData);
   });
 
   test('adopting child throws if id is already in use and not given up', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
     final RestorationBucket childOfChild = child.claimChild('child1', debugOwner: 'owner2');
@@ -490,15 +549,18 @@ void main() {
   });
 
   test('adopting child does not throw if id is already in use and given up', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
     final RestorationBucket childOfChild = child.claimChild('child1', debugOwner: 'owner2');
     childOfChild.write<String>('foo', 'bar');
 
-    final Object childOfChildData = (((rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Map<String, dynamic>)[childrenMapKey] as Map<Object?, Object?>)['child1']!;
+    final Object childOfChildData =
+        (((rawData[childrenMapKey] as Map<String, dynamic>)['child1']
+                as Map<String, dynamic>)[childrenMapKey]
+            as Map<Object?, Object?>)['child1']!;
     expect(childOfChildData, isNotEmpty);
 
     expect(manager.updateScheduled, isTrue);
@@ -515,9 +577,9 @@ void main() {
   });
 
   test('adopting a to-be-added child under an already in use id', () {
-    final MockRestorationManager manager = MockRestorationManager();
+    final manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
-    final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
     final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner1');
@@ -538,17 +600,24 @@ void main() {
     manager.doSerialization();
     expect(manager.updateScheduled, isFalse);
 
-    expect((((rawData[childrenMapKey] as Map<String, dynamic>)['child2'] as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>)['foo'], 'bar');
-    expect((((((rawData[childrenMapKey] as Map<String, dynamic>)
-      ['child1'] as Map<String, dynamic>)
-        [childrenMapKey] as Map<Object?, Object?>)
-          ['child2']! as Map<String, dynamic>)
-            [valuesMapKey] as Map<Object?, Object?>)
-              ['hello'], 'world');
+    expect(
+      (((rawData[childrenMapKey] as Map<String, dynamic>)['child2']
+              as Map<String, dynamic>)[valuesMapKey]
+          as Map<Object?, Object?>)['foo'],
+      'bar',
+    );
+    expect(
+      (((((rawData[childrenMapKey] as Map<String, dynamic>)['child1']
+                      as Map<String, dynamic>)[childrenMapKey]
+                  as Map<Object?, Object?>)['child2']!
+              as Map<String, dynamic>)[valuesMapKey]
+          as Map<Object?, Object?>)['hello'],
+      'world',
+    );
   });
 
   test('throws when used after dispose', () {
-    final RestorationBucket bucket = RestorationBucket.empty(restorationId: 'foo', debugOwner: null);
+    final bucket = RestorationBucket.empty(restorationId: 'foo', debugOwner: null);
     bucket.dispose();
 
     expect(() => bucket.debugOwner, throwsFlutterError);
@@ -558,7 +627,7 @@ void main() {
     expect(() => bucket.remove<int>('foo'), throwsFlutterError);
     expect(() => bucket.contains('foo'), throwsFlutterError);
     expect(() => bucket.claimChild('child', debugOwner: null), throwsFlutterError);
-    final RestorationBucket child = RestorationBucket.empty(restorationId: 'child', debugOwner: null);
+    final child = RestorationBucket.empty(restorationId: 'child', debugOwner: null);
     expect(() => bucket.adoptChild(child), throwsFlutterError);
     expect(() => bucket.rename('bar'), throwsFlutterError);
     expect(() => bucket.dispose(), throwsFlutterError);
@@ -567,34 +636,25 @@ void main() {
   test('$RestorationBucket dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
-        () => RestorationBucket.empty(
-          restorationId: 'child1',
-          debugOwner: null,
-        ).dispose(),
+        () => RestorationBucket.empty(restorationId: 'child1', debugOwner: null).dispose(),
         RestorationBucket,
       ),
       areCreateAndDispose,
     );
 
-    final MockRestorationManager manager1 = MockRestorationManager();
+    final manager1 = MockRestorationManager();
     addTearDown(manager1.dispose);
     await expectLater(
       await memoryEvents(
-        () => RestorationBucket.root(
-          manager: manager1,
-          rawData: null,
-        ).dispose(),
+        () => RestorationBucket.root(manager: manager1, rawData: null).dispose(),
         RestorationBucket,
       ),
       areCreateAndDispose,
     );
 
-    final MockRestorationManager manager2 = MockRestorationManager();
+    final manager2 = MockRestorationManager();
     addTearDown(manager2.dispose);
-    final RestorationBucket parent = RestorationBucket.root(
-      manager: manager2,
-      rawData: _createRawDataSet()
-    );
+    final parent = RestorationBucket.root(manager: manager2, rawData: _createRawDataSet());
     addTearDown(parent.dispose);
     await expectLater(
       await memoryEvents(
@@ -612,15 +672,10 @@ void main() {
 
 Map<String, dynamic> _createRawDataSet() {
   return <String, dynamic>{
-    valuesMapKey: <String, dynamic>{
-      'value1' : 10,
-      'value2' : 'Hello',
-    },
+    valuesMapKey: <String, dynamic>{'value1': 10, 'value2': 'Hello'},
     childrenMapKey: <String, dynamic>{
-      'child1' : <String, dynamic>{
-        valuesMapKey : <String, dynamic>{
-          'foo': 22,
-        },
+      'child1': <String, dynamic>{
+        valuesMapKey: <String, dynamic>{'foo': 22},
       },
     },
   };

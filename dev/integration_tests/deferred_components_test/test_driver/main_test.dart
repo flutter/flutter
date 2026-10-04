@@ -12,8 +12,8 @@ Future<void> main() async {
     driver = await FlutterDriver.connect();
   });
 
-  tearDownAll(() {
-    driver.close();
+  tearDownAll(() async {
+    await driver.close();
   });
 
   // Run `run_release_test.sh` to also test release engine deferred components code. This
@@ -22,8 +22,7 @@ Future<void> main() async {
     final String preloadText = await driver.getText(find.byValueKey('PreloadText'));
     expect(preloadText, 'preload');
 
-    final SerializableFinder fab =
-      find.byValueKey('FloatingActionButton');
+    final SerializableFinder fab = find.byValueKey('FloatingActionButton');
     await driver.tap(fab);
 
     final String placeholderText = await driver.getText(find.byValueKey('PlaceholderText'));

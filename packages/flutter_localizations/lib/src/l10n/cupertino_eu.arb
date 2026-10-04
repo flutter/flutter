@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Bilatu",
   "searchWebButtonLabel": "Bilatu sarean",
   "shareButtonLabel": "Partekatu...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Garbitu",
+  "cancelButtonLabel": "Utzi",
+  "backButtonLabel": "Atzera",
+  "expansionTileExpandedHint": "tolesteko, sakatu birritan",
+  "expansionTileCollapsedHint": "zabaltzeko, sakatu birritan",
+  "expansionTileExpandedTapHint": "Tolestu",
+  "expansionTileCollapsedTapHint": "Zabaldu hau xehetasun gehiago lortzeko",
+  "expandedHint": "Tolestuta",
+  "collapsedHint": "Zabalduta"
 }

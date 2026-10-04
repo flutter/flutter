@@ -24,9 +24,7 @@ class ProcessTextAction {
       return true;
     }
 
-    return other is ProcessTextAction &&
-      other.id == id &&
-      other.label == label;
+    return other is ProcessTextAction && other.id == id && other.label == label;
   }
 
   @override
@@ -116,8 +114,7 @@ class DefaultProcessTextService implements ProcessTextService {
     final Map<Object?, Object?> rawResults;
 
     try {
-      final Map<Object?, Object?>? result =
-          await _processTextChannel.invokeMethod(
+      final result = await _processTextChannel.invokeMethod(
         'ProcessText.queryTextActions',
       ) as Map<Object?, Object?>?;
 
@@ -140,7 +137,7 @@ class DefaultProcessTextService implements ProcessTextService {
   /// On Android, the readOnly parameter might be used by the targeted activity, see:
   /// https://developer.android.com/reference/android/content/Intent#EXTRA_PROCESS_TEXT_READONLY.
   Future<String?> processTextAction(String id, String text, bool readOnly) async {
-    final String? processedText = await _processTextChannel.invokeMethod(
+    final processedText = await _processTextChannel.invokeMethod(
       'ProcessText.processTextAction',
       <dynamic>[id, text, readOnly],
     ) as String?;

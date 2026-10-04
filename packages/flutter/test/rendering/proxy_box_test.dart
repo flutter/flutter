@@ -5,8 +5,8 @@
 import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
@@ -14,18 +14,16 @@ import 'rendering_tester.dart';
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
   test('RenderFittedBox handles applying paint transform and hit-testing with empty size', () {
-    final RenderFittedBox fittedBox = RenderFittedBox(
-      child: RenderCustomPaint(
-        painter: TestCallbackPainter(onPaint: () {}),
-      ),
+    final fittedBox = RenderFittedBox(
+      child: RenderCustomPaint(painter: TestCallbackPainter(onPaint: () {})),
     );
 
     layout(fittedBox, phase: EnginePhase.flushSemantics);
-    final Matrix4 transform = Matrix4.identity();
+    final transform = Matrix4.identity();
     fittedBox.applyPaintTransform(fittedBox.child!, transform);
     expect(transform, Matrix4.zero());
 
-    final BoxHitTestResult hitTestResult = BoxHitTestResult();
+    final hitTestResult = BoxHitTestResult();
     expect(fittedBox.hitTestChildren(hitTestResult, position: Offset.zero), isFalse);
   });
 
@@ -35,9 +33,11 @@ void main() {
       return RenderFittedBox(
         child: RenderCustomPaint(
           preferredSize: size,
-          painter: TestCallbackPainter(onPaint: () {
-            painted = true;
-          }),
+          painter: TestCallbackPainter(
+            onPaint: () {
+              painted = true;
+            },
+          ),
         ),
       );
     }
@@ -54,12 +54,16 @@ void main() {
 
     // The RenderFittedBox should not paint if it is empty.
     painted = false;
-    layout(makeFittedBox(const Size(1, 1)), constraints: BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
+    layout(
+      makeFittedBox(const Size(1, 1)),
+      constraints: BoxConstraints.tight(Size.zero),
+      phase: EnginePhase.paint,
+    );
     expect(painted, equals(false));
   });
 
   test('RenderPhysicalModel compositing', () {
-    final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
+    final root = RenderPhysicalModel(color: const Color(0xffff00ff));
     layout(root, phase: EnginePhase.composite);
     expect(root.needsCompositing, isFalse);
 
@@ -74,13 +78,32 @@ void main() {
     expect(root.needsCompositing, isFalse);
   });
 
-  test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
-    final RenderSemanticsGestureHandler renderObj = RenderSemanticsGestureHandler(
-      onTap: () { },
-      onHorizontalDragUpdate: (DragUpdateDetails details) { },
+  test('RenderPhysicalModel paints shadow only for non-zero elevation', () {
+    final root = RenderPhysicalModel(
+      color: const Color(0xffff00ff),
+      child: RenderSizedBox(const Size(10.0, 10.0)),
+    );
+    layout(root, phase: EnginePhase.paint);
+    expect(
+      (PaintingContext context, Offset offset) => root.paint(context, offset),
+      paintsExactlyCountTimes(#drawShadow, 0),
     );
 
-    SemanticsConfiguration config = SemanticsConfiguration();
+    root.elevation = 1.0;
+    pumpFrame(phase: EnginePhase.paint);
+    expect(
+      (PaintingContext context, Offset offset) => root.paint(context, offset),
+      paintsExactlyCountTimes(#drawShadow, 1),
+    );
+  });
+
+  test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
+    final renderObj = RenderSemanticsGestureHandler(
+      onTap: () {},
+      onHorizontalDragUpdate: (DragUpdateDetails details) {},
+    );
+
+    var config = SemanticsConfiguration();
     renderObj.describeSemanticsConfiguration(config);
     expect(config.getActionHandler(SemanticsAction.tap), isNotNull);
     expect(config.getActionHandler(SemanticsAction.scrollLeft), isNotNull);
@@ -100,7 +123,7 @@ void main() {
       for (final TargetPlatform platform in TargetPlatform.values) {
         debugDefaultTargetPlatformOverride = platform;
 
-        final RenderPhysicalShape root = RenderPhysicalShape(
+        final root = RenderPhysicalShape(
           color: const Color(0xffff00ff),
           clipper: const ShapeBorderClipper(shape: CircleBorder()),
         );
@@ -121,7 +144,7 @@ void main() {
     test('compositing', () {
       for (final TargetPlatform platform in TargetPlatform.values) {
         debugDefaultTargetPlatformOverride = platform;
-        final RenderPhysicalShape root = RenderPhysicalShape(
+        final root = RenderPhysicalShape(
           color: const Color(0xffff00ff),
           clipper: const ShapeBorderClipper(shape: CircleBorder()),
         );
@@ -142,7 +165,7 @@ void main() {
   });
 
   test('RenderRepaintBoundary can capture images of itself', () async {
-    RenderRepaintBoundary boundary = RenderRepaintBoundary();
+    var boundary = RenderRepaintBoundary();
     layout(boundary, constraints: BoxConstraints.tight(const Size(100.0, 200.0)));
     pumpFrame(phase: EnginePhase.composite);
     ui.Image image = await boundary.toImage();
@@ -159,8 +182,8 @@ void main() {
 
     // Try building one with two child layers and make sure it renders them both.
     boundary = RenderRepaintBoundary();
-    final RenderStack stack = RenderStack()..alignment = Alignment.topLeft;
-    final RenderDecoratedBox blackBox = RenderDecoratedBox(
+    final stack = RenderStack()..alignment = Alignment.topLeft;
+    final blackBox = RenderDecoratedBox(
       decoration: const BoxDecoration(color: Color(0xff000000)),
       child: RenderConstrainedBox(
         additionalConstraints: BoxConstraints.tight(const Size.square(20.0)),
@@ -171,13 +194,13 @@ void main() {
         ..opacity = 0.5
         ..child = blackBox,
     );
-    final RenderDecoratedBox whiteBox = RenderDecoratedBox(
+    final whiteBox = RenderDecoratedBox(
       decoration: const BoxDecoration(color: Color(0xffffffff)),
       child: RenderConstrainedBox(
         additionalConstraints: BoxConstraints.tight(const Size.square(10.0)),
       ),
     );
-    final RenderPositionedBox positioned = RenderPositionedBox(
+    final positioned = RenderPositionedBox(
       widthFactor: 2.0,
       heightFactor: 2.0,
       alignment: Alignment.topRight,
@@ -197,16 +220,16 @@ void main() {
     expect(data.lengthInBytes, equals(20 * 20 * 4));
     expect(data.elementSizeInBytes, equals(1));
     expect(getPixel(0, 0), equals(0x00000080));
-    expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
+    expect(getPixel(image.width - 1, 0), equals(0xffffffff));
 
-    final OffsetLayer layer = boundary.debugLayer! as OffsetLayer;
+    final layer = boundary.debugLayer! as OffsetLayer;
 
     image = await layer.toImage(Offset.zero & const Size(20.0, 20.0));
     expect(image.width, equals(20));
     expect(image.height, equals(20));
     data = (await image.toByteData())!;
     expect(getPixel(0, 0), equals(0x00000080));
-    expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
+    expect(getPixel(image.width - 1, 0), equals(0xffffffff));
 
     // non-zero offsets.
     image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
@@ -219,7 +242,10 @@ void main() {
     expect(getPixel(image.width - 1, 10), equals(0xffffffff));
 
     // offset combined with a custom pixel ratio.
-    image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0), pixelRatio: 2.0);
+    image = await layer.toImage(
+      const Offset(-10.0, -10.0) & const Size(30.0, 30.0),
+      pixelRatio: 2.0,
+    );
     expect(image.width, equals(60));
     expect(image.height, equals(60));
     data = (await image.toByteData())!;
@@ -227,10 +253,10 @@ void main() {
     expect(getPixel(20, 20), equals(0x00000080));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
     expect(getPixel(image.width - 1, 20), equals(0xffffffff));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
+  });
 
   test('RenderRepaintBoundary can capture images of itself synchronously', () async {
-    RenderRepaintBoundary boundary = RenderRepaintBoundary();
+    var boundary = RenderRepaintBoundary();
     layout(boundary, constraints: BoxConstraints.tight(const Size(100.0, 200.0)));
     pumpFrame(phase: EnginePhase.composite);
     ui.Image image = boundary.toImageSync();
@@ -247,8 +273,8 @@ void main() {
 
     // Try building one with two child layers and make sure it renders them both.
     boundary = RenderRepaintBoundary();
-    final RenderStack stack = RenderStack()..alignment = Alignment.topLeft;
-    final RenderDecoratedBox blackBox = RenderDecoratedBox(
+    final stack = RenderStack()..alignment = Alignment.topLeft;
+    final blackBox = RenderDecoratedBox(
       decoration: const BoxDecoration(color: Color(0xff000000)),
       child: RenderConstrainedBox(
         additionalConstraints: BoxConstraints.tight(const Size.square(20.0)),
@@ -259,13 +285,13 @@ void main() {
         ..opacity = 0.5
         ..child = blackBox,
     );
-    final RenderDecoratedBox whiteBox = RenderDecoratedBox(
+    final whiteBox = RenderDecoratedBox(
       decoration: const BoxDecoration(color: Color(0xffffffff)),
       child: RenderConstrainedBox(
         additionalConstraints: BoxConstraints.tight(const Size.square(10.0)),
       ),
     );
-    final RenderPositionedBox positioned = RenderPositionedBox(
+    final positioned = RenderPositionedBox(
       widthFactor: 2.0,
       heightFactor: 2.0,
       alignment: Alignment.topRight,
@@ -285,16 +311,16 @@ void main() {
     expect(data.lengthInBytes, equals(20 * 20 * 4));
     expect(data.elementSizeInBytes, equals(1));
     expect(getPixel(0, 0), equals(0x00000080));
-    expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
+    expect(getPixel(image.width - 1, 0), equals(0xffffffff));
 
-    final OffsetLayer layer = boundary.debugLayer! as OffsetLayer;
+    final layer = boundary.debugLayer! as OffsetLayer;
 
     image = layer.toImageSync(Offset.zero & const Size(20.0, 20.0));
     expect(image.width, equals(20));
     expect(image.height, equals(20));
     data = (await image.toByteData())!;
     expect(getPixel(0, 0), equals(0x00000080));
-    expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
+    expect(getPixel(image.width - 1, 0), equals(0xffffffff));
 
     // non-zero offsets.
     image = layer.toImageSync(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
@@ -315,10 +341,10 @@ void main() {
     expect(getPixel(20, 20), equals(0x00000080));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
     expect(getPixel(image.width - 1, 20), equals(0xffffffff));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
+  });
 
   test('RenderOpacity does not composite if it is transparent', () {
-    final RenderOpacity renderOpacity = RenderOpacity(
+    final renderOpacity = RenderOpacity(
       opacity: 0.0,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
@@ -328,7 +354,7 @@ void main() {
   });
 
   test('RenderOpacity does composite if it is opaque', () {
-    final RenderOpacity renderOpacity = RenderOpacity(
+    final renderOpacity = RenderOpacity(
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
@@ -337,7 +363,7 @@ void main() {
   });
 
   test('RenderOpacity does composite if it is partially opaque', () {
-    final RenderOpacity renderOpacity = RenderOpacity(
+    final renderOpacity = RenderOpacity(
       opacity: 0.1,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
@@ -347,20 +373,21 @@ void main() {
   });
 
   test('RenderOpacity reuses its layer', () {
-    _testLayerReuse<OpacityLayer>(RenderOpacity(
-      opacity: 0.5,  // must not be 0 or 1.0. Otherwise, it won't create a layer
-      child: RenderRepaintBoundary(
-        child: RenderSizedBox(const Size(1.0, 1.0)),
-      ), // size doesn't matter
-    ));
+    _testLayerReuse<OpacityLayer>(
+      RenderOpacity(
+        opacity: 0.5, // must not be 0 or 1.0. Otherwise, it won't create a layer
+        child: RenderRepaintBoundary(
+          child: RenderSizedBox(const Size(1.0, 1.0)),
+        ), // size doesn't matter
+      ),
+    );
   });
 
   test('RenderAnimatedOpacity does not composite if it is transparent', () async {
-    final Animation<double> opacityAnimation = AnimationController(
-      vsync: FakeTickerProvider(),
-    )..value = 0.0;
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
+      ..value = 0.0;
 
-    final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
+    final renderAnimatedOpacity = RenderAnimatedOpacity(
       opacity: opacityAnimation,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
@@ -370,11 +397,10 @@ void main() {
   });
 
   test('RenderAnimatedOpacity does composite if it is opaque', () {
-    final Animation<double> opacityAnimation = AnimationController(
-      vsync: FakeTickerProvider(),
-    )..value = 1.0;
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
+      ..value = 1.0;
 
-    final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
+    final renderAnimatedOpacity = RenderAnimatedOpacity(
       opacity: opacityAnimation,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
@@ -384,11 +410,10 @@ void main() {
   });
 
   test('RenderAnimatedOpacity does composite if it is partially opaque', () {
-    final Animation<double> opacityAnimation = AnimationController(
-      vsync: FakeTickerProvider(),
-    )..value = 0.5;
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
+      ..value = 0.5;
 
-    final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
+    final renderAnimatedOpacity = RenderAnimatedOpacity(
       opacity: opacityAnimation,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
@@ -398,122 +423,144 @@ void main() {
   });
 
   test('RenderAnimatedOpacity reuses its layer', () {
-    final Animation<double> opacityAnimation = AnimationController(
-      vsync: FakeTickerProvider(),
-    )..value = 0.5;  // must not be 0 or 1.0. Otherwise, it won't create a layer
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
+      ..value = 0.5; // must not be 0 or 1.0. Otherwise, it won't create a layer
 
-    _testLayerReuse<OpacityLayer>(RenderAnimatedOpacity(
-      opacity: opacityAnimation,
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-    ));
+    _testLayerReuse<OpacityLayer>(
+      RenderAnimatedOpacity(
+        opacity: opacityAnimation,
+        child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      ),
+    );
   });
 
   test('RenderShaderMask reuses its layer', () {
-    _testLayerReuse<ShaderMaskLayer>(RenderShaderMask(
-      shaderCallback: (Rect rect) {
-        return ui.Gradient.radial(
-          rect.center,
-          rect.shortestSide / 2.0,
-          const <Color>[Color.fromRGBO(0, 0, 0, 1.0), Color.fromRGBO(255, 255, 255, 1.0)],
-        );
-      },
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-    ));
+    _testLayerReuse<ShaderMaskLayer>(
+      RenderShaderMask(
+        shaderCallback: (Rect rect) {
+          return ui.Gradient.radial(rect.center, rect.shortestSide / 2.0, const <Color>[
+            Color.fromRGBO(0, 0, 0, 1.0),
+            Color.fromRGBO(255, 255, 255, 1.0),
+          ]);
+        },
+        child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      ),
+    );
   });
 
   test('RenderBackdropFilter reuses its layer', () {
-    _testLayerReuse<BackdropFilterLayer>(RenderBackdropFilter(
-      filter: ui.ImageFilter.blur(),
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
-    ));
+    _testLayerReuse<BackdropFilterLayer>(
+      RenderBackdropFilter(
+        filter: ui.ImageFilter.blur(),
+        child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      ),
+    );
   });
 
   test('RenderClipRect reuses its layer', () {
-    _testLayerReuse<ClipRectLayer>(RenderClipRect(
-      clipper: _TestRectClipper(),
-      child: RenderRepaintBoundary(
-        child: RenderSizedBox(const Size(1.0, 1.0)),
-      ), // size doesn't matter
-    ));
+    _testLayerReuse<ClipRectLayer>(
+      RenderClipRect(
+        clipper: _TestRectClipper(),
+        child: RenderRepaintBoundary(
+          child: RenderSizedBox(const Size(1.0, 1.0)),
+        ), // size doesn't matter
+      ),
+    );
   });
 
   test('RenderClipRRect reuses its layer', () {
-    _testLayerReuse<ClipRRectLayer>(RenderClipRRect(
-      clipper: _TestRRectClipper(),
-      child: RenderRepaintBoundary(
-        child: RenderSizedBox(const Size(1.0, 1.0)),
-      ), // size doesn't matter
-    ));
+    _testLayerReuse<ClipRRectLayer>(
+      RenderClipRRect(
+        clipper: _TestRRectClipper(),
+        child: RenderRepaintBoundary(
+          child: RenderSizedBox(const Size(1.0, 1.0)),
+        ), // size doesn't matter
+      ),
+    );
   });
 
   test('RenderClipOval reuses its layer', () {
-    _testLayerReuse<ClipPathLayer>(RenderClipOval(
-      clipper: _TestRectClipper(),
-      child: RenderRepaintBoundary(
-        child: RenderSizedBox(const Size(1.0, 1.0)),
-      ), // size doesn't matter
-    ));
+    _testLayerReuse<ClipPathLayer>(
+      RenderClipOval(
+        clipper: _TestRectClipper(),
+        child: RenderRepaintBoundary(
+          child: RenderSizedBox(const Size(1.0, 1.0)),
+        ), // size doesn't matter
+      ),
+    );
   });
 
   test('RenderClipPath reuses its layer', () {
-    _testLayerReuse<ClipPathLayer>(RenderClipPath(
-      clipper: _TestPathClipper(),
-      child: RenderRepaintBoundary(
-        child: RenderSizedBox(const Size(1.0, 1.0)),
-      ), // size doesn't matter
-    ));
+    _testLayerReuse<ClipPathLayer>(
+      RenderClipPath(
+        clipper: _TestPathClipper(),
+        child: RenderRepaintBoundary(
+          child: RenderSizedBox(const Size(1.0, 1.0)),
+        ), // size doesn't matter
+      ),
+    );
   });
 
   test('RenderPhysicalModel reuses its layer', () {
-    _testLayerReuse<ClipRRectLayer>(RenderPhysicalModel(
-      clipBehavior: Clip.hardEdge,
-      color: const Color.fromRGBO(0, 0, 0, 1.0),
-      child: RenderRepaintBoundary(
-        child: RenderSizedBox(const Size(1.0, 1.0)),
-      ), // size doesn't matter
-    ));
+    _testLayerReuse<ClipRRectLayer>(
+      RenderPhysicalModel(
+        clipBehavior: Clip.hardEdge,
+        color: const Color.fromRGBO(0, 0, 0, 1.0),
+        child: RenderRepaintBoundary(
+          child: RenderSizedBox(const Size(1.0, 1.0)),
+        ), // size doesn't matter
+      ),
+    );
   });
 
   test('RenderPhysicalShape reuses its layer', () {
-    _testLayerReuse<ClipPathLayer>(RenderPhysicalShape(
-      clipper: _TestPathClipper(),
-      clipBehavior: Clip.hardEdge,
-      color: const Color.fromRGBO(0, 0, 0, 1.0),
-      child: RenderRepaintBoundary(
-        child: RenderSizedBox(const Size(1.0, 1.0)),
-      ), // size doesn't matter
-    ));
+    _testLayerReuse<ClipPathLayer>(
+      RenderPhysicalShape(
+        clipper: _TestPathClipper(),
+        clipBehavior: Clip.hardEdge,
+        color: const Color.fromRGBO(0, 0, 0, 1.0),
+        child: RenderRepaintBoundary(
+          child: RenderSizedBox(const Size(1.0, 1.0)),
+        ), // size doesn't matter
+      ),
+    );
   });
 
   test('RenderTransform reuses its layer', () {
-    _testLayerReuse<TransformLayer>(RenderTransform(
-      // Use a 3D transform to force compositing.
-      transform: Matrix4.rotationX(0.1),
-      child: RenderRepaintBoundary(
-        child: RenderSizedBox(const Size(1.0, 1.0)),
-      ), // size doesn't matter
-    ));
+    _testLayerReuse<TransformLayer>(
+      RenderTransform(
+        // Use a 3D transform to force compositing.
+        transform: Matrix4.rotationX(0.1),
+        child: RenderRepaintBoundary(
+          child: RenderSizedBox(const Size(1.0, 1.0)),
+        ), // size doesn't matter
+      ),
+    );
   });
 
   void testFittedBoxWithClipRectLayer() {
-    _testLayerReuse<ClipRectLayer>(RenderFittedBox(
-      fit: BoxFit.cover,
-      clipBehavior: Clip.hardEdge,
-      // Inject opacity under the clip to force compositing.
-      child: RenderRepaintBoundary(
-        child: RenderSizedBox(const Size(100.0, 200.0)),
-      ), // size doesn't matter
-    ));
+    _testLayerReuse<ClipRectLayer>(
+      RenderFittedBox(
+        fit: BoxFit.cover,
+        clipBehavior: Clip.hardEdge,
+        // Inject opacity under the clip to force compositing.
+        child: RenderRepaintBoundary(
+          child: RenderSizedBox(const Size(100.0, 200.0)),
+        ), // size doesn't matter
+      ),
+    );
   }
 
   void testFittedBoxWithTransformLayer() {
-    _testLayerReuse<TransformLayer>(RenderFittedBox(
-      fit: BoxFit.fill,
-      // Inject opacity under the clip to force compositing.
-      child: RenderRepaintBoundary(
-        child: RenderSizedBox(const Size(1, 1)),
-      ), // size doesn't matter
-    ));
+    _testLayerReuse<TransformLayer>(
+      RenderFittedBox(
+        fit: BoxFit.fill,
+        // Inject opacity under the clip to force compositing.
+        child: RenderRepaintBoundary(
+          child: RenderSizedBox(const Size(1, 1)),
+        ), // size doesn't matter
+      ),
+    );
   }
 
   test('RenderFittedBox reuses ClipRectLayer', () {
@@ -534,9 +581,9 @@ void main() {
   });
 
   test('RenderFittedBox respects clipBehavior', () {
-    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
-    for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
-      final TestClipPaintingContext context = TestClipPaintingContext();
+    const viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    for (final clip in <Clip?>[null, ...Clip.values]) {
+      final context = TestClipPaintingContext();
       final RenderFittedBox box;
       switch (clip) {
         case Clip.none:
@@ -547,7 +594,12 @@ void main() {
         case null:
           box = RenderFittedBox(child: box200x200, fit: BoxFit.none);
       }
-      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
+      layout(
+        box,
+        constraints: viewport,
+        phase: EnginePhase.composite,
+        onErrors: expectNoFlutterErrors,
+      );
       box.paint(context, Offset.zero);
       // By default, clipBehavior should be Clip.none
       expect(context.clipBehavior, equals(clip ?? Clip.none));
@@ -555,7 +607,7 @@ void main() {
   });
 
   test('RenderMouseRegion can change properties when detached', () {
-    final RenderMouseRegion object = RenderMouseRegion();
+    final object = RenderMouseRegion();
     object
       ..opaque = false
       ..onEnter = (_) {}
@@ -565,7 +617,7 @@ void main() {
   });
 
   test('RenderFractionalTranslation updates its semantics after its translation value is set', () {
-    final _TestSemanticsUpdateRenderFractionalTranslation box = _TestSemanticsUpdateRenderFractionalTranslation(
+    final box = _TestSemanticsUpdateRenderFractionalTranslation(
       translation: const Offset(0.5, 0.5),
     );
     layout(box, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
@@ -577,61 +629,58 @@ void main() {
   });
 
   test('RenderFollowerLayer hit test without a leader layer and the showWhenUnlinked is true', () {
-    final RenderFollowerLayer follower = RenderFollowerLayer(
+    final follower = RenderFollowerLayer(
       link: LayerLink(),
       child: RenderSizedBox(const Size(1.0, 1.0)),
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
-    final BoxHitTestResult hitTestResult = BoxHitTestResult();
+    final hitTestResult = BoxHitTestResult();
     expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
   });
 
   test('RenderFollowerLayer hit test without a leader layer and the showWhenUnlinked is false', () {
-    final RenderFollowerLayer follower = RenderFollowerLayer(
+    final follower = RenderFollowerLayer(
       link: LayerLink(),
       showWhenUnlinked: false,
       child: RenderSizedBox(const Size(1.0, 1.0)),
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
-    final BoxHitTestResult hitTestResult = BoxHitTestResult();
+    final hitTestResult = BoxHitTestResult();
     expect(follower.hitTest(hitTestResult, position: Offset.zero), isFalse);
   });
 
   test('RenderFollowerLayer hit test with a leader layer and the showWhenUnlinked is true', () {
     // Creates a layer link with a leader.
-    final LayerLink link = LayerLink();
-    final LeaderLayer leader = LeaderLayer(link: link);
+    final link = LayerLink();
+    final leader = LeaderLayer(link: link);
     leader.attach(Object());
 
-    final RenderFollowerLayer follower = RenderFollowerLayer(
-      link: link,
-      child: RenderSizedBox(const Size(1.0, 1.0)),
-    );
+    final follower = RenderFollowerLayer(link: link, child: RenderSizedBox(const Size(1.0, 1.0)));
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
-    final BoxHitTestResult hitTestResult = BoxHitTestResult();
+    final hitTestResult = BoxHitTestResult();
     expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
   });
 
   test('RenderFollowerLayer hit test with a leader layer and the showWhenUnlinked is false', () {
     // Creates a layer link with a leader.
-    final LayerLink link = LayerLink();
-    final LeaderLayer leader = LeaderLayer(link: link);
+    final link = LayerLink();
+    final leader = LeaderLayer(link: link);
     leader.attach(Object());
 
-    final RenderFollowerLayer follower = RenderFollowerLayer(
+    final follower = RenderFollowerLayer(
       link: link,
       showWhenUnlinked: false,
       child: RenderSizedBox(const Size(1.0, 1.0)),
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
-    final BoxHitTestResult hitTestResult = BoxHitTestResult();
+    final hitTestResult = BoxHitTestResult();
     // The follower is still hit testable because there is a leader layer.
     expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
   });
 
   test('RenderObject can become a repaint boundary', () {
-    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
-    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+    final childBox = ConditionalRepaintBoundary();
+    final renderBox = ConditionalRepaintBoundary(child: childBox);
 
     layout(renderBox, phase: EnginePhase.composite);
 
@@ -684,8 +733,8 @@ void main() {
   });
 
   test('RenderObject with repaint boundary asserts when a composited layer is replaced during layer property update', () {
-    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
-    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+    final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final renderBox = ConditionalRepaintBoundary(child: childBox);
 
     // Ignore old layer.
     childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
@@ -700,11 +749,11 @@ void main() {
     renderBox.markNeedsCompositedLayerUpdate();
 
     pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102086
+  });
 
   test('RenderObject with repaint boundary asserts when a composited layer is replaced during painting', () {
-    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
-    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+    final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final renderBox = ConditionalRepaintBoundary(child: childBox);
 
     // Ignore old layer.
     childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
@@ -718,11 +767,11 @@ void main() {
     renderBox.markNeedsPaint();
 
     pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102086
+  });
 
   test('RenderObject with repaint boundary asserts when a composited layer tries to update its own offset', () {
-    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
-    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+    final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final renderBox = ConditionalRepaintBoundary(child: childBox);
 
     // Ignore old layer.
     childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
@@ -736,12 +785,12 @@ void main() {
     renderBox.markNeedsPaint();
 
     pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102086
+  });
 
   test('RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
-    'calling markNeedsCompositingBitsUpdate 1', () {
-    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
-    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+      'calling markNeedsCompositingBitsUpdate 1', () {
+    final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final renderBox = ConditionalRepaintBoundary(child: childBox);
     // Ignore old layer.
     childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
       return oldLayer ?? TestOffsetLayerA();
@@ -760,9 +809,9 @@ void main() {
   });
 
   test('RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
-    'calling markNeedsCompositingBitsUpdate 2', () {
-    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
-    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+      'calling markNeedsCompositingBitsUpdate 2', () {
+    final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final renderBox = ConditionalRepaintBoundary(child: childBox);
     // Ignore old layer.
     childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
       return oldLayer ?? TestOffsetLayerA();
@@ -781,9 +830,9 @@ void main() {
   });
 
   test('RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
-    'calling markNeedsCompositingBitsUpdate 3', () {
-    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
-    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+      'calling markNeedsCompositingBitsUpdate 3', () {
+    final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final renderBox = ConditionalRepaintBoundary(child: childBox);
     // Ignore old layer.
     childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
       return oldLayer ?? TestOffsetLayerA();
@@ -802,9 +851,13 @@ void main() {
   });
 
   test('Offstage implements paintsChild correctly', () {
-    final RenderConstrainedBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final RenderConstrainedBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final RenderOffstage offstage = RenderOffstage(offstage: false, child: box);
+    final box = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints.tightFor(width: 20),
+    );
+    final parent = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints.tightFor(width: 20),
+    );
+    final offstage = RenderOffstage(offstage: false, child: box);
     parent.child = offstage;
 
     expect(offstage.paintsChild(box), true);
@@ -815,8 +868,10 @@ void main() {
   });
 
   test('Opacity implements paintsChild correctly', () {
-    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final RenderOpacity opacity = RenderOpacity(child: box);
+    final RenderBox box = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints.tightFor(width: 20),
+    );
+    final opacity = RenderOpacity(child: box);
 
     expect(opacity.paintsChild(box), true);
 
@@ -826,9 +881,11 @@ void main() {
   });
 
   test('AnimatedOpacity sets paint matrix to zero when alpha == 0', () {
-    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
-    final RenderAnimatedOpacity opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
+    final RenderBox box = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints.tightFor(width: 20),
+    );
+    final opacityAnimation = AnimationController(value: 1, vsync: const TestVSync());
+    final opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
 
     // Make it listen to the animation.
     opacity.attach(PipelineOwner());
@@ -841,9 +898,11 @@ void main() {
   });
 
   test('AnimatedOpacity sets paint matrix to zero when alpha == 0 (sliver)', () {
-    final RenderSliver sliver = RenderSliverToBoxAdapter(child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)));
-    final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
-    final RenderSliverAnimatedOpacity opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
+    final RenderSliver sliver = RenderSliverToBoxAdapter(
+      child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)),
+    );
+    final opacityAnimation = AnimationController(value: 1, vsync: const TestVSync());
+    final opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
 
     // Make it listen to the animation.
     opacity.attach(PipelineOwner());
@@ -856,28 +915,18 @@ void main() {
   });
 
   test('RenderCustomClip extenders respect clipBehavior when asked to describeApproximateClip', () {
-    final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
-    final RenderClipRect renderClipRect = RenderClipRect(clipBehavior: Clip.none, child: child);
+    final RenderBox child = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
+    );
+    final renderClipRect = RenderClipRect(clipBehavior: Clip.none, child: child);
     layout(renderClipRect);
-    expect(
-      renderClipRect.describeApproximatePaintClip(child),
-      null,
-    );
+    expect(renderClipRect.describeApproximatePaintClip(child), null);
     renderClipRect.clipBehavior = Clip.hardEdge;
-    expect(
-      renderClipRect.describeApproximatePaintClip(child),
-      Offset.zero & renderClipRect.size,
-    );
+    expect(renderClipRect.describeApproximatePaintClip(child), Offset.zero & renderClipRect.size);
     renderClipRect.clipBehavior = Clip.antiAlias;
-    expect(
-      renderClipRect.describeApproximatePaintClip(child),
-      Offset.zero & renderClipRect.size,
-    );
+    expect(renderClipRect.describeApproximatePaintClip(child), Offset.zero & renderClipRect.size);
     renderClipRect.clipBehavior = Clip.antiAliasWithSaveLayer;
-    expect(
-      renderClipRect.describeApproximatePaintClip(child),
-      Offset.zero & renderClipRect.size,
-    );
+    expect(renderClipRect.describeApproximatePaintClip(child), Offset.zero & renderClipRect.size);
   });
 
   // Simulate painting a RenderBox as if 'debugPaintSizeEnabled == true'
@@ -892,8 +941,10 @@ void main() {
 
   test('RenderClipPath.debugPaintSize draws a path and a debug text when clipBehavior is not Clip.none', () {
     DebugPaintCallback debugPaintClipRect(Clip clip) {
-      final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
-      final RenderClipPath renderClipPath = RenderClipPath(clipBehavior: clip, child: child);
+      final RenderBox child = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
+      );
+      final renderClipPath = RenderClipPath(clipBehavior: clip, child: child);
       return debugPaint(renderClipPath);
     }
 
@@ -909,8 +960,10 @@ void main() {
 
   test('RenderClipRect.debugPaintSize draws a rect and a debug text when clipBehavior is not Clip.none', () {
     DebugPaintCallback debugPaintClipRect(Clip clip) {
-      final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
-      final RenderClipRect renderClipRect = RenderClipRect(clipBehavior: clip, child: child);
+      final RenderBox child = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
+      );
+      final renderClipRect = RenderClipRect(clipBehavior: clip, child: child);
       return debugPaint(renderClipRect);
     }
 
@@ -925,8 +978,10 @@ void main() {
 
   test('RenderClipRRect.debugPaintSize draws a rounded rect and a debug text when clipBehavior is not Clip.none', () {
     DebugPaintCallback debugPaintClipRRect(Clip clip) {
-      final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
-      final RenderClipRRect renderClipRRect = RenderClipRRect(clipBehavior: clip, child: child);
+      final RenderBox child = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
+      );
+      final renderClipRRect = RenderClipRRect(clipBehavior: clip, child: child);
       return debugPaint(renderClipRRect);
     }
 
@@ -941,8 +996,10 @@ void main() {
 
   test('RenderClipOval.debugPaintSize draws a path and a debug text when clipBehavior is not Clip.none', () {
     DebugPaintCallback debugPaintClipOval(Clip clip) {
-      final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
-      final RenderClipOval renderClipOval = RenderClipOval(clipBehavior: clip, child: child);
+      final RenderBox child = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
+      );
+      final renderClipOval = RenderClipOval(clipBehavior: clip, child: child);
       return debugPaint(renderClipOval);
     }
 
@@ -956,7 +1013,7 @@ void main() {
   });
 
   test('RenderProxyBox behavior can be mixed in along with another base class', () {
-    final RenderFancyProxyBox fancyProxyBox = RenderFancyProxyBox(fancy: 6);
+    final fancyProxyBox = RenderFancyProxyBox(fancy: 6);
     // Box has behavior from its base class:
     expect(fancyProxyBox.fancyMethod(), 36);
     // Box has behavior from RenderProxyBox:
@@ -968,10 +1025,88 @@ void main() {
   });
 
   test('computeDryLayout constraints are covariant', () {
-    final RenderBoxWithTestConstraints box = RenderBoxWithTestConstraints();
-    const TestConstraints constraints = TestConstraints(testValue: 6);
+    final box = RenderBoxWithTestConstraints();
+    const constraints = TestConstraints(testValue: 6);
     expect(box.computeDryLayout(constraints), const Size.square(6));
   });
+
+  test('RenderBackdropFilter handles mix uses of .filter and .filterConfig', () {
+    final filter1 = ui.ImageFilter.blur();
+    final filter2 = ui.ImageFilter.matrix(Float64List.fromList(Matrix4.identity().storage));
+    final filter3 = ui.ImageFilter.compose(outer: filter1, inner: filter2);
+
+    final backdropFilter = RenderBackdropFilter(filter: filter1);
+
+    expect(backdropFilter.filter, filter1);
+    expect(backdropFilter.filterConfig, equals(ImageFilterConfig(filter1)));
+
+    backdropFilter.filterConfig = ImageFilterConfig(filter2);
+
+    expect(backdropFilter.filter, filter2);
+    expect(backdropFilter.filterConfig, equals(ImageFilterConfig(filter2)));
+
+    backdropFilter.filter = filter3;
+
+    expect(backdropFilter.filter, filter3);
+    expect(backdropFilter.filterConfig, equals(ImageFilterConfig(filter3)));
+
+    const filterConfig1 = ImageFilterConfig.blur(sigmaX: 10.0, sigmaY: 10.0);
+    backdropFilter.filterConfig = filterConfig1;
+
+    expect(backdropFilter.filterConfig, equals(filterConfig1));
+    expect(() => backdropFilter.filter, throwsAssertionError);
+  });
+
+  test('RenderProxyBoxMixin.computeDryBaseline returns null when the child has no baseline', () {
+    // Regression test for https://github.com/flutter/flutter/issues/189711
+    final child = _RenderNoBaseline();
+    final proxy = RenderSemanticsAnnotations(child: child, properties: const SemanticsProperties());
+    layout(proxy);
+    expect(
+      proxy.getDryBaseline(
+        const BoxConstraints.tightFor(width: 40.0, height: 20.0),
+        TextBaseline.alphabetic,
+      ),
+      isNull,
+    );
+  });
+
+  test('RenderProxyBoxMixin.computeDistanceToActualBaseline returns null when child is null or child has no baseline', () {
+    final proxyNoChild = RenderProxyBox();
+    final parentNoChild = _TestBaselineParent(proxyNoChild);
+    layout(parentNoChild, constraints: BoxConstraints.tight(const Size(40.0, 20.0)));
+    expect(parentNoChild.childBaseline, isNull);
+
+    final child = _RenderNoBaseline();
+    final proxyWithChild = RenderProxyBox(child);
+    final parentWithChild = _TestBaselineParent(proxyWithChild);
+    layout(parentWithChild, constraints: BoxConstraints.tight(const Size(40.0, 20.0)));
+    expect(parentWithChild.childBaseline, isNull);
+  });
+
+  test('RenderProxyBoxMixin.computeDryBaseline returns null when child is null', () {
+    final proxyNoChild = RenderProxyBox();
+    expect(
+      proxyNoChild.getDryBaseline(
+        const BoxConstraints.tightFor(width: 40.0, height: 20.0),
+        TextBaseline.alphabetic,
+      ),
+      isNull,
+    );
+  });
+}
+
+class _TestBaselineParent extends RenderProxyBox {
+  _TestBaselineParent(super.child);
+
+  double? childBaseline;
+
+  @override
+  void performLayout() {
+    child!.layout(constraints, parentUsesSize: true);
+    size = child!.size;
+    childBaseline = child!.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
+  }
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -1006,7 +1141,11 @@ class _TestRRectClipper extends CustomClipper<RRect> {
 void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
   expect(L, isNot(Layer));
   expect(renderObject.debugLayer, null);
-  layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
+  layout(
+    renderObject,
+    phase: EnginePhase.paint,
+    constraints: BoxConstraints.tight(const Size(10, 10)),
+  );
   final Layer? layer = renderObject.debugLayer;
   expect(layer, isA<L>());
   expect(layer, isNotNull);
@@ -1022,17 +1161,15 @@ void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
 class _TestPathClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    return Path()
-      ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+    return Path()..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
   }
+
   @override
   bool shouldReclip(_TestPathClipper oldClipper) => false;
 }
 
 class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTranslation {
-  _TestSemanticsUpdateRenderFractionalTranslation({
-    required super.translation,
-  });
+  _TestSemanticsUpdateRenderFractionalTranslation({required super.translation});
 
   int markNeedsSemanticsUpdateCallCount = 0;
 
@@ -1083,7 +1220,8 @@ class RenderFancyProxyBox extends RenderFancyBox
 }
 
 void expectAssertionError() {
-  final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
+  final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance
+      .takeFlutterErrorDetails()!;
   final bool asserted = errorDetails.toString().contains('Failed assertion');
   if (!asserted) {
     FlutterError.reportError(errorDetails);
@@ -1093,10 +1231,8 @@ void expectAssertionError() {
 typedef DebugPaintCallback = void Function(PaintingContext context, Offset offset);
 
 class TestConstraints extends BoxConstraints {
-  const TestConstraints({
-    double extent = 100,
-    required this.testValue,
-  }) : super(maxWidth: extent, maxHeight: extent);
+  const TestConstraints({double extent = 100, required this.testValue})
+    : super(maxWidth: extent, maxHeight: extent);
 
   final double testValue;
 }
@@ -1105,5 +1241,22 @@ class RenderBoxWithTestConstraints extends RenderProxyBox {
   @override
   Size computeDryLayout(TestConstraints constraints) {
     return constraints.constrain(Size.square(constraints.testValue));
+  }
+}
+
+class _RenderNoBaseline extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.constrain(const Size(40.0, 20.0));
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(const Size(40.0, 20.0));
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    return null;
   }
 }

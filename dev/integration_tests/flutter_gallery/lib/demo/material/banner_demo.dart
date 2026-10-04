@@ -6,14 +6,10 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-enum BannerDemoAction {
-  reset,
-  showMultipleActions,
-  showLeading,
-}
+enum BannerDemoAction { reset, showMultipleActions, showLeading }
 
 class BannerDemo extends StatefulWidget {
-  const BannerDemo({ super.key });
+  const BannerDemo({super.key});
 
   static const String routeName = '/material/banner';
 
@@ -95,12 +91,15 @@ class _BannerDemoState extends State<BannerDemo> {
           ),
         ],
       ),
-      body: ListView.builder(itemCount: _displayBanner ? _numItems + 1 : _numItems, itemBuilder: (BuildContext context, int index) {
-        if (index == 0 && _displayBanner) {
-          return banner;
-        }
-        return ListTile(title: Text('Item ${_displayBanner ? index : index + 1}'),);
-      }),
+      body: ListView.builder(
+        itemCount: _displayBanner ? _numItems + 1 : _numItems,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 0 && _displayBanner) {
+            return banner;
+          }
+          return ListTile(title: Text('Item ${_displayBanner ? index : index + 1}'));
+        },
+      ),
     );
   }
 }

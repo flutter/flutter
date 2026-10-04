@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('Typography is defined for all target platforms', () {
     for (final TargetPlatform platform in TargetPlatform.values) {
-      final Typography typography = Typography.material2018(platform: platform);
+      final typography = Typography.material2018(platform: platform);
       expect(typography, isNotNull, reason: 'null typography for $platform');
       expect(typography.black, isNotNull, reason: 'null black typography for $platform');
       expect(typography.white, isNotNull, reason: 'null white typography for $platform');
@@ -17,21 +17,45 @@ void main() {
   });
 
   test('Typography lerp special cases', () {
-    final Typography typography = Typography();
+    final typography = Typography();
     expect(identical(Typography.lerp(typography, typography, 0.5), typography), true);
   });
 
   test('Typography on non-Apple platforms defaults to the correct font', () {
     expect(Typography.material2018().black.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.fuchsia).black.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamilyFallback, <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial']);
-    expect(Typography.material2018(platform: TargetPlatform.windows).black.titleLarge!.fontFamily, 'Segoe UI');
+    expect(
+      Typography.material2018(platform: TargetPlatform.fuchsia).black.titleLarge!.fontFamily,
+      'Roboto',
+    );
+    expect(
+      Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamily,
+      'Roboto',
+    );
+    expect(
+      Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamilyFallback,
+      <String>['Ubuntu', 'Adwaita Sans', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'],
+    );
+    expect(
+      Typography.material2018(platform: TargetPlatform.windows).black.titleLarge!.fontFamily,
+      'Segoe UI',
+    );
     expect(Typography.material2018().white.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.fuchsia).white.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamilyFallback, <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial']);
-    expect(Typography.material2018(platform: TargetPlatform.windows).white.titleLarge!.fontFamily, 'Segoe UI');
+    expect(
+      Typography.material2018(platform: TargetPlatform.fuchsia).white.titleLarge!.fontFamily,
+      'Roboto',
+    );
+    expect(
+      Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamily,
+      'Roboto',
+    );
+    expect(
+      Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamilyFallback,
+      <String>['Ubuntu', 'Adwaita Sans', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'],
+    );
+    expect(
+      Typography.material2018(platform: TargetPlatform.windows).white.titleLarge!.fontFamily,
+      'Segoe UI',
+    );
   });
 
   // Ref: https://developer.apple.com/design/human-interface-guidelines/typography/
@@ -48,8 +72,8 @@ void main() {
   }, 'Uses macOS system meta-font');
 
   test('Typography on iOS defaults to the correct SF font family based on size', () {
-    final Typography typography = Typography.material2018(platform: TargetPlatform.iOS);
-    for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
+    final typography = Typography.material2018(platform: TargetPlatform.iOS);
+    for (final textTheme in <TextTheme>[typography.black, typography.white]) {
       expect(textTheme.displayLarge, isSanFranciscoDisplayFont);
       expect(textTheme.displayMedium, isSanFranciscoDisplayFont);
       expect(textTheme.displaySmall, isSanFranciscoDisplayFont);
@@ -69,8 +93,8 @@ void main() {
   });
 
   test('Typography on macOS defaults to the system UI meta-font', () {
-    final Typography typography = Typography.material2018(platform: TargetPlatform.macOS);
-    for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
+    final typography = Typography.material2018(platform: TargetPlatform.macOS);
+    for (final textTheme in <TextTheme>[typography.black, typography.white]) {
       expect(textTheme.displayLarge, isMacOSSanFranciscoMetaFont);
       expect(textTheme.displayMedium, isMacOSSanFranciscoMetaFont);
       expect(textTheme.displaySmall, isMacOSSanFranciscoMetaFont);
@@ -90,7 +114,7 @@ void main() {
   });
 
   testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     Typography.material2014(
       black: Typography.blackCupertino,
       white: Typography.whiteCupertino,
@@ -100,28 +124,26 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> nonDefaultPropertyNames = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.name!).toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.name!)
+        .toList();
 
     expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });
 
   test('Can lerp between different typographies', () {
-    final List<Typography> all = <Typography>[
-      for (final TargetPlatform platform in TargetPlatform.values) Typography.material2014(platform: platform),
-      for (final TargetPlatform platform in TargetPlatform.values) Typography.material2018(platform: platform),
-      for (final TargetPlatform platform in TargetPlatform.values) Typography.material2021(platform: platform),
+    final all = <Typography>[
+      for (final TargetPlatform platform in TargetPlatform.values)
+        Typography.material2014(platform: platform),
+      for (final TargetPlatform platform in TargetPlatform.values)
+        Typography.material2018(platform: platform),
+      for (final TargetPlatform platform in TargetPlatform.values)
+        Typography.material2021(platform: platform),
     ];
 
-    for (final Typography fromTypography in all) {
-      for (final Typography toTypography in all) {
-        Object? error;
-        try {
-          Typography.lerp(fromTypography, toTypography, 0.5);
-        } catch (e) {
-          error = e;
-        }
-        expect(error, isNull);
+    for (final fromTypography in all) {
+      for (final toTypography in all) {
+        Typography.lerp(fromTypography, toTypography, 0.5);
       }
     }
   });
@@ -370,7 +392,7 @@ void main() {
   });
 
   test('Default M3 light textTheme styles all use onSurface', () {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final theme = ThemeData();
     final TextTheme textTheme = theme.textTheme;
     final Color dark = theme.colorScheme.onSurface;
     expect(textTheme.displayLarge!.color, dark);
@@ -391,7 +413,7 @@ void main() {
   });
 
   test('Default M3 dark textTheme styles all use onSurface', () {
-    final ThemeData theme = ThemeData(useMaterial3: true, brightness: Brightness.dark);
+    final theme = ThemeData(brightness: Brightness.dark);
     final TextTheme textTheme = theme.textTheme;
     final Color light = theme.colorScheme.onSurface;
     expect(textTheme.displayLarge!.color, light);

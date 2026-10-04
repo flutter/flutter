@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -77,10 +81,7 @@ abstract class AnimatedWidget extends StatefulWidget {
   /// Creates a widget that rebuilds when the given listenable changes.
   ///
   /// The [listenable] argument is required.
-  const AnimatedWidget({
-    super.key,
-    required this.listenable,
-  });
+  const AnimatedWidget({super.key, required this.listenable});
 
   /// The [Listenable] to which this widget is listening.
   ///
@@ -126,6 +127,9 @@ class _AnimatedState extends State<AnimatedWidget> {
   }
 
   void _handleChange() {
+    if (!mounted) {
+      return;
+    }
     setState(() {
       // The listenable's state is our build state, and it changed already.
     });
@@ -134,6 +138,23 @@ class _AnimatedState extends State<AnimatedWidget> {
   @override
   Widget build(BuildContext context) => widget.build(context);
 }
+
+/// Signature for a builder used to control a page's exit transition.
+///
+/// When a new route enters the stack, the `animation` argument is typically
+/// used to control the enter and exit transition of the topmost route. The exit
+/// transition of the route just below the new route is controlled with the
+/// `secondaryAnimation`, which also controls the transition of the old route
+/// when the topmost route is popped off the stack.
+///
+/// Typically used as the argument for [ModalRoute.delegatedTransition].
+typedef DelegatedTransitionBuilder = Widget? Function(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  bool allowSnapshotting,
+  Widget? child,
+);
 
 /// Animates the position of a widget relative to its normal position.
 ///
@@ -299,10 +320,7 @@ class MatrixTransition extends AnimatedWidget {
     return Transform(
       transform: onTransform(animation.value),
       alignment: alignment,
-      filterQuality: switch (animation.status) {
-        AnimationStatus.forward   || AnimationStatus.reverse   => filterQuality,
-        AnimationStatus.dismissed || AnimationStatus.completed => null,
-      },
+      filterQuality: animation.isAnimating ? filterQuality : null,
       child: child,
     );
   }
@@ -393,8 +411,8 @@ class RotationTransition extends MatrixTransition {
 /// Animates its own size and clips and aligns its child.
 ///
 /// [SizeTransition] acts as a [ClipRect] that animates either its width or its
-/// height, depending upon the value of [axis]. The alignment of the child along
-/// the [axis] is specified by the [axisAlignment].
+/// height, depending upon the value of [axis]. The alignment of the child is
+/// specified by the [alignment].
 ///
 /// Like most widgets, [SizeTransition] will conform to the constraints it is
 /// given, so be sure to put it in a context where it can change size. For
@@ -427,18 +445,28 @@ class RotationTransition extends MatrixTransition {
 class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
-  /// The [axis] argument defaults to [Axis.vertical]. The [axisAlignment]
-  /// defaults to zero, which centers the child along the main axis during the
-  /// transition.
+  /// The [axis] argument defaults to [Axis.vertical]. The [alignment] defaults
+  /// to [Alignment.center], which centers the child within the parent during
+  /// the transition.
   const SizeTransition({
     super.key,
     this.axis = Axis.vertical,
     required Animation<double> sizeFactor,
-    this.axisAlignment = 0.0,
+    @Deprecated(
+      'Use alignment instead. '
+      'This property provides full control over both axes, which is an improvement over the old axisAlignment. '
+      'This feature was deprecated after v3.41.0-1.0.pre.',
+    )
+    this.axisAlignment,
+    this.alignment,
     this.fixedCrossAxisSizeFactor,
     this.child,
   }) : assert(fixedCrossAxisSizeFactor == null || fixedCrossAxisSizeFactor >= 0.0),
-    super(listenable: sizeFactor);
+       assert(
+         axisAlignment == null || alignment == null,
+         'Cannot provide both axisAlignment and alignment as axisAlignment has been deprecated and superseded by alignment.',
+       ),
+       super(listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
   /// [Axis.vertical].
@@ -465,7 +493,19 @@ class SizeTransition extends AnimatedWidget {
   /// A value of 1.0 indicates the bottom or end, depending upon the [axis].
   ///
   /// A value of 0.0 (the default) indicates the center for either [axis] value.
-  final double axisAlignment;
+  ///
+  /// This property has been deprecated and superseded by [alignment]. Existing usages can be migrated to [alignment] as follows:
+  /// - If [axis] is [Axis.horizontal], replace with `Alignment(axisAlignment ?? 0.0, -1.0)`.
+  /// - If [axis] is [Axis.vertical], replace with `Alignment(-1.0, axisAlignment ?? 0.0)`.
+  @Deprecated(
+    'Use alignment instead. '
+    'This property provides full control over both axes, which is an improvement over the old axisAlignment. '
+    'This feature was deprecated after v3.41.0-1.0.pre.',
+  )
+  final double? axisAlignment;
+
+  /// The alignment of the child within the parent during the transition.
+  final AlignmentGeometry? alignment;
 
   /// The factor by which to multiply the cross axis size of the child.
   ///
@@ -482,17 +522,20 @@ class SizeTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AlignmentDirectional alignment;
-    if (axis == Axis.vertical) {
-      alignment = AlignmentDirectional(-1.0, axisAlignment);
-    } else {
-      alignment = AlignmentDirectional(axisAlignment, -1.0);
-    }
     return ClipRect(
       child: Align(
-        alignment: alignment,
-        heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : fixedCrossAxisSizeFactor,
-        widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : fixedCrossAxisSizeFactor,
+        alignment:
+            alignment ??
+            switch (axis) {
+              Axis.horizontal => AlignmentDirectional(axisAlignment ?? 0.0, -1.0),
+              Axis.vertical => AlignmentDirectional(-1.0, axisAlignment ?? 0.0),
+            },
+        heightFactor: axis == Axis.vertical
+            ? math.max(sizeFactor.value, 0.0)
+            : fixedCrossAxisSizeFactor,
+        widthFactor: axis == Axis.horizontal
+            ? math.max(sizeFactor.value, 0.0)
+            : fixedCrossAxisSizeFactor,
         child: child,
       ),
     );
@@ -571,10 +614,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 
   @override
   RenderAnimatedOpacity createRenderObject(BuildContext context) {
-    return RenderAnimatedOpacity(
-      opacity: opacity,
-      alwaysIncludeSemantics: alwaysIncludeSemantics,
-    );
+    return RenderAnimatedOpacity(opacity: opacity, alwaysIncludeSemantics: alwaysIncludeSemantics);
   }
 
   @override
@@ -588,7 +628,13 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+    properties.add(
+      FlagProperty(
+        'alwaysIncludeSemantics',
+        value: alwaysIncludeSemantics,
+        ifTrue: 'alwaysIncludeSemantics',
+      ),
+    );
   }
 }
 
@@ -624,7 +670,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 /// To avoid such problems, it is generally a good idea to combine this widget
 /// with a [SliverIgnorePointer] that one enables when the [opacity] animation
 /// reaches zero. This prevents interactions with any children in the subtree
-/// when the [sliver] is not visible. For performance reasons, when implementing
+/// when the sliver is not visible. For performance reasons, when implementing
 /// this, care should be taken not to rebuild the relevant widget (e.g. by
 /// calling [State.setState]) except at the transition point.
 ///
@@ -678,7 +724,13 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+    properties.add(
+      FlagProperty(
+        'alwaysIncludeSemantics',
+        value: alwaysIncludeSemantics,
+        ifTrue: 'alwaysIncludeSemantics',
+      ),
+    );
   }
 }
 
@@ -693,7 +745,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as [RelativeRect.fill].
-  RelativeRectTween({ super.begin, super.end });
+  RelativeRectTween({super.begin, super.end});
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -749,10 +801,7 @@ class PositionedTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fromRelativeRect(
-      rect: rect.value,
-      child: child,
-    );
+    return Positioned.fromRelativeRect(rect: rect.value, child: child);
   }
 }
 
@@ -819,7 +868,7 @@ class RelativePositionedTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final RelativeRect offsets = RelativeRect.fromSize(rect.value ?? Rect.zero, size);
+    final offsets = RelativeRect.fromSize(rect.value ?? Rect.zero, size);
     return Positioned(
       top: offsets.top,
       right: offsets.right,
@@ -879,11 +928,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: decoration.value,
-      position: position,
-      child: child,
-    );
+    return DecoratedBox(decoration: decoration.value, position: position, child: child);
   }
 }
 

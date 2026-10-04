@@ -27,15 +27,22 @@ import '../localizations_utils.dart';
 import '../localizations_validator.dart';
 
 Future<void> main(List<String> rawArgs) async {
-  bool removeUndefined = false;
+  var removeUndefined = false;
   if (rawArgs.contains('--remove-undefined')) {
     removeUndefined = true;
   }
   checkCwdIsRepoRoot('gen_missing_localizations');
 
-  final String localizationPath = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n');
+  final String localizationPath = path.join(
+    'packages',
+    'flutter_localizations',
+    'lib',
+    'src',
+    'l10n',
+  );
   updateMissingResources(localizationPath, 'material', removeUndefined: removeUndefined);
   updateMissingResources(localizationPath, 'cupertino', removeUndefined: removeUndefined);
+  updateMissingResources(localizationPath, 'widgets', removeUndefined: removeUndefined);
 }
 
 Map<String, dynamic> loadBundle(File file) {
@@ -46,7 +53,7 @@ Map<String, dynamic> loadBundle(File file) {
 }
 
 void writeBundle(File file, Map<String, dynamic> bundle) {
-  final StringBuffer contents = StringBuffer();
+  final contents = StringBuffer();
   contents.writeln('{');
   for (final String key in bundle.keys) {
     contents.writeln('  "$key": ${json.encode(bundle[key])}${key == bundle.keys.last ? '' : ','}');
@@ -58,12 +65,12 @@ void writeBundle(File file, Map<String, dynamic> bundle) {
 Set<String> resourceKeys(Map<String, dynamic> bundle) {
   return Set<String>.from(
     // Skip any attribute keys
-    bundle.keys.where((String key) => !key.startsWith('@'))
+    bundle.keys.where((String key) => !key.startsWith('@')),
   );
 }
 
 bool intentionallyOmitted(String key, Map<String, dynamic> bundle) {
-  final String attributeKey = '@$key';
+  final attributeKey = '@$key';
   final dynamic attribute = bundle[attributeKey];
   return attribute is Map && attribute.containsKey('notUsed');
 }
@@ -79,34 +86,41 @@ bool isPluralVariation(String key, Map<String, dynamic> bundle) {
   return bundle.containsKey('${prefix}Other');
 }
 
-void updateMissingResources(String localizationPath, String groupPrefix, {bool removeUndefined = false}) {
-  final Directory localizationDir = Directory(localizationPath);
-  final RegExp filenamePattern = RegExp('${groupPrefix}_(\\w+)\\.arb');
+void updateMissingResources(
+  String localizationPath,
+  String groupPrefix, {
+  bool removeUndefined = false,
+}) {
+  final localizationDir = Directory(localizationPath);
+  final filenamePattern = RegExp('${groupPrefix}_(\\w+)\\.arb');
 
-  final Map<String, dynamic> englishBundle = loadBundle(File(path.join(localizationPath, '${groupPrefix}_en.arb')));
+  final Map<String, dynamic> englishBundle = loadBundle(
+    File(path.join(localizationPath, '${groupPrefix}_en.arb')),
+  );
   final Set<String> requiredKeys = resourceKeys(englishBundle);
 
-  for (final FileSystemEntity entity in localizationDir.listSync().toList()..sort(sortFilesByPath)) {
+  for (final FileSystemEntity entity
+      in localizationDir.listSync().toList()..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
     if (FileSystemEntity.isFileSync(entityPath) && filenamePattern.hasMatch(entityPath)) {
       final String localeString = filenamePattern.firstMatch(entityPath)![1]!;
-      final LocaleInfo locale = LocaleInfo.fromString(localeString);
+      final locale = LocaleInfo.fromString(localeString);
 
       // Only look at top-level language locales
       if (locale.length == 1) {
-        final File arbFile = File(entityPath);
+        final arbFile = File(entityPath);
         final Map<String, dynamic> localeBundle = loadBundle(arbFile);
         final Set<String> localeResources = resourceKeys(localeBundle);
         // Whether or not the resources were modified and need to be updated.
-        bool shouldWrite = false;
+        var shouldWrite = false;
 
         // Remove any localizations that are not defined in the canonical
         // locale. This allows unused localizations to be removed if
         // --remove-undefined is passed.
         if (removeUndefined) {
           bool isIncluded(String key) {
-            return !isPluralVariation(key, localeBundle)
-                && !intentionallyOmitted(key, localeBundle);
+            return !isPluralVariation(key, localeBundle) &&
+                !intentionallyOmitted(key, localeBundle);
           }
 
           // Find any resources in this locale that don't appear in the
@@ -132,12 +146,19 @@ void updateMissingResources(String localizationPath, String groupPrefix, {bool r
 
         // Add in any resources that are in the canonical locale and not present
         // in this locale.
-        final Set<String> missingResources = requiredKeys.difference(localeResources).where(
-          (String key) => !isPluralVariation(key, localeBundle) && !intentionallyOmitted(key, localeBundle)
-        ).toSet();
+        final Set<String> missingResources = requiredKeys
+            .difference(localeResources)
+            .where(
+              (String key) =>
+                  !isPluralVariation(key, localeBundle) && !intentionallyOmitted(key, localeBundle),
+            )
+            .toSet();
         if (missingResources.isNotEmpty) {
-          localeBundle.addEntries(missingResources.map((String k) =>
-            MapEntry<String, String>(k, englishBundle[k].toString())));
+          localeBundle.addEntries(
+            missingResources.map(
+              (String k) => MapEntry<String, String>(k, englishBundle[k].toString()),
+            ),
+          );
           shouldWrite = true;
           print('Updating $entityPath with missing entries for $missingResources');
         }

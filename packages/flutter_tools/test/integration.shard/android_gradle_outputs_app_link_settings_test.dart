@@ -6,190 +6,180 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/android/gradle_utils.dart'
-    show getGradlewFileName;
+import 'package:flutter_tools/src/android/gradle_utils.dart' show getGradlewFileName;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:xml/xml.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
-final XmlElement deeplinkFlagMetaData = XmlElement(
-  XmlName('meta-data'),
-  <XmlAttribute>[
-    XmlAttribute(XmlName('name', 'android'), 'flutter_deeplinking_enabled'),
-    XmlAttribute(XmlName('value', 'android'), 'true'),
-  ],
-);
-final XmlElement pureHttpIntentFilter = XmlElement(
+
+final deeplinkFlagMetaData = XmlElement(XmlName('meta-data'), <XmlAttribute>[
+  XmlAttribute(XmlName('name', 'android'), 'flutter_deeplinking_enabled'),
+  XmlAttribute(XmlName('value', 'android'), 'true'),
+]);
+final pureHttpIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
-    XmlElement(
-      XmlName('action'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'http'),
-        XmlAttribute(XmlName('host', 'android'), 'pure-http.com'),
-      ],
-    ),
+    XmlElement(XmlName('action'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE'),
+    ]),
+    XmlElement(XmlName('data'), <XmlAttribute>[
+      XmlAttribute(XmlName('scheme', 'android'), 'http'),
+      XmlAttribute(XmlName('host', 'android'), 'pure-http.com'),
+    ]),
   ],
 );
 
-final XmlElement nonHttpIntentFilter = XmlElement(
+final nonHttpIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
-    XmlElement(
-      XmlName('action'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'custom'),
-        XmlAttribute(XmlName('host', 'android'), 'custom.com'),
-      ],
-    ),
+    XmlElement(XmlName('action'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE'),
+    ]),
+    XmlElement(XmlName('data'), <XmlAttribute>[
+      XmlAttribute(XmlName('scheme', 'android'), 'custom'),
+      XmlAttribute(XmlName('host', 'android'), 'custom.com'),
+    ]),
   ],
 );
 
-final XmlElement hybridIntentFilter = XmlElement(
+final hybridIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
-    XmlElement(
-      XmlName('action'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'custom'),
-        XmlAttribute(XmlName('host', 'android'), 'hybrid.com'),
-      ],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'http'),
-      ],
-    ),
+    XmlElement(XmlName('action'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE'),
+    ]),
+    XmlElement(XmlName('data'), <XmlAttribute>[
+      XmlAttribute(XmlName('scheme', 'android'), 'custom'),
+      XmlAttribute(XmlName('host', 'android'), 'hybrid.com'),
+    ]),
+    XmlElement(XmlName('data'), <XmlAttribute>[XmlAttribute(XmlName('scheme', 'android'), 'http')]),
   ],
 );
 
-final XmlElement nonAutoVerifyIntentFilter = XmlElement(
+final nonAutoVerifyIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[],
   <XmlElement>[
-    XmlElement(
-      XmlName('action'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'http'),
-        XmlAttribute(XmlName('host', 'android'), 'non-auto-verify.com'),
-      ],
-    ),
+    XmlElement(XmlName('action'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE'),
+    ]),
+    XmlElement(XmlName('data'), <XmlAttribute>[
+      XmlAttribute(XmlName('scheme', 'android'), 'http'),
+      XmlAttribute(XmlName('host', 'android'), 'non-auto-verify.com'),
+    ]),
   ],
 );
-final XmlElement nonActionIntentFilter = XmlElement(
+final nonActionIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'http'),
-        XmlAttribute(XmlName('host', 'android'), 'non-action.com'),
-      ],
-    ),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE'),
+    ]),
+    XmlElement(XmlName('data'), <XmlAttribute>[
+      XmlAttribute(XmlName('scheme', 'android'), 'http'),
+      XmlAttribute(XmlName('host', 'android'), 'non-action.com'),
+    ]),
   ],
 );
-final XmlElement nonDefaultCategoryIntentFilter = XmlElement(
+final nonDefaultCategoryIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
-    XmlElement(
-      XmlName('action'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'http'),
-        XmlAttribute(XmlName('host', 'android'), 'non-default-category.com'),
-      ],
-    ),
+    XmlElement(XmlName('action'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE'),
+    ]),
+    XmlElement(XmlName('data'), <XmlAttribute>[
+      XmlAttribute(XmlName('scheme', 'android'), 'http'),
+      XmlAttribute(XmlName('host', 'android'), 'non-default-category.com'),
+    ]),
   ],
 );
-final XmlElement nonBrowsableCategoryIntentFilter = XmlElement(
+final nonBrowsableCategoryIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
-    XmlElement(
-      XmlName('action'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'http'),
-        XmlAttribute(XmlName('host', 'android'), 'non-browsable-category.com'),
-      ],
-    ),
+    XmlElement(XmlName('action'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT'),
+    ]),
+    XmlElement(XmlName('data'), <XmlAttribute>[
+      XmlAttribute(XmlName('scheme', 'android'), 'http'),
+      XmlAttribute(XmlName('host', 'android'), 'non-browsable-category.com'),
+    ]),
+  ],
+);
+final nonSchemeCategoryIntentFilter = XmlElement(
+  XmlName('intent-filter'),
+  <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
+  <XmlElement>[
+    XmlElement(XmlName('action'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE'),
+    ]),
+    XmlElement(XmlName('data'), <XmlAttribute>[
+      XmlAttribute(XmlName('host', 'android'), 'non-browsable-category.com'),
+    ]),
+  ],
+);
+final nonHostCategoryIntentFilter = XmlElement(
+  XmlName('intent-filter'),
+  <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
+  <XmlElement>[
+    XmlElement(XmlName('action'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT'),
+    ]),
+    XmlElement(XmlName('category'), <XmlAttribute>[
+      XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE'),
+    ]),
+    XmlElement(XmlName('data'), <XmlAttribute>[
+      XmlAttribute(XmlName('scheme', 'android'), 'http'),
+      XmlAttribute(XmlName('path', 'android'), '/path1'),
+    ]),
   ],
 );
 
@@ -206,8 +196,8 @@ void main() {
 
   void testDeeplink(
     dynamic deeplink,
-    String scheme,
-    String host,
+    String? scheme,
+    String? host,
     String path, {
     required bool hasAutoVerify,
     required bool hasActionView,
@@ -218,19 +208,183 @@ void main() {
     expect(deeplink['scheme'], scheme);
     expect(deeplink['host'], host);
     expect(deeplink['path'], path);
-    final Map<String, dynamic> intentFilterCheck = deeplink['intentFilterCheck'] as Map<String, dynamic>;
+    final intentFilterCheck = deeplink['intentFilterCheck'] as Map<String, dynamic>;
     expect(intentFilterCheck['hasAutoVerify'], hasAutoVerify);
     expect(intentFilterCheck['hasActionView'], hasActionView);
     expect(intentFilterCheck['hasDefaultCategory'], hasDefaultCategory);
     expect(intentFilterCheck['hasBrowsableCategory'], hasBrowsableCategory);
   }
 
-
   testWithoutContext(
-      'gradle task outputs<mode>AppLinkSettings works when a project has app links', () async {
+    'gradle task outputs<mode>AppLinkSettings works when a project has app links',
+    () async {
+      // Create a new flutter project.
+      ProcessResult result = await processManager.run(<String>[
+        flutterBin,
+        'create',
+        tempDir.path,
+        '--project-name=testapp',
+      ], workingDirectory: tempDir.path);
+      printOnFailure('Created testapp in $tempDir');
+      expect(result, const ProcessResultMatcher());
+      // Adds intent filters for app links
+      final String androidManifestPath = fileSystem.path.join(
+        tempDir.path,
+        'android',
+        'app',
+        'src',
+        'main',
+        'AndroidManifest.xml',
+      );
+      final androidManifestFile = io.File(androidManifestPath);
+      final androidManifest = XmlDocument.parse(androidManifestFile.readAsStringSync());
+      final XmlElement activity = androidManifest.findAllElements('activity').first;
+      activity.children.add(deeplinkFlagMetaData);
+      activity.children.add(pureHttpIntentFilter);
+      activity.children.add(nonHttpIntentFilter);
+      activity.children.add(hybridIntentFilter);
+      activity.children.add(nonAutoVerifyIntentFilter);
+      activity.children.add(nonActionIntentFilter);
+      activity.children.add(nonDefaultCategoryIntentFilter);
+      activity.children.add(nonBrowsableCategoryIntentFilter);
+      activity.children.add(nonSchemeCategoryIntentFilter);
+      activity.children.add(nonHostCategoryIntentFilter);
+      androidManifestFile.writeAsStringSync(androidManifest.toString(), flush: true);
+
+      // Ensure that gradle files exists from templates.
+      result = await processManager.run(<String>[
+        flutterBin,
+        'build',
+        'apk',
+        '--config-only',
+      ], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
+
+      final Directory androidApp = tempDir.childDirectory('android');
+      final io.File fileDump = tempDir
+          .childDirectory('build')
+          .childDirectory('app')
+          .childFile('app-link-settings-debug.json');
+      result = await processManager.run(<String>[
+        '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+        ...getLocalEngineArguments(),
+        '-q', // quiet output.
+        '-PoutputPath=${fileDump.path}',
+        'outputDebugAppLinkSettings',
+      ], workingDirectory: androidApp.path);
+
+      expect(result, const ProcessResultMatcher());
+      expect(fileDump.existsSync(), true);
+      final json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+      expect(json['applicationId'], 'com.example.testapp');
+      expect(json['deeplinkingFlagEnabled'], true);
+      final deeplinks = json['deeplinks']! as List<dynamic>;
+      expect(deeplinks.length, 10);
+      testDeeplink(
+        deeplinks[0],
+        'http',
+        'pure-http.com',
+        '.*',
+        hasAutoVerify: true,
+        hasActionView: true,
+        hasDefaultCategory: true,
+        hasBrowsableCategory: true,
+      );
+      testDeeplink(
+        deeplinks[1],
+        'custom',
+        'custom.com',
+        '.*',
+        hasAutoVerify: true,
+        hasActionView: true,
+        hasDefaultCategory: true,
+        hasBrowsableCategory: true,
+      );
+      testDeeplink(
+        deeplinks[2],
+        'custom',
+        'hybrid.com',
+        '.*',
+        hasAutoVerify: true,
+        hasActionView: true,
+        hasDefaultCategory: true,
+        hasBrowsableCategory: true,
+      );
+      testDeeplink(
+        deeplinks[3],
+        'http',
+        'hybrid.com',
+        '.*',
+        hasAutoVerify: true,
+        hasActionView: true,
+        hasDefaultCategory: true,
+        hasBrowsableCategory: true,
+      );
+      testDeeplink(
+        deeplinks[4],
+        'http',
+        'non-auto-verify.com',
+        '.*',
+        hasAutoVerify: false,
+        hasActionView: true,
+        hasDefaultCategory: true,
+        hasBrowsableCategory: true,
+      );
+      testDeeplink(
+        deeplinks[5],
+        'http',
+        'non-action.com',
+        '.*',
+        hasAutoVerify: true,
+        hasActionView: false,
+        hasDefaultCategory: true,
+        hasBrowsableCategory: true,
+      );
+      testDeeplink(
+        deeplinks[6],
+        'http',
+        'non-default-category.com',
+        '.*',
+        hasAutoVerify: true,
+        hasActionView: true,
+        hasDefaultCategory: false,
+        hasBrowsableCategory: true,
+      );
+      testDeeplink(
+        deeplinks[7],
+        'http',
+        'non-browsable-category.com',
+        '.*',
+        hasAutoVerify: true,
+        hasActionView: true,
+        hasDefaultCategory: true,
+        hasBrowsableCategory: false,
+      );
+      testDeeplink(
+        deeplinks[8],
+        null,
+        'non-browsable-category.com',
+        '.*',
+        hasAutoVerify: true,
+        hasActionView: true,
+        hasDefaultCategory: true,
+        hasBrowsableCategory: true,
+      );
+      testDeeplink(
+        deeplinks[9],
+        'http',
+        null,
+        '/path1',
+        hasAutoVerify: true,
+        hasActionView: true,
+        hasDefaultCategory: true,
+        hasBrowsableCategory: true,
+      );
+    },
+  );
+
+  testWithoutContext('gradle task outputs<mode>AppLinkSettings works when a project does not have app link and the flutter_deeplinking_enabled flag', () async {
     // Create a new flutter project.
-    final String flutterBin =
-    fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',
@@ -238,20 +392,6 @@ void main() {
       '--project-name=testapp',
     ], workingDirectory: tempDir.path);
     expect(result, const ProcessResultMatcher());
-    // Adds intent filters for app links
-    final String androidManifestPath =  fileSystem.path.join(tempDir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
-    final io.File androidManifestFile = io.File(androidManifestPath);
-    final XmlDocument androidManifest = XmlDocument.parse(androidManifestFile.readAsStringSync());
-    final XmlElement activity = androidManifest.findAllElements('activity').first;
-    activity.children.add(deeplinkFlagMetaData);
-    activity.children.add(pureHttpIntentFilter);
-    activity.children.add(nonHttpIntentFilter);
-    activity.children.add(hybridIntentFilter);
-    activity.children.add(nonAutoVerifyIntentFilter);
-    activity.children.add(nonActionIntentFilter);
-    activity.children.add(nonDefaultCategoryIntentFilter);
-    activity.children.add(nonBrowsableCategoryIntentFilter);
-    androidManifestFile.writeAsStringSync(androidManifest.toString(), flush: true);
 
     // Ensure that gradle files exists from templates.
     result = await processManager.run(<String>[
@@ -263,7 +403,10 @@ void main() {
     expect(result, const ProcessResultMatcher());
 
     final Directory androidApp = tempDir.childDirectory('android');
-    final io.File fileDump = tempDir.childDirectory('build').childDirectory('app').childFile('app-link-settings-debug.json');
+    final io.File fileDump = tempDir
+        .childDirectory('build')
+        .childDirectory('app')
+        .childFile('app-link-settings-debug.json');
     result = await processManager.run(<String>[
       '.${platform.pathSeparator}${getGradlewFileName(platform)}',
       ...getLocalEngineArguments(),
@@ -274,26 +417,70 @@ void main() {
 
     expect(result, const ProcessResultMatcher());
     expect(fileDump.existsSync(), true);
-    final Map<String, dynamic> json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+    final json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
     expect(json['applicationId'], 'com.example.testapp');
-    expect(json['deeplinkingFlagEnabled'], true);
-    final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
-    expect(deeplinks.length, 8);
-    testDeeplink(deeplinks[0], 'http', 'pure-http.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
-    testDeeplink(deeplinks[1], 'custom', 'custom.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
-    testDeeplink(deeplinks[2], 'custom', 'hybrid.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
-    testDeeplink(deeplinks[3], 'http', 'hybrid.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
-    testDeeplink(deeplinks[4], 'http', 'non-auto-verify.com', '.*', hasAutoVerify:false, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
-    testDeeplink(deeplinks[5], 'http', 'non-action.com', '.*', hasAutoVerify:true, hasActionView: false, hasDefaultCategory:true, hasBrowsableCategory: true);
-    testDeeplink(deeplinks[6], 'http', 'non-default-category.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:false, hasBrowsableCategory: true);
-    testDeeplink(deeplinks[7], 'http', 'non-browsable-category.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: false);
+    expect(json['deeplinkingFlagEnabled'], false);
+    final deeplinks = json['deeplinks']! as List<dynamic>;
+    expect(deeplinks.length, 0);
   });
 
   testWithoutContext(
-      'gradle task outputs<mode>AppLinkSettings works when a project does not have app link and the flutter_deeplinking_enabled flag', () async {
+    'gradle task outputs<mode>AppLinkSettings uses resolved application ID',
+    () async {
+      ProcessResult result = await processManager.run(<String>[
+        flutterBin,
+        'create',
+        tempDir.path,
+        '--project-name=testapp',
+      ], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
+
+      final File buildGradle = tempDir
+          .childDirectory('android')
+          .childDirectory('app')
+          .childFile('build.gradle.kts');
+      buildGradle.writeAsStringSync(
+        buildGradle.readAsStringSync().replaceFirst(
+          'applicationId = "com.example.testapp"',
+          'applicationId = System.getenv("TEST_APPLICATION_ID") ?: "com.example.testapp"',
+        ),
+      );
+
+      // Ensure that gradle files exists from templates.
+      result = await processManager.run(<String>[
+        flutterBin,
+        'build',
+        'apk',
+        '--config-only',
+      ], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
+
+      final Directory androidApp = tempDir.childDirectory('android');
+      final io.File fileDump = tempDir
+          .childDirectory('build')
+          .childDirectory('app')
+          .childFile('app-link-settings-release.json');
+      result = await processManager.run(
+        <String>[
+          '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+          ...getLocalEngineArguments(),
+          '-q', // quiet output.
+          '-PoutputPath=${fileDump.path}',
+          'outputReleaseAppLinkSettings',
+        ],
+        workingDirectory: androidApp.path,
+        environment: <String, String>{'TEST_APPLICATION_ID': 'com.example.fromenv'},
+      );
+
+      expect(result, const ProcessResultMatcher());
+      expect(fileDump.existsSync(), true);
+      final json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+      expect(json['applicationId'], 'com.example.fromenv');
+    },
+  );
+
+  testWithoutContext('gradle task outputs<mode>AppLinkSettings is resolved FROM-CACHE after clean build if manifest does not change with build caching enabled', () async {
     // Create a new flutter project.
-    final String flutterBin =
-    fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',
@@ -311,22 +498,48 @@ void main() {
     ], workingDirectory: tempDir.path);
     expect(result, const ProcessResultMatcher());
 
+    // Enable Gradle build caching.
+    final gradleProperties = io.File(
+      fileSystem.path.join(tempDir.path, 'android', 'gradle.properties'),
+    );
+    gradleProperties.writeAsStringSync('\norg.gradle.caching=true\n', mode: io.FileMode.append);
+
     final Directory androidApp = tempDir.childDirectory('android');
-    final io.File fileDump = tempDir.childDirectory('build').childDirectory('app').childFile('app-link-settings-debug.json');
+    final io.File fileDump = tempDir
+        .childDirectory('build')
+        .childDirectory('app')
+        .childFile('app-link-settings-debug.json');
+
+    // Run the task the first time to populate outputs and build cache.
     result = await processManager.run(<String>[
       '.${platform.pathSeparator}${getGradlewFileName(platform)}',
       ...getLocalEngineArguments(),
-      '-q', // quiet output.
       '-PoutputPath=${fileDump.path}',
       'outputDebugAppLinkSettings',
     ], workingDirectory: androidApp.path);
-
     expect(result, const ProcessResultMatcher());
-    expect(fileDump.existsSync(), true);
-    final Map<String, dynamic> json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
-    expect(json['applicationId'], 'com.example.testapp');
-    expect(json['deeplinkingFlagEnabled'], false);
-    final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
-    expect(deeplinks.length, 0);
+
+    // Run the clean task to delete the local build folder (destroy local incremental UP-TO-DATE state).
+    result = await processManager.run(<String>[
+      '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+      ...getLocalEngineArguments(),
+      'clean',
+    ], workingDirectory: androidApp.path);
+    expect(result, const ProcessResultMatcher());
+
+    // Run the task a second time.
+    result = await processManager.run(<String>[
+      '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+      ...getLocalEngineArguments(),
+      '-PoutputPath=${fileDump.path}',
+      'outputDebugAppLinkSettings',
+    ], workingDirectory: androidApp.path);
+    expect(result, const ProcessResultMatcher());
+
+    // Verify custom tasks are successfully resolved FROM-CACHE.
+    final stdout = result.stdout as String;
+    expect(stdout.contains('extractDeepLinksDebug FROM-CACHE'), isTrue);
+    expect(stdout.contains('processDebugMainManifest FROM-CACHE'), isTrue);
+    expect(stdout.contains('outputDebugAppLinkSettings FROM-CACHE'), isTrue);
   });
 }

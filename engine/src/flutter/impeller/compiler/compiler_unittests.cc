@@ -1,0 +1,825 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include <cstring>
+#include "flutter/testing/testing.h"
+#include "gtest/gtest.h"
+#include "impeller/base/validation.h"
+#include "impeller/compiler/compiler.h"
+#include "impeller/compiler/compiler_test.h"
+#include "impeller/compiler/source_options.h"
+#include "impeller/compiler/types.h"
+
+namespace impeller {
+namespace compiler {
+namespace testing {
+
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTest,
+    ::testing::Values(TargetPlatform::kOpenGLES,
+                      TargetPlatform::kOpenGLDesktop,
+                      TargetPlatform::kMetalDesktop,
+                      TargetPlatform::kMetalIOS,
+                      TargetPlatform::kVulkan),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
+
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTestRuntime,
+    ::testing::Values(TargetPlatform::kRuntimeStageMetal,
+                      TargetPlatform::kRuntimeStageGLES,
+                      TargetPlatform::kRuntimeStageGLES3,
+                      TargetPlatform::kRuntimeStageVulkan,
+                      TargetPlatform::kSkSL),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
+
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTestSkSL,
+    ::testing::Values(TargetPlatform::kSkSL),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
+
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTestUnknownPlatform,
+    ::testing::Values(TargetPlatform::kUnknown),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
+
+TEST(CompilerTest, Defines) {
+  std::shared_ptr<const fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping("check_gles_definition.frag");
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.entry_point_name = "main";
+  options.type = SourceType::kFragmentShader;
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  Compiler compiler = Compiler(fixture, options, reflector_options);
+
+  // Should fail as the shader has a compilation error in it.
+  EXPECT_EQ(compiler.GetSPIRVAssembly(), nullptr);
+
+  // Should succeed as the compilation error is ifdef'd out.
+  options.target_platform = TargetPlatform::kRuntimeStageVulkan;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageVulkan;
+  Compiler compiler_2 = Compiler(fixture, options, reflector_options);
+  EXPECT_NE(compiler_2.GetSPIRVAssembly(), nullptr);
+}
+
+TEST(CompilerTest, DeprecatedUnflippedDefines) {
+  std::shared_ptr<const fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping(
+          "check_gles_unflipped_definition.frag");
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.entry_point_name = "main";
+  options.type = SourceType::kFragmentShader;
+
+  Reflector::Options reflector_options;
+
+  // Test that IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED is defined on
+  // TargetPlatform::kRuntimeStageGLES.
+  {
+    options.target_platform = TargetPlatform::kRuntimeStageGLES;
+    reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+    Compiler compiler = Compiler(fixture, options, reflector_options);
+    // Should fail as the shader has a compilation error in it.
+    EXPECT_EQ(compiler.GetSPIRVAssembly(), nullptr);
+  }
+
+  // Test that IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED is defined on
+  // TargetPlatform::kRuntimeStageGLES3.
+  {
+    options.target_platform = TargetPlatform::kRuntimeStageGLES3;
+    reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES3;
+    Compiler compiler = Compiler(fixture, options, reflector_options);
+    // Should fail as the shader has a compilation error in it.
+    EXPECT_EQ(compiler.GetSPIRVAssembly(), nullptr);
+  }
+
+  // Should succeed as the compilation error is ifdef'd out.
+  {
+    options.target_platform = TargetPlatform::kRuntimeStageVulkan;
+    reflector_options.target_platform = TargetPlatform::kRuntimeStageVulkan;
+    Compiler compiler = Compiler(fixture, options, reflector_options);
+    EXPECT_NE(compiler.GetSPIRVAssembly(), nullptr);
+  }
+}
+
+TEST(CompilerTest, YFlipInjectionForGLESVertexShaders) {
+  // Compiles `fixture_name` for `platform` and returns the generated SL
+  // source. See https://github.com/flutter/flutter/issues/186554.
+  auto compile = [](const char* fixture_name, SourceType type,
+                    TargetPlatform platform) -> std::string {
+    std::shared_ptr<fml::Mapping> fixture =
+        flutter::testing::OpenFixtureAsMapping(fixture_name);
+    FML_CHECK(fixture);
+
+    SourceOptions options(fixture_name, type);
+    options.source_language = SourceLanguage::kGLSL;
+    options.target_platform = platform;
+    options.working_directory = std::make_shared<fml::UniqueFD>(
+        flutter::testing::OpenFixturesDirectory());
+    options.entry_point_name = "main";
+
+    Reflector::Options reflector_options;
+    reflector_options.target_platform = platform;
+    reflector_options.header_file_name = "y_flip_injection.h";
+    reflector_options.shader_name = "shader";
+
+    Compiler compiler(fixture, options, reflector_options);
+    if (!compiler.IsValid()) {
+      return "";
+    }
+    auto sl = compiler.GetSLShaderSource();
+    if (!sl || !sl->GetMapping()) {
+      return "";
+    }
+    return std::string(reinterpret_cast<const char*>(sl->GetMapping()),
+                       sl->GetSize());
+  };
+
+  // GL vertex shader: gets both the declaration and the epilogue.
+  const std::string gl_vert = compile("sample.vert", SourceType::kVertexShader,
+                                      TargetPlatform::kOpenGLES);
+  EXPECT_NE(gl_vert.find("uniform float _impeller_y_flip"), std::string::npos)
+      << "GLES vertex shader is missing the y-flip uniform declaration:\n"
+      << gl_vert;
+  EXPECT_NE(gl_vert.find("gl_Position.y *= _impeller_y_flip"),
+            std::string::npos)
+      << "GLES vertex shader is missing the y-flip epilogue:\n"
+      << gl_vert;
+
+  // GL fragment shader: not injected.
+  const std::string gl_frag = compile(
+      "sample.frag", SourceType::kFragmentShader, TargetPlatform::kOpenGLES);
+  EXPECT_EQ(gl_frag.find("_impeller_y_flip"), std::string::npos)
+      << "GLES fragment shader was unexpectedly injected:\n"
+      << gl_frag;
+
+  // Metal vertex shader: not injected.
+  const std::string mtl_vert = compile("sample.vert", SourceType::kVertexShader,
+                                       TargetPlatform::kMetalIOS);
+  EXPECT_EQ(mtl_vert.find("_impeller_y_flip"), std::string::npos)
+      << "Metal vertex shader was unexpectedly injected:\n"
+      << mtl_vert;
+}
+
+TEST(CompilerTest, YFlipInjectionHandlesEarlyReturnsInGLESVertexShader) {
+  // `y_flip_early_return.vert` has an early `return` before main's implicit
+  // exit; the wrap-main injection must flip on both paths.
+  std::shared_ptr<fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping("y_flip_early_return.vert");
+  FML_CHECK(fixture);
+
+  SourceOptions options("y_flip_early_return.vert", SourceType::kVertexShader);
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kOpenGLES;
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+  options.entry_point_name = "main";
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kOpenGLES;
+  reflector_options.header_file_name = "y_flip_early_return.h";
+  reflector_options.shader_name = "shader";
+
+  Compiler compiler(fixture, options, reflector_options);
+  ASSERT_TRUE(compiler.IsValid());
+  auto sl = compiler.GetSLShaderSource();
+  ASSERT_TRUE(sl && sl->GetMapping());
+  const std::string gl_vert(reinterpret_cast<const char*>(sl->GetMapping()),
+                            sl->GetSize());
+
+  EXPECT_NE(gl_vert.find("void _impeller_user_main("), std::string::npos)
+      << gl_vert;
+  EXPECT_NE(gl_vert.find("_impeller_user_main();"), std::string::npos)
+      << gl_vert;
+  EXPECT_NE(gl_vert.find("gl_Position.y *= _impeller_y_flip"),
+            std::string::npos)
+      << gl_vert;
+
+  // Only the wrapper's `void main(` should remain after the rename.
+  const size_t first_main = gl_vert.find("\nvoid main(");
+  ASSERT_NE(first_main, std::string::npos);
+  EXPECT_EQ(gl_vert.find("\nvoid main(", first_main + 1), std::string::npos)
+      << gl_vert;
+}
+
+TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
+  ASSERT_EQ(SourceTypeFromFileName("hello.vert"), SourceType::kVertexShader);
+  ASSERT_EQ(SourceTypeFromFileName("hello.frag"), SourceType::kFragmentShader);
+  ASSERT_EQ(SourceTypeFromFileName("hello.comp"), SourceType::kComputeShader);
+  ASSERT_EQ(SourceTypeFromFileName("hello.msl"), SourceType::kUnknown);
+  ASSERT_EQ(SourceTypeFromFileName("hello.glsl"), SourceType::kUnknown);
+}
+
+TEST_P(CompilerTest, CanCompile) {
+  ASSERT_TRUE(CanCompileAndReflect("sample.vert"));
+  ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader));
+  ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader,
+                                   SourceLanguage::kGLSL));
+}
+
+TEST_P(CompilerTest, CanCompileHLSL) {
+  ASSERT_TRUE(CanCompileAndReflect(
+      "simple.vert.hlsl", SourceType::kVertexShader, SourceLanguage::kHLSL));
+}
+
+TEST_P(CompilerTest, CanCompileHLSLWithMultipleStages) {
+  ASSERT_TRUE(CanCompileAndReflect("multiple_stages.hlsl",
+                                   SourceType::kVertexShader,
+                                   SourceLanguage::kHLSL, "VertexShader"));
+  ASSERT_TRUE(CanCompileAndReflect("multiple_stages.hlsl",
+                                   SourceType::kFragmentShader,
+                                   SourceLanguage::kHLSL, "FragmentShader"));
+}
+
+TEST_P(CompilerTest, CanCompileComputeShader) {
+  ASSERT_TRUE(CanCompileAndReflect("sample.comp", SourceType::kComputeShader,
+                                   SourceLanguage::kGLSL, "main"));
+}
+
+TEST_P(CompilerTest, MustFailDueToExceedingResourcesLimit) {
+  ScopedValidationDisable disable_validation;
+  ASSERT_FALSE(
+      CanCompileAndReflect("resources_limit.vert", SourceType::kVertexShader));
+}
+
+TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
+  ScopedValidationDisable disable_validation;
+  ASSERT_FALSE(CanCompileAndReflect("struct_def_bug.vert"));
+}
+
+TEST_P(CompilerTest, UniformBlockInstanceNameCanonicalizedForGL) {
+  if (!TargetPlatformIsOpenGL(GetParam())) {
+    GTEST_SKIP() << "Only GL targets lower uniform blocks to flat structs.";
+  }
+  // `mat2_test.frag` has `uniform Params { ... } uParams;`. Without
+  // canonicalization, BufferBindingsGLES cannot resolve `uParams.uMat2`.
+  ASSERT_TRUE(
+      CanCompileAndReflect("mat2_test.frag", SourceType::kFragmentShader));
+  auto sl_source = GetCompiler()->GetSLShaderSource();
+  ASSERT_NE(sl_source, nullptr);
+  const std::string source(
+      reinterpret_cast<const char*>(sl_source->GetMapping()),
+      sl_source->GetSize());
+  EXPECT_EQ(source.find("uParams."), std::string::npos) << source;
+  EXPECT_NE(source.find("_Params."), std::string::npos) << source;
+}
+
+TEST_P(CompilerTest, BindingBaseForFragShader) {
+  if (!TargetPlatformIsVulkan(GetParam())) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader));
+  ASSERT_TRUE(CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));
+
+  auto get_binding = [&](const char* fixture) -> uint32_t {
+    auto json_fd = GetReflectionJson(fixture);
+    nlohmann::json shader_json = nlohmann::json::parse(json_fd->GetMapping());
+    return shader_json["buffers"][0]["binding"].get<uint32_t>();
+  };
+
+  auto vert_uniform_binding = get_binding("sample.vert");
+  auto frag_uniform_binding = get_binding("sample.frag");
+
+  ASSERT_GT(frag_uniform_binding, vert_uniform_binding);
+}
+
+namespace {
+struct UniformInfo {
+  std::string uniform_name;
+  uint32_t location;
+  std::string type_name;
+  uint32_t columns;
+  uint32_t vec_size;
+
+  static UniformInfo fromJson(const nlohmann::json& json) {
+    return {
+        .uniform_name = json["name"].get<std::string>(),
+        .location = json["location"].get<uint32_t>(),
+        .type_name = json["type"]["type_name"].get<std::string>(),
+        .columns = json["type"]["columns"].get<uint32_t>(),
+        .vec_size = json["type"]["vec_size"].get<uint32_t>(),
+    };
+  }
+
+  static UniformInfo Sampler(const std::string& name, uint32_t location) {
+    return UniformInfo{
+        .uniform_name = name,
+        .location = location,
+        .type_name = "ShaderType::kSampledImage",
+        .columns = 1u,
+        .vec_size = 1u,
+    };
+  }
+  static UniformInfo Float(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 1u, 1u);
+  }
+  static UniformInfo Vec2(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 1u, 2u);
+  }
+  static UniformInfo Vec3(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 1u, 3u);
+  }
+  static UniformInfo Vec4(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 1u, 4u);
+  }
+  static UniformInfo Mat4(const std::string& name, uint32_t location) {
+    return FloatInfo(name, location, 4u, 4u);
+  }
+
+  constexpr bool operator==(const UniformInfo& other) const {
+    return (uniform_name == other.uniform_name &&  //
+            location == other.location &&          //
+            type_name == other.type_name &&        //
+            columns == other.columns &&            //
+            vec_size == other.vec_size);
+  }
+
+ private:
+  static UniformInfo FloatInfo(const std::string& name,
+                               uint32_t location,
+                               uint32_t columns,
+                               uint32_t vec_size) {
+    return UniformInfo{
+        .uniform_name = name,
+        .location = location,
+        .type_name = "ShaderType::kFloat",
+        .columns = columns,
+        .vec_size = vec_size,
+    };
+  }
+};
+
+inline std::ostream& operator<<(std::ostream& out, const UniformInfo& info) {
+  out << "UniformInfo {" << std::endl
+      << "  uniform_name: " << info.uniform_name << std::endl
+      << "  location: " << info.location << std::endl
+      << "  type_name: " << info.type_name << std::endl
+      << "  columns: " << info.columns << std::endl
+      << "  vec_size: " << info.vec_size << std::endl
+      << "}";
+  return out;
+}
+}  // namespace
+
+TEST_P(CompilerTestRuntime, UniformsAppearInJson) {
+  if (GetParam() == TargetPlatform::kRuntimeStageVulkan) {
+    // TODO(https://github.com/flutter/flutter/issues/182578): Investigate why
+    // this does not pass.
+    GTEST_SKIP() << "Not supported with Vulkan";
+  }
+
+  ASSERT_TRUE(CanCompileAndReflect("sample_with_uniforms.frag",
+                                   SourceType::kFragmentShader,
+                                   SourceLanguage::kGLSL));
+
+  auto json_fd = GetReflectionJson("sample_with_uniforms.frag");
+  ASSERT_TRUE(json_fd);
+  nlohmann::json shader_json = nlohmann::json::parse(json_fd->GetMapping());
+  auto sampler_list = shader_json["sampled_images"];
+  auto float_list = shader_json["uniforms"];
+  ASSERT_EQ(sampler_list.size(), 2u);
+  ASSERT_EQ(float_list.size(), 6u);
+
+  {
+    // clang-format off
+    std::array expected_infos = {
+        UniformInfo::Sampler("uFirstSampler", 1u),
+        UniformInfo::Sampler("uSampler", 7u),
+    };
+    // clang-format on
+    ASSERT_EQ(sampler_list.size(), expected_infos.size());
+    for (size_t i = 0; i < expected_infos.size(); i++) {
+      EXPECT_EQ(UniformInfo::fromJson(sampler_list[i]), expected_infos[i])
+          << "index: " << i;
+    }
+  }
+
+  {
+    // clang-format off
+    std::array expected_infos = {
+        UniformInfo::Float("uFirstFloat", 0u),
+        UniformInfo::Float("uFloat", 2u),
+        UniformInfo::Vec2("uVec2", 3u),
+        UniformInfo::Vec3("uVec3", 4u),
+        UniformInfo::Vec4("uVec4", 5u),
+        UniformInfo::Mat4("uMat4", 6u),
+    };
+    // clang-format on
+    ASSERT_EQ(float_list.size(), expected_infos.size());
+    for (size_t i = 0; i < expected_infos.size(); i++) {
+      EXPECT_EQ(UniformInfo::fromJson(float_list[i]), expected_infos[i])
+          << "index: " << i;
+    }
+  }
+}
+
+TEST_P(CompilerTestRuntime, PositionedUniformsAppearInJson) {
+  if (GetParam() == TargetPlatform::kRuntimeStageVulkan) {
+    // TODO(https://github.com/flutter/flutter/issues/182578): Investigate why
+    // this does not pass.
+    GTEST_SKIP() << "Not supported with Vulkan";
+  }
+
+  ASSERT_TRUE(CanCompileAndReflect("sample_with_positioned_uniforms.frag",
+                                   SourceType::kFragmentShader,
+                                   SourceLanguage::kGLSL));
+
+  auto json_fd = GetReflectionJson("sample_with_positioned_uniforms.frag");
+  ASSERT_TRUE(json_fd);
+  nlohmann::json shader_json = nlohmann::json::parse(json_fd->GetMapping());
+  auto sampler_list = shader_json["sampled_images"];
+  auto float_list = shader_json["uniforms"];
+  ASSERT_EQ(sampler_list.size(), 3u);
+  ASSERT_EQ(float_list.size(), 7u);
+
+  {
+    // clang-format off
+    std::array expected_infos = {
+        UniformInfo::Sampler("uSamplerNotPositioned1", 1u),
+        UniformInfo::Sampler("uSampler", 0u),
+        UniformInfo::Sampler("uSamplerNotPositioned2", 3u),
+    };
+    // clang-format on
+    ASSERT_EQ(sampler_list.size(), expected_infos.size());
+    for (size_t i = 0; i < expected_infos.size(); i++) {
+      EXPECT_EQ(UniformInfo::fromJson(sampler_list[i]), expected_infos[i])
+          << "index: " << i;
+    }
+  }
+
+  {
+    // clang-format off
+    std::array expected_infos = {
+        UniformInfo::Float("uFloatNotPositioned1", 0u),
+        UniformInfo::Float("uFloat", 6u),
+        UniformInfo::Vec2("uVec2", 5u),
+        UniformInfo::Vec3("uVec3", 3u),
+        UniformInfo::Vec4("uVec4", 2u),
+        UniformInfo::Mat4("uMat4", 1u),
+        UniformInfo::Float("uFloatNotPositioned2", 2u),
+    };
+    // clang-format on
+    ASSERT_EQ(float_list.size(), expected_infos.size());
+    for (size_t i = 0; i < expected_infos.size(); i++) {
+      EXPECT_EQ(UniformInfo::fromJson(float_list[i]), expected_infos[i])
+          << "index: " << i;
+    }
+  }
+}
+
+TEST_P(CompilerTest, UniformsHaveBindingAndSet) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
+  ASSERT_TRUE(CanCompileAndReflect("sample_with_binding.vert",
+                                   SourceType::kVertexShader));
+  ASSERT_TRUE(CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));
+
+  struct binding_and_set {
+    uint32_t binding;
+    uint32_t set;
+  };
+
+  auto get_binding = [&](const char* fixture) -> binding_and_set {
+    auto json_fd = GetReflectionJson(fixture);
+    nlohmann::json shader_json = nlohmann::json::parse(json_fd->GetMapping());
+    uint32_t binding = shader_json["buffers"][0]["binding"].get<uint32_t>();
+    uint32_t set = shader_json["buffers"][0]["set"].get<uint32_t>();
+    return {binding, set};
+  };
+
+  auto vert_uniform_binding = get_binding("sample_with_binding.vert");
+  auto frag_uniform_binding = get_binding("sample.frag");
+
+  ASSERT_EQ(frag_uniform_binding.set, 0u);
+  ASSERT_EQ(vert_uniform_binding.set, 3u);
+  ASSERT_EQ(vert_uniform_binding.binding, 17u);
+}
+
+TEST_P(CompilerTestSkSL, SkSLTextureLookUpOrderOfOperations) {
+  ASSERT_TRUE(
+      CanCompileAndReflect("texture_lookup.frag", SourceType::kFragmentShader));
+
+  auto shader = GetShaderFile("texture_lookup.frag", GetParam());
+  std::string_view shader_mapping(
+      reinterpret_cast<const char*>(shader->GetMapping()), shader->GetSize());
+
+  constexpr std::string_view expected =
+      "textureA.eval(textureA_size * ( vec2(1.0) + flutter_FragCoord.xy));";
+
+  EXPECT_NE(shader_mapping.find(expected), std::string::npos);
+}
+
+TEST_P(CompilerTestSkSL, CanCompileStructs) {
+  ASSERT_TRUE(CanCompileAndReflect("struct_internal.frag",
+                                   SourceType::kFragmentShader));
+}
+
+TEST_P(CompilerTestSkSL, FailsToCompileDueToArrayInitializerWithConstants) {
+  auto expected_err =
+      "There was a compiler error: SkSL does not support array initializers: "
+      "array_initializer_with_constants.frag:6";
+
+  EXPECT_EXIT(CanCompileAndReflect("array_initializer_with_constants.frag",
+                                   SourceType::kFragmentShader),
+              ::testing::ExitedWithCode(1), expected_err);
+}
+
+TEST_P(CompilerTestSkSL, FailsToCompileDueToArrayInitializerWithVariables) {
+  auto expected_err =
+      "There was a compiler error: SkSL does not support array initializers: "
+      "array_initializer_with_variables.frag:12";
+
+  EXPECT_EXIT(CanCompileAndReflect("array_initializer_with_variables.frag",
+                                   SourceType::kFragmentShader),
+              ::testing::ExitedWithCode(1), expected_err);
+}
+
+TEST_P(CompilerTestSkSL, FailsToCompileDueToArrayAssignment) {
+  // Does not EXIT because the backend SkSL compiler doesn't detect the invalid
+  // SkSL. Returns false because the Impeller Compiler's post-compile validation
+  // fails.
+  ASSERT_FALSE(CanCompileAndReflect("array_assignment.frag",
+                                    SourceType::kFragmentShader));
+
+  const Compiler* compiler = GetCompiler();
+  ASSERT_TRUE(compiler);
+  // Truncated error message.
+  ASSERT_STREQ(
+      compiler->GetErrorMessages().c_str(),
+      "\"array_assignment.frag\": \n"
+      "Compiled to invalid SkSL:\n"
+      "        // This SkSL shader is autogenerated by spirv-cross.\n"
+      "        \n"
+      "        float4 flutter_FragCoord;\n"
+      "        \n"
+      "        vec4 frag_color;\n"
+      "        \n"
+      "... (truncated 16 lines)\n"
+      "SkSL Error:\n"
+      "        error: 12: initializers are not permitted on arrays (or structs "
+      "containing arrays)\n"
+      "            float more_nums[2] = nums;\n"
+      "                                 ^^^^\n"
+      "        1 error\n");
+  // Full error message.
+  ASSERT_STREQ(compiler->GetVerboseErrorMessages().c_str(),
+               "\"array_assignment.frag\": \n"
+               "Compiled to invalid SkSL:\n"
+               "// This SkSL shader is autogenerated by spirv-cross.\n"
+               "\n"
+               "float4 flutter_FragCoord;\n"
+               "\n"
+               "vec4 frag_color;\n"
+               "\n"
+               "void FLT_main()\n"
+               "{\n"
+               "    float nums[2];\n"
+               "    nums[0] = 1.0;\n"
+               "    nums[1] = 0.5;\n"
+               "    float more_nums[2] = nums;\n"
+               "    frag_color = vec4(nums[0], nums[1], 1.0, 1.0);\n"
+               "}\n"
+               "\n"
+               "half4 main(float2 iFragCoord)\n"
+               "{\n"
+               "      flutter_FragCoord = float4(iFragCoord, 0, 0);\n"
+               "      FLT_main();\n"
+               "      return frag_color;\n"
+               "}\n"
+               "\n"
+               "SkSL Error:\n"
+               "error: 12: initializers are not permitted on arrays (or "
+               "structs containing arrays)\n"
+               "    float more_nums[2] = nums;\n"
+               "                         ^^^^\n"
+               "1 error\n"
+               "\n");
+}
+
+TEST_P(CompilerTestSkSL, CompilesWithValidArrayInitialization) {
+  ASSERT_TRUE(
+      CanCompileAndReflect("array_initialization_without_initializer.frag",
+                           SourceType::kFragmentShader));
+}
+
+TEST_P(CompilerTestRuntime, Mat2Reflection) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
+
+  ASSERT_TRUE(CanCompileAndReflect(
+      "mat2_test.frag", SourceType::kFragmentShader, SourceLanguage::kGLSL));
+
+  std::unique_ptr<fml::FileMapping> json_fd =
+      GetReflectionJson("mat2_test.frag");
+  ASSERT_TRUE(json_fd);
+  nlohmann::json shader_json = nlohmann::json::parse(json_fd->GetMapping());
+  nlohmann::json::value_type buffers = shader_json["buffers"];
+
+  // uParams should be in buffers.
+  ASSERT_GE(buffers.size(), 1u);
+  nlohmann::json::value_type uParams = buffers[0];
+  EXPECT_EQ(uParams["name"], "Params");
+
+  nlohmann::json::value_type members = uParams["type"]["members"];
+  // We expect 1 member (for the mat2) which is a Point (vec2) with array
+  // size 2.
+  ASSERT_EQ(members.size(), 1u);
+
+  nlohmann::json::value_type mat2Member = members[0];
+
+  // Should be Mat2 (vec2)
+  EXPECT_EQ(mat2Member["type"], "Mat2");
+
+  // Size 8 bytes (vec2)
+  EXPECT_EQ(mat2Member["size"], 8u);
+
+  // Byte length should be total array size (stride * count)
+  // Stride 16 * 2 = 32.
+  EXPECT_EQ(mat2Member["byte_length"], 32u);
+
+  // Array elements should be 2 (columns).
+  EXPECT_EQ(mat2Member["array_elements"], 2u);
+
+  // Offset 0
+  EXPECT_EQ(mat2Member["offset"], 0u);
+}
+
+TEST_P(CompilerTestUnknownPlatform, MustFailDueToUnknownPlatform) {
+  ASSERT_FALSE(
+      CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));
+}
+
+TEST(CompilerTest, EarlyReturnWithSamplerWarns) {
+  const std::string shader_source = R"(
+    #version 460 core
+    uniform sampler2D u_texture;
+    uniform vec4 u_array[4];
+    out vec4 fragColor;
+    void main() {
+      vec4 c = texture(u_texture, vec2(0.0));
+      if (c.a < 0.5) {
+        fragColor = vec4(0.0);
+        return;
+      }
+      vec4 total = vec4(0.0);
+      for (int i = 0; i < 4; i++) {
+        total += u_array[i];
+      }
+      fragColor = c + 0.001 * total;
+    }
+  )";
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(shader_source.data()),
+      shader_source.size(), [](auto, auto) {});
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "early_return_test.frag";
+  options.entry_point_name = "main";
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  EXPECT_FALSE(compiler.GetWarningMessages().empty())
+      << "Generated SL:\n"
+      << std::string(reinterpret_cast<const char*>(
+                         compiler.GetSLShaderSource()->GetMapping()),
+                     compiler.GetSLShaderSource()->GetSize());
+  EXPECT_NE(compiler.GetWarningMessages().find("multiple 'return'"),
+            std::string::npos);
+}
+
+TEST(CompilerTest, EarlyReturnWithoutSamplerDoesNotWarn) {
+  const std::string shader_source = R"(
+    #version 460 core
+    out vec4 fragColor;
+    void main() {
+      fragColor = vec4(1.0);
+      if (fragColor.r > 0.5) {
+        return;
+      }
+      fragColor = vec4(0.0);
+    }
+  )";
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(shader_source.data()),
+      shader_source.size(), [](auto, auto) {});
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "no_sampler_test.frag";
+  options.entry_point_name = "main";
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  EXPECT_TRUE(compiler.GetWarningMessages().empty());
+}
+
+TEST(CompilerTest, ReturnInCommentsDoesNotWarn) {
+  const std::string shader_source = R"(
+    #version 460 core
+    uniform sampler2D u_texture;
+    out vec4 fragColor;
+    // single line comment with return;
+    /* multi line comment
+       with return;
+    */
+    void main() {
+      // return; inside main comment
+      fragColor = texture(u_texture, vec2(0.0));
+    }
+  )";
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(shader_source.data()),
+      shader_source.size(), [](auto, auto) {});
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "comment_test.frag";
+  options.entry_point_name = "main";
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  EXPECT_TRUE(compiler.GetWarningMessages().empty());
+}
+
+TEST(CompilerTest, HelperFunctionWithReturnDoesNotWarn) {
+  const std::string shader_source = R"(
+    #version 460 core
+    uniform sampler2D u_texture;
+    out vec4 fragColor;
+    float helper(float val) {
+      if (val > 0.5) {
+        return 1.0;
+      }
+      return 0.0;
+    }
+    void main() {
+      fragColor = texture(u_texture, vec2(helper(0.8)));
+    }
+  )";
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(shader_source.data()),
+      shader_source.size(), [](auto, auto) {});
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "helper_test.frag";
+  options.entry_point_name = "main";
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  EXPECT_TRUE(compiler.GetWarningMessages().empty());
+}
+
+}  // namespace testing
+}  // namespace compiler
+}  // namespace impeller

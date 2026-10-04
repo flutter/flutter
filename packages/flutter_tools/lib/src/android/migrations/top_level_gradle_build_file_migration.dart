@@ -6,31 +6,31 @@ import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../project.dart';
 
-const String _eagerCleanTaskDeclaration = '''
+const _eagerCleanTaskDeclaration = '''
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
 ''';
 
-const String _lazyCleanTaskDeclaration = '''
+const _lazyCleanTaskDeclaration = '''
 tasks.register("clean", Delete) {
-    delete rootProject.buildDir
+    delete rootProject.layout.buildDirectory
 }
 ''';
 
 /// Migrate the Gradle "clean" task to use modern, lazy declaration style.
 class TopLevelGradleBuildFileMigration extends ProjectMigrator {
-  TopLevelGradleBuildFileMigration(
-    AndroidProject project,
-    super.logger,
-  ) : _topLevelGradleBuildFile = project.hostAppGradleRoot.childFile('build.gradle');
+  TopLevelGradleBuildFileMigration(AndroidProject project, super.logger)
+    : _topLevelGradleBuildFile = project.hostAppGradleRoot.childFile('build.gradle');
 
   final File _topLevelGradleBuildFile;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     if (!_topLevelGradleBuildFile.existsSync()) {
-      logger.printTrace('Top-level Gradle build file not found, skipping migration of task "clean".');
+      logger.printTrace(
+        'Top-level Gradle build file not found, skipping migration of task "clean".',
+      );
       return;
     }
 

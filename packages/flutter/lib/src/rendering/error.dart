@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextStyle;
+import 'dart:ui'
+    as ui
+    show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextStyle;
 
 import 'package:flutter/foundation.dart';
 
@@ -32,7 +34,7 @@ class RenderErrorBox extends RenderBox {
   ///
   /// A message can optionally be provided. If a message is provided, an attempt
   /// will be made to render the message when the box paints.
-  RenderErrorBox([ this.message = '' ]) {
+  RenderErrorBox([this.message = '']) {
     try {
       if (message != '') {
         // This class is intentionally doing things using the low-level
@@ -43,7 +45,7 @@ class RenderErrorBox extends RenderBox {
         // Generally, the much better way to draw text in a RenderObject is to
         // use the TextPainter class. If you're looking for code to crib from,
         // see the paragraph.dart file and the RenderParagraph class.
-        final ui.ParagraphBuilder builder = ui.ParagraphBuilder(paragraphStyle);
+        final builder = ui.ParagraphBuilder(paragraphStyle);
         builder.pushStyle(textStyle);
         builder.addText(message);
         _paragraph = builder.build();
@@ -110,7 +112,7 @@ class RenderErrorBox extends RenderBox {
   static Color backgroundColor = _initBackgroundColor();
 
   static Color _initBackgroundColor() {
-    Color result = const Color(0xF0C0C0C0);
+    var result = const Color(0xF0C0C0C0);
     assert(() {
       result = const Color(0xF0900000);
       return true;
@@ -125,7 +127,7 @@ class RenderErrorBox extends RenderBox {
   static ui.TextStyle textStyle = _initTextStyle();
 
   static ui.TextStyle _initTextStyle() {
-    ui.TextStyle result = ui.TextStyle(
+    var result = ui.TextStyle(
       color: const Color(0xFF303030),
       fontFamily: 'sans-serif',
       fontSize: 18.0,
@@ -151,11 +153,11 @@ class RenderErrorBox extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     try {
-      context.canvas.drawRect(offset & size, Paint() .. color = backgroundColor);
+      context.canvas.drawRect(offset & size, Paint()..color = backgroundColor);
       if (_paragraph != null) {
         double width = size.width;
-        double left = 0.0;
-        double top = 0.0;
+        var left = 0.0;
+        var top = 0.0;
         if (width > padding.left + minimumWidth + padding.right) {
           width -= padding.left + padding.right;
           left += padding.left;

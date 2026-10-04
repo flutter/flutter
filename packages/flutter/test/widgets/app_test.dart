@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_page_tester.dart';
 
 class TestIntent extends Intent {
   const TestIntent();
@@ -44,14 +47,12 @@ void main() {
       WidgetsApp(
         key: key,
         builder: (BuildContext context, Widget? child) {
-          return Material(
-            child: Checkbox(
-              value: checked,
-              autofocus: true,
-              onChanged: (bool? value) {
-                checked = value;
-              },
-            ),
+          return _BasicCheckbox(
+            value: checked,
+            autofocus: true,
+            onChanged: (bool? value) {
+              checked = value;
+            },
           );
         },
         color: const Color(0xFF123456),
@@ -65,27 +66,23 @@ void main() {
   });
 
   testWidgets('WidgetsApp can override default key bindings', (WidgetTester tester) async {
-    final TestAction action = TestAction();
+    final action = TestAction();
     bool? checked = false;
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       WidgetsApp(
         key: key,
-        actions: <Type, Action<Intent>>{
-          TestIntent: action,
-        },
-        shortcuts: const <ShortcutActivator, Intent> {
+        actions: <Type, Action<Intent>>{TestIntent: action},
+        shortcuts: const <ShortcutActivator, Intent>{
           SingleActivator(LogicalKeyboardKey.space): TestIntent(),
         },
         builder: (BuildContext context, Widget? child) {
-          return Material(
-            child: Checkbox(
-              value: checked,
-              autofocus: true,
-              onChanged: (bool? value) {
-                checked = value;
-              },
-            ),
+          return _BasicCheckbox(
+            value: checked,
+            autofocus: true,
+            onChanged: (bool? value) {
+              checked = value;
+            },
           );
         },
         color: const Color(0xFF123456),
@@ -107,14 +104,12 @@ void main() {
     await tester.pumpWidget(
       WidgetsApp(
         builder: (BuildContext context, Widget? child) {
-          return Material(
-            child: Checkbox(
-              value: checked,
-              autofocus: true,
-              onChanged: (bool? value) {
-                checked = value;
-              },
-            ),
+          return _BasicCheckbox(
+            value: checked,
+            autofocus: true,
+            onChanged: (bool? value) {
+              checked = value;
+            },
           );
         },
         color: const Color(0xFF123456),
@@ -153,6 +148,19 @@ void main() {
     expect(checked, isTrue);
   }, variant: KeySimulatorTransitModeVariant.all());
 
+  testWidgets('Title is not created if title is not passed and kIsWeb', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF123456),
+        builder: (BuildContext context, Widget? child) => Container(),
+      ),
+    );
+
+    expect(find.byType(Title), kIsWeb ? findsNothing : findsOneWidget);
+  });
+
   group('error control test', () {
     Future<void> expectFlutterError({
       required GlobalKey<NavigatorState> key,
@@ -174,57 +182,53 @@ void main() {
     }
 
     testWidgets('push unknown route when onUnknownRoute is null', (WidgetTester tester) async {
-      final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
-      expectFlutterError(
+      final key = GlobalKey<NavigatorState>();
+      await expectFlutterError(
         key: key,
         tester: tester,
-        widget: MaterialApp(
-          navigatorKey: key,
-          home: Container(),
-          onGenerateRoute: (_) => null,
-        ),
+        widget: TestWidgetsApp(navigatorKey: key, home: Container(), onGenerateRoute: (_) => null),
         errorMessage:
-          'FlutterError\n'
-          '   Could not find a generator for route RouteSettings("/path", null)\n'
-          '   in the _WidgetsAppState.\n'
-          '   Make sure your root app widget has provided a way to generate\n'
-          '   this route.\n'
-          '   Generators for routes are searched for in the following order:\n'
-          '    1. For the "/" route, the "home" property, if non-null, is used.\n'
-          '    2. Otherwise, the "routes" table is used, if it has an entry for\n'
-          '   the route.\n'
-          '    3. Otherwise, onGenerateRoute is called. It should return a\n'
-          '   non-null value for any valid route not handled by "home" and\n'
-          '   "routes".\n'
-          '    4. Finally if all else fails onUnknownRoute is called.\n'
-          '   Unfortunately, onUnknownRoute was not set.\n',
+            'FlutterError\n'
+            '   Could not find a generator for route RouteSettings("/path", null)\n'
+            '   in the _WidgetsAppState.\n'
+            '   Make sure your root app widget has provided a way to generate\n'
+            '   this route.\n'
+            '   Generators for routes are searched for in the following order:\n'
+            '    1. For the "/" route, the "home" property, if non-null, is used.\n'
+            '    2. Otherwise, the "routes" table is used, if it has an entry for\n'
+            '   the route.\n'
+            '    3. Otherwise, onGenerateRoute is called. It should return a\n'
+            '   non-null value for any valid route not handled by "home" and\n'
+            '   "routes".\n'
+            '    4. Finally if all else fails onUnknownRoute is called.\n'
+            '   Unfortunately, onUnknownRoute was not set.\n',
       );
     });
 
     testWidgets('push unknown route when onUnknownRoute returns null', (WidgetTester tester) async {
-      final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
-      expectFlutterError(
+      final key = GlobalKey<NavigatorState>();
+      await expectFlutterError(
         key: key,
         tester: tester,
-        widget: MaterialApp(
+        widget: TestWidgetsApp(
           navigatorKey: key,
           home: Container(),
           onGenerateRoute: (_) => null,
           onUnknownRoute: (_) => null,
         ),
         errorMessage:
-          'FlutterError\n'
-          '   The onUnknownRoute callback returned null.\n'
-          '   When the _WidgetsAppState requested the route\n'
-          '   RouteSettings("/path", null) from its onUnknownRoute callback,\n'
-          '   the callback returned null. Such callbacks must never return\n'
-          '   null.\n' ,
+            'FlutterError\n'
+            '   The onUnknownRoute callback returned null.\n'
+            '   When the _WidgetsAppState requested the route\n'
+            '   RouteSettings("/path", null) from its onUnknownRoute callback,\n'
+            '   the callback returned null. Such callbacks must never return\n'
+            '   null.\n',
       );
     });
   });
 
   testWidgets('WidgetsApp can customize initial routes', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       WidgetsApp(
         navigatorKey: navigatorKey,
@@ -232,35 +236,38 @@ void main() {
           expect(initialRoute, '/abc');
           return <Route<void>>[
             PageRouteBuilder<void>(
-              pageBuilder: (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return const Text('non-regular page one');
-              },
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return const Text('non-regular page one');
+                  },
             ),
             PageRouteBuilder<void>(
-              pageBuilder: (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return const Text('non-regular page two');
-              },
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return const Text('non-regular page two');
+                  },
             ),
           ];
         },
         initialRoute: '/abc',
         onGenerateRoute: (RouteSettings settings) {
           return PageRouteBuilder<void>(
-            pageBuilder: (
-              BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-            ) {
-              return const Text('regular page');
-            },
+            pageBuilder:
+                (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) {
+                  return const Text('regular page');
+                },
           );
         },
         color: const Color(0xFF123456),
@@ -277,171 +284,411 @@ void main() {
   });
 
   testWidgets('WidgetsApp.router works', (WidgetTester tester) async {
-    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: RouteInformation(
-        uri: Uri.parse('initial'),
-      ),
+    final provider = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
     );
     addTearDown(provider.dispose);
-    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+    final delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = RouteInformation(
-          uri: Uri.parse('popped'),
-        );
+        delegate.routeInformation = RouteInformation(uri: Uri.parse('popped'));
         return route.didPop(result);
       },
     );
     addTearDown(delegate.dispose);
-    await tester.pumpWidget(WidgetsApp.router(
-      routeInformationProvider: provider,
-      routeInformationParser: SimpleRouteInformationParser(),
-      routerDelegate: delegate,
-      color: const Color(0xFF123456),
-    ));
-    expect(find.text('initial'), findsOneWidget);
-
-    // Simulate android back button intent.
-    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
-    await tester.pumpAndSettle();
-    expect(find.text('popped'), findsOneWidget);
-  });
-
-  testWidgets('WidgetsApp.router route information parser is optional', (WidgetTester tester) async {
-    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
-      builder: (BuildContext context, RouteInformation information) {
-        return Text(information.uri.toString());
-      },
-      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = RouteInformation(
-          uri: Uri.parse('popped'),
-        );
-        return route.didPop(result);
-      },
-    );
-    addTearDown(delegate.dispose);
-    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
-    await tester.pumpWidget(WidgetsApp.router(
-      routerDelegate: delegate,
-      color: const Color(0xFF123456),
-    ));
-    expect(find.text('initial'), findsOneWidget);
-
-    // Simulate android back button intent.
-    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
-    await tester.pumpAndSettle();
-    expect(find.text('popped'), findsOneWidget);
-  });
-
-  testWidgets('WidgetsApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
-    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
-      builder: (BuildContext context, RouteInformation information) {
-        return Text(information.uri.toString());
-      },
-      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = RouteInformation(
-          uri: Uri.parse('popped'),
-        );
-        return route.didPop(result);
-      },
-    );
-    addTearDown(delegate.dispose);
-    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
-    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: RouteInformation(
-        uri: Uri.parse('initial'),
-      ),
-    );
-    addTearDown(provider.dispose);
-    await expectLater(() async {
-      await tester.pumpWidget(WidgetsApp.router(
+    await tester.pumpWidget(
+      WidgetsApp.router(
         routeInformationProvider: provider,
+        routeInformationParser: SimpleRouteInformationParser(),
         routerDelegate: delegate,
         color: const Color(0xFF123456),
-      ));
-    }, throwsAssertionError);
+      ),
+    );
+    expect(find.text('initial'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/navigation',
+      message,
+      (_) {},
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
   });
 
-  testWidgets('WidgetsApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
-    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+  testWidgets('WidgetsApp.router route information parser is optional', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = RouteInformation(
-          uri: Uri.parse('popped'),
-        );
+        delegate.routeInformation = RouteInformation(uri: Uri.parse('popped'));
         return route.didPop(result);
       },
     );
     addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
-    final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
-    await expectLater(() async {
-      await tester.pumpWidget(WidgetsApp.router(
-        routerDelegate: delegate,
-        routerConfig: routerConfig,
-        color: const Color(0xFF123456),
-      ));
-    }, throwsAssertionError);
+    await tester.pumpWidget(
+      WidgetsApp.router(routerDelegate: delegate, color: const Color(0xFF123456)),
+    );
+    expect(find.text('initial'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/navigation',
+      message,
+      (_) {},
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
   });
+
+  testWidgets(
+    'WidgetsApp.router throw if route information provider is provided but no route information parser',
+    (WidgetTester tester) async {
+      final delegate = SimpleNavigatorRouterDelegate(
+        builder: (BuildContext context, RouteInformation information) {
+          return Text(information.uri.toString());
+        },
+        onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+          delegate.routeInformation = RouteInformation(uri: Uri.parse('popped'));
+          return route.didPop(result);
+        },
+      );
+      addTearDown(delegate.dispose);
+      delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
+      final provider = PlatformRouteInformationProvider(
+        initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
+      );
+      addTearDown(provider.dispose);
+      await expectLater(() async {
+        await tester.pumpWidget(
+          WidgetsApp.router(
+            routeInformationProvider: provider,
+            routerDelegate: delegate,
+            color: const Color(0xFF123456),
+          ),
+        );
+      }, throwsAssertionError);
+    },
+  );
+
+  testWidgets(
+    'WidgetsApp.router throw if route configuration is provided along with other delegate',
+    (WidgetTester tester) async {
+      final delegate = SimpleNavigatorRouterDelegate(
+        builder: (BuildContext context, RouteInformation information) {
+          return Text(information.uri.toString());
+        },
+        onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+          delegate.routeInformation = RouteInformation(uri: Uri.parse('popped'));
+          return route.didPop(result);
+        },
+      );
+      addTearDown(delegate.dispose);
+      delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
+      final routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
+      await expectLater(() async {
+        await tester.pumpWidget(
+          WidgetsApp.router(
+            routerDelegate: delegate,
+            routerConfig: routerConfig,
+            color: const Color(0xFF123456),
+          ),
+        );
+      }, throwsAssertionError);
+    },
+  );
 
   testWidgets('WidgetsApp.router router config works', (WidgetTester tester) async {
-    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+    final delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = RouteInformation(
-          uri: Uri.parse('popped'),
-        );
+        delegate.routeInformation = RouteInformation(uri: Uri.parse('popped'));
         return route.didPop(result);
       },
     );
     addTearDown(delegate.dispose);
-    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: RouteInformation(
-        uri: Uri.parse('initial'),
-      ),
+    final provider = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
     );
     addTearDown(provider.dispose);
-    final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
+    final routerConfig = RouterConfig<RouteInformation>(
       routeInformationProvider: provider,
       routeInformationParser: SimpleRouteInformationParser(),
       routerDelegate: delegate,
-      backButtonDispatcher: RootBackButtonDispatcher()
+      backButtonDispatcher: RootBackButtonDispatcher(),
     );
-    await tester.pumpWidget(WidgetsApp.router(
-      routerConfig: routerConfig,
-      color: const Color(0xFF123456),
-    ));
+    await tester.pumpWidget(
+      WidgetsApp.router(routerConfig: routerConfig, color: const Color(0xFF123456)),
+    );
     expect(find.text('initial'), findsOneWidget);
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/navigation',
+      message,
+      (_) {},
+    );
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
 
   testWidgets('WidgetsApp.router has correct default', (WidgetTester tester) async {
-    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+    final delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
       },
-      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) => true,
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
     );
     addTearDown(delegate.dispose);
-    await tester.pumpWidget(WidgetsApp.router(
-      routeInformationParser: SimpleRouteInformationParser(),
-      routerDelegate: delegate,
-      color: const Color(0xFF123456),
-    ));
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+        color: const Color(0xFF123456),
+      ),
+    );
     expect(find.text('/'), findsOneWidget);
+  });
+
+  testWidgets('WidgetsApp.router wraps routing in FocusScope', (WidgetTester tester) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+        color: const Color(0xFF123456),
+      ),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    expect(focusScopeFinder, findsOneWidget);
+
+    final FocusScope focusScope = tester.widget(focusScopeFinder);
+    expect(focusScope.autofocus, isTrue);
+    expect(focusScope.child, isA<Router<Object>>());
+    expect(
+      delegate.navigatorKey.currentState!.focusNode.enclosingScope?.debugLabel,
+      'Navigator Scope',
+    );
+  });
+
+  testWidgets('WidgetsApp.router with routerConfig wraps routing in FocusScope', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
+    final routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
+    await tester.pumpWidget(
+      WidgetsApp.router(routerConfig: routerConfig, color: const Color(0xFF123456)),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    expect(focusScopeFinder, findsOneWidget);
+
+    final FocusScope focusScope = tester.widget(focusScopeFinder);
+    expect(focusScope.autofocus, isTrue);
+    expect(focusScope.child, isA<Router<Object>>());
+    expect(
+      delegate.navigatorKey.currentState!.focusNode.enclosingScope?.debugLabel,
+      'Navigator Scope',
+    );
+  });
+
+  testWidgets('WidgetsApp wraps navigator in FocusScope', (WidgetTester tester) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      WidgetsApp(
+        navigatorKey: navigatorKey,
+        color: const Color(0xFF123456),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            settings: settings,
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) =>
+                builder(context),
+          );
+        },
+        home: const Placeholder(),
+      ),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    expect(focusScopeFinder, findsOneWidget);
+
+    final FocusScope focusScope = tester.widget(focusScopeFinder);
+    expect(focusScope.autofocus, isTrue);
+    expect(focusScope.child, isA<Navigator>());
+    expect(navigatorKey.currentState!.focusNode.enclosingScope?.debugLabel, 'Navigator Scope');
+  });
+
+  testWidgets('WidgetsApp.router passes FocusScope as child to builder', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    Widget? capturedChild;
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+        builder: (BuildContext context, Widget? child) {
+          capturedChild = child;
+          return child!;
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+
+    expect(capturedChild, isA<FocusScope>());
+    final focusScope = capturedChild! as FocusScope;
+    expect(focusScope.debugLabel, 'Navigator Scope');
+    expect(focusScope.child, isA<Router<Object>>());
+  });
+
+  testWidgets('WidgetsApp.router produces expected semantics tree structure', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return const Text('route content', textDirection: TextDirection.ltr);
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+        color: const Color(0xFF123456),
+      ),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    final SemanticsNode focusScopeNode = tester.semantics.find(focusScopeFinder);
+    final SemanticsNode routeContentNode = tester.semantics.find(find.text('route content'));
+    final SemanticsNode routeScopeNode = routeContentNode.parent!;
+
+    // FocusScope's explicitChildNodes prevents WidgetsApp's Directionality from
+    // merging with the route's semantics node, ensuring the route remains an
+    // explicit child node even when it is the sole entry in the Navigator.
+    expect(routeScopeNode, isNot(same(focusScopeNode)));
+    expect(routeScopeNode.parent, same(focusScopeNode));
+
+    // Inserting an overlay entry (such as Autocomplete options or a dialog) does
+    // not reparent the route's semantics node.
+    final entry = OverlayEntry(
+      builder: (BuildContext context) =>
+          const Text('overlay content', textDirection: TextDirection.ltr),
+    );
+    addTearDown(
+      () => entry
+        ..remove()
+        ..dispose(),
+    );
+    delegate.navigatorKey.currentState!.overlay!.insert(entry);
+    await tester.pump();
+
+    expect(tester.semantics.find(find.text('route content')).parent, same(routeScopeNode));
+    expect(routeScopeNode.parent, same(focusScopeNode));
+    expect(tester.semantics.find(find.text('overlay content')).parent, same(focusScopeNode));
+  });
+
+  testWidgets('WidgetsApp.router with routerConfig produces expected semantics tree structure', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return const Text('route content', textDirection: TextDirection.ltr);
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
+    final routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
+
+    await tester.pumpWidget(
+      WidgetsApp.router(routerConfig: routerConfig, color: const Color(0xFF123456)),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    final SemanticsNode focusScopeNode = tester.semantics.find(focusScopeFinder);
+    final SemanticsNode routeContentNode = tester.semantics.find(find.text('route content'));
+    final SemanticsNode routeScopeNode = routeContentNode.parent!;
+
+    expect(routeScopeNode, isNot(same(focusScopeNode)));
+    expect(routeScopeNode.parent, same(focusScopeNode));
+  });
+
+  testWidgets('WidgetsApp with navigator produces expected semantics tree structure', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF123456),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            settings: settings,
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) =>
+                builder(context),
+          );
+        },
+        home: const Text('route content', textDirection: TextDirection.ltr),
+      ),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    final SemanticsNode focusScopeNode = tester.semantics.find(focusScopeFinder);
+    final SemanticsNode routeContentNode = tester.semantics.find(find.text('route content'));
+    final SemanticsNode routeScopeNode = routeContentNode.parent!;
+
+    expect(routeScopeNode, isNot(same(focusScopeNode)));
+    expect(routeScopeNode.parent, same(focusScopeNode));
   });
 
   testWidgets('WidgetsApp has correct default ScrollBehavior', (WidgetTester tester) async {
@@ -462,14 +709,8 @@ void main() {
     // Matches exactly for language code.
     expect(
       basicLocaleListResolution(
-        <Locale>[
-          const Locale('zh'),
-          const Locale('un'),
-          const Locale('en'),
-        ],
-        <Locale>[
-          const Locale('en'),
-        ],
+        <Locale>[const Locale('zh'), const Locale('un'), const Locale('en')],
+        <Locale>[const Locale('en')],
       ),
       const Locale('en'),
     );
@@ -477,13 +718,8 @@ void main() {
     // Matches exactly for language code and country code.
     expect(
       basicLocaleListResolution(
-        <Locale>[
-          const Locale('en'),
-          const Locale('en', 'US'),
-        ],
-        <Locale>[
-          const Locale('en', 'US'),
-        ],
+        <Locale>[const Locale('en'), const Locale('en', 'US')],
+        <Locale>[const Locale('en', 'US')],
       ),
       const Locale('en', 'US'),
     );
@@ -492,55 +728,28 @@ void main() {
     expect(
       basicLocaleListResolution(
         <Locale>[
-          const Locale.fromSubtags(
-            languageCode: 'zh',
-            scriptCode: 'Hant',
-            countryCode: 'HK',
-          ),
+          const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
         ],
         <Locale>[
-          const Locale.fromSubtags(
-            languageCode: 'zh',
-            countryCode: 'HK',
-          ),
-          const Locale.fromSubtags(
-            languageCode: 'zh',
-            scriptCode: 'Hant',
-          ),
+          const Locale.fromSubtags(languageCode: 'zh', countryCode: 'HK'),
+          const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
         ],
       ),
-      const Locale.fromSubtags(
-        languageCode: 'zh',
-        scriptCode: 'Hant',
-      ),
+      const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
     );
 
     // Matches exactly for language code, script code and country code.
     expect(
       basicLocaleListResolution(
         <Locale>[
-          const Locale.fromSubtags(
-            languageCode: 'zh',
-          ),
-          const Locale.fromSubtags(
-            languageCode: 'zh',
-            scriptCode: 'Hant',
-            countryCode: 'TW',
-          ),
+          const Locale.fromSubtags(languageCode: 'zh'),
+          const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'),
         ],
         <Locale>[
-          const Locale.fromSubtags(
-            languageCode: 'zh',
-            scriptCode: 'Hant',
-            countryCode: 'TW',
-          ),
+          const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'),
         ],
       ),
-      const Locale.fromSubtags(
-        languageCode: 'zh',
-        scriptCode: 'Hant',
-        countryCode: 'TW',
-      ),
+      const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'),
     );
 
     // Selects for country code if the language code is not found in the
@@ -548,48 +757,32 @@ void main() {
     expect(
       basicLocaleListResolution(
         <Locale>[
-          const Locale.fromSubtags(
-            languageCode: 'en',
-          ),
-          const Locale.fromSubtags(
-            languageCode: 'ar',
-            countryCode: 'tn',
-          ),
+          const Locale.fromSubtags(languageCode: 'en'),
+          const Locale.fromSubtags(languageCode: 'ar', countryCode: 'tn'),
         ],
-        <Locale>[
-          const Locale.fromSubtags(
-            languageCode: 'fr',
-            countryCode: 'tn',
-          ),
-        ],
+        <Locale>[const Locale.fromSubtags(languageCode: 'fr', countryCode: 'tn')],
       ),
-      const Locale.fromSubtags(
-        languageCode: 'fr',
-        countryCode: 'tn',
-      ),
+      const Locale.fromSubtags(languageCode: 'fr', countryCode: 'tn'),
     );
 
     // Selects first (default) locale when no match at all is found.
     expect(
       basicLocaleListResolution(
-        <Locale>[
-          const Locale('tn'),
-        ],
-        <Locale>[
-          const Locale('zh'),
-          const Locale('un'),
-          const Locale('en'),
-        ],
+        <Locale>[const Locale('tn')],
+        <Locale>[const Locale('zh'), const Locale('un'), const Locale('en')],
       ),
       const Locale('zh'),
     );
   });
 
-  testWidgets("WidgetsApp reports an exception if the selected locale isn't supported", (WidgetTester tester) async {
+  testWidgets("WidgetsApp reports an exception if the selected locale isn't supported", (
+    WidgetTester tester,
+  ) async {
     late final List<Locale>? localesArg;
     late final Iterable<Locale> supportedLocalesArg;
     await tester.pumpWidget(
-      MaterialApp( // This uses a MaterialApp because it introduces some actual localizations.
+      TestWidgetsApp(
+        localizationsDelegates: const <LocalizationsDelegate<Object?>>[TestLocalizationsDelegate()],
         localeListResolutionCallback: (List<Locale>? locales, Iterable<Locale> supportedLocales) {
           localesArg = locales;
           supportedLocalesArg = supportedLocales;
@@ -606,189 +799,233 @@ void main() {
       expect(localesArg, const <Locale>[Locale('en', 'US'), Locale('zh', 'CN')]);
     }
     expect(supportedLocalesArg, const <Locale>[Locale('en', 'US')]);
-    expect(tester.takeException(), "Warning: This application's locale, C_UTF-8, is not supported by all of its localization delegates.");
+    expect(
+      tester.takeException(),
+      "Warning: This application's locale, C_UTF-8, is not supported by all of its localization delegates.",
+    );
   });
 
   testWidgets("WidgetsApp doesn't have dependency on MediaQuery", (WidgetTester tester) async {
-    int routeBuildCount = 0;
+    var routeBuildCount = 0;
 
     final Widget widget = WidgetsApp(
       color: const Color.fromARGB(255, 255, 255, 255),
       onGenerateRoute: (_) {
-        return PageRouteBuilder<void>(pageBuilder: (_, __, ___) {
-          routeBuildCount++;
-          return const Placeholder();
-        });
+        return PageRouteBuilder<void>(
+          pageBuilder: (_, _, _) {
+            routeBuildCount++;
+            return const Placeholder();
+          },
+        );
       },
     );
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(textScaler: TextScaler.linear(10)), child: widget),
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(10)),
+        child: widget,
+      ),
     );
 
     expect(routeBuildCount, equals(1));
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(textScaler: TextScaler.linear(20)), child: widget),
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(20)),
+        child: widget,
+      ),
     );
 
     expect(routeBuildCount, equals(1));
   });
 
-  testWidgets('WidgetsApp provides meta based shortcuts for iOS and macOS', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
+  testWidgets(
+    'WidgetsApp provides meta based shortcuts for iOS and macOS',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
 
-    final SelectAllSpy selectAllSpy = SelectAllSpy();
-    final CopySpy copySpy = CopySpy();
-    final PasteSpy pasteSpy = PasteSpy();
-    final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
-      // Copy Paste
-      SelectAllTextIntent: selectAllSpy,
-      CopySelectionTextIntent: copySpy,
-      PasteTextIntent: pasteSpy,
-    };
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (BuildContext context, Widget? child) {
-          return Actions(
-            actions: actions,
-            child: Focus(
-              focusNode: focusNode,
-              child: const Placeholder(),
-            ),
-          );
-        },
-        color: const Color(0xFF123456),
-      ),
-    );
-    focusNode.requestFocus();
-    await tester.pump();
-    expect(selectAllSpy.invoked, isFalse);
-    expect(copySpy.invoked, isFalse);
-    expect(pasteSpy.invoked, isFalse);
+      final selectAllSpy = SelectAllSpy();
+      final copySpy = CopySpy();
+      final pasteSpy = PasteSpy();
+      final actions = <Type, Action<Intent>>{
+        // Copy Paste
+        SelectAllTextIntent: selectAllSpy,
+        CopySelectionTextIntent: copySpy,
+        PasteTextIntent: pasteSpy,
+      };
+      await tester.pumpWidget(
+        WidgetsApp(
+          builder: (BuildContext context, Widget? child) {
+            return Actions(
+              actions: actions,
+              child: Focus(focusNode: focusNode, child: const Placeholder()),
+            );
+          },
+          color: const Color(0xFF123456),
+        ),
+      );
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(selectAllSpy.invoked, isFalse);
+      expect(copySpy.invoked, isFalse);
+      expect(pasteSpy.invoked, isFalse);
 
-    // Select all.
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
-    await tester.pump();
+      // Select all.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await tester.pump();
 
-    expect(selectAllSpy.invoked, isTrue);
-    expect(copySpy.invoked, isFalse);
-    expect(pasteSpy.invoked, isFalse);
+      expect(selectAllSpy.invoked, isTrue);
+      expect(copySpy.invoked, isFalse);
+      expect(pasteSpy.invoked, isFalse);
 
-    // Copy.
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
-    await tester.pump();
+      // Copy.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await tester.pump();
 
-    expect(selectAllSpy.invoked, isTrue);
-    expect(copySpy.invoked, isTrue);
-    expect(pasteSpy.invoked, isFalse);
+      expect(selectAllSpy.invoked, isTrue);
+      expect(copySpy.invoked, isTrue);
+      expect(pasteSpy.invoked, isFalse);
 
-    // Paste.
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyV);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyV);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
-    await tester.pump();
+      // Paste.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyV);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyV);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await tester.pump();
 
-    expect(selectAllSpy.invoked, isTrue);
-    expect(copySpy.invoked, isTrue);
-    expect(pasteSpy.invoked, isTrue);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+      expect(selectAllSpy.invoked, isTrue);
+      expect(copySpy.invoked, isTrue);
+      expect(pasteSpy.invoked, isTrue);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
 
   group('Android Predictive Back', () {
     Future<void> setAppLifeCycleState(AppLifecycleState state) async {
       final ByteData? message = const StringCodec().encodeMessage(state.toString());
-      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .handlePlatformMessage('flutter/lifecycle', message, (ByteData? data) {});
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/lifecycle',
+        message,
+        (ByteData? data) {},
+      );
     }
 
-    final List<bool> frameworkHandlesBacks = <bool>[];
+    final frameworkHandlesBacks = <bool>[];
     setUp(() async {
       frameworkHandlesBacks.clear();
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async {
           if (methodCall.method == 'SystemNavigator.setFrameworkHandlesBack') {
             expect(methodCall.arguments, isA<bool>());
             frameworkHandlesBacks.add(methodCall.arguments as bool);
           }
           return;
-        });
+        },
+      );
     });
 
     tearDown(() async {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(SystemChannels.platform, null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      );
       await setAppLifeCycleState(AppLifecycleState.resumed);
     });
 
-    testWidgets('WidgetsApp calls setFrameworkHandlesBack only when app is ready', (WidgetTester tester) async {
-      // Start in the `resumed` state, where setFrameworkHandlesBack should be
-      // called like normal.
-      await setAppLifeCycleState(AppLifecycleState.resumed);
+    testWidgets(
+      'WidgetsApp calls setFrameworkHandlesBack only when app is ready',
+      (WidgetTester tester) async {
+        // Start in the `resumed` state, where setFrameworkHandlesBack should be
+        // called like normal.
+        await setAppLifeCycleState(AppLifecycleState.resumed);
 
-      late BuildContext currentContext;
-      await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xFF123456),
-          builder: (BuildContext context, Widget? child) {
-            currentContext = context;
-            return const Placeholder();
-          },
-        ),
-      );
+        late BuildContext currentContext;
+        await tester.pumpWidget(
+          WidgetsApp(
+            color: const Color(0xFF123456),
+            builder: (BuildContext context, Widget? child) {
+              currentContext = context;
+              return const Placeholder();
+            },
+          ),
+        );
 
-      expect(frameworkHandlesBacks, isEmpty);
+        expect(frameworkHandlesBacks, isEmpty);
 
-      const NavigationNotification(canHandlePop: true).dispatch(currentContext);
-      await tester.pumpAndSettle();
-      expect(frameworkHandlesBacks, isNotEmpty);
-      expect(frameworkHandlesBacks.last, isTrue);
+        const NavigationNotification(canHandlePop: true).dispatch(currentContext);
+        await tester.pumpAndSettle();
+        expect(frameworkHandlesBacks, isNotEmpty);
+        expect(frameworkHandlesBacks.last, isTrue);
 
-      const NavigationNotification(canHandlePop: false).dispatch(currentContext);
-      await tester.pumpAndSettle();
-      expect(frameworkHandlesBacks.last, isFalse);
+        const NavigationNotification(canHandlePop: false).dispatch(currentContext);
+        await tester.pumpAndSettle();
+        expect(frameworkHandlesBacks.last, isFalse);
 
-      // Set the app state to inactive, where setFrameworkHandlesBack shouldn't
-      // be called.
-      await setAppLifeCycleState(AppLifecycleState.inactive);
+        // Set the app state to inactive, where setFrameworkHandlesBack is still
+        // called. This could happen when responding to a tap on a notification
+        // when the app is not active and immediately navigating, for example.
+        // See https://github.com/flutter/flutter/pull/154313.
+        await setAppLifeCycleState(AppLifecycleState.inactive);
 
-      final int finalCallsLength = frameworkHandlesBacks.length;
-      const NavigationNotification(canHandlePop: true).dispatch(currentContext);
-      await tester.pumpAndSettle();
-      expect(frameworkHandlesBacks, hasLength(finalCallsLength));
+        final int inactiveStartCallsLength = frameworkHandlesBacks.length;
+        const NavigationNotification(canHandlePop: true).dispatch(currentContext);
+        await tester.pumpAndSettle();
+        expect(frameworkHandlesBacks, hasLength(inactiveStartCallsLength + 1));
 
-      const NavigationNotification(canHandlePop: false).dispatch(currentContext);
-      await tester.pumpAndSettle();
-      expect(frameworkHandlesBacks, hasLength(finalCallsLength));
+        const NavigationNotification(canHandlePop: false).dispatch(currentContext);
+        await tester.pumpAndSettle();
+        expect(frameworkHandlesBacks, hasLength(inactiveStartCallsLength + 2));
 
-      // Set the app state to detached, which also shouldn't call
-      // setFrameworkHandlesBack. Must go to paused, then detached.
-      await setAppLifeCycleState(AppLifecycleState.paused);
-      await setAppLifeCycleState(AppLifecycleState.detached);
+        // Set the app state to detached, where setFrameworkHandlesBack shouldn't
+        // be called.
+        await setAppLifeCycleState(AppLifecycleState.detached);
 
-      const NavigationNotification(canHandlePop: true).dispatch(currentContext);
-      await tester.pumpAndSettle();
-      expect(frameworkHandlesBacks, hasLength(finalCallsLength));
+        final int finalCallsLength = frameworkHandlesBacks.length;
+        const NavigationNotification(canHandlePop: true).dispatch(currentContext);
+        await tester.pumpAndSettle();
+        expect(frameworkHandlesBacks, hasLength(finalCallsLength));
 
-      const NavigationNotification(canHandlePop: false).dispatch(currentContext);
-      await tester.pumpAndSettle();
-      expect(frameworkHandlesBacks, hasLength(finalCallsLength));
-    },
+        const NavigationNotification(canHandlePop: false).dispatch(currentContext);
+        await tester.pumpAndSettle();
+        expect(frameworkHandlesBacks, hasLength(finalCallsLength));
+      },
       skip: kIsWeb, // [intended] predictive back is only native Android.
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
     );
+  });
+
+  testWidgets('WidgetsApp does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox.shrink(
+          child: WidgetsApp(builder: (_, _) => const Text('X'), color: const Color(0xFFAABBCC)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(WidgetsApp)), Size.zero);
   });
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
-typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
+typedef SimpleRouterDelegateBuilder = Widget Function(
+  BuildContext context,
+  RouteInformation information,
+);
+typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(
+  Route<T> route,
+  T result,
+  SimpleNavigatorRouterDelegate delegate,
+);
 
 class SelectAllSpy extends Action<SelectAllTextIntent> {
   bool invoked = false;
@@ -828,11 +1065,9 @@ class SimpleRouteInformationParser extends RouteInformationParser<RouteInformati
   }
 }
 
-class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
-  SimpleNavigatorRouterDelegate({
-    required this.builder,
-    required this.onPopPage,
-  });
+class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>
+    with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
+  SimpleNavigatorRouterDelegate({required this.builder, required this.onPopPage});
 
   @override
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -865,14 +1100,55 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        const MaterialPage<void>(
-          child: Text('base'),
-        ),
-        MaterialPage<void>(
+        const TestPage<void>(child: Text('base')),
+        TestPage<void>(
           key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),
       ],
+    );
+  }
+}
+
+class TestLocalizationsDelegate extends LocalizationsDelegate<Object> {
+  const TestLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'en';
+
+  @override
+  Future<Object> load(Locale locale) {
+    return SynchronousFuture<Object>(const Object());
+  }
+
+  @override
+  bool shouldReload(TestLocalizationsDelegate old) => false;
+}
+
+class _BasicCheckbox extends StatefulWidget {
+  const _BasicCheckbox({required this.value, required this.onChanged, this.autofocus = false});
+
+  final bool? value;
+  final ValueChanged<bool?>? onChanged;
+  final bool autofocus;
+
+  @override
+  State<_BasicCheckbox> createState() => _BasicCheckboxState();
+}
+
+class _BasicCheckboxState extends State<_BasicCheckbox> {
+  @override
+  Widget build(BuildContext context) {
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            widget.onChanged?.call(!(widget.value ?? false));
+            return null;
+          },
+        ),
+      },
+      child: Focus(autofocus: widget.autofocus, child: const SizedBox()),
     );
   }
 }

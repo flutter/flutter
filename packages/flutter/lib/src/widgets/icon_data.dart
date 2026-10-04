@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'basic.dart';
+/// @docImport 'icon.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 /// A description of an icon fulfilled by a font glyph.
@@ -12,12 +19,24 @@ import 'package:flutter/foundation.dart';
 /// In release builds, the Flutter tool will tree shake out of bundled fonts
 /// the code points (or instances of [IconData]) which are not referenced from
 /// Dart app code. See the [staticIconProvider] annotation for more details.
+@RecordUse()
 @immutable
-class IconData {
+final class IconData {
   /// Creates icon data.
   ///
   /// Rarely used directly. Instead, consider using one of the predefined icons
   /// like the [Icons] collection.
+  ///
+  /// The [fontFamily] argument is normally required when using custom icons.
+  ///
+  /// e.g. When using a [codePoint] from a `CustomIcons` font
+  /// ```yaml
+  /// fonts:
+  ///   - family: CustomIcons
+  ///     fonts:
+  ///       - asset: assets/fonts/CustomIcons.ttf
+  /// ```
+  /// `IconData` usages should specify `fontFamily: 'CustomIcons'`.
   ///
   /// The [fontPackage] argument must be non-null when using a font family that
   /// is included in a package. This is used when selecting the font.
@@ -27,17 +46,19 @@ class IconData {
   /// need to be explicitly opted out at build time). See [staticIconProvider]
   /// for more context.
   const IconData(
-    this.codePoint, {
-    this.fontFamily,
-    this.fontPackage,
+    @mustBeConst this.codePoint, {
+    @mustBeConst this.fontFamily,
+    @mustBeConst this.fontPackage,
     this.matchTextDirection = false,
     this.fontFamilyFallback,
   });
 
   /// The Unicode code point at which this icon is stored in the icon font.
+  @_retainForIconTreeShaker
   final int codePoint;
 
   /// The font family from which the glyph for the [codePoint] will be selected.
+  @_retainForIconTreeShaker
   final String? fontFamily;
 
   /// The name of the package from which the font family is included.
@@ -48,6 +69,7 @@ class IconData {
   /// See also:
   ///
   ///  * [TextStyle], which describes how to use fonts from other packages.
+  @_retainForIconTreeShaker
   final String? fontPackage;
 
   /// Whether this icon should be automatically mirrored in right-to-left
@@ -55,11 +77,13 @@ class IconData {
   ///
   /// The [Icon] widget respects this value by mirroring the icon when the
   /// [Directionality] is [TextDirection.rtl].
+  @_retainForIconTreeShaker
   final bool matchTextDirection;
 
   /// The ordered list of font families to fall back on when a glyph cannot be found in a higher priority font family.
   ///
   /// For more details, refer to the documentation of [TextStyle]
+  @_retainForIconTreeShaker
   final List<String>? fontFamilyFallback;
 
   @override
@@ -67,12 +91,12 @@ class IconData {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is IconData
-        && other.codePoint == codePoint
-        && other.fontFamily == fontFamily
-        && other.fontPackage == fontPackage
-        && other.matchTextDirection == matchTextDirection
-        && listEquals(other.fontFamilyFallback, fontFamilyFallback);
+    return other is IconData &&
+        other.codePoint == codePoint &&
+        other.fontFamily == fontFamily &&
+        other.fontPackage == fontPackage &&
+        other.matchTextDirection == matchTextDirection &&
+        listEquals(other.fontFamilyFallback, fontFamilyFallback);
   }
 
   @override
@@ -106,9 +130,7 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object?> json = super.toJsonMap(delegate);
     if (value != null) {
-      json['valueProperties'] = <String, Object>{
-        'codePoint': value!.codePoint,
-      };
+      json['valueProperties'] = <String, Object>{'codePoint': value!.codePoint};
     }
     return json;
   }
@@ -138,3 +160,10 @@ class _StaticIconProvider {
 /// }
 /// ```
 const Object staticIconProvider = _StaticIconProvider();
+
+/// Retain the fields of [IconData] to ensure the icon tree shaker can access
+/// those fields after tree shaking the application.
+///
+/// This may be replaced with a `@RecordUse()` annotation once icon tree
+/// shaking uses the new link hooks.
+const _retainForIconTreeShaker = pragma('vm:entry-point');

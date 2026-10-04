@@ -15,11 +15,7 @@ import '../framework/utils.dart';
 
 const String _packageName = 'package_with_native_assets';
 
-const List<String> _buildModes = <String>[
-  'debug',
-  'profile',
-  'release',
-];
+const List<String> _buildModes = <String>['debug', 'profile', 'release'];
 
 TaskFunction createNativeAssetsTest({
   String? deviceIdOverride,
@@ -33,17 +29,17 @@ TaskFunction createNativeAssetsTest({
       deviceIdOverride = device.deviceId;
     }
 
-    await enableNativeAssets();
-
     for (final String buildMode in _buildModes) {
       if (buildMode != 'debug' && isIosSimulator) {
         continue;
       }
       final TaskResult buildModeResult = await inTempDir((Directory tempDirectory) async {
         final Directory packageDirectory = await createTestProject(_packageName, tempDirectory);
-        final Directory exampleDirectory = dir(packageDirectory.uri.resolve('example/').toFilePath());
+        final Directory exampleDirectory = dir(
+          packageDirectory.uri.resolve('example/').toFilePath(),
+        );
 
-        final List<String> options = <String>[
+        final options = <String>[
           '-d',
           deviceIdOverride!,
           '--no-android-gradle-daemon',
@@ -52,13 +48,17 @@ TaskFunction createNativeAssetsTest({
           '--uninstall-first',
           '--$buildMode',
         ];
-        int transitionCount = 0;
-        bool done = false;
+        var transitionCount = 0;
+        var done = false;
+        var error = false;
 
         await inDirectory<void>(exampleDirectory, () async {
           final int runFlutterResult = await runFlutter(
+            command: 'run',
             options: options,
             onLine: (String line, Process process) {
+              error |= line.contains('EXCEPTION CAUGHT BY WIDGETS LIBRARY');
+              error |= line.contains("Invalid argument(s): Couldn't resolve native function 'sum'");
               if (done) {
                 return;
               }
@@ -101,13 +101,36 @@ TaskFunction createNativeAssetsTest({
           }
         });
 
-        final int expectedNumberOfTransitions = buildMode == 'debug' ? 4 : 1;
+        final expectedNumberOfTransitions = buildMode == 'debug' ? 4 : 1;
         if (transitionCount != expectedNumberOfTransitions) {
           return TaskResult.failure(
             'Did not get expected number of transitions: $transitionCount '
             '(expected $expectedNumberOfTransitions)',
           );
         }
+        if (error) {
+          return TaskResult.failure('Error during hot reload or hot restart.');
+        }
+
+        if (buildMode == _buildModes.last) {
+          // Only run integration tests once.
+          done = false;
+          final int integrationTestResult = await inDirectory<int>(exampleDirectory, () async {
+            return runFlutter(
+              command: 'test',
+              options: <String>['integration_test', '-d', deviceIdOverride!],
+              onLine: (String line, Process _) {
+                if (line.contains('All tests passed!')) {
+                  done = true;
+                }
+              },
+            );
+          });
+          if (!done && integrationTestResult != 0) {
+            return TaskResult.failure('flutter test integration test failed');
+          }
+        }
+
         return TaskResult.success(null);
       });
       if (buildModeResult.failed) {
@@ -119,25 +142,25 @@ TaskFunction createNativeAssetsTest({
 }
 
 Future<int> runFlutter({
+  required String command,
   required List<String> options,
   required void Function(String, Process) onLine,
 }) async {
-  final Process process = await startFlutter(
-    'run',
-    options: options,
-  );
+  final Process process = await startFlutter(command, options: options);
 
-  final Completer<void> stdoutDone = Completer<void>();
-  final Completer<void> stderrDone = Completer<void>();
-  process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+  final stdoutDone = Completer<void>();
+  final stderrDone = Completer<void>();
+  process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((
+    String line,
+  ) {
     onLine(line, process);
     print('stdout: $line');
   }, onDone: stdoutDone.complete);
 
-  process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(
-        (String line) => print('stderr: $line'),
-        onDone: stderrDone.complete,
-      );
+  process.stderr
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen((String line) => print('stderr: $line'), onDone: stderrDone.complete);
 
   await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   final int exitCode = await process.exitCode;
@@ -146,54 +169,22 @@ Future<int> runFlutter({
 
 final String _flutterBin = path.join(flutterDirectory.path, 'bin', 'flutter');
 
-Future<void> enableNativeAssets() async {
-  print('Enabling configs for native assets...');
-  final int configResult = await exec(
-      _flutterBin,
-      <String>[
-        'config',
-        '-v',
-        '--enable-native-assets',
-      ],
-      canFail: true);
-  if (configResult != 0) {
-    print('Failed to enable configuration, tasks may not run.');
-  }
-}
+Future<Directory> createTestProject(String packageName, Directory tempDirectory) async {
+  await exec(_flutterBin, <String>[
+    'create',
+    '--no-pub',
+    '--template=package_ffi',
+    packageName,
+  ], workingDirectory: tempDirectory.path);
 
-Future<Directory> createTestProject(
-  String packageName,
-  Directory tempDirectory,
-) async {
-  await exec(
-    _flutterBin,
-    <String>[
-      'create',
-      '--no-pub',
-      '--template=package_ffi',
-      packageName,
-    ],
-    workingDirectory: tempDirectory.path,
-  );
+  final packageDirectory = Directory(path.join(tempDirectory.path, packageName));
+  await _pinDependencies(File(path.join(packageDirectory.path, 'pubspec.yaml')));
+  await _pinDependencies(File(path.join(packageDirectory.path, 'example', 'pubspec.yaml')));
 
-  final Directory packageDirectory = Directory(
-    path.join(tempDirectory.path, packageName),
-  );
-  await _pinDependencies(
-    File(path.join(packageDirectory.path, 'pubspec.yaml')),
-  );
-  await _pinDependencies(
-    File(path.join(packageDirectory.path, 'example', 'pubspec.yaml')),
-  );
+  await _addCodeAssetOpenHelper(packageDirectory, packageName);
+  await _addIntegrationTest(packageDirectory.uri.resolve('example/'), packageName);
 
-  await exec(
-    _flutterBin,
-    <String>[
-      'pub',
-      'get',
-    ],
-    workingDirectory: packageDirectory.path,
-  );
+  await exec(_flutterBin, <String>['pub', 'get'], workingDirectory: packageDirectory.path);
 
   return packageDirectory;
 }
@@ -204,12 +195,88 @@ Future<void> _pinDependencies(File pubspecFile) async {
   await pubspecFile.writeAsString(newPubspec);
 }
 
+Future<void> _addCodeAssetOpenHelper(Directory packageDirectory, String packageName) async {
+  final dartFile = File(path.join(packageDirectory.path, 'lib', '$packageName.dart'));
+  final String oldDartFile = await dartFile.readAsString();
+  final lineEnding = oldDartFile.contains('\r\n') ? '\r\n' : '\n';
+  final String withFfiImport = oldDartFile.replaceFirst(
+    "import 'dart:async';",
+    "import 'dart:async';${lineEnding}import 'dart:ffi';",
+  );
+  if (withFfiImport == oldDartFile) {
+    throw StateError('Failed to add dart:ffi import to ${dartFile.path}');
+  }
+  final String newDartFile = withFfiImport.replaceFirst(
+    'int sum(int a, int b) => bindings.sum(a, b);',
+    '''
+int sum(int a, int b) => bindings.sum(a, b);
+
+/// Invokes `sum` by explicitly opening the generated code asset.
+int sumWithCodeAsset(int a, int b) {
+  final library = DynamicLibrary.codeAsset(
+    'package:$packageName/${packageName}_bindings_generated.dart',
+  );
+  try {
+    final sum = library.lookupFunction<
+        IntPtr Function(IntPtr, IntPtr), int Function(int, int)>('sum');
+    return sum(a, b);
+  } finally {
+    library.close();
+  }
+}
+''',
+  );
+  if (newDartFile == withFfiImport) {
+    throw StateError('Failed to add sumWithCodeAsset to ${dartFile.path}');
+  }
+  await dartFile.writeAsString(newDartFile);
+}
 
 Future<T> inTempDir<T>(Future<T> Function(Directory tempDirectory) fun) async {
-  final Directory tempDirectory = dir(Directory.systemTemp.createTempSync().resolveSymbolicLinksSync());
+  final Directory tempDirectory = dir(
+    Directory.systemTemp.createTempSync().resolveSymbolicLinksSync(),
+  );
   try {
     return await fun(tempDirectory);
   } finally {
-    tempDirectory.deleteSync(recursive: true);
+    try {
+      tempDirectory.deleteSync(recursive: true);
+    } catch (_) {
+      // Ignore failures to delete a temporary directory.
+    }
   }
+}
+
+Future<void> _addIntegrationTest(Uri exampleDirectory, String packageName) async {
+  await exec(_flutterBin, <String>[
+    'pub',
+    'add',
+    'dev:integration_test:{"sdk":"flutter"}',
+  ], workingDirectory: exampleDirectory.toFilePath());
+
+  final Uri integrationTestPath = exampleDirectory.resolve('integration_test/my_test.dart');
+  final integrationTestFile = File.fromUri(integrationTestPath);
+  integrationTestFile
+    ..createSync(recursive: true)
+    ..writeAsStringSync('''
+import 'package:flutter_test/flutter_test.dart';
+import 'package:$packageName/$packageName.dart' as native_assets;
+import 'package:${packageName}_example/main.dart';
+import 'package:integration_test/integration_test.dart';
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  group('end-to-end test', () {
+    testWidgets('invoke native code', (tester) async {
+      // Load app widget.
+      await tester.pumpWidget(const MyApp());
+
+      // Verify the native function was called.
+      expect(find.text('sum(1, 2) = 3'), findsOneWidget);
+      expect(native_assets.sumWithCodeAsset(2, 3), 5);
+    });
+  });
+}
+''');
 }

@@ -34,10 +34,8 @@ class CategoryListItem extends StatefulWidget {
   State<CategoryListItem> createState() => _CategoryListItemState();
 }
 
-class _CategoryListItemState extends State<CategoryListItem>
-    with SingleTickerProviderStateMixin {
-  static final Animatable<double> _easeInTween =
-      CurveTween(curve: Curves.easeIn);
+class _CategoryListItemState extends State<CategoryListItem> with SingleTickerProviderStateMixin {
+  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
   static const Duration _expandDuration = Duration(milliseconds: 200);
   late AnimationController _controller;
   late Animation<double> _childrenHeightFactor;
@@ -59,10 +57,7 @@ class _CategoryListItemState extends State<CategoryListItem>
 
     _childrenHeightFactor = _controller.drive(_easeInTween);
     _headerChevronOpacity = _controller.drive(_easeInTween);
-    _headerHeight = Tween<double>(
-      begin: 80,
-      end: 96,
-    ).animate(_controller);
+    _headerHeight = Tween<double>(begin: 80, end: 96).animate(_controller);
     _headerMargin = EdgeInsetsGeometryTween(
       begin: const EdgeInsets.fromLTRB(32, 8, 32, 8),
       end: EdgeInsets.zero,
@@ -91,19 +86,8 @@ class _CategoryListItemState extends State<CategoryListItem>
     super.dispose();
   }
 
-  bool _shouldOpenList() {
-    switch (_controller.status) {
-      case AnimationStatus.completed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        return false;
-      case AnimationStatus.dismissed:
-        return true;
-    }
-  }
-
   void _handleTap() {
-    if (_shouldOpenList()) {
+    if (_controller.isDismissed) {
       _controller.forward();
       if (widget.onTap != null) {
         widget.onTap!(true);
@@ -133,10 +117,7 @@ class _CategoryListItemState extends State<CategoryListItem>
         Padding(
           padding: _childrenPadding.value,
           child: ClipRect(
-            child: Align(
-              heightFactor: _childrenHeightFactor.value,
-              child: child,
-            ),
+            child: Align(heightFactor: _childrenHeightFactor.value, child: child),
           ),
         ),
       ],
@@ -148,12 +129,9 @@ class _CategoryListItemState extends State<CategoryListItem>
     return AnimatedBuilder(
       animation: _controller.view,
       builder: _buildHeaderWithChildren,
-      child: _shouldOpenList()
+      child: _controller.isDismissed
           ? null
-          : _ExpandedCategoryDemos(
-              category: widget.category,
-              demos: widget.demos,
-            ),
+          : _ExpandedCategoryDemos(category: widget.category, demos: widget.demos),
     );
   }
 }
@@ -189,7 +167,7 @@ class _CategoryHeader extends StatelessWidget {
         color: colorScheme.onBackground,
         clipBehavior: Clip.antiAlias,
         child: SizedBox(
-          width: MediaQuery.of(context).size.width,
+          width: MediaQuery.widthOf(context),
           child: InkWell(
             // Makes integration tests possible.
             key: ValueKey<String>('${category.name}CategoryHeader'),
@@ -203,10 +181,7 @@ class _CategoryHeader extends StatelessWidget {
                       Padding(
                         padding: imagePadding,
                         child: FadeInImage(
-                          image: AssetImage(
-                            imageString,
-                            package: 'flutter_gallery_assets',
-                          ),
+                          image: AssetImage(imageString, package: 'flutter_gallery_assets'),
                           placeholder: MemoryImage(kTransparentImage),
                           fadeInDuration: entranceAnimationDuration,
                           width: 64,
@@ -217,13 +192,9 @@ class _CategoryHeader extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsetsDirectional.only(start: 8),
                         child: Text(
-                          category.displayTitle(
-                            GalleryLocalizations.of(context)!,
-                          )!,
-                          style:
-                              Theme.of(context).textTheme.headlineSmall!.apply(
-                                    color: colorScheme.onSurface,
-                                  ),
+                          category.displayTitle(GalleryLocalizations.of(context)!)!,
+                          style: Theme.of(context).textTheme.headlineSmall!
+                              .apply(color: colorScheme.onSurface),
                         ),
                       ),
                     ],
@@ -233,14 +204,8 @@ class _CategoryHeader extends StatelessWidget {
                   opacity: chevronOpacity,
                   child: chevronOpacity != 0
                       ? Padding(
-                          padding: const EdgeInsetsDirectional.only(
-                            start: 8,
-                            end: 32,
-                          ),
-                          child: Icon(
-                            Icons.keyboard_arrow_up,
-                            color: colorScheme.onSurface,
-                          ),
+                          padding: const EdgeInsetsDirectional.only(start: 8, end: 32),
+                          child: Icon(Icons.keyboard_arrow_up, color: colorScheme.onSurface),
                         )
                       : null,
                 ),
@@ -254,10 +219,7 @@ class _CategoryHeader extends StatelessWidget {
 }
 
 class _ExpandedCategoryDemos extends StatelessWidget {
-  const _ExpandedCategoryDemos({
-    required this.category,
-    required this.demos,
-  });
+  const _ExpandedCategoryDemos({required this.category, required this.demos});
 
   final GalleryDemoCategory category;
   final List<GalleryDemo> demos;
@@ -268,10 +230,7 @@ class _ExpandedCategoryDemos extends StatelessWidget {
       // Makes integration tests possible.
       key: ValueKey<String>('${category.name}DemoList'),
       children: <Widget>[
-        for (final GalleryDemo demo in demos)
-          CategoryDemoItem(
-            demo: demo,
-          ),
+        for (final GalleryDemo demo in demos) CategoryDemoItem(demo: demo),
         const SizedBox(height: 12), // Extra space below.
       ],
     );
@@ -294,9 +253,7 @@ class CategoryDemoItem extends StatelessWidget {
       child: MergeSemantics(
         child: InkWell(
           onTap: () {
-            Navigator.of(context).restorablePushNamed(
-              '${DemoPage.baseRoute}/${demo.slug}',
-            );
+            Navigator.of(context).restorablePushNamed('${DemoPage.baseRoute}/${demo.slug}');
           },
           child: Padding(
             padding: EdgeInsetsDirectional.only(
@@ -307,10 +264,7 @@ class CategoryDemoItem extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Icon(
-                  demo.icon,
-                  color: colorScheme.primary,
-                ),
+                Icon(demo.icon, color: colorScheme.primary),
                 const SizedBox(width: 40),
                 Flexible(
                   child: Column(
@@ -318,8 +272,7 @@ class CategoryDemoItem extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         demo.title,
-                        style: textTheme.titleMedium!
-                            .apply(color: colorScheme.onSurface),
+                        style: textTheme.titleMedium!.apply(color: colorScheme.onSurface),
                       ),
                       Text(
                         demo.subtitle,

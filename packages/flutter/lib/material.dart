@@ -14,6 +14,10 @@
 ///    for a catalog of commonly-used Material component widgets.
 ///  * [m3.material.io](https://m3.material.io/) for the Material 3 specification
 ///  * [m2.material.io](https://m2.material.io/) for the Material 2 specification
+@Deprecated(
+  'Use package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 library material;
 
 export 'src/material/about.dart';
@@ -46,6 +50,8 @@ export 'src/material/button_theme.dart';
 export 'src/material/calendar_date_picker.dart';
 export 'src/material/card.dart';
 export 'src/material/card_theme.dart';
+export 'src/material/carousel.dart';
+export 'src/material/carousel_theme.dart';
 export 'src/material/checkbox.dart';
 export 'src/material/checkbox_list_tile.dart';
 export 'src/material/checkbox_theme.dart';
@@ -76,6 +82,7 @@ export 'src/material/drawer_header.dart';
 export 'src/material/drawer_theme.dart';
 export 'src/material/dropdown.dart';
 export 'src/material/dropdown_menu.dart';
+export 'src/material/dropdown_menu_form_field.dart';
 export 'src/material/dropdown_menu_theme.dart';
 export 'src/material/elevated_button.dart';
 export 'src/material/elevated_button_theme.dart';
@@ -84,7 +91,6 @@ export 'src/material/expand_icon.dart';
 export 'src/material/expansion_panel.dart';
 export 'src/material/expansion_tile.dart';
 export 'src/material/expansion_tile_theme.dart';
-export 'src/material/feedback.dart';
 export 'src/material/filled_button.dart';
 export 'src/material/filled_button_theme.dart';
 export 'src/material/filter_chip.dart';
@@ -92,7 +98,6 @@ export 'src/material/flexible_space_bar.dart';
 export 'src/material/floating_action_button.dart';
 export 'src/material/floating_action_button_location.dart';
 export 'src/material/floating_action_button_theme.dart';
-export 'src/material/flutter_logo.dart';
 export 'src/material/grid_tile.dart';
 export 'src/material/grid_tile_bar.dart';
 export 'src/material/icon_button.dart';
@@ -144,6 +149,7 @@ export 'src/material/radio.dart';
 export 'src/material/radio_list_tile.dart';
 export 'src/material/radio_theme.dart';
 export 'src/material/range_slider.dart';
+export 'src/material/range_slider_parts.dart';
 export 'src/material/refresh_indicator.dart';
 export 'src/material/reorderable_list.dart';
 export 'src/material/scaffold.dart';
@@ -159,7 +165,9 @@ export 'src/material/selectable_text.dart';
 export 'src/material/selection_area.dart';
 export 'src/material/shadows.dart';
 export 'src/material/slider.dart';
+export 'src/material/slider_parts.dart';
 export 'src/material/slider_theme.dart';
+export 'src/material/slider_value_indicator_shape.dart';
 export 'src/material/snack_bar.dart';
 export 'src/material/snack_bar_theme.dart';
 export 'src/material/spell_check_suggestions_toolbar.dart';
@@ -188,7 +196,6 @@ export 'src/material/time_picker.dart';
 export 'src/material/time_picker_theme.dart';
 export 'src/material/toggle_buttons.dart';
 export 'src/material/toggle_buttons_theme.dart';
-export 'src/material/toggleable.dart';
 export 'src/material/tooltip.dart';
 export 'src/material/tooltip_theme.dart';
 export 'src/material/tooltip_visibility.dart';

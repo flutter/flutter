@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 
+import 'base/common.dart';
 import 'base/logger.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
@@ -23,6 +24,15 @@ abstract class VMServiceDiscoveryForAttach {
   /// Port forwarding is only attempted when this is invoked, for each VM
   /// Service URI in the stream.
   Stream<Uri> get uris;
+
+  /// Find the first URI discovered for attach.
+  Future<Uri> firstValidUri() async {
+    final List<Uri> candidateUris = await uris.take(1).toList();
+    if (candidateUris.isEmpty) {
+      throwToolExit('Failed to find VM Service URL.');
+    }
+    return candidateUris.first;
+  }
 }
 
 /// An implementation of [VMServiceDiscoveryForAttach] that uses log scanning
@@ -50,14 +60,11 @@ class LogScanningVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach
 
   @override
   Stream<Uri> get uris {
-    final StreamController<Uri> controller = StreamController<Uri>();
-    _protocolDiscovery.then(
-      (ProtocolDiscovery protocolDiscovery) async {
-        await controller.addStream(protocolDiscovery.uris);
-        await controller.close();
-      },
-      onError: (Object error) => controller.addError(error),
-    );
+    final controller = StreamController<Uri>();
+    _protocolDiscovery.then((ProtocolDiscovery protocolDiscovery) async {
+      await controller.addStream(protocolDiscovery.uris);
+      await controller.close();
+    }, onError: (Object error) => controller.addError(error));
     return controller.stream;
   }
 }
@@ -83,16 +90,20 @@ class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
 
   @override
   Stream<Uri> get uris {
-    final Future<Uri?> mDNSDiscoveryFuture = MDnsVmServiceDiscovery.instance!.getVMServiceUriForAttach(
-      appId,
-      device,
-      usesIpv6: usesIpv6,
-      useDeviceIPAsHost: useDeviceIPAsHost,
-      deviceVmservicePort: deviceVmservicePort,
-      hostVmservicePort: hostVmservicePort,
-    );
+    final Future<Uri?> mDNSDiscoveryFuture = MDnsVmServiceDiscovery.instance!
+        .getVMServiceUriForAttach(
+          appId,
+          device,
+          usesIpv6: usesIpv6,
+          useDeviceIPAsHost: useDeviceIPAsHost,
+          deviceVmservicePort: deviceVmservicePort,
+          hostVmservicePort: hostVmservicePort,
+        );
 
-    return Stream<Uri?>.fromFuture(mDNSDiscoveryFuture).where((Uri? uri) => uri != null).cast<Uri>().asBroadcastStream();
+    return Stream<Uri?>.fromFuture(mDNSDiscoveryFuture)
+        .where((Uri? uri) => uri != null)
+        .cast<Uri>()
+        .asBroadcastStream();
   }
 }
 
@@ -104,7 +115,7 @@ class DelegateVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
   final List<VMServiceDiscoveryForAttach> delegates;
 
   @override
-  Stream<Uri> get uris =>
-      StreamGroup.merge<Uri>(
-        delegates.map((VMServiceDiscoveryForAttach delegate) => delegate.uris));
+  Stream<Uri> get uris => StreamGroup.merge<Uri>(
+    delegates.map((VMServiceDiscoveryForAttach delegate) => delegate.uris),
+  );
 }

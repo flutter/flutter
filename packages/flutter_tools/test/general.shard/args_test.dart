@@ -5,13 +5,30 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
+import 'package:flutter_tools/src/context/android_context.dart';
+import 'package:flutter_tools/src/context/apple_context.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/emulator.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/testbed.dart';
 import 'runner/utils.dart';
 
@@ -24,29 +41,55 @@ void main() {
     Cache.enableLocking();
   });
 
-  test('Help for command line arguments is consistently styled and complete', () => Testbed().run(() {
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
-    executable.generateCommands(
-      verboseHelp: true,
-      verbose: true,
-    ).forEach(runner.addCommand);
-    verifyCommandRunner(runner);
-    for (final Command<void> command in runner.commands.values) {
-      if (command.name == 'analyze') {
-        final AnalyzeCommand analyze = command as AnalyzeCommand;
-        expect(analyze.allProjectValidators().length, 2);
+  testUsingContext(
+    'Help for command line arguments is consistently styled and complete',
+    () => TestBed().run(() {
+      final fakeAndroidContext = FakeAndroidContext();
+      final fakeAppleContext = FakeAppleContext();
+      final fakeToolContext = FakeToolContext();
+      final fakeToolDependencies = FakeToolDependencies(
+        androidContext: fakeAndroidContext,
+        appleContext: fakeAppleContext,
+        toolContext: fakeToolContext,
+      );
+      final runner = FlutterCommandRunner(
+        analytics: fakeToolDependencies.analytics,
+        toolContext: fakeToolContext,
+        verboseHelp: true,
+      );
+      executable
+          .generateCommands(
+            toolDependencies: fakeToolDependencies,
+            verbose: true,
+            verboseHelp: true,
+          )
+          .forEach(runner.addCommand);
+      verifyCommandRunner(runner);
+      for (final Command<void> command in runner.commands.values) {
+        if (command.name == 'analyze') {
+          final analyze = command as AnalyzeCommand;
+          expect(analyze.allProjectValidators().length, 2);
+        }
       }
-    }
-  }));
+    }),
+    overrides: <Type, Generator>{
+      AndroidSdk: () => FakeAndroidSdk(),
+      AndroidStudio: () => FakeAndroidStudio(),
+    },
+  );
 
   testUsingContext('Global arg results are available in FlutterCommands', () async {
-    final DummyFlutterCommand command = DummyFlutterCommand(
+    final command = DummyFlutterCommand(
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
 
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
+    );
 
     runner.addCommand(command);
     await runner.run(<String>['dummy', '--${FlutterGlobalOptions.kContinuousIntegrationFlag}']);
@@ -56,13 +99,13 @@ void main() {
   });
 
   testUsingContext('Global arg results are available in FlutterCommands sub commands', () async {
-    final DummyFlutterCommand command = DummyFlutterCommand(
+    final command = DummyFlutterCommand(
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
 
-    final DummyFlutterCommand subcommand = DummyFlutterCommand(
+    final subcommand = DummyFlutterCommand(
       name: 'sub',
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
@@ -71,23 +114,35 @@ void main() {
 
     command.addSubcommand(subcommand);
 
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
+    );
 
     runner.addCommand(command);
     runner.addCommand(subcommand);
-    await runner.run(<String>['dummy', 'sub', '--${FlutterGlobalOptions.kContinuousIntegrationFlag}']);
+    await runner.run(<String>[
+      'dummy',
+      'sub',
+      '--${FlutterGlobalOptions.kContinuousIntegrationFlag}',
+    ]);
 
     expect(subcommand.globalResults, isNotNull);
     expect(subcommand.boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true), true);
   });
 
   testUsingContext('bool? safe argResults', () async {
-    final DummyFlutterCommand command = DummyFlutterCommand(
+    final command = DummyFlutterCommand(
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
+    );
     command.argParser.addFlag('key');
     command.argParser.addFlag('key-false');
     // argResults will be null at this point, if attempt to read them is made,
@@ -108,12 +163,16 @@ void main() {
   });
 
   testUsingContext('String? safe argResults', () async {
-    final DummyFlutterCommand command = DummyFlutterCommand(
+    final command = DummyFlutterCommand(
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
+    );
     command.argParser.addOption('key');
     // argResults will be null at this point, if attempt to read them is made,
     // exception `Null check operator used on a null value` would be thrown
@@ -130,16 +189,17 @@ void main() {
   });
 
   testUsingContext('List<String> safe argResults', () async {
-    final DummyFlutterCommand command = DummyFlutterCommand(
+    final command = DummyFlutterCommand(
       commandFunction: () async {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
-    command.argParser.addMultiOption(
-      'key',
-      allowed: <String>['a', 'b', 'c'],
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
     );
+    command.argParser.addMultiOption('key', allowed: <String>['a', 'b', 'c']);
     // argResults will be null at this point, if attempt to read them is made,
     // exception `Null check operator used on a null value` would be thrown.
     expect(() => command.stringsArg('key'), throwsA(const TypeMatcher<TypeError>()));
@@ -158,12 +218,34 @@ void main() {
     await runner.run(<String>['dummy']);
     expect(command.stringsArg('key'), <String>[]);
   });
+
+  testUsingContext('wrap-column option updates argParser usageLineLength', () async {
+    final command = DummyFlutterCommand(
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
+    );
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
+    );
+    runner.addCommand(command);
+
+    await runner.run(<String>['--wrap', '--wrap-column=50', 'dummy']);
+
+    expect(runner.argParser.usageLineLength, 50);
+  });
 }
 
 void verifyCommandRunner(CommandRunner<Object?> runner) {
   expect(runner.argParser, isNotNull, reason: '${runner.runtimeType} has no argParser');
   expect(runner.argParser.allowsAnything, isFalse, reason: '${runner.runtimeType} allows anything');
-  expect(runner.argParser.allowTrailingOptions, isFalse, reason: '${runner.runtimeType} allows trailing options');
+  expect(
+    runner.argParser.allowTrailingOptions,
+    isFalse,
+    reason: '${runner.runtimeType} allows trailing options',
+  );
   verifyOptions(null, runner.argParser.options.values);
   runner.commands.values.forEach(verifyCommand);
 }
@@ -173,7 +255,12 @@ void verifyCommand(Command<Object?> runner) {
   verifyOptions(runner.name, runner.argParser.options.values);
 
   final String firstDescriptionLine = runner.description.split('\n').first;
-  expect(firstDescriptionLine, matches(_allowedTrailingPatterns), reason: "command ${runner.name}'s description does not end with the expected single period that a full sentence should end with");
+  expect(
+    firstDescriptionLine,
+    matches(_allowedTrailingPatterns),
+    reason:
+        "command ${runner.name}'s description does not end with the expected single period that a full sentence should end with",
+  );
 
   if (!runner.hidden && runner.parent == null) {
     expect(
@@ -191,25 +278,29 @@ void verifyCommand(Command<Object?> runner) {
 }
 
 // Patterns for arguments names.
-final RegExp _allowedArgumentNamePattern = RegExp(r'^([-a-z0-9]+)$');
-final RegExp _allowedArgumentNamePatternForPrecache = RegExp(r'^([-a-z0-9_]+)$');
-final RegExp _bannedArgumentNamePattern = RegExp(r'-uri$');
+final _allowedArgumentNamePattern = RegExp(r'^([-a-z0-9]+)$');
+final _allowedArgumentNamePatternForPrecache = RegExp(r'^([-a-z0-9_]+)$');
+final _bannedArgumentNamePattern = RegExp(r'-uri$');
 
 // Patterns for help messages.
-final RegExp _bannedLeadingPatterns = RegExp(r'^[-a-z]', multiLine: true);
-final RegExp _allowedTrailingPatterns = RegExp(r'([^ ]([^.^!^:][.!:])\)?|: https?://[^ ]+[^.]|^)$');
-final RegExp _bannedQuotePatterns = RegExp(r" '|' |'\.|\('|'\)|`");
-final RegExp _bannedArgumentReferencePatterns = RegExp(r'[^"=]--[^ ]');
-final RegExp _questionablePatterns = RegExp(r'[a-z]\.[A-Z]');
-final RegExp _bannedUri = RegExp(r'\b[Uu][Rr][Ii]\b');
-final RegExp _nonSecureFlutterDartUrl = RegExp(r'http://([a-z0-9-]+\.)*(flutter|dart)\.dev', caseSensitive: false);
-const String _needHelp = "Every option must have help explaining what it does, even if it's "
-                         'for testing purposes, because this is the bare minimum of '
-                         'documentation we can add just for ourselves. If it is not intended '
-                         'for developers, then use "hide: !verboseHelp" to only show the '
-                         'help when people run with "--help --verbose".';
+final _bannedLeadingPatterns = RegExp(r'^[-a-z]', multiLine: true);
+final _allowedTrailingPatterns = RegExp(r'([^ ]([^.^!^:][.!:])\)?|: https?://[^ ]+[^.]|^)$');
+final _bannedQuotePatterns = RegExp(r" '|' |'\.|\('|'\)|`");
+final _bannedArgumentReferencePatterns = RegExp(r'[^"=]--[^ ]');
+final _questionablePatterns = RegExp(r'[a-z]\.[A-Z]');
+final _bannedUri = RegExp(r'\b[Uu][Rr][Ii]\b');
+final _nonSecureFlutterDartUrl = RegExp(
+  r'http://([a-z0-9-]+\.)*(flutter|dart)\.dev',
+  caseSensitive: false,
+);
+const _needHelp =
+    "Every option must have help explaining what it does, even if it's "
+    'for testing purposes, because this is the bare minimum of '
+    'documentation we can add just for ourselves. If it is not intended '
+    'for developers, then use "hide: !verboseHelp" to only show the '
+    'help when people run with "--help --verbose".';
 
-const String _header = ' Comment: ';
+const _header = ' Comment: ';
 
 void verifyOptions(String? command, Iterable<Option> options) {
   String target;
@@ -219,30 +310,114 @@ void verifyOptions(String? command, Iterable<Option> options) {
     target = '"flutter $command ';
   }
   assert(target.contains('"'));
-  for (final Option option in options) {
+  for (final option in options) {
     // If you think you need to add an exception here, please ask Hixie (but he'll say no).
     if (command == 'precache') {
-      expect(option.name, matches(_allowedArgumentNamePatternForPrecache), reason: '$_header$target--${option.name}" is not a valid name for a command line argument. (Is it all lowercase?)');
+      expect(
+        option.name,
+        matches(_allowedArgumentNamePatternForPrecache),
+        reason:
+            '$_header$target--${option.name}" is not a valid name for a command line argument. (Is it all lowercase?)',
+      );
     } else {
-      expect(option.name, matches(_allowedArgumentNamePattern), reason: '$_header$target--${option.name}" is not a valid name for a command line argument. (Is it all lowercase? Does it use hyphens rather than underscores?)');
+      expect(
+        option.name,
+        matches(_allowedArgumentNamePattern),
+        reason:
+            '$_header$target--${option.name}" is not a valid name for a command line argument. (Is it all lowercase? Does it use hyphens rather than underscores?)',
+      );
     }
-    expect(option.name, isNot(matches(_bannedArgumentNamePattern)), reason: '$_header$target--${option.name}" is not a valid name for a command line argument. (We use "--foo-url", not "--foo-uri", for example.)');
-    // The flag --sound-null-safety is deprecated
-    if (option.name != FlutterOptions.kNullSafety && option.name != FlutterOptions.kNullAssertions) {
-      expect(option.hide, isFalse, reason: '${_header}Help for $target--${option.name}" is always hidden. $_needHelp');
+    expect(
+      option.name,
+      isNot(matches(_bannedArgumentNamePattern)),
+      reason:
+          '$_header$target--${option.name}" is not a valid name for a command line argument. (We use "--foo-url", not "--foo-uri", for example.)',
+    );
+
+    // Fully hidden options and flags should still have help text.
+    const hiddenOptions = <String>['pwa-strategy'];
+    final bool isHiddenOption = hiddenOptions.contains(option.name);
+    if (!isHiddenOption) {
+      expect(
+        option.hide,
+        isFalse,
+        reason:
+            '${_header}Option "--${option.name}" for "flutter $command" should not be hidden. $_needHelp',
+      );
+    } else {
+      expect(
+        option.hide,
+        isTrue,
+        reason:
+            '${_header}Hidden option "--${option.name}" for "flutter $command" should be hidden. $_needHelp',
+      );
     }
-    expect(option.help, isNotNull, reason: '${_header}Help for $target--${option.name}" has null help. $_needHelp');
-    expect(option.help, isNotEmpty, reason: '${_header}Help for $target--${option.name}" has empty help. $_needHelp');
-    expect(option.help, isNot(matches(_bannedLeadingPatterns)), reason: '${_header}A line in the help for $target--${option.name}" starts with a lowercase letter. For stylistic consistency, all help messages must start with a capital letter.');
-    expect(option.help, isNot(startsWith('(Deprecated')), reason: '${_header}Help for $target--${option.name}" should start with lowercase "(deprecated)" for consistency with other deprecated commands.');
-    expect(option.help, isNot(startsWith('(Required')), reason: '${_header}Help for $target--${option.name}" should start with lowercase "(required)" for consistency with other deprecated commands.');
-    expect(option.help, isNot(contains('?')), reason: '${_header}Help for $target--${option.name}" has a question mark. Generally we prefer the passive voice for help messages.');
-    expect(option.help, isNot(contains('Note:')), reason: '${_header}Help for $target--${option.name}" uses "Note:". See our style guide entry about "empty prose".');
-    expect(option.help, isNot(contains('Note that')), reason: '${_header}Help for $target--${option.name}" uses "Note that". See our style guide entry about "empty prose".');
-    expect(option.help, isNot(matches(_bannedQuotePatterns)), reason: '${_header}Help for $target--${option.name}" uses single quotes or backticks instead of double quotes in the help message. For consistency we use double quotes throughout.');
-    expect(option.help, isNot(matches(_questionablePatterns)), reason: '${_header}Help for $target--${option.name}" may have a typo. (If it does not you may have to update args_test.dart, sorry. Search for "_questionablePatterns")');
+
+    expect(
+      option.help,
+      isNotNull,
+      reason: '${_header}Help for $target--${option.name}" has null help. $_needHelp',
+    );
+    expect(
+      option.help,
+      isNotEmpty,
+      reason: '${_header}Help for $target--${option.name}" has empty help. $_needHelp',
+    );
+    expect(
+      option.help,
+      isNot(matches(_bannedLeadingPatterns)),
+      reason:
+          '${_header}A line in the help for $target--${option.name}" starts with a lowercase letter. For stylistic consistency, all help messages must start with a capital letter.',
+    );
+    expect(
+      option.help,
+      isNot(startsWith('(Deprecated')),
+      reason:
+          '${_header}Help for $target--${option.name}" should start with lowercase "(deprecated)" for consistency with other deprecated commands.',
+    );
+    expect(
+      option.help,
+      isNot(startsWith('(Required')),
+      reason:
+          '${_header}Help for $target--${option.name}" should start with lowercase "(required)" for consistency with other deprecated commands.',
+    );
+    expect(
+      option.help,
+      isNot(contains('?')),
+      reason:
+          '${_header}Help for $target--${option.name}" has a question mark. Generally we prefer the passive voice for help messages.',
+    );
+    expect(
+      option.help,
+      isNot(contains('Note:')),
+      reason:
+          '${_header}Help for $target--${option.name}" uses "Note:". See our style guide entry about "empty prose".',
+    );
+    expect(
+      option.help,
+      isNot(contains('Note that')),
+      reason:
+          '${_header}Help for $target--${option.name}" uses "Note that". See our style guide entry about "empty prose".',
+    );
+    expect(
+      option.help,
+      isNot(matches(_bannedQuotePatterns)),
+      reason:
+          '${_header}Help for $target--${option.name}" uses single quotes or backticks instead of double quotes in the help message. For consistency we use double quotes throughout.',
+    );
+    expect(
+      option.help,
+      isNot(matches(_questionablePatterns)),
+      reason:
+          '${_header}Help for $target--${option.name}" may have a typo. (If it does not you may have to update args_test.dart, sorry. Search for "_questionablePatterns")',
+    );
     if (option.defaultsTo != null) {
-      expect(option.help, isNot(contains('Default')), reason: '${_header}Help for $target--${option.name}" mentions the default value but that is redundant with the defaultsTo option which is also specified (and preferred).');
+      expect(
+        option.help,
+        isNot(contains('Default')),
+        reason:
+            '${_header}Help for $target--${option.name}" mentions the default value but that is redundant with the defaultsTo option which is also specified (and preferred).',
+      );
 
       final Map<String, String>? allowedHelp = option.allowedHelp;
       if (allowedHelp != null) {
@@ -250,22 +425,134 @@ void verifyOptions(String? command, Iterable<Option> options) {
           expect(
             allowedHelp[allowedValue],
             isNot(anyOf(contains('default'), contains('Default'))),
-            reason: '${_header}Help for $target--${option.name} $allowedValue" mentions the default value but that is redundant with the defaultsTo option which is also specified (and preferred).',
+            reason:
+                '${_header}Help for $target--${option.name} $allowedValue" mentions the default value but that is redundant with the defaultsTo option which is also specified (and preferred).',
           );
         }
       }
     }
-    expect(option.help, isNot(matches(_bannedArgumentReferencePatterns)), reason: '${_header}Help for $target--${option.name}" contains the string "--" in an unexpected way. If it\'s trying to mention another argument, it should be quoted, as in "--foo".');
+    expect(
+      option.help,
+      isNot(matches(_bannedArgumentReferencePatterns)),
+      reason:
+          '${_header}Help for $target--${option.name}" contains the string "--" in an unexpected way. If it\'s trying to mention another argument, it should be quoted, as in "--foo".',
+    );
     for (final String line in option.help!.split('\n')) {
       if (!line.startsWith('    ')) {
-        expect(line, isNot(contains('  ')), reason: '${_header}Help for $target--${option.name}" has excessive whitespace (check e.g. for double spaces after periods or round line breaks in the source).');
-        expect(line, matches(_allowedTrailingPatterns), reason: '${_header}A line in the help for $target--${option.name}" does not end with the expected period that a full sentence should end with. (If the help ends with a URL, place it after a colon, don\'t leave a trailing period; if it\'s sample code, prefix the line with four spaces.)');
+        expect(
+          line,
+          isNot(contains('  ')),
+          reason:
+              '${_header}Help for $target--${option.name}" has excessive whitespace (check e.g. for double spaces after periods or round line breaks in the source).',
+        );
+        expect(
+          line,
+          matches(_allowedTrailingPatterns),
+          reason:
+              '${_header}A line in the help for $target--${option.name}" does not end with the expected period that a full sentence should end with. (If the help ends with a URL, place it after a colon, don\'t leave a trailing period; if it\'s sample code, prefix the line with four spaces.)',
+        );
       }
     }
-    expect(option.help, isNot(endsWith(':')), reason: '${_header}Help for $target--${option.name}" ends with a colon, which seems unlikely to be correct.');
-    expect(option.help, isNot(contains(_bannedUri)), reason: '${_header}Help for $target--${option.name}" uses the term "URI" rather than "URL".');
-    expect(option.help, isNot(contains(_nonSecureFlutterDartUrl)), reason: '${_header}Help for $target--${option.name}" links to a non-secure ("http") version of a Flutter or Dart site.');
+    expect(
+      option.help,
+      isNot(endsWith(':')),
+      reason:
+          '${_header}Help for $target--${option.name}" ends with a colon, which seems unlikely to be correct.',
+    );
+    expect(
+      option.help,
+      isNot(contains(_bannedUri)),
+      reason: '${_header}Help for $target--${option.name}" uses the term "URI" rather than "URL".',
+    );
+    expect(
+      option.help,
+      isNot(contains(_nonSecureFlutterDartUrl)),
+      reason:
+          '${_header}Help for $target--${option.name}" links to a non-secure ("http") version of a Flutter or Dart site.',
+    );
     // TODO(ianh): add some checking for embedded URLs to make sure we're consistent on how we format those.
     // TODO(ianh): arguably we should ban help text that starts with "Whether to..." since by definition a flag is to enable a feature, so the "whether to" is redundant.
   }
+}
+
+class FakeAnalytics extends Fake implements Analytics {
+  final sentEvents = <Event>[];
+
+  @override
+  void send(Event event) => sentEvents.add(event);
+
+  @override
+  bool get telemetryEnabled => false;
+
+  @override
+  bool get okToSend => false;
+}
+
+class FakeBuildSystem extends Fake implements BuildSystem {}
+
+class FakeBuildTargets extends Fake implements BuildTargets {}
+
+class FakeCrashReporter extends Fake implements CrashReporter {}
+
+class FakeToolDependencies extends Fake implements ToolDependencies {
+  FakeToolDependencies({
+    Analytics? analytics,
+    AndroidContext? androidContext,
+    AppleContext? appleContext,
+    BuildSystem? buildSystem,
+    BuildTargets? buildTargets,
+    CrashReporter? crashReporter,
+    DeviceManager? deviceManager,
+    Doctor? doctor,
+    EmulatorManager? emulatorManager,
+    this.extensionManager,
+    FeatureFlags? featureFlags,
+    ToolContext? toolContext,
+  }) : analytics = analytics ?? FakeAnalytics(),
+       androidContext = androidContext ?? FakeAndroidContext(),
+       appleContext = appleContext ?? FakeAppleContext(),
+       buildSystem = buildSystem ?? FakeBuildSystem(),
+       buildTargets = buildTargets ?? FakeBuildTargets(),
+       crashReporter = crashReporter ?? FakeCrashReporter(),
+       deviceManager = deviceManager ?? FakeDeviceManager(),
+       doctor = doctor ?? FakeDoctor(),
+       emulatorManager = emulatorManager ?? FakeEmulatorManager(),
+       featureFlags = featureFlags ?? TestFeatureFlags(),
+       toolContext = toolContext ?? FakeToolContext();
+
+  @override
+  final Analytics analytics;
+
+  @override
+  final AndroidContext androidContext;
+
+  @override
+  final AppleContext appleContext;
+
+  @override
+  final BuildSystem buildSystem;
+
+  @override
+  final BuildTargets buildTargets;
+
+  @override
+  final CrashReporter crashReporter;
+
+  @override
+  final DeviceManager deviceManager;
+
+  @override
+  final Doctor doctor;
+
+  @override
+  final EmulatorManager emulatorManager;
+
+  @override
+  final ExtensionManager? extensionManager;
+
+  @override
+  final FeatureFlags featureFlags;
+
+  @override
+  final ToolContext toolContext;
 }

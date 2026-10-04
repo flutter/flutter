@@ -1,0 +1,9 @@
+coding_agent:
+  agentic_mode: true
+  google_mode: false
+
+customization_config:
+  customization_discovery_config:
+    skills:
+      inherit_user: false
+      skills_paths: []

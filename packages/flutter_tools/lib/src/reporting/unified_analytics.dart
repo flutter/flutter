@@ -18,7 +18,7 @@ import '../version.dart';
 /// will be enabled to ensure usage of this class is within GA4 limitations.
 ///
 /// For testing purposes, pass in a [FakeAnalytics] instance initialized with
-/// an in-memory [FileSystem] to prevent writing to disk.
+/// an in-memory file system to prevent writing to disk.
 Analytics getAnalytics({
   required bool runningOnBot,
   required FlutterVersion flutterVersion,
@@ -29,14 +29,16 @@ Analytics getAnalytics({
   FakeAnalytics? analyticsOverride,
 }) {
   final String version = flutterVersion.getVersionString(redactUnknownBranches: true);
-  final bool suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
+  final suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
+  final String? aiAgentName = AiAgent.detectAgentName(environment);
+  final hasAiAgent = aiAgentName != null;
 
-  if (// Ignore local user branches.
-      version.startsWith('[user-branch]') ||
+  if ( // Ignore local user branches.
+  version.startsWith('[user-branch]') ||
       // Many CI systems don't do a full git checkout.
       version.endsWith('/unknown') ||
-      // Ignore bots.
-      runningOnBot ||
+      // Ignore bots, unless run by an AI agent.
+      (runningOnBot && !hasAiAgent) ||
       // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
       suppressEnvFlag) {
     return const NoOpAnalytics();
@@ -56,29 +58,30 @@ Analytics getAnalytics({
     enableAsserts: enableAsserts,
     clientIde: clientIde,
     enabledFeatures: getEnabledFeatures(config),
+    agent: aiAgentName,
   );
 }
 
 /// Uses the [Config] object to get enabled features.
 String? getEnabledFeatures(Config config) {
   // Create string with all enabled features to send as user property
-  final Iterable<Feature> enabledFeatures = allFeatures.where((Feature feature) {
+  final Iterable<Feature> enabledFeatures = featureFlags.allFeatures.where((Feature feature) {
     final String? configSetting = feature.configSetting;
     return configSetting != null && config.getValue(configSetting) == true;
   });
   return enabledFeatures.isNotEmpty
-      ? enabledFeatures
-          .map((Feature feature) => feature.configSetting)
-          .join(',')
+      ? enabledFeatures.map((Feature feature) => feature.configSetting).join(',')
       : null;
 }
 
 /// Function to safely grab the max rss from [ProcessInfo].
 int? getMaxRss(ProcessInfo processInfo) {
   try {
-    return globals.processInfo.maxRss;
+    return processInfo.maxRss;
   } on Exception catch (error) {
     globals.printTrace('Querying maxRss failed with error: $error');
+  } on UnsupportedError {
+    // maxRss is unsupported on this platform.
   }
   return null;
 }

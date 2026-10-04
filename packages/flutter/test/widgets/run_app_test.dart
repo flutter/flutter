@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -10,13 +10,11 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: ElevatedButton(
-            onPressed: () {
-              runApp(const Center(child: Text('Done', textDirection: TextDirection.ltr)));
-            },
-            child: const Text('GO'),
-          ),
+        child: GestureDetector(
+          onTap: () {
+            runApp(const Center(child: Text('Done', textDirection: TextDirection.ltr)));
+          },
+          child: const Text('GO'),
         ),
       ),
     );

@@ -20,27 +20,22 @@ import 'linux_workflow.dart';
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
   LinuxDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-  })  : _operatingSystemUtils = operatingSystemUtils,
-        _logger = logger,
-        super(
-          'linux',
-          platformType: PlatformType.linux,
-          ephemeral: false,
-          logger: logger,
-          processManager: processManager,
-          fileSystem: fileSystem,
-          operatingSystemUtils: operatingSystemUtils,
-        );
+    required super.processManager,
+    required super.logger,
+    required super.fileSystem,
+    required super.operatingSystemUtils,
+  }) : _operatingSystemUtils = operatingSystemUtils,
+       _logger = logger,
+       super('linux', platformType: PlatformType.linux, ephemeral: false);
 
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
+
+  @override
+  bool get supportsFlavors => true;
 
   @override
   String get name => 'Linux';
@@ -49,9 +44,14 @@ class LinuxDevice extends DesktopDevice {
   late final Future<TargetPlatform> targetPlatform = () async {
     if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
       return TargetPlatform.linux_x64;
+    } else if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_riscv64) {
+      return TargetPlatform.linux_riscv64;
     }
     return TargetPlatform.linux_arm64;
   }();
+
+  @override
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -62,6 +62,7 @@ class LinuxDevice extends DesktopDevice {
   Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
+    bool usingCISystem = false,
   }) async {
     await buildLinux(
       FlutterProject.current().linux,
@@ -74,7 +75,7 @@ class LinuxDevice extends DesktopDevice {
 
   @override
   String executablePathForDevice(covariant LinuxApp package, BuildInfo buildInfo) {
-    return package.executable(buildInfo.mode);
+    return package.executable(buildInfo.mode, buildInfo.flavor);
   }
 }
 
@@ -82,19 +83,12 @@ class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
     required Platform platform,
     required FeatureFlags featureFlags,
-    required OperatingSystemUtils operatingSystemUtils,
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required Logger logger,
+    required this._operatingSystemUtils,
+    required this._fileSystem,
+    required this._processManager,
+    required this._logger,
   }) : _platform = platform,
-       _linuxWorkflow = LinuxWorkflow(
-          platform: platform,
-          featureFlags: featureFlags,
-       ),
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _processManager = processManager,
-       _operatingSystemUtils = operatingSystemUtils,
+       _linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags),
        super('linux devices');
 
   final Platform _platform;
@@ -111,7 +105,10 @@ class LinuxDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _linuxWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

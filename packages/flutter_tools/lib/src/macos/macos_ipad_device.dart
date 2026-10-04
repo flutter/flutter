@@ -23,20 +23,12 @@ import '../project.dart';
 /// https://developer.apple.com/documentation/apple-silicon/running-your-ios-apps-on-macos
 class MacOSDesignedForIPadDevice extends DesktopDevice {
   MacOSDesignedForIPadDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-  })  : _operatingSystemUtils = operatingSystemUtils,
-        super(
-          'mac-designed-for-ipad',
-          platformType: PlatformType.macos,
-          ephemeral: false,
-          processManager: processManager,
-          logger: logger,
-          fileSystem: fileSystem,
-          operatingSystemUtils: operatingSystemUtils,
-        );
+    required super.processManager,
+    required super.logger,
+    required super.fileSystem,
+    required super.operatingSystemUtils,
+  }) : _operatingSystemUtils = operatingSystemUtils,
+       super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
 
   final OperatingSystemUtils _operatingSystemUtils;
 
@@ -46,15 +38,21 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
+  // "Designed for iPad" apps are only supported on Apple Silicon Macs.
   @override
-  bool isSupported() => _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
+  Future<CpuArch> get cpuArch async => CpuArch.arm64;
+
+  @override
+  Future<bool> isSupported() async =>
+      _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
 
   @override
   bool get supportsFlavors => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
-    return flutterProject.ios.existsSync() && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
+    return flutterProject.ios.existsSync() &&
+        _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
   }
 
   @override
@@ -69,7 +67,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required bool ipv6,
     required Logger logger,
   }) {
-    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+    final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
       device: this,
       appId: appId,
       deviceVmservicePort: filterDevicePort,
@@ -99,7 +97,6 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     // Only attaching to a running app launched from Xcode is supported.
@@ -107,15 +104,13 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   }
 
   @override
-  Future<bool> stopApp(
-    ApplicationPackage? app, {
-    String? userIdentifier,
-  }) async => false;
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async => false;
 
   @override
   Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
+    bool usingCISystem = false,
   }) async {
     // Only attaching to a running app launched from Xcode is supported.
     throw UnimplementedError('Building for "$name" is not supported.');
@@ -124,19 +119,13 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
 class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   MacOSDesignedForIPadDevices({
-    required Platform platform,
-    required IOSWorkflow iosWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-  })  : _logger = logger,
-        _platform = platform,
-        _iosWorkflow = iosWorkflow,
-        _processManager = processManager,
-        _fileSystem = fileSystem,
-        _operatingSystemUtils = operatingSystemUtils,
-        super('Mac designed for iPad devices');
+    required this._platform,
+    required this._iosWorkflow,
+    required this._processManager,
+    required this._logger,
+    required this._fileSystem,
+    required this._operatingSystemUtils,
+  }) : super('Mac designed for iPad devices');
 
   final IOSWorkflow _iosWorkflow;
   final Platform _platform;
@@ -152,10 +141,18 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   /// and discovery is allowed for this command.
   @override
   bool get canListAnything =>
-      _iosWorkflow.canListDevices && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
+      _iosWorkflow.canListDevices &&
+      _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64 &&
+      allowDiscovery;
+
+  /// Set to show ARM macOS as an iOS device target.
+  static bool allowDiscovery = false;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

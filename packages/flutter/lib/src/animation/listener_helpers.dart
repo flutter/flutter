@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
@@ -72,16 +71,16 @@ mixin AnimationLazyListenerMixin {
 mixin AnimationEagerListenerMixin {
   /// This implementation ignores listener registrations.
   @protected
-  void didRegisterListener() { }
+  void didRegisterListener() {}
 
   /// This implementation ignores listener registrations.
   @protected
-  void didUnregisterListener() { }
+  void didUnregisterListener() {}
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
   @mustCallSuper
-  void dispose() { }
+  void dispose() {}
 }
 
 /// A mixin that implements the [addListener]/[removeListener] protocol and notifies
@@ -91,7 +90,7 @@ mixin AnimationEagerListenerMixin {
 /// and [didUnregisterListener]. Implementations of these methods can be obtained
 /// by mixing in another mixin from this library, such as [AnimationLazyListenerMixin].
 mixin AnimationLocalListenersMixin {
-  final ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
+  final HashedObserverList<VoidCallback> _listeners = HashedObserverList<VoidCallback>();
 
   /// Called immediately before a listener is added via [addListener].
   ///
@@ -144,7 +143,7 @@ mixin AnimationLocalListenersMixin {
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
     final List<VoidCallback> localListeners = _listeners.toList(growable: false);
-    for (final VoidCallback listener in localListeners) {
+    for (final listener in localListeners) {
       InformationCollector? collector;
       assert(() {
         collector = () => <DiagnosticsNode>[
@@ -161,13 +160,15 @@ mixin AnimationLocalListenersMixin {
           listener();
         }
       } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'animation library',
-          context: ErrorDescription('while notifying listeners for $runtimeType'),
-          informationCollector: collector,
-        ));
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'animation library',
+            context: ErrorDescription('while notifying listeners for $runtimeType'),
+            informationCollector: collector,
+          ),
+        );
       }
     }
   }
@@ -181,7 +182,8 @@ mixin AnimationLocalListenersMixin {
 /// and [didUnregisterListener]. Implementations of these methods can be obtained
 /// by mixing in another mixin from this library, such as [AnimationLazyListenerMixin].
 mixin AnimationLocalStatusListenersMixin {
-  final ObserverList<AnimationStatusListener> _statusListeners = ObserverList<AnimationStatusListener>();
+  final ObserverList<AnimationStatusListener> _statusListeners =
+      ObserverList<AnimationStatusListener>();
 
   /// Called immediately before a status listener is added via [addStatusListener].
   ///
@@ -234,7 +236,7 @@ mixin AnimationLocalStatusListenersMixin {
   @pragma('vm:notify-debugger-on-exception')
   void notifyStatusListeners(AnimationStatus status) {
     final List<AnimationStatusListener> localListeners = _statusListeners.toList(growable: false);
-    for (final AnimationStatusListener listener in localListeners) {
+    for (final listener in localListeners) {
       try {
         if (_statusListeners.contains(listener)) {
           listener(status);
@@ -251,13 +253,15 @@ mixin AnimationLocalStatusListenersMixin {
           ];
           return true;
         }());
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'animation library',
-          context: ErrorDescription('while notifying status listeners for $runtimeType'),
-          informationCollector: collector,
-        ));
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'animation library',
+            context: ErrorDescription('while notifying status listeners for $runtimeType'),
+            informationCollector: collector,
+          ),
+        );
       }
     }
   }

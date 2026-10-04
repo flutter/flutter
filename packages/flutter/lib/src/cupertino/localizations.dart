@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_tab_bar.dart';
+/// @docImport 'date_picker.dart';
+/// @docImport 'expansion_tile.dart';
+/// @docImport 'nav_bar.dart';
+/// @docImport 'search_field.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -17,14 +24,17 @@ enum DatePickerDateTimeOrder {
   ///
   /// Example: Fri Aug 31 | 02 | 08 | PM.
   date_time_dayPeriod,
+
   /// Order of the columns, from left to right: date, am/pm, hour, minute.
   ///
   /// Example: Fri Aug 31 | PM | 02 | 08.
   date_dayPeriod_time,
+
   /// Order of the columns, from left to right: hour, minute, am/pm, date.
   ///
   /// Example: 02 | 08 | PM | Fri Aug 31.
   time_dayPeriod_date,
+
   /// Order of the columns, from left to right: am/pm, hour, minute, date.
   ///
   /// Example: PM | 02 | 08 | Fri Aug 31.
@@ -37,14 +47,17 @@ enum DatePickerDateOrder {
   ///
   /// Example: 12 | March | 1996.
   dmy,
+
   /// Order of the columns, from left to right: month, day, year.
   ///
   /// Example: March | 12 | 1996.
   mdy,
+
   /// Order of the columns, from left to right: year, month, day.
   ///
   /// Example: 1996 | March | 12.
   ymd,
+
   /// Order of the columns, from left to right: year, day, month.
   ///
   /// Example: 1996 | 12 | March.
@@ -291,6 +304,36 @@ abstract class CupertinoLocalizations {
   /// indicate that a tap outside dismisses the context menu.
   String get menuDismissLabel;
 
+  /// The label for the cancel button in modal views, used in [CupertinoNavigationBar] and [CupertinoSliverNavigationBar].
+  String get cancelButtonLabel;
+
+  /// The label for the back button, used in [CupertinoNavigationBar] and [CupertinoSliverNavigationBar].
+  String get backButtonLabel;
+
+  /// The semantics hint to describe the tap action on an expanded
+  /// [CupertinoExpansionTile] on iOS and macOS. This is appended to the [collapsedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Expanded
+  /// double tap to collapse".
+  String get expansionTileExpandedHint => 'double tap to collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed
+  /// [CupertinoExpansionTile] on iOS and macOS. This is appended to the [expandedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Collapsed
+  /// double tap to expand".
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  /// The semantics hint to describe the tap action on an expanded [CupertinoExpansionTile].
+  String get expansionTileExpandedTapHint => 'Collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed [CupertinoExpansionTile].
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  /// The semantics hint to describe the [CupertinoExpansionTile] expanded state.
+  String get expandedHint => 'Collapsed';
+
+  /// The semantics hint to describe the [CupertinoExpansionTile] collapsed state.
+  String get collapsedHint => 'Expanded';
+
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -338,7 +381,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   const DefaultCupertinoLocalizations();
 
   /// Short version of days of week.
-  static const List<String> shortWeekdays = <String>[
+  static const List<String> _shortWeekdays = <String>[
     'Mon',
     'Tue',
     'Wed',
@@ -378,8 +421,6 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
     'December',
   ];
 
-
-
   @override
   String datePickerYear(int yearIndex) => yearIndex.toString();
 
@@ -392,7 +433,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   @override
   String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
     if (weekDay != null) {
-      return ' ${shortWeekdays[weekDay - DateTime.monday]} $dayIndex ';
+      return ' ${_shortWeekdays[weekDay - DateTime.monday]} $dayIndex ';
     }
 
     return dayIndex.toString();
@@ -417,16 +458,17 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String datePickerMediumDate(DateTime date) {
-    return '${shortWeekdays[date.weekday - DateTime.monday]} '
-      '${_shortMonths[date.month - DateTime.january]} '
-      '${date.day.toString().padRight(2)}';
+    return '${_shortWeekdays[date.weekday - DateTime.monday]} '
+        '${_shortMonths[date.month - DateTime.january]} '
+        '${date.day.toString().padRight(2)}';
   }
 
   @override
   DatePickerDateOrder get datePickerDateOrder => DatePickerDateOrder.mdy;
 
   @override
-  DatePickerDateTimeOrder get datePickerDateTimeOrder => DatePickerDateTimeOrder.date_time_dayPeriod;
+  DatePickerDateTimeOrder get datePickerDateTimeOrder =>
+      DatePickerDateTimeOrder.date_time_dayPeriod;
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
@@ -510,6 +552,30 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   @override
   String get menuDismissLabel => 'Dismiss menu';
 
+  @override
+  String get cancelButtonLabel => 'Cancel';
+
+  @override
+  String get backButtonLabel => 'Back';
+
+  @override
+  String get expansionTileExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get collapsedHint => 'Expanded';
+
   /// Creates an object that provides US English resource values for the
   /// cupertino library widgets.
   ///
@@ -522,5 +588,6 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   /// A [LocalizationsDelegate] that uses [DefaultCupertinoLocalizations.load]
   /// to create an instance of this class.
-  static const LocalizationsDelegate<CupertinoLocalizations> delegate = _CupertinoLocalizationsDelegate();
+  static const LocalizationsDelegate<CupertinoLocalizations> delegate =
+      _CupertinoLocalizationsDelegate();
 }

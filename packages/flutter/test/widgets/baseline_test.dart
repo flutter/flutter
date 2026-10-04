@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'list_tile_tester.dart';
+
+const Color _debugChipColor = Color(0xFFCCCCCC);
 
 void main() {
   testWidgets('Baseline - control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: DefaultTextStyle(
-          style: TextStyle(
-            fontSize: 100.0,
-          ),
+          style: TextStyle(fontSize: 100.0),
           child: Text('X', textDirection: TextDirection.ltr),
         ),
       ),
@@ -28,38 +30,30 @@ void main() {
           baseline: 175.0,
           baselineType: TextBaseline.alphabetic,
           child: DefaultTextStyle(
-            style: TextStyle(
-              fontFamily: 'FlutterTest',
-              fontSize: 100.0,
-            ),
+            style: TextStyle(fontFamily: 'FlutterTest', fontSize: 100.0),
             child: Text('X', textDirection: TextDirection.ltr),
           ),
         ),
       ),
     );
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
-    expect(
-      tester.renderObject<RenderBox>(find.byType(Baseline)).size,
-      const Size(100.0, 200),
-    );
+    expect(tester.renderObject<RenderBox>(find.byType(Baseline)).size, const Size(100.0, 200));
   });
 
   testWidgets('Chip caches baseline', (WidgetTester tester) async {
     final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
     debugCheckIntrinsicSizes = false;
-    int calls = 0;
+    var calls = 0;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Baseline(
-            baseline: 100.0,
-            baselineType: TextBaseline.alphabetic,
-            child: Chip(
-              label: BaselineDetector(() {
-                assert(!debugCheckIntrinsicSizes);
-                calls += 1;
-              }),
-            ),
+      TestWidgetsApp(
+        home: Baseline(
+          baseline: 100.0,
+          baselineType: TextBaseline.alphabetic,
+          child: TestChip(
+            label: BaselineDetector(() {
+              assert(!debugCheckIntrinsicSizes);
+              calls += 1;
+            }),
           ),
         ),
       ),
@@ -76,19 +70,17 @@ void main() {
   testWidgets('ListTile caches baseline', (WidgetTester tester) async {
     final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
     debugCheckIntrinsicSizes = false;
-    int calls = 0;
+    var calls = 0;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Baseline(
-            baseline: 100.0,
-            baselineType: TextBaseline.alphabetic,
-            child: ListTile(
-              title: BaselineDetector(() {
-                assert(!debugCheckIntrinsicSizes);
-                calls += 1;
-              }),
-            ),
+      TestWidgetsApp(
+        home: Baseline(
+          baseline: 100.0,
+          baselineType: TextBaseline.alphabetic,
+          child: TestListTile(
+            title: BaselineDetector(() {
+              assert(!debugCheckIntrinsicSizes);
+              calls += 1;
+            }),
           ),
         ),
       ),
@@ -104,16 +96,14 @@ void main() {
 
   testWidgets("LayoutBuilder returns child's baseline", (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Baseline(
-            baseline: 180.0,
-            baselineType: TextBaseline.alphabetic,
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return BaselineDetector(() {});
-              },
-            ),
+      TestWidgetsApp(
+        home: Baseline(
+          baseline: 180.0,
+          baselineType: TextBaseline.alphabetic,
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return BaselineDetector(() {});
+            },
           ),
         ),
       ),
@@ -121,15 +111,56 @@ void main() {
 
     expect(tester.getRect(find.byType(BaselineDetector)).top, 160.0);
   });
+
+  testWidgets('Baseline does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: Baseline(
+            baseline: 180.0,
+            baselineType: TextBaseline.alphabetic,
+            child: Placeholder(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Baseline)), Size.zero);
+  });
+}
+
+class TestChip extends StatelessWidget {
+  const TestChip({required this.label, super.key});
+
+  final Widget label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: _debugChipColor,
+        borderRadius: BorderRadius.all(Radius.circular(16.0)),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 32.0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+          child: label,
+        ),
+      ),
+    );
+  }
 }
 
 class BaselineDetector extends LeafRenderObjectWidget {
-  const BaselineDetector(this.callback, { super.key });
+  const BaselineDetector(this.callback, {super.key});
 
   final VoidCallback callback;
 
   @override
-  RenderBaselineDetector createRenderObject(BuildContext context) => RenderBaselineDetector(callback);
+  RenderBaselineDetector createRenderObject(BuildContext context) =>
+      RenderBaselineDetector(callback);
 
   @override
   void updateRenderObject(BuildContext context, RenderBaselineDetector renderObject) {
@@ -173,5 +204,5 @@ class RenderBaselineDetector extends RenderBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) { }
+  void paint(PaintingContext context, Offset offset) {}
 }

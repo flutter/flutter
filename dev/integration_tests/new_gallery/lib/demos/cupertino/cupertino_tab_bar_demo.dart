@@ -21,19 +21,10 @@ class CupertinoTabBarDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    final List<_TabInfo> tabInfo = <_TabInfo>[
-      _TabInfo(
-        localizations.cupertinoTabBarHomeTab,
-        CupertinoIcons.home,
-      ),
-      _TabInfo(
-        localizations.cupertinoTabBarChatTab,
-        CupertinoIcons.conversation_bubble,
-      ),
-      _TabInfo(
-        localizations.cupertinoTabBarProfileTab,
-        CupertinoIcons.profile_circled,
-      ),
+    final tabInfo = <_TabInfo>[
+      _TabInfo(localizations.cupertinoTabBarHomeTab, CupertinoIcons.home),
+      _TabInfo(localizations.cupertinoTabBarChatTab, CupertinoIcons.conversation_bubble),
+      _TabInfo(localizations.cupertinoTabBarProfileTab, CupertinoIcons.profile_circled),
     ];
 
     return DefaultTextStyle(
@@ -43,19 +34,14 @@ class CupertinoTabBarDemo extends StatelessWidget {
         tabBar: CupertinoTabBar(
           items: <BottomNavigationBarItem>[
             for (final _TabInfo tabInfo in tabInfo)
-              BottomNavigationBarItem(
-                label: tabInfo.title,
-                icon: Icon(tabInfo.icon),
-              ),
+              BottomNavigationBarItem(label: tabInfo.title, icon: Icon(tabInfo.icon)),
           ],
         ),
         tabBuilder: (BuildContext context, int index) {
           return CupertinoTabView(
             restorationScopeId: 'cupertino_tab_view_$index',
-            builder: (BuildContext context) => _CupertinoDemoTab(
-              title: tabInfo[index].title,
-              icon: tabInfo[index].icon,
-            ),
+            builder: (BuildContext context) =>
+                _CupertinoDemoTab(title: tabInfo[index].title, icon: tabInfo[index].icon),
             defaultTitle: tabInfo[index].title,
           );
         },
@@ -65,10 +51,7 @@ class CupertinoTabBarDemo extends StatelessWidget {
 }
 
 class _CupertinoDemoTab extends StatelessWidget {
-  const _CupertinoDemoTab({
-    required this.title,
-    required this.icon,
-  });
+  const _CupertinoDemoTab({required this.title, required this.icon});
 
   final String title;
   final IconData icon;
@@ -78,13 +61,7 @@ class _CupertinoDemoTab extends StatelessWidget {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(),
       backgroundColor: CupertinoColors.systemBackground,
-      child: Center(
-        child: Icon(
-          icon,
-          semanticLabel: title,
-          size: 100,
-        ),
-      ),
+      child: Center(child: Icon(icon, semanticLabel: title, size: 100)),
     );
   }
 }

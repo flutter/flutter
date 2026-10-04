@@ -7,37 +7,45 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'src/android/android_workflow.dart';
 import 'src/base/async_guard.dart';
 import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/error_handling_io.dart';
+import 'src/base/exit.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
+import 'src/context/tool_dependencies.dart';
 import 'src/context_runner.dart';
+import 'src/device.dart';
 import 'src/doctor.dart';
+import 'src/emulator.dart';
+import 'src/experimental/extension_discovery.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
-import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
+import 'src/windows/windows_workflow.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
 Future<int> run(
   List<String> args,
-  List<FlutterCommand> Function() commands, {
-    bool muteCommandLogging = false,
-    bool verbose = false,
-    bool verboseHelp = false,
-    bool? reportCrashes,
-    String? flutterVersion,
-    Map<Type, Generator>? overrides,
-    required ShutdownHooks shutdownHooks,
-  }) async {
+  List<FlutterCommand> Function(ToolDependencies toolDependencies) commands, {
+  required ShutdownHooks shutdownHooks,
+  List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
+  String? flutterVersion,
+  bool muteCommandLogging = false,
+  Map<Type, Generator>? overrides,
+  bool? reportCrashes,
+  bool verbose = false,
+  bool verboseHelp = false,
+}) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
@@ -45,104 +53,176 @@ Future<int> run(
     args.removeWhere((String option) => option == '-vv' || option == '-v' || option == '--verbose');
   }
 
+  // Reset this on each run to ensure we don't leak state across tests.
+  _alreadyHandlingToolError = null;
+
+  final bool usingLocalEngine = args.any((a) => a.startsWith('--local-engine'));
+
   return runInContext<int>(() async {
     globals.terminal.applyFeatureFlags(featureFlags);
 
     reportCrashes ??= !await globals.isRunningOnBot;
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
-    commands().forEach(runner.addCommand);
-
-    // Initialize the system locale.
-    final String systemLocale = await intl_standalone.findSystemLocale();
-    intl.Intl.defaultLocale = intl.Intl.verifiedLocale(
-      systemLocale, intl.NumberFormat.localeExists,
-      onFailure: (String _) => 'en_US',
+    final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
+      analytics: globals.analytics,
+      androidSdk: globals.androidSdk,
+      androidStudio: globals.androidStudio,
+      androidWorkflow: androidWorkflow,
+      artifacts: globals.artifacts,
+      botDetector: globals.botDetector,
+      buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
+      cache: globals.cache,
+      cocoaPods: globals.cocoaPods,
+      cocoapodsValidator: globals.cocoapodsValidator,
+      config: globals.config,
+      crashReporter: globals.crashReporter,
+      customDevicesConfig: globals.customDevicesConfig,
+      deviceManager: globals.deviceManager,
+      doctor: globals.doctor,
+      emulatorManager: emulatorManager,
+      extensionEntryPoints: extensionEntryPoints,
+      featureFlags: featureFlags,
+      flutterVersion: globals.flutterVersion,
+      fs: globals.fs,
+      git: globals.git,
+      gradleUtils: globals.gradleUtils,
+      iosSimulatorUtils: globals.iosSimulatorUtils,
+      iosWorkflow: globals.iosWorkflow,
+      java: globals.java,
+      localEngineLocator: globals.localEngineLocator,
+      logger: globals.logger,
+      nativeAssetsBuilder: globals.nativeAssetsBuilder,
+      outputPreferences: globals.outputPreferences,
+      persistentToolState: globals.persistentToolState,
+      platform: globals.platform,
+      plistParser: globals.plistParser,
+      preRunValidator: globals.preRunValidator,
+      processInfo: globals.processInfo,
+      processManager: globals.processManager,
+      projectFactory: globals.projectFactory,
+      shutdownHooks: shutdownHooks,
+      stdio: globals.stdio,
+      systemClock: globals.systemClock,
+      terminal: globals.terminal,
+      userMessages: globals.userMessages,
+      windowsWorkflow: windowsWorkflow,
+      xcdevice: globals.xcdevice,
+      xcode: globals.xcode,
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
     );
+    return context.run<int>(
+      overrides: <Type, Generator>{DeviceManager: () => toolDeps.deviceManager},
+      body: () async {
+        final runner = FlutterCommandRunner(
+          analytics: toolDeps.analytics,
+          featureFlags: featureFlags,
+          toolContext: toolDeps.toolContext,
+          verboseHelp: verboseHelp,
+        );
+        commands(toolDeps).forEach(runner.addCommand);
 
-    String getVersion() => flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
-    Object? firstError;
-    StackTrace? firstStackTrace;
-    return runZoned<Future<int>>(() async {
-      try {
-        if (args.contains('--disable-analytics') &&
-            args.contains('--enable-analytics')) {
-          throwToolExit(
-              'Both enable and disable analytics commands were detected '
-              'when only one can be supplied per invocation.',
-              exitCode: 1);
-        }
+        // Initialize the system locale.
+        final String systemLocale = await intl_standalone.findSystemLocale();
+        intl.Intl.defaultLocale = intl.Intl.verifiedLocale(
+          systemLocale,
+          intl.NumberFormat.localeExists,
+          onFailure: (String _) => 'en_US',
+        );
 
-        // Disable analytics if user passes in the `--disable-analytics` option
-        // "flutter --disable-analytics"
-        //
-        // Same functionality as "flutter config --no-analytics" for disabling
-        // except with the `value` hard coded as false
-        if (args.contains('--disable-analytics')) {
-          // The tool sends the analytics event *before* toggling the flag
-          // intentionally to be sure that opt-out events are sent correctly.
-          AnalyticsConfigEvent(enabled: false).send();
+        String getVersion() =>
+            flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
+        Object? firstError;
+        StackTrace? firstStackTrace;
+        return runZonedGuarded<Future<int>>(
+          () async {
+            try {
+              if (args.contains('--disable-analytics') && args.contains('--enable-analytics')) {
+                throwToolExit(
+                  'Both enable and disable analytics commands were detected '
+                  'when only one can be supplied per invocation.',
+                  exitCode: 1,
+                );
+              }
 
-          // Normally, the tool waits for the analytics to all send before the
-          // tool exits, but only when analytics are enabled. When reporting that
-          // analytics have been disable, the wait must be done here instead.
-          await globals.flutterUsage.ensureAnalyticsSent();
+              if (args.contains('--disable-analytics')) {
+                if (globals.analytics.telemetryEnabled) {
+                  globals.analytics.send(Event.analyticsCollectionEnabled(status: false));
+                  // Before disablig analytics, we need to close the client to make
+                  // sure the above collection event is sent.
+                  await globals.analytics.close();
+                }
+                await globals.analytics.setTelemetry(false);
+                globals.printStatus('Analytics reporting disabled.');
+              }
 
-          globals.flutterUsage.enabled = false;
-          globals.printStatus('Analytics reporting disabled.');
+              if (args.contains('--enable-analytics')) {
+                final bool alreadyEnabled = globals.analytics.telemetryEnabled;
+                await globals.analytics.setTelemetry(true);
+                if (!alreadyEnabled) {
+                  globals.analytics.send(Event.analyticsCollectionEnabled(status: true));
+                }
+                globals.printStatus('Analytics reporting enabled.');
+              }
 
-          // TODO(eliasyishak): Set the telemetry for the unified_analytics
-          //  package as well, the above will be removed once we have
-          //  fully transitioned to using the new package
-          await globals.analytics.setTelemetry(false);
-        }
+              await runner.run(args);
 
-        // Enable analytics if user passes in the `--enable-analytics` option
-        // `flutter --enable-analytics`
-        //
-        // Same functionality as `flutter config --analytics` for enabling
-        // except with the `value` hard coded as true
-        if (args.contains('--enable-analytics')) {
-          // The tool sends the analytics event *before* toggling the flag
-          // intentionally to be sure that opt-out events are sent correctly.
-          AnalyticsConfigEvent(enabled: true).send();
+              // Triggering [runZoned]'s error callback does not necessarily mean that
+              // we stopped executing the body. See https://github.com/dart-lang/sdk/issues/42150.
+              if (firstError == null) {
+                return await exitWithHooks(0, shutdownHooks: shutdownHooks);
+              }
 
-          globals.flutterUsage.enabled = true;
-          globals.printStatus('Analytics reporting enabled.');
-
-          // TODO(eliasyishak): Set the telemetry for the unified_analytics
-          //  package as well, the above will be removed once we have
-          //  fully transitioned to using the new package
-          await globals.analytics.setTelemetry(true);
-        }
-
-
-        await runner.run(args);
-
-        // Triggering [runZoned]'s error callback does not necessarily mean that
-        // we stopped executing the body. See https://github.com/dart-lang/sdk/issues/42150.
-        if (firstError == null) {
-          return await exitWithHooks(0, shutdownHooks: shutdownHooks);
-        }
-
-        // We already hit some error, so don't return success. The error path
-        // (which should be in progress) is responsible for calling _exit().
-        return 1;
-      } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
-        // This catches all exceptions to send to crash logging, etc.
-        firstError = error;
-        firstStackTrace = stackTrace;
-        return _handleToolError(error, stackTrace, verbose, args, reportCrashes!, getVersion, shutdownHooks);
-      }
-    }, onError: (Object error, StackTrace stackTrace) async {
-      // If sending a crash report throws an error into the zone, we don't want
-      // to re-try sending the crash report with *that* error. Rather, we want
-      // to send the original error that triggered the crash report.
-      firstError ??= error;
-      firstStackTrace ??= stackTrace;
-      await _handleToolError(firstError!, firstStackTrace, verbose, args, reportCrashes!, getVersion, shutdownHooks);
-    });
+              // We already hit some error, so don't return success. The error path
+              // (which should be in progress) is responsible for calling _exit().
+              return 1;
+              // This catches all exceptions to send to crash logging, etc.
+              // ignore: avoid_catches_without_on_clauses
+            } catch (error, stackTrace) {
+              firstError = error;
+              firstStackTrace = stackTrace;
+              return _handleToolError(
+                error,
+                stackTrace,
+                verbose,
+                args,
+                reportCrashes!,
+                getVersion,
+                shutdownHooks,
+                featureFlags: featureFlags,
+                usingLocalEngine: usingLocalEngine,
+              );
+            }
+          },
+          (Object error, StackTrace stackTrace) async {
+            // If sending a crash report throws an error into the zone, we don't want
+            // to re-try sending the crash report with *that* error. Rather, we want
+            // to send the original error that triggered the crash report.
+            firstError ??= error;
+            firstStackTrace ??= stackTrace;
+            await _handleToolError(
+              firstError!,
+              firstStackTrace,
+              verbose,
+              args,
+              reportCrashes!,
+              getVersion,
+              shutdownHooks,
+              featureFlags: featureFlags,
+              usingLocalEngine: usingLocalEngine,
+            );
+          },
+        )!;
+      },
+    );
   }, overrides: overrides);
 }
+
+/// Track if we're actively processing an error so we don't try and process
+/// additional asynchronous exceptions while we're trying to shut down.
+///
+/// NOTE: This state is cleared at the beginning of [run] to ensure state
+/// doesn't leak when running tests.
+Future<int>? _alreadyHandlingToolError;
 
 Future<int> _handleToolError(
   Object error,
@@ -151,11 +231,39 @@ Future<int> _handleToolError(
   List<String> args,
   bool reportCrashes,
   String Function() getFlutterVersion,
-  ShutdownHooks shutdownHooks,
-) async {
+  ShutdownHooks shutdownHooks, {
+  required bool usingLocalEngine,
+  required FeatureFlags featureFlags,
+}) async {
+  return _alreadyHandlingToolError ??= _handleToolErrorImpl(
+    error,
+    stackTrace,
+    verbose,
+    args,
+    reportCrashes,
+    getFlutterVersion,
+    shutdownHooks,
+    usingLocalEngine: usingLocalEngine,
+    featureFlags: featureFlags,
+  );
+}
+
+Future<int> _handleToolErrorImpl(
+  Object error,
+  StackTrace? stackTrace,
+  bool verbose,
+  List<String> args,
+  bool reportCrashes,
+  String Function() getFlutterVersion,
+  ShutdownHooks shutdownHooks, {
+  required bool usingLocalEngine,
+  required FeatureFlags featureFlags,
+}) async {
   if (error is UsageException) {
     globals.printError('${error.message}\n');
-    globals.printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
+    globals.printError(
+      "Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.",
+    );
     // Argument error exit code.
     return exitWithHooks(64, shutdownHooks: shutdownHooks);
   } else if (error is ToolExit) {
@@ -174,48 +282,71 @@ Future<int> _handleToolError(
     } else {
       return exitWithHooks(error.exitCode, shutdownHooks: shutdownHooks);
     }
+  } else if (error is ProcessException &&
+      _isErrorDueToGitMissing(error, globals.processManager, globals.logger)) {
+    globals.printError('${error.message}\n');
+    globals.printError(
+      'An error was encountered when trying to run git.\n'
+      "Please ensure git is installed and available in your system's search path. "
+      'See https://docs.flutter.dev/get-started for instructions on '
+      'installing git for your platform.',
+    );
+    return exitWithHooks(1, shutdownHooks: shutdownHooks);
   } else {
     // We've crashed; emit a log report.
     globals.stdio.stderrWrite('\n');
-
     if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
       globals.stdio.stderrWrite('$error\n');
       globals.stdio.stderrWrite('$stackTrace\n');
+
+      final String featureFlagsEnabled = allConfigurableFeatures
+          .where(featureFlags.isEnabled)
+          .map((Feature f) => f.configSetting)
+          .join(', ');
+      globals.stdio.stderrWrite('Feature flags enabled: $featureFlagsEnabled\n');
       return exitWithHooks(1, shutdownHooks: shutdownHooks);
     }
 
-    // Report to both [Usage] and [CrashReportSender].
-    globals.flutterUsage.sendException(error);
+    // Flutter tool crash analytics benefits from the concrete Dart error type.
+    // The tool is not obfuscated, and collapsing unknown types to Object loses useful signal.
+    // ignore: avoid_type_to_string
     globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
-    await asyncGuard(() async {
-      final CrashReportSender crashReportSender = CrashReportSender(
-        usage: globals.flutterUsage,
-        platform: globals.platform,
-        logger: globals.logger,
-        operatingSystemUtils: globals.os,
+
+    if (!usingLocalEngine) {
+      await asyncGuard(
+        () async {
+          final crashReportSender = CrashReportSender(
+            platform: globals.platform,
+            logger: globals.logger,
+            operatingSystemUtils: globals.os,
+            analytics: globals.analytics,
+          );
+          await crashReportSender.sendReport(
+            error: error,
+            stackTrace: stackTrace!,
+            getFlutterVersion: getFlutterVersion,
+            command: args.join(' '),
+          );
+        },
+        onError: (dynamic error) {
+          globals.printError('Error sending crash report: $error');
+        },
       );
-      await crashReportSender.sendReport(
-        error: error,
-        stackTrace: stackTrace!,
-        getFlutterVersion: getFlutterVersion,
-        command: args.join(' '),
-      );
-    }, onError: (dynamic error) {
-      globals.printError('Error sending crash report: $error');
-    });
+    }
 
     globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 
     try {
-      final BufferLogger logger = BufferLogger(
+      final logger = BufferLogger(
         terminal: globals.terminal,
         outputPreferences: globals.outputPreferences,
+        verbose: true /* Capture flutter doctor -v */,
       );
 
-      final DoctorText doctorText = DoctorText(logger);
+      final doctorText = DoctorText(logger);
 
-      final CrashDetails details = CrashDetails(
+      final details = CrashDetails(
         command: _crashCommand(args),
         error: error,
         stackTrace: stackTrace!,
@@ -224,9 +355,10 @@ Future<int> _handleToolError(
       final File file = await _createLocalCrashReport(details);
       await globals.crashReporter!.informUser(details, file);
 
-      return exitWithHooks(1, shutdownHooks: shutdownHooks);
-    // This catch catches all exceptions to ensure the message below is printed.
-    } catch (error, st) { // ignore: avoid_catches_without_on_clauses
+      return await exitWithHooks(1, shutdownHooks: shutdownHooks);
+      // This catch catches all exceptions to ensure the message below is printed.
+      // ignore: avoid_catches_without_on_clauses
+    } catch (error, st) {
       globals.stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n$st\n'
         '${globals.userMessages.flutterToolBugInstructions}\n',
@@ -246,7 +378,7 @@ String _crashException(dynamic error) => '${error.runtimeType}: $error';
 
 /// Saves the crash report to a local file.
 Future<File> _createLocalCrashReport(CrashDetails details) async {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
 
   buffer.writeln('Flutter crash report.');
   buffer.writeln('${globals.userMessages.flutterToolBugInstructions}\n');
@@ -264,20 +396,12 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   late File crashFile;
   ErrorHandlingFileSystem.noExitOnFailure(() {
     try {
-      crashFile = globals.fsUtils.getUniqueFile(
-        globals.fs.currentDirectory,
-        'flutter',
-        'log',
-      );
+      crashFile = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'flutter', 'log');
       crashFile.writeAsStringSync(buffer.toString());
     } on FileSystemException catch (_) {
       // Fallback to the system temporary directory.
       try {
-        crashFile = globals.fsUtils.getUniqueFile(
-          globals.fs.systemTempDirectory,
-          'flutter',
-          'log',
-        );
+        crashFile = globals.fsUtils.getUniqueFile(globals.fs.systemTempDirectory, 'flutter', 'log');
         crashFile.writeAsStringSync(buffer.toString());
       } on FileSystemException catch (e) {
         globals.printError('Could not write crash report to disk: $e');
@@ -289,4 +413,21 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   });
 
   return crashFile;
+}
+
+bool _isErrorDueToGitMissing(
+  ProcessException exception,
+  ProcessManager processManager,
+  Logger logger,
+) {
+  if (!exception.message.contains('git')) {
+    return false;
+  }
+
+  try {
+    return !processManager.canRun('git');
+  } on Object catch (error) {
+    logger.printTrace('Unable to check whether git is runnable: $error\n');
+    return true;
+  }
 }

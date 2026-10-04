@@ -15,9 +15,11 @@ class XcodeScriptBuildPhaseMigration extends ProjectMigrator {
   final File _xcodeProjectInfoFile;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     if (!_xcodeProjectInfoFile.existsSync()) {
-      logger.printTrace('Xcode project not found, skipping script build phase dependency analysis removal.');
+      logger.printTrace(
+        'Xcode project not found, skipping script build phase dependency analysis removal.',
+      );
       return;
     }
 
@@ -31,26 +33,31 @@ class XcodeScriptBuildPhaseMigration extends ProjectMigrator {
     //   isa = PBXShellScriptBuildPhase;
     //   buildActionMask = 2147483647;
 
-    final List<String> scriptIdentifierLinesToMigrate = <String>[
+    final scriptIdentifierLinesToMigrate = <String>[
       '3B06AD1E1E4923F5004D2608 /* Thin Binary */', // iOS template
       '9740EEB61CF901F6004384FC /* Run Script */', // iOS template
       '3399D490228B24CF009A79C7 /* ShellScript */', // macOS Runner target (not Flutter Assemble)
     ];
 
-    String newProjectContents = originalProjectContents;
-    for (final String scriptIdentifierLine in scriptIdentifierLinesToMigrate) {
-      final String scriptBuildPhaseOriginal = '''
+    var newProjectContents = originalProjectContents;
+    for (final scriptIdentifierLine in scriptIdentifierLinesToMigrate) {
+      final scriptBuildPhaseOriginal =
+          '''
 		$scriptIdentifierLine = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 ''';
-      final String scriptBuildPhaseReplacement = '''
+      final scriptBuildPhaseReplacement =
+          '''
 		$scriptIdentifierLine = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 ''';
-      newProjectContents = newProjectContents.replaceAll(scriptBuildPhaseOriginal, scriptBuildPhaseReplacement);
+      newProjectContents = newProjectContents.replaceAll(
+        scriptBuildPhaseOriginal,
+        scriptBuildPhaseReplacement,
+      );
     }
     if (originalProjectContents != newProjectContents) {
       logger.printStatus('Removing script build phase dependency analysis.');

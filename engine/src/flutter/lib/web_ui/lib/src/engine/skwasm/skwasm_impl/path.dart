@@ -1,0 +1,319 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:convert';
+import 'dart:ffi';
+import 'dart:typed_data';
+
+import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
+import 'package:ui/ui.dart' as ui;
+
+enum PathDirection { clockwise, counterClockwise }
+
+enum PathArcSize { small, large }
+
+ui.Rect _getPathBounds(Pointer<RawPath> handle) {
+  return withStackScope((StackScope s) {
+    final Pointer<Float> rectBuffer = s.allocFloatArray(4);
+    pathGetBounds(handle, rectBuffer);
+    return s.convertRectFromNative(rectBuffer);
+  });
+}
+
+class SkwasmPath implements BackendPath {
+  SkwasmPath.fromHandle(this.handle);
+
+  final Pointer<RawPath> handle;
+  bool _isDisposed = false;
+
+  @override
+  void dispose() {
+    assert(!_isDisposed, 'SkwasmPath has already been disposed.');
+    if (!_isDisposed) {
+      pathDispose(handle);
+      _isDisposed = true;
+    }
+  }
+
+  bool contains(ui.Offset point) => pathContains(handle, point.dx, point.dy);
+  ui.PathFillType get fillType => ui.PathFillType.values[pathGetFillType(handle)];
+
+  @override
+  ui.Rect getBounds() => _getPathBounds(handle);
+
+  @override
+  SkwasmPathMetricIterator computeMetrics({bool forceClosed = false}) {
+    return SkwasmPathMetricIterator(this, forceClosed);
+  }
+
+  @override
+  String toSvgString() {
+    final SkStringHandle skString = pathGetSvgString(handle);
+    final Pointer<Int8> buffer = skStringGetData(skString);
+    final int length = skStringGetLength(skString);
+    final String svgString = utf8.decode(buffer.toUint8List(length));
+    skStringFree(skString);
+    return svgString;
+  }
+}
+
+class SkwasmPathBuilder implements BackendPathBuilder {
+  factory SkwasmPathBuilder() {
+    return SkwasmPathBuilder.fromHandle(pathCreate());
+  }
+
+  factory SkwasmPathBuilder.from(SkwasmPath source) {
+    return SkwasmPathBuilder.fromHandle(pathCopy(source.handle));
+  }
+
+  SkwasmPathBuilder.fromHandle(this.handle);
+
+  final Pointer<RawPath> handle;
+  bool _isDisposed = false;
+
+  @override
+  SkwasmPath build() {
+    assert(!_isDisposed, 'SkwasmPathBuilder has been disposed.');
+    return SkwasmPath.fromHandle(pathCopy(handle));
+  }
+
+  @override
+  void dispose() {
+    assert(!_isDisposed, 'SkwasmPathBuilder has already been disposed.');
+    if (!_isDisposed) {
+      pathDispose(handle);
+      _isDisposed = true;
+    }
+  }
+
+  @override
+  ui.PathFillType get fillType => ui.PathFillType.values[pathGetFillType(handle)];
+
+  @override
+  set fillType(ui.PathFillType fillType) => pathSetFillType(handle, fillType.index);
+
+  @override
+  void moveTo(double x, double y) => pathMoveTo(handle, x, y);
+
+  @override
+  void relativeMoveTo(double x, double y) => pathRelativeMoveTo(handle, x, y);
+
+  @override
+  void lineTo(double x, double y) => pathLineTo(handle, x, y);
+
+  @override
+  void relativeLineTo(double x, double y) => pathRelativeLineTo(handle, x, y);
+
+  @override
+  void quadraticBezierTo(double x1, double y1, double x2, double y2) =>
+      pathQuadraticBezierTo(handle, x1, y1, x2, y2);
+
+  @override
+  void relativeQuadraticBezierTo(double x1, double y1, double x2, double y2) =>
+      pathRelativeQuadraticBezierTo(handle, x1, y1, x2, y2);
+
+  @override
+  void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3) =>
+      pathCubicTo(handle, x1, y1, x2, y2, x3, y3);
+
+  @override
+  void relativeCubicTo(double x1, double y1, double x2, double y2, double x3, double y3) =>
+      pathRelativeCubicTo(handle, x1, y1, x2, y2, x3, y3);
+
+  @override
+  void conicTo(double x1, double y1, double x2, double y2, double w) =>
+      pathConicTo(handle, x1, y1, x2, y2, w);
+
+  @override
+  void relativeConicTo(double x1, double y1, double x2, double y2, double w) =>
+      pathRelativeConicTo(handle, x1, y1, x2, y2, w);
+
+  @override
+  void arcTo(ui.Rect rect, double startAngle, double sweepAngle, bool forceMoveTo) {
+    withStackScope((StackScope s) {
+      pathArcToOval(
+        handle,
+        s.convertRectToNative(rect),
+        ui.toDegrees(startAngle),
+        ui.toDegrees(sweepAngle),
+        forceMoveTo,
+      );
+    });
+  }
+
+  @override
+  void arcToPoint(
+    ui.Offset arcEnd, {
+    ui.Radius radius = ui.Radius.zero,
+    double rotation = 0.0,
+    bool largeArc = false,
+    bool clockwise = true,
+  }) {
+    final PathArcSize arcSize = largeArc ? PathArcSize.large : PathArcSize.small;
+    final PathDirection pathDirection = clockwise
+        ? PathDirection.clockwise
+        : PathDirection.counterClockwise;
+    pathArcToRotated(
+      handle,
+      radius.x,
+      radius.y,
+      ui.toDegrees(rotation),
+      arcSize.index,
+      pathDirection.index,
+      arcEnd.dx,
+      arcEnd.dy,
+    );
+  }
+
+  @override
+  void relativeArcToPoint(
+    ui.Offset arcEndDelta, {
+    ui.Radius radius = ui.Radius.zero,
+    double rotation = 0.0,
+    bool largeArc = false,
+    bool clockwise = true,
+  }) {
+    final PathArcSize arcSize = largeArc ? PathArcSize.large : PathArcSize.small;
+    final PathDirection pathDirection = clockwise
+        ? PathDirection.clockwise
+        : PathDirection.counterClockwise;
+    pathRelativeArcToRotated(
+      handle,
+      radius.x,
+      radius.y,
+      ui.toDegrees(rotation),
+      arcSize.index,
+      pathDirection.index,
+      arcEndDelta.dx,
+      arcEndDelta.dy,
+    );
+  }
+
+  @override
+  void addRect(ui.Rect rect) {
+    withStackScope((StackScope s) {
+      pathAddRect(handle, s.convertRectToNative(rect));
+    });
+  }
+
+  @override
+  void addOval(ui.Rect rect) {
+    withStackScope((StackScope s) {
+      pathAddOval(handle, s.convertRectToNative(rect));
+    });
+  }
+
+  @override
+  void addArc(ui.Rect rect, double startAngle, double sweepAngle) {
+    withStackScope((StackScope s) {
+      pathAddArc(
+        handle,
+        s.convertRectToNative(rect),
+        ui.toDegrees(startAngle),
+        ui.toDegrees(sweepAngle),
+      );
+    });
+  }
+
+  @override
+  void addPolygon(List<ui.Offset> points, bool close) {
+    withStackScope((StackScope s) {
+      pathAddPolygon(handle, s.convertPointArrayToNative(points), points.length, close);
+    });
+  }
+
+  @override
+  void addRRect(ui.RRect rrect) {
+    withStackScope((StackScope s) {
+      pathAddRRect(handle, s.convertRRectToNative(rrect));
+    });
+  }
+
+  @override
+  void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
+    final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    addPath((path as EnginePath).backendPath, offset);
+  }
+
+  @override
+  void addPath(BackendPath path, ui.Offset offset, {Float64List? matrix4}) {
+    _addPath(path, offset, false, matrix4: matrix4);
+  }
+
+  @override
+  void extendWithPath(BackendPath path, ui.Offset offset, {Float64List? matrix4}) {
+    _addPath(path, offset, true, matrix4: matrix4);
+  }
+
+  void _addPath(BackendPath path, ui.Offset offset, bool extend, {Float64List? matrix4}) {
+    assert(path is SkwasmPath);
+    withStackScope((StackScope s) {
+      final Pointer<Float> convertedMatrix = s.convertMatrix4toSkMatrix(
+        matrix4 ?? Matrix4.identity().toFloat64(),
+      );
+      convertedMatrix[2] += offset.dx;
+      convertedMatrix[5] += offset.dy;
+      pathAddPath(handle, (path as SkwasmPath).handle, convertedMatrix, extend);
+    });
+  }
+
+  @override
+  void close() => pathClose(handle);
+
+  @override
+  void reset() => pathReset(handle);
+
+  @override
+  bool contains(ui.Offset point) => pathContains(handle, point.dx, point.dy);
+
+  @override
+  void shiftInPlace(ui.Offset offset) {
+    transformInPlace(Matrix4.translationValues(offset.dx, offset.dy, 0.0).toFloat64());
+  }
+
+  @override
+  void transformInPlace(Float64List matrix4) {
+    return withStackScope((StackScope s) {
+      pathTransform(handle, s.convertMatrix4toSkMatrix(matrix4));
+    });
+  }
+
+  @override
+  ui.Rect getBounds() => _getPathBounds(handle);
+
+  static SkwasmPathBuilder combine(
+    ui.PathOperation operation,
+    SkwasmPath path1,
+    SkwasmPath path2,
+  ) => SkwasmPathBuilder.fromHandle(pathCombine(operation.index, path1.handle, path2.handle));
+}
+
+class SkwasmPathConstructors implements BackendPathConstructors {
+  @override
+  SkwasmPathBuilder createNew() => SkwasmPathBuilder();
+
+  @override
+  BackendPathBuilder fromPath(BackendPath path) => SkwasmPathBuilder.from(path as SkwasmPath);
+
+  @override
+  SkwasmPathBuilder combinePaths(ui.PathOperation operation, BackendPath path1, BackendPath path2) {
+    return SkwasmPathBuilder.combine(operation, path1 as SkwasmPath, path2 as SkwasmPath);
+  }
+}
+
+/// Using a specialized local extension rather than a generic List<int>.generate
+/// prevents dart2wasm from dynamically boxing the primitive integers into
+/// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+/// Explicitly masks the signed Int8 values to positive unsigned bytes (& 0xFF)
+/// to guarantee correct decoding by the UTF-8 decoder.
+extension on Pointer<Int8> {
+  Uint8List toUint8List(int length) {
+    final list = Uint8List(length);
+    for (int i = length - 1; i >= 0; i--) {
+      list[i] = this[i] & 0xFF;
+    }
+    return list;
+  }
+}

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+
 import '../../gallery_localizations.dart';
 
 // BEGIN cupertinoActivityIndicatorDemo
@@ -15,13 +16,9 @@ class CupertinoProgressIndicatorDemo extends StatelessWidget {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,
-        middle: Text(
-          GalleryLocalizations.of(context)!.demoCupertinoActivityIndicatorTitle,
-        ),
+        middle: Text(GalleryLocalizations.of(context)!.demoCupertinoActivityIndicatorTitle),
       ),
-      child: const Center(
-        child: CupertinoActivityIndicator(),
-      ),
+      child: const Center(child: CupertinoActivityIndicator()),
     );
   }
 }

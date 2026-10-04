@@ -16,9 +16,11 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
   final File _xcodeProjectInfoFile;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     if (!_xcodeProjectInfoFile.existsSync()) {
-      logger.printTrace('Xcode project not found, skipping Runner project build settings and configuration migration');
+      logger.printTrace(
+        'Xcode project not found, skipping Runner project build settings and configuration migration',
+      );
       return;
     }
 
@@ -32,7 +34,7 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
     //				97C147041CF9000F007C1171 /* Release */,
     //				2436755321828D23008C7051 /* Profile */,
     //			);
-    final RegExp projectBuildConfigurationList = RegExp(
+    final projectBuildConfigurationList = RegExp(
       r'\/\* Build configuration list for PBXProject "Runner" \*\/ = {\s*isa = XCConfigurationList;\s*buildConfigurations = \(\s*(.*) \/\* Debug \*\/,\s*(.*) \/\* Release \*\/,\s*(.*) \/\* Profile \*\/,',
       multiLine: true,
     );
@@ -45,41 +47,56 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
     final String profileIdentifier = match?.group(3) ?? '249021D3217E4FDB00AE95B9';
 
     // Debug
-    final String debugBaseConfigurationOriginal = '''
+    final debugBaseConfigurationOriginal =
+        '''
 		$debugIdentifier /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 ''';
-    final String debugBaseConfigurationReplacement = '''
+    final debugBaseConfigurationReplacement =
+        '''
 		$debugIdentifier /* Debug */ = {
 			isa = XCBuildConfiguration;
 ''';
-    String newProjectContents = originalProjectContents.replaceAll(debugBaseConfigurationOriginal, debugBaseConfigurationReplacement);
+    String newProjectContents = originalProjectContents.replaceAll(
+      debugBaseConfigurationOriginal,
+      debugBaseConfigurationReplacement,
+    );
 
     // Profile
-    final String profileBaseConfigurationOriginal = '''
+    final profileBaseConfigurationOriginal =
+        '''
 		$profileIdentifier /* Profile */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 ''';
-    final String profileBaseConfigurationReplacement = '''
+    final profileBaseConfigurationReplacement =
+        '''
 		$profileIdentifier /* Profile */ = {
 			isa = XCBuildConfiguration;
 ''';
-    newProjectContents = newProjectContents.replaceAll(profileBaseConfigurationOriginal, profileBaseConfigurationReplacement);
+    newProjectContents = newProjectContents.replaceAll(
+      profileBaseConfigurationOriginal,
+      profileBaseConfigurationReplacement,
+    );
 
     // Release
-    final String releaseBaseConfigurationOriginal = '''
+    final releaseBaseConfigurationOriginal =
+        '''
 		$releaseIdentifier /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 ''';
-    final String releaseBaseConfigurationReplacement = '''
+    final releaseBaseConfigurationReplacement =
+        '''
 		$releaseIdentifier /* Release */ = {
 			isa = XCBuildConfiguration;
 ''';
 
-    newProjectContents = newProjectContents.replaceAll(releaseBaseConfigurationOriginal, releaseBaseConfigurationReplacement);
+    newProjectContents = newProjectContents.replaceAll(
+      releaseBaseConfigurationOriginal,
+      releaseBaseConfigurationReplacement,
+    );
     if (originalProjectContents != newProjectContents) {
       logger.printStatus('Project base configurations detected, removing.');
       _xcodeProjectInfoFile.writeAsStringSync(newProjectContents);

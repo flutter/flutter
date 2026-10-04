@@ -3,16 +3,24 @@
 // found in the LICENSE file.
 
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../web/chrome.dart';
@@ -26,9 +34,11 @@ import 'test_wrapper.dart';
 import 'watcher.dart';
 import 'web_test_compiler.dart';
 
-/// A class that abstracts launching the test process from the test runner.
-abstract class FlutterTestRunner {
-  const factory FlutterTestRunner() = _FlutterTestRunnerImpl;
+/// Launching the `flutter_tester` process from the test runner.
+interface class FlutterTestRunner {
+  const FlutterTestRunner({required this._toolContext});
+
+  final ToolContext _toolContext;
 
   /// Runs tests using package:test and the Flutter engine.
   Future<int> runTests(
@@ -37,10 +47,10 @@ abstract class FlutterTestRunner {
     required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
+    List<String> tags = const <String>[],
+    List<String> excludeTags = const <String>[],
+    List<String> presets = const <String>[],
     bool enableVmService = false,
-    bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
     Map<String, String>? precompiledDillFiles,
@@ -52,11 +62,12 @@ abstract class FlutterTestRunner {
     String? icudtlPath,
     Directory? coverageDirectory,
     bool web = false,
-    bool useWasm = false,
     String? randomSeed,
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool ignoreTimeouts = false,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -64,167 +75,89 @@ abstract class FlutterTestRunner {
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  });
-
-  /// Runs tests using the experimental strategy of spawning each test in a
-  /// separate lightweight Engine.
-  Future<int> runTestsBySpawningLightweightEngines(
-    List<Uri> testFiles, {
-    required DebuggingOptions debuggingOptions,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
-    bool machine = false,
-    bool updateGoldens = false,
-    required int? concurrency,
-    String? testAssetDirectory,
-    FlutterProject? flutterProject,
-    String? icudtlPath,
-    String? randomSeed,
-    String? reporter,
-    String? fileReporter,
-    String? timeout,
-    bool runSkipped = false,
-    int? shardIndex,
-    int? totalShards,
-    TestTimeRecorder? testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  });
-}
-
-class _FlutterTestRunnerImpl implements FlutterTestRunner {
-  const _FlutterTestRunnerImpl();
-
-  @override
-  Future<int> runTests(
-    TestWrapper testWrapper,
-    List<Uri> testFiles, {
-    required DebuggingOptions debuggingOptions,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
-    bool enableVmService = false,
-    bool ipv6 = false,
-    bool machine = false,
-    String? precompiledDillPath,
-    Map<String, String>? precompiledDillFiles,
-    bool updateGoldens = false,
-    TestWatcher? watcher,
-    required int? concurrency,
-    String? testAssetDirectory,
-    FlutterProject? flutterProject,
-    String? icudtlPath,
-    Directory? coverageDirectory,
-    bool web = false,
-    bool useWasm = false,
-    String? randomSeed,
-    String? reporter,
-    String? fileReporter,
-    String? timeout,
-    bool runSkipped = false,
-    int? shardIndex,
-    int? totalShards,
-    Device? integrationTestDevice,
-    String? integrationTestUserIdentifier,
-    TestTimeRecorder? testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    required BuildInfo buildInfo,
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessManager processManager,
+      :AnsiTerminal terminal,
+    ) = _toolContext;
+
     // Configure package:test to use the Flutter engine for child processes.
-    final String shellPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
+    final String flutterTesterBinPath = artifacts.getArtifactPath(Artifact.flutterTester);
 
     // Compute the command-line arguments for package:test.
-    final List<String> testArgs = <String>[
-      if (!globals.terminal.supportsColor)
-        '--no-color',
-      if (debuggingOptions.startPaused)
-        '--pause-after-load',
-      if (machine)
-        ...<String>['-r', 'json']
-      else if (reporter != null)
-        ...<String>['-r', reporter],
-      if (fileReporter != null)
-        '--file-reporter=$fileReporter',
-      if (timeout != null)
-        ...<String>['--timeout', timeout],
-      if (concurrency != null)
-        '--concurrency=$concurrency',
-      for (final String name in names)
-        ...<String>['--name', name],
-      for (final String plainName in plainNames)
-        ...<String>['--plain-name', plainName],
-      if (randomSeed != null)
-        '--test-randomize-ordering-seed=$randomSeed',
-      if (tags != null)
-        ...<String>['--tags', tags],
-      if (excludeTags != null)
-        ...<String>['--exclude-tags', excludeTags],
-      if (runSkipped)
-        '--run-skipped',
-      if (totalShards != null)
-        '--total-shards=$totalShards',
-      if (shardIndex != null)
-        '--shard-index=$shardIndex',
+    final testArgs = <String>[
+      if (!terminal.supportsColor) '--no-color',
+      if (debuggingOptions.startPaused) '--pause-after-load',
+      if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
+      if (fileReporter != null) '--file-reporter=$fileReporter',
+      if (timeout != null) ...<String>['--timeout', timeout],
+      if (ignoreTimeouts) '--ignore-timeouts',
+      if (concurrency != null) '--concurrency=$concurrency',
+      for (final String name in names) ...<String>['--name', name],
+      for (final String plainName in plainNames) ...<String>['--plain-name', plainName],
+      if (randomSeed != null) '--test-randomize-ordering-seed=$randomSeed',
+      for (final String tag in tags) ...<String>['--tags', tag],
+      for (final String excludeTag in excludeTags) ...<String>['--exclude-tags', excludeTag],
+      for (final String preset in presets) ...<String>['--preset', preset],
+      if (failFast) '--fail-fast',
+      if (runSkipped) '--run-skipped',
+      if (totalShards != null) '--total-shards=$totalShards',
+      if (shardIndex != null) '--shard-index=$shardIndex',
       '--chain-stack-traces',
     ];
 
     if (web) {
-      final String tempBuildDir = globals.fs.systemTempDirectory
-        .createTempSync('flutter_test.')
-        .absolute
-        .uri
-        .toFilePath();
-      final WebMemoryFS result = await WebTestCompiler(
-        logger: globals.logger,
-        fileSystem: globals.fs,
-        platform: globals.platform,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
-        config: globals.config,
-      ).initialize(
+      // Unsupported for general Flutter developers.
+      // This is only used by the Flutter Framework tests.
+      // See: https://github.com/flutter/flutter/pull/65984.
+      final String tempBuildDir = fs.systemTempDirectory
+          .createTempSync('flutter_test.')
+          .absolute
+          .uri
+          .toFilePath();
+      final WebMemoryFS result = await WebTestCompiler(toolContext: _toolContext).initialize(
         projectDirectory: flutterProject!.directory,
         testOutputDir: tempBuildDir,
         testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
         webRenderer: debuggingOptions.webRenderer,
-        useWasm: useWasm,
+        useWasm: debuggingOptions.webUseWasm,
       );
       testArgs
         ..add('--platform=chrome')
         ..add('--')
         ..addAll(testFiles.map((Uri uri) => uri.toString()));
-      testWrapper.registerPlatformPlugin(
-        <Runtime>[Runtime.chrome],
-        () {
-          return FlutterWebPlatform.start(
-            flutterProject.directory.path,
-            updateGoldens: updateGoldens,
-            shellPath: shellPath,
-            flutterProject: flutterProject,
-            pauseAfterLoad: debuggingOptions.startPaused,
-            nullAssertions: debuggingOptions.nullAssertions,
-            buildInfo: debuggingOptions.buildInfo,
-            webMemoryFS: result,
-            logger: globals.logger,
-            fileSystem: globals.fs,
-            buildDirectory: globals.fs.directory(tempBuildDir),
-            artifacts: globals.artifacts,
-            processManager: globals.processManager,
-            chromiumLauncher: ChromiumLauncher(
-              fileSystem: globals.fs,
-              platform: globals.platform,
-              processManager: globals.processManager,
-              operatingSystemUtils: globals.os,
-              browserFinder: findChromeExecutable,
-              logger: globals.logger,
-            ),
-            testTimeRecorder: testTimeRecorder,
-            webRenderer: debuggingOptions.webRenderer,
-            useWasm: useWasm,
-          );
-        },
-      );
+      testWrapper.registerPlatformPlugin(<Runtime>[Runtime.chrome], () {
+        return FlutterWebPlatform.start(
+          flutterProject.directory.path,
+          buildDirectory: fs.directory(tempBuildDir),
+          buildInfo: debuggingOptions.buildInfo,
+          chromiumLauncher: ChromiumLauncher(
+            fileSystem: fs,
+            platform: platform,
+            processManager: processManager,
+            operatingSystemUtils: os,
+            browserFinder: findChromeExecutable,
+            logger: logger,
+          ),
+          crossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
+          flutterProject: flutterProject,
+          flutterTesterBinPath: flutterTesterBinPath,
+          toolContext: _toolContext,
+          useWasm: debuggingOptions.webUseWasm,
+          webMemoryFS: result,
+          webRenderer: debuggingOptions.webRenderer,
+          pauseAfterLoad: debuggingOptions.startPaused,
+          testTimeRecorder: testTimeRecorder,
+          updateGoldens: updateGoldens,
+        );
+      });
       await testWrapper.main(testArgs);
       return exitCode;
     }
@@ -233,40 +166,43 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       ..add('--')
       ..addAll(testFiles.map((Uri uri) => uri.toString()));
 
-    final InternetAddressType serverType =
-        ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
+    final InternetAddressType serverType = debuggingOptions.ipv6
+        ? InternetAddressType.IPv6
+        : InternetAddressType.IPv4;
 
-    final loader.FlutterPlatform platform = loader.installHook(
-      testWrapper: testWrapper,
-      shellPath: shellPath,
+    final loader.FlutterPlatform platformInstance = loader.installHook(
+      buildInfo: buildInfo,
       debuggingOptions: debuggingOptions,
-      watcher: watcher,
+      flutterTesterBinPath: flutterTesterBinPath,
+      toolContext: _toolContext,
       enableVmService: enableVmService,
-      machine: machine,
-      serverType: serverType,
-      precompiledDillPath: precompiledDillPath,
-      precompiledDillFiles: precompiledDillFiles,
-      updateGoldens: updateGoldens,
-      testAssetDirectory: testAssetDirectory,
-      projectRootDirectory: globals.fs.currentDirectory.uri,
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: integrationTestUserIdentifier,
-      testTimeRecorder: testTimeRecorder,
+      machine: machine,
       nativeAssetsBuilder: nativeAssetsBuilder,
+      precompiledDillFiles: precompiledDillFiles,
+      precompiledDillPath: precompiledDillPath,
+      projectRootDirectory: fs.currentDirectory.uri,
+      serverType: serverType,
+      testAssetDirectory: testAssetDirectory,
+      testTimeRecorder: testTimeRecorder,
+      testWrapper: testWrapper,
+      updateGoldens: updateGoldens,
+      watcher: watcher,
     );
 
     try {
-      globals.printTrace('running test package with arguments: $testArgs');
+      logger.printTrace('running test package with arguments: $testArgs');
       await testWrapper.main(testArgs);
 
       // test.main() sets dart:io's exitCode global.
-      globals.printTrace('test package returned with exit code $exitCode');
+      logger.printTrace('test package returned with exit code $exitCode');
 
       return exitCode;
     } finally {
-      await platform.close();
+      await platformInstance.close();
     }
   }
 
@@ -278,57 +214,67 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
   static Future<void> _generateIsolateSpawningTesterPackageConfig({
     required FlutterProject flutterProject,
     required File isolateSpawningTesterPackageConfigFile,
+    required ToolContext toolContext,
   }) async {
-    final File projectPackageConfigFile = globals.fs.directory(
-      flutterProject.directory.path,
-    ).childDirectory('.dart_tool').childFile('package_config.json');
-    final PackageConfig projectPackageConfig = PackageConfig.parseBytes(
-      projectPackageConfigFile.readAsBytesSync(),
-      projectPackageConfigFile.uri,
-    );
+    final FileSystem fs = toolContext.fs;
+    final File packageConfigFile = fs
+        .directory(flutterProject.directory.path)
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json');
+    PackageConfig? projectPackageConfig;
+    if (packageConfigFile.existsSync()) {
+      projectPackageConfig = PackageConfig.parseBytes(
+        packageConfigFile.readAsBytesSync(),
+        packageConfigFile.absolute.uri,
+      );
+    } else {
+      // We can't use this directly, but need to manually check
+      // `flutterProject.directory.path` first, as `findPackageConfig` is from a
+      // different package which does not use package:file. This inhibits
+      // mocking the file system.
+      projectPackageConfig = await findPackageConfig(fs.directory(flutterProject.directory.path));
+    }
+
+    if (projectPackageConfig == null) {
+      throwToolExit('Could not find package config for ${flutterProject.directory.path}.');
+    }
 
     // The flutter_tools package_config.json is guaranteed to include
     // package:ffi and package:test_core.
-    final File flutterToolsPackageConfigFile = globals.fs.directory(
-      globals.fs.path.join(
-        Cache.flutterRoot!,
-        'packages',
-        'flutter_tools',
-      ),
-    ).childDirectory('.dart_tool').childFile('package_config.json');
+    final File flutterToolsPackageConfigFile = fs
+        .directory(fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'))
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json');
     final PackageConfig flutterToolsPackageConfig = PackageConfig.parseBytes(
       flutterToolsPackageConfigFile.readAsBytesSync(),
-      flutterToolsPackageConfigFile.uri,
+      flutterToolsPackageConfigFile.absolute.uri,
     );
 
-    final List<Package> mergedPackages = <Package>[
-      ...projectPackageConfig.packages,
-    ];
-    final Set<String> projectPackageNames = Set<String>.from(
-      mergedPackages.map((Package p) => p.name),
-    );
+    final mergedPackages = <Package>[...projectPackageConfig.packages];
+    final projectPackageNames = Set<String>.from(mergedPackages.map((Package p) => p.name));
     for (final Package p in flutterToolsPackageConfig.packages) {
       if (!projectPackageNames.contains(p.name)) {
         mergedPackages.add(p);
       }
     }
 
-    final PackageConfig mergedPackageConfig = PackageConfig(mergedPackages);
-    final StringBuffer buffer = StringBuffer();
+    final mergedPackageConfig = PackageConfig(mergedPackages);
+    final buffer = StringBuffer();
     PackageConfig.writeString(mergedPackageConfig, buffer);
     isolateSpawningTesterPackageConfigFile.writeAsStringSync(buffer.toString());
   }
 
   static void _generateChildTestIsolateSpawnerSourceFile(
     List<Uri> paths, {
-    required List<String> packageTestArgs,
     required bool autoUpdateGoldenFiles,
     required File childTestIsolateSpawnerSourceFile,
-    required File childTestIsolateSpawnerDillFile,
+    required List<String> packageTestArgs,
+    required ToolContext toolContext,
   }) {
-    final Map<String, String> testConfigPaths = <String, String>{};
+    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = toolContext;
+    final testConfigPaths = <String, String>{};
 
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.writeln('''
 import 'dart:ffi';
 import 'dart:isolate';
@@ -343,16 +289,13 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
     String pathToImport(String path) {
       assert(path.endsWith('.dart'));
       return path
-          .replaceAll('.', '_')
-          .replaceAll(':', '_')
-          .replaceAll('/', '_')
-          .replaceAll(r'\', '_')
+          .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')
           .replaceRange(path.length - '.dart'.length, null, '');
     }
 
-    final Map<String, String> testImports = <String, String>{};
-    final Set<String> seenTestConfigPaths = <String>{};
-    for (final Uri path in paths) {
+    final testImports = <String, String>{};
+    final seenTestConfigPaths = <String>{};
+    for (final path in paths) {
       final String sanitizedPath = !path.path.endsWith('?')
           ? path.path
           : path.path.substring(0, path.path.length - 1);
@@ -360,38 +303,40 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
       buffer.writeln("import '$sanitizedPath' as $sanitizedImport;");
       testImports[sanitizedPath] = sanitizedImport;
       final File? testConfigFile = findTestConfigFile(
-        globals.fs.file(
-          globals.platform.isWindows
+        fs.file(
+          platform.isWindows
               ? sanitizedPath.replaceAll('/', r'\').replaceFirst(r'\', '')
               : sanitizedPath,
         ),
-        globals.logger,
+        logger,
       );
       if (testConfigFile != null) {
         final String sanitizedTestConfigImport = pathToImport(testConfigFile.path);
         testConfigPaths[sanitizedImport] = sanitizedTestConfigImport;
         if (seenTestConfigPaths.add(testConfigFile.path)) {
-          buffer.writeln("import '${Uri.file(testConfigFile.path, windows: true)}' as $sanitizedTestConfigImport;");
+          buffer.writeln(
+            "import '${Uri.file(testConfigFile.path, windows: true)}' as $sanitizedTestConfigImport;",
+          );
         }
       }
     }
     buffer.writeln();
 
     buffer.writeln('const List<String> packageTestArgs = <String>[');
-    for (final String arg in packageTestArgs) {
+    for (final arg in packageTestArgs) {
       buffer.writeln("  '$arg',");
     }
     buffer.writeln('];');
     buffer.writeln();
 
     buffer.writeln('const List<String> testPaths = <String>[');
-    for (final Uri path in paths) {
+    for (final path in paths) {
       buffer.writeln("  '$path',");
     }
     buffer.writeln('];');
     buffer.writeln();
 
-  buffer.writeln(r'''
+    buffer.writeln(r'''
 @Native<Void Function(Pointer<Utf8>, Pointer<Utf8>)>(symbol: 'Spawn')
 external void _spawn(Pointer<Utf8> entrypoint, Pointer<Utf8> route);
 
@@ -405,7 +350,7 @@ void spawn({required SendPort port, String entrypoint = 'main', String route = '
 }
 ''');
 
-  buffer.write('''
+    buffer.write('''
 /// Runs on a spawned isolate.
 void createChannelAndConnect(String path, String name, Function testMain) {
   goldenFileComparator = LocalFileComparator(Uri.parse(path));
@@ -416,28 +361,32 @@ void createChannelAndConnect(String path, String name, Function testMain) {
   channel.pipe(RemoteListener.start(() => testMain));
 }
 
+@pragma('vm:entry-point')
 void testMain() {
   final String route = PlatformDispatcher.instance.defaultRouteName;
   switch (route) {
 ''');
 
-  for (final MapEntry<String, String> kvp in testImports.entries) {
-    final String importName = kvp.value;
-    final String path = kvp.key;
-    final String? testConfigImport = testConfigPaths[importName];
-    if (testConfigImport != null) {
-      buffer.writeln("    case '$importName':");
-      buffer.writeln("      createChannelAndConnect('$path', route, () => $testConfigImport.testExecutable($importName.main));");
-    } else {
-      buffer.writeln("    case '$importName':");
-      buffer.writeln("      createChannelAndConnect('$path', route, $importName.main);");
+    for (final MapEntry<String, String> kvp in testImports.entries) {
+      final String importName = kvp.value;
+      final String path = kvp.key;
+      final String? testConfigImport = testConfigPaths[importName];
+      if (testConfigImport != null) {
+        buffer.writeln("    case '$importName':");
+        buffer.writeln(
+          "      createChannelAndConnect('$path', route, () => $testConfigImport.testExecutable($importName.main));",
+        );
+      } else {
+        buffer.writeln("    case '$importName':");
+        buffer.writeln("      createChannelAndConnect('$path', route, $importName.main);");
+      }
     }
-  }
 
-  buffer.write(r'''
+    buffer.write(r'''
   }
 }
 
+@pragma('vm:entry-point')
 void main([dynamic sendPort]) {
   if (sendPort is SendPort) {
     final ReceivePort receivePort = ReceivePort();
@@ -459,11 +408,12 @@ void main([dynamic sendPort]) {
   }
 
   static void _generateRootTestIsolateSpawnerSourceFile({
-    required File childTestIsolateSpawnerSourceFile,
     required File childTestIsolateSpawnerDillFile,
+    required File childTestIsolateSpawnerSourceFile,
+    required Platform platform,
     required File rootTestIsolateSpawnerSourceFile,
   }) {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.writeln('''
 import 'dart:async';
 import 'dart:ffi';
@@ -515,6 +465,7 @@ Future<void> spawn({
   commandPort.send(<Object>['spawn', port, entrypoint, route]);
 }
 
+@pragma('vm:entry-point')
 void main() async {
   final String route = PlatformDispatcher.instance.defaultRouteName;
 
@@ -558,10 +509,7 @@ String pathToImport(String path) {
   assert(path.endsWith('.dart'));
   return path
       .replaceRange(path.length - '.dart'.length, null, '')
-      .replaceAll('.', '_')
-      .replaceAll(':', '_')
-      .replaceAll('/', '_')
-      .replaceAll(r'\', '_');
+      .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
 }
 
 class SpawnPlugin extends PlatformPlugin {
@@ -590,7 +538,7 @@ class SpawnPlugin extends PlatformPlugin {
     SuiteConfiguration suiteConfig,
     Object message,
   ) async {
-    final String correctedPath = ${globals.platform.isWindows ? r'"/$path"' : 'path'};
+    final String correctedPath = ${platform.isWindows ? r'"/$path"' : 'path'};
     await launchIsolate(correctedPath);
 
     final StreamChannel<dynamic> channel = _channels[pathToImport(correctedPath)]!;
@@ -605,58 +553,65 @@ class SpawnPlugin extends PlatformPlugin {
   }
 
   static Future<void> _compileFile({
-    required DebuggingOptions debuggingOptions,
-    required File packageConfigFile,
-    required PackageConfig packageConfig,
-    required File sourceFile,
+    required BuildInfo buildInfo,
     required File outputDillFile,
-    required TestTimeRecorder? testTimeRecorder,
+    required File sourceFile,
+    required ToolContext toolContext,
     Uri? nativeAssetsYaml,
+    TestTimeRecorder? testTimeRecorder,
   }) async {
-    globals.printTrace('Compiling ${sourceFile.absolute.uri}');
-    final Stopwatch compilerTime = Stopwatch()..start();
+    final ToolContext(
+      :Artifacts artifacts,
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ShutdownHooks shutdownHooks,
+    ) = toolContext;
+    logger.printTrace('Compiling ${sourceFile.absolute.uri}');
+    final compilerTime = Stopwatch()..start();
     final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
 
-    final ResidentCompiler residentCompiler = ResidentCompiler(
-      globals.artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath),
-      artifacts: globals.artifacts!,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      buildMode: debuggingOptions.buildInfo.mode,
-      trackWidgetCreation: debuggingOptions. buildInfo.trackWidgetCreation,
-      dartDefines: debuggingOptions.buildInfo.dartDefines,
-      packagesPath: packageConfigFile.path,
-      frontendServerStarterPath: debuggingOptions.buildInfo.frontendServerStarterPath,
-      extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
-      platform: globals.platform,
+    final ResidentCompiler residentCompiler = residentCompilerFactory.create(
+      targetPlatform: .tester,
+      artifacts: artifacts,
+      logger: logger,
+      processManager: processManager,
+      buildInfo: buildInfo,
+      platform: platform,
       testCompilation: true,
-      fileSystem: globals.fs,
-      fileSystemRoots: debuggingOptions.buildInfo.fileSystemRoots,
-      fileSystemScheme: debuggingOptions.buildInfo.fileSystemScheme,
+      fileSystem: fs,
+      shutdownHooks: shutdownHooks,
+      config: config,
     );
 
     await residentCompiler.recompile(
       sourceFile.absolute.uri,
       null,
       outputPath: outputDillFile.absolute.path,
-      packageConfig: packageConfig,
-      fs: globals.fs,
+      packageConfig: buildInfo.packageConfig,
+      fs: fs,
       nativeAssetsYaml: nativeAssetsYaml,
     );
     residentCompiler.accept();
 
-    globals.printTrace('Compiling ${sourceFile.absolute.uri} took ${compilerTime.elapsedMilliseconds}ms');
+    logger.printTrace(
+      'Compiling ${sourceFile.absolute.uri} took ${compilerTime.elapsedMilliseconds}ms',
+    );
     testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
   }
 
-  @override
+  /// Runs tests using the experimental strategy of spawning each test in a
+  /// separate lightweight Engine.
   Future<int> runTestsBySpawningLightweightEngines(
     List<Uri> testFiles, {
     required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
+    List<String> tags = const <String>[],
+    List<String> excludeTags = const <String>[],
+    List<String> presets = const <String>[],
     bool machine = false,
     bool updateGoldens = false,
     required int? concurrency,
@@ -667,36 +622,46 @@ class SpawnPlugin extends PlatformPlugin {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool ignoreTimeouts = false,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
     TestTimeRecorder? testTimeRecorder,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :Stdio stdio,
+      :AnsiTerminal terminal,
+    ) = _toolContext;
+
     assert(testFiles.length > 1);
 
-    final Directory buildDirectory = globals.fs.directory(globals.fs.path.join(
-      flutterProject!.directory.path,
-      getBuildDirectory(),
-    ));
+    final Directory buildDirectory = fs.directory(
+      fs.path.join(flutterProject!.directory.path, getBuildDirectory()),
+    );
     final Directory isolateSpawningTesterDirectory = buildDirectory.childDirectory(
       'isolate_spawning_tester',
     );
     isolateSpawningTesterDirectory.createSync();
 
     final File isolateSpawningTesterPackageConfigFile = isolateSpawningTesterDirectory
-      .childDirectory('.dart_tool')
-      .childFile(
-        'package_config.json',
-      );
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json');
     isolateSpawningTesterPackageConfigFile.createSync(recursive: true);
     await _generateIsolateSpawningTesterPackageConfig(
       flutterProject: flutterProject,
       isolateSpawningTesterPackageConfigFile: isolateSpawningTesterPackageConfigFile,
+      toolContext: _toolContext,
     );
     final PackageConfig isolateSpawningTesterPackageConfig = PackageConfig.parseBytes(
       isolateSpawningTesterPackageConfigFile.readAsBytesSync(),
-      isolateSpawningTesterPackageConfigFile.uri,
+      isolateSpawningTesterPackageConfigFile.absolute.uri,
     );
 
     final File childTestIsolateSpawnerSourceFile = isolateSpawningTesterDirectory.childFile(
@@ -713,95 +678,77 @@ class SpawnPlugin extends PlatformPlugin {
     );
 
     // Compute the command-line arguments for package:test.
-    final List<String> packageTestArgs = <String>[
-      if (!globals.terminal.supportsColor)
-        '--no-color',
-      if (machine)
-        ...<String>['-r', 'json']
-      else if (reporter != null)
-        ...<String>['-r', reporter],
-      if (fileReporter != null)
-        '--file-reporter=$fileReporter',
-      if (timeout != null)
-        ...<String>['--timeout', timeout],
-      if (concurrency != null)
-        '--concurrency=$concurrency',
-      for (final String name in names)
-        ...<String>['--name', name],
-      for (final String plainName in plainNames)
-        ...<String>['--plain-name', plainName],
-      if (randomSeed != null)
-        '--test-randomize-ordering-seed=$randomSeed',
-      if (tags != null)
-        ...<String>['--tags', tags],
-      if (excludeTags != null)
-        ...<String>['--exclude-tags', excludeTags],
-      if (runSkipped)
-        '--run-skipped',
-      if (totalShards != null)
-        '--total-shards=$totalShards',
-      if (shardIndex != null)
-        '--shard-index=$shardIndex',
+    final packageTestArgs = <String>[
+      if (!terminal.supportsColor) '--no-color',
+      if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
+      if (fileReporter != null) '--file-reporter=$fileReporter',
+      if (timeout != null) ...<String>['--timeout', timeout],
+      if (ignoreTimeouts) '--ignore-timeouts',
+      if (concurrency != null) '--concurrency=$concurrency',
+      for (final String name in names) ...<String>['--name', name],
+      for (final String plainName in plainNames) ...<String>['--plain-name', plainName],
+      if (randomSeed != null) '--test-randomize-ordering-seed=$randomSeed',
+      for (final String tag in tags) ...<String>['--tags', tag],
+      for (final String excludeTag in excludeTags) ...<String>['--exclude-tags', excludeTag],
+      for (final String preset in presets) ...<String>['--preset', preset],
+      if (failFast) '--fail-fast',
+      if (runSkipped) '--run-skipped',
+      if (totalShards != null) '--total-shards=$totalShards',
+      if (shardIndex != null) '--shard-index=$shardIndex',
       '--chain-stack-traces',
     ];
 
     _generateChildTestIsolateSpawnerSourceFile(
       testFiles,
-      packageTestArgs: packageTestArgs,
       autoUpdateGoldenFiles: updateGoldens,
       childTestIsolateSpawnerSourceFile: childTestIsolateSpawnerSourceFile,
-      childTestIsolateSpawnerDillFile: childTestIsolateSpawnerDillFile,
+      packageTestArgs: packageTestArgs,
+      toolContext: _toolContext,
     );
 
     _generateRootTestIsolateSpawnerSourceFile(
       childTestIsolateSpawnerSourceFile: childTestIsolateSpawnerSourceFile,
       childTestIsolateSpawnerDillFile: childTestIsolateSpawnerDillFile,
       rootTestIsolateSpawnerSourceFile: rootTestIsolateSpawnerSourceFile,
+      platform: platform,
     );
 
-    final Uri? nativeAssetsYaml = await nativeAssetsBuilder?.build(
-      debuggingOptions.buildInfo,
-    );
-
-    await _compileFile(
-      debuggingOptions: debuggingOptions,
-      packageConfigFile: isolateSpawningTesterPackageConfigFile,
+    final BuildInfo buildInfo = debuggingOptions.buildInfo.copyWith(
       packageConfig: isolateSpawningTesterPackageConfig,
-      sourceFile: childTestIsolateSpawnerSourceFile,
+      packageConfigPath: isolateSpawningTesterPackageConfigFile.path,
+    );
+    await _compileFile(
+      buildInfo: buildInfo,
       outputDillFile: childTestIsolateSpawnerDillFile,
+      sourceFile: childTestIsolateSpawnerSourceFile,
+      toolContext: _toolContext,
       testTimeRecorder: testTimeRecorder,
-      nativeAssetsYaml: nativeAssetsYaml,
     );
 
     await _compileFile(
-      debuggingOptions: debuggingOptions,
-      packageConfigFile: isolateSpawningTesterPackageConfigFile,
-      packageConfig: isolateSpawningTesterPackageConfig,
-      sourceFile: rootTestIsolateSpawnerSourceFile,
+      buildInfo: buildInfo,
       outputDillFile: rootTestIsolateSpawnerDillFile,
+      sourceFile: rootTestIsolateSpawnerSourceFile,
+      toolContext: _toolContext,
       testTimeRecorder: testTimeRecorder,
     );
 
-    final List<String> command = <String>[
-      globals.artifacts!.getArtifactPath(Artifact.flutterTester),
+    final command = <String>[
+      artifacts.getArtifactPath(Artifact.flutterTester),
       '--disable-vm-service',
       if (icudtlPath != null) '--icu-data-file-path=$icudtlPath',
       '--enable-checked-mode',
       '--verify-entry-points',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
-      if (debuggingOptions.enableDartProfiling)
-        '--enable-dart-profiling',
+      if (debuggingOptions.enableDartProfiling) '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',
       '--disable-asset-fonts',
-      '--packages=${debuggingOptions.buildInfo.packagesPath}',
-      if (testAssetDirectory != null)
-        '--flutter-assets-dir=$testAssetDirectory',
-      if (debuggingOptions.nullAssertions)
-        '--dart-flags=--null_assertions',
+      '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
+      if (testAssetDirectory != null) '--flutter-assets-dir=$testAssetDirectory',
       ...debuggingOptions.dartEntrypointArgs,
-      rootTestIsolateSpawnerDillFile.absolute.path
+      rootTestIsolateSpawnerDillFile.absolute.path,
     ];
 
     // If the FLUTTER_TEST environment variable has been set, then pass it on
@@ -809,34 +756,34 @@ class SpawnPlugin extends PlatformPlugin {
     //
     // If FLUTTER_TEST has not been set, assume from this context that this
     // call was invoked by the command 'flutter test'.
-    final String flutterTest = globals.platform.environment.containsKey('FLUTTER_TEST')
-        ? globals.platform.environment['FLUTTER_TEST']!
+    final String flutterTest = platform.environment.containsKey('FLUTTER_TEST')
+        ? platform.environment['FLUTTER_TEST']!
         : 'true';
-    final Map<String, String> environment = <String, String>{
+    final environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': FontConfigManager().fontConfigFile.path,
       'APP_NAME': flutterProject.manifest.appName,
-      if (testAssetDirectory != null)
-        'UNIT_TEST_ASSETS': testAssetDirectory,
+      'UNIT_TEST_ASSETS': ?testAssetDirectory,
+      if (nativeAssetsBuilder != null && platform.isWindows)
+        'PATH':
+            '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject)};${platform.environment['PATH']}',
     };
 
-    globals.logger.printTrace('Starting flutter_tester process with command=$command, environment=$environment');
+    logger.printTrace(
+      'Starting flutter_tester process with command=$command, environment=$environment',
+    );
     final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Run);
-    final Process process = await globals.processManager.start(command, environment: environment);
-    globals.logger.printTrace('Started flutter_tester process at pid ${process.pid}');
+    final Process process = await processManager.start(command, environment: environment);
+    logger.printTrace('Started flutter_tester process at pid ${process.pid}');
 
-    for (final Stream<List<int>> stream in <Stream<List<int>>>[
-      process.stderr,
-      process.stdout,
-    ]) {
-      stream
-        .transform<String>(utf8.decoder)
-        .listen(globals.stdio.stdoutWrite);
+    for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
+      // Use permissive decoder for test output which may contain invalid UTF-8
+      stream.transform<String>(utf8AllowMalformed.decoder).listen(stdio.stdoutWrite);
     }
 
     return process.exitCode.then((int exitCode) {
       testTimeRecorder?.stop(TestTimePhases.Run, testTimeRecorderStopwatch!);
-      globals.logger.printTrace('flutter_tester process at pid ${process.pid} exited with code=$exitCode');
+      logger.printTrace('flutter_tester process at pid ${process.pid} exited with code=$exitCode');
       return exitCode;
     });
   }

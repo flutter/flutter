@@ -2,13 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'common.dart';
+/// @docImport 'terminal.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:file/file.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
+import 'package:stack_trace/stack_trace.dart';
 
 import '../convert.dart';
 import 'platform.dart';
@@ -20,9 +26,10 @@ final path.Context urlContext = path.url;
 String camelCase(String str) {
   int index = str.indexOf('_');
   while (index != -1 && index < str.length - 2) {
-    str = str.substring(0, index) +
-      str.substring(index + 1, index + 2).toUpperCase() +
-      str.substring(index + 2);
+    str =
+        str.substring(0, index) +
+        str.substring(index + 1, index + 2).toUpperCase() +
+        str.substring(index + 2);
     index = str.indexOf('_');
   }
   return str;
@@ -30,15 +37,22 @@ String camelCase(String str) {
 
 /// Convert `fooBar` to `foo-bar`.
 String kebabCase(String str) {
-  return snakeCase(str, '-');
+  return _reCase(str, '-');
 }
 
-final RegExp _upperRegex = RegExp(r'[A-Z]');
+final _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
-String snakeCase(String str, [ String sep = '_' ]) {
-  return str.replaceAllMapped(_upperRegex,
-      (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}');
+String snakeCase(String str) {
+  return _reCase(str, '_');
+}
+
+/// Convert `fooBar` to `foo[sep]bar`.
+String _reCase(String str, String sep) {
+  return str.replaceAllMapped(
+    _upperRegex,
+    (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}',
+  );
 }
 
 abstract interface class CliEnum implements Enum {
@@ -47,23 +61,12 @@ abstract interface class CliEnum implements Enum {
 
   static Map<String, String> allowedHelp<T extends CliEnum>(List<T> values) =>
       Map<String, String>.fromEntries(
-        values.map(
-          (T e) => MapEntry<String, String>(e.cliName, e.helpText),
-        ),
+        values.map((T e) => MapEntry<String, String>(e.cliName, e.helpText)),
       );
 }
 
 /// Converts `fooBar` to `FooBar`.
-///
-/// This uses [toBeginningOfSentenceCase](https://pub.dev/documentation/intl/latest/intl/toBeginningOfSentenceCase.html),
-/// with the input and return value of non-nullable.
-String sentenceCase(String str, [String? locale]) {
-  if (str.isEmpty) {
-    return str;
-  }
-  // TODO(christopherfujino): Remove this check after the next release of intl
-  return ArgumentError.checkNotNull(toBeginningOfSentenceCase(str, locale));
-}
+String sentenceCase(String str) => str.isEmpty ? str : '${str[0].toUpperCase()}${str.substring(1)}';
 
 /// Converts `foo_bar` to `Foo Bar`.
 String snakeCaseToTitleCase(String snakeCaseString) {
@@ -78,22 +81,31 @@ String toPrettyJson(Object jsonable) {
   return '$value\n';
 }
 
-final NumberFormat kSecondsFormat = NumberFormat('0.0');
-final NumberFormat kMillisecondsFormat = NumberFormat.decimalPattern();
+final _singleDigitPrecision = intl.NumberFormat('0.0');
+final _decimalPattern = intl.NumberFormat.decimalPattern();
+
+String getElapsedAsMinutesOrSeconds(Duration duration) {
+  if (duration.inMinutes < 1) {
+    return getElapsedAsSeconds(duration);
+  }
+  final double minutes = duration.inSeconds / Duration.secondsPerMinute;
+  return '${_singleDigitPrecision.format(minutes)}m';
+}
 
 String getElapsedAsSeconds(Duration duration) {
   final double seconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
-  return '${kSecondsFormat.format(seconds)}s';
+  return '${_singleDigitPrecision.format(seconds)}s';
 }
 
 String getElapsedAsMilliseconds(Duration duration) {
-  return '${kMillisecondsFormat.format(duration.inMilliseconds)}ms';
+  return '${_decimalPattern.format(duration.inMilliseconds)}ms';
 }
 
 /// Return a platform-appropriate [String] representing the size of the given number of bytes.
-String getSizeAsPlatformMB(int bytesLength, {
-    @visibleForTesting Platform platform = const LocalPlatform()
-  }) {
+String getSizeAsPlatformMB(
+  int bytesLength, {
+  @visibleForTesting Platform platform = const LocalPlatform(),
+}) {
   // Because Windows displays 'MB' but actually reports MiB, we calculate MiB
   // accordingly on Windows.
   final int bytesInPlatformMB = platform.isWindows ? 1024 * 1024 : 1000 * 1000;
@@ -104,14 +116,14 @@ String getSizeAsPlatformMB(int bytesLength, {
 /// removed, and calculate a diff of changes when a new list of items is
 /// available.
 class ItemListNotifier<T> {
-  ItemListNotifier(): _items = <T>{}, _isPopulated = false;
+  ItemListNotifier() : _items = <T>{}, _isPopulated = false;
 
   ItemListNotifier.from(List<T> items) : _items = Set<T>.of(items), _isPopulated = true;
 
   Set<T> _items;
 
-  final StreamController<T> _addedController = StreamController<T>.broadcast();
-  final StreamController<T> _removedController = StreamController<T>.broadcast();
+  final _addedController = StreamController<T>.broadcast();
+  final _removedController = StreamController<T>.broadcast();
 
   Stream<T> get onAdded => _addedController.stream;
   Stream<T> get onRemoved => _removedController.stream;
@@ -124,7 +136,7 @@ class ItemListNotifier<T> {
   bool get isPopulated => _isPopulated;
 
   void updateWithNewList(List<T> updatedList) {
-    final Set<T> updatedSet = Set<T>.of(updatedList);
+    final updatedSet = Set<T>.of(updatedList);
 
     final Set<T> addedItems = updatedSet.difference(_items);
     final Set<T> removedItems = _items.difference(updatedSet);
@@ -167,26 +179,30 @@ class SettingsFile {
 
   SettingsFile.parseFromFile(File file) : this.parse(file.readAsStringSync());
 
-  final Map<String, String> values = <String, String>{};
+  final values = <String, String>{};
 
   void writeContents(File file) {
     file.parent.createSync(recursive: true);
-    file.writeAsStringSync(values.keys.map<String>((String key) {
-      return '$key=${values[key]}';
-    }).join('\n'));
+    file.writeAsStringSync(
+      values.keys
+          .map<String>((String key) {
+            return '$key=${values[key]}';
+          })
+          .join('\n'),
+    );
   }
 }
 
 /// Given a data structure which is a Map of String to dynamic values, return
 /// the same structure (`Map<String, dynamic>`) with the correct runtime types.
 Map<String, Object?>? castStringKeyedMap(Object? untyped) {
-  final Map<dynamic, dynamic>? map = untyped as Map<dynamic, dynamic>?;
+  final map = untyped as Map<dynamic, dynamic>?;
   return map?.cast<String, Object?>();
 }
 
 /// Smallest column that will be used for text wrapping. If the requested column
 /// width is smaller than this, then this is what will be used.
-const int kMinColumnWidth = 10;
+const kMinColumnWidth = 10;
 
 /// Wraps a block of text into lines no longer than [columnWidth].
 ///
@@ -215,14 +231,15 @@ const int kMinColumnWidth = 10;
 ///          [arguments]
 /// ```
 ///
-/// If [outputPreferences.wrapText] is false, then the text will be returned
+/// If [OutputPreferences.wrapText] is false, then the text will be returned
 /// unchanged. If [shouldWrap] is specified, then it overrides the
-/// [outputPreferences.wrapText] setting.
+/// [OutputPreferences.wrapText] setting.
 ///
 /// If the amount of indentation (from the text, [indent], and [hangingIndent])
 /// is such that less than [kMinColumnWidth] characters can fit in the
 /// [columnWidth], then the indent is truncated to allow the text to fit.
-String wrapText(String text, {
+String wrapText(
+  String text, {
   required int columnWidth,
   required bool shouldWrap,
   int? hangingIndent,
@@ -235,8 +252,8 @@ String wrapText(String text, {
   indent ??= 0;
   hangingIndent ??= 0;
   final List<String> splitText = text.split('\n');
-  final List<String> result = <String>[];
-  for (final String line in splitText) {
+  final result = <String>[];
+  for (final line in splitText) {
     String trimmedText = line.trimLeft();
     final String leadingWhitespace = line.substring(0, line.length - trimmedText.length);
     List<String> notIndented;
@@ -252,11 +269,13 @@ String wrapText(String text, {
       notIndented = <String>[firstLineWrap.removeAt(0)];
       trimmedText = trimmedText.substring(notIndented[0].length).trimLeft();
       if (trimmedText.isNotEmpty) {
-        notIndented.addAll(_wrapTextAsLines(
-          trimmedText,
-          columnWidth: columnWidth - leadingWhitespace.length - indent - hangingIndent,
-          shouldWrap: shouldWrap,
-        ));
+        notIndented.addAll(
+          _wrapTextAsLines(
+            trimmedText,
+            columnWidth: columnWidth - leadingWhitespace.length - indent - hangingIndent,
+            shouldWrap: shouldWrap,
+          ),
+        );
       }
     } else {
       notIndented = _wrapTextAsLines(
@@ -267,21 +286,24 @@ String wrapText(String text, {
     }
     String? hangingIndentString;
     final String indentString = ' ' * indent;
-    result.addAll(notIndented.map<String>(
-      (String line) {
+    result.addAll(
+      notIndented.map<String>((String line) {
         // Don't return any lines with just whitespace on them.
         if (line.isEmpty) {
           return '';
         }
-        String truncatedIndent = '$indentString${hangingIndentString ?? ''}$leadingWhitespace';
+        var truncatedIndent = '$indentString${hangingIndentString ?? ''}$leadingWhitespace';
         if (truncatedIndent.length > columnWidth - kMinColumnWidth) {
-          truncatedIndent = truncatedIndent.substring(0, math.max(columnWidth - kMinColumnWidth, 0));
+          truncatedIndent = truncatedIndent.substring(
+            0,
+            math.max(columnWidth - kMinColumnWidth, 0),
+          );
         }
-        final String result = '$truncatedIndent$line';
+        final result = '$truncatedIndent$line';
         hangingIndentString ??= ' ' * hangingIndent!;
         return result;
-      },
-    ));
+      }),
+    );
   }
   return result.join('\n');
 }
@@ -304,15 +326,16 @@ class _AnsiRun {
 ///
 /// If [columnWidth] is not specified, then the column width will be the width of the
 /// terminal window by default. If the stdout is not a terminal window, then the
-/// default will be [outputPreferences.wrapColumn].
+/// default will be [OutputPreferences.wrapColumn].
 ///
 /// The [columnWidth] is clamped to [kMinColumnWidth] at minimum (so passing negative
 /// widths is fine, for instance).
 ///
-/// If [outputPreferences.wrapText] is false, then the text will be returned
+/// If [OutputPreferences.wrapText] is false, then the text will be returned
 /// split at the newlines, but not wrapped. If [shouldWrap] is specified,
-/// then it overrides the [outputPreferences.wrapText] setting.
-List<String> _wrapTextAsLines(String text, {
+/// then it overrides the [OutputPreferences.wrapText] setting.
+List<String> _wrapTextAsLines(
+  String text, {
   int start = 0,
   required int columnWidth,
   required bool shouldWrap,
@@ -328,9 +351,9 @@ List<String> _wrapTextAsLines(String text, {
   // reconstitute the original string. This is useful for manipulating "visible"
   // characters in the presence of ANSI control codes.
   List<_AnsiRun> splitWithCodes(String input) {
-    final RegExp characterOrCode = RegExp('(\u001b\\[[0-9;]*m|.)', multiLine: true);
-    List<_AnsiRun> result = <_AnsiRun>[];
-    final StringBuffer current = StringBuffer();
+    final characterOrCode = RegExp('(\u001b\\[[0-9;]*m|.)', multiLine: true);
+    var result = <_AnsiRun>[];
+    final current = StringBuffer();
     for (final Match match in characterOrCode.allMatches(input)) {
       current.write(match[0]);
       if (match[0]!.length < 4) {
@@ -353,11 +376,11 @@ List<String> _wrapTextAsLines(String text, {
     return result;
   }
 
-  String joinRun(List<_AnsiRun> list, int start, [ int? end ]) {
+  String joinRun(List<_AnsiRun> list, int start, [int? end]) {
     return list.sublist(start, end).map<String>((_AnsiRun run) => run.original).join().trim();
   }
 
-  final List<String> result = <String>[];
+  final result = <String>[];
   final int effectiveLength = math.max(columnWidth - start, kMinColumnWidth);
   for (final String line in text.split('\n')) {
     // If the line is short enough, even with ANSI codes, then we can just add
@@ -372,10 +395,10 @@ List<String> _wrapTextAsLines(String text, {
       continue;
     }
 
-    int currentLineStart = 0;
+    var currentLineStart = 0;
     int? lastWhitespace;
     // Find the start of the current line.
-    for (int index = 0; index < splitLine.length; ++index) {
+    for (var index = 0; index < splitLine.length; ++index) {
       if (splitLine[index].character.isNotEmpty && _isWhitespace(splitLine[index])) {
         lastWhitespace = index;
       }
@@ -403,8 +426,8 @@ List<String> _wrapTextAsLines(String text, {
   return result;
 }
 
-/// Returns true if the code unit at [index] in [text] is a whitespace
-/// character.
+/// Returns `true` if the code unit at the specified [run] is a
+/// whitespace character.
 ///
 /// Based on: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
 bool _isWhitespace(_AnsiRun run) {
@@ -423,7 +446,7 @@ bool _isWhitespace(_AnsiRun run) {
       rune == 0xFEFF;
 }
 
-final RegExp _interpolationRegex = RegExp(r'\$\{([^}]*)\}');
+final _interpolationRegex = RegExp(r'\$\{([^}]*)\}');
 
 /// Given a string that possibly contains string interpolation sequences
 /// (so for example, something like `ping -n 1 ${host}`), replace all those
@@ -471,7 +494,10 @@ String interpolateString(String toInterpolate, Map<String, String> replacementVa
 /// final interpolated2 = _interpolateString(['ping', '-n', '1', r'${_host}'], {'host': 'raspberrypi'});
 /// print(interpolated2); // will print '[ping, -n, 1, ]'
 /// ```
-List<String> interpolateStringList(List<String> toInterpolate, Map<String, String> replacementValues) {
+List<String> interpolateStringList(
+  List<String> toInterpolate,
+  Map<String, String> replacementValues,
+) {
   return toInterpolate.map((String s) => interpolateString(s, replacementValues)).toList();
 }
 
@@ -518,10 +544,162 @@ bool listEquals<T>(List<T> a, List<T> b) {
   if (a.length != b.length) {
     return false;
   }
-  for (int index = 0; index < a.length; index++) {
+  for (var index = 0; index < a.length; index++) {
     if (a[index] != b[index]) {
       return false;
     }
   }
   return true;
+}
+
+/// Simple "X (months|days|hours|minutes) ago" [Duration] converter.
+extension DurationAgo on Duration {
+  String ago() {
+    if (inDays > 31) {
+      return '${inDays ~/ 31} months ago';
+    }
+    if (inDays > 1) {
+      return '$inDays days ago';
+    }
+    if (inHours > 1) {
+      return '$inHours hours ago';
+    }
+    return '$inMinutes minutes ago';
+  }
+}
+
+extension UriParseExtension on String {
+  /// Convenience method for parsing [Uri]s from a [String].
+  ///
+  /// Allows for use of null-aware operators when building [Uri]s.
+  Uri toUri() => Uri.parse(this);
+}
+
+extension UriExtension on Uri {
+  /// Returns this [Uri] with its query parameters removed.
+  Uri withoutQueryParameters() {
+    return Uri(scheme: scheme, userInfo: userInfo, host: host, port: port, path: this.path);
+  }
+}
+
+extension StackTraceTransform<T> on Stream<T> {
+  /// A custom implementation of [transform] that captures the
+  /// stack trace at the point of invocation.
+  Stream<S> transformWithCallSite<S>(StreamTransformer<T, S> transformer) {
+    // Don't include this frame with the stack trace as it adds no value.
+    final callSiteTrace = Trace.current(1);
+    return transform(transformer).transform(
+      StreamTransformer.fromHandlers(
+        handleData: (data, sink) {
+          sink.add(data);
+        },
+        handleError: (error, stackTrace, sink) {
+          sink.addError(error, callSiteTrace);
+        },
+      ),
+    );
+  }
+}
+
+final utf8LineDecoder = StreamTransformer<List<int>, String>.fromBind(
+  (stream) => stream.transformWithCallSite(utf8.decoder).transform(const LineSplitter()),
+);
+
+/// A line decoder that permits malformed UTF-8 bytes.
+///
+/// Used for displaying tool output (compiler, tests, debuggers) where invalid
+/// UTF-8 is expected from external sources. Invalid UTF-8 sequences are decoded
+/// to replacement characters (U+FFFD) without warnings.
+final utf8AllowMalformedLineDecoder = StreamTransformer<List<int>, String>.fromBind(
+  (stream) =>
+      stream.transformWithCallSite(utf8AllowMalformed.decoder).transform(const LineSplitter()),
+);
+
+/// Formats a list of rows into a table with aligned columns.
+///
+/// [table] is a list of rows, where each row is a list of strings.
+/// [separator] is the string used to separate columns (default is ' • ').
+///
+/// Returns a list of strings, where each string is a formatted row.
+List<String> formatTable(List<List<String>> table, {String separator = ' • ', int indent = 0}) {
+  if (table.isEmpty) {
+    return <String>[];
+  }
+
+  // Calculate column widths
+  if (table.first.isEmpty) {
+    throw Exception('Table header cannot be empty');
+  }
+  final indices = List<int>.generate(table.first.length - 1, (int i) => i);
+  final widths = List<int>.filled(indices.length, 0);
+  for (final row in table) {
+    for (final i in indices) {
+      widths[i] = math.max(widths[i], row[i].length);
+    }
+  }
+
+  final String indentString = ' ' * indent;
+
+  // Join columns into lines of text
+  return table.map<String>((List<String> row) {
+    final String formatted = indices
+        .map<String>((int i) => row[i].padRight(widths[i]))
+        .followedBy(<String>[row.last])
+        .join(separator);
+    return '$indentString$formatted';
+  }).toList();
+}
+
+/// Decodes a list of bytes into a string, supporting UTF-8 (with or without
+/// BOM) and UTF-16 LE/BE (with BOM).
+///
+/// Inspects leading Byte Order Mark (BOM) signatures in [bytes] to determine
+/// the encoding:
+///
+/// * **UTF-16 LE** (`0xFF, 0xFE`): Strips the 2-byte BOM and decodes the
+///   remaining payload as 16-bit little-endian code units.
+/// * **UTF-16 BE** (`0xFE, 0xFF`): Strips the 2-byte BOM and decodes the
+///   remaining payload as 16-bit big-endian code units.
+/// * **UTF-8 with BOM** (`0xEF, 0xBB, 0xBF`): Strips the 3-byte BOM and decodes
+///   the remaining payload as strict UTF-8.
+/// * **Default UTF-8** (no BOM): Decodes the entire byte list as strict UTF-8.
+///
+/// Throws a [FormatException] if a UTF-16 byte payload has an odd length after
+/// stripping the BOM, or a [ToolExit] if strict UTF-8 decoding fails.
+String decodeUtf8OrUtf16(List<int> bytes) {
+  // Avoid using list pattern matching here (e.g., `[0xFF, 0xFE, ...final payload]`)
+  // as the rest pattern allocates a copied sublist for the payload.
+  if (bytes.length >= 2 && bytes[0] == 0xFF && bytes[1] == 0xFE) {
+    return _decodeUtf16(bytes, 2, Endian.little);
+  }
+  if (bytes.length >= 2 && bytes[0] == 0xFE && bytes[1] == 0xFF) {
+    return _decodeUtf16(bytes, 2, Endian.big);
+  }
+  if (bytes.length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF) {
+    return utf8.decode(bytes.sublist(3));
+  }
+  return utf8.decode(bytes);
+}
+
+/// Decodes a UTF-16 byte list [bytes] starting from [offset] after its BOM has
+/// been stripped.
+///
+/// Reads 16-bit integers according to the specified byte [endian] (either
+/// [Endian.little] or [Endian.big]).
+///
+/// Throws a [FormatException] if the payload length has an odd number of bytes,
+/// as each UTF-16 code unit requires exactly 2 bytes.
+String _decodeUtf16(List<int> bytes, int offset, Endian endian) {
+  final int length = bytes.length - offset;
+  if (length.isOdd) {
+    throw const FormatException('UTF-16 data length must be even after BOM');
+  }
+  final Uint8List uint8List = bytes is Uint8List ? bytes : Uint8List.fromList(bytes);
+  final byteData = ByteData.sublistView(uint8List, offset);
+  final int count = length ~/ 2;
+  final codeUnits = Uint16List(count);
+  for (var i = 0; i < count; i++) {
+    codeUnits[i] = byteData.getUint16(i * 2, endian);
+  }
+  return String.fromCharCodes(codeUnits);
 }

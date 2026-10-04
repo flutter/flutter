@@ -5,11 +5,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+Finder findAppBarPhysicalModel() {
+  return find.descendant(of: find.byType(AppBar), matching: find.byType(PhysicalModel)).first;
+}
+
+Color? getAppBarAnimatedBackgroundColor(WidgetTester tester) {
+  return tester.widget<PhysicalModel>(findAppBarPhysicalModel()).color;
+}
+
 Finder findAppBarMaterial() {
-  return find.descendant(
-    of: find.byType(AppBar),
-    matching: find.byType(Material),
-  ).first;
+  return find.descendant(of: find.byType(AppBar), matching: find.byType(Material)).first;
 }
 
 Color? getAppBarBackgroundColor(WidgetTester tester) {
@@ -33,9 +38,7 @@ double tabBarHeight(WidgetTester tester) {
 }
 
 ScrollController primaryScrollController(WidgetTester tester) {
-  return PrimaryScrollController.of(
-    tester.element(find.byType(CustomScrollView))
-  );
+  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
 }
 
 void verifyTextNotClipped(Finder textFinder, WidgetTester tester) {

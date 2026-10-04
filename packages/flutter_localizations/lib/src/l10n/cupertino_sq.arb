@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Kërko",
   "searchWebButtonLabel": "Kërko në ueb",
   "shareButtonLabel": "Ndaj...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Pastro",
+  "cancelButtonLabel": "Anulo",
+  "backButtonLabel": "Prapa",
+  "expansionTileExpandedHint": "trokit dy herë për ta palosur",
+  "expansionTileCollapsedHint": "trokit dy herë për ta zgjeruar",
+  "expansionTileExpandedTapHint": "Palos",
+  "expansionTileCollapsedTapHint": "Zgjero për më shumë detaje",
+  "expandedHint": "U palos",
+  "collapsedHint": "U zgjerua"
 }

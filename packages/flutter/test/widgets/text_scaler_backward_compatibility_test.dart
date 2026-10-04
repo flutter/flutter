@@ -19,7 +19,7 @@ void main() {
   });
   group('TextPainter', () {
     test('textScaleFactor translates to textScaler', () {
-      final TextPainter textPainter = TextPainter(
+      final textPainter = TextPainter(
         text: const TextSpan(text: 'text'),
         textDirection: TextDirection.ltr,
         textScaleFactor: 42,
@@ -45,7 +45,7 @@ void main() {
     });
 
     test('copyWith is backward compatible', () {
-      const MediaQueryData data = MediaQueryData(textScaler: TextScaler.linear(2.0));
+      const data = MediaQueryData(textScaler: TextScaler.linear(2.0));
 
       final MediaQueryData data1 = data.copyWith(textScaleFactor: 42);
       expect(data1.textScaler, const TextScaler.linear(42));
@@ -57,14 +57,16 @@ void main() {
     });
 
     test('copyWith specifying both textScaler and textScalingFactor asserts', () {
-      const MediaQueryData data = MediaQueryData();
-       expect(
+      const data = MediaQueryData();
+      expect(
         () => data.copyWith(textScaleFactor: 2, textScaler: const TextScaler.linear(2.0)),
         throwsAssertionError,
       );
     });
 
-    testWidgets('MediaQuery.textScaleFactorOf overriding compatibility', (WidgetTester tester) async {
+    testWidgets('MediaQuery.textScaleFactorOf overriding compatibility', (
+      WidgetTester tester,
+    ) async {
       late final double outsideTextScaleFactor;
       late final TextScaler outsideTextScaler;
       late final double insideTextScaleFactor;
@@ -76,9 +78,7 @@ void main() {
             outsideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
             outsideTextScaler = MediaQuery.textScalerOf(context);
             return MediaQuery(
-              data: const MediaQueryData(
-                textScaleFactor: 4.0,
-              ),
+              data: const MediaQueryData(textScaleFactor: 4.0),
               child: Builder(
                 builder: (BuildContext context) {
                   insideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
@@ -97,7 +97,7 @@ void main() {
       // should get the correct TextScaler.
       expect(outsideTextScaleFactor, 1.0);
       expect(outsideTextScaler.textScaleFactor, 1.0);
-      expect(outsideTextScaler, TextScaler.noScaling);
+      expect(outsideTextScaler, isSystemTextScaler(withScaleFactor: 1.0));
       expect(insideTextScaleFactor, 4.0);
       expect(insideTextScaler.textScaleFactor, 4.0);
       expect(insideTextScaler, const TextScaler.linear(4.0));
@@ -130,7 +130,7 @@ void main() {
 
       expect(outsideTextScaleFactor, 1.0);
       expect(outsideTextScaler.textScaleFactor, 1.0);
-      expect(outsideTextScaler, TextScaler.noScaling);
+      expect(outsideTextScaler, isSystemTextScaler(withScaleFactor: 1.0));
       expect(insideTextScaleFactor, 4.0);
       expect(insideTextScaler.textScaleFactor, 4.0);
       expect(insideTextScaler, const TextScaler.linear(4.0));
@@ -139,16 +139,13 @@ void main() {
 
   group('RenderObjects backward compatibility', () {
     test('RenderEditable', () {
-      final RenderEditable renderObject = RenderEditable(
+      final renderObject = RenderEditable(
         backgroundCursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
         textDirection: TextDirection.ltr,
         cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
         offset: ViewportOffset.zero(),
         textSelectionDelegate: _FakeEditableTextState(),
-        text: const TextSpan(
-          text: 'test',
-          style: TextStyle(height: 1.0, fontSize: 10.0),
-        ),
+        text: const TextSpan(text: 'test', style: TextStyle(height: 1.0, fontSize: 10.0)),
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         selection: const TextSelection.collapsed(offset: 0),
@@ -164,11 +161,8 @@ void main() {
     });
 
     test('RenderParagraph', () {
-      final RenderParagraph renderObject = RenderParagraph(
-        const TextSpan(
-          text: 'test',
-          style: TextStyle(height: 1.0, fontSize: 10.0),
-        ),
+      final renderObject = RenderParagraph(
+        const TextSpan(text: 'test', style: TextStyle(height: 1.0, fontSize: 10.0)),
         textDirection: TextDirection.ltr,
       );
       expect(renderObject.textScaleFactor, 1.0);
@@ -185,11 +179,7 @@ void main() {
   group('Widgets backward compatibility', () {
     testWidgets('RichText', (WidgetTester tester) async {
       await tester.pumpWidget(
-        RichText(
-          textDirection: TextDirection.ltr,
-          text: const TextSpan(),
-          textScaleFactor: 2.0,
-        ),
+        RichText(textDirection: TextDirection.ltr, text: const TextSpan(), textScaleFactor: 2.0),
       );
 
       expect(
@@ -201,11 +191,7 @@ void main() {
 
     testWidgets('Text', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const Text(
-          'text',
-          textDirection: TextDirection.ltr,
-          textScaleFactor: 2.0,
-        ),
+        const Text('text', textDirection: TextDirection.ltr, textScaleFactor: 2.0),
       );
 
       expect(
@@ -215,12 +201,12 @@ void main() {
     });
 
     testWidgets('EditableText', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final controller = TextEditingController();
       addTearDown(controller.dispose);
-      final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
+      final focusNode = FocusNode(debugLabel: 'EditableText Node');
       addTearDown(focusNode.dispose);
-      const TextStyle textStyle = TextStyle();
-      const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+      const textStyle = TextStyle();
+      const cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(),
@@ -238,11 +224,10 @@ void main() {
         ),
       );
 
-      final RenderEditable renderEditable = tester.allRenderObjects.whereType<RenderEditable>().first;
-      expect(
-        renderEditable.textScaler,
-        const TextScaler.linear(2.0),
-      );
+      final RenderEditable renderEditable = tester.allRenderObjects
+          .whereType<RenderEditable>()
+          .first;
+      expect(renderEditable.textScaler, const TextScaler.linear(2.0));
     });
   });
 }
@@ -254,7 +239,7 @@ class _FakeEditableTextState with TextSelectionDelegate {
   TextSelection? selection;
 
   @override
-  void hideToolbar([bool hideHandles = true]) { }
+  void hideToolbar([bool hideHandles = true]) {}
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
@@ -262,10 +247,10 @@ class _FakeEditableTextState with TextSelectionDelegate {
   }
 
   @override
-  void bringIntoView(TextPosition position) { }
+  void bringIntoView(TextPosition position) {}
 
   @override
-  void cutSelection(SelectionChangedCause cause) { }
+  void cutSelection(SelectionChangedCause cause) {}
 
   @override
   Future<void> pasteText(SelectionChangedCause cause) {
@@ -273,8 +258,8 @@ class _FakeEditableTextState with TextSelectionDelegate {
   }
 
   @override
-  void selectAll(SelectionChangedCause cause) { }
+  void selectAll(SelectionChangedCause cause) {}
 
   @override
-  void copySelection(SelectionChangedCause cause) { }
+  void copySelection(SelectionChangedCause cause) {}
 }

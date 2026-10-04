@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # For details regarding the *Flutter Fix* feature, see
-# https://flutter.dev/docs/development/tools/flutter-fix
+# https://flutter.dev/to/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -83,5 +83,19 @@ transforms:
       overlays:
         kind: 'fragment'
         value: 'arguments[0]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/161518
+  - title: "Migrate 'SelectionChangedCause.scribble' to 'SelectionChangedCause.stylusHandwriting'"
+    date: 2025-01-13
+    element:
+      uris: [ 'services.dart' ]
+      constant: 'scribble'
+      inEnum: 'SelectionChangedCause'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'services.dart' ]
+          constant: 'stylusHandwriting'
+          inEnum: 'SelectionChangedCause'
 
 # Before adding a new fix: read instructions at the top of this file.

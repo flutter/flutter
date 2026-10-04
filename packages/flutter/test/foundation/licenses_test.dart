@@ -77,7 +77,7 @@ S
 \u0020\u0020\u0020\u0020\u0020\u0020
       Y''').paragraphs.toList();
 
-    int index = 0;
+    var index = 0;
     expect(paragraphs[index].text, 'A A A');
     expect(paragraphs[index].indent, 0);
     index += 1;
@@ -157,8 +157,14 @@ S
   });
 
   test('LicenseEntryWithLineBreaks - leading and trailing whitespace', () {
-    expect(const LicenseEntryWithLineBreaks(<String>[], '    \n\n    ').paragraphs.toList(), isEmpty);
-    expect(const LicenseEntryWithLineBreaks(<String>[], '    \r\n\r\n    ').paragraphs.toList(), isEmpty);
+    expect(
+      const LicenseEntryWithLineBreaks(<String>[], '    \n\n    ').paragraphs.toList(),
+      isEmpty,
+    );
+    expect(
+      const LicenseEntryWithLineBreaks(<String>[], '    \r\n\r\n    ').paragraphs.toList(),
+      isEmpty,
+    );
 
     List<LicenseParagraph> paragraphs;
 
@@ -171,6 +177,21 @@ S
     expect(paragraphs[0].text, 'A');
     expect(paragraphs[0].indent, 0);
     expect(paragraphs, hasLength(1));
+  });
+
+  test('LicenseEntryWithLineBreaks - CRLF line endings inside paragraphs', () {
+    final List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(
+      <String>[],
+      'A\r\nB\r\nC\r\n\r\nD\r\nE',
+    ).paragraphs.toList();
+
+    expect(paragraphs[0].text, 'A B C');
+    expect(paragraphs[0].text.contains('\r'), isFalse);
+    expect(paragraphs[0].indent, 0);
+    expect(paragraphs[1].text, 'D E');
+    expect(paragraphs[1].text.contains('\r'), isFalse);
+    expect(paragraphs[1].indent, 0);
+    expect(paragraphs, hasLength(2));
   });
 
   test('LicenseRegistry', () async {

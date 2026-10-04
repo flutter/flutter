@@ -6,38 +6,54 @@ import '../build_info.dart' show BuildMode;
 import '../convert.dart';
 import 'compile.dart';
 
-enum CompileTarget {
-  js,
-  wasm,
-}
+enum CompileTarget { js, wasm }
 
 sealed class WebCompilerConfig {
-  const WebCompilerConfig({required this.renderer, required this.optimizationLevel});
-
-  /// The default optimization level for dart2js/dart2wasm.
-  static const int kDefaultOptimizationLevel = 4;
+  const WebCompilerConfig({
+    required this.renderer,
+    this.optimizationLevel,
+    required this.sourceMaps,
+    this.webContentHash = false,
+  });
 
   /// Build environment flag for [optimizationLevel].
-  static const String kOptimizationLevel = 'OptimizationLevel';
+  static const kOptimizationLevel = 'OptimizationLevel';
 
-  /// The compiler optimization level.
+  /// Build environment flag for [sourceMaps].
+  static const kSourceMapsEnabled = 'SourceMaps';
+
+  /// Calculates the optimization level for the compiler for the given
+  /// build mode.
+  int optimizationLevelForBuildMode(BuildMode mode);
+
+  /// The compiler optimization level specified by the user.
   ///
-  /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
-  final int optimizationLevel;
+  /// Valid values are O0 (lowest, debug default) to O4 (highest, release default).
+  /// If the value is null, the user hasn't specified an optimization level and an
+  /// appropriate default for the build mode will be used instead.
+  final int? optimizationLevel;
+
+  /// `true` if the compiler build should output source maps.
+  final bool sourceMaps;
+
+  /// `true` if web output files should include a content hash in their filename.
+  final bool webContentHash;
 
   /// Returns which target this compiler outputs (js or wasm)
   CompileTarget get compileTarget;
   final WebRendererMode renderer;
+  List<String> toCommandOptions(BuildMode buildMode);
 
   String get buildKey;
 
   Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
-    'optimizationLevel': optimizationLevel,
+    'optimizationLevel': ?optimizationLevel,
   };
-
 
   Map<String, dynamic> get _buildKeyMap => <String, dynamic>{
     'optimizationLevel': optimizationLevel,
+    'webRenderer': renderer.name,
+    'webContentHash': webContentHash,
   };
 }
 
@@ -47,37 +63,19 @@ class JsCompilerConfig extends WebCompilerConfig {
     this.csp = false,
     this.dumpInfo = false,
     this.nativeNullAssertions = false,
-    super.optimizationLevel = WebCompilerConfig.kDefaultOptimizationLevel,
-    this.noFrequencyBasedMinification = false,
-    this.sourceMaps = true,
-    super.renderer = WebRendererMode.auto,
+    super.optimizationLevel,
+    this.useFrequencyBasedMinification = true,
+    super.sourceMaps = true,
+    super.webContentHash = false,
+    this.minify,
+    super.renderer = WebRendererMode.defaultForJs,
   });
 
   /// Instantiates [JsCompilerConfig] suitable for the `flutter run` command.
   const JsCompilerConfig.run({
     required bool nativeNullAssertions,
     required WebRendererMode renderer,
-  }) : this(
-          nativeNullAssertions: nativeNullAssertions,
-          optimizationLevel: WebCompilerConfig.kDefaultOptimizationLevel ,
-          renderer: renderer,
-        );
-
-  /// Build environment flag for [dumpInfo].
-  static const String kDart2jsDumpInfo = 'Dart2jsDumpInfo';
-
-  /// Build environment flag for [noFrequencyBasedMinification].
-  static const String kDart2jsNoFrequencyBasedMinification =
-      'Dart2jsNoFrequencyBasedMinification';
-
-  /// Build environment flag for [csp].
-  static const String kCspMode = 'cspMode';
-
-  /// Build environment flag for [sourceMaps].
-  static const String kSourceMapsEnabled = 'SourceMaps';
-
-  /// Build environment flag for [nativeNullAssertions].
-  static const String kNativeNullAssertions = 'NativeNullAssertions';
+  }) : this(nativeNullAssertions: nativeNullAssertions, renderer: renderer);
 
   /// Whether to disable dynamic generation code to satisfy CSP policies.
   final bool csp;
@@ -85,46 +83,66 @@ class JsCompilerConfig extends WebCompilerConfig {
   /// If `--dump-info` should be passed to the compiler.
   final bool dumpInfo;
 
+  /// If minification should be used in the JS compiler.
+  ///
+  /// If `null`, minifies in release mode only.
+  final bool? minify;
+
   /// Whether native null assertions are enabled.
   final bool nativeNullAssertions;
 
-  // If `--no-frequency-based-minification` should be passed to dart2js
-  // TODO(kevmoo): consider renaming this to be "positive". Double negatives are confusing.
-  final bool noFrequencyBasedMinification;
-
-  /// `true` if the JavaScript compiler build should output source maps.
-  final bool sourceMaps;
+  /// Whether to use frequency-based minification in dart2js.
+  ///
+  /// When `false`, passes `--no-frequency-based-minification` to the compiler.
+  final bool useFrequencyBasedMinification;
 
   @override
   CompileTarget get compileTarget => CompileTarget.js;
 
   /// Arguments to use in both phases: full JS compile and CFE-only.
-  List<String> toSharedCommandOptions() => <String>[
-        if (nativeNullAssertions) '--native-null-assertions',
-        if (!sourceMaps) '--no-source-maps',
-      ];
+  ///
+  /// NOTE: MOST args should be passed here!
+  List<String> toSharedCommandOptions(BuildMode buildMode) => <String>[
+    if (nativeNullAssertions) '--native-null-assertions',
+    if (!sourceMaps) '--no-source-maps',
+    if (buildMode == BuildMode.debug) '--enable-asserts',
+    '-O${optimizationLevelForBuildMode(buildMode)}',
+    if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
+    if (!useFrequencyBasedMinification) '--no-frequency-based-minification',
+    if (csp) '--csp',
+  ];
+
+  @override
+  int optimizationLevelForBuildMode(BuildMode mode) =>
+      optimizationLevel ??
+      switch (mode) {
+        // dart2js optimization level 0 is not well supported. Use
+        // 1 instead.
+        BuildMode.debug => 1,
+        BuildMode.profile || BuildMode.release => 4,
+        BuildMode.jitRelease => throw ArgumentError('Invalid build mode for web'),
+      };
 
   /// Arguments to use in the full JS compile, but not CFE-only.
   ///
-  /// Includes the contents of [toSharedCommandOptions].
+  /// Includes the contents of [toSharedCommandOptions]. That is where MOST
+  /// JS compiler flags should be passed!
+  @override
   List<String> toCommandOptions(BuildMode buildMode) => <String>[
-        if (buildMode == BuildMode.profile) '--no-minify',
-        ...toSharedCommandOptions(),
-        '-O$optimizationLevel',
-        if (dumpInfo) '--dump-info',
-        if (noFrequencyBasedMinification) '--no-frequency-based-minification',
-        if (csp) '--csp',
-      ];
+    ...toSharedCommandOptions(buildMode),
+    if (dumpInfo) '--stage=dump-info-all',
+  ];
 
   @override
   String get buildKey {
-    final Map<String, dynamic> settings = <String, dynamic>{
+    final settings = <String, dynamic>{
       ...super._buildKeyMap,
       'csp': csp,
       'dumpInfo': dumpInfo,
       'nativeNullAssertions': nativeNullAssertions,
-      'noFrequencyBasedMinification': noFrequencyBasedMinification,
-      'sourceMaps': sourceMaps,
+      'useFrequencyBasedMinification': useFrequencyBasedMinification,
+      'minify': minify,
+      WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
     };
     return jsonEncode(settings);
   }
@@ -133,34 +151,74 @@ class JsCompilerConfig extends WebCompilerConfig {
 /// Configuration for the Wasm compiler.
 class WasmCompilerConfig extends WebCompilerConfig {
   const WasmCompilerConfig({
-    super.optimizationLevel = WebCompilerConfig.kDefaultOptimizationLevel,
+    super.optimizationLevel,
     this.stripWasm = true,
-    super.renderer = WebRendererMode.auto,
+    this.minify,
+    this.dryRun = false,
+    super.sourceMaps = true,
+    super.webContentHash = false,
+    this.enableWasmDeferredLoading = false,
+    super.renderer = WebRendererMode.defaultForWasm,
   });
 
   /// Build environment for [stripWasm].
-  static const String kStripWasm = 'StripWasm';
+  static const kStripWasm = 'StripWasm';
 
   /// Whether to strip the wasm file of static symbols.
   final bool stripWasm;
 
+  final bool? minify;
+
+  final bool dryRun;
+
+  final bool enableWasmDeferredLoading;
+
   @override
   CompileTarget get compileTarget => CompileTarget.wasm;
 
+  @override
+  int optimizationLevelForBuildMode(BuildMode mode) =>
+      optimizationLevel ??
+      switch (mode) {
+        BuildMode.debug => 0,
+
+        // The optimization level of O2 uses only sound optimizations. We default
+        // to this level because our web benchmarks have shown that the difference
+        // between O2 and O4 is marginal enough that we would prefer soundness here.
+        BuildMode.profile || BuildMode.release => 2,
+        BuildMode.jitRelease => throw ArgumentError('Invalid build mode for web'),
+      };
+
+  @override
   List<String> toCommandOptions(BuildMode buildMode) {
     final bool stripSymbols = buildMode == BuildMode.release && stripWasm;
     return <String>[
-      '-O$optimizationLevel',
-      '--${stripSymbols ? 'no-' : ''}name-section',
+      '-O${optimizationLevelForBuildMode(buildMode)}',
+      '--${stripSymbols ? '' : 'no-'}strip-wasm',
+      if (!sourceMaps) '--no-source-maps',
+      if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
+      if (buildMode == BuildMode.debug) '--extra-compiler-option=--enable-asserts',
+      if (dryRun) '--extra-compiler-option=--dry-run',
+      if (enableWasmDeferredLoading) '--enable-deferred-loading',
     ];
   }
 
   @override
   String get buildKey {
-    final Map<String, dynamic> settings = <String, dynamic>{
+    final settings = <String, dynamic>{
       ...super._buildKeyMap,
-      'stripWasm': stripWasm,
+      kStripWasm: stripWasm,
+      'minify': minify,
+      'dryRun': dryRun,
+      WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
+      'enableWasmDeferredLoading': enableWasmDeferredLoading,
     };
     return jsonEncode(settings);
   }
+
+  @override
+  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
+    ...super.buildEventAnalyticsValues,
+    'dryRun': dryRun,
+  };
 }

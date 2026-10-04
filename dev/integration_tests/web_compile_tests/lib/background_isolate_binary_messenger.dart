@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
+
 import 'package:flutter/services.dart';
 
 void main() {
-  BackgroundIsolateBinaryMessenger.ensureInitialized(
-    ui.RootIsolateToken.instance!
-  );
+  BackgroundIsolateBinaryMessenger.ensureInitialized(ui.RootIsolateToken.instance!);
 }

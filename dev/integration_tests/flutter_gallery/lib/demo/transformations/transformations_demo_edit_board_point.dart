@@ -3,23 +3,20 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import 'transformations_demo_board.dart';
 import 'transformations_demo_color_picker.dart';
 
 // The panel for editing a board point.
 @immutable
 class EditBoardPoint extends StatelessWidget {
-  const EditBoardPoint({
-    super.key,
-    required this.boardPoint,
-    this.onColorSelection,
-  });
+  const EditBoardPoint({super.key, required this.boardPoint, this.onColorSelection});
 
   final BoardPoint boardPoint;
   final ValueChanged<Color>? onColorSelection;
 
   @override
-  Widget build (BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[

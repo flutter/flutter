@@ -13,6 +13,7 @@ import 'package:process/process.dart';
 
 import 'common.dart';
 import 'process_runner.dart';
+import 'transactional_update.dart';
 
 class ArchivePublisher {
   ArchivePublisher(
@@ -26,13 +27,13 @@ class ArchivePublisher {
     bool subprocessOutput = true,
     required this.fs,
     this.platform = const LocalPlatform(),
-  })  : assert(revision.length == 40),
-        platformName = platform.operatingSystem.toLowerCase(),
-        metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
-        _processRunner = ProcessRunner(
-          processManager: processManager,
-          subprocessOutput: subprocessOutput,
-        );
+  }) : assert(revision.length == 40),
+       platformName = platform.operatingSystem.toLowerCase(),
+       metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
+       _processRunner = ProcessRunner(
+         processManager: processManager,
+         subprocessOutput: subprocessOutput,
+       );
 
   final Platform platform;
   final FileSystem fs;
@@ -45,11 +46,13 @@ class ArchivePublisher {
   final File outputFile;
   final ProcessRunner _processRunner;
   final bool dryRun;
-  String get destinationArchivePath => '${branch.name}/$platformName/${path.basename(outputFile.path)}';
-  static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
+  String get destinationArchivePath =>
+      '${branch.name}/$platformName/${path.basename(outputFile.path)}';
+  static String getMetadataFilename(Platform platform) =>
+      'releases_${platform.operatingSystem.toLowerCase()}.json';
 
   Future<String> _getChecksum(File archiveFile) async {
-    final AccumulatorSink<Digest> digestSink = AccumulatorSink<Digest>();
+    final digestSink = AccumulatorSink<Digest>();
     final ByteConversionSink sink = sha256.startChunkedConversion(digestSink);
 
     final Stream<List<int>> stream = archiveFile.openRead();
@@ -65,21 +68,36 @@ class ArchivePublisher {
   /// This method will throw if the target archive already exists on cloud
   /// storage.
   Future<void> publishArchive([bool forceUpload = false]) async {
-    final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
+    final destGsPath = '$gsReleaseFolder/$destinationArchivePath';
     if (!forceUpload) {
       if (await _cloudPathExists(destGsPath) && !dryRun) {
-        throw PreparePackageException(
-          'File $destGsPath already exists on cloud storage!',
-        );
+        throw PreparePackageException('File $destGsPath already exists on cloud storage!');
       }
     }
-    await _cloudCopy(
-      src: outputFile.absolute.path,
-      dest: destGsPath,
-    );
+    await _cloudCopy(src: outputFile.absolute.path, dest: destGsPath);
     assert(tempDir.existsSync());
-    final String gcsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
-    await _publishMetadata(gcsPath);
+    final gcsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
+
+    await transactionalUpdate(
+      gsPath: gcsPath,
+      fs: fs,
+      tempDirectory: tempDir,
+      dryRun: dryRun,
+      runGsUtil: (List<String> args) => _runGsUtil(args),
+      callback: (String currentContents) async {
+        var jsonData = <String, Object?>{};
+        if (currentContents.isNotEmpty) {
+          try {
+            jsonData = json.decode(currentContents) as Map<String, Object?>;
+          } on FormatException catch (e) {
+            throw PreparePackageException('Unable to parse JSON metadata: $e');
+          }
+        }
+        jsonData = await _addRelease(jsonData);
+        const encoder = JsonEncoder.withIndent('  ');
+        return encoder.convert(jsonData);
+      },
+    );
   }
 
   /// Downloads and updates the metadata file without publishing it.
@@ -87,17 +105,17 @@ class ArchivePublisher {
     await _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
   }
 
-  Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData) async {
+  Future<Map<String, Object?>> _addRelease(Map<String, Object?> jsonData) async {
     jsonData['base_url'] = '$baseUrl$releaseFolder';
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
     }
-    (jsonData['current_release'] as Map<String, dynamic>)[branch.name] = revision;
+    (jsonData['current_release']! as Map<String, Object?>)[branch.name] = revision;
     if (!jsonData.containsKey('releases')) {
-      jsonData['releases'] = <Map<String, dynamic>>[];
+      jsonData['releases'] = <Map<String, Object?>>[];
     }
 
-    final Map<String, dynamic> newEntry = <String, dynamic>{};
+    final newEntry = <String, Object?>{};
     newEntry['hash'] = revision;
     newEntry['channel'] = branch.name;
     newEntry['version'] = version[frameworkVersionTag];
@@ -107,20 +125,25 @@ class ArchivePublisher {
     newEntry['archive'] = destinationArchivePath;
     newEntry['sha256'] = await _getChecksum(outputFile);
 
+    print(
+      'Adding new release entry to manifest:\n${const JsonEncoder.withIndent('  ').convert(newEntry)}',
+    );
+
     // Search for any entries with the same hash and channel and remove them.
-    final List<dynamic> releases = jsonData['releases'] as List<dynamic>;
-    jsonData['releases'] = <Map<String, dynamic>>[
-      for (final Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
-        if (entry['hash'] != newEntry['hash'] ||
-            entry['channel'] != newEntry['channel'] ||
-            entry['dart_sdk_arch'] != newEntry['dart_sdk_arch'])
-          entry,
-      newEntry,
-    ]..sort((Map<String, dynamic> a, Map<String, dynamic> b) {
-      final DateTime aDate = DateTime.parse(a['release_date'] as String);
-      final DateTime bDate = DateTime.parse(b['release_date'] as String);
-      return bDate.compareTo(aDate);
-    });
+    final releases = jsonData['releases']! as List<Object?>;
+    jsonData['releases'] =
+        <Map<String, Object?>>[
+          for (final Map<String, Object?> entry in releases.cast<Map<String, Object?>>())
+            if (entry['hash'] != newEntry['hash'] ||
+                entry['channel'] != newEntry['channel'] ||
+                entry['dart_sdk_arch'] != newEntry['dart_sdk_arch'])
+              entry,
+          newEntry,
+        ]..sort((Map<String, Object?> a, Map<String, Object?> b) {
+          final DateTime aDate = DateTime.parse(a['release_date']! as String);
+          final DateTime bDate = DateTime.parse(b['release_date']! as String);
+          return bDate.compareTo(aDate);
+        });
     return jsonData;
   }
 
@@ -133,14 +156,14 @@ class ArchivePublisher {
       path.join(tempDir.absolute.path, getMetadataFilename(platform)),
     );
     await _runGsUtil(<String>['cp', gsPath, metadataFile.absolute.path]);
-    Map<String, dynamic> jsonData = <String, dynamic>{};
+    var jsonData = <String, Object?>{};
     if (!dryRun) {
       final String currentMetadata = metadataFile.readAsStringSync();
       if (currentMetadata.isEmpty) {
         throw PreparePackageException('Empty metadata received from server');
       }
       try {
-        jsonData = json.decode(currentMetadata) as Map<String, dynamic>;
+        jsonData = json.decode(currentMetadata) as Map<String, Object?>;
       } on FormatException catch (e) {
         throw PreparePackageException('Unable to parse JSON metadata received from cloud: $e');
       }
@@ -150,23 +173,8 @@ class ArchivePublisher {
     // release.
     jsonData = await _addRelease(jsonData);
 
-    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    const encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
-  }
-
-  /// Publishes the metadata file to GCS.
-  Future<void> _publishMetadata(String gsPath) async {
-    final File metadataFile = fs.file(
-      path.join(tempDir.absolute.path, getMetadataFilename(platform)),
-    );
-    await _cloudCopy(
-      src: metadataFile.absolute.path,
-      dest: gsPath,
-      // This metadata file is used by the website, so we don't want a long
-      // latency between publishing a release and it being available on the
-      // site.
-      cacheSeconds: shortCacheSeconds,
-    );
   }
 
   Future<String> _runGsUtil(
@@ -179,7 +187,12 @@ class ArchivePublisher {
       return '';
     }
     return _processRunner.runProcess(
-      <String>['python3', path.join(platform.environment['DEPOT_TOOLS']!, 'gsutil.py'), '--', ...args],
+      <String>[
+        'python3',
+        path.join(platform.environment['DEPOT_TOOLS']!, 'gsutil.py'),
+        '--',
+        ...args,
+      ],
       workingDirectory: workingDirectory,
       failOk: failOk,
     );
@@ -188,9 +201,7 @@ class ArchivePublisher {
   /// Determine if a file exists at a given [cloudPath].
   Future<bool> _cloudPathExists(String cloudPath) async {
     try {
-      await _runGsUtil(
-        <String>['stat', cloudPath],
-      );
+      await _runGsUtil(<String>['stat', cloudPath]);
     } on PreparePackageException {
       // `gsutil stat gs://path/to/file` will exit with 1 if file does not exist
       return false;
@@ -198,11 +209,7 @@ class ArchivePublisher {
     return true;
   }
 
-  Future<String> _cloudCopy({
-    required String src,
-    required String dest,
-    int? cacheSeconds,
-  }) async {
+  Future<String> _cloudCopy({required String src, required String dest, int? cacheSeconds}) async {
     // We often don't have permission to overwrite, but
     // we have permission to remove, so that's what we do.
     await _runGsUtil(<String>['rm', dest], failOk: true);

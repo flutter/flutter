@@ -12,8 +12,8 @@ external JSAny? get _windowFlutterCanvasKit;
 @JS('window._flutter_skwasmInstance')
 external JSAny? get _skwasmInstance;
 
-/// The web implementation of [isCanvasKit]
+/// The web implementation of [isCanvasKit].
 bool get isCanvasKit => _windowFlutterCanvasKit != null;
 
-/// The web implementation of [isSkwasm]
+/// The web implementation of [isSkwasm].
 bool get isSkwasm => _skwasmInstance != null;

@@ -18,7 +18,7 @@
   "cutButtonLabel": "Retalla",
   "copyButtonLabel": "Copia",
   "pasteButtonLabel": "Enganxa",
-  "clearButtonLabel": "Clear",
+  "clearButtonLabel": "Esborra",
   "selectAllButtonLabel": "Seleccionar-ho tot",
   "tabSemanticsLabel": "Pestanya $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Ignora",
@@ -27,5 +27,13 @@
   "menuDismissLabel": "Ignora el menú",
   "lookUpButtonLabel": "Mira amunt",
   "searchWebButtonLabel": "Cerca al web",
-  "shareButtonLabel": "Comparteix..."
+  "shareButtonLabel": "Comparteix...",
+  "cancelButtonLabel": "Cancel·la",
+  "backButtonLabel": "Enrere",
+  "expansionTileExpandedHint": "fes doble toc per replegar",
+  "expansionTileCollapsedHint": "fes doble toc per desplegar",
+  "expansionTileExpandedTapHint": "Replega",
+  "expansionTileCollapsedTapHint": "Desplega per obtenir més informació",
+  "expandedHint": "S'ha replegat",
+  "collapsedHint": "S'ha desplegat"
 }

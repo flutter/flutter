@@ -144,7 +144,7 @@
   "menuDismissLabel": "ปิดเมนู",
   "lookUpButtonLabel": "ค้นหา",
   "searchWebButtonLabel": "ค้นหาบนอินเทอร์เน็ต",
-  "shareButtonLabel": "แชร์...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "แชร์",
+  "clearButtonTooltip": "ล้างข้อความ",
+  "selectedDateLabel": "เลือกไว้"
 }

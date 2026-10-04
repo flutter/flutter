@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../../layout/adaptive.dart';
 import '../../layout/highlight_focus.dart';
 import '../../layout/image_placeholder.dart';
@@ -12,10 +13,7 @@ import 'model/destination.dart';
 const double mobileThumbnailSize = 60.0;
 
 class DestinationCard extends StatelessWidget {
-  const DestinationCard({
-    super.key,
-    required this.destination,
-  });
+  const DestinationCard({super.key, required this.destination});
 
   final Destination destination;
 
@@ -38,10 +36,7 @@ class DestinationCard extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 20, bottom: 10),
-                    child: SelectableText(
-                      destination.destination,
-                      style: textTheme.titleMedium,
-                    ),
+                    child: SelectableText(destination.destination, style: textTheme.titleMedium),
                   ),
                   SelectableText(
                     destination.subtitle(context),
@@ -59,14 +54,12 @@ class DestinationCard extends StatelessWidget {
                 contentPadding: const EdgeInsetsDirectional.only(end: 8),
                 leading: ClipRRect(
                   borderRadius: const BorderRadius.all(Radius.circular(4)),
-                  child: SizedBox(
-                    width: mobileThumbnailSize,
-                    height: mobileThumbnailSize,
+                  child: SizedBox.square(
+                    dimension: mobileThumbnailSize,
                     child: _DestinationImage(destination: destination),
                   ),
                 ),
-                title: SelectableText(destination.destination,
-                    style: textTheme.titleMedium),
+                title: SelectableText(destination.destination, style: textTheme.titleMedium),
                 subtitle: SelectableText(
                   destination.subtitle(context),
                   semanticsLabel: destination.subtitleSemantics(context),
@@ -87,9 +80,7 @@ class DestinationCard extends StatelessWidget {
 }
 
 class _DestinationImage extends StatelessWidget {
-  const _DestinationImage({
-    required this.destination,
-  });
+  const _DestinationImage({required this.destination});
 
   final Destination destination;
 
@@ -101,20 +92,23 @@ class _DestinationImage extends StatelessWidget {
       label: destination.assetSemanticLabel,
       child: ExcludeSemantics(
         child: FadeInImagePlaceholder(
-          image: AssetImage(
-            destination.assetName,
-            package: 'flutter_gallery_assets',
+          image: ResizeImage(
+            AssetImage(destination.assetName, package: 'flutter_gallery_assets'),
+            width: isDesktop ? null : mobileThumbnailSize.toInt(),
+            height: isDesktop ? null : mobileThumbnailSize.toInt(),
           ),
           fit: BoxFit.cover,
           width: isDesktop ? null : mobileThumbnailSize,
           height: isDesktop ? null : mobileThumbnailSize,
-          placeholder: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-            return Container(
-              color: Colors.black.withOpacity(0.1),
-              width: constraints.maxWidth,
-              height: constraints.maxWidth / destination.imageAspectRatio,
-            );
-          }),
+          placeholder: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return Container(
+                color: Colors.black.withOpacity(0.1),
+                width: constraints.maxWidth,
+                height: constraints.maxWidth / destination.imageAspectRatio,
+              );
+            },
+          ),
         ),
       ),
     );

@@ -7,59 +7,56 @@ import '../features.dart';
 import 'io.dart' as io;
 import 'logger.dart';
 import 'platform.dart';
+import 'process.dart';
+import 'utils.dart';
 
-enum TerminalColor {
-  red,
-  green,
-  blue,
-  cyan,
-  yellow,
-  magenta,
-  grey,
-}
+enum TerminalColor { red, green, blue, cyan, yellow, magenta, grey }
 
 /// A class that contains the context settings for command text output to the
 /// console.
 class OutputPreferences {
-  OutputPreferences({
-    bool? wrapText,
-    int? wrapColumn,
-    bool? showColor,
-    io.Stdio? stdio,
-  }) : _stdio = stdio,
-       wrapText = wrapText ?? stdio?.hasTerminal ?? false,
-       _overrideWrapColumn = wrapColumn,
-       showColor = showColor ?? false;
+  OutputPreferences({bool? wrapText, int? wrapColumn, bool? showColor, io.Stdio? stdio})
+    : _stdio = stdio,
+      wrapText = wrapText ?? stdio?.hasTerminal ?? false,
+      _overrideWrapColumn = wrapColumn,
+      showColor = showColor ?? false;
 
   /// A version of this class for use in tests.
-  OutputPreferences.test({this.wrapText = false, int wrapColumn = kDefaultTerminalColumns, this.showColor = false})
-    : _overrideWrapColumn = wrapColumn, _stdio = null;
+  OutputPreferences.test({
+    this.wrapText = false,
+    int wrapColumn = kDefaultTerminalColumns,
+    this.showColor = false,
+  }) : _overrideWrapColumn = wrapColumn,
+       _stdio = null;
 
   final io.Stdio? _stdio;
 
-  /// If [wrapText] is true, then any text sent to the context's [Logger]
-  /// instance (e.g. from the [printError] or [printStatus] functions) will be
-  /// wrapped (newlines added between words) to be no longer than the
-  /// [wrapColumn] specifies. Defaults to true if there is a terminal. To
-  /// determine if there's a terminal, [OutputPreferences] asks the context's
-  /// stdio.
+  /// If `true`, then any text sent to the context's [Logger] instance,
+  /// such as from the [Logger.printError] and [Logger.printStatus] functions,
+  /// will be wrapped (newlines added between words) to
+  /// be no longer than the [wrapColumn] specifies.
+  /// Defaults to `true` if there is a terminal.
+  ///
+  /// To determine if there's a terminal,
+  /// [OutputPreferences] asks the context's stdio.
   final bool wrapText;
 
   /// The terminal width used by the [wrapText] function if there is no terminal
   /// attached to [io.Stdio], --wrap is on, and --wrap-columns was not specified.
-  static const int kDefaultTerminalColumns = 100;
+  static const kDefaultTerminalColumns = 100;
 
-  /// The column at which output sent to the context's [Logger] instance
-  /// (e.g. from the [printError] or [printStatus] functions) will be wrapped.
-  /// Ignored if [wrapText] is false. Defaults to the width of the output
-  /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
+  /// The column at which output sent to the context's [Logger] instance,
+  /// such as from the [Logger.printError] and [Logger.printStatus] functions,
+  /// will be wrapped. Ignored if [wrapText] is `false`.
+  /// Defaults to the width of the output terminal, or to
+  /// [kDefaultTerminalColumns] if not writing to a terminal.
   final int? _overrideWrapColumn;
   int get wrapColumn {
     return _overrideWrapColumn ?? _stdio?.terminalColumns ?? kDefaultTerminalColumns;
   }
 
   /// Whether or not to output ANSI color codes when writing to the output
-  /// terminal. Defaults to whatever [platform.stdoutSupportsAnsi] says if
+  /// terminal. Defaults to whatever [Platform.stdoutSupportsAnsi] says if
   /// writing to a terminal, and false otherwise.
   final bool showColor;
 
@@ -133,6 +130,11 @@ abstract class Terminal {
   /// Useful when the console is in [singleCharMode].
   Stream<String> get keystrokes;
 
+  /// Reads a full line from the console.
+  ///
+  /// Useful when the console is not in [singleCharMode].
+  Future<String> readLine();
+
   /// Prompts the user to input a character within a given list. Re-prompts if
   /// entered character is not in the list.
   ///
@@ -160,44 +162,50 @@ abstract class Terminal {
 
 class AnsiTerminal implements Terminal {
   AnsiTerminal({
-    required io.Stdio stdio,
-    required Platform platform,
+    required this._stdio,
+    required this._platform,
     DateTime? now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
     bool defaultCliAnimationEnabled = true,
-  })
-    : _stdio = stdio,
-      _platform = platform,
-      _now = now ?? DateTime(1),
-      _isCliAnimationEnabled = defaultCliAnimationEnabled;
+    ShutdownHooks? shutdownHooks,
+  }) : _now = now ?? DateTime(1),
+       _isCliAnimationEnabled = defaultCliAnimationEnabled {
+    shutdownHooks?.addShutdownHook(() {
+      singleCharMode = false;
+    });
+  }
 
   final io.Stdio _stdio;
   final Platform _platform;
   final DateTime _now;
 
-  static const String bold = '\u001B[1m';
-  static const String resetAll = '\u001B[0m';
-  static const String resetColor = '\u001B[39m';
-  static const String resetBold = '\u001B[22m';
-  static const String clear = '\u001B[2J\u001B[H';
+  static const bold = '\u001B[1m';
+  static const resetAll = '\u001B[0m';
+  static const resetColor = '\u001B[39m';
+  static const resetBold = '\u001B[22m';
+  static const clear = '\u001B[2J\u001B[H';
 
-  static const String red = '\u001b[31m';
-  static const String green = '\u001b[32m';
-  static const String blue = '\u001b[34m';
-  static const String cyan = '\u001b[36m';
-  static const String magenta = '\u001b[35m';
-  static const String yellow = '\u001b[33m';
-  static const String grey = '\u001b[90m';
+  static const red = '\u001b[31m';
+  static const green = '\u001b[32m';
+  static const blue = '\u001b[34m';
+  static const cyan = '\u001b[36m';
+  static const magenta = '\u001b[35m';
+  static const yellow = '\u001b[33m';
+  static const grey = '\u001b[90m';
 
   // Moves cursor up 1 line.
-  static const String cursorUpLineCode = '\u001b[1A';
+  static const cursorUpLineCode = '\u001b[1A';
 
   // Moves cursor to the beginning of the line.
-  static const String cursorBeginningOfLineCode = '\u001b[1G';
+  static const cursorBeginningOfLineCode = '\u001b[1G';
 
   // Clear the entire line, cursor position does not change.
-  static const String clearEntireLineCode = '\u001b[2K';
+  static const clearEntireLineCode = '\u001b[2K';
 
-  static const Map<TerminalColor, String> _colorMap = <TerminalColor, String>{
+  // Move cursor to column 0 and erase from cursor to end of line (\x1B[K = \x1B[0K).
+  // Clears the entire current line regardless of cursor position.
+  static const clearAndReturnCode = '\r\x1B[K';
+
+  static const _colorMap = <TerminalColor, String>{
     TerminalColor.red: red,
     TerminalColor.green: green,
     TerminalColor.blue: blue,
@@ -209,8 +217,11 @@ class AnsiTerminal implements Terminal {
 
   static String colorCode(TerminalColor color) => _colorMap[color]!;
 
+  // See https://no-color.org/.
+  bool get _noColorSet => _platform.environment.containsKey('NO_COLOR');
+
   @override
-  bool get supportsColor => _platform.stdoutSupportsAnsi;
+  bool get supportsColor => _platform.stdoutSupportsAnsi && !_noColorSet;
 
   @override
   bool get isCliAnimationEnabled => _isCliAnimationEnabled;
@@ -225,10 +236,9 @@ class AnsiTerminal implements Terminal {
   // Assume unicode emojis are supported when not on Windows.
   // If we are on Windows, unicode emojis are supported in Windows Terminal,
   // which sets the WT_SESSION environment variable. See:
-  // https://github.com/microsoft/terminal/blob/master/doc/user-docs/index.md#tips-and-tricks
+  // https://learn.microsoft.com/en-us/windows/terminal/tips-and-tricks
   @override
-  bool get supportsEmoji => !_platform.isWindows
-    || _platform.environment.containsKey('WT_SESSION');
+  bool get supportsEmoji => !_platform.isWindows || _platform.environment.containsKey('WT_SESSION');
 
   @override
   int get preferredStyle {
@@ -239,9 +249,7 @@ class AnsiTerminal implements Terminal {
     return _now.hour + workdays;
   }
 
-  final RegExp _boldControls = RegExp(
-    '(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})',
-  );
+  final _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
   @override
   bool usesTerminalUi = false;
@@ -261,7 +269,7 @@ class AnsiTerminal implements Terminal {
     if (!supportsColor || message.isEmpty) {
       return message;
     }
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     for (String line in message.split('\n')) {
       // If there were bolds or resetBolds in the string before, then nuke them:
       // they're redundant. This prevents previously embedded resets from
@@ -269,7 +277,7 @@ class AnsiTerminal implements Terminal {
       line = line.replaceAll(_boldControls, '');
       buffer.writeln('$bold$line$resetBold');
     }
-    final String result = buffer.toString();
+    final result = buffer.toString();
     // avoid introducing a new newline to the emboldened text
     return (!message.endsWith('\n') && result.endsWith('\n'))
         ? result.substring(0, result.length - 1)
@@ -281,7 +289,7 @@ class AnsiTerminal implements Terminal {
     if (!supportsColor || message.isEmpty) {
       return message;
     }
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     final String colorCodes = _colorMap[color]!;
     for (String line in message.split('\n')) {
       // If there were resets in the string before, then keep them, but
@@ -290,7 +298,7 @@ class AnsiTerminal implements Terminal {
       line = line.replaceAll(resetColor, '$resetColor$colorCodes');
       buffer.writeln('$colorCodes$line$resetColor');
     }
-    final String result = buffer.toString();
+    final result = buffer.toString();
     // avoid introducing a new newline to the colored text
     return (!message.endsWith('\n') && result.endsWith('\n'))
         ? result.substring(0, result.length - 1)
@@ -318,15 +326,16 @@ class AnsiTerminal implements Terminal {
     if (!_stdio.stdinHasTerminal) {
       return false;
     }
-    final io.Stdin stdin = _stdio.stdin as io.Stdin;
-    return stdin.lineMode && stdin.echoMode;
+    final stdin = _stdio.stdin as io.Stdin;
+    return !stdin.lineMode && !stdin.echoMode;
   }
+
   @override
   set singleCharMode(bool value) {
     if (!_stdio.stdinHasTerminal) {
       return;
     }
-    final io.Stdin stdin = _stdio.stdin as io.Stdin;
+    final stdin = _stdio.stdin as io.Stdin;
 
     try {
       // The order of setting lineMode and echoMode is important on Windows.
@@ -350,7 +359,19 @@ class AnsiTerminal implements Terminal {
 
   @override
   Stream<String> get keystrokes {
-    return _broadcastStdInString ??= _stdio.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
+    return _broadcastStdInString ??= _stdio.stdin
+        .transform<String>(const AsciiDecoder(allowInvalid: true))
+        .asBroadcastStream();
+  }
+
+  Stream<String>? _broadcastStdInLines;
+
+  @override
+  Future<String> readLine() {
+    return (_broadcastStdInLines ??= _stdio.stdin
+            .transform<String>(utf8AllowMalformedLineDecoder)
+            .asBroadcastStream())
+        .first;
   }
 
   @override
@@ -366,7 +387,7 @@ class AnsiTerminal implements Terminal {
     if (!usesTerminalUi) {
       throw StateError('cannot prompt without a terminal ui');
     }
-    List<String> charactersToDisplay = acceptedCharacters;
+    var charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
       charactersToDisplay = List<String>.of(charactersToDisplay);
@@ -414,7 +435,13 @@ class _TestTerminal implements Terminal {
   Stream<String> get keystrokes => const Stream<String>.empty();
 
   @override
-  Future<String> promptForCharInput(List<String> acceptedCharacters, {
+  Future<String> readLine() {
+    throw UnsupportedError('readLine not supported in the test terminal.');
+  }
+
+  @override
+  Future<String> promptForCharInput(
+    List<String> acceptedCharacters, {
     required Logger logger,
     String? prompt,
     int? defaultChoiceIndex,
@@ -426,7 +453,7 @@ class _TestTerminal implements Terminal {
   @override
   bool get singleCharMode => false;
   @override
-  set singleCharMode(bool value) { }
+  set singleCharMode(bool value) {}
 
   @override
   final bool supportsColor;
@@ -434,7 +461,7 @@ class _TestTerminal implements Terminal {
   @override
   bool get isCliAnimationEnabled => supportsColor && _isCliAnimationEnabled;
 
-  bool _isCliAnimationEnabled = true;
+  var _isCliAnimationEnabled = true;
 
   @override
   void applyFeatureFlags(FeatureFlags flags) {

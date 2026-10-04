@@ -18,32 +18,51 @@ import '../dart/package_map.dart';
 /// The flutter tool can be run with the output files of one or more engine builds
 /// replacing the cached artifacts. Typically this is done by setting the
 /// `--local-engine` command line flag to the name of the desired engine variant
-/// (e.g. "host_debug_unopt"). Provided that the `flutter/` and `engine/` directories
-/// are located adjacent to one another, the output folder will be located
-/// automatically.
-///
-/// For scenarios where the engine is not adjacent to flutter, the
-/// `--local-engine-src-path` can be provided to give an exact path.
+/// (e.g. "host_debug_unopt"). The `--local-engine-src-path` can be provided to
+/// give an exact path to the engine subtree. If it is not specified, the `engine`
+/// subfolder in this repository is used.
 ///
 /// For more information on local engines, see README.md.
 class LocalEngineLocator {
   LocalEngineLocator({
-    required Platform platform,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required String flutterRoot,
-    required UserMessages userMessages,
-  }) : _platform = platform,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _flutterRoot = flutterRoot,
-        _userMessages = userMessages;
+    required this._platform,
+    required this._logger,
+    required this._fileSystem,
+    required this._flutterRoot,
+    required this._userMessages,
+  });
 
   final Platform _platform;
   final Logger _logger;
   final FileSystem _fileSystem;
   final String _flutterRoot;
   final UserMessages _userMessages;
+
+  String _runnerNoEngineBuild(String engineBuildPath) =>
+      'No Flutter engine build found at $engineBuildPath.';
+
+  String get _runnerHostEngineRequiresLocalEngine =>
+      'You must specify --local-engine if you are using --local-engine-host.';
+
+  String _runnerNoWebSdk(String webSdkPath) => 'No Flutter web sdk found at $webSdkPath.';
+
+  String get _runnerLocalEngineRequiresHostEngine =>
+      'You are using a locally built engine (--local-engine) but have not specified --local-engine-host.\n'
+      'You may be building with a different engine than the one you are running with. '
+      'See https://github.com/flutter/flutter/issues/132245 for details.';
+
+  String _runnerNoEngineBuildDirInPath(String engineSourcePath) =>
+      'No Flutter engine build directory found at: $engineSourcePath.\n'
+      '\n'
+      'To fix this:\n'
+      "1. Ensure '$engineSourcePath' is a valid Flutter engine 'src' directory.\n"
+      "2. Verify the engine is compiled in that directory, which should produce an 'out' directory.\n"
+      '\n'
+      'Alternatively, specify a different engine source path using the '
+      '--local-engine-src-path flag or the FLUTTER_ENGINE environment variable.';
+
+  String get _runnerLocalEngineOrWebSdkRequired =>
+      'You must specify --local-engine or --local-web-sdk if you are using a locally built engine or web sdk.';
 
   /// Returns the engine build path of a local engine if one is located, otherwise `null`.
   Future<EngineBuildPaths?> findEnginePath({
@@ -53,8 +72,15 @@ class LocalEngineLocator {
     String? localWebSdk,
     String? packagePath,
   }) async {
+    if (localHostEngine != null && localEngine == null) {
+      throwToolExit(_runnerHostEngineRequiresLocalEngine, exitCode: 2);
+    }
+
     engineSourcePath ??= _platform.environment[kFlutterEngineEnvironmentVariableName];
-    if (engineSourcePath == null && localEngine == null && localWebSdk == null && packagePath == null) {
+    if (engineSourcePath == null &&
+        localEngine == null &&
+        localWebSdk == null &&
+        packagePath == null) {
       return null;
     }
 
@@ -74,15 +100,12 @@ class LocalEngineLocator {
 
       // If engineSourcePath is still not set, try to determine it by flutter root.
       engineSourcePath ??= _tryEnginePath(
-        _fileSystem.path.join(_fileSystem.directory(_flutterRoot).parent.path, 'engine', 'src'),
+        _fileSystem.path.join(_fileSystem.directory(_flutterRoot).path, 'engine', 'src'),
       );
     }
 
     if (engineSourcePath != null && _tryEnginePath(engineSourcePath) == null) {
-      throwToolExit(
-        _userMessages.runnerNoEngineBuildDirInPath(engineSourcePath),
-        exitCode: 2,
-      );
+      throwToolExit(_runnerNoEngineBuildDirInPath(engineSourcePath), exitCode: 2);
     }
 
     if (engineSourcePath != null) {
@@ -114,7 +137,9 @@ class LocalEngineLocator {
       final Directory buildDirectory = _fileSystem.directory(buildPath);
       final Directory outDirectory = buildDirectory.parent;
       final Directory srcDirectory = outDirectory.parent;
-      if (buildDirectory.existsSync() && outDirectory.basename == 'out' && srcDirectory.basename == 'src') {
+      if (buildDirectory.existsSync() &&
+          outDirectory.basename == 'out' &&
+          srcDirectory.basename == 'src') {
         _logger.printTrace('Parsed engine source from local engine as ${srcDirectory.path}.');
         return srcDirectory.path;
       }
@@ -124,18 +149,24 @@ class LocalEngineLocator {
 
   Future<String?> _findEngineSourceByPackageConfig(String? packagePath) async {
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      _fileSystem.file(
-        // TODO(zanderso): update to package_config
-        packagePath ?? _fileSystem.path.join('.packages'),
-      ),
+      _fileSystem.file(packagePath ?? findPackageConfigFileOrDefault(_fileSystem.currentDirectory)),
       logger: _logger,
       throwOnError: false,
     );
     // Skip if sky_engine is the version in bin/cache.
     Uri? engineUri = packageConfig[kFlutterEnginePackageName]?.packageUriRoot;
-    final String cachedPath = _fileSystem.path.join(_flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib');
+    final String cachedPath = _fileSystem.path.join(
+      _flutterRoot,
+      'bin',
+      'cache',
+      'pkg',
+      kFlutterEnginePackageName,
+      'lib',
+    );
     if (engineUri != null && _fileSystem.identicalSync(cachedPath, engineUri.path)) {
-      _logger.printTrace('Local engine auto-detection sky_engine in $packagePath is the same version in bin/cache.');
+      _logger.printTrace(
+        'Local engine auto-detection sky_engine in $packagePath is the same version in bin/cache.',
+      );
       engineUri = null;
     }
     // If sky_engine is specified and the engineSourcePath not set, try to
@@ -145,15 +176,17 @@ class LocalEngineLocator {
     String? engineSourcePath;
     final String? engineUriPath = engineUri?.path;
     if (engineUriPath != null) {
-      engineSourcePath = _fileSystem.directory(engineUriPath)
-        .parent
-        .parent
-        .parent
-        .parent
-        .parent
-        .parent
-        .path;
-      if (engineSourcePath == _fileSystem.path.dirname(engineSourcePath) || engineSourcePath.isEmpty) {
+      engineSourcePath = _fileSystem
+          .directory(engineUriPath)
+          .parent
+          .parent
+          .parent
+          .parent
+          .parent
+          .parent
+          .path;
+      if (engineSourcePath == _fileSystem.path.dirname(engineSourcePath) ||
+          engineSourcePath.isEmpty) {
         engineSourcePath = null;
         throwToolExit(
           _userMessages.runnerNoEngineSrcDir(
@@ -174,37 +207,45 @@ class LocalEngineLocator {
     String? localHostEngine,
   }) {
     if (localEngine == null && localWebSdk == null) {
-      throwToolExit(_userMessages.runnerLocalEngineOrWebSdkRequired, exitCode: 2);
+      throwToolExit(_runnerLocalEngineOrWebSdkRequired, exitCode: 2);
     }
 
     String? engineBuildPath;
     String? engineHostBuildPath;
     if (localEngine != null) {
-      engineBuildPath = _fileSystem.path.normalize(_fileSystem.path.join(engineSourcePath, 'out', localEngine));
+      engineBuildPath = _fileSystem.path.normalize(
+        _fileSystem.path.join(engineSourcePath, 'out', localEngine),
+      );
       if (!_fileSystem.isDirectorySync(engineBuildPath)) {
-        throwToolExit(_userMessages.runnerNoEngineBuild(engineBuildPath), exitCode: 2);
+        throwToolExit(_runnerNoEngineBuild(engineBuildPath), exitCode: 2);
       }
 
       if (localHostEngine == null) {
-        throwToolExit(_userMessages.runnerLocalEngineRequiresHostEngine);
+        throwToolExit(_runnerLocalEngineRequiresHostEngine);
       }
       engineHostBuildPath = _fileSystem.path.normalize(
         _fileSystem.path.join(_fileSystem.path.dirname(engineBuildPath), localHostEngine),
       );
       if (!_fileSystem.isDirectorySync(engineHostBuildPath)) {
-        throwToolExit(_userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
+        throwToolExit(_runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
       }
     }
 
     String? webSdkPath;
     if (localWebSdk != null) {
-      webSdkPath = _fileSystem.path.normalize(_fileSystem.path.join(engineSourcePath, 'out', localWebSdk));
+      webSdkPath = _fileSystem.path.normalize(
+        _fileSystem.path.join(engineSourcePath, 'out', localWebSdk),
+      );
       if (!_fileSystem.isDirectorySync(webSdkPath)) {
-        throwToolExit(_userMessages.runnerNoWebSdk(webSdkPath), exitCode: 2);
+        throwToolExit(_runnerNoWebSdk(webSdkPath), exitCode: 2);
       }
     }
 
-    return EngineBuildPaths(targetEngine: engineBuildPath, webSdk: webSdkPath, hostEngine: engineHostBuildPath);
+    return EngineBuildPaths(
+      targetEngine: engineBuildPath,
+      webSdk: webSdkPath,
+      hostEngine: engineHostBuildPath,
+    );
   }
 
   String? _tryEnginePath(String enginePath) {

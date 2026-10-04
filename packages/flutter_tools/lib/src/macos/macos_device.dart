@@ -12,37 +12,29 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
-import '../macos/application_package.dart';
 import '../project.dart';
+import 'application_package.dart';
 import 'build_macos.dart';
 import 'macos_workflow.dart';
 
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required super.processManager,
+    required super.logger,
+    required super.fileSystem,
+    required super.operatingSystemUtils,
   }) : _processManager = processManager,
        _logger = logger,
        _operatingSystemUtils = operatingSystemUtils,
-       super(
-        'macos',
-        platformType: PlatformType.macos,
-        ephemeral: false,
-        processManager: processManager,
-        logger: logger,
-        fileSystem: fileSystem,
-        operatingSystemUtils: operatingSystemUtils,
-      );
+       super('macos', platformType: PlatformType.macos, ephemeral: false);
 
   final ProcessManager _processManager;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   String get name => 'macOS';
@@ -52,6 +44,9 @@ class MacOSDevice extends DesktopDevice {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
+
+  @override
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
 
   @override
   Future<String> get targetPlatformDisplayName async {
@@ -70,12 +65,14 @@ class MacOSDevice extends DesktopDevice {
   Future<void> buildForDevice({
     required BuildInfo buildInfo,
     String? mainPath,
+    bool usingCISystem = false,
   }) async {
     await buildMacOS(
       flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,
+      usingCISystem: usingCISystem,
     );
   }
 
@@ -95,9 +92,7 @@ class MacOSDevice extends DesktopDevice {
       _logger.printError('Failed to foreground app; application bundle not found');
       return;
     }
-    _processManager.run(<String>[
-      'open', applicationBundle,
-    ]).then((ProcessResult result) {
+    _processManager.run(<String>['open', applicationBundle]).then((ProcessResult result) {
       if (result.exitCode != 0) {
         _logger.printError('Failed to foreground app; open returned ${result.exitCode}');
       }
@@ -107,19 +102,13 @@ class MacOSDevice extends DesktopDevice {
 
 class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices({
-    required Platform platform,
-    required MacOSWorkflow macOSWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _logger = logger,
-       _platform = platform,
-       _macOSWorkflow = macOSWorkflow,
-       _processManager = processManager,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils,
-       super('macOS devices');
+    required this._platform,
+    required this._macOSWorkflow,
+    required this._processManager,
+    required this._logger,
+    required this._fileSystem,
+    required this._operatingSystemUtils,
+  }) : super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
   final Platform _platform;
@@ -135,7 +124,10 @@ class MacOSDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _macOSWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'menu_bar_theme.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -11,12 +14,13 @@ import 'theme.dart';
 
 // Examples can assume:
 // late Widget child;
+// late BuildContext context;
 
 /// Defines the configuration of the submenus created by the [SubmenuButton],
 /// [MenuBar], or [MenuAnchor] widgets.
 ///
 /// Descendant widgets obtain the current [MenuThemeData] object using
-/// `MenuTheme.of(context)`.
+/// [MenuTheme.of].
 ///
 /// Typically, a [MenuThemeData] is specified as part of the overall [Theme]
 /// with [ThemeData.menuTheme]. Otherwise, [MenuTheme] can be used to configure
@@ -33,7 +37,7 @@ import 'theme.dart';
 @immutable
 class MenuThemeData with Diagnosticable {
   /// Creates a const set of properties used to configure [MenuTheme].
-  const MenuThemeData({this.style});
+  const MenuThemeData({this.style, this.submenuIcon});
 
   /// The [MenuStyle] of a [SubmenuButton] menu.
   ///
@@ -41,16 +45,27 @@ class MenuThemeData with Diagnosticable {
   /// property.
   final MenuStyle? style;
 
+  /// If provided, the widget replaces the default [SubmenuButton] arrow icon.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  final WidgetStateProperty<Widget?>? submenuIcon;
+
   /// Linearly interpolate between two menu button themes.
   static MenuThemeData? lerp(MenuThemeData? a, MenuThemeData? b, double t) {
     if (identical(a, b)) {
       return a;
     }
-    return MenuThemeData(style: MenuStyle.lerp(a?.style, b?.style, t));
+    return MenuThemeData(
+      style: MenuStyle.lerp(a?.style, b?.style, t),
+      submenuIcon: t < 0.5 ? a?.submenuIcon : b?.submenuIcon,
+    );
   }
 
   @override
-  int get hashCode => style.hashCode;
+  int get hashCode => Object.hash(style, submenuIcon);
 
   @override
   bool operator ==(Object other) {
@@ -60,13 +75,20 @@ class MenuThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MenuThemeData && other.style == style;
+    return other is MenuThemeData && other.style == style && other.submenuIcon == submenuIcon;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MenuStyle>('style', style, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<WidgetStateProperty<Widget?>>(
+        'submenuIcon',
+        submenuIcon,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
@@ -90,11 +112,7 @@ class MenuThemeData with Diagnosticable {
 class MenuTheme extends InheritedTheme {
   /// Creates a const theme that controls the configurations for the menus
   /// created by the [SubmenuButton] or [MenuAnchor] widgets.
-  const MenuTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const MenuTheme({super.key, required this.data, required super.child});
 
   /// The properties for [MenuBar] and [MenuItemButton] in this widget's
   /// descendants.
@@ -107,16 +125,7 @@ class MenuTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return MenuTheme(
-  ///     data: const MenuThemeData(
-  ///       style: MenuStyle(
-  ///         backgroundColor: MaterialStatePropertyAll<Color>(Colors.red),
-  ///       ),
-  ///     ),
-  ///     child: child,
-  ///   );
-  /// }
+  /// MenuThemeData theme = MenuTheme.of(context);
   /// ```
   static MenuThemeData of(BuildContext context) {
     final MenuTheme? menuTheme = context.dependOnInheritedWidgetOfExactType<MenuTheme>();

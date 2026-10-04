@@ -8,7 +8,7 @@ Performance benchmarks use either flutter drive or the web benchmark harness.
 
 To run the cull opacity benchmark on a device:
 
-```
+```sh
 flutter drive --profile -t test_driver/run_app.dart --driver test_driver/cull_opacity_perf_test.dart
 ```
 
@@ -20,7 +20,7 @@ More detailed logs should be in `build/cull_opacity_perf.timeline.json`.
 
 To run the cubic-bezier benchmark on a device:
 
-```
+```sh
 flutter drive --profile -t test_driver/run_app.dart --driver test_driver/cubic_bezier_perf_test.dart
 ```
 
@@ -33,7 +33,7 @@ More detailed logs should be in `build/cubic_bezier_perf.timeline.json`.
 To run the backdrop filter benchmark on a device:
 To run a mobile benchmark on a device:
 
-```bash
+```sh
 flutter drive --profile -t test_driver/run_app.dart --driver test_driver/[test_name]_test.dart
 ```
 
@@ -69,7 +69,7 @@ host machine. The following tests are E2E:
 
 These tests should be run by:
 
-```bash
+```sh
 flutter drive --profile -t test/[test_name]_e2e.dart --driver test_driver/e2e_test.dart
 ```
 
@@ -111,30 +111,24 @@ in `lib/web_benchmarks.dart`.
 ### How to run a web benchmark
 
 Web benchmarks can be run using `flutter run` in debug, profile, and release
-modes, using either the HTML or the CanvasKit rendering backend. Note, however,
+modes, using either the CanvasKit or the Skwasm rendering backend. Note, however,
 that running in debug mode will result in worse numbers. Profile mode is useful
 for profiling in Chrome DevTools because the numbers are close to release mode
 and the profile contains unobfuscated names.
 
 Example:
 
-```
+```sh
 cd dev/benchmarks/macrobenchmarks
 
-# Runs in profile mode using the HTML renderer
-flutter run --web-renderer=html --profile -d web-server lib/web_benchmarks.dart
-
-# Runs in profile mode using the CanvasKit renderer
-flutter run --web-renderer=canvaskit --profile -d web-server lib/web_benchmarks.dart
+# Runs in profile mode
+flutter run --profile -d web-server lib/web_benchmarks.dart
 ```
 
 You can also run all benchmarks exactly as the devicelab runs them:
 
-```
+```sh
 cd dev/devicelab
-
-# Runs using the HTML renderer
-../../bin/cache/dart-sdk/bin/dart bin/run.dart -t bin/tasks/web_benchmarks_html.dart
 
 # Runs using the CanvasKit renderer
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -t bin/tasks/web_benchmarks_canvaskit.dart

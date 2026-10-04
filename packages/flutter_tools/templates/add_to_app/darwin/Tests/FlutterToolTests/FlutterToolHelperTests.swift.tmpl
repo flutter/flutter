@@ -1,0 +1,136 @@
+import Foundation
+import Testing
+
+@testable import FlutterToolHelper
+
+@Test(
+  "Parse Flutter Build Mode from Environment",
+  arguments: [
+    (["CONFIGURATION": "Debug"], "Debug"),
+    (["CONFIGURATION": "debug"], "Debug"),
+    (["CONFIGURATION": "Release"], "Release"),
+    (["CONFIGURATION": "release"], "Release"),
+    (["CONFIGURATION": "Profile"], "Profile"),
+    (["CONFIGURATION": "profile"], "Profile"),
+    (["CONFIGURATION": "Debug-vanilla"], "Debug"),
+    (["FLUTTER_BUILD_MODE": "Debug-vanilla"], "Debug"),
+  ]
+)
+func parseFlutterBuildModeSuccess(
+  env: [String: String],
+  expectedBuildMode: String
+) async throws {
+  let buildMode = try FlutterToolHelper.parseFlutterBuildMode(env: env)
+  #expect(buildMode == expectedBuildMode)
+}
+
+@Test(
+  "Parse Flutter Build Mode from Environment Throws",
+  arguments: [
+    (["CONFIGURATION": "ASDF"]),
+    (["FLUTTER_BUILD_MODE": "ASDF"]),
+    ([:]),
+  ]
+)
+func parseFlutterBuildModeThrows(env: [String: String]) async throws {
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterToolHelper.parseFlutterBuildMode(env: env)
+  }
+}
+
+@Test
+func findOrExitSuccess() async throws {
+  let value = try FlutterToolHelper.findOrExit(env: ["A": "a"], key: "A")
+  #expect(value == "a")
+}
+
+@Test
+func findOrExitThrows() async throws {
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterToolHelper.findOrExit(env: ["A": "a"], key: "a")
+  }
+}
+
+@Test(
+  "Parse target platform from build settings",
+  arguments: [
+    (["PLATFORM_NAME": "iphoneos"], FlutterPlatform.ios),
+    (["PLATFORM_NAME": "iphonesimulator"], FlutterPlatform.ios),
+    (["PLATFORM_NAME": "macosx"], FlutterPlatform.macos),
+  ]
+)
+func targetPlatform(env: [String: String], expectedPlatform: FlutterPlatform) async throws {
+  let platform = try FlutterToolHelper.targetPlatform(env: env)
+  #expect(platform == expectedPlatform)
+}
+
+@Test(
+  "Parse target platform from build settings",
+  arguments: [
+    (["PLATFORM_NAME": "watchos"]),
+    ([:]),
+  ]
+)
+func targetPlatformThrows(env: [String: String]) async throws {
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterToolHelper.targetPlatform(env: env)
+  }
+}
+
+@Test
+func updateSymlinkNoChange() async throws {
+  let fileManager = MockFileManager()
+
+  let targetBuildMode = "Release"
+  try FlutterToolHelper.updateSymlink(
+    targetBuildMode: targetBuildMode,
+    integrationPackagePath: "/path/to/SwiftPackages/FlutterNativeIntegration",
+    fileManager: fileManager
+  )
+
+  #expect(fileManager.filesRemoved.count == 0)
+  #expect(fileManager.symlinksCreated.count == 0)
+}
+
+@Test
+func updateSymlinkSuccess() async throws {
+  let fileManager = MockFileManager()
+
+  let targetBuildMode = "Debug"
+  let targetName = "FlutterPluginRegistrant"
+  let expectedLink = "./\(targetBuildMode)"
+  let flutterPluginRegistrantPath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let currentLinkPath = "\(flutterPluginRegistrantPath)/\(targetName)"
+  let newTargetPath = "\(flutterPluginRegistrantPath)/\(expectedLink)"
+  fileManager.filesExist[newTargetPath] = true
+  fileManager.filesExist[currentLinkPath] = true
+
+  try FlutterToolHelper.updateSymlink(
+    targetBuildMode: targetBuildMode,
+    integrationPackagePath: flutterPluginRegistrantPath,
+    fileManager: fileManager
+  )
+
+  #expect(fileManager.filesRemoved.count == 1)
+  #expect(fileManager.filesRemoved.first == currentLinkPath)
+  #expect(fileManager.symlinksCreated.count == 1)
+  #expect(fileManager.symlinksCreated[currentLinkPath] == expectedLink)
+}
+
+@Test
+func updateSymlinkThrowsIfNewLinkDoesNotExist() async throws {
+  let fileManager = MockFileManager()
+  let targetBuildMode = "Debug"
+  let targetName = "FlutterPluginRegistrant"
+  let flutterPluginRegistrantPath = "/path/to/SwiftPackages/FlutterPluginRegistrant"
+  let currentLinkPath = "\(flutterPluginRegistrantPath)/\(targetName)"
+  fileManager.filesExist[currentLinkPath] = true
+
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterToolHelper.updateSymlink(
+      targetBuildMode: targetBuildMode,
+      integrationPackagePath: "/path/to/SwiftPackages/FlutterNativeIntegration",
+      fileManager: fileManager
+    )
+  }
+}

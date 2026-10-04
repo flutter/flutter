@@ -2,12 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'gesture_detector.dart';
+library;
+
+import 'dart:ui' as ui show Rect, SemanticsAction, SemanticsActionEvent;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'editable_text.dart';
 import 'framework.dart';
+import 'routes.dart';
 
 // Enable if you want verbose logging about tap region changes.
 const bool _kDebugTapRegion = false;
@@ -25,11 +35,23 @@ bool _tapRegionDebug(String message, [Iterable<String>? details]) {
   return true;
 }
 
-/// The type of callback that [TapRegion.onTapOutside] and
-/// [TapRegion.onTapInside] take.
+/// Signature for a callback called for a [PointerDownEvent] relative to a [TapRegion].
 ///
-/// The event is the pointer event that caused the callback to be called.
+/// See also:
+///
+///  * [TapRegion.onTapOutside], which is of this type.
+///  * [TapRegion.onTapInside], which is of this type.
+///  * [TapRegionUpCallback], which is similar but for [PointerUpEvent]s.
 typedef TapRegionCallback = void Function(PointerDownEvent event);
+
+/// Signature for a callback called for a [PointerUpEvent] relative to a [TapRegion].
+///
+/// See also:
+///
+///  * [TapRegion.onTapUpOutside], which is of this type.
+///  * [TapRegion.onTapUpInside], which is of this type.
+///  * [TapRegionCallback], which is similar but for [PointerDownEvent]s.
+typedef TapRegionUpCallback = void Function(PointerUpEvent event);
 
 /// An interface for registering and unregistering a [RenderTapRegion]
 /// (typically created with a [TapRegion] widget) with a
@@ -72,7 +94,7 @@ abstract class TapRegionRegistry {
 
 /// A widget that provides notification of a tap inside or outside of a set of
 /// registered regions, without participating in the [gesture
-/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
+/// disambiguation](https://flutter.dev/to/gesture-disambiguation)
 /// system.
 ///
 /// The regions are defined by adding [TapRegion] widgets to the widget tree
@@ -81,24 +103,26 @@ abstract class TapRegionRegistry {
 /// by assigning a [TapRegion.groupId], where all the regions with the same
 /// groupId act as if they were all one region.
 ///
-/// When a tap outside of a registered region or region group is detected, its
-/// [TapRegion.onTapOutside] callback is called. If the tap is outside one
-/// member of a group, but inside another, no notification is made.
+/// When a tap down or tap up outside of a registered region or region group is
+/// detected, its [TapRegion.onTapOutside] or [TapRegion.onTapUpOutside]
+/// callback is called, respectively. If the tap is outside one member of a
+/// group, but inside another, no notification is made.
 ///
-/// When a tap inside of a registered region or region group is detected, its
-/// [TapRegion.onTapInside] callback is called. If the tap is inside one member
-/// of a group, all members are notified.
+/// When a tap down or tap up inside of a registered region or region group is
+/// detected, its [TapRegion.onTapInside] or [TapRegion.onTapUpInside]
+/// callback is called, respectively. If the tap is inside one member of a
+/// group, all members are notified.
 ///
 /// The [TapRegionSurface] should be defined at the highest level needed to
 /// encompass the entire area where taps should be monitored. This is typically
 /// around the entire app. If the entire app isn't covered, then taps outside of
-/// the [TapRegionSurface] will be ignored and no [TapRegion.onTapOutside] calls
-/// will be made for those events. The [WidgetsApp], [MaterialApp] and
-/// [CupertinoApp] automatically include a [TapRegionSurface] around their
-/// entire app.
+/// the [TapRegionSurface] will be ignored and no [TapRegion.onTapOutside] or
+/// [TapRegion.onTapUpOutside] calls will be made for those events. The
+/// [WidgetsApp], [MaterialApp] and [CupertinoApp] automatically include a
+/// [TapRegionSurface] around their entire app.
 ///
 /// [TapRegionSurface] does not participate in the [gesture
-/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
+/// disambiguation](https://flutter.dev/to/gesture-disambiguation)
 /// system, so if multiple [TapRegionSurface]s are active at the same time, they
 /// will all fire, and so will any other gestures recognized by a
 /// [GestureDetector] or other pointer event handlers.
@@ -109,16 +133,13 @@ abstract class TapRegionRegistry {
 ///
 ///  * [RenderTapRegionSurface], the render object that is inserted into the
 ///    render tree by this widget.
-///  * <https://flutter.dev/gestures/#gesture-disambiguation> for more
+///  * <https://flutter.dev/to/gesture-disambiguation> for more
 ///    information about the gesture system and how it disambiguates inputs.
 class TapRegionSurface extends SingleChildRenderObjectWidget {
   /// Creates a const [RenderTapRegionSurface].
   ///
   /// The [child] attribute is required.
-  const TapRegionSurface({
-    super.key,
-    required Widget super.child,
-  });
+  const TapRegionSurface({super.key, required Widget super.child});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -126,15 +147,17 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(
-    BuildContext context,
-    RenderProxyBoxWithHitTestBehavior renderObject,
-  ) {}
+  void updateRenderObject(BuildContext context, RenderProxyBoxWithHitTestBehavior renderObject) {}
 }
+
+typedef _ClassifiedTapRegions = ({
+  Iterable<RenderTapRegion> inside,
+  Iterable<RenderTapRegion> outside,
+});
 
 /// A render object that provides notification of a tap inside or outside of a
 /// set of registered regions, without participating in the [gesture
-/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation) system
+/// disambiguation](https://flutter.dev/to/gesture-disambiguation) system
 /// (other than to consume tap down events if [TapRegion.consumeOutsideTaps] is
 /// true).
 ///
@@ -144,24 +167,27 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 /// group by assigning a [RenderTapRegion.groupId], where all the regions with
 /// the same groupId act as if they were all one region.
 ///
-/// When a tap outside of a registered region or region group is detected, its
-/// [TapRegion.onTapOutside] callback is called. If the tap is outside one
-/// member of a group, but inside another, no notification is made.
+/// When a tap down or tap up outside of a registered region or region group is
+/// detected, its [TapRegion.onTapOutside] or [TapRegion.onTapUpOutside]
+/// callback is called, respectively. If the tap is outside one member of a
+/// group, but inside another, no notification is made.
 ///
-/// When a tap inside of a registered region or region group is detected, its
-/// [TapRegion.onTapInside] callback is called. If the tap is inside one member
-/// of a group, all members are notified.
+/// When a tap down or tap up inside of a registered region or region group is
+/// detected, its [TapRegion.onTapInside] or [TapRegion.onTapUpInside]
+/// callback is called, respectively. If the tap is inside one member of a
+/// group, all members are notified.
 ///
 /// The [RenderTapRegionSurface] should be defined at the highest level needed
 /// to encompass the entire area where taps should be monitored. This is
 /// typically around the entire app. If the entire app isn't covered, then taps
 /// outside of the [RenderTapRegionSurface] will be ignored and no
-/// [RenderTapRegion.onTapOutside] calls will be made for those events. The
-/// [WidgetsApp], [MaterialApp] and [CupertinoApp] automatically include a
-/// [RenderTapRegionSurface] around the entire app.
+/// [RenderTapRegion.onTapOutside] or [RenderTapRegion.onTapUpOutside] calls
+/// will be made for those events. The [WidgetsApp], [MaterialApp] and
+/// [CupertinoApp] automatically include a [RenderTapRegionSurface] around the
+/// entire app.
 ///
 /// [RenderTapRegionSurface] does not participate in the [gesture
-/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
+/// disambiguation](https://flutter.dev/to/gesture-disambiguation)
 /// system, so if multiple [RenderTapRegionSurface]s are active at the same
 /// time, they will all fire, and so will any other gestures recognized by a
 /// [GestureDetector] or other pointer event handlers.
@@ -175,10 +201,78 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 ///   the render tree.
 /// * [TapRegionRegistry.of], which can find the nearest ancestor
 ///   [RenderTapRegionSurface], which is a [TapRegionRegistry].
-class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implements TapRegionRegistry {
+class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
+    implements TapRegionRegistry {
   final Expando<BoxHitTestResult> _cachedResults = Expando<BoxHitTestResult>();
   final Set<RenderTapRegion> _registeredRegions = <RenderTapRegion>{};
   final Map<Object?, Set<RenderTapRegion>> _groupIdToRegions = <Object?, Set<RenderTapRegion>>{};
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    SemanticsBinding.instance.addSemanticsActionListener(_handleSemanticsAction);
+  }
+
+  @override
+  void detach() {
+    SemanticsBinding.instance.removeSemanticsActionListener(_handleSemanticsAction);
+    super.detach();
+  }
+
+  // Handles semantics tap and long-press events so that TapRegionSurface can
+  // detect taps delivered via the accessibility / semantics channel, not just
+  // the pointer event channel.
+  //
+  // When a semantics action arrives, we ask SemanticsBinding for the tapped
+  // semantics node's global rect and run a hit test at its center. We need the
+  // hit test because TapRegion tracks regions as render objects, not semantics
+  // nodes, so the only way to determine which RenderTapRegion was hit is to
+  // query the render tree. The hit test result is then passed to
+  // _classifyRegions, which reuses the same inside/outside logic as pointer
+  // events without going through handleEvent and its pointer-specific side
+  // effects.
+  //
+  // TODO(flutter-zl): consumeOutsideTaps cannot currently stop semantics
+  // action propagation. SemanticsBinding listeners have no mechanism to
+  // prevent an action from reaching performSemanticsAction. A new API
+  // similar to WidgetsBindingObserver.handleStartBackGesture may be needed.
+  // See https://github.com/flutter/flutter/pull/183093 for discussion.
+  void _handleSemanticsAction(ui.SemanticsActionEvent event) {
+    if (event.type != ui.SemanticsAction.tap && event.type != ui.SemanticsAction.longPress) {
+      return;
+    }
+    if (_registeredRegions.isEmpty) {
+      return;
+    }
+
+    final ui.Rect? globalRect = SemanticsBinding.instance.getRectOfSemanticsNodeInViewCoordinates(
+      event.viewId,
+      event.nodeId,
+    );
+    if (globalRect == null) {
+      return;
+    }
+    final Offset globalCenter = globalRect.center;
+    final Offset localPosition = globalToLocal(globalCenter);
+
+    final hitResult = BoxHitTestResult();
+    if (!hitTest(hitResult, position: localPosition)) {
+      return;
+    }
+
+    final (:Iterable<RenderTapRegion> inside, :Iterable<RenderTapRegion> outside) =
+        _classifyRegions(hitResult);
+
+    final syntheticEvent = PointerDownEvent(viewId: event.viewId, position: globalCenter);
+    for (final region in outside) {
+      assert(_tapRegionDebug('Calling onTapOutside for $region (from semantics action)'));
+      region.onTapOutside?.call(syntheticEvent);
+    }
+    for (final region in inside) {
+      assert(_tapRegionDebug('Calling onTapInside for $region (from semantics action)'));
+      region.onTapInside?.call(syntheticEvent);
+    }
+  }
 
   @override
   void registerTapRegion(RenderTapRegion region) {
@@ -214,12 +308,35 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implement
     final bool hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
 
     if (hitTarget) {
-      final BoxHitTestEntry entry = BoxHitTestEntry(this, position);
+      final entry = BoxHitTestEntry(this, position);
       _cachedResults[entry] = result;
       result.add(entry);
     }
 
     return hitTarget;
+  }
+
+  // Classifies registered TapRegions as inside or outside based on which
+  // regions appear in the hit test result path. Grouped regions are treated
+  // as a single unit: if any member of a group is hit, all members are
+  // considered inside.
+  _ClassifiedTapRegions _classifyRegions(BoxHitTestResult result) {
+    final Iterable<RenderTapRegion> hitRegions = _getRegionsHit(
+      _registeredRegions,
+      result.path,
+    ).cast<RenderTapRegion>();
+    assert(_tapRegionDebug('Tap event hit ${hitRegions.length} descendants.'));
+
+    final insideRegions = <RenderTapRegion>{
+      for (final RenderTapRegion region in hitRegions)
+        if (region.groupId == null) region else ..._groupIdToRegions[region.groupId]!,
+    };
+    return (
+      inside: insideRegions,
+      // Materialize the outside list so callbacks that mutate registrations
+      // during iteration do not affect the snapshot we are walking.
+      outside: _registeredRegions.where((RenderTapRegion r) => !insideRegions.contains(r)).toList(),
+    );
   }
 
   @override
@@ -234,7 +351,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implement
       return true;
     }(), 'A RenderTapRegion was registered when it was disabled.');
 
-    if (event is! PointerDownEvent) {
+    if (event is! PointerDownEvent && event is! PointerUpEvent) {
       return;
     }
 
@@ -250,57 +367,56 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implement
       return;
     }
 
-    // A child was hit, so we need to call onTapOutside for those regions or
-    // groups of regions that were not hit.
-    final Set<RenderTapRegion> hitRegions =
-        _getRegionsHit(_registeredRegions, result.path).cast<RenderTapRegion>().toSet();
-    final Set<RenderTapRegion> insideRegions = <RenderTapRegion>{};
-    assert(_tapRegionDebug('Tap event hit ${hitRegions.length} descendants.'));
+    final (:Iterable<RenderTapRegion> inside, :Iterable<RenderTapRegion> outside) =
+        _classifyRegions(result);
 
-    for (final RenderTapRegion region in hitRegions) {
-      if (region.groupId == null) {
-        insideRegions.add(region);
-        continue;
+    var consumeOutsideTaps = false;
+    for (final region in outside) {
+      if (event is PointerDownEvent) {
+        assert(_tapRegionDebug('Calling onTapOutside for $region'));
+        region.onTapOutside?.call(event);
+      } else if (event is PointerUpEvent) {
+        assert(_tapRegionDebug('Calling onTapUpOutside for $region'));
+        region.onTapUpOutside?.call(event);
       }
-      // Add all grouped regions to the insideRegions so that groups act as a
-      // single region.
-      insideRegions.addAll(_groupIdToRegions[region.groupId]!);
-    }
-    // If they're not inside, then they're outside.
-    final Set<RenderTapRegion> outsideRegions = _registeredRegions.difference(insideRegions);
 
-    bool consumeOutsideTaps = false;
-    for (final RenderTapRegion region in outsideRegions) {
-      assert(_tapRegionDebug('Calling onTapOutside for $region'));
       if (region.consumeOutsideTaps) {
-        assert(_tapRegionDebug('Stopping tap propagation for $region (and all of ${region.groupId})'));
+        assert(
+          _tapRegionDebug('Stopping tap propagation for $region (and all of ${region.groupId})'),
+        );
         consumeOutsideTaps = true;
       }
-      region.onTapOutside?.call(event);
     }
-    for (final RenderTapRegion region in insideRegions) {
-      assert(_tapRegionDebug('Calling onTapInside for $region'));
-      region.onTapInside?.call(event);
+    for (final region in inside) {
+      if (event is PointerDownEvent) {
+        assert(_tapRegionDebug('Calling onTapInside for $region'));
+        region.onTapInside?.call(event);
+      } else if (event is PointerUpEvent) {
+        assert(_tapRegionDebug('Calling onTapUpInside for $region'));
+        region.onTapUpInside?.call(event);
+      }
     }
 
     // If any of the "outside" regions have consumeOutsideTaps set, then stop
     // the propagation of the event through the gesture recognizer by adding it
     // to the recognizer and immediately resolving it.
-    if (consumeOutsideTaps) {
-      GestureBinding.instance.gestureArena.add(event.pointer, _DummyTapRecognizer()).resolve(GestureDisposition.accepted);
+    if (consumeOutsideTaps && event is PointerDownEvent) {
+      GestureBinding.instance.gestureArena
+          .add(event.pointer, _DummyTapRecognizer())
+          .resolve(GestureDisposition.accepted);
     }
   }
 
   // Returns the registered regions that are in the hit path.
-  Iterable<HitTestTarget> _getRegionsHit(Set<RenderTapRegion> detectors, Iterable<HitTestEntry> hitTestPath) {
-    final Set<HitTestTarget> hitRegions = <HitTestTarget>{};
-    for (final HitTestEntry<HitTestTarget> entry in hitTestPath) {
-      final HitTestTarget target = entry.target;
-      if (_registeredRegions.contains(target)) {
-        hitRegions.add(target);
-      }
-    }
-    return hitRegions;
+  Set<HitTestTarget> _getRegionsHit(
+    Set<RenderTapRegion> detectors,
+    Iterable<HitTestEntry> hitTestPath,
+  ) {
+    return <HitTestTarget>{
+      for (final HitTestEntry<HitTestTarget> entry in hitTestPath)
+        if (entry.target case final HitTestTarget target)
+          if (_registeredRegions.contains(target)) target,
+    };
   }
 }
 
@@ -309,16 +425,16 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implement
 // anyhow.
 class _DummyTapRecognizer extends GestureArenaMember {
   @override
-  void acceptGesture(int pointer) { }
+  void acceptGesture(int pointer) {}
 
   @override
-  void rejectGesture(int pointer) { }
+  void rejectGesture(int pointer) {}
 }
 
 /// A widget that defines a region that can detect taps inside or outside of
 /// itself and any group of regions it belongs to, without participating in the
 /// [gesture
-/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation) system
+/// disambiguation](https://flutter.dev/to/gesture-disambiguation) system
 /// (other than to consume tap down events if [consumeOutsideTaps] is true).
 ///
 /// This widget indicates to the nearest ancestor [TapRegionSurface] that the
@@ -329,6 +445,24 @@ class _DummyTapRecognizer extends GestureArenaMember {
 /// regions in the group will act as one.
 ///
 /// If there is no [TapRegionSurface] ancestor, [TapRegion] will do nothing.
+///
+/// [TapRegion] is aware of the [Route]s in the [Navigator], so that [onTapOutside]
+/// or [onTapUpOutside] isn't called after the user navigates to a different page.
+///
+/// {@tool dartpad}
+/// This example shows a [TapRegion] that updates a status message when taps
+/// are detected inside or outside of the outlined area.
+///
+/// ** See code in examples/api/lib/widgets/tap_region/tap_region.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows two [TapRegion]s sharing a [groupId]. Tapping inside
+/// either box triggers [onTapInside] for both, and tapping outside triggers
+/// [onTapOutside] for both, because grouped regions are treated as one.
+///
+/// ** See code in examples/api/lib/widgets/tap_region/tap_region.1.dart **
+/// {@end-tool}
 class TapRegion extends SingleChildRenderObjectWidget {
   /// Creates a const [TapRegion].
   ///
@@ -340,6 +474,8 @@ class TapRegion extends SingleChildRenderObjectWidget {
     this.behavior = HitTestBehavior.deferToChild,
     this.onTapOutside,
     this.onTapInside,
+    this.onTapUpOutside,
+    this.onTapUpInside,
     this.groupId,
     this.consumeOutsideTaps = false,
     String? debugLabel,
@@ -356,37 +492,71 @@ class TapRegion extends SingleChildRenderObjectWidget {
   /// See [HitTestBehavior] for the allowed values and their meanings.
   final HitTestBehavior behavior;
 
-  /// A callback to be invoked when a tap is detected outside of this
+  /// A callback to be invoked when a tap down is detected outside of this
   /// [TapRegion] and any other region with the same [groupId], if any.
   ///
   /// The [PointerDownEvent] passed to the function is the event that caused the
   /// notification. If this region is part of a group (i.e. [groupId] is set),
   /// then it's possible that the event may be outside of this immediate region,
   /// although it will be within the region of one of the group members.
+  ///
+  /// See also:
+  /// * [onTapUpOutside], which is called when a tap up is detected outside
+  ///   of this region.
   final TapRegionCallback? onTapOutside;
 
-  /// A callback to be invoked when a tap is detected inside of this
+  /// A callback to be invoked when a tap down is detected inside of this
   /// [TapRegion], or any other tap region with the same [groupId], if any.
   ///
   /// The [PointerDownEvent] passed to the function is the event that caused the
   /// notification. If this region is part of a group (i.e. [groupId] is set),
   /// then it's possible that the event may be outside of this immediate region,
   /// although it will be within the region of one of the group members.
+  ///
+  /// See also:
+  /// * [onTapUpInside], which is called when a tap up is detected inside
+  ///   of this region.
   final TapRegionCallback? onTapInside;
+
+  /// A callback to be invoked when a tap up is detected outside of this
+  /// [TapRegion] and any other region with the same [groupId], if any.
+  ///
+  /// The [PointerUpEvent] passed to the function is the event that caused the
+  /// notification. If this region is part of a group (i.e. [groupId] is set),
+  /// then it's possible that the event may be outside of this immediate region,
+  /// although it will be within the region of one of the group members.
+  ///
+  /// See also:
+  /// * [onTapOutside], which is called when a tap down is detected outside
+  ///   of this region.
+  final TapRegionUpCallback? onTapUpOutside;
+
+  /// A callback to be invoked when a tap up is detected inside of this
+  /// [TapRegion], or any other tap region with the same [groupId], if any.
+  ///
+  /// The [PointerUpEvent] passed to the function is the event that caused the
+  /// notification. If this region is part of a group (i.e. [groupId] is set),
+  /// then it's possible that the event may be outside of this immediate region,
+  /// although it will be within the region of one of the group members.
+  ///
+  /// See also:
+  /// * [onTapInside], which is called when a tap down is detected inside
+  ///   of this region.
+  final TapRegionUpCallback? onTapUpInside;
 
   /// An optional group ID that groups [TapRegion]s together so that they
   /// operate as one region. If any member of a group is hit by a particular
-  /// tap, then the [onTapOutside] will not be called for any members of the
-  /// group. If any member of the group is hit, then all members will have their
-  /// [onTapInside] called.
+  /// tap, then the [onTapOutside] / [onTapUpOutside] will not be called for
+  /// any members of the group. If any member of the group is hit, then all
+  /// members will have their [onTapInside] / [onTapUpInside] called.
   ///
   /// If the group id is null, then only this region is hit tested.
   final Object? groupId;
 
   /// If true, then the group that this region belongs to will stop the
-  /// propagation of the tap down event in the gesture arena.
+  /// propagation of all events in the gesture arena.
   ///
-  /// This is useful if you want to block the tap down from being given to a
+  /// This is useful if you want to block events from being given to a
   /// [GestureDetector] when [onTapOutside] is called.
   ///
   /// If other [TapRegion]s with the same [groupId] have [consumeOutsideTaps]
@@ -403,13 +573,17 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
+    final bool isCurrent = ModalRoute.isCurrentOf(context) ?? true;
+
     return RenderTapRegion(
       registry: TapRegionRegistry.maybeOf(context),
       enabled: enabled,
-      consumeOutsideTaps: consumeOutsideTaps,
+      consumeOutsideTaps: isCurrent && consumeOutsideTaps,
       behavior: behavior,
-      onTapOutside: onTapOutside,
+      onTapOutside: isCurrent ? onTapOutside : null,
       onTapInside: onTapInside,
+      onTapUpOutside: isCurrent ? onTapUpOutside : null,
+      onTapUpInside: onTapUpInside,
       groupId: groupId,
       debugLabel: debugLabel,
     );
@@ -417,13 +591,18 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, covariant RenderTapRegion renderObject) {
+    final bool isCurrent = ModalRoute.isCurrentOf(context) ?? true;
+
     renderObject
       ..registry = TapRegionRegistry.maybeOf(context)
       ..enabled = enabled
+      ..consumeOutsideTaps = isCurrent && consumeOutsideTaps
       ..behavior = behavior
       ..groupId = groupId
-      ..onTapOutside = onTapOutside
-      ..onTapInside = onTapInside;
+      ..onTapOutside = isCurrent ? onTapOutside : null
+      ..onTapInside = onTapInside
+      ..onTapUpOutside = isCurrent ? onTapUpOutside : null
+      ..onTapUpInside = onTapUpInside;
     if (!kReleaseMode) {
       renderObject.debugLabel = debugLabel;
     }
@@ -432,8 +611,16 @@ class TapRegion extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
-    properties.add(DiagnosticsProperty<HitTestBehavior>('behavior', behavior, defaultValue: HitTestBehavior.deferToChild));
+    properties.add(
+      FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true),
+    );
+    properties.add(
+      DiagnosticsProperty<HitTestBehavior>(
+        'behavior',
+        behavior,
+        defaultValue: HitTestBehavior.deferToChild,
+      ),
+    );
     properties.add(DiagnosticsProperty<Object?>('debugLabel', debugLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
   }
@@ -442,8 +629,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
 /// A render object that defines a region that can detect taps inside or outside
 /// of itself and any group of regions it belongs to, without participating in
 /// the [gesture
-/// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
-/// system.
+/// disambiguation](https://flutter.dev/to/gesture-disambiguation) system.
 ///
 /// This render object indicates to the nearest ancestor [TapRegionSurface] that
 /// the region occupied by its child (or itself if [behavior] is
@@ -468,23 +654,21 @@ class TapRegion extends SingleChildRenderObjectWidget {
 class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a [RenderTapRegion].
   RenderTapRegion({
-    TapRegionRegistry? registry,
-    bool enabled = true,
-    bool consumeOutsideTaps = false,
+    this._registry,
+    this._enabled = true,
+    this._consumeOutsideTaps = false,
     this.onTapOutside,
     this.onTapInside,
+    this.onTapUpOutside,
+    this.onTapUpInside,
     super.behavior = HitTestBehavior.deferToChild,
-    Object? groupId,
+    this._groupId,
     String? debugLabel,
-  })  : _registry = registry,
-        _enabled = enabled,
-        _consumeOutsideTaps = consumeOutsideTaps,
-        _groupId = groupId,
-        debugLabel = kReleaseMode ? null : debugLabel;
+  }) : debugLabel = kReleaseMode ? null : debugLabel;
 
   bool _isRegistered = false;
 
-  /// A callback to be invoked when a tap is detected outside of this
+  /// A callback to be invoked when a tap down is detected outside of this
   /// [RenderTapRegion] and any other region with the same [groupId], if any.
   ///
   /// The [PointerDownEvent] passed to the function is the event that caused the
@@ -493,7 +677,7 @@ class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
   /// although it will be within the region of one of the group members.
   TapRegionCallback? onTapOutside;
 
-  /// A callback to be invoked when a tap is detected inside of this
+  /// A callback to be invoked when a tap down is detected inside of this
   /// [RenderTapRegion], or any other tap region with the same [groupId], if any.
   ///
   /// The [PointerDownEvent] passed to the function is the event that caused the
@@ -501,6 +685,24 @@ class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
   /// then it's possible that the event may be outside of this immediate region,
   /// although it will be within the region of one of the group members.
   TapRegionCallback? onTapInside;
+
+  /// A callback to be invoked when a tap up is detected outside of this
+  /// [RenderTapRegion] and any other region with the same [groupId], if any.
+  ///
+  /// The [PointerUpEvent] passed to the function is the event that caused the
+  /// notification. If this region is part of a group (i.e. [groupId] is set),
+  /// then it's possible that the event may be outside of this immediate region,
+  /// although it will be within the region of one of the group members.
+  TapRegionUpCallback? onTapUpOutside;
+
+  /// A callback to be invoked when a tap up is detected inside of this
+  /// [RenderTapRegion], or any other tap region with the same [groupId], if any.
+  ///
+  /// The [PointerUpEvent] passed to the function is the event that caused the
+  /// notification. If this region is part of a group (i.e. [groupId] is set),
+  /// then it's possible that the event may be outside of this immediate region,
+  /// although it will be within the region of one of the group members.
+  TapRegionUpCallback? onTapUpInside;
 
   /// A label used in debug builds. Will be null in release builds.
   String? debugLabel;
@@ -515,8 +717,8 @@ class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
     }
   }
 
-  /// Whether or not the tap down even that triggers a call to [onTapOutside]
-  /// will continue on to participate in the gesture arena.
+  /// Whether or not the tap event that triggers a call to [onTapOutside]
+  /// or [onTapUpOutside] will continue on to participate in the gesture arena.
   ///
   /// If any [RenderTapRegion] in the same group has [consumeOutsideTaps] set to
   /// true, then the tap down event will be consumed before other gesture
@@ -532,9 +734,9 @@ class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
 
   /// An optional group ID that groups [RenderTapRegion]s together so that they
   /// operate as one region. If any member of a group is hit by a particular
-  /// tap, then the [onTapOutside] will not be called for any members of the
-  /// group. If any member of the group is hit, then all members will have their
-  /// [onTapInside] called.
+  /// tap, then the [onTapOutside] / [onTapUpOutside] will not be called for
+  /// any members of the group. If any member of the group is hit, then all
+  /// members will have their [onTapInside] / [onTapUpInside] called.
   ///
   /// If the group id is null, then only this region is hit tested.
   Object? get groupId => _groupId;
@@ -600,7 +802,9 @@ class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String?>('debugLabel', debugLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
-    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
+    properties.add(
+      FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true),
+    );
   }
 }
 
@@ -640,7 +844,10 @@ class TextFieldTapRegion extends TapRegion {
     super.enabled,
     super.onTapOutside,
     super.onTapInside,
+    super.onTapUpOutside,
+    super.onTapUpInside,
     super.consumeOutsideTaps,
     super.debugLabel,
-  }) : super(groupId: EditableText);
+    super.groupId = EditableText,
+  });
 }

@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['reduced-test-set'])
+library;
+
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
@@ -18,19 +21,15 @@ Future<void> main() async {
   final ui.Image rawImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
   final ImageProvider image = TestImageProvider(0, 0, image: rawImage);
 
-  testWidgets('ShapeDecoration.image',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('ShapeDecoration.image', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     await tester.pumpWidget(
-      MaterialApp(
-        home: DecoratedBox(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DecoratedBox(
           decoration: ShapeDecoration(
-            shape: Border.all(color: Colors.white) +
-                   Border.all(),
-            image: DecorationImage(
-              image: image,
-            ),
+            shape: Border.all(color: const Color(0xFFFFFFFF)) + Border.all(),
+            image: DecorationImage(image: image),
           ),
         ),
       ),
@@ -39,86 +38,71 @@ Future<void> main() async {
       find.byType(DecoratedBox),
       paints
         ..drawImageRect(image: rawImage)
-        ..rect(color: Colors.black)
-        ..rect(color: Colors.white),
+        ..rect(color: const Color(0xFF000000))
+        ..rect(color: const Color(0xFFFFFFFF)),
     );
   });
 
   testWidgets('ShapeDecoration.color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: DecoratedBox(
-          decoration: ShapeDecoration(
-            shape: Border.all(color: Colors.white) +
-                   Border.all(),
-            color: Colors.blue,
-          ),
+      DecoratedBox(
+        decoration: ShapeDecoration(
+          shape: Border.all(color: const Color(0xFFFFFFFF)) + Border.all(),
+          color: const Color(0xFF0000FF),
         ),
       ),
     );
     expect(
       find.byType(DecoratedBox),
       paints
-        ..rect(color: Color(Colors.blue.value))
-        ..rect(color: Colors.black)
-        ..rect(color: Colors.white),
+        ..rect(color: const Color(0xFF0000FF))
+        ..rect(color: const Color(0xFF000000))
+        ..rect(color: const Color(0xFFFFFFFF)),
     );
   });
 
   test('ShapeDecoration with BorderDirectional', () {
-    const ShapeDecoration decoration = ShapeDecoration(
-      shape: BorderDirectional(start: BorderSide(color: Colors.red, width: 3)),
+    const decoration = ShapeDecoration(
+      shape: BorderDirectional(start: BorderSide(color: Color(0xFFFF0000), width: 3)),
     );
 
     expect(decoration.padding, isA<EdgeInsetsDirectional>());
   });
 
   testWidgets('TestBorder and Directionality - 1', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
     await tester.pumpWidget(
-      MaterialApp(
-        home: DecoratedBox(
-          decoration: ShapeDecoration(
-            shape: TestBorder(log.add),
-            color: Colors.green,
-          ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DecoratedBox(
+          decoration: ShapeDecoration(shape: TestBorder(log.add), color: const Color(0xFF00FF00)),
         ),
       ),
     );
-    expect(
-      log,
-      <String>[
-        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
-        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
-      ],
-    );
+    expect(log, <String>[
+      'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+      'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+    ]);
   });
 
-  testWidgets('TestBorder and Directionality - 2',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
-    final List<String> log = <String>[];
+  testWidgets('TestBorder and Directionality - 2', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
+    final log = <String>[];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
         child: DecoratedBox(
           decoration: ShapeDecoration(
             shape: TestBorder(log.add),
-            image: DecorationImage(
-              image: image,
-            ),
+            image: DecorationImage(image: image),
           ),
         ),
       ),
     );
-    expect(
-      log,
-      <String>[
-        'getInnerPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
-        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
-      ],
-    );
+    expect(log, <String>[
+      'getInnerPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
+      'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
+    ]);
   });
 
   testWidgets('Does not crash with directional gradient', (WidgetTester tester) async {
@@ -133,12 +117,10 @@ Future<void> main() async {
               focal: AlignmentDirectional.bottomCenter,
               focalRadius: 5,
               radius: 2,
-              colors: <Color>[Colors.red, Colors.black],
+              colors: <Color>[Color(0xFFFF0000), Color(0xFF000000)],
               stops: <double>[0.0, 0.4],
             ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
           ),
         ),
       ),
@@ -148,13 +130,13 @@ Future<void> main() async {
   });
 
   test('ShapeDecoration equality', () {
-    const ShapeDecoration a = ShapeDecoration(
+    const a = ShapeDecoration(
       color: Color(0xFFFFFFFF),
       shadows: <BoxShadow>[BoxShadow()],
       shape: Border(),
     );
 
-    const ShapeDecoration b = ShapeDecoration(
+    const b = ShapeDecoration(
       color: Color(0xFFFFFFFF),
       shadows: <BoxShadow>[BoxShadow()],
       shape: Border(),
@@ -162,5 +144,60 @@ Future<void> main() async {
 
     expect(a.hashCode, equals(b.hashCode));
     expect(a, equals(b));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/13675
+  testWidgets('OutlinedBorder avoids clipping edges when possible', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    Widget buildWidget(Color color) {
+      final circles = <Widget>[];
+      for (var i = 100; i > 25; i--) {
+        final double radius = i * 2.5;
+        final double angle = i * 0.5;
+        final double x = radius * math.cos(angle);
+        final double y = radius * math.sin(angle);
+        final Widget circle = Positioned(
+          left: 275 - x,
+          top: 275 - y,
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: ShapeDecoration(
+              color: const Color(0xFF000000),
+              shape: CircleBorder(side: BorderSide(color: color, width: 50)),
+            ),
+          ),
+        );
+        circles.add(circle);
+      }
+
+      return Center(
+        key: key,
+        child: Container(
+          width: 800,
+          height: 800,
+          decoration: const ShapeDecoration(
+            color: Color(0xFFFF5252),
+            shape: CircleBorder(side: BorderSide(strokeAlign: BorderSide.strokeAlignOutside)),
+          ),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(children: circles),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(const Color(0xFFFFFFFF)));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('painting.shape_decoration.outlined_border.should_be_white.png'),
+    );
+
+    await tester.pumpWidget(buildWidget(const Color(0xFEFFFFFF)));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('painting.shape_decoration.outlined_border.show_lines_due_to_opacity.png'),
+    );
   });
 }

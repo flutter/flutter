@@ -1,0 +1,139 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_EPOXY_H_
+#define FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_EPOXY_H_
+
+#include "gmock/gmock.h"
+
+#include <epoxy/egl.h>
+#include <epoxy/gl.h>
+
+namespace flutter {
+namespace testing {
+
+class MockEpoxy {
+ public:
+  MockEpoxy();
+  ~MockEpoxy();
+
+  MOCK_METHOD(bool, epoxy_has_gl_extension, (const char* extension));
+  MOCK_METHOD(bool,
+              epoxy_has_egl_extension,
+              (EGLDisplay dpy, const char* extension));
+  MOCK_METHOD(bool, epoxy_is_desktop_gl, ());
+  MOCK_METHOD(int, epoxy_gl_version, ());
+  MOCK_METHOD(EGLSyncKHR,
+              eglCreateSyncKHR,
+              (EGLDisplay dpy, EGLenum type, const EGLint* attrib_list));
+  MOCK_METHOD(EGLBoolean, eglDestroySyncKHR, (EGLDisplay dpy, EGLSyncKHR sync));
+  MOCK_METHOD(
+      EGLint,
+      eglClientWaitSyncKHR,
+      (EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout));
+  MOCK_METHOD(EGLint,
+              eglWaitSyncKHR,
+              (EGLDisplay dpy, EGLSyncKHR sync, EGLint flags));
+  MOCK_METHOD(void, glClear, (GLbitfield mask));
+  MOCK_METHOD(void, glClearColor, (GLfloat r, GLfloat g, GLfloat b, GLfloat a));
+  MOCK_METHOD(void,
+              glBlitFramebuffer,
+              (GLint srcX0,
+               GLint srcY0,
+               GLint srcX1,
+               GLint srcY1,
+               GLint dstX0,
+               GLint dstY0,
+               GLint dstX1,
+               GLint dstY1,
+               GLbitfield mask,
+               GLenum filter));
+  MOCK_METHOD(void,
+              glDeleteFramebuffers,
+              (GLsizei n, const GLuint* framebuffers));
+  MOCK_METHOD(void,
+              glDeleteRenderbuffers,
+              (GLsizei n, const GLuint* renderbuffers));
+  MOCK_METHOD(void, glDeleteTextures, (GLsizei n, const GLuint* textures));
+  MOCK_METHOD(void, glFinish, ());
+  MOCK_METHOD(void, glGenFramebuffers, (GLsizei n, GLuint* framebuffers));
+  MOCK_METHOD(void, glGenRenderbuffers, (GLsizei n, GLuint* renderbuffers));
+  MOCK_METHOD(void, glGenTextures, (GLsizei n, GLuint* textures));
+  MOCK_METHOD(void,
+              glFramebufferRenderbuffer,
+              (GLenum target,
+               GLenum attachment,
+               GLenum renderbuffertarget,
+               GLuint renderbuffer));
+  MOCK_METHOD(void,
+              glFramebufferTexture2D,
+              (GLenum target,
+               GLenum attachment,
+               GLenum textarget,
+               GLuint texture,
+               GLint level));
+  MOCK_METHOD(void,
+              glFramebufferTexture2DMultisampleEXT,
+              (GLenum target,
+               GLenum attachment,
+               GLenum textarget,
+               GLuint texture,
+               GLint level,
+               GLsizei samples));
+  MOCK_METHOD(void, glGetFloatv, (GLenum pname, GLfloat* data));
+  MOCK_METHOD(void, glGetIntegerv, (GLenum pname, GLint* data));
+  MOCK_METHOD(const GLubyte*, glGetString, (GLenum pname));
+  MOCK_METHOD(void,
+              glReadPixels,
+              (GLint x,
+               GLint y,
+               GLsizei width,
+               GLsizei height,
+               GLenum format,
+               GLenum type,
+               void* pixels));
+  MOCK_METHOD(
+      void,
+      glRenderbufferStorage,
+      (GLenum target, GLenum internalformat, GLsizei width, GLsizei height));
+  MOCK_METHOD(void,
+              glRenderbufferStorageMultisample,
+              (GLenum target,
+               GLsizei samples,
+               GLenum internalformat,
+               GLsizei width,
+               GLsizei height));
+  MOCK_METHOD(void,
+              glRenderbufferStorageMultisampleEXT,
+              (GLenum target,
+               GLsizei samples,
+               GLenum internalformat,
+               GLsizei width,
+               GLsizei height));
+  MOCK_METHOD(void,
+              glTexImage2D,
+              (GLenum target,
+               GLint level,
+               GLint internalformat,
+               GLsizei width,
+               GLsizei height,
+               GLint border,
+               GLenum format,
+               GLenum type,
+               const void* pixels));
+  MOCK_METHOD(void,
+              glViewport,
+              (GLint x, GLint y, GLsizei width, GLsizei height));
+  MOCK_METHOD(void, eglSwapBuffers, ());
+
+  // The size reported for EGL surfaces. Zero by default, so anything drawing
+  // to a mock surface sees a size change on its first frame.
+  EGLint egl_surface_width = 0;
+  EGLint egl_surface_height = 0;
+};
+
+}  // namespace testing
+}  // namespace flutter
+
+#endif  // FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_EPOXY_H_

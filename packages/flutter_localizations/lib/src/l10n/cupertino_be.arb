@@ -28,7 +28,7 @@
   "cutButtonLabel": "Выразаць",
   "copyButtonLabel": "Капіраваць",
   "pasteButtonLabel": "Уставіць",
-  "clearButtonLabel": "Clear",
+  "clearButtonLabel": "Ачысціць",
   "selectAllButtonLabel": "Выбраць усе",
   "tabSemanticsLabel": "Укладка $tabIndex з $tabCount",
   "modalBarrierDismissLabel": "Адхіліць",
@@ -37,5 +37,13 @@
   "menuDismissLabel": "Закрыць меню",
   "lookUpButtonLabel": "Знайсці",
   "searchWebButtonLabel": "Пошук у сетцы",
-  "shareButtonLabel": "Абагуліць..."
+  "shareButtonLabel": "Абагуліць...",
+  "cancelButtonLabel": "Скасаваць",
+  "backButtonLabel": "Назад",
+  "expansionTileExpandedHint": "двойчы націснуць, каб згарнуць",
+  "expansionTileCollapsedHint": "двойчы націснуць, каб разгарнуць",
+  "expansionTileExpandedTapHint": "Згарнуць",
+  "expansionTileCollapsedTapHint": "Разгарніце, каб даведацца больш",
+  "expandedHint": "Згорнута",
+  "collapsedHint": "Разгорнута"
 }

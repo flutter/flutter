@@ -4,27 +4,22 @@
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'multi_view_testing.dart';
 
 void main() {
+  const kYellow = Color(0xFFFFEB3B);
+  const kYellowAccent = Color(0xFFFFFF00);
+
   testWidgets('Detects tap targets in all views', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await pumpViews(
       tester: tester,
       viewContents: <Widget>[
-        SizedBox(
-          width: 47.0,
-          height: 47.0,
-          child: GestureDetector(onTap: () {}),
-        ),
-        SizedBox(
-          width: 46.0,
-          height: 46.0,
-          child: GestureDetector(onTap: () {}),
-        ),
+        SizedBox(width: 47.0, height: 47.0, child: GestureDetector(onTap: () {})),
+        SizedBox(width: 46.0, height: 46.0, child: GestureDetector(onTap: () {})),
       ],
     );
     final Evaluation result = await androidTapTargetGuideline.evaluate(tester);
@@ -45,16 +40,8 @@ void main() {
     await pumpViews(
       tester: tester,
       viewContents: <Widget>[
-        SizedBox(
-          width: 47.0,
-          height: 47.0,
-          child: GestureDetector(onTap: () {}),
-        ),
-        SizedBox(
-          width: 46.0,
-          height: 46.0,
-          child: GestureDetector(onTap: () {}),
-        ),
+        SizedBox(width: 47.0, height: 47.0, child: GestureDetector(onTap: () {})),
+        SizedBox(width: 46.0, height: 46.0, child: GestureDetector(onTap: () {})),
       ],
     );
     final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
@@ -62,9 +49,15 @@ void main() {
     final List<String> lines = const LineSplitter().convert(result.reason!);
     expect(lines, hasLength(2));
     expect(lines.first, startsWith('SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 47.0, 47.0)'));
-    expect(lines.first, endsWith('expected tappable node to have semantic label, but none was found.'));
+    expect(
+      lines.first,
+      endsWith('expected tappable node to have semantic label, but none was found.'),
+    );
     expect(lines.last, startsWith('SemanticsNode#2(Rect.fromLTRB(0.0, 0.0, 46.0, 46.0)'));
-    expect(lines.last, endsWith('expected tappable node to have semantic label, but none was found.'));
+    expect(
+      lines.last,
+      endsWith('expected tappable node to have semantic label, but none was found.'),
+    );
     handle.dispose();
   });
 
@@ -76,39 +69,43 @@ void main() {
         Container(
           width: 200.0,
           height: 200.0,
-          color: Colors.yellow,
+          color: kYellow,
           child: const Text(
             'this is a test',
-            style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
+            style: TextStyle(fontSize: 14.0, color: kYellowAccent),
           ),
         ),
         Container(
           width: 200.0,
           height: 200.0,
-          color: Colors.yellow,
+          color: kYellow,
           child: const Text(
             'this is a test',
-            style: TextStyle(fontSize: 25.0, color: Colors.yellowAccent),
+            style: TextStyle(fontSize: 25.0, color: kYellowAccent),
           ),
         ),
       ],
     );
     final Evaluation result = await textContrastGuideline.evaluate(tester);
     expect(result.passed, false);
-    expect(result.reason, contains('Expected contrast ratio of at least 4.5 but found 0.88 for a font size of 14.0.'));
-    expect(result.reason, contains('Expected contrast ratio of at least 3.0 but found 0.88 for a font size of 25.0.'));
+    expect(
+      result.reason,
+      contains('Expected contrast ratio of at least 4.5 but found 0.88 for a font size of 14.0.'),
+    );
+    expect(
+      result.reason,
+      contains('Expected contrast ratio of at least 3.0 but found 0.88 for a font size of 25.0.'),
+    );
     handle.dispose();
   });
 }
 
-Future<void> pumpViews({required WidgetTester tester, required  List<Widget> viewContents}) {
-  final List<Widget> views = <Widget>[
+Future<void> pumpViews({required WidgetTester tester, required List<Widget> viewContents}) {
+  final views = <Widget>[
     for (int i = 0; i < viewContents.length; i++)
       View(
         view: FakeView(tester.view, viewId: i + 100),
-        child: Center(
-          child: viewContents[i],
-        ),
+        child: Center(child: viewContents[i]),
       ),
   ];
 
@@ -116,9 +113,7 @@ Future<void> pumpViews({required WidgetTester tester, required  List<Widget> vie
     wrapWithView: false,
     Directionality(
       textDirection: TextDirection.ltr,
-      child: ViewCollection(
-        views: views,
-      ),
+      child: ViewCollection(views: views),
     ),
   );
 }

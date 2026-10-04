@@ -12,7 +12,7 @@ void main() {
   });
 
   test('Gravity simulation 2', () {
-    final GravitySimulation gravity = GravitySimulation(-10, 0.0, 6.0, 10.0);
+    final gravity = GravitySimulation(-10, 0.0, 6.0, 10.0);
 
     expect(gravity.x(0.0), equals(0.0));
     expect(gravity.dx(0.0), equals(10.0));

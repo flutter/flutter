@@ -2,14 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('SliverFillViewport control test', (WidgetTester tester) async {
-    final List<Widget> children = List<Widget>.generate(20, (int i) {
-      return ColoredBox(color: Colors.green, child: Text('$i', textDirection: TextDirection.ltr));
+    final children = List<Widget>.generate(20, (int i) {
+      return ColoredBox(
+        color: const Color(0xff00ff00),
+        child: Text('$i', textDirection: TextDirection.ltr),
+      );
     });
 
     await tester.pumpWidget(
@@ -18,7 +23,11 @@ void main() {
         child: CustomScrollView(
           slivers: <Widget>[
             SliverFillViewport(
-              delegate: SliverChildListDelegate(children, addAutomaticKeepAlives: false, addSemanticIndexes: false),
+              delegate: SliverChildListDelegate(
+                children,
+                addAutomaticKeepAlives: false,
+                addSemanticIndexes: false,
+              ),
             ),
           ],
         ),
@@ -60,7 +69,9 @@ void main() {
     expect(find.text('2'), findsNothing);
     expect(find.text('3'), findsNothing);
 
-    final RenderObject viewport = tester.renderObject<RenderObject>(find.byType(SliverFillViewport).first);
+    final RenderObject viewport = tester.renderObject<RenderObject>(
+      find.byType(SliverFillViewport).first,
+    );
     expect(viewport, hasAGoodToStringDeep);
     expect(
       viewport.toStringDeep(minLevel: DiagnosticLevel.info),
@@ -118,6 +129,7 @@ void main() {
         '   │     │ softWrap: wrapping at box width\n'
         '   │     │ overflow: clip\n'
         '   │     │ maxLines: unlimited\n'
+        '   │     │ devicePixelRatio: 3.0\n'
         '   │     ╘═╦══ text ═══\n'
         '   │       ║ TextSpan:\n'
         '   │       ║   <all styles inherited>\n'
@@ -149,6 +161,7 @@ void main() {
         '         │ softWrap: wrapping at box width\n'
         '         │ overflow: clip\n'
         '         │ maxLines: unlimited\n'
+        '         │ devicePixelRatio: 3.0\n'
         '         ╘═╦══ text ═══\n'
         '           ║ TextSpan:\n'
         '           ║   <all styles inherited>\n'
@@ -159,10 +172,8 @@ void main() {
   });
 
   testWidgets('SliverFillViewport padding test', (WidgetTester tester) async {
-    final SliverChildListDelegate delegate = SliverChildListDelegate(
-      <Widget>[
-        const Text('0'),
-      ],
+    final delegate = SliverChildListDelegate(
+      <Widget>[const Text('0')],
       addAutomaticKeepAlives: false,
       addSemanticIndexes: false,
     );
@@ -171,17 +182,14 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
-          slivers: <Widget>[
-            SliverFillViewport(
-              viewportFraction: 0.5,
-              delegate: delegate,
-            ),
-          ],
+          slivers: <Widget>[SliverFillViewport(viewportFraction: 0.5, delegate: delegate)],
         ),
       ),
     );
 
-    final RenderSliver boxWithPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
+    final RenderSliver boxWithPadding = tester.renderObject<RenderSliver>(
+      find.byType(SliverFillViewport),
+    );
     expect(boxWithPadding.geometry!.paintExtent, equals(600.0));
 
     await tester.pumpWidget(
@@ -189,17 +197,64 @@ void main() {
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
           slivers: <Widget>[
+            SliverFillViewport(padEnds: false, viewportFraction: 0.5, delegate: delegate),
+          ],
+        ),
+      ),
+    );
+
+    final RenderSliver boxWithoutPadding = tester.renderObject<RenderSliver>(
+      find.byType(SliverFillViewport),
+    );
+    expect(boxWithoutPadding.geometry!.paintExtent, equals(300.0));
+  });
+
+  testWidgets('SliverFillViewport semantics respects allowImplicitScrolling', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
             SliverFillViewport(
-              padEnds: false,
-              viewportFraction: 0.5,
-              delegate: delegate,
+              delegate: SliverChildListDelegate(
+                const <Widget>[Text('Page 1'), Text('Page 2')],
+                addAutomaticKeepAlives: false,
+                addSemanticIndexes: false,
+              ),
+              allowImplicitScrolling: false,
             ),
           ],
         ),
       ),
     );
 
-    final RenderSliver boxWithoutPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
-    expect(boxWithoutPadding.geometry!.paintExtent, equals(300.0));
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(semantics, isNot(includesNodeWith(label: 'Page 2')));
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverFillViewport(
+              delegate: SliverChildListDelegate(
+                const <Widget>[Text('Page 1'), Text('Page 2')],
+                addAutomaticKeepAlives: false,
+                addSemanticIndexes: false,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(semantics, includesNodeWith(label: 'Page 2'));
+
+    semantics.dispose();
   });
 }

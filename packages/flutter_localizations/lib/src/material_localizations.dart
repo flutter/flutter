@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:intl/intl.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
@@ -12,6 +15,7 @@ import 'utils/date_localizations.dart' as util;
 import 'widgets_localizations.dart';
 
 // Examples can assume:
+// // ignore_for_file: deprecated_member_use
 // import 'package:flutter_localizations/flutter_localizations.dart';
 // import 'package:flutter/material.dart';
 
@@ -64,8 +68,12 @@ import 'widgets_localizations.dart';
 /// See also:
 ///
 ///  * The Flutter Internationalization Tutorial,
-///    <https://flutter.dev/tutorials/internationalization/>.
+///    <https://flutter.dev/to/internationalization/>.
 ///  * [DefaultMaterialLocalizations], which only provides US English translations.
+@Deprecated(
+  'Use GlobalMaterialLocalizations from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// Initializes an object that defines the material widgets' localized strings
   /// for the given `locale`.
@@ -90,27 +98,22 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///
   /// The [narrowWeekdays] and [firstDayOfWeekIndex] properties use the values
   /// from the [intl.DateFormat] used by [formatFullDate].
+  @Deprecated(
+    'Use GlobalMaterialLocalizations from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const GlobalMaterialLocalizations({
-    required String localeName,
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : _localeName = localeName,
-       _fullYearFormat = fullYearFormat,
-       _compactDateFormat = compactDateFormat,
-       _shortDateFormat = shortDateFormat,
-       _mediumDateFormat = mediumDateFormat,
-       _longDateFormat = longDateFormat,
-       _yearMonthFormat = yearMonthFormat,
-       _shortMonthDayFormat = shortMonthDayFormat,
-       _decimalFormat = decimalFormat,
-       _twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
+    required this._localeName,
+    required this._fullYearFormat,
+    required this._compactDateFormat,
+    required this._shortDateFormat,
+    required this._mediumDateFormat,
+    required this._longDateFormat,
+    required this._yearMonthFormat,
+    required this._shortMonthDayFormat,
+    required this._decimalFormat,
+    required this._twoDigitZeroPaddedFormat,
+  });
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;
@@ -124,7 +127,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   final intl.NumberFormat _twoDigitZeroPaddedFormat;
 
   @override
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
+  String formatHour(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false}) {
     switch (hourFormat(of: timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat))) {
       case HourFormat.HH:
         return _twoDigitZeroPaddedFormat.format(timeOfDay.hour);
@@ -199,7 +202,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
+  String formatTimeOfDay(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false}) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -226,12 +229,10 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   String? _formatDayPeriod(TimeOfDay timeOfDay) {
-    switch (timeOfDay.period) {
-      case DayPeriod.am:
-        return anteMeridiemAbbreviation;
-      case DayPeriod.pm:
-        return postMeridiemAbbreviation;
-    }
+    return switch (timeOfDay.period) {
+      DayPeriod.am => anteMeridiemAbbreviation,
+      DayPeriod.pm => postMeridiemAbbreviation,
+    };
   }
 
   /// The raw version of [dateRangeStartDateSemanticLabel], with `$formattedDate` verbatim
@@ -293,9 +294,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     String? text = rowCountIsApproximate ? pageRowsInfoTitleApproximateRaw : null;
     text ??= pageRowsInfoTitleRaw;
     return text
-      .replaceFirst(r'$firstRow', formatDecimal(firstRow))
-      .replaceFirst(r'$lastRow', formatDecimal(lastRow))
-      .replaceFirst(r'$rowCount', formatDecimal(rowCount));
+        .replaceFirst(r'$firstRow', formatDecimal(firstRow))
+        .replaceFirst(r'$lastRow', formatDecimal(lastRow))
+        .replaceFirst(r'$rowCount', formatDecimal(rowCount));
   }
 
   /// The raw version of [tabLabel], with `$tabIndex` and `$tabCount` verbatim
@@ -304,13 +305,13 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get tabLabelRaw;
 
   @override
-  String tabLabel({ required int tabIndex, required int tabCount }) {
+  String tabLabel({required int tabIndex, required int tabCount}) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     final String template = tabLabelRaw;
     return template
-      .replaceFirst(r'$tabIndex', formatDecimal(tabIndex))
-      .replaceFirst(r'$tabCount', formatDecimal(tabCount));
+        .replaceFirst(r'$tabIndex', formatDecimal(tabIndex))
+        .replaceFirst(r'$tabCount', formatDecimal(tabCount));
   }
 
   /// The "zero" form of [selectedRowCountTitle].
@@ -438,7 +439,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * <http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US>, which shows
   ///    the short time pattern used in the `en_US` locale.
   @override
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
+  TimeOfDayFormat timeOfDayFormat({bool alwaysUse24HourFormat = false}) {
     if (alwaysUse24HourFormat) {
       return _get24HourVersionOf(timeOfDayFormatRaw);
     }
@@ -671,7 +672,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// Most internationalized apps will use [GlobalMaterialLocalizations.delegates]
   /// as the value of [MaterialApp.localizationsDelegates] to include
   /// the localizations for both the material and widget libraries.
-  static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
+  static const LocalizationsDelegate<MaterialLocalizations> delegate =
+      _MaterialLocalizationsDelegate();
 
   /// A value for [MaterialApp.localizationsDelegates] that's typically used by
   /// internationalized apps.
@@ -723,7 +725,8 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   @override
   bool isSupported(Locale locale) => kMaterialSupportedLanguages.contains(locale.languageCode);
 
-  static final Map<Locale, Future<MaterialLocalizations>> _loadedTranslations = <Locale, Future<MaterialLocalizations>>{};
+  static final Map<Locale, Future<MaterialLocalizations>> _loadedTranslations =
+      <Locale, Future<MaterialLocalizations>>{};
 
   @override
   Future<MaterialLocalizations> load(Locale locale) {
@@ -784,18 +787,20 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
         twoDigitZeroPaddedFormat = intl.NumberFormat('00');
       }
 
-      return SynchronousFuture<MaterialLocalizations>(getMaterialTranslation(
-        locale,
-        fullYearFormat,
-        compactDateFormat,
-        shortDateFormat,
-        mediumDateFormat,
-        longDateFormat,
-        yearMonthFormat,
-        shortMonthDayFormat,
-        decimalFormat,
-        twoDigitZeroPaddedFormat,
-      )!);
+      return SynchronousFuture<MaterialLocalizations>(
+        getMaterialTranslation(
+          locale,
+          fullYearFormat,
+          compactDateFormat,
+          shortDateFormat,
+          mediumDateFormat,
+          longDateFormat,
+          yearMonthFormat,
+          shortMonthDayFormat,
+          decimalFormat,
+          twoDigitZeroPaddedFormat,
+        )!,
+      );
     });
   }
 
@@ -803,5 +808,6 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   bool shouldReload(_MaterialLocalizationsDelegate old) => false;
 
   @override
-  String toString() => 'GlobalMaterialLocalizations.delegate(${kMaterialSupportedLanguages.length} locales)';
+  String toString() =>
+      'GlobalMaterialLocalizations.delegate(${kMaterialSupportedLanguages.length} locales)';
 }

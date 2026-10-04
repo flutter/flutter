@@ -10,29 +10,40 @@ import '../../src/common.dart';
 typedef _InstallationMessage = String Function(Platform);
 
 void main() {
-  final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
-  final FakePlatform linuxPlatform = FakePlatform();
-  final FakePlatform windowsPlatform = FakePlatform(operatingSystem: 'windows');
+  final macPlatform = FakePlatform(operatingSystem: 'macos');
+  final linuxPlatform = FakePlatform();
+  final windowsPlatform = FakePlatform(operatingSystem: 'windows');
 
   void checkInstallationURL(_InstallationMessage message) {
-    expect(message(macPlatform), contains('https://flutter.dev/docs/get-started/install/macos#android-setup'));
-    expect(message(linuxPlatform), contains('https://flutter.dev/docs/get-started/install/linux#android-setup'));
-    expect(message(windowsPlatform), contains('https://flutter.dev/docs/get-started/install/windows#android-setup'));
-    expect(message(FakePlatform(operatingSystem: '')), contains('https://flutter.dev/docs/get-started/install '));
+    expect(message(macPlatform), contains('https://flutter.dev/to/macos-android-setup'));
+    expect(message(linuxPlatform), contains('https://flutter.dev/to/linux-android-setup'));
+    expect(message(windowsPlatform), contains('https://flutter.dev/to/windows-android-setup'));
+    expect(
+      message(FakePlatform(operatingSystem: '')),
+      contains('https://flutter.dev/to/android-setup'),
+    );
   }
 
   testWithoutContext('Android installation instructions', () {
-    final UserMessages userMessages = UserMessages();
-    checkInstallationURL((Platform platform) => userMessages.androidMissingSdkInstructions(platform));
+    final userMessages = UserMessages();
+    checkInstallationURL(
+      (Platform platform) => userMessages.androidMissingSdkInstructions(platform),
+    );
     checkInstallationURL((Platform platform) => userMessages.androidSdkInstallHelp(platform));
-    checkInstallationURL((Platform platform) => userMessages.androidMissingSdkManager('/', platform));
-    checkInstallationURL((Platform platform) => userMessages.androidCannotRunSdkManager('/', '', platform));
-    checkInstallationURL((Platform platform) => userMessages.androidSdkBuildToolsOutdated(0, '', platform));
+    checkInstallationURL(
+      (Platform platform) => userMessages.androidMissingSdkManager('/', platform),
+    );
+    checkInstallationURL(
+      (Platform platform) => userMessages.androidCannotRunSdkManager('/', '', platform),
+    );
+    checkInstallationURL(
+      (Platform platform) => userMessages.androidSdkBuildToolsOutdated(0, '', platform),
+    );
     checkInstallationURL((Platform platform) => userMessages.androidStudioInstallation(platform));
   });
 
   testWithoutContext('Xcode installation instructions', () {
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     expect(userMessages.xcodeMissing, contains('iOS and macOS'));
     expect(userMessages.xcodeIncomplete, contains('iOS and macOS'));
   });

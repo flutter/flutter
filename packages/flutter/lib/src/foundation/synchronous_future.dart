@@ -29,39 +29,40 @@ class SynchronousFuture<T> implements Future<T> {
 
   @override
   Stream<T> asStream() {
-    final StreamController<T> controller = StreamController<T>();
+    final controller = StreamController<T>();
     controller.add(_value);
     controller.close();
     return controller.stream;
   }
 
   @override
-  Future<T> catchError(Function onError, { bool Function(Object error)? test }) => Completer<T>().future;
+  Future<T> catchError(Function onError, {bool Function(Object error)? test}) =>
+      Completer<T>().future;
 
   @override
-  Future<R> then<R>(FutureOr<R> Function(T value) onValue, { Function? onError }) {
-    final FutureOr<R> result = onValue(_value);
-    if (result is Future<R>) {
-      return result;
-    }
-    return SynchronousFuture<R>(result);
+  Future<R> then<R>(FutureOr<R> Function(T value) onValue, {Function? onError}) {
+    return switch (onValue(_value)) {
+      final Future<R> result => result,
+      final R result => SynchronousFuture<R>(result),
+    };
   }
 
   @override
-  Future<T> timeout(Duration timeLimit, { FutureOr<T> Function()? onTimeout }) {
+  Future<T> timeout(Duration timeLimit, {FutureOr<T> Function()? onTimeout}) {
     return Future<T>.value(_value).timeout(timeLimit, onTimeout: onTimeout);
   }
 
   @override
   Future<T> whenComplete(FutureOr<dynamic> Function() action) {
+    final FutureOr<dynamic> result;
     try {
-      final FutureOr<dynamic> result = action();
-      if (result is Future) {
-        return result.then<T>((dynamic value) => _value);
-      }
-      return this;
+      result = action();
     } catch (e, stack) {
       return Future<T>.error(e, stack);
     }
+    if (result is Future) {
+      return result.then<T>((dynamic value) => _value);
+    }
+    return this;
   }
 }

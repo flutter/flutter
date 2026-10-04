@@ -12,7 +12,6 @@ import 'base/logger.dart';
 import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
-import 'fuchsia/application_package.dart';
 import 'globals.dart' as globals;
 import 'ios/application_package.dart';
 import 'linux/application_package.dart';
@@ -25,18 +24,14 @@ import 'windows/application_package.dart';
 /// A package factory that supports all Flutter target platforms.
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   FlutterApplicationPackageFactory({
-    required AndroidSdk? androidSdk,
+    required this._androidSdk,
     required ProcessManager processManager,
     required Logger logger,
-    required UserMessages userMessages,
-    required FileSystem fileSystem,
-  }) : _androidSdk = androidSdk,
-       _processManager = processManager,
+    required this._userMessages,
+    required this._fileSystem,
+  }) : _processManager = processManager,
        _logger = logger,
-       _userMessages = userMessages,
-       _fileSystem = fileSystem,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
-
 
   final AndroidSdk? _androidSdk;
   final ProcessManager _processManager;
@@ -56,7 +51,6 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
         if (applicationBinary == null) {
           return AndroidApk.fromAndroidProject(
             FlutterProject.current().android,
@@ -94,6 +88,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
         return applicationBinary == null
             ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);
@@ -104,9 +99,8 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             : WindowsApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
-        return applicationBinary == null
-            ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
-            : FuchsiaApp.fromPrebuiltApp(applicationBinary);
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 }

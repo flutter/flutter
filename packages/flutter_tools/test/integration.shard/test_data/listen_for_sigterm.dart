@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
+import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 // This application will log to STDOUT and exit with 0 when it receives the

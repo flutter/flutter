@@ -7,11 +7,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group(CustomSemanticsAction, () {
-
     test('is provided a canonical id based on the label', () {
-      final CustomSemanticsAction action1 = CustomSemanticsAction(label: _nonconst('test'));
-      final CustomSemanticsAction action2 = CustomSemanticsAction(label: _nonconst('test'));
-      final CustomSemanticsAction action3 = CustomSemanticsAction(label: _nonconst('not test'));
+      final action1 = CustomSemanticsAction(label: _nonconst('test'));
+      final action2 = CustomSemanticsAction(label: _nonconst('test'));
+      final action3 = CustomSemanticsAction(label: _nonconst('not test'));
       final int id1 = CustomSemanticsAction.getIdentifier(action1);
       final int id2 = CustomSemanticsAction.getIdentifier(action2);
       final int id3 = CustomSemanticsAction.getIdentifier(action3);
@@ -22,7 +21,6 @@ void main() {
       expect(CustomSemanticsAction.getAction(id2), action1);
       expect(CustomSemanticsAction.getAction(id3), action3);
     });
-
   });
 }
 

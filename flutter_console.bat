@@ -25,10 +25,10 @@ echo  Run "flutter create <app_name>" to create a new Flutter project.
 echo.
 echo  Run "flutter help" to see all available commands.
 echo.
-echo  Want to use an IDE to interact with Flutter? https://flutter.dev/ide-setup/
+echo  Want to use an IDE to interact with Flutter? https://docs.flutter.dev/tools/editors/
 echo.
 echo  Want to run the "flutter" command from any Command Prompt or PowerShell window?
-echo  Add Flutter to your PATH: https://flutter.dev/setup-windows/#update-your-path
+echo  Add Flutter to your PATH: https://docs.flutter.dev/install/add-to-path#windows
 echo.
 echo  ===============================================================================
 

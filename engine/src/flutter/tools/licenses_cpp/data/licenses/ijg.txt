@@ -1,0 +1,3 @@
+ijg
+^libjpeg-turbo note:  This file has been modified by The libjpeg-turbo Project
+(?s)libjpeg-turbo note:  This file has been modified by The libjpeg-turbo Project.*The authors make NO WARRANTY or representation.*Permission is hereby granted to use, copy, modify, and distribute.*

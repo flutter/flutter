@@ -4,33 +4,35 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const red = Color(0xffff0000);
+
   testWidgets('ImageFiltered avoids repainting child as it animates', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       ColoredBox(
-        color: Colors.red,
+        color: red,
         child: ImageFiltered(
           imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: const TestWidget(),
         ),
-      )
+      ),
     );
 
     expect(RenderTestObject.paintCount, 1);
 
     await tester.pumpWidget(
       ColoredBox(
-        color: Colors.red,
+        color: red,
         child: ImageFiltered(
           imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: const TestWidget(),
         ),
-      )
+      ),
     );
 
     expect(RenderTestObject.paintCount, 1);

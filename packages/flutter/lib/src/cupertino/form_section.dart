@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'form_row.dart';
+/// @docImport 'text_form_field_row.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -9,7 +13,12 @@ import 'list_section.dart';
 
 // Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
 // iOS 14.2 SDK.
-const EdgeInsetsDirectional _kFormDefaultInsetGroupedRowsMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kFormDefaultInsetGroupedRowsMargin = EdgeInsetsDirectional.fromSTEB(
+  20.0,
+  0.0,
+  20.0,
+  10.0,
+);
 
 /// An iOS-style form section.
 ///
@@ -96,8 +105,8 @@ class CupertinoFormSection extends StatelessWidget {
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
     this.decoration,
     this.clipBehavior = Clip.none,
-  })  : _type = CupertinoListSectionType.base,
-        assert(children.length > 0);
+  }) : _type = CupertinoListSectionType.base,
+       assert(children.length > 0);
 
   /// Creates a section that mimics standard "Inset Grouped" iOS forms.
   ///
@@ -142,8 +151,8 @@ class CupertinoFormSection extends StatelessWidget {
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
     this.decoration,
     this.clipBehavior = Clip.none,
-  })  : _type = CupertinoListSectionType.insetGrouped,
-        assert(children.length > 0);
+  }) : _type = CupertinoListSectionType.insetGrouped,
+       assert(children.length > 0);
 
   final CupertinoListSectionType _type;
 
@@ -199,7 +208,8 @@ class CupertinoFormSection extends StatelessWidget {
               fontSize: 13.0,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
             ),
-            child: header!);
+            child: header!,
+          );
 
     final Widget? footerWidget = footer == null
         ? null
@@ -208,7 +218,8 @@ class CupertinoFormSection extends StatelessWidget {
               fontSize: 13.0,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
             ),
-            child: footer!);
+            child: footer!,
+          );
 
     switch (_type) {
       case CupertinoListSectionType.base:

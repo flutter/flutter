@@ -11,12 +11,13 @@ void testConfig(
   String? expectedStringValue, {
   Map<Type, dynamic> otherExpectedValues = const <Type, dynamic>{int: isNull},
 }) {
-  final String? actualStringValue = Zone.current[String] as String?;
-  final Map<Type, dynamic> otherActualValues = otherExpectedValues.map<Type, dynamic>(
-    (Type key, dynamic value) {
-      return MapEntry<Type, dynamic>(key, Zone.current[key]);
-    },
-  );
+  final actualStringValue = Zone.current[String] as String?;
+  final Map<Type, dynamic> otherActualValues = otherExpectedValues.map<Type, dynamic>((
+    Type key,
+    dynamic value,
+  ) {
+    return MapEntry<Type, dynamic>(key, Zone.current[key]);
+  });
 
   test(description, () {
     expect(actualStringValue, expectedStringValue);

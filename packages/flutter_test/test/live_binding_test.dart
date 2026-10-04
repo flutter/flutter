@@ -2,15 +2,170 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // This file is for testings that require a `LiveTestWidgetsFlutterBinding`
 void main() {
-  final LiveTestWidgetsFlutterBinding binding = LiveTestWidgetsFlutterBinding();
+  final binding = LiveTestWidgetsFlutterBinding();
+  testWidgets('Widgets are built within the current test zone (test 1 of 2)', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/113885
+    Zone? buildZone;
+    final Zone bodyZone = Zone.current;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            buildZone = Zone.current;
+            return const Text('Test 1');
+          },
+        ),
+      ),
+    );
+    expect(buildZone, equals(bodyZone));
+  });
+
+  testWidgets('Widgets are built within the current test zone (test 2 of 2)', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/113885
+    Zone? buildZone;
+    final Zone bodyZone = Zone.current;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            buildZone = Zone.current;
+            return const Text('Test 2');
+          },
+        ),
+      ),
+    );
+    expect(buildZone, equals(bodyZone));
+  });
+
+  testWidgets('Frame callbacks and pointer events run in current test zone (test 1 of 2)', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/113885
+    Zone? frameCallbackZone;
+    Zone? postFrameCallbackZone;
+    Zone? gestureZone;
+    final Zone bodyZone = Zone.current;
+
+    tester.binding.scheduleFrameCallback((Duration timeStamp) {
+      frameCallbackZone = Zone.current;
+    });
+    tester.binding.addPostFrameCallback((Duration timeStamp) {
+      postFrameCallbackZone = Zone.current;
+    });
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: GestureDetector(
+          onTap: () {
+            gestureZone = Zone.current;
+          },
+          child: const Text('Tap target 1'),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Tap target 1'));
+    await tester.pump();
+
+    expect(frameCallbackZone, equals(bodyZone));
+    expect(postFrameCallbackZone, equals(bodyZone));
+    expect(gestureZone, equals(bodyZone));
+  });
+
+  testWidgets('Frame callbacks and pointer events run in current test zone (test 2 of 2)', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/113885
+    Zone? frameCallbackZone;
+    Zone? postFrameCallbackZone;
+    Zone? gestureZone;
+    final Zone bodyZone = Zone.current;
+
+    tester.binding.scheduleFrameCallback((Duration timeStamp) {
+      frameCallbackZone = Zone.current;
+    });
+    tester.binding.addPostFrameCallback((Duration timeStamp) {
+      postFrameCallbackZone = Zone.current;
+    });
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: GestureDetector(
+          onTap: () {
+            gestureZone = Zone.current;
+          },
+          child: const Text('Tap target 2'),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Tap target 2'));
+    await tester.pump();
+
+    expect(frameCallbackZone, equals(bodyZone));
+    expect(postFrameCallbackZone, equals(bodyZone));
+    expect(gestureZone, equals(bodyZone));
+  });
+
+  testWidgets(
+    'Teardown callbacks and frame callbacks in teardown run in current test zone (test 1 of 2)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/113885
+      final Zone bodyZone = Zone.current;
+      addTearDown(() async {
+        Zone? teardownBuildZone;
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Builder(
+              builder: (BuildContext context) {
+                teardownBuildZone = Zone.current;
+                return const Text('Teardown 1');
+              },
+            ),
+          ),
+        );
+        expect(teardownBuildZone, equals(bodyZone));
+      });
+    },
+  );
+
+  testWidgets(
+    'Teardown callbacks and frame callbacks in teardown run in current test zone (test 2 of 2)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/113885
+      final Zone bodyZone = Zone.current;
+      addTearDown(() async {
+        Zone? teardownBuildZone;
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Builder(
+              builder: (BuildContext context) {
+                teardownBuildZone = Zone.current;
+                return const Text('Teardown 2');
+              },
+            ),
+          ),
+        );
+        expect(teardownBuildZone, equals(bodyZone));
+      });
+    },
+  );
+
   testWidgets('Input PointerAddedEvent', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: Text('Test')));
+    await tester.pumpWidget(const TestWidgetsApp(home: Text('Test')));
     await tester.pump();
     final TestGesture gesture = await tester.createGesture();
     // This mimics the start of a gesture as seen on a device, where inputs
@@ -21,12 +176,16 @@ void main() {
 
   testWidgets('Input PointerHoverEvent', (WidgetTester tester) async {
     PointerHoverEvent? hoverEvent;
-    await tester.pumpWidget(MaterialApp(home: MouseRegion(
-      child: const Text('Test'),
-      onHover: (PointerHoverEvent event) {
-        hoverEvent = event;
-      },
-    )));
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: MouseRegion(
+          child: const Text('Test'),
+          onHover: (PointerHoverEvent event) {
+            hoverEvent = event;
+          },
+        ),
+      ),
+    );
     await tester.pump();
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     final Offset location = tester.getCenter(find.text('Test'));
@@ -37,16 +196,14 @@ void main() {
   });
 
   testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
-    int invocations = 0;
+    var invocations = 0;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: GestureDetector(
-            onTap: () {
-              invocations++;
-            },
-            child: const Text('Test'),
-          ),
+      TestWidgetsApp(
+        home: GestureDetector(
+          onTap: () {
+            invocations++;
+          },
+          child: const Text('Test'),
         ),
       ),
     );
@@ -69,11 +226,10 @@ void main() {
   });
 
   testWidgets('setSurfaceSize works', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
+    addTearDown(binding.resetLayers);
+    await tester.pumpWidget(const TestWidgetsApp(home: Center(child: Text('Test'))));
 
-    final Size windowCenter = tester.view.physicalSize /
-        tester.view.devicePixelRatio /
-        2;
+    final Size windowCenter = tester.view.physicalSize / tester.view.devicePixelRatio / 2;
     final double windowCenterX = windowCenter.width;
     final double windowCenterY = windowCenter.height;
 
@@ -100,32 +256,61 @@ void main() {
     await expectLater(tester.binding.reassembleApplication(), completes);
   }, timeout: const Timeout(Duration(seconds: 30)));
 
-  testWidgets('shouldPropagateDevicePointerEvents can override events from ${TestBindingEventSource.device}', (WidgetTester tester) async {
-    binding.shouldPropagateDevicePointerEvents = true;
+  testWidgets(
+    'shouldPropagateDevicePointerEvents can override events from ${TestBindingEventSource.device}',
+    (WidgetTester tester) async {
+      binding.shouldPropagateDevicePointerEvents = true;
 
-    await tester.pumpWidget(_ShowNumTaps());
+      await tester.pumpWidget(_ShowNumTaps());
 
-    final Offset position = tester.getCenter(find.text('0'));
+      final Offset position = tester.getCenter(find.text('0'));
 
-    // Simulates a real device tap.
-    //
-    // `handlePointerEventForSource defaults to sending events using
-    // TestBindingEventSource.device. This will not be forwarded to the actual
-    // gesture handlers, unless `shouldPropagateDevicePointerEvents` is true.
-    binding.handlePointerEventForSource(
-      PointerDownEvent(position: position),
+      // Simulates a real device tap.
+      //
+      // `handlePointerEventForSource defaults to sending events using
+      // TestBindingEventSource.device. This will not be forwarded to the actual
+      // gesture handlers, unless `shouldPropagateDevicePointerEvents` is true.
+      binding.handlePointerEventForSource(PointerDownEvent(position: position));
+      binding.handlePointerEventForSource(PointerUpEvent(position: position));
+
+      await tester.pump();
+
+      expect(find.text('1'), findsOneWidget);
+
+      // Reset the value, otherwise the test will fail when it checks that this
+      // has not been changed as an invariant.
+      binding.shouldPropagateDevicePointerEvents = false;
+    },
+  );
+
+  testWidgets('resetLayers resets configuration and replaces root layer', (
+    WidgetTester tester,
+  ) async {
+    // Ensure cleanup. This statement is not part of the test.
+    addTearDown(binding.resetLayers);
+
+    final ViewConfiguration currentConfig = binding.renderView.configuration;
+    await binding.setSurfaceSize(const Size(400, 400));
+    binding.renderView.configuration = const ViewConfiguration(devicePixelRatio: 10.0);
+    final Layer? currentRootLayer = binding.renderView.debugLayer;
+
+    await binding.resetLayers(); // This statement is the testee.
+
+    // Verify that all properties have been reset
+    expect(
+      binding.renderView.configuration.logicalConstraints,
+      equals(currentConfig.logicalConstraints),
     );
-    binding.handlePointerEventForSource(
-      PointerUpEvent(position: position),
+    expect(
+      binding.renderView.configuration.physicalConstraints,
+      equals(currentConfig.physicalConstraints),
     );
-
-    await tester.pump();
-
-    expect(find.text('1'), findsOneWidget);
-
-    // Reset the value, otherwise the test will fail when it checks that this
-    // has not been changed as an invariant.
-    binding.shouldPropagateDevicePointerEvents = false;
+    expect(
+      binding.renderView.configuration.devicePixelRatio,
+      equals(currentConfig.devicePixelRatio),
+    );
+    // Verify that root layer has been replaced
+    expect(binding.renderView.debugLayer, isNot(same(currentRootLayer)));
   });
 }
 
@@ -146,10 +331,7 @@ class _ShowNumTapsState extends State<_ShowNumTaps> {
           _counter++;
         });
       },
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Text(_counter.toString()),
-      ),
+      child: Directionality(textDirection: TextDirection.ltr, child: Text(_counter.toString())),
     );
   }
 }

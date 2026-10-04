@@ -58,9 +58,9 @@ class ProcessRunner {
     if (subprocessOutput) {
       stderr.write('Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
     }
-    final List<int> output = <int>[];
-    final Completer<void> stdoutComplete = Completer<void>();
-    final Completer<void> stderrComplete = Completer<void>();
+    final output = <int>[];
+    final stdoutComplete = Completer<void>();
+    final stderrComplete = Completer<void>();
     late Process process;
     Future<int> allComplete() async {
       await stderrComplete.future;
@@ -74,38 +74,34 @@ class ProcessRunner {
         workingDirectory: workingDirectory.absolute.path,
         environment: environment,
       );
-      process.stdout.listen(
-        (List<int> event) {
-          output.addAll(event);
-          if (subprocessOutput) {
-            stdout.add(event);
-          }
-        },
-        onDone: () async => stdoutComplete.complete(),
-      );
+      process.stdout.listen((List<int> event) {
+        output.addAll(event);
+        if (subprocessOutput) {
+          stdout.add(event);
+        }
+      }, onDone: () async => stdoutComplete.complete());
       if (subprocessOutput) {
-        process.stderr.listen(
-          (List<int> event) {
-            stderr.add(event);
-          },
-          onDone: () async => stderrComplete.complete(),
-        );
+        process.stderr.listen((List<int> event) {
+          stderr.add(event);
+        }, onDone: () async => stderrComplete.complete());
       } else {
         stderrComplete.complete();
       }
     } on ProcessException catch (e) {
-      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
+      final message =
+          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n$e';
       throw PreparePackageException(message);
     } on ArgumentError catch (e) {
-      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
+      final message =
+          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n$e';
       throw PreparePackageException(message);
     }
 
     final int exitCode = await allComplete();
     if (exitCode != 0 && !failOk) {
-      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
+      final message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
       throw PreparePackageException(
         message,
         ProcessResult(0, exitCode, null, 'returned $exitCode'),

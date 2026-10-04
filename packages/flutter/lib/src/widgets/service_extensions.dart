@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+/// @docImport 'package:flutter/foundation.dart';
+/// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'accessibility_inspector.dart';
+/// @docImport 'app.dart';
+/// @docImport 'binding.dart';
+/// @docImport 'debug.dart';
+/// @docImport 'framework.dart';
+/// @docImport 'widget_inspector.dart';
+library;
+
 /// Service extension constants for the widgets library.
 ///
 /// These constants will be used when registering service extensions in the
@@ -102,6 +114,15 @@ enum WidgetsServiceExtensions {
   /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   debugAllowBanner,
+
+  /// Name of service extension that, when called, will perform accessibility
+  /// evaluations on the widget tree and return the results.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
+  ///   registered.
+  accessibilityEvaluations,
 }
 
 /// Service extension constants for the Widget Inspector.
@@ -144,7 +165,22 @@ enum WidgetInspectorServiceExtensions {
   ///   extension is registered.
   trackRebuildDirtyWidgets,
 
+  /// Name of service extension that, when called, returns the mapping of
+  /// widget locations to ids.
+  ///
+  /// This service extension is only supported if
+  /// [WidgetInspectorService._widgetCreationTracked] is true.
+  ///
+  /// See also:
+  ///
+  /// * [trackRebuildDirtyWidgets], which toggles dispatching events that use
+  ///   these ids to efficiently indicate the locations of widgets.
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  widgetLocationIdMap,
+
   /// Name of service extension that, when called, determines whether
+  /// [WidgetInspectorService._trackRepaintWidgets], which determines whether
   /// a callback is invoked for every [RenderObject] painted each frame.
   ///
   /// See also:
@@ -352,6 +388,22 @@ enum WidgetInspectorServiceExtensions {
   getRootWidget,
 
   /// Name of service extension that, when called, will return the
+  /// [DiagnosticsNode] data for the root [Element] of the widget tree.
+  ///
+  /// If the parameter `isSummaryTree` is true, the tree will only include
+  /// [Element]s that were created by user code.
+  ///
+  /// If the parameter `withPreviews` is true, text previews will be included
+  /// for [Element]s with a corresponding [RenderObject] of type
+  /// [RenderParagraph].
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  getRootWidgetTree,
+
+  /// Name of service extension that, when called, will return the
   /// [DiagnosticsNode] data for the root [Element] of the summary tree, which
   /// only includes [Element]s that were created by user code.
   ///
@@ -485,4 +537,47 @@ enum WidgetInspectorServiceExtensions {
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   setFlexProperties,
+}
+
+/// Service extension constants for accessibility and semantics.
+///
+/// These constants will be used when registering service extensions in the
+/// framework, and they will also be used by tools and services that call these
+/// service extensions.
+///
+/// The String value for each of these extension names should be accessed by
+/// calling the [extensionName] property on the enum value.
+enum AccessibilityServiceExtensions {
+  /// Name of service extension that, when called, returns the JSON serialized
+  /// semantics tree.
+  ///
+  /// This extension should only be called after semantics has been enabled
+  /// (for example, by calling [enableSemantics]).
+  ///
+  /// See also:
+  ///
+  /// * [AccessibilityInspector.initServiceExtensions], where the service
+  ///   extension is registered.
+  getSemanticsTree,
+
+  /// Name of service extension that, when called, enables semantics in the app
+  /// by creating a [SemanticsHandle].
+  ///
+  /// See also:
+  ///
+  /// * [AccessibilityInspector.initServiceExtensions], where the service
+  ///   extension is registered.
+  enableSemantics,
+
+  /// Name of service extension that, when called, disposes the [SemanticsHandle]
+  /// created by [enableSemantics].
+  ///
+  /// See also:
+  ///
+  /// * [AccessibilityInspector.initServiceExtensions], where the service
+  ///   extension is registered.
+  disposeSemantics;
+
+  /// The full name of the service extension, including the `accessibility.` prefix.
+  String get extensionName => 'accessibility.$name';
 }

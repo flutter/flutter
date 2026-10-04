@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Փնտրել",
   "searchWebButtonLabel": "Որոնել համացանցում",
   "shareButtonLabel": "Կիսվել...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Մաքրել",
+  "cancelButtonLabel": "Չեղարկել",
+  "backButtonLabel": "Հետ",
+  "expansionTileExpandedHint": "կրկնակի հպեք ծալելու համար",
+  "expansionTileCollapsedHint": "կրկնակի հպեք ծավալելու համար",
+  "expansionTileExpandedTapHint": "Ծալել",
+  "expansionTileCollapsedTapHint": "ծավալեք՝ մանրամասները տեսնելու համար",
+  "expandedHint": "Ծալված է",
+  "collapsedHint": "Ծավալված է"
 }

@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'inherited_model.dart';
+/// @docImport 'scroll_position.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -58,11 +65,7 @@ import 'framework.dart';
 abstract class InheritedNotifier<T extends Listenable> extends InheritedWidget {
   /// Create an inherited widget that updates its dependents when [notifier]
   /// sends notifications.
-  const InheritedNotifier({
-    super.key,
-    this.notifier,
-    required super.child,
-  });
+  const InheritedNotifier({super.key, this.notifier, required super.child});
 
   /// The [Listenable] object to which to listen.
   ///

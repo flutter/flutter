@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_emulator.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/base/common.dart';
+
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/fake.dart';
@@ -13,18 +15,16 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const String emulatorID = 'i1234';
-const String errorText = '[Android emulator test error]';
-const List<String> kEmulatorLaunchCommand = <String>[
-  'emulator', '-avd', emulatorID,
-];
+const emulatorID = 'i1234';
+const errorText = '[Android emulator test error]';
+const kEmulatorLaunchCommand = <String>['emulator', '-avd', emulatorID];
 
 void main() {
   group('android_emulator', () {
     testWithoutContext('flags emulators without config', () {
-      const String emulatorID = '1234';
+      const emulatorID = '1234';
 
-      final AndroidEmulator emulator = AndroidEmulator(
+      final emulator = AndroidEmulator(
         emulatorID,
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
@@ -35,8 +35,8 @@ void main() {
     });
 
     testWithoutContext('flags emulators with config', () {
-      const String emulatorID = '1234';
-      final AndroidEmulator emulator = AndroidEmulator(
+      const emulatorID = '1234';
+      final emulator = AndroidEmulator(
         emulatorID,
         properties: const <String, String>{'name': 'test'},
         logger: BufferLogger.test(),
@@ -49,14 +49,14 @@ void main() {
     });
 
     testWithoutContext('reads expected metadata', () {
-      const String emulatorID = '1234';
-      const String manufacturer = 'Me';
-      const String displayName = 'The best one';
-      final Map<String, String> properties = <String, String>{
+      const emulatorID = '1234';
+      const manufacturer = 'Me';
+      const displayName = 'The best one';
+      final properties = <String, String>{
         'hw.device.manufacturer': manufacturer,
         'avd.ini.displayname': displayName,
       };
-      final AndroidEmulator emulator = AndroidEmulator(
+      final emulator = AndroidEmulator(
         emulatorID,
         properties: properties,
         logger: BufferLogger.test(),
@@ -72,12 +72,10 @@ void main() {
     });
 
     testWithoutContext('prefers displayname for name', () {
-      const String emulatorID = '1234';
-      const String displayName = 'The best one';
-      final Map<String, String> properties = <String, String>{
-        'avd.ini.displayname': displayName,
-      };
-      final AndroidEmulator emulator = AndroidEmulator(
+      const emulatorID = '1234';
+      const displayName = 'The best one';
+      final properties = <String, String>{'avd.ini.displayname': displayName};
+      final emulator = AndroidEmulator(
         emulatorID,
         properties: properties,
         logger: BufferLogger.test(),
@@ -91,11 +89,9 @@ void main() {
     testWithoutContext('uses cleaned up ID if no displayname is set', () {
       // Android Studio uses the ID with underscores replaced with spaces
       // for the name if displayname is not set so we do the same.
-      const String emulatorID = 'This_is_my_ID';
-      final Map<String, String> properties = <String, String>{
-        'avd.ini.notadisplayname': 'this is not a display name',
-      };
-      final AndroidEmulator emulator = AndroidEmulator(
+      const emulatorID = 'This_is_my_ID';
+      final properties = <String, String>{'avd.ini.notadisplayname': 'this is not a display name'};
+      final emulator = AndroidEmulator(
         emulatorID,
         properties: properties,
         logger: BufferLogger.test(),
@@ -107,7 +103,7 @@ void main() {
     });
 
     testWithoutContext('parses ini files', () {
-      const String iniFile = '''
+      const iniFile = '''
         hw.device.name=My Test Name
         #hw.device.name=Bad Name
 
@@ -131,7 +127,8 @@ void main() {
     });
 
     testWithoutContext('succeeds', () async {
-      final AndroidEmulator emulator = AndroidEmulator(emulatorID,
+      final emulator = AndroidEmulator(
+        emulatorID,
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: kEmulatorLaunchCommand),
         ]),
@@ -143,11 +140,12 @@ void main() {
     });
 
     testWithoutContext('succeeds with coldboot launch', () async {
-      final List<String> kEmulatorLaunchColdBootCommand = <String>[
+      final kEmulatorLaunchColdBootCommand = <String>[
         ...kEmulatorLaunchCommand,
         '-no-snapshot-load',
       ];
-      final AndroidEmulator emulator = AndroidEmulator(emulatorID,
+      final emulator = AndroidEmulator(
+        emulatorID,
         processManager: FakeProcessManager.list(<FakeCommand>[
           FakeCommand(command: kEmulatorLaunchColdBootCommand),
         ]),
@@ -159,8 +157,9 @@ void main() {
     });
 
     testWithoutContext('prints error on failure', () async {
-      final BufferLogger logger =  BufferLogger.test();
-      final AndroidEmulator emulator = AndroidEmulator(emulatorID,
+      final logger = BufferLogger.test();
+      final emulator = AndroidEmulator(
+        emulatorID,
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: kEmulatorLaunchCommand,
@@ -173,14 +172,89 @@ void main() {
         logger: logger,
       );
 
-      await emulator.launch(startupDuration: Duration.zero);
+      await expectLater(
+        () => emulator.launch(startupDuration: Duration.zero),
+        throwsA(isA<ToolExit>()),
+      );
 
       expect(logger.errorText, contains(errorText));
     });
 
+    testWithoutContext('throws ToolExit on AVD lock error during startup without AVD directory', () async {
+      final logger = BufferLogger.test();
+      final emulator = AndroidEmulator(
+        emulatorID,
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: kEmulatorLaunchCommand,
+            exitCode: 1,
+            stderr:
+                'ERROR: Running multiple emulators with the same AVD is an experimental feature.\n'
+                'Refer to -read-only for details.',
+          ),
+        ]),
+        androidSdk: mockSdk,
+        logger: logger,
+      );
+
+      await expectLater(
+        () => emulator.launch(startupDuration: Duration.zero),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit exception) => exception.message,
+            'message',
+            allOf(
+              contains(
+                'An emulator with the name "i1234" is already running or has active lock files',
+              ),
+              contains('in your AVD directory.'),
+              isNot(contains('in the AVD directory located at:')),
+            ),
+          ),
+        ),
+      );
+    });
+
+    testWithoutContext('throws ToolExit on AVD lock error during startup with AVD directory', () async {
+      final logger = BufferLogger.test();
+      final emulator = AndroidEmulator(
+        emulatorID,
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: kEmulatorLaunchCommand,
+            exitCode: 1,
+            stderr:
+                'ERROR: Running multiple emulators with the same AVD is an experimental feature.\n'
+                'Refer to -read-only for details.',
+          ),
+        ]),
+        androidSdk: mockSdk,
+        logger: logger,
+        avdDirectory: '/path/to/avd/directory',
+      );
+
+      await expectLater(
+        () => emulator.launch(startupDuration: Duration.zero),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit exception) => exception.message,
+            'message',
+            allOf(
+              contains(
+                'An emulator with the name "i1234" is already running or has active lock files',
+              ),
+              contains('in the AVD directory located at:'),
+              contains('/path/to/avd/directory'),
+            ),
+          ),
+        ),
+      );
+    });
+
     testWithoutContext('prints nothing on late failure with empty stderr', () async {
-      final BufferLogger logger =  BufferLogger.test();
-      final AndroidEmulator emulator = AndroidEmulator(emulatorID,
+      final logger = BufferLogger.test();
+      final emulator = AndroidEmulator(
+        emulatorID,
         processManager: FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
             command: kEmulatorLaunchCommand,
@@ -200,7 +274,7 @@ void main() {
     testWithoutContext('throws if emulator not found', () async {
       mockSdk.emulatorPath = null;
 
-      final AndroidEmulator emulator = AndroidEmulator(
+      final emulator = AndroidEmulator(
         emulatorID,
         processManager: FakeProcessManager.empty(),
         androidSdk: mockSdk,
@@ -209,11 +283,13 @@ void main() {
 
       await expectLater(
         () => emulator.launch(startupDuration: Duration.zero),
-        throwsA(isException.having(
-          (Exception exception) => exception.toString(),
-          'description',
-          contains('Emulator is missing from the Android SDK'),
-        )),
+        throwsA(
+          isException.having(
+            (Exception exception) => exception.toString(),
+            'description',
+            contains('Emulator is missing from the Android SDK'),
+          ),
+        ),
       );
     });
   });

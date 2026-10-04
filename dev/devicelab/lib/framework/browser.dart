@@ -10,6 +10,16 @@ import 'dart:math' as math;
 import 'package:path/path.dart' as path;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
+/// Flags passed to Chrome to disable GCM (Google Cloud Messaging) and MCS
+/// (Mobile Connection Server) background network registration calls and
+/// prevent deprecation error logs.
+const kGcmDisabledFlags = <String>[
+  '--disable-features=GCM',
+  '--gcm-checkin-url=http://127.0.0.1',
+  '--gcm-registration-url=http://127.0.0.1',
+  '--gcm-mcs-endpoint=127.0.0.1:0',
+];
+
 /// The number of samples used to extract metrics, such as noise, means,
 /// max/min values.
 ///
@@ -26,6 +36,7 @@ class ChromeOptions {
     this.headless,
     this.debugPort,
     this.enableWasmGC = false,
+    this.silent = false,
   });
 
   /// If not null passed as `--user-data-dir`.
@@ -45,7 +56,7 @@ class ChromeOptions {
   final int windowHeight;
 
   /// Launches code in "headless" mode, which allows running Chrome in
-  /// environments without a display, such as LUCI and Cirrus.
+  /// environments without a display, such as LUCI.
   final bool? headless;
 
   /// The port Chrome will use for its debugging protocol.
@@ -57,6 +68,9 @@ class ChromeOptions {
 
   /// Whether to enable experimental WasmGC flags
   final bool enableWasmGC;
+
+  /// Disables Chrome stdio outputs.
+  final bool silent;
 }
 
 /// A function called when the Chrome process encounters an error.
@@ -68,62 +82,103 @@ class Chrome {
     // If the Chrome process quits before it was asked to quit, notify the
     // error listener.
     _chromeProcess.exitCode.then((int exitCode) {
-      if (!_isStopped) {
+      if (!_isStopped && exitCode != 0) {
         _onError('Chrome process exited prematurely with exit code $exitCode');
       }
     });
   }
 
-  /// Launches Chrome with the give [options].
+  /// Launches Chrome with the given [options].
   ///
   /// The [onError] callback is called with an error message when the Chrome
   /// process encounters an error. In particular, [onError] is called when the
-  /// Chrome process exits prematurely, i.e. before [stop] is called.
-  static Future<Chrome> launch(ChromeOptions options, { String? workingDirectory, required ChromeErrorCallback onError }) async {
+  /// Chrome process exits prematurely, i.e. before [stop] or [disconnect] is called.
+  static Future<Chrome> launch(
+    ChromeOptions options, {
+    String? workingDirectory,
+    required ChromeErrorCallback onError,
+  }) async {
     if (!io.Platform.isWindows) {
-      final io.ProcessResult versionResult = io.Process.runSync(_findSystemChromeExecutable(), const <String>['--version']);
+      final io.ProcessResult versionResult = io.Process.runSync(
+        _findSystemChromeExecutable(),
+        const <String>['--version'],
+      );
       print('Launching ${versionResult.stdout}');
     } else {
       print('Launching Chrome...');
     }
 
-    final String jsFlags = options.enableWasmGC ? <String>[
-      '--experimental-wasm-gc',
-      '--experimental-wasm-type-reflection',
-    ].join(' ') : '';
-    final bool withDebugging = options.debugPort != null;
-    final List<String> args = <String>[
-      if (options.userDataDirectory != null)
-        '--user-data-dir=${options.userDataDirectory}',
-      if (options.url != null)
-        options.url!,
-      if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true')
-        '--no-sandbox',
-      if (options.headless ?? false)
+    final String jsFlags = options.enableWasmGC
+        ? <String>['--experimental-wasm-gc', '--experimental-wasm-type-reflection'].join(' ')
+        : '';
+    final withDebugging = options.debugPort != null;
+    final args = <String>[
+      if (options.userDataDirectory != null) '--user-data-dir=${options.userDataDirectory}',
+      ?options.url,
+      if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true') '--no-sandbox',
+      if (options.headless ?? false) ...<String>[
         '--headless',
-      if (withDebugging)
-        '--remote-debugging-port=${options.debugPort}',
+        if (io.Platform.isLinux) ...<String>[
+          '--use-gl=angle',
+          '--use-angle=swiftshader',
+          '--enable-unsafe-swiftshader',
+          '--disable-gpu-sandbox',
+        ],
+      ],
+      if (withDebugging) '--remote-debugging-port=${options.debugPort}',
       '--window-size=${options.windowWidth},${options.windowHeight}',
       '--disable-extensions',
       '--disable-popup-blocking',
+      '--disable-background-timer-throttling',
+      '--disable-renderer-backgrounding',
+      '--disable-background-networking',
+      '--disable-sync',
+      '--disable-client-side-phishing-detection',
+      '--disable-notifications',
+      ...kGcmDisabledFlags,
       // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
       '--bwsi',
       '--no-first-run',
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      '--password-store=basic',
+      '--disable-search-engine-choice-screen',
+      if (io.Platform.isMacOS) '--use-mock-keychain',
       if (jsFlags.isNotEmpty) '--js-flags=$jsFlags',
     ];
 
     final io.Process chromeProcess = await _spawnChromiumProcess(
       _findSystemChromeExecutable(),
       args,
+      silent: options.silent,
       workingDirectory: workingDirectory,
     );
 
     WipConnection? debugConnection;
     if (withDebugging) {
-      debugConnection = await _connectToChromeDebugPort(chromeProcess, options.debugPort!);
+      debugConnection = await _connectToChromeDebugPort(options.debugPort!, options.url);
+    }
+
+    return Chrome._(chromeProcess, onError, debugConnection);
+  }
+
+  /// Connects to an existing Chrome process with the given [options].
+  ///
+  /// The [onError] callback is called with an error message when the Chrome
+  /// process encounters an error. In particular, [onError] is called when the
+  /// Chrome process exits prematurely, i.e. before [stop] or [disconnect] is called.
+  static Future<Chrome> connect(
+    io.Process chromeProcess,
+    ChromeOptions options, {
+    String? workingDirectory,
+    required ChromeErrorCallback onError,
+  }) async {
+    final withDebugging = options.debugPort != null;
+
+    WipConnection? debugConnection;
+    if (withDebugging) {
+      debugConnection = await _connectToChromeDebugPort(options.debugPort!, options.url);
     }
 
     return Chrome._(chromeProcess, onError, debugConnection);
@@ -134,7 +189,7 @@ class Chrome {
   final WipConnection? _debugConnection;
   bool _isStopped = false;
 
-  Completer<void> ?_tracingCompleter;
+  Completer<void>? _tracingCompleter;
   StreamSubscription<WipEvent>? _tracingSubscription;
   List<Map<String, dynamic>>? _tracingData;
 
@@ -148,7 +203,7 @@ class Chrome {
     if (_tracingCompleter != null) {
       throw StateError(
         'Cannot start a new performance trace. A tracing session labeled '
-        '"$label" is already in progress.'
+        '"$label" is already in progress.',
       );
     }
     _tracingCompleter = Completer<void>();
@@ -167,10 +222,14 @@ class Chrome {
       } else if (event.method == 'Tracing.dataCollected') {
         final dynamic value = event.params?['value'];
         if (value is! List) {
-          throw FormatException('"Tracing.dataCollected" returned malformed data. '
-              'Expected a List but got: ${value.runtimeType}');
+          throw FormatException(
+            '"Tracing.dataCollected" returned malformed data. '
+            'Expected a List but got: ${value.runtimeType}',
+          );
         }
-        _tracingData?.addAll((event.params?['value'] as List<dynamic>).cast<Map<String, dynamic>>());
+        _tracingData?.addAll(
+          (event.params?['value'] as List<dynamic>).cast<Map<String, dynamic>>(),
+        );
       }
     });
     await _debugConnection?.sendCommand('Tracing.start', <String, dynamic>{
@@ -187,7 +246,10 @@ class Chrome {
       //   provides tracing data from the GPU data
       //   disabled due to https://bugs.chromium.org/p/chromium/issues/detail?id=1068259
       // TODO(yjbanov): extract useful GPU data
-      'categories': 'blink,blink.user_timing',
+      'traceConfig': <String, dynamic>{
+        'includedCategories': <String>['blink', 'blink.user_timing'],
+        'enableThreadCpuTime': true,
+      },
       'transferMode': 'SendAsStream',
     });
   }
@@ -208,10 +270,15 @@ class Chrome {
     await _debugConnection?.page.reload(ignoreCache: ignoreCache);
   }
 
-  /// Stops the Chrome process.
-  void stop() {
+  /// Disconnects from the Chrome process without killing it.
+  void disconnect() {
     _isStopped = true;
     _tracingSubscription?.cancel();
+  }
+
+  /// Stops the Chrome process.
+  void stop() {
+    disconnect();
     _chromeProcess.kill();
   }
 }
@@ -226,8 +293,7 @@ String _findSystemChromeExecutable() {
   }
 
   if (io.Platform.isLinux) {
-    final io.ProcessResult which =
-        io.Process.runSync('which', <String>['google-chrome']);
+    final io.ProcessResult which = io.Process.runSync('which', <String>['google-chrome']);
 
     if (which.exitCode != 0) {
       throw Exception('Failed to locate system Chrome installation.');
@@ -237,7 +303,7 @@ String _findSystemChromeExecutable() {
   } else if (io.Platform.isMacOS) {
     return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   } else if (io.Platform.isWindows) {
-    const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
+    const kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
     final List<String> kWindowsPrefixes = <String?>[
       io.Platform.environment['LOCALAPPDATA'],
       io.Platform.environment['PROGRAMFILES'],
@@ -254,14 +320,19 @@ String _findSystemChromeExecutable() {
 }
 
 /// Waits for Chrome to print DevTools URI and connects to it.
-Future<WipConnection> _connectToChromeDebugPort(io.Process chromeProcess, int port) async {
+Future<WipConnection> _connectToChromeDebugPort(int port, String? tabUrl) async {
   final Uri devtoolsUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
   print('Connecting to DevTools: $devtoolsUri');
-  final ChromeConnection chromeConnection = ChromeConnection('localhost', port);
-  final Iterable<ChromeTab> tabs = (await chromeConnection.getTabs()).where((ChromeTab tab) {
-    return tab.url.startsWith('http://localhost');
-  });
-  final ChromeTab tab = tabs.single;
+
+  final String url = tabUrl ?? 'http://localhost';
+  final chromeConnection = ChromeConnection('localhost', port);
+  final ChromeTab? tab = await chromeConnection.getTab(
+    (ChromeTab tab) => tab.url.startsWith(url),
+    retryFor: const Duration(seconds: 5),
+  );
+  if (tab == null) {
+    throw Exception('Chrome failed to open a tab for $url');
+  }
   final WipConnection debugConnection = await tab.connect();
   print('Connected to Chrome tab: ${tab.title} (${tab.url})');
   return debugConnection;
@@ -269,10 +340,10 @@ Future<WipConnection> _connectToChromeDebugPort(io.Process chromeProcess, int po
 
 /// Gets the Chrome debugger URL for the web page being benchmarked.
 Future<Uri> _getRemoteDebuggerUrl(Uri base) async {
-  final io.HttpClient client = io.HttpClient();
+  final client = io.HttpClient();
   final io.HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
   final io.HttpClientResponse response = await request.close();
-  final List<dynamic>? jsonObject = await json.fuse(utf8).decoder.bind(response).single as List<dynamic>?;
+  final jsonObject = await json.fuse(utf8).decoder.bind(response).single as List<dynamic>?;
   if (jsonObject == null || jsonObject.isEmpty) {
     return base;
   }
@@ -289,10 +360,9 @@ class BlinkTraceSummary {
   static BlinkTraceSummary? fromJson(List<Map<String, dynamic>> traceJson) {
     try {
       // Convert raw JSON data to BlinkTraceEvent objects sorted by timestamp.
-      List<BlinkTraceEvent> events = traceJson
-        .map<BlinkTraceEvent>(BlinkTraceEvent.fromJson)
-        .toList()
-        ..sort((BlinkTraceEvent a, BlinkTraceEvent b) => a.ts! - b.ts!);
+      List<BlinkTraceEvent> events =
+          traceJson.map<BlinkTraceEvent>(BlinkTraceEvent.fromJson).toList()
+            ..sort((BlinkTraceEvent a, BlinkTraceEvent b) => a.ts! - b.ts!);
 
       Exception noMeasuredFramesFound() => Exception(
         'No measured frames found in benchmark tracing data. This likely '
@@ -319,10 +389,10 @@ class BlinkTraceSummary {
       events = events.where((BlinkTraceEvent element) => element.pid == tabPid).toList();
 
       // Extract frame data.
-      final List<BlinkFrame> frames = <BlinkFrame>[];
-      int skipCount = 0;
-      BlinkFrame frame = BlinkFrame();
-      for (final BlinkTraceEvent event in events) {
+      final frames = <BlinkFrame>[];
+      var skipCount = 0;
+      var frame = BlinkFrame();
+      for (final event in events) {
         if (event.isBeginFrame) {
           frame.beginFrame = event;
         } else if (event.isUpdateAllLifecyclePhases) {
@@ -349,12 +419,21 @@ class BlinkTraceSummary {
 
       // Compute averages and summarize.
       return BlinkTraceSummary._(
-        averageBeginFrameTime: _computeAverageDuration(frames.map((BlinkFrame frame) => frame.beginFrame).whereType<BlinkTraceEvent>().toList()),
-        averageUpdateLifecyclePhasesTime: _computeAverageDuration(frames.map((BlinkFrame frame) => frame.updateAllLifecyclePhases).whereType<BlinkTraceEvent>().toList()),
+        averageBeginFrameTime: _computeAverageDuration(
+          frames.map((BlinkFrame frame) => frame.beginFrame).whereType<BlinkTraceEvent>().toList(),
+        ),
+        averageUpdateLifecyclePhasesTime: _computeAverageDuration(
+          frames
+              .map((BlinkFrame frame) => frame.updateAllLifecyclePhases)
+              .whereType<BlinkTraceEvent>()
+              .toList(),
+        ),
       );
     } catch (_) {
-      final io.File traceFile = io.File('./chrome-trace.json');
-      io.stderr.writeln('Failed to interpret the Chrome trace contents. The trace was saved in ${traceFile.path}');
+      final traceFile = io.File('./chrome-trace.json');
+      io.stderr.writeln(
+        'Failed to interpret the Chrome trace contents. The trace was saved in ${traceFile.path}',
+      );
       traceFile.writeAsStringSync(const JsonEncoder.withIndent('  ').convert(traceJson));
       rethrow;
     }
@@ -381,9 +460,10 @@ class BlinkTraceSummary {
   final Duration averageTotalUIFrameTime;
 
   @override
-  String toString() => '$BlinkTraceSummary('
-    'averageBeginFrameTime: ${averageBeginFrameTime.inMicroseconds / 1000}ms, '
-    'averageUpdateLifecyclePhasesTime: ${averageUpdateLifecyclePhasesTime.inMicroseconds / 1000}ms)';
+  String toString() =>
+      '$BlinkTraceSummary('
+      'averageBeginFrameTime: ${averageBeginFrameTime.inMicroseconds / 1000}ms, '
+      'averageUpdateLifecyclePhasesTime: ${averageUpdateLifecyclePhasesTime.inMicroseconds / 1000}ms)';
 }
 
 /// Contains events pertaining to a single frame in the Blink trace data.
@@ -405,14 +485,16 @@ class BlinkFrame {
 /// their average as a [Duration] value.
 Duration _computeAverageDuration(List<BlinkTraceEvent> events) {
   // Compute the sum of "tdur" fields of the last _kMeasuredSampleCount events.
-  final double sum = events
-    .skip(math.max(events.length - _kMeasuredSampleCount, 0))
-    .fold(0.0, (double previousValue, BlinkTraceEvent event) {
-      if (event.tdur == null) {
-        throw FormatException('Trace event lacks "tdur" field: $event');
-      }
-      return previousValue + event.tdur!;
-    });
+  final double sum = events.skip(math.max(events.length - _kMeasuredSampleCount, 0)).fold(0.0, (
+    double previousValue,
+    BlinkTraceEvent event,
+  ) {
+    final int? duration = event.tdur ?? event.dur;
+    if (duration == null) {
+      throw FormatException('Trace event lacks "tdur" and "dur" fields: $event');
+    }
+    return previousValue + duration;
+  });
   final int sampleCount = math.min(events.length, _kMeasuredSampleCount);
   return Duration(microseconds: sum ~/ sampleCount);
 }
@@ -447,15 +529,16 @@ class BlinkTraceEvent {
   ///
   /// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
   BlinkTraceEvent.fromJson(Map<String, dynamic> json)
-      : args = json['args'] as Map<String, dynamic>,
-        cat = json['cat'] as String,
-        name = json['name'] as String,
-        ph = json['ph'] as String,
-        pid = _readInt(json, 'pid'),
-        tid = _readInt(json, 'tid'),
-        ts = _readInt(json, 'ts'),
-        tts = _readInt(json, 'tts'),
-        tdur = _readInt(json, 'tdur');
+    : args = json['args'] as Map<String, dynamic>,
+      cat = json['cat'] as String,
+      name = json['name'] as String,
+      ph = json['ph'] as String,
+      pid = _readInt(json, 'pid'),
+      tid = _readInt(json, 'tid'),
+      ts = _readInt(json, 'ts'),
+      tts = _readInt(json, 'tts'),
+      tdur = _readInt(json, 'tdur'),
+      dur = _readInt(json, 'dur');
 
   /// Event-specific data.
   final Map<String, dynamic> args;
@@ -484,6 +567,9 @@ class BlinkTraceEvent {
   /// Event duration in microseconds.
   final int? tdur;
 
+  /// Wall-clock event duration in microseconds.
+  final int? dur;
+
   /// A "begin frame" event contains all of the scripting time of an animation
   /// frame (JavaScript, WebAssembly), plus a negligible amount of internal
   /// browser overhead.
@@ -496,11 +582,10 @@ class BlinkTraceEvent {
   ///
   /// This event is a duration event that has its `tdur` populated.
   bool get isBeginFrame {
-    return ph == 'X' && (
-      name == 'WebViewImpl::beginFrame' ||
-      name == 'WebFrameWidgetBase::BeginMainFrame' ||
-      name == 'WebFrameWidgetImpl::BeginMainFrame'
-    );
+    return ph == 'X' &&
+        (name == 'WebViewImpl::beginFrame' ||
+            name == 'WebFrameWidgetBase::BeginMainFrame' ||
+            name == 'WebFrameWidgetImpl::BeginMainFrame');
   }
 
   /// An "update all lifecycle phases" event contains UI thread computations
@@ -514,10 +599,9 @@ class BlinkTraceEvent {
   ///
   /// This event is a duration event that has its `tdur` populated.
   bool get isUpdateAllLifecyclePhases {
-    return ph == 'X' && (
-      name == 'WebViewImpl::updateAllLifecyclePhases' ||
-      name == 'WebFrameWidgetImpl::UpdateLifecycle'
-    );
+    return ph == 'X' &&
+        (name == 'WebViewImpl::updateAllLifecyclePhases' ||
+            name == 'WebFrameWidgetImpl::UpdateLifecycle');
   }
 
   /// Whether this is the beginning of a "measured_frame" event.
@@ -537,16 +621,17 @@ class BlinkTraceEvent {
   bool get isEndMeasuredFrame => ph == 'e' && name == 'measured_frame';
 
   @override
-  String toString() => '$BlinkTraceEvent('
-    'args: ${json.encode(args)}, '
-    'cat: $cat, '
-    'name: $name, '
-    'ph: $ph, '
-    'pid: $pid, '
-    'tid: $tid, '
-    'ts: $ts, '
-    'tts: $tts, '
-    'tdur: $tdur)';
+  String toString() =>
+      '$BlinkTraceEvent('
+      'args: ${json.encode(args)}, '
+      'cat: $cat, '
+      'name: $name, '
+      'ph: $ph, '
+      'pid: $pid, '
+      'tid: $tid, '
+      'ts: $ts, '
+      'tts: $tts, '
+      'tdur: $tdur)';
 }
 
 /// Read an integer out of [json] stored under [key].
@@ -556,7 +641,7 @@ class BlinkTraceEvent {
 ///
 /// Returns null if the value is null.
 int? _readInt(Map<String, dynamic> json, String key) {
-  final num? jsonValue = json[key] as num?;
+  final jsonValue = json[key] as num?;
   return jsonValue?.toInt();
 }
 
@@ -572,48 +657,81 @@ int? _readInt(Map<String, dynamic> json, String key) {
 ///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
 const String _kGlibcError = 'Inconsistency detected by ld.so';
 
-Future<io.Process> _spawnChromiumProcess(String executable, List<String> args, { String? workingDirectory }) async {
+/// Filters out non-fatal D-Bus connection error messages emitted by Chromium.
+///
+/// Headless Linux Chrome attempts to query Linux D-Bus desktop services (such as
+/// system theme, desktop notifications, and keyrings) when `DBUS_SESSION_BUS_ADDRESS`
+/// is missing or disabled. Chromium logs non-fatal fallback notices to stderr via
+/// `LOG(ERROR)` in `dbus/bus.cc` (see
+/// https://chromium.googlesource.com/chromium/src/+/refs/heads/main/dbus/bus.cc#405)
+/// and `dbus/object_proxy.cc`.
+///
+/// We filter out these benign D-Bus lines to prevent stderr log noise in CI,
+/// following the industry standard pattern used by open source projects to filter
+/// E2E test logs (e.g. https://github.com/kitelev/exocortex/blob/4290cdade669034e5f71c892fb3e1908c5a2fe12/packages/obsidian-plugin/docker-entrypoint-e2e.sh#L48-L49).
+bool _isDbusError(String line) {
+  return line.contains('ERROR:dbus/bus.cc') ||
+      line.contains('ERROR:dbus/object_proxy.cc') ||
+      line.contains('Failed to connect to the bus') ||
+      line.contains('org.freedesktop.DBus');
+}
+
+Future<io.Process> _spawnChromiumProcess(
+  String executable,
+  List<String> args, {
+  required bool silent,
+  String? workingDirectory,
+}) async {
   // Keep attempting to launch the browser until one of:
   // - Chrome launched successfully, in which case we just return from the loop.
   // - The tool detected an unretryable Chrome error, in which case we throw ToolExit.
   while (true) {
-    final io.Process process = await io.Process.start(executable, args, workingDirectory: workingDirectory);
+    final io.Process process = await io.Process.start(
+      executable,
+      args,
+      workingDirectory: workingDirectory,
+    );
 
-    process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen((String line) {
+    process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
+      if (!silent) {
         print('[CHROME STDOUT]: $line');
-      });
+      }
+    });
 
     // Wait until the DevTools are listening before trying to connect. This is
     // only required for flutter_test --platform=chrome and not flutter run.
-    bool hitGlibcBug = false;
+    var hitGlibcBug = false;
     await process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .map((String line) {
-        print('[CHROME STDERR]:$line');
-        if (line.contains(_kGlibcError)) {
-          hitGlibcBug = true;
-        }
-        return line;
-      })
-      .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
-        if (hitGlibcBug) {
-          print(
-            'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
-            'Will try launching browser again.',
-          );
-          return '';
-        }
-        print('Failed to launch browser. Command used to launch it: ${args.join(' ')}');
-        throw Exception(
-          'Failed to launch browser. Make sure you are using an up-to-date '
-          'Chrome or Edge. Otherwise, consider using -d web-server instead '
-          'and filing an issue at https://github.com/flutter/flutter/issues.',
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .where((String line) => !_isDbusError(line))
+        .map((String line) {
+          if (!silent) {
+            print('[CHROME STDERR]:$line');
+          }
+          if (line.contains(_kGlibcError)) {
+            hitGlibcBug = true;
+          }
+          return line;
+        })
+        .firstWhere(
+          (String line) => line.startsWith('DevTools listening'),
+          orElse: () {
+            if (hitGlibcBug) {
+              print(
+                'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
+                'Will try launching browser again.',
+              );
+              return '';
+            }
+            print('Failed to launch browser. Command used to launch it: ${args.join(' ')}');
+            throw Exception(
+              'Failed to launch browser. Make sure you are using an up-to-date '
+              'Chrome or Edge. Otherwise, consider using -d web-server instead '
+              'and filing an issue at https://github.com/flutter/flutter/issues.',
+            );
+          },
         );
-      });
 
     if (!hitGlibcBug) {
       return process;
@@ -622,9 +740,14 @@ Future<io.Process> _spawnChromiumProcess(String executable, List<String> args, {
     // A precaution that avoids accumulating browser processes, in case the
     // glibc bug doesn't cause the browser to quit and we keep looping and
     // launching more processes.
-    unawaited(process.exitCode.timeout(const Duration(seconds: 1), onTimeout: () {
-      process.kill();
-      return 0;
-    }));
+    unawaited(
+      process.exitCode.timeout(
+        const Duration(seconds: 1),
+        onTimeout: () {
+          process.kill();
+          return 0;
+        },
+      ),
+    );
   }
 }

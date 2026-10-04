@@ -24,7 +24,23 @@ void main() {
     await tester.pumpWidget(buildFrame(0.0, 0.0));
     expect(tester.getSize(find.byType(IntrinsicWidth)), const Size(100.0, 50.0));
 
-    expect(() { buildFrame(-1.0, 0.0); }, throwsAssertionError);
-    expect(() { buildFrame(0.0, -1.0); }, throwsAssertionError);
+    expect(() {
+      buildFrame(-1.0, 0.0);
+    }, throwsAssertionError);
+    expect(() {
+      buildFrame(0.0, -1.0);
+    }, throwsAssertionError);
+  });
+
+  testWidgets('IntrinsicWidth does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: IntrinsicWidth(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(IntrinsicWidth)), Size.zero);
   });
 }

@@ -16,9 +16,9 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
+import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../reporting/reporting.dart';
 import 'depfile.dart';
 import 'exceptions.dart';
 import 'file_store.dart';
@@ -31,7 +31,15 @@ export 'source.dart';
 /// This number is somewhat arbitrary - it is difficult to detect whether
 /// or not we'll run out of file descriptors when using async dart:io
 /// APIs.
-const int kMaxOpenFiles = 64;
+const kMaxOpenFiles = 64;
+
+/// The [Source] for the FlutterMacOS framework binary.
+const kFlutterMacOSFrameworkBinarySource = Source.pattern(
+  '{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+);
+
+/// The [Source] for the Flutter framework binary.
+const kFlutterIOSFrameworkBinarySource = Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter');
 
 /// Configuration for the build system itself.
 class BuildSystemConfig {
@@ -40,7 +48,7 @@ class BuildSystemConfig {
 
   /// The maximum number of concurrent tasks the build system will run.
   ///
-  /// If not provided, defaults to [platform.numberOfProcessors].
+  /// If not provided, defaults to [Platform.numberOfProcessors].
   final int? resourcePoolSize;
 }
 
@@ -55,7 +63,7 @@ class BuildSystemConfig {
 /// be either an md5 hash of the file contents or a timestamp.
 ///
 /// A Target has both implicit and explicit inputs and outputs. Only the
-/// later are safe to evaluate before invoking the [buildAction]. For example,
+/// latter are safe to evaluate before invoking the [build] action. For example,
 /// a wildcard output pattern requires the outputs to exist before it can
 /// glob files correctly.
 ///
@@ -69,8 +77,9 @@ class BuildSystemConfig {
 /// subsequent builds to determine which file hashes need to be checked. If the
 /// stamp file is missing, the target's action is always rerun.
 ///
-///  file: `example_target.stamp`
+///  File: `example_target.stamp`
 ///
+/// ```json
 /// {
 ///   "inputs": [
 ///      "absolute/path/foo",
@@ -81,6 +90,7 @@ class BuildSystemConfig {
 ///      "absolute/path/fizz"
 ///    ]
 /// }
+/// ```
 ///
 /// ## Code review
 ///
@@ -103,13 +113,14 @@ class BuildSystemConfig {
 ///
 /// Most targets will invoke an external binary which makes unit testing
 /// trickier. It is recommend that for unit testing that a Fake is used and
-/// provided via the dependency injection system. a [Testbed] may be used to
+/// provided via the dependency injection system. A `Testbed` may be used to
 /// set up the environment before the test is run. Unit tests should fully
 /// exercise the rule, ensuring that the existing input and output verification
 /// logic can run, as well as verifying it correctly handles provided defines
 /// and meets any additional contracts present in the target.
 abstract class Target {
   const Target();
+
   /// The user-readable name of the target.
   ///
   /// This information is surfaced in the assemble commands and used as an
@@ -149,7 +160,7 @@ abstract class Target {
   ///
   /// Returning `true` will cause [build] to be skipped. This is equivalent
   /// to a build that produces no outputs.
-  bool canSkip(Environment environment) => false;
+  Future<bool> canSkip(Environment environment) async => false;
 
   /// The action which performs this build step.
   Future<void> build(Environment environment);
@@ -162,41 +173,27 @@ abstract class Target {
       this,
       inputsFiles.sources,
       outputFiles.sources,
-      <Node>[
-        for (final Target target in dependencies) target._toNode(environment),
-      ],
+      <Node>[for (final Target target in dependencies) target._toNode(environment)],
       buildKey,
       environment,
       inputsFiles.containsNewDepfile,
     );
   }
 
-  /// Invoke to remove the stamp file if the [buildAction] threw an exception.
+  /// Invoke to remove the stamp file if the [build] action threw an exception.
   void clearStamp(Environment environment) {
     final File stamp = _findStampFile(environment);
     ErrorHandlingFileSystem.deleteIfExists(stamp);
   }
 
-  void _writeStamp(
-    List<File> inputs,
-    List<File> outputs,
-    Environment environment,
-  ) {
-    final File stamp = _findStampFile(environment);
-    final List<String> inputPaths = <String>[];
-    for (final File input in inputs) {
-      inputPaths.add(input.path);
-    }
-    final List<String> outputPaths = <String>[];
-    for (final File output in outputs) {
-      outputPaths.add(output.path);
-    }
-    final String? key = buildKey;
-    final Map<String, Object> result = <String, Object>{
-      'inputs': inputPaths,
-      'outputs': outputPaths,
-      if (key != null) 'buildKey': key,
+  void _writeStamp(List<File> inputs, List<File> outputs, Environment environment) {
+    String getPath(File file) => file.path;
+    final result = <String, Object>{
+      'inputs': inputs.map(getPath).toList(),
+      'outputs': outputs.map(getPath).toList(),
+      if (buildKey case final String key) 'buildKey': key,
     };
+    final File stamp = _findStampFile(environment);
     if (!stamp.existsSync()) {
       stamp.createSync();
     }
@@ -211,7 +208,7 @@ abstract class Target {
 
   /// Find the current set of declared outputs, including wildcard directories.
   ///
-  /// The [implicit] flag controls whether it is safe to evaluate [Source]s
+  /// The [Source.implicit] flag controls whether it is safe to evaluate [Source]s
   /// which uses functions, behaviors, or patterns.
   ResolvedFiles resolveOutputs(Environment environment) {
     return _resolveConfiguration(outputs, depfiles, environment, inputs: false);
@@ -220,7 +217,9 @@ abstract class Target {
   /// Performs a fold across this target and its dependencies.
   T fold<T>(T initialValue, T Function(T previousValue, Target target) combine) {
     final T dependencyResult = dependencies.fold(
-        initialValue, (T prev, Target t) => t.fold(prev, combine));
+      initialValue,
+      (T prev, Target t) => t.fold(prev, combine),
+    );
     return combine(dependencyResult, this);
   }
 
@@ -233,23 +232,17 @@ abstract class Target {
     final String? key = buildKey;
     return <String, Object>{
       'name': name,
-      'dependencies': <String>[
-        for (final Target target in dependencies) target.name,
-      ],
-      'inputs': <String>[
-        for (final File file in resolveInputs(environment).sources) file.path,
-      ],
-      'outputs': <String>[
-        for (final File file in resolveOutputs(environment).sources) file.path,
-      ],
-      if (key != null) 'buildKey': key,
+      'dependencies': <String>[for (final Target target in dependencies) target.name],
+      'inputs': <String>[for (final File file in resolveInputs(environment).sources) file.path],
+      'outputs': <String>[for (final File file in resolveOutputs(environment).sources) file.path],
+      'buildKey': ?key,
       'stamp': _findStampFile(environment).absolute.path,
     };
   }
 
   /// Locate the stamp file for a particular target name and environment.
   File _findStampFile(Environment environment) {
-    final String fileName = '$name.stamp';
+    final fileName = '$name.stamp';
     return environment.buildDir.childFile(fileName);
   }
 
@@ -259,8 +252,8 @@ abstract class Target {
     Environment environment, {
     bool inputs = true,
   }) {
-    final SourceVisitor collector = SourceVisitor(environment, inputs);
-    for (final Source source in config) {
+    final collector = SourceVisitor(environment, inputs);
+    for (final source in config) {
       source.accept(collector);
     }
     depfiles.forEach(collector.visitDepfile);
@@ -282,7 +275,7 @@ class CompositeTarget extends Target {
   String get name => '_composite';
 
   @override
-  Future<void> build(Environment environment) async { }
+  Future<void> build(Environment environment) async {}
 
   @override
   List<Source> get inputs => <Source>[];
@@ -341,6 +334,7 @@ class Environment {
   /// [engineVersion] should be set to null for local engine builds.
   factory Environment({
     required Directory projectDir,
+    required String packageConfigPath,
     required Directory outputDir,
     required Directory cacheDir,
     required Directory flutterRootDir,
@@ -349,7 +343,6 @@ class Environment {
     required Artifacts artifacts,
     required ProcessManager processManager,
     required Platform platform,
-    required Usage usage,
     required Analytics analytics,
     String? engineVersion,
     required bool generateDartPluginRegistry,
@@ -362,17 +355,17 @@ class Environment {
     // include the engine and dart versions.
     String buildPrefix;
     final List<String> keys = defines.keys.toList()..sort();
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     // The engine revision is `null` for local or custom engines.
     if (engineVersion != null) {
       buffer.write(engineVersion);
     }
-    for (final String key in keys) {
+    for (final key in keys) {
       buffer.write(key);
       buffer.write(defines[key]);
     }
     buffer.write(outputDir.path);
-    final String output = buffer.toString();
+    final output = buffer.toString();
     final Digest digest = md5.convert(utf8.encode(output));
     buildPrefix = hex.encode(digest.bytes);
 
@@ -381,6 +374,7 @@ class Environment {
     return Environment._(
       outputDir: outputDir,
       projectDir: projectDir,
+      packageConfigPath: packageConfigPath,
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
       cacheDir: cacheDir,
@@ -391,7 +385,6 @@ class Environment {
       artifacts: artifacts,
       processManager: processManager,
       platform: platform,
-      usage: usage,
       analytics: analytics,
       engineVersion: engineVersion,
       inputs: inputs,
@@ -403,8 +396,10 @@ class Environment {
   ///
   /// Any directories not provided will fallback to a [testDirectory]
   @visibleForTesting
-  factory Environment.test(Directory testDirectory, {
+  factory Environment.test(
+    Directory testDirectory, {
     Directory? projectDir,
+    String? packageConfigPath,
     Directory? outputDir,
     Directory? cacheDir,
     Directory? flutterRootDir,
@@ -413,7 +408,6 @@ class Environment {
     Map<String, String> inputs = const <String, String>{},
     String? engineVersion,
     Platform? platform,
-    Usage? usage,
     Analytics? analytics,
     bool generateDartPluginRegistry = false,
     required FileSystem fileSystem,
@@ -423,6 +417,7 @@ class Environment {
   }) {
     return Environment(
       projectDir: projectDir ?? testDirectory,
+      packageConfigPath: packageConfigPath ?? '.dart_tool/package_config.json',
       outputDir: outputDir ?? testDirectory,
       cacheDir: cacheDir ?? testDirectory,
       flutterRootDir: flutterRootDir ?? testDirectory,
@@ -434,7 +429,6 @@ class Environment {
       artifacts: artifacts,
       processManager: processManager,
       platform: platform ?? FakePlatform(),
-      usage: usage ?? TestUsage(),
       analytics: analytics ?? const NoOpAnalytics(),
       engineVersion: engineVersion,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -444,6 +438,7 @@ class Environment {
   Environment._({
     required this.outputDir,
     required this.projectDir,
+    required this.packageConfigPath,
     required this.buildDir,
     required this.rootBuildDir,
     required this.cacheDir,
@@ -454,27 +449,53 @@ class Environment {
     required this.logger,
     required this.fileSystem,
     required this.artifacts,
-    required this.usage,
     required this.analytics,
     this.engineVersion,
     required this.inputs,
     required this.generateDartPluginRegistry,
   });
 
+  Environment copyWith({Directory? outputDir}) {
+    return Environment._(
+      outputDir: outputDir ?? this.outputDir,
+      projectDir: projectDir,
+      packageConfigPath: packageConfigPath,
+      buildDir: buildDir,
+      rootBuildDir: rootBuildDir,
+      cacheDir: cacheDir,
+      defines: defines,
+      flutterRootDir: flutterRootDir,
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+      platform: platform,
+      analytics: analytics,
+      engineVersion: engineVersion,
+      inputs: inputs,
+      generateDartPluginRegistry: generateDartPluginRegistry,
+    );
+  }
+
   /// The [Source] value which is substituted with the path to [projectDir].
-  static const String kProjectDirectory = '{PROJECT_DIR}';
+  static const kProjectDirectory = '{PROJECT_DIR}';
+
+  /// The [Source] value which is substituted with the path to the directory
+  /// that contains `.dart_tool/package_config.json`.
+  /// That is the grand-parent of [BuildInfo.packageConfigPath].
+  static const kWorkspaceDirectory = '{WORKSPACE_DIR}';
 
   /// The [Source] value which is substituted with the path to [buildDir].
-  static const String kBuildDirectory = '{BUILD_DIR}';
+  static const kBuildDirectory = '{BUILD_DIR}';
 
   /// The [Source] value which is substituted with the path to [cacheDir].
-  static const String kCacheDirectory = '{CACHE_DIR}';
+  static const kCacheDirectory = '{CACHE_DIR}';
 
   /// The [Source] value which is substituted with a path to the flutter root.
-  static const String kFlutterRootDirectory = '{FLUTTER_ROOT}';
+  static const kFlutterRootDirectory = '{FLUTTER_ROOT}';
 
   /// The [Source] value which is substituted with a path to [outputDir].
-  static const String kOutputDirectory = '{OUTPUT_DIR}';
+  static const kOutputDirectory = '{OUTPUT_DIR}';
 
   /// The `PROJECT_DIR` environment variable.
   ///
@@ -482,10 +503,16 @@ class Environment {
   /// can be located.
   final Directory projectDir;
 
+  /// The path to the package configuration file to use for compilation.
+  ///
+  /// This is used by package:package_config to locate the actual package_config.json
+  /// file. If not provided in tests, defaults to `.dart_tool/package_config.json`.
+  final String packageConfigPath;
+
   /// The `BUILD_DIR` environment variable.
   ///
   /// The root of the output directory where build step intermediates and
-  /// outputs are written. Current usages of assemble configure ths to be
+  /// outputs are written. Current usages of assemble configure this to be
   /// a unique directory under `.dart_tool/flutter_build`, though it can
   /// be placed anywhere. The uniqueness is only enforced by callers, and
   /// is currently done by hashing the build configuration.
@@ -536,22 +563,17 @@ class Environment {
 
   final FileSystem fileSystem;
 
-  final Usage usage;
-
   final Analytics analytics;
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String? engineVersion;
 
   /// Whether to generate the Dart plugin registry.
-  /// When [true], the main entrypoint is wrapped and the wrapper becomes
+  /// When `true`, the main entrypoint is wrapped and the wrapper becomes
   /// the new entrypoint.
   final bool generateDartPluginRegistry;
 
-  late final DepfileService depFileService = DepfileService(
-    logger: logger,
-    fileSystem: fileSystem,
-  );
+  late final depFileService = DepfileService(logger: logger, fileSystem: fileSystem);
 }
 
 /// The result information from the build system.
@@ -598,16 +620,31 @@ abstract class BuildSystem {
 
 class FlutterBuildSystem extends BuildSystem {
   const FlutterBuildSystem({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _logger = logger;
+    required this._fileSystem,
+    required this._platform,
+    required this._logger,
+  });
 
   final FileSystem _fileSystem;
   final Platform _platform;
   final Logger _logger;
+
+  /// Sources that should not be deleted when removed from output list.
+  static const _preservedOutputSources = <Source>[
+    // Xcode handles the Flutter framework output when using SwiftPM so it should not be deleted
+    // from the build.
+    kFlutterMacOSFrameworkBinarySource,
+    kFlutterIOSFrameworkBinarySource,
+  ];
+
+  @visibleForTesting
+  Set<String> convertSourcesToPaths(List<Source> sources, Environment environment) {
+    final collection = SourceVisitor(environment, false);
+    for (final source in sources) {
+      source.accept(collection);
+    }
+    return collection.sources.map((file) => file.path).toSet();
+  }
 
   @override
   Future<BuildResult> build(
@@ -620,24 +657,27 @@ class FlutterBuildSystem extends BuildSystem {
 
     // Load file store from previous builds.
     final File cacheFile = environment.buildDir.childFile(FileStore.kFileCache);
-    final FileStore fileCache = FileStore(
-      cacheFile: cacheFile,
-      logger: _logger,
-    )..initialize();
+    final fileCache = FileStore(cacheFile: cacheFile, logger: _logger)..initialize();
 
     // Perform sanity checks on build.
     checkCycles(target);
 
+    final Set<String> preservedOutputFilePaths = convertSourcesToPaths(
+      _preservedOutputSources,
+      environment,
+    );
+
     final Node node = target._toNode(environment);
-    final _BuildInstance buildInstance = _BuildInstance(
+    final buildInstance = _BuildInstance(
       environment: environment,
       fileCache: fileCache,
       buildSystemConfig: buildSystemConfig,
       logger: _logger,
       fileSystem: _fileSystem,
       platform: _platform,
+      preservedOutputFilePaths: preservedOutputFilePaths,
     );
-    bool passed = true;
+    var passed = true;
     try {
       passed = await buildInstance.invokeTarget(node);
     } finally {
@@ -652,35 +692,44 @@ class FlutterBuildSystem extends BuildSystem {
     // We also remove files under .dart_tool, since these are intermediaries
     // and don't need to be tracked by external systems.
     {
+      bool isUnconditionalFile(String path) {
+        return switch (_fileSystem.path.basename(path)) {
+          '.flutter-plugins' || '.flutter-plugins-dependencies' => true,
+          _ when _fileSystem.path.extension(path) == '.xcconfig' => true,
+          _ when _fileSystem.path.split(path).contains('.dart_tool') => true,
+          _ => false,
+        };
+      }
+
       buildInstance.inputFiles.removeWhere((String path, File file) {
-        return path.contains('.flutter-plugins') ||
-                       path.contains('xcconfig') ||
-                     path.contains('.dart_tool');
+        return isUnconditionalFile(path);
       });
       buildInstance.outputFiles.removeWhere((String path, File file) {
-        return path.contains('.flutter-plugins') ||
-                       path.contains('xcconfig') ||
-                     path.contains('.dart_tool');
+        return isUnconditionalFile(path);
       });
     }
     trackSharedBuildDirectory(
-      environment, _fileSystem, buildInstance.outputFiles,
+      environment,
+      _fileSystem,
+      buildInstance.outputFiles,
+      preservedOutputFilePaths,
     );
-    environment.buildDir.childFile('outputs.json')
-      .writeAsStringSync(json.encode(buildInstance.outputFiles.keys.toList()));
+    environment.buildDir
+        .childFile('outputs.json')
+        .writeAsStringSync(json.encode(buildInstance.outputFiles.keys.toList()));
 
     return BuildResult(
       success: passed,
       exceptions: buildInstance.exceptionMeasurements,
       performance: buildInstance.stepTimings,
       inputFiles: buildInstance.inputFiles.values.toList()
-          ..sort((File a, File b) => a.path.compareTo(b.path)),
+        ..sort((File a, File b) => a.path.compareTo(b.path)),
       outputFiles: buildInstance.outputFiles.values.toList()
-          ..sort((File a, File b) => a.path.compareTo(b.path)),
+        ..sort((File a, File b) => a.path.compareTo(b.path)),
     );
   }
 
-  static final Expando<FileStore> _incrementalFileStore = Expando<FileStore>();
+  static final _incrementalFileStore = Expando<FileStore>();
 
   @override
   Future<BuildResult> buildIncremental(
@@ -703,7 +752,7 @@ class FlutterBuildSystem extends BuildSystem {
       fileCache = _incrementalFileStore[previousBuild];
     }
     final Node node = target._toNode(environment);
-    final _BuildInstance buildInstance = _BuildInstance(
+    final buildInstance = _BuildInstance(
       environment: environment,
       fileCache: fileCache!,
       buildSystemConfig: const BuildSystemConfig(),
@@ -711,13 +760,13 @@ class FlutterBuildSystem extends BuildSystem {
       fileSystem: _fileSystem,
       platform: _platform,
     );
-    bool passed = true;
+    var passed = true;
     try {
       passed = await buildInstance.invokeTarget(node);
     } finally {
       fileCache.persistIncremental();
     }
-    final BuildResult result = BuildResult(
+    final result = BuildResult(
       success: passed,
       exceptions: buildInstance.exceptionMeasurements,
       performance: buildInstance.stepTimings,
@@ -737,12 +786,19 @@ class FlutterBuildSystem extends BuildSystem {
   /// files, if these were not already covered by the built-in cleanup. This
   /// cleanup is only necessary when multiple different build configurations
   /// output to the same directory.
-  @visibleForTesting
   void trackSharedBuildDirectory(
     Environment environment,
     FileSystem fileSystem,
     Map<String, File> currentOutputs,
+    Set<String> preservedOutputFilePaths,
   ) {
+    if (environment.defines[kXcodeBuildScript] == kXcodeBuildScriptValuePrepare) {
+      // If the current build is the "prepare" Xcode pre-action, skip
+      // updating the last build identifier and cleaning up the previous build
+      // since this build is not a complete build.
+      return;
+    }
+
     final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
     final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
     if (!lastBuildIdFile.existsSync()) {
@@ -760,10 +816,9 @@ class FlutterBuildSystem extends BuildSystem {
     lastBuildIdFile
       ..createSync()
       ..writeAsStringSync(currentBuildId);
-    final File outputsFile = environment.buildDir
-      .parent
-      .childDirectory(lastBuildId)
-      .childFile('outputs.json');
+    final File outputsFile = environment.buildDir.parent
+        .childDirectory(lastBuildId)
+        .childFile('outputs.json');
 
     if (!outputsFile.existsSync()) {
       // There is no output list. This could happen if the user manually
@@ -771,13 +826,57 @@ class FlutterBuildSystem extends BuildSystem {
       return;
     }
     final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object?>)
-      .cast<String>();
-    for (final String lastOutput in lastOutputs) {
-      if (!currentOutputs.containsKey(lastOutput)) {
-        final File lastOutputFile = fileSystem.file(lastOutput);
-        ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
-      }
+        .cast<String>();
+    _deleteStaleOutputs(
+      currentOutputs: currentOutputs,
+      environment: environment,
+      fileSystem: fileSystem,
+      preservedOutputFilePaths: preservedOutputFilePaths,
+      previousOutputs: lastOutputs,
+    );
+  }
+}
+
+/// Deletes stale output files from previous builds or build stages that are no
+/// longer part of the current build configuration or output graph.
+///
+/// Files located in the shared hooks runner output directory
+/// (`.dart_tool/hooks_runner/shared/`) and files in [preservedOutputFilePaths]
+/// are explicitly spared from deletion. Shared native asset hook outputs manage
+/// their own caching and invalidation lifecycles independently, so cleaning
+/// them up when switching to build configurations or stages that do not invoke
+/// native assets hooks would incorrectly cause subsequent hook-enabled builds
+/// to skip running hooks (due to valid metadata) while failing to locate the
+/// deleted output files.
+void _deleteStaleOutputs({
+  required Map<String, File> currentOutputs,
+  required Environment environment,
+  required FileSystem fileSystem,
+  required Set<String> preservedOutputFilePaths,
+  required Iterable<String> previousOutputs,
+}) {
+  String projectDirPath;
+  try {
+    projectDirPath = environment.projectDir.resolveSymbolicLinksSync();
+  } on FileSystemException {
+    projectDirPath = environment.projectDir.absolute.path;
+  }
+  final String sharedHooksPath = fileSystem.path.canonicalize(
+    fileSystem.path.join(projectDirPath, '.dart_tool', 'hooks_runner', 'shared'),
+  );
+  for (final previousOutput in previousOutputs) {
+    if (currentOutputs.containsKey(previousOutput)) {
+      continue;
     }
+    final File previousFile = fileSystem.file(previousOutput);
+    if (preservedOutputFilePaths.contains(previousFile.path) ||
+        fileSystem.path.isWithin(
+          sharedHooksPath,
+          fileSystem.path.canonicalize(previousFile.path),
+        )) {
+      continue;
+    }
+    ErrorHandlingFileSystem.deleteIfExists(previousFile);
   }
 }
 
@@ -789,25 +888,26 @@ class _BuildInstance {
     required this.buildSystemConfig,
     required this.logger,
     required this.fileSystem,
+    this.preservedOutputFilePaths = const <String>{},
     Platform? platform,
-  })
-    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
+  }) : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
 
   final Logger logger;
   final FileSystem fileSystem;
   final BuildSystemConfig buildSystemConfig;
   final Pool resourcePool;
-  final Map<String, AsyncMemoizer<bool>> pending = <String, AsyncMemoizer<bool>>{};
+  final pending = <String, AsyncMemoizer<bool>>{};
   final Environment environment;
   final FileStore fileCache;
-  final Map<String, File> inputFiles = <String, File>{};
-  final Map<String, File> outputFiles = <String, File>{};
+  final inputFiles = <String, File>{};
+  final outputFiles = <String, File>{};
+  final Set<String> preservedOutputFilePaths;
 
   // Timings collected during target invocation.
-  final Map<String, PerformanceMeasurement> stepTimings = <String, PerformanceMeasurement>{};
+  final stepTimings = <String, PerformanceMeasurement>{};
 
   // Exceptions caught during the build process.
-  final Map<String, ExceptionMeasurement> exceptionMeasurements = <String, ExceptionMeasurement>{};
+  final exceptionMeasurements = <String, ExceptionMeasurement>{};
 
   Future<bool> invokeTarget(Node node) async {
     final List<bool> results = await Future.wait(node.dependencies.map(invokeTarget));
@@ -820,9 +920,9 @@ class _BuildInstance {
 
   Future<bool> _invokeInternal(Node node) async {
     final PoolResource resource = await resourcePool.request();
-    final Stopwatch stopwatch = Stopwatch()..start();
-    bool succeeded = true;
-    bool skipped = false;
+    final stopwatch = Stopwatch()..start();
+    var succeeded = true;
+    var skipped = false;
 
     // The build system produces a list of aggregate input and output
     // files for the overall build. This list is provided to a hosting build
@@ -850,8 +950,8 @@ class _BuildInstance {
     try {
       // If we're missing a depfile, wait until after evaluating the target to
       // compute changes.
-      final bool canSkip = !node.missingDepfile &&
-        node.computeChanges(environment, fileCache, fileSystem, logger);
+      final bool canSkip =
+          !node.missingDepfile && node.computeChanges(environment, fileCache, fileSystem, logger);
 
       if (canSkip) {
         skipped = true;
@@ -866,7 +966,7 @@ class _BuildInstance {
       node.outputs.clear();
 
       // Check if we can skip via runtime dependencies.
-      final bool runtimeSkip = node.target.canSkip(environment);
+      final bool runtimeSkip = await node.target.canSkip(environment);
       if (runtimeSkip) {
         logger.printTrace('Skipping target: ${node.target.name}');
         skipped = true;
@@ -891,19 +991,23 @@ class _BuildInstance {
 
       // Delete outputs from previous stages that are no longer a part of the
       // build.
-      for (final String previousOutput in node.previousOutputs) {
-        if (outputFiles.containsKey(previousOutput)) {
-          continue;
-        }
-        final File previousFile = fileSystem.file(previousOutput);
-        ErrorHandlingFileSystem.deleteIfExists(previousFile);
-      }
+      _deleteStaleOutputs(
+        currentOutputs: outputFiles,
+        environment: environment,
+        fileSystem: fileSystem,
+        preservedOutputFilePaths: preservedOutputFilePaths,
+        previousOutputs: node.previousOutputs,
+      );
     } on Exception catch (exception, stackTrace) {
       node.target.clearStamp(environment);
       succeeded = false;
       skipped = false;
       exceptionMeasurements[node.target.name] = ExceptionMeasurement(
-          node.target.name, exception, stackTrace, fatal: true);
+        node.target.name,
+        exception,
+        stackTrace,
+        fatal: true,
+      );
     } finally {
       resource.release();
       stopwatch.stop();
@@ -969,27 +1073,8 @@ void checkCycles(Target initial) {
     }
     stack.remove(target);
   }
-  checkInternal(initial, <Target>{}, <Target>{});
-}
 
-/// Verifies that all files exist and are in a subdirectory of [Environment.buildDir].
-void verifyOutputDirectories(List<File> outputs, Environment environment, Target target) {
-  final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
-  final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
-  final List<File> missingOutputs = <File>[];
-  for (final File sourceFile in outputs) {
-    if (!sourceFile.existsSync()) {
-      missingOutputs.add(sourceFile);
-      continue;
-    }
-    final String path = sourceFile.path;
-    if (!path.startsWith(buildDirectory) && !path.startsWith(projectDirectory)) {
-      throw MisplacedOutputException(path, target.name);
-    }
-  }
-  if (missingOutputs.isNotEmpty) {
-    throw MissingOutputException(missingOutputs, target.name);
-  }
+  checkInternal(initial, <Target>{}, <Target>{});
 }
 
 /// A node in the build graph.
@@ -1021,7 +1106,7 @@ class Node {
       }
     }
     if (stampValues != null) {
-      final String? previousBuildKey = stampValues['buildKey'] as String?;
+      final previousBuildKey = stampValues['buildKey'] as String?;
       final Object? stampInputs = stampValues['inputs'];
       final Object? stampOutputs = stampValues['outputs'];
       if (stampInputs is List<Object?> && stampOutputs is List<Object?>) {
@@ -1040,14 +1125,7 @@ class Node {
         );
       }
     }
-    return Node.withNoStamp(
-      target,
-      inputs,
-      outputs,
-      dependencies,
-      buildKey,
-      missingDepfile,
-    );
+    return Node.withNoStamp(target, inputs, outputs, dependencies, buildKey, missingDepfile);
   }
 
   Node.withNoStamp(
@@ -1115,11 +1193,11 @@ class Node {
   /// One or more reasons why a task was invalidated.
   ///
   /// May be empty if the task was skipped.
-  final Map<InvalidatedReasonKind, InvalidatedReason> invalidatedReasons = <InvalidatedReasonKind, InvalidatedReason>{};
+  final invalidatedReasons = <InvalidatedReasonKind, InvalidatedReason>{};
 
   /// Whether this node needs an action performed.
   bool get dirty => _dirty;
-  bool _dirty = false;
+  var _dirty = false;
 
   InvalidatedReason _invalidate(InvalidatedReasonKind kind) {
     return invalidatedReasons[kind] ??= InvalidatedReason(kind);
@@ -1138,13 +1216,11 @@ class Node {
       _invalidate(InvalidatedReasonKind.buildKeyChanged);
       _dirty = true;
     }
-    final Set<String> currentOutputPaths = <String>{
-      for (final File file in outputs) file.path,
-    };
+    final currentOutputPaths = <String>{for (final File file in outputs) file.path};
     // For each input, first determine if we've already computed the key
     // for it. Then collect it to be sent off for diffing as a group.
-    final List<File> sourcesToDiff = <File>[];
-    final List<File> missingInputs = <File>[];
+    final sourcesToDiff = <File>[];
+    final missingInputs = <File>[];
     for (final File file in inputs) {
       if (!file.existsSync()) {
         missingInputs.add(file);
@@ -1168,10 +1244,10 @@ class Node {
     // For each output, first determine if we've already computed the key
     // for it. Then collect it to be sent off for hashing as a group.
     for (final String previousOutput in previousOutputs) {
-      // output paths changed.
+      // Output paths changed - an output was removed.
       if (!currentOutputPaths.contains(previousOutput)) {
         _dirty = true;
-        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputSetChanged);
+        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputSetRemoval);
         reason.data.add(previousOutput);
         // if this isn't a current output file there is no reason to compute the key.
         continue;
@@ -1194,6 +1270,16 @@ class Node {
         }
       } else {
         sourcesToDiff.add(file);
+      }
+    }
+
+    for (final currentOutput in currentOutputPaths) {
+      // Output paths changed - a new output was added.
+      if (!previousOutputs.contains(currentOutput)) {
+        _dirty = true;
+        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputSetAddition);
+        reason.data.add(currentOutput);
+        continue;
       }
     }
 
@@ -1227,17 +1313,24 @@ class InvalidatedReason {
   InvalidatedReason(this.kind);
 
   final InvalidatedReasonKind kind;
+
   /// Absolute file paths of inputs or outputs, depending on [kind].
-  final List<String> data = <String>[];
+  final data = <String>[];
 
   @override
   String toString() {
     return switch (kind) {
       InvalidatedReasonKind.inputMissing => 'The following inputs were missing: ${data.join(',')}',
-      InvalidatedReasonKind.inputChanged => 'The following inputs have updated contents: ${data.join(',')}',
-      InvalidatedReasonKind.outputChanged => 'The following outputs have updated contents: ${data.join(',')}',
-      InvalidatedReasonKind.outputMissing => 'The following outputs were missing: ${data.join(',')}',
-      InvalidatedReasonKind.outputSetChanged => 'The following outputs were removed from the output set: ${data.join(',')}',
+      InvalidatedReasonKind.inputChanged =>
+        'The following inputs have updated contents: ${data.join(',')}',
+      InvalidatedReasonKind.outputChanged =>
+        'The following outputs have updated contents: ${data.join(',')}',
+      InvalidatedReasonKind.outputMissing =>
+        'The following outputs were missing: ${data.join(',')}',
+      InvalidatedReasonKind.outputSetRemoval =>
+        'The following outputs were removed from the output set: ${data.join(',')}',
+      InvalidatedReasonKind.outputSetAddition =>
+        'The following outputs were added to the output set: ${data.join(',')}',
       InvalidatedReasonKind.buildKeyChanged => 'The target build key changed.',
     };
   }
@@ -1258,8 +1351,11 @@ enum InvalidatedReasonKind {
   /// An output file that is expected is missing.
   outputMissing,
 
-  /// The set of expected output files changed.
-  outputSetChanged,
+  /// An output file was added to the set of expected output files.
+  outputSetAddition,
+
+  /// An output file was removed from the set of expected output files.
+  outputSetRemoval,
 
   /// The build key changed
   buildKeyChanged,

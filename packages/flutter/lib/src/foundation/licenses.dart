@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/foundation.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/scheduler.dart';
+library;
+
 import 'dart:async';
 
 import 'package:meta/meta.dart' show visibleForTesting;
@@ -16,7 +21,9 @@ class LicenseParagraph {
   /// Creates a string for a license entry paragraph.
   const LicenseParagraph(this.text, this.indent);
 
-  /// The text of the paragraph. Should not have any leading or trailing whitespace.
+  /// The text of the paragraph.
+  ///
+  /// Should not have any leading or trailing whitespace.
   final String text;
 
   /// How many steps of indentation the paragraph has.
@@ -42,29 +49,30 @@ class LicenseParagraph {
 /// demand in [LicenseEntryCollector] callbacks passed to
 /// [LicenseRegistry.addLicense].
 abstract class LicenseEntry {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
+  /// This constructor enables subclasses to provide const constructors so that
+  /// they can be used in const expressions.
   const LicenseEntry();
 
   /// The names of the packages that this license entry applies to.
   Iterable<String> get packages;
 
   /// The paragraphs of the license, each as a [LicenseParagraph] consisting of
-  /// a string and some formatting information. Paragraphs can include newline
-  /// characters, but this is discouraged as it results in ugliness.
+  /// a string and some formatting information.
+  ///
+  /// Paragraphs can include newline characters, but this is discouraged as it
+  /// results in ugliness.
   Iterable<LicenseParagraph> get paragraphs;
 }
 
-enum _LicenseEntryWithLineBreaksParserState {
-  beforeParagraph,
-  inParagraph,
-}
+enum _LicenseEntryWithLineBreaksParserState { beforeParagraph, inParagraph }
 
 /// Variant of [LicenseEntry] for licenses that separate paragraphs with blank
-/// lines and that hard-wrap text within paragraphs. Lines that begin with one
-/// or more space characters are also assumed to introduce new paragraphs,
-/// unless they start with the same number of spaces as the previous line, in
-/// which case it's assumed they are a continuation of an indented paragraph.
+/// lines and that hard-wrap text within paragraphs.
+///
+/// Lines that begin with one or more space characters are also assumed to
+/// introduce new paragraphs, unless they start with the same number of spaces
+/// as the previous line, in which case it's assumed they are a continuation of
+/// an indented paragraph.
 ///
 /// {@tool snippet}
 ///
@@ -143,24 +151,30 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 
   @override
   Iterable<LicenseParagraph> get paragraphs {
-    int lineStart = 0;
-    int currentPosition = 0;
-    int lastLineIndent = 0;
-    int currentLineIndent = 0;
+    var lineStart = 0;
+    var currentPosition = 0;
+    var lastLineIndent = 0;
+    var currentLineIndent = 0;
     int? currentParagraphIndentation;
-    _LicenseEntryWithLineBreaksParserState state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-    final List<String> lines = <String>[];
-    final List<LicenseParagraph> result = <LicenseParagraph>[];
+    _LicenseEntryWithLineBreaksParserState state =
+        _LicenseEntryWithLineBreaksParserState.beforeParagraph;
+    final lines = <String>[];
+    final result = <LicenseParagraph>[];
 
     void addLine() {
-      assert(lineStart < currentPosition);
-      lines.add(text.substring(lineStart, currentPosition));
+      var lineEnd = currentPosition;
+      // Drop a trailing CR so CRLF line endings are treated like LF line endings.
+      if (text[lineEnd - 1] == '\r') {
+        lineEnd -= 1;
+      }
+      assert(lineStart < lineEnd);
+      lines.add(text.substring(lineStart, lineEnd));
     }
 
     LicenseParagraph getParagraph() {
       assert(lines.isNotEmpty);
       assert(currentParagraphIndentation != null);
-      final LicenseParagraph result = LicenseParagraph(lines.join(' '), currentParagraphIndentation!);
+      final result = LicenseParagraph(lines.join(' '), currentParagraphIndentation!);
       assert(result.text.trimLeft() == result.text);
       assert(result.text.isNotEmpty);
       lines.clear();
@@ -186,8 +200,9 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               if (lines.isNotEmpty) {
                 result.add(getParagraph());
               }
-              if (text[currentPosition] == '\r' && currentPosition < text.length - 1
-                  && text[currentPosition + 1] == '\n') {
+              if (text[currentPosition] == '\r' &&
+                  currentPosition < text.length - 1 &&
+                  text[currentPosition + 1] == '\n') {
                 currentPosition += 1;
               }
               lastLineIndent = 0;
@@ -256,7 +271,6 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
   }
 }
 
-
 /// A registry for packages to add licenses to, so that they can be displayed
 /// together in an interface such as the [LicensePage].
 ///
@@ -264,10 +278,11 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 /// that wish to show all the licenses can obtain them by calling [licenses].
 ///
 /// The flutter tool will automatically collect the contents of all the LICENSE
-/// files found at the root of each package into a single LICENSE file in the
-/// default asset bundle. Each license in that file is separated from the next
+/// files found at the root of each package into a single NOTICES file (or its
+/// compressed variant, `NOTICES.Z`) in the default asset bundle. Each license
+/// in that file is separated from the next
 /// by a line of eighty hyphens (`-`), and begins with a list of package names
-/// that the license applies to, one to a line, separated from the next by a
+/// that the license applies to, one to a line, separated from the license text by a
 /// blank line. The `services` package registers a license collector that splits
 /// that file and adds each entry to the registry.
 ///
@@ -317,8 +332,9 @@ abstract final class LicenseRegistry {
     return controller.stream;
   }
 
-  /// Resets the internal state of [LicenseRegistry]. Intended for use in
-  /// testing.
+  /// Resets the internal state of [LicenseRegistry].
+  ///
+  /// Intended for use in testing.
   @visibleForTesting
   static void reset() {
     _collectors = null;

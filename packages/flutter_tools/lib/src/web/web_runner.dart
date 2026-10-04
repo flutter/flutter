@@ -5,13 +5,10 @@
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/context.dart';
-import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/time.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 
 WebRunnerFactory? get webRunnerFactory => context.get<WebRunnerFactory>();
@@ -23,17 +20,15 @@ abstract class WebRunnerFactory {
   /// Create a [ResidentRunner] for the web.
   ResidentRunner createWebRunner(
     FlutterDevice device, {
-    String? target,
-    required bool stayResident,
-    required FlutterProject flutterProject,
-    required bool? ipv6,
-    required DebuggingOptions debuggingOptions,
-    UrlTunneller? urlTunneller,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required SystemClock systemClock,
-    required Usage usage,
     required Analytics analytics,
+    required DebuggingOptions debuggingOptions,
+    required FlutterProject flutterProject,
+    required bool stayResident,
+    required ToolContext toolContext,
     bool machine = false,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    String? target,
+    UrlTunneller? urlTunneller,
+    Map<String, String> webDefines,
   });
 }

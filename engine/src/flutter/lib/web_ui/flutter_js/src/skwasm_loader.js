@@ -1,0 +1,94 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import { createWasmInstantiator } from "./instantiate_wasm.js";
+import { resolveUrlWithSegments } from "./utils.js";
+
+export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
+  const needsHeavy = (!browserEnvironment.hasImageCodecs || !browserEnvironment.hasChromiumBreakIterators)
+  if (needsHeavy && config.enableWimp) {
+    console.error('Flutter Web: wimp_heavy is required but it hasn\'t been implemented yet.');
+  }
+  const fileStem = needsHeavy
+     ? 'skwasm_heavy'
+     : (config.enableWimp ? 'wimp' : 'skwasm');
+  const rawSkwasmUrl = resolveUrlWithSegments(baseUrl, `${fileStem}.js`)
+  let skwasmUrl = rawSkwasmUrl;
+  if (deps.flutterTT.policy) {
+    skwasmUrl = deps.flutterTT.policy.createScriptURL(skwasmUrl);
+  }
+  const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, `${fileStem}.wasm`), `${fileStem}.wasm`);
+  const skwasm = await import(skwasmUrl);
+  if (!browserEnvironment.crossOriginIsolated
+      && !config.forceSingleThreadedSkwasm
+      && !config.suppressMultithreadingWarning) {
+    console.warn(
+      'Flutter Web: Skwasm uses multi-threading and web workers for better ' +
+      'performance, but your page needs to be cross-origin isolated to support ' +
+      'multi-threading. Skwasm will run in single-threaded mode.\n' +
+      'To enable multithreading, serve your app with these HTTP response headers:\n' +
+      '  Cross-Origin-Opener-Policy: same-origin\n' +
+      '  Cross-Origin-Embedder-Policy: require-corp\n' +
+      'See https://web.dev/articles/coop-coep for guidance.\n' +
+      'To silence this warning, set `suppressMultithreadingWarning: true` in ' +
+      'your Flutter configuration.'
+    );
+  }
+  return await skwasm.default({
+    // Chrome extensions enforce strict CSP that blocks the dynamic script
+    // loading required for multi-threaded workers. We force single-threaded
+    // mode to prevent startup crashes.
+    // See https://github.com/flutter/flutter/issues/177974.
+    skwasmSingleThreaded: !browserEnvironment.crossOriginIsolated || browserEnvironment.isChromeExtension || config.forceSingleThreadedSkwasm,
+    instantiateWasm: wasmInstantiator,
+    locateFile: (filename, scriptDirectory) => {
+      // The wasm workers API has a separate .ww.js file that bootstraps the
+      // web worker. However, it turns out this worker bootstrapper doesn't
+      // actually work with ES6 modules, which we have enabled. So we instead
+      // pass our own bootstrapper that loads skwasm.js as an ES6 module, and
+      // queues/flushes pending messages that were received during the
+      // asynchronous load.
+      if (filename.endsWith('.ww.js')) {
+        return URL.createObjectURL(new Blob(
+          [`
+"use strict";
+
+let eventListener;
+eventListener = (message) => {
+    const pendingMessages = [];
+    const data = message.data;
+    data["instantiateWasm"] = (info,receiveInstance) => {
+        const instance = new WebAssembly.Instance(data["wasm"], info);
+        return receiveInstance(instance, data["wasm"])
+    };
+    import(data.js).then(async (skwasm) => {
+        await skwasm.default(data);
+
+        removeEventListener("message", eventListener);
+        for (const message of pendingMessages) {
+            dispatchEvent(message);
+        }
+    });
+    removeEventListener("message", eventListener);
+    eventListener = (message) => {
+
+        pendingMessages.push(message);
+    };
+
+    addEventListener("message", eventListener);
+};
+addEventListener("message", eventListener);
+`
+          ],
+          { 'type': 'application/javascript' }));
+      }
+      const url = resolveUrlWithSegments(baseUrl, filename);
+      return url;
+    },
+    // Because of the above workaround, the worker is just a blob and
+    // can't locate the main script using a relative path to itself,
+    // so we pass the main script location in.
+    mainScriptUrlOrBlob: rawSkwasmUrl,
+  });
+}

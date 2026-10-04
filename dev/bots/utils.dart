@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' as system show exit;
 import 'dart:io' hide exit;
@@ -10,25 +11,94 @@ import 'dart:math' as math;
 
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/source/line_info.dart';
+import 'package:collection/collection.dart';
+import 'package:file/file.dart' as fs;
+import 'package:file/local.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-const Duration _quietTimeout = Duration(minutes: 10); // how long the output should be hidden between calls to printProgress before just being verbose
+import 'luci_resultdb.dart';
+import 'run_command.dart';
+import 'tool_subsharding.dart';
+
+typedef ShardRunner = Future<void> Function();
+
+/// A function used to validate the output of a test.
+///
+/// If the output matches expectations, the function shall return null.
+///
+/// If the output does not match expectations, the function shall return an
+/// appropriate error message.
+typedef OutputChecker = String? Function(CommandResult);
+
+const Duration _quietTimeout = Duration(
+  minutes: 10,
+); // how long the output should be hidden between calls to printProgress before just being verbose
 
 // If running from LUCI set to False.
-final bool isLuci =  Platform.environment['LUCI_CI'] == 'True';
+final bool isLuci = Platform.environment['LUCI_CI'] == 'True';
 final bool hasColor = stdout.supportsAnsiEscapes && !isLuci;
-
+final bool _isRandomizationOff =
+    bool.tryParse(Platform.environment['TEST_RANDOMIZATION_OFF'] ?? '') ?? false;
 
 final String bold = hasColor ? '\x1B[1m' : ''; // shard titles
 final String red = hasColor ? '\x1B[31m' : ''; // errors
 final String green = hasColor ? '\x1B[32m' : ''; // section titles, commands
-final String yellow = hasColor ? '\x1B[33m' : ''; // indications that a test was skipped (usually renders orange or brown)
+final String yellow = hasColor
+    ? '\x1B[33m'
+    : ''; // indications that a test was skipped (usually renders orange or brown)
 final String cyan = hasColor ? '\x1B[36m' : ''; // paths
 final String reverse = hasColor ? '\x1B[7m' : ''; // clocks
-final String gray = hasColor ? '\x1B[30m' : ''; // subtle decorative items (usually renders as dark gray)
+final String gray = hasColor
+    ? '\x1B[30m'
+    : ''; // subtle decorative items (usually renders as dark gray)
 final String white = hasColor ? '\x1B[37m' : ''; // last log line (usually renders as light gray)
 final String reset = hasColor ? '\x1B[0m' : '';
+
+final String exe = Platform.isWindows ? '.exe' : '';
+final String bat = Platform.isWindows ? '.bat' : '';
+final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
+final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
+final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
+final String pubCache = path.join(flutterRoot, '.pub-cache');
+final String engineVersionFile = path.join(flutterRoot, 'bin', 'cache', 'engine.stamp');
+final String engineInfoFile = path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json');
+final String luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
+final bool runningInDartHHHBot =
+    luciBotId.startsWith('luci-dart-') || luciBotId.startsWith('dart-tests-');
+
+const String kShardKey = 'SHARD';
+const String kSubshardKey = 'SUBSHARD';
+const String kTestHarnessShardName = 'test_harness_tests';
+
+/// Environment variables to override the local engine when running `pub test`,
+/// if such flags are provided to `test.dart`.
+final Map<String, String> localEngineEnv = <String, String>{};
+
+/// The arguments to pass to `flutter test` (typically the local engine
+/// configuration) -- prefilled with  the arguments passed to test.dart.
+final List<String> flutterTestArgs = <String>[];
+
+/// Whether execution should be simulated for debugging purposes.
+///
+/// When `true`, calls to [runCommand] print to [stdout] instead of running
+/// the process. This is useful for determining what an invocation of `test.dart`
+/// _might_ due if not invoked with `--dry-run`, or otherwise determine what the
+/// different test shards and sub-shards are configured as.
+bool get dryRun => _dryRun ?? false;
+
+/// Switches [dryRun] to `true`.
+///
+/// Expected to be called at most once during execution of a process.
+void enableDryRun() {
+  if (_dryRun != null) {
+    throw StateError('Should only be called at most once');
+  }
+  _dryRun = true;
+}
+
+bool? _dryRun;
 
 const int kESC = 0x1B;
 const int kOpenSquareBracket = 0x5B;
@@ -39,25 +109,32 @@ const int kCSIIntermediateRangeEnd = 0x2F;
 const int kCSIFinalRangeStart = 0x40;
 const int kCSIFinalRangeEnd = 0x7E;
 
+int get terminalColumns {
+  try {
+    return stdout.terminalColumns;
+  } catch (e) {
+    return 40;
+  }
+}
 
 String get redLine {
   if (hasColor) {
-    return '$red${'━' * stdout.terminalColumns}$reset';
+    return '$red${'━' * terminalColumns}$reset';
   }
   return '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
 }
 
 String get clock {
-  final DateTime now = DateTime.now();
+  final now = DateTime.now();
   return '$reverse▌'
-         '${now.hour.toString().padLeft(2, "0")}:'
-         '${now.minute.toString().padLeft(2, "0")}:'
-         '${now.second.toString().padLeft(2, "0")}'
-         '▐$reset';
+      '${now.hour.toString().padLeft(2, "0")}:'
+      '${now.minute.toString().padLeft(2, "0")}:'
+      '${now.second.toString().padLeft(2, "0")}'
+      '▐$reset';
 }
 
 String prettyPrintDuration(Duration duration) {
-  String result = '';
+  var result = '';
   final int minutes = duration.inMinutes;
   if (minutes > 0) {
     result += '${minutes}min ';
@@ -94,11 +171,15 @@ final List<String> _pendingLogs = <String>[];
 Timer? _hideTimer; // When this is null, the output is verbose.
 
 void foundError(List<String> messages) {
+  if (dryRun) {
+    printProgress(messages.join('\n'));
+    return;
+  }
   assert(messages.isNotEmpty);
   // Make the error message easy to notice in the logs by
   // wrapping it in a red box.
-  final int width = math.max(15, (hasColor ? stdout.terminalColumns : 80) - 1);
-  final String title = 'ERROR #${_errorMessages.length + 1}';
+  final int width = math.max(15, (hasColor ? terminalColumns : 80) - 1);
+  final title = 'ERROR #${_errorMessages.length + 1}';
   print('$red╔═╡$bold$title$reset$red╞═${"═" * (width - 4 - title.length)}');
   for (final String message in messages.expand((String line) => line.split('\n'))) {
     print('$red║$reset $message');
@@ -136,16 +217,16 @@ Never reportErrorsAndExit(String message) {
   _hideTimer = null;
   print('$clock $message$reset');
   print(redLine);
-  print('${red}For your convenience, the error messages reported above are repeated here:$reset');
+  print('${red}The error messages reported above are repeated here:$reset');
   final bool printSeparators = _errorMessages.any((List<String> messages) => messages.length > 1);
   if (printSeparators) {
-    print('  🙙  🙛  ');
+    print('  -- This line intentionally left blank --  ');
   }
-  for (int index = 0; index < _errorMessages.length * 2 - 1; index += 1) {
+  for (var index = 0; index < _errorMessages.length * 2 - 1; index += 1) {
     if (index.isEven) {
       _errorMessages[index ~/ 2].forEach(print);
     } else if (printSeparators) {
-      print('  🙙  🙛  ');
+      print('  -- This line intentionally left blank --  ');
     }
   }
   print(redLine);
@@ -185,24 +266,32 @@ void _printQuietly(Object? message) {
     _pendingLogs.add(message.toString());
     String line = '$message'.trimRight();
     final int start = line.lastIndexOf(_lineBreak) + 1;
-    int index = start;
-    int length = 0;
-    while (index < line.length && length < stdout.terminalColumns) {
-      if (line.codeUnitAt(index) == kESC) { // 0x1B
+    var index = start;
+    var length = 0;
+    while (index < line.length && length < terminalColumns) {
+      if (line.codeUnitAt(index) == kESC) {
+        // 0x1B
         index += 1;
-        if (index < line.length && line.codeUnitAt(index) == kOpenSquareBracket) { // 0x5B, [
+        if (index < line.length && line.codeUnitAt(index) == kOpenSquareBracket) {
+          // 0x5B, [
           // That was the start of a CSI sequence.
           index += 1;
-          while (index < line.length && line.codeUnitAt(index) >= kCSIParameterRangeStart
-                                     && line.codeUnitAt(index) <= kCSIParameterRangeEnd) { // 0x30..0x3F
+          while (index < line.length &&
+              line.codeUnitAt(index) >= kCSIParameterRangeStart &&
+              line.codeUnitAt(index) <= kCSIParameterRangeEnd) {
+            // 0x30..0x3F
             index += 1; // ...parameter bytes...
           }
-          while (index < line.length && line.codeUnitAt(index) >= kCSIIntermediateRangeStart
-                                     && line.codeUnitAt(index) <= kCSIIntermediateRangeEnd) { // 0x20..0x2F
+          while (index < line.length &&
+              line.codeUnitAt(index) >= kCSIIntermediateRangeStart &&
+              line.codeUnitAt(index) <= kCSIIntermediateRangeEnd) {
+            // 0x20..0x2F
             index += 1; // ...intermediate bytes...
           }
-          if (index < line.length && line.codeUnitAt(index) >= kCSIFinalRangeStart
-                                  && line.codeUnitAt(index) <= kCSIFinalRangeEnd) { // 0x40..0x7E
+          if (index < line.length &&
+              line.codeUnitAt(index) >= kCSIFinalRangeStart &&
+              line.codeUnitAt(index) <= kCSIFinalRangeEnd) {
+            // 0x40..0x7E
             index += 1; // ...final byte.
           }
         }
@@ -231,7 +320,7 @@ void _printLoudly(String message) {
 
 // THE FOLLOWING CODE IS A VIOLATION OF OUR STYLE GUIDE
 // BECAUSE IT INTRODUCES A VERY FLAKY RACE CONDITION
-// https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#never-check-if-a-port-is-available-before-using-it-never-add-timeouts-and-other-race-conditions
+// https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#never-check-if-a-port-is-available-before-using-it-never-add-timeouts-and-other-race-conditions
 // DO NOT USE THE FOLLOWING FUNCTIONS
 // DO NOT WRITE CODE LIKE THE FOLLOWING FUNCTIONS
 // https://github.com/flutter/flutter/issues/109474
@@ -259,4 +348,522 @@ Future<bool> _isPortAvailable(int port) async {
 
 String locationInFile(ResolvedUnitResult unit, AstNode node, String workingDirectory) {
   return '${path.relative(path.relative(unit.path, from: workingDirectory))}:${unit.lineInfo.getLocation(node.offset).lineNumber}';
+}
+
+/// Whether the given [AstNode] within the `compilationUnit` is under the effect
+/// of an inline ignore directive described by `ignoreDirectivePattern`.
+///
+/// The `compilationUnit` parameter is the parsed dart file containing the given
+/// [AstNode]. The `ignoreDirectivePattern` is a [Pattern] that should precisely
+/// match the ignore directive of interest (including the slashes, example:
+/// `// flutter_ignore: deprecation_syntax`).
+///
+/// The implementation assumes the `ignoreDirectivePattern` matches no more than
+/// one line. It searches for the given `ignoreDirectivePattern` in the
+/// `compilationUnit`, that either starts the line above the given `node`, or
+/// appears after `node` but on the same line, such that the ignore directive
+/// works the same way as dart's "ignore" comment: it can either be added above
+/// or after the line that needs to be exemped.
+bool hasInlineIgnore(
+  AstNode node,
+  ParseStringResult compilationUnit,
+  Pattern ignoreDirectivePattern,
+) {
+  final LineInfo lineInfo = compilationUnit.lineInfo;
+  // In case the node has multiple lines, match from its start offset.
+  final String textAfterNode = compilationUnit.content.substring(
+    node.offset,
+    // This assumes every line ends with a newline character (including the last
+    // line) and the new line character is not included to match the given pattern.
+    lineInfo.getOffsetOfLineAfter(node.offset) - 1,
+  );
+  if (textAfterNode.contains(ignoreDirectivePattern)) {
+    return true;
+  }
+  // The lineNumber getter uses one-based index while everything else uses zero-based index.
+  final int lineNumber = lineInfo.getLocation(node.offset).lineNumber - 1;
+  if (lineNumber <= 0) {
+    return false;
+  }
+  return compilationUnit.content
+      .substring(lineInfo.getOffsetOfLine(lineNumber - 1), lineInfo.getOffsetOfLine(lineNumber))
+      .trimLeft()
+      .contains(ignoreDirectivePattern);
+}
+
+// The seed used to shuffle tests. If not passed with
+// --test-randomize-ordering-seed=<seed> on the command line, it will be set the
+// first time it is accessed. Pass zero to turn off shuffling.
+String? _shuffleSeed;
+
+set shuffleSeed(String? newSeed) {
+  _shuffleSeed = newSeed;
+}
+
+String get shuffleSeed {
+  if (_shuffleSeed != null) {
+    return _shuffleSeed!;
+  }
+  // Attempt to load from the command-line argument
+  final String? seedArg = Platform.environment['--test-randomize-ordering-seed'];
+  if (seedArg != null) {
+    return seedArg;
+  }
+  // Fallback to the original time-based seed generation
+  final DateTime seedTime = DateTime.now().toUtc().subtract(const Duration(hours: 7));
+  _shuffleSeed = '${seedTime.year * 10000 + seedTime.month * 100 + seedTime.day}';
+  return _shuffleSeed!;
+}
+
+// TODO(sigmund): includeLocalEngineEnv should default to true. Currently we
+// only enable it on flutter-web test because some test suites do not work
+// properly when overriding the local engine (for example, because some platform
+// dependent targets are only built on some engines).
+// See https://github.com/flutter/flutter/issues/72368
+Future<void> runDartTest(
+  String workingDirectory, {
+  List<String>? testPaths,
+  bool enableFlutterToolAsserts = true,
+  bool useBuildRunner = false,
+  String? coverage,
+  bool forceSingleCore = false,
+  Duration? perTestTimeout,
+  bool includeLocalEngineEnv = false,
+  bool ensurePrecompiledTool = true,
+  bool shuffleTests = true,
+  bool collectMetrics = false,
+  List<String>? tags,
+  bool runSkipped = false,
+}) async {
+  // TODO(matanlurey): Consider Platform.numberOfProcessors instead.
+  // See https://github.com/flutter/flutter/issues/161399.
+  var cpus = 2;
+
+  // Integration tests that depend on external processes like chrome
+  // can get stuck if there are multiple instances running at once.
+  if (forceSingleCore) {
+    cpus = 1;
+  }
+
+  const fileSystem = LocalFileSystem();
+  final suffix = DateTime.now().microsecondsSinceEpoch.toString();
+  final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
+  final args = <String>[
+    'run',
+    'test',
+    '--reporter=expanded',
+    '--file-reporter=json:${metricFile.path}',
+    if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
+    '-j$cpus',
+    if (!hasColor) '--no-color',
+    if (coverage != null) '--coverage=$coverage',
+    if (perTestTimeout != null) '--timeout=${perTestTimeout.inMilliseconds}ms',
+    if (runSkipped) '--run-skipped',
+    ...?tags?.map((String t) => '--tags=$t'),
+    if (testPaths != null)
+      for (final String testPath in testPaths) testPath,
+  ];
+  final environment = <String, String>{
+    'FLUTTER_ROOT': flutterRoot,
+    if (includeLocalEngineEnv) ...localEngineEnv,
+    if (Directory(pubCache).existsSync()) 'PUB_CACHE': pubCache,
+  };
+  if (enableFlutterToolAsserts) {
+    adjustEnvironmentToEnableFlutterAsserts(environment);
+  }
+  if (ensurePrecompiledTool) {
+    // We rerun the `flutter` tool here just to make sure that it is compiled
+    // before tests run, because the tests might time out if they have to rebuild
+    // the tool themselves.
+    await runCommand(flutter, <String>['--version'], environment: environment);
+  }
+  await runCommand(
+    dart,
+    args,
+    workingDirectory: workingDirectory,
+    environment: environment,
+    removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
+  );
+
+  if (dryRun) {
+    return;
+  }
+
+  final test = TestFileReporterResults.fromFile(metricFile); // --file-reporter name
+  final File info = fileSystem.file(path.join(flutterRoot, 'error.log'));
+  info.writeAsStringSync(json.encode(test.errors));
+
+  if (collectMetrics) {
+    try {
+      final testList = <String>[];
+      final Map<int, TestSpecs> allTestSpecs = test.allTestSpecs;
+      for (final TestSpecs testSpecs in allTestSpecs.values) {
+        testList.add(testSpecs.toJson());
+      }
+      if (testList.isNotEmpty) {
+        final String testJson = json.encode(testList);
+        final File testResults = fileSystem.file(path.join(flutterRoot, 'test_results.json'));
+        testResults.writeAsStringSync(testJson);
+      }
+    } on fs.FileSystemException catch (e) {
+      print('Failed to generate metrics: $e');
+    }
+  }
+
+  // Report the individual test cases to LUCI ResultDB (no-op when not on LUCI).
+  await reportTestResultsToResultDb(test, workingDirectory: workingDirectory);
+
+  // metriciFile is a transitional file that needs to be deleted once it is parsed.
+  // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
+  // https://github.com/flutter/flutter/issues/146003
+  metricFile.deleteSync();
+}
+
+Future<void> runFlutterTest(
+  String workingDirectory, {
+  String? script,
+  bool expectFailure = false,
+  bool printOutput = true,
+  OutputChecker? outputChecker,
+  List<String> options = const <String>[],
+  Map<String, String>? environment,
+  List<String> tests = const <String>[],
+  bool shuffleTests = true,
+  bool fatalWarnings = true,
+}) async {
+  assert(
+    !printOutput || outputChecker == null,
+    'Output either can be printed or checked but not both',
+  );
+
+  final tags = <String>[];
+  // Recipe-configured reduced test shards will only execute tests with the
+  // appropriate tag.
+  if (Platform.environment['REDUCED_TEST_SET'] == 'True') {
+    tags.addAll(<String>['-t', 'reduced-test-set']);
+  }
+
+  const fileSystem = LocalFileSystem();
+  final suffix = DateTime.now().microsecondsSinceEpoch.toString();
+  final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
+  final args = <String>[
+    'test',
+    '--reporter=expanded',
+    '--file-reporter=json:${metricFile.path}',
+    if (shuffleTests && !_isRandomizationOff) '--test-randomize-ordering-seed=$shuffleSeed',
+    if (fatalWarnings) '--fatal-warnings',
+    ...options,
+    ...tags,
+    ...flutterTestArgs,
+  ];
+
+  if (script != null) {
+    final String fullScriptPath = path.join(workingDirectory, script);
+    if (!FileSystemEntity.isFileSync(fullScriptPath)) {
+      foundError(<String>[
+        '${red}Could not find test$reset: $green$fullScriptPath$reset',
+        'Working directory: $cyan$workingDirectory$reset',
+        'Script: $green$script$reset',
+        if (!printOutput) 'This is one of the tests that does not normally print output.',
+      ]);
+      return;
+    }
+    args.add(script);
+  }
+
+  args.addAll(tests);
+
+  final OutputMode outputMode = outputChecker == null && printOutput
+      ? OutputMode.print
+      : OutputMode.capture;
+
+  final CommandResult result = await runCommand(
+    flutter,
+    args,
+    workingDirectory: workingDirectory,
+    expectNonZeroExit: expectFailure,
+    outputMode: outputMode,
+    environment: environment,
+  );
+
+  // metriciFile is a transitional file that needs to be deleted once it is parsed.
+  // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
+  // https://github.com/flutter/flutter/issues/146003
+  if (!dryRun) {
+    // Parse the test results and report the individual test cases to LUCI
+    // ResultDB (no-op off LUCI) so `flutter test`-based shards populate the
+    // "Test Results" tab.
+    if (metricFile.existsSync()) {
+      final test = TestFileReporterResults.fromFile(metricFile);
+      await reportTestResultsToResultDb(
+        test,
+        workingDirectory: workingDirectory,
+        expectFailure: expectFailure,
+      );
+    }
+    metricFile.deleteSync();
+  }
+
+  if (outputChecker != null) {
+    final String? message = outputChecker(result);
+    if (message != null) {
+      foundError(<String>[message]);
+    }
+  }
+}
+
+/// Reports the individual test cases in [test] to LUCI ResultDB so that they
+/// show up in the "Test Results" tab of the LUCI build.
+///
+/// Uses the ResultDB Recorder API, which is available whenever the build has a
+/// ResultDB invocation (the case for Flutter builds with ResultDB enabled).
+///
+/// This is a no-op when not running inside a LUCI build with ResultDB enabled
+/// (for example, local runs), and any failure to report is logged but does not
+/// fail the test run.
+///
+/// [workingDirectory] is the directory the shard ran the tests in; it is used to
+/// resolve relative suite paths into repo-relative module names.
+///
+/// When [expectFailure] is true, the whole `flutter test` invocation was
+/// expected to fail, so the reported results are marked as expected failures
+/// (rather than red regressions) in ResultDB.
+Future<void> reportTestResultsToResultDb(
+  TestFileReporterResults test, {
+  String? workingDirectory,
+  bool expectFailure = false,
+}) async {
+  final List<LuciTestResult> results = convertToLuciTestResultsFormat(
+    test,
+    expectFailure: expectFailure,
+    workingDirectory: workingDirectory,
+    rootDirectory: flutterRoot,
+  );
+  if (results.isEmpty) {
+    return;
+  }
+
+  ResultDbRecorder? recorder;
+  try {
+    recorder = ResultDbRecorder.fromEnvironment();
+    if (recorder == null) {
+      print('ResultDB is not available; skipping test result reporting.');
+      return;
+    }
+    await recorder.reportTestResults(results);
+    print('Reported ${results.length} test result(s) to ResultDB.');
+  } catch (e) {
+    print('Failed to report test results to ResultDB: $e');
+  } finally {
+    recorder?.close();
+  }
+}
+
+/// This will force the next run of the Flutter tool (if it uses the provided
+/// environment) to have asserts enabled, by setting an environment variable.
+void adjustEnvironmentToEnableFlutterAsserts(Map<String, String> environment) {
+  // If an existing env variable exists append to it, but only if
+  // it doesn't appear to already include enable-asserts.
+  String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
+  if (!toolsArgs.contains('--enable-asserts')) {
+    toolsArgs += ' --enable-asserts';
+  }
+  environment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
+}
+
+Future<void> selectShard(Map<String, ShardRunner> shards) =>
+    _runFromList(shards, kShardKey, 'shard', 0);
+Future<void> selectSubshard(Map<String, ShardRunner> subshards) =>
+    _runFromList(subshards, kSubshardKey, 'subshard', 1);
+
+Future<void> runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
+  final List<ShardRunner> sublist = selectIndexOfTotalSubshard<ShardRunner>(tests);
+  for (final test in sublist) {
+    await test();
+  }
+}
+
+/// Parse (one-)index/total-named subshards from environment variable SUBSHARD
+/// and equally distribute [tests] between them.
+/// The format of SUBSHARD is "{index}_{total number of shards}".
+/// The scheduler can change the number of total shards without needing an additional
+/// commit in this repository.
+///
+/// Examples:
+/// 1_3
+/// 2_3
+/// 3_3
+List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubshardKey}) {
+  // Example: "1_3" means the first (one-indexed) shard of three total shards.
+  final String? subshardName = Platform.environment[subshardKey];
+  if (subshardName == null) {
+    print('$kSubshardKey environment variable is missing, skipping sharding');
+    return tests;
+  }
+  printProgress('$bold$subshardKey=$subshardName$reset');
+
+  final pattern = RegExp(r'^(\d+)_(\d+)$');
+  final Match? match = pattern.firstMatch(subshardName);
+  if (match == null || match.groupCount != 2) {
+    foundError(<String>[
+      '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"',
+    ]);
+    throw Exception('Invalid subshard name: $subshardName');
+  }
+  // One-indexed.
+  final int index = int.parse(match.group(1)!);
+  final int total = int.parse(match.group(2)!);
+  if (index > total) {
+    foundError(<String>[
+      '${red}Invalid subshard name "$subshardName". Index number must be greater or equal to total.',
+    ]);
+    return <T>[];
+  }
+
+  final (int start, int end) = selectTestsForSubShard(
+    testCount: tests.length,
+    subShardIndex: index,
+    subShardCount: total,
+  );
+  print('Selecting subshard $index of $total (tests ${start + 1}-$end of ${tests.length})');
+  return tests.sublist(start, end);
+}
+
+/// Finds the interval of tests that a subshard is responsible for testing.
+@visibleForTesting
+(int start, int end) selectTestsForSubShard({
+  required int testCount,
+  required int subShardIndex,
+  required int subShardCount,
+}) {
+  // While there exists a closed formula figuring out the range of tests the
+  // subshard is responsible for, modeling this as a simulation of distributing
+  // items equally into buckets is more intuitive.
+  //
+  // A bucket represents how many tests a subshard should be allocated.
+  final buckets = List<int>.filled(subShardCount, 0);
+  // First, allocate an equal number of items to each bucket.
+  for (var i = 0; i < buckets.length; i++) {
+    buckets[i] = (testCount / subShardCount).floor();
+  }
+  // For the N leftover items, put one into each of the first N buckets.
+  final int remainingItems = testCount % buckets.length;
+  for (var i = 0; i < remainingItems; i++) {
+    buckets[i] += 1;
+  }
+
+  // Lastly, compute the indices of the items in buckets[index].
+  // We derive this from the toal number items in previous buckets and the number
+  // of items in this bucket.
+  final int numberOfItemsInPreviousBuckets = subShardIndex == 0
+      ? 0
+      : buckets.sublist(0, subShardIndex - 1).sum;
+  final start = numberOfItemsInPreviousBuckets;
+  final int end = start + buckets[subShardIndex - 1];
+
+  return (start, end);
+}
+
+Future<void> _runFromList(
+  Map<String, ShardRunner> items,
+  String key,
+  String name,
+  int positionInTaskName,
+) async {
+  try {
+    final String? item = Platform.environment[key];
+    if (item == null) {
+      for (final String currentItem in items.keys) {
+        printProgress('$bold$key=$currentItem$reset');
+        await items[currentItem]!();
+      }
+    } else {
+      printProgress('$bold$key=$item$reset');
+      if (!items.containsKey(item)) {
+        foundError(<String>[
+          '${red}Invalid $name: $item$reset',
+          'The available ${name}s are: ${items.keys.join(", ")}',
+        ]);
+        return;
+      }
+      await items[item]!();
+    }
+  } catch (_) {
+    if (!dryRun) {
+      rethrow;
+    }
+  }
+}
+
+/// Provides access to read and parse the `bin/cache/flutter.version.json`.
+sealed class Version {
+  static final RegExp _pattern = RegExp(r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre([-\.]\d+)?)?$');
+
+  /// Attempts to read and resolve the version stored in the [checkoutPath].
+  ///
+  /// If omitted, defaults the current flutter root using the real file system.
+  static Future<Version> resolveIn([fs.Directory? checkoutPath]) async {
+    checkoutPath ??= const LocalFileSystem().directory(flutterRoot);
+    return resolveFile(
+      checkoutPath.childDirectory('bin').childDirectory('cache').childFile('flutter.version.json'),
+    );
+  }
+
+  /// Attempts to read and resolve the version stored in [file].
+  static Future<Version> resolveFile(fs.File file) async {
+    if (!file.existsSync()) {
+      return VersionError._(
+        'The version logic failed to create the Flutter version file: ${file.path}',
+        contents: null,
+      );
+    }
+    final Object? json = jsonDecode(await file.readAsString());
+    if (json is! Map<String, Object?>) {
+      return VersionError._('The version file was in an unexpected format.', contents: '$json');
+    }
+    final version = json['flutterVersion'] as String?;
+    if (version == null) {
+      return VersionError._(
+        'The version file was missing the key "flutterVersion".',
+        contents: '$json',
+      );
+    }
+    if (version == '0.0.0-unknown') {
+      return VersionError._(
+        'The version logic failed to determine the Flutter version.',
+        contents: version,
+      );
+    }
+    if (!version.contains(_pattern)) {
+      return VersionError._(
+        'The version logic generated an invalid version string: "$version".',
+        contents: version,
+      );
+    }
+    return VersionOk._(version);
+  }
+}
+
+/// A failed result of [Version.resolveFile].
+final class VersionError implements Version {
+  const VersionError._(this.error, {required this.contents});
+
+  /// Describes the error state.
+  final String error;
+
+  /// The contents of the version file, if any.
+  final String? contents;
+
+  @override
+  String toString() {
+    return error;
+  }
+}
+
+/// A successful result of [Version.resolveFile].
+final class VersionOk implements Version {
+  const VersionOk._(this.version);
+
+  /// The contents of the version file, successfully parsed.
+  final String version;
 }

@@ -10,19 +10,21 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   Future<void> setAppLifeCycleState(AppLifecycleState state) async {
-    final ByteData? message =
-        const StringCodec().encodeMessage(state.toString());
-    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    final ByteData? message = const StringCodec().encodeMessage(state.toString());
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/lifecycle',
+      message,
+      (_) {},
+    );
   }
 
   testWidgets('Ticker mute control test', (WidgetTester tester) async {
-    int tickCount = 0;
+    var tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
     }
 
-    final Ticker ticker = Ticker(handleTick);
+    final ticker = Ticker(handleTick);
     addTearDown(ticker.dispose);
 
     expect(ticker.isTicking, isFalse);
@@ -104,7 +106,7 @@ void main() {
     addTearDown(() => ticker.dispose());
 
     void testFunction() {
-      ticker = Ticker((Duration _) { });
+      ticker = Ticker((Duration _) {});
     }
 
     testFunction();
@@ -120,7 +122,7 @@ void main() {
       lastDuration = duration;
     }
 
-    final Ticker ticker = Ticker(handleTick);
+    final ticker = Ticker(handleTick);
     ticker.start();
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
@@ -138,7 +140,7 @@ void main() {
       lastDuration = duration;
     }
 
-    final Ticker ticker = Ticker(handleTick);
+    final ticker = Ticker(handleTick);
     ticker.start();
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
@@ -150,12 +152,12 @@ void main() {
   });
 
   testWidgets('Ticker stops ticking when application is paused', (WidgetTester tester) async {
-    int tickCount = 0;
+    var tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
     }
 
-    final Ticker ticker = Ticker(handleTick);
+    final ticker = Ticker(handleTick);
     addTearDown(ticker.dispose);
     ticker.start();
 
@@ -163,25 +165,25 @@ void main() {
     expect(ticker.isActive, isTrue);
     expect(tickCount, equals(0));
 
-    setAppLifeCycleState(AppLifecycleState.paused);
+    await setAppLifeCycleState(AppLifecycleState.paused);
 
     expect(ticker.isTicking, isFalse);
     expect(ticker.isActive, isTrue);
 
     ticker.stop();
 
-    setAppLifeCycleState(AppLifecycleState.resumed);
+    await setAppLifeCycleState(AppLifecycleState.resumed);
   });
 
   testWidgets('Ticker can be created before application unpauses', (WidgetTester tester) async {
-    setAppLifeCycleState(AppLifecycleState.paused);
+    await setAppLifeCycleState(AppLifecycleState.paused);
 
-    int tickCount = 0;
+    var tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
     }
 
-    final Ticker ticker = Ticker(handleTick);
+    final ticker = Ticker(handleTick);
     addTearDown(ticker.dispose);
     ticker.start();
 
@@ -193,7 +195,7 @@ void main() {
     expect(tickCount, equals(0));
     expect(ticker.isTicking, isFalse);
 
-    setAppLifeCycleState(AppLifecycleState.resumed);
+    await setAppLifeCycleState(AppLifecycleState.resumed);
 
     await tester.pump(const Duration(milliseconds: 10));
 
@@ -205,7 +207,7 @@ void main() {
 
   test('Ticker dispatches memory events', () async {
     await expectLater(
-      await memoryEvents(() => Ticker((_) {}).dispose(), Ticker,),
+      await memoryEvents(() => Ticker((_) {}).dispose(), Ticker),
       areCreateAndDispose,
     );
   });

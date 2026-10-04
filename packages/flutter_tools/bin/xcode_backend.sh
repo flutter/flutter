@@ -3,6 +3,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# ---------------------------------- NOTE ---------------------------------- #
+#
+# Please keep the logic in this file consistent with the logic in the
+# `macos_assemble.sh` script (used for macOS projects) in the same directory.
+#
+# -------------------------------------------------------------------------- #
+
 # exit on error, or usage of unset var
 set -euo pipefail
 
@@ -10,12 +17,12 @@ set -euo pipefail
 unset CDPATH
 
 function follow_links() (
-  cd -P "$(dirname -- "$1")"
+  cd -P -- "$(dirname -- "$1")"
   file="$PWD/$(basename -- "$1")"
   while [[ -h "$file" ]]; do
-    cd -P "$(dirname -- "$file")"
+    cd -P -- "$(dirname -- "$file")"
     file="$(readlink -- "$file")"
-    cd -P "$(dirname -- "$file")"
+    cd -P -- "$(dirname -- "$file")"
     file="$PWD/$(basename -- "$file")"
   done
   echo "$file"
@@ -26,4 +33,4 @@ BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 FLUTTER_ROOT="$BIN_DIR/../../.."
 DART="$FLUTTER_ROOT/bin/dart"
 
-"$DART" "$BIN_DIR/xcode_backend.dart" "$@"
+"$DART" "$BIN_DIR/xcode_backend.dart" "$@" "ios"

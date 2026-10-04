@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'icon.dart';
+/// @docImport 'icon_theme.dart';
+/// @docImport 'image_icon.dart';
+/// @docImport 'text.dart';
+library;
+
 import 'dart:ui' show Color;
 
 import 'framework.dart';
@@ -29,6 +38,7 @@ class BottomNavigationBarItem {
     Widget? activeIcon,
     this.backgroundColor,
     this.tooltip,
+    this.semanticsLabel,
   }) : activeIcon = activeIcon ?? icon;
 
   /// A key to be passed through to the resultant widget.
@@ -95,4 +105,16 @@ class BottomNavigationBarItem {
   ///
   /// Defaults to null, in which case the tooltip is not shown.
   final String? tooltip;
+
+  /// The semantic label for this [BottomNavigationBarItem].
+  ///
+  /// This is used by accessibility tools to describe the item. When provided,
+  /// it overrides the default [label] String when read by accessibility tools.
+  ///
+  /// This is useful when the visual label does not fully describe the action
+  /// or destination, or when you want to provide additional context for
+  /// screen reader users.
+  ///
+  /// If null, the default semantic description is used.
+  final String? semanticsLabel;
 }

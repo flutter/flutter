@@ -4,77 +4,109 @@
 
 // Logic for native assets shared between all host OSes.
 
-import '../../../base/os.dart';
+import 'package:code_assets/code_assets.dart' show OS;
+import 'package:package_config/package_config_types.dart';
+
 import '../../../base/platform.dart';
 import '../../../build_info.dart';
 import '../../../globals.dart' as globals;
 import '../../../native_assets.dart';
 import '../../../project.dart';
-import '../linux/native_assets.dart';
-import '../macos/native_assets.dart';
+import '../dart_hook_result.dart';
 import '../native_assets.dart';
-import '../windows/native_assets.dart';
 
-class TestCompilerNativeAssetsBuilderImpl
-    implements TestCompilerNativeAssetsBuilder {
+class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBuilder {
   const TestCompilerNativeAssetsBuilderImpl();
 
   @override
-  Future<Uri?> build(BuildInfo buildInfo) =>
+  Future<Uri?> build(BuildInfo buildInfo) async =>
+      (await buildWithHookResult(buildInfo)).nativeAssetsManifest;
+
+  @override
+  Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) =>
       testCompilerBuildNativeAssets(buildInfo);
+
+  @override
+  String windowsBuildDirectory(FlutterProject project) {
+    final String buildDir = getBuildDirectory();
+    return project.directory.uri.resolve('$buildDir/native_assets/windows/').toFilePath();
+  }
 }
 
-Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
-  Uri? nativeAssetsYaml;
+Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
+  BuildInfo buildInfo,
+) async {
   if (!buildInfo.buildNativeAssets) {
-    nativeAssetsYaml = null;
-  } else {
-    final Uri projectUri = FlutterProject.current().directory.uri;
-    final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(
-      projectUri,
-      buildInfo.packageConfig,
-      globals.fs,
-      globals.logger,
-    );
-    if (globals.platform.isMacOS) {
-      (nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
-        buildMode: buildInfo.mode,
-        projectUri: projectUri,
-        flutterTester: true,
-        fileSystem: globals.fs,
-        buildRunner: buildRunner,
-      );
-    } else if (globals.platform.isLinux) {
-      (nativeAssetsYaml, _) = await buildNativeAssetsLinux(
-        buildMode: buildInfo.mode,
-        projectUri: projectUri,
-        flutterTester: true,
-        fileSystem: globals.fs,
-        buildRunner: buildRunner,
-      );
-    } else if (globals.platform.isWindows) {
-      final TargetPlatform targetPlatform;
-      if (globals.os.hostPlatform == HostPlatform.windows_x64) {
-        targetPlatform = TargetPlatform.windows_x64;
-      } else {
-        targetPlatform = TargetPlatform.windows_arm64;
-      }
-      (nativeAssetsYaml, _) = await buildNativeAssetsWindows(
-        buildMode: buildInfo.mode,
-        targetPlatform: targetPlatform,
-        projectUri: projectUri,
-        flutterTester: true,
-        fileSystem: globals.fs,
-        buildRunner: buildRunner,
-      );
-    } else {
-      await ensureNoNativeAssetsOrOsIsSupported(
-        projectUri,
-        const LocalPlatform().operatingSystem,
-        globals.fs,
-        buildRunner,
-      );
-    }
+    return (nativeAssetsManifest: null, flutterHookResult: null);
   }
-  return nativeAssetsYaml;
+  final Uri projectUri = FlutterProject.current().directory.uri;
+  final String runPackageName = buildInfo.packageConfig.packages
+      .firstWhere((Package p) => p.root == projectUri)
+      .name;
+  final String pubspecPath = Uri.file(buildInfo.packageConfigPath)
+      .resolve('../pubspec.yaml')
+      .toFilePath();
+  final FlutterNativeAssetsBuildRunner buildRunner = FlutterNativeAssetsBuildRunnerImpl(
+    buildInfo.packageConfigPath,
+    buildInfo.packageConfig,
+    globals.fs,
+    globals.logger,
+    globals.platform,
+    runPackageName,
+    includeDevDependencies: true,
+    pubspecPath,
+  );
+
+  if (!globals.platform.isMacOS && !globals.platform.isLinux && !globals.platform.isWindows) {
+    await ensureNoNativeAssetsOrOsIsSupported(
+      projectUri,
+      const LocalPlatform().operatingSystem,
+      globals.fs,
+      buildRunner,
+    );
+    return (nativeAssetsManifest: null, flutterHookResult: null);
+  }
+
+  // Only `flutter test` uses the
+  // `build/native_assets/<os>/native_assets.json` file which uses absolute
+  // paths to the shared libraries.
+  final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
+  final String buildDir = getBuildDirectory();
+  final String osName = targetOS.name;
+  final Uri buildUri = projectUri.resolve('$buildDir/native_assets/$osName/');
+  final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
+
+  final environmentDefines = <String, String>{kBuildMode: buildInfo.mode.cliName};
+
+  // First perform the dart build.
+  final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
+    environmentDefines: environmentDefines,
+    buildRunner: buildRunner,
+    targetPlatform: TargetPlatform.tester,
+    projectUri: projectUri,
+    fileSystem: globals.fs,
+    buildCodeAssets: const BuildCodeAssetsOptions(
+      // We're in tests, so there is no app build directory
+      appBuildDirectory: null,
+    ),
+    buildDataAssets: true,
+    recordedUsesFile: null,
+  );
+
+  // Then "install" the code assets so they can be used at runtime.
+  await installCodeAssets(
+    dartHookResult: dartHookResult,
+    environmentDefines: environmentDefines,
+    targetPlatform: TargetPlatform.tester,
+    projectUri: projectUri,
+    fileSystem: globals.fs,
+    nativeAssetsFileUri: nativeAssetsFileUri,
+    targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/$osName/'),
+  );
+  assert(globals.fs.file(nativeAssetsFileUri).existsSync());
+
+  return (
+    nativeAssetsManifest: nativeAssetsFileUri,
+    flutterHookResult: dartHookResult.asFlutterResult,
+  );
 }

@@ -7,7 +7,7 @@ import '../../base/project_migrator.dart';
 import '../../cmake_project.dart';
 import 'utils.dart';
 
-const String _cmakeFileToolBackendBefore = r'''
+const _cmakeFileToolBackendBefore = r'''
 add_custom_command(
   OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
     ${CPP_WRAPPER_SOURCES_CORE} ${CPP_WRAPPER_SOURCES_PLUGIN}
@@ -21,7 +21,7 @@ add_custom_command(
 )
 ''';
 
-const String _cmakeFileToolBackendAfter = r'''
+const _cmakeFileToolBackendAfter = r'''
 add_custom_command(
   OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
     ${CPP_WRAPPER_SOURCES_CORE} ${CPP_WRAPPER_SOURCES_PLUGIN}
@@ -35,7 +35,7 @@ add_custom_command(
 )
 ''';
 
-const String _cmakeFileTargetPlatformBefore = r'''
+const _cmakeFileTargetPlatformBefore = r'''
 # TODO: Move the rest of this into files in ephemeral. See
 # https://github.com/flutter/flutter/issues/57146.
 set(WRAPPER_ROOT "${EPHEMERAL_DIR}/cpp_client_wrapper")
@@ -43,7 +43,7 @@ set(WRAPPER_ROOT "${EPHEMERAL_DIR}/cpp_client_wrapper")
 # === Flutter Library ===
 ''';
 
-const String _cmakeFileTargetPlatformAfter = r'''
+const _cmakeFileTargetPlatformAfter = r'''
 # TODO: Move the rest of this into files in ephemeral. See
 # https://github.com/flutter/flutter/issues/57146.
 set(WRAPPER_ROOT "${EPHEMERAL_DIR}/cpp_client_wrapper")
@@ -59,11 +59,7 @@ endif()
 /// Migrates Windows build to target specific architecture.
 /// In more, it deletes old runner folder
 class BuildArchitectureMigration extends ProjectMigrator {
-  BuildArchitectureMigration(
-    WindowsProject project,
-    Directory buildDirectory,
-    super.logger
-  )
+  BuildArchitectureMigration(WindowsProject project, Directory buildDirectory, super.logger)
     : _cmakeFile = project.managedCmakeFile,
       _buildDirectory = buildDirectory;
 
@@ -71,10 +67,8 @@ class BuildArchitectureMigration extends ProjectMigrator {
   final Directory _buildDirectory;
 
   @override
-  void migrate() {
-    final Directory oldRunnerDirectory = _buildDirectory
-      .parent
-      .childDirectory('runner');
+  Future<void> migrate() async {
+    final Directory oldRunnerDirectory = _buildDirectory.parent.childDirectory('runner');
     if (oldRunnerDirectory.existsSync()) {
       logger.printTrace('''
 Deleting previous build folder ${oldRunnerDirectory.path}.
@@ -87,7 +81,7 @@ New binaries can be found in ${_buildDirectory.childDirectory('runner').path}.
           'Failed to remove ${oldRunnerDirectory.path}: $error. '
           'A program may still be using a file in the directory or the directory itself. '
           'To find and stop such a program, see: '
-          'https://superuser.com/questions/1333118/cant-delete-empty-folder-because-it-is-used'
+          'https://superuser.com/questions/1333118/cant-delete-empty-folder-because-it-is-used',
         );
       }
     }
@@ -119,7 +113,9 @@ If needed, you can reset it by deleting the "windows" folder and then using the
       _cmakeFileToolBackendAfter,
     );
     if (originalCmakeContents != newCmakeContents) {
-      logger.printStatus('windows/flutter/CMakeLists.txt does not use FLUTTER_TARGET_PLATFORM, updating.');
+      logger.printStatus(
+        'windows/flutter/CMakeLists.txt does not use FLUTTER_TARGET_PLATFORM, updating.',
+      );
       _cmakeFile.writeAsStringSync(newCmakeContents);
     }
   }

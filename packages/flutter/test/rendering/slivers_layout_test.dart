@@ -25,7 +25,7 @@ void main() {
     RenderSliverToBoxAdapter sliver;
     RenderViewport viewport;
     RenderBox box;
-    final RenderLayoutWatcher root = RenderLayoutWatcher(
+    final root = RenderLayoutWatcher(
       viewport = RenderViewport(
         crossAxisDirection: AxisDirection.right,
         offset: ViewportOffset.zero(),
@@ -69,5 +69,4 @@ void main() {
     expect(layouts, 1);
     expect(box.localToGlobal(box.size.center(Offset.zero)), const Offset(400.0, 600.0 - 190.0));
   });
-
 }

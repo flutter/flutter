@@ -34,7 +34,6 @@ import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
@@ -65,14 +64,14 @@ void testUsingContext(
   bool? skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
-    throw StateError(
+    fail(
       'If you override the FileSystem context you must also provide a ProcessManager, '
       'otherwise the processes you launch will not be dealing with the same file system '
-      'that you are dealing with in your test.'
+      'that you are dealing with in your test.',
     );
   }
   if (overrides.containsKey(ProcessUtils)) {
-    throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
+    fail('Do not inject ProcessUtils for testing, use ProcessManager instead.');
   }
 
   // Ensure we don't rely on the default [Config] constructor which will
@@ -86,104 +85,109 @@ void testUsingContext(
   });
   Config buildConfig(FileSystem fs) {
     configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
-    return Config.test(
-      name: Config.kFlutterSettings,
-      directory: configDir,
-      logger: globals.logger,
-    );
-  }
-  PersistentToolState buildPersistentToolState(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
-    return PersistentToolState.test(
-      directory: configDir!,
-      logger: globals.logger,
-    );
+    return Config.test(name: Config.kFlutterSettings, directory: configDir, logger: globals.logger);
   }
 
-  test(description, () async {
-    await runInContext<dynamic>(() {
-      return context.run<dynamic>(
-        name: 'mocks',
-        overrides: <Type, Generator>{
-          AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
-          Config: () => buildConfig(globals.fs),
-          DeviceManager: () => FakeDeviceManager(),
-          Doctor: () => FakeDoctor(globals.logger),
-          FlutterVersion: () => FakeFlutterVersion(),
-          HttpClient: () => FakeHttpClient.any(),
-          IOSSimulatorUtils: () => const NoopIOSSimulatorUtils(),
-          OutputPreferences: () => OutputPreferences.test(),
-          Logger: () => BufferLogger.test(),
-          OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-          PersistentToolState: () => buildPersistentToolState(globals.fs),
-          Usage: () => TestUsage(),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
-          FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
-          PlistParser: () => FakePlistParser(),
-          Signals: () => FakeSignals(),
-          Pub: () => ThrowingPub(), // prevent accidentally using pub.
-          CrashReporter: () => const NoopCrashReporter(),
-          TemplateRenderer: () => const MustacheTemplateRenderer(),
-          BuildTargets: () => const BuildTargetsImpl(),
-          Analytics: () => const NoOpAnalytics(),
-        },
-        body: () {
-          // To catch all errors thrown by the test, even uncaught async errors, we use a zone.
-          //
-          // Zones introduce their own event loop, so we do not await futures created inside
-          // the zone from outside the zone. Instead, we create a Completer outside the zone,
-          // and have the test complete it when the test ends (in success or failure), and we
-          // await that.
-          final Completer<void> completer = Completer<void>();
-          runZonedGuarded<Future<dynamic>>(() async {
-            try {
-              return await context.run<dynamic>(
-                // Apply the overrides to the test context in the zone since their
-                // instantiation may reference items already stored on the context.
-                overrides: overrides,
-                name: 'test-specific overrides',
-                body: () async {
-                  if (initializeFlutterRoot) {
-                    // Provide a sane default for the flutterRoot directory. Individual
-                    // tests can override this either in the test or during setup.
-                    Cache.flutterRoot ??= getFlutterRoot();
+  PersistentToolState buildPersistentToolState(FileSystem fs) {
+    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
+    return PersistentToolState.test(directory: configDir!, logger: globals.logger);
+  }
+
+  test(
+    description,
+    () async {
+      await runInContext<dynamic>(
+        () {
+          return context.run<dynamic>(
+            name: 'mocks',
+            overrides: <Type, Generator>{
+              AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
+              Config: () => buildConfig(globals.fs),
+              DeviceManager: () => FakeDeviceManager(),
+              Doctor: () => _ContextFakeDoctor(globals.logger),
+              FlutterVersion: () => FakeFlutterVersion(),
+              HttpClient: () => FakeHttpClient.any(),
+              IOSSimulatorUtils: () => const NoopIOSSimulatorUtils(),
+              OutputPreferences: () => OutputPreferences.test(),
+              Logger: () => BufferLogger.test(outputPreferences: context.get<OutputPreferences>()),
+              OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+              PersistentToolState: () => buildPersistentToolState(globals.fs),
+              XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
+              FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
+              PlistParser: () => FakePlistParser(),
+              Signals: () => FakeSignals(),
+              Pub: () => const ThrowingPub(), // prevent accidentally using pub.
+              CrashReporter: () => const NoopCrashReporter(),
+              TemplateRenderer: () => const MustacheTemplateRenderer(),
+              BuildTargets: () => const BuildTargetsImpl(),
+              Analytics: () => const NoOpAnalytics(),
+              Stdio: () => FakeStdio(),
+            },
+            body: () {
+              // To catch all errors thrown by the test, even uncaught async errors, we use a zone.
+              //
+              // Zones introduce their own event loop, so we do not await futures created inside
+              // the zone from outside the zone. Instead, we create a Completer outside the zone,
+              // and have the test complete it when the test ends (in success or failure), and we
+              // await that.
+              final completer = Completer<void>();
+              runZonedGuarded<Future<dynamic>>(
+                () async {
+                  try {
+                    return await context.run<dynamic>(
+                      // Apply the overrides to the test context in the zone since their
+                      // instantiation may reference items already stored on the context.
+                      overrides: overrides,
+                      name: 'test-specific overrides',
+                      body: () async {
+                        if (initializeFlutterRoot) {
+                          // Provide a sane default for the flutterRoot directory. Individual
+                          // tests can override this either in the test or during setup.
+                          Cache.flutterRoot ??= getFlutterRoot();
+                        }
+                        return await testMethod();
+                      },
+                    );
+                  } finally {
+                    // We do not need a catch { ... } block because the error zone
+                    // will catch all errors and send them to the completer below.
+                    //
+                    // See https://github.com/flutter/flutter/pull/141821/files#r1462288131.
+                    if (!completer.isCompleted) {
+                      completer.complete();
+                    }
                   }
-                  return await testMethod();
+                },
+                (Object error, StackTrace stackTrace) {
+                  // When things fail, it's ok to print to the console!
+                  print(error); // ignore: avoid_print
+                  print(stackTrace); // ignore: avoid_print
+                  _printBufferedErrors(context);
+                  if (!completer.isCompleted) {
+                    completer.completeError(error, stackTrace);
+                  }
+                  throw error; //ignore: only_throw_errors
                 },
               );
-            } finally {
-              // We do not need a catch { ... } block because the error zone
-              // will catch all errors and send them to the completer below.
-              //
-              // See https://github.com/flutter/flutter/pull/141821/files#r1462288131.
-              if (!completer.isCompleted) {
-                completer.complete();
-              }
-            }
-          }, (Object error, StackTrace stackTrace) {
-            // When things fail, it's ok to print to the console!
-            print(error); // ignore: avoid_print
-            print(stackTrace); // ignore: avoid_print
-            _printBufferedErrors(context);
-            if (!completer.isCompleted) {
-              completer.completeError(error, stackTrace);
-            }
-            throw error; //ignore: only_throw_errors
-          });
-          return completer.future;
+              return completer.future;
+            },
+          );
+        },
+        overrides: <Type, Generator>{
+          // This has to go here so that runInContext will pick it up when it tries
+          // to do bot detection before running the closure. This is important
+          // because the test may be giving us a fake HttpClientFactory, which may
+          // throw in unexpected/abnormal ways.
+          // If a test needs a BotDetector that does not always return true, it
+          // can provide the AlwaysFalseBotDetector in the overrides, or its own
+          // BotDetector implementation in the overrides.
+          BotDetector: overrides[BotDetector] ?? () => const FakeBotDetector(true),
         },
       );
-    }, overrides: <Type, Generator>{
-      // This has to go here so that runInContext will pick it up when it tries
-      // to do bot detection before running the closure. This is important
-      // because the test may be giving us a fake HttpClientFactory, which may
-      // throw in unexpected/abnormal ways.
-      // If a test needs a BotDetector that does not always return true, it
-      // can provide the AlwaysFalseBotDetector in the overrides, or its own
-      // BotDetector implementation in the overrides.
-      BotDetector: overrides[BotDetector] ?? () => const FakeBotDetector(true),
-    });
-  }, testOn: testOn, skip: skip);
+    },
+    testOn: testOn,
+    skip: skip,
+  );
   // We don't support "timeout"; see ../../dart_test.yaml which
   // configures all tests to have a 15 minute timeout which should
   // definitely be enough.
@@ -191,7 +195,7 @@ void testUsingContext(
 
 void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
-    final BufferLogger bufferLogger = testContext.get<Logger>()! as BufferLogger;
+    final bufferLogger = testContext.get<Logger>()! as BufferLogger;
     if (bufferLogger.errorText.isNotEmpty) {
       // This is where the logger outputting errors is implemented, so it has
       // to use `print`.
@@ -216,6 +220,9 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
+  void stopExtendedWirelessDeviceDiscoverers() {}
+
+  @override
   set specifiedDeviceId(String? id) {
     _specifiedDeviceId = id;
   }
@@ -229,9 +236,8 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Future<List<Device>> getAllDevices({
-    DeviceDiscoveryFilter? filter,
-  }) async => filteredDevices(filter);
+  Future<List<Device>> getAllDevices({DeviceDiscoveryFilter? filter}) async =>
+      filteredDevices(filter);
 
   @override
   Future<List<Device>> refreshAllDevices({
@@ -290,13 +296,11 @@ class FakeDeviceManager implements DeviceManager {
   Device? getSingleEphemeralDevice(List<Device> devices) => null;
 
   List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
-    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.attached) {
-      return attachedDevices;
-    }
-    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.wireless) {
-      return wirelessDevices;
-    }
-    return attachedDevices + wirelessDevices;
+    return switch (filter?.deviceConnectionInterface) {
+      DeviceConnectionInterface.attached => attachedDevices,
+      DeviceConnectionInterface.wireless => wirelessDevices,
+      null => attachedDevices + wirelessDevices,
+    };
   }
 }
 
@@ -309,9 +313,8 @@ class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidato
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
 
-class FakeDoctor extends Doctor {
-  FakeDoctor(Logger logger, {super.clock = const SystemClock()})
-      : super(logger: logger);
+class _ContextFakeDoctor extends Doctor {
+  _ContextFakeDoctor(Logger logger, {super.clock = const SystemClock()}) : super(logger: logger);
 
   // True for testing.
   @override
@@ -347,22 +350,34 @@ class NoopIOSSimulatorUtils implements IOSSimulatorUtils {
 }
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
-  @override
-  bool get isInstalled => true;
+  FakeXcodeProjectInterpreter({
+    this._isInstalled = true,
+    this._versionText = 'Xcode 15',
+    this._version = const Version.withText(15, 0, 0, '15.0.0'),
+    this._build = '15A240D',
+  });
+
+  final bool _isInstalled;
+  final String? _versionText;
+  final Version? _version;
+  final String? _build;
 
   @override
-  String get versionText => 'Xcode 14';
+  bool get isInstalled => _isInstalled;
 
   @override
-  Version get version => Version(14, null, null);
+  String? get versionText => _versionText;
 
   @override
-  String get build => '14A309';
+  Version? get version => _version;
+
+  @override
+  String? get build => _build;
 
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
-    XcodeProjectBuildContext? buildContext,
+    XcodeBasedProject xcodeProject, {
+    required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
@@ -370,27 +385,54 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   Future<String> pluginsBuildSettingsOutput(
-      Directory podXcodeProject, {
-        Duration timeout = const Duration(minutes: 1),
-      }) async {
+    Directory podXcodeProject, {
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
     return '';
   }
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async { }
+  Future<void> cleanWorkspace(
+    XcodeBasedProject xcodeProject,
+    String workspacePath,
+    String scheme, {
+    required Directory buildDirectory,
+    bool verbose = false,
+  }) async {}
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
-    return XcodeProjectInfo(
-      <String>['Runner'],
-      <String>['Debug', 'Release'],
-      <String>['Runner'],
-      BufferLogger.test(),
-    );
+  Future<XcodeProjectInfo?> getInfo(
+    XcodeBasedProject xcodeProject, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
+    return XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
+      'Runner',
+    ], BufferLogger.test());
   }
 
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
+
+  @override
+  Future<void> prefetchSwiftPackagesForProject(
+    XcodeBasedProject xcodeProject, {
+    required Directory buildDirectory,
+  }) async {}
+
+  @override
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    XcodeBasedProject xcodeProject,
+    Directory buildDirectory, {
+    bool skipPackageValidation = true,
+  }) async {
+    return <String>['xcrun', 'xcodebuild'];
+  }
+
+  @override
+  String swiftPackageCachePath(Directory buildDirectory) {
+    return '';
+  }
 }
 
 /// Prevent test crashes from being reported to the crash backend.
@@ -398,7 +440,7 @@ class NoopCrashReporter implements CrashReporter {
   const NoopCrashReporter();
 
   @override
-  Future<void> informUser(CrashDetails details, File crashFile) async { }
+  Future<void> informUser(CrashDetails details, File crashFile) async {}
 }
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
@@ -408,10 +450,12 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
 
   @override
   set currentDirectory(dynamic value) {
-    throw Exception('globals.fs.currentDirectory should not be set on the local file system during '
-          'tests as this can cause race conditions with concurrent tests. '
-          'Consider using a MemoryFileSystem for testing if possible or refactor '
-          'code to not require setting globals.fs.currentDirectory.');
+    throw Exception(
+      'globals.fs.currentDirectory should not be set on the local file system during '
+      'tests as this can cause race conditions with concurrent tests. '
+      'Consider using a MemoryFileSystem for testing if possible or refactor '
+      'code to not require setting globals.fs.currentDirectory.',
+    );
   }
 }
 

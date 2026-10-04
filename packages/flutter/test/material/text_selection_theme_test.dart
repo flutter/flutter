@@ -9,24 +9,27 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('TextSelectionThemeData copyWith, ==, hashCode basics', () {
     expect(const TextSelectionThemeData(), const TextSelectionThemeData().copyWith());
-    expect(const TextSelectionThemeData().hashCode, const TextSelectionThemeData().copyWith().hashCode);
+    expect(
+      const TextSelectionThemeData().hashCode,
+      const TextSelectionThemeData().copyWith().hashCode,
+    );
   });
 
   test('TextSelectionThemeData lerp special cases', () {
     expect(TextSelectionThemeData.lerp(null, null, 0), null);
-    const TextSelectionThemeData data = TextSelectionThemeData();
+    const data = TextSelectionThemeData();
     expect(identical(TextSelectionThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('TextSelectionThemeData null fields by default', () {
-    const TextSelectionThemeData theme = TextSelectionThemeData();
+    const theme = TextSelectionThemeData();
     expect(theme.cursorColor, null);
     expect(theme.selectionColor, null);
     expect(theme.selectionHandleColor, null);
   });
 
   testWidgets('Default TextSelectionThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const TextSelectionThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -38,7 +41,7 @@ void main() {
   });
 
   testWidgets('TextSelectionThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const TextSelectionThemeData(
       cursorColor: Color(0xffeeffaa),
       selectionColor: Color(0x88888888),
@@ -51,17 +54,19 @@ void main() {
         .toList();
 
     expect(description, <String>[
-      'cursorColor: Color(0xffeeffaa)',
-      'selectionColor: Color(0x88888888)',
-      'selectionHandleColor: Color(0xaabbccdd)',
+      'cursorColor: ${const Color(0xffeeffaa)}',
+      'selectionColor: ${const Color(0x88888888)}',
+      'selectionHandleColor: ${const Color(0xaabbccdd)}',
     ]);
   });
 
-  testWidgets('Material2 - Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: false);
-    const Color defaultCursorColor = Color(0xff2196f3);
-    const Color defaultSelectionColor = Color(0x662196f3);
-    const Color defaultSelectionHandleColor = Color(0xff2196f3);
+  testWidgets('Material2 - Empty textSelectionTheme will use defaults', (
+    WidgetTester tester,
+  ) async {
+    final theme = ThemeData(useMaterial3: false);
+    const defaultCursorColor = Color(0xff2196f3);
+    const defaultSelectionColor = Color(0x662196f3);
+    const defaultSelectionHandleColor = Color(0xff2196f3);
 
     EditableText.debugDeterministicCursor = true;
     addTearDown(() {
@@ -71,9 +76,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
-          child: TextField(autofocus: true),
-        ),
+        home: const Material(child: TextField(autofocus: true)),
       ),
     );
     await tester.pump();
@@ -106,8 +109,10 @@ void main() {
     expect(handle, paints..path(color: defaultSelectionHandleColor));
   });
 
-  testWidgets('Material3 - Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+  testWidgets('Material3 - Empty textSelectionTheme will use defaults', (
+    WidgetTester tester,
+  ) async {
+    final theme = ThemeData();
     final Color defaultCursorColor = theme.colorScheme.primary;
     final Color defaultSelectionColor = theme.colorScheme.primary.withOpacity(0.40);
     final Color defaultSelectionHandleColor = theme.colorScheme.primary;
@@ -120,9 +125,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
-          child: TextField(autofocus: true),
-        ),
+        home: const Material(child: TextField(autofocus: true)),
       ),
     );
     await tester.pump();
@@ -156,14 +159,12 @@ void main() {
   });
 
   testWidgets('ThemeData.textSelectionTheme will be used if provided', (WidgetTester tester) async {
-    const TextSelectionThemeData textSelectionTheme = TextSelectionThemeData(
+    const textSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffaabbcc),
       selectionColor: Color(0x88888888),
       selectionHandleColor: Color(0x00ccbbaa),
     );
-    final ThemeData theme = ThemeData.fallback().copyWith(
-      textSelectionTheme: textSelectionTheme,
-    );
+    final ThemeData theme = ThemeData.fallback().copyWith(textSelectionTheme: textSelectionTheme);
 
     EditableText.debugDeterministicCursor = true;
     addTearDown(() {
@@ -174,9 +175,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
-          child: TextField(autofocus: true),
-        ),
+        home: const Material(child: TextField(autofocus: true)),
       ),
     );
     await tester.pump();
@@ -208,8 +207,10 @@ void main() {
     expect(handle, paints..path(color: textSelectionTheme.selectionHandleColor));
   });
 
-  testWidgets('TextSelectionTheme widget will override ThemeData.textSelectionTheme', (WidgetTester tester) async {
-    const TextSelectionThemeData defaultTextSelectionTheme = TextSelectionThemeData(
+  testWidgets('TextSelectionTheme widget will override ThemeData.textSelectionTheme', (
+    WidgetTester tester,
+  ) async {
+    const defaultTextSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffaabbcc),
       selectionColor: Color(0x88888888),
       selectionHandleColor: Color(0x00ccbbaa),
@@ -217,7 +218,7 @@ void main() {
     final ThemeData theme = ThemeData.fallback().copyWith(
       textSelectionTheme: defaultTextSelectionTheme,
     );
-    const TextSelectionThemeData widgetTextSelectionTheme = TextSelectionThemeData(
+    const widgetTextSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffddeeff),
       selectionColor: Color(0x44444444),
       selectionHandleColor: Color(0x00ffeedd),
@@ -271,18 +272,18 @@ void main() {
   });
 
   testWidgets('TextField parameters will override theme settings', (WidgetTester tester) async {
-    const TextSelectionThemeData defaultTextSelectionTheme = TextSelectionThemeData(
+    const defaultTextSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffaabbcc),
       selectionHandleColor: Color(0x00ccbbaa),
     );
     final ThemeData theme = ThemeData.fallback().copyWith(
       textSelectionTheme: defaultTextSelectionTheme,
     );
-    const TextSelectionThemeData widgetTextSelectionTheme = TextSelectionThemeData(
+    const widgetTextSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffddeeff),
       selectionHandleColor: Color(0x00ffeedd),
     );
-    const Color cursorColor = Color(0x88888888);
+    const cursorColor = Color(0x88888888);
 
     // Test TextField's cursor color.
     await tester.pumpWidget(
@@ -320,10 +321,10 @@ void main() {
   });
 
   testWidgets('TextSelectionThem overrides DefaultSelectionStyle', (WidgetTester tester) async {
-    const Color themeSelectionColor = Color(0xffaabbcc);
-    const Color themeCursorColor = Color(0x00ccbbaa);
-    const Color defaultSelectionColor = Color(0xffaa1111);
-    const Color defaultCursorColor = Color(0x00cc2222);
+    const themeSelectionColor = Color(0xffaabbcc);
+    const themeCursorColor = Color(0x00ccbbaa);
+    const defaultSelectionColor = Color(0xffaa1111);
+    const defaultCursorColor = Color(0x00cc2222);
     final Key defaultSelectionStyle = UniqueKey();
     final Key themeStyle = UniqueKey();
     // Test TextField's cursor color.
@@ -339,15 +340,15 @@ void main() {
                 selectionColor: themeSelectionColor,
                 cursorColor: themeCursorColor,
               ),
-              child: Placeholder(
-                key: themeStyle,
-              ),
+              child: Placeholder(key: themeStyle),
             ),
-          )
+          ),
         ),
       ),
     );
-    final BuildContext defaultSelectionStyleContext = tester.element(find.byKey(defaultSelectionStyle));
+    final BuildContext defaultSelectionStyleContext = tester.element(
+      find.byKey(defaultSelectionStyle),
+    );
     DefaultSelectionStyle style = DefaultSelectionStyle.of(defaultSelectionStyleContext);
     expect(style.selectionColor, defaultSelectionColor);
     expect(style.cursorColor, defaultCursorColor);

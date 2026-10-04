@@ -6,7 +6,6 @@ changelog:
     labels:
       - passed first triage
       - passed secondary triage
-      - team-release
       - "team: flakes"
       - revert
   categories:
@@ -20,10 +19,10 @@ changelog:
         - "f: gestures"
       exclude:
         labels:
-          - "f: material design"
+          - "p: material_ui"
     - title: Material
       labels:
-        - "f: material design"
+        - "p: material_ui"
     # Mobile
     - title: iOS
       labels:

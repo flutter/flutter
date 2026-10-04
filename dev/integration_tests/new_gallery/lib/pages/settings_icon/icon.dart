@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+
 import 'package:flutter/material.dart';
+
 import 'metrics.dart';
 
 class SettingsIcon extends StatelessWidget {
@@ -35,11 +37,11 @@ class _SettingsIconPainter extends CustomPainter {
   /// The icon is aligned to the bottom-start corner.
   void _computeCenterAndScaling(Size size) {
     _scaling = min(size.width / unitWidth, size.height / unitHeight);
-    _center = Directionality.of(context) == TextDirection.ltr
-        ? Offset(
-            unitWidth * _scaling / 2, size.height - unitHeight * _scaling / 2)
-        : Offset(size.width - unitWidth * _scaling / 2,
-            size.height - unitHeight * _scaling / 2);
+    final double dx = switch (Directionality.of(context)) {
+      TextDirection.rtl => size.width - unitWidth * _scaling / 2,
+      TextDirection.ltr => unitWidth * _scaling / 2,
+    };
+    _center = Offset(dx, size.height - unitHeight * _scaling / 2);
   }
 
   /// Transforms an offset in relative units into an offset in logical pixels.
@@ -54,38 +56,31 @@ class _SettingsIconPainter extends CustomPainter {
 
   /// A rectangle with a fixed location, used to locate gradients.
   Rect get _fixedRect {
-    final Offset topLeft = Offset(-_size(stickLength / 2), -_size(stickWidth / 2));
-    final Offset bottomRight = Offset(_size(stickLength / 2), _size(stickWidth / 2));
+    final topLeft = Offset(-_size(stickLength / 2), -_size(stickWidth / 2));
+    final bottomRight = Offset(_size(stickLength / 2), _size(stickWidth / 2));
     return Rect.fromPoints(topLeft, bottomRight);
   }
 
   /// Black or white paint, depending on brightness.
   Paint get _monoPaint {
-    final Color monoColor =
-        Theme.of(context).colorScheme.brightness == Brightness.light
-            ? Colors.black
-            : Colors.white;
+    final Color monoColor = Theme.of(context).colorScheme.brightness == Brightness.light
+        ? Colors.black
+        : Colors.white;
     return Paint()..color = monoColor;
   }
 
   /// Pink paint with horizontal gradient.
   Paint get _pinkPaint {
-    const LinearGradient shader = LinearGradient(colors: <Color>[pinkLeft, pinkRight]);
-    final Rect shaderRect = _fixedRect.translate(
-      _size(-(stickLength - colorLength(time)) / 2),
-      0,
-    );
+    const shader = LinearGradient(colors: <Color>[pinkLeft, pinkRight]);
+    final Rect shaderRect = _fixedRect.translate(_size(-(stickLength - colorLength(time)) / 2), 0);
 
     return Paint()..shader = shader.createShader(shaderRect);
   }
 
   /// Teal paint with horizontal gradient.
   Paint get _tealPaint {
-    const LinearGradient shader = LinearGradient(colors: <Color>[tealLeft, tealRight]);
-    final Rect shaderRect = _fixedRect.translate(
-      _size((stickLength - colorLength(time)) / 2),
-      0,
-    );
+    const shader = LinearGradient(colors: <Color>[tealLeft, tealRight]);
+    final Rect shaderRect = _fixedRect.translate(_size((stickLength - colorLength(time)) / 2), 0);
 
     return Paint()..shader = shader.createShader(shaderRect);
   }
@@ -113,15 +108,9 @@ class _SettingsIconPainter extends CustomPainter {
     _canvas.translate(center.dx, center.dy);
     _canvas.rotate(angle);
 
-    final Rect leftOval = Rect.fromCircle(
-      center: Offset(-stretch + radius, 0),
-      radius: radius,
-    );
+    final leftOval = Rect.fromCircle(center: Offset(-stretch + radius, 0), radius: radius);
 
-    final Rect rightOval = Rect.fromCircle(
-      center: Offset(stretch - radius, 0),
-      radius: radius,
-    );
+    final rightOval = Rect.fromCircle(center: Offset(stretch - radius, 0), radius: radius);
 
     _canvas.drawPath(
       Path()

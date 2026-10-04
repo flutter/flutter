@@ -77,7 +77,7 @@ class AnimatedIcon extends StatelessWidget {
 
   /// Semantic label for the icon.
   ///
-  /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
+  /// Announced by assistive technologies (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
   ///
   /// See also:
@@ -99,7 +99,7 @@ class AnimatedIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    final _AnimatedIconData iconData = icon as _AnimatedIconData;
+    final iconData = icon as _AnimatedIconData;
     final IconThemeData iconTheme = IconTheme.of(context);
     assert(iconTheme.isConcrete);
     final double iconSize = size ?? iconTheme.size!;
@@ -144,6 +144,7 @@ class _AnimatedIconPainter extends CustomPainter {
   final Animation<double> progress;
   final Color color;
   final double scale;
+
   /// If this is true the image will be mirrored horizontally.
   final bool shouldMirror;
   final _UiPathFactory uiPathFactory;
@@ -164,16 +165,16 @@ class _AnimatedIconPainter extends CustomPainter {
     }
   }
 
-
   @override
   bool shouldRepaint(_AnimatedIconPainter oldDelegate) {
-    return oldDelegate.progress.value != progress.value
-        || oldDelegate.color != color
+    return oldDelegate.progress.value != progress.value ||
+        oldDelegate.color != color
         // We are comparing the paths list by reference, assuming the list is
         // treated as immutable to be more efficient.
-        || oldDelegate.paths != paths
-        || oldDelegate.scale != scale
-        || oldDelegate.uiPathFactory != uiPathFactory;
+        ||
+        oldDelegate.paths != paths ||
+        oldDelegate.scale != scale ||
+        oldDelegate.uiPathFactory != uiPathFactory;
   }
 
   @override
@@ -187,17 +188,14 @@ class _AnimatedIconPainter extends CustomPainter {
 }
 
 class _PathFrames {
-  const _PathFrames({
-    required this.commands,
-    required this.opacities,
-  });
+  const _PathFrames({required this.commands, required this.opacities});
 
   final List<_PathCommand> commands;
   final List<double> opacities;
 
   void paint(ui.Canvas canvas, Color color, _UiPathFactory uiPathFactory, double progress) {
     final double opacity = _interpolate<double?>(opacities, progress, ui.lerpDouble)!;
-    final ui.Paint paint = ui.Paint()
+    final paint = ui.Paint()
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(color.opacity * opacity);
     final ui.Path path = uiPathFactory();
@@ -247,9 +245,12 @@ class _PathCubicTo extends _PathCommand {
     final Offset controlPoint2 = _interpolate<Offset?>(controlPoints2, progress, Offset.lerp)!;
     final Offset targetPoint = _interpolate<Offset?>(targetPoints, progress, Offset.lerp)!;
     path.cubicTo(
-      controlPoint1.dx, controlPoint1.dy,
-      controlPoint2.dx, controlPoint2.dy,
-      targetPoint.dx, targetPoint.dy,
+      controlPoint1.dx,
+      controlPoint1.dy,
+      controlPoint2.dx,
+      controlPoint2.dy,
+      targetPoint.dx,
+      targetPoint.dy,
     );
   }
 }
@@ -293,7 +294,7 @@ T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator
   if (values.length == 1) {
     return values[0];
   }
-  final double targetIdx = ui.lerpDouble(0, values.length -1, progress)!;
+  final double targetIdx = ui.lerpDouble(0, values.length - 1, progress)!;
   final int lowIdx = targetIdx.floor();
   final int highIdx = targetIdx.ceil();
   final double t = targetIdx - lowIdx;

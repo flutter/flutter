@@ -2,73 +2,64 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RenderOpacity avoids repainting and does not drop layer at fully opaque', (WidgetTester tester) async {
+  const red = Color(0xffff0000);
+
+  testWidgets('RenderOpacity avoids repainting and does not drop layer at fully opaque', (
+    WidgetTester tester,
+  ) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       const ColoredBox(
-        color: Colors.red,
-        child: Opacity(
-          opacity: 0.0,
-          child: TestWidget(),
-        ),
-      )
+        color: red,
+        child: Opacity(opacity: 0.0, child: TestWidget()),
+      ),
     );
 
     expect(RenderTestObject.paintCount, 0);
 
     await tester.pumpWidget(
       const ColoredBox(
-        color: Colors.red,
-        child: Opacity(
-          opacity: 0.1,
-          child: TestWidget(),
-        ),
-      )
+        color: red,
+        child: Opacity(opacity: 0.1, child: TestWidget()),
+      ),
     );
 
     expect(RenderTestObject.paintCount, 1);
 
     await tester.pumpWidget(
       const ColoredBox(
-        color: Colors.red,
-        child: Opacity(
-          opacity: 1,
-          child: TestWidget(),
-        ),
-      )
+        color: red,
+        child: Opacity(opacity: 1, child: TestWidget()),
+      ),
     );
 
     expect(RenderTestObject.paintCount, 1);
   });
 
-  testWidgets('RenderOpacity allows opacity layer to be dropped at 0 opacity', (WidgetTester tester) async {
+  testWidgets('RenderOpacity allows opacity layer to be dropped at 0 opacity', (
+    WidgetTester tester,
+  ) async {
     RenderTestObject.paintCount = 0;
 
     await tester.pumpWidget(
       const ColoredBox(
-        color: Colors.red,
-        child: Opacity(
-          opacity: 0.5,
-          child: TestWidget(),
-        ),
-      )
+        color: red,
+        child: Opacity(opacity: 0.5, child: TestWidget()),
+      ),
     );
 
     expect(RenderTestObject.paintCount, 1);
 
     await tester.pumpWidget(
       const ColoredBox(
-        color: Colors.red,
-        child: Opacity(
-          opacity: 0.0,
-          child: TestWidget(),
-        ),
-      )
+        color: red,
+        child: Opacity(opacity: 0.0, child: TestWidget()),
+      ),
     );
 
     expect(RenderTestObject.paintCount, 1);
