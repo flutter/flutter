@@ -6,7 +6,10 @@
 #define FLUTTER_LIB_GPU_SHADER_H_
 
 #include <algorithm>
+#include <array>
+#include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "flutter/lib/gpu/context.h"
@@ -39,6 +42,24 @@ class Shader : public RefCountedDartWrappable<Shader> {
     impeller::ShaderMetadata metadata;
   };
 
+  struct StorageBufferBinding {
+    /// How the shader accesses the buffer, from its `readonly` or `writeonly`
+    /// qualifier.
+    enum class Access {
+      kReadWrite,
+      kReadOnly,
+      kWriteOnly,
+    };
+
+    impeller::ShaderUniformSlot slot;
+    Access access = Access::kReadWrite;
+    /// The size of the block, counting a trailing runtime-sized array as empty.
+    size_t size_in_bytes = 0;
+    /// The stride of the block's trailing runtime-sized array, or zero if the
+    /// block does not end in one.
+    size_t runtime_array_stride = 0;
+  };
+
   ~Shader() override;
 
   static fml::RefPtr<Shader> Make(
@@ -50,7 +71,10 @@ class Shader : public RefCountedDartWrappable<Shader> {
       std::vector<impeller::ShaderStageBufferLayout> layouts,
       std::unordered_map<std::string, UniformBinding> uniform_structs,
       std::unordered_map<std::string, TextureBinding> uniform_textures,
-      std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts);
+      std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts,
+      std::unordered_map<std::string, StorageBufferBinding> storage_buffers =
+          {},
+      std::optional<std::array<uint32_t, 3>> workgroup_size = std::nullopt);
 
   std::shared_ptr<const impeller::ShaderFunction> GetFunctionFromLibrary(
       impeller::ShaderLibrary& library);
@@ -93,6 +117,13 @@ class Shader : public RefCountedDartWrappable<Shader> {
   const Shader::TextureBinding* GetUniformTexture(
       const std::string& name) const;
 
+  const Shader::StorageBufferBinding* GetStorageBuffer(
+      const std::string& name) const;
+
+  /// The workgroup size a compute shader declares, or std::nullopt for any
+  /// other stage.
+  const std::optional<std::array<uint32_t, 3>>& GetWorkgroupSize() const;
+
   /// The position of the named uniform struct in this shader's stable
   /// binding order, or -1. Indices stay valid until the shader's payload
   /// is replaced by a reload (`ResetFrom`); callers cache them to bind
@@ -124,6 +155,8 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::vector<impeller::ShaderStageBufferLayout> layouts_;
   std::unordered_map<std::string, UniformBinding> uniform_structs_;
   std::unordered_map<std::string, TextureBinding> uniform_textures_;
+  std::unordered_map<std::string, StorageBufferBinding> storage_buffers_;
+  std::optional<std::array<uint32_t, 3>> workgroup_size_;
   // The maps' entries in a stable order for index-based lookup. Entry
   // pointers stay valid for the maps' lifetime (node-based containers);
   // rebuilt whenever the maps are replaced (`Make`, `ResetFrom`).

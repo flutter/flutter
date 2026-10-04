@@ -4,8 +4,10 @@
 
 #include "flutter/lib/gpu/shader_library.h"
 
+#include <array>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -13,6 +15,7 @@
 #include "flutter/lib/gpu/shader.h"
 #include "fml/mapping.h"
 #include "gtest/gtest.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/context.h"
 // Pulls in flatbuffers/flatbuffers.h (FlatBufferBuilder, Verifier) and the
@@ -243,6 +246,123 @@ TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferSkipsOptimizedOutStruct) {
   ASSERT_TRUE(shader);
   EXPECT_NE(shader->GetUniformStruct("Live"), nullptr);
   EXPECT_EQ(shader->GetUniformStruct("Dced"), nullptr);
+}
+
+struct StorageBufferDescription {
+  std::string name;
+  uint64_t ext_res_0 = 0;
+  uint64_t binding = 0;
+  impeller::fb::shaderbundle::ShaderResourceAccess access =
+      impeller::fb::shaderbundle::ShaderResourceAccess::kReadWrite;
+};
+
+// Serializes a single-compute-shader bundle (Metal desktop variant) with the
+// given storage buffers and, when present, workgroup size.
+static std::shared_ptr<std::vector<uint8_t>> BuildComputeBundle(
+    const std::vector<StorageBufferDescription>& storage_buffers,
+    const std::optional<std::array<uint32_t, 3>>& workgroup_size) {
+  namespace fbs = impeller::fb::shaderbundle;
+
+  auto metal = std::make_unique<fbs::BackendShaderT>();
+  metal->stage = fbs::ShaderStage::kCompute;
+  metal->entrypoint = "main";
+  metal->shader = {0};
+  for (const auto& description : storage_buffers) {
+    auto storage_buffer = std::make_unique<fbs::ShaderStorageBufferT>();
+    storage_buffer->name = description.name;
+    storage_buffer->ext_res_0 = description.ext_res_0;
+    storage_buffer->binding = description.binding;
+    storage_buffer->access = description.access;
+    storage_buffer->size_in_bytes = 16;
+    storage_buffer->runtime_array_stride = 8;
+    metal->storage_buffers.push_back(std::move(storage_buffer));
+  }
+  if (workgroup_size.has_value()) {
+    metal->workgroup_size = std::make_unique<fbs::WorkgroupSize>(
+        (*workgroup_size)[0], (*workgroup_size)[1], (*workgroup_size)[2]);
+  }
+
+  auto shader = std::make_unique<fbs::ShaderT>();
+  shader->name = "test";
+  shader->metal_desktop = std::move(metal);
+
+  fbs::ShaderBundleT bundle;
+  bundle.format_version =
+      static_cast<uint32_t>(fbs::ShaderBundleFormatVersion::kVersion);
+  bundle.shaders.push_back(std::move(shader));
+
+  flatbuffers::FlatBufferBuilder builder;
+  builder.Finish(fbs::ShaderBundle::Pack(builder, &bundle),
+                 fbs::ShaderBundleIdentifier());
+  return std::make_shared<std::vector<uint8_t>>(
+      builder.GetBufferPointer(),
+      builder.GetBufferPointer() + builder.GetSize());
+}
+
+TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferLoadsComputeMetadata) {
+  const uint64_t sentinel = impeller::kOptimizedOutBinding;
+  auto bundle = BuildComputeBundle(
+      {
+          {.name = "Input",
+           .ext_res_0 = 0,
+           .binding = 0,
+           .access =
+               impeller::fb::shaderbundle::ShaderResourceAccess::kReadOnly},
+          {.name = "Output",
+           .ext_res_0 = 1,
+           .binding = 1,
+           .access =
+               impeller::fb::shaderbundle::ShaderResourceAccess::kWriteOnly},
+          {.name = "Dced", .ext_res_0 = sentinel, .binding = 2},
+      },
+      std::array<uint32_t, 3>{8, 4, 2});
+  auto library = ShaderLibrary::MakeFromFlatbuffer(
+      impeller::Context::BackendType::kMetal, CreateMappingFromVector(bundle),
+      "test_bundle");
+  ASSERT_TRUE(library);
+  auto shader = library->FindShaderForTesting("test");
+  ASSERT_TRUE(shader);
+
+  EXPECT_EQ(shader->GetShaderStage(), impeller::ShaderStage::kCompute);
+  ASSERT_TRUE(shader->GetWorkgroupSize().has_value());
+  EXPECT_EQ(shader->GetWorkgroupSize().value(),
+            (std::array<uint32_t, 3>{8, 4, 2}));
+
+  const auto* input = shader->GetStorageBuffer("Input");
+  ASSERT_NE(input, nullptr);
+  EXPECT_EQ(input->access, Shader::StorageBufferBinding::Access::kReadOnly);
+  EXPECT_EQ(input->slot.ext_res_0, 0u);
+  EXPECT_EQ(input->size_in_bytes, 16u);
+  EXPECT_EQ(input->runtime_array_stride, 8u);
+  const auto* output = shader->GetStorageBuffer("Output");
+  ASSERT_NE(output, nullptr);
+  EXPECT_EQ(output->access, Shader::StorageBufferBinding::Access::kWriteOnly);
+  EXPECT_EQ(output->slot.binding, 1u);
+  // A storage buffer the compiler dead-code-eliminated is not bindable.
+  EXPECT_EQ(shader->GetStorageBuffer("Dced"), nullptr);
+
+  // Each live storage buffer gets a descriptor set layout, which the Vulkan
+  // pipeline layout is built from.
+  size_t storage_layouts = 0;
+  for (const auto& layout : shader->GetDescriptorSetLayouts()) {
+    if (layout.descriptor_type == impeller::DescriptorType::kStorageBuffer) {
+      EXPECT_EQ(layout.shader_stage, impeller::ShaderStage::kCompute);
+      storage_layouts++;
+    }
+  }
+  EXPECT_EQ(storage_layouts, 2u);
+}
+
+// A compute shader without a workgroup size cannot be dispatched, so it is
+// left out of the library.
+TEST(FlutterGpuShaderLibraryTest,
+     MakeFromFlatbufferSkipsComputeShaderWithoutWorkgroupSize) {
+  impeller::ScopedValidationDisable disable_validation;
+  auto bundle = BuildComputeBundle({}, std::nullopt);
+  auto library = ShaderLibrary::MakeFromFlatbuffer(
+      impeller::Context::BackendType::kMetal, CreateMappingFromVector(bundle),
+      "test_bundle");
+  EXPECT_FALSE(library);
 }
 
 }  // namespace testing
