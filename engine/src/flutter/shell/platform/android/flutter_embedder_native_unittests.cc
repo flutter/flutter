@@ -1693,6 +1693,7 @@ TEST(OSLibraryLoaderTest, ThreadSafeConcurrentValidityAndResolution) {
   });
 
   std::vector<std::future<void>> readers;
+  readers.reserve(4);
   for (int i = 0; i < 4; ++i) {
     readers.push_back(std::async(std::launch::async, [&]() {
       for (int j = 0; j < 500; ++j) {
@@ -3527,6 +3528,7 @@ TEST(WindowMetricsTranslationTest, ConcurrentProviderReplacementInNative) {
   FlutterEmbedderNative native;
   std::atomic<bool> running{true};
   std::vector<std::thread> threads;
+  threads.reserve(3);
 
   for (int i = 0; i < 2; ++i) {
     threads.emplace_back([&]() {
@@ -4439,6 +4441,7 @@ TEST(HardwareBufferTest, ConcurrentProviderReplacementInNative) {
   FlutterEmbedderNative native;
   std::atomic<bool> running{true};
   std::vector<std::thread> threads;
+  threads.reserve(3);
 
   for (int i = 0; i < 2; ++i) {
     threads.emplace_back([&]() {
@@ -4791,6 +4794,7 @@ TEST(VulkanExternalTextureTest, ConcurrentProviderReplacementInNative) {
   FlutterEmbedderNative native;
   std::atomic<bool> running{true};
   std::vector<std::thread> threads;
+  threads.reserve(4);
 
   for (int i = 0; i < 2; ++i) {
     threads.emplace_back([&native, &running]() {
@@ -8751,10 +8755,13 @@ TEST_F(Phase63FinalGNIntegrationTest,
   FlutterEmbedderNative::SetDefaultVMArgs(args);
 
   EXPECT_EQ(FlutterEmbedderNative::GetDefaultVMInit(), vm_init);
-  ASSERT_TRUE(FlutterEmbedderNative::GetDefaultVMArgs().has_value());
-  EXPECT_EQ(FlutterEmbedderNative::GetDefaultVMArgs()->api_level, 34);
-  EXPECT_EQ(FlutterEmbedderNative::GetDefaultVMArgs()->engine_caches_path,
-            "/data/user/0/com.example/cache");
+  auto default_vm_args = FlutterEmbedderNative::GetDefaultVMArgs();
+  ASSERT_TRUE(default_vm_args.has_value());
+  if (default_vm_args.has_value()) {
+    EXPECT_EQ(default_vm_args->api_level, 34);
+    EXPECT_EQ(default_vm_args->engine_caches_path,
+              "/data/user/0/com.example/cache");
+  }
 
   // Verify that an instantiated FlutterEmbedderNative picks up the default
   // VMInit
@@ -10148,6 +10155,467 @@ TEST(AndroidSurfaceManagerVulkanTest,
 
   surface_manager.reset();
   owner.reset();
+  VulkanQueueGuard::ResetForTesting();
+}
+
+namespace {
+
+struct MockSwapchainState {
+  uint32_t create_swapchain_calls = 0;
+  VkExtent2D last_swapchain_extent = {0, 0};
+  VkSurfaceTransformFlagBitsKHR last_pre_transform =
+      VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+  VkResult acquire_result = VK_SUBOPTIMAL_KHR;
+  VkResult present_result = VK_SUBOPTIMAL_KHR;
+  uint64_t next_handle = 0x5000;
+};
+
+MockSwapchainState* g_mock_swapchain_state = nullptr;
+
+VKAPI_ATTR VkResult VKAPI_CALL MockVkCreateAndroidSurfaceKHR(
+    VkInstance /*instance*/,
+    const VkAndroidSurfaceCreateInfoKHR* /*pCreateInfo*/,
+    const VkAllocationCallbacks* /*pAllocator*/,
+    VkSurfaceKHR* pSurface) {
+  *pSurface =
+      reinterpret_cast<VkSurfaceKHR>(++g_mock_swapchain_state->next_handle);
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+MockVkDestroySurfaceKHR(VkInstance /*instance*/,
+                        VkSurfaceKHR /*surface*/,
+                        const VkAllocationCallbacks* /*pAllocator*/) {}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkGetPhysicalDeviceSurfaceSupportKHR(VkPhysicalDevice /*physicalDevice*/,
+                                         uint32_t /*queueFamilyIndex*/,
+                                         VkSurfaceKHR /*surface*/,
+                                         VkBool32* pSupported) {
+  *pSupported = VK_TRUE;
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL MockVkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+    VkPhysicalDevice /*physicalDevice*/,
+    VkSurfaceKHR /*surface*/,
+    VkSurfaceCapabilitiesKHR* pSurfaceCapabilities) {
+  std::memset(pSurfaceCapabilities, 0, sizeof(VkSurfaceCapabilitiesKHR));
+  // 2 minimum swapchain images, 3 maximum swapchain images.
+  pSurfaceCapabilities->minImageCount = 2;
+  pSurfaceCapabilities->maxImageCount = 3;
+  // Simulate Android ANativeWindow reporting stale portrait buffer dimensions
+  // (1080x2400) while the device is rotated 90 degrees into landscape.
+  constexpr uint32_t kPortraitWidth = 1080;
+  constexpr uint32_t kPortraitHeight = 2400;
+  constexpr uint32_t kMaxDimension = 4096;
+  pSurfaceCapabilities->currentExtent = {kPortraitWidth, kPortraitHeight};
+  pSurfaceCapabilities->minImageExtent = {1, 1};
+  pSurfaceCapabilities->maxImageExtent = {kMaxDimension, kMaxDimension};
+  pSurfaceCapabilities->maxImageArrayLayers = 1;
+  pSurfaceCapabilities->supportedTransforms =
+      VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR |
+      VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR;
+  pSurfaceCapabilities->currentTransform =
+      VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR;
+  pSurfaceCapabilities->supportedCompositeAlpha =
+      VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR |
+      VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR |
+      VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+  pSurfaceCapabilities->supportedUsageFlags =
+      VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+      VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkGetPhysicalDeviceSurfaceFormatsKHR(VkPhysicalDevice /*physicalDevice*/,
+                                         VkSurfaceKHR /*surface*/,
+                                         uint32_t* pSurfaceFormatCount,
+                                         VkSurfaceFormatKHR* pSurfaceFormats) {
+  *pSurfaceFormatCount = 1;
+  if (pSurfaceFormats != nullptr) {
+    pSurfaceFormats[0].format = VK_FORMAT_R8G8B8A8_UNORM;
+    pSurfaceFormats[0].colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+  }
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkCreateSwapchainKHR(VkDevice /*device*/,
+                         const VkSwapchainCreateInfoKHR* pCreateInfo,
+                         const VkAllocationCallbacks* /*pAllocator*/,
+                         VkSwapchainKHR* pSwapchain) {
+  ++g_mock_swapchain_state->create_swapchain_calls;
+  g_mock_swapchain_state->last_swapchain_extent = pCreateInfo->imageExtent;
+  g_mock_swapchain_state->last_pre_transform = pCreateInfo->preTransform;
+  *pSwapchain =
+      reinterpret_cast<VkSwapchainKHR>(++g_mock_swapchain_state->next_handle);
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+MockVkDestroySwapchainKHR(VkDevice /*device*/,
+                          VkSwapchainKHR /*swapchain*/,
+                          const VkAllocationCallbacks* /*pAllocator*/) {}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkGetSwapchainImagesKHR(VkDevice /*device*/,
+                            VkSwapchainKHR /*swapchain*/,
+                            uint32_t* pSwapchainImageCount,
+                            VkImage* pSwapchainImages) {
+  // 2 swapchain images for double-buffered mock swapchain.
+  constexpr uint32_t kImageCount = 2;
+  *pSwapchainImageCount = kImageCount;
+  if (pSwapchainImages != nullptr) {
+    for (uint32_t i = 0; i < kImageCount; ++i) {
+      // Base handle 0x7000 for mock VkImage handles.
+      constexpr uint64_t kBaseImageHandle = 0x7000;
+      pSwapchainImages[i] = reinterpret_cast<VkImage>(kBaseImageHandle + i);
+    }
+  }
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkAcquireNextImageKHR(VkDevice /*device*/,
+                          VkSwapchainKHR /*swapchain*/,
+                          uint64_t /*timeout*/,
+                          VkSemaphore /*semaphore*/,
+                          VkFence /*fence*/,
+                          uint32_t* pImageIndex) {
+  *pImageIndex = 0;
+  return g_mock_swapchain_state->acquire_result;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkQueuePresentKHR(VkQueue /*queue*/,
+                      const VkPresentInfoKHR* /*pPresentInfo*/) {
+  return g_mock_swapchain_state->present_result;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkCreateCommandPool(VkDevice /*device*/,
+                        const VkCommandPoolCreateInfo* /*pCreateInfo*/,
+                        const VkAllocationCallbacks* /*pAllocator*/,
+                        VkCommandPool* pCommandPool) {
+  *pCommandPool =
+      reinterpret_cast<VkCommandPool>(++g_mock_swapchain_state->next_handle);
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+MockVkDestroyCommandPool(VkDevice /*device*/,
+                         VkCommandPool /*commandPool*/,
+                         const VkAllocationCallbacks* /*pAllocator*/) {}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkAllocateCommandBuffers(VkDevice /*device*/,
+                             const VkCommandBufferAllocateInfo* pAllocateInfo,
+                             VkCommandBuffer* pCommandBuffers) {
+  for (uint32_t i = 0; i < pAllocateInfo->commandBufferCount; ++i) {
+    pCommandBuffers[i] = reinterpret_cast<VkCommandBuffer>(
+        ++g_mock_swapchain_state->next_handle);
+  }
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+MockVkFreeCommandBuffers(VkDevice /*device*/,
+                         VkCommandPool /*commandPool*/,
+                         uint32_t /*commandBufferCount*/,
+                         const VkCommandBuffer* /*pCommandBuffers*/) {}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkBeginCommandBuffer(VkCommandBuffer /*commandBuffer*/,
+                         const VkCommandBufferBeginInfo* /*pBeginInfo*/) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkEndCommandBuffer(VkCommandBuffer /*commandBuffer*/) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkResetCommandBuffer(VkCommandBuffer /*commandBuffer*/,
+                         VkCommandBufferResetFlags /*flags*/) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL MockVkCmdPipelineBarrier(
+    VkCommandBuffer /*commandBuffer*/,
+    VkPipelineStageFlags /*srcStageMask*/,
+    VkPipelineStageFlags /*dstStageMask*/,
+    VkDependencyFlags /*dependencyFlags*/,
+    uint32_t /*memoryBarrierCount*/,
+    const VkMemoryBarrier* /*pMemoryBarriers*/,
+    uint32_t /*bufferMemoryBarrierCount*/,
+    const VkBufferMemoryBarrier* /*pBufferMemoryBarriers*/,
+    uint32_t /*imageMemoryBarrierCount*/,
+    const VkImageMemoryBarrier* /*pImageMemoryBarriers*/) {}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkCreateFence(VkDevice /*device*/,
+                  const VkFenceCreateInfo* /*pCreateInfo*/,
+                  const VkAllocationCallbacks* /*pAllocator*/,
+                  VkFence* pFence) {
+  *pFence = reinterpret_cast<VkFence>(++g_mock_swapchain_state->next_handle);
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+MockVkDestroyFence(VkDevice /*device*/,
+                   VkFence /*fence*/,
+                   const VkAllocationCallbacks* /*pAllocator*/) {}
+
+VKAPI_ATTR VkResult VKAPI_CALL MockVkWaitForFences(VkDevice /*device*/,
+                                                   uint32_t /*fenceCount*/,
+                                                   const VkFence* /*pFences*/,
+                                                   VkBool32 /*waitAll*/,
+                                                   uint64_t /*timeout*/) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL MockVkResetFences(VkDevice /*device*/,
+                                                 uint32_t /*fenceCount*/,
+                                                 const VkFence* /*pFences*/) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL
+MockSwapchainGetInstanceProcAddr(VkInstance instance, const char* pName) {
+  if (pName == nullptr || std::strcmp(pName, "vkGetDeviceProcAddr") == 0) {
+    return nullptr;
+  }
+  if (std::strcmp(pName, "vkCreateAndroidSurfaceKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkCreateAndroidSurfaceKHR);
+  }
+  if (std::strcmp(pName, "vkDestroySurfaceKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkDestroySurfaceKHR);
+  }
+  if (std::strcmp(pName, "vkGetPhysicalDeviceSurfaceSupportKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        &MockVkGetPhysicalDeviceSurfaceSupportKHR);
+  }
+  if (std::strcmp(pName, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        &MockVkGetPhysicalDeviceSurfaceCapabilitiesKHR);
+  }
+  if (std::strcmp(pName, "vkGetPhysicalDeviceSurfaceFormatsKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        &MockVkGetPhysicalDeviceSurfaceFormatsKHR);
+  }
+  if (std::strcmp(pName, "vkCreateSwapchainKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkCreateSwapchainKHR);
+  }
+  if (std::strcmp(pName, "vkDestroySwapchainKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkDestroySwapchainKHR);
+  }
+  if (std::strcmp(pName, "vkGetSwapchainImagesKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkGetSwapchainImagesKHR);
+  }
+  if (std::strcmp(pName, "vkAcquireNextImageKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkAcquireNextImageKHR);
+  }
+  if (std::strcmp(pName, "vkQueuePresentKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkQueuePresentKHR);
+  }
+  if (std::strcmp(pName, "vkCreateCommandPool") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkCreateCommandPool);
+  }
+  if (std::strcmp(pName, "vkDestroyCommandPool") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkDestroyCommandPool);
+  }
+  if (std::strcmp(pName, "vkAllocateCommandBuffers") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkAllocateCommandBuffers);
+  }
+  if (std::strcmp(pName, "vkFreeCommandBuffers") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkFreeCommandBuffers);
+  }
+  if (std::strcmp(pName, "vkBeginCommandBuffer") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkBeginCommandBuffer);
+  }
+  if (std::strcmp(pName, "vkEndCommandBuffer") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkEndCommandBuffer);
+  }
+  if (std::strcmp(pName, "vkResetCommandBuffer") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkResetCommandBuffer);
+  }
+  if (std::strcmp(pName, "vkCmdPipelineBarrier") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkCmdPipelineBarrier);
+  }
+  if (std::strcmp(pName, "vkCreateFence") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkCreateFence);
+  }
+  if (std::strcmp(pName, "vkDestroyFence") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkDestroyFence);
+  }
+  if (std::strcmp(pName, "vkWaitForFences") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkWaitForFences);
+  }
+  if (std::strcmp(pName, "vkResetFences") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkResetFences);
+  }
+  return FakeGroupVulkanGetInstanceProcAddr(instance, pName);
+}
+
+}  // namespace
+
+TEST(AndroidSurfaceManagerVulkanTest,
+     SwapchainUsesFrameInfoExtentIdentityTransformAndIgnoresSuboptimal) {
+  VulkanQueueGuard::ResetForTesting();
+  MockSwapchainState state;
+  g_mock_swapchain_state = &state;
+
+  // Base tag 0x8600 for mock Vulkan handles.
+  constexpr uintptr_t kTag = 0x8600;
+  auto fake_instance = reinterpret_cast<VkInstance>(kTag + 1);
+  auto fake_phys_dev = reinterpret_cast<VkPhysicalDevice>(kTag + 2);
+  auto fake_device = reinterpret_cast<VkDevice>(kTag + 3);
+  auto fake_queue = reinterpret_cast<VkQueue>(kTag + 4);
+  auto owner = std::make_shared<VulkanDeviceOwner>(
+      /*vulkan_lib_handle=*/nullptr, fake_instance, fake_phys_dev, fake_device,
+      fake_queue, /*graphics_queue_family_index=*/0, VK_API_VERSION_1_1,
+      std::vector<std::string>{"VK_KHR_surface", "VK_KHR_android_surface"},
+      std::vector<std::string>{"VK_KHR_swapchain"},
+      &MockSwapchainGetInstanceProcAddr, &FakeGroupVkDestroyDevice,
+      &FakeGroupVkDestroyInstance);
+
+  auto surface_manager = AndroidSurfaceManager::Create(
+      AndroidRenderingAPI::kImpellerVulkan, owner);
+  ASSERT_NE(surface_manager, nullptr);
+  ASSERT_TRUE(surface_manager->IsVulkanInitialized());
+
+  // 1. Overlay swapchain path: even when caps.currentExtent is portrait
+  // (1080x2400) and caps.currentTransform is ROTATE_90, a landscape
+  // FlutterFrameInfo (2400x1080) must create the swapchain at 2400x1080 with
+  // VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR.
+  constexpr uint32_t kLandscapeWidth = 2400;
+  constexpr uint32_t kLandscapeHeight = 1080;
+  constexpr uint32_t kPortraitWidth = 1080;
+  constexpr uint32_t kPortraitHeight = 2400;
+  auto* overlay_window = reinterpret_cast<ANativeWindow*>(0x9101);
+  FlutterFrameInfo landscape_frame = {};
+  landscape_frame.struct_size = sizeof(FlutterFrameInfo);
+  landscape_frame.size = {kLandscapeWidth, kLandscapeHeight};
+
+  FlutterVulkanImage overlay_img1 =
+      surface_manager->GetNextOverlayImage(overlay_window, &landscape_frame);
+  EXPECT_NE(overlay_img1.image, 0u);
+  EXPECT_EQ(state.create_swapchain_calls, 1u);
+  EXPECT_EQ(state.last_swapchain_extent.width, kLandscapeWidth);
+  EXPECT_EQ(state.last_swapchain_extent.height, kLandscapeHeight);
+  EXPECT_EQ(state.last_pre_transform, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
+  EXPECT_TRUE(
+      surface_manager->PresentOverlayImage(overlay_window, &overlay_img1));
+
+  // 2. Subsequent frame at the same landscape size must NOT recreate the
+  // swapchain even when vkAcquireNextImageKHR and vkQueuePresentKHR return
+  // VK_SUBOPTIMAL_KHR.
+  FlutterVulkanImage overlay_img2 =
+      surface_manager->GetNextOverlayImage(overlay_window, &landscape_frame);
+  EXPECT_NE(overlay_img2.image, 0u);
+  EXPECT_EQ(state.create_swapchain_calls, 1u);
+  EXPECT_TRUE(
+      surface_manager->PresentOverlayImage(overlay_window, &overlay_img2));
+
+  // 3. Rotating back to portrait (1080x2400) in FlutterFrameInfo must trigger
+  // swapchain recreation with the new 1080x2400 extent and identity transform.
+  FlutterFrameInfo portrait_frame = {};
+  portrait_frame.struct_size = sizeof(FlutterFrameInfo);
+  portrait_frame.size = {kPortraitWidth, kPortraitHeight};
+  FlutterVulkanImage overlay_img3 =
+      surface_manager->GetNextOverlayImage(overlay_window, &portrait_frame);
+  EXPECT_NE(overlay_img3.image, 0u);
+  EXPECT_EQ(state.create_swapchain_calls, 2u);
+  EXPECT_EQ(state.last_swapchain_extent.width, kPortraitWidth);
+  EXPECT_EQ(state.last_swapchain_extent.height, kPortraitHeight);
+  EXPECT_EQ(state.last_pre_transform, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
+  EXPECT_TRUE(
+      surface_manager->PresentOverlayImage(overlay_window, &overlay_img3));
+
+  // 4. Onscreen swapchain path: verify SetNativeWindow + GetNextImage
+  // + PresentImage also prioritize FlutterFrameInfo extent, use identity
+  // preTransform, and do not thrash on VK_SUBOPTIMAL_KHR.
+  auto verify_onscreen_path = [&](ANativeWindow* onscreen_window) {
+    EXPECT_TRUE(surface_manager->SetNativeWindow(onscreen_window,
+                                                 /*is_fake_window=*/false));
+    // Initial SetNativeWindow has fallback_w=0, fallback_h=0, so it uses
+    // caps.currentExtent (1080x2400) with identity preTransform.
+    EXPECT_EQ(state.create_swapchain_calls, 3u);
+    EXPECT_EQ(state.last_swapchain_extent.width, kPortraitWidth);
+    EXPECT_EQ(state.last_swapchain_extent.height, kPortraitHeight);
+    EXPECT_EQ(state.last_pre_transform, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
+
+    // First landscape frame updates the onscreen swapchain to 2400x1080.
+    FlutterVulkanImage onscreen_img1 =
+        surface_manager->GetNextImage(&landscape_frame);
+    EXPECT_NE(onscreen_img1.image, 0u);
+    EXPECT_EQ(state.create_swapchain_calls, 4u);
+    EXPECT_EQ(state.last_swapchain_extent.width, kLandscapeWidth);
+    EXPECT_EQ(state.last_swapchain_extent.height, kLandscapeHeight);
+    EXPECT_EQ(state.last_pre_transform, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
+    EXPECT_TRUE(surface_manager->PresentImage(&onscreen_img1));
+
+    // Second landscape frame does not recreate the onscreen swapchain despite
+    // VK_SUBOPTIMAL_KHR.
+    FlutterVulkanImage onscreen_img2 =
+        surface_manager->GetNextImage(&landscape_frame);
+    EXPECT_NE(onscreen_img2.image, 0u);
+    EXPECT_EQ(state.create_swapchain_calls, 4u);
+    EXPECT_TRUE(surface_manager->PresentImage(&onscreen_img2));
+    surface_manager->ClearNativeWindow();
+  };
+
+#if FML_OS_ANDROID
+  void* mediandk = dlopen("libmediandk.so", RTLD_NOW);
+  if (mediandk != nullptr) {
+    typedef struct AImageReader AImageReader;
+    typedef int32_t (*AImageReader_newWithUsage_fn)(
+        int32_t width, int32_t height, int32_t format, uint64_t usage,
+        int32_t maxImages, AImageReader** reader);
+    typedef int32_t (*AImageReader_getWindow_fn)(AImageReader* reader,
+                                                 ANativeWindow** window);
+    typedef void (*AImageReader_delete_fn)(AImageReader* reader);
+
+    auto new_with_usage = reinterpret_cast<AImageReader_newWithUsage_fn>(
+        dlsym(mediandk, "AImageReader_newWithUsage"));
+    auto get_window = reinterpret_cast<AImageReader_getWindow_fn>(
+        dlsym(mediandk, "AImageReader_getWindow"));
+    auto delete_reader = reinterpret_cast<AImageReader_delete_fn>(
+        dlsym(mediandk, "AImageReader_delete"));
+
+    if (new_with_usage && get_window && delete_reader) {
+      // (1ULL << 8) is AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE.
+      // (1ULL << 9) is AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT.
+      constexpr uint64_t kUsage = (1ULL << 8) | (1ULL << 9);
+      // 640 and 480 are test buffer dimensions; 1 is AIMAGE_FORMAT_RGBA_8888;
+      // 3 is maxImages buffer queue depth.
+      constexpr int32_t kWidth = 640;
+      constexpr int32_t kHeight = 480;
+      constexpr int32_t kFormatRgba8888 = 1;
+      constexpr int32_t kMaxImages = 3;
+      AImageReader* reader = nullptr;
+      if (new_with_usage(kWidth, kHeight, kFormatRgba8888, kUsage, kMaxImages,
+                         &reader) == 0 &&
+          reader != nullptr) {
+        ANativeWindow* window = nullptr;
+        if (get_window(reader, &window) == 0 && window != nullptr) {
+          verify_onscreen_path(window);
+        }
+        delete_reader(reader);
+      }
+    }
+    dlclose(mediandk);
+  }
+#else
+  verify_onscreen_path(reinterpret_cast<ANativeWindow*>(0x9102));
+#endif
+
+  surface_manager.reset();
+  owner.reset();
+  g_mock_swapchain_state = nullptr;
   VulkanQueueGuard::ResetForTesting();
 }
 
