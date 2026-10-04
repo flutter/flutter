@@ -45,6 +45,8 @@ class AnalysisServer {
   final bool suppressAnalytics;
 
   Process? _process;
+  StreamSubscription<String>? _errorStreamSubscription;
+  StreamSubscription<List<int>>? _stdoutStreamSubscription;
   final _analyzingController = StreamController<bool>.broadcast();
   final _errorsController = StreamController<FileAnalysisErrors>.broadcast();
   var _didServerErrorOccur = false;
@@ -87,9 +89,9 @@ class AnalysisServer {
     unawaited(process.exitCode.whenComplete(() => _process = null));
 
     final Stream<String> errorStream = process.stderr.transform(utf8LineDecoder);
-    errorStream.listen(_handleError);
+    _errorStreamSubscription = errorStream.listen(_handleError);
 
-    process.stdout.listen(_handleServerResponseRaw);
+    _stdoutStreamSubscription = process.stdout.listen(_handleServerResponseRaw);
 
     await Future.any<void>([
       sendRequest('initialize', <String, Object?>{
@@ -296,7 +298,7 @@ class AnalysisServer {
     // LSP progress for analysis is typically reported via tokens.
     // The server sends begin/report/end for a token.
     final Object? value = params['value'];
-    if (value is Map<String, Object?>) {
+    if (value is Map<String, Object?> && !_analyzingController.isClosed) {
       final kind = value['kind'] as String?;
       if (kind == 'begin') {
         _analyzingController.add(true);
@@ -357,6 +359,10 @@ class AnalysisServer {
   }
 
   Future<bool?> dispose() async {
+    await _stdoutStreamSubscription?.cancel();
+    _stdoutStreamSubscription = null;
+    await _errorStreamSubscription?.cancel();
+    _errorStreamSubscription = null;
     await _analyzingController.close();
     await _errorsController.close();
     return _process?.kill();
