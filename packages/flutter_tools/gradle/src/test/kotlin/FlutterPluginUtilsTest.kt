@@ -1162,14 +1162,14 @@ class FlutterPluginUtilsTest {
                 @TempDir tempDir: Path
             ) {
                 val subproject = mockk<Project>()
-                val mockBuildFile = mockk<File>()
+                // A directory exists but cannot be read as text, so readText() throws an
+                // IOException (FileNotFoundException) on every platform. This avoids mocking
+                // java.io.File, whose internal call order differs across JDK versions.
+                val unreadableBuildFile = tempDir.resolve("build.gradle").toFile()
+                assertTrue(unreadableBuildFile.mkdir())
                 val mockLogger = mockk<Logger>(relaxed = true)
 
-                every { subproject.buildFile } returns mockBuildFile
-                every { mockBuildFile.exists() } returns true
-                every { mockBuildFile.absolutePath } returns "/some/path/build.gradle"
-                every { mockBuildFile.extension } returns "gradle"
-                every { mockBuildFile.path } throws IOException("Simulated I/O error")
+                every { subproject.buildFile } returns unreadableBuildFile
                 every { subproject.projectDir } returns tempDir.toFile()
                 every { subproject.logger } returns mockLogger
 
@@ -1178,7 +1178,7 @@ class FlutterPluginUtilsTest {
                 assertNull(result)
                 verify(exactly = 1) {
                     mockLogger.error(
-                        "Failed to read build file: /some/path/build.gradle",
+                        "Failed to read build file: ${unreadableBuildFile.absolutePath}",
                         any<IOException>()
                     )
                 }
