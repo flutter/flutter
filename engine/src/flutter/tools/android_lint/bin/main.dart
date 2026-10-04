@@ -94,8 +94,8 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
       'FlutterActivity.java',
       'FlutterFragmentActivity.java',
       'FlutterEngineConnectionRegistry.java',
-      'FlutterActivityAndFragmentDelegate.java', // TODO(camsim99): Remove as part of https://github.com/flutter/flutter/issues/190461.
-      'FlutterShellArgs.java', // TODO(camsim99): Remove as part of https://github.com/flutter/flutter/issues/190461.
+      'FlutterEngineFlagsProviderImpl.java', // Exempted because it is the intentional boundary for engine flag intent inspection.
+      'FlutterShellArgs.java', // TODO(camsim99): Remove as part of https://github.com/flutter/flutter/issues/193256.
       'ProcessTextPlugin.java', // Exempted because it safely parses the result of startActivityForResult.
       'IntentUtils.java',
     ];
