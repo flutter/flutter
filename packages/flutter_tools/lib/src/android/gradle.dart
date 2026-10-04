@@ -177,6 +177,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     this._androidSdk,
   }) : _fileSystem = fileSystem,
        _logger = logger,
+       _platform = platform,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
@@ -189,6 +190,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _gradleUtils = androidContext.gradleUtils,
        _java = androidContext.java,
        _logger = toolContext.logger,
+       _platform = toolContext.platform,
        _androidStudio = androidContext.androidStudio,
        _androidSdk = androidContext.androidSdk,
        _fileSystemUtils = toolContext.fileSystemUtils,
@@ -197,6 +199,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final Analytics _analytics;
   final Java? _java;
   final Logger _logger;
+  final Platform _platform;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
   final GradleUtils _gradleUtils;
@@ -204,6 +207,20 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final AndroidSdk? _androidSdk;
   final FileSystemUtils _fileSystemUtils;
   final ProcessUtils _processUtils;
+
+  Map<String, String>? get _gradleEnvironment {
+    final Map<String, String>? environment = _java?.environment;
+    if ((_java?.version?.major ?? 0) < 24) {
+      return environment;
+    }
+    // Java 24 warns when Gradle loads native libraries without explicit access.
+    // Set this on the launcher JVM, not only the Gradle daemon.
+    return <String, String>{
+      ...?environment,
+      'GRADLE_OPTS':
+          '${_platform.environment['GRADLE_OPTS'] ?? ''} --enable-native-access=ALL-UNNAMED'.trim(),
+    };
+  }
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -363,7 +380,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: _java?.environment,
+        environment: _gradleEnvironment,
         mapFunction: consumeLog,
       );
     } on ProcessException catch (exception) {
@@ -957,7 +974,7 @@ To fix this, you can either:
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: _java?.environment,
+        environment: _gradleEnvironment,
       );
     } finally {
       status.stop();

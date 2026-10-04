@@ -1940,6 +1940,48 @@ BuildVariant: paidProfile
       },
     );
 
+    for (final javaVersion in <int?>[null, 17, 21, 23, 24, 25]) {
+      for (final gradleOptions in <String?>[null, '-Dexample="value with spaces"']) {
+        testUsingContext(
+          'Gradle native access with Java $javaVersion and GRADLE_OPTS=$gradleOptions',
+          () async {
+            final java = FakeJava()
+              ..version = javaVersion == null ? null : Version(javaVersion, 0, 0);
+            final AndroidGradleBuilder builder = createBuilder(
+              java: java,
+              gradleUtils: FakeGradleUtils(),
+              logger: logger,
+              processManager: processManager,
+              fileSystem: fileSystem,
+              platform: FakePlatform(environment: <String, String>{'GRADLE_OPTS': ?gradleOptions}),
+            );
+            processManager.addCommand(
+              FakeCommand(
+                command: const <String>['gradlew', '-q', 'printBuildVariants'],
+                environment: <String, String>{
+                  ...java.environment,
+                  if (javaVersion == 24 || javaVersion == 25)
+                    'GRADLE_OPTS': gradleOptions == null
+                        ? '--enable-native-access=ALL-UNNAMED'
+                        : '$gradleOptions --enable-native-access=ALL-UNNAMED',
+                  'FLUTTER_ALREADY_LOCKED': 'true',
+                },
+                stdout: 'BuildVariant: debug',
+              ),
+            );
+
+            expect(
+              await builder.getBuildVariants(
+                project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+              ),
+              <String>['debug'],
+            );
+            expect(processManager, hasNoRemainingExpectations);
+          },
+        );
+      }
+    }
+
     testUsingContext('getBuildOptions returns empty list if gradle returns error', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
