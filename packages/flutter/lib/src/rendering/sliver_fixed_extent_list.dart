@@ -638,7 +638,10 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     // We do this after super.performLayout() so that _currentLayoutDimensions is updated.
     final int? childCount = childManager.estimatedChildCount;
     if (childCount == null || childCount > 0) {
-      final int firstIndex = math.max(0, _findChildIndexForScrollOffset(constraints.scrollOffset, findMax: false));
+      final int firstIndex = math.max(
+        0,
+        _findChildIndexForScrollOffset(constraints.scrollOffset, findMax: false),
+      );
       if (childCount == null || firstIndex < childCount) {
         itemExtentBuilder(firstIndex, layoutDimensions);
       }
