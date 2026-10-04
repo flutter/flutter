@@ -691,6 +691,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           analytics: const NoOpAnalytics(),
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
         );
       });
 
@@ -724,6 +725,7 @@ void main() {
         xcodeDebug: FakeXcodeDebug(),
         analytics: const NoOpAnalytics(),
         shutdownHooks: shutdownHooks,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       expect(shutdownHooks.registeredHooks, hasLength(1));
@@ -768,6 +770,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           analytics: fakeAnalytics,
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
         );
       });
 
@@ -1601,6 +1604,7 @@ void main() {
               xcodeDebug: FakeXcodeDebug(),
               analytics: fakeAnalytics,
               shutdownHooks: FakeShutdownHooks(),
+              templateRenderer: FakeTemplateRenderer(),
             );
             const devicesOutput = '''
 [

@@ -1102,6 +1102,7 @@ void main() {
         final FileSystem fileSystem = MemoryFileSystem.test();
         final processManager = FakeProcessManager.empty();
         final fakeAnalytics = FakeAnalytics();
+        final templateRenderer = FakeTemplateRenderer();
         final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
             .childDirectory('flutter_empty_xcode.rand0');
         final Directory bundleLocation = fileSystem.currentDirectory;
@@ -1120,8 +1121,10 @@ void main() {
             expectedDeviceId: '123',
             expectedLaunchArguments: <String>['--enable-dart-profiling'],
             expectedBundlePath: bundleLocation.path,
+            expectedTemplateRenderer: templateRenderer,
           ),
           analytics: fakeAnalytics,
+          templateRenderer: templateRenderer,
         );
         final IOSApp iosApp = PrebuiltIOSApp(
           projectBundleId: 'app',
@@ -2079,6 +2082,7 @@ IOSDevice setUpIOSDevice({
   FakePlatform? platform,
   Xcode? xcode,
   UserMessages? userMessages,
+  TemplateRenderer? templateRenderer,
 }) {
   final artifacts = Artifacts.test();
   final FakePlatform macPlatform =
@@ -2133,6 +2137,7 @@ IOSDevice setUpIOSDevice({
     isCoreDevice: isCoreDevice,
     operatingSystemUtils: FakeOperatingSystemUtils(),
     shutdownHooks: FakeShutdownHooks(),
+    templateRenderer: templateRenderer ?? FakeTemplateRenderer(),
   );
 }
 
@@ -2189,6 +2194,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     this.expectedDeviceId,
     this.expectedLaunchArguments,
     this.expectedBundlePath,
+    this.expectedTemplateRenderer,
     this.completer,
   });
 
@@ -2197,6 +2203,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
   final String? expectedDeviceId;
   final List<String>? expectedLaunchArguments;
   final String? expectedBundlePath;
+  final TemplateRenderer? expectedTemplateRenderer;
   final Completer<void>? completer;
 
   @override
@@ -2211,6 +2218,9 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
   }) async {
     if (expectedBundlePath != null) {
       expect(expectedBundlePath, deviceBundlePath);
+    }
+    if (expectedTemplateRenderer != null) {
+      expect(templateRenderer, same(expectedTemplateRenderer));
     }
     return expectedProject!;
   }

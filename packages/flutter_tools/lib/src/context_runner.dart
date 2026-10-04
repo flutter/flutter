@@ -335,6 +335,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         fileSystem: globals.fs,
         analytics: globals.analytics,
         shutdownHooks: globals.shutdownHooks,
+        templateRenderer: globals.templateRenderer,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,

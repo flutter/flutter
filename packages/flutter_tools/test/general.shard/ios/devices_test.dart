@@ -103,6 +103,7 @@ void main() {
         processUtils: processUtils,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       );
       expect(await device.isSupported(), isTrue);
@@ -134,6 +135,7 @@ void main() {
           processUtils: processUtils,
           operatingSystemUtils: FakeOperatingSystemUtils(),
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
           xcode: null,
         );
 
@@ -185,6 +187,7 @@ void main() {
         processUtils: processUtils,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       );
       expect(await device.isSupported(), isFalse);
@@ -216,6 +219,7 @@ void main() {
           processUtils: processUtils,
           operatingSystemUtils: FakeOperatingSystemUtils(),
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
           xcode: null,
         ).majorSdkVersion,
         1,
@@ -245,6 +249,7 @@ void main() {
           processUtils: processUtils,
           operatingSystemUtils: FakeOperatingSystemUtils(),
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
           xcode: null,
         ).majorSdkVersion,
         13,
@@ -274,6 +279,7 @@ void main() {
           processUtils: processUtils,
           operatingSystemUtils: FakeOperatingSystemUtils(),
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
           xcode: null,
         ).majorSdkVersion,
         10,
@@ -303,6 +309,7 @@ void main() {
           processUtils: processUtils,
           operatingSystemUtils: FakeOperatingSystemUtils(),
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
           xcode: null,
         ).majorSdkVersion,
         0,
@@ -332,6 +339,7 @@ void main() {
           processUtils: processUtils,
           operatingSystemUtils: FakeOperatingSystemUtils(),
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
           xcode: null,
         ).majorSdkVersion,
         0,
@@ -363,6 +371,7 @@ void main() {
         processUtils: processUtils,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       ).sdkVersion;
       var expectedVersion = Version(13, 3, 1, text: '13.3.1');
@@ -394,6 +403,7 @@ void main() {
         processUtils: processUtils,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       ).sdkVersion;
       expectedVersion = Version(13, 3, 1, text: '13.3.1 (20ADBC)');
@@ -425,6 +435,7 @@ void main() {
         processUtils: processUtils,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       ).sdkVersion;
       expectedVersion = Version(16, 4, 1, text: '16.4.1(a) (20ADBC)');
@@ -456,6 +467,7 @@ void main() {
         processUtils: processUtils,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       ).sdkVersion;
       expectedVersion = Version(0, 0, 0, text: '0');
@@ -486,6 +498,7 @@ void main() {
         processUtils: processUtils,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       ).sdkVersion;
       expect(sdkVersion, isNull);
@@ -514,6 +527,7 @@ void main() {
         processUtils: processUtils,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       ).sdkVersion;
       expect(sdkVersion, isNull);
@@ -544,6 +558,7 @@ void main() {
         processUtils: processUtils,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       );
 
@@ -575,6 +590,7 @@ void main() {
         processUtils: processUtils,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       );
 
@@ -613,6 +629,7 @@ void main() {
               processUtils: processUtils,
               operatingSystemUtils: FakeOperatingSystemUtils(),
               shutdownHooks: FakeShutdownHooks(),
+              templateRenderer: FakeTemplateRenderer(),
               xcode: null,
             );
           }, throwsAssertionError);
@@ -709,6 +726,7 @@ void main() {
           processUtils: processUtils,
           operatingSystemUtils: FakeOperatingSystemUtils(),
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
           xcode: null,
         );
         logReader1 = createLogReader(device, appPackage1, process1);
@@ -761,6 +779,7 @@ void main() {
           processUtils: processUtils,
           operatingSystemUtils: FakeOperatingSystemUtils(),
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(currentVersion: Version(15, 0, 0)),
         );
 
@@ -795,6 +814,7 @@ void main() {
             processUtils: processUtils,
             operatingSystemUtils: FakeOperatingSystemUtils(),
             shutdownHooks: FakeShutdownHooks(),
+            templateRenderer: FakeTemplateRenderer(),
             xcode: fakeXcode,
           );
 
@@ -832,6 +852,7 @@ void main() {
           processUtils: processUtils,
           operatingSystemUtils: FakeOperatingSystemUtils(),
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
 
@@ -867,6 +888,7 @@ void main() {
           processUtils: processUtils,
           operatingSystemUtils: FakeOperatingSystemUtils(),
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
 
@@ -906,6 +928,7 @@ void main() {
           processUtils: processUtils,
           operatingSystemUtils: FakeOperatingSystemUtils(),
           shutdownHooks: FakeShutdownHooks(),
+          templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
         );
 
@@ -985,6 +1008,7 @@ void main() {
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       );
 
@@ -1012,6 +1036,7 @@ void main() {
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       );
     });
@@ -1352,6 +1377,7 @@ void main() {
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
         operatingSystemUtils: FakeOperatingSystemUtils(),
         shutdownHooks: FakeShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
         xcode: null,
       );
     });

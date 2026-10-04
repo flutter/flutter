@@ -31,7 +31,6 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../features.dart';
-import '../isolated/mustache_template.dart';
 import '../macos/xcdevice.dart';
 import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
@@ -333,8 +332,8 @@ class IOSDevice extends Device {
     required this._xcode,
     required this._operatingSystemUtils,
     required this._shutdownHooks,
+    required this._templateRenderer,
     UserMessages? userMessages,
-    this._templateRenderer = const MustacheTemplateRenderer(),
   }) : _iproxy = iProxy,
        _logger = logger,
        _userMessages = userMessages ?? UserMessages(),

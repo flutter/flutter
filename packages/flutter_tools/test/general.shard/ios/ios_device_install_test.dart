@@ -397,6 +397,7 @@ IOSDevice setUpIOSDevice({
     isCoreDevice: isCoreDevice,
     operatingSystemUtils: FakeOperatingSystemUtils(),
     shutdownHooks: FakeShutdownHooks(),
+    templateRenderer: FakeTemplateRenderer(),
   );
 }
 

@@ -129,6 +129,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     isCoreDevice: false,
     operatingSystemUtils: FakeOperatingSystemUtils(),
     shutdownHooks: FakeShutdownHooks(),
+    templateRenderer: FakeTemplateRenderer(),
   );
 }
 

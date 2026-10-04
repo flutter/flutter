@@ -56,6 +56,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       expect(dependencies.toolContext, isNotNull);
@@ -119,6 +120,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       expect(dependencies.androidContext.androidSdk, same(mockSdk));
@@ -134,6 +136,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       expect(dependencies.buildTargets, same(mockBuildTargets));
@@ -148,6 +151,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       expect(dependencies.deviceManager, same(mockDeviceManager));
@@ -162,6 +166,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       expect(dependencies.featureFlags, same(mockFeatureFlags));
