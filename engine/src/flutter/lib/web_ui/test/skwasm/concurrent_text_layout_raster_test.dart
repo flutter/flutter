@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' show renderer;
@@ -116,5 +119,70 @@ Future<void> testMain() async {
 
     // Completing without a RuntimeError or hang is the pass condition.
     expect(frame, greaterThan(0));
+  }, timeout: const Timeout(Duration(minutes: 2)));
+
+  test('concurrent glyph metrics and rasterization use the same font safely', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/193439.
+    // Keep the font and variation fixed so layout and rasterization share a
+    // FreeType face, while changing sizes to miss their respective glyph caches.
+    ui.Paragraph layoutParagraph(double fontSize) {
+      final builder = ui.ParagraphBuilder(ui.ParagraphStyle())
+        ..pushStyle(
+          ui.TextStyle(
+            fontFamily: 'RobotoVariable',
+            fontSize: fontSize,
+            fontVariations: const <ui.FontVariation>[ui.FontVariation('wght', 400)],
+          ),
+        )
+        ..addText(
+          'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz '
+          '0123456789 ()*+,-.:@',
+        );
+      return builder.build()..layout(const ui.ParagraphConstraints(width: 300));
+    }
+
+    final ui.Paragraph paragraph = layoutParagraph(12);
+    final random = math.Random(1);
+    var layouts = 0;
+    final timer = Timer.periodic(const Duration(milliseconds: 1), (_) {
+      final burst = Stopwatch()..start();
+      do {
+        layoutParagraph(4 + random.nextDouble() * 60).dispose();
+        layouts++;
+      } while (burst.elapsed < const Duration(milliseconds: 6));
+    });
+
+    final stopwatch = Stopwatch()..start();
+    var frame = 0;
+    try {
+      while (frame < _maxFrames && stopwatch.elapsed < _maxTestTime) {
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder);
+        for (var i = 0; i < 6; i++) {
+          final double scale = 0.8 + 12 * (0.5 + 0.5 * math.sin(frame * 0.037 + i));
+          canvas
+            ..save()
+            ..translate(10.0 + i * 3, 10.0 + i * 40)
+            ..scale(scale)
+            ..drawParagraph(paragraph, ui.Offset.zero)
+            ..restore();
+        }
+        final ui.Picture picture = recorder.endRecording();
+        try {
+          await renderScene((ui.SceneBuilder()..addPicture(ui.Offset.zero, picture)).build());
+        } finally {
+          picture.dispose();
+        }
+        // Single-threaded rendering can complete without yielding to timers.
+        await Future<void>.delayed(Duration.zero);
+        frame++;
+      }
+    } finally {
+      timer.cancel();
+      paragraph.dispose();
+    }
+
+    expect(frame, greaterThan(0));
+    expect(layouts, greaterThan(0));
   }, timeout: const Timeout(Duration(minutes: 2)));
 }
