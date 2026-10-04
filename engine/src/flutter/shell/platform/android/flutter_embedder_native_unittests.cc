@@ -10883,6 +10883,155 @@ TEST(
   native.NotifySurfaceDestroyed();
 }
 
+TEST(
+    FlutterEmbedderNativeCompositorTest,
+    NotifySurfaceDestroyedTearsDownOverlaySurfacesAndResetsCompositorStateForCachedEngine) {
+  class OverlayWindowMockJvmInvoker : public NiceMock<MockJvmInvoker> {
+   public:
+    ANativeWindow* GetOverlayWindow(int32_t id) override {
+      auto it = active_overlay_windows.find(id);
+      return it != active_overlay_windows.end() ? it->second : nullptr;
+    }
+    std::unordered_map<int32_t, ANativeWindow*> active_overlay_windows;
+  };
+
+  auto mock_invoker = std::make_shared<OverlayWindowMockJvmInvoker>();
+  bool hcpp_enabled = true;
+  int create_overlay_calls = 0;
+  int destroy_overlay_calls = 0;
+  int show_overlay_calls = 0;
+  int hide_overlay_calls = 0;
+  std::vector<int32_t> hidden_view_ids;
+
+  // Synthetic ANativeWindow pointers representing overlay surfaces created for
+  // Activity 1 and Activity 2 on a cached FlutterEngine.
+  auto* overlay_window_activity_1 = reinterpret_cast<ANativeWindow*>(0x1001);
+  auto* overlay_window_activity_2 = reinterpret_cast<ANativeWindow*>(0x2002);
+  auto& active_overlay_windows = mock_invoker->active_overlay_windows;
+
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(Eq("isHcppEnabled"), _, _))
+      .WillByDefault([&](const std::string&, const std::string&,
+                         const std::vector<uint8_t>&) { return hcpp_enabled; });
+  ON_CALL(*mock_invoker, InvokeIntMethod(Eq("createOverlaySurface2Id"), _, _))
+      .WillByDefault([&](const std::string&, const std::string&,
+                         const std::vector<uint8_t>&) {
+        ++create_overlay_calls;
+        // PlatformViewsController2.createOverlaySurface() always returns ID 0.
+        constexpr int32_t kHcppOverlaySurfaceId = 0;
+        active_overlay_windows[kHcppOverlaySurfaceId] =
+            (create_overlay_calls == 1) ? overlay_window_activity_1
+                                        : overlay_window_activity_2;
+        return static_cast<int64_t>(kHcppOverlaySurfaceId);
+      });
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault([&](const std::string& method_name,
+                         const std::string& /*signature*/,
+                         const std::vector<uint8_t>& payload) {
+        if (method_name == "setHcppEnabled" && !payload.empty()) {
+          hcpp_enabled = (payload[0] != 0);
+        } else if (method_name == "destroyOverlaySurface2" ||
+                   method_name == "destroyOverlaySurfaces") {
+          ++destroy_overlay_calls;
+          active_overlay_windows.clear();
+        } else if (method_name == "showOverlaySurface2") {
+          ++show_overlay_calls;
+        } else if (method_name == "hideOverlaySurface2") {
+          ++hide_overlay_calls;
+        } else if ((method_name == "hidePlatformView2" ||
+                    method_name == "hidePlatformView") &&
+                   payload.size() >= sizeof(int32_t)) {
+          int32_t id = 0;
+          std::memcpy(&id, payload.data(), sizeof(int32_t));
+          hidden_view_ids.push_back(id);
+        }
+        return true;
+      });
+
+  FlutterEmbedderNative native(mock_invoker);
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(native.SetHcppEnabled(true));
+  EXPECT_TRUE(native.IsHcppEnabled());
+
+  // 42 is a test platform view identifier; 100.0 and 50.0 are test layer
+  // dimensions.
+  constexpr int64_t kActivity1ViewId = 42;
+  constexpr double kRootSize = 100.0;
+  constexpr double kPvSize = 50.0;
+
+  FlutterBackingStore root_store = {};
+  root_store.struct_size = sizeof(FlutterBackingStore);
+  FlutterBackingStore overlay_store = {};
+  overlay_store.struct_size = sizeof(FlutterBackingStore);
+  overlay_store.type = kFlutterBackingStoreTypeSoftware;
+  FlutterPlatformView pv1 = {
+      .struct_size = sizeof(FlutterPlatformView),
+      .identifier = kActivity1ViewId,
+  };
+  FlutterLayer root_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &root_store,
+      .size = FlutterSize{kRootSize, kRootSize},
+  };
+  FlutterLayer pv1_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypePlatformView,
+      .platform_view = &pv1,
+      .size = FlutterSize{kPvSize, kPvSize},
+  };
+  FlutterLayer overlay_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &overlay_store,
+      .size = FlutterSize{kRootSize, kRootSize},
+  };
+
+  // --- Activity 1 attaches and renders a platform view with an overlay ---
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+  EXPECT_EQ(native.GetOverlayWindowForTesting(0), overlay_window_activity_1);
+  EXPECT_EQ(create_overlay_calls, 1);
+
+  // 3 layers: root backing store + platform view + overlay backing store.
+  constexpr size_t kCompositeLayerCount = 3;
+  const FlutterLayer* activity1_layers[kCompositeLayerCount] = {
+      &root_layer, &pv1_layer, &overlay_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(activity1_layers,
+                                                    kCompositeLayerCount));
+  EXPECT_EQ(show_overlay_calls, 1);
+  EXPECT_EQ(hide_overlay_calls, 0);
+  EXPECT_TRUE(hidden_view_ids.empty());
+
+  // --- Activity 1 detaches and destroys its FlutterSurfaceView ---
+  native.NotifySurfaceDestroyed();
+  EXPECT_EQ(destroy_overlay_calls, 1);
+  EXPECT_TRUE(active_overlay_windows.empty());
+
+  // --- Activity 2 attaches to the same cached FlutterEngine ---
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+
+  // Frame 1 in Activity 2 has no platform views or overlays (e.g. textTest).
+  // Because NotifySurfaceDestroyed() reset views_visible_last_frame_ and
+  // overlay_layer_is_shown_, no stale hidePlatformView2(42) or
+  // hideOverlaySurface2() calls should be emitted for Activity 1's destroyed
+  // surface.
+  constexpr size_t kRootOnlyLayerCount = 1;
+  const FlutterLayer* root_only_layers[kRootOnlyLayerCount] = {&root_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(root_only_layers,
+                                                    kRootOnlyLayerCount));
+  EXPECT_TRUE(hidden_view_ids.empty());
+  EXPECT_EQ(hide_overlay_calls, 0);
+
+  // Frame 2 in Activity 2 renders a platform view with an overlay (e.g.
+  // platformViewTextureLayerTest). GetOverlayWindow(0) must allocate a fresh
+  // overlay surface on Activity 2 rather than returning Activity 1's stale
+  // window.
+  EXPECT_EQ(native.GetOverlayWindowForTesting(0), overlay_window_activity_2);
+  EXPECT_EQ(create_overlay_calls, 2);
+
+  native.NotifySurfaceDestroyed();
+  EXPECT_EQ(destroy_overlay_calls, 2);
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter

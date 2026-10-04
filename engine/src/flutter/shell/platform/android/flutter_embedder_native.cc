@@ -642,6 +642,7 @@ ANativeWindow* FlutterEmbedderNative::GetOverlayWindow(size_t overlay_index) {
 }
 
 void FlutterEmbedderNative::HandleCompositorFramePresented() {
+  const bool is_surface_control = IsHcppEnabled();
   std::vector<int64_t> frame_views;
   size_t frame_overlays = 0;
   bool pending_begin = false;
@@ -650,6 +651,9 @@ void FlutterEmbedderNative::HandleCompositorFramePresented() {
   size_t root_gl_height = 0;
   std::vector<PendingPlatformViewPresentation> pending_pvs;
   std::vector<PlatformViewOverlay> pending_overlays;
+  std::vector<int64_t> views_to_hide;
+  bool should_show_overlay = false;
+  bool should_hide_overlay = false;
   {
     std::scoped_lock lock(compositor_frame_mutex_);
     frame_views = std::move(current_frame_platform_view_ids_);
@@ -668,6 +672,23 @@ void FlutterEmbedderNative::HandleCompositorFramePresented() {
     pending_platform_views_.clear();
     pending_overlays = std::move(pending_overlays_);
     pending_overlays_.clear();
+    if (is_surface_control) {
+      std::unordered_set<int64_t> current_set(frame_views.begin(),
+                                              frame_views.end());
+      for (int64_t old_view_id : views_visible_last_frame_) {
+        if (current_set.find(old_view_id) == current_set.end()) {
+          views_to_hide.push_back(old_view_id);
+        }
+      }
+      views_visible_last_frame_ = std::move(current_set);
+      if (frame_overlays > 0) {
+        should_show_overlay = true;
+        overlay_layer_is_shown_ = true;
+      } else if (overlay_layer_is_shown_) {
+        should_hide_overlay = true;
+        overlay_layer_is_shown_ = false;
+      }
+    }
   }
 
   if (!jni_router_ || !android_task_runners_) {
@@ -684,27 +705,6 @@ void FlutterEmbedderNative::HandleCompositorFramePresented() {
       if (auto default_vm_init = GetDefaultVMInit()) {
         vm_service_uri = default_vm_init->GetVmServiceUri();
       }
-    }
-  }
-  bool is_surface_control = IsHcppEnabled();
-  std::vector<int64_t> views_to_hide;
-  bool should_show_overlay = false;
-  bool should_hide_overlay = false;
-  if (is_surface_control) {
-    std::unordered_set<int64_t> current_set(frame_views.begin(),
-                                            frame_views.end());
-    for (int64_t old_view_id : views_visible_last_frame_) {
-      if (current_set.find(old_view_id) == current_set.end()) {
-        views_to_hide.push_back(old_view_id);
-      }
-    }
-    views_visible_last_frame_ = std::move(current_set);
-    if (frame_overlays > 0) {
-      should_show_overlay = true;
-      overlay_layer_is_shown_ = true;
-    } else if (overlay_layer_is_shown_) {
-      should_hide_overlay = true;
-      overlay_layer_is_shown_ = false;
     }
   }
 
@@ -1936,6 +1936,43 @@ void FlutterEmbedderNative::NotifySurfaceDestroyed() {
   }
   surface_attached_ = false;
   SetNativeWindow(nullptr, /*is_fake_window=*/false);
+  {
+    std::scoped_lock lock(compositor_frame_mutex_);
+    current_frame_platform_view_ids_.clear();
+    current_frame_overlay_count_ = 0;
+    pending_begin_frame_ = false;
+    pending_root_gl_fbo_ = 0;
+    pending_root_gl_width_ = 0;
+    pending_root_gl_height_ = 0;
+    pending_platform_views_.clear();
+    pending_overlays_.clear();
+    views_visible_last_frame_.clear();
+    overlay_layer_is_shown_ = false;
+  }
+  bool had_overlay_surfaces = false;
+  if (overlay_surface_state_) {
+    std::scoped_lock lock(overlay_surface_state_->mutex);
+    had_overlay_surfaces = !overlay_surface_state_->surface_ids.empty();
+    overlay_surface_state_->surface_ids.clear();
+  }
+  if (surface_manager_) {
+    surface_manager_->DestroyOverlaySurfaces();
+  }
+  if (had_overlay_surfaces && jni_router_) {
+    auto platform_runner = android_task_runners_
+                               ? android_task_runners_->GetPlatformTaskRunner()
+                               : nullptr;
+    if (!platform_runner || platform_runner->RunsTasksOnCurrentThread()) {
+      jni_router_->RouteDestroyOverlaySurfaces();
+    } else {
+      fml::AutoResetWaitableEvent latch;
+      platform_runner->PostTask([this, &latch]() {
+        jni_router_->RouteDestroyOverlaySurfaces();
+        latch.Signal();
+      });
+      latch.Wait();
+    }
+  }
 }
 
 ANativeWindow* FlutterEmbedderNative::GetNativeWindow() {
@@ -2652,6 +2689,10 @@ std::optional<int32_t> FlutterEmbedderNative::CreateOverlaySurface() const {
 
 bool FlutterEmbedderNative::DestroyOverlaySurfaces() const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::DestroyOverlaySurfaces");
+  {
+    std::scoped_lock lock(compositor_frame_mutex_);
+    overlay_layer_is_shown_ = false;
+  }
   if (overlay_surface_state_) {
     std::scoped_lock lock(overlay_surface_state_->mutex);
     overlay_surface_state_->surface_ids.clear();
@@ -2662,7 +2703,20 @@ bool FlutterEmbedderNative::DestroyOverlaySurfaces() const {
   if (!jni_router_) {
     return false;
   }
-  return jni_router_->RouteDestroyOverlaySurfaces();
+  auto platform_runner = android_task_runners_
+                             ? android_task_runners_->GetPlatformTaskRunner()
+                             : nullptr;
+  if (!platform_runner || platform_runner->RunsTasksOnCurrentThread()) {
+    return jni_router_->RouteDestroyOverlaySurfaces();
+  }
+  bool result = false;
+  fml::AutoResetWaitableEvent latch;
+  platform_runner->PostTask([this, &result, &latch]() {
+    result = jni_router_->RouteDestroyOverlaySurfaces();
+    latch.Signal();
+  });
+  latch.Wait();
+  return result;
 }
 
 bool FlutterEmbedderNative::OnDisplayOverlaySurface(

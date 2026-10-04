@@ -1364,7 +1364,7 @@ class FlutterEmbedderNative {
   std::atomic<bool> surface_attached_{false};
   std::atomic<bool> first_frame_presented_{false};
   std::atomic<bool> is_image_view_surface_active_{false};
-  bool overlay_layer_is_shown_ = false;
+  mutable bool overlay_layer_is_shown_ = false;
 
   void FlushPendingPlatformMessages();
 
