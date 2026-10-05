@@ -618,6 +618,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// [axisDirection] is [AxisDirection.right], then the zero scroll offset is
   /// on the left edge of the viewport.
   ///
+  /// Defaults to 0.0 for viewports that do not support anchoring.
+  ///
   /// {@macro flutter.rendering.GrowthDirection.sample}
   double get anchor => 0.0;
 
@@ -1645,7 +1647,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   set anchor(double value) {
     assert(
       value >= 0.0 && value <= 1.0,
-      'The anchor must be between 0.0 and 1.0, inclusive, but was $anchor',
+      'The anchor must be between 0.0 and 1.0, inclusive, but was $value',
     );
     if (value == _anchor) {
       return;
