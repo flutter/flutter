@@ -83,10 +83,8 @@ void Record(const ContentContextOptions& options,
   if (found == registry.variants.end()) {
     return;
   }
-  found->second.push_back(
-      RecordedPipelineVariant{.descriptor = std::move(descriptor.value()),
-                              .options = options,
-                              .warmed = tWarmed});
+  found->second.push_back(RecordedPipelineVariant{
+      .descriptor = descriptor.value(), .options = options, .warmed = tWarmed});
 }
 
 void Report(const ContentContext* content_context,

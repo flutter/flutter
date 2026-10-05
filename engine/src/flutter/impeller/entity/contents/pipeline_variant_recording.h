@@ -74,7 +74,8 @@ using PipelineVariantObserver =
 #if IMPELLER_PIPELINE_VARIANT_RECORDER_IS_SUPPORTED()
 void SetPipelineVariantObserver(PipelineVariantObserver observer);
 #else
-inline void SetPipelineVariantObserver(PipelineVariantObserver observer) {
+inline void SetPipelineVariantObserver(
+    const PipelineVariantObserver& observer) {
   if (observer) {
     FML_LOG(ERROR) << "Pipeline variant recording is only available in debug "
                       "builds. The observer will never be called.";
