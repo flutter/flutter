@@ -4439,10 +4439,15 @@ TEST_F(ShellTest, PointerPacketsFlushMicrotasks) {
       // fixture.
       "NotifyNative", CREATE_FFI_LAMBDA([&]() { did_invoke_callback = true; }));
 
-  // This dispatches the packet and flushes microtask so the callback must
-  // be invoked immediately.
-  DispatchFakePointerData(shell.get(), 23);
-  EXPECT_TRUE(did_invoke_callback);
+  fml::AutoResetWaitableEvent latch;
+  task_runner->PostTask([&] {
+    // This dispatches the packet and flushes microtask so the callback must
+    // be invoked immediately.
+    DispatchFakePointerData(shell.get(), 23);
+    EXPECT_TRUE(did_invoke_callback);
+    latch.Signal();
+  });
+  latch.Wait();
 
   DestroyShell(std::move(shell), task_runners);
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
