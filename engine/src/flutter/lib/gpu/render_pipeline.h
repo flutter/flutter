@@ -6,6 +6,7 @@
 #define FLUTTER_LIB_GPU_RENDER_PIPELINE_H_
 
 #include <memory>
+#include <string>
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/export.h"
@@ -36,6 +37,10 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
       impeller::ShaderLibrary& library,
       impeller::PipelineDescriptor& desc);
 
+  const Shader& GetVertexShader() const { return *vertex_shader_; }
+
+  const Shader& GetFragmentShader() const { return *fragment_shader_; }
+
  private:
   fml::RefPtr<flutter::gpu::Shader> vertex_shader_;
   fml::RefPtr<flutter::gpu::Shader> fragment_shader_;
@@ -60,6 +65,14 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
 /// deep inside backend pipeline compilation with no useful signal).
 const char* ValidateRenderPipelineShaderStages(const Shader& vertex_shader,
                                                const Shader& fragment_shader);
+
+/// Checks that neither stage declares a push constant block larger than the
+/// device supports, returning an error message suitable for a Dart exception
+/// when one does, and an empty string otherwise. Reported at pipeline creation
+/// rather than emulated, so an unsupported size is never silently slow.
+std::string ValidatePushConstantSizes(Context& gpu_context,
+                                      const Shader& vertex_shader,
+                                      const Shader& fragment_shader);
 
 }  // namespace gpu
 }  // namespace flutter

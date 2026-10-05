@@ -174,6 +174,9 @@ class CapabilitiesGLES final
   size_t GetMinimumUniformAlignment() const override;
 
   // |Capabilities|
+  size_t GetMaxPushConstantSize() const override;
+
+  // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override;
 
  private:

@@ -30,6 +30,11 @@ void ShaderBundleData::AddUniformTexture(ShaderUniformTexture uniform_texture) {
   uniform_textures_.emplace_back(std::move(uniform_texture));
 }
 
+void ShaderBundleData::SetPushConstantBlock(
+    ShaderPushConstantBlock push_constants) {
+  push_constants_ = std::move(push_constants);
+}
+
 void ShaderBundleData::AddInputDescription(InputDescription input) {
   inputs_.emplace_back(std::move(input));
 }
@@ -208,6 +213,38 @@ ShaderBundleData::CreateFlatbuffer() const {
     desc->set = texture.set;
     desc->binding = texture.binding;
     shader_bundle->uniform_textures.emplace_back(std::move(desc));
+  }
+
+  if (push_constants_.has_value()) {
+    auto desc = std::make_unique<fb::shaderbundle::ShaderPushConstantBlockT>();
+    desc->name = push_constants_->name;
+    if (desc->name.empty()) {
+      VALIDATION_LOG << "Push constant block name cannot be empty.";
+      return nullptr;
+    }
+    desc->ext_res_0 = push_constants_->ext_res_0;
+    desc->size_in_bytes = push_constants_->size_in_bytes;
+
+    for (const auto& field : push_constants_->fields) {
+      auto field_desc =
+          std::make_unique<fb::shaderbundle::ShaderUniformStructFieldT>();
+      field_desc->name = field.name;
+      auto type = ToUniformType(field.type);
+      if (!type.has_value()) {
+        VALIDATION_LOG << " Invalid shader type " << field.type << ".";
+        return nullptr;
+      }
+      field_desc->type = type.value();
+      field_desc->offset_in_bytes = field.offset_in_bytes;
+      field_desc->element_size_in_bytes = field.element_size_in_bytes;
+      field_desc->total_size_in_bytes = field.total_size_in_bytes;
+      field_desc->array_elements = field.array_elements.value_or(0);
+      field_desc->vec_size = field.vec_size;
+      field_desc->columns = field.columns;
+      desc->fields.push_back(std::move(field_desc));
+    }
+
+    shader_bundle->push_constants = std::move(desc);
   }
 
   for (const auto& input : inputs_) {
