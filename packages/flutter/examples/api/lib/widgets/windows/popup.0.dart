@@ -48,39 +48,34 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  PopupWindowController? _popup;
+  final NestedWindowController _controller = NestedWindowController();
 
-  bool get _isShowing => !(_popup?.isDestroyed ?? true);
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
-  // The anchorContext is below the NestedWindow, so NestedWindow.layoutInfoOf
-  // reports the geometry of the button that the popup is anchored to.
-  void _togglePopup(BuildContext anchorContext) {
-    if (_isShowing) {
-      _popup!.destroy();
-      return;
-    }
-    final NestedWindowLayoutInfo info = NestedWindow.layoutInfoOf(
-      anchorContext,
-    );
-    setState(() {
-      _popup = PopupWindowController(
+  // The NestedWindow owns the returned PopupWindowController and destroys it
+  // when the popup is hidden.
+  ({BaseWindowController controller, WidgetBuilder builder}) _buildPopup(
+    BuildContext context,
+    NestedWindowLayoutInfo info,
+  ) {
+    return (
+      controller: PopupWindowController(
         parent: WindowScope.of(context),
         anchorRect: info.anchorRect,
         positioner: const WindowPositioner(
           parentAnchor: .right,
           childAnchor: .left,
         ),
-      );
-    });
+      ),
+      builder: _buildPopupContent,
+    );
   }
 
-  @override
-  void dispose() {
-    _popup?.destroy();
-    super.dispose();
-  }
-
-  Widget _buildPopupContent(BuildContext context, PopupWindowController popup) {
+  Widget _buildPopupContent(BuildContext context) {
     return Material(
       color: Colors.black,
       child: Padding(
@@ -94,7 +89,7 @@ class _MyAppState extends State<MyApp> {
             ),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: popup.destroy,
+              onPressed: _controller.hide,
               child: const Text('Close'),
             ),
           ],
@@ -105,21 +100,17 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final PopupWindowController? popup = _popup;
     return Center(
       child: NestedWindow(
-        controller: popup,
-        builder: _buildPopupContent,
-        child: Builder(
-          builder: (BuildContext anchorContext) => ElevatedButton(
-            onPressed: () => _togglePopup(anchorContext),
-            // The popup may also be destroyed by the platform, for example when
-            // it loses focus, so the label listens to the popup directly.
-            child: ListenableBuilder(
-              listenable: Listenable.merge(<Listenable?>[popup]),
-              builder: (BuildContext context, Widget? child) =>
-                  Text(_isShowing ? 'Hide Popup' : 'Show Popup'),
-            ),
+        controller: _controller,
+        windowBuilder: _buildPopup,
+        // The popup may also be destroyed by the platform, for example when
+        // it loses focus, so the label listens to the controller.
+        child: ListenableBuilder(
+          listenable: _controller,
+          builder: (BuildContext context, Widget? child) => ElevatedButton(
+            onPressed: _controller.toggle,
+            child: Text(_controller.isShowing ? 'Hide Popup' : 'Show Popup'),
           ),
         ),
       ),

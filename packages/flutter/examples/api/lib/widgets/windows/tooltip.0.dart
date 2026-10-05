@@ -48,45 +48,34 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  TooltipWindowController? _tooltip;
+  final NestedWindowController _controller = NestedWindowController();
 
-  bool get _isShowing => !(_tooltip?.isDestroyed ?? true);
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
-  // The anchorContext is below the NestedWindow, so NestedWindow.layoutInfoOf
-  // reports the geometry of the widget that the tooltip is anchored to.
-  void _showTooltip(BuildContext anchorContext) {
-    if (_isShowing) {
-      return;
-    }
-    final NestedWindowLayoutInfo info = NestedWindow.layoutInfoOf(
-      anchorContext,
-    );
-    setState(() {
-      _tooltip = TooltipWindowController(
+  // The NestedWindow owns the returned TooltipWindowController and destroys it
+  // when the tooltip is hidden.
+  ({BaseWindowController controller, WidgetBuilder builder}) _buildTooltip(
+    BuildContext context,
+    NestedWindowLayoutInfo info,
+  ) {
+    return (
+      controller: TooltipWindowController(
         parent: WindowScope.of(context),
         anchorRect: info.anchorRect,
         positioner: const WindowPositioner(
           parentAnchor: WindowPositionerAnchor.right,
           childAnchor: WindowPositionerAnchor.left,
         ),
-      );
-    });
+      ),
+      builder: _buildTooltipContent,
+    );
   }
 
-  void _hideTooltip() {
-    _tooltip?.destroy();
-  }
-
-  @override
-  void dispose() {
-    _tooltip?.destroy();
-    super.dispose();
-  }
-
-  Widget _buildTooltipContent(
-    BuildContext context,
-    TooltipWindowController tooltip,
-  ) {
+  Widget _buildTooltipContent(BuildContext context) {
     return Container(
       padding: const .all(8),
       color: Colors.black,
@@ -99,29 +88,25 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final TooltipWindowController? tooltip = _tooltip;
     return Center(
       child: NestedWindow(
-        controller: tooltip,
-        builder: _buildTooltipContent,
-        child: Builder(
-          builder: (BuildContext anchorContext) => MouseRegion(
-            onEnter: (_) => _showTooltip(anchorContext),
-            onExit: (_) => _hideTooltip(),
-            cursor: SystemMouseCursors.click,
-            child: ListenableBuilder(
-              listenable: Listenable.merge(<Listenable?>[tooltip]),
-              builder: (BuildContext context, Widget? child) =>
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    color: _isShowing ? Colors.blueAccent : Colors.blue,
-                    padding: const .all(12),
-                    child: child,
-                  ),
-              child: const Text(
-                'Hover Me',
-                style: TextStyle(color: Colors.white),
-              ),
+        controller: _controller,
+        windowBuilder: _buildTooltip,
+        child: MouseRegion(
+          onEnter: (_) => _controller.show(),
+          onExit: (_) => _controller.hide(),
+          cursor: SystemMouseCursors.click,
+          child: ListenableBuilder(
+            listenable: _controller,
+            builder: (BuildContext context, Widget? child) => AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              color: _controller.isShowing ? Colors.blueAccent : Colors.blue,
+              padding: const .all(12),
+              child: child,
+            ),
+            child: const Text(
+              'Hover Me',
+              style: TextStyle(color: Colors.white),
             ),
           ),
         ),

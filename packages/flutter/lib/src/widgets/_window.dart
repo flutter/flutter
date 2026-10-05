@@ -14,6 +14,7 @@
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
+import 'dart:async' show scheduleMicrotask;
 import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
@@ -162,8 +163,8 @@ mixin class WindowControllerDelegate {
 /// This class does not interact with the widget tree. To render content in the
 /// window, provide this controller with a content builder: in a [WindowEntry]
 /// passed to [WindowManager.initialWindows] when starting the application, to
-/// [showWindow] to open an additional top-level window, or to [NestedWindow] to
-/// render a nested window.
+/// [showWindow] to open an additional top-level window, or from a
+/// [NestedWindow.windowBuilder] to render a nested window.
 /// {@endtemplate}
 ///
 /// The user of this class is responsible for managing the lifecycle of the window.
@@ -2158,8 +2159,8 @@ class _WindowRegistryScope extends InheritedWidget {
 ///
 /// Creating an entry does not mount its content. Pass it to
 /// [WindowManager.initialWindows] or [showWindow] to render it in a
-/// separate subtree. To render a window in the surrounding subtree, pass its
-/// controller and builder to [NestedWindow] instead.
+/// separate subtree. To render a window in the surrounding subtree, return its
+/// controller and builder from a [NestedWindow.windowBuilder] instead.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 ///
@@ -2403,8 +2404,8 @@ void showWindow({
   windowRegistry._register(WindowEntry(controller: controller, builder: builder));
 }
 
-/// The geometry of a [NestedWindow.child], as returned by
-/// [NestedWindow.layoutInfoOf] and [NestedWindow.maybeLayoutInfoOf].
+/// The geometry of a [NestedWindow.child], as passed to
+/// [NestedWindow.windowBuilder].
 ///
 /// Use it to create a native window relative to the widget it is anchored to,
 /// for example by passing [anchorRect] to a [PopupWindowController] or a
@@ -2415,22 +2416,13 @@ void showWindow({
 /// All values are in logical pixels, and [childPaintTransform] and [viewSize]
 /// share the coordinate space of the [View] that contains [NestedWindow.child].
 ///
-/// This is a snapshot taken when it is requested; it does not change when the
-/// anchor moves afterwards. See [NestedWindow.controller] for how later changes to
-/// the anchor's geometry are handled.
+/// Unlike [OverlayChildLayoutInfo], this information is captured once per
+/// [NestedWindowController.show] rather than on every layout, because the
+/// builder it is passed to creates a native window. See
+/// [NestedWindow.windowBuilder] for how later changes to the anchor's geometry
+/// are handled.
 ///
-/// {@template flutter.widgets.windowing.nestedExperimental}
-/// Do not use this API in production applications or packages published to
-/// pub.dev. Flutter will make breaking changes to this API, even in patch
-/// versions.
-///
-/// This API throws an [UnsupportedError] error unless Flutter’s windowing
-/// feature is enabled by [isWindowingEnabled]. Where a nested window is
-/// ultimately placed is decided by the platform, which may ignore or adjust the
-/// requested placement.
-///
-/// See: https://github.com/flutter/flutter/issues/30701.
-/// {@endtemplate}
+/// {@macro flutter.widgets.windowing.experimental}
 @internal
 extension type NestedWindowLayoutInfo._(
   (Size childSize, Matrix4 childPaintTransform, Size viewSize) _info,
@@ -2455,45 +2447,157 @@ extension type NestedWindowLayoutInfo._(
   Rect get anchorRect => MatrixUtils.transformRect(childPaintTransform, Offset.zero & childSize);
 }
 
-/// Renders a window alongside [child] in the surrounding widget subtree.
+/// The signature of [NestedWindow.windowBuilder].
 ///
-/// The [child] remains in its current view. While [controller] is non-null and
-/// its native window has not been destroyed, the widget returned by [builder]
-/// is rendered in the window's [View], attached with a [ViewAnchor]. The
-/// window's content inherits from ancestors of this widget, but not from
-/// [child] or its descendants. This widget must have a [View] ancestor for
-/// [child] to render into.
+/// Called each time a [NestedWindow] transitions from hidden to showing. The
+/// callback receives the [BuildContext] of the [NestedWindow] and the current
+/// geometry of [NestedWindow.child], and returns a record with:
 ///
-/// This widget is the windowing counterpart of [OverlayPortal]. The [child] stays
-/// where it is, while additional content is rendered somewhere it cannot be
-/// clipped by this widget's bounds.
+///  * `controller`, a newly created native window controller. The
+///    [NestedWindow] takes ownership of it and destroys it when the window is
+///    hidden or the [NestedWindow] is removed from the tree.
+///  * `builder`, which builds the content rendered in that window's
+///    [BaseWindowController.rootView].
 ///
-/// Unlike [showWindow], this widget does not require a [WindowManager]
-/// or add an entry to a [WindowRegistry]. It is useful for popups, tooltips, and
-/// other windows that need access to the surrounding inherited widgets.
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+typedef NestedWindowBuilder = ({BaseWindowController controller, WidgetBuilder builder}) Function(
+  BuildContext context,
+  NestedWindowLayoutInfo info,
+);
+
+/// Controls whether a [NestedWindow] shows its window.
+///
+/// This controller controls the visibility of the [NestedWindow], not the
+/// native window's properties. The [BaseWindowController] returned by
+/// [NestedWindow.windowBuilder] manages the native window, and is owned by the
+/// [NestedWindow].
+///
+/// Associate this controller with a single [NestedWindow], and call [show],
+/// [hide], or [toggle] only while that widget is mounted. Listeners are notified
+/// when [isShowing] changes. The owner is responsible for disposing this
+/// controller when it is no longer needed.
+///
+/// This is the windowing counterpart of [OverlayPortalController].
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+class NestedWindowController extends ChangeNotifier {
+  /// Creates a controller for an initially hidden [NestedWindow].
+  NestedWindowController();
+
+  _NestedWindowState? _state;
+  bool _isShowing = false;
+  bool _isDisposed = false;
+
+  /// Whether the associated [NestedWindow] is showing its window.
+  ///
+  /// This becomes true when [show] creates a window, and false when the window
+  /// is hidden, destroyed by the platform, or the [NestedWindow] is removed from
+  /// the tree. It does not track native visibility or activation.
+  bool get isShowing => _isShowing;
+
+  void _setShowing(bool showing, {bool deferNotification = false}) {
+    if (_isShowing == showing) {
+      return;
+    }
+    _isShowing = showing;
+    if (!deferNotification) {
+      notifyListeners();
+      return;
+    }
+    // Listeners may rebuild widgets, which is not allowed while the widget tree
+    // is being built or finalized.
+    scheduleMicrotask(() {
+      if (!_isDisposed) {
+        notifyListeners();
+      }
+    });
+  }
+
+  _NestedWindowState? get _attachedState {
+    assert(
+      _state != null,
+      'NestedWindowController is not attached to a NestedWindow. Only call its '
+      'methods while the NestedWindow it is passed to is mounted.',
+    );
+    return _state;
+  }
+
+  /// Creates and shows the associated [NestedWindow]'s window.
+  ///
+  /// Calls [NestedWindow.windowBuilder] with the current geometry of
+  /// [NestedWindow.child] to create a new native window. Does nothing if the
+  /// window is already showing.
+  ///
+  /// The associated [NestedWindow] must be mounted, and its [NestedWindow.child]
+  /// must have been laid out, so call this from event handlers or after the
+  /// first frame in which the [NestedWindow] was laid out, rather than during
+  /// build.
+  void show() {
+    _attachedState?._show();
+  }
+
+  /// Destroys the native window and removes its content from the associated
+  /// [NestedWindow].
+  ///
+  /// Does nothing if the window is already hidden. A subsequent [show] calls
+  /// [NestedWindow.windowBuilder] to create a new window rather than reusing
+  /// the destroyed one.
+  ///
+  /// The associated [NestedWindow] must be mounted.
+  void hide() {
+    _attachedState?._hide();
+  }
+
+  /// Hides the window if it is showing, or shows it if it is hidden.
+  ///
+  /// The associated [NestedWindow] must be mounted.
+  void toggle() {
+    _attachedState?._toggle();
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
+}
+
+/// Renders a window alongside [child] in the widget tree.
+///
+/// This widget is most useful for popups, tooltips, and other windows that
+/// require access to the same inherited widgets as their parent.
+///
+/// The [child] remains in its current view. When [controller] shows the window,
+/// [windowBuilder] creates a native window controller and a content builder.
+/// The content is rendered in the window's [View], attached with a
+/// [ViewAnchor]. The window's content inherits from ancestors of this widget,
+/// but not from [child] or its descendants. This widget must have a [View]
+/// ancestor for [child] to render into.
+///
+/// Unlike [showWindow], this widget does not require a [WindowManager] or add
+/// an entry to a [WindowRegistry].
 ///
 /// ## Showing and hiding
 ///
-/// To show a window, create a native window controller and
-/// rebuild this widget with it as the [controller]. Use [layoutInfoOf] to
-/// position the window relative to [child]. To hide the window, rebuild this widget
-/// with a null [controller]. A destroyed native window cannot be shown again;
-/// create a new controller instead.
+/// The window is initially hidden. Use [NestedWindowController.show],
+/// [NestedWindowController.hide], or [NestedWindowController.toggle] to change
+/// its visibility, and [NestedWindowController.isShowing] to observe it.
 ///
-/// This widget does not own its [controller]. The code that creates the
-/// controller is responsible for destroying it, typically in [State.dispose].
-/// When [controller] becomes null, is replaced by a different controller, or
-/// this widget is removed from the tree, this widget stops rendering the
-/// window's content but does not destroy the native window. When the platform
-/// destroys the window on its own, for example when a popup loses focus, this
-/// widget stops rendering its content.
+/// This widget owns the native window controller returned by [windowBuilder].
+/// Hiding the window, or removing this widget from the tree, destroys the
+/// native window. Showing it again calls [windowBuilder] for a new native
+/// window. When the native window is destroyed by other means, for example by
+/// the platform when a popup loses focus, this widget stops rendering its
+/// content and [NestedWindowController.isShowing] becomes false.
 ///
 /// ## Native parent and positioning
 ///
 /// Nesting in the widget tree does not set a native parent. Supply the
-/// appropriate parent when creating the native controller. This widget provides
-/// a [WindowScope] for that controller, so descendants of the window's content
-/// can access it via [WindowScope.of].
+/// appropriate parent when creating the native controller in [windowBuilder].
+/// This widget provides a [WindowScope] for that controller, so descendants of
+/// the window's content can access it via [WindowScope.of].
 ///
 /// For [PopupWindowController] and [TooltipWindowController], this widget tracks
 /// [child]'s bounds in the containing view and requests position updates when
@@ -2518,39 +2622,39 @@ extension type NestedWindowLayoutInfo._(
 /// }
 ///
 /// class _NestedDialogButtonState extends State<NestedDialogButton> {
-///   DialogWindowController? _dialog;
-///
-///   void _open() {
-///     setState(() {
-///       _dialog = DialogWindowController(
-///         parent: WindowScope.of(context),
-///         size: const Size(400, 300),
-///         title: 'Nested dialog',
-///       );
-///     });
-///   }
+///   final NestedWindowController _controller = NestedWindowController();
 ///
 ///   @override
 ///   void dispose() {
-///     _dialog?.destroy();
+///     _controller.dispose();
 ///     super.dispose();
 ///   }
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return NestedWindow(
-///       controller: _dialog,
-///       builder: (BuildContext context, DialogWindowController dialog) => Material(
-///         child: Center(
-///           child: ElevatedButton(
-///             onPressed: dialog.destroy,
-///             child: const Text('Close dialog'),
+///       controller: _controller,
+///       windowBuilder: (BuildContext context, NestedWindowLayoutInfo info) => (
+///         controller: DialogWindowController(
+///           parent: WindowScope.of(context),
+///           size: const Size(400, 300),
+///           title: 'Nested dialog',
+///         ),
+///         builder: (BuildContext context) => Material(
+///           child: Center(
+///             child: ElevatedButton(
+///               onPressed: _controller.hide,
+///               child: const Text('Close dialog'),
+///             ),
 ///           ),
 ///         ),
 ///       ),
-///       child: ElevatedButton(
-///         onPressed: _open,
-///         child: const Text('Open dialog'),
+///       child: ListenableBuilder(
+///         listenable: _controller,
+///         builder: (BuildContext context, Widget? child) => ElevatedButton(
+///           onPressed: _controller.toggle,
+///           child: Text(_controller.isShowing ? 'Close dialog' : 'Open dialog'),
+///         ),
 ///       ),
 ///     );
 ///   }
@@ -2558,175 +2662,153 @@ extension type NestedWindowLayoutInfo._(
 /// ```
 /// {@end-tool}
 ///
-/// {@macro flutter.widgets.windowing.nestedExperimental}
+/// {@macro flutter.widgets.windowing.experimental}
 ///
 /// See also:
 ///
-///  * [layoutInfoOf], which reports the geometry of [child].
+///  * [NestedWindowController], which shows and hides the window.
 ///  * [showWindow], which renders content in a separate subtree under a
 ///    window manager.
 ///  * [OverlayPortal], which renders extra content in an [Overlay] rather than in
 ///    a native window.
 ///  * [ViewAnchor], which attaches a view alongside a widget in another view.
 @internal
-class NestedWindow<T extends BaseWindowController> extends StatefulWidget {
-  /// Creates a widget that renders the window of [controller], if any,
-  /// alongside [child].
-  const NestedWindow({super.key, this.controller, required this.builder, required this.child});
+class NestedWindow extends StatefulWidget {
+  /// Creates a widget that can show a window alongside [child].
+  ///
+  /// The [windowBuilder] is called lazily when [controller] shows the window,
+  /// rather than when this widget is built.
+  const NestedWindow({
+    super.key,
+    required this.controller,
+    required this.windowBuilder,
+    required this.child,
+  });
 
-  /// The native window to render alongside [child], or null to render no
-  /// window.
+  /// Controls whether the window is shown.
   ///
-  /// The window is showing while this is non-null and has not been destroyed.
-  /// This widget does not destroy the controller; the code that creates it is
-  /// responsible for calling [BaseWindowController.destroy], typically in
-  /// [State.dispose].
-  ///
-  /// While a popup or tooltip is showing, this widget forwards changes to the
-  /// bounds of [child] to [PopupWindowController.updatePosition] or
-  /// [TooltipWindowController.updatePosition], so the window keeps following
-  /// [child].
-  final T? controller;
+  /// The caller owns this controller and is responsible for disposing it. If a
+  /// different controller is supplied while the window is showing, the window
+  /// keeps showing and the new controller reports it.
+  final NestedWindowController controller;
 
-  /// Builds the content of the window of [controller].
+  /// Creates the native window controller and the content builder each time
+  /// the window is shown after being hidden.
   ///
-  /// This is only called while the window is showing, and receives the
-  /// non-null [controller]. The returned widget is rendered in the window's
-  /// [BaseWindowController.rootView], below a [WindowScope] for [controller].
-  /// The supplied context can be used to look up that view and controller, as
-  /// well as inherited widgets surrounding this widget.
+  /// The callback receives the [BuildContext] of this widget, which can be used
+  /// to look up inherited widgets surrounding it, such as the enclosing
+  /// [WindowScope], and the geometry of [child] at the time the window is shown.
+  /// Developers can use that geometry to, for example, anchor a popup to
+  /// [child] and size it based on how close [child] is to the edges of the
+  /// [View]. See [NestedWindowLayoutInfo] for the geometry that is made
+  /// available.
   ///
-  /// The builder is called again whenever this widget rebuilds, so updating it
-  /// updates the window's content without recreating the native window.
-  final Widget Function(BuildContext context, T controller) builder;
+  /// Return a new native window controller on each call; this widget owns it
+  /// and destroys it when the window is hidden. The returned content builder
+  /// is called again whenever this widget rebuilds while the window is
+  /// showing. Updating this callback while the window is showing does not
+  /// replace the current window.
+  ///
+  /// After the window is shown, this widget keeps tracking [child]'s bounds and
+  /// forwards them to [PopupWindowController.updatePosition] or
+  /// [TooltipWindowController.updatePosition], so popups and tooltips continue
+  /// to follow [child] without this callback being invoked again. The geometry
+  /// is read from the last layout, so [RenderObject]s between [child] and the
+  /// containing [View] that only establish their paint transform when
+  /// composited, such as the one created by [CompositedTransformFollower], may
+  /// report a stale transform.
+  final NestedWindowBuilder windowBuilder;
 
-  /// The widget that remains in the containing view whether or not a window is
-  /// shown.
+  /// The widget that remains in the containing view whether the window is
+  /// shown or hidden.
   ///
-  /// Its bounds are reported by [layoutInfoOf] and are used to update the
-  /// anchor rectangle of popup and tooltip windows.
+  /// Its bounds are used to compute the [NestedWindowLayoutInfo] passed to
+  /// [windowBuilder], and to update the anchor rectangle of popup and tooltip
+  /// windows.
   final Widget child;
 
-  static _NestedWindowState<BaseWindowController>? _stateOf(BuildContext context) {
-    if (context case StatefulElement(
-      state: final _NestedWindowState<BaseWindowController> state,
-    )) {
-      return state;
-    }
-    return context.findAncestorStateOfType<_NestedWindowState<BaseWindowController>>();
-  }
-
-  /// Returns the geometry of the [child] of the nearest [NestedWindow] at or
-  /// above [context], or null if there is none or its child has not been laid
-  /// out yet.
-  ///
-  /// See [layoutInfoOf] for details.
-  static NestedWindowLayoutInfo? maybeLayoutInfoOf(BuildContext context) {
-    final _NestedWindowState<BaseWindowController>? state = _stateOf(context);
-    if (state == null) {
-      return null;
-    }
-    return _computeNestedWindowLayoutInfo(state.context);
-  }
-
-  /// Returns the geometry of the [child] of the nearest [NestedWindow] at or
-  /// above [context].
-  ///
-  /// The measured widget is always the [NestedWindow]'s [child], never the
-  /// widget that [context] belongs to. The [context] must therefore belong to
-  /// the [NestedWindow] itself, for example via a [GlobalKey] on it, or to a
-  /// descendant of it, for example a [Builder] inside [child]. The [State.context]
-  /// of a widget that builds the [NestedWindow] is above it and cannot be used.
-  ///
-  /// The geometry is read from the last layout, so call this method from event
-  /// handlers or after the first frame in which the [NestedWindow] was laid out,
-  /// rather than during build. Render objects between [child] and the containing
-  /// [View] that only establish their paint transform when composited, such as
-  /// the one created by [CompositedTransformFollower], may report a stale
-  /// transform.
-  ///
-  /// Throws a [FlutterError] if no [NestedWindow] is found or its child has not
-  /// been laid out yet. Use [maybeLayoutInfoOf] to get null instead.
-  static NestedWindowLayoutInfo layoutInfoOf(BuildContext context) {
-    final _NestedWindowState<BaseWindowController>? state = _stateOf(context);
-    if (state == null) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('No NestedWindow found in context.'),
-        ErrorDescription(
-          'NestedWindow.layoutInfoOf() measures the child of the nearest NestedWindow '
-          'at or above the given context.',
-        ),
-        context.describeWidget('The context used was'),
-        ErrorHint(
-          'If the context belongs to a widget that builds the NestedWindow, it is '
-          'above the NestedWindow. Either put a GlobalKey on the NestedWindow and '
-          'pass its currentContext, or call this method from a context inside '
-          'NestedWindow.child, for example by using a Builder.',
-        ),
-      ]);
-    }
-    final NestedWindowLayoutInfo? info = _computeNestedWindowLayoutInfo(state.context);
-    if (info == null) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('NestedWindow.child has not been laid out.'),
-        ErrorDescription(
-          'NestedWindow.layoutInfoOf() can only report the geometry of a child '
-          'that has been laid out in a View.',
-        ),
-        ErrorHint(
-          'Call this method from an event handler or after the first frame in '
-          'which the NestedWindow is mounted, rather than during build.',
-        ),
-      ]);
-    }
-    return info;
-  }
-
   @override
-  State<NestedWindow<T>> createState() => _NestedWindowState<T>();
+  State<NestedWindow> createState() => _NestedWindowState();
 }
 
-class _NestedWindowState<T extends BaseWindowController> extends State<NestedWindow<T>> {
-  // The controller whose window is currently rendered. This is null when
-  // widget.controller is null or its native window has been destroyed.
-  T? _controller;
+class _NestedWindowState extends State<NestedWindow> {
+  // The native window currently rendered, and the builder for its content.
+  // Both are null while the window is hidden.
+  BaseWindowController? _windowController;
+  WidgetBuilder? _contentBuilder;
   _NestedWindowLayoutTracker? _tracker;
 
   @override
   void initState() {
     super.initState();
-    _syncController(widget.controller);
+    widget.controller._state = this;
   }
 
   @override
-  void didUpdateWidget(NestedWindow<T> oldWidget) {
+  void didUpdateWidget(NestedWindow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _syncController(widget.controller);
+    if (widget.controller != oldWidget.controller) {
+      if (oldWidget.controller._state == this) {
+        oldWidget.controller._state = null;
+      }
+      widget.controller._state = this;
+      if (_windowController != null) {
+        if (!oldWidget.controller._isDisposed) {
+          oldWidget.controller._setShowing(false, deferNotification: true);
+        }
+        widget.controller._setShowing(true, deferNotification: true);
+      }
+    }
   }
 
   @override
   void dispose() {
-    _detachController();
+    final NestedWindowController controller = widget.controller;
+    if (controller._state == this) {
+      controller._state = null;
+    }
+    final wasShowing = _windowController != null;
+    _detachWindow();
+    if (wasShowing && !controller._isDisposed) {
+      controller._setShowing(false, deferNotification: true);
+    }
     super.dispose();
   }
 
-  // Updates the rendered window to match `controller`.
-  //
-  // This does not call setState; it is only called before a build.
-  void _syncController(T? controller) {
-    if (controller == _controller) {
-      return;
-    }
-
-    _detachController();
-    if (controller == null || controller.isDestroyed) {
+  void _show() {
+    if (_windowController != null) {
       return;
     }
 
     final tracker = _NestedWindowLayoutTracker(element: context);
-    // Priming the tracker with the last layout ensures that a window created
-    // from that layout is not asked to reposition itself to where it already is.
-    tracker.getLayoutInfo();
+    // Priming the tracker with the layout passed to the window builder ensures
+    // that the window is not asked to reposition itself to where it already is.
+    final NestedWindowLayoutInfo? info = tracker.getLayoutInfo();
+    if (info == null) {
+      tracker.dispose();
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('NestedWindow.child has not been laid out.'),
+        ErrorDescription(
+          'NestedWindowController.show() passes the geometry of NestedWindow.child '
+          'to NestedWindow.windowBuilder, so the child must have been laid out in a '
+          'View before the window is shown.',
+        ),
+        ErrorHint(
+          'Call NestedWindowController.show() from an event handler or after the '
+          'first frame in which the NestedWindow is mounted, rather than during build.',
+        ),
+      ]);
+    }
+
+    final (:BaseWindowController controller, :WidgetBuilder builder) = widget.windowBuilder(
+      context,
+      info,
+    );
+    if (controller.isDestroyed) {
+      tracker.dispose();
+      return;
+    }
+
     tracker.onLayoutInfoChange = (NestedWindowLayoutInfo info) {
       switch (controller) {
         case final PopupWindowController popup:
@@ -2737,45 +2819,68 @@ class _NestedWindowState<T extends BaseWindowController> extends State<NestedWin
           break;
       }
     };
-    controller.addListener(_handleControllerChanged);
-    _controller = controller;
-    _tracker = tracker;
+    controller.addListener(_handleWindowChanged);
+    setState(() {
+      _windowController = controller;
+      _contentBuilder = builder;
+      _tracker = tracker;
+    });
+    widget.controller._setShowing(true);
   }
 
-  // Stops tracking the anchor and stops listening to the current controller.
-  // The controller is not destroyed; its owner is responsible for that.
+  // Stops tracking the anchor, stops listening to the native window controller
+  // and destroys its window if it has not already been destroyed.
   //
-  // This does not call setState.
-  void _detachController() {
-    final T? controller = _controller;
+  // This does not call setState, so callers that are still mounted must use
+  // _hide instead.
+  void _detachWindow() {
+    final BaseWindowController? controller = _windowController;
     if (controller == null) {
       return;
     }
 
-    controller.removeListener(_handleControllerChanged);
+    // The listener is removed before the window is destroyed so that
+    // _handleWindowChanged does not try to detach the same window twice.
+    controller.removeListener(_handleWindowChanged);
     _tracker?.dispose();
-    _controller = null;
+    _windowController = null;
+    _contentBuilder = null;
     _tracker = null;
+    if (!controller.isDestroyed) {
+      controller.destroy();
+    }
   }
 
-  void _handleControllerChanged() {
-    if (_controller == null || !_controller!.isDestroyed) {
+  void _hide() {
+    if (_windowController == null) {
       return;
     }
 
-    setState(_detachController);
+    setState(_detachWindow);
+    widget.controller._setShowing(false);
+  }
+
+  void _toggle() {
+    if (_windowController == null) {
+      _show();
+    } else {
+      _hide();
+    }
+  }
+
+  void _handleWindowChanged() {
+    if (_windowController?.isDestroyed ?? false) {
+      _hide();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final T? controller = _controller;
+    final BaseWindowController? controller = _windowController;
     return ViewAnchor(
       view: controller == null
           ? null
-          : _WindowRender(
-              controller: controller,
-              builder: (BuildContext context) => widget.builder(context, controller),
-            ),
+          : _WindowRender(controller: controller, builder: _contentBuilder!),
       child: widget.child,
     );
   }

@@ -11,18 +11,6 @@ import 'package:material_ui/material_ui.dart';
 import 'models.dart';
 import 'tooltip_window_content.dart';
 
-class _TooltipDelegate with TooltipWindowControllerDelegate {
-  _TooltipDelegate(this.onDestroyed);
-
-  final VoidCallback onDestroyed;
-
-  @override
-  void onWindowDestroyed() {
-    super.onWindowDestroyed();
-    onDestroyed();
-  }
-}
-
 class TooltipButton extends StatefulWidget {
   const TooltipButton({super.key, required this.parentController});
 
@@ -33,40 +21,11 @@ class TooltipButton extends StatefulWidget {
 }
 
 class _TooltipButtonState extends State<TooltipButton> {
-  TooltipWindowController? _tooltip;
-  bool _disposing = false;
-
-  void _onTooltipDestroyed(TooltipWindowController tooltip) {
-    if (_disposing || _tooltip != tooltip) {
-      return;
-    }
-    setState(() {
-      _tooltip = null;
-    });
-  }
-
-  void _onPressed(BuildContext anchorContext, WindowSettings windowSettings) {
-    if (_tooltip != null) {
-      _tooltip!.destroy();
-      return;
-    }
-    final NestedWindowLayoutInfo info = NestedWindow.layoutInfoOf(anchorContext);
-    late final TooltipWindowController tooltip;
-    tooltip = TooltipWindowController(
-      anchorRect: info.anchorRect,
-      positioner: windowSettings.positioner,
-      parent: widget.parentController,
-      delegate: _TooltipDelegate(() => _onTooltipDestroyed(tooltip)),
-    );
-    setState(() {
-      _tooltip = tooltip;
-    });
-  }
+  final NestedWindowController _controller = NestedWindowController();
 
   @override
   void dispose() {
-    _disposing = true;
-    _tooltip?.destroy();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -75,13 +34,23 @@ class _TooltipButtonState extends State<TooltipButton> {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     return NestedWindow(
-      controller: _tooltip,
-      builder: (BuildContext context, TooltipWindowController tooltip) =>
-          TooltipWindowContent(controller: tooltip),
-      child: Builder(
-        builder: (BuildContext anchorContext) => OutlinedButton(
-          onPressed: () => _onPressed(anchorContext, windowSettings),
-          child: Text(_tooltip != null ? 'Hide Tooltip' : 'Show Tooltip'),
+      controller: _controller,
+      windowBuilder: (BuildContext context, NestedWindowLayoutInfo info) {
+        final tooltip = TooltipWindowController(
+          anchorRect: info.anchorRect,
+          positioner: windowSettings.positioner,
+          parent: widget.parentController,
+        );
+        return (
+          controller: tooltip,
+          builder: (BuildContext context) => TooltipWindowContent(controller: tooltip),
+        );
+      },
+      child: ListenableBuilder(
+        listenable: _controller,
+        builder: (BuildContext context, Widget? child) => OutlinedButton(
+          onPressed: _controller.toggle,
+          child: Text(_controller.isShowing ? 'Hide Tooltip' : 'Show Tooltip'),
         ),
       ),
     );
