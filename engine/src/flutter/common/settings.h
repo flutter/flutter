@@ -243,6 +243,14 @@ struct Settings {
   // Whether to use SDFs for rendering in Impeller.
   bool impeller_use_sdfs = false;
 
+  // Whether the origin of the default framebuffer (framebuffer 0) is the
+  // top-left of the window rather than OpenGL's usual bottom-left.
+  //
+  // Set by embedders whose window surface is created with an inverted Y axis,
+  // such as ANGLE's EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE. Only meaningful
+  // for OpenGL ES backends.
+  bool impeller_top_left_default_framebuffer_origin = false;
+
   // Log a warning during shell initialization if Impeller is not enabled.
   bool warn_on_impeller_opt_out = false;
 

@@ -35,7 +35,9 @@ ContextGLES::ContextGLES(
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_mappings,
     bool enable_gpu_tracing,
     std::shared_ptr<fml::BasicTaskRunner> io_task_runner)
-    : Context(flags) {
+    : Context(flags),
+      top_left_default_framebuffer_origin_(
+          flags.top_left_default_framebuffer_origin) {
   reactor_ = std::make_shared<ReactorGLES>(std::move(gl));
   if (!reactor_->IsValid()) {
     VALIDATION_LOG << "Could not create valid reactor.";

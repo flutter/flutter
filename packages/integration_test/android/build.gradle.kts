@@ -51,7 +51,9 @@ android {
         // TODO(egarciad): These dependencies should not be added to release builds.
         // https://github.com/flutter/flutter/issues/56591
         testImplementation("junit:junit:4.13.2")
-        testImplementation("org.mockito:mockito-core:5.8.0")
+        // Mockito bundles Byte Buddy, which must support the JDK running the
+        // tests (Java 25 requires Byte Buddy >= 1.17.5).
+        testImplementation("org.mockito:mockito-core:5.20.0")
 
         api("androidx.test:runner:1.3.0")
         api("androidx.test:rules:1.2.0")
