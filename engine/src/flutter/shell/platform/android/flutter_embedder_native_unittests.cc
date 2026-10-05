@@ -87,6 +87,14 @@ class MockJvmInvoker : public JvmInvoker {
               RequestDartDeferredLibrary,
               (int loading_unit_id),
               (override));
+  MOCK_METHOD(double,
+              GetScaledFontSize,
+              (double unscaled_font_size, int configuration_id),
+              (override));
+  MOCK_METHOD(std::vector<std::string>,
+              ComputePlatformResolvedLocale,
+              (const std::vector<std::string>& supported_locales_data),
+              (override));
 
   MOCK_METHOD(bool,
               InvokeVoidMethod,
@@ -3697,10 +3705,11 @@ TEST(VsyncRoutingTest, JniDelegateVsyncOperations) {
 
   EXPECT_EQ(delegate->GetVsyncWaiter(), vsync_waiter);
 
-  // 1. OnVsync dispatches to JVM (and ConsumePendingVsync also notifies JVM)
+  // 1. OnVsync dispatches to JVM (ConsumePendingVsync does not redundantly
+  // notify JVM)
   EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-      .Times(2)
-      .WillRepeatedly(Return(true));
+      .Times(1)
+      .WillOnce(Return(true));
   EXPECT_TRUE(delegate->OnVsync(1000000LL, 2000000LL));
 
   // 2. AsyncWaitForVsync routes to AndroidVsyncWaiter
@@ -3737,8 +3746,8 @@ TEST(VsyncRoutingTest, JniRouterVsyncDirectRouting) {
     JniRouter::SetEmbedderEnabled(flag);
 
     EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-        .Times(2)
-        .WillRepeatedly(Return(true));
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_TRUE(router.RouteVsync(5000LL, 10000LL));
 
     EXPECT_TRUE(router.RouteAsyncWaitForVsync(456));
@@ -3785,8 +3794,7 @@ TEST(VsyncRoutingTest, FlutterEmbedderNativeVsyncIntegration) {
   EXPECT_EQ(vsync_waiter->GetVsyncRequestCount(), 1u);
   EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
 
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _)).Times(0);
   mock_choreographer->TriggerPendingCallbacks(10000000LL);
   EXPECT_EQ(delivered_baton, 8888);
   EXPECT_EQ(delivered_start, 10000000LL);
@@ -6315,8 +6323,8 @@ TEST(Phase54LegacyDeletionGraphicsPipelineTest,
     // 1. VSync routing
     EXPECT_CALL(*mock_invoker,
                 InvokeVoidMethod("onVsync", "(JJ)V", ::testing::_))
-        .Times(2)
-        .WillRepeatedly(::testing::Return(true));
+        .Times(1)
+        .WillOnce(::testing::Return(true));
     EXPECT_TRUE(router->RouteVsync(1000000LL, 2000000LL));
     EXPECT_TRUE(router->RouteAsyncWaitForVsync(999));
     EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
@@ -11030,6 +11038,236 @@ TEST(
 
   native.NotifySurfaceDestroyed();
   EXPECT_EQ(destroy_overlay_calls, 2);
+}
+
+TEST(Google3RegressionFixesTest, MergedPlatformUIThreadDefaultTrue) {
+  AndroidVMArgs default_args;
+  EXPECT_TRUE(default_args.merged_platform_ui_thread);
+
+  FlutterEmbedderNative native;
+  auto runners = native.GetTaskRunners();
+  ASSERT_NE(runners, nullptr);
+  EXPECT_EQ(runners->GetPlatformTaskRunner().get(),
+            runners->GetUITaskRunner().get());
+}
+
+TEST(Google3RegressionFixesTest,
+     LaunchExtractsParentDirectoryWhenKernelPathIsFile) {
+  auto vm_init = std::make_shared<AndroidVMInit>();
+  AndroidVMArgs args;
+  args.kernel_path = "/data/user/0/com.example/app_flutter/kernel_blob.bin";
+  args.icu_data_path = "/data/user/0/com.example/app_flutter/icudtl.dat";
+  EXPECT_TRUE(vm_init->Init(args));
+
+  FlutterEmbedderNative native;
+  native.SetVMInit(vm_init);
+
+  std::string captured_assets_path;
+  native.SetInitializeEngineFnForTesting(
+      [&](const FlutterRendererConfig* config, const FlutterProjectArgs* p_args,
+          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        if (p_args && p_args->assets_path) {
+          captured_assets_path = p_args->assets_path;
+        }
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x1);
+        return kSuccess;
+      });
+  native.SetRunInitializedEngineFnForTesting(
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine) { return kSuccess; });
+
+  EXPECT_EQ(native.Launch("main", "", {}, 1), kSuccess);
+  EXPECT_EQ(captured_assets_path, "/data/user/0/com.example/app_flutter");
+  native.SetEngine(nullptr);
+}
+
+TEST(Google3RegressionFixesTest,
+     ProjectArgsCallbacksWiredAndDispatchedInLaunchAndSpawn) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto vm_init = std::make_shared<AndroidVMInit>();
+  AndroidVMArgs args;
+  args.assets_path = "/tmp/assets";
+  args.icu_data_path = "/tmp/icudtl.dat";
+  EXPECT_TRUE(vm_init->Init(args));
+
+  const FlutterProjectArgs* vm_init_args = vm_init->GetProjectArgs();
+  ASSERT_NE(vm_init_args, nullptr);
+  EXPECT_NE(vm_init_args->compute_platform_resolved_locale_callback, nullptr);
+  EXPECT_NE(vm_init_args->on_pre_engine_restart_callback, nullptr);
+  EXPECT_NE(vm_init_args->dart_deferred_library_loader_callback, nullptr);
+  EXPECT_NE(vm_init_args->get_scaled_font_size_callback, nullptr);
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, vm_init);
+
+  FlutterProjectArgs captured_launch_args = {};
+  void* captured_launch_user_data = nullptr;
+  native.SetInitializeEngineFnForTesting(
+      [&](const FlutterRendererConfig* config, const FlutterProjectArgs* p_args,
+          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        if (p_args) {
+          captured_launch_args = *p_args;
+        }
+        captured_launch_user_data = user_data;
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x2);
+        return kSuccess;
+      });
+  native.SetRunInitializedEngineFnForTesting(
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine) { return kSuccess; });
+
+  EXPECT_EQ(native.Launch("main", "", {}, 1), kSuccess);
+  ASSERT_NE(captured_launch_args.compute_platform_resolved_locale_callback,
+            nullptr);
+  ASSERT_NE(captured_launch_args.on_pre_engine_restart_callback, nullptr);
+  ASSERT_NE(captured_launch_args.dart_deferred_library_loader_callback,
+            nullptr);
+  ASSERT_NE(captured_launch_args.get_scaled_font_size_callback, nullptr);
+  ASSERT_NE(captured_launch_args.log_message_callback, nullptr);
+
+  // Verify OnPreEngineRestartCallback routes to JvmInvoker::OnPreEngineRestart
+  EXPECT_CALL(*mock_invoker, OnPreEngineRestart()).WillOnce(Return(true));
+  captured_launch_args.on_pre_engine_restart_callback(
+      captured_launch_user_data);
+
+  // Verify OnDartDeferredLibraryLoaderCallback routes to
+  // JvmInvoker::RequestDartDeferredLibrary
+  constexpr int64_t kTestLoadingUnitId = 7;
+  EXPECT_CALL(*mock_invoker,
+              RequestDartDeferredLibrary(static_cast<int>(kTestLoadingUnitId)))
+      .WillOnce(Return(true));
+  captured_launch_args.dart_deferred_library_loader_callback(
+      kTestLoadingUnitId, captured_launch_user_data);
+
+  // Verify OnGetScaledFontSizeCallback routes to JvmInvoker::GetScaledFontSize
+  constexpr double kUnscaledFontSize = 14.0;
+  constexpr int kConfigId = 3;
+  constexpr double kExpectedScaledSize = 21.0;
+  EXPECT_CALL(*mock_invoker, GetScaledFontSize(kUnscaledFontSize, kConfigId))
+      .WillOnce(Return(kExpectedScaledSize));
+  EXPECT_DOUBLE_EQ(captured_launch_args.get_scaled_font_size_callback(
+                       kUnscaledFontSize, kConfigId, captured_launch_user_data),
+                   kExpectedScaledSize);
+
+  // Verify OnComputePlatformResolvedLocaleCallback routes to
+  // JvmInvoker::ComputePlatformResolvedLocale
+  FlutterLocale locale_en = {};
+  locale_en.struct_size = sizeof(FlutterLocale);
+  locale_en.language_code = "en";
+  locale_en.country_code = "US";
+  locale_en.script_code = "Latn";
+  const FlutterLocale* locales[1] = {&locale_en};
+
+  EXPECT_CALL(*mock_invoker, ComputePlatformResolvedLocale(
+                                 std::vector<std::string>{"en", "US", "Latn"}))
+      .WillOnce(Return(std::vector<std::string>{"en", "GB", ""}));
+  const FlutterLocale* resolved =
+      captured_launch_args.compute_platform_resolved_locale_callback(locales,
+                                                                     1);
+  ASSERT_NE(resolved, nullptr);
+  EXPECT_STREQ(resolved->language_code, "en");
+  EXPECT_STREQ(resolved->country_code, "GB");
+  EXPECT_EQ(resolved->script_code, nullptr);
+
+  // Verify SpawnChild also wires all callbacks
+  auto mock_group = std::make_shared<AndroidEngineGroup>();
+  FlutterProjectArgs captured_spawn_args = {};
+  mock_group->SetSpawnCallback([&](FLUTTER_API_SYMBOL(FlutterEngine) parent,
+                                   const FlutterEngineSpawnConfig* config)
+                                   -> FLUTTER_API_SYMBOL(FlutterEngine) {
+    if (config && config->project_args) {
+      captured_spawn_args = *config->project_args;
+    }
+    return reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x3);
+  });
+  native.SetEngineGroup(mock_group);
+
+  AndroidEngineSpawnArgs spawn_args;
+  spawn_args.entrypoint = "spawnMain";
+  spawn_args.engine_id = 2;
+  auto child = native.SpawnChild(nullptr, nullptr, spawn_args);
+  ASSERT_NE(child, nullptr);
+  EXPECT_NE(captured_spawn_args.compute_platform_resolved_locale_callback,
+            nullptr);
+  EXPECT_NE(captured_spawn_args.on_pre_engine_restart_callback, nullptr);
+  EXPECT_NE(captured_spawn_args.dart_deferred_library_loader_callback, nullptr);
+  EXPECT_NE(captured_spawn_args.get_scaled_font_size_callback, nullptr);
+  EXPECT_NE(captured_spawn_args.log_message_callback, nullptr);
+
+  child->SetEngine(nullptr);
+  native.SetEngine(nullptr);
+}
+
+TEST(Google3RegressionFixesTest, SoftwareRenderingFlagQuery) {
+  auto prev_default = FlutterEmbedderNative::GetDefaultVMArgs();
+
+  AndroidVMArgs args;
+  args.enable_software_rendering = true;
+  FlutterEmbedderNative::SetDefaultVMArgs(args);
+  ASSERT_TRUE(FlutterEmbedderNative::GetDefaultVMArgs().has_value());
+  EXPECT_TRUE(
+      FlutterEmbedderNative::GetDefaultVMArgs()->enable_software_rendering);
+
+  args.enable_software_rendering = false;
+  FlutterEmbedderNative::SetDefaultVMArgs(args);
+  EXPECT_FALSE(
+      FlutterEmbedderNative::GetDefaultVMArgs()->enable_software_rendering);
+
+  if (prev_default.has_value()) {
+    FlutterEmbedderNative::SetDefaultVMArgs(*prev_default);
+  }
+}
+
+TEST(Google3RegressionFixesTest,
+     LaunchReusesVMInitAOTDataWithoutDuplicateCreate) {
+  int vm_init_create_aot_calls = 0;
+  auto mock_aot_handle = reinterpret_cast<FlutterEngineAOTData>(0xBEEF);
+
+  auto vm_init = std::make_shared<AndroidVMInit>(
+      nullptr, nullptr,
+      [&](const FlutterEngineAOTDataSource* source,
+          FlutterEngineAOTData* data_out) {
+        ++vm_init_create_aot_calls;
+        *data_out = mock_aot_handle;
+        return kSuccess;
+      },
+      [](FlutterEngineAOTData data) { return kSuccess; });
+
+  AndroidVMArgs args;
+  args.aot_library_path = "/data/app/libapp.so";
+  EXPECT_TRUE(vm_init->Init(args));
+  EXPECT_EQ(vm_init_create_aot_calls, 1);
+
+  FlutterEmbedderNative native;
+  native.SetVMInit(vm_init);
+
+  int native_create_aot_calls = 0;
+  native.SetCreateAOTDataFnForTesting(
+      [&](const FlutterEngineAOTDataSource* source,
+          FlutterEngineAOTData* data_out) {
+        ++native_create_aot_calls;
+        *data_out = reinterpret_cast<FlutterEngineAOTData>(0xCAFE);
+        return kSuccess;
+      });
+  native.SetCollectAOTDataFnForTesting(
+      [](FlutterEngineAOTData data) { return kSuccess; });
+
+  FlutterEngineAOTData captured_aot_data = nullptr;
+  native.SetInitializeEngineFnForTesting(
+      [&](const FlutterRendererConfig* config, const FlutterProjectArgs* p_args,
+          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        if (p_args) {
+          captured_aot_data = p_args->aot_data;
+        }
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x4);
+        return kSuccess;
+      });
+  native.SetRunInitializedEngineFnForTesting(
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine) { return kSuccess; });
+
+  EXPECT_EQ(native.Launch("main", "", {}, 1), kSuccess);
+  EXPECT_EQ(native_create_aot_calls, 0);
+  EXPECT_EQ(captured_aot_data, mock_aot_handle);
+  native.SetEngine(nullptr);
 }
 
 }  // namespace testing

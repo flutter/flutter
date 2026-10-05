@@ -49,6 +49,27 @@ int GetDeviceApiLevel() {
   return 10000;
 #endif
 }
+
+std::mutex g_active_embedders_mutex;
+std::vector<FlutterEmbedderNative*> g_active_embedders;
+
+void RegisterActiveEmbedder(FlutterEmbedderNative* instance) {
+  if (!instance) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(g_active_embedders_mutex);
+  if (std::find(g_active_embedders.begin(), g_active_embedders.end(),
+                instance) == g_active_embedders.end()) {
+    g_active_embedders.push_back(instance);
+  }
+}
+
+void UnregisterActiveEmbedder(FlutterEmbedderNative* instance) {
+  std::lock_guard<std::mutex> lock(g_active_embedders_mutex);
+  g_active_embedders.erase(std::remove(g_active_embedders.begin(),
+                                       g_active_embedders.end(), instance),
+                           g_active_embedders.end());
+}
 }  // namespace
 
 void FlutterEmbedderNative::SetDeviceApiLevelForTesting(
@@ -377,13 +398,14 @@ class FlutterEmbedderNative::CompositorDelegate
 void FlutterEmbedderNative::InitializeRuntimeSubsystems(
     std::shared_ptr<VulkanDeviceOwner> shared_vulkan_device_owner,
     std::shared_ptr<AndroidSurfaceManager> surface_manager) {
+  RegisterActiveEmbedder(this);
   if (vm_init_ && !vm_init_->IsInitialized()) {
     auto global_args = AndroidVMInit::GetGlobalVMArgs();
     if (global_args.has_value()) {
       vm_init_->Init(*global_args);
     }
   }
-  bool merge_threads = false;
+  bool merge_threads = true;
   if (auto vm_args = GetVMArgs(); vm_args.has_value()) {
     merge_threads = vm_args->merged_platform_ui_thread;
   }
@@ -1636,6 +1658,7 @@ FlutterEmbedderNative::FlutterEmbedderNative(
 
 FlutterEmbedderNative::~FlutterEmbedderNative() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::~FlutterEmbedderNative");
+  UnregisterActiveEmbedder(this);
   if (vsync_waiter_ != nullptr) {
     vsync_waiter_->SetEngine(nullptr);
   }
@@ -3570,6 +3593,169 @@ void FlutterEmbedderNative::OnPlatformMessageCallback(
   }
 }
 
+double FlutterEmbedderNative::GetScaledFontSize(double unscaled_font_size,
+                                                int configuration_id) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetScaledFontSize");
+  if (jvm_invoker_) {
+    return jvm_invoker_->GetScaledFontSize(unscaled_font_size,
+                                           configuration_id);
+  }
+  return -1.0;
+}
+
+std::vector<std::string> FlutterEmbedderNative::ComputePlatformResolvedLocale(
+    const std::vector<std::string>& supported_locales_data) const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::ComputePlatformResolvedLocale");
+  if (jvm_invoker_) {
+    return jvm_invoker_->ComputePlatformResolvedLocale(supported_locales_data);
+  }
+  return {};
+}
+
+double FlutterEmbedderNative::OnGetScaledFontSizeCallback(
+    double unscaled_font_size,
+    int configuration_id,
+    void* user_data) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnGetScaledFontSizeCallback");
+  if (!user_data) {
+    return -1.0;
+  }
+  auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
+  return native->GetScaledFontSize(unscaled_font_size, configuration_id);
+}
+
+const FlutterLocale*
+FlutterEmbedderNative::OnComputePlatformResolvedLocaleCallback(
+    const FlutterLocale** supported_locales,
+    size_t number_of_locales) {
+  TRACE_EVENT0(
+      "flutter",
+      "FlutterEmbedderNative::OnComputePlatformResolvedLocaleCallback");
+  if (!supported_locales || number_of_locales == 0) {
+    return nullptr;
+  }
+  // Rationale: FlutterJNI.computePlatformResolvedLocale expects a flat array of
+  // 3 consecutive strings per locale: [language_code, country_code,
+  // script_code].
+  constexpr size_t kStringsPerLocale = 3;
+  std::vector<std::string> supported_locales_data;
+  supported_locales_data.reserve(number_of_locales * kStringsPerLocale);
+  for (size_t i = 0; i < number_of_locales; ++i) {
+    const FlutterLocale* locale = supported_locales[i];
+    if (!locale) {
+      continue;
+    }
+    supported_locales_data.emplace_back(
+        locale->language_code ? locale->language_code : "");
+    supported_locales_data.emplace_back(
+        locale->country_code ? locale->country_code : "");
+    supported_locales_data.emplace_back(
+        locale->script_code ? locale->script_code : "");
+  }
+  if (supported_locales_data.empty()) {
+    return nullptr;
+  }
+
+  std::vector<std::string> resolved;
+  {
+    std::lock_guard<std::mutex> lock(g_active_embedders_mutex);
+    for (auto it = g_active_embedders.rbegin(); it != g_active_embedders.rend();
+         ++it) {
+      FlutterEmbedderNative* instance = *it;
+      if (instance) {
+        resolved =
+            instance->ComputePlatformResolvedLocale(supported_locales_data);
+        if (resolved.size() >= kStringsPerLocale) {
+          break;
+        }
+      }
+    }
+  }
+
+  static thread_local std::string s_language_code;
+  static thread_local std::string s_country_code;
+  static thread_local std::string s_script_code;
+  static thread_local FlutterLocale s_resolved_locale = {};
+
+  if (resolved.size() >= kStringsPerLocale && !resolved[0].empty()) {
+    s_language_code = resolved[0];
+    s_country_code = resolved[1];
+    s_script_code = resolved[2];
+    s_resolved_locale = {};
+    s_resolved_locale.struct_size = sizeof(FlutterLocale);
+    s_resolved_locale.language_code = s_language_code.c_str();
+    s_resolved_locale.country_code =
+        s_country_code.empty() ? nullptr : s_country_code.c_str();
+    s_resolved_locale.script_code =
+        s_script_code.empty() ? nullptr : s_script_code.c_str();
+    s_resolved_locale.variant_code = nullptr;
+    return &s_resolved_locale;
+  }
+
+  return supported_locales[0];
+}
+
+void FlutterEmbedderNative::OnPreEngineRestartCallback(void* user_data) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnPreEngineRestartCallback");
+  if (!user_data) {
+    return;
+  }
+  auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
+  if (native->GetRouter()) {
+    native->GetRouter()->RoutePreEngineRestart();
+  } else if (native->GetJvmInvoker()) {
+    native->GetJvmInvoker()->OnPreEngineRestart();
+  }
+}
+
+void FlutterEmbedderNative::OnDartDeferredLibraryLoaderCallback(
+    int64_t loading_unit_id,
+    void* user_data) {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::OnDartDeferredLibraryLoaderCallback",
+               "loading_unit_id", std::to_string(loading_unit_id).c_str());
+  if (!user_data) {
+    return;
+  }
+  auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
+  if (native->GetRouter()) {
+    native->GetRouter()->RouteRequestDartDeferredLibrary(
+        static_cast<int>(loading_unit_id));
+  } else if (native->GetJvmInvoker()) {
+    native->GetJvmInvoker()->RequestDartDeferredLibrary(
+        static_cast<int>(loading_unit_id));
+  }
+}
+
+void FlutterEmbedderNative::OnLogMessageCallback(const char* tag,
+                                                 const char* message,
+                                                 void* user_data) {
+  const char* resolved_tag = (tag && tag[0] != '\0') ? tag : "flutter";
+  const char* resolved_msg = message ? message : "";
+#if FML_OS_ANDROID
+  __android_log_print(ANDROID_LOG_INFO, resolved_tag, "%s", resolved_msg);
+#else
+  FML_LOG(INFO) << "[" << resolved_tag << "] " << resolved_msg;
+#endif
+  if (user_data && message) {
+    std::string msg_str(message);
+    const std::string kPrefix = "The Dart VM service is listening on ";
+    auto pos = msg_str.find(kPrefix);
+    if (pos != std::string::npos) {
+      std::string uri = msg_str.substr(pos + kPrefix.size());
+      while (!uri.empty() &&
+             (uri.back() == '\n' || uri.back() == '\r' || uri.back() == ' ')) {
+        uri.pop_back();
+      }
+      auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+      if (self) {
+        self->SetVmServiceUri(uri);
+      }
+    }
+  }
+}
+
 bool FlutterEmbedderNative::AsyncWaitForVsync(intptr_t baton) const {
   TRACE_EVENT1("flutter", "FlutterEmbedderNative::AsyncWaitForVsync", "baton",
                std::to_string(baton).c_str());
@@ -3909,7 +4095,26 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
   }
 
   if (!vm_args.kernel_path.empty()) {
-    assets_path_storage_ = vm_args.kernel_path;
+    constexpr std::string_view kKernelBlobSuffix = "kernel_blob.bin";
+    const bool is_kernel_file =
+        fml::IsFile(vm_args.kernel_path) ||
+        (vm_args.kernel_path.size() >= kKernelBlobSuffix.size() &&
+         std::string_view(vm_args.kernel_path)
+                 .substr(vm_args.kernel_path.size() -
+                         kKernelBlobSuffix.size()) == kKernelBlobSuffix);
+    if (is_kernel_file) {
+      const size_t slash_pos = vm_args.kernel_path.find_last_of('/');
+      if (slash_pos != std::string::npos) {
+        assets_path_storage_ =
+            (slash_pos > 0) ? vm_args.kernel_path.substr(0, slash_pos) : "/";
+      } else if (!asset_dir.empty()) {
+        assets_path_storage_ = asset_dir;
+      } else {
+        assets_path_storage_ = vm_args.assets_path;
+      }
+    } else {
+      assets_path_storage_ = vm_args.kernel_path;
+    }
   } else if (!asset_dir.empty()) {
     assets_path_storage_ = asset_dir;
   } else {
@@ -3941,14 +4146,28 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
                                              ? vm_args.dart_old_gen_heap_size
                                              : kDefaultOldGenHeapSize;
 
-  if (!initialize_engine_fn_ && !vm_args.aot_library_path.empty() &&
-      aot_data_ == nullptr) {
-    FlutterEngineAOTDataSource source = {};
-    source.type = kFlutterEngineAOTDataSourceTypeElfPath;
-    source.elf_path = vm_args.aot_library_path.c_str();
-    CreateAOTData(&source, &aot_data_);
+  std::shared_ptr<AndroidVMInit> active_vm_init = GetVMInit();
+  if (!active_vm_init) {
+    active_vm_init = GetDefaultVMInit();
   }
-  project_args_.aot_data = aot_data_;
+  const FlutterProjectArgs* vm_init_project_args =
+      active_vm_init ? active_vm_init->GetProjectArgs() : nullptr;
+  const auto vm_init_args =
+      active_vm_init ? active_vm_init->GetVMArgs() : std::nullopt;
+  if (vm_init_project_args && vm_init_project_args->aot_data != nullptr &&
+      vm_init_args.has_value() &&
+      vm_init_args->aot_library_path == vm_args.aot_library_path) {
+    project_args_.aot_data = vm_init_project_args->aot_data;
+  } else {
+    if (!initialize_engine_fn_ && !vm_args.aot_library_path.empty() &&
+        aot_data_ == nullptr) {
+      FlutterEngineAOTDataSource source = {};
+      source.type = kFlutterEngineAOTDataSourceTypeElfPath;
+      source.elf_path = vm_args.aot_library_path.c_str();
+      CreateAOTData(&source, &aot_data_);
+    }
+    project_args_.aot_data = aot_data_;
+  }
   {
     std::lock_guard<std::mutex> lock(pending_messages_mutex_);
     project_args_.initial_route =
@@ -3963,32 +4182,16 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
       &FlutterEmbedderNative::OnPlatformMessageCallback;
   project_args_.update_semantics_callback2 =
       &FlutterEmbedderNative::OnUpdateSemantics2;
-  project_args_.log_message_callback = [](const char* tag, const char* message,
-                                          void* user_data) {
-    const char* resolved_tag = (tag && tag[0] != '\0') ? tag : "flutter";
-    const char* resolved_msg = message ? message : "";
-#if FML_OS_ANDROID
-    __android_log_print(ANDROID_LOG_INFO, resolved_tag, "%s", resolved_msg);
-#else
-    FML_LOG(INFO) << "[" << resolved_tag << "] " << resolved_msg;
-#endif
-    if (user_data && message) {
-      std::string msg_str(message);
-      const std::string kPrefix = "The Dart VM service is listening on ";
-      auto pos = msg_str.find(kPrefix);
-      if (pos != std::string::npos) {
-        std::string uri = msg_str.substr(pos + kPrefix.size());
-        while (!uri.empty() && (uri.back() == '\n' || uri.back() == '\r' ||
-                                uri.back() == ' ')) {
-          uri.pop_back();
-        }
-        auto* self = static_cast<FlutterEmbedderNative*>(user_data);
-        if (self) {
-          self->SetVmServiceUri(uri);
-        }
-      }
-    }
-  };
+  project_args_.compute_platform_resolved_locale_callback =
+      &FlutterEmbedderNative::OnComputePlatformResolvedLocaleCallback;
+  project_args_.on_pre_engine_restart_callback =
+      &FlutterEmbedderNative::OnPreEngineRestartCallback;
+  project_args_.dart_deferred_library_loader_callback =
+      &FlutterEmbedderNative::OnDartDeferredLibraryLoaderCallback;
+  project_args_.get_scaled_font_size_callback =
+      &FlutterEmbedderNative::OnGetScaledFontSizeCallback;
+  project_args_.log_message_callback =
+      &FlutterEmbedderNative::OnLogMessageCallback;
 
   FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
   FlutterEngineResult init_result =
@@ -4085,6 +4288,30 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::SpawnChild(
       child->entrypoint_argv_ptrs_.empty()
           ? nullptr
           : child->entrypoint_argv_ptrs_.data();
+
+  child->asset_resolvers_storage_.clear();
+  {
+    std::lock_guard<std::mutex> lock(child->asset_provider_mutex_);
+    if (child->asset_provider_) {
+      FlutterAssetResolver resolver =
+          child->asset_provider_->ToFlutterAssetResolver();
+      if (resolver.find_asset_callback != nullptr) {
+        child->asset_resolvers_storage_.push_back(
+            std::make_unique<FlutterAssetResolver>(resolver));
+      }
+    }
+  }
+  if (!child->asset_resolvers_storage_.empty()) {
+    child->asset_resolver_ptrs_.clear();
+    child->asset_resolver_ptrs_.reserve(child->asset_resolvers_storage_.size());
+    for (const auto& r : child->asset_resolvers_storage_) {
+      child->asset_resolver_ptrs_.push_back(r.get());
+    }
+    child->project_args_.asset_resolvers = child->asset_resolver_ptrs_.data();
+    child->project_args_.asset_resolvers_count =
+        child->asset_resolver_ptrs_.size();
+  }
+
   // Note: FlutterEngineSpawn requires custom_task_runners to be nullptr in
   // project_args because the spawned engine inherits task runners from
   // parent.
@@ -4095,6 +4322,16 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::SpawnChild(
       &FlutterEmbedderNative::OnPlatformMessageCallback;
   child->project_args_.update_semantics_callback2 =
       &FlutterEmbedderNative::OnUpdateSemantics2;
+  child->project_args_.compute_platform_resolved_locale_callback =
+      &FlutterEmbedderNative::OnComputePlatformResolvedLocaleCallback;
+  child->project_args_.on_pre_engine_restart_callback =
+      &FlutterEmbedderNative::OnPreEngineRestartCallback;
+  child->project_args_.dart_deferred_library_loader_callback =
+      &FlutterEmbedderNative::OnDartDeferredLibraryLoaderCallback;
+  child->project_args_.get_scaled_font_size_callback =
+      &FlutterEmbedderNative::OnGetScaledFontSizeCallback;
+  child->project_args_.log_message_callback =
+      &FlutterEmbedderNative::OnLogMessageCallback;
   child->initial_route_ = spawn_args.initial_route;
   child->project_args_.initial_route =
       child->initial_route_.empty() ? nullptr : child->initial_route_.c_str();
@@ -6732,7 +6969,15 @@ static jboolean FlutterJNI_GetIsSoftwareRendering(JNIEnv* env,
                                                   jobject jcaller) {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterJNI_GetIsSoftwareRendering");
-  return false;
+  if (auto vm_args = FlutterEmbedderNative::GetDefaultVMArgs();
+      vm_args.has_value()) {
+    return vm_args->enable_software_rendering ? JNI_TRUE : JNI_FALSE;
+  }
+  if (auto global_args = AndroidVMInit::GetGlobalVMArgs();
+      global_args.has_value()) {
+    return global_args->enable_software_rendering ? JNI_TRUE : JNI_FALSE;
+  }
+  return JNI_FALSE;
 }
 
 static void FlutterJNI_RegisterTexture(JNIEnv* env,

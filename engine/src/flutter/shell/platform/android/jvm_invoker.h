@@ -154,6 +154,22 @@ class JvmInvoker {
   /// FlutterJNI.requestDartDeferredLibrary.
   virtual bool RequestDartDeferredLibrary(int loading_unit_id) = 0;
 
+  /// @brief Scales a font size via FlutterJNI.getScaledFontSize.
+  virtual double GetScaledFontSize(double unscaled_font_size,
+                                   int configuration_id) {
+    (void)unscaled_font_size;
+    (void)configuration_id;
+    return -1.0;
+  }
+
+  /// @brief Computes the platform-resolved locale via
+  /// FlutterJNI.computePlatformResolvedLocale.
+  virtual std::vector<std::string> ComputePlatformResolvedLocale(
+      const std::vector<std::string>& supported_locales_data) {
+    (void)supported_locales_data;
+    return {};
+  }
+
   /// @brief Decodes an image from buffer bytes via FlutterJNI.decodeImage.
   virtual bool DecodeImage(const uint8_t* data,
                            size_t size,
@@ -283,6 +299,10 @@ class DefaultJvmInvoker : public JvmInvoker {
   bool OnFirstFrame() override;
   bool OnPreEngineRestart() override;
   bool RequestDartDeferredLibrary(int loading_unit_id) override;
+  double GetScaledFontSize(double unscaled_font_size,
+                           int configuration_id) override;
+  std::vector<std::string> ComputePlatformResolvedLocale(
+      const std::vector<std::string>& supported_locales_data) override;
   bool DecodeImage(const uint8_t* data,
                    size_t size,
                    int64_t generator_handle) override;
@@ -382,6 +402,10 @@ class AndroidJvmInvoker : public JvmInvoker {
   bool OnFirstFrame() override;
   bool OnPreEngineRestart() override;
   bool RequestDartDeferredLibrary(int loading_unit_id) override;
+  double GetScaledFontSize(double unscaled_font_size,
+                           int configuration_id) override;
+  std::vector<std::string> ComputePlatformResolvedLocale(
+      const std::vector<std::string>& supported_locales_data) override;
   bool DecodeImage(const uint8_t* data,
                    size_t size,
                    int64_t generator_handle) override;

@@ -433,6 +433,14 @@ void AndroidProjectArgsHolder::Populate(const AndroidVMArgs& args,
   project_args_.vsync_callback = &FlutterEmbedderNative::OnVsyncCallback;
   project_args_.update_semantics_callback2 =
       &FlutterEmbedderNative::OnUpdateSemantics2;
+  project_args_.compute_platform_resolved_locale_callback =
+      &FlutterEmbedderNative::OnComputePlatformResolvedLocaleCallback;
+  project_args_.on_pre_engine_restart_callback =
+      &FlutterEmbedderNative::OnPreEngineRestartCallback;
+  project_args_.dart_deferred_library_loader_callback =
+      &FlutterEmbedderNative::OnDartDeferredLibraryLoaderCallback;
+  project_args_.get_scaled_font_size_callback =
+      &FlutterEmbedderNative::OnGetScaledFontSizeCallback;
 }
 
 const FlutterProjectArgs* AndroidProjectArgsHolder::GetProjectArgs() const {

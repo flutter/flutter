@@ -774,27 +774,25 @@ TEST(AndroidVsyncWaiterTest, ConsumePendingVsyncNotifiesJvmInvoker) {
   auto waiter =
       std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
 
-  bool jvm_on_vsync_called = false;
+  intptr_t received_baton = 0;
   int64_t received_start = 0;
   int64_t received_target = 0;
+  waiter->SetVsyncResultCallback(
+      [&](intptr_t baton, int64_t start_time, int64_t target_time) {
+        received_baton = baton;
+        received_start = start_time;
+        received_target = target_time;
+      });
 
   EXPECT_CALL(*mock_invoker,
               InvokeVoidMethod(::testing::StrEq("onVsync"),
                                ::testing::StrEq("(JJ)V"), ::testing::_))
-      .WillOnce([&](const std::string& method, const std::string& sig,
-                    const std::vector<uint8_t>& payload) {
-        jvm_on_vsync_called = true;
-        EXPECT_EQ(payload.size(), 16u);
-        std::memcpy(&received_start, payload.data(), sizeof(int64_t));
-        std::memcpy(&received_target, payload.data() + sizeof(int64_t),
-                    sizeof(int64_t));
-        return true;
-      });
+      .Times(0);
 
   EXPECT_TRUE(waiter->AsyncWaitForVsync(1234));
   mock_choreographer->TriggerPendingCallbacks(50000000LL);
 
-  EXPECT_TRUE(jvm_on_vsync_called);
+  EXPECT_EQ(received_baton, 1234);
   EXPECT_EQ(received_start, 50000000LL);
   EXPECT_EQ(received_target, 50000000LL + 16666666LL);
 }
@@ -851,7 +849,7 @@ TEST(AndroidVsyncWaiterTest, OnJavaVsyncRoutesThroughPendingBaton) {
   EXPECT_CALL(*mock_invoker,
               InvokeVoidMethod(::testing::StrEq("onVsync"),
                                ::testing::StrEq("(JJ)V"), ::testing::_))
-      .WillOnce(::testing::Return(true));
+      .Times(0);
 
   bool vsync_result_fired = false;
   intptr_t result_baton = 0;
