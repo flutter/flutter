@@ -226,26 +226,18 @@ class FlutterPluginTest {
     ) {
         val env = setupTestProjectEnvironment(tempDir)
         val project = env.project
-        val mockCompileTaskProvider = mockk<TaskProvider<FlutterTask>>(relaxed = true)
-        every {
-            project.tasks.register("compileFlutterBuildDebug", FlutterTask::class.java, any())
-        } returns mockCompileTaskProvider
+        val compileTaskProvider = project.stubTaskRegistration<FlutterTask>("compileFlutterBuildDebug")
         val compileOutputSlot = slot<Transformer<File, FlutterTask>>()
         val compileOutput = mockk<Provider<File>>()
-        every { mockCompileTaskProvider.map(capture(compileOutputSlot)) } returns compileOutput
+        every { compileTaskProvider.map(capture(compileOutputSlot)) } returns compileOutput
         val compileOutputDir = mockk<Provider<Directory>>()
         every { project.layout.dir(compileOutput) } returns compileOutputDir
-        val jniLibsActionSlot = slot<Action<CopyFlutterJniLibsTask>>()
-        every {
-            project.tasks.register("copyJniLibsflutterBuildDebug", CopyFlutterJniLibsTask::class.java, capture(jniLibsActionSlot))
-        } returns mockk(relaxed = true)
+        val configureJniLibsTask = project.captureTaskConfiguration<CopyFlutterJniLibsTask>("copyJniLibsflutterBuildDebug")
 
-        val onVariant = applyPluginCapturingVariantCallback(env)
-        onVariant(mockApplicationVariant())
-        val mockJniLibsTask = mockk<CopyFlutterJniLibsTask>(relaxed = true)
-        jniLibsActionSlot.captured.execute(mockJniLibsTask)
+        applyPluginCapturingVariantCallback(env)(mockApplicationVariant())
+        val jniLibsTask = configureJniLibsTask()
 
-        verify { mockJniLibsTask.intermediateDir.set(compileOutputDir) }
+        verify { jniLibsTask.intermediateDir.set(compileOutputDir) }
         val compileTask = mockk<FlutterTask>()
         val outputDirectory = File("build/intermediates/flutter/debug")
         every { compileTask.outputDirectory } returns outputDirectory
@@ -263,25 +255,20 @@ class FlutterPluginTest {
         val env = setupTestProjectEnvironment(tempDir)
         val project = env.project
         // A host task, whose name matches none of the module's variant names.
-        every { project.gradle.startParameter.taskNames } returns listOf(":app:assembleDemoStaging")
-        val mockCopyAssetsTaskProvider = mockk<TaskProvider<CopyFlutterAssetsTask>>(relaxed = true)
-        every {
-            project.tasks.register("copyFlutterAssetsDebug", CopyFlutterAssetsTask::class.java, any())
-        } returns mockCopyAssetsTaskProvider
-        val mockCopyJniLibsTaskProvider = mockk<TaskProvider<CopyFlutterJniLibsTask>>(relaxed = true)
-        every {
-            project.tasks.register("copyJniLibsflutterBuildDebug", CopyFlutterJniLibsTask::class.java, any())
-        } returns mockCopyJniLibsTaskProvider
+        project.setCommandLineTasks(":app:assembleDemoStaging")
+        val copyAssetsTaskProvider = project.stubTaskRegistration<CopyFlutterAssetsTask>("copyFlutterAssetsDebug")
+        val copyJniLibsTaskProvider = project.stubTaskRegistration<CopyFlutterJniLibsTask>("copyJniLibsflutterBuildDebug")
         val assetsSource = mockk<SourceDirectories.Layered>(relaxed = true)
         val jniLibsSource = mockk<SourceDirectories.Layered>(relaxed = true)
 
-        val onVariant = applyPluginToModuleCapturingVariantCallback(env)
-        onVariant(mockLibraryVariant(assetsSource = assetsSource, jniLibsSource = jniLibsSource))
+        applyPluginToModuleCapturingVariantCallback(env)(
+            mockLibraryVariant(assetsSource = assetsSource, jniLibsSource = jniLibsSource)
+        )
 
         val taskContainer = project.tasks
         verify { taskContainer.register("compileFlutterBuildDebug", FlutterTask::class.java, any()) }
-        verify { assetsSource.addGeneratedSourceDirectory(mockCopyAssetsTaskProvider, CopyFlutterAssetsTask::destinationDir) }
-        verify { jniLibsSource.addGeneratedSourceDirectory(mockCopyJniLibsTaskProvider, CopyFlutterJniLibsTask::destinationDir) }
+        verify { assetsSource.addGeneratedSourceDirectory(copyAssetsTaskProvider, CopyFlutterAssetsTask::destinationDir) }
+        verify { jniLibsSource.addGeneratedSourceDirectory(copyJniLibsTaskProvider, CopyFlutterJniLibsTask::destinationDir) }
         verify(exactly = 0) { taskContainer.register(any(), CopyFlutterApksTask::class.java, any()) }
         verify(exactly = 0) { taskContainer.configureEach(any<Action<in Task>>()) }
     }
@@ -291,14 +278,9 @@ class FlutterPluginTest {
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
-        val project = env.project
-        val compileActionSlots =
+        val configureCompileTasks =
             listOf("Debug", "Profile", "Release").associateWith { variantName ->
-                val actionSlot = slot<Action<FlutterTask>>()
-                every {
-                    project.tasks.register("compileFlutterBuild$variantName", FlutterTask::class.java, capture(actionSlot))
-                } returns mockk(relaxed = true)
-                actionSlot
+                env.project.captureTaskConfiguration<FlutterTask>("compileFlutterBuild$variantName")
             }
 
         val onVariant = applyPluginToModuleCapturingVariantCallback(env)
@@ -308,9 +290,8 @@ class FlutterPluginTest {
         onVariant(mockLibraryVariant(name = "release", buildType = "release", debuggable = false))
 
         val buildModes =
-            compileActionSlots.mapValues { (_, actionSlot) ->
-                val task = mockk<FlutterTask>(relaxed = true)
-                actionSlot.captured.execute(task)
+            configureCompileTasks.mapValues { (_, configureCompileTask) ->
+                val task = configureCompileTask()
                 val buildModeSlot = slot<String>()
                 verify { task.buildMode = capture(buildModeSlot) }
                 buildModeSlot.captured
@@ -710,6 +691,27 @@ class FlutterPluginTest {
         val output: VariantOutput,
         val versionCode: Property<Int>
     )
+
+    /** Stubs registering task [name] to return a relaxed provider, which is returned. */
+    private inline fun <reified T : Task> Project.stubTaskRegistration(name: String): TaskProvider<T> {
+        val provider = mockk<TaskProvider<T>>(relaxed = true)
+        every { tasks.register(name, T::class.java, any()) } returns provider
+        return provider
+    }
+
+    /**
+     * Captures the configuration action registered for task [name]. The returned function runs
+     * that action on a relaxed mock task and returns the task, for verifying what it set.
+     */
+    private inline fun <reified T : Task> Project.captureTaskConfiguration(name: String): () -> T {
+        val action = slot<Action<T>>()
+        every { tasks.register(name, T::class.java, capture(action)) } returns mockk(relaxed = true)
+        return { mockk<T>(relaxed = true).also { action.captured.execute(it) } }
+    }
+
+    private fun Project.setCommandLineTasks(vararg taskNames: String) {
+        every { gradle.startParameter.taskNames } returns taskNames.toList()
+    }
 
     /**
      * A [VariantOutput] with an ABI filter for [abi] (none if null). Only `set` is stubbed on its
