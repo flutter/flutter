@@ -246,16 +246,14 @@ class UpdatePackagesCommand extends FlutterCommand {
     await _pubGet(
       rootProject,
       enforceLockfile: !forceUpgrade && cherryPicks.isEmpty && !updateHashes,
-      offline: offline,
     );
 
     // Manually do a pub get for packages not part of the workspace.
     // See https://github.com/flutter/flutter/pull/170364.
-    await _pubGet(toolProject, enforceLockfile: false, offline: offline);
+    await _pubGet(toolProject, enforceLockfile: false);
     await _pubGet(
       FlutterProject.fromDirectory(hooksUserDefineIntegrationTestDirectory),
       enforceLockfile: false,
-      offline: offline,
     );
 
     await _downloadCoverageData();
@@ -263,15 +261,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  Future<void> _pubGet(
-    FlutterProject project, {
-    required bool enforceLockfile,
-    required bool offline,
-  }) async => pub.get(
+  Future<void> _pubGet(FlutterProject project, {required bool enforceLockfile}) async => pub.get(
     context: PubContext.pubGet,
     project: project,
     enforceLockfile: enforceLockfile,
-    offline: offline,
+    offline: boolArg(_keyOffline),
   );
 
   Future<List<_ProjectDeps>> _upgrade({
