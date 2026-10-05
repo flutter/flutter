@@ -595,7 +595,9 @@ object FlutterPluginUtils {
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
         val pluginsWithKGPAppliedList = mutableListOf<String>()
         val agpVersion = VersionFetcher.getAGPVersion(project)
-        var shouldLogForApp = false
+        // The app subproject that applies KGP, as (name, build file path). This isn't always
+        // [project]: in add-to-app builds, [project] is the Flutter module's `:flutter` project.
+        var appApplyingKgp: Pair<String, String>? = null
         project.rootProject.subprojects {
             val pluginState = getSubprojectPluginState(this) ?: return@subprojects
 
@@ -618,7 +620,7 @@ object FlutterPluginUtils {
 
             // Apply AGP exists and Apply KGP also exists in build.gradle
             if (pluginState.hasAppPlugin && pluginState.hasKgpPlugin) {
-                shouldLogForApp = true
+                appApplyingKgp = Pair(name, buildFile.absolutePath)
             }
 
             if (pluginState.hasLibPlugin && pluginState.hasKgpPlugin) {
@@ -627,7 +629,7 @@ object FlutterPluginUtils {
         }
 
         // If no imperative apply KGP declarations were found, there is nothing to log.
-        if (!shouldLogForApp && pluginsWithKGPAppliedList.isEmpty()) {
+        if (appApplyingKgp == null && pluginsWithKGPAppliedList.isEmpty()) {
             return
         }
 
@@ -635,10 +637,10 @@ object FlutterPluginUtils {
             if (agpVersion == null || agpVersion.major < 9) {
                 return@projectsEvaluated
             }
-            if (shouldLogForApp) {
+            appApplyingKgp?.let { (appName, appBuildFilePath) ->
                 project.logger.error(
                     """
-                    WARNING: Your Android app project: ${project.name} located at: ${project.buildFile.absolutePath}
+                    WARNING: Your Android app project: $appName located at: $appBuildFilePath
                     applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
                     Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
 

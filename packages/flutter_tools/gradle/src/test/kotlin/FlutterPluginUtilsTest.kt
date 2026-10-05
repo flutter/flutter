@@ -1649,6 +1649,52 @@ class FlutterPluginUtilsTest {
                     }
 
                     @Test
+                    fun `app warning names the subproject that applies KGP, not the add-to-app Flutter module project`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig =
+                                    SubprojectConfig(
+                                        "app",
+                                        declarativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
+                                    ),
+                                pluginConfigs =
+                                    listOf(
+                                        SubprojectConfig("plugin", declarativelyAppliedPlugins = listOf("com.android.library"))
+                                    )
+                            )
+                        // In add-to-app builds, the Flutter Gradle Plugin is applied to the Flutter
+                        // module's `:flutter` project instead of the host app.
+                        val flutterModuleBuildFile = tempDir.resolve("hello/.android/Flutter/build.gradle").toFile()
+                        val flutterModuleProject = mockk<Project>()
+                        every { flutterModuleProject.name } returns "flutter"
+                        every { flutterModuleProject.buildFile } returns flutterModuleBuildFile
+                        every { flutterModuleProject.logger } returns mockLogger
+                        every { flutterModuleProject.rootProject } returns rootProject
+                        every { flutterModuleProject.providers } answers { rootProject.providers }
+                        every { flutterModuleProject.gradle } returns mockGradle
+
+                        detectApplyingKotlinGradlePlugin(flutterModuleProject)
+                        testProject.projectsEvaluatedActionSlot.captured.execute(mockGradle)
+
+                        val appBuildFilePath = testProject.appProject.buildFile.absolutePath
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your Android app project: app located at: $appBuildFilePath")
+                                }
+                            )
+                        }
+                        verify(exactly = 0) {
+                            mockLogger.error(match { it.contains(flutterModuleBuildFile.absolutePath) })
+                        }
+                    }
+
+                    @Test
                     fun `logs warning when KGP is only applied in one plugin`(
                         @TempDir tempDir: Path
                     ) {
