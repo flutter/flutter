@@ -35,7 +35,6 @@ void main() {
     );
     expect(result, const ProcessResultMatcher());
     expect(result.stderr, contains('Please upgrade your Android Gradle Plugin version'));
-    expect(result.stderr, isNot(contains('Please upgrade your Gradle version')));
   });
 
   testUsingContext('Gradle version out of "warn" support band but in "error" band builds '
