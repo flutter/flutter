@@ -673,13 +673,13 @@ dependencies {
         // Newer AGP version supports max gradle version.
         GradleAgpTestData(
           true,
-          agpVersion: '9.2',
+          agpVersion: '9.4',
           gradleVersion: maxKnownAndSupportedGradleVersion,
         ),
         // Newer AGP version does not even meet current gradle version requirements.
-        GradleAgpTestData(false, agpVersion: '9.2', gradleVersion: '7.3'),
+        GradleAgpTestData(false, agpVersion: '9.4', gradleVersion: '7.3'),
         // Newer AGP version requires newer gradle version.
-        GradleAgpTestData(true, agpVersion: '9.2', gradleVersion: '9.3.1'),
+        GradleAgpTestData(true, agpVersion: '9.4', gradleVersion: '9.5.0'),
 
         // Template versions of Gradle/AGP.
         GradleAgpTestData(
@@ -789,9 +789,13 @@ dependencies {
       }
     });
 
-    FakeCommand createKgpVersionCommand(String kgpV) {
+    FakeCommand createKgpVersionCommand(String kgpV, {String? gradlewPath}) {
+      gradlewPath ??= fileSystem
+          .directory('/android')
+          .childFile(getGradlewFileName(const LocalPlatform()))
+          .path;
       return FakeCommand(
-        command: const <String>['./gradlew', 'kgpVersion', '-q'],
+        command: <String>[gradlewPath, 'kgpVersion', '-q'],
         stdout:
             '''
     KGP Version: $kgpV
@@ -814,10 +818,34 @@ dependencies {
       ]);
       expect(await getKgpVersion(androidDirectory, BufferLogger.test(), processManager3), kgpV3);
       final processManagerNoGradle = FakeProcessManager.empty();
-      processManagerNoGradle.excludedExecutables = <String>{'./gradlew'};
+      processManagerNoGradle.excludedExecutables = <String>{
+        androidDirectory.childFile('gradlew').path,
+        androidDirectory.childFile('gradlew.bat').path,
+      };
       expect(
         await getKgpVersion(androidDirectory, BufferLogger.test(), processManagerNoGradle),
         null,
+      );
+    });
+
+    testWithoutContext('executes gradlew.bat on Windows to find KGP version', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      // File must exist and cannot have kgp defined.
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
+      const kgpVersion = '2.0.0';
+      final platform = FakePlatform(operatingSystem: 'windows');
+      final String gradlewPath = androidDirectory.childFile('gradlew.bat').path;
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        createKgpVersionCommand(kgpVersion, gradlewPath: gradlewPath),
+      ]);
+      expect(
+        await getKgpVersion(
+          androidDirectory,
+          BufferLogger.test(),
+          processManager,
+          platform: platform,
+        ),
+        kgpVersion,
       );
     });
 
@@ -838,7 +866,10 @@ pluginManagement {
 }
 ''');
         final processManager = FakeProcessManager.empty();
-        processManager.excludedExecutables = <String>{'./gradlew'};
+        processManager.excludedExecutables = <String>{
+          androidDirectory.childFile('gradlew').path,
+          androidDirectory.childFile('gradlew.bat').path,
+        };
 
         expect(
           await getKgpVersion(androidDirectory, BufferLogger.test(), processManager),
@@ -864,7 +895,10 @@ pluginManagement {
 }
 ''');
         final processManager = FakeProcessManager.empty();
-        processManager.excludedExecutables = <String>{'./gradlew'};
+        processManager.excludedExecutables = <String>{
+          androidDirectory.childFile('gradlew').path,
+          androidDirectory.childFile('gradlew.bat').path,
+        };
 
         expect(
           await getKgpVersion(androidDirectory, BufferLogger.test(), processManager),
@@ -1492,6 +1526,8 @@ allprojects {
       expect(getGradleVersionFor('8.13'), '8.14');
       expect(getGradleVersionFor('9.0.1'), '9.1.0');
       expect(getGradleVersionFor('9.1.0'), '9.3.1');
+      expect(getGradleVersionFor('9.2.0'), '9.3.1');
+      expect(getGradleVersionFor('9.3.1'), '9.5.0');
     });
 
     testWithoutContext('throws on unsupported versions', () {
