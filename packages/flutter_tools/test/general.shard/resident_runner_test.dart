@@ -77,32 +77,6 @@ HotRunner createHotRunner(
     platform: toolContext.platform,
   );
 
-  if (reassembleHelper != null) {
-    return HotRunner(
-      flutterDevices,
-      analytics: analytics ?? const NoOpAnalytics(),
-      buildSystem: buildSystem,
-      buildTargets: buildTargets ?? const BuildTargetsImpl(),
-      debuggingOptions: debuggingOptions,
-      target: target,
-      toolContext: toolContext,
-      xcode: xcode,
-      applicationBinary: applicationBinary,
-      benchmarkMode: benchmarkMode,
-      dartBuilder: dartBuilder,
-      dillOutputPath: dillOutputPath,
-      hostIsIde: hostIsIde,
-      hotRunnerConfig: hotRunnerConfig,
-      machine: machine,
-      nativeAssetsYamlFile: nativeAssetsYamlFile,
-      projectFileInvalidator: projectFileInvalidator,
-      projectRootPath: projectRootPath,
-      reassembleHelper: reassembleHelper,
-      reloadSourcesHelper: reloadSourcesHelper,
-      stayResident: stayResident,
-      stopwatchFactory: stopwatchFactory,
-    );
-  }
   return HotRunner(
     flutterDevices,
     analytics: analytics ?? const NoOpAnalytics(),
@@ -122,6 +96,7 @@ HotRunner createHotRunner(
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     projectFileInvalidator: projectFileInvalidator,
     projectRootPath: projectRootPath,
+    reassembleHelper: reassembleHelper,
     reloadSourcesHelper: reloadSourcesHelper,
     stayResident: stayResident,
     stopwatchFactory: stopwatchFactory,

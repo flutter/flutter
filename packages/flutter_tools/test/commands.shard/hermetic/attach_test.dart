@@ -1297,46 +1297,6 @@ void main() {
     );
 
     testUsingContext(
-      'passes the injected ToolContext to the hot runner',
-      () async {
-        final device = FakeAndroidDevice(id: '1')
-          ..portForwarder = const NoOpDevicePortForwarder()
-          ..onGetLogReader = () => NoOpDeviceLogReader('test');
-        final hotRunner = FakeHotRunner()
-          ..exited = false
-          ..isWaitingForVmService = false;
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool enableDevTools,
-        ) async => 0;
-        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
-
-        testDeviceManager.devices = <Device>[device];
-        testFileSystem.file('lib/main.dart').createSync();
-
-        final DelegatingToolContext toolContext = createToolContext();
-        final command = AttachCommand(
-          buildSystem: buildSystem,
-          buildTargets: const BuildTargetsImpl(),
-          toolContext: toolContext,
-          xcode: null,
-          hotRunnerFactory: hotRunnerFactory,
-        );
-        await createTestCommandRunner(command).run(<String>['attach']);
-
-        final ToolContext? runnerToolContext = hotRunnerFactory.toolContext;
-        expect(runnerToolContext, same(toolContext));
-        expect(runnerToolContext!.fs, same(testFileSystem));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => testDeviceManager,
-      },
-    );
-
-    testUsingContext(
       'Catches "Service connection disposed" error by code',
       () async {
         final device = FakeAndroidDevice(id: '1')
@@ -1597,7 +1557,6 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
   String? dillOutputPath;
   String? projectRootPath;
   late List<FlutterDevice> devices;
-  ToolContext? toolContext;
   void Function(Artifacts artifacts)? _artifactTester;
 
   @override
@@ -1614,9 +1573,7 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     bool benchmarkMode = false,
     String? dillOutputPath,
     bool hostIsIde = false,
-    HotRunnerConfig? hotRunnerConfig,
     String? nativeAssetsYamlFile,
-    ProjectFileInvalidator? projectFileInvalidator,
     String? projectRootPath,
     bool stayResident = true,
   }) {
@@ -1628,7 +1585,6 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     this.devices = devices;
     this.dillOutputPath = dillOutputPath;
     this.projectRootPath = projectRootPath;
-    this.toolContext = toolContext;
     hotRunner.flutterDevices
       ..clear()
       ..addAll(devices);
