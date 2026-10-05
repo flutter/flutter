@@ -4414,8 +4414,8 @@ TEST_F(ShellTest, PointerPacketFlushMessageLoop) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
-// Verifies a pointer event will flush the dart event loop.
-TEST_F(ShellTest, DISABLED_PointerPacketsAreDispatchedWithTask) {
+// Verifies a pointer event will flush the dart microtask queue.
+TEST_F(ShellTest, PointerPacketsFlushMicrotasks) {
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
                          ThreadHost::Type::kPlatform);
@@ -4427,23 +4427,21 @@ TEST_F(ShellTest, DISABLED_PointerPacketsAreDispatchedWithTask) {
             task_runners.GetUITaskRunner());
   auto shell = CreateShell(settings, task_runners);
   auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("testDispatchEvents");
-
+  configuration.SetEntrypoint("testDispatchEventsMicrotask");
+  // The onPointerDataPacket callback is set synchronously during
+  // RunEngine so the packet can be dispatched right away.
   RunEngine(shell.get(), std::move(configuration));
-  fml::CountDownLatch latch(1);
+
   bool did_invoke_callback = false;
   AddFfiNativeCallback(
       // The Dart native function names aren't very consistent but this is
       // just the native function name of the second vm entrypoint in the
       // fixture.
-      "NotifyNative", CREATE_FFI_LAMBDA([&]() {
-        did_invoke_callback = true;
-        latch.CountDown();
-      }));
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() { did_invoke_callback = true; }));
 
+  // This dispatches the packet and flushes microtask so the callback must
+  // be invoked immediately.
   DispatchFakePointerData(shell.get(), 23);
-  EXPECT_FALSE(did_invoke_callback);
-  latch.Wait();
   EXPECT_TRUE(did_invoke_callback);
 
   DestroyShell(std::move(shell), task_runners);

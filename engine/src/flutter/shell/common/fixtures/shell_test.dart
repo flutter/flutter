@@ -617,6 +617,15 @@ void testDispatchEvents() {
 }
 
 @pragma('vm:entry-point')
+void testDispatchEventsMicrotask() {
+  PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket pointer) {
+    Future.microtask(() {
+      notifyNative();
+    });
+  };
+}
+
+@pragma('vm:entry-point')
 void testSendViewFocusEvent() {
   PlatformDispatcher.instance.onViewFocusChange = (ViewFocusEvent event) {
     notifyMessage('${event.viewId} ${event.state} ${event.direction}');
