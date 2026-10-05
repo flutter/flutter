@@ -317,7 +317,7 @@ class _WindowCreatorCard extends StatelessWidget {
                         entry = WindowEntry(
                           controller: controller,
                           builder: (BuildContext context) =>
-                              SatelliteWindowContent(satelliteWindowController: controller),
+                              SatelliteWindowContent(controller: controller),
                         );
                         windowRegistry.register(entry);
                       },
