@@ -23,7 +23,15 @@ Future<void> main(List<String> args) async {
   // SHOULD be 'bin' distribution types) AND the default gradle
   // version defined in gradle_utils.dart (this SHOULD be the 'all'
   // distribution type).
-  final versions = <String>['8.14-bin', '8.4-bin', '8.13-rc-1-bin', '9.3.1-bin', '9.3.1-all'];
+  final versions = <String>[
+    '8.14-bin',
+    '8.4-bin',
+    '8.13-rc-1-bin',
+    '9.3.1-bin',
+    '9.3.1-all',
+    '9.5.0-bin',
+    '9.5.0-all',
+  ];
 
   // Define the CIPD packages location
   const location = 'flutter/gradle_dists';
