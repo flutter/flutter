@@ -85,9 +85,9 @@ class CursorHandlerTest : public WindowsTest {
 
     window_ = window.get();
     engine_ = builder.Build();
-    view_ =
-        engine_->CreateView(std::move(window),
-                            /*is_sized_to_content=*/false, BoxConstraints());
+    view_ = engine_->CreateView(std::move(window),
+                                /*is_sized_to_content=*/false, BoxConstraints(),
+                                /*allow_implicit_view=*/true);
   }
 
  private:

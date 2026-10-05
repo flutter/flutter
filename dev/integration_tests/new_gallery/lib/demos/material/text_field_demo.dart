@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../gallery_localizations.dart';
 
 // BEGIN textFieldDemo
@@ -165,9 +166,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> with RestorationMi
     } else {
       form.save();
       showInSnackBar(
-        GalleryLocalizations.of(
-          context,
-        )!.demoTextFieldNameHasPhoneNumber(person.name!, person.phoneNumber!),
+        GalleryLocalizations.of(context)!
+            .demoTextFieldNameHasPhoneNumber(person.name!, person.phoneNumber!),
       );
     }
   }

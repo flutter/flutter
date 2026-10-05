@@ -371,9 +371,8 @@ const androidx64ReleaseBundle = AndroidAotBundle(androidx64Release);
 class AndroidAotDeferredComponentsBundle extends Target {
   /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [BuildInfo.mode].
   ///
-  /// If [components] is not provided, it will be read from the `pubspec.yaml` manifest.
-  AndroidAotDeferredComponentsBundle(this.dependency, {List<DeferredComponent>? components})
-    : _components = components;
+  /// If [_components] is not provided, it will be read from the `pubspec.yaml` manifest.
+  AndroidAotDeferredComponentsBundle(this.dependency, {this._components});
 
   /// The [AndroidAotBundle] instance this bundle rule depends on.
   final AndroidAotBundle dependency;

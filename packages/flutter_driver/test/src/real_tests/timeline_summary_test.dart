@@ -193,22 +193,16 @@ void main() {
 
       test('skips leading "end" events', () {
         expect(
-          summarize(<Map<String, dynamic>>[
-            frameEnd(1000),
-            frameBegin(2000),
-            frameEnd(4000),
-          ]).computeAverageFrameBuildTimeMillis(),
+          summarize(<Map<String, dynamic>>[frameEnd(1000), frameBegin(2000), frameEnd(4000)])
+              .computeAverageFrameBuildTimeMillis(),
           2.0,
         );
       });
 
       test('skips trailing "begin" events', () {
         expect(
-          summarize(<Map<String, dynamic>>[
-            frameBegin(2000),
-            frameEnd(4000),
-            frameBegin(5000),
-          ]).computeAverageFrameBuildTimeMillis(),
+          summarize(<Map<String, dynamic>>[frameBegin(2000), frameEnd(4000), frameBegin(5000)])
+              .computeAverageFrameBuildTimeMillis(),
           2.0,
         );
       });
@@ -276,22 +270,16 @@ void main() {
 
       test('skips leading "end" events', () {
         expect(
-          summarize(<Map<String, dynamic>>[
-            frameEnd(1000),
-            frameBegin(2000),
-            frameEnd(4000),
-          ]).computeWorstFrameBuildTimeMillis(),
+          summarize(<Map<String, dynamic>>[frameEnd(1000), frameBegin(2000), frameEnd(4000)])
+              .computeWorstFrameBuildTimeMillis(),
           2.0,
         );
       });
 
       test('skips trailing "begin" events', () {
         expect(
-          summarize(<Map<String, dynamic>>[
-            frameBegin(2000),
-            frameEnd(4000),
-            frameBegin(5000),
-          ]).computeWorstFrameBuildTimeMillis(),
+          summarize(<Map<String, dynamic>>[frameBegin(2000), frameEnd(4000), frameBegin(5000)])
+              .computeWorstFrameBuildTimeMillis(),
           2.0,
         );
       });
@@ -329,34 +317,24 @@ void main() {
 
       test('computes average frame rasterizer time in milliseconds', () {
         expect(
-          summarize(<Map<String, dynamic>>[
-            begin(1000),
-            end(2000),
-            begin(3000),
-            end(5000),
-          ]).computeAverageFrameRasterizerTimeMillis(),
+          summarize(<Map<String, dynamic>>[begin(1000), end(2000), begin(3000), end(5000)])
+              .computeAverageFrameRasterizerTimeMillis(),
           1.5,
         );
       });
 
       test('skips leading "end" events', () {
         expect(
-          summarize(<Map<String, dynamic>>[
-            end(1000),
-            begin(2000),
-            end(4000),
-          ]).computeAverageFrameRasterizerTimeMillis(),
+          summarize(<Map<String, dynamic>>[end(1000), begin(2000), end(4000)])
+              .computeAverageFrameRasterizerTimeMillis(),
           2.0,
         );
       });
 
       test('skips trailing "begin" events', () {
         expect(
-          summarize(<Map<String, dynamic>>[
-            begin(2000),
-            end(4000),
-            begin(5000),
-          ]).computeAverageFrameRasterizerTimeMillis(),
+          summarize(<Map<String, dynamic>>[begin(2000), end(4000), begin(5000)])
+              .computeAverageFrameRasterizerTimeMillis(),
           2.0,
         );
       });
@@ -378,43 +356,29 @@ void main() {
 
       test('computes worst frame rasterizer time in milliseconds', () {
         expect(
-          summarize(<Map<String, dynamic>>[
-            begin(1000),
-            end(2000),
-            begin(3000),
-            end(5000),
-          ]).computeWorstFrameRasterizerTimeMillis(),
+          summarize(<Map<String, dynamic>>[begin(1000), end(2000), begin(3000), end(5000)])
+              .computeWorstFrameRasterizerTimeMillis(),
           2.0,
         );
         expect(
-          summarize(<Map<String, dynamic>>[
-            begin(3000),
-            end(5000),
-            begin(1000),
-            end(2000),
-          ]).computeWorstFrameRasterizerTimeMillis(),
+          summarize(<Map<String, dynamic>>[begin(3000), end(5000), begin(1000), end(2000)])
+              .computeWorstFrameRasterizerTimeMillis(),
           2.0,
         );
       });
 
       test('skips leading "end" events', () {
         expect(
-          summarize(<Map<String, dynamic>>[
-            end(1000),
-            begin(2000),
-            end(4000),
-          ]).computeWorstFrameRasterizerTimeMillis(),
+          summarize(<Map<String, dynamic>>[end(1000), begin(2000), end(4000)])
+              .computeWorstFrameRasterizerTimeMillis(),
           2.0,
         );
       });
 
       test('skips trailing "begin" events', () {
         expect(
-          summarize(<Map<String, dynamic>>[
-            begin(2000),
-            end(4000),
-            begin(5000),
-          ]).computeWorstFrameRasterizerTimeMillis(),
+          summarize(<Map<String, dynamic>>[begin(2000), end(4000), begin(5000)])
+              .computeWorstFrameRasterizerTimeMillis(),
           2.0,
         );
       });
@@ -446,9 +410,8 @@ void main() {
       test('computes 90th frame rasterizer time in milliseconds', () {
         for (var i = 0; i < sequences.length; ++i) {
           expect(
-            summarize(
-              rasterizeTimeSequenceInMillis(sequences[i]),
-            ).computePercentileFrameRasterizerTimeMillis(90.0),
+            summarize(rasterizeTimeSequenceInMillis(sequences[i]))
+                .computePercentileFrameRasterizerTimeMillis(90.0),
             p90s[i],
           );
         }
@@ -460,9 +423,8 @@ void main() {
           sequence.add(i);
         }
         expect(
-          summarize(
-            rasterizeTimeSequenceInMillis(sequence),
-          ).computePercentileFrameRasterizerTimeMillis(99.0),
+          summarize(rasterizeTimeSequenceInMillis(sequence))
+              .computePercentileFrameRasterizerTimeMillis(99.0),
           99,
         );
       });

@@ -4,7 +4,7 @@
 
 // ignore_for_file: avoid_print
 
-import 'dart:ffi';
+import 'dart:ffi' hide Size;
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -102,3 +102,44 @@ void testWindowController() {
 
 @pragma('vm:entry-point')
 void testWindowControllerRetainCycle() {}
+
+@pragma('vm:entry-point')
+// Used in FlutterWindowControllerSizeTest.SizedToContentResizable
+void testRenderSizedToContentResizable() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    final baseRecorder = PictureRecorder();
+    final canvas = Canvas(baseRecorder);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    canvas.drawRect(const Rect.fromLTRB(0.0, 0.0, 300, 300.0), blackPaint);
+    final Picture picture = baseRecorder.endRecording();
+
+    final builder = SceneBuilder();
+    builder.addPicture(Offset.zero, picture);
+    PlatformDispatcher.instance.views.last.render(builder.build(), size: const Size(300, 300));
+  };
+
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+// Used in FlutterWindowControllerSizeTest.SizedToContentNotResizable
+void testRenderSizedToContent() {
+  var frameCount = 0;
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    final size = frameCount == 0 ? const Size(300, 300) : const Size(200, 200);
+    final baseRecorder = PictureRecorder();
+    final canvas = Canvas(baseRecorder);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    canvas.drawRect(Offset.zero & size, blackPaint);
+    final Picture picture = baseRecorder.endRecording();
+    final builder = SceneBuilder();
+    builder.addPicture(Offset.zero, picture);
+    PlatformDispatcher.instance.views.last.render(builder.build(), size: size);
+    ++frameCount;
+    if (frameCount == 1) {
+      PlatformDispatcher.instance.scheduleFrame();
+    }
+  };
+
+  signalNativeTest();
+}

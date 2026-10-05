@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -68,7 +69,13 @@ void main() {
     });
 
     testUsingContext('can list devices', () async {
-      daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        serverDaemonConnection,
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
+        notifyingLogger: notifyingLogger,
+        featureFlags: TestFeatureFlags(),
+      );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -86,7 +93,13 @@ void main() {
     });
 
     testUsingContext('calls supportsRuntimeMode', () async {
-      daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        serverDaemonConnection,
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
+        notifyingLogger: notifyingLogger,
+        featureFlags: TestFeatureFlags(),
+      );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -103,7 +116,13 @@ void main() {
     }, overrides: <Type, Generator>{Java: () => FakeJava()});
 
     testUsingContext('redirects logs', () async {
-      daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        serverDaemonConnection,
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
+        notifyingLogger: notifyingLogger,
+        featureFlags: TestFeatureFlags(),
+      );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -132,7 +151,13 @@ void main() {
     testUsingContext(
       'starts and stops app',
       () async {
-        daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          serverDaemonConnection,
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
+          notifyingLogger: notifyingLogger,
+          featureFlags: TestFeatureFlags(),
+        );
         fakeDevice = FakeAndroidDevice();
         final discoverer = FakePollingDeviceDiscovery();
         daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -189,7 +214,13 @@ void main() {
     testUsingContext(
       'takes screenshot',
       () async {
-        daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          serverDaemonConnection,
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
+          notifyingLogger: notifyingLogger,
+          featureFlags: TestFeatureFlags(),
+        );
         fakeDevice = FakeAndroidDevice();
         final discoverer = FakePollingDeviceDiscovery();
         daemon!.deviceDomain.addDeviceDiscoverer(discoverer);

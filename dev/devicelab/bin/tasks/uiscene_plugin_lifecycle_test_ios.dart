@@ -367,8 +367,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-DeepLinks-SceneEvents.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-DeepLinks-SceneEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
     'AppMigrated-FlutterSceneDelegate-PluginNotMigrated-DeepLink': <String, String>{
       ...sharedLifecycleFiles,
@@ -376,8 +375,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-DeepLinks-ApplicationEvents.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-DeepLinks-ApplicationEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
   };
 
@@ -442,8 +440,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
 
     // When the app has migrated but the plugin hasn't, we expect application events to be used as
@@ -454,8 +451,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppMigrated.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppMigrated.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
 
     // When both the app and the plugin have migrated to scenes, we expect scene events.
@@ -465,8 +461,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
 
     // When the app has migrated but the plugin hasn't, we expect application events to be used as
@@ -477,8 +472,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppMigrated.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppMigrated.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
 
     // When the app has not migrated, but the plugin supports both, we expect application events.
@@ -488,8 +482,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/Info.plist',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppNotMigrated.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppNotMigrated.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
 
     // When the app and plugin have not migrated, we expect application events.
@@ -499,8 +492,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/Info.plist',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppNotMigrated.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppNotMigrated.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
   };
 
@@ -520,8 +512,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
 
     // When multi scene is enabled and the ViewController is created programatically with a
@@ -539,8 +530,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/ViewController.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-SceneEvents-NoApplicationEvents.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents-NoApplicationEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
 
     // When multi scene is enabled and the ViewController is created via Storyboard with a
@@ -558,8 +548,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/ViewController.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-SceneEvents-NoApplicationEvents.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents-NoApplicationEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
   };
 
@@ -588,8 +577,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/Base.lproj/Main.storyboard',
       r'$TEMPLATE_DIR/native/AppDelegate-FlutterImplicitEngineDelegate.swift':
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/AppDelegate.swift',
-      r'$TEMPLATE_DIR/native/UITests-SceneEvents-ApplicationLaunchEvents.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents-ApplicationLaunchEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
 
     // When registering plugins with the AppDelegate's self (and therefore the FlutterLaunchEngine)
@@ -607,29 +595,28 @@ class Scenarios {
               r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/Base.lproj/Main.storyboard',
           r'$TEMPLATE_DIR/native/AppDelegate-FlutterImplicitEngineDelegateWithLaunchEngine.swift':
               r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/AppDelegate.swift',
-          r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift':
-              r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+          r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
         },
 
     // When the app has not migrated to scenes, storyboard is instantiated earlier in the lifecycle.
     // So when using an implicit FlutterEngine created by the storyboard, we expect plugins to
     // receive all application events.
-    'FlutterImplicitEngineDelegate-AppNotMigrated-StoryboardFlutterViewController': <String, String>{
-      ...sharedAppLifecycleFiles,
-      ...sharedPluginLifecycleFiles,
-      r'$TEMPLATE_DIR/native/Info-unmigrated.plist':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/Info.plist',
-      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
-      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
-          r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/AppDelegate-FlutterImplicitEngineDelegate.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/AppDelegate.swift',
-      r'$TEMPLATE_DIR/native/Main-FlutterViewController.storyboard':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/Base.lproj/Main.storyboard',
-      r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-FlutterImplicitEngineDelegate.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
-    },
+    'FlutterImplicitEngineDelegate-AppNotMigrated-StoryboardFlutterViewController':
+        <String, String>{
+          ...sharedAppLifecycleFiles,
+          ...sharedPluginLifecycleFiles,
+          r'$TEMPLATE_DIR/native/Info-unmigrated.plist':
+              r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/Info.plist',
+          r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+              r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
+          r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+              r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
+          r'$TEMPLATE_DIR/native/AppDelegate-FlutterImplicitEngineDelegate.swift':
+              r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/AppDelegate.swift',
+          r'$TEMPLATE_DIR/native/Main-FlutterViewController.storyboard':
+              r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/Base.lproj/Main.storyboard',
+          r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-FlutterImplicitEngineDelegate.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+        },
 
     // When using an implicit FlutterEngine, created by the FlutterViewController in another
     // ViewController, we expect plugins to be registered after the FlutterViewController is
@@ -647,8 +634,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/AppDelegate.swift',
       r'$TEMPLATE_DIR/native/ViewController-ImplicitFlutterEngine.swift':
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/ViewController.swift',
-      r'$TEMPLATE_DIR/native/UITests-SceneEventsNoConnect-NoApplicationEvents.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEventsNoConnect-NoApplicationEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
   };
 
@@ -682,7 +668,6 @@ class Scenarios {
         r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
     r'$TEMPLATE_DIR/native/Main-FlutterViewController-RestorationId.storyboard':
         r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/Base.lproj/Main.storyboard',
-    r'$TEMPLATE_DIR/native/UITests-StateRestoration.swift':
-        r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+    r'$TEMPLATE_DIR/native/UITests-StateRestoration.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
   };
 }

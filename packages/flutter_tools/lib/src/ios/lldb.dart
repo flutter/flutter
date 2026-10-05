@@ -23,14 +23,11 @@ import 'xcodeproj.dart';
 /// See `xcrun devicectl device process launch --help` for more information.
 class LLDB {
   LLDB({
-    required Logger logger,
-    required ProcessUtils processUtils,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
-    required Version? deviceVersion,
-  }) : _logger = logger,
-       _processUtils = processUtils,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _deviceVersion = deviceVersion;
+    required this._logger,
+    required this._processUtils,
+    required this._xcodeProjectInterpreter,
+    required this._deviceVersion,
+  });
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -350,9 +347,8 @@ if not error.Success():
 
   /// Prints logs of available Device Support
   Future<void> _printDeviceSupportStatus() async {
-    final Future<String> futureLog = _startWaitingForLog(
-      RegExp(r'\s*Platform:'),
-    ).then((value) => value, onError: _handleAsyncError);
+    final Future<String> futureLog = _startWaitingForLog(RegExp(r'\s*Platform:'))
+        .then((value) => value, onError: _handleAsyncError);
 
     await _lldbProcess?.stdinWriteln('platform status');
     await futureLog;
@@ -362,9 +358,8 @@ if not error.Success():
   Future<void> _attachToAppProcess(int appProcessId) async {
     // Since the app starts stopped (--start-stopped), we expect a stopped state
     // after attaching.
-    final Future<String> futureLog = _startWaitingForLog(
-      _lldbProcessStopped,
-    ).then((value) => value, onError: _handleAsyncError);
+    final Future<String> futureLog = _startWaitingForLog(_lldbProcessStopped)
+        .then((value) => value, onError: _handleAsyncError);
 
     await _lldbProcess?.stdinWriteln('device process attach --pid $appProcessId');
     await futureLog;
@@ -373,9 +368,8 @@ if not error.Success():
   /// Sets a breakpoint, waits for it print the breakpoint id, and adds a python
   /// script command to be executed whenever the breakpoint is hit.
   Future<void> _setBreakpoint(bool manualContinue) async {
-    final Future<String> futureLog = _startWaitingForLog(
-      _breakpointPattern,
-    ).then((value) => value, onError: _handleAsyncError);
+    final Future<String> futureLog = _startWaitingForLog(_breakpointPattern)
+        .then((value) => value, onError: _handleAsyncError);
 
     final breakpointSetCommand = manualContinue
         ? r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'"
@@ -420,9 +414,8 @@ if not error.Success():
   ///
   /// Without this, the debugger would remain attached to the process and the app will hang on crash.
   Future<void> _setupStopHooks() async {
-    final Future<String> futureLog = _startWaitingForLog(
-      _stopHookAddedPattern,
-    ).then((value) => value, onError: _handleAsyncError);
+    final Future<String> futureLog = _startWaitingForLog(_stopHookAddedPattern)
+        .then((value) => value, onError: _handleAsyncError);
     await _lldbProcess?.stdinWriteln(
       'target stop-hook add -o "$_threadBacktraceAllCommand" -o "$_detachCommand"',
     );
@@ -514,9 +507,8 @@ class _LLDBLogPatternCompleter {
 /// A container class for associating a [Process] that is running LLDB with
 /// the iOS device process of an application.
 class _LLDBProcess {
-  _LLDBProcess({required Process process, required this.appProcessId, required Logger logger})
-    : _lldbProcess = process,
-      _logger = logger;
+  _LLDBProcess({required Process process, required this.appProcessId, required this._logger})
+    : _lldbProcess = process;
 
   final Process _lldbProcess;
   final int appProcessId;
