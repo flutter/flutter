@@ -271,6 +271,57 @@ Future<void> main() async {
         'lib/armeabi-v7a/libflutter.so',
       ], await getFilesInApk(demoProdApk));
 
+      await clean();
+
+      section('Run app:assembleDemoQa with android.newDsl=true');
+
+      // With android.newDsl=true, AGP has no `libraryVariants` or `applicationVariants`.
+      final String demoQaOutput = await inDirectory(hostAppDir, () async {
+        return eval(
+          gradlewExecutable,
+          <String>[
+            'app:assembleDemoQa',
+            '-Pandroid.newDsl=true',
+            '-Pandroid.compatibility.enableLegacyApi=false',
+            '-Pflutter.hostAppProjectName=app',
+          ],
+          environment: <String, String>{'JAVA_HOME': javaHome},
+        );
+      });
+
+      if (!demoQaOutput.contains(
+        "The Gradle property 'flutter.hostAppProjectName' has no effect.",
+      )) {
+        return TaskResult.failure(
+          'Expected a warning that flutter.hostAppProjectName has no effect',
+        );
+      }
+
+      final String demoQaApk = path.join(
+        hostAppDir.path,
+        'app',
+        'build',
+        'outputs',
+        'apk',
+        'demo',
+        'qa',
+        'app-demo-qa.apk',
+      );
+
+      if (!exists(File(demoQaApk))) {
+        return TaskResult.failure('Failed to build app-demo-qa.apk');
+      }
+
+      section('Verify AOT ELF in app-demo-qa.apk');
+
+      final Iterable<String> demoQaFiles = await getFilesInApk(demoQaApk);
+      checkCollectionContains<String>(<String>[
+        ...flutterAssets,
+        'lib/arm64-v8a/libapp.so',
+        'lib/armeabi-v7a/libapp.so',
+      ], demoQaFiles);
+      checkCollectionDoesNotContain<String>(debugAssets, demoQaFiles);
+
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
