@@ -128,7 +128,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
         'os=${specificOS ?? platform}',
         if (cpu != null) 'cpu=$cpu',
       ],
-      'gclient_variables': <String, dynamic>{'download_android_deps': false, 'download_jdk': false},
+      'gclient_variables': <String, dynamic>{'download_android_deps': false},
       'dependencies': <String>[...bundles.map((bundle) => 'web_tests/test_bundles/${bundle.name}')],
       'test_dependencies': <dynamic>[
         <String, dynamic>{
