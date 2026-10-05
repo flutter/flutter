@@ -337,7 +337,7 @@ class FlutterPlugin : Plugin<Project> {
                     )
                 registerFlutterAssetTasks(projectToAddTasksTo, variant, compileTaskProvider)
                 registerFlutterJniLibsTask(projectToAddTasksTo, variant, compileTaskProvider, targetPlatforms)
-                if (isApplicationProject) {
+                if (variant is ApplicationVariant) {
                     configureApplicationOutputs(
                         projectToAddTasksTo,
                         variant,
@@ -641,18 +641,14 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         /**
-         * Configures the per-ABI versionCodes and the copy into `build/outputs/flutter-apk/`. Both
-         * act on APK outputs, which library variants don't have.
+         * Configures the per-ABI versionCodes of [variant] and the copy of its APKs into
+         * `build/outputs/flutter-apk/`.
          */
         private fun configureApplicationOutputs(
             project: Project,
-            variant: Variant,
+            variant: ApplicationVariant,
             dslVersionCodes: DslVersionCodes
         ) {
-            check(variant is ApplicationVariant) {
-                "Expected an application variant for '${variant.name}' in an application " +
-                    "project, but got ${variant::class.java.name}."
-            }
             configureSplitPerAbiVersionCodes(
                 project,
                 variant,
