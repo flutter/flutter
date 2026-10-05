@@ -902,7 +902,7 @@ public class FlutterView extends FrameLayout
    */
   @Override
   public boolean onCheckIsTextEditor() {
-    return isAttachedToFlutterEngine() && textInputPlugin.isTextEditor();
+    return isAttachedToFlutterEngine() && textInputPlugin != null && textInputPlugin.isTextEditor();
   }
 
   /**
