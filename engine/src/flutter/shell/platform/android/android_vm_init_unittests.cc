@@ -20,7 +20,7 @@ using ::testing::_;
 using ::testing::Eq;
 using ::testing::Return;
 
-class MockJvmInvoker : public JvmInvoker {
+class MockJvmInvokerForVMInit : public JvmInvoker {
  public:
   MOCK_METHOD(bool, EnsureAttachedToThread, (), (override));
   MOCK_METHOD(void, DetachFromThread, (), (override));
@@ -64,6 +64,16 @@ class MockJvmInvoker : public JvmInvoker {
   MOCK_METHOD(bool,
               RequestDartDeferredLibrary,
               (int loading_unit_id),
+              (override));
+
+  MOCK_METHOD(double,
+              GetScaledFontSize,
+              (double unscaled_font_size, int configuration_id),
+              (override));
+
+  MOCK_METHOD(std::vector<std::string>,
+              ComputePlatformResolvedLocale,
+              (const std::vector<std::string>& supported_locales_data),
               (override));
 
   MOCK_METHOD(bool,
@@ -366,7 +376,7 @@ TEST(AndroidVMInitTest, AndroidVMInitIdempotency) {
 }
 
 TEST(AndroidVMInitTest, AndroidVMInitLifecycleAndDispatch) {
-  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto mock_invoker = std::make_shared<MockJvmInvokerForVMInit>();
   auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
   auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
 
