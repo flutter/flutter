@@ -691,25 +691,30 @@ class ProxiedPortForwarder extends DevicePortForwarder {
             },
           ),
         );
-        debounceDataStream(socket).listen((Uint8List data) {
-          unawaited(
-            connection
-                .sendRequest('proxy.write', <String, Object>{'id': id}, data)
-                .then(
-                  (Object? obj) => obj,
-                  onError: (Object error, StackTrace stackTrace) {
-                    // Log the error, but proceed normally. Network failure should not
-                    // crash the tool. If this is critical, the place where the connection
-                    // is being used would crash.
-                    _logger.printWarning('Write to remote proxy error: $error');
-                    _logger.printTrace(
-                      'Write to remote proxy error: $error, stack trace: $stackTrace',
-                    );
-                    return null;
-                  },
-                ),
-          );
-        });
+        debounceDataStream(socket).listen(
+          (Uint8List data) {
+            unawaited(
+              connection
+                  .sendRequest('proxy.write', <String, Object>{'id': id}, data)
+                  .then(
+                    (Object? obj) => obj,
+                    onError: (Object error, StackTrace stackTrace) {
+                      // Log the error, but proceed normally. Network failure should not
+                      // crash the tool. If this is critical, the place where the connection
+                      // is being used would crash.
+                      _logger.printWarning('Write to remote proxy error: $error');
+                      _logger.printTrace(
+                        'Write to remote proxy error: $error, stack trace: $stackTrace',
+                      );
+                      return null;
+                    },
+                  ),
+            );
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            _logger.printTrace('Socket error: $error\n$stackTrace');
+          },
+        );
         _connectedSockets.add(socket);
 
         unawaited(

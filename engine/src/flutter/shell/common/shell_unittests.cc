@@ -1665,7 +1665,7 @@ TEST_F(ShellTest, ReportTimingsIsCalledImmediatelyAfterTheFirstFrame) {
   ASSERT_EQ(timestamps.size(), FrameTiming::kCount);
 }
 
-TEST_F(ShellTest, WaitForFirstFrame) {
+TEST_F(ShellTest, AddFirstFrameCallbackFiresAfterFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1685,7 +1685,7 @@ TEST_F(ShellTest, WaitForFirstFrame) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, WaitForFirstFrameZeroSizeFrame) {
+TEST_F(ShellTest, AddFirstFrameCallbackDeferredIfZeroSizeFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1706,7 +1706,7 @@ TEST_F(ShellTest, WaitForFirstFrameZeroSizeFrame) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, WaitForFirstFrameTimeout) {
+TEST_F(ShellTest, AddFirstFrameCallbackDeferredIfNoFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1726,7 +1726,7 @@ TEST_F(ShellTest, WaitForFirstFrameTimeout) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, WaitForFirstFrameMultiple) {
+TEST_F(ShellTest, AddFirstFrameCallbackMultiple) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1752,9 +1752,9 @@ TEST_F(ShellTest, WaitForFirstFrameMultiple) {
   DestroyShell(std::move(shell));
 }
 
-/// Makes sure that WaitForFirstFrame works if we rendered a frame with the
+/// Makes sure that AddFirstFrameCallback fires if we rendered a frame with the
 /// single-thread setup.
-TEST_F(ShellTest, WaitForFirstFrameInlined) {
+TEST_F(ShellTest, AddFirstFrameCallbackInlined) {
   Settings settings = CreateSettingsForFixture();
   auto task_runner = CreateNewThread();
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
@@ -2590,6 +2590,54 @@ TEST_F(ShellTest, RasterizerMakeSkiaSnapshot) {
       });
   latch->Wait();
   DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, RasterizerMakeImpellerSnapshotDoesNotGenerateMipmaps) {
+#if !SHELL_ENABLE_METAL
+  // This test uses the Metal backend.
+  GTEST_SKIP();
+#else
+  Settings settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  auto task_runner = CreateNewThread();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+  std::unique_ptr<Shell> shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback = ShellTestPlatformViewBuilder({
+          .rendering_backend =
+              ShellTestPlatformView::BackendType::kMetalBackend,
+      }),
+  });
+
+  ASSERT_TRUE(ValidateShell(shell.get()));
+  PlatformViewNotifyCreated(shell.get());
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  auto latch = std::make_shared<fml::AutoResetWaitableEvent>();
+
+  PumpOneFrame(shell.get());
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetRasterTaskRunner(), [&shell, &latch]() {
+        SnapshotDelegate* delegate = shell->GetRasterizer().get();
+        std::shared_ptr<impeller::Texture> texture =
+            delegate->MakeImpellerSnapshotSync(MakeSizedDisplayList(50, 50),
+                                               DlISize(50, 50),
+                                               SnapshotPixelFormat::kDontCare);
+        EXPECT_NE(texture, nullptr);
+        if (texture != nullptr) {
+          EXPECT_EQ(texture->GetTextureDescriptor().mip_count, 1u);
+        }
+
+        latch->Signal();
+      });
+  latch->Wait();
+  DestroyShell(std::move(shell), task_runners);
+#endif  // !SHELL_ENABLE_METAL
 }
 
 TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {

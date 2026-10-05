@@ -137,6 +137,57 @@ TEST_F(FlOpenGLFrameTest, ZeroSizeClearsFrame) {
   EXPECT_EQ(frame_height, 0u);
 }
 
+// A frame with nothing to rasterize (e.g. everything painted is fully
+// transparent) has no layers. The previous frame must not be shown again.
+TEST_F(FlOpenGLFrameTest, NoLayersClearsFrame) {
+  constexpr size_t width = 100;
+  constexpr size_t height = 100;
+
+  g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new();
+  g_autoptr(FlFramebuffer) framebuffer =
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
+  FlutterBackingStore backing_store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {
+          .type = kFlutterOpenGLTargetTypeFramebuffer,
+          .framebuffer = {.target = GL_RGBA8, .user_data = framebuffer}}};
+  FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
+                        .backing_store = &backing_store,
+                        .offset = {0, 0},
+                        .size = {width, height}};
+  const FlutterLayer* layers[1] = {&layer};
+
+  fl_opengl_frame_composite(frame, compositor, layers, 1);
+
+  EXPECT_CALL(epoxy, glClear(GL_COLOR_BUFFER_BIT));
+
+  fl_opengl_frame_composite(frame, compositor, nullptr, 0);
+
+  // The frame is kept at the same size so it still matches the window and is
+  // drawn, showing the view background rather than the previous frame.
+  size_t frame_width = 0;
+  size_t frame_height = 0;
+  fl_opengl_frame_get_size(frame, &frame_width, &frame_height);
+  EXPECT_EQ(frame_width, width);
+  EXPECT_EQ(frame_height, height);
+}
+
+// A frame with no layers received before any content has been rendered has
+// nothing to clear.
+TEST_F(FlOpenGLFrameTest, NoLayersWithoutFrame) {
+  g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new();
+
+  EXPECT_CALL(epoxy, glClear).Times(0);
+
+  fl_opengl_frame_composite(frame, compositor, nullptr, 0);
+
+  size_t frame_width = 123;
+  size_t frame_height = 456;
+  fl_opengl_frame_get_size(frame, &frame_width, &frame_height);
+  EXPECT_EQ(frame_width, 0u);
+  EXPECT_EQ(frame_height, 0u);
+}
+
 // Frames are copied into CPU memory so they can be used in the OpenGL context
 // GTK draws with, which doesn't share objects with the Flutter context.
 TEST_F(FlOpenGLFrameTest, CompositeReadsBackPixels) {
