@@ -234,7 +234,7 @@ final flavorUndefinedHandler = GradleHandledError(
       <String>[globals.gradleUtils!.getExecutable(project), 'app:tasks', '--all', '--console=auto'],
       throwOnError: true,
       workingDirectory: project.android.hostAppGradleRoot.path,
-      environment: globals.java?.environment,
+      environment: globals.java?.gradleEnvironment,
     );
     // Extract build types and product flavors.
     final variants = <String>{};
