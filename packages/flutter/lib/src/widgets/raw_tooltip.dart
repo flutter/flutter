@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'feedback.dart';
+import 'focus_manager.dart';
 import 'framework.dart';
 import 'media_query.dart';
 import 'overlay.dart';
@@ -591,23 +592,30 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     assert(mounted);
     switch ((_animationStatus.isDismissed, status.isDismissed)) {
       case (false, true):
-        HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
-        RawTooltip._openedTooltips.remove(this);
+        if (RawTooltip._openedTooltips.remove(this) && RawTooltip._openedTooltips.isEmpty) {
+          FocusManager.instance.removeEarlyKeyEventHandler(_handleEarlyKeyEvent);
+          HardwareKeyboard.instance.removeHandler(_handleHardwareKeyEvent);
+        }
         _overlayController.hide();
       case (true, false):
         _overlayController.show();
+        if (RawTooltip._openedTooltips.isEmpty) {
+          // Register an early FocusManager key handler (plus a HardwareKeyboard
+          // fallback when primaryFocus is null) while at least one tooltip is open:
+          // 1. FocusManager.addEarlyKeyEventHandler runs before walking the focus
+          //    tree and stops propagation when returning KeyEventResult.handled,
+          //    preventing Escape from simultaneously triggering focused
+          //    descendants (e.g. EditableText) or ancestor ModalRoute
+          //    DismissIntent handlers (e.g. closing DatePickerDialog while a
+          //    button tooltip is hovered).
+          // 2. HardwareKeyboard.addHandler alone runs before FocusManager, which
+          //    would empty _openedTooltips before WidgetsApp's root Focus handler
+          //    checks RawTooltip.dismissAllToolTips(), allowing Escape to fall
+          //    through to WidgetsApp's DismissIntent shortcut.
+          FocusManager.instance.addEarlyKeyEventHandler(_handleEarlyKeyEvent);
+          HardwareKeyboard.instance.addHandler(_handleHardwareKeyEvent);
+        }
         RawTooltip._openedTooltips.add(this);
-        // Register a global HardwareKeyboard handler while the tooltip is open
-        // rather than wrapping child in a Shortcuts widget or relying solely on
-        // WidgetsApp's root Focus handler (app.dart):
-        // 1. A local Shortcuts widget around RawTooltip.child only receives key
-        //    events when primaryFocus is inside RawTooltip.child, which misses
-        //    tooltips triggered by pointer hover when focus is elsewhere.
-        // 2. WidgetsApp's root Focus handler is an ancestor of route content, so
-        //    focused descendants that consume Escape (such as EditableText's
-        //    DoNothingAndStopPropagationTextIntent or RawMenuAnchor/DropdownMenu)
-        //    stop propagation before the event bubbles up to WidgetsApp.
-        HardwareKeyboard.instance.addHandler(_handleKeyEvent);
         SemanticsService.tooltip(widget.semanticsTooltip ?? '');
       case (true, true) || (false, false):
         break;
@@ -820,8 +828,20 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     return true;
   }
 
-  bool _handleKeyEvent(KeyEvent event) {
-    if (event is KeyDownEvent &&
+  static KeyEventResult _handleEarlyKeyEvent(KeyEvent event) {
+    if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
+        event.logicalKey == LogicalKeyboardKey.escape &&
+        RawTooltip._openedTooltips.isNotEmpty) {
+      return RawTooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  static bool _handleHardwareKeyEvent(KeyEvent event) {
+    if (FocusManager.instance.primaryFocus != null) {
+      return false;
+    }
+    if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
         event.logicalKey == LogicalKeyboardKey.escape &&
         RawTooltip._openedTooltips.isNotEmpty) {
       return RawTooltip.dismissAllToolTips();
@@ -894,8 +914,10 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   @override
   void dispose() {
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
-    HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
-    RawTooltip._openedTooltips.remove(this);
+    if (RawTooltip._openedTooltips.remove(this) && RawTooltip._openedTooltips.isEmpty) {
+      FocusManager.instance.removeEarlyKeyEventHandler(_handleEarlyKeyEvent);
+      HardwareKeyboard.instance.removeHandler(_handleHardwareKeyEvent);
+    }
     // _longPressRecognizer.dispose() and _tapRecognizer.dispose() may call
     // their registered onCancel callbacks if there's a gesture in progress.
     // Remove the onCancel callbacks to prevent the registered callbacks from

@@ -160,17 +160,17 @@ enum CacheExtentStyle {
 enum SliverPaintOrder {
   /// The first sliver paints on top, and the last sliver on bottom.
   ///
-  /// The slivers are painted in the reverse order of [Viewport.slivers]
+  /// The slivers are painted in the reverse order of [Viewport]'s `slivers`
   /// (for example, the reverse order of [ScrollView.buildSlivers]
   /// or [CustomScrollView.slivers]),
-  /// and hit-tested in the same order as [Viewport.slivers].
+  /// and hit-tested in the same order as [Viewport]'s `slivers`.
   ///
   /// This is the default order.
   firstIsTop,
 
   /// The last sliver paints on top, and the first sliver on bottom.
   ///
-  /// The slivers are painted in the same order as [Viewport.slivers]
+  /// The slivers are painted in the same order as [Viewport]'s `slivers`
   /// (for example, the same order as [ScrollView.buildSlivers]
   /// or [CustomScrollView.slivers]),
   /// and hit-tested in the reverse order.

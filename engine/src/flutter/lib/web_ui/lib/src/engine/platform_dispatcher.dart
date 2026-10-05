@@ -1882,10 +1882,7 @@ class ViewConfiguration {
     this.view,
     this.devicePixelRatio = 1.0,
     this.visible = false,
-    this.viewInsets = ui.ViewPadding.zero as ViewPadding,
-    this.viewPadding = ui.ViewPadding.zero as ViewPadding,
     this.systemGestureInsets = ui.ViewPadding.zero as ViewPadding,
-    this.padding = ui.ViewPadding.zero as ViewPadding,
     this.gestureSettings = const ui.GestureSettings(),
     this.displayFeatures = const <ui.DisplayFeature>[],
     this.displayCornerRadii,
@@ -1895,10 +1892,7 @@ class ViewConfiguration {
     EngineFlutterView? view,
     double? devicePixelRatio,
     bool? visible,
-    ViewPadding? viewInsets,
-    ViewPadding? viewPadding,
     ViewPadding? systemGestureInsets,
-    ViewPadding? padding,
     ui.GestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
     ui.DisplayCornerRadii? displayCornerRadii,
@@ -1907,10 +1901,7 @@ class ViewConfiguration {
       view: view ?? this.view,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       visible: visible ?? this.visible,
-      viewInsets: viewInsets ?? this.viewInsets,
-      viewPadding: viewPadding ?? this.viewPadding,
       systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
-      padding: padding ?? this.padding,
       gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
       displayCornerRadii: displayCornerRadii ?? this.displayCornerRadii,
@@ -1920,10 +1911,7 @@ class ViewConfiguration {
   final EngineFlutterView? view;
   final double devicePixelRatio;
   final bool visible;
-  final ViewPadding viewInsets;
-  final ViewPadding viewPadding;
   final ViewPadding systemGestureInsets;
-  final ViewPadding padding;
   final ui.GestureSettings gestureSettings;
   final List<ui.DisplayFeature> displayFeatures;
   final ui.DisplayCornerRadii? displayCornerRadii;
