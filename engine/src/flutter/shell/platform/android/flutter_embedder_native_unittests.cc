@@ -11096,9 +11096,8 @@ TEST(Google3RegressionFixesTest,
   EXPECT_NE(vm_init_args->dart_deferred_library_loader_callback, nullptr);
   EXPECT_NE(vm_init_args->get_scaled_font_size_callback, nullptr);
 
-  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
-                               nullptr, nullptr, nullptr, nullptr, nullptr,
-                               nullptr, vm_init);
+  FlutterEmbedderNative native(mock_invoker);
+  native.SetVMInit(vm_init);
 
   FlutterProjectArgs captured_launch_args = {};
   void* captured_launch_user_data = nullptr;
@@ -11169,16 +11168,31 @@ TEST(Google3RegressionFixesTest,
   EXPECT_EQ(resolved->script_code, nullptr);
 
   // Verify SpawnChild also wires all callbacks
-  auto mock_group = std::make_shared<AndroidEngineGroup>();
-  FlutterProjectArgs captured_spawn_args = {};
-  mock_group->SetSpawnCallback([&](FLUTTER_API_SYMBOL(FlutterEngine) parent,
-                                   const FlutterEngineSpawnConfig* config)
-                                   -> FLUTTER_API_SYMBOL(FlutterEngine) {
-    if (config && config->project_args) {
-      captured_spawn_args = *config->project_args;
+  class CapturingEngineGroupProvider
+      : public InMemoryAndroidEngineGroupProvider {
+   public:
+    FlutterProjectArgs captured_args = {};
+    bool spawn_called = false;
+
+    FlutterEngineResult SpawnEngine(FLUTTER_API_SYMBOL(FlutterEngine)
+                                        parent_engine,
+                                    const FlutterEngineSpawnConfig* config,
+                                    FLUTTER_API_SYMBOL(FlutterEngine) *
+                                        engine_out) override {
+      spawn_called = true;
+      if (config && config->project_args) {
+        captured_args = *config->project_args;
+      }
+      if (engine_out) {
+        *engine_out = nullptr;
+      }
+      return kInvalidArguments;
     }
-    return reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x3);
-  });
+  };
+
+  auto group_provider = std::make_shared<CapturingEngineGroupProvider>();
+  auto mock_group =
+      std::make_shared<AndroidEngineGroup>(group_provider, mock_invoker);
   native.SetEngineGroup(mock_group);
 
   AndroidEngineSpawnArgs spawn_args;
@@ -11186,12 +11200,17 @@ TEST(Google3RegressionFixesTest,
   spawn_args.engine_id = 2;
   auto child = native.SpawnChild(nullptr, nullptr, spawn_args);
   ASSERT_NE(child, nullptr);
-  EXPECT_NE(captured_spawn_args.compute_platform_resolved_locale_callback,
+  ASSERT_TRUE(group_provider->spawn_called);
+  EXPECT_NE(
+      group_provider->captured_args.compute_platform_resolved_locale_callback,
+      nullptr);
+  EXPECT_NE(group_provider->captured_args.on_pre_engine_restart_callback,
             nullptr);
-  EXPECT_NE(captured_spawn_args.on_pre_engine_restart_callback, nullptr);
-  EXPECT_NE(captured_spawn_args.dart_deferred_library_loader_callback, nullptr);
-  EXPECT_NE(captured_spawn_args.get_scaled_font_size_callback, nullptr);
-  EXPECT_NE(captured_spawn_args.log_message_callback, nullptr);
+  EXPECT_NE(group_provider->captured_args.dart_deferred_library_loader_callback,
+            nullptr);
+  EXPECT_NE(group_provider->captured_args.get_scaled_font_size_callback,
+            nullptr);
+  EXPECT_NE(group_provider->captured_args.log_message_callback, nullptr);
 
   child->SetEngine(nullptr);
   native.SetEngine(nullptr);
@@ -11219,37 +11238,24 @@ TEST(Google3RegressionFixesTest, SoftwareRenderingFlagQuery) {
 
 TEST(Google3RegressionFixesTest,
      LaunchReusesVMInitAOTDataWithoutDuplicateCreate) {
-  int vm_init_create_aot_calls = 0;
-  auto mock_aot_handle = reinterpret_cast<FlutterEngineAOTData>(0xBEEF);
-
-  auto vm_init = std::make_shared<AndroidVMInit>(
-      nullptr, nullptr,
-      [&](const FlutterEngineAOTDataSource* source,
-          FlutterEngineAOTData* data_out) {
-        ++vm_init_create_aot_calls;
-        *data_out = mock_aot_handle;
-        return kSuccess;
-      },
-      [](FlutterEngineAOTData data) { return kSuccess; });
+  auto vm_aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  auto vm_init =
+      std::make_shared<AndroidVMInit>(nullptr, nullptr, vm_aot_provider);
 
   AndroidVMArgs args;
   args.aot_library_path = "/data/app/libapp.so";
   EXPECT_TRUE(vm_init->Init(args));
-  EXPECT_EQ(vm_init_create_aot_calls, 1);
+  EXPECT_EQ(vm_aot_provider->GetCreateCount(), 1u);
+  ASSERT_NE(vm_init->GetProjectArgs(), nullptr);
+  FlutterEngineAOTData vm_aot_handle = vm_init->GetProjectArgs()->aot_data;
+  ASSERT_NE(vm_aot_handle, nullptr);
 
   FlutterEmbedderNative native;
+  auto native_aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  // Call SetAOTProvider before SetVMInit so native_aot_provider is not
+  // forwarded onto vm_init.
+  native.SetAOTProvider(native_aot_provider);
   native.SetVMInit(vm_init);
-
-  int native_create_aot_calls = 0;
-  native.SetCreateAOTDataFnForTesting(
-      [&](const FlutterEngineAOTDataSource* source,
-          FlutterEngineAOTData* data_out) {
-        ++native_create_aot_calls;
-        *data_out = reinterpret_cast<FlutterEngineAOTData>(0xCAFE);
-        return kSuccess;
-      });
-  native.SetCollectAOTDataFnForTesting(
-      [](FlutterEngineAOTData data) { return kSuccess; });
 
   FlutterEngineAOTData captured_aot_data = nullptr;
   native.SetInitializeEngineFnForTesting(
@@ -11265,8 +11271,8 @@ TEST(Google3RegressionFixesTest,
       [](FLUTTER_API_SYMBOL(FlutterEngine) engine) { return kSuccess; });
 
   EXPECT_EQ(native.Launch("main", "", {}, 1), kSuccess);
-  EXPECT_EQ(native_create_aot_calls, 0);
-  EXPECT_EQ(captured_aot_data, mock_aot_handle);
+  EXPECT_EQ(native_aot_provider->GetCreateCount(), 0u);
+  EXPECT_EQ(captured_aot_data, vm_aot_handle);
   native.SetEngine(nullptr);
 }
 
