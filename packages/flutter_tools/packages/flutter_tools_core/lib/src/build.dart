@@ -45,10 +45,7 @@ class ExtensionBuildTarget {
     if (rpcResult case final List<Object?> list) {
       return <ExtensionBuildTarget>[
         for (final item in list)
-          if (item case final Map<String, Object?> map)
-            ExtensionBuildTarget.fromJson(map)
-          else if (item case final Map<Object?, Object?> map)
-            ExtensionBuildTarget.fromJson(map.cast<String, Object?>()),
+          if (item case final Map<String, Object?> map) ExtensionBuildTarget.fromJson(map),
       ];
     }
     return const <ExtensionBuildTarget>[];

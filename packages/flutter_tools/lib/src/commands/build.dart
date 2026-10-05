@@ -227,6 +227,10 @@ class BuildCommand extends FlutterCommand with ExtensionArgParserMixin {
               verboseHelp: verboseHelp,
             ),
           );
+        } else {
+          toolContext.logger.printTrace(
+            'Skipping custom build target "${target.name}" because a subcommand with that name already exists.',
+          );
         }
       }
     }
@@ -278,6 +282,7 @@ abstract class BuildSubCommand extends FlutterCommand {
   bool get supported => true;
 }
 
+/// A dynamically registered `flutter build` subcommand backed by a tool extension.
 class ExtensionBuildSubCommand extends BuildSubCommand {
   ExtensionBuildSubCommand({
     required this._buildManager,
@@ -295,6 +300,8 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
   }
 
   final ExtensionBuildManager _buildManager;
+
+  /// The custom build target definition provided by the tool extension.
   final ExtensionBuildTarget target;
 
   @override
