@@ -503,11 +503,11 @@ class FlutterProject {
       buildDirectory: buildDirectory.uri,
       directory: directory.uri,
       appVersion: appVersion,
-      dependencies: dependencies,
+      dependencies: <String>{...dependencies},
       isEmpty: isEmpty,
       isModule: isModule,
       isPlugin: isPlugin,
-      workspace: workspace,
+      workspace: <String>[...workspace],
     );
   }
 

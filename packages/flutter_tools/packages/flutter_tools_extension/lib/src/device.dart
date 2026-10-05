@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
 
 import 'protocol_base/service.dart';
 
@@ -11,11 +12,15 @@ abstract base class DeviceService extends ToolExtensionService {
   /// Service namespace identifier for device services.
   static const String serviceNamespace = 'device';
 
+  static const String _getDevicesRpcMethod = 'getDevices';
+  static const String _isSupportedForProjectRpcMethod = 'isSupportedForProject';
+
   /// RPC method identifier to query contributed target devices.
-  static const String getDevicesMethod = 'device.getDevices';
+  static const String getDevicesMethod = '$serviceNamespace.$_getDevicesRpcMethod';
 
   /// RPC method identifier to query whether a target device is supported for a project.
-  static const String isSupportedForProjectMethod = 'device.isSupportedForProject';
+  static const String isSupportedForProjectMethod =
+      '$serviceNamespace.$_isSupportedForProjectRpcMethod';
 
   /// RPC parameter key for the target device ID.
   static const String deviceIdParam = 'deviceId';
@@ -38,8 +43,8 @@ abstract base class DeviceService extends ToolExtensionService {
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
     return <String, ExtensionRpcHandler>{
-      'getDevices': _getDevicesRpc,
-      'isSupportedForProject': _isSupportedForProjectRpc,
+      _getDevicesRpcMethod: _getDevicesRpc,
+      _isSupportedForProjectRpcMethod: _isSupportedForProjectRpc,
     };
   }
 
@@ -61,6 +66,8 @@ abstract base class DeviceService extends ToolExtensionService {
         project: ExtensionFlutterProject.fromJson(projectMap),
       );
     }
-    return false;
+    throw RpcException.invalidParams(
+      'Invalid or missing parameters for $isSupportedForProjectMethod.',
+    );
   }
 }

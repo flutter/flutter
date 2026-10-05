@@ -123,7 +123,7 @@ class ExtensionFlutterProject {
     isEmptyKey: isEmpty,
     isModuleKey: isModule,
     isPluginKey: isPlugin,
-    workspaceKey: workspace,
+    workspaceKey: workspace.toList(),
   };
 
   @override

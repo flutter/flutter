@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/test.dart';
 
@@ -34,7 +36,10 @@ void main() {
         'packages/pkg_b',
       ]);
 
-      final parsed = ExtensionFlutterProject.fromJson(map);
+      final String encoded = jsonEncode(map);
+      final parsed = ExtensionFlutterProject.fromJson(
+        (jsonDecode(encoded) as Map<Object?, Object?>).cast<String, Object?>(),
+      );
       expect(parsed, equals(project));
       expect(parsed.hashCode, equals(project.hashCode));
       expect(parsed.toString(), contains('my_app'));

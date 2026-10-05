@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -118,6 +120,8 @@ flutter:
         expect(extProject.isModule, isTrue);
         expect(extProject.isPlugin, isFalse);
         expect(extProject.workspace, <String>['packages/sub_pkg']);
+        expect(extProject.workspace.runtimeType, <String>[].runtimeType);
+        expect(() => jsonEncode(extProject.toMap()), returnsNormally);
       },
     );
 
