@@ -467,9 +467,11 @@ class FlutterPlugin : Plugin<Project> {
          * tracked by https://github.com/flutter/flutter/issues/109560, which also documents the
          * AGP behavior that made it necessary.
          *
-         * Library (add-to-app module) variants are never gated: the command line names a host
-         * task, and `matchingFallbacks` can map it to a module variant of any name. The tasks are
-         * registered lazily, so only the module variant the host consumes runs.
+         * Library variants (an add-to-app module) skip this check. The command line names a host
+         * task such as `:app:assembleDemoStaging`, and the host's `matchingFallbacks` pick the
+         * module variant it consumes, so the task name can't identify that variant. Registering
+         * every library variant is safe because registration is lazy: Gradle only runs the module
+         * tasks that the host build depends on.
          */
         private fun shouldCompileFlutterForVariant(
             project: Project,
@@ -512,8 +514,7 @@ class FlutterPlugin : Plugin<Project> {
                         )
                     )
                 }
-            // The assets source set is expected to exist for application and library variants;
-            // fail loudly rather than silently building an APK or AAR without Flutter assets.
+            // Fail at configuration rather than silently build an APK or AAR without Flutter assets.
             val assetSources =
                 variant.sources.assets
                     ?: throw GradleException(
@@ -558,10 +559,7 @@ class FlutterPlugin : Plugin<Project> {
             )
         }
 
-        /**
-         * Registers the [FlutterTask] (the `flutter assemble` invocation) for [variant],
-         * configured entirely from the public variant API.
-         */
+        /** Registers the [FlutterTask] (the `flutter assemble` invocation) for [variant]. */
         private fun registerFlutterCompileTask(
             project: Project,
             variant: Variant,
@@ -643,8 +641,8 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         /**
-         * Per-ABI versionCodes and the copy into `build/outputs/flutter-apk/`. Library variants
-         * produce an AAR, so they need neither.
+         * Configures the per-ABI versionCodes and the copy into `build/outputs/flutter-apk/`. Both
+         * act on APK outputs, which library variants don't have.
          */
         private fun configureApplicationOutputs(
             project: Project,
