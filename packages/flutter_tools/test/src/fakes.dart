@@ -870,6 +870,9 @@ class FakeJava extends Fake implements Java {
   Map<String, String> get environment => _environment;
 
   @override
+  Map<String, String> get gradleEnvironment => _environment;
+
+  @override
   Version? version;
 
   @override
