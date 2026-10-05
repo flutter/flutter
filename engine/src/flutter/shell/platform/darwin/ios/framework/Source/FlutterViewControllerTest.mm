@@ -3369,17 +3369,23 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   return viewController;
 }
 
-// Regression test for https://github.com/flutter/flutter/issues/175520.
-- (void)testSetViewportMetricsPaddings_subtractsStatusBarHeightAfterHidingOnNonNotchDevice {
+// Skips unless the stale-safeAreaInsets.top correction applies on the running OS, i.e. iOS
+// 26.0/26.0.1. See testSetViewportMetricsPaddings_doesNotApplyCorrectionOnIOS26_1OrLater for
+// the 26.1+ no-op case.
+- (void)skipUnlessStatusBarCorrectionApplies {
   if (@available(iOS 26.1, *)) {
     XCTSkip(@"Fixed in iOS 26.1+: UIKit updates safeAreaInsets.top correctly, so the "
-            @"correction is not applied. See "
-            @"testSetViewportMetricsPaddings_doesNotApplyCorrectionOnIOS26_1OrLater.");
+            @"correction is not applied.");
   }
   if (!@available(iOS 26.0, *)) {
     XCTSkip(@"iOS 26.0/26.0.1 specific behavior: UIKit stale safeAreaInsets.top fix not needed "
             @"on earlier OS versions.");
   }
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/175520.
+- (void)testSetViewportMetricsPaddings_subtractsStatusBarHeightAfterHidingOnNonNotchDevice {
+  [self skipUnlessStatusBarCorrectionApplies];
   FlutterEngineForPaddingTest* testEngine = [[FlutterEngineForPaddingTest alloc] init];
   [testEngine runWithEntrypoint:nil];
 
@@ -3444,15 +3450,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 // Covers the status bar coming back (rotation, iPad resize, leaving Split View): the
 // correction must stop applying and the full inset must be reported again.
 - (void)testSetViewportMetricsPaddings_restoresPaddingWhenStatusBarBecomesVisibleAgain {
-  if (@available(iOS 26.1, *)) {
-    XCTSkip(@"Fixed in iOS 26.1+: UIKit updates safeAreaInsets.top correctly, so the "
-            @"correction is not applied. See "
-            @"testSetViewportMetricsPaddings_doesNotApplyCorrectionOnIOS26_1OrLater.");
-  }
-  if (!@available(iOS 26.0, *)) {
-    XCTSkip(@"iOS 26.0/26.0.1 specific behavior: UIKit stale safeAreaInsets.top fix not needed "
-            @"on earlier OS versions.");
-  }
+  [self skipUnlessStatusBarCorrectionApplies];
   FlutterEngineForPaddingTest* testEngine = [[FlutterEngineForPaddingTest alloc] init];
   [testEngine runWithEntrypoint:nil];
 
@@ -3488,8 +3486,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngineForPaddingTest* testEngine = [[FlutterEngineForPaddingTest alloc] init];
   [testEngine runWithEntrypoint:nil];
 
-  // Simulates a view nested in a container that folds its own additional inset in on top of
-  // the status bar's, e.g. 24pt status bar + 50pt additionalSafeAreaInsets.
+  // 24pt status bar + 50pt additionalSafeAreaInsets.
   FlutterFakeStatusBarState* statusBar = [[FlutterFakeStatusBarState alloc] init];
   statusBar.hidden = NO;
   statusBar.height = 24;
