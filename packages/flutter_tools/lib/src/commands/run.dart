@@ -652,22 +652,22 @@ class RunCommand extends RunCommandBase {
     if (hotMode && !webMode) {
       return HotRunner(
         flutterDevices,
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
-        debuggingOptions: debuggingOptions,
         target: targetFile,
-        toolContext: toolContext!,
-        xcode: globals.xcode,
-        analytics: globals.analytics,
+        debuggingOptions: debuggingOptions,
+        benchmarkMode: boolArg('benchmark'),
         applicationBinary: applicationBinaryPath == null
             ? null
             : globals.fs.file(applicationBinaryPath),
-        benchmarkMode: boolArg('benchmark'),
-        dartBuilder: hookRunner,
-        dillOutputPath: stringArg('output-dill'),
-        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
         projectRootPath: stringArg('project-root'),
+        dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
+        analytics: globals.analytics,
+        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        dartBuilder: hookRunner,
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        toolContext: toolContext!,
+        xcode: globals.xcode,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -685,20 +685,20 @@ class RunCommand extends RunCommandBase {
     }
     return ColdRunner(
       flutterDevices,
-      buildSystem: globals.buildSystem,
-      buildTargets: globals.buildTargets,
-      debuggingOptions: debuggingOptions,
       target: targetFile,
-      toolContext: toolContext!,
-      xcode: globals.xcode,
-      analytics: globals.analytics,
+      debuggingOptions: debuggingOptions,
+      traceStartup: traceStartup,
+      awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
       applicationBinary: applicationBinaryPath == null
           ? null
           : globals.fs.file(applicationBinaryPath),
-      awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
-      dartBuilder: hookRunner,
       stayResident: stayResident,
-      traceStartup: traceStartup,
+      dartBuilder: hookRunner,
+      analytics: globals.analytics,
+      buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
+      toolContext: toolContext!,
+      xcode: globals.xcode,
     );
   }
 

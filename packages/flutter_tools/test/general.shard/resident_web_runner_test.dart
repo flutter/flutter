@@ -1165,7 +1165,6 @@ name: my_app
     },
     overrides: <Type, Generator>{
       Analytics: () => fakeAnalytics,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Pub: ThrowingPub.new,
@@ -2328,7 +2327,7 @@ flutter:
           }),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-          analytics: const NoOpAnalytics(),
+          analytics: globals.analytics,
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         );
 
@@ -2358,7 +2357,7 @@ flutter:
           }),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-          analytics: const NoOpAnalytics(),
+          analytics: globals.analytics,
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         );
 
@@ -2394,7 +2393,7 @@ flutter:
           }),
           buildTargets: const BuildTargetsImpl(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
-          analytics: const NoOpAnalytics(),
+          analytics: globals.analytics,
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         );
 
@@ -2436,7 +2435,7 @@ flutter:
             fs: fileSystem,
             systemClock: SystemClock.fixed(DateTime(2001)),
           ),
-          analytics: const NoOpAnalytics(),
+          analytics: globals.analytics,
         );
 
         expect(await residentWebRunner.run(), 0);
@@ -2484,7 +2483,7 @@ flutter:
             fs: fileSystem,
             systemClock: SystemClock.fixed(DateTime(2001)),
           ),
-          analytics: const NoOpAnalytics(),
+          analytics: globals.analytics,
         );
 
         expect(await residentWebRunner.run(), 0);

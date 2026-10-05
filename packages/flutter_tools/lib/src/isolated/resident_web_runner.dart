@@ -321,7 +321,7 @@ class ResidentWebRunner extends ResidentRunner {
             return 1;
           }
           flutterDevice!.generator!.accept();
-          unawaited(cacheInitialDillCompilation());
+          cacheInitialDillCompilation();
         } else {
           final webBuilder = WebBuilder(
             logger: logger,
