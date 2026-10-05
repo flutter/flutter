@@ -77,7 +77,6 @@ name: my_app
       expect(debugConnectionInfo.wsUri, null);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Pub: ThrowingPub.new,
@@ -109,7 +108,6 @@ name: my_app
       expect(await residentWebRunner.waitForAppToFinish(), 1);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: false)),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Pub: ThrowingPub.new,
@@ -141,7 +139,6 @@ name: my_app
       expect(await residentWebRunner.waitForAppToFinish(), 1);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.error(Exception('foo')),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Pub: ThrowingPub.new,
@@ -175,7 +172,6 @@ name: my_app
       expect(result.code, 0);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Pub: ThrowingPub.new,
@@ -213,10 +209,6 @@ name: my_app
       expect(result.message, contains('Failed to recompile application.'));
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.list(<BuildResult>[
-        BuildResult(success: true),
-        BuildResult(success: false),
-      ]),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Pub: ThrowingPub.new,

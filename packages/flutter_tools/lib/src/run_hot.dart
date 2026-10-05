@@ -404,7 +404,7 @@ class HotRunner extends ResidentRunner {
                 suppressErrors: applicationBinary == null,
                 checkDartPluginRegistry: true,
                 dartPluginRegistrant: toolContext.projectFactory
-                    .fromDirectory(fileSystem.directory(projectRootPath))
+                    .fromDirectory(fileSystem.currentDirectory)
                     .dartPluginRegistrant,
                 outputPath: dillOutputPath,
                 packageConfig: debuggingOptions.buildInfo.packageConfig,
@@ -452,7 +452,7 @@ class HotRunner extends ResidentRunner {
         appFailedToStart();
         return 1;
       }
-      await cacheInitialDillCompilation();
+      cacheInitialDillCompilation();
     } on Exception catch (err) {
       logger.printError(err.toString());
       appFailedToStart();

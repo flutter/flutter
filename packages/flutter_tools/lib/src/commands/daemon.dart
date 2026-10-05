@@ -914,31 +914,31 @@ class AppDomain extends Domain {
     } else if (enableHotReload) {
       runner = HotRunner(
         <FlutterDevice>[flutterDevice],
-        analytics: _analytics,
-        buildSystem: _buildSystem,
-        buildTargets: _buildTargets,
-        debuggingOptions: options,
         target: target,
-        toolContext: _toolContext,
-        xcode: _xcode,
+        debuggingOptions: options,
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
         dillOutputPath: dillOutputPath,
         hostIsIde: true,
         machine: machine,
+        analytics: _analytics,
+        buildSystem: _buildSystem,
+        buildTargets: _buildTargets,
+        toolContext: _toolContext,
+        xcode: _xcode,
       );
     } else {
       runner = ColdRunner(
         <FlutterDevice>[flutterDevice],
+        target: target,
+        debuggingOptions: options,
+        applicationBinary: applicationBinary,
+        machine: machine,
         analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        debuggingOptions: options,
-        target: target,
         toolContext: _toolContext,
         xcode: _xcode,
-        applicationBinary: applicationBinary,
-        machine: machine,
       );
     }
 

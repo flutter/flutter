@@ -54,10 +54,10 @@ class FlutterDevice {
   FlutterDevice(
     this.device, {
     required this.buildInfo,
+    required this._toolContext,
     required this.developmentShaderCompiler,
     required this.generator,
     required this.targetPlatform,
-    required this._toolContext,
     @visibleForTesting this.logFlushDelay = const Duration(milliseconds: 500),
     this.userIdentifier,
   });
@@ -67,9 +67,9 @@ class FlutterDevice {
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
+    required ToolContext toolContext,
     required BuildInfo buildInfo,
     required String? target,
-    required ToolContext toolContext,
     TargetModel? targetModelOverride,
     String? userIdentifier,
   }) async {
@@ -111,11 +111,11 @@ class FlutterDevice {
 
     return FlutterDevice(
       device,
+      toolContext: toolContext,
       buildInfo: buildInfo,
       developmentShaderCompiler: shaderCompiler,
       generator: generator,
       targetPlatform: targetPlatform,
-      toolContext: toolContext,
       userIdentifier: userIdentifier,
     );
   }
@@ -970,10 +970,10 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.machine = false,
     String? projectRootPath,
     this.stayResident = true,
-  }) : _dillOutputPath = dillOutputPath,
-       mainPath = toolContext.fs.file(target).absolute.path,
+  }) : mainPath = toolContext.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? toolContext.fs.currentDirectory.path,
+       _dillOutputPath = dillOutputPath,
        artifactDirectory = dillOutputPath == null
            ? toolContext.fs.systemTempDirectory.createTempSync('flutter_tool.')
            : toolContext.fs.file(dillOutputPath).parent,
@@ -995,14 +995,23 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   FileSystem get fileSystem => toolContext.fs;
 
+  @protected
   Platform get platform => toolContext.platform;
+  @protected
   Terminal get terminal => toolContext.terminal;
+  @protected
   OutputPreferences get outputPreferences => toolContext.outputPreferences;
+  @protected
   Artifacts get artifacts => toolContext.artifacts;
+  @protected
   Config get config => toolContext.config;
+  @protected
   Cache get cache => toolContext.cache;
+  @protected
   FlutterVersion get flutterVersion => toolContext.flutterVersion;
+  @protected
   ProcessManager get processManager => toolContext.processManager;
+  @protected
   OperatingSystemUtils get osUtils => toolContext.os;
 
   /// The Xcode installation, or null on platforms without Xcode support.
@@ -1237,10 +1246,8 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
-  /// Write the resident runner's compiled dill to the cache.
-  ///
-  /// This should only be called by [run] when starting in debug mode.
-  Future<void> cacheInitialDillCompilation() async {
+  @protected
+  void cacheInitialDillCompilation() {
     if (_dillOutputPath != null) {
       return;
     }

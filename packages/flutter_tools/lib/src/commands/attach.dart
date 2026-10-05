@@ -390,27 +390,27 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     return buildInfo.isDebug
         ? _hotRunnerFactory.build(
             flutterDevices,
-            buildSystem: _buildSystem,
-            buildTargets: _buildTargets,
-            debuggingOptions: debuggingOptions,
             target: targetFile,
-            toolContext: toolContext,
-            xcode: _xcode,
+            debuggingOptions: debuggingOptions,
             projectRootPath: stringArg('project-root'),
             dillOutputPath: stringArg('output-dill'),
             nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
             analytics: analytics,
+            buildSystem: _buildSystem,
+            buildTargets: _buildTargets,
+            toolContext: toolContext,
+            xcode: _xcode,
           )
         : ColdRunner(
             flutterDevices,
+            target: targetFile,
+            debuggingOptions: debuggingOptions,
+            dartBuilder: hookRunner,
             analytics: analytics,
             buildSystem: _buildSystem,
             buildTargets: _buildTargets,
-            debuggingOptions: debuggingOptions,
-            target: targetFile,
             toolContext: toolContext,
             xcode: _xcode,
-            dartBuilder: hookRunner,
           );
   }
 
