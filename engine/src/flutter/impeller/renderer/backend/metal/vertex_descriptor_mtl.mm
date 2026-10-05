@@ -51,12 +51,16 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
       return MTLVertexFormatCharNormalized;
     case VertexAttributeFormat::kSNorm8x2:
       return MTLVertexFormatChar2Normalized;
+    case VertexAttributeFormat::kSNorm8x3:
+      return MTLVertexFormatChar3Normalized;
     case VertexAttributeFormat::kSNorm8x4:
       return MTLVertexFormatChar4Normalized;
     case VertexAttributeFormat::kUNorm8:
       return MTLVertexFormatUCharNormalized;
     case VertexAttributeFormat::kUNorm8x2:
       return MTLVertexFormatUChar2Normalized;
+    case VertexAttributeFormat::kUNorm8x3:
+      return MTLVertexFormatUChar3Normalized;
     case VertexAttributeFormat::kUNorm8x4:
       return MTLVertexFormatUChar4Normalized;
     case VertexAttributeFormat::kUNorm8x4BGRA:
@@ -81,12 +85,16 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
       return MTLVertexFormatShortNormalized;
     case VertexAttributeFormat::kSNorm16x2:
       return MTLVertexFormatShort2Normalized;
+    case VertexAttributeFormat::kSNorm16x3:
+      return MTLVertexFormatShort3Normalized;
     case VertexAttributeFormat::kSNorm16x4:
       return MTLVertexFormatShort4Normalized;
     case VertexAttributeFormat::kUNorm16:
       return MTLVertexFormatUShortNormalized;
     case VertexAttributeFormat::kUNorm16x2:
       return MTLVertexFormatUShort2Normalized;
+    case VertexAttributeFormat::kUNorm16x3:
+      return MTLVertexFormatUShort3Normalized;
     case VertexAttributeFormat::kUNorm16x4:
       return MTLVertexFormatUShort4Normalized;
     case VertexAttributeFormat::kSInt32:

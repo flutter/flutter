@@ -50,12 +50,16 @@ vk::Format ToVertexDescriptorFormat(VertexAttributeFormat format) {
       return vk::Format::eR8Snorm;
     case VertexAttributeFormat::kSNorm8x2:
       return vk::Format::eR8G8Snorm;
+    case VertexAttributeFormat::kSNorm8x3:
+      return vk::Format::eR8G8B8Snorm;
     case VertexAttributeFormat::kSNorm8x4:
       return vk::Format::eR8G8B8A8Snorm;
     case VertexAttributeFormat::kUNorm8:
       return vk::Format::eR8Unorm;
     case VertexAttributeFormat::kUNorm8x2:
       return vk::Format::eR8G8Unorm;
+    case VertexAttributeFormat::kUNorm8x3:
+      return vk::Format::eR8G8B8Unorm;
     case VertexAttributeFormat::kUNorm8x4:
       return vk::Format::eR8G8B8A8Unorm;
     case VertexAttributeFormat::kUNorm8x4BGRA:
@@ -80,12 +84,16 @@ vk::Format ToVertexDescriptorFormat(VertexAttributeFormat format) {
       return vk::Format::eR16Snorm;
     case VertexAttributeFormat::kSNorm16x2:
       return vk::Format::eR16G16Snorm;
+    case VertexAttributeFormat::kSNorm16x3:
+      return vk::Format::eR16G16B16Snorm;
     case VertexAttributeFormat::kSNorm16x4:
       return vk::Format::eR16G16B16A16Snorm;
     case VertexAttributeFormat::kUNorm16:
       return vk::Format::eR16Unorm;
     case VertexAttributeFormat::kUNorm16x2:
       return vk::Format::eR16G16Unorm;
+    case VertexAttributeFormat::kUNorm16x3:
+      return vk::Format::eR16G16B16Unorm;
     case VertexAttributeFormat::kUNorm16x4:
       return vk::Format::eR16G16B16A16Unorm;
     case VertexAttributeFormat::kSInt32:

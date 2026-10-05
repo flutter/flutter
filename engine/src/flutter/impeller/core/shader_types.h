@@ -188,9 +188,9 @@ struct SampledImageSlot {
 ///         always sees floats, so they are requested through
 ///         `ShaderStageIOSlot::vertex_format`.
 ///
-///         Normalized and packed formats deliberately omit their 3-component
-///         variants. They have no D3D11 equivalent, so they are unavailable
-///         through ANGLE.
+///         D3D11 has no 3-component 8 or 16-bit vertex format, so ANGLE
+///         widens the `x3` formats to 4 components with a CPU copy per buffer.
+///         They work, but prefer an `x4` format for a hot attribute.
 ///
 /// TODO(https://github.com/flutter/flutter/issues/186309): Add the 64-bit
 /// float formats. They are Vulkan-only among the backends here (Metal has no
@@ -223,10 +223,12 @@ enum class VertexAttributeFormat {
 
   kSNorm8,
   kSNorm8x2,
+  kSNorm8x3,
   kSNorm8x4,
 
   kUNorm8,
   kUNorm8x2,
+  kUNorm8x3,
   kUNorm8x4,
 
   /// Four unsigned normalized bytes stored in blue, green, red, alpha order.
@@ -245,10 +247,12 @@ enum class VertexAttributeFormat {
 
   kSNorm16,
   kSNorm16x2,
+  kSNorm16x3,
   kSNorm16x4,
 
   kUNorm16,
   kUNorm16x2,
+  kUNorm16x3,
   kUNorm16x4,
 
   kSInt32,
@@ -290,16 +294,20 @@ constexpr bool IsVertexFormatReadableAs(VertexAttributeFormat format,
     case VertexAttributeFormat::kFloat16x4:
     case VertexAttributeFormat::kSNorm8:
     case VertexAttributeFormat::kSNorm8x2:
+    case VertexAttributeFormat::kSNorm8x3:
     case VertexAttributeFormat::kSNorm8x4:
     case VertexAttributeFormat::kUNorm8:
     case VertexAttributeFormat::kUNorm8x2:
+    case VertexAttributeFormat::kUNorm8x3:
     case VertexAttributeFormat::kUNorm8x4:
     case VertexAttributeFormat::kUNorm8x4BGRA:
     case VertexAttributeFormat::kSNorm16:
     case VertexAttributeFormat::kSNorm16x2:
+    case VertexAttributeFormat::kSNorm16x3:
     case VertexAttributeFormat::kSNorm16x4:
     case VertexAttributeFormat::kUNorm16:
     case VertexAttributeFormat::kUNorm16x2:
+    case VertexAttributeFormat::kUNorm16x3:
     case VertexAttributeFormat::kUNorm16x4:
     case VertexAttributeFormat::kUNormR10G10B10A2:
       format_class = ScalarClass::kFloat;

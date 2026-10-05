@@ -174,8 +174,8 @@ struct VertexAttribGLES {
 constexpr std::optional<VertexAttribGLES> ToVertexAttribGLES(
     VertexAttributeFormat format,
     const VertexFormatSupportGLES& support) {
-  auto floating = [](GLint size, GLenum type) {
-    return VertexAttribGLES{.size = size, .type = type};
+  auto floating = [](GLint size) {
+    return VertexAttribGLES{.size = size, .type = GL_FLOAT};
   };
   auto normalized = [](GLint size, GLenum type) {
     return VertexAttribGLES{.size = size, .type = type, .normalized = GL_TRUE};
@@ -196,13 +196,13 @@ constexpr std::optional<VertexAttribGLES> ToVertexAttribGLES(
 
   switch (format) {
     case VertexAttributeFormat::kFloat32:
-      return floating(1, GL_FLOAT);
+      return floating(1);
     case VertexAttributeFormat::kFloat32x2:
-      return floating(2, GL_FLOAT);
+      return floating(2);
     case VertexAttributeFormat::kFloat32x3:
-      return floating(3, GL_FLOAT);
+      return floating(3);
     case VertexAttributeFormat::kFloat32x4:
-      return floating(4, GL_FLOAT);
+      return floating(4);
 
     case VertexAttributeFormat::kFloat16:
       return half(1);
@@ -235,6 +235,8 @@ constexpr std::optional<VertexAttribGLES> ToVertexAttribGLES(
       return normalized(1, GL_BYTE);
     case VertexAttributeFormat::kSNorm8x2:
       return normalized(2, GL_BYTE);
+    case VertexAttributeFormat::kSNorm8x3:
+      return normalized(3, GL_BYTE);
     case VertexAttributeFormat::kSNorm8x4:
       return normalized(4, GL_BYTE);
 
@@ -242,6 +244,8 @@ constexpr std::optional<VertexAttribGLES> ToVertexAttribGLES(
       return normalized(1, GL_UNSIGNED_BYTE);
     case VertexAttributeFormat::kUNorm8x2:
       return normalized(2, GL_UNSIGNED_BYTE);
+    case VertexAttributeFormat::kUNorm8x3:
+      return normalized(3, GL_UNSIGNED_BYTE);
     case VertexAttributeFormat::kUNorm8x4:
       return normalized(4, GL_UNSIGNED_BYTE);
 
@@ -273,6 +277,8 @@ constexpr std::optional<VertexAttribGLES> ToVertexAttribGLES(
       return normalized(1, GL_SHORT);
     case VertexAttributeFormat::kSNorm16x2:
       return normalized(2, GL_SHORT);
+    case VertexAttributeFormat::kSNorm16x3:
+      return normalized(3, GL_SHORT);
     case VertexAttributeFormat::kSNorm16x4:
       return normalized(4, GL_SHORT);
 
@@ -280,6 +286,8 @@ constexpr std::optional<VertexAttribGLES> ToVertexAttribGLES(
       return normalized(1, GL_UNSIGNED_SHORT);
     case VertexAttributeFormat::kUNorm16x2:
       return normalized(2, GL_UNSIGNED_SHORT);
+    case VertexAttributeFormat::kUNorm16x3:
+      return normalized(3, GL_UNSIGNED_SHORT);
     case VertexAttributeFormat::kUNorm16x4:
       return normalized(4, GL_UNSIGNED_SHORT);
 

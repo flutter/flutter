@@ -54,6 +54,23 @@ TEST(BufferBindingsGLESTest, ToVertexAttribGLESNormalized) {
   EXPECT_FALSE(attrib->integer);
 }
 
+TEST(BufferBindingsGLESTest, ToVertexAttribGLESThreeComponentNormalized) {
+  // The 3-component normalized formats bind like any other normalized
+  // attribute. ANGLE widens them to 4 components on D3D11 with a CPU copy.
+  auto attrib = ToVertexAttribGLES(VertexAttributeFormat::kSNorm16x3,
+                                   kFullVertexFormatSupport);
+  ASSERT_TRUE(attrib.has_value());
+  EXPECT_EQ(attrib->size, 3);
+  EXPECT_EQ(attrib->type, static_cast<GLenum>(GL_SHORT));
+  EXPECT_EQ(attrib->normalized, GL_TRUE);
+  EXPECT_FALSE(attrib->integer);
+
+  // Available on the OpenGL ES 2.0 floor, like the other normalized formats.
+  constexpr VertexFormatSupportGLES kFloor = {};
+  EXPECT_TRUE(
+      ToVertexAttribGLES(VertexAttributeFormat::kUNorm8x3, kFloor).has_value());
+}
+
 TEST(BufferBindingsGLESTest, ToVertexAttribGLESIntegersTakeTheIPointerPath) {
   auto attrib = ToVertexAttribGLES(VertexAttributeFormat::kUInt32x2,
                                    kFullVertexFormatSupport);
