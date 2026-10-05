@@ -106,12 +106,6 @@ void main() {
     );
   });
 
-  testUsingContext('accepts --[no-]deprecated-js-interop', () {
-    expectAcceptsDeprecatedJsInteropFlag(
-      TestCommand(toolContext: toolContext, testWrapper: FakePackageTest()),
-    );
-  });
-
   testUsingContext(
     'Missing dependencies in pubspec',
     () async {

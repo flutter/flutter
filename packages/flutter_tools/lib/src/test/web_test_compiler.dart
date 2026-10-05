@@ -122,7 +122,7 @@ class WebTestCompiler {
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       dartDefines: buildInfo.dartDefines,
       targetModel: TargetModel.dartdevc,
-      extraFrontEndOptions: ddcFrontEndOptions(buildInfo),
+      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       fileSystem: fs,
       config: config,
     );
