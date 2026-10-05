@@ -15,21 +15,16 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -46,106 +41,6 @@ import '../src/throwing_pub.dart';
 import 'resident_runner_helpers.dart';
 
 FakeAnalytics get fakeAnalytics => globals.analytics as FakeAnalytics;
-
-HotRunner createHotRunner(
-  List<FlutterDevice> flutterDevices, {
-  required DebuggingOptions debuggingOptions,
-  required String target,
-  Analytics? analytics,
-  File? applicationBinary,
-  bool benchmarkMode = false,
-  BuildSystem? buildSystem,
-  BuildTargets? buildTargets,
-  FlutterHookRunner? dartBuilder,
-  String? dillOutputPath,
-  bool hostIsIde = false,
-  HotRunnerConfig? hotRunnerConfig,
-  bool machine = false,
-  String? nativeAssetsYamlFile,
-  ProjectFileInvalidator? projectFileInvalidator,
-  String? projectRootPath,
-  ReassembleHelper? reassembleHelper,
-  ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
-  bool stayResident = true,
-  StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  ToolContext toolContext = const DelegatingToolContext(),
-  Xcode? xcode,
-}) {
-  buildSystem ??= FlutterBuildSystem(
-    fileSystem: toolContext.fs,
-    logger: toolContext.logger,
-    platform: toolContext.platform,
-  );
-
-  return HotRunner(
-    flutterDevices,
-    analytics: analytics ?? const NoOpAnalytics(),
-    buildSystem: buildSystem,
-    buildTargets: buildTargets ?? const BuildTargetsImpl(),
-    debuggingOptions: debuggingOptions,
-    target: target,
-    toolContext: toolContext,
-    xcode: xcode,
-    applicationBinary: applicationBinary,
-    benchmarkMode: benchmarkMode,
-    dartBuilder: dartBuilder,
-    dillOutputPath: dillOutputPath,
-    hostIsIde: hostIsIde,
-    hotRunnerConfig: hotRunnerConfig,
-    machine: machine,
-    nativeAssetsYamlFile: nativeAssetsYamlFile,
-    projectFileInvalidator: projectFileInvalidator,
-    projectRootPath: projectRootPath,
-    reassembleHelper: reassembleHelper,
-    reloadSourcesHelper: reloadSourcesHelper,
-    stayResident: stayResident,
-    stopwatchFactory: stopwatchFactory,
-  );
-}
-
-ColdRunner createColdRunner(
-  List<FlutterDevice> flutterDevices, {
-  required DebuggingOptions debuggingOptions,
-  required String target,
-  Analytics? analytics,
-  File? applicationBinary,
-  bool awaitFirstFrameWhenTracing = true,
-  BuildSystem? buildSystem,
-  BuildTargets? buildTargets,
-  FlutterHookRunner? dartBuilder,
-  String? dillOutputPath,
-  bool machine = false,
-  String? projectRootPath,
-  bool stayResident = true,
-  ToolContext toolContext = const DelegatingToolContext(),
-  bool traceStartup = false,
-  Xcode? xcode,
-}) {
-  return ColdRunner(
-    flutterDevices,
-    analytics: analytics ?? const NoOpAnalytics(),
-    buildSystem:
-        buildSystem ??
-        FlutterBuildSystem(
-          fileSystem: toolContext.fs,
-          logger: toolContext.logger,
-          platform: toolContext.platform,
-        ),
-    buildTargets: buildTargets ?? const BuildTargetsImpl(),
-    debuggingOptions: debuggingOptions,
-    target: target,
-    toolContext: toolContext,
-    xcode: xcode,
-    applicationBinary: applicationBinary,
-    awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
-    dartBuilder: dartBuilder,
-    dillOutputPath: dillOutputPath,
-    machine: machine,
-    projectRootPath: projectRootPath,
-    stayResident: stayResident,
-    traceStartup: traceStartup,
-  );
-}
 
 void main() {
   late TestBed testbed;
@@ -736,6 +631,7 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           target: 'main.dart',
           analytics: fakeAnalytics,
+          projectFileInvalidator: FakeProjectFileInvalidator(),
         );
         devFS.nextUpdateReport = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
 
@@ -765,7 +661,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(),
-        ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
       },
     ),
   );

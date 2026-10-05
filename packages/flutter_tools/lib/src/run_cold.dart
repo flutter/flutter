@@ -26,9 +26,7 @@ class ColdRunner extends ResidentRunner {
     this.applicationBinary,
     this.awaitFirstFrameWhenTracing = true,
     super.dartBuilder,
-    super.dillOutputPath,
     super.machine,
-    super.projectRootPath,
     super.stayResident,
     this.traceStartup = false,
   }) : super(hotMode: false);

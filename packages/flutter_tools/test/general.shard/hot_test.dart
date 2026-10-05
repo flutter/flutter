@@ -6,18 +6,11 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/build_targets.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/hook_runner.dart';
-import 'package:flutter_tools/src/isolated/build_targets.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -30,87 +23,7 @@ import '../src/fakes.dart';
 import '../src/package_config.dart';
 import '../src/throwing_pub.dart';
 import 'hot_shared.dart';
-
-HotRunner createHotRunner(
-  List<FlutterDevice> flutterDevices, {
-  required DebuggingOptions debuggingOptions,
-  required String target,
-  Analytics? analytics,
-  File? applicationBinary,
-  bool benchmarkMode = false,
-  BuildSystem? buildSystem,
-  BuildTargets? buildTargets,
-  FlutterHookRunner? dartBuilder,
-  String? dillOutputPath,
-  bool hostIsIde = false,
-  HotRunnerConfig? hotRunnerConfig,
-  bool machine = false,
-  String? nativeAssetsYamlFile,
-  ProjectFileInvalidator? projectFileInvalidator,
-  String? projectRootPath,
-  ReassembleHelper? reassembleHelper,
-  ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
-  bool stayResident = true,
-  StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  ToolContext toolContext = const DelegatingToolContext(),
-  Xcode? xcode,
-}) {
-  buildSystem ??= FlutterBuildSystem(
-    fileSystem: toolContext.fs,
-    logger: toolContext.logger,
-    platform: toolContext.platform,
-  );
-
-  if (reassembleHelper != null) {
-    return HotRunner(
-      flutterDevices,
-      analytics: analytics ?? const NoOpAnalytics(),
-      buildSystem: buildSystem,
-      buildTargets: buildTargets ?? const BuildTargetsImpl(),
-      debuggingOptions: debuggingOptions,
-      target: target,
-      toolContext: toolContext,
-      xcode: xcode,
-      applicationBinary: applicationBinary,
-      benchmarkMode: benchmarkMode,
-      dartBuilder: dartBuilder,
-      dillOutputPath: dillOutputPath,
-      hostIsIde: hostIsIde,
-      hotRunnerConfig: hotRunnerConfig,
-      machine: machine,
-      nativeAssetsYamlFile: nativeAssetsYamlFile,
-      projectFileInvalidator: projectFileInvalidator,
-      projectRootPath: projectRootPath,
-      reassembleHelper: reassembleHelper,
-      reloadSourcesHelper: reloadSourcesHelper,
-      stayResident: stayResident,
-      stopwatchFactory: stopwatchFactory,
-    );
-  }
-  return HotRunner(
-    flutterDevices,
-    analytics: analytics ?? const NoOpAnalytics(),
-    buildSystem: buildSystem,
-    buildTargets: buildTargets ?? const BuildTargetsImpl(),
-    debuggingOptions: debuggingOptions,
-    target: target,
-    toolContext: toolContext,
-    xcode: xcode,
-    applicationBinary: applicationBinary,
-    benchmarkMode: benchmarkMode,
-    dartBuilder: dartBuilder,
-    dillOutputPath: dillOutputPath,
-    hostIsIde: hostIsIde,
-    hotRunnerConfig: hotRunnerConfig,
-    machine: machine,
-    nativeAssetsYamlFile: nativeAssetsYamlFile,
-    projectFileInvalidator: projectFileInvalidator,
-    projectRootPath: projectRootPath,
-    reloadSourcesHelper: reloadSourcesHelper,
-    stayResident: stayResident,
-    stopwatchFactory: stopwatchFactory,
-  );
-}
+import 'resident_runner_helpers.dart' show createHotRunner;
 
 void main() {
   group('validateReloadReport', () {
