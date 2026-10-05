@@ -1733,12 +1733,13 @@ class _NestedBallisticGroup {
           // determines which body's velocity starts the header. For equal
           // times use the greater speed, independently of attachment order.
           _leader = _simulations.values.reduce((a, b) {
-            final ({double time, double velocity}) left = a._bodyArrival!;
-            final ({double time, double velocity}) right = b._bodyArrival!;
-            if (left.time != right.time) {
-              return left.time > right.time ? a : b;
-            }
-            return left.velocity.abs() >= right.velocity.abs() ? a : b;
+            final (time: double leftTime, velocity: double leftVelocity) = a._bodyArrival!;
+            final (time: double rightTime, velocity: double rightVelocity) = b._bodyArrival!;
+            return switch (leftTime.compareTo(rightTime)) {
+              > 0 => a,
+              < 0 => b,
+              _ => leftVelocity.abs() >= rightVelocity.abs() ? a : b,
+            };
           });
           final ({double time, double velocity}) arrival = _leader!._bodyArrival!;
           // Detaching an unfinished body can release bodies that arrived in
@@ -1774,6 +1775,9 @@ class _NestedBallisticGroup {
       _waiting &&
       _simulations.values.every((simulation) => simulation._waitingForOuter || simulation._done);
 
+  // Bodies share the leader's velocity only while the header is moving.
+  bool get _movingHeader => !_independent && !_waiting && !_released;
+
   double offset(_NestedScrollPosition position) {
     if (position == outer) {
       if (_simulations.isEmpty) {
@@ -1786,11 +1790,11 @@ class _NestedBallisticGroup {
       return _leader == null ? outer.pixels : _leader!.outerOffset(_leader!._pixels);
     }
     final _NestedCoordinatedSimulation simulation = _simulations[position]!;
-    return _independent || _waiting || _released || simulation == _leader
-        ? simulation.innerOffset(simulation._pixels)
-        : simulation._waitingForOuter
-        ? position.minScrollExtent
-        : simulation.innerStart;
+    return switch ((_movingHeader, simulation == _leader, simulation._waitingForOuter)) {
+      (false, _, _) || (_, true, _) => simulation.innerOffset(simulation._pixels),
+      (_, _, true) => position.minScrollExtent,
+      _ => simulation.innerStart,
+    };
   }
 
   double velocity(_NestedScrollPosition position) {
@@ -1801,7 +1805,7 @@ class _NestedBallisticGroup {
       return _waiting || _independent || _leader!.outerFinished ? 0.0 : _leader!._velocity;
     }
     final _NestedCoordinatedSimulation simulation = _simulations[position]!;
-    if (!_independent && !_released && !_waiting) {
+    if (_movingHeader) {
       return _leader!._velocity;
     }
     // As in the existing nested activities, a parked body still reports the
@@ -1819,9 +1823,12 @@ class _NestedBallisticGroup {
           (!_waiting && (_leader!._done || _leader!.outerFinished));
     }
     final _NestedCoordinatedSimulation simulation = _simulations[position]!;
-    return _stoppedShort ||
-        (!_waiting && !_released && !_independent && _leader!._done) ||
-        ((_independent || _released) && simulation._done);
+    return switch ((_stoppedShort, _movingHeader, _independent || _released)) {
+      (true, _, _) => true,
+      (_, true, _) => _leader!._done,
+      (_, _, true) => simulation._done,
+      _ => false,
+    };
   }
 }
 
@@ -2202,11 +2209,18 @@ class _NestedCoordinatedSimulation extends Simulation {
     return (time: _segmentEpoch + elapsed, velocity: probe().dx(elapsed));
   }
 
-  double outerOffset(double pixels) => _independentOuter
-      ? clampDouble(pixels, outerMetrics.minScrollExtent, outerMetrics.maxScrollExtent)
-      : direction > 0.0
-      ? clampDouble(outerStart + pixels - initialPixels, outerStart, outerMetrics.maxScrollExtent)
-      : clampDouble(pixels, outerMetrics.minScrollExtent, outerStart);
+  double outerOffset(double pixels) {
+    final (double target, double min, double max) = switch ((_independentOuter, direction > 0.0)) {
+      (true, _) => (pixels, outerMetrics.minScrollExtent, outerMetrics.maxScrollExtent),
+      (false, true) => (
+        outerStart + pixels - initialPixels,
+        outerStart,
+        outerMetrics.maxScrollExtent,
+      ),
+      (false, false) => (pixels, outerMetrics.minScrollExtent, outerStart),
+    };
+    return clampDouble(target, min, max);
+  }
 
   double innerOffset(double pixels) {
     if (direction > 0.0) {
