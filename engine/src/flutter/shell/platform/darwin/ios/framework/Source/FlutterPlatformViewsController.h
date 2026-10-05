@@ -41,6 +41,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// @brief The flutter view controller.
 @property(nonatomic, weak) UIViewController<FlutterViewResponder>* _Nullable flutterViewController;
 
+/// Called from main thread when a frame has been submitted.
+@property(readwrite, nonatomic) void (^onFrameSubmitted)(void);
+
 /// @brief set the factory used to construct embedded UI Views.
 - (void)registerViewFactory:(NSObject<FlutterPlatformViewFactory>*)factory
                               withId:(NSString*)factoryId
