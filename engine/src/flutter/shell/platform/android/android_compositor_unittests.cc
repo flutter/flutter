@@ -105,19 +105,32 @@ TEST(AndroidCompositorTest, CreateAndCollectSoftwareBackingStore) {
   ASSERT_NE(surface_manager, nullptr);
   auto compositor = std::make_unique<AndroidCompositor>(surface_manager);
 
+  // 100x200 test backing store dimensions; 4 bytes per pixel for default
+  // RGBA_8888 software format.
+  constexpr double kWidth = 100.0;
+  constexpr double kHeight = 200.0;
+  constexpr size_t kWidthPx = 100u;
+  constexpr size_t kHeightPx = 200u;
+  constexpr size_t kRgba8888BytesPerPixel = 4u;
+
   FlutterBackingStoreConfig config = {};
   config.struct_size = sizeof(FlutterBackingStoreConfig);
-  config.size = FlutterSize{100.0, 200.0};
+  config.size = FlutterSize{kWidth, kHeight};
   config.view_id = 0;
 
   FlutterBackingStore backing_store = {};
   EXPECT_TRUE(compositor->CreateBackingStore(&config, &backing_store));
   EXPECT_EQ(backing_store.struct_size, sizeof(FlutterBackingStore));
-  EXPECT_EQ(backing_store.type, kFlutterBackingStoreTypeSoftware);
-  ASSERT_NE(backing_store.software.allocation, nullptr);
-  EXPECT_EQ(backing_store.software.row_bytes, 100u * 4);
-  EXPECT_EQ(backing_store.software.height, 200u);
-  EXPECT_EQ(backing_store.software.destruction_callback, nullptr);
+  EXPECT_EQ(backing_store.type, kFlutterBackingStoreTypeSoftware2);
+  EXPECT_EQ(backing_store.software2.struct_size,
+            sizeof(FlutterSoftwareBackingStore2));
+  ASSERT_NE(backing_store.software2.allocation, nullptr);
+  EXPECT_EQ(backing_store.software2.row_bytes,
+            kWidthPx * kRgba8888BytesPerPixel);
+  EXPECT_EQ(backing_store.software2.height, kHeightPx);
+  EXPECT_EQ(backing_store.software2.destruction_callback, nullptr);
+  EXPECT_EQ(backing_store.software2.pixel_format,
+            kFlutterSoftwarePixelFormatRGBA8888);
 
   // Invalid config checks
   FlutterBackingStore bad_backing_store = {};
@@ -131,6 +144,68 @@ TEST(AndroidCompositorTest, CreateAndCollectSoftwareBackingStore) {
 
   EXPECT_TRUE(compositor->CollectBackingStore(&backing_store));
   EXPECT_FALSE(compositor->CollectBackingStore(nullptr));
+}
+
+TEST(AndroidCompositorTest,
+     CreatePresentAndCollectSoftwareRgb565AndOverlayBackingStores) {
+  std::shared_ptr<AndroidSurfaceManager> surface_manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kSoftware);
+  ASSERT_NE(surface_manager, nullptr);
+  EXPECT_TRUE(
+      surface_manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+  surface_manager->SetSoftwarePixelFormatForTesting(
+      kFlutterSoftwarePixelFormatRGB565);
+
+  auto compositor = std::make_unique<AndroidCompositor>(surface_manager);
+
+  // 128x139 test dimensions matching upi_lite_low_balance_0.png golden;
+  // 2 bytes per pixel for RGB_565 root surface and 4 bytes per pixel for
+  // translucent RGBA_8888 overlay surface.
+  constexpr double kWidth = 128.0;
+  constexpr double kHeight = 139.0;
+  constexpr size_t kWidthPx = 128u;
+  constexpr size_t kHeightPx = 139u;
+  constexpr size_t kRgb565BytesPerPixel = 2u;
+  constexpr size_t kRgba8888BytesPerPixel = 4u;
+
+  FlutterBackingStoreConfig root_config = {};
+  root_config.struct_size = sizeof(FlutterBackingStoreConfig);
+  root_config.size = FlutterSize{kWidth, kHeight};
+  root_config.view_id = 0;
+  root_config.is_overlay = false;
+
+  FlutterBackingStore root_bs = {};
+  ASSERT_TRUE(compositor->CreateBackingStore(&root_config, &root_bs));
+  EXPECT_EQ(root_bs.type, kFlutterBackingStoreTypeSoftware2);
+  ASSERT_NE(root_bs.software2.allocation, nullptr);
+  EXPECT_EQ(root_bs.software2.row_bytes, kWidthPx * kRgb565BytesPerPixel);
+  EXPECT_EQ(root_bs.software2.height, kHeightPx);
+  EXPECT_EQ(root_bs.software2.pixel_format, kFlutterSoftwarePixelFormatRGB565);
+
+  FlutterBackingStoreConfig overlay_config = root_config;
+  overlay_config.is_overlay = true;
+
+  FlutterBackingStore overlay_bs = {};
+  ASSERT_TRUE(compositor->CreateBackingStore(&overlay_config, &overlay_bs));
+  EXPECT_EQ(overlay_bs.type, kFlutterBackingStoreTypeSoftware2);
+  ASSERT_NE(overlay_bs.software2.allocation, nullptr);
+  EXPECT_EQ(overlay_bs.software2.row_bytes, kWidthPx * kRgba8888BytesPerPixel);
+  EXPECT_EQ(overlay_bs.software2.height, kHeightPx);
+  EXPECT_EQ(overlay_bs.software2.pixel_format,
+            kFlutterSoftwarePixelFormatRGBA8888);
+
+  FlutterLayer root_layer = {};
+  root_layer.struct_size = sizeof(FlutterLayer);
+  root_layer.type = kFlutterLayerContentTypeBackingStore;
+  root_layer.backing_store = &root_bs;
+  root_layer.size = FlutterSize{kWidth, kHeight};
+  const FlutterLayer* layers[] = {&root_layer};
+
+  EXPECT_TRUE(compositor->PresentLayers(layers, 1));
+  EXPECT_EQ(compositor->GetPresentedFrameCount(), 1u);
+
+  EXPECT_TRUE(compositor->CollectBackingStore(&root_bs));
+  EXPECT_TRUE(compositor->CollectBackingStore(&overlay_bs));
 }
 
 TEST(AndroidCompositorTest, CreateAndCollectGLBackingStore) {

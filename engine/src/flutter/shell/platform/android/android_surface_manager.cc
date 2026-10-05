@@ -229,13 +229,22 @@ bool AndroidSurfaceManager::SetNativeWindow(ANativeWindow* window,
 
   native_window_ = window;
   is_fake_window_ = is_fake_window;
+  software_pixel_format_ = kFlutterSoftwarePixelFormatRGBA8888;
 
 #if FML_OS_ANDROID
   if (native_window_ != nullptr && !is_fake_window_) {
     ANativeWindow_acquire(native_window_);
     if (rendering_api_ == AndroidRenderingAPI::kSoftware) {
-      ANativeWindow_setBuffersGeometry(native_window_, 0, 0,
-                                       WINDOW_FORMAT_RGBA_8888);
+      int32_t window_format = ANativeWindow_getFormat(native_window_);
+      if (window_format == WINDOW_FORMAT_RGB_565) {
+        software_pixel_format_ = kFlutterSoftwarePixelFormatRGB565;
+      } else {
+        software_pixel_format_ = kFlutterSoftwarePixelFormatRGBA8888;
+        if (window_format != WINDOW_FORMAT_RGBA_8888) {
+          ANativeWindow_setBuffersGeometry(native_window_, 0, 0,
+                                           WINDOW_FORMAT_RGBA_8888);
+        }
+      }
     } else if (IsVulkanInitialized()) {
       // Vulkan manages swapchain buffer geometry and formats exclusively via
       // VkSwapchainCreateInfoKHR. Calling ANativeWindow_setBuffersGeometry on
@@ -281,6 +290,7 @@ void AndroidSurfaceManager::ClearNativeWindow() {
 
   native_window_ = nullptr;
   is_fake_window_ = false;
+  software_pixel_format_ = kFlutterSoftwarePixelFormatRGBA8888;
 }
 
 bool AndroidSurfaceManager::InitializeEGL() {
@@ -629,9 +639,120 @@ EGLContext AndroidSurfaceManager::GetResourceContext() const {
   return egl_resource_context_;
 }
 
+FlutterSoftwarePixelFormat AndroidSurfaceManager::GetSoftwarePixelFormat()
+    const {
+  std::lock_guard<std::mutex> lock(window_mutex_);
+  return software_pixel_format_;
+}
+
+void AndroidSurfaceManager::SetSoftwarePixelFormatForTesting(
+    FlutterSoftwarePixelFormat format) {
+  std::lock_guard<std::mutex> lock(window_mutex_);
+  software_pixel_format_ = format;
+}
+
+bool AndroidSurfaceManager::CopySoftwarePixelsToWindowBuffer(
+    void* dst_bits,
+    int32_t dst_width,
+    int32_t dst_height,
+    int32_t dst_stride,
+    int32_t dst_format,
+    const void* src_allocation,
+    size_t src_row_bytes,
+    size_t src_height) {
+  if (dst_bits == nullptr || src_allocation == nullptr || dst_width <= 0 ||
+      dst_height <= 0 || dst_stride < dst_width) {
+    return false;
+  }
+
+  // 4 is Android's AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM / WINDOW_FORMAT_RGB_565.
+  constexpr int32_t kWindowFormatRgb565 = 4;
+  // 16-bit RGB_565 uses 2 bytes per pixel.
+  constexpr size_t kRgb565BytesPerPixel = 2;
+  // 32-bit RGBA_8888 uses 4 bytes per pixel.
+  constexpr size_t kRgba8888BytesPerPixel = 4;
+  // Maximum 5-bit unsigned integer value (2^5 - 1 = 31) for Red and Blue in
+  // RGB_565.
+  constexpr uint32_t kRgb565Max5Bit = 31;
+  // Maximum 6-bit unsigned integer value (2^6 - 1 = 63) for Green in RGB_565.
+  constexpr uint32_t kRgb565Max6Bit = 63;
+  // Maximum 8-bit unsigned integer value (2^8 - 1 = 255) for RGBA_8888
+  // channels.
+  constexpr uint32_t kRgba8888ChannelMax = 255;
+  // Half-divisor (255 / 2 = 127) for rounded integer division by 255.
+  constexpr uint32_t kRgba8888RoundingBias = 127;
+  // Bit offset of the 5-bit Red field in a 16-bit RGB_565 pixel (bits 11..15).
+  constexpr uint32_t kRgb565RedShift = 11;
+  // Bit offset of the 6-bit Green field in a 16-bit RGB_565 pixel (bits 5..10).
+  constexpr uint32_t kRgb565GreenShift = 5;
+  // Byte index of the Red channel in an RGBA_8888 pixel.
+  constexpr size_t kRgbaRedIndex = 0;
+  // Byte index of the Green channel in an RGBA_8888 pixel.
+  constexpr size_t kRgbaGreenIndex = 1;
+  // Byte index of the Blue channel in an RGBA_8888 pixel.
+  constexpr size_t kRgbaBlueIndex = 2;
+
+  const uint8_t* src = static_cast<const uint8_t*>(src_allocation);
+  uint8_t* dst = static_cast<uint8_t*>(dst_bits);
+  size_t copy_rows = std::min(src_height, static_cast<size_t>(dst_height));
+
+  if (dst_format == kWindowFormatRgb565) {
+    size_t dst_row_bytes =
+        static_cast<size_t>(dst_stride) * kRgb565BytesPerPixel;
+    size_t width_rgb565_bytes =
+        static_cast<size_t>(dst_width) * kRgb565BytesPerPixel;
+    size_t width_rgba8888_bytes =
+        static_cast<size_t>(dst_width) * kRgba8888BytesPerPixel;
+
+    if (src_row_bytes >= width_rgba8888_bytes &&
+        src_row_bytes != width_rgb565_bytes) {
+      size_t width = static_cast<size_t>(dst_width);
+      for (size_t y = 0; y < copy_rows; ++y) {
+        const uint8_t* src_row = src + y * src_row_bytes;
+        uint16_t* dst_row =
+            reinterpret_cast<uint16_t*>(dst + y * dst_row_bytes);
+        for (size_t x = 0; x < width; ++x) {
+          uint32_t r = src_row[x * kRgba8888BytesPerPixel + kRgbaRedIndex];
+          uint32_t g = src_row[x * kRgba8888BytesPerPixel + kRgbaGreenIndex];
+          uint32_t b = src_row[x * kRgba8888BytesPerPixel + kRgbaBlueIndex];
+          uint32_t r5 = (r * kRgb565Max5Bit + kRgba8888RoundingBias) /
+                        kRgba8888ChannelMax;
+          uint32_t g6 = (g * kRgb565Max6Bit + kRgba8888RoundingBias) /
+                        kRgba8888ChannelMax;
+          uint32_t b5 = (b * kRgb565Max5Bit + kRgba8888RoundingBias) /
+                        kRgba8888ChannelMax;
+          dst_row[x] = static_cast<uint16_t>((r5 << kRgb565RedShift) |
+                                             (g6 << kRgb565GreenShift) | b5);
+        }
+      }
+    } else {
+      size_t copy_bytes_per_row = std::min(src_row_bytes, width_rgb565_bytes);
+      for (size_t y = 0; y < copy_rows; ++y) {
+        std::memcpy(dst + y * dst_row_bytes, src + y * src_row_bytes,
+                    copy_bytes_per_row);
+      }
+    }
+    return true;
+  }
+
+  size_t dst_row_bytes =
+      static_cast<size_t>(dst_stride) * kRgba8888BytesPerPixel;
+  size_t width_rgba8888_bytes =
+      static_cast<size_t>(dst_width) * kRgba8888BytesPerPixel;
+  size_t copy_bytes_per_row = std::min(src_row_bytes, width_rgba8888_bytes);
+  for (size_t y = 0; y < copy_rows; ++y) {
+    std::memcpy(dst + y * dst_row_bytes, src + y * src_row_bytes,
+                copy_bytes_per_row);
+  }
+  return true;
+}
+
 bool AndroidSurfaceManager::PresentSoftware(const void* allocation,
                                             size_t row_bytes,
                                             size_t height) {
+  if (allocation == nullptr) {
+    return false;
+  }
   std::lock_guard<std::mutex> lock(window_mutex_);
   if (is_fake_window_) {
     return true;
@@ -645,23 +766,12 @@ bool AndroidSurfaceManager::PresentSoftware(const void* allocation,
     return false;
   }
 
-  if (buffer.bits == nullptr || buffer.stride <= 0 || buffer.height <= 0) {
-    ANativeWindow_unlockAndPost(native_window_);
-    return false;
-  }
+  bool copied = CopySoftwarePixelsToWindowBuffer(
+      buffer.bits, buffer.width, buffer.height, buffer.stride, buffer.format,
+      allocation, row_bytes, height);
 
-  const uint8_t* src = static_cast<const uint8_t*>(allocation);
-  uint8_t* dst = static_cast<uint8_t*>(buffer.bits);
-  size_t copy_bytes_per_row =
-      std::min(row_bytes, static_cast<size_t>(buffer.stride * 4));
-  size_t copy_rows = std::min(height, static_cast<size_t>(buffer.height));
-
-  for (size_t y = 0; y < copy_rows; ++y) {
-    std::memcpy(dst + y * buffer.stride * 4, src + y * row_bytes,
-                copy_bytes_per_row);
-  }
-
-  return ANativeWindow_unlockAndPost(native_window_) == 0;
+  bool unlocked = (ANativeWindow_unlockAndPost(native_window_) == 0);
+  return copied && unlocked;
 #else
   return true;
 #endif

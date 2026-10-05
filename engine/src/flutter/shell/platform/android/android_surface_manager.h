@@ -202,6 +202,25 @@ class AndroidSurfaceManager {
   // Software Surface Lifecycle Methods
   // ---------------------------------------------------------------------------
 
+  /// Returns the active software pixel format for the attached native window
+  /// (kFlutterSoftwarePixelFormatRGB565 for WINDOW_FORMAT_RGB_565 surfaces,
+  /// or kFlutterSoftwarePixelFormatRGBA8888 otherwise). Thread-safe.
+  FlutterSoftwarePixelFormat GetSoftwarePixelFormat() const;
+
+  /// Overrides the active software pixel format for unit testing. Thread-safe.
+  void SetSoftwarePixelFormatForTesting(FlutterSoftwarePixelFormat format);
+
+  /// Copies or converts a software-rendered pixel buffer into a locked
+  /// native window buffer. Exposed for deterministic host unit testing.
+  static bool CopySoftwarePixelsToWindowBuffer(void* dst_bits,
+                                               int32_t dst_width,
+                                               int32_t dst_height,
+                                               int32_t dst_stride,
+                                               int32_t dst_format,
+                                               const void* src_allocation,
+                                               size_t src_row_bytes,
+                                               size_t src_height);
+
   /// Presents a software-rendered pixel buffer to the native window.
   bool PresentSoftware(const void* allocation, size_t row_bytes, size_t height);
 
@@ -432,7 +451,7 @@ class AndroidSurfaceManager {
   std::unordered_map<ANativeWindow*, VulkanOverlaySurface>
       overlay_vulkan_surfaces_;
 
-  // 4-byte aligned members (40 bytes total: 10 * 4 bytes, aligned to 8)
+  // 4-byte aligned members
   AndroidRenderingAPI rendering_api_;
   uint32_t vk_version_ = VK_API_VERSION_1_1;
   uint32_t vk_graphics_queue_family_index_ = 0;
@@ -442,8 +461,10 @@ class AndroidSurfaceManager {
   VkExtent2D vk_swapchain_extent_ = {0, 0};
   VkSurfaceTransformFlagBitsKHR vk_surface_transform_ =
       VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+  FlutterSoftwarePixelFormat software_pixel_format_ =
+      kFlutterSoftwarePixelFormatRGBA8888;
 
-  // 1-byte aligned booleans (8 bytes total: 40 + 8 = 48, aligned to 8)
+  // 1-byte aligned booleans
   bool is_fake_window_ = false;
   bool is_valid_ = false;
   bool has_surfaceless_context_ = false;
