@@ -6327,6 +6327,12 @@ class InheritedElement extends ProxyElement {
   /// so that they can selectively rebuild dependents in [notifyDependent].
   ///
   /// This method is typically only called in overrides of [updateDependencies].
+  /// For example, [InheritedModelElement.updateDependencies] calls this method
+  /// to register the initial dependency value for a [dependent], or to replace
+  /// it with an unconditional dependency, and otherwise mutates the existing
+  /// [Set] returned by [getDependencies] in-place without calling this method
+  /// again if the same [dependent] has already been registered by a previous
+  /// call to [updateDependencies].
   ///
   /// See also:
   ///
@@ -7137,7 +7143,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   void update(SingleChildRenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _child = updateChild(_child, (widget as SingleChildRenderObjectWidget).child, null);
+    _child = updateChild(_child, newWidget.child, null);
   }
 
   @override
@@ -7307,12 +7313,11 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   void update(MultiChildRenderObjectWidget newWidget) {
     super.update(newWidget);
-    final multiChildRenderObjectWidget = widget as MultiChildRenderObjectWidget;
     assert(widget == newWidget);
-    assert(!debugChildrenHaveDuplicateKeys(widget, multiChildRenderObjectWidget.children));
+    assert(!debugChildrenHaveDuplicateKeys(widget, newWidget.children));
     _children = updateChildren(
       _children,
-      multiChildRenderObjectWidget.children,
+      newWidget.children,
       forgottenChildren: _forgottenChildren,
     );
     _forgottenChildren.clear();
