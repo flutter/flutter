@@ -15,8 +15,10 @@ import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/emulator.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -332,10 +334,10 @@ void verifyOptions(String? command, Iterable<Option> options) {
           '$_header$target--${option.name}" is not a valid name for a command line argument. (We use "--foo-url", not "--foo-uri", for example.)',
     );
 
-    // Deprecated options and flags should be hidden but still have help text.
-    const deprecatedOptions = <String>['pwa-strategy'];
-    final bool isOptionDeprecated = deprecatedOptions.contains(option.name);
-    if (!isOptionDeprecated) {
+    // Fully hidden options and flags should still have help text.
+    const hiddenOptions = <String>['pwa-strategy'];
+    final bool isHiddenOption = hiddenOptions.contains(option.name);
+    if (!isHiddenOption) {
       expect(
         option.hide,
         isFalse,
@@ -347,7 +349,7 @@ void verifyOptions(String? command, Iterable<Option> options) {
         option.hide,
         isTrue,
         reason:
-            '${_header}Deprecated option "--${option.name}" for "flutter $command" should be hidden. $_needHelp',
+            '${_header}Hidden option "--${option.name}" for "flutter $command" should be hidden. $_needHelp',
       );
     }
 
@@ -500,8 +502,10 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
     CrashReporter? crashReporter,
+    DeviceManager? deviceManager,
     Doctor? doctor,
     EmulatorManager? emulatorManager,
+    this.extensionManager,
     FeatureFlags? featureFlags,
     ToolContext? toolContext,
   }) : analytics = analytics ?? FakeAnalytics(),
@@ -510,6 +514,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        buildSystem = buildSystem ?? FakeBuildSystem(),
        buildTargets = buildTargets ?? FakeBuildTargets(),
        crashReporter = crashReporter ?? FakeCrashReporter(),
+       deviceManager = deviceManager ?? FakeDeviceManager(),
        doctor = doctor ?? FakeDoctor(),
        emulatorManager = emulatorManager ?? FakeEmulatorManager(),
        featureFlags = featureFlags ?? TestFeatureFlags(),
@@ -534,10 +539,16 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final CrashReporter crashReporter;
 
   @override
+  final DeviceManager deviceManager;
+
+  @override
   final Doctor doctor;
 
   @override
   final EmulatorManager emulatorManager;
+
+  @override
+  final ExtensionManager? extensionManager;
 
   @override
   final FeatureFlags featureFlags;

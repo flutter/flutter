@@ -7,8 +7,11 @@ import 'dart:convert';
 
 import 'package:dtd/dtd.dart';
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
+import 'package:flutter_tools/src/dart/analysis.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:process/process.dart';
@@ -46,6 +49,25 @@ Future<Stream<String>> startWidgetPreview({
   Uri? devToolsServerAddress,
   ProcessManager processManager = _processManager, // Allow overriding for testing if needed
 }) async {
+  if (dtdUri != null) {
+    final analysisServer = AnalysisServer(
+      globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
+      <String>[tempDir.path],
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: processManager,
+      terminal: globals.terminal,
+      suppressAnalytics: true,
+    );
+    addTearDown(() async {
+      await analysisServer.dispose();
+      await analysisServer.onExit;
+    });
+    await analysisServer.start();
+    await analysisServer.connectToDtd(dtdUri: dtdUri);
+  }
+
   final Process process = await processManager.start(<String>[
     flutterBin,
     'widget-preview',
