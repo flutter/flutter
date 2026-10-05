@@ -346,7 +346,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: _java?.environment,
+        environment: _java?.gradleEnvironment,
         mapFunction: consumeLog,
       );
     } on ProcessException catch (exception) {
@@ -941,7 +941,7 @@ To fix this, you can either:
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: _java?.environment,
+        environment: _java?.gradleEnvironment,
       );
     } finally {
       status.stop();

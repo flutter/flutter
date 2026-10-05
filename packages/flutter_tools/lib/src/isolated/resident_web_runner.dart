@@ -18,6 +18,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
+import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -442,7 +443,8 @@ class ResidentWebRunner extends ResidentRunner {
       return OperationResult(1, 'A restart is already in progress.');
     }
     _isRestarting = true;
-    final DateTime start = toolContext.systemClock.now();
+    final SystemClock systemClock = toolContext.systemClock;
+    final DateTime start = systemClock.now();
     final Status status;
     if (debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
         !debuggingOptions.buildInfo.canaryFeatures) {
@@ -554,7 +556,7 @@ class ResidentWebRunner extends ResidentRunner {
               rethrow;
             }
           } else {
-            final DateTime reloadStart = toolContext.systemClock.now();
+            final DateTime reloadStart = systemClock.now();
             final vmservice.VM vm = await _vmService.service.getVM();
             final String hotReloadMethod =
                 _registeredMethodsForService['reloadSources'] ?? 'reloadSources';
@@ -579,7 +581,7 @@ class ResidentWebRunner extends ResidentRunner {
               rethrow;
             }
 
-            reloadDuration = toolContext.systemClock.now().difference(reloadStart);
+            reloadDuration = systemClock.now().difference(reloadStart);
             final contents = ReloadReportContents.fromReloadReport(report);
             final bool success = contents.success ?? false;
             if (!success) {
@@ -597,7 +599,7 @@ class ResidentWebRunner extends ResidentRunner {
             }
             await evictDirtyAssets();
             String? failedReassemble;
-            final DateTime reassembleStart = toolContext.systemClock.now();
+            final DateTime reassembleStart = systemClock.now();
             await _vmService
                 .flutterReassemble(isolateId: null)
                 .then(
@@ -607,7 +609,7 @@ class ResidentWebRunner extends ResidentRunner {
                     logger.printError(failedReassemble!);
                   },
                 );
-            reassembleDuration = toolContext.systemClock.now().difference(reassembleStart);
+            reassembleDuration = systemClock.now().difference(reassembleStart);
             if (failedReassemble != null) {
               return OperationResult(1, failedReassemble!);
             }
@@ -627,7 +629,7 @@ class ResidentWebRunner extends ResidentRunner {
       status.stop();
     }
 
-    final Duration elapsed = toolContext.systemClock.now().difference(start);
+    final Duration elapsed = systemClock.now().difference(start);
     final String elapsedMS = getElapsedAsMilliseconds(elapsed);
     logger.printStatus('${fullRestart ? 'Restarted' : 'Reloaded'} application in $elapsedMS.');
 
