@@ -1400,6 +1400,57 @@ name: my_app
   );
 
   testUsingContext(
+    'Does not allow concurrent restarts',
+    () async {
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        systemClock: SystemClock.fixed(DateTime(2001)),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ...kAttachExpectations,
+          const FakeVmServiceRequest(method: 'hotRestart'),
+        ],
+      );
+      flutterDevice.device = WebServerDevice(logger: logger);
+      webDevFS.report = UpdateFSReport(success: true);
+
+      final appStartedCompleter = Completer<void>();
+      unawaited(residentWebRunner.run(appStartedCompleter: appStartedCompleter));
+
+      await appStartedCompleter.future;
+
+      final Future<OperationResult> firstRestart = residentWebRunner.restart(fullRestart: true);
+      final OperationResult secondRestart = await residentWebRunner.restart(fullRestart: true);
+
+      expect(secondRestart.code, 1);
+      expect(secondRestart.message, 'A restart is already in progress.');
+
+      final OperationResult firstResult = await firstRestart;
+      expect(firstResult.code, 0);
+
+      // Verify that a failed recompile resets `_isRestarting` so subsequent
+      // restarts can proceed.
+      webDevFS.report = UpdateFSReport();
+      final OperationResult failedResult = await residentWebRunner.restart(fullRestart: true);
+      expect(failedResult.code, 1);
+      expect(failedResult.message, 'Failed to recompile application.');
+
+      webDevFS.report = UpdateFSReport(success: true);
+      final OperationResult recoveredResult = await residentWebRunner.restart(fullRestart: true);
+      expect(recoveredResult.code, 0);
+    },
+    overrides: <Type, Generator>{
+      Analytics: () => fakeAnalytics,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'web resident runner is debuggable',
     () {
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
@@ -1439,6 +1490,76 @@ name: my_app
       expect(mockDevice.lastPlatformArgs, isNotNull);
       expect(mockDevice.lastPlatformArgs!['no-launch-chrome'], true);
       expect(mockDevice.lastPlatformArgs!['uri'], isNotNull);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/192091.
+  testUsingContext(
+    'ResidentWebRunner does not wait for a Chromium instance when no-launch-chrome is set',
+    () async {
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      // The launcher of `chromeDevice` never produces an instance, mirroring
+      // `flutter drive`, where WebDriver (not the tool) launches the browser.
+      flutterDevice.device = chromeDevice;
+      final runner = ResidentWebRunner(
+        flutterDevice,
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        platformArgs: <String, Object?>{'no-launch-chrome': true},
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
+        analytics: globals.analytics,
+        systemClock: globals.systemClock,
+      );
+
+      final appStartedCompleter = Completer<void>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(
+        runner.run(
+          appStartedCompleter: appStartedCompleter,
+          connectionInfoCompleter: connectionInfoCompleter,
+        ),
+      );
+      await appStartedCompleter.future;
+      await connectionInfoCompleter.future;
+
+      expect(chromeDevice.lastPlatformArgs!['no-launch-chrome'], true);
+      // Chrome-based DWDS debugging would wait on the never-launched instance.
+      expect(runner.useDwdsWebSocketConnection, isTrue);
+      expect(appConnection.ranMain, isTrue);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'ResidentWebRunner uses Chrome-based debugging when it launches Chromium',
+    () {
+      flutterDevice.device = chromeDevice;
+      final runner = ResidentWebRunner(
+        flutterDevice,
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
+        analytics: globals.analytics,
+        systemClock: globals.systemClock,
+      );
+
+      expect(runner.useDwdsWebSocketConnection, isFalse);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

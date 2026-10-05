@@ -115,7 +115,7 @@ void main() {
       final server = FakeServer();
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
-        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
+        buildDirectory: fileSystem.directory('build'),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           '',
@@ -124,19 +124,21 @@ void main() {
           extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--canary'],
           webEnableHotReload: true,
         ),
-        webMemoryFS: WebMemoryFS(),
-        fileSystem: fileSystem,
-        buildDirectory: fileSystem.directory('build'),
-        logger: logger,
         chromiumLauncher: chromiumLauncher,
+        crossOriginIsolation: false,
+        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
         flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        artifacts: artifacts,
-        processManager: processManager,
-        webRenderer: WebRendererMode.canvaskit,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
         useWasm: false,
+        webMemoryFS: WebMemoryFS(),
+        webRenderer: WebRendererMode.canvaskit,
         serverFactory: () async => server,
         testPackageUri: Uri.parse('test'),
-        crossOriginIsolation: false,
       );
       final shelf.Handler? handler = server.mountedHandler;
       expect(handler, isNotNull);
@@ -187,7 +189,7 @@ void main() {
 
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
-        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
+        buildDirectory: fileSystem.directory('build'),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           '',
@@ -196,19 +198,21 @@ void main() {
           extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--canary'],
           webEnableHotReload: true,
         ),
-        webMemoryFS: webMemoryFS,
-        fileSystem: fileSystem,
-        buildDirectory: fileSystem.directory('build'),
-        logger: logger,
         chromiumLauncher: chromiumLauncher,
+        crossOriginIsolation: false,
+        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
         flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        artifacts: artifacts,
-        processManager: processManager,
-        webRenderer: WebRendererMode.canvaskit,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
         useWasm: false,
+        webMemoryFS: webMemoryFS,
+        webRenderer: WebRendererMode.canvaskit,
         serverFactory: () async => server,
         testPackageUri: Uri.parse('test'),
-        crossOriginIsolation: false,
       );
       final shelf.Handler? handler = server.mountedHandler;
       expect(handler, isNotNull);
@@ -258,7 +262,7 @@ void main() {
       final server = FakeServer();
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
-        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
+        buildDirectory: fileSystem.directory('build'),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           '',
@@ -266,19 +270,21 @@ void main() {
           treeShakeIcons: false,
           webEnableHotReload: true,
         ),
-        webMemoryFS: WebMemoryFS(),
-        fileSystem: fileSystem,
-        buildDirectory: fileSystem.directory('build'),
-        logger: logger,
         chromiumLauncher: recordingLauncher,
+        crossOriginIsolation: false,
+        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
         flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        artifacts: artifacts,
-        processManager: processManager,
-        webRenderer: WebRendererMode.canvaskit,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
         useWasm: false,
+        webMemoryFS: WebMemoryFS(),
+        webRenderer: WebRendererMode.canvaskit,
         serverFactory: () async => server,
         testPackageUri: Uri.parse('test'),
-        crossOriginIsolation: false,
       );
 
       final suitePlatform = SuitePlatform(Runtime.chrome);
