@@ -4159,8 +4159,7 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
       vm_init_args->aot_library_path == vm_args.aot_library_path) {
     project_args_.aot_data = vm_init_project_args->aot_data;
   } else {
-    if (!initialize_engine_fn_ && !vm_args.aot_library_path.empty() &&
-        aot_data_ == nullptr) {
+    if (!vm_args.aot_library_path.empty() && aot_data_ == nullptr) {
       FlutterEngineAOTDataSource source = {};
       source.type = kFlutterEngineAOTDataSourceTypeElfPath;
       source.elf_path = vm_args.aot_library_path.c_str();
