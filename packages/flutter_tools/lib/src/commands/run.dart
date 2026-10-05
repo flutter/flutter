@@ -71,7 +71,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       DebuggingOptionDescriptors.iosProfileDebugger,
     ], verboseHelp: verboseHelp);
     usesWebOptions(verboseHelp: verboseHelp);
-    usesDeprecatedJsInteropFlag(verboseHelp: verboseHelp);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
     usesIpv6Flag(verboseHelp: verboseHelp);

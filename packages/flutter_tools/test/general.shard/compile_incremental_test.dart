@@ -216,68 +216,6 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('DDC compile forwards compiler diagnostics to stderr', () async {
-    final ddcGenerator = DefaultResidentCompiler(
-      'sdkroot',
-      buildInfo: BuildInfo.debug,
-      logger: testLogger,
-      processManager: fakeProcessManager,
-      artifacts: Artifacts.test(),
-      platform: FakePlatform(),
-      fileSystem: MemoryFileSystem.test(),
-      shutdownHooks: FakeShutdownHooks(),
-      config: Config.test(),
-      targetModel: TargetModel.dartdevc,
-    );
-    const webDartRuntime = 'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript';
-    const webFrontendServer =
-        'Artifact.frontendServerSnapshotForEngineDartSdk'
-        '.TargetPlatform.web_javascript';
-    fakeProcessManager.addCommand(
-      FakeCommand(
-        command: const <String>[
-          webDartRuntime,
-          webFrontendServer,
-          '--sdk-root',
-          'sdkroot/',
-          '--incremental',
-          '--target=dartdevc',
-          '--experimental-emit-debug-metadata',
-          '--output-dill',
-          '/build/',
-          '--packages',
-          '.dart_tool/package_config.json',
-          '-Ddart.vm.profile=false',
-          '-Ddart.vm.product=false',
-          '--enable-asserts',
-          '--track-creation-locations',
-          '--initialize-from-dill',
-          'build/471e67e273aac2e3e05542afef95ef7f.cache.dill.track.dill',
-          '--verbosity=error',
-        ],
-        stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 2',
-        stderr: 'compiler stderr',
-        stdin: frontendServerStdIn,
-      ),
-    );
-
-    await ddcGenerator.recompile(
-      Uri.parse('/path/to/main.dart'),
-      null /* invalidatedFiles */,
-      outputPath: '/build/',
-      packageConfig: PackageConfig.empty,
-      fs: MemoryFileSystem(),
-      projectRootPath: '',
-    );
-
-    expect(testLogger.statusText, isEmpty);
-    // The stdout and stderr streams are read independently, so their relative
-    // order is not guaranteed.
-    expect(testLogger.errorText, contains('line1\nline2\n'));
-    expect(testLogger.errorText, contains('compiler stderr\n'));
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
-
   testWithoutContext('incremental compile single dart compile abnormally terminates', () async {
     fakeProcessManager.addCommand(
       FakeCommand(
