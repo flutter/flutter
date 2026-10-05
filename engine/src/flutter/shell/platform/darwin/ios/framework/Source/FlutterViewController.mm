@@ -755,7 +755,8 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   }
 }
 
-// Creates the surface if the viewport is sized and the application/scene is in the foreground.
+// Creates the surface if the viewport is sized.
+//
 // Callers must guarantee GPU access is permitted since UIApplication reports
 // UIApplicationStateBackground while willEnterForeground is delivered, so the application state
 // can't be enforced here.
