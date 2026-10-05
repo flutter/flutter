@@ -213,12 +213,123 @@ TEST_F(AndroidSurfaceManagerTest, SoftwarePresentValidation) {
   ASSERT_NE(manager, nullptr);
 
   // Without window, software present fails
-  uint8_t dummy_pixels[64] = {0};
-  EXPECT_FALSE(manager->PresentSoftware(dummy_pixels, 16, 4));
+  constexpr size_t kDummyBufferSize = 64;
+  constexpr size_t kRowBytes = 16;
+  constexpr size_t kHeight = 4;
+  uint8_t dummy_pixels[kDummyBufferSize] = {0};
+  EXPECT_FALSE(manager->PresentSoftware(dummy_pixels, kRowBytes, kHeight));
 
-  // With fake window, software present succeeds
+  // With fake window, software present succeeds for non-null buffer and fails
+  // for null buffer.
   EXPECT_TRUE(manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
-  EXPECT_TRUE(manager->PresentSoftware(dummy_pixels, 16, 4));
+  EXPECT_TRUE(manager->PresentSoftware(dummy_pixels, kRowBytes, kHeight));
+  EXPECT_FALSE(manager->PresentSoftware(nullptr, kRowBytes, kHeight));
+}
+
+TEST_F(AndroidSurfaceManagerTest, SoftwarePixelFormatStateAndReset) {
+  auto manager = AndroidSurfaceManager::Create(AndroidRenderingAPI::kSoftware);
+  ASSERT_NE(manager, nullptr);
+  EXPECT_EQ(manager->GetSoftwarePixelFormat(),
+            kFlutterSoftwarePixelFormatRGBA8888);
+
+  manager->SetSoftwarePixelFormatForTesting(kFlutterSoftwarePixelFormatRGB565);
+  EXPECT_EQ(manager->GetSoftwarePixelFormat(),
+            kFlutterSoftwarePixelFormatRGB565);
+
+  manager->ClearNativeWindow();
+  EXPECT_EQ(manager->GetSoftwarePixelFormat(),
+            kFlutterSoftwarePixelFormatRGBA8888);
+
+  manager->SetSoftwarePixelFormatForTesting(kFlutterSoftwarePixelFormatRGB565);
+  EXPECT_TRUE(manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+  EXPECT_EQ(manager->GetSoftwarePixelFormat(),
+            kFlutterSoftwarePixelFormatRGBA8888);
+}
+
+TEST_F(AndroidSurfaceManagerTest,
+       CopySoftwarePixelsToWindowBufferRgb565AndRgba8888) {
+  // 1 is WINDOW_FORMAT_RGBA_8888; 4 is WINDOW_FORMAT_RGB_565.
+  constexpr int32_t kFormatRgba8888 = 1;
+  constexpr int32_t kFormatRgb565 = 4;
+  // 2x2 image dimensions with a 4-pixel destination row stride to verify stride
+  // padding.
+  constexpr int32_t kWidth = 2;
+  constexpr int32_t kHeight = 2;
+  constexpr int32_t kStride = 4;
+  constexpr size_t kRgb565BytesPerPixel = 2;
+  constexpr size_t kRgba8888BytesPerPixel = 4;
+  constexpr size_t kPixelCount = static_cast<size_t>(kWidth * kHeight);
+  constexpr size_t kDstElementCount = static_cast<size_t>(kStride * kHeight);
+
+  // 1. Direct 16-bit RGB_565 copy (2 bytes per pixel) with stride padding.
+  // #F8FAFD in Skia store_565 is 0xF7DF; pure red is 0xF800; pure green is
+  // 0x07E0; pure blue is 0x001F.
+  constexpr uint16_t kPackedCardBg = 0xF7DF;
+  constexpr uint16_t kPackedRed = 0xF800;
+  constexpr uint16_t kPackedGreen = 0x07E0;
+  constexpr uint16_t kPackedBlue = 0x001F;
+  const uint16_t src_rgb565[kPixelCount] = {
+      kPackedCardBg,
+      kPackedRed,
+      kPackedGreen,
+      kPackedBlue,
+  };
+  uint16_t dst_rgb565[kDstElementCount] = {0};
+  EXPECT_TRUE(AndroidSurfaceManager::CopySoftwarePixelsToWindowBuffer(
+      dst_rgb565, kWidth, kHeight, kStride, kFormatRgb565, src_rgb565,
+      static_cast<size_t>(kWidth) * kRgb565BytesPerPixel,
+      static_cast<size_t>(kHeight)));
+  EXPECT_EQ(dst_rgb565[0], kPackedCardBg);
+  EXPECT_EQ(dst_rgb565[1], kPackedRed);
+  EXPECT_EQ(dst_rgb565[2], 0u);
+  EXPECT_EQ(dst_rgb565[3], 0u);
+  EXPECT_EQ(dst_rgb565[kStride + 0], kPackedGreen);
+  EXPECT_EQ(dst_rgb565[kStride + 1], kPackedBlue);
+
+  // 2. Fallback conversion from 32-bit RGBA_8888 (4 bytes per pixel) to 16-bit
+  // WINDOW_FORMAT_RGB_565 using rounded integer arithmetic:
+  // #F8FAFD (R=248, G=250, B=253, A=255) -> r5=30, g6=62, b5=31 (0xF7DF).
+  constexpr uint8_t kCardBgR = 248;
+  constexpr uint8_t kCardBgG = 250;
+  constexpr uint8_t kCardBgB = 253;
+  constexpr uint8_t kMaxChannel = 255;
+  constexpr uint8_t kZeroChannel = 0;
+  const uint8_t src_rgba[kPixelCount * kRgba8888BytesPerPixel] = {
+      kCardBgR,     kCardBgG,     kCardBgB,     kMaxChannel,  // (0,0): #F8FAFD
+      kMaxChannel,  kZeroChannel, kZeroChannel, kMaxChannel,  // (1,0): Red
+      kZeroChannel, kMaxChannel,  kZeroChannel, kMaxChannel,  // (0,1): Green
+      kZeroChannel, kZeroChannel, kMaxChannel,  kMaxChannel,  // (1,1): Blue
+  };
+  std::memset(dst_rgb565, 0, sizeof(dst_rgb565));
+  EXPECT_TRUE(AndroidSurfaceManager::CopySoftwarePixelsToWindowBuffer(
+      dst_rgb565, kWidth, kHeight, kStride, kFormatRgb565, src_rgba,
+      static_cast<size_t>(kWidth) * kRgba8888BytesPerPixel,
+      static_cast<size_t>(kHeight)));
+  EXPECT_EQ(dst_rgb565[0], kPackedCardBg);
+  EXPECT_EQ(dst_rgb565[1], kPackedRed);
+  EXPECT_EQ(dst_rgb565[kStride + 0], kPackedGreen);
+  EXPECT_EQ(dst_rgb565[kStride + 1], kPackedBlue);
+
+  // 3. Direct 32-bit RGBA_8888 copy when destination window is RGBA_8888.
+  uint8_t dst_rgba[kDstElementCount * kRgba8888BytesPerPixel] = {0};
+  EXPECT_TRUE(AndroidSurfaceManager::CopySoftwarePixelsToWindowBuffer(
+      dst_rgba, kWidth, kHeight, kStride, kFormatRgba8888, src_rgba,
+      static_cast<size_t>(kWidth) * kRgba8888BytesPerPixel,
+      static_cast<size_t>(kHeight)));
+  EXPECT_EQ(dst_rgba[0], kCardBgR);
+  EXPECT_EQ(dst_rgba[1], kCardBgG);
+  EXPECT_EQ(dst_rgba[2], kCardBgB);
+  EXPECT_EQ(dst_rgba[3], kMaxChannel);
+
+  // 4. Invalid arguments return false safely.
+  EXPECT_FALSE(AndroidSurfaceManager::CopySoftwarePixelsToWindowBuffer(
+      nullptr, kWidth, kHeight, kStride, kFormatRgb565, src_rgb565,
+      static_cast<size_t>(kWidth) * kRgb565BytesPerPixel,
+      static_cast<size_t>(kHeight)));
+  EXPECT_FALSE(AndroidSurfaceManager::CopySoftwarePixelsToWindowBuffer(
+      dst_rgb565, kWidth, kHeight, kWidth - 1, kFormatRgb565, src_rgb565,
+      static_cast<size_t>(kWidth) * kRgb565BytesPerPixel,
+      static_cast<size_t>(kHeight)));
 }
 
 TEST_F(AndroidSurfaceManagerTest, PopulateGLRendererConfig) {

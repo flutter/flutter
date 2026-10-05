@@ -58,25 +58,39 @@ bool AndroidCompositor::CreateBackingStore(
 
   switch (surface_manager_->GetRenderingAPI()) {
     case AndroidRenderingAPI::kSoftware: {
+      FlutterSoftwarePixelFormat pixel_format =
+          is_overlay ? kFlutterSoftwarePixelFormatRGBA8888
+                     : surface_manager_->GetSoftwarePixelFormat();
+      // 16-bit RGB_565 uses 2 bytes per pixel; 32-bit RGBA_8888 uses 4 bytes
+      // per pixel.
+      constexpr size_t kRgb565BytesPerPixel = 2;
+      constexpr size_t kRgba8888BytesPerPixel = 4;
+      size_t bytes_per_pixel =
+          (pixel_format == kFlutterSoftwarePixelFormatRGB565)
+              ? kRgb565BytesPerPixel
+              : kRgba8888BytesPerPixel;
       size_t width = static_cast<size_t>(config->size.width);
       size_t height = static_cast<size_t>(config->size.height);
-      size_t row_bytes = width * 4;
+      size_t row_bytes = width * bytes_per_pixel;
       size_t allocation_size = row_bytes * height;
       if (allocation_size == 0) {
-        allocation_size = 4;
+        allocation_size = bytes_per_pixel;
       }
       uint8_t* allocation = new (std::nothrow) uint8_t[allocation_size]();
       if (allocation == nullptr) {
         return false;
       }
 
-      backing_store_out->type = kFlutterBackingStoreTypeSoftware;
+      backing_store_out->type = kFlutterBackingStoreTypeSoftware2;
       backing_store_out->user_data = allocation;
-      backing_store_out->software.allocation = allocation;
-      backing_store_out->software.row_bytes = row_bytes;
-      backing_store_out->software.height = height;
-      backing_store_out->software.user_data = allocation;
-      backing_store_out->software.destruction_callback = nullptr;
+      backing_store_out->software2.struct_size =
+          sizeof(FlutterSoftwareBackingStore2);
+      backing_store_out->software2.allocation = allocation;
+      backing_store_out->software2.row_bytes = row_bytes;
+      backing_store_out->software2.height = height;
+      backing_store_out->software2.user_data = allocation;
+      backing_store_out->software2.destruction_callback = nullptr;
+      backing_store_out->software2.pixel_format = pixel_format;
       return true;
     }
     case AndroidRenderingAPI::kImpellerVulkan:
@@ -212,7 +226,8 @@ bool AndroidCompositor::CollectBackingStore(
   if (backing_stores_created_in_frame_ > 0) {
     backing_stores_created_in_frame_--;
   }
-  if (renderer->type == kFlutterBackingStoreTypeSoftware &&
+  if ((renderer->type == kFlutterBackingStoreTypeSoftware ||
+       renderer->type == kFlutterBackingStoreTypeSoftware2) &&
       renderer->user_data != nullptr) {
     delete[] static_cast<const uint8_t*>(renderer->user_data);
   } else if (renderer->type == kFlutterBackingStoreTypeOpenGL &&
@@ -381,6 +396,13 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
     if (bs->type == kFlutterBackingStoreTypeSoftware) {
       bool res = surface_manager_->PresentSoftware(
           bs->software.allocation, bs->software.row_bytes, bs->software.height);
+      if (!res && !surface_manager_->IsFakeWindow()) {
+        present_success = false;
+      }
+    } else if (bs->type == kFlutterBackingStoreTypeSoftware2) {
+      bool res = surface_manager_->PresentSoftware(bs->software2.allocation,
+                                                   bs->software2.row_bytes,
+                                                   bs->software2.height);
       if (!res && !surface_manager_->IsFakeWindow()) {
         present_success = false;
       }
