@@ -275,14 +275,14 @@ Future<void> main() async {
 
       section('Run app:assembleDemoQa with android.newDsl=true');
 
-      // With android.newDsl=true, AGP has no `libraryVariants` or `applicationVariants`.
+      // The fixture's gradle.properties sets android.newDsl=false. With
+      // android.newDsl=true, AGP has no `libraryVariants` or `applicationVariants`.
       final String demoQaOutput = await inDirectory(hostAppDir, () async {
         return eval(
           gradlewExecutable,
           <String>[
             'app:assembleDemoQa',
             '-Pandroid.newDsl=true',
-            '-Pandroid.compatibility.enableLegacyApi=false',
             '-Pflutter.hostAppProjectName=app',
           ],
           environment: <String, String>{'JAVA_HOME': javaHome},
