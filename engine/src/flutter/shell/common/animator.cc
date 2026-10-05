@@ -67,7 +67,7 @@ void Animator::MaybeCleanTraceFlowIds() {
     }
 
     TRACE_EVENT0_WITH_FLOW_IDS(
-        "flutter", "Animator::ScheduleMaybeClearTraceFlowIds - callback",
+        "flutter", "Animator::MaybeCleanTraceFlowIds - callback",
         flow_id_count, flow_ids.get());
 
     while (!trace_flow_ids_.empty()) {

@@ -50,7 +50,7 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
       isVariableRefreshRateEnabled:display_link_manager_.maxRefreshRateEnabledOnIPhone
                     maxRefreshRate:display_link_manager_.displayRefreshRate
                           callback:vsyncCallback];
-  client_.allowPauseAfterVsync = false;
+  client_.allowPauseAfterVsync = NO;
   max_refresh_rate_ = display_link_manager_.displayRefreshRate;
 }
 

@@ -469,6 +469,7 @@ void Engine::DispatchPointerDataPacket(
   animator_->EnqueueTraceFlowId(trace_flow_id);
   if (runtime_controller_) {
     runtime_controller_->DispatchPointerDataPacket(*packet);
+    runtime_controller_->FlushMicrotaskQueue();
   }
   animator_->MaybeCleanTraceFlowIds();
 }

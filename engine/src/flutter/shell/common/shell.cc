@@ -1235,20 +1235,19 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
                          flow_id = next_pointer_flow_id_]() mutable {
         if (engine) {
           engine->DispatchPointerDataPacket(std::move(packet), flow_id);
-        };
+        }
       });
 
   // Dispatch the event synchronously if possible to reduce latency.
-  // If the event dispatch is shomehow triggered from Dart code though
+  // If the event dispatch is somehow triggered from Dart code though
   // the task will be dispatched asynchronously in order to avoid re-entrancy
   // issues.
   if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() &&
       Dart_CurrentIsolate() == nullptr) {
     task();
-    engine_->FlushMicrotaskQueue();
   } else {
     task_runners_.GetUITaskRunner()->PostTask(task);
-  };
+  }
 
   next_pointer_flow_id_++;
 }
