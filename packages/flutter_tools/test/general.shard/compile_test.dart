@@ -358,7 +358,6 @@ void main() {
         null,
         treeShakeIcons: false,
         packageConfigPath: '.dart_tool/package_config.json',
-        webEnableHotReload: true,
       ),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
