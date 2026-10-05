@@ -467,7 +467,8 @@ class _PreviewSearchControlsState extends State<PreviewSearchControls> {
                   ),
                   suffixIcon: _SearchClearButton(controller: widget.controller),
                   suffixIconConstraints: const BoxConstraints(
-                    maxHeight: defaultButtonHeight,
+                    minWidth: defaultButtonHeight,
+                    minHeight: defaultButtonHeight,
                   ),
                 ),
               ),
