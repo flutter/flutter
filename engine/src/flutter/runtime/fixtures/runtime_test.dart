@@ -97,8 +97,8 @@ Future<void> testIsolateStartupFailure() async {
       if (!await exits.moveNext()) {
         throw AssertionError('Failed to receive onExit');
       }
-      messages.cancel();
-      exits.cancel();
+      await messages.cancel();
+      await exits.cancel();
     }
 
     Future<void> testUnsuccessfullIsolateLaunch() async {
@@ -121,7 +121,7 @@ Future<void> testIsolateStartupFailure() async {
 
   // The root isolate will not run an eventloop, so we have to run the actual
   // test in an isolate.
-  Isolate.spawn(mainTest, null);
+  unawaited(Isolate.spawn(mainTest, null));
 }
 
 @pragma('vm:external-name', 'MakeNextIsolateSpawnFail')

@@ -286,7 +286,7 @@ void main() {
       'updates packages - only runs pub get',
       () async {
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command).run(<String>['update-packages']);
@@ -294,6 +294,37 @@ void main() {
           pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
           Pubspec.parse(kFlutterWorkspacePubspecYaml).dependencies,
         );
+        expect(pub.recordedPubGets, hasLength(3));
+        expect(pub.recordedPubGets.map((r) => r.offline), everyElement(isFalse));
+        expect(pub.recordedPubGets[0].enforceLockfile, isTrue);
+        expect(pub.recordedPubGets[1].enforceLockfile, isFalse);
+        expect(pub.recordedPubGets[2].enforceLockfile, isFalse);
+      },
+      overrides: <Type, Generator>{
+        Pub: () => pub,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => Cache.test(processManager: processManager),
+      },
+    );
+
+    testUsingContext(
+      'updates packages --offline passes offline flag to pub get',
+      () async {
+        final command = UpdatePackagesCommand(
+          toolContext: DelegatingToolContext(),
+          verboseHelp: false,
+        );
+        await createTestCommandRunner(command).run(<String>['update-packages', '--offline']);
+        expect(
+          pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
+          Pubspec.parse(kFlutterWorkspacePubspecYaml).dependencies,
+        );
+        expect(pub.recordedPubGets, hasLength(3));
+        expect(pub.recordedPubGets.map((r) => r.offline), everyElement(isTrue));
+        expect(pub.recordedPubGets[0].enforceLockfile, isTrue);
+        expect(pub.recordedPubGets[1].enforceLockfile, isFalse);
+        expect(pub.recordedPubGets[2].enforceLockfile, isFalse);
       },
       overrides: <Type, Generator>{
         Pub: () => pub,
@@ -318,7 +349,7 @@ void main() {
         );
 
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
@@ -357,7 +388,7 @@ void main() {
       '--cherry-pick-package',
       () async {
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command)
@@ -384,7 +415,7 @@ void main() {
       '--cherry-pick-package with caret',
       () async {
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command)
@@ -411,7 +442,7 @@ void main() {
       '--cherry-pick-package muliple',
       () async {
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command)
@@ -441,7 +472,7 @@ void main() {
       '--force-upgrade',
       () async {
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
@@ -555,7 +586,7 @@ dependencies:
             .writeAsStringSync(flutterToolsWithWorkspacePubspecYaml);
 
         final command = UpdatePackagesCommand(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: false,
         );
         await createTestCommandRunner(command)
@@ -637,6 +668,9 @@ class _FakePub extends Fake implements Pub {
     (pubspecs[project.directory.path] ??= <Pubspec>[]).add(pubspec);
   }
 
+  final recordedPubGets =
+      <({PubContext context, FlutterProject project, bool enforceLockfile, bool offline})>[];
+
   @override
   Future<void> get({
     required PubContext context,
@@ -649,6 +683,12 @@ class _FakePub extends Fake implements Pub {
     bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
+    recordedPubGets.add((
+      context: context,
+      project: project,
+      enforceLockfile: enforceLockfile,
+      offline: offline,
+    ));
     (pubspecs[project.directory.path] ??= <Pubspec>[]).add(
       Pubspec.parse(project.pubspecFile.readAsStringSync()),
     );

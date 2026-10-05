@@ -120,11 +120,13 @@ final class AriaLabelRepresentation extends LabelRepresentationBehavior {
     if (label == _previousLabel) {
       return;
     }
+    _previousLabel = label;
     owner.setAttribute('aria-label', label);
   }
 
   @override
   void cleanUp() {
+    _previousLabel = null;
     owner.removeAttribute('aria-label');
   }
 
@@ -455,6 +457,10 @@ class LabelAndValue extends SemanticBehavior {
 
   @override
   void update() {
+    if (semanticsObject.isAccessibilityFocusBlocked) {
+      _cleanUpDom();
+      return;
+    }
     final String? computedLabel = _computeLabel();
 
     if (computedLabel == null) {
@@ -584,6 +590,7 @@ class LabelAndValue extends SemanticBehavior {
   void _cleanUpDom() {
     _cleanUpDescriptionOrDescribedBy();
     _representation?.cleanUp();
+    _representation = null;
   }
 
   @override

@@ -26,6 +26,7 @@ import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
+import '../../web/content_hash.dart';
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
 import '../../web/web_constants.dart';
@@ -123,54 +124,27 @@ class WebEntrypointTarget extends Target {
 String hashAndRenameWebOutput({required File file, File? sourceMapFile}) =>
     _hashAndRenameWebOutput(file: file, sourceMapFile: sourceMapFile);
 
-const List<String> _kKnownHashedExtensions = <String>[
-  '.js.map',
-  '.wasm.map',
-  '.mjs.map',
-  '.js',
-  '.wasm',
-  '.mjs',
-];
-
-String _computeHashedBasename(String oldBasename, String contentHash, FileSystem fileSystem) {
-  final String doubleExt = fileSystem.path.extension(oldBasename, 2);
-  final String ext = _kKnownHashedExtensions.contains(doubleExt)
-      ? doubleExt
-      : fileSystem.path.extension(oldBasename);
-  if (ext.isNotEmpty) {
-    final String stem = oldBasename.substring(0, oldBasename.length - ext.length);
-    return '$stem.$contentHash$ext';
-  }
-  return '$oldBasename.$contentHash';
-}
-
 String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
   if (!file.existsSync()) {
     return file.basename;
   }
 
-  // The hash is computed before the sourceMappingURL comment is rewritten
-  // below; deriving the map name from the hashed binary name would otherwise
-  // be circular. The compiler emits the binary and its map from the same
-  // compilation, so identical binaries imply identical maps.
-  final String contentHash = crypto.sha256
-      .convert(file.readAsBytesSync())
-      .toString()
-      .substring(0, 8);
-  final String newBasename = _computeHashedBasename(file.basename, contentHash, file.fileSystem);
-
-  // The source map shares the binary's hash so the pair stays discoverable as
-  // '<binary>.map'. A `.wasm` binary embeds its map name in a binary custom
-  // section that cannot be rewritten here, so its map keeps the unhashed name.
+  // Hash and rename the source map first so its hashed filename can be
+  // written into the JS/MJS `sourceMappingURL` comment before hashing the
+  // code file itself. This ensures the code file's final on-disk bytes match
+  // the content hash in its filename. A `.wasm` binary embeds its map name in
+  // a binary custom section that cannot be rewritten here, so its map keeps
+  // the unhashed name.
   final isWasm = file.fileSystem.path.extension(file.path) == '.wasm';
   if (sourceMapFile != null && sourceMapFile.existsSync() && !isWasm) {
     final String oldMapBasename = sourceMapFile.basename;
-    final newMapBasename = '$newBasename.map';
+    final String mapHash = computeShortContentHash(sourceMapFile.readAsBytesSync());
+    final String newMapBasename = computeHashedBasename(oldMapBasename, mapHash, file.fileSystem);
     sourceMapFile.renameSync(sourceMapFile.parent.childFile(newMapBasename).path);
 
     final String content = file.readAsStringSync();
     final mapDirectiveRegex = RegExp(
-      r'//[#@]\s*sourceMappingURL=' + RegExp.escape(oldMapBasename) + r'\s*$',
+      r'//[#@]\s*sourceMappingURL=' + RegExp.escape(oldMapBasename) + r'(?=\s*$)',
       multiLine: true,
     );
     if (mapDirectiveRegex.hasMatch(content)) {
@@ -180,6 +154,8 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
     }
   }
 
+  final String contentHash = computeShortContentHash(file.readAsBytesSync());
+  final String newBasename = computeHashedBasename(file.basename, contentHash, file.fileSystem);
   file.renameSync(file.parent.childFile(newBasename).path);
   return newBasename;
 }
@@ -264,6 +240,20 @@ abstract class Dart2WebTarget extends Target {
       if (patterns.any((RegExp pattern) => pattern.hasMatch(file.basename))) {
         file.deleteSync();
       }
+    }
+  }
+
+  void _checkNoDeferredParts(Directory dir, RegExp partRegex) {
+    final bool hasDeferredParts = dir.listSync().whereType<File>().any(
+      (File file) => partRegex.hasMatch(file.basename),
+    );
+    if (hasDeferredParts) {
+      throwToolExit(
+        '"--web-content-hash" does not yet support deferred imports: '
+        'deferred part files keep unhashed names and can be served stale '
+        'from the browser cache alongside a new entrypoint. Remove the '
+        'deferred imports or build without "--web-content-hash".',
+      );
     }
   }
 }
@@ -372,17 +362,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     }
     var finalOutputFile = outputJSFile;
     if (compilerConfig.webContentHash) {
-      final bool hasDeferredParts = environment.buildDir.listSync().whereType<File>().any(
-        (File file) => _partFileRegex.hasMatch(file.basename),
-      );
-      if (hasDeferredParts) {
-        throwToolExit(
-          '"--web-content-hash" does not yet support deferred imports: '
-          'deferred part files keep unhashed names and can be served stale '
-          'from the browser cache alongside a new entrypoint. Remove the '
-          'deferred imports or build without "--web-content-hash".',
-        );
-      }
+      _checkNoDeferredParts(environment.buildDir, _partFileRegex);
       final String newBasename = _hashAndRenameWebOutput(
         file: outputJSFile,
         sourceMapFile: compilerConfig.sourceMaps
@@ -422,12 +402,16 @@ class Dart2JSTarget extends Dart2WebTarget {
   Iterable<File> buildFiles(Environment environment) {
     final String mainJsName =
         (getBuildConfig(environment)['mainJsPath'] as String?) ?? 'main.dart.js';
-    final mainJsMapName = '$mainJsName.map';
+    final String? mainJsMapName = !compilerConfig.sourceMaps
+        ? null
+        : compilerConfig.webContentHash
+        ? _resolveHashedBasename(environment.buildDir, _mainJsMapRegex, 'main.dart.js.map')
+        : '$mainJsName.map';
     return environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
       if (file.basename == mainJsName) {
         return true;
       }
-      if (compilerConfig.sourceMaps && file.basename == mainJsMapName) {
+      if (mainJsMapName != null && file.basename == mainJsMapName) {
         return true;
       }
       if (_partFileRegex.hasMatch(file.basename)) {
@@ -545,6 +529,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
         _mainWasmMapRegex,
         _mainMjsRegex,
         _mainMjsMapRegex,
+        _partWasmRegex,
+        _partWasmMapRegex,
       ]);
     }
     final Artifacts artifacts = environment.artifacts;
@@ -595,6 +581,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       _checkForLegacyWebImports(environment, runResult.stdout, runResult.stderr);
       throwToolExit('Failed to compile application for the Web.');
     } else if (compilerConfig.webContentHash) {
+      _checkNoDeferredParts(environment.buildDir, _partWasmRegex);
       final String newWasmBasename = _hashAndRenameWebOutput(
         file: outputWasmFile,
         sourceMapFile: compilerConfig.sourceMaps
@@ -680,7 +667,11 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final String mainWasmName = (config['mainWasmPath'] as String?) ?? 'main.dart.wasm';
     final String jsSupportName = (config['jsSupportRuntimePath'] as String?) ?? 'main.dart.mjs';
     const mainWasmMapName = 'main.dart.wasm.map';
-    final jsSupportMapName = '$jsSupportName.map';
+    final String? jsSupportMapName = !compilerConfig.sourceMaps
+        ? null
+        : compilerConfig.webContentHash
+        ? _resolveHashedBasename(environment.buildDir, _mainMjsMapRegex, 'main.dart.mjs.map')
+        : '$jsSupportName.map';
 
     return environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
       if (file.basename == mainWasmName || file.basename == jsSupportName) {
@@ -1051,16 +1042,27 @@ class WebReleaseBundle extends Target {
   Iterable<String> get buildPatternStems =>
       compileTargets.expand((Dart2WebTarget target) => target.buildPatternStems);
 
+  bool get _hasWebContentHash =>
+      compileTargets.any((Dart2WebTarget t) => t.compilerConfig.webContentHash);
+
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     const Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file')),
+    if (_hasWebContentHash) ...<Source>[
+      const Source.pattern('{OUTPUT_DIR}/index.html', optional: true),
+      const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js', optional: true),
+    ],
   ];
 
   @override
   List<Source> get outputs => <Source>[
     ...buildPatternStems.map((String file) => Source.pattern('{OUTPUT_DIR}/$file')),
+    if (_hasWebContentHash) ...<Source>[
+      const Source.pattern('{OUTPUT_DIR}/index.html'),
+      const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js'),
+    ],
   ];
 
   @override
@@ -1108,6 +1110,9 @@ class WebReleaseBundle extends Target {
 
     createVersionFile(environment, environment.defines);
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
+    if (outputDirectory.existsSync()) {
+      outputDirectory.deleteSync(recursive: true);
+    }
     outputDirectory.createSync(recursive: true);
 
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
@@ -1120,7 +1125,28 @@ class WebReleaseBundle extends Target {
     );
     final Depfile bundledDepfile = _bundleLocalRobotoFallback(environment, depfile);
     final DepfileService depfileService = environment.depFileService;
-    depfileService.writeToFile(bundledDepfile, environment.buildDir.childFile('flutter_assets.d'));
+
+    final bool webContentHash = compileTargets.any(
+      (Dart2WebTarget t) => t.compilerConfig.webContentHash,
+    );
+    if (webContentHash) {
+      final WebAssetHashResult hashResult = hashWebAssets(outputDirectory);
+      final Map<String, File> renamedOutputs = hashResult.renamedFiles;
+      final List<File> updatedOutputs = bundledDepfile.outputs.map((File f) {
+        final String normalizedPath = environment.fileSystem.path.normalize(f.path);
+        return renamedOutputs[normalizedPath] ?? renamedOutputs[f.path] ?? f;
+      }).toList();
+      depfileService.writeToFile(
+        Depfile(bundledDepfile.inputs, updatedOutputs),
+        environment.buildDir.childFile('flutter_assets.d'),
+      );
+      injectManifestBuildConfig(environment.outputDir, hashResult);
+    } else {
+      depfileService.writeToFile(
+        bundledDepfile,
+        environment.buildDir.childFile('flutter_assets.d'),
+      );
+    }
 
     final Directory webResources = environment.projectDir.childDirectory('web');
     final List<File> inputResourceFiles = webResources
@@ -1314,12 +1340,22 @@ class WebTemplatedFiles extends Target {
       'builds': descriptions,
       if (environment.defines[kUseLocalCanvasKitFlag] == 'true') 'useLocalCanvasKit': true,
     };
+    final bool hasWasmBuild = descriptions.any(
+      (Map<String, Object?> description) => description['compileTarget'] == 'dart2wasm',
+    );
+    final File supportJsFile = environment.buildDir.childFile('main.dart.support.js');
+    final String? supportJs = hasWasmBuild && supportJsFile.existsSync()
+        ? supportJsFile.readAsStringSync().trim()
+        : null;
+    final supportsDart2WasmLine = (supportJs != null && supportJs.isNotEmpty)
+        ? '_flutter.supportsDart2Wasm = $supportJs;\n'
+        : '';
     return '''
 if (!window._flutter) {
   window._flutter = {};
 }
 _flutter.buildConfig = ${jsonEncode(buildConfig)};
-''';
+$supportsDart2WasmLine''';
   }
 
   @override
@@ -1415,6 +1451,11 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     const Source.pattern('{PROJECT_DIR}/web/*/index.html'),
     const Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js'),
     const Source.hostArtifact(HostArtifact.flutterWebSdk),
+    if (compileTargets?.any(
+          (Dart2WebTarget target) => target is Dart2WasmTarget && !target.compilerConfig.dryRun,
+        ) ??
+        false)
+      const Source.pattern('{BUILD_DIR}/main.dart.support.js', optional: true),
     if (compileTargets != null)
       for (final Dart2WebTarget target in compileTargets!)
         for (final String stem in target.buildPatternStems) Source.pattern('{BUILD_DIR}/$stem'),
@@ -1468,6 +1509,7 @@ class WebBuiltInAssets extends Target {
   @override
   List<Source> get outputs => <Source>[
     const Source.pattern('{BUILD_DIR}/flutter.js'),
+    const Source.pattern('{BUILD_DIR}/flutter.js.map'),
     for (final File file in _canvasKitFiles)
       Source.pattern('{BUILD_DIR}/canvaskit/${_filePathRelativeToCanvasKitDirectory(file)}'),
   ];
@@ -1484,15 +1526,15 @@ class WebBuiltInAssets extends Target {
       file.copySync(targetPath);
     }
 
-    // Write the flutter.js file
-    final String flutterJsOut = fileSystem.path.join(environment.outputDir.path, 'flutter.js');
-    final File flutterJsFile = fileSystem.file(
-      fileSystem.path.join(
-        globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
-        'flutter.js',
-      ),
+    // Write the Flutter loader and its source map.
+    final Directory flutterJsDirectory = fileSystem.directory(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
     );
-    flutterJsFile.copySync(flutterJsOut);
+    for (final fileName in <String>['flutter.js', 'flutter.js.map']) {
+      final File sourceFile = flutterJsDirectory.childFile(fileName);
+      final File targetFile = environment.outputDir.childFile(fileName);
+      sourceFile.copySync(targetFile.path);
+    }
   }
 }
 
@@ -1530,12 +1572,21 @@ class WebServiceWorker extends Target {
         .where(
           (File file) =>
               !file.path.endsWith('flutter_service_worker.js') &&
+              !file.path.endsWith(kPrecacheManifestFile) &&
               !environment.fileSystem.path.basename(file.path).startsWith('.'),
         )
         .toList();
 
+    final bool webContentHash = compileConfigs.any(
+      (WebCompilerConfig config) => config.webContentHash,
+    );
+    final File? precacheManifestFile = updatePrecacheManifest(
+      environment.outputDir,
+      enabled: webContentHash,
+      useLocalCanvasKit: environment.defines[kUseLocalCanvasKitFlag] == 'true',
+    );
     final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
-    final depfile = Depfile(contents, <File>[serviceWorkerFile]);
+    final depfile = Depfile(contents, <File>[serviceWorkerFile, ?precacheManifestFile]);
     final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
       Artifact.flutterToolsFileGenerators,
     );

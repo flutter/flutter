@@ -78,8 +78,7 @@ Requires the custom devices feature to be enabled. You can enable it using "flut
 /// to the subcommands, like backing up the config file & checking if the
 /// feature is enabled.
 abstract class CustomDevicesCommandBase extends FlutterCommand {
-  CustomDevicesCommandBase({required this.featureFlags, required ToolContext toolContext})
-    : super(toolContext: toolContext);
+  CustomDevicesCommandBase({required this.featureFlags, required ToolContext super.toolContext});
 
   @override
   ToolContext get toolContext => super.toolContext!;

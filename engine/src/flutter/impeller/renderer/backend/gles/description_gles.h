@@ -35,6 +35,10 @@ class DescriptionGLES {
 
   bool IsANGLE() const;
 
+  const std::string& GetRenderer() const;
+
+  const std::string& GetGlVersionString() const;
+
  private:
   Version gl_version_;
   Version sl_version_;
