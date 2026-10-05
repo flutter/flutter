@@ -1339,8 +1339,14 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (void)forceTouchesCancelled:(NSSet*)touches {
-  flutter::PointerData::Change cancel = flutter::PointerData::Change::kCancel;
-  [self dispatchTouches:touches pointerDataChangeOverride:&cancel event:nullptr];
+  NSSet* activeTouches = [self activeTouches:touches];
+  // A sequence that began before the presentation must be allowed to end, otherwise its pointer
+  // stays down in the framework forever.
+  [self.ignoredTouches minusSet:touches];
+  if (activeTouches.count > 0) {
+    flutter::PointerData::Change cancel = flutter::PointerData::Change::kCancel;
+    [self dispatchTouches:activeTouches pointerDataChangeOverride:&cancel event:nullptr];
+  }
 }
 
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(CGPoint)location {

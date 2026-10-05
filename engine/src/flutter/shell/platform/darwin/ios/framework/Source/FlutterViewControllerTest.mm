@@ -3640,4 +3640,27 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
       @"UITouch object of an ignored sequence");
 }
 
+- (void)testTouchesDispatchedForNewSequenceAfterIgnoredSequenceForceCancelled {
+  FlutterEnginePointerDataRecorder* engine = [[FlutterEnginePointerDataRecorder alloc] init];
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerWithEngine:engine];
+  vc.stubbedPresentedViewController = [[UIViewController alloc] init];
+  UITouch* touch = [[UITouch alloc] init];
+  UIEvent* event = nil;
+  touch.phase = UITouchPhaseBegan;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  [vc forceTouchesCancelled:[NSSet setWithObject:touch]];
+  XCTAssertFalse(vc.touchesDispatched, @"the whole ignored sequence must stay undispatched");
+
+  // The presented view controller is dismissed, then UIKit recycles the same UITouch object for an
+  // unrelated sequence.
+  vc.stubbedPresentedViewController = nil;
+  touch.phase = UITouchPhaseBegan;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+
+  XCTAssertTrue(
+      vc.touchesDispatched,
+      @"a sequence that begins after the dismissal must dispatch, even when an earlier ignored "
+      @"sequence that reused the same UITouch object ended via forceTouchesCancelled:");
+}
+
 @end
