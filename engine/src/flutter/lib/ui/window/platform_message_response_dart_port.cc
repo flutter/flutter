@@ -37,11 +37,13 @@ void PostResponse(Dart_Port send_port,
                   const std::string& channel) {
   bool did_send = Dart_PostCObject(send_port, response);
   if (!did_send) {
-    FML_DLOG(WARNING) << "Dropping platform message response on channel \""
-                      << channel
-                      << "\" because it could not be posted to its Dart port. "
-                         "This usually means the isolate exited before the "
-                         "reply arrived.";
+    FML_LOG(WARNING) << "Dropping platform message response on channel \""
+                     << channel
+                     << "\" because it could not be posted to its Dart port. "
+                        "This usually means the isolate that sent the message "
+                        "exited before the reply arrived. Await pending "
+                        "platform channel calls before exiting the isolate if "
+                        "their results are needed.";
   }
 }
 
