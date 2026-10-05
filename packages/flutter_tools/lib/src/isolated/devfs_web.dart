@@ -83,9 +83,10 @@ class WebDevFS implements DevFS {
     required this.platform,
     this.testMode = false,
     this._webDefines = const <String, String>{},
-  }) : // TODO(srujzs): Remove this assertion when the library bundle format is
-       // supported without canary mode.
-       assert(canaryFeatures) {
+  })
+    // TODO(srujzs): Remove this assertion when the library bundle format is
+    // supported without canary mode.
+    : assert(canaryFeatures == buildInfo.canaryFeatures) {
     _assetTransformer = DevelopmentAssetTransformer(
       transformer: AssetTransformer(
         processManager: globals.processManager,
