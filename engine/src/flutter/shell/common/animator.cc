@@ -66,9 +66,9 @@ void Animator::MaybeCleanTraceFlowIds() {
       flow_ids.get()[i] = trace_flow_ids_.at(i);
     }
 
-    TRACE_EVENT0_WITH_FLOW_IDS(
-        "flutter", "Animator::MaybeCleanTraceFlowIds - callback",
-        flow_id_count, flow_ids.get());
+    TRACE_EVENT0_WITH_FLOW_IDS("flutter",
+                               "Animator::MaybeCleanTraceFlowIds - callback",
+                               flow_id_count, flow_ids.get());
 
     while (!trace_flow_ids_.empty()) {
       auto flow_id = trace_flow_ids_.front();
