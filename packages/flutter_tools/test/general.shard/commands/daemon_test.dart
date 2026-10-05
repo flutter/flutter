@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fakes.dart' show FakeToolContext, TestFeatureFlags;
@@ -22,6 +23,7 @@ void main() {
     final bindPorts = <int>[];
 
     final server = DaemonServer(
+      analytics: const NoOpAnalytics(),
       toolContext: FakeToolContext(),
       port: 123,
       logger: logger,
@@ -48,6 +50,7 @@ void main() {
     final bindPorts = <int>[];
 
     final server = DaemonServer(
+      analytics: const NoOpAnalytics(),
       toolContext: FakeToolContext(),
       port: 123,
       logger: logger,
