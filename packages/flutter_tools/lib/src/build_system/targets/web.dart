@@ -129,28 +129,22 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
     return file.basename;
   }
 
-  // The hash is computed before the sourceMappingURL comment is rewritten
-  // below; deriving the map name from the hashed binary name would otherwise
-  // be circular. The compiler emits the binary and its map from the same
-  // compilation, so identical binaries imply identical maps.
-  final String contentHash = crypto.sha256
-      .convert(file.readAsBytesSync())
-      .toString()
-      .substring(0, 8);
-  final String newBasename = computeHashedBasename(file.basename, contentHash, file.fileSystem);
-
-  // The source map shares the binary's hash so the pair stays discoverable as
-  // '<binary>.map'. A `.wasm` binary embeds its map name in a binary custom
-  // section that cannot be rewritten here, so its map keeps the unhashed name.
+  // Hash and rename the source map first so its hashed filename can be
+  // written into the JS/MJS `sourceMappingURL` comment before hashing the
+  // code file itself. This ensures the code file's final on-disk bytes match
+  // the content hash in its filename. A `.wasm` binary embeds its map name in
+  // a binary custom section that cannot be rewritten here, so its map keeps
+  // the unhashed name.
   final isWasm = file.fileSystem.path.extension(file.path) == '.wasm';
   if (sourceMapFile != null && sourceMapFile.existsSync() && !isWasm) {
     final String oldMapBasename = sourceMapFile.basename;
-    final newMapBasename = '$newBasename.map';
+    final String mapHash = computeShortContentHash(sourceMapFile.readAsBytesSync());
+    final String newMapBasename = computeHashedBasename(oldMapBasename, mapHash, file.fileSystem);
     sourceMapFile.renameSync(sourceMapFile.parent.childFile(newMapBasename).path);
 
     final String content = file.readAsStringSync();
     final mapDirectiveRegex = RegExp(
-      r'//[#@]\s*sourceMappingURL=' + RegExp.escape(oldMapBasename) + r'\s*$',
+      r'//[#@]\s*sourceMappingURL=' + RegExp.escape(oldMapBasename) + r'(?=\s*$)',
       multiLine: true,
     );
     if (mapDirectiveRegex.hasMatch(content)) {
@@ -160,6 +154,8 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
     }
   }
 
+  final String contentHash = computeShortContentHash(file.readAsBytesSync());
+  final String newBasename = computeHashedBasename(file.basename, contentHash, file.fileSystem);
   file.renameSync(file.parent.childFile(newBasename).path);
   return newBasename;
 }
@@ -246,6 +242,20 @@ abstract class Dart2WebTarget extends Target {
       }
     }
   }
+
+  void _checkNoDeferredParts(Directory dir, RegExp partRegex) {
+    final bool hasDeferredParts = dir.listSync().whereType<File>().any(
+      (File file) => partRegex.hasMatch(file.basename),
+    );
+    if (hasDeferredParts) {
+      throwToolExit(
+        '"--web-content-hash" does not yet support deferred imports: '
+        'deferred part files keep unhashed names and can be served stale '
+        'from the browser cache alongside a new entrypoint. Remove the '
+        'deferred imports or build without "--web-content-hash".',
+      );
+    }
+  }
 }
 
 /// Compiles a web entry point with dart2js.
@@ -323,11 +333,11 @@ class Dart2JSTarget extends Dart2WebTarget {
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
     // parse the kernel file for web builds.
-    await processUtils.run(cfeCompilationArgs, throwOnError: true);
+    await _runDart2js(processUtils, environment.logger, cfeCompilationArgs);
 
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
 
-    await processUtils.run(throwOnError: true, <String>[
+    await _runDart2js(processUtils, environment.logger, <String>[
       ...sharedCommandOptions,
       ...compilerConfig.toCommandOptions(buildMode),
       '-o',
@@ -352,17 +362,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     }
     var finalOutputFile = outputJSFile;
     if (compilerConfig.webContentHash) {
-      final bool hasDeferredParts = environment.buildDir.listSync().whereType<File>().any(
-        (File file) => _partFileRegex.hasMatch(file.basename),
-      );
-      if (hasDeferredParts) {
-        throwToolExit(
-          '"--web-content-hash" does not yet support deferred imports: '
-          'deferred part files keep unhashed names and can be served stale '
-          'from the browser cache alongside a new entrypoint. Remove the '
-          'deferred imports or build without "--web-content-hash".',
-        );
-      }
+      _checkNoDeferredParts(environment.buildDir, _partFileRegex);
       final String newBasename = _hashAndRenameWebOutput(
         file: outputJSFile,
         sourceMapFile: compilerConfig.sourceMaps
@@ -377,6 +377,38 @@ class Dart2JSTarget extends Dart2WebTarget {
       finalOutputFile,
     );
     depFileService.writeToFile(depFile, environment.buildDir.childFile('dart2js.d'));
+  }
+
+  /// Runs one phase of the dart2js compilation with [args].
+  ///
+  /// dart2js reports its diagnostics, such as compile errors and the import
+  /// paths that reach deprecated JS interop libraries, on stdout. If the
+  /// compilation fails, that output is shown to the user before failing the
+  /// target.
+  static Future<void> _runDart2js(
+    ProcessUtils processUtils,
+    Logger logger,
+    List<String> args,
+  ) async {
+    final RunResult result = await processUtils.run(args, encoding: utf8);
+    if (result.exitCode == 0) {
+      return;
+    }
+    _printCompilerOutput(logger, result);
+    throwToolExit('Failed to compile application for the Web.');
+  }
+
+  /// Prints the stdout and stderr of [result] as errors.
+  ///
+  /// dart2js writes its diagnostics to stdout, but they are surfaced on the
+  /// tool's stderr, consistent with frontend server (DDC) diagnostics.
+  static void _printCompilerOutput(Logger logger, RunResult result) {
+    for (final output in <String>[result.stdout, result.stderr]) {
+      final String trimmed = output.trimRight();
+      if (trimmed.isNotEmpty) {
+        logger.printError(trimmed);
+      }
+    }
   }
 
   @override
@@ -402,12 +434,16 @@ class Dart2JSTarget extends Dart2WebTarget {
   Iterable<File> buildFiles(Environment environment) {
     final String mainJsName =
         (getBuildConfig(environment)['mainJsPath'] as String?) ?? 'main.dart.js';
-    final mainJsMapName = '$mainJsName.map';
+    final String? mainJsMapName = !compilerConfig.sourceMaps
+        ? null
+        : compilerConfig.webContentHash
+        ? _resolveHashedBasename(environment.buildDir, _mainJsMapRegex, 'main.dart.js.map')
+        : '$mainJsName.map';
     return environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
       if (file.basename == mainJsName) {
         return true;
       }
-      if (compilerConfig.sourceMaps && file.basename == mainJsMapName) {
+      if (mainJsMapName != null && file.basename == mainJsMapName) {
         return true;
       }
       if (_partFileRegex.hasMatch(file.basename)) {
@@ -440,7 +476,7 @@ class Dart2JSTarget extends Dart2WebTarget {
 }
 
 /// The classification of a wasm dry-run compile, derived from the compiler's
-/// exit code and output in [Dart2WasmTarget._logAndClassifyDryRunResult].
+/// exit code and output in [Dart2WasmTarget._classifyDryRunResult].
 ///
 /// dart2wasm exits with code 254 when dry-run analysis completes with issues;
 /// any other non-zero exit code is unexpected.
@@ -525,6 +561,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
         _mainWasmMapRegex,
         _mainMjsRegex,
         _mainMjsMapRegex,
+        _partWasmRegex,
+        _partWasmMapRegex,
       ]);
     }
     final Artifacts artifacts = environment.artifacts;
@@ -575,6 +613,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       _checkForLegacyWebImports(environment, runResult.stdout, runResult.stderr);
       throwToolExit('Failed to compile application for the Web.');
     } else if (compilerConfig.webContentHash) {
+      _checkNoDeferredParts(environment.buildDir, _partWasmRegex);
       final String newWasmBasename = _hashAndRenameWebOutput(
         file: outputWasmFile,
         sourceMapFile: compilerConfig.sourceMaps
@@ -660,7 +699,11 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final String mainWasmName = (config['mainWasmPath'] as String?) ?? 'main.dart.wasm';
     final String jsSupportName = (config['jsSupportRuntimePath'] as String?) ?? 'main.dart.mjs';
     const mainWasmMapName = 'main.dart.wasm.map';
-    final jsSupportMapName = '$jsSupportName.map';
+    final String? jsSupportMapName = !compilerConfig.sourceMaps
+        ? null
+        : compilerConfig.webContentHash
+        ? _resolveHashedBasename(environment.buildDir, _mainMjsMapRegex, 'main.dart.mjs.map')
+        : '$jsSupportName.map';
 
     return environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
       if (file.basename == mainWasmName || file.basename == jsSupportName) {
@@ -706,8 +749,14 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final String stdout = runResult.stdout;
     final String stderr = runResult.stderr;
 
-    final _DryRunOutcome outcome = _logAndClassifyDryRunResult(
-      logger: environment.logger,
+    final _DryRunOutcome outcome = _classifyDryRunResult(
+      exitCode: exitCode,
+      stdout: stdout,
+      stderr: stderr,
+    );
+    _logDryRunResult(
+      environment: environment,
+      outcome: outcome,
       exitCode: exitCode,
       stdout: stdout,
       stderr: stderr,
@@ -729,10 +778,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
       findingsInfo = const <String, String>{};
     }
 
-    _checkForLegacyWebImports(environment, stdout, stderr);
-
-    environment.logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
-
     _analytics.send(
       Event.flutterWasmDryRunPackage(
         result: outcome.name,
@@ -742,57 +787,91 @@ class Dart2WasmTarget extends Dart2WebTarget {
     );
   }
 
-  /// Classifies the dry-run compile result into a [_DryRunOutcome] (see the
-  /// enum values for the classification rules) and logs the corresponding
-  /// warning output to [logger].
-  static _DryRunOutcome _logAndClassifyDryRunResult({
-    required Logger logger,
+  /// Classifies the dry-run compile result into a [_DryRunOutcome]; see the
+  /// enum values for the classification rules.
+  static _DryRunOutcome _classifyDryRunResult({
     required int exitCode,
     required String stdout,
     required String stderr,
   }) {
     if (exitCode != 0 && exitCode != 254) {
-      logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
-      if (stdout.isNotEmpty) {
-        logger.printWarning('stdout:');
-        logger.printWarning(stdout);
-      }
-      if (stderr.isNotEmpty) {
-        logger.printWarning('stderr:');
-        logger.printWarning(stderr);
-      }
       return _DryRunOutcome.crash;
     }
     if (exitCode == 0) {
-      logger.printWarning(
-        'Wasm dry run succeeded. Consider building and testing your application with the '
-        '`--wasm` flag. See docs for more info: '
-        'https://docs.flutter.dev/platform-integration/web/wasm',
-      );
       return _DryRunOutcome.success;
     }
     if (stderr.isNotEmpty) {
-      logger.printWarning('Wasm dry run failed:');
-      if (stdout.isNotEmpty) {
-        logger.printWarning('stdout:');
-        logger.printWarning(stdout);
-      }
-      logger.printWarning('stderr:');
-      logger.printWarning(stderr);
       return _DryRunOutcome.failure;
     }
     if (stdout.isNotEmpty) {
-      logger.printWarning('Wasm dry run findings:');
-      logger.printWarning(stdout);
-      logger.printWarning(
-        'Consider addressing these issues to enable wasm builds. '
-        '$_kLegacyWebDeprecationWarning\n'
-        'See docs for more info: '
-        'https://docs.flutter.dev/platform-integration/web/wasm\n',
-      );
       return _DryRunOutcome.findings;
     }
     return _DryRunOutcome.unknown;
+  }
+
+  /// Logs the warnings for a dry-run compile with the given [outcome].
+  ///
+  /// When [WasmCompilerConfig.omitDeprecatedJsInteropFindings] is set, the
+  /// findings already reported by dart2js are left out, and nothing is logged
+  /// if no other findings remain.
+  void _logDryRunResult({
+    required Environment environment,
+    required _DryRunOutcome outcome,
+    required int exitCode,
+    required String stdout,
+    required String stderr,
+  }) {
+    final String displayedStdout =
+        outcome == _DryRunOutcome.findings && compilerConfig.omitDeprecatedJsInteropFindings
+        ? _removeDeprecatedJsInteropFindings(stdout)
+        : stdout;
+    if (outcome == _DryRunOutcome.findings && displayedStdout.isEmpty) {
+      return;
+    }
+    final Logger logger = environment.logger;
+    switch (outcome) {
+      case _DryRunOutcome.crash:
+        logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
+        _printDryRunStreams(logger, stdout: stdout, stderr: stderr);
+      case _DryRunOutcome.success:
+        logger.printWarning(
+          'Wasm dry run succeeded. Consider building and testing your application with the '
+          '`--wasm` flag. See docs for more info: '
+          'https://docs.flutter.dev/platform-integration/web/wasm',
+        );
+      case _DryRunOutcome.failure:
+        logger.printWarning('Wasm dry run failed:');
+        _printDryRunStreams(logger, stdout: stdout, stderr: stderr);
+      case _DryRunOutcome.findings:
+        logger.printWarning('Wasm dry run findings:');
+        logger.printWarning(displayedStdout);
+        final deprecationWarning = _hasDeprecatedJsInteropFindings(displayedStdout)
+            ? '$_kLegacyWebDeprecationWarning\n'
+            : '';
+        logger.printWarning(
+          'Consider addressing these issues to enable wasm builds. '
+          '$deprecationWarning'
+          'See docs for more info: '
+          'https://docs.flutter.dev/platform-integration/web/wasm\n',
+        );
+      case _DryRunOutcome.unknown:
+        break;
+    }
+    _checkForLegacyWebImports(environment, displayedStdout, stderr);
+    logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
+  }
+
+  /// Prints the non-empty [stdout] and [stderr] of a dry run as labeled
+  /// warnings.
+  static void _printDryRunStreams(Logger logger, {required String stdout, required String stderr}) {
+    if (stdout.isNotEmpty) {
+      logger.printWarning('stdout:');
+      logger.printWarning(stdout);
+    }
+    if (stderr.isNotEmpty) {
+      logger.printWarning('stderr:');
+      logger.printWarning(stderr);
+    }
   }
 
   /// Builds the per-error-code analytics payload for a dry run that produced
@@ -850,6 +929,20 @@ class Dart2WasmTarget extends Dart2WebTarget {
   ///     package:bar/some/path.dart 120:5 - dart:js unsupported (1)
   static final RegExp _wasmErrorCodePattern = RegExp(r'\(([0-9]+)\)\s*$');
 
+  /// The dry-run error codes for imports of the deprecated JS interop
+  /// libraries, which dart2js reports as errors with
+  /// `--no-deprecated-js-interop`.
+  ///
+  /// These match `_DryRunErrorCode` in dart2wasm's `dry_run.dart`:
+  /// `noDartHtml` (0, which also covers `dart:indexed_db`, `dart:svg`,
+  /// `dart:web_audio` and `dart:web_gl`), `noDartJs` (1), `noPackageJs` (14)
+  /// and `noDartJsUtil` (15).
+  static const _deprecatedJsInteropErrorCodes = <String>{'0', '1', '14', '15'};
+
+  /// Returns the trailing error code of a dry-run finding [line], or null if
+  /// [line] is not a finding.
+  static String? _findingErrorCode(String line) => _wasmErrorCodePattern.firstMatch(line)?.group(1);
+
   /// Parses the dry-run findings printed to [stdout], one finding per line
   /// in the form `<uri> <location> - <message> (<errorCode>)`, e.g.:
   ///
@@ -861,7 +954,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
   static Map<String, Set<Uri>> _parseWasmFindings(String stdout) {
     final errorCodeToImportUris = <String, Set<Uri>>{};
     for (final String line in stdout.split('\n')) {
-      final String? errorCode = _wasmErrorCodePattern.firstMatch(line)?.group(1);
+      final String? errorCode = _findingErrorCode(line);
       if (errorCode != null) {
         final Uri uri = Uri.parse(line.split(' ')[0]);
         (errorCodeToImportUris[errorCode] ??= {}).add(uri);
@@ -869,6 +962,30 @@ class Dart2WasmTarget extends Dart2WebTarget {
     }
     return errorCodeToImportUris;
   }
+
+  /// Removes the findings for deprecated JS interop imports from the dry-run
+  /// [stdout].
+  ///
+  /// Returns an empty string if no other findings remain.
+  static String _removeDeprecatedJsInteropFindings(String stdout) {
+    final List<String> remainingLines = stdout
+        .split('\n')
+        .where((String line) => !_isDeprecatedJsInteropFinding(line))
+        .toList();
+    final bool hasRemainingFindings = remainingLines.any(
+      (String line) => _findingErrorCode(line) != null,
+    );
+    return hasRemainingFindings ? remainingLines.join('\n') : '';
+  }
+
+  /// Whether the dry-run [stdout] contains a finding for a deprecated JS
+  /// interop import.
+  static bool _hasDeprecatedJsInteropFindings(String stdout) =>
+      stdout.split('\n').any(_isDeprecatedJsInteropFinding);
+
+  /// Whether [line] is a dry-run finding for a deprecated JS interop import.
+  static bool _isDeprecatedJsInteropFinding(String line) =>
+      _deprecatedJsInteropErrorCodes.contains(_findingErrorCode(line));
 
   /// Splits the packages in the project's package config into pub-hosted
   /// packages (mapped to their resolved version, which is safe to report to
@@ -1031,16 +1148,27 @@ class WebReleaseBundle extends Target {
   Iterable<String> get buildPatternStems =>
       compileTargets.expand((Dart2WebTarget target) => target.buildPatternStems);
 
+  bool get _hasWebContentHash =>
+      compileTargets.any((Dart2WebTarget t) => t.compilerConfig.webContentHash);
+
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     const Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file')),
+    if (_hasWebContentHash) ...<Source>[
+      const Source.pattern('{OUTPUT_DIR}/index.html', optional: true),
+      const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js', optional: true),
+    ],
   ];
 
   @override
   List<Source> get outputs => <Source>[
     ...buildPatternStems.map((String file) => Source.pattern('{OUTPUT_DIR}/$file')),
+    if (_hasWebContentHash) ...<Source>[
+      const Source.pattern('{OUTPUT_DIR}/index.html'),
+      const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js'),
+    ],
   ];
 
   @override
@@ -1108,7 +1236,8 @@ class WebReleaseBundle extends Target {
       (Dart2WebTarget t) => t.compilerConfig.webContentHash,
     );
     if (webContentHash) {
-      final Map<String, File> renamedOutputs = hashWebAssets(outputDirectory);
+      final WebAssetHashResult hashResult = hashWebAssets(outputDirectory);
+      final Map<String, File> renamedOutputs = hashResult.renamedFiles;
       final List<File> updatedOutputs = bundledDepfile.outputs.map((File f) {
         final String normalizedPath = environment.fileSystem.path.normalize(f.path);
         return renamedOutputs[normalizedPath] ?? renamedOutputs[f.path] ?? f;
@@ -1117,6 +1246,7 @@ class WebReleaseBundle extends Target {
         Depfile(bundledDepfile.inputs, updatedOutputs),
         environment.buildDir.childFile('flutter_assets.d'),
       );
+      injectManifestBuildConfig(environment.outputDir, hashResult);
     } else {
       depfileService.writeToFile(
         bundledDepfile,
@@ -1316,12 +1446,22 @@ class WebTemplatedFiles extends Target {
       'builds': descriptions,
       if (environment.defines[kUseLocalCanvasKitFlag] == 'true') 'useLocalCanvasKit': true,
     };
+    final bool hasWasmBuild = descriptions.any(
+      (Map<String, Object?> description) => description['compileTarget'] == 'dart2wasm',
+    );
+    final File supportJsFile = environment.buildDir.childFile('main.dart.support.js');
+    final String? supportJs = hasWasmBuild && supportJsFile.existsSync()
+        ? supportJsFile.readAsStringSync().trim()
+        : null;
+    final supportsDart2WasmLine = (supportJs != null && supportJs.isNotEmpty)
+        ? '_flutter.supportsDart2Wasm = $supportJs;\n'
+        : '';
     return '''
 if (!window._flutter) {
   window._flutter = {};
 }
 _flutter.buildConfig = ${jsonEncode(buildConfig)};
-''';
+$supportsDart2WasmLine''';
   }
 
   @override
@@ -1417,6 +1557,11 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     const Source.pattern('{PROJECT_DIR}/web/*/index.html'),
     const Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js'),
     const Source.hostArtifact(HostArtifact.flutterWebSdk),
+    if (compileTargets?.any(
+          (Dart2WebTarget target) => target is Dart2WasmTarget && !target.compilerConfig.dryRun,
+        ) ??
+        false)
+      const Source.pattern('{BUILD_DIR}/main.dart.support.js', optional: true),
     if (compileTargets != null)
       for (final Dart2WebTarget target in compileTargets!)
         for (final String stem in target.buildPatternStems) Source.pattern('{BUILD_DIR}/$stem'),
@@ -1470,6 +1615,7 @@ class WebBuiltInAssets extends Target {
   @override
   List<Source> get outputs => <Source>[
     const Source.pattern('{BUILD_DIR}/flutter.js'),
+    const Source.pattern('{BUILD_DIR}/flutter.js.map'),
     for (final File file in _canvasKitFiles)
       Source.pattern('{BUILD_DIR}/canvaskit/${_filePathRelativeToCanvasKitDirectory(file)}'),
   ];
@@ -1486,15 +1632,15 @@ class WebBuiltInAssets extends Target {
       file.copySync(targetPath);
     }
 
-    // Write the flutter.js file
-    final String flutterJsOut = fileSystem.path.join(environment.outputDir.path, 'flutter.js');
-    final File flutterJsFile = fileSystem.file(
-      fileSystem.path.join(
-        globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
-        'flutter.js',
-      ),
+    // Write the Flutter loader and its source map.
+    final Directory flutterJsDirectory = fileSystem.directory(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
     );
-    flutterJsFile.copySync(flutterJsOut);
+    for (final fileName in <String>['flutter.js', 'flutter.js.map']) {
+      final File sourceFile = flutterJsDirectory.childFile(fileName);
+      final File targetFile = environment.outputDir.childFile(fileName);
+      sourceFile.copySync(targetFile.path);
+    }
   }
 }
 
@@ -1532,12 +1678,21 @@ class WebServiceWorker extends Target {
         .where(
           (File file) =>
               !file.path.endsWith('flutter_service_worker.js') &&
+              !file.path.endsWith(kPrecacheManifestFile) &&
               !environment.fileSystem.path.basename(file.path).startsWith('.'),
         )
         .toList();
 
+    final bool webContentHash = compileConfigs.any(
+      (WebCompilerConfig config) => config.webContentHash,
+    );
+    final File? precacheManifestFile = updatePrecacheManifest(
+      environment.outputDir,
+      enabled: webContentHash,
+      useLocalCanvasKit: environment.defines[kUseLocalCanvasKitFlag] == 'true',
+    );
     final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
-    final depfile = Depfile(contents, <File>[serviceWorkerFile]);
+    final depfile = Depfile(contents, <File>[serviceWorkerFile, ?precacheManifestFile]);
     final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
       Artifact.flutterToolsFileGenerators,
     );
