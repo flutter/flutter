@@ -5,9 +5,11 @@
 import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -469,5 +471,60 @@ void main() {
     expect(CpuArch.x86.name, 'x86');
     expect(CpuArch.x64.name, 'x64');
     expect(CpuArch.riscv64.name, 'riscv64');
+  });
+
+  group('getBuildDirectory', () {
+    testWithoutContext('defaults to "build" when config does not specify build-dir', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      expect(getBuildDirectory(config, fileSystem), 'build');
+    });
+
+    testWithoutContext('uses passed in config', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      config.setValue('build-dir', 'custom_build_out');
+      expect(getBuildDirectory(config, fileSystem), 'custom_build_out');
+    });
+
+    testWithoutContext('throws exception when configured build-dir is absolute', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      config.setValue('build-dir', '/absolute/path/to/build');
+      expect(() => getBuildDirectory(config, fileSystem), throwsException);
+    });
+
+    testUsingContext('defaults to "build" when config does not specify build-dir in context', () {
+      expect(getBuildDirectory(), 'build');
+    }, overrides: <Type, Generator>{Config: () => Config.test()});
+
+    testUsingContext('uses zone injected config', () {
+      globals.config.setValue('build-dir', 'injected_build_dir');
+      expect(getBuildDirectory(), 'injected_build_dir');
+    }, overrides: <Type, Generator>{Config: () => Config.test()});
+  });
+
+  group('deprecatedJsInterop', () {
+    testWithoutContext('passes no compiler flags when unset', () {
+      expect(deprecatedJsInteropCompilerFlags(null), isEmpty);
+    });
+
+    testWithoutContext('passes the matching compiler flag when set', () {
+      expect(deprecatedJsInteropCompilerFlags(true), <String>['--deprecated-js-interop']);
+      expect(deprecatedJsInteropCompilerFlags(false), <String>['--no-deprecated-js-interop']);
+    });
+
+    testWithoutContext('defaults to null and is preserved by copyWith', () {
+      expect(BuildInfo.debug.deprecatedJsInterop, isNull);
+
+      const buildInfo = BuildInfo(
+        BuildMode.debug,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+        deprecatedJsInterop: false,
+      );
+      expect(buildInfo.copyWith(dartDefines: <String>['foo=bar']).deprecatedJsInterop, isFalse);
+    });
   });
 }

@@ -7,6 +7,7 @@
 #include <zircon/types.h>
 
 #include <algorithm>  // For std::remove_if
+#include <cmath>
 #include <memory>
 
 #include "flutter/fml/logging.h"
@@ -244,7 +245,8 @@ void FakeFlatland::SetScale(fuchsia::ui::composition::TransformId transform_id,
     return;
   }
 
-  if (isinf(scale.x) || isinf(scale.y) || isnan(scale.x) || isnan(scale.y)) {
+  if (std::isinf(scale.x) || std::isinf(scale.y) || std::isnan(scale.x) ||
+      std::isnan(scale.y)) {
     FML_CHECK(false) << "SetScale failed, invalid scale values (" << scale.x
                      << ", " << scale.y << " ).";
     return;

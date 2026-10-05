@@ -154,32 +154,29 @@ Unable to locate a development device; please run 'flutter doctor' for informati
       expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
     });
 
-    testUsingContext(
-      'ensure unsupported for projects are included when includeDevicesUnsupportedByProject is true',
-      () async {
-        final logger = BufferLogger.test();
-        final deviceManager = TestDeviceManager(logger: logger, platform: platform);
-        deviceManager.androidDiscoverer.deviceList = <Device>[
-          attachedUnsupportedAndroidDevice,
-          attachedUnsupportedForProjectAndroidDevice,
-        ];
+    testUsingContext('ensure unsupported for projects are included when includeDevicesUnsupportedByProject is true', () async {
+      final logger = BufferLogger.test();
+      final deviceManager = TestDeviceManager(logger: logger, platform: platform);
+      deviceManager.androidDiscoverer.deviceList = <Device>[
+        attachedUnsupportedAndroidDevice,
+        attachedUnsupportedForProjectAndroidDevice,
+      ];
 
-        final targetDevices = TargetDevices(
-          platform: platform,
-          deviceManager: deviceManager,
-          logger: logger,
-        );
-        final List<Device>? devices = await targetDevices.findAllTargetDevices(
-          includeDevicesUnsupportedByProject: true,
-        );
+      final targetDevices = TargetDevices(
+        platform: platform,
+        deviceManager: deviceManager,
+        logger: logger,
+      );
+      final List<Device>? devices = await targetDevices.findAllTargetDevices(
+        includeDevicesUnsupportedByProject: true,
+      );
 
-        expect(logger.statusText, equals(''));
-        expect(devices, <Device>[attachedUnsupportedForProjectAndroidDevice]);
-        expect(deviceManager.androidDiscoverer.devicesCalled, 2);
-        expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
-        expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
-      },
-    );
+      expect(logger.statusText, equals(''));
+      expect(devices, <Device>[attachedUnsupportedForProjectAndroidDevice]);
+      expect(deviceManager.androidDiscoverer.devicesCalled, 2);
+      expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
+      expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
+    });
 
     group('finds no devices', () {
       late BufferLogger logger;
@@ -669,6 +666,7 @@ target-device-5 (wireless) (mobile) • xxx • android • Android 10
 
 [1]: target-device-1 (xxx)
 [2]: target-device-5 (wireless) (xxx)
+To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
 '''),
             );
             expect(devices, <Device>[wirelessAndroidDevice1]);
@@ -719,6 +717,7 @@ target-device-1 (mobile) • xxx • android • Android 10
 target-device-2 (mobile) • xxx • android • Android 10
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
+To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
 '''),
             );
             expect(devices, <Device>[attachedAndroidDevice1]);
@@ -742,6 +741,13 @@ target-device-2 (mobile) • xxx • android • Android 10
             expect(logger.statusText, contains('[11]: target-device-11 (id-11)'));
             expect(logger.statusText, contains('Please choose one (or "q" to quit): '));
             expect(logger.statusText, isNot(contains('Please choose one (or "q" to quit): 11')));
+            expect(
+              logger.statusText,
+              contains(
+                'To skip this prompt in the future, pass the device id to the "-d" flag, '
+                'e.g. "-d id-11".',
+              ),
+            );
             expect(terminal.singleCharMode, isFalse);
             expect(deviceManager.androidDiscoverer.devicesCalled, 2);
             expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
@@ -768,6 +774,7 @@ target-device-6 (wireless) (mobile) • xxx • android • Android 10
 
 [1]: target-device-5 (wireless) (xxx)
 [2]: target-device-6 (wireless) (xxx)
+To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
 '''),
             );
             expect(devices, <Device>[wirelessAndroidDevice1]);
@@ -904,6 +911,7 @@ target-device-8 (wireless) (mobile) • xxx • android • Android 10
 [2]: target-device-4 (xxx)
 [3]: target-device-5 (wireless) (xxx)
 [4]: target-device-8 (wireless) (xxx)
+To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
 '''),
             );
             expect(devices, <Device>[attachedUnsupportedForProjectAndroidDevice]);
@@ -929,6 +937,7 @@ target-device-1 (mobile) • xxx • android • Android 10
 target-device-2 (mobile) • xxx • android • Android 10
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
+To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
 '''),
             );
             expect(devices, <Device>[attachedAndroidDevice1]);
@@ -957,6 +966,7 @@ target-device-6 (wireless) (mobile) • xxx • android • Android 10
 
 [1]: target-device-5 (wireless) (xxx)
 [2]: target-device-6 (wireless) (xxx)
+To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
 '''),
             );
             expect(devices, <Device>[wirelessAndroidDevice1]);
@@ -1232,30 +1242,27 @@ Unable to locate a development device; please run 'flutter doctor' for informati
       expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 1);
     });
 
-    testUsingContext(
-      'ensure unsupported for projects are included when includeDevicesUnsupportedByProject is true',
-      () async {
-        final logger = BufferLogger.test();
-        final deviceManager = TestDeviceManager(logger: logger, platform: platform);
-        deviceManager.iosDiscoverer.deviceList = <Device>[
-          attachedUnsupportedIOSDevice,
-          attachedUnsupportedForProjectIOSDevice,
-        ];
+    testUsingContext('ensure unsupported for projects are included when includeDevicesUnsupportedByProject is true', () async {
+      final logger = BufferLogger.test();
+      final deviceManager = TestDeviceManager(logger: logger, platform: platform);
+      deviceManager.iosDiscoverer.deviceList = <Device>[
+        attachedUnsupportedIOSDevice,
+        attachedUnsupportedForProjectIOSDevice,
+      ];
 
-        final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
-          deviceManager: deviceManager,
-          logger: logger,
-        );
-        final List<Device>? devices = await targetDevices.findAllTargetDevices(
-          includeDevicesUnsupportedByProject: true,
-        );
+      final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
+        deviceManager: deviceManager,
+        logger: logger,
+      );
+      final List<Device>? devices = await targetDevices.findAllTargetDevices(
+        includeDevicesUnsupportedByProject: true,
+      );
 
-        expect(logger.statusText, equals(''));
-        expect(devices, <Device>[attachedUnsupportedForProjectIOSDevice]);
-        expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
-        expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
-      },
-    );
+      expect(logger.statusText, equals(''));
+      expect(devices, <Device>[attachedUnsupportedForProjectIOSDevice]);
+      expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
+      expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
+    });
 
     group('finds no devices', () {
       late BufferLogger logger;
@@ -1761,7 +1768,8 @@ target-device-9 (mobile) • xxx • ios • iOS 16
 No wireless devices were found.
 
 [1]: target-device-9 (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
+'''),
             );
             expect(devices, <Device>[nonEphemeralDevice]);
             expect(deviceManager.iosDiscoverer.devicesCalled, 2);
@@ -1807,7 +1815,8 @@ target-device-9 (mobile) • xxx • ios • iOS 16
 No wireless devices were found.
 
 [1]: target-device-9 (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
+'''),
             );
             expect(devices, <Device>[nonEphemeralDevice]);
           }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
@@ -2008,31 +2017,26 @@ Checking for wireless devices...
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
         });
 
-        testUsingContext(
-          'when partially matching wireless device and an attached device from different discoverer',
-          () async {
-            final androidDevice = FakeDevice(deviceName: 'target-device-android');
-            deviceManager.androidDiscoverer.deviceList = <Device>[androidDevice];
-            deviceManager.iosDiscoverer.deviceList = <Device>[disconnectedWirelessIOSDevice1];
-            deviceManager.iosDiscoverer.refreshDeviceList = <Device>[
-              disconnectedWirelessIOSDevice1,
-            ];
+        testUsingContext('when partially matching wireless device and an attached device from different discoverer', () async {
+          final androidDevice = FakeDevice(deviceName: 'target-device-android');
+          deviceManager.androidDiscoverer.deviceList = <Device>[androidDevice];
+          deviceManager.iosDiscoverer.deviceList = <Device>[disconnectedWirelessIOSDevice1];
+          deviceManager.iosDiscoverer.refreshDeviceList = <Device>[disconnectedWirelessIOSDevice1];
 
-            final List<Device>? devices = await targetDevices.findAllTargetDevices();
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
-            expect(
-              logger.statusText,
-              equals('''
+          expect(
+            logger.statusText,
+            equals('''
 Checking for wireless devices...
 '''),
-            );
-            expect(devices, <Device>[androidDevice]);
-            expect(deviceManager.iosDiscoverer.devicesCalled, 3);
-            expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
-            expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
-            expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
-          },
-        );
+          );
+          expect(devices, <Device>[androidDevice]);
+          expect(deviceManager.iosDiscoverer.devicesCalled, 3);
+          expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
+          expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
+          expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
+        });
 
         testUsingContext('when matching single non-ephemeral attached device', () async {
           deviceManager.iosDiscoverer.deviceList = <Device>[nonEphemeralDevice];
@@ -2158,7 +2162,8 @@ target-device-5 (wireless) (mobile) • xxx • ios • iOS 16
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
 [3]: target-device-5 (wireless) (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
+'''),
             );
             expect(devices, <Device>[connectedWirelessIOSDevice1]);
             expect(deviceManager.iosDiscoverer.devicesCalled, 2);
@@ -2198,7 +2203,8 @@ No wireless devices were found.
 
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
+'''),
             );
             expect(devices, <Device>[attachedIOSDevice2]);
             expect(deviceManager.iosDiscoverer.devicesCalled, 2);
@@ -2235,6 +2241,7 @@ target-device-6 (wireless) (mobile) • xxx • ios • iOS 16
 
 [1]: target-device-5 (wireless) (xxx)
 [2]: target-device-6 (wireless) (xxx)
+To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
 '''),
             );
             expect(devices, <Device>[connectedWirelessIOSDevice1]);
@@ -2283,6 +2290,7 @@ target-device-5 (wireless) (mobile) • xxx • ios • iOS 16
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
 [3]: target-device-5 (wireless) (xxx)
+To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
 '''),
               );
               expect(devices, <Device>[attachedIOSDevice1]);
@@ -2340,7 +2348,8 @@ target-device-2 (mobile) • xxx • ios • iOS 16
 
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
+'''),
               );
 
               expect(devices, <Device>[attachedIOSDevice2]);
@@ -2396,7 +2405,8 @@ target-device-5 (wireless) (mobile) • xxx • ios • iOS 16
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
 [3]: target-device-5 (wireless) (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
+'''),
               );
 
               expect(devices, <Device>[attachedIOSDevice2]);
@@ -2585,7 +2595,8 @@ target-device-8 (wireless) (mobile) • xxx • ios • iOS 16
 [2]: target-device-4 (xxx)
 [3]: target-device-5 (wireless) (xxx)
 [4]: target-device-8 (wireless) (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
+'''),
             );
             expect(devices, <Device>[connectedWirelessIOSDevice1]);
             expect(deviceManager.iosDiscoverer.devicesCalled, 3);
@@ -2625,7 +2636,8 @@ No wireless devices were found.
 
 [1]: target-device-1 (xxx)
 [2]: target-device-2 (xxx)
-Please choose one (or "q" to quit): '''),
+Please choose one (or "q" to quit): To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
+'''),
             );
             expect(devices, <Device>[attachedIOSDevice2]);
             expect(deviceManager.iosDiscoverer.devicesCalled, 3);
@@ -2660,6 +2672,7 @@ target-device-6 (wireless) (mobile) • xxx • ios • iOS 16
 
 [1]: target-device-5 (wireless) (xxx)
 [2]: target-device-6 (wireless) (xxx)
+To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d xxx".
 '''),
             );
             expect(devices, <Device>[connectedWirelessIOSDevice1]);

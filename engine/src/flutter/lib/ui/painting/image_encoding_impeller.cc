@@ -10,6 +10,7 @@
 #include "fml/status.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/context.h"
 #include "third_party/skia/include/core/SkBitmap.h"
@@ -146,13 +147,22 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
                             "Image is not an Impeller image."));
     return;
   }
-  auto texture = impeller_image->GetImpellerTexture(impeller_context);
-
   if (impeller_context == nullptr) {
     encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,
                             "Impeller context was null."));
     return;
   }
+
+  std::shared_ptr<impeller::AiksContext> aiks_context =
+      snapshot_delegate ? snapshot_delegate->GetAiksContext() : nullptr;
+  std::unique_ptr<impeller::AiksContext> fallback_aiks_context;
+  if (!aiks_context) {
+    fallback_aiks_context =
+        std::make_unique<impeller::AiksContext>(impeller_context, nullptr);
+    aiks_context = {fallback_aiks_context.get(), [](auto*) {}};
+  }
+  auto texture =
+      impeller_image->GetImpellerTexture(aiks_context->GetContentContext());
 
   if (texture == nullptr) {
     encode_task(

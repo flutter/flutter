@@ -93,6 +93,11 @@ class FilterInput {
   /// @brief  Sets the effect transform of filter inputs.
   virtual void SetEffectTransform(const Matrix& matrix);
 
+  /// @brief  Sets the local to pass transform of filter inputs.
+  ///
+  /// @see    `FilterContents::SetLocalToPassTransform`
+  virtual void SetLocalToPassTransform(const Matrix& matrix);
+
   /// @brief  Turns on subpass mode for filter inputs.
   virtual void SetRenderingMode(Entity::RenderingMode rendering_mode);
 };

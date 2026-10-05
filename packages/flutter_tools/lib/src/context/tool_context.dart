@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport '../build_system/build_system.dart';
+/// @docImport '../doctor.dart';
+/// @docImport 'android_context.dart';
+/// @docImport 'apple_context.dart';
+/// @docImport 'tool_dependencies.dart';
+library;
+
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -21,12 +28,26 @@ import '../cache.dart';
 import '../custom_devices/custom_devices_config.dart';
 import '../git.dart';
 import '../native_assets.dart';
+import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
 import '../runner/local_engine.dart';
 import '../version.dart';
 
-/// Holds core, platform-independent dependencies.
+/// Holds the core, platform-independent services used throughout the tool.
+///
+/// This includes host I/O and environment wrappers (such as [FileSystem],
+/// [Logger], [Platform], [ProcessManager], [Stdio], [AnsiTerminal], [Signals],
+/// and [SystemClock]) and SDK configuration and state (such as [Artifacts],
+/// [Cache], [Config], [FlutterVersion], and [FlutterProjectFactory]).
+///
+/// [ToolContext] is the lowest layer of the dependency graph and is what most
+/// code should depend on: commands, builders, compilers, and test runners take
+/// a [ToolContext] rather than [ToolDependencies]. It deliberately excludes the
+/// platform toolchains ([AndroidContext], [AppleContext]) and the higher-level
+/// services built on top of it (such as [BuildSystem] and [Doctor]), so
+/// consumers stay decoupled from platform SDKs and unit tests can use a
+/// lightweight fake without constructing the full object graph.
 class ToolContext {
   ToolContext({
     required this.artifacts,
@@ -42,8 +63,10 @@ class ToolContext {
     this.nativeAssetsBuilder,
     required this.os,
     required this.outputPreferences,
+    required this.persistentToolState,
     required this.platform,
     required this.preRunValidator,
+    required this.processInfo,
     required this.processManager,
     required this.processUtils,
     required this.projectFactory,
@@ -94,11 +117,17 @@ class ToolContext {
   /// Manages formatting preferences for console output, such as line wrapping width.
   final OutputPreferences outputPreferences;
 
+  /// Global tool internal state that persists across tool invocations.
+  final PersistentToolState persistentToolState;
+
   /// Provides host operating system details and environment variables.
   final Platform platform;
 
   /// Validates environment prerequisites and file permissions before command execution.
   final PreRunValidator preRunValidator;
+
+  /// Process resource and memory usage reporting.
+  final ProcessInfo processInfo;
 
   /// Spawns and manages external host processes.
   final ProcessManager processManager;

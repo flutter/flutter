@@ -484,6 +484,43 @@ dependencies:
       );
 
       testUsingContext(
+        'Refreshing the plugin list sorts plugins by dependency order',
+        () async {
+          createPlugin(
+            name: 'plugin_b',
+            platforms: const <String, _PluginPlatformInfo>{
+              'ios': _PluginPlatformInfo(pluginClass: 'PluginB'),
+            },
+            dependencies: <String>['plugin_z'],
+          );
+          createPlugin(
+            name: 'plugin_z',
+            platforms: const <String, _PluginPlatformInfo>{
+              'ios': _PluginPlatformInfo(pluginClass: 'PluginZ'),
+            },
+          );
+
+          iosProject.testExists = true;
+
+          await refreshPluginsList(flutterProject);
+
+          expect(flutterProject.flutterPluginsDependenciesFile, exists);
+
+          final String pluginsFileContents = flutterProject.flutterPluginsDependenciesFile
+              .readAsStringSync();
+          expect(
+            pluginsFileContents.indexOf('plugin_z'),
+            lessThan(pluginsFileContents.indexOf('plugin_b')),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
         'does not crash when a plugin pubspec.yaml is not valid UTF-8',
         () async {
           // Regression test for https://github.com/flutter/flutter/issues/188970.
@@ -497,7 +534,10 @@ dependencies:
               .writeAsBytesSync(Uint8List.fromList(<int>[0xff, 0xfe, 0xfd]));
 
           // The tool must not crash when a plugin's pubspec.yaml cannot be read.
-          final Future<List<Plugin>> pluginsFuture = findPlugins(flutterProject);
+          final Future<List<Plugin>> pluginsFuture = findPlugins(
+            flutterProject,
+            logger: BufferLogger.test(),
+          );
           await expectLater(pluginsFuture, completes);
 
           // The unreadable plugin is skipped, but the readable one is still found.
@@ -1673,7 +1713,7 @@ flutter:
       );
 
       testUsingContext(
-        'Generated Linux plugin files sorts by plugin name',
+        'Generated Linux plugin files sorts by plugin name when independent',
         () async {
           createFakePlugins(fs, <String>[
             'plugin_d',
@@ -1693,6 +1733,41 @@ flutter:
             expect(contents.indexOf('plugin_a'), lessThan(contents.indexOf('plugin_b')));
             expect(contents.indexOf('plugin_b'), lessThan(contents.indexOf('plugin_c')));
             expect(contents.indexOf('plugin_c'), lessThan(contents.indexOf('plugin_d')));
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
+        'Generated Linux plugin files sorts by dependency order',
+        () async {
+          createPlugin(
+            name: 'plugin_b',
+            platforms: const <String, _PluginPlatformInfo>{
+              'linux': _PluginPlatformInfo(pluginClass: 'PluginB'),
+            },
+            dependencies: <String>['plugin_z'],
+          );
+          createPlugin(
+            name: 'plugin_z',
+            platforms: const <String, _PluginPlatformInfo>{
+              'linux': _PluginPlatformInfo(pluginClass: 'PluginZ'),
+            },
+          );
+
+          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
+
+          final File pluginCmakeFile = linuxProject.generatedPluginCmakeFile;
+          final File pluginRegistrant = linuxProject.managedDirectory.childFile(
+            'generated_plugin_registrant.cc',
+          );
+          for (final file in <File>[pluginCmakeFile, pluginRegistrant]) {
+            final String contents = file.readAsStringSync();
+            expect(contents.indexOf('plugin_z'), lessThan(contents.indexOf('plugin_b')));
           }
         },
         overrides: <Type, Generator>{
@@ -1757,7 +1832,7 @@ flutter:
       );
 
       testUsingContext(
-        'Generated Windows plugin files sorts by plugin name',
+        'Generated Windows plugin files sorts by plugin name when independent',
         () async {
           createFakePlugins(fs, <String>[
             'plugin_d',
@@ -1777,6 +1852,41 @@ flutter:
             expect(contents.indexOf('plugin_a'), lessThan(contents.indexOf('plugin_b')));
             expect(contents.indexOf('plugin_b'), lessThan(contents.indexOf('plugin_c')));
             expect(contents.indexOf('plugin_c'), lessThan(contents.indexOf('plugin_d')));
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
+        'Generated Windows plugin files sorts by dependency order',
+        () async {
+          createPlugin(
+            name: 'plugin_b',
+            platforms: const <String, _PluginPlatformInfo>{
+              'windows': _PluginPlatformInfo(pluginClass: 'PluginB'),
+            },
+            dependencies: <String>['plugin_z'],
+          );
+          createPlugin(
+            name: 'plugin_z',
+            platforms: const <String, _PluginPlatformInfo>{
+              'windows': _PluginPlatformInfo(pluginClass: 'PluginZ'),
+            },
+          );
+
+          await injectPlugins(flutterProject, releaseMode: false, windowsPlatform: true);
+
+          final File pluginCmakeFile = windowsProject.generatedPluginCmakeFile;
+          final File pluginRegistrant = windowsProject.managedDirectory.childFile(
+            'generated_plugin_registrant.cc',
+          );
+          for (final file in <File>[pluginCmakeFile, pluginRegistrant]) {
+            final String contents = file.readAsStringSync();
+            expect(contents.indexOf('plugin_z'), lessThan(contents.indexOf('plugin_b')));
           }
         },
         overrides: <Type, Generator>{
@@ -2009,6 +2119,71 @@ flutter:
           FeatureFlags: () => featureFlags,
         },
       );
+
+      testUsingContext(
+        'createPluginSymlinks repairs broken symlinks without failing',
+        () async {
+          linuxProject.exists = true;
+          windowsProject.exists = true;
+          final Directory pluginDir = createFakePlugin(fs);
+          await refreshPluginsList(flutterProject);
+
+          final links = <Link>[
+            linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
+            windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
+          ];
+          for (final link in links) {
+            link.deleteSync();
+            link.createSync('/non_existent_target_path');
+          }
+          createPluginSymlinks(flutterProject);
+
+          for (final link in links) {
+            expect(link, exists);
+            expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => featureFlags,
+        },
+      );
+
+      testUsingContext(
+        'createPluginSymlinks replaces existing files with symlinks without failing',
+        () async {
+          linuxProject.exists = true;
+          windowsProject.exists = true;
+          final Directory pluginDir = createFakePlugin(fs);
+          await refreshPluginsList(flutterProject);
+
+          final files = <File>[
+            linuxProject.pluginSymlinkDirectory.childFile('some_plugin'),
+            windowsProject.pluginSymlinkDirectory.childFile('some_plugin'),
+          ];
+          for (final file in files) {
+            ErrorHandlingFileSystem.deleteIfExists(file, recursive: true);
+            file.createSync(recursive: true);
+            file.writeAsStringSync('stale content');
+          }
+          createPluginSymlinks(flutterProject);
+
+          final links = <Link>[
+            linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
+            windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
+          ];
+          for (final link in links) {
+            expect(link, exists);
+            expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => featureFlags,
+        },
+      );
     });
 
     group('pubspec', () {
@@ -2203,31 +2378,34 @@ iosPrefix: "FLT; evilInjectedCall(); //"
         );
       });
 
-      testUsingContext('Plugin.fromYaml reports every invalid legacy-format field at once', () async {
-        const maliciousYaml = '''
+      testUsingContext(
+        'Plugin.fromYaml reports every invalid legacy-format field at once',
+        () async {
+          const maliciousYaml = '''
 androidPackage: "com.example.evil.Payload.run(); //"
 pluginClass: "Evil(); evilInjectedCall(); //"
 iosPrefix: "FLT; evilInjectedCall(); //"
 ''';
-        expect(
-          () => Plugin.fromYaml(
-            'evil_legacy_plugin',
-            '',
-            loadYaml(maliciousYaml) as YamlMap,
-            null,
-            const <String>[],
-            fileSystem: globals.fs,
-            isDevDependency: false,
-          ),
-          throwsToolExit(
-            message:
-                'Invalid plugin specification evil_legacy_plugin.\n'
-                'The "androidPackage" must be a valid identifier, optionally with dot-separated segments.\n'
-                'The "iosPrefix" must be a valid identifier, optionally with dot-separated segments.\n'
-                'The "pluginClass" must be a valid identifier, optionally with dot-separated segments.',
-          ),
-        );
-      });
+          expect(
+            () => Plugin.fromYaml(
+              'evil_legacy_plugin',
+              '',
+              loadYaml(maliciousYaml) as YamlMap,
+              null,
+              const <String>[],
+              fileSystem: globals.fs,
+              isDevDependency: false,
+            ),
+            throwsToolExit(
+              message:
+                  'Invalid plugin specification evil_legacy_plugin.\n'
+                  'The "androidPackage" must be a valid identifier, optionally with dot-separated segments.\n'
+                  'The "iosPrefix" must be a valid identifier, optionally with dot-separated segments.\n'
+                  'The "pluginClass" must be a valid identifier, optionally with dot-separated segments.',
+            ),
+          );
+        },
+      );
 
       testUsingContext('Plugin.fromYaml accepts a legacy-format plugin declaration', () async {
         const legacyYaml = '''
@@ -2867,82 +3045,6 @@ iosPrefix: FLT
         },
       );
     });
-
-    group('flutterPluginsListHasDevDependencies', () {
-      testWithoutContext('throws if file does not exist', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        expect(
-          () => flutterPluginsListHasDevDependencies(pluginsFile),
-          throwsA(isA<FileSystemException>()),
-        );
-      });
-
-      testWithoutContext('throws if file is malformed', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('This is not JSON');
-
-        expect(
-          () => flutterPluginsListHasDevDependencies(pluginsFile),
-          throwsA(isA<FormatException>()),
-        );
-      });
-
-      testWithoutContext('Returns false if has no dependencies', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('''
-{
-  "plugins": {}
-}
-''');
-        expect(flutterPluginsListHasDevDependencies(pluginsFile), isFalse);
-      });
-
-      testWithoutContext('Returns false if has no dev dependencies', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('''
-{
-  "plugins": {
-    "ios": [
-      {
-        "name": "foo_package",
-        "dev_dependency": false
-      }
-    ]
-  }
-}
-''');
-
-        expect(flutterPluginsListHasDevDependencies(pluginsFile), isFalse);
-      });
-
-      testWithoutContext('Returns true if has dev dependencies', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('''
-{
-  "plugins": {
-    "ios": [
-      {
-        "name": "foo_package",
-        "dev_dependency": true
-      }
-    ]
-  }
-}
-''');
-
-        expect(flutterPluginsListHasDevDependencies(pluginsFile), isTrue);
-      });
-    });
   });
 
   testUsingContext(
@@ -3344,27 +3446,108 @@ flutter:
       }
     });
 
-    test(
-      'packages absent from PackageConfig have no entry, distinguishing them from packages with missing pubspec.yaml',
-      () async {
-        final PackageConfig config = makePackageConfig(<String>['in_resolution']);
-        fs.file(config.packages.first.root.resolve('pubspec.yaml'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('name: in_resolution\n');
+    test('packages absent from PackageConfig have no entry, distinguishing them from packages with missing pubspec.yaml', () async {
+      final PackageConfig config = makePackageConfig(<String>['in_resolution']);
+      fs.file(config.packages.first.root.resolve('pubspec.yaml'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('name: in_resolution\n');
 
-        final PubspecCache cache = await buildPubspecCache(config, fileSystem: fs);
+      final PubspecCache cache = await buildPubspecCache(config, fileSystem: fs);
 
-        // Package in resolution with pubspec
-        // this means that the key is present and the value is non-null.
-        expect(cache.containsKey('file:///pkgs/in_resolution/'), isTrue);
-        expect(cache['file:///pkgs/in_resolution/'], isNotNull);
+      // Package in resolution with pubspec
+      // this means that the key is present and the value is non-null.
+      expect(cache.containsKey('file:///pkgs/in_resolution/'), isTrue);
+      expect(cache['file:///pkgs/in_resolution/'], isNotNull);
 
-        // Package NOT in resolution (e.g. example-only dep)
-        // this means that the key is absent entirely.
-        // containsKey must return false so callers can fall back to disk reads.
-        expect(cache.containsKey('file:///pkgs/example_only_plugin/'), isFalse);
-      },
-    );
+      // Package NOT in resolution (e.g. example-only dep)
+      // this means that the key is absent entirely.
+      // containsKey must return false so callers can fall back to disk reads.
+      expect(cache.containsKey('file:///pkgs/example_only_plugin/'), isFalse);
+    });
+  });
+
+  group('sortByDependencies', () {
+    Plugin makePlugin(String name, {List<String> dependencies = const <String>[]}) {
+      return Plugin(
+        name: name,
+        path: '/pkgs/$name',
+        platforms: const <String, PluginPlatform>{},
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+        dependencies: dependencies,
+        isDirectDependency: true,
+        isDevDependency: false,
+      );
+    }
+
+    test('returns empty list when input is empty', () {
+      expect(sortByDependencies(<Plugin>[]), isEmpty);
+    });
+
+    test('returns single element list as-is', () {
+      final Plugin plugin = makePlugin('plugin_a');
+      expect(sortByDependencies(<Plugin>[plugin]), <Plugin>[plugin]);
+    });
+
+    test('sorts independent plugins alphabetically', () {
+      final Plugin pluginA = makePlugin('plugin_a');
+      final Plugin pluginB = makePlugin('plugin_b');
+      final Plugin pluginC = makePlugin('plugin_c');
+
+      final List<Plugin> sorted = sortByDependencies(<Plugin>[pluginC, pluginA, pluginB]);
+      expect(sorted, <Plugin>[pluginA, pluginB, pluginC]);
+    });
+
+    test('sorts direct dependency before dependent plugin', () {
+      // plugin_a depends on plugin_z.
+      final Plugin pluginA = makePlugin('plugin_a', dependencies: <String>['plugin_z']);
+      final Plugin pluginZ = makePlugin('plugin_z');
+
+      final List<Plugin> sorted = sortByDependencies(<Plugin>[pluginA, pluginZ]);
+      expect(sorted, <Plugin>[pluginZ, pluginA]);
+    });
+
+    test('sorts multi-level linear dependency chain', () {
+      // plugin_a -> plugin_b -> plugin_c
+      final Plugin pluginA = makePlugin('plugin_a', dependencies: <String>['plugin_b']);
+      final Plugin pluginB = makePlugin('plugin_b', dependencies: <String>['plugin_c']);
+      final Plugin pluginC = makePlugin('plugin_c');
+
+      final List<Plugin> sorted = sortByDependencies(<Plugin>[pluginA, pluginB, pluginC]);
+      expect(sorted, <Plugin>[pluginC, pluginB, pluginA]);
+    });
+
+    test('sorts diamond dependency graph', () {
+      // plugin_d depends on plugin_b and plugin_c; plugin_b and plugin_c depend on plugin_a.
+      final Plugin pluginA = makePlugin('plugin_a');
+      final Plugin pluginB = makePlugin('plugin_b', dependencies: <String>['plugin_a']);
+      final Plugin pluginC = makePlugin('plugin_c', dependencies: <String>['plugin_a']);
+      final Plugin pluginD = makePlugin('plugin_d', dependencies: <String>['plugin_b', 'plugin_c']);
+
+      final List<Plugin> sorted = sortByDependencies(<Plugin>[pluginD, pluginC, pluginB, pluginA]);
+      expect(sorted, <Plugin>[pluginA, pluginB, pluginC, pluginD]);
+    });
+
+    test('ignores non-plugin dependencies', () {
+      final Plugin pluginA = makePlugin(
+        'plugin_a',
+        dependencies: <String>['flutter', 'collection', 'plugin_b'],
+      );
+      final Plugin pluginB = makePlugin('plugin_b', dependencies: <String>['meta']);
+
+      final List<Plugin> sorted = sortByDependencies(<Plugin>[pluginA, pluginB]);
+      expect(sorted, <Plugin>[pluginB, pluginA]);
+    });
+
+    test('handles dependency cycle deterministically without throwing or hanging', () {
+      // plugin_a depends on plugin_b; plugin_b depends on plugin_a.
+      final Plugin pluginA = makePlugin('plugin_a', dependencies: <String>['plugin_b']);
+      final Plugin pluginB = makePlugin('plugin_b', dependencies: <String>['plugin_a']);
+
+      final List<Plugin> sorted = sortByDependencies(<Plugin>[pluginB, pluginA]);
+      expect(sorted.length, 2);
+      expect(sorted.map((Plugin p) => p.name).toSet(), <String>{'plugin_a', 'plugin_b'});
+    });
   });
 }
 

@@ -29,8 +29,8 @@ typedef ScrollNotificationCallback = void Function(ScrollNotification notificati
 class _ScrollNotificationObserverScope extends InheritedWidget {
   const _ScrollNotificationObserverScope({
     required super.child,
-    required ScrollNotificationObserverState scrollNotificationObserverState,
-  }) : _scrollNotificationObserverState = scrollNotificationObserverState;
+    required this._scrollNotificationObserverState,
+  });
 
   final ScrollNotificationObserverState _scrollNotificationObserverState;
 

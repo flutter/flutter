@@ -831,6 +831,8 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
 
   external String getPropertyValue(String property);
 
+  external String getPropertyPriority(String property);
+
   @JS('setProperty')
   external void _setProperty(String propertyName, String value, String priority);
   void setProperty(String propertyName, String value, [String? priority]) {
@@ -1758,8 +1760,11 @@ extension type DomFontFaceSet._(JSObject _) implements DomEventTarget {
   void forEach(DomFontFaceSetForEachCallback callback) => _forEach(callback.toJS);
 }
 
-typedef DomFontFaceSetForEachCallback =
-    void Function(DomFontFace fontFace, DomFontFace fontFaceAgain, DomFontFaceSet set);
+typedef DomFontFaceSetForEachCallback = void Function(
+  DomFontFace fontFace,
+  DomFontFace fontFaceAgain,
+  DomFontFaceSet set,
+);
 
 @JS('VisualViewport')
 extension type DomVisualViewport._(JSObject _) implements DomEventTarget {
@@ -2379,8 +2384,10 @@ extension type DomResizeObserverObserveOptions._(JSObject _) implements JSObject
 }
 
 /// Type of the function used to create a Resize Observer.
-typedef DomResizeObserverCallbackFn =
-    void Function(List<DomResizeObserverEntry> entries, DomResizeObserver observer);
+typedef DomResizeObserverCallbackFn = void Function(
+  List<DomResizeObserverEntry> entries,
+  DomResizeObserver observer,
+);
 
 /// The object passed to the [DomResizeObserverCallbackFn], which allows access to the new dimensions of the observed element.
 ///

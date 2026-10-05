@@ -104,6 +104,8 @@ object DependencyVersionChecker {
 
     @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 11, 1)
 
+    @VisibleForTesting internal val firstUnsupportedAGPMajorVersion: Int = 10
+
     @VisibleForTesting internal val warnKGPVersion: Version = Version(2, 3, 20)
 
     @VisibleForTesting internal val errorKGPVersion: Version = Version(2, 2, 20)
@@ -140,10 +142,16 @@ object DependencyVersionChecker {
         }
 
         val kgpVersion: Version? = VersionFetcher.getKGPVersion(project)
-        if (kgpVersion != null) {
+        val usesBuiltInKotlin = FlutterPluginUtils.isBuiltInKotlinEnabled(project, agpVersion)
+
+        if (kgpVersion != null && !usesBuiltInKotlin) {
             checkKGPVersion(kgpVersion, project)
+        } else {
+            project.logger.debug(
+                "Skipping Kotlin min-version enforcement because the project uses " +
+                    "AGP built-in Kotlin or does not apply KGP."
+            )
         }
-        // KGP is not required, so don't log any warning if we can't find the version.
     }
 
     private fun configureMinSdkCheck(project: Project) {
@@ -208,6 +216,20 @@ object DependencyVersionChecker {
             "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
             " to bypass this check.\n\nPotential fix: $potentialFix"
 
+    @VisibleForTesting internal fun getFutureUnsupportedMajorVersionErrorMessage(
+        dependencyName: String,
+        versionString: String,
+        unsupportedMajorVersion: Int,
+        potentialFix: String
+    ): String =
+        "Error: Your project's $dependencyName version ($versionString) is not yet " +
+            "supported. Flutter does not support $dependencyName $unsupportedMajorVersion, " +
+            "and support will be added in a future Flutter release. Please downgrade your " +
+            "$dependencyName version to a version below $unsupportedMajorVersion.0.0 to " +
+            "continue.\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
+            " to bypass this check (unsupported; your build may fail).\n\n" +
+            "Potential fix: $potentialFix"
+
     @VisibleForTesting
     internal fun getFlavorSpecificMessage(
         flavorName: String?,
@@ -270,6 +292,17 @@ object DependencyVersionChecker {
         androidPluginVersion: AndroidPluginVersion,
         project: Project
     ) {
+        if (androidPluginVersion.major >= firstUnsupportedAGPMajorVersion) {
+            val errorMessage: String =
+                getFutureUnsupportedMajorVersionErrorMessage(
+                    AGP_NAME,
+                    "${androidPluginVersion.major}.${androidPluginVersion.minor}.${androidPluginVersion.micro}",
+                    firstUnsupportedAGPMajorVersion,
+                    getPotentialAGPFix(project.rootDir.path)
+                )
+            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
+            throw DependencyValidationException(errorMessage)
+        }
         if (androidPluginVersion < errorAGPVersion) {
             val errorMessage: String =
                 getErrorMessage(

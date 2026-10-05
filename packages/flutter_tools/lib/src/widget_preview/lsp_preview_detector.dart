@@ -117,20 +117,15 @@ class LspPreviewDetector {
       // file watcher finished initializing.
       project.reloadManifest(logger: logger, fs: fs);
 
-      if (!dtd.lspServiceAvailable) {
+      if (dtd.dtdUri == null) {
         logger.printStatus('Launching analysis server...');
         _analysisServer = analysisServerFactory != null
             ? await analysisServerFactory!()
             : await launchAnalysisServer();
         await _analysisServer!.start();
 
-        final Uri? dtdUri = dtd.dtdUri;
-        if (dtdUri != null) {
-          await _analysisServer!.connectToDtd(dtdUri: dtdUri);
-        } else {
-          logger.printTrace('Launching a fresh DTD instance...');
-          await dtd.launchAndConnect(analysisServer: _analysisServer!);
-        }
+        logger.printTrace('Launching a fresh DTD instance...');
+        await dtd.launchAndConnect(analysisServer: _analysisServer!);
       }
     });
   }
@@ -185,44 +180,76 @@ class LspPreviewDetector {
     });
   }
 
+  /// Returns a [Future] that completes when the analysis server has completed
+  /// any in-progress initialization or analysis.
+  Future<void> waitForAnalysis() async {
+    if (_analysisServer != null) {
+      await _analysisServer!.waitForAnalysis();
+    } else {
+      await dtd.waitForAnalysis();
+    }
+  }
+
   Future<void> _fileAddedOrUpdated({required String filePath}) async {
     if (filePath.isPubspec) {
       onPubspecChangeDetected(filePath);
       return;
     }
-    await _analysisServer?.waitForAnalysis();
+    if (!filePath.isDartFile) {
+      return;
+    }
+    previewAnalytics.startPreviewReloadStopwatch();
     FlutterWidgetPreviews? result;
-    var retries = 5;
-    while (retries > 0) {
-      if (_disposed || shutdownHooks.isShuttingDown) {
-        break;
-      }
-      try {
-        result = await dtd.getFlutterWidgetPreviews().timeout(const Duration(seconds: 5));
-        break;
-      } catch (e) {
-        retries--;
-        if (retries == 0) {
-          if (_disposed || shutdownHooks.isShuttingDown) {
-            logger.printTrace('Failed to get widget previews during shutdown: $e');
-          } else if (e is StateError || e is Exception) {
-            logger.printWarning(
-              'Lost connection to the Dart Tooling Daemon (DTD). '
-              'Live preview updates are paused. Details: $e',
-            );
+    try {
+      await waitForAnalysis();
+      var retries = 5;
+      while (retries > 0) {
+        if (_disposed || shutdownHooks.isShuttingDown) {
+          break;
+        }
+        try {
+          result = await dtd.getFlutterWidgetPreviews().timeout(const Duration(seconds: 5));
+          break;
+        } catch (e) {
+          retries--;
+          if (retries == 0) {
+            if (_disposed || shutdownHooks.isShuttingDown) {
+              logger.printTrace('Failed to get widget previews during shutdown: $e');
+            } else if (e is StateError || e is Exception) {
+              logger.printWarning(
+                'Lost connection to the Dart Tooling Daemon (DTD). '
+                'Live preview updates are paused. Details: $e',
+              );
+            } else {
+              rethrow;
+            }
           } else {
-            rethrow;
+            logger.printTrace(
+              'Failed to get widget previews, retrying in 200ms... ($retries retries left). Error: $e',
+            );
+            await Future<void>.delayed(const Duration(milliseconds: 200));
           }
-        } else {
-          logger.printTrace(
-            'Failed to get widget previews, retrying in 200ms... ($retries retries left). Error: $e',
-          );
-          await Future<void>.delayed(const Duration(milliseconds: 200));
         }
       }
+    } catch (e) {
+      previewAnalytics.resetPreviewReloadStopwatch();
+      if (_disposed || shutdownHooks.isShuttingDown) {
+        logger.printTrace('Failed to get widget previews during shutdown: $e');
+      } else if (e is StateError || e is Exception) {
+        logger.printWarning(
+          'Lost connection to the Dart Tooling Daemon (DTD). '
+          'Live preview updates are paused. Details: $e',
+        );
+      } else {
+        rethrow;
+      }
+      return;
     }
     if (result != null) {
       onChangeDetected(result);
+      previewAnalytics.reportPreviewReloadTiming();
+    } else {
+      previewAnalytics.resetPreviewReloadStopwatch();
     }
   }
 }

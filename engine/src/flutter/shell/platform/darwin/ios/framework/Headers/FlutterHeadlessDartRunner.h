@@ -26,6 +26,9 @@ typedef void (^FlutterHeadlessDartRunnerCallback)(BOOL success);
  * and no native drawing surface. It is appropriate for use in running Dart
  * code e.g. in the background from a plugin.
  *
+ * Like any `FlutterEngine`, this class must be created and run on the main thread.
+ * See `FlutterEngine` class documentation.
+ *
  * Most callers should prefer using `FlutterEngine` directly; this interface exists
  * for legacy support.
  */
@@ -46,7 +49,8 @@ FLUTTER_DEPRECATED("FlutterEngine should be used rather than FlutterHeadlessDart
  * be unique across FlutterEngine instances
  * @param projectOrNil The `FlutterDartProject` to run.
  */
-- (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)projectOrNil;
+- (instancetype)initWithName:(NSString*)labelPrefix
+                     project:(FlutterDartProject*)projectOrNil NS_SWIFT_UI_ACTOR;
 
 /**
  * Initialize this FlutterHeadlessDartRunner with a `FlutterDartProject`.
@@ -64,7 +68,7 @@ FLUTTER_DEPRECATED("FlutterEngine should be used rather than FlutterHeadlessDart
  */
 - (instancetype)initWithName:(NSString*)labelPrefix
                      project:(FlutterDartProject*)projectOrNil
-      allowHeadlessExecution:(BOOL)allowHeadlessExecution;
+      allowHeadlessExecution:(BOOL)allowHeadlessExecution NS_SWIFT_UI_ACTOR;
 
 /**
  * Initialize this FlutterHeadlessDartRunner with a `FlutterDartProject`.
@@ -84,13 +88,13 @@ FLUTTER_DEPRECATED("FlutterEngine should be used rather than FlutterHeadlessDart
 - (instancetype)initWithName:(NSString*)labelPrefix
                      project:(FlutterDartProject*)projectOrNil
       allowHeadlessExecution:(BOOL)allowHeadlessExecution
-          restorationEnabled:(BOOL)restorationEnabled NS_DESIGNATED_INITIALIZER;
+          restorationEnabled:(BOOL)restorationEnabled NS_DESIGNATED_INITIALIZER NS_SWIFT_UI_ACTOR;
 
 /**
  * Not recommended for use - will initialize with a default label ("io.flutter.headless")
  * and the default FlutterDartProject.
  */
-- (instancetype)init;
+- (instancetype)init NS_SWIFT_UI_ACTOR;
 
 @end
 

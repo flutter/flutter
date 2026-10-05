@@ -44,9 +44,7 @@ export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 export 'autofill.dart' show AutofillConfiguration, AutofillScope;
 export 'text_editing.dart' show TextSelection;
-
-// TODO(a14n): the following export leads to Segmentation fault, see https://github.com/flutter/flutter/issues/106332
-// export 'text_editing_delta.dart' show TextEditingDelta;
+export 'text_editing_delta.dart' show TextEditingDelta;
 
 /// Indicates how to handle the intelligent replacement of dashes in text input.
 ///
@@ -648,6 +646,14 @@ class TextInputConfiguration {
   /// This flag only affects Android. On iOS, suggestions are tied directly to
   /// [autocorrect], so that suggestions are only shown when [autocorrect] is
   /// true. On Android autocorrection and suggestion are controlled separately.
+  ///
+  /// On Android, setting this to false can also limit which keyboard languages
+  /// the user can type in. Keyboards interpret the underlying
+  /// `TYPE_TEXT_FLAG_NO_SUGGESTIONS` flag differently: some, like Gboard,
+  /// disable keyboard languages that rely on suggestions to work, such as
+  /// Chinese, Korean, and Cantonese, so the user can't switch to them while
+  /// typing in the field. Consider leaving this true for fields where users may
+  /// need to type in those languages.
   ///
   /// Defaults to true.
   ///

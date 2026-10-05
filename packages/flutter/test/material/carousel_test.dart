@@ -1200,9 +1200,8 @@ void main() {
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return MaterialApp(
-            theme: Theme.of(
-              context,
-            ).copyWith(brightness: isLight ? Brightness.light : Brightness.dark),
+            theme: Theme.of(context)
+                .copyWith(brightness: isLight ? Brightness.light : Brightness.dark),
             home: Scaffold(
               appBar: AppBar(
                 actions: <Widget>[

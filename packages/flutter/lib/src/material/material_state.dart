@@ -103,9 +103,9 @@ typedef MaterialPropertyResolver<T> = WidgetPropertyResolver<T>;
 /// value will be used for all states.
 ///
 /// To define a `const` [MaterialStateColor], you'll need to extend
-/// [MaterialStateColor] and override its [resolve] method. You'll also need
-/// to provide a `defaultValue` to the super constructor, so that we can know
-/// at compile-time what its default color is.
+/// [MaterialStateColor] and override its [MaterialStateColor.resolve] method.
+/// You'll also need to provide a `defaultValue` to the super constructor, so
+/// that we can know at compile-time what its default color is.
 ///
 /// {@tool snippet}
 ///
@@ -265,9 +265,9 @@ typedef MaterialStateOutlinedBorder = WidgetStateOutlinedBorder;
 /// value will be used for all states.
 ///
 /// To define a `const` [MaterialStateTextStyle], you'll need to extend
-/// [MaterialStateTextStyle] and override its [resolve] method. You'll also need
-/// to provide a `defaultValue` to the super constructor, so that we can know
-/// at compile-time what its default color is.
+/// [MaterialStateTextStyle] and override its [MaterialStateTextStyle.resolve]
+/// method. You'll also need to provide a `defaultValue` to the super
+/// constructor, so that we can know at compile-time what its default color is.
 ///
 /// See also:
 ///
@@ -500,8 +500,8 @@ class _WidgetInputBorderMapper extends WidgetStateMapper<InputBorder>
   const _WidgetInputBorderMapper(super.map);
 }
 
-/// Interface for classes that [resolve] to a value of type `T` based
-/// on a widget's interactive "state", which is defined as a set
+/// Interface for classes that [MaterialStateProperty.resolve] to a value of
+/// type `T` based on a widget's interactive "state", which is defined as a set
 /// of [MaterialState]s.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=CylXr3AF3uU}
@@ -511,14 +511,14 @@ class _WidgetInputBorderMapper extends WidgetStateMapper<InputBorder>
 /// [WidgetState.focused], [WidgetState.hovered], [WidgetState.pressed]. For
 /// example the [InkWell.overlayColor] defines the color that fills the ink well
 /// when it's pressed (the "splash color"), focused, or hovered. The [InkWell]
-/// uses the overlay color's [resolve] method to compute the color for the
-/// ink well's current state.
+/// uses the overlay color's [MaterialStateProperty.resolve] method to compute
+/// the color for the ink well's current state.
 ///
 /// [ButtonStyle], which is used to configure the appearance of
 /// buttons like [TextButton], [ElevatedButton], and [OutlinedButton],
 /// has many material state properties. The button widgets keep track
-/// of their current material state and [resolve] the button style's
-/// material state properties when their value is needed.
+/// of their current material state and [MaterialStateProperty.resolve] the
+/// button style's material state properties when their value is needed.
 ///
 /// {@tool dartpad}
 /// This example shows how you can override the default text and icon
@@ -562,25 +562,28 @@ typedef MaterialStatePropertyAll<T> = WidgetStatePropertyAll<T>;
 /// extensions that add support for additional states. See
 /// [TextButton] for an example.
 ///
-/// The controller's [value] is its current set of states. Listeners
-/// are notified whenever the [value] changes. The [value] should only be
-/// changed with [update]; it should not be modified directly.
+/// The controller's [MaterialStatesController.value] is its current set of
+/// states. Listeners are notified whenever the
+/// [MaterialStatesController.value] changes. The
+/// [MaterialStatesController.value] should only be changed with
+/// [MaterialStatesController.update]; it should not be modified directly.
 ///
-/// The controller's [value] represents the set of states that a
-/// widget's visual properties, typically [MaterialStateProperty]
+/// The controller's [MaterialStatesController.value] represents the set of
+/// states that a widget's visual properties, typically [MaterialStateProperty]
 /// values, are resolved against. It is _not_ the intrinsic state of
 /// the widget. The widget is responsible for ensuring that the
-/// controller's [value] tracks its intrinsic state. For example one
-/// cannot request the keyboard focus for a widget by adding
-/// [WidgetState.focused] to its controller. When the widget gains the
-/// or loses the focus it will [update] its controller's [value] and
-/// notify listeners of the change.
+/// controller's [MaterialStatesController.value] tracks its intrinsic state.
+/// For example one cannot request the keyboard focus for a widget by adding
+/// [WidgetState.focused] to its controller. When the widget gains or loses the
+/// focus it will [MaterialStatesController.update] its controller's
+/// [MaterialStatesController.value] and notify listeners of the change.
 ///
 /// When calling `setState` in a [MaterialStatesController] listener, use the
 /// [SchedulerBinding.addPostFrameCallback] to delay the call to `setState` after
 /// the frame has been rendered. It's generally prudent to use the
 /// [SchedulerBinding.addPostFrameCallback] because some of the widgets that
-/// depend on [MaterialStatesController] may call [update] in their build method.
+/// depend on [MaterialStatesController] may call
+/// [MaterialStatesController.update] in their build method.
 /// In such cases, listener's that call `setState` - during the build phase - will cause
 /// an error.
 ///

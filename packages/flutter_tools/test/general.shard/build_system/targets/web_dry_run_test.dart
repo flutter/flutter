@@ -41,9 +41,13 @@ void main() {
 
   final Platform linux = FakePlatform(environment: <String, String>{});
 
-  Dart2WasmTarget createTarget() =>
-      Dart2WasmTarget(const WasmCompilerConfig(dryRun: true), fakeAnalytics)
-        ..dryRunRandom = Random(0);
+  Dart2WasmTarget createTarget({bool omitDeprecatedJsInteropFindings = false}) => Dart2WasmTarget(
+    WasmCompilerConfig(
+      dryRun: true,
+      omitDeprecatedJsInteropFindings: omitDeprecatedJsInteropFindings,
+    ),
+    fakeAnalytics,
+  )..dryRunRandom = Random(0);
 
   setUp(() {
     testbed = TestBed(
@@ -182,7 +186,13 @@ package:foo/some/path.dart 6:1 - dart:html unsupported (0)
       expect(
         logger.statusText,
         contains(
-          'Migrate your project from dart:html and package:js to package:web and dart:js_interop.',
+          'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal',
+        ),
+      );
+      expect(
+        logger.statusText,
+        contains(
+          'from the Dart SDK in a future release. Migrate your project to package:web and dart:js_interop.',
         ),
       );
 
@@ -222,7 +232,13 @@ package:bar/some/path.dart 12:4 - dart:js_util unsupported (6)
       expect(
         logger.statusText,
         contains(
-          'Migrate your project from dart:html and package:js to package:web and dart:js_interop.',
+          'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal',
+        ),
+      );
+      expect(
+        logger.statusText,
+        contains(
+          'from the Dart SDK in a future release. Migrate your project to package:web and dart:js_interop.',
         ),
       );
     }),
@@ -687,4 +703,112 @@ package:baz/some/path.dart 10:1 - dart:html unsupported (0)
       expect(event.eventData['E0'], 'baz:3.0.0,bar:2.0.0,foo:1.0.0');
     }),
   );
+
+  group('omitDeprecatedJsInteropFindings', () {
+    const deprecatedJsInteropFindings = '''
+Found incompatibilities with WebAssembly.
+
+package:foo/some/path.dart 6:1 - dart:html unsupported (0)
+package:bar/some/path.dart 120:5 - dart:js unsupported (1)
+package:baz/some/path.dart 16:6 - package:js/js.dart unsupported (14)
+package:foo/some/path.dart 8:1 - dart:js_util unsupported (15)
+''';
+    const otherFinding =
+        "package:bar/some/path.dart 94:6 - JS interop class 'B' cannot extend "
+        "Dart class 'A'. (2)";
+    const legacyWebDeprecationWarning =
+        'dart:html, dart:js, and legacy JS interop libraries are deprecated';
+
+    void addDryRunCommand(String stdout) {
+      processManager.addCommand(FakeCommand(command: commandArgs, exitCode: 254, stdout: stdout));
+    }
+
+    test(
+      'shows deprecated JS interop findings by default',
+      () => testbed.run(() async {
+        addDryRunCommand(deprecatedJsInteropFindings);
+
+        await createTarget().build(environment);
+
+        final logger = environment.logger as BufferLogger;
+        expect(logger.warningText, contains('Wasm dry run findings:'));
+        expect(logger.warningText, contains('dart:html unsupported (0)'));
+        expect(logger.warningText, contains(legacyWebDeprecationWarning));
+        expect(
+          logger.statusText,
+          contains('Note: WebAssembly compilation failed due to legacy web imports.'),
+        );
+      }),
+    );
+
+    test(
+      'logs nothing when only deprecated JS interop findings remain',
+      () => testbed.run(() async {
+        addDryRunCommand(deprecatedJsInteropFindings);
+
+        await createTarget(omitDeprecatedJsInteropFindings: true).build(environment);
+
+        final logger = environment.logger as BufferLogger;
+        expect(logger.warningText, isEmpty);
+        expect(logger.statusText, isEmpty);
+      }),
+    );
+
+    test(
+      'logs only the remaining findings',
+      () => testbed.run(() async {
+        addDryRunCommand('$deprecatedJsInteropFindings$otherFinding\n');
+
+        await createTarget(omitDeprecatedJsInteropFindings: true).build(environment);
+
+        final logger = environment.logger as BufferLogger;
+        expect(logger.warningText, contains('Wasm dry run findings:'));
+        expect(logger.warningText, contains('Found incompatibilities with WebAssembly.'));
+        expect(logger.warningText, contains(otherFinding));
+        expect(logger.warningText, isNot(contains('unsupported')));
+        // None of the remaining findings are deprecated JS interop imports.
+        expect(logger.warningText, isNot(contains(legacyWebDeprecationWarning)));
+        expect(logger.warningText, contains('Use --no-wasm-dry-run to disable these warnings.'));
+        expect(
+          logger.statusText,
+          isNot(contains('Note: WebAssembly compilation failed due to legacy web imports.')),
+        );
+      }),
+    );
+
+    test(
+      'does not mention the deprecation without deprecated JS interop findings',
+      () => testbed.run(() async {
+        addDryRunCommand('Found incompatibilities with WebAssembly.\n\n$otherFinding\n');
+
+        await createTarget().build(environment);
+
+        final logger = environment.logger as BufferLogger;
+        expect(logger.warningText, contains(otherFinding));
+        expect(
+          logger.warningText,
+          contains('Consider addressing these issues to enable wasm builds.'),
+        );
+        expect(logger.warningText, isNot(contains(legacyWebDeprecationWarning)));
+      }),
+    );
+
+    test(
+      'still reports omitted findings to analytics',
+      () => testbed.run(() async {
+        addDryRunCommand(deprecatedJsInteropFindings);
+
+        await createTarget(omitDeprecatedJsInteropFindings: true).build(environment);
+
+        expect(fakeAnalytics.sentEvents, hasLength(1));
+        final Event event = fakeAnalytics.sentEvents.single;
+        expect(event.eventName, DashEvent.flutterWasmDryRunPackage);
+        expect(event.eventData['result'], 'findings');
+        expect(event.eventData['E0'], 'foo:${_fakePackageVersions['foo']}');
+        expect(event.eventData['E1'], 'bar:${_fakePackageVersions['bar']}');
+        expect(event.eventData['E14'], 'baz:${_fakePackageVersions['baz']}');
+        expect(event.eventData['E15'], 'foo:${_fakePackageVersions['foo']}');
+      }),
+    );
+  });
 }

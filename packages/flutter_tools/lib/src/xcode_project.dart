@@ -65,8 +65,8 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   Directory? _xcodeDirectoryWithExtension(String extension) {
     final List<FileSystemEntity> contents = hostAppRoot.listSync();
     for (final entity in contents) {
-      if (globals.fs.path.extension(entity.path) == extension &&
-          !globals.fs.path.basename(entity.path).startsWith('.')) {
+      if (hostAppRoot.fileSystem.path.extension(entity.path) == extension &&
+          !hostAppRoot.fileSystem.path.basename(entity.path).startsWith('.')) {
         return hostAppRoot.childDirectory(entity.basename);
       }
     }
@@ -88,7 +88,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// On the first call, this will find plugins in the project.
   /// On subsequent calls, this will return the cached list of plugins.
   Future<List<Plugin>> getPlugins() async {
-    _plugins ??= await findPlugins(parent);
+    _plugins ??= await findPlugins(parent, logger: globals.logger);
     return _plugins!;
   }
 
