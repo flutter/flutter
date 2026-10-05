@@ -49,6 +49,10 @@ class FlutterPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         this.project = project
 
+        // Must run before anything that touches old AGP DSL types. Otherwise an add-to-app host on
+        // AGP 9 without `android.newDsl=false` fails first with an unexplained NullPointerException.
+        FlutterPluginUtils.checkAddToAppHostAgp9Config(project)
+
         val rootProject = project.rootProject
         if (FlutterPluginUtils.isFlutterAppProject(project)) {
             addTaskForLockfileGeneration(rootProject)

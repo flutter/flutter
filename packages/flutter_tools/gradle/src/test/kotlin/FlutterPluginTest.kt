@@ -1,5 +1,6 @@
 package com.flutter.gradle
 
+import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
@@ -27,6 +28,8 @@ import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.AfterEach
@@ -119,6 +122,38 @@ class FlutterPluginTest {
         verify {
             FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest(project)
         }
+    }
+
+    @Test
+    fun `apply fails with the add-to-app AGP 9 error before touching the Android extension`(
+        @TempDir tempDir: Path
+    ) {
+        // The Flutter module library project (`:flutter`) included from source in a native host app.
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        every { project.plugins.hasPlugin("com.android.application") } returns false
+        val hostDir = tempDir.resolve("hello_host_app").toFile().apply { mkdirs() }
+        val hostRootProject = mockk<Project>()
+        every { hostRootProject.projectDir } returns hostDir
+        every { hostRootProject.file("gradle.properties") } returns File(hostDir, "gradle.properties")
+        every { hostRootProject.subprojects } returns emptySet()
+        every { project.rootProject } returns hostRootProject
+
+        // AGP 9 with neither `android.newDsl` nor `android.builtInKotlin` set.
+        mockkObject(VersionFetcher)
+        every { VersionFetcher.getAGPVersion(project) } returns AndroidPluginVersion(9, 3, 1)
+        val unsetProperty = mockk<Provider<String>>()
+        every { unsetProperty.orNull } returns null
+        val providers = mockk<ProviderFactory>()
+        every { providers.gradleProperty(any<String>()) } returns unsetProperty
+        every { project.providers } returns providers
+
+        mockkObject(FlutterPluginUtils)
+        val exception = assertThrows<GradleException> { FlutterPlugin().apply(project) }
+
+        assertContains(exception.message!!, "android.newDsl=false")
+        verify(exactly = 0) { FlutterPluginUtils.getAndroidExtension(any()) }
+        verify(exactly = 0) { project.extensions.create("flutter", any<Class<*>>()) }
     }
 
     @Test
