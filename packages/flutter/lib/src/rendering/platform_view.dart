@@ -804,6 +804,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   /// How to behave during hit testing.
   // Changing _hitTestBehavior might affect which objects are considered hovered over.
+  // ignore: avoid_setters_without_getters
   set hitTestBehavior(PlatformViewHitTestBehavior value) {
     if (value != _hitTestBehavior) {
       _hitTestBehavior = value;
