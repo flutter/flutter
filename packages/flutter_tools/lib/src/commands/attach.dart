@@ -203,14 +203,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
-  /// Optional [HotRunnerConfig] passed to [HotRunner].
-  @protected
-  HotRunnerConfig? get hotRunnerConfig => null;
-
-  /// Optional [ProjectFileInvalidator] passed to [HotRunner].
-  @protected
-  ProjectFileInvalidator? get projectFileInvalidator => null;
-
   @override
   Future<void> validateCommand() async {
     // ARM macOS as an iOS target is hidden, except for attach.
@@ -406,9 +398,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             xcode: _xcode,
             projectRootPath: stringArg('project-root'),
             dillOutputPath: stringArg('output-dill'),
-            hotRunnerConfig: hotRunnerConfig,
             nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-            projectFileInvalidator: projectFileInvalidator,
             analytics: analytics,
           )
         : ColdRunner(
@@ -509,9 +499,7 @@ class HotRunnerFactory {
     bool benchmarkMode = false,
     String? dillOutputPath,
     bool hostIsIde = false,
-    HotRunnerConfig? hotRunnerConfig,
     String? nativeAssetsYamlFile,
-    ProjectFileInvalidator? projectFileInvalidator,
     String? projectRootPath,
     bool stayResident = true,
   }) => HotRunner(
@@ -526,8 +514,6 @@ class HotRunnerFactory {
     benchmarkMode: benchmarkMode,
     applicationBinary: applicationBinary,
     hostIsIde: hostIsIde,
-    hotRunnerConfig: hotRunnerConfig,
-    projectFileInvalidator: projectFileInvalidator,
     projectRootPath: projectRootPath,
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
