@@ -109,9 +109,9 @@ class FullPageDimensionsProvider extends DimensionsProvider {
   /// This is normally `documentElement.clientHeight`. When the page scrolls,
   /// iOS collapses the browser toolbar and the visible area grows, but
   /// `clientHeight` keeps the toolbar-expanded height. In that case the view
-  /// uses the taller `visualViewport.height`, but only while the visual
-  /// viewport has the same width as the document, so a stale value from the
-  /// previous orientation during a rotation is ignored.
+  /// uses `visualViewport.height` once it is at least a pixel taller, but only
+  /// while the visual viewport has the same width as the document, so a stale
+  /// value from the previous orientation during a rotation is ignored.
   ///
   /// The view never shrinks below `clientHeight`. A visual viewport that is
   /// too short, as Chrome on iOS reports after rotating, or one that the
@@ -123,7 +123,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     final double docHeight = documentElement.clientHeight;
     final double viewportHeight = viewport.height!;
     final bool sameOrientation = (viewport.width! - docWidth).abs() < 1;
-    return sameOrientation && viewportHeight > docHeight ? viewportHeight : docHeight;
+    return sameOrientation && viewportHeight - docHeight >= 1 ? viewportHeight : docHeight;
   }
 
   @override

@@ -340,8 +340,8 @@ void doTests() {
       fakes.add((target, name));
     }
 
-    // The values an iPhone reports in portrait, with the browser toolbar
-    // expanded, unless a test overrides the visual viewport.
+    // An iPhone document in portrait with the browser toolbar expanded. Each
+    // test picks the visual viewport size.
     void fakeIPhone({double viewportWidth = 430, required double viewportHeight}) {
       fake(documentElement, 'clientWidth', 430);
       fake(documentElement, 'clientHeight', 775);
@@ -385,6 +385,12 @@ void doTests() {
     test('does not shrink the view for a shorter visual viewport', () {
       // The on-screen keyboard shrinks the visual viewport.
       fakeIPhone(viewportHeight: 426);
+
+      expect(provider.computePhysicalSize(), const ui.Size(430 * 2, 775 * 2));
+    });
+
+    test('ignores sub-pixel visual viewport growth', () {
+      fakeIPhone(viewportHeight: 775.4);
 
       expect(provider.computePhysicalSize(), const ui.Size(430 * 2, 775 * 2));
     });
