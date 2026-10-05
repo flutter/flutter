@@ -26,7 +26,7 @@ void main() {
       'successfully and prints warning', () async {
     final versionTuple = VersionTuple(
       agpVersion: '9.1.1',
-      gradleVersion: '9.3.1',
+      gradleVersion: '9.5.0',
       kotlinVersion: '2.4.20',
     );
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
@@ -35,6 +35,7 @@ void main() {
     );
     expect(result, const ProcessResultMatcher());
     expect(result.stderr, contains('Please upgrade your Android Gradle Plugin version'));
+    expect(result.stderr, isNot(contains('Please upgrade your Gradle version')));
   });
 
   testUsingContext('Gradle version out of "warn" support band but in "error" band builds '
