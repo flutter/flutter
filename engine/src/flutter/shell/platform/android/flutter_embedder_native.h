@@ -774,6 +774,41 @@ class FlutterEmbedderNative {
   static void OnPlatformMessageCallback(const FlutterPlatformMessage* message,
                                         void* user_data);
 
+  /// @brief Static C-API callback matching
+  /// FlutterProjectArgs::compute_platform_resolved_locale_callback.
+  static const FlutterLocale* OnComputePlatformResolvedLocaleCallback(
+      const FlutterLocale** supported_locales,
+      size_t number_of_locales);
+
+  /// @brief Static C-API callback matching
+  /// FlutterProjectArgs::on_pre_engine_restart_callback.
+  static void OnPreEngineRestartCallback(void* user_data);
+
+  /// @brief Static C-API callback matching
+  /// FlutterProjectArgs::dart_deferred_library_loader_callback.
+  static void OnDartDeferredLibraryLoaderCallback(int64_t loading_unit_id,
+                                                  void* user_data);
+
+  /// @brief Static C-API callback matching
+  /// FlutterProjectArgs::get_scaled_font_size_callback.
+  static double OnGetScaledFontSizeCallback(double unscaled_font_size,
+                                            int configuration_id,
+                                            void* user_data);
+
+  /// @brief Static C-API callback matching
+  /// FlutterProjectArgs::log_message_callback.
+  static void OnLogMessageCallback(const char* tag,
+                                   const char* message,
+                                   void* user_data);
+
+  /// @brief Scales a font size via the attached JvmInvoker.
+  double GetScaledFontSize(double unscaled_font_size,
+                           int configuration_id) const;
+
+  /// @brief Computes the platform-resolved locale via the attached JvmInvoker.
+  std::vector<std::string> ComputePlatformResolvedLocale(
+      const std::vector<std::string>& supported_locales_data) const;
+
   /// @brief Asynchronously requests a VSync signal for the given baton.
   bool AsyncWaitForVsync(intptr_t baton) const;
 

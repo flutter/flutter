@@ -135,6 +135,30 @@ bool DefaultJvmInvoker::RequestDartDeferredLibrary(int loading_unit_id) {
   return true;
 }
 
+double DefaultJvmInvoker::GetScaledFontSize(double unscaled_font_size,
+                                            int configuration_id) {
+  TRACE_EVENT0("flutter", "DefaultJvmInvoker::GetScaledFontSize");
+  (void)configuration_id;
+  if (pending_exception_.load()) {
+    return -1.0;
+  }
+  return unscaled_font_size;
+}
+
+std::vector<std::string> DefaultJvmInvoker::ComputePlatformResolvedLocale(
+    const std::vector<std::string>& supported_locales_data) {
+  TRACE_EVENT0("flutter", "DefaultJvmInvoker::ComputePlatformResolvedLocale");
+  // Rationale: Each locale entry in supported_locales_data consists of 3
+  // consecutive strings (language_code, country_code, script_code).
+  constexpr size_t kStringsPerLocale = 3;
+  if (pending_exception_.load() ||
+      supported_locales_data.size() < kStringsPerLocale) {
+    return {};
+  }
+  return {supported_locales_data[0], supported_locales_data[1],
+          supported_locales_data[2]};
+}
+
 bool DefaultJvmInvoker::DecodeImage(const uint8_t* data,
                                     size_t size,
                                     int64_t generator_handle) {
@@ -270,6 +294,9 @@ static jmethodID g_set_application_locale_method = nullptr;
 static jmethodID g_update_semantics_method = nullptr;
 static jmethodID g_update_custom_accessibility_actions_method = nullptr;
 static jmethodID g_set_semantics_tree_enabled_method = nullptr;
+static jmethodID g_request_dart_deferred_library_method = nullptr;
+static jmethodID g_get_scaled_font_size_method = nullptr;
+static jmethodID g_compute_platform_resolved_locale_method = nullptr;
 
 static jmethodID g_on_display_platform_view_method = nullptr;
 static jmethodID g_on_display_platform_view2_method = nullptr;
@@ -335,6 +362,13 @@ bool AndroidJvmInvoker::RegisterJni(JNIEnv* env, jclass clazz) {
                        "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V");
   g_set_semantics_tree_enabled_method =
       env->GetMethodID(clazz, "setSemanticsTreeEnabled", "(Z)V");
+  g_request_dart_deferred_library_method =
+      env->GetMethodID(clazz, "requestDartDeferredLibrary", "(I)V");
+  g_get_scaled_font_size_method =
+      env->GetMethodID(clazz, "getScaledFontSize", "(FI)F");
+  g_compute_platform_resolved_locale_method =
+      env->GetMethodID(clazz, "computePlatformResolvedLocale",
+                       "([Ljava/lang/String;)[Ljava/lang/String;");
 
   g_on_display_platform_view_method =
       env->GetMethodID(clazz, "onDisplayPlatformView",
@@ -786,9 +820,99 @@ bool AndroidJvmInvoker::OnPreEngineRestart() {
 bool AndroidJvmInvoker::RequestDartDeferredLibrary(int loading_unit_id) {
   TRACE_EVENT1("flutter", "AndroidJvmInvoker::RequestDartDeferredLibrary",
                "loading_unit_id", std::to_string(loading_unit_id).c_str());
-  // TODO(mboetger): Unimplemented stub. Returns true without dispatching to
-  // FlutterJNI.requestDartDeferredLibrary.
-  return true;
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
+  if (!env || java_object.is_null()) {
+    return true;
+  }
+  jmethodID method = g_request_dart_deferred_library_method;
+  if (!method) {
+    jclass cls = env->GetObjectClass(java_object.obj());
+    if (cls) {
+      method = env->GetMethodID(cls, "requestDartDeferredLibrary", "(I)V");
+      env->DeleteLocalRef(cls);
+    }
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+  }
+  if (!method) {
+    return false;
+  }
+  env->CallVoidMethod(java_object.obj(), method,
+                      static_cast<jint>(loading_unit_id));
+  return fml::jni::CheckException(env);
+}
+
+double AndroidJvmInvoker::GetScaledFontSize(double unscaled_font_size,
+                                            int configuration_id) {
+  TRACE_EVENT0("flutter", "AndroidJvmInvoker::GetScaledFontSize");
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
+  // Rationale: -1.0 is the sentinel returned by FlutterJNI.getScaledFontSize
+  // when display metrics or Java references are unavailable.
+  constexpr double kInvalidScaledFontSize = -1.0;
+  if (!env || java_object.is_null()) {
+    return kInvalidScaledFontSize;
+  }
+  jmethodID method = g_get_scaled_font_size_method;
+  if (!method) {
+    jclass cls = env->GetObjectClass(java_object.obj());
+    if (cls) {
+      method = env->GetMethodID(cls, "getScaledFontSize", "(FI)F");
+      env->DeleteLocalRef(cls);
+    }
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+  }
+  if (!method) {
+    return kInvalidScaledFontSize;
+  }
+  const jfloat scaled = env->CallFloatMethod(
+      java_object.obj(), method, static_cast<jfloat>(unscaled_font_size),
+      static_cast<jint>(configuration_id));
+  if (!fml::jni::CheckException(env)) {
+    return kInvalidScaledFontSize;
+  }
+  return static_cast<double>(scaled);
+}
+
+std::vector<std::string> AndroidJvmInvoker::ComputePlatformResolvedLocale(
+    const std::vector<std::string>& supported_locales_data) {
+  TRACE_EVENT0("flutter", "AndroidJvmInvoker::ComputePlatformResolvedLocale");
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
+  if (!env || java_object.is_null()) {
+    return {};
+  }
+  jmethodID method = g_compute_platform_resolved_locale_method;
+  if (!method) {
+    jclass cls = env->GetObjectClass(java_object.obj());
+    if (cls) {
+      method = env->GetMethodID(cls, "computePlatformResolvedLocale",
+                                "([Ljava/lang/String;)[Ljava/lang/String;");
+      env->DeleteLocalRef(cls);
+    }
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+  }
+  if (!method) {
+    return {};
+  }
+  fml::jni::ScopedJavaLocalRef<jobjectArray> j_locales =
+      fml::jni::VectorToStringArray(env, supported_locales_data);
+  jobjectArray result_array = static_cast<jobjectArray>(
+      env->CallObjectMethod(java_object.obj(), method, j_locales.obj()));
+  if (!fml::jni::CheckException(env) || !result_array) {
+    return {};
+  }
+  fml::jni::ScopedJavaLocalRef<jobjectArray> scoped_result(env, result_array);
+  return fml::jni::StringArrayToVector(env, scoped_result.obj());
 }
 
 bool AndroidJvmInvoker::DecodeImage(const uint8_t* data,

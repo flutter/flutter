@@ -17,7 +17,8 @@ namespace flutter {
 namespace testing {
 
 TEST(AndroidTaskRunnersTest, DedicatedThreadsCreation) {
-  AndroidTaskRunners task_runners("test.dedicated");
+  AndroidTaskRunners task_runners("test.dedicated",
+                                  /*merged_platform_ui_thread=*/false);
   ASSERT_TRUE(task_runners.IsValid());
 
   auto platform_runner = task_runners.GetPlatformTaskRunner();
@@ -55,8 +56,7 @@ TEST(AndroidTaskRunnersTest, DedicatedThreadsCreation) {
 }
 
 TEST(AndroidTaskRunnersTest, MergedPlatformUIThreads) {
-  AndroidTaskRunners task_runners("test.merged",
-                                  /*merged_platform_ui_thread=*/true);
+  AndroidTaskRunners task_runners("test.merged");
   ASSERT_TRUE(task_runners.IsValid());
 
   auto platform_runner = task_runners.GetPlatformTaskRunner();
@@ -98,7 +98,8 @@ TEST(AndroidTaskRunnersTest, CustomConstructedRunners) {
 }
 
 TEST(AndroidTaskRunnersTest, RunsTasksOnCurrentThreadCallback) {
-  AndroidTaskRunners task_runners("test.thread_check");
+  AndroidTaskRunners task_runners("test.thread_check",
+                                  /*merged_platform_ui_thread=*/false);
   ASSERT_TRUE(task_runners.IsValid());
 
   const auto& custom = task_runners.GetCustomTaskRunners();
@@ -142,7 +143,8 @@ TEST(AndroidTaskRunnersTest, RunsTasksOnCurrentThreadCallback) {
 }
 
 TEST(AndroidTaskRunnersTest, PreStartupTaskStagingAndDraining) {
-  AndroidTaskRunners task_runners("test.staging");
+  AndroidTaskRunners task_runners("test.staging",
+                                  /*merged_platform_ui_thread=*/false);
   ASSERT_TRUE(task_runners.IsValid());
 
   EXPECT_EQ(task_runners.GetEngine(), nullptr);

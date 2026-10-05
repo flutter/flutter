@@ -122,7 +122,7 @@ struct AndroidVMArgs {
   bool enable_surface_control = false;
 
   /// Whether platform and UI threads are merged.
-  bool merged_platform_ui_thread = false;
+  bool merged_platform_ui_thread = true;
 
   /// Initial VM service URI (if available).
   std::string vm_service_uri;

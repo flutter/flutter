@@ -55,7 +55,7 @@ class AndroidTaskRunners {
   // and Raster task runners. If merged_platform_ui_thread is true, the
   // platform task runner is shared as the UI task runner.
   explicit AndroidTaskRunners(const std::string& thread_label,
-                              bool merged_platform_ui_thread = false);
+                              bool merged_platform_ui_thread = true);
 
   // Creates AndroidTaskRunners using existing task runners.
   AndroidTaskRunners(const std::string& thread_label,

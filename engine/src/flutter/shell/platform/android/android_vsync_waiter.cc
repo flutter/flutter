@@ -537,19 +537,6 @@ void AndroidVsyncWaiter::ConsumePendingVsync(intptr_t baton,
     NotifyVsyncToEngine(engine, baton, info.frame_start_time_nanos,
                         info.frame_target_time_nanos);
   }
-
-  if (invoker) {
-    struct PackedVsync {
-      int64_t frame_start_time_nanos;
-      int64_t frame_target_time_nanos;
-    };
-    PackedVsync data = {info.frame_start_time_nanos,
-                        info.frame_target_time_nanos};
-    std::vector<uint8_t> payload(sizeof(PackedVsync));
-    std::memcpy(payload.data(), &data, sizeof(PackedVsync));
-    invoker->InvokeVoidMethod("onVsync", "(JJ)V", payload);
-  }
-
   if (result_cb) {
     result_cb(baton, info.frame_start_time_nanos, info.frame_target_time_nanos);
   }
