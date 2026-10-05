@@ -855,12 +855,7 @@ class AppDomain extends Domain {
         urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
         analytics: _analytics,
-        systemClock: _toolContext.systemClock,
-        logger: _logger,
-        terminal: _toolContext.terminal,
-        platform: _toolContext.platform,
-        outputPreferences: _toolContext.outputPreferences,
-        fileSystem: _fs,
+        toolContext: _toolContext,
         webDefines: webDefines,
       );
     } else if (enableHotReload) {

@@ -10,23 +10,21 @@ import 'package:package_config/package_config_types.dart';
 
 import '../android/android_device.dart';
 import '../application_package.dart';
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/signals.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
 import '../drive/import_validator.dart';
 import '../drive/web_driver_service.dart' show Browser;
-import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart'
@@ -57,13 +55,14 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
-    required ToolContext toolContext,
+    required this._buildSystem,
+    required this._buildTargets,
+    required this._toolContext,
     @visibleForTesting this._flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     super.verboseHelp = false,
-  }) : _toolContext = toolContext,
-       _fsUtils = FileSystemUtils(fileSystem: toolContext.fs, platform: toolContext.platform) {
+  }) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
 
@@ -195,8 +194,9 @@ class DriveCommand extends RunCommandBase {
     return true;
   }
 
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
   FlutterDriverFactory? _flutterDriverFactory;
-  final FileSystemUtils _fsUtils;
   final ToolContext _toolContext;
 
   @override
@@ -310,13 +310,7 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :Terminal terminal,
-      :OutputPreferences outputPreferences,
-    ) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final String? testFile = _getTestFile();
     if (testFile == null) {
       throwToolExit(null);
@@ -350,10 +344,13 @@ class DriveCommand extends RunCommandBase {
     final web = webDevServerConfig != null;
 
     _flutterDriverFactory ??= FlutterDriverFactory(
-      toolContext: _toolContext,
+      analytics: analytics,
       applicationPackageFactory: ApplicationPackageFactory.instance!,
-      dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+      buildSystem: _buildSystem,
+      buildTargets: _buildTargets,
+      dartSdkPath: _toolContext.artifacts.getArtifactPath(.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
+      toolContext: _toolContext,
     );
     final File packageConfigFile = findPackageConfigFileOrDefault(fs.currentDirectory);
 
@@ -438,7 +435,7 @@ class DriveCommand extends RunCommandBase {
       if (testResult != 0) {
         throwToolExit(null);
       }
-    } on Exception catch (_) {
+    } on Exception {
       // On exceptions, including ToolExit, take a screenshot on the device
       // unless a screenshot was already taken on test failure.
       if (!screenshotTaken && screenshot != null) {
@@ -563,10 +560,10 @@ class DriveCommand extends RunCommandBase {
     if (!device.supportsScreenshot) {
       return;
     }
-    final Logger logger = _toolContext.logger;
+    final ToolContext(:FileSystemUtils fileSystemUtils, :Logger logger) = _toolContext;
     try {
       outputDirectory.createSync(recursive: true);
-      final File outputFile = _fsUtils.getUniqueFile(outputDirectory, 'drive', 'png');
+      final File outputFile = fileSystemUtils.getUniqueFile(outputDirectory, 'drive', 'png');
       await device.takeScreenshot(outputFile);
       logger.printStatus('Screenshot written to ${outputFile.path}');
     } on Exception catch (error) {
