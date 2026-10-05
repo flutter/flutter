@@ -18,11 +18,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
-import '../base/signals.dart';
 import '../base/terminal.dart';
-import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../context/android_context.dart';
@@ -54,8 +50,8 @@ const protocolVersion = '0.6.1';
 /// process).
 class DaemonCommand extends FlutterCommand {
   DaemonCommand({
-    required super.toolContext,
     required this._androidContext,
+    required super.toolContext,
     this._androidWorkflow,
     this._deviceManager,
     this.hidden = false,
@@ -91,14 +87,12 @@ class DaemonCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = toolContext.logger;
-    final Stdio stdio = toolContext.stdio;
-    final AnsiTerminal terminal = toolContext.terminal;
-    final OutputPreferences outputPreferences = toolContext.outputPreferences;
-    final FileSystem fs = toolContext.fs;
-    final Platform platform = toolContext.platform;
-    final ProcessManager processManager = toolContext.processManager;
-    final SystemClock systemClock = toolContext.systemClock;
+    final ToolContext(
+      :Logger logger,
+      :Stdio stdio,
+      :AnsiTerminal terminal,
+      :OutputPreferences outputPreferences,
+    ) = toolContext;
 
     if (argResults!['listen-on-tcp-port'] != null) {
       int? port;
@@ -109,25 +103,20 @@ class DaemonCommand extends FlutterCommand {
       }
 
       await DaemonServer(
+        analytics: analytics,
+        featureFlags: featureFlags,
         logger: StdoutLogger(
           terminal: terminal,
           stdio: stdio,
           outputPreferences: outputPreferences,
         ),
-        analytics: analytics,
+        toolContext: toolContext,
         androidSdk: _androidSdk,
         androidWorkflow: _androidWorkflow,
         deviceManager: _deviceManager,
-        featureFlags: featureFlags,
-        fileSystem: fs,
         java: _java,
         notifyingLogger: asLogger<NotifyingLogger>(logger),
-        outputPreferences: outputPreferences,
-        platform: platform,
         port: port,
-        processManager: processManager,
-        systemClock: systemClock,
-        terminal: terminal,
       ).run();
       return FlutterCommandResult.success();
     }
@@ -137,20 +126,13 @@ class DaemonCommand extends FlutterCommand {
         logger: logger,
       ),
       analytics: analytics,
+      featureFlags: featureFlags,
+      toolContext: toolContext,
       androidSdk: _androidSdk,
       androidWorkflow: _androidWorkflow,
       deviceManager: _deviceManager,
-      featureFlags: featureFlags,
-      fileSystem: fs,
       java: _java,
-      logger: logger,
       notifyingLogger: asLogger<NotifyingLogger>(logger),
-      outputPreferences: outputPreferences,
-      platform: platform,
-      processManager: processManager,
-      stdio: stdio,
-      systemClock: systemClock,
-      terminal: terminal,
     );
     logger.printStatus('Device daemon started.');
     final int code = await daemon.onExit;
@@ -164,26 +146,21 @@ class DaemonCommand extends FlutterCommand {
 @visibleForTesting
 class DaemonServer {
   DaemonServer({
+    required this.analytics,
+    required this.featureFlags,
     required this.logger,
-    this.analytics,
+    required this.toolContext,
     this.androidSdk,
     this.androidWorkflow,
     @visibleForTesting this._bind = ServerSocket.bind,
     this.deviceManager,
-    required this.featureFlags,
-    this.fileSystem,
     this.java,
     this.notifyingLogger,
-    this.outputPreferences,
-    this.platform,
     this.port,
-    this.processManager,
-    this.stdio,
-    this.systemClock,
-    this.terminal,
   });
 
   final int? port;
+  final ToolContext toolContext;
 
   /// Stdout logger used to print general server-related errors.
   final Logger logger;
@@ -191,19 +168,12 @@ class DaemonServer {
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
 
-  final FileSystem? fileSystem;
-  final Platform? platform;
-  final ProcessManager? processManager;
-  final Analytics? analytics;
-  final SystemClock? systemClock;
-  final AnsiTerminal? terminal;
-  final OutputPreferences? outputPreferences;
+  final Analytics analytics;
   final DeviceManager? deviceManager;
   final Java? java;
   final AndroidSdk? androidSdk;
   final FeatureFlags featureFlags;
   final AndroidWorkflow? androidWorkflow;
-  final Stdio? stdio;
 
   final Future<ServerSocket> Function(InternetAddress address, int port) _bind;
 
@@ -225,40 +195,32 @@ class DaemonServer {
       // We have to listen to socket.done. Otherwise when the connection is
       // reset, we will receive an uncatchable exception.
       // https://github.com/dart-lang/sdk/issues/25518
-      final Future<void> socketDone = socket.done.then<void>(
-        (_) {},
-        onError: (Object error, StackTrace stackTrace) {
-          logger.printError('Socket error: $error');
-          logger.printTrace('$stackTrace');
-        },
-      );
+      final Future<void> socketDone = socket.done.handleError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        logger.printError('Socket error: $error');
+        logger.printTrace('$stackTrace');
+      });
       final daemon = Daemon(
         DaemonConnection(
           daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
           logger: logger,
         ),
-        notifyingLogger: notifyingLogger,
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: processManager,
-        logger: logger,
         analytics: analytics,
-        systemClock: systemClock,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
+        toolContext: toolContext,
+        notifyingLogger: notifyingLogger,
         deviceManager: deviceManager,
         java: java,
         androidSdk: androidSdk,
         featureFlags: featureFlags,
         androidWorkflow: androidWorkflow,
-        stdio: stdio,
       );
       await daemon.onExit;
       await socketDone;
     });
 
     // Wait indefinitely until the server closes.
-    await subscription.asFuture<void>();
     await subscription.cancel();
   }
 }
@@ -272,34 +234,21 @@ typedef CommandHandlerWithBinary = Future<Object?> Function(
 class Daemon {
   Daemon(
     this.connection, {
-    Analytics? analytics,
+    required Analytics analytics,
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
-    required FeatureFlags featureFlags,
-    FileSystem? fileSystem,
     FileTransfer fileTransfer = const FileTransfer(),
     Java? java,
     this.logToStdout = false,
-    Logger? logger,
     this.notifyingLogger,
-    OutputPreferences? outputPreferences,
-    Platform? platform,
-    ProcessManager? processManager,
-    Stdio? stdio,
-    SystemClock? systemClock,
-    AnsiTerminal? terminal,
-  }) : _stdio = stdio,
-       _logger = logger ?? BufferLogger.test(),
-       _fs =
-           fileSystem ??
-           LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks()) {
-    final Platform p = platform ?? const LocalPlatform();
-    final ProcessManager pm = processManager ?? const LocalProcessManager();
-    final AnsiTerminal term = terminal ?? AnsiTerminal(stdio: stdio ?? Stdio(), platform: p);
-    final OutputPreferences prefs = outputPreferences ?? OutputPreferences.test();
-    final Analytics an = analytics ?? const NoOpAnalytics();
-    final SystemClock clock = systemClock ?? const SystemClock();
+  }) : _logger = notifyingLogger ?? toolContext.logger,
+       _fs = toolContext.fs,
+       _stdio = toolContext.stdio {
+    final ToolContext(:ProcessManager processManager, :FlutterProjectFactory projectFactory) =
+        toolContext;
     final AndroidWorkflow workflow =
         androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: featureFlags);
 
@@ -310,23 +259,19 @@ class Daemon {
         featureFlags: featureFlags,
         fileSystem: _fs,
         logger: _logger,
+        projectFactory: projectFactory,
         stdio: _stdio,
       ),
     );
+    registerDomain(appDomain = AppDomain(this, analytics: analytics, toolContext: toolContext));
     registerDomain(
-      appDomain = AppDomain(
+      deviceDomain = DeviceDomain(
         this,
-        analytics: an,
         fileSystem: _fs,
         logger: _logger,
-        outputPreferences: prefs,
-        platform: p,
-        systemClock: clock,
-        terminal: term,
+        projectFactory: projectFactory,
+        deviceManager: deviceManager,
       ),
-    );
-    registerDomain(
-      deviceDomain = DeviceDomain(this, logger: _logger, deviceManager: deviceManager),
     );
     registerDomain(
       emulatorDomain = EmulatorDomain(
@@ -334,7 +279,7 @@ class Daemon {
         androidWorkflow: workflow,
         fileSystem: _fs,
         logger: _logger,
-        processManager: pm,
+        processManager: processManager,
         androidSdk: androidSdk,
         java: java,
       ),
@@ -357,39 +302,26 @@ class Daemon {
   }
 
   factory Daemon.createMachineDaemon({
-    required Logger logger,
-    required Stdio stdio,
-    Analytics? analytics,
+    required Analytics analytics,
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
-    required FeatureFlags featureFlags,
-    FileSystem? fileSystem,
     Java? java,
-    OutputPreferences? outputPreferences,
-    Platform? platform,
-    ProcessManager? processManager,
-    SystemClock? systemClock,
-    AnsiTerminal? terminal,
   }) {
+    final ToolContext(:Logger logger, :Stdio stdio) = toolContext;
     final daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
+      analytics: analytics,
+      toolContext: toolContext,
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       logToStdout: true,
-      stdio: stdio,
-      logger: logger,
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: processManager,
-      analytics: analytics,
-      systemClock: systemClock,
-      terminal: terminal,
-      outputPreferences: outputPreferences,
       deviceManager: deviceManager,
       java: java,
       androidSdk: androidSdk,
@@ -400,7 +332,7 @@ class Daemon {
   }
 
   final DaemonConnection connection;
-  final Stdio? _stdio;
+  final Stdio _stdio;
   final Logger _logger;
   final FileSystem _fs;
 
@@ -432,11 +364,7 @@ class Daemon {
     final Object? id = request.data['id'];
 
     if (id == null) {
-      if (_stdio != null) {
-        _stdio.stderrWrite('no id for request: $request\n');
-      } else {
-        _logger.printError('no id for request: $request');
-      }
+      _stdio.stderrWrite('no id for request: $request\n');
       return;
     }
 
@@ -577,7 +505,8 @@ class DaemonDomain extends Domain {
     required this._featureFlags,
     required FileSystem fileSystem,
     required this._logger,
-    this._stdio,
+    required this._projectFactory,
+    required this._stdio,
   }) : _fs = fileSystem,
        super(daemon, 'daemon') {
     registerHandler('version', version);
@@ -595,13 +524,9 @@ class DaemonDomain extends Domain {
           // ignore: avoid_print
           print(message.message);
         } else if (message.level == 'error' || message.level == 'warning') {
-          if (_stdio != null) {
-            _stdio.stderrWrite('${message.message}\n');
-            if (message.stackTrace != null) {
-              _stdio.stderrWrite('${message.stackTrace.toString().trimRight()}\n');
-            }
-          } else {
-            _logger.printError(message.message, stackTrace: message.stackTrace);
+          _stdio.stderrWrite('${message.message}\n');
+          if (message.stackTrace != null) {
+            _stdio.stderrWrite('${message.stackTrace.toString().trimRight()}\n');
           }
         }
       } else {
@@ -624,7 +549,8 @@ class DaemonDomain extends Domain {
   final FileSystem _fs;
   final FeatureFlags _featureFlags;
   final Logger _logger;
-  final Stdio? _stdio;
+  final FlutterProjectFactory _projectFactory;
+  final Stdio _stdio;
 
   StreamSubscription<LogMessage>? _subscription;
 
@@ -671,7 +597,7 @@ class DaemonDomain extends Domain {
     final platformTypes = <String>[];
     final platformTypesMap = <String, Object>{};
     try {
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      final FlutterProject flutterProject = _projectFactory.fromDirectory(
         _fs.directory(projectRoot),
       );
       final Set<SupportedPlatform> supportedPlatforms = flutterProject
@@ -855,28 +781,10 @@ typedef RunOrAttach = Future<void> Function({
 ///
 /// It fires events for application start, stop, and stdout and stderr.
 class AppDomain extends Domain {
-  AppDomain(
-    Daemon daemon, {
-    Analytics? analytics,
-    FileSystem? fileSystem,
-    Logger? logger,
-    OutputPreferences? outputPreferences,
-    Platform? platform,
-    SystemClock? systemClock,
-    AnsiTerminal? terminal,
-  }) : _fs = fileSystem ?? daemon._fs,
-       _platform = platform ?? const LocalPlatform(),
-       _analytics = analytics ?? const NoOpAnalytics(),
-       _systemClock = systemClock ?? const SystemClock(),
-       _logger = logger ?? daemon._logger,
-       _terminal =
-           terminal ??
-           AnsiTerminal(
-             stdio: daemon._stdio ?? Stdio(),
-             platform: platform ?? const LocalPlatform(),
-           ),
-       _outputPreferences = outputPreferences ?? OutputPreferences.test(),
-       super(daemon, 'app') {
+  AppDomain(Daemon daemon, {required this._analytics, required this._toolContext})
+    : _fs = _toolContext.fs,
+      _logger = _toolContext.logger,
+      super(daemon, 'app') {
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
@@ -884,12 +792,9 @@ class AppDomain extends Domain {
   }
 
   final FileSystem _fs;
-  final Platform _platform;
   final Analytics _analytics;
-  final SystemClock _systemClock;
   final Logger _logger;
-  final AnsiTerminal _terminal;
-  final OutputPreferences _outputPreferences;
+  final ToolContext _toolContext;
 
   static const _uuidGenerator = Uuid();
 
@@ -926,13 +831,15 @@ class AppDomain extends Domain {
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = _fs.currentDirectory;
     _fs.currentDirectory = _fs.directory(projectDirectory);
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(_fs.currentDirectory);
+    final FlutterProject flutterProject = _toolContext.projectFactory.fromDirectory(
+      _fs.currentDirectory,
+    );
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      target: target,
+      toolContext: _toolContext,
       buildInfo: options.buildInfo,
-      platform: _platform,
+      target: target,
       userIdentifier: userIdentifier,
     );
 
@@ -948,12 +855,7 @@ class AppDomain extends Domain {
         urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
         analytics: _analytics,
-        systemClock: _systemClock,
-        logger: _logger,
-        terminal: _terminal,
-        platform: _platform,
-        outputPreferences: _outputPreferences,
-        fileSystem: _fs,
+        toolContext: _toolContext,
         webDefines: webDefines,
       );
     } else if (enableHotReload) {
@@ -1054,6 +956,8 @@ class AppDomain extends Domain {
         }),
       );
     }
+    // Kept separate from [AppInstance.started]. Runners attach listeners to this
+    // completer that have no error handler, so it must only ever be completed.
     final appStartedCompleter = Completer<void>();
 
     // This future won't complete until the application has shutdown, so we don't want to
@@ -1079,18 +983,31 @@ class AppDomain extends Domain {
       }
     });
 
-    await Future.any(<Future<void>>[
-      appStartedCompleter.future.then<void>((void value) {
-        _sendAppEvent(app, 'started');
-      }),
-      appRunFuture,
-    ]);
+    try {
+      await Future.any(<Future<void>>[
+        appStartedCompleter.future.then<void>((void value) {
+          app._markStarted();
+          _sendAppEvent(app, 'started');
+        }),
+        appRunFuture,
+      ]);
+    } on Object catch (error, stackTrace) {
+      // `appRunFuture` only converts an [Exception] into a `stop` event, so an
+      // [Error] thrown by the runner or by the `finally` above surfaces here.
+      // Settle anything waiting on [AppInstance.started] before it propagates,
+      // otherwise a deferred `app.restart` waits forever.
+      app._failedToStart(error, stackTrace);
+      rethrow;
+    }
 
     // If appRunFuture completes early due to a fatal initialization error
-    // without actually starting the app, we must explicitly throw an exception
-    // to prevent the IDE/client from hanging indefinitely.
+    // without actually starting the app, we must explicitly fail both this
+    // request and anything waiting on [AppInstance.started], to prevent the
+    // IDE/client from hanging indefinitely.
     if (!appStartedCompleter.isCompleted) {
-      throw DaemonException('App failed to start');
+      final failure = DaemonException('App failed to start');
+      app._failedToStart(failure);
+      throw failure;
     }
     return app;
   }
@@ -1113,6 +1030,14 @@ class AppDomain extends Domain {
     if (app == null) {
       throw DaemonException("app '$appId' not found");
     }
+
+    // The `app.start` event carries the app ID and is sent before the runner
+    // has finished starting up, so a client can ask for a restart while the
+    // initial compile is still in flight. Servicing it now would issue a
+    // recompile against a compiler that has not accepted its first compile
+    // yet. Defer instead of dropping it: the client may have edited a file
+    // that the initial compile did not pick up.
+    await app.started;
 
     return _queueAndDebounceReloadAction(
       app,
@@ -1248,8 +1173,14 @@ typedef _DeviceEventHandler = void Function(Device device);
 /// It exports a `getDevices()` call, as well as firing `device.added` and
 /// `device.removed` events.
 class DeviceDomain extends Domain {
-  DeviceDomain(Daemon daemon, {required this._logger, this._deviceManager})
-    : super(daemon, 'device') {
+  DeviceDomain(
+    Daemon daemon, {
+    required FileSystem fileSystem,
+    required this._logger,
+    required this._projectFactory,
+    this._deviceManager,
+  }) : _fs = fileSystem,
+       super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
     registerHandler('discoverDevices', discoverDevices);
     registerHandler('enable', enable);
@@ -1275,7 +1206,9 @@ class DeviceDomain extends Domain {
   }
 
   final DeviceManager? _deviceManager;
+  final FileSystem _fs;
   final Logger _logger;
+  final FlutterProjectFactory _projectFactory;
 
   /// An incrementing number used to generate unique ids.
   var _id = 0;
@@ -1528,8 +1461,8 @@ class DeviceDomain extends Domain {
 
     FlutterProject? project;
     try {
-      project = FlutterProject.current();
-    } on ToolExit catch (_) {
+      project = _projectFactory.fromDirectory(_fs.currentDirectory);
+    } on ToolExit {
       // In daemon mode the cwd may not be a Flutter project, so we just ignore
       // these errors and use 'Unknown' as the package name below.
     }
@@ -1820,12 +1753,41 @@ class NotifyingLogger extends DelegatingLogger {
 
 /// A running application, started by this daemon.
 class AppInstance {
-  AppInstance(this.id, {required this.runner, this.logToStdout = false, required this._logger});
+  AppInstance(this.id, {required this.runner, this.logToStdout = false, required this._logger}) {
+    // Nothing is obliged to await [started], so make sure a failure never
+    // surfaces as an unhandled async error.
+    _startedCompleter.future.ignore();
+  }
 
   final String id;
   final ResidentRunner runner;
   final bool logToStdout;
   final MachineOutputLogger _logger;
+
+  final _startedCompleter = Completer<void>();
+
+  /// Completes once [runner] reports the app has started, which is the same
+  /// signal the `app.started` event is sent from, or with an error if the app
+  /// exited before it got there.
+  ///
+  /// For a runner with an incremental compiler this is after the initial
+  /// compile was accepted, which is what makes it safe to ask for a reload. It
+  /// does not mean the VM service is connected: the web runner attaches that
+  /// asynchronously afterwards, so the VM service may still be unattached once
+  /// this completes.
+  Future<void> get started => _startedCompleter.future;
+
+  void _markStarted() {
+    _startedCompleter.complete();
+  }
+
+  void _failedToStart(Object error, [StackTrace? stackTrace]) {
+    // Reachable after [_markStarted] when sending the `app.started` event is
+    // what threw, so this cannot assume the completer is still pending.
+    if (!_startedCompleter.isCompleted) {
+      _startedCompleter.completeError(error, stackTrace);
+    }
+  }
 
   Future<OperationResult> restart({bool fullRestart = false, bool pause = false, String? reason}) {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);

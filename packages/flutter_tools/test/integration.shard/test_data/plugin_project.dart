@@ -16,13 +16,13 @@ class PluginDeferredComponentsConfig extends BasicDeferredComponentsConfig {
   @override
   String get androidBuild => r'''
 buildscript {
-    ext.kotlin_version = '2.2.20'
+    ext.kotlin_version = '2.4.20'
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.11.1'
+        classpath 'com.android.tools.build:gradle:9.3.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
     configurations.classpath {

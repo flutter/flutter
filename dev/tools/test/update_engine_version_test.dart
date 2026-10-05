@@ -578,8 +578,8 @@ final class _FlutterRootUnderTest {
   /// `bin/internal/update_engine_version.{sh|ps1}`.
   ///
   /// This file contains a shell script that conditionally writes, on execution:
-  /// - [binInternalEngineVersion]
-  /// - [binInternalEngineRealm]
+  /// - [binCacheEngineStamp]
+  /// - [binCacheEngineRealm]
   final File binInternalUpdateEngineVersion;
 
   /// `bin/internal/content_aware_hash.{sh|ps1}`.

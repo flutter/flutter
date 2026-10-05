@@ -840,22 +840,34 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.shell.RunEngine(std::move(configuration));
 }
 
-- (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
-    withVMServicePublication:(BOOL)doesVMServicePublication {
+/// Takes ownership of `shell` and initializes engine-owned objects whose lifetime is tied to shell
+/// lifetime.
+- (void)adoptShell:(std::unique_ptr<flutter::Shell>)shell {
+  FML_DCHECK(shell);
   _shell = std::move(shell);
   _platformTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
       initWithTaskRunner:_shell->GetTaskRunners().GetPlatformTaskRunner()];
   _rasterTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
       initWithTaskRunner:_shell->GetTaskRunners().GetRasterTaskRunner()];
+}
 
+/// Configures the engine.
+///
+/// Wires up platform channels, pushes initial state to the framework and starts the VM service
+/// publisher.
+- (void)configureForRunningShellWithVMServicePublication:(BOOL)doesVMServicePublication {
   [self setUpChannels];
   [self onLocaleUpdated:nil];
   [self updateDisplays];
   self.publisher = [[FlutterDartVMServicePublisher alloc]
       initWithEnableVMServicePublication:doesVMServicePublication];
   [self maybeSetupPlatformViewChannels];
-  _shell->SetGpuAvailability(_isGpuDisabled ? flutter::GpuAvailability::kUnavailable
-                                            : flutter::GpuAvailability::kAvailable);
+}
+
+- (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
+    withVMServicePublication:(BOOL)doesVMServicePublication {
+  [self adoptShell:std::move(shell)];
+  [self configureForRunningShellWithVMServicePublication:doesVMServicePublication];
 }
 
 + (BOOL)isProfilerEnabled {
@@ -1201,6 +1213,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
           lookUpSelectedText:(NSString*)selectedText {
   [self.platformPlugin showLookUpViewController:selectedText];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+       translateSelectedText:(NSString*)selectedText {
+  [self.platformPlugin showTranslateViewControllerForTerm:selectedText];
 }
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
