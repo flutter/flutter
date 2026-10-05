@@ -35,18 +35,6 @@ const kDdcLibraryBundleFlags = <String>[
   '--no-js-strongly-connected-components',
 ];
 
-/// Returns the frontend server options used when compiling [buildInfo] with
-/// DDC.
-///
-/// These options are part of the default cached kernel path (see
-/// [getDefaultCachedKernelPath]), so any code that reads or writes the cached
-/// kernel for DDC must use them to compute the same path as the compiler.
-List<String> ddcFrontEndOptions(BuildInfo buildInfo) => <String>[
-  ...buildInfo.extraFrontEndOptions,
-  if (buildInfo.webEnableHotReload) ...kDdcLibraryBundleFlags,
-  ...deprecatedJsInteropCompilerFlags(buildInfo.deprecatedJsInterop),
-];
-
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
 class TargetModel {
@@ -584,7 +572,10 @@ class ResidentCompilerFactory {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
-        extraFrontEndOptions: ddcFrontEndOptions(buildInfo),
+        extraFrontEndOptions: [
+          ...buildInfo.extraFrontEndOptions,
+          if (buildInfo.webEnableHotReload) ...kDdcLibraryBundleFlags,
+        ],
       );
     } else {
       if (targetPlatform case .fuchsia_arm64 || .fuchsia_x64) {
