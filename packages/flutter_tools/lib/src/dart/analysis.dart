@@ -21,21 +21,16 @@ class AnalysisServer {
   AnalysisServer(
     this.sdkPath,
     this.directories, {
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required Logger logger,
-    required Platform platform,
-    required Terminal terminal,
+    required this._fileSystem,
+    required this._processManager,
+    required this._logger,
+    required this._platform,
+    required this._terminal,
     required this.suppressAnalytics,
     this.withFineDependencies = true,
     this.usePlugins = true,
-    String? protocolTrafficLog,
-  }) : _fileSystem = fileSystem,
-       _processManager = processManager,
-       _logger = logger,
-       _platform = platform,
-       _terminal = terminal,
-       _protocolTrafficLog = protocolTrafficLog;
+    this._protocolTrafficLog,
+  });
 
   final bool withFineDependencies;
   final bool usePlugins;
@@ -50,6 +45,8 @@ class AnalysisServer {
   final bool suppressAnalytics;
 
   Process? _process;
+  StreamSubscription<String>? _errorStreamSubscription;
+  StreamSubscription<List<int>>? _stdoutStreamSubscription;
   final _analyzingController = StreamController<bool>.broadcast();
   final _errorsController = StreamController<FileAnalysisErrors>.broadcast();
   var _didServerErrorOccur = false;
@@ -92,9 +89,9 @@ class AnalysisServer {
     unawaited(process.exitCode.whenComplete(() => _process = null));
 
     final Stream<String> errorStream = process.stderr.transform(utf8LineDecoder);
-    errorStream.listen(_handleError);
+    _errorStreamSubscription = errorStream.listen(_handleError);
 
-    process.stdout.listen(_handleServerResponseRaw);
+    _stdoutStreamSubscription = process.stdout.listen(_handleServerResponseRaw);
 
     await Future.any<void>([
       sendRequest('initialize', <String, Object?>{
@@ -255,18 +252,6 @@ class AnalysisServer {
     final Object? response = json.decode(line);
 
     if (response is Map<String, Object?>) {
-      final Object? id = response['id'];
-      final Completer<Map<String, Object?>?>? completer = _outstandingRequests.remove(id);
-      if (completer != null) {
-        if (response case {'result': final Map<String, Object?>? result}) {
-          completer.complete(result);
-        } else if (response case {'error': final Map<String, Object?> error}) {
-          completer.completeError(error['message'] ?? error);
-        } else {
-          completer.completeError('Response for unknown request received: $response');
-        }
-      }
-
       final method = response['method'] as String?;
       if (method != null) {
         final Object? id = response['id'];
@@ -293,6 +278,18 @@ class AnalysisServer {
               _handleShowMessage(paramsMap);
           }
         }
+      } else {
+        final Object? id = response['id'];
+        final Completer<Map<String, Object?>?>? completer = _outstandingRequests.remove(id);
+        if (completer != null) {
+          if (response case {'result': final Map<String, Object?>? result}) {
+            completer.complete(result);
+          } else if (response case {'error': final Map<String, Object?> error}) {
+            completer.completeError(error['message'] ?? error);
+          } else {
+            completer.completeError('Response for unknown request received: $response');
+          }
+        }
       }
     }
   }
@@ -301,7 +298,7 @@ class AnalysisServer {
     // LSP progress for analysis is typically reported via tokens.
     // The server sends begin/report/end for a token.
     final Object? value = params['value'];
-    if (value is Map<String, Object?>) {
+    if (value is Map<String, Object?> && !_analyzingController.isClosed) {
       final kind = value['kind'] as String?;
       if (kind == 'begin') {
         _analyzingController.add(true);
@@ -362,6 +359,10 @@ class AnalysisServer {
   }
 
   Future<bool?> dispose() async {
+    await _stdoutStreamSubscription?.cancel();
+    _stdoutStreamSubscription = null;
+    await _errorStreamSubscription?.cancel();
+    _errorStreamSubscription = null;
     await _analyzingController.close();
     await _errorsController.close();
     return _process?.kill();
@@ -374,12 +375,10 @@ enum AnalysisSeverity { error, warning, info, none }
 class AnalysisError implements Comparable<AnalysisError> {
   AnalysisError(
     this.writtenError, {
-    required Platform platform,
-    required Terminal terminal,
-    required FileSystem fileSystem,
-  }) : _platform = platform,
-       _terminal = terminal,
-       _fileSystem = fileSystem;
+    required this._platform,
+    required this._terminal,
+    required this._fileSystem,
+  });
 
   final WrittenError writtenError;
   final Platform _platform;

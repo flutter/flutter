@@ -1,19 +1,13 @@
 import Cocoa
 import FlutterMacOS
 
-public class {{pluginClass}}: NSObject, FlutterPlugin {
+public class {{pluginClass}}: NSObject, FlutterPlugin, {{pluginClass}}Api {
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "{{projectName}}", binaryMessenger: registrar.messenger)
     let instance = {{pluginClass}}()
-    registrar.addMethodCallDelegate(instance, channel: channel)
+    {{pluginClass}}ApiSetup.setUp(binaryMessenger: registrar.messenger, api: instance)
   }
 
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    switch call.method {
-    case "getPlatformVersion":
-      result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
-    default:
-      result(FlutterMethodNotImplemented)
-    }
+  public func getPlatformVersion() throws -> String {
+    return "macOS " + ProcessInfo.processInfo.operatingSystemVersionString
   }
 }

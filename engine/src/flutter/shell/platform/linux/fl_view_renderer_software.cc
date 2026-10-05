@@ -118,6 +118,11 @@ static void fl_view_renderer_software_realize(GtkWidget* widget) {
   self->task_runner =
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
   self->compositor = fl_compositor_software_new();
+
+  // Any frames rendered before this point were dropped, as there was nothing
+  // to present them to. Ask for another one so the view isn't left empty until
+  // something else causes Flutter to render.
+  fl_engine_schedule_frame(self->engine);
 }
 
 // Implements GtkWidget::draw.
@@ -171,10 +176,22 @@ static void fl_view_renderer_software_present_layers(
   }
 
   g_mutex_lock(&self->frame_mutex);
+  size_t width = 0;
+  size_t height = 0;
+  gboolean have_frame = TRUE;
   if (layers_count > 0) {
-    size_t width = layers[0]->size.width;
-    size_t height = layers[0]->size.height;
+    width = layers[0]->size.width;
+    height = layers[0]->size.height;
+  } else if (self->surface != nullptr) {
+    // Keep current size if no layers - just clearing.
+    width = cairo_image_surface_get_width(self->surface);
+    height = cairo_image_surface_get_height(self->surface);
+  } else {
+    // Nothing has been rendered yet, so there is nothing to clear.
+    have_frame = FALSE;
+  }
 
+  if (have_frame) {
     if (width == 0 || height == 0) {
       // A zero-sized layer has no content to show. Drop any existing frame so
       // the renderer reports no frame rather than an empty surface (a 0x0

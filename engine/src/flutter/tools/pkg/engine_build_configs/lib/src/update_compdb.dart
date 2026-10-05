@@ -61,12 +61,39 @@ String expandSwiftcCommands(String contents) {
 
 /// Post-processes the contents of a `compile_commands.json` file.
 ///
-/// Strips compiler wrapper prefixes (such as rewrapper and ccache) from clang
-/// commands, and converts GN `swiftc.py` invocations into native `swiftc`
-/// commands expanded per-file for SourceKit-LSP.
-String updateCompilationDatabase(String contents) {
-  contents = stripCompilerWrappers(contents);
-  return expandSwiftcCommands(contents);
+/// [compileCommands] is GN's exported database and [swiftCompileCommands] the
+/// output of `ninja -t compdb swift`. Strips compiler wrapper prefixes (such as
+/// rewrapper and ccache) from [compileCommands], converts the GN `swiftc.py`
+/// invocations in [swiftCompileCommands] into native `swiftc` commands expanded
+/// per-file for SourceKit-LSP, and appends them.
+///
+/// GN's exporter has no Swift tool type, so only the Swift entries are sourced
+/// from ninja. Ninja's unrestricted database also describes link, copy, and
+/// phony edges, whose `file` fields shadow the real compile command for the
+/// files they name.
+String updateCompilationDatabase(String compileCommands, String swiftCompileCommands) {
+  final String stripped = stripCompilerWrappers(compileCommands);
+  if (swiftCompileCommands.trim().isEmpty) {
+    return stripped;
+  }
+  final entries = convert.jsonDecode(expandSwiftcCommands(swiftCompileCommands)) as List<Object?>;
+  return entries.isEmpty ? stripped : _appendEntries(stripped, entries);
+}
+
+/// Appends [entries] to the JSON array in [database].
+String _appendEntries(String database, List<Object?> entries) {
+  final int close = database.lastIndexOf(']');
+  if (close < 0) {
+    return database;
+  }
+  String head = database.substring(0, close).trimRight();
+  // GN has emitted a trailing comma after the final entry, which would
+  // otherwise double up with the separator below.
+  if (head.endsWith(',')) {
+    head = head.substring(0, head.length - 1);
+  }
+  final String rendered = entries.map(_jsonEncoder.convert).join(',\n  ');
+  return '$head${head.endsWith('[') ? '' : ','}\n  $rendered\n]\n';
 }
 
 /// Expands a single `swiftc.py` [entry] into per-file `swiftc` compilation entries.

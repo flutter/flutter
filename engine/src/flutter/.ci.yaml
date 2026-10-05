@@ -16,7 +16,7 @@ platform_properties:
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "gradle_cache", "version": "none"}
         ]
       device_type: none
@@ -28,10 +28,10 @@ platform_properties:
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
       device_type: none
-      os: Mac-15.7
+      os: Mac-15.7|Mac-26.6
       $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
@@ -41,7 +41,7 @@ platform_properties:
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
       device_type: none
       os: Windows-10
@@ -51,7 +51,6 @@ targets:
     enabled_branches:
       - master
     recipe: engine_v2/engine_v2
-    bringup: true
     properties:
       config_name: local_engine
     # local_engine schedules a bunch of other builds, so it's likely to timeout waiting for those builds to run.
@@ -88,8 +87,7 @@ targets:
       gclient_variables: >-
         {
           "download_emsdk": "true",
-          "download_android_deps": "true",
-          "download_jdk": "true"
+          "download_android_deps": "true"
         }
     timeout: 60
 
@@ -111,8 +109,7 @@ targets:
         ]
       gclient_variables: >-
         {
-          "download_android_deps": "true",
-          "download_jdk": "true"
+          "download_android_deps": "true"
         }
     timeout: 60
 
@@ -136,8 +133,7 @@ targets:
         ]
       gclient_variables: >-
         {
-          "download_android_deps": "true",
-          "download_jdk": "true"
+          "download_android_deps": "true"
         }
     timeout: 60
 
@@ -492,7 +488,7 @@ targets:
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-15.7
+      - os=Mac-15.7|Mac-26.6
 
   - name: Mac clangd
     recipe: engine_v2/builder
@@ -521,7 +517,7 @@ targets:
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-15.7
+      - os=Mac-15.7|Mac-26.6
       - cpu=x86
 
   - name: Mac mac_ios_engine_ddm
@@ -541,7 +537,7 @@ targets:
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-15.7
+      - os=Mac-15.7|Mac-26.6
       - cpu=x86
 
   - name: Linux windows_android_aot_engine
@@ -593,8 +589,6 @@ targets:
   - name: Windows windows_unopt
     recipe: engine_v2/builder
     timeout: 120
-    # TODO(#177172): dashboard super unhealthy
-    bringup: true
     properties:
       config_name: windows_unopt
 
@@ -606,7 +600,7 @@ targets:
   #
   - name: Linux linux_android_aot_engine_size_exp
     recipe: engine_v2/engine_v2
-    bringup: true
+    presubmit: false
     timeout: 120
     enabled_branches:
       # Don't run this on release branches

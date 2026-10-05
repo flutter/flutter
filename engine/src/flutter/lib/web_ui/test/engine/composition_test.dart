@@ -260,43 +260,40 @@ Future<void> testMain() async {
       );
     });
 
-    test(
-      'should be [beforeComposingText - composingText, compostionStrLength] on composition in the middle of text',
-      () {
-        const composingText = 'hi';
-        const beforeComposingText = 'beforeComposingText';
-        const afterComposingText = 'afterComposingText';
+    test('should be [beforeComposingText - composingText, compostionStrLength] on composition in the middle of text', () {
+      const composingText = 'hi';
+      const beforeComposingText = 'beforeComposingText';
+      const afterComposingText = 'afterComposingText';
 
-        // Type in the text box, then move cursor to the middle.
-        _inputElement.value = '$beforeComposingText$afterComposingText';
-        _inputElement.setSelectionRange(beforeComposingText.length, beforeComposingText.length);
+      // Type in the text box, then move cursor to the middle.
+      _inputElement.value = '$beforeComposingText$afterComposingText';
+      _inputElement.setSelectionRange(beforeComposingText.length, beforeComposingText.length);
 
-        _inputElement.dispatchEvent(
-          createDomCompositionEvent(
-            _MockWithCompositionAwareMixin._kCompositionUpdate,
-            <Object?, Object?>{'data': composingText},
-          ),
-        );
+      _inputElement.dispatchEvent(
+        createDomCompositionEvent(
+          _MockWithCompositionAwareMixin._kCompositionUpdate,
+          <Object?, Object?>{'data': composingText},
+        ),
+      );
 
-        // Flush editing state (since we did not compositionend).
-        _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+      // Flush editing state (since we did not compositionend).
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
 
-        expect(
-          editingStrategy.lastEditingState,
-          isA<EditingState>()
-              .having(
-                (EditingState editingState) => editingState.composingBaseOffset,
-                'composingBaseOffset',
-                beforeComposingText.length - composingText.length,
-              )
-              .having(
-                (EditingState editingState) => editingState.composingExtentOffset,
-                'composingExtentOffset',
-                beforeComposingText.length,
-              ),
-        );
-      },
-    );
+      expect(
+        editingStrategy.lastEditingState,
+        isA<EditingState>()
+            .having(
+              (EditingState editingState) => editingState.composingBaseOffset,
+              'composingBaseOffset',
+              beforeComposingText.length - composingText.length,
+            )
+            .having(
+              (EditingState editingState) => editingState.composingExtentOffset,
+              'composingExtentOffset',
+              beforeComposingText.length,
+            ),
+      );
+    });
   });
 
   group('Text Editing Delta Model', () {
