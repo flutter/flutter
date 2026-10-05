@@ -45,7 +45,7 @@ base class ExtensionBuildManager {
     try {
       await _extensionManager.ensureInitialized();
     } on Object catch (e) {
-      _logger.printError('Failed to initialize extension manager: $e');
+      _logger.printTrace('Failed to initialize extension manager: $e');
       return const <ExtensionBuildTarget>[];
     }
 
@@ -56,25 +56,36 @@ base class ExtensionBuildManager {
         if (connection.capabilities.services.contains(BuildService.serviceNamespace)) connection,
     ];
 
-    await Future.wait<void>(
+    final List<List<ExtensionBuildTarget>> connectionTargets = await Future.wait(
       connections.map((ExtensionConnection connection) async {
         try {
           final Object? rpcResult = await connection
               .sendRequest(BuildService.getBuildTargetsMethod)
               .timeout(_kGetBuildTargetsTimeout);
-          for (final ExtensionBuildTarget target in ExtensionBuildTarget.listFromJson(rpcResult)) {
-            if (target.name.isNotEmpty) {
-              targets.add(target);
-              _targetToConnection[target.name] = connection;
-            }
-          }
+          return ExtensionBuildTarget.listFromJson(rpcResult);
         } on Object catch (e) {
-          _logger.printError(
+          _logger.printTrace(
             'Failed to get results from extension for ${BuildService.getBuildTargetsMethod}: $e',
           );
+          return const <ExtensionBuildTarget>[];
         }
       }),
     );
+
+    for (var i = 0; i < connections.length; i++) {
+      final ExtensionConnection connection = connections[i];
+      for (final ExtensionBuildTarget target in connectionTargets[i]) {
+        if (target.name.isEmpty) {
+          continue;
+        }
+        if (_targetToConnection.containsKey(target.name)) {
+          _logger.printTrace('Skipping duplicate build target "${target.name}" from extension.');
+          continue;
+        }
+        targets.add(target);
+        _targetToConnection[target.name] = connection;
+      }
+    }
 
     _cachedTargets = targets;
     return targets;
@@ -97,7 +108,7 @@ base class ExtensionBuildManager {
     try {
       await _extensionManager.ensureInitialized();
     } on Object catch (e) {
-      _logger.printError('Failed to initialize extension manager: $e');
+      _logger.printTrace('Failed to initialize extension manager: $e');
       return ExtensionBuildResult(
         success: false,
         errorMessage: 'Failed to initialize extension manager: $e',
@@ -133,7 +144,7 @@ base class ExtensionBuildManager {
         errorMessage: 'Invalid build result from extension.',
       );
     } on Object catch (e) {
-      _logger.printError('Failed to run build from extension: $e');
+      _logger.printTrace('Failed to run build from extension: $e');
       return ExtensionBuildResult(success: false, errorMessage: e.toString());
     }
   }

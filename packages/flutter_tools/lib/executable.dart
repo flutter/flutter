@@ -10,6 +10,7 @@ import 'runner.dart' as runner;
 import 'src/android/android_workflow.dart' as android_workflow;
 import 'src/android/gradle.dart';
 import 'src/base/context.dart';
+import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
@@ -115,17 +116,22 @@ Future<void> main(List<String> args) async {
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
-      final ExtensionManager manager = toolDependencies.extensionManager!;
+      final ToolDependencies(
+        :ExtensionManager? extensionManager,
+        :FeatureFlags featureFlags,
+        toolContext: ToolContext(:FileSystem fs, :Logger logger),
+      ) = toolDependencies;
+      final ExtensionManager manager = extensionManager!;
       final templateManager = ExtensionTemplateManager(
         extensionManager: manager,
-        fileSystem: toolDependencies.toolContext.fs,
-        logger: toolDependencies.toolContext.logger,
         featureFlags: featureFlags,
+        fileSystem: fs,
+        logger: logger,
       );
       final buildManager = ExtensionBuildManager(
         extensionManager: manager,
         featureFlags: featureFlags,
-        logger: toolDependencies.toolContext.logger,
+        logger: logger,
       );
       return generateCommands(
         toolDependencies: toolDependencies,
