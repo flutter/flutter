@@ -60,11 +60,11 @@ dependencies {
     // When bumping, also update:
     //  * KGP error version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.10")
-    // Update to 1.8.0 when min kotlin is 2.1
+    // 1.11.0 is built with Kotlin 2.3.20. Update to 1.12.0 (built with Kotlin 2.4.10) once it is stable.
     // https://github.com/Kotlin/kotlinx.serialization/releases for kotlin version compatibility.
     // All kotlinx implementation dependencies must work with the oldest kotlin supported versions.
     // Defined in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     // When bumping the default agpVersion above, also update:
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * ndkVersion constant in packages/flutter_tools/lib/src/android/gradle_utils.dart
