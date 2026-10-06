@@ -2881,56 +2881,74 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(scrollController.offset, 100.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('The bar applies pointer axis modifiers to mouse wheel events', (
-    WidgetTester tester,
-  ) async {
-    final scrollController = ScrollController();
-    addTearDown(scrollController.dispose);
+  testWidgets(
+    'The bar uses the scrollable pointer axis modifiers for mouse wheel events',
+    (WidgetTester tester) async {
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
 
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: ScrollConfiguration(
-            behavior: const ScrollBehavior(),
-            child: RawScrollbar(
-              thumbVisibility: true,
-              thickness: 24.0,
-              controller: scrollController,
-              child: SingleChildScrollView(
+      Widget buildFrame({ScrollBehavior? scrollableBehavior}) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: ScrollConfiguration(
+              behavior: const ScrollBehavior().copyWith(
+                pointerAxisModifiers: <LogicalKeyboardKey>{LogicalKeyboardKey.controlLeft},
+              ),
+              child: RawScrollbar(
+                thumbVisibility: true,
+                thickness: 24.0,
                 controller: scrollController,
-                scrollDirection: Axis.horizontal,
-                child: const SizedBox(width: 1200.0, height: 600.0),
+                child: ListView(
+                  controller: scrollController,
+                  scrollDirection: Axis.horizontal,
+                  scrollBehavior: scrollableBehavior,
+                  children: const <Widget>[SizedBox(width: 1200.0, height: 600.0)],
+                ),
               ),
             ),
           ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame());
+      await tester.pumpAndSettle();
+      expect(scrollController.offset, 0.0);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      addTearDown(() => tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft));
+
+      final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      pointer.hover(const Offset(15.0, 598.0));
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+      await tester.pumpAndSettle();
+
+      expect(scrollController.offset, 30.0);
+
+      scrollController.jumpTo(0.0);
+      await tester.pumpWidget(
+        buildFrame(
+          scrollableBehavior: const ScrollBehavior().copyWith(
+            pointerAxisModifiers: <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(scrollController.offset, 0.0);
+      );
+      await tester.pumpAndSettle();
 
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-    addTearDown(() => tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft));
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+      await tester.pumpAndSettle();
+      expect(scrollController.offset, 0.0);
 
-    final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
-    pointer.hover(const Offset(15.0, 598.0));
-    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
-    await tester.pumpAndSettle();
-
-    expect(scrollController.offset, 30.0);
-
-    scrollController.jumpTo(0.0);
-    final trackpad = TestPointer(2, ui.PointerDeviceKind.trackpad);
-    trackpad.hover(const Offset(15.0, 598.0));
-    await tester.sendEventToBinding(trackpad.scroll(const Offset(0.0, 30.0)));
-    await tester.pumpAndSettle();
-
-    // Pointer axis modifiers only affect physical mouse wheel input. Trackpads
-    // already expose both axes directly and should not be flipped.
-    expect(scrollController.offset, 0.0);
-  }, variant: TargetPlatformVariant.all());
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      addTearDown(() => tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft));
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+      await tester.pumpAndSettle();
+      expect(scrollController.offset, 30.0);
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 
   testWidgets(
     'Flinging a vertical scrollbar thumb does not cause a ballistic scroll - non-mobile platforms',
