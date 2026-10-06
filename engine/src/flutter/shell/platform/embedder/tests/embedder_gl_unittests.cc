@@ -5397,7 +5397,7 @@ TEST_F(EmbedderTest, ExternalTextureGLAppliesUVTransformation) {
   auto surface = gl_surface.GetOnscreenSurface();
   ASSERT_NE(surface, nullptr);
 
-  auto external_texture_callback =
+  EmbedderExternalTextureGL::ExternalTextureCallback external_texture_callback =
       [tex_id](int64_t texture_id, size_t width,
                size_t height) -> std::unique_ptr<FlutterOpenGLTexture> {
     auto desc = std::make_unique<FlutterOpenGLTexture>();
@@ -5454,9 +5454,20 @@ TEST_F(EmbedderTest, ExternalTextureGLAppliesUVTransformation) {
   EXPECT_NE(identity_top_left, identity_bottom_left);
 
   // 2. Vertical flip UV transformation (Android SurfaceTexture mtxFlipV:
-  // diag(1, -1, 1, 1) + translation(0, 1, 0)): verify top and bottom rows swap.
+  // diag(1, -1, 1, 1) + translation(0, 1, 0)): verify top and bottom rows swap,
+  // passing an inline rvalue closure to verify value-storage lifetime safety.
   EmbedderExternalTextureGL flipped_texture(
-      kTextureId, external_texture_callback,
+      kTextureId,
+      [tex_id](int64_t texture_id, size_t width,
+               size_t height) -> std::unique_ptr<FlutterOpenGLTexture> {
+        auto desc = std::make_unique<FlutterOpenGLTexture>();
+        desc->target = GL_TEXTURE_2D;
+        desc->name = tex_id;
+        desc->format = GL_RGBA8;
+        desc->width = kTextureDimension;
+        desc->height = kTextureDimension;
+        return desc;
+      },
       [](int64_t id, DlMatrix* matrix_out) -> bool {
         *matrix_out = DlMatrix::MakeColumn(1.0f, 0.0f, 0.0f, 0.0f,   //
                                            0.0f, -1.0f, 0.0f, 0.0f,  //

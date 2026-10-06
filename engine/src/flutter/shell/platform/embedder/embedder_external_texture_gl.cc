@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 
+#include <utility>
+
 #include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/image/dl_image_skia.h"
@@ -33,11 +35,11 @@ namespace flutter {
 
 EmbedderExternalTextureGL::EmbedderExternalTextureGL(
     int64_t texture_identifier,
-    const ExternalTextureCallback& callback,
-    const UVTransformationCallback& uv_transformation_callback)
+    ExternalTextureCallback callback,
+    UVTransformationCallback uv_transformation_callback)
     : Texture(texture_identifier),
-      external_texture_callback_(callback),
-      uv_transformation_callback_(uv_transformation_callback) {
+      external_texture_callback_(std::move(callback)),
+      uv_transformation_callback_(std::move(uv_transformation_callback)) {
   FML_DCHECK(external_texture_callback_);
 }
 
