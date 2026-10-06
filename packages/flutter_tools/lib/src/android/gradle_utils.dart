@@ -53,7 +53,7 @@ const templateKotlinGradlePluginVersion = '2.4.20';
 // so new versions are picked up after a Flutter upgrade.
 //
 // Please see the README before changing any of these values.
-const compileSdkVersionInt = 36;
+const compileSdkVersionInt = 37;
 const compileSdkVersion = '$compileSdkVersionInt';
 const minSdkVersionInt = 24;
 const minSdkVersion = '$minSdkVersionInt';
@@ -413,8 +413,9 @@ OS:           Mac OS X 13.2.1 aarch64
 Future<String?> getKgpVersion(
   Directory androidDirectory,
   Logger logger,
-  ProcessManager processManager,
-) async {
+  ProcessManager processManager, {
+  Platform platform = const LocalPlatform(),
+}) async {
   // Maintainers of the kotlin dsl and the kotlin gradle plugin are different.
   //
   // Android Docs refer to the kotlin gradle plugin with either the full name or KGP.
@@ -428,9 +429,10 @@ Future<String?> getKgpVersion(
   // Instead the kgpVersion task is a custom flutter task dynamically added that can
   // print the kgp version if gradle can run successfully.
 
-  if (processManager.canRun('./gradlew', workingDirectory: androidDirectory.path)) {
+  final String gradlew = androidDirectory.childFile(getGradlewFileName(platform)).path;
+  if (processManager.canRun(gradlew, workingDirectory: androidDirectory.path)) {
     final ProcessResult command = await processManager.run(<String>[
-      './gradlew',
+      gradlew,
       'kgpVersion',
       '-q',
     ], workingDirectory: androidDirectory.path);
@@ -824,7 +826,7 @@ bool validateGradleAndAgp(Logger logger, {required String? gradleV, required Str
     return isWithinVersionRange(gradleV, min: '9.3.1', max: maxKnownAndSupportedGradleVersion);
   }
   if (isWithinVersionRange(agpV, min: '9.2.0', max: '9.2.99')) {
-    return isWithinVersionRange(gradleV, min: '9.3.1', max: maxKnownAndSupportedGradleVersion);
+    return isWithinVersionRange(gradleV, min: '9.4.1', max: maxKnownAndSupportedGradleVersion);
   }
   if (isWithinVersionRange(agpV, min: '9.3.0', max: '9.3.99')) {
     return isWithinVersionRange(gradleV, min: '9.5.0', max: maxKnownAndSupportedGradleVersion);
@@ -1142,7 +1144,7 @@ String getGradleVersionFor(String agpV) {
     GradleForAgp(agpMin: '8.13.0', agpMax: '8.13.99', minRequiredGradle: '8.14'),
     GradleForAgp(agpMin: '9.0', agpMax: '9.0.99', minRequiredGradle: '9.1.0'),
     GradleForAgp(agpMin: '9.1.0', agpMax: '9.1.99', minRequiredGradle: '9.3.1'),
-    GradleForAgp(agpMin: '9.2.0', agpMax: '9.2.99', minRequiredGradle: '9.3.1'),
+    GradleForAgp(agpMin: '9.2.0', agpMax: '9.2.99', minRequiredGradle: '9.4.1'),
     GradleForAgp(agpMin: '9.3.0', agpMax: '9.3.99', minRequiredGradle: '9.5.0'),
     // Assume if AGP is newer than this code knows about return the highest gradle
     // version we know about.

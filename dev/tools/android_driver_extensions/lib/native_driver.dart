@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_test/flutter_test.dart';
+library;
+
 import 'dart:async';
 import 'dart:io' as io;
 import 'dart:typed_data';
