@@ -2023,6 +2023,7 @@ Int32List _encodeParagraphStyle(
   if (hyphens != null) {
     result[0] |= 1 << 13;
     result[7] = hyphens.index;
+  }
   if (fakeMissingFontStyles != null) {
     result[0] |= 1 << 14; // Present
     if (fakeMissingFontStyles) {
@@ -2196,8 +2197,8 @@ class ParagraphStyle {
         'strutStyle: ${_encoded[0] & 0x400 == 0x400 ? _strutStyle : "unspecified"}, '
         'ellipsis: ${_encoded[0] & 0x800 == 0x800 ? '"$_ellipsis"' : "unspecified"}, '
         'locale: ${_encoded[0] & 0x1000 == 0x1000 ? _locale : "unspecified"}, '
-        'hyphens: ${_encoded[0] & 0x2000 == 0x2000 ? Hyphens.values[_encoded[7]] : "unspecified"}',
-        'fakeMissingFontStyles: ${_encoded[0] & 0x2000 == 0x2000 ? (_encoded[0] & 0x4000 == 0x4000 ? "true" : "false") : "unspecified"}'
+        'hyphens: ${_encoded[0] & 0x2000 == 0x2000 ? Hyphens.values[_encoded[7]] : "unspecified"}, '
+        'fakeMissingFontStyles: ${_encoded[0] & 0x4000 == 0x4000 ? (_encoded[0] & 0x8000 == 0x8000 ? "true" : "false") : "unspecified"}'
         ')';
   }
 }
