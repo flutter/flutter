@@ -25,7 +25,7 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/platform/fuchsia/flutter/external_view_embedder.h"
 
-#include "flow/embedded_views.h"
+#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/time/time_delta.h"
@@ -97,6 +97,8 @@ class PlatformView : public flutter::PlatformView {
       bool intercept_all_input = false);
 
   ~PlatformView() override;
+
+  void SetGestureResponsePolicy(GestureResponsePolicy policy);
 
   void OnGetLayout(fuchsia::ui::composition::LayoutInfo info);
   void OnParentViewportStatus(

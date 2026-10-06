@@ -28,24 +28,35 @@ struct IxnHasher {
   }
 };
 
-// Axis-aligned rectangular region in logical view coordinates paired with a
-// TouchResponseType for Scenic's gesture disambiguation contest.
+// Axis-aligned region in logical view coordinates paired with a gesture
+// contest response for touches starting inside the region.
 struct GestureResponseRegion {
   float left = 0.f;
   float top = 0.f;
   float right = 0.f;
   float bottom = 0.f;
   fuchsia::ui::pointer::TouchResponseType response =
-      fuchsia::ui::pointer::TouchResponseType::YES;
+      fuchsia::ui::pointer::TouchResponseType::NO;
+  // Number of initial samples in an interaction to answer with
+  // |defer_response| before committing to |response|.
   uint32_t defer_samples = 0;
   fuchsia::ui::pointer::TouchResponseType defer_response =
-      fuchsia::ui::pointer::TouchResponseType::MAYBE;
+      fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS;
+
+  bool Contains(float x, float y) const {
+    return x >= left && x <= right && y >= top && y <= bottom;
+  }
 };
 
+// Per-app gesture-response policy evaluated synchronously on the platform
+// thread when |intercept_all_input| is false.
 struct GestureResponsePolicy {
   std::vector<GestureResponseRegion> regions;
   fuchsia::ui::pointer::TouchResponseType default_response =
       fuchsia::ui::pointer::TouchResponseType::NO;
+  uint32_t default_defer_samples = 0;
+  fuchsia::ui::pointer::TouchResponseType default_defer_response =
+      fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS;
 };
 
 // Channel processors for fuchsia.ui.pointer.TouchSource and MouseSource
@@ -58,6 +69,9 @@ class PointerDelegate {
                   fuchsia::ui::pointer::MouseSourceHandle mouse_source,
                   bool intercept_all_input = false);
 
+  // Sets or updates the per-app gesture-response policy used to answer
+  // Scenic's gesture disambiguation contest when |intercept_all_input| is
+  // false.
   void SetGestureResponsePolicy(GestureResponsePolicy policy);
 
   // This function collects Fuchsia's TouchPointerSample and MousePointerSample
@@ -73,8 +87,6 @@ class PointerDelegate {
 
   // Channel for touch events from Scenic.
   fuchsia::ui::pointer::TouchSourcePtr touch_source_;
-  [[maybe_unused]] bool intercept_all_input_ = false;
-  [[maybe_unused]] std::optional<GestureResponsePolicy> policy_;
 
   // Receive touch events from Scenic. Must be copyable.
   std::function<void(std::vector<fuchsia::ui::pointer::TouchEvent>)>
@@ -130,6 +142,27 @@ class PointerDelegate {
   // state represents the absence of view parameters, early in the protocol
   // lifecycle.
   std::optional<fuchsia::ui::pointer::ViewParameters> touch_view_parameters_;
+
+  fuchsia::ui::pointer::TouchResponseType EvaluatePolicy(
+      const fuchsia::ui::pointer::TouchInteractionId& ixn,
+      fuchsia::ui::pointer::EventPhase phase,
+      float logical_x,
+      float logical_y);
+  void RemoveActiveInteraction(
+      const fuchsia::ui::pointer::TouchInteractionId& ixn);
+
+  const bool intercept_all_input_;
+  std::optional<GestureResponsePolicy> policy_;
+
+  struct ActiveInteraction {
+    fuchsia::ui::pointer::TouchInteractionId id{};
+    float start_x = 0.f;
+    float start_y = 0.f;
+    uint32_t sample_count = 0;
+  };
+  static constexpr size_t kMaxActiveInteractions = 16;
+  std::array<ActiveInteraction, kMaxActiveInteractions> active_interactions_{};
+  size_t active_interactions_count_ = 0;
 
   /***** MOUSE STATE *****/
 

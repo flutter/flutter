@@ -959,10 +959,10 @@ TEST_F(PointerDelegateTest, GesturePolicy_FlagFalseRegionsAndDefaultResponses) {
   auto responses = touch_source_->UploadedResponses();
   ASSERT_TRUE(responses.has_value());
   ASSERT_EQ(responses->size(), 3u);
-  // Baseline (before policy evaluation): unconditionally answers YES.
-  EXPECT_EQ((*responses)[0].response_type(), fup_TouchResponseType::YES);
+  EXPECT_EQ((*responses)[0].response_type(),
+            fup_TouchResponseType::YES_PRIORITIZE);
   EXPECT_EQ((*responses)[1].response_type(), fup_TouchResponseType::YES);
-  EXPECT_EQ((*responses)[2].response_type(), fup_TouchResponseType::YES);
+  EXPECT_EQ((*responses)[2].response_type(), fup_TouchResponseType::NO);
 }
 
 TEST_F(PointerDelegateTest, GesturePolicy_FlagFalseNoPolicyFailsLoudly) {
@@ -970,20 +970,20 @@ TEST_F(PointerDelegateTest, GesturePolicy_FlagFalseNoPolicyFailsLoudly) {
   pointer_delegate_->WatchLoop([](std::vector<flutter::PointerData>) {});
   RunLoopUntilIdle();
 
-  // Baseline (before policy enforcement): answers YES even without a policy.
-  (void)touch_source_->UploadedResponses();
-  std::vector<fup_TouchEvent> events =
-      TouchEventBuilder::New()
-          .AddTime(1000u)
-          .AddViewParameters(kRect, kRect, kIdentity)
-          .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
-          .BuildAsVector();
-  touch_source_->ScheduleCallback(std::move(events));
-  RunLoopUntilIdle();
-  auto responses = touch_source_->UploadedResponses();
-  ASSERT_TRUE(responses.has_value());
-  ASSERT_EQ(responses->size(), 1u);
-  EXPECT_EQ((*responses)[0].response_type(), fup_TouchResponseType::YES);
+  // On Fuchsia, FML_CHECK logs to the Fuchsia syslog rather than stderr, so
+  // the stderr matcher for EXPECT_DEATH_IF_SUPPORTED must be empty.
+  EXPECT_DEATH_IF_SUPPORTED(
+      {
+        std::vector<fup_TouchEvent> events =
+            TouchEventBuilder::New()
+                .AddTime(1000u)
+                .AddViewParameters(kRect, kRect, kIdentity)
+                .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
+                .BuildAsVector();
+        touch_source_->ScheduleCallback(std::move(events));
+        RunLoopUntilIdle();
+      },
+      "");
 }
 
 TEST_F(PointerDelegateTest,
@@ -1029,8 +1029,8 @@ TEST_F(PointerDelegateTest,
   auto r1 = touch_source_->UploadedResponses();
   ASSERT_TRUE(r1.has_value());
   ASSERT_EQ(r1->size(), 2u);
-  EXPECT_EQ((*r1)[0].response_type(), fup_TouchResponseType::YES);
-  EXPECT_EQ((*r1)[1].response_type(), fup_TouchResponseType::YES);
+  EXPECT_EQ((*r1)[0].response_type(), fup_TouchResponseType::YES_PRIORITIZE);
+  EXPECT_EQ((*r1)[1].response_type(), fup_TouchResponseType::NO);
 
   // Batch 2: 3 events (sample, interaction_result only, sample).
   std::vector<fup_TouchEvent> batch2;
@@ -1054,9 +1054,9 @@ TEST_F(PointerDelegateTest,
   auto r2 = touch_source_->UploadedResponses();
   ASSERT_TRUE(r2.has_value());
   ASSERT_EQ(r2->size(), 3u);
-  EXPECT_EQ((*r2)[0].response_type(), fup_TouchResponseType::YES);
+  EXPECT_EQ((*r2)[0].response_type(), fup_TouchResponseType::YES_PRIORITIZE);
   EXPECT_FALSE((*r2)[1].has_response_type());
-  EXPECT_EQ((*r2)[2].response_type(), fup_TouchResponseType::YES);
+  EXPECT_EQ((*r2)[2].response_type(), fup_TouchResponseType::YES_PRIORITIZE);
 }
 
 TEST_F(PointerDelegateTest,
@@ -1270,11 +1270,14 @@ TEST_F(PointerDelegateTest, GesturePolicy_DeferralAndMidInteractionCommit) {
   auto responses = touch_source_->UploadedResponses();
   ASSERT_TRUE(responses.has_value());
   ASSERT_EQ(responses->size(), 4u);
-  // Baseline (before deferral policy evaluation): answers YES on all samples.
-  EXPECT_EQ((*responses)[0].response_type(), fup_TouchResponseType::YES);
-  EXPECT_EQ((*responses)[1].response_type(), fup_TouchResponseType::YES);
-  EXPECT_EQ((*responses)[2].response_type(), fup_TouchResponseType::YES);
-  EXPECT_EQ((*responses)[3].response_type(), fup_TouchResponseType::YES);
+  EXPECT_EQ((*responses)[0].response_type(),
+            fup_TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*responses)[1].response_type(),
+            fup_TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*responses)[2].response_type(),
+            fup_TouchResponseType::YES_PRIORITIZE);
+  EXPECT_EQ((*responses)[3].response_type(),
+            fup_TouchResponseType::YES_PRIORITIZE);
 }
 
 }  // namespace flutter_runner::testing
