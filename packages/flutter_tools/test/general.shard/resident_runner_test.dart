@@ -1689,7 +1689,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: DelegatingToolContext(),
+                toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1741,7 +1741,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: DelegatingToolContext(),
+                toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1794,7 +1794,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: DelegatingToolContext(),
+                toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1827,7 +1827,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: DelegatingToolContext(),
+                toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1859,7 +1859,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: DelegatingToolContext(),
+                toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1890,7 +1890,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: DelegatingToolContext(),
+                toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',

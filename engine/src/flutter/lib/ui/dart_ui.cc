@@ -104,6 +104,7 @@ typedef CanvasPath Path;
   V(PlatformConfigurationNativeApi::UpdateSemantics)               \
   V(PlatformConfigurationNativeApi::SetApplicationLocale)          \
   V(PlatformConfigurationNativeApi::SetNeedsReportTimings)         \
+  V(PlatformConfigurationNativeApi::ResetInternalState)            \
   V(PlatformConfigurationNativeApi::SetIsolateDebugName)           \
   V(PlatformConfigurationNativeApi::SetSemanticsTreeEnabled)       \
   V(PlatformConfigurationNativeApi::RequestDartPerformanceMode)    \
