@@ -99,7 +99,7 @@ void main() {
 
     expect(result2[AccessibilityInspectorKeys.error], isNull);
     expect(result2[AccessibilityInspectorKeys.data], isA<Map<String, Object?>>());
-    expect(result2[AccessibilityInspectorKeys.issues], isA<List<Object?>>());
+    expect(result2[AccessibilityInspectorKeys.issues], isNull);
     final nodes = result2[AccessibilityInspectorKeys.data]! as Map<String, Object?>;
     expect(nodes, isNotEmpty);
 
@@ -158,7 +158,7 @@ void main() {
     AccessibilityInspector.instance.resetAllState();
   }, semanticsEnabled: false);
 
-  testWidgets('ext.flutter.accessibility.getSemanticsTree detects accessibility issues', (
+  testWidgets('ext.flutter.accessibility.getEvaluations detects accessibility issues', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -210,14 +210,19 @@ void main() {
     await callExtension(AccessibilityServiceExtensions.enableSemantics.extensionName);
     await tester.pump();
 
-    final Map<String, Object?> result = await callExtension(
+    final Map<String, Object?> treeResult = await callExtension(
       AccessibilityServiceExtensions.getSemanticsTree.extensionName,
     );
+    expect(treeResult[AccessibilityInspectorKeys.error], isNull);
+    final nodes = treeResult[AccessibilityInspectorKeys.data]! as Map<String, Object?>;
 
-    expect(result[AccessibilityInspectorKeys.error], isNull);
-    final nodes = result[AccessibilityInspectorKeys.data]! as Map<String, Object?>;
+    final Map<String, Object?> evaluationsResult = await callExtension(
+      AccessibilityServiceExtensions.getEvaluations.extensionName,
+    );
+    expect(evaluationsResult[AccessibilityInspectorKeys.error], isNull);
     final List<Map<String, Object?>> issues =
-        (result[AccessibilityInspectorKeys.issues]! as List<Object?>).cast<Map<String, Object?>>();
+        (evaluationsResult[AccessibilityInspectorKeys.issues]! as List<Object?>)
+            .cast<Map<String, Object?>>();
 
     final tapTargetIssues = <Map<String, Object?>>[];
     final missingLabelIssues = <Map<String, Object?>>[];

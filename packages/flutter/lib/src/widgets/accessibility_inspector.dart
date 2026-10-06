@@ -56,6 +56,10 @@ class AccessibilityInspector {
       callback: _getSemanticsTree,
     );
     registerServiceExtension(
+      name: AccessibilityServiceExtensions.getEvaluations.extensionName,
+      callback: _getEvaluations,
+    );
+    registerServiceExtension(
       name: AccessibilityServiceExtensions.enableSemantics.extensionName,
       callback: _enableSemantics,
     );
@@ -89,26 +93,74 @@ class AccessibilityInspector {
     return <String, Object?>{};
   }
 
-  /// Evaluates and returns the semantics tree hierarchy of the application.
-  Future<Map<String, Object?>> _getSemanticsTree(Map<String, String> parameters) async {
+  (SemanticsOwner, SemanticsNode)? _getSemanticsOwnerAndRoot(Map<String, Object?> errorMap) {
     if (!SemanticsBinding.instance.semanticsEnabled) {
-      return <String, Object?>{AccessibilityInspectorKeys.error: 'Semantics not enabled.'};
+      errorMap[AccessibilityInspectorKeys.error] = 'Semantics not enabled.';
+      return null;
     }
     final RenderView? renderView = _findRenderView();
     final PipelineOwner? pipelineOwner = renderView?.owner;
     final SemanticsOwner? semanticsOwner = pipelineOwner?.semanticsOwner;
     if (renderView == null || semanticsOwner == null) {
-      return <String, Object?>{
-        AccessibilityInspectorKeys.error: 'No PipelineOwner with SemanticsOwner found',
-      };
+      errorMap[AccessibilityInspectorKeys.error] = 'No PipelineOwner with SemanticsOwner found';
+      return null;
     }
     final SemanticsNode? root = semanticsOwner.rootSemanticsNode;
     if (root == null) {
       RendererBinding.instance.ensureVisualUpdate();
-      return <String, Object?>{
-        AccessibilityInspectorKeys.error: 'rootSemanticsNode is null, needs a frame.',
-      };
+      errorMap[AccessibilityInspectorKeys.error] = 'rootSemanticsNode is null, needs a frame.';
+      return null;
     }
+    return (semanticsOwner, root);
+  }
+
+  /// Returns the semantics tree hierarchy of the application.
+  Future<Map<String, Object?>> _getSemanticsTree(Map<String, String> parameters) async {
+    final errorMap = <String, Object?>{};
+    final (SemanticsOwner, SemanticsNode)? result = _getSemanticsOwnerAndRoot(errorMap);
+    if (result == null) {
+      return errorMap;
+    }
+    final (SemanticsOwner _, SemanticsNode root) = result;
+
+    final nodes = <String, Object?>{};
+    final visited = <int>{};
+    final queue = <SemanticsNode>[root];
+    while (queue.isNotEmpty) {
+      final SemanticsNode node = queue.removeLast();
+      if (!visited.add(node.id)) {
+        continue;
+      }
+
+      nodes[node.id.toString()] = node.toJson();
+
+      for (final SemanticsNode child in node.debugListChildrenInOrder(
+        DebugSemanticsDumpOrder.traversalOrder,
+      )) {
+        if (!visited.contains(child.id)) {
+          queue.add(child);
+        }
+      }
+      for (final SemanticsNode child in node.debugListChildrenInOrder(
+        DebugSemanticsDumpOrder.inverseHitTest,
+      )) {
+        if (!visited.contains(child.id)) {
+          queue.add(child);
+        }
+      }
+    }
+
+    return <String, Object?>{AccessibilityInspectorKeys.data: nodes};
+  }
+
+  /// Evaluates accessibility rules and returns detected issues.
+  Future<Map<String, Object?>> _getEvaluations(Map<String, String> parameters) async {
+    final errorMap = <String, Object?>{};
+    final (SemanticsOwner, SemanticsNode)? ownerAndRoot = _getSemanticsOwnerAndRoot(errorMap);
+    if (ownerAndRoot == null) {
+      return errorMap;
+    }
+    final (SemanticsOwner semanticsOwner, SemanticsNode _) = ownerAndRoot;
 
     // The violations are displayed in Devtool.
     // TODO(hannah-hyj): If we add a "target platforms" option on the devtool side,
@@ -141,37 +193,7 @@ class AccessibilityInspector {
       }
     }
 
-    final nodes = <String, Object?>{};
-    final visited = <int>{};
-    final queue = <SemanticsNode>[root];
-    while (queue.isNotEmpty) {
-      final SemanticsNode node = queue.removeLast();
-      if (!visited.add(node.id)) {
-        continue;
-      }
-
-      nodes[node.id.toString()] = node.toJson();
-
-      for (final SemanticsNode child in node.debugListChildrenInOrder(
-        DebugSemanticsDumpOrder.traversalOrder,
-      )) {
-        if (!visited.contains(child.id)) {
-          queue.add(child);
-        }
-      }
-      for (final SemanticsNode child in node.debugListChildrenInOrder(
-        DebugSemanticsDumpOrder.inverseHitTest,
-      )) {
-        if (!visited.contains(child.id)) {
-          queue.add(child);
-        }
-      }
-    }
-
-    return <String, Object?>{
-      AccessibilityInspectorKeys.data: nodes,
-      AccessibilityInspectorKeys.issues: issues,
-    };
+    return <String, Object?>{AccessibilityInspectorKeys.issues: issues};
   }
 
   // TODO(hannah-hyj): https://github.com/flutter/devtools/issues/9991 - This returns the first RenderView with a SemanticsOwner.
