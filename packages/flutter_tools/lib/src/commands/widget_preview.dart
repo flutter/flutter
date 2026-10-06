@@ -20,7 +20,6 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
-import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -561,7 +560,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         webRunHeadless: boolArg(kHeadless),
         devToolsServerAddress: devToolsServerAddress,
       );
-      final String target = bundle.defaultMainPath;
+      final String target = widgetPreviewScaffoldProject.directory
+          .childDirectory('lib')
+          .childFile('main.dart')
+          .absolute
+          .path;
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
         target: target,

@@ -285,7 +285,11 @@ void main() {
       ?rootProject?.path,
     ], analysisServerFactoryOverride: analysisServerFactoryOverride);
     final Directory projectDir = rootProject ?? current;
-    final Directory scaffoldDir = projectDir.childDirectory('.widget_preview');
+    final FlutterProject project = FlutterProjectFactory(
+      logger: logger,
+      fileSystem: fs,
+    ).fromDirectory(projectDir);
+    final Directory scaffoldDir = (project.workspaceRoot ?? project).widgetPreviewScaffold;
     await analyzeProject(scaffoldDir.path);
     fs.currentDirectory = current;
   }
