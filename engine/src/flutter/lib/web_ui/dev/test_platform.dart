@@ -432,23 +432,61 @@ class BrowserPlatform extends PlatformPlugin {
     );
 
     // Take screenshot.
-    final Image screenshot = await (await browserManager).captureScreenshot(regionAsRectangle);
-
-    return compareImage(
-      screenshot,
-      doUpdateScreenshotGoldens,
+    final Image screenshot = await _reportIfSlow(
+      'captureScreenshot',
       filename,
-      getSkiaGoldDirectoryForSuite(suite),
-      skiaClient,
-      isCanvaskitTest: isCanvaskitTest,
-      verbose: isVerbose,
-      pixelComparison: pixelComparison,
-      maxDiffRate: maxDiffRate,
-      pixelColorDeltaPerChannel: pixelColorDeltaPerChannel,
-      isOffline: isOffline,
-      refreshGoldens: refreshGoldens,
-      cacheDirectory: env.environment.webUiGoldensCacheDirectory,
+      () async => (await browserManager).captureScreenshot(regionAsRectangle),
     );
+
+    return _reportIfSlow(
+      'compareImage',
+      filename,
+      () => compareImage(
+        screenshot,
+        doUpdateScreenshotGoldens,
+        filename,
+        getSkiaGoldDirectoryForSuite(suite),
+        skiaClient,
+        isCanvaskitTest: isCanvaskitTest,
+        verbose: isVerbose,
+        pixelComparison: pixelComparison,
+        maxDiffRate: maxDiffRate,
+        pixelColorDeltaPerChannel: pixelColorDeltaPerChannel,
+        isOffline: isOffline,
+        refreshGoldens: refreshGoldens,
+        cacheDirectory: env.environment.webUiGoldensCacheDirectory,
+      ),
+    );
+  }
+
+  /// How long a golden screenshot phase may run before it is reported.
+  ///
+  /// Well below the 30-second test timeout, so a stalled phase is reported
+  /// before the test times out.
+  static const Duration _slowScreenshotPhaseThreshold = Duration(seconds: 10);
+
+  /// Runs [action] and prints a diagnostic when it exceeds
+  /// [_slowScreenshotPhaseThreshold].
+  ///
+  /// Golden tests occasionally time out on CI with no indication of whether
+  /// the Chrome DevTools screenshot or the comparison (which runs `goldctl` on
+  /// LUCI) stalled. The diagnostic names the stalled phase in the step log.
+  Future<T> _reportIfSlow<T>(String phase, String filename, Future<T> Function() action) async {
+    final stopwatch = Stopwatch()..start();
+    final stallTimer = Timer(_slowScreenshotPhaseThreshold, () {
+      print(
+        'Golden $filename: $phase still running after '
+        '${stopwatch.elapsed.inSeconds}s.',
+      );
+    });
+    try {
+      return await action();
+    } finally {
+      stallTimer.cancel();
+      if (stopwatch.elapsed >= _slowScreenshotPhaseThreshold) {
+        print('Golden $filename: $phase finished after ${stopwatch.elapsedMilliseconds}ms.');
+      }
+    }
   }
 
   static const Map<String, String> contentTypes = <String, String>{
