@@ -19,9 +19,11 @@ namespace flutter {
 // Unlike a tooltip or a popup, a satellite is decorated and activatable. Its
 // position callback runs only once, for the initial placement, after the first
 // frame has been rendered and before the window is shown; afterwards the
-// satellite keeps whatever offset it has from its parent, moving by the same
-// delta whenever the parent moves. A satellite cannot be minimized on its own,
-// and may be reparented at runtime without changing its screen position.
+// satellite keeps whatever offset it has from its parent's client area, moving
+// with the parent. The offset is kept in the parent's logical pixels, so it
+// scales when the parent moves to a monitor with a different DPI. A satellite
+// cannot be minimized on its own, and may be reparented at runtime without
+// changing its screen position.
 class HostWindowSatellite : public HostWindowSized {
  public:
   // Creates a satellite window anchored to |parent|.
@@ -37,8 +39,9 @@ class HostWindowSatellite : public HostWindowSized {
 
   ~HostWindowSatellite() override;
 
-  // Called by the window this satellite is anchored to when it has moved.
-  // Shifts the satellite by the same delta so it retains its relative offset.
+  // Called by the window this satellite is anchored to when it has moved,
+  // resized, or changed its frame. Moves the satellite so that it retains its
+  // offset from the parent's client area, scaled by the parent's current DPI.
   void OnParentMoved();
 
   // Changes the window that this satellite is anchored to. The satellite keeps
@@ -98,6 +101,16 @@ class HostWindowSatellite : public HostWindowSized {
   std::optional<WindowRect> ComputePosition(
       const WindowSize& window_size) const;
 
+  // Returns the origin of |parent_|'s client area, in screen coordinates, or
+  // std::nullopt if |parent_| is minimized.
+  std::optional<POINT> GetParentClientOrigin() const;
+
+  // Returns the ratio of |parent_|'s DPI to the default DPI.
+  double GetParentScaleFactor() const;
+
+  // Records the satellite's current offset from |parent_|'s client area.
+  void UpdateParentOffset();
+
   GetWindowPositionCallback get_position_callback_;
 
   // The window this satellite is anchored to.
@@ -105,9 +118,17 @@ class HostWindowSatellite : public HostWindowSized {
 
   Isolate isolate_;
 
-  // The last observed top-left corner of the parent window, in screen
-  // coordinates. Used to compute movement deltas.
-  POINT last_parent_pos_ = {0, 0};
+  // The offset from the origin of |parent_|'s client area to the top-left
+  // corner of this satellite's window rectangle, in |parent_|'s logical pixels.
+  double parent_offset_x_ = 0;
+  double parent_offset_y_ = 0;
+
+  // Whether the satellite is currently being moved to follow |parent_|. Moves
+  // made while this is set do not update the offset from the parent.
+  bool is_following_parent_ = false;
+
+  // Whether the user is currently moving or resizing the satellite.
+  bool is_in_move_size_loop_ = false;
 
   // Whether the one-shot initial placement has already run.
   bool initial_position_applied_ = false;

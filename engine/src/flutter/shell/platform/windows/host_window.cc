@@ -524,8 +524,14 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
       return 0;
 
     case WM_WINDOWPOSCHANGED: {
+      // Satellites are anchored to this window's client area, which can move
+      // even if the window itself does not (e.g. when a DPI change resizes the
+      // title bar).
       auto const* const window_pos = reinterpret_cast<WINDOWPOS*>(lparam);
-      if (window_pos && !(window_pos->flags & SWP_NOMOVE)) {
+      UINT const kNoClientChange = SWP_NOMOVE | SWP_NOSIZE;
+      if (window_pos &&
+          ((window_pos->flags & kNoClientChange) != kNoClientChange ||
+           (window_pos->flags & SWP_FRAMECHANGED))) {
         for (HostWindow* const owned : GetOwnedWindows()) {
           if (owned->GetArchetype() == WindowArchetype::kSatellite) {
             static_cast<HostWindowSatellite*>(owned)->OnParentMoved();

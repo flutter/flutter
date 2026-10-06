@@ -5,8 +5,6 @@
 #include <algorithm>
 #include <vector>
 
-#include <dwmapi.h>
-
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/testing/egl/mock_context.h"
 #include "flutter/shell/platform/windows/testing/egl/mock_manager.h"
@@ -1354,17 +1352,12 @@ TEST_F(WindowManagerTest, SatelliteWindowUsesPositionCallbackAfterFirstFrame) {
   POINT parent_top_left = {parent_client_rect.left, parent_client_rect.top};
   ClientToScreen(parent_window_handle, &parent_top_left);
 
-  // Compare against the window frame rather than the window rectangle: the
-  // placement aligns the frame, not the window rectangle (which includes the
-  // invisible drop-shadow border), with the requested origin.
-  RECT satellite_frame;
-  ASSERT_EQ(DwmGetWindowAttribute(satellite_window_handle,
-                                  DWMWA_EXTENDED_FRAME_BOUNDS, &satellite_frame,
-                                  sizeof(satellite_frame)),
-            S_OK);
+  // The positioner's origin applies to the window rectangle.
+  RECT satellite_rect;
+  GetWindowRect(satellite_window_handle, &satellite_rect);
 
-  EXPECT_EQ(satellite_frame.left, parent_top_left.x + 20);
-  EXPECT_EQ(satellite_frame.top, parent_top_left.y + 30);
+  EXPECT_EQ(satellite_rect.left, parent_top_left.x + 20);
+  EXPECT_EQ(satellite_rect.top, parent_top_left.y + 30);
 }
 
 TEST_F(WindowManagerTest, SatelliteWindowIsHiddenUntilFirstFrame) {
@@ -1476,6 +1469,93 @@ TEST_F(WindowManagerTest, SatelliteWindowDoesNotMoveWhenParentOnlyResizes) {
 
   EXPECT_EQ(satellite_rect_after.left, satellite_rect_before.left);
   EXPECT_EQ(satellite_rect_after.top, satellite_rect_before.top);
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowKeepsOffsetAfterBeingMoved) {
+  IsolateScope isolate_scope(isolate());
+
+  WindowingInitRequest init_request{
+      .on_message = [](WindowsMessage* message) {}};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SetWindowPos(parent_window_handle, nullptr, 200, 100, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+  const HWND satellite_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &creation_request));
+
+  // Move the satellite itself, as the user would by dragging it.
+  RECT satellite_rect;
+  GetWindowRect(satellite_window_handle, &satellite_rect);
+  SetWindowPos(satellite_window_handle, nullptr, satellite_rect.left + 40,
+               satellite_rect.top + 60, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+  RECT satellite_rect_before;
+  GetWindowRect(satellite_window_handle, &satellite_rect_before);
+  ASSERT_EQ(satellite_rect_before.left, satellite_rect.left + 40);
+  ASSERT_EQ(satellite_rect_before.top, satellite_rect.top + 60);
+
+  // The satellite keeps its new offset from the parent.
+  SetWindowPos(parent_window_handle, nullptr, 250, 200, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  RECT satellite_rect_after;
+  GetWindowRect(satellite_window_handle, &satellite_rect_after);
+  EXPECT_EQ(satellite_rect_after.left, satellite_rect_before.left + 50);
+  EXPECT_EQ(satellite_rect_after.top, satellite_rect_before.top + 100);
+}
+
+TEST_F(WindowManagerTest, SatelliteWindowFollowsParentClientArea) {
+  IsolateScope isolate_scope(isolate());
+
+  WindowingInitRequest init_request{
+      .on_message = [](WindowsMessage* message) {}};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const HWND parent_window_handle = CreateParentWindow();
+  SetWindowPos(parent_window_handle, nullptr, 200, 100, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER);
+
+  SatelliteWindowCreationRequest creation_request =
+      SatelliteCreationRequest(parent_window_handle, OffsetPositionCallback);
+  const HWND satellite_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(),
+          InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+              engine_id(), &creation_request));
+
+  POINT parent_client_origin_before = {0, 0};
+  ClientToScreen(parent_window_handle, &parent_client_origin_before);
+  RECT satellite_rect_before;
+  GetWindowRect(satellite_window_handle, &satellite_rect_before);
+
+  // Removing the parent's caption moves its client area without moving the
+  // window, much like a DPI change that rescales the title bar.
+  SetWindowLongPtr(
+      parent_window_handle, GWL_STYLE,
+      GetWindowLongPtr(parent_window_handle, GWL_STYLE) & ~WS_CAPTION);
+  SetWindowPos(parent_window_handle, nullptr, 0, 0, 0, 0,
+               SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE |
+                   SWP_FRAMECHANGED);
+
+  POINT parent_client_origin_after = {0, 0};
+  ClientToScreen(parent_window_handle, &parent_client_origin_after);
+  ASSERT_NE(parent_client_origin_after.y, parent_client_origin_before.y);
+
+  RECT satellite_rect_after;
+  GetWindowRect(satellite_window_handle, &satellite_rect_after);
+  EXPECT_EQ(satellite_rect_after.left,
+            satellite_rect_before.left +
+                (parent_client_origin_after.x - parent_client_origin_before.x));
+  EXPECT_EQ(satellite_rect_after.top,
+            satellite_rect_before.top +
+                (parent_client_origin_after.y - parent_client_origin_before.y));
 }
 
 TEST_F(WindowManagerTest, SatelliteWindowCannotBeMinimized) {
@@ -1615,14 +1695,11 @@ TEST_F(WindowManagerTest,
   ClientToScreen(parent_window_handle, &parent_top_left);
 
   // As on the creation path, the positioner's origin applies to the window
-  // frame rather than the window rectangle.
-  RECT satellite_frame;
-  ASSERT_EQ(DwmGetWindowAttribute(satellite_window_handle,
-                                  DWMWA_EXTENDED_FRAME_BOUNDS, &satellite_frame,
-                                  sizeof(satellite_frame)),
-            S_OK);
-  EXPECT_EQ(satellite_frame.left, parent_top_left.x + 20);
-  EXPECT_EQ(satellite_frame.top, parent_top_left.y + 30);
+  // rectangle.
+  RECT satellite_rect;
+  GetWindowRect(satellite_window_handle, &satellite_rect);
+  EXPECT_EQ(satellite_rect.left, parent_top_left.x + 20);
+  EXPECT_EQ(satellite_rect.top, parent_top_left.y + 30);
 }
 
 TEST_F(WindowManagerTest, SatelliteWindowCannotBeReparentedToItself) {

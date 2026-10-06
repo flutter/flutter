@@ -4,7 +4,11 @@
 
 #include "flutter/shell/platform/windows/host_window_satellite.h"
 
+#include <cmath>
+#include <utility>
+
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/windows/dpi_utils.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 #include "flutter/shell/platform/windows/window_proc_delegate_manager.h"
@@ -51,12 +55,7 @@ HostWindowSatellite::HostWindowSatellite(
       .is_sized_to_content = sized_to_content,
   });
 
-  // Record where the parent is now so subsequent moves can be applied as
-  // deltas.
-  RECT parent_rect;
-  if (GetWindowRect(parent_, &parent_rect)) {
-    last_parent_pos_ = {parent_rect.left, parent_rect.top};
-  }
+  UpdateParentOffset();
 }
 
 HostWindowSatellite::~HostWindowSatellite() {
@@ -136,12 +135,6 @@ void HostWindowSatellite::ApplyInitialPosition() {
   SetWindowPos(window_handle_, nullptr, rect->left, rect->top, rect->width,
                rect->height, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 
-  // |HostWindow::InitializeFlutterView| aligns a window's origin with the
-  // top-left corner of its frame rather than its window rectangle, which
-  // includes the invisible drop-shadow border. Reapply the same adjustment
-  // here so that the positioner's result is interpreted the same way.
-  AlignOriginWithFrame();
-
   initial_position_applied_ = true;
 
   // The positioner constrained the dimensions more than the current size, so
@@ -170,27 +163,63 @@ void HostWindowSatellite::ApplyContentSize(int32_t physical_width,
   ApplyInitialPosition();
 }
 
+std::optional<POINT> HostWindowSatellite::GetParentClientOrigin() const {
+  // A minimized window's client area has no meaningful position.
+  if (IsIconic(parent_)) {
+    return std::nullopt;
+  }
+
+  POINT origin = {0, 0};
+  if (!ClientToScreen(parent_, &origin)) {
+    return std::nullopt;
+  }
+
+  return origin;
+}
+
+double HostWindowSatellite::GetParentScaleFactor() const {
+  return static_cast<double>(GetDpiForHWND(parent_)) / kDefaultDpi;
+}
+
+void HostWindowSatellite::UpdateParentOffset() {
+  std::optional<POINT> const parent_origin = GetParentClientOrigin();
+  RECT window_rect;
+  if (!parent_origin || !GetWindowRect(window_handle_, &window_rect)) {
+    return;
+  }
+
+  double const scale_factor = GetParentScaleFactor();
+  parent_offset_x_ = (window_rect.left - parent_origin->x) / scale_factor;
+  parent_offset_y_ = (window_rect.top - parent_origin->y) / scale_factor;
+}
+
 void HostWindowSatellite::OnParentMoved() {
-  RECT parent_rect;
-  if (!GetWindowRect(parent_, &parent_rect)) {
-    return;
+  bool const was_following_parent = std::exchange(is_following_parent_, true);
+
+  // Moving the satellite may carry it onto a monitor with a different DPI. Its
+  // WM_DPICHANGED handler then resizes it to the system-suggested rectangle,
+  // which may also move it. A second pass corrects for that.
+  for (int pass = 0; pass < 2; ++pass) {
+    std::optional<POINT> const parent_origin = GetParentClientOrigin();
+    RECT window_rect;
+    if (!parent_origin || !GetWindowRect(window_handle_, &window_rect)) {
+      break;
+    }
+
+    double const scale_factor = GetParentScaleFactor();
+    LONG const target_x =
+        parent_origin->x + std::lround(parent_offset_x_ * scale_factor);
+    LONG const target_y =
+        parent_origin->y + std::lround(parent_offset_y_ * scale_factor);
+    if (target_x == window_rect.left && target_y == window_rect.top) {
+      break;
+    }
+
+    SetWindowPos(window_handle_, nullptr, target_x, target_y, 0, 0,
+                 SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
   }
 
-  LONG const dx = parent_rect.left - last_parent_pos_.x;
-  LONG const dy = parent_rect.top - last_parent_pos_.y;
-  last_parent_pos_ = {parent_rect.left, parent_rect.top};
-
-  if (dx == 0 && dy == 0) {
-    return;
-  }
-
-  RECT satellite_rect;
-  if (!GetWindowRect(window_handle_, &satellite_rect)) {
-    return;
-  }
-  SetWindowPos(window_handle_, nullptr, satellite_rect.left + dx,
-               satellite_rect.top + dy, 0, 0,
-               SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+  is_following_parent_ = was_following_parent;
 }
 
 void HostWindowSatellite::SetSatelliteParent(HWND new_parent) {
@@ -217,12 +246,9 @@ void HostWindowSatellite::SetSatelliteParent(HWND new_parent) {
                SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE |
                    SWP_FRAMECHANGED);
 
-  // Re-anchor the movement tracking to the new parent's current position so
-  // that reparenting does not move the satellite.
-  RECT parent_rect;
-  if (GetWindowRect(new_parent, &parent_rect)) {
-    last_parent_pos_ = {parent_rect.left, parent_rect.top};
-  }
+  // Measure the offset against the new parent so that reparenting does not
+  // move the satellite.
+  UpdateParentOffset();
 }
 
 LRESULT HostWindowSatellite::HandleMessage(HWND hwnd,
@@ -236,6 +262,47 @@ LRESULT HostWindowSatellite::HandleMessage(HWND hwnd,
         return 0;
       }
       break;
+
+    case WM_ENTERSIZEMOVE:
+      is_in_move_size_loop_ = true;
+      break;
+
+    case WM_EXITSIZEMOVE:
+      is_in_move_size_loop_ = false;
+      break;
+
+    case WM_DPICHANGED: {
+      // While the user drags the satellite, or while it is already following
+      // its parent (whose loop corrects the position), use the default
+      // handling, which applies the system-suggested rectangle.
+      if (is_in_move_size_loop_ || is_following_parent_) {
+        break;
+      }
+      
+      // Otherwise the DPI change was not caused by the user moving the
+      // satellite (e.g. it followed its parent onto another monitor). Apply the
+      // suggested rectangle for its new size, without treating the
+      // accompanying move as a new offset from the parent, and then re-anchor
+      // the satellite to its parent.
+      bool const was_following_parent =
+          std::exchange(is_following_parent_, true);
+      LRESULT const result =
+          HostWindow::HandleMessage(hwnd, message, wparam, lparam);
+      is_following_parent_ = was_following_parent;
+      OnParentMoved();
+      return result;
+    }
+
+    case WM_WINDOWPOSCHANGED: {
+      // When the satellite is moved other than by following its parent (e.g.
+      // dragged by the user), keep the new offset from the parent.
+      auto const* const window_pos = reinterpret_cast<WINDOWPOS*>(lparam);
+      if (!is_following_parent_ && window_pos &&
+          !(window_pos->flags & SWP_NOMOVE)) {
+        UpdateParentOffset();
+      }
+      break;
+    }
 
     case WM_ACTIVATE:
       // Forward the message to Dart before handling it on the C++ side, so
