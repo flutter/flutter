@@ -69,5 +69,66 @@ TEST_F(ShellTest, PlatformMessageResponseDartPort) {
   DestroyShell(std::move(shell), task_runners);
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/189768.
+// Responding to a port whose isolate has already closed it should drop the
+// response instead of aborting the process.
+TEST_F(ShellTest, PlatformMessageResponseDartPortClosedPort) {
+  bool did_pass = false;
+  auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
+  TaskRunners task_runners("test",                  // label
+                           GetCurrentTaskRunner(),  // platform
+                           CreateNewThread(),       // raster
+                           CreateNewThread(),       // ui
+                           CreateNewThread()        // io
+  );
+
+  auto nativeCallPlatformMessageResponseDartPort =
+      [](Dart_NativeArguments args) {
+        Dart_Port port = tonic::DartConverter<int64_t>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        auto response = fml::MakeRefCounted<PlatformMessageResponseDartPort>(
+            port, 123, "foobar");
+        uint8_t* data = static_cast<uint8_t*>(malloc(100));
+        auto mapping = std::make_unique<fml::MallocMapping>(data, 100);
+        response->Complete(std::move(mapping));
+
+        auto empty_response =
+            fml::MakeRefCounted<PlatformMessageResponseDartPort>(port, 456,
+                                                                 "foobar");
+        empty_response->CompleteEmpty();
+      };
+
+  AddNativeCallback(
+      "CallPlatformMessageResponseDartPort",
+      CREATE_NATIVE_ENTRY(nativeCallPlatformMessageResponseDartPort));
+
+  auto nativeFinishCallResponse = [message_latch,
+                                   &did_pass](Dart_NativeArguments args) {
+    did_pass =
+        tonic::DartConverter<bool>::FromDart(Dart_GetNativeArgument(args, 0));
+    message_latch->Signal();
+  };
+
+  AddNativeCallback("FinishCallResponse",
+                    CREATE_NATIVE_ENTRY(nativeFinishCallResponse));
+
+  Settings settings = CreateSettingsForFixture();
+
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+
+  ASSERT_TRUE(shell->IsSetup());
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("platformMessagePortResponseClosedPortTest");
+
+  shell->RunEngine(std::move(configuration), [](auto result) {
+    ASSERT_EQ(result, Engine::RunStatus::Success);
+  });
+
+  message_latch->Wait();
+
+  ASSERT_TRUE(did_pass);
+  DestroyShell(std::move(shell), task_runners);
+}
+
 }  // namespace testing
 }  // namespace flutter
