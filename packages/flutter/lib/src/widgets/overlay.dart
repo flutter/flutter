@@ -1391,7 +1391,7 @@ class _RenderTheater extends RenderBox
     final Size size = !alwaysSizeToContent && constraints.biggest.isFinite
         ? constraints.biggest
         : _findSizeDeterminingChild().getDryLayout(constraints);
-    final nonPositionedChildConstraints = BoxConstraints.tight(size);
+    final dryChildConstraints = BoxConstraints.tight(size);
     final Alignment alignment = theater._resolvedAlignment;
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
@@ -1401,7 +1401,7 @@ class _RenderTheater extends RenderBox
           _RenderTheaterMixin.baselineForChild(
             child,
             size,
-            nonPositionedChildConstraints,
+            dryChildConstraints,
             alignment,
             baseline,
           ),
@@ -1461,12 +1461,13 @@ class _RenderTheater extends RenderBox
 
   bool _layingOutSizeDeterminingChild = false;
 
-  // Cache these constraints so layout surrogates can lay out their deferred
-  // children without reading the theater's size during their own layout.
+  // The `BoxConstraints` to use for laying out `_DeferredLayoutBox`es and other
+  // non-positioned and non-size-determining children.
   //
-  // Set before laying out the remaining children. While laying out the
-  // size-determining child, _layingOutSizeDeterminingChild prevents surrogates
-  // from reading uninitialized or stale constraints.
+  // Adding a `_DeferredLayoutBox` child does not trigger a `_RenderTheater`
+  // relayout, so `_RenderTheater` must cache this value for
+  // `_RenderLayoutSurrogateProxyBox.performLayout` to set the correct
+  // `BoxConstraints` on the newly added `_DeferredLayoutBox`.
   late BoxConstraints _nonPositionedChildConstraints;
 
   @override
