@@ -445,27 +445,26 @@ void SetAdreno630Properties(VkPhysicalDevice device,
 }  // namespace
 
 TEST(ContextVKTest, SelectDeviceExposesDriverInfoBeforeContextCreation) {
-  std::optional<ContextVK::DeviceSelection> selection =
+  absl::StatusOr<ContextVK::DeviceSelection> selection =
       MockVulkanContextBuilder()
           .SetPhysicalPropertiesCallback(SetAdreno630Properties)
           .SelectDevice();
 
-  ASSERT_TRUE(selection.has_value());
-  EXPECT_EQ(selection->GetDriverInfo().GetVendor(), VendorVK::kQualcomm);
-  EXPECT_EQ(selection->GetDriverInfo().GetAdrenoGPUInfo(),
-            AdrenoGPU::kAdreno630);
-  EXPECT_TRUE(selection->GetDriverInfo().IsKnownBadDriver());
+  ASSERT_TRUE(selection.ok());
+  EXPECT_EQ(selection->driver_info->GetVendor(), VendorVK::kQualcomm);
+  EXPECT_EQ(selection->driver_info->GetAdrenoGPUInfo(), AdrenoGPU::kAdreno630);
+  EXPECT_TRUE(selection->driver_info->IsKnownBadDriver());
   // Dropping `selection` without calling CreateContext() tears down the Vulkan
   // instance cleanly (verified by MockVulkanStatePtr's thread-exit leak check).
 }
 
 TEST(ContextVKTest, SelectDeviceCanFinishCreatingContext) {
-  std::optional<ContextVK::DeviceSelection> selection =
+  absl::StatusOr<ContextVK::DeviceSelection> selection =
       MockVulkanContextBuilder()
           .SetPhysicalPropertiesCallback(SetAdreno630Properties)
           .SelectDevice();
 
-  ASSERT_TRUE(selection.has_value());
+  ASSERT_TRUE(selection.ok());
   std::shared_ptr<ContextVK> context = selection->CreateContext();
 
   ASSERT_NE(context, nullptr);

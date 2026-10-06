@@ -102,30 +102,11 @@ static std::optional<QueueIndexVK> PickQueue(const vk::PhysicalDevice& device,
   return std::nullopt;
 }
 
-ContextVK::DeviceSelection::DeviceSelection(
-    Settings settings,
-    std::shared_ptr<CapabilitiesVK> caps,
-    std::shared_ptr<DeviceHolderImpl> device_holder,
-    std::unique_ptr<DebugReportVK> debug_report,
-    std::unique_ptr<DriverInfoVK> driver_info)
-    : settings_(std::move(settings)),
-      caps_(std::move(caps)),
-      device_holder_(std::move(device_holder)),
-      debug_report_(std::move(debug_report)),
-      driver_info_(std::move(driver_info)) {}
-
-ContextVK::DeviceSelection::~DeviceSelection() = default;
-
-ContextVK::DeviceSelection::DeviceSelection(DeviceSelection&&) = default;
-
-ContextVK::DeviceSelection& ContextVK::DeviceSelection::operator=(
-    DeviceSelection&&) = default;
-
 std::shared_ptr<ContextVK> ContextVK::DeviceSelection::CreateContext() {
-  if (!device_holder_) {
+  if (!device_holder) {
     return nullptr;
   }
-  auto context = std::shared_ptr<ContextVK>(new ContextVK(settings_.flags));
+  auto context = std::shared_ptr<ContextVK>(new ContextVK(settings.flags));
   context->Setup(std::move(*this));
   if (!context->IsValid()) {
     return nullptr;
@@ -135,7 +116,7 @@ std::shared_ptr<ContextVK> ContextVK::DeviceSelection::CreateContext() {
 
 std::shared_ptr<ContextVK> ContextVK::Create(Settings settings) {
   auto selection = SelectDevice(std::move(settings));
-  if (!selection.has_value()) {
+  if (!selection.ok()) {
     return nullptr;
   }
   return selection->CreateContext();
@@ -176,13 +157,13 @@ static constexpr uint32_t kImpellerEngineVersion =
     VK_MAKE_API_VERSION(0, 2, 0, 0);
 static constexpr uint32_t kImpellerVulkanApiVersion = VK_API_VERSION_1_1;
 
-std::optional<ContextVK::DeviceSelection> ContextVK::SelectDevice(
+absl::StatusOr<ContextVK::DeviceSelection> ContextVK::SelectDevice(
     Settings settings) {
   TRACE_EVENT0("impeller", "ContextVK::SelectDevice");
 
   if (!settings.proc_address_callback) {
     VALIDATION_LOG << "Missing proc address callback.";
-    return std::nullopt;
+    return absl::InvalidArgumentError("Missing proc address callback.");
   }
 
   auto& dispatcher = VULKAN_HPP_DEFAULT_DISPATCHER;
@@ -204,7 +185,7 @@ std::optional<ContextVK::DeviceSelection> ContextVK::SelectDevice(
 
   if (!caps->IsValid()) {
     VALIDATION_LOG << "Could not determine device capabilities.";
-    return std::nullopt;
+    return absl::InternalError("Could not determine device capabilities.");
   }
 
   gHasValidationLayers = caps->AreValidationsEnabled();
@@ -214,7 +195,7 @@ std::optional<ContextVK::DeviceSelection> ContextVK::SelectDevice(
 
   if (!enabled_layers.has_value() || !enabled_extensions.has_value()) {
     VALIDATION_LOG << "Device has insufficient capabilities.";
-    return std::nullopt;
+    return absl::InternalError("Device has insufficient capabilities.");
   }
 
   vk::InstanceCreateFlags instance_flags = {};
@@ -280,7 +261,7 @@ std::optional<ContextVK::DeviceSelection> ContextVK::SelectDevice(
     if (instance.result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Could not create Vulkan instance: "
                      << vk::to_string(instance.result);
-      return std::nullopt;
+      return absl::InternalError("Could not create Vulkan instance.");
     }
     device_holder->instance = std::move(instance.value);
   } else {
@@ -300,7 +281,7 @@ std::optional<ContextVK::DeviceSelection> ContextVK::SelectDevice(
 
   if (!debug_report->IsValid()) {
     VALIDATION_LOG << "Could not set up debug report.";
-    return std::nullopt;
+    return absl::InternalError("Could not set up debug report.");
   }
 
   //----------------------------------------------------------------------------
@@ -311,7 +292,7 @@ std::optional<ContextVK::DeviceSelection> ContextVK::SelectDevice(
         PickPhysicalDevice(*caps, device_holder->instance.get());
     if (!physical_device.has_value()) {
       VALIDATION_LOG << "No valid Vulkan device found.";
-      return std::nullopt;
+      return absl::NotFoundError("No valid Vulkan device found.");
     }
     device_holder->physical_device = physical_device.value();
   } else {
@@ -321,22 +302,23 @@ std::optional<ContextVK::DeviceSelection> ContextVK::SelectDevice(
   auto driver_info =
       std::make_unique<DriverInfoVK>(device_holder->physical_device);
 
-  return DeviceSelection(std::move(settings),       //
-                         std::move(caps),           //
-                         std::move(device_holder),  //
-                         std::move(debug_report),   //
-                         std::move(driver_info)     //
-  );
+  return DeviceSelection{
+      .settings = std::move(settings),
+      .caps = std::move(caps),
+      .device_holder = std::move(device_holder),
+      .debug_report = std::move(debug_report),
+      .driver_info = std::move(driver_info),
+  };
 }
 
 void ContextVK::Setup(DeviceSelection selection) {
   TRACE_EVENT0("impeller", "ContextVK::Setup");
 
-  Settings settings = std::move(selection.settings_);
-  auto caps = std::move(selection.caps_);
-  auto device_holder = std::move(selection.device_holder_);
-  auto debug_report = std::move(selection.debug_report_);
-  auto driver_info = std::move(selection.driver_info_);
+  Settings settings = std::move(selection.settings);
+  auto caps = std::move(selection.caps);
+  auto device_holder = std::move(selection.device_holder);
+  auto debug_report = std::move(selection.debug_report);
+  auto driver_info = std::move(selection.driver_info);
 
   //----------------------------------------------------------------------------
   /// Pick device queues.

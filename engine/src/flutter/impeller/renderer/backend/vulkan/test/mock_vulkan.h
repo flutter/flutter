@@ -67,7 +67,7 @@ class MockVulkanContextBuilder {
   /// @return     A `ContextVK::DeviceSelection` if a physical device can be
   ///             selected.
   ///
-  std::optional<ContextVK::DeviceSelection> SelectDevice();
+  absl::StatusOr<ContextVK::DeviceSelection> SelectDevice();
 
   //------------------------------------------------------------------------------
   /// @brief      Create a Vulkan context with Vulkan functions mocked. The

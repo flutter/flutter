@@ -1336,7 +1336,7 @@ ContextVK::Settings MockVulkanContextBuilder::PrepareSettings() {
   return settings;
 }
 
-std::optional<ContextVK::DeviceSelection>
+absl::StatusOr<ContextVK::DeviceSelection>
 MockVulkanContextBuilder::SelectDevice() {
   return ContextVK::SelectDevice(PrepareSettings());
 }

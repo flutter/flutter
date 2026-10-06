@@ -54,10 +54,10 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   // issues with Vulkan are rejected as soon as the physical device is
   // identified, before the (expensive) remainder of Vulkan setup runs.
   auto selection = impeller::ContextVK::SelectDevice(std::move(settings));
-  if (!selection.has_value()) {
+  if (!selection.ok()) {
     return nullptr;
   }
-  if (selection->GetDriverInfo().IsKnownBadDriver()) {
+  if (selection->driver_info->IsKnownBadDriver()) {
     FML_LOG(INFO)
         << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
     return nullptr;
