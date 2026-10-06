@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'overscroll_indicator.dart';
+library;
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -242,12 +245,11 @@ class _StretchEffectShader {
 
   static void initializeShader() {
     if (!_initCalled) {
-      ui.FragmentProgram.fromAsset('shaders/stretch_effect.frag').then((
-        ui.FragmentProgram program,
-      ) {
-        _program = program;
-        _initialized = true;
-      });
+      ui.FragmentProgram.fromAsset('shaders/stretch_effect.frag')
+          .then((ui.FragmentProgram program) {
+            _program = program;
+            _initialized = true;
+          });
       _initCalled = true;
     }
   }

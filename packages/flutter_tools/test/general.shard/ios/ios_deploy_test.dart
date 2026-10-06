@@ -103,8 +103,7 @@ void main() {
         final processManager = FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
             command: const <String>['ios-deploy'],
-            stdout:
-                "(mylldb)    platform select remote-'ios' --sysroot\r\n(mylldb)     run\r\nsuccess\r\n",
+            stdout: "(mylldb)    platform select remote-'ios' --sysroot\r\n(mylldb)     run\r\nsuccess\r\n",
             stdin: IOSink(stdin.sink),
           ),
         ]);
@@ -120,8 +119,7 @@ void main() {
         final processManager = FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
             command: const <String>['ios-deploy'],
-            stdout:
-                "(lldb)     run\r\nsuccess\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n\r\n\r\n\r\nPROCESS_STOPPED\r\nLog after process stop\r\nthread backtrace all\r\n* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP",
+            stdout: "(lldb)     run\r\nsuccess\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n\r\n\r\n\r\nPROCESS_STOPPED\r\nLog after process stop\r\nthread backtrace all\r\n* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP",
             stdin: IOSink(stdin.sink),
           ),
         ]);
@@ -160,8 +158,7 @@ void main() {
         final processManager = FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
             command: const <String>['ios-deploy'],
-            stdout:
-                '(lldb)     run\r\nsuccess\r\nsuccess\r\nprocess signal SIGSTOP\r\n\r\nerror: Failed to send signal 17: failed to send signal 17',
+            stdout: '(lldb)     run\r\nsuccess\r\nsuccess\r\nprocess signal SIGSTOP\r\n\r\nerror: Failed to send signal 17: failed to send signal 17',
             stdin: IOSink(stdin.sink),
           ),
         ]);
@@ -202,8 +199,7 @@ void main() {
         final processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
-            stdout:
-                '(lldb)     run\r\nsuccess\r\nLog on attach\r\nProcess 100 exited with status = 0\r\nLog after process exit',
+            stdout: '(lldb)     run\r\nsuccess\r\nLog on attach\r\nProcess 100 exited with status = 0\r\nLog after process exit',
           ),
         ]);
         final iosDeployDebugger = IOSDeployDebugger.test(
@@ -224,8 +220,7 @@ void main() {
         final processManager = FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
             command: const <String>['ios-deploy'],
-            stdout:
-                '(lldb)     run\r\nsuccess\r\nLog on attach\r\n(lldb) Process 6156 stopped\r\n* thread #1, stop reason = Assertion failed:\r\nthread backtrace all\r\n* thread #1, stop reason = Assertion failed:',
+            stdout: '(lldb)     run\r\nsuccess\r\nLog on attach\r\n(lldb) Process 6156 stopped\r\n* thread #1, stop reason = Assertion failed:\r\nthread backtrace all\r\n* thread #1, stop reason = Assertion failed:',
             stdin: IOSink(stdin.sink),
           ),
         ]);
@@ -313,8 +308,7 @@ void main() {
         final processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
-            stdout:
-                '[  +95 ms] error: The operation couldn’t be completed. Unable to launch io.flutter.examples.gallery because the device was not, or could not be, unlocked.',
+            stdout: '[  +95 ms] error: The operation couldn’t be completed. Unable to launch io.flutter.examples.gallery because the device was not, or could not be, unlocked.',
           ),
         ]);
         final iosDeployDebugger = IOSDeployDebugger.test(
@@ -407,8 +401,7 @@ void main() {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['ios-deploy'],
-          stdout:
-              '(lldb)     run\nsuccess\nLog on attach\n(lldb) Process 6156 stopped\n* thread #1, stop reason = Assertion failed:\n(lldb) Process 6156 detached',
+          stdout: '(lldb)     run\nsuccess\nLog on attach\n(lldb) Process 6156 stopped\n* thread #1, stop reason = Assertion failed:\n(lldb) Process 6156 detached',
           stdin: IOSink(stdin),
         ),
       ]);

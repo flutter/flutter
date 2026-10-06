@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1334,6 +1335,7 @@ class _TextStyleProxy implements TextStyle {
     String? ellipsis,
     int? maxLines,
     ui.TextHeightBehavior? textHeightBehavior,
+    Hyphens? hyphens,
     Locale? locale,
     String? fontFamily,
     double? fontSize,

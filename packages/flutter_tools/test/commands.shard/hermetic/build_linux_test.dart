@@ -959,8 +959,7 @@ set(BINARY_NAME "fizz_bar")
 }
 
 class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  CustomFakeOperatingSystemUtils({HostPlatform hostPlatform = HostPlatform.linux_x64})
-    : _hostPlatform = hostPlatform;
+  CustomFakeOperatingSystemUtils({this._hostPlatform = HostPlatform.linux_x64});
 
   final HostPlatform _hostPlatform;
 

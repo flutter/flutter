@@ -148,16 +148,13 @@ enum HostArtifact {
   /// The summary dill for the dart2js target.
   webPlatformDart2JSKernelDill('dart2js_platform.dill'),
 
-  /// The precompiled SDKs and sourcemaps for web debug builds with the AMD module system.
-  // TODO(markzipan): delete these when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-  webPrecompiledAmdCanvaskitSdk('dart_sdk.js'),
-  webPrecompiledAmdCanvaskitSdkSourcemaps('dart_sdk.js.map'),
+  /// The precompiled SDKs and sourcemaps for web debug builds with the stable DDC.
+  webPrecompiledDDCStableSdk('dart_sdk.js'),
+  webPrecompiledDDCStableSdkSourcemaps('dart_sdk.js.map'),
 
-  /// The precompiled SDKs and sourcemaps for web debug builds with the DDC
-  /// library bundle module system. Only SDKs built with sound null-safety are
-  /// provided here.
-  webPrecompiledDdcLibraryBundleCanvaskitSdk('dart_sdk.js'),
-  webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps('dart_sdk.js.map'),
+  /// The precompiled SDKs and sourcemaps for web debug builds with the canary DDC.
+  webPrecompiledDDCCanarySdk('dart_sdk.js'),
+  webPrecompiledDDCCanarySdkSourcemaps('dart_sdk.js.map'),
 
   iosDeploy('ios-deploy'),
   idevicesyslog('idevicesyslog'),
@@ -421,14 +418,11 @@ class DeferredArtifacts implements Artifacts {
 /// Manages the engine artifacts downloaded to the local cache.
 class CachedArtifacts implements Artifacts {
   CachedArtifacts({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Cache cache,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _cache = cache,
-       _operatingSystemUtils = operatingSystemUtils;
+    required this._fileSystem,
+    required this._platform,
+    required this._cache,
+    required this._operatingSystemUtils,
+  });
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -447,10 +441,10 @@ class CachedArtifacts implements Artifacts {
       case HostArtifact.webPlatformKernelFolder:
       case HostArtifact.webPlatformDDCKernelDill:
       case HostArtifact.webPlatformDart2JSKernelDill:
-      case HostArtifact.webPrecompiledAmdCanvaskitSdk:
-      case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
+      case HostArtifact.webPrecompiledDDCStableSdk:
+      case HostArtifact.webPrecompiledDDCStableSdkSourcemaps:
+      case HostArtifact.webPrecompiledDDCCanarySdk:
+      case HostArtifact.webPrecompiledDDCCanarySdkSourcemaps:
         return _resolveWebArtifact(artifact, _getFlutterWebSdkPath(), _fileSystem, _platform);
       case HostArtifact.idevicesyslog:
       case HostArtifact.idevicescreenshot:
@@ -1050,7 +1044,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
     required String engineOutPath,
     required FileSystem fileSystem,
     required Cache cache,
-    required ProcessManager processManager,
+    required this._processManager,
     required Platform platform,
     required OperatingSystemUtils operatingSystemUtils,
     Artifacts? parent,
@@ -1059,7 +1053,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
          targetOutPath: engineOutPath,
          hostOutPath: _hostEngineOutPath,
        ),
-       _processManager = processManager,
        _platform = platform,
        _operatingSystemUtils = operatingSystemUtils,
        _backupCache =
@@ -1100,10 +1093,10 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case HostArtifact.webPlatformKernelFolder:
       case HostArtifact.webPlatformDDCKernelDill:
       case HostArtifact.webPlatformDart2JSKernelDill:
-      case HostArtifact.webPrecompiledAmdCanvaskitSdk:
-      case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
+      case HostArtifact.webPrecompiledDDCStableSdk:
+      case HostArtifact.webPrecompiledDDCStableSdkSourcemaps:
+      case HostArtifact.webPrecompiledDDCCanarySdk:
+      case HostArtifact.webPrecompiledDDCCanarySdkSourcemaps:
       case HostArtifact.idevicesyslog:
       case HostArtifact.idevicescreenshot:
       case HostArtifact.skyEnginePath:
@@ -1294,16 +1287,12 @@ class CachedLocalEngineArtifacts implements Artifacts {
 
 class CachedLocalWebSdkArtifacts implements Artifacts {
   CachedLocalWebSdkArtifacts({
-    required Artifacts parent,
-    required String webSdkPath,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _parent = parent,
-       _webSdkPath = webSdkPath,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _operatingSystemUtils = operatingSystemUtils;
+    required this._parent,
+    required this._webSdkPath,
+    required this._fileSystem,
+    required this._platform,
+    required this._operatingSystemUtils,
+  });
 
   final Artifacts _parent;
   final String _webSdkPath;
@@ -1386,10 +1375,10 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case HostArtifact.webPlatformKernelFolder:
       case HostArtifact.webPlatformDDCKernelDill:
       case HostArtifact.webPlatformDart2JSKernelDill:
-      case HostArtifact.webPrecompiledAmdCanvaskitSdk:
-      case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
+      case HostArtifact.webPrecompiledDDCStableSdk:
+      case HostArtifact.webPrecompiledDDCStableSdkSourcemaps:
+      case HostArtifact.webPrecompiledDDCCanarySdk:
+      case HostArtifact.webPrecompiledDDCCanarySdkSourcemaps:
         return _resolveWebArtifact(artifact, _getFlutterWebSdkPath(), _fileSystem, _platform);
       case HostArtifact.iosDeploy:
       case HostArtifact.idevicesyslog:
@@ -1536,20 +1525,15 @@ FileSystemEntity _resolveWebArtifact(
       return fileSystem.file(
         fileSystem.path.join(webSdkPath, 'kernel', artifact.getFileName(platform)),
       );
-    case HostArtifact.webPrecompiledAmdCanvaskitSdk:
-    case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
+    case HostArtifact.webPrecompiledDDCStableSdk:
+    case HostArtifact.webPrecompiledDDCStableSdkSourcemaps:
       return fileSystem.file(
-        fileSystem.path.join(webSdkPath, 'kernel', 'amd-canvaskit', artifact.getFileName(platform)),
+        fileSystem.path.join(webSdkPath, 'kernel', 'ddc', 'stable', artifact.getFileName(platform)),
       );
-    case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk:
-    case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
+    case HostArtifact.webPrecompiledDDCCanarySdk:
+    case HostArtifact.webPrecompiledDDCCanarySdkSourcemaps:
       return fileSystem.file(
-        fileSystem.path.join(
-          webSdkPath,
-          'kernel',
-          'ddcLibraryBundle-canvaskit',
-          artifact.getFileName(platform),
-        ),
+        fileSystem.path.join(webSdkPath, 'kernel', 'ddc', 'canary', artifact.getFileName(platform)),
       );
     case HostArtifact.iosDeploy:
     case HostArtifact.idevicesyslog:

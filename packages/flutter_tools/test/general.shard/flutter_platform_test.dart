@@ -8,14 +8,15 @@ import 'dart:io' as io;
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
@@ -27,6 +28,7 @@ import 'package:vm_service/src/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -53,9 +55,15 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, hostVmServicePort: 1234),
           enableVmService: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
         flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
@@ -80,9 +88,15 @@ void main() {
           precompiledDillPath: 'example.dill',
           enableVmService: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
         flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
@@ -101,6 +115,7 @@ void main() {
       'an exception from the app not starting bubbles up to the test runner',
       () async {
         final testDevice = _UnstartableDevice();
+        final logger = BufferLogger.test();
         final flutterPlatform = FlutterPlatform(
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           flutterTesterBinPath: '/',
@@ -110,9 +125,15 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
 
         await expectLater(
@@ -126,10 +147,7 @@ void main() {
             ),
           ),
         );
-        expect(
-          (globals.logger as BufferLogger).traceText,
-          contains('test 0: error caught during test;'),
-        );
+        expect(logger.traceText, contains('test 0: error caught during test;'));
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -142,6 +160,7 @@ void main() {
       'a shutdown signal terminates the test device',
       () async {
         final testDevice = _WorkingDevice();
+        final logger = BufferLogger.test();
 
         final shutdownHooks = ShutdownHooks();
         final flutterPlatform = FlutterPlatform(
@@ -152,11 +171,16 @@ void main() {
           flutterProject: _FakeFlutterProject(),
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
-          shutdownHooks: shutdownHooks,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: shutdownHooks,
+          ),
         );
 
         await expectLater(
@@ -164,7 +188,6 @@ void main() {
           returnsNormally,
         );
 
-        final logger = globals.logger as BufferLogger;
         await shutdownHooks.runShutdownHooks(logger);
         expect(logger.traceText, contains('test 0: ensuring test device is terminated.'));
       },
@@ -181,9 +204,15 @@ void main() {
           flutterTesterBinPath: 'abc',
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         ),
         throwsAssertionError,
       );
@@ -197,9 +226,15 @@ void main() {
             hostVmServicePort: 123,
           ),
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         ),
         throwsAssertionError,
       );
@@ -226,9 +261,15 @@ void main() {
           capturedPlatform = platform;
         },
         buildInfo: BuildInfo.debug,
-        fileSystem: fileSystem,
-        processManager: FakeProcessManager.empty(),
-        logger: BufferLogger.test(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.empty(),
+          shutdownHooks: ShutdownHooks(),
+        ),
       );
 
       expect(identical(capturedPlatform, flutterPlatform), equals(true));
@@ -247,47 +288,51 @@ void main() {
       expect(flutterPlatform.icudtlPath, equals('ghi'));
     });
 
-    testUsingContext('pipeHarnessToRemote safely ignores non-JSON string and logs warning', () async {
-      final harnessController = StreamChannelController<Object?>();
-      final remoteController = StreamChannelController<String>();
+    testWithoutContext(
+      'pipeHarnessToRemote safely ignores non-JSON string and logs warning',
+      () async {
+        final harnessController = StreamChannelController<Object?>();
+        final remoteController = StreamChannelController<String>();
+        final logger = BufferLogger.test();
 
-      final Future<void> pipeFuture = pipeHarnessToRemote(
-        id: 0,
-        harnessChannel: harnessController.foreign,
-        remoteChannel: remoteController.foreign,
-      );
+        final Future<void> pipeFuture = pipeHarnessToRemote(
+          id: 0,
+          harnessChannel: harnessController.foreign,
+          remoteChannel: remoteController.foreign,
+          logger: logger,
+        );
 
-      final receivedFromRemote = <Object?>[];
-      harnessController.local.stream.listen(receivedFromRemote.add);
+        final receivedFromRemote = <Object?>[];
+        harnessController.local.stream.listen(receivedFromRemote.add);
 
-      // Send non-JSON error string from remote channel followed by valid JSON.
-      remoteController.local.sink.add(
-        'Loading dynamic library failed: dlopen(/opt/homebrew/share/flutter/bin/cache/libflutter.dylib)',
-      );
-      remoteController.local.sink.add('{"valid": true}');
+        // Send non-JSON error string from remote channel followed by valid JSON.
+        remoteController.local.sink.add(
+          'Loading dynamic library failed: dlopen(/opt/homebrew/share/flutter/bin/cache/libflutter.dylib)',
+        );
+        remoteController.local.sink.add('{"valid": true}');
 
-      await pumpEventQueue();
+        await pumpEventQueue();
 
-      await remoteController.local.sink.close();
-      await harnessController.local.sink.close();
+        await remoteController.local.sink.close();
+        await harnessController.local.sink.close();
 
-      await pipeFuture;
+        await pipeFuture;
 
-      expect(
-        receivedFromRemote,
-        equals(<Object?>[
-          <String, Object?>{'valid': true},
-        ]),
-      );
-      final logger = globals.logger as BufferLogger;
-      expect(
-        logger.warningText,
-        contains(
-          'Received unexpected non-JSON output from test runner: Loading dynamic library failed: dlopen',
-        ),
-      );
-      expect(logger.traceText, contains('test 0: JSON decoding failed:'));
-    });
+        expect(
+          receivedFromRemote,
+          equals(<Object?>[
+            <String, Object?>{'valid': true},
+          ]),
+        );
+        expect(
+          logger.warningText,
+          contains(
+            'Received unexpected non-JSON output from test runner: Loading dynamic library failed: dlopen',
+          ),
+        );
+        expect(logger.traceText, contains('test 0: JSON decoding failed:'));
+      },
+    );
   });
 
   group('generateTestBootstrap', () {
@@ -396,9 +441,15 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: processManager,
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: artifacts,
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: processManager,
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
         flutterPlatform.compiler = testCompiler;
 
@@ -459,9 +510,15 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: processManager,
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: artifacts,
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: processManager,
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
         flutterPlatform.compiler = testCompiler;
 

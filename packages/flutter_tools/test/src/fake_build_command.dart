@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -31,10 +32,12 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
+import 'android_common.dart';
 import 'fake_process_manager.dart';
 import 'fakes.dart';
 
 BuildCommand createFakeBuildCommand({
+  AndroidBuilder? androidBuilder,
   AndroidSdk? androidSdk,
   ApplicationPackageFactory? applicationPackageFactory,
   Artifacts? artifacts,
@@ -118,6 +121,7 @@ BuildCommand createFakeBuildCommand({
   final OperatingSystemUtils resolvedOsUtils = effectiveOsUtils ?? FakeOperatingSystemUtils();
 
   final command = BuildCommand(
+    androidBuilder: androidBuilder ?? FakeAndroidBuilder(),
     androidContext: FakeAndroidContext(androidSdk: androidSdk),
     appleContext: FakeAppleContext(
       plistParser: plistParser ?? FakePlistParser(),

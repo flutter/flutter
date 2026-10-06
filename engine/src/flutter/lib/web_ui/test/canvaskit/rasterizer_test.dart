@@ -16,16 +16,13 @@ void main() {
 
 void testMain() {
   setUpCanvasKitTest(withImplicitView: true);
-  test(
-    'defaults to OffscreenCanvasRasterizer on Chrome and MultiSurfaceRasterizer on Firefox and Safari',
-    () {
-      if (isChromium) {
-        expect(CanvasKitRenderer.instance.rasterizer, isA<OffscreenCanvasRasterizer>());
-      } else {
-        expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
-      }
-    },
-  );
+  test('defaults to OffscreenCanvasRasterizer on Chrome and MultiSurfaceRasterizer on Firefox and Safari', () {
+    if (isChromium) {
+      expect(CanvasKitRenderer.instance.rasterizer, isA<OffscreenCanvasRasterizer>());
+    } else {
+      expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
+    }
+  });
 
   test('can be configured to always use MultiSurfaceRasterizer', () {
     debugOverrideJsConfiguration(

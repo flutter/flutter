@@ -100,9 +100,9 @@ void main() {
       testUsingContext(
         'does not check that Flutter installation is up-to-date with --machine flag present anywhere',
         () async {
-          final runner =
-              createTestCommandRunner(_FlutterCommandWithItsOwnMachineFlag(verboseHelp: false))
-                  as FlutterCommandRunner;
+          final runner = createTestCommandRunner(
+            _FlutterCommandWithItsOwnMachineFlag(verboseHelp: false),
+          ) as FlutterCommandRunner;
           final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['dummy-with-machine', '--machine']);
@@ -214,6 +214,7 @@ void main() {
                 commandPath: 'version',
                 result: 'success',
                 commandHasTerminal: false,
+                hostArch: globals.os.hostPlatform.cliName,
               ),
             ),
           );
@@ -303,8 +304,55 @@ void main() {
         });
 
         testUsingContext(
-          '',
+          'returns all packages in dev, examples, and packages',
           () {
+            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+            final List<String> packagePaths = runner
+                .getRepoPackages()
+                .map((Directory d) => d.path)
+                .toList();
+            expect(packagePaths, <String>[
+              fileSystem
+                  .directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool'))
+                  .path,
+              fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools')).path,
+            ]);
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => platform,
+            FlutterVersion: () => FakeFlutterVersion(),
+            OutputPreferences: () => OutputPreferences.test(),
+          },
+        );
+
+        testUsingContext(
+          'ignores .dart_tool and build directories',
+          () {
+            fileSystem
+                .file(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'build', 'pubspec.yaml'))
+                .createSync(recursive: true);
+            fileSystem
+                .file(
+                  fileSystem.path.join(
+                    _kFlutterRoot,
+                    'dev',
+                    'tools',
+                    'build',
+                    'ios',
+                    'SourcePackages',
+                    'pkg',
+                    'pubspec.yaml',
+                  ),
+                )
+                .createSync(recursive: true);
+            fileSystem
+                .file(
+                  fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', '.dart_tool', 'pubspec.yaml'),
+                )
+                .createSync(recursive: true);
+
             final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
             final List<String> packagePaths = runner
                 .getRepoPackages()
