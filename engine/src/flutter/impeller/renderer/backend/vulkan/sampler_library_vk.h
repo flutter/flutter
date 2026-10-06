@@ -37,6 +37,12 @@ class SamplerLibraryVK final
   raw_ptr<const Sampler> GetSampler(
       const SamplerDescriptor& descriptor) override;
 
+  /// @brief Find the cached sampler for `key`, or a null `raw_ptr` if there
+  ///        is none.
+  ///
+  ///        The result outlives `samplers_mutex_`: `samplers_` holds each
+  ///        sampler by shared_ptr and never removes one, so it stays valid
+  ///        for the lifetime of this library.
   raw_ptr<const Sampler> FindSampler(uint64_t key) const
       IPLR_REQUIRES(samplers_mutex_);
 
