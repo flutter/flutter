@@ -183,10 +183,6 @@ abstract class ProcessUtils {
   ///
   /// If [timeout] is supplied, the command will be retried [timeoutRetries] times
   /// if it times out.
-  ///
-  /// The child process's stdout and stderr are decoded with [encoding], which
-  /// defaults to the system encoding. When [timeout] is supplied, they are
-  /// always decoded as UTF-8.
   Future<RunResult> run(
     List<String> cmd, {
     bool throwOnError = false,
@@ -196,7 +192,6 @@ abstract class ProcessUtils {
     Map<String, String>? environment,
     Duration? timeout,
     int timeoutRetries = 0,
-    Encoding encoding = systemEncoding,
   });
 
   /// Run the command and block waiting for its result.
@@ -357,7 +352,6 @@ class _DefaultProcessUtils implements ProcessUtils {
     Map<String, String>? environment,
     Duration? timeout,
     int timeoutRetries = 0,
-    Encoding encoding = systemEncoding,
   }) async {
     if (cmd.isEmpty) {
       throw ArgumentError('cmd must be a non-empty list');
@@ -374,8 +368,6 @@ class _DefaultProcessUtils implements ProcessUtils {
         cmd,
         workingDirectory: workingDirectory,
         environment: _environment(allowReentrantFlutter, environment),
-        stdoutEncoding: encoding,
-        stderrEncoding: encoding,
       );
       final runResult = RunResult(results, cmd);
       _logger.printTrace(runResult.toString());
