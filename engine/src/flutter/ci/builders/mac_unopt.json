@@ -4,7 +4,7 @@
             "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7|Mac-26.6",
+                "os=Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -34,7 +34,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27a266a"
                 }
             },
             "tests": [
@@ -56,7 +56,7 @@
             "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7|Mac-26.6",
+                "os=Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -85,7 +85,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27a266a"
                 }
             },
             "tests": [
@@ -107,7 +107,7 @@
             "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7|Mac-26.6",
+                "os=Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -137,7 +137,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27a266a"
                 }
             },
             "tests": [
@@ -158,7 +158,7 @@
             "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7|Mac-26.6",
+                "os=Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -188,7 +188,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27a266a"
                 }
             },
             "tests": [
@@ -215,7 +215,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -245,7 +245,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27a266a"
                 }
             },
             "tests": [
@@ -266,7 +266,7 @@
             "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7|Mac-26.6",
+                "os=Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -297,7 +297,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17c52"
+                    "sdk_version": "27a266a"
                 }
             },
             "tests": [
@@ -329,12 +329,12 @@
                     "runtime_versions": [
                         "ios-26-2_17c52"
                     ],
-                    "sdk_version": "17c52"
+                    "sdk_version": "27a266a"
                 }
             },
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7|Mac-26.6",
+                "os=Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -397,12 +397,12 @@
                     "runtime_versions": [
                         "ios-26-2_17c52"
                     ],
-                    "sdk_version": "17c52"
+                    "sdk_version": "27a266a"
                 }
             },
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7|Mac-26.6",
+                "os=Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
