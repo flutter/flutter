@@ -1612,4 +1612,10 @@ void ContentContext::ClearCachedTextures() const {
   texture_cache_.clear();
 }
 
+void ContentContext::ClearRenderTargetCache() const {
+  if (render_target_cache_) {
+    render_target_cache_->Clear();
+  }
+}
+
 }  // namespace impeller

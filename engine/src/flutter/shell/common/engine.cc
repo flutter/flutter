@@ -584,6 +584,10 @@ FontCollection& Engine::GetFontCollection() {
   return *font_collection_;
 }
 
+void Engine::ResetInternalState() {
+  delegate_.OnEngineResetInternalState();
+}
+
 void Engine::DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,
                               uint64_t trace_flow_id) {
   animator_->EnqueueTraceFlowId(trace_flow_id);
