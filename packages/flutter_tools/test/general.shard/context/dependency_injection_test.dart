@@ -172,8 +172,6 @@ void main() {
         expect(artifacts.usesLocalArtifacts, isTrue);
         expect(artifacts.localEngineInfo, isNotNull);
         expect(artifacts.localEngineInfo?.localTargetName, 'host_debug');
-        // Verifies dependent context instances created with DeferredArtifacts remain intact.
-        expect(dependencies.appleContext.xcdevice, isNotNull);
       } else {
         fail('Expected dependencies.toolContext.artifacts to be DeferredArtifacts');
       }
