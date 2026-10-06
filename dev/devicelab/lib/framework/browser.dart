@@ -270,6 +270,31 @@ class Chrome {
     await _debugConnection?.page.reload(ignoreCache: ignoreCache);
   }
 
+  /// Forces a full garbage collection (V8 + Oilpan) in the page.
+  ///
+  /// When the page reloads, the previous document is detached but stays
+  /// GC-reachable until the next major GC, together with ~2.5 GB of unlinked
+  /// `/dev/shm` segments it holds. Major GC cadence follows JS heap growth, not
+  /// shared-memory usage, so a few uncollected reloads (6 on the Linux bots,
+  /// where `/dev/shm` is a tmpfs capped at 50% of RAM) fill `/dev/shm` and
+  /// Chrome refuses response bodies with `net::ERR_INSUFFICIENT_RESOURCES`.
+  /// Collecting before each reload keeps at most one detached document alive.
+  ///
+  /// No-op when there is no debug connection.
+  Future<void> collectGarbage() async {
+    final WipConnection? debugConnection = _debugConnection;
+    if (debugConnection == null) {
+      return;
+    }
+    try {
+      await debugConnection
+          .sendCommand('HeapProfiler.collectGarbage')
+          .timeout(const Duration(seconds: 30));
+    } on Object catch (error) {
+      print('HeapProfiler.collectGarbage failed: $error');
+    }
+  }
+
   /// Disconnects from the Chrome process without killing it.
   void disconnect() {
     _isStopped = true;
