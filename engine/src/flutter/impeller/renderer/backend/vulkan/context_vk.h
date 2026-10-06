@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 
 #include <format>
+#include <functional>
 #include <memory>
 
 #include "flutter/fml/concurrent_message_loop.h"
@@ -90,6 +91,12 @@ class ContextVK final : public Context,
     /// If validations are requested but cannot be enabled, log a fatal error.
     bool fatal_missing_validations = false;
     Flags flags;
+
+    /// An optional policy hook consulted as soon as a physical device has been
+    /// selected, before the logical device, allocator, pipeline cache, shader
+    /// modules, or worker threads are created. Returning true aborts setup and
+    /// leaves the context invalid.
+    std::function<bool(const DriverInfoVK&)> should_reject_device;
 
     std::optional<EmbedderData> embedder_data;
 

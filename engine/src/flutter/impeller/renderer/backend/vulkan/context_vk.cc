@@ -153,9 +153,6 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
 
-  raster_message_loop_ = fml::ConcurrentMessageLoop::Create(
-      ChooseThreadCountForWorkers(std::thread::hardware_concurrency()));
-
   auto& dispatcher = VULKAN_HPP_DEFAULT_DISPATCHER;
   dispatcher.init(settings.proc_address_callback);
 
@@ -290,6 +287,20 @@ void ContextVK::Setup(Settings settings) {
   }
 
   //----------------------------------------------------------------------------
+  /// Identify the driver and give the caller a chance to reject it.
+  ///
+  /// This only needs the physical device, so it is done before the logical
+  /// device, allocator, pipeline cache, shader modules and worker threads are
+  /// created.
+  ///
+  auto driver_info =
+      std::make_unique<DriverInfoVK>(device_holder->physical_device);
+  if (settings.should_reject_device &&
+      settings.should_reject_device(*driver_info)) {
+    return;
+  }
+
+  //----------------------------------------------------------------------------
   /// Pick device queues.
   ///
   auto graphics_queue =
@@ -381,8 +392,11 @@ void ContextVK::Setup(Settings settings) {
   }
 
   //----------------------------------------------------------------------------
-  /// Setup the pipeline library.
+  /// Setup the worker threads and the pipeline library.
   ///
+  raster_message_loop_ = fml::ConcurrentMessageLoop::Create(
+      ChooseThreadCountForWorkers(std::thread::hardware_concurrency()));
+
   auto pipeline_library = std::shared_ptr<PipelineLibraryVK>(
       new PipelineLibraryVK(device_holder,                         //
                             caps,                                  //
@@ -457,20 +471,15 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
 
-  VkPhysicalDeviceProperties physical_device_properties;
-  dispatcher.vkGetPhysicalDeviceProperties(device_holder->physical_device,
-                                           &physical_device_properties);
-
   //----------------------------------------------------------------------------
   /// All done!
   ///
 
   // Apply workarounds for broken drivers.
-  auto driver_info =
-      std::make_unique<DriverInfoVK>(device_holder->physical_device);
   workarounds_ = GetWorkaroundsFromDriverInfo(*driver_info);
   caps->ApplyWorkarounds(workarounds_);
 
+  device_name_ = driver_info->GetDriverName();
   device_holder_ = std::move(device_holder);
   idle_waiter_vk_ = std::make_shared<IdleWaiterVK>(device_holder_);
   driver_info_ = std::move(driver_info);
@@ -487,7 +496,6 @@ void ContextVK::Setup(Settings settings) {
   resource_manager_ = std::move(resource_manager);
   command_pool_recycler_ = std::move(command_pool_recycler);
   descriptor_pool_recycler_ = std::move(descriptor_pool_recycler);
-  device_name_ = std::string(physical_device_properties.deviceName);
   command_queue_vk_ = std::make_shared<CommandQueueVK>(weak_from_this());
   should_enable_surface_control_ = settings.enable_surface_control;
   should_batch_cmd_buffers_ = !workarounds_.batch_submit_command_buffer_timeout;
