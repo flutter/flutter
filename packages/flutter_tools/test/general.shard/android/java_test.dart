@@ -333,6 +333,43 @@ OpenJDK 64-Bit Server VM (build 21+35, mixed mode, sharing)
         expect(version, equals(Version(21, 0, 0)));
       });
     });
+
+    group('gradleEnvironment', () {
+      Java createJava({Map<String, String> environment = const <String, String>{}}) {
+        return Java(
+          fileSystem: fs,
+          logger: logger,
+          os: FakeOperatingSystemUtils(),
+          platform: FakePlatform(environment: <String, String>{'PATH': '', ...environment}),
+          processManager: processManager,
+          binaryPath: 'javaHome/bin/java',
+          javaHome: 'javaHome',
+          javaSource: JavaSource.javaHome,
+        );
+      }
+
+      testWithoutContext('enables native access', () {
+        final Java java = createJava();
+
+        expect(java.gradleEnvironment['GRADLE_OPTS'], Java.enableNativeAccessFlag);
+        expect(java.gradleEnvironment[Java.javaHomeEnvironmentVariable], 'javaHome');
+        expect(java.gradleEnvironment['PATH'], java.environment['PATH']);
+      });
+
+      testWithoutContext('appends to existing GRADLE_OPTS', () {
+        final Java java = createJava(environment: <String, String>{'GRADLE_OPTS': '-Xmx2g'});
+
+        expect(java.gradleEnvironment['GRADLE_OPTS'], '-Xmx2g ${Java.enableNativeAccessFlag}');
+      });
+
+      testWithoutContext('does not override user-specified native access', () {
+        final Java java = createJava(
+          environment: <String, String>{'GRADLE_OPTS': '--enable-native-access=foo'},
+        );
+
+        expect(java.gradleEnvironment, isNot(contains('GRADLE_OPTS')));
+      });
+    });
   });
 }
 

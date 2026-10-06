@@ -370,6 +370,12 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addDescriptor(WebOptions.baseHref);
   }
 
+  /// Adds the `--[no-]deprecated-js-interop` flag, which is forwarded to the
+  /// web compilers through [BuildInfo.deprecatedJsInterop].
+  void usesDeprecatedJsInteropFlag({required bool verboseHelp}) {
+    argParser.addDescriptor(WebOptions.deprecatedJsInterop, verboseHelp: verboseHelp);
+  }
+
   void usesTargetOption() {
     CommonOptions.target.addTo(argParser);
     _usesTargetOption = true;
@@ -1165,6 +1171,7 @@ abstract class FlutterCommand extends Command<void> {
       useLocalCanvasKit: useLocalCanvasKit,
       webEnableHotReload: true,
       linuxGtkVersion: linuxGtkVersion,
+      deprecatedJsInterop: getValue(WebOptions.deprecatedJsInterop),
     );
   }
 
