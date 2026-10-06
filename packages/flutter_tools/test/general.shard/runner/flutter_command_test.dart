@@ -790,6 +790,26 @@ void main() {
     );
 
     testUsingContext(
+      'reports --[no-]deprecated-js-interop in BuildInfo only when passed',
+      () async {
+        Future<bool?> deprecatedJsInteropFor(List<String> args) async {
+          final command = DummyDeprecatedJsInteropFlutterCommand();
+          await createTestCommandRunner(command).run(<String>['dummy', ...args]);
+          final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
+          return buildInfo.deprecatedJsInterop;
+        }
+
+        expect(await deprecatedJsInteropFor(<String>['--deprecated-js-interop']), isTrue);
+        expect(await deprecatedJsInteropFor(<String>['--no-deprecated-js-interop']), isFalse);
+        expect(await deprecatedJsInteropFor(<String>[]), isNull);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'reports the enable-hcpp feature flag to gradle as the injected default',
       () async {
         final command = DummyHcppFlutterCommand();
@@ -2408,6 +2428,12 @@ class DummyMachineFlutterCommand extends DummyFlutterCommand {
 class DummyHcppFlutterCommand extends DummyFlutterCommand {
   DummyHcppFlutterCommand() : super(name: 'dummy') {
     addEnableHcppFlag(verboseHelp: false);
+  }
+}
+
+class DummyDeprecatedJsInteropFlutterCommand extends DummyFlutterCommand {
+  DummyDeprecatedJsInteropFlutterCommand() : super(name: 'dummy') {
+    usesDeprecatedJsInteropFlag(verboseHelp: false);
   }
 }
 
