@@ -1898,9 +1898,22 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
   /// {@template flutter.widgets.Transform.optional.FilterQuality}
-  /// The transform will be applied by re-rendering the child if [filterQuality] is null,
-  /// otherwise it controls the quality of an [ImageFilter.matrix] applied to a bitmap
-  /// rendering of the child.
+  /// If null, the transform is applied to the child's painting operations.
+  /// Otherwise, the child is rendered into a bitmap and transformed using an
+  /// [ImageFilter.matrix] with the specified sampling quality. This introduces
+  /// an [ImageFilterLayer] and can incur additional offscreen rendering work.
+  ///
+  /// Changing the transform repaints without laying out the child, regardless
+  /// of this value. During an animation, the child's painting operations run on
+  /// each tick, except where a [RepaintBoundary] can reuse its existing layer.
+  /// Repaint boundaries can retain their layers in either case; setting a
+  /// non-null value does not by itself prevent the child from repainting.
+  ///
+  /// Leave this null for simple children or translation-only transforms to
+  /// avoid the additional image filter. For a complex child that is scaled or
+  /// rotated, consider a non-null value if profiling shows that bitmap sampling
+  /// reduces raster work. Scaling up a bitmap can reduce sharpness, and the
+  /// offscreen rendering cost can outweigh the benefit.
   /// {@endtemplate}
   final FilterQuality? filterQuality;
 
