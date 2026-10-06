@@ -831,7 +831,7 @@ class BrowserManager {
     WipConnection? wipConnection,
   }) : _wipConnection = wipConnection {
     if (wipConnection != null) {
-      _networkTracker = CdpNetworkTracker(wipConnection, _systemClock);
+      _networkTracker = CdpNetworkTracker(wipConnection, _logger, _systemClock);
       unawaited(_networkTracker!.enable());
     }
 
@@ -1251,10 +1251,11 @@ class BrowserManager {
 /// Tracks active network requests via Chrome DevTools Protocol to identify pending or stalled asset fetches.
 class CdpNetworkTracker {
   /// Creates a [CdpNetworkTracker] using the provided [connection].
-  CdpNetworkTracker(this.connection, this._systemClock);
+  CdpNetworkTracker(this.connection, this._logger, this._systemClock);
 
   /// The connection to the Chrome DevTools Protocol.
   final WipConnection connection;
+  final Logger _logger;
   final SystemClock _systemClock;
   final Map<String, _PendingRequestInfo> _pendingRequests = <String, _PendingRequestInfo>{};
   StreamSubscription<WipEvent>? _subscription;
@@ -1283,8 +1284,9 @@ class CdpNetworkTracker {
             _pendingRequests.remove(requestId);
         }
       });
-    } on Object {
+    } on Object catch (e) {
       // Network tracking is best-effort diagnostics; never fail the test run over it.
+      _logger.printWarning('Failed to enable CDP network tracking for hang diagnostics: $e');
     }
   }
 
