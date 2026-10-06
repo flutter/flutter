@@ -33,6 +33,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
+    ui.Hyphens? hyphens,
   }) : skParagraphStyle = toSkParagraphStyle(
          textAlign,
          textDirection,
@@ -59,7 +60,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
        _textHeightBehavior = textHeightBehavior,
        _strutStyle = strutStyle,
        _ellipsis = ellipsis,
-       _locale = locale;
+       _locale = locale,
+       _hyphens = hyphens;
 
   final SkParagraphStyle skParagraphStyle;
 
@@ -76,6 +78,14 @@ class CkParagraphStyle implements ui.ParagraphStyle {
   final ui.StrutStyle? _strutStyle;
   final String? _ellipsis;
   final ui.Locale? _locale;
+  // TODO(dbebawy): hyphens is accepted and stored but not honored here yet.
+  // Neither Hyphens.manual nor Hyphens.hidden takes effect on CanvasKit until a
+  // renderSoftHyphens setter is exposed on the CanvasKit ParagraphStyle binding
+  // (the native engine wires this via SkParagraph::setRenderSoftHyphens).
+  // https://github.com/flutter/flutter/issues/193506
+  // Customizing the hyphen string is separate future work:
+  // https://github.com/flutter/flutter/issues/189617
+  final ui.Hyphens? _hyphens;
 
   static SkTextStyleProperties toSkTextStyleProperties(
     String? fontFamily,
@@ -263,7 +273,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
         other._textHeightBehavior == _textHeightBehavior &&
         other._strutStyle == _strutStyle &&
         other._ellipsis == _ellipsis &&
-        other._locale == _locale;
+        other._locale == _locale &&
+        other._hyphens == _hyphens;
   }
 
   @override
@@ -282,6 +293,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
       _strutStyle,
       _ellipsis,
       _locale,
+      _hyphens,
     );
   }
 
@@ -304,7 +316,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           'height: ${height != null ? "${height.toStringAsFixed(1)}x" : "unspecified"}, '
           'strutStyle: ${_strutStyle ?? "unspecified"}, '
           'ellipsis: ${_ellipsis != null ? '"$_ellipsis"' : "unspecified"}, '
-          'locale: ${_locale ?? "unspecified"}'
+          'locale: ${_locale ?? "unspecified"}, '
+          'hyphens: ${_hyphens ?? "unspecified"}'
           ')';
       return true;
     }());
@@ -974,7 +987,26 @@ class CkParagraph implements ui.Paragraph {
   ui.TextRange getLineBoundary(ui.TextPosition position) {
     assert(!_disposed, 'Paragraph has been disposed.');
     final List<SkLineMetrics> metrics = skiaObject.getLineMetrics();
-    final int offset = position.offset;
+    final ui.TextRange line = _lineBoundaryAtOffset(metrics, position.offset);
+
+    // A line's endIndex equals the next line's startIndex at a soft wrap, so
+    // the lookup above cannot tell the two apart on its own and always answers
+    // with the earlier line, as if the affinity were upstream. A downstream
+    // position sitting exactly on that seam belongs to the next line instead.
+    // This mirrors the native implementation in `lib/ui/text.dart`.
+    final ui.TextRange nextLine = _lineBoundaryAtOffset(metrics, position.offset + 1);
+    if (nextLine.isValid &&
+        position.affinity == ui.TextAffinity.downstream &&
+        line != nextLine &&
+        position.offset == line.end &&
+        line.end == nextLine.start) {
+      return nextLine;
+    }
+    return line;
+  }
+
+  // The line containing [offset], treating both line bounds as inclusive.
+  static ui.TextRange _lineBoundaryAtOffset(List<SkLineMetrics> metrics, int offset) {
     for (final metric in metrics) {
       if (offset >= metric.startIndex && offset <= metric.endIndex) {
         return ui.TextRange(start: metric.startIndex.toInt(), end: metric.endIndex.toInt());
