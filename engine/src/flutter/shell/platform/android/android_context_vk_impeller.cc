@@ -53,16 +53,17 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   // Android can fall back to OpenGLES, so drivers that are known to have
   // issues with Vulkan are rejected as soon as the physical device is
   // identified, before the (expensive) remainder of Vulkan setup runs.
-  settings.should_reject_device = [](const impeller::DriverInfoVK& info) {
-    if (!info.IsKnownBadDriver()) {
-      return false;
-    }
+  auto selection = impeller::ContextVK::SelectDevice(std::move(settings));
+  if (!selection.has_value()) {
+    return nullptr;
+  }
+  if (selection->GetDriverInfo().IsKnownBadDriver()) {
     FML_LOG(INFO)
         << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
-    return true;
-  };
+    return nullptr;
+  }
 
-  auto context = impeller::ContextVK::Create(std::move(settings));
+  auto context = selection->CreateContext();
 
   if (!p_settings.quiet) {
     if (context && impeller::CapabilitiesVK::Cast(*context->GetCapabilities())

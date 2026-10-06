@@ -438,68 +438,51 @@ void SetAdreno630Properties(VkPhysicalDevice device,
                             VkPhysicalDeviceProperties* prop) {
   prop->vendorID = kQualcommVendorID;
   kAdreno630Name.copy(prop->deviceName, kAdreno630Name.size());
+  prop->deviceName[kAdreno630Name.size()] = '\0';
   prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
 }
 
 }  // namespace
 
-TEST(ContextVKTest, ShouldRejectDeviceSeesDriverInfoAndAbortsSetup) {
-  int calls = 0;
-  std::optional<VendorVK> seen_vendor;
-  std::optional<AdrenoGPU> seen_gpu;
-  bool seen_known_bad = false;
-
-  std::shared_ptr<ContextVK> context =
+TEST(ContextVKTest, SelectDeviceExposesDriverInfoBeforeContextCreation) {
+  std::optional<ContextVK::DeviceSelection> selection =
       MockVulkanContextBuilder()
           .SetPhysicalPropertiesCallback(SetAdreno630Properties)
-          .SetSettingsCallback([&](ContextVK::Settings& settings) {
-            settings.should_reject_device = [&](const DriverInfoVK& info) {
-              calls++;
-              seen_vendor = info.GetVendor();
-              seen_gpu = info.GetAdrenoGPUInfo();
-              seen_known_bad = info.IsKnownBadDriver();
-              return true;
-            };
-          })
-          .Build();
+          .SelectDevice();
 
-  // Rejection leaves the context invalid, so Create returns null.
-  EXPECT_EQ(context, nullptr);
-
-  // The hook is consulted exactly once, with a fully populated DriverInfoVK.
-  EXPECT_EQ(calls, 1);
-  ASSERT_TRUE(seen_vendor.has_value());
-  EXPECT_EQ(*seen_vendor, VendorVK::kQualcomm);
-  ASSERT_TRUE(seen_gpu.has_value());
-  EXPECT_EQ(*seen_gpu, AdrenoGPU::kAdreno630);
-  EXPECT_TRUE(seen_known_bad);
+  ASSERT_TRUE(selection.has_value());
+  EXPECT_EQ(selection->GetDriverInfo().GetVendor(), VendorVK::kQualcomm);
+  EXPECT_EQ(selection->GetDriverInfo().GetAdrenoGPUInfo(),
+            AdrenoGPU::kAdreno630);
+  EXPECT_TRUE(selection->GetDriverInfo().IsKnownBadDriver());
+  // Dropping `selection` without calling CreateContext() tears down the Vulkan
+  // instance cleanly (verified by MockVulkanStatePtr's thread-exit leak check).
 }
 
-TEST(ContextVKTest, ShouldRejectDeviceReturningFalseDoesNotAbortSetup) {
-  int calls = 0;
-  std::shared_ptr<ContextVK> context =
+TEST(ContextVKTest, SelectDeviceCanFinishCreatingContext) {
+  std::optional<ContextVK::DeviceSelection> selection =
       MockVulkanContextBuilder()
           .SetPhysicalPropertiesCallback(SetAdreno630Properties)
-          .SetSettingsCallback([&](ContextVK::Settings& settings) {
-            settings.should_reject_device = [&](const DriverInfoVK& info) {
-              calls++;
-              return false;
-            };
-          })
-          .Build();
+          .SelectDevice();
+
+  ASSERT_TRUE(selection.has_value());
+  std::shared_ptr<ContextVK> context = selection->CreateContext();
 
   ASSERT_NE(context, nullptr);
   EXPECT_TRUE(context->IsValid());
-  EXPECT_EQ(calls, 1);
-  // The same DriverInfoVK consulted by the hook is retained by the context.
+  // The same DriverInfoVK inspected on the selection is retained by the
+  // context.
   EXPECT_EQ(context->GetDriverInfo()->GetAdrenoGPUInfo(),
             AdrenoGPU::kAdreno630);
   EXPECT_EQ(context->DescribeGpuModel(), std::string(kAdreno630Name));
+
+  // CreateContext() consumes the selection; calling it again returns nullptr.
+  EXPECT_EQ(selection->CreateContext(), nullptr);
 }
 
-TEST(ContextVKTest, NoShouldRejectDeviceHookAcceptsKnownBadDrivers) {
-  // Without a hook, a driver that Android would reject still produces a valid
-  // context. Callers without a fallback rely on this.
+TEST(ContextVKTest, CreateAcceptsKnownBadDriversByDefault) {
+  // ContextVK::Create does not reject known-bad drivers on its own; callers
+  // without a fallback rely on this.
   std::shared_ptr<ContextVK> context =
       MockVulkanContextBuilder()
           .SetPhysicalPropertiesCallback(SetAdreno630Properties)

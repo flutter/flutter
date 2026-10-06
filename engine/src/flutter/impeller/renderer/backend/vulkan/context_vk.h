@@ -6,8 +6,8 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 
 #include <format>
-#include <functional>
 #include <memory>
+#include <optional>
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/mapping.h"
@@ -32,6 +32,7 @@ namespace impeller {
 
 bool HasValidationLayers();
 
+class CapabilitiesVK;
 class CommandEncoderFactoryVK;
 class CommandEncoderVK;
 class CommandPoolRecyclerVK;
@@ -65,6 +66,8 @@ class IdleWaiterVK : public IdleWaiter {
 class ContextVK final : public Context,
                         public BackendCast<ContextVK, Context>,
                         public std::enable_shared_from_this<ContextVK> {
+  struct DeviceHolderImpl;
+
  public:
   // Mutable tracker for command buffer submission bookkeeping.
   const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
@@ -92,23 +95,58 @@ class ContextVK final : public Context,
     bool fatal_missing_validations = false;
     Flags flags;
 
-    /// An optional policy hook consulted as soon as a physical device has been
-    /// selected, before the logical device, allocator, pipeline cache, shader
-    /// modules, or worker threads are created. Returning true aborts setup and
-    /// leaves the context invalid.
-    std::function<bool(const DriverInfoVK&)> should_reject_device;
-
     std::optional<EmbedderData> embedder_data;
 
     Settings() = default;
 
     Settings(Settings&&) = default;
+    Settings& operator=(Settings&&) = default;
+  };
+
+  /// Holds the Vulkan instance, selected physical device, and its
+  /// `DriverInfoVK` produced by `SelectDevice`, before the logical device,
+  /// allocator, pipeline cache, shader modules, or worker threads are created.
+  class DeviceSelection {
+   public:
+    ~DeviceSelection();
+
+    DeviceSelection(DeviceSelection&&);
+    DeviceSelection& operator=(DeviceSelection&&);
+
+    DeviceSelection(const DeviceSelection&) = delete;
+    DeviceSelection& operator=(const DeviceSelection&) = delete;
+
+    const DriverInfoVK& GetDriverInfo() const { return *driver_info_; }
+
+    /// Finish initializing the `ContextVK` for the selected physical device.
+    /// Consumes this `DeviceSelection`.
+    std::shared_ptr<ContextVK> CreateContext();
+
+   private:
+    friend class ContextVK;
+
+    DeviceSelection(Settings settings,
+                    std::shared_ptr<CapabilitiesVK> caps,
+                    std::shared_ptr<DeviceHolderImpl> device_holder,
+                    std::unique_ptr<DebugReportVK> debug_report,
+                    std::unique_ptr<DriverInfoVK> driver_info);
+
+    Settings settings_;
+    std::shared_ptr<CapabilitiesVK> caps_;
+    std::shared_ptr<DeviceHolderImpl> device_holder_;
+    std::unique_ptr<DebugReportVK> debug_report_;
+    std::unique_ptr<DriverInfoVK> driver_info_;
   };
 
   /// Choose the number of worker threads the context_vk will create.
   ///
   /// Visible for testing.
   static size_t ChooseThreadCountForWorkers(size_t hardware_concurrency);
+
+  /// Initialize the Vulkan instance and select a physical device, returning its
+  /// `DriverInfoVK` so the caller can inspect or reject the device before the
+  /// remainder of context setup runs.
+  static std::optional<DeviceSelection> SelectDevice(Settings settings);
 
   static std::shared_ptr<ContextVK> Create(Settings settings);
 
@@ -323,7 +361,7 @@ class ContextVK final : public Context,
 
   explicit ContextVK(const Flags& flags);
 
-  void Setup(Settings settings);
+  void Setup(DeviceSelection selection);
 
   ContextVK(const ContextVK&) = delete;
 
