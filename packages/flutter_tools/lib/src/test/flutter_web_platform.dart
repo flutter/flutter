@@ -673,14 +673,10 @@ window.\$dartLoader.loader.nextAttempt();
           _logger.printError('[flutter_tools] Failed to diagnose hang: $e\n$st');
         } finally {
           if (timeoutCompleter != null && !timeoutCompleter.isCompleted) {
-            try {
-              throwToolExit(
-                'Test suite $relativePath timed out after 3 minutes (stalled CanvasKit WASM fetch or unresponsive browser). '
-                'Exiting to prevent LUCI bot hanging.',
-              );
-            } catch (e, st) {
-              timeoutCompleter.completeError(e, st);
-            }
+            timeoutCompleter.completeWithToolExit(
+              'Test suite $relativePath timed out after 3 minutes (stalled CanvasKit WASM fetch or unresponsive browser). '
+              'Exiting to prevent LUCI bot hanging.',
+            );
           }
         }
       });
