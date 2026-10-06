@@ -11276,6 +11276,69 @@ TEST(Google3RegressionFixesTest,
   native.SetEngine(nullptr);
 }
 
+TEST(Google3RegressionFixesTest, SurfaceTextureUVTransformationLifecycle) {
+  constexpr int64_t kSurfaceTextureId = 42;
+  constexpr int64_t kImageTextureId = 99;
+
+  FlutterEmbedderNative native;
+  FlutterRendererConfig config = {};
+  native.PopulateRendererConfig(&config);
+  ASSERT_EQ(config.type, kOpenGL);
+  ASSERT_NE(config.open_gl.gl_external_texture_uv_transformation_callback,
+            nullptr);
+
+  std::array<float, FlutterEmbedderNative::kSurfaceTextureTransformMatrixSize>
+      queried_matrix{};
+
+  // 1. Unregistered texture returns false.
+  EXPECT_FALSE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kSurfaceTextureId, queried_matrix.data()));
+
+  // 2. Registered SurfaceTexture without a captured UV matrix returns false.
+  native.RegisterSurfaceTexture(kSurfaceTextureId,
+                                fml::jni::ScopedJavaGlobalRef<jobject>());
+  EXPECT_FALSE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kSurfaceTextureId, queried_matrix.data()));
+
+  // 3. Registered SurfaceTexture with a vertical flip UV matrix returns true
+  // and copies all 16 column-major floats.
+  const std::array<float,
+                   FlutterEmbedderNative::kSurfaceTextureTransformMatrixSize>
+      expected_flip_v = {
+          1.0f, 0.0f,  0.0f, 0.0f,  //
+          0.0f, -1.0f, 0.0f, 0.0f,  //
+          0.0f, 0.0f,  1.0f, 0.0f,  //
+          0.0f, 1.0f,  0.0f, 1.0f,  //
+  };
+  native.SetSurfaceTextureUVTransformForTesting(kSurfaceTextureId,
+                                                expected_flip_v);
+  EXPECT_TRUE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kSurfaceTextureId, queried_matrix.data()));
+  EXPECT_EQ(queried_matrix, expected_flip_v);
+
+  // 4. ImageConsumer textures do not have a SurfaceTexture UV transform and
+  // return false.
+  native.RegisterImageTexture(kImageTextureId, nullptr, false);
+  EXPECT_FALSE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kImageTextureId, queried_matrix.data()));
+  native.UnregisterImageTexture(kImageTextureId);
+
+  // 5. Re-registering or unregistering the SurfaceTexture clears the cached UV
+  // transformation matrix.
+  native.RegisterSurfaceTexture(kSurfaceTextureId,
+                                fml::jni::ScopedJavaGlobalRef<jobject>());
+  EXPECT_FALSE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kSurfaceTextureId, queried_matrix.data()));
+
+  native.SetSurfaceTextureUVTransformForTesting(kSurfaceTextureId,
+                                                expected_flip_v);
+  EXPECT_TRUE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kSurfaceTextureId, queried_matrix.data()));
+  native.UnregisterSurfaceTexture(kSurfaceTextureId);
+  EXPECT_FALSE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kSurfaceTextureId, queried_matrix.data()));
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter

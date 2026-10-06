@@ -1108,7 +1108,8 @@ void FlutterEmbedderNative::PopulateRendererConfig(
             if (gl_it != self->surface_texture_gl_ids_.end()) {
               gl_tex_id = gl_it->second;
             } else {
-              if (self->renderer_config_.open_gl.gl_proc_resolver) {
+              if (HasCurrentEGLContext() &&
+                  self->renderer_config_.open_gl.gl_proc_resolver) {
                 typedef void (*PFNGLGENTEXTURESPROC)(int, uint32_t*);
                 auto gen_textures_fn = reinterpret_cast<PFNGLGENTEXTURESPROC>(
                     self->renderer_config_.open_gl.gl_proc_resolver(
@@ -1152,10 +1153,17 @@ void FlutterEmbedderNative::PopulateRendererConfig(
                 }
               }
               if (target_obj) {
-                if (g_surface_texture_wrapper_class &&
+                const bool is_wrapper =
+                    g_surface_texture_wrapper_class &&
                     !g_surface_texture_wrapper_class->is_null() &&
                     env->IsInstanceOf(target_obj,
-                                      g_surface_texture_wrapper_class->obj())) {
+                                      g_surface_texture_wrapper_class->obj());
+                const bool is_surface_tex =
+                    !is_wrapper && g_surface_texture_class &&
+                    !g_surface_texture_class->is_null() &&
+                    env->IsInstanceOf(target_obj,
+                                      g_surface_texture_class->obj());
+                if (is_wrapper) {
                   if (need_attach && g_wrapper_attach_to_gl_context_method) {
                     env->CallVoidMethod(target_obj,
                                         g_wrapper_attach_to_gl_context_method,
@@ -1167,10 +1175,7 @@ void FlutterEmbedderNative::PopulateRendererConfig(
                     env->CallVoidMethod(target_obj,
                                         g_wrapper_update_tex_image_method);
                   }
-                } else if (g_surface_texture_class &&
-                           !g_surface_texture_class->is_null() &&
-                           env->IsInstanceOf(target_obj,
-                                             g_surface_texture_class->obj())) {
+                } else if (is_surface_tex) {
                   if (need_attach && g_st_attach_to_gl_context_method) {
                     env->CallVoidMethod(target_obj,
                                         g_st_attach_to_gl_context_method,
@@ -1181,6 +1186,39 @@ void FlutterEmbedderNative::PopulateRendererConfig(
                   if (g_st_update_tex_image_method) {
                     env->CallVoidMethod(target_obj,
                                         g_st_update_tex_image_method);
+                  }
+                }
+                if (env->ExceptionCheck()) {
+                  env->ExceptionClear();
+                } else {
+                  jmethodID transform_method =
+                      is_wrapper
+                          ? g_wrapper_get_transform_matrix_method
+                          : (is_surface_tex ? g_st_get_transform_matrix_method
+                                            : nullptr);
+                  if (transform_method) {
+                    jfloatArray j_matrix =
+                        env->NewFloatArray(kSurfaceTextureTransformMatrixSize);
+                    if (j_matrix) {
+                      env->CallVoidMethod(target_obj, transform_method,
+                                          j_matrix);
+                      if (!env->ExceptionCheck()) {
+                        std::array<float, kSurfaceTextureTransformMatrixSize>
+                            uv_matrix{};
+                        env->GetFloatArrayRegion(
+                            j_matrix, 0, kSurfaceTextureTransformMatrixSize,
+                            uv_matrix.data());
+                        std::scoped_lock lock(self->surface_textures_mutex_);
+                        if (self->surface_textures_.find(texture_id) !=
+                            self->surface_textures_.end()) {
+                          self->surface_texture_uv_transforms_[texture_id] =
+                              uv_matrix;
+                        }
+                      } else {
+                        env->ExceptionClear();
+                      }
+                      env->DeleteLocalRef(j_matrix);
+                    }
                   }
                 }
               }
@@ -1214,7 +1252,8 @@ void FlutterEmbedderNative::PopulateRendererConfig(
             return false;
           }
           if (it->second.gl_texture_id == 0) {
-            if (self->renderer_config_.open_gl.gl_proc_resolver) {
+            if (HasCurrentEGLContext() &&
+                self->renderer_config_.open_gl.gl_proc_resolver) {
               typedef void (*PFNGLGENTEXTURESPROC)(int, uint32_t*);
               auto gen_textures_fn = reinterpret_cast<PFNGLGENTEXTURESPROC>(
                   self->renderer_config_.open_gl.gl_proc_resolver(
@@ -1454,6 +1493,21 @@ void FlutterEmbedderNative::PopulateRendererConfig(
       };
       config->open_gl.hardware_buffer_external_texture_frame_callback =
           &FlutterEmbedderNative::OnHardwareBufferExternalTextureFrameCallback;
+      config->open_gl.gl_external_texture_uv_transformation_callback =
+          [](void* user_data, int64_t texture_id, float* matrix_out) -> bool {
+        auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+        if (!self || !matrix_out) {
+          return false;
+        }
+        std::scoped_lock lock(self->surface_textures_mutex_);
+        auto it = self->surface_texture_uv_transforms_.find(texture_id);
+        if (it == self->surface_texture_uv_transforms_.end()) {
+          return false;
+        }
+        std::memcpy(matrix_out, it->second.data(),
+                    kSurfaceTextureTransformMatrixSize * sizeof(float));
+        return true;
+      };
       break;
   }
 }
@@ -1778,6 +1832,14 @@ FlutterEmbedderNative::~FlutterEmbedderNative() {
       }
     }
     image_textures_.clear();
+  }
+  {
+    std::scoped_lock lock(surface_textures_mutex_);
+    surface_textures_.clear();
+    surface_texture_attached_.clear();
+    surface_texture_vulkan_buffers_.clear();
+    surface_texture_gl_ids_.clear();
+    surface_texture_uv_transforms_.clear();
   }
   if (surface_manager_) {
     surface_manager_->DestroyOverlaySurfaces();
@@ -4832,6 +4894,7 @@ void FlutterEmbedderNative::RegisterSurfaceTexture(
           : std::make_shared<fml::jni::ScopedJavaGlobalRef<jobject>>(
                 surface_texture);
   surface_texture_attached_.erase(texture_id);
+  surface_texture_uv_transforms_.erase(texture_id);
 }
 
 void FlutterEmbedderNative::UnregisterSurfaceTexture(int64_t texture_id) {
@@ -4841,6 +4904,7 @@ void FlutterEmbedderNative::UnregisterSurfaceTexture(int64_t texture_id) {
     surface_textures_.erase(texture_id);
     surface_texture_attached_.erase(texture_id);
     surface_texture_vulkan_buffers_.erase(texture_id);
+    surface_texture_uv_transforms_.erase(texture_id);
     auto it = surface_texture_gl_ids_.find(texture_id);
     if (it != surface_texture_gl_ids_.end()) {
       gl_id = it->second;
@@ -4947,6 +5011,15 @@ void FlutterEmbedderNative::SetImageTextureCurrentBufferForTesting(
   auto it = image_textures_.find(texture_id);
   if (it != image_textures_.end()) {
     it->second.current_buffer = std::move(buffer);
+  }
+}
+
+void FlutterEmbedderNative::SetSurfaceTextureUVTransformForTesting(
+    int64_t texture_id,
+    const std::array<float, kSurfaceTextureTransformMatrixSize>& uv_transform) {
+  std::scoped_lock lock(surface_textures_mutex_);
+  if (surface_textures_.find(texture_id) != surface_textures_.end()) {
+    surface_texture_uv_transforms_[texture_id] = uv_transform;
   }
 }
 

@@ -2530,8 +2530,36 @@ CreateExternalTextureResolver(const FlutterRendererConfig* config,
         }
         return texture;
       };
-      external_texture_resolver =
-          std::make_unique<ExternalTextureResolver>(external_texture_callback);
+      flutter::EmbedderExternalTextureGL::UVTransformationCallback
+          uv_transformation_callback = nullptr;
+      if (SAFE_ACCESS(open_gl_config,
+                      gl_external_texture_uv_transformation_callback,
+                      nullptr) != nullptr) {
+        uv_transformation_callback =
+            [ptr =
+                 open_gl_config->gl_external_texture_uv_transformation_callback,
+             user_data](int64_t texture_identifier,
+                        flutter::DlMatrix* matrix_out) -> bool {
+          if (!matrix_out) {
+            return false;
+          }
+          // 16 elements in a 4x4 column-major UV transformation matrix.
+          constexpr size_t kMatrix4x4ElementCount = 16;
+          float m[kMatrix4x4ElementCount] = {};
+          if (!ptr(user_data, texture_identifier, m)) {
+            return false;
+          }
+          *matrix_out =
+              flutter::DlMatrix::MakeColumn(m[0], m[1], m[2], m[3],     //
+                                            m[4], m[5], m[6], m[7],     //
+                                            m[8], m[9], m[10], m[11],   //
+                                            m[12], m[13], m[14], m[15]  //
+              );
+          return true;
+        };
+      }
+      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
+          external_texture_callback, uv_transformation_callback);
     }
   }
 #endif
