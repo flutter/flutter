@@ -171,16 +171,30 @@ void Rasterizer::DisableThreadMergerIfNeeded() {
 }
 
 void Rasterizer::NotifyLowMemoryWarning() const {
-#if !SLIMPELLER
+  ClearRenderTargetCache();
+}
+
+void Rasterizer::ClearRenderTargetCache() const {
   if (!surface_) {
     FML_DLOG(INFO)
-        << "Rasterizer::NotifyLowMemoryWarning called with no surface.";
+        << "Rasterizer::ClearRenderTargetCache called with no surface.";
     return;
   }
+#if IMPELLER_SUPPORTS_RENDERING
+  if (auto aiks_context = surface_->GetAiksContext()) {
+    auto context_switch = surface_->MakeRenderContextCurrent();
+    if (context_switch->GetResult()) {
+      aiks_context->ClearRenderTargetCache();
+      aiks_context->ClearCachedTextures();
+    }
+    return;
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+#if !SLIMPELLER
   auto context = surface_->GetContext();
   if (!context) {
     FML_DLOG(INFO)
-        << "Rasterizer::NotifyLowMemoryWarning called with no GrContext.";
+        << "Rasterizer::ClearRenderTargetCache called with no GrContext.";
     return;
   }
   auto context_switch = surface_->MakeRenderContextCurrent();
@@ -188,7 +202,7 @@ void Rasterizer::NotifyLowMemoryWarning() const {
     return;
   }
   context->performDeferredCleanup(std::chrono::milliseconds(0));
-#endif  //  !SLIMPELLER
+#endif  // !SLIMPELLER
 }
 
 void Rasterizer::CollectView(int64_t view_id) {
