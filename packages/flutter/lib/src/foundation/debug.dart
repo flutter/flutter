@@ -53,6 +53,9 @@ export '_view_metrics.dart'
         debugViewWithMetricsOverrides;
 export 'print.dart' show DebugPrintCallback;
 
+// Examples can assume:
+// late DebugViewMetricsOverride metricsOverride;
+
 /// Returns true if none of the foundation library debug variables have been
 /// changed.
 ///
@@ -596,10 +599,12 @@ class DebugViewMetricsOverride with Diagnosticable {
   ///
   /// {@tool snippet}
   /// This stops overriding the text scale factor while leaving every other
-  /// metric of `override` in place:
+  /// metric of `metricsOverride` in place:
   ///
   /// ```dart
-  /// override.copyWith(clear: <DebugViewMetric>{DebugViewMetric.textScaleFactor});
+  /// metricsOverride.copyWith(
+  ///   clear: <DebugViewMetric>{DebugViewMetric.textScaleFactor},
+  /// );
   /// ```
   /// {@end-tool}
   DebugViewMetricsOverride copyWith({
