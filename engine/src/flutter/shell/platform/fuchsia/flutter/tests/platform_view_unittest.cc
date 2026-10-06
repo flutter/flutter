@@ -1597,7 +1597,7 @@ TEST_F(PlatformViewTests, TouchGestureResponsePolicy_InterceptAllInputTrue) {
   platform_view.HandlePlatformMessage(msg_response->WithMessage(
       "flutter/platform_views",
       R"({"method":"View.setGestureResponsePolicy","args":{"defaultResponse":"NO"}})"));
-  EXPECT_TRUE(msg_response->IsCompleted());
+  msg_response->ExpectCompleted("[0]");
 
   std::vector<fuchsia::ui::pointer::TouchEvent> events;
   events.emplace_back(
@@ -1668,7 +1668,7 @@ TEST_F(PlatformViewTests,
               ]
             }
           })"));
-  EXPECT_TRUE(msg_response->IsCompleted());
+  msg_response->ExpectCompleted("[0]");
 
   std::vector<fuchsia::ui::pointer::TouchEvent> events;
   // Inside first region -> YES_PRIORITIZE (9)
@@ -1697,13 +1697,12 @@ TEST_F(PlatformViewTests,
   auto responses = touch_server.UploadedResponses();
   ASSERT_TRUE(responses.has_value());
   ASSERT_EQ(responses->size(), 3u);
-  // Baseline (before policy evaluation): answers YES to all samples.
   EXPECT_EQ((*responses)[0].response_type(),
-            fuchsia::ui::pointer::TouchResponseType::YES);
+            fuchsia::ui::pointer::TouchResponseType::YES_PRIORITIZE);
   EXPECT_EQ((*responses)[1].response_type(),
             fuchsia::ui::pointer::TouchResponseType::YES);
   EXPECT_EQ((*responses)[2].response_type(),
-            fuchsia::ui::pointer::TouchResponseType::YES);
+            fuchsia::ui::pointer::TouchResponseType::NO);
 }
 
 TEST_F(PlatformViewTests,
@@ -1725,21 +1724,21 @@ TEST_F(PlatformViewTests,
           .Build();
   RunLoopUntilIdle();
 
-  // Baseline (before policy enforcement): answers YES even without a policy.
-  (void)touch_server.UploadedResponses();
-  std::vector<fuchsia::ui::pointer::TouchEvent> events =
-      TouchEventBuilder::New()
-          .AddTime(1000u)
-          .AddViewParameters(kRect, kRect, kIdentity)
-          .AddSample(kIxn, fuchsia::ui::pointer::EventPhase::ADD, {10.f, 10.f})
-          .BuildAsVector();
-  touch_server.ScheduleCallback(std::move(events));
-  RunLoopUntilIdle();
-  auto responses = touch_server.UploadedResponses();
-  ASSERT_TRUE(responses.has_value());
-  ASSERT_EQ(responses->size(), 1u);
-  EXPECT_EQ((*responses)[0].response_type(),
-            fuchsia::ui::pointer::TouchResponseType::YES);
+  // On Fuchsia, FML_CHECK logs to the Fuchsia syslog rather than stderr, so
+  // the stderr matcher for EXPECT_DEATH_IF_SUPPORTED must be empty.
+  EXPECT_DEATH_IF_SUPPORTED(
+      {
+        std::vector<fuchsia::ui::pointer::TouchEvent> events =
+            TouchEventBuilder::New()
+                .AddTime(1000u)
+                .AddViewParameters(kRect, kRect, kIdentity)
+                .AddSample(kIxn, fuchsia::ui::pointer::EventPhase::ADD,
+                           {10.f, 10.f})
+                .BuildAsVector();
+        touch_server.ScheduleCallback(std::move(events));
+        RunLoopUntilIdle();
+      },
+      "");
 }
 
 TEST_F(PlatformViewTests,
@@ -1779,7 +1778,7 @@ TEST_F(PlatformViewTests,
               ]
             }
           })"));
-  EXPECT_TRUE(msg_response->IsCompleted());
+  msg_response->ExpectCompleted("[0]");
 
   std::vector<fuchsia::ui::pointer::TouchEvent> events;
   events.emplace_back(
@@ -1812,15 +1811,14 @@ TEST_F(PlatformViewTests,
   auto responses = touch_server.UploadedResponses();
   ASSERT_TRUE(responses.has_value());
   ASSERT_EQ(responses->size(), 4u);
-  // Baseline (before deferral policy evaluation): answers YES on all samples.
   EXPECT_EQ((*responses)[0].response_type(),
-            fuchsia::ui::pointer::TouchResponseType::YES);
+            fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS);
   EXPECT_EQ((*responses)[1].response_type(),
-            fuchsia::ui::pointer::TouchResponseType::YES);
+            fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS);
   EXPECT_EQ((*responses)[2].response_type(),
-            fuchsia::ui::pointer::TouchResponseType::YES);
+            fuchsia::ui::pointer::TouchResponseType::YES_PRIORITIZE);
   EXPECT_EQ((*responses)[3].response_type(),
-            fuchsia::ui::pointer::TouchResponseType::YES);
+            fuchsia::ui::pointer::TouchResponseType::YES_PRIORITIZE);
 }
 
 }  // namespace flutter_runner::testing
