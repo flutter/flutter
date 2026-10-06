@@ -44,6 +44,7 @@ void main() {
           transformInputIssueHandler,
           javaHeapSpaceHandler,
           lockFileDepMissingHandler,
+          flutterHostAppCompileSdkHandler,
           minCompileSdkVersionHandler,
           incompatibleJavaAndAgpVersionsHandler,
           outdatedGradleHandler,
@@ -1097,6 +1098,85 @@ Execution failed for task ':app:checkDebugAarMetadata'.
             '└────────────────────────────────────────────────────────────────────────────────┘\n',
           ),
         );
+      },
+      overrides: <Type, Generator>{
+        GradleUtils: () => FakeGradleUtils(),
+        Platform: () => fakePlatform('android'),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    const agp9ErrorLine =
+        "      1.  Dependency ':myplugin' requires libraries and applications that";
+
+    testWithoutContext('pattern matches AGP 9 wording', () {
+      expect(minCompileSdkVersionHandler.test(agp9ErrorLine), isTrue);
+      expect(
+        minCompileSdkVersionHandler.test(
+          '          depend on it to compile against version 37 or later of the',
+        ),
+        isFalse,
+      );
+    });
+
+    testUsingContext(
+      'suggestion for AGP 9 wording names the dependency',
+      () async {
+        await minCompileSdkVersionHandler.handler(
+          line: agp9ErrorLine,
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          usesAndroidX: true,
+        );
+
+        expect(
+          testLogger.statusText,
+          contains('Your project requires a higher compileSdk version.'),
+        );
+        expect(testLogger.statusText, contains('The dependency :myplugin requires projects'));
+        expect(testLogger.statusText, contains('/android/app/build.gradle'));
+        expect(testLogger.statusText, contains('compileSdk = <version>'));
+      },
+      overrides: <Type, Generator>{
+        GradleUtils: () => FakeGradleUtils(),
+        Platform: () => fakePlatform('android'),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+  });
+
+  group('Flutter Gradle plugin add-to-app host app compileSdk', () {
+    const fgpErrorLine =
+        "> [Flutter] Your Android host app's compileSdk (35) is lower than the compileSdk "
+        'required by its Flutter AARs (37).';
+
+    testWithoutContext('pattern', () {
+      expect(flutterHostAppCompileSdkHandler.test(fgpErrorLine), isTrue);
+      expect(
+        flutterHostAppCompileSdkHandler.test('Your project requires a higher compileSdk'),
+        isFalse,
+      );
+    });
+
+    testWithoutContext('takes priority over minCompileSdkVersionHandler', () {
+      final int fgpIndex = gradleErrors.indexOf(flutterHostAppCompileSdkHandler);
+      final int agpIndex = gradleErrors.indexOf(minCompileSdkVersionHandler);
+      expect(fgpIndex, lessThan(agpIndex));
+    });
+
+    testUsingContext(
+      'does not print a second fix',
+      () async {
+        final GradleBuildStatus status = await flutterHostAppCompileSdkHandler.handler(
+          line: fgpErrorLine,
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          usesAndroidX: true,
+        );
+
+        expect(status, GradleBuildStatus.exit);
+        expect(testLogger.statusText, isEmpty);
+        expect(testLogger.errorText, isEmpty);
       },
       overrides: <Type, Generator>{
         GradleUtils: () => FakeGradleUtils(),

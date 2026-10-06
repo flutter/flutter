@@ -72,6 +72,8 @@ final gradleErrors = <GradleHandledError>[
   transformInputIssueHandler,
   javaHeapSpaceHandler,
   lockFileDepMissingHandler,
+  // Must come before minCompileSdkVersionHandler so FGP's add-to-app message wins.
+  flutterHostAppCompileSdkHandler,
   minCompileSdkVersionHandler,
   incompatibleJavaAndAgpVersionsHandler,
   outdatedGradleHandler,
@@ -442,19 +444,69 @@ final outdatedGradleHandler = GradleHandledError(
 
 final _minCompileSdkVersionPattern = RegExp(r'The minCompileSdk \(([0-9]+)\) specified in a');
 
+/// The AGP 9+ wording of the AAR metadata `minCompileSdk` check, for example:
+///
+/// ```text
+/// 1.  Dependency ':flutter' requires libraries and applications that
+///     depend on it to compile against version 36 or later of the
+///     Android APIs.
+/// ```
+///
+/// Only the first line is matched because handlers see one line at a time.
+final _agp9MinCompileSdkPattern = RegExp(
+  r"Dependency '([^']+)' requires libraries and applications that",
+);
+
+/// The marker the Flutter Gradle plugin's `validateHostAppCompileSdk` task puts at the start of
+/// its error message (see `ValidateHostAppCompileSdkTask.ERROR_MARKER`).
+@visibleForTesting
+const kFlutterHostAppCompileSdkMarker = "[Flutter] Your Android host app's compileSdk";
+
+/// Handler for the Flutter Gradle plugin's add-to-app host app compileSdk check.
+///
+/// The Flutter Gradle plugin already prints which host app, Flutter AARs, and file to change,
+/// so this handler only stops AGP's `minCompileSdk` error from adding a second, less specific
+/// fix.
+@visibleForTesting
+final flutterHostAppCompileSdkHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[kFlutterHostAppCompileSdkMarker]),
+  handler:
+      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'host-app-min-compile-sdk',
+);
+
 @visibleForTesting
 final minCompileSdkVersionHandler = GradleHandledError(
-  test: _minCompileSdkVersionPattern.hasMatch,
+  test: (String line) =>
+      _minCompileSdkVersionPattern.hasMatch(line) || _agp9MinCompileSdkPattern.hasMatch(line),
   handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-    final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
-    assert(minCompileSdkVersionMatch?.groupCount == 1);
-
     final File gradleFile = project.android.appGradleFile;
+    final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
+    if (minCompileSdkVersionMatch != null) {
+      assert(minCompileSdkVersionMatch.groupCount == 1);
+      globals.printBox(
+        '${globals.logger.terminal.warningMark} Your project requires a higher compileSdk version.\n'
+        'Fix this issue by bumping the compileSdk version in ${gradleFile.path}:\n'
+        'android {\n'
+        '  compileSdk ${minCompileSdkVersionMatch.group(1)}\n'
+        '}',
+        title: _boxTitle,
+      );
+      return GradleBuildStatus.exit;
+    }
+
+    // AGP 9+ puts the required version on a later line, which this handler doesn't see.
+    final String? dependency = _agp9MinCompileSdkPattern.firstMatch(line)?.group(1);
     globals.printBox(
       '${globals.logger.terminal.warningMark} Your project requires a higher compileSdk version.\n'
-      'Fix this issue by bumping the compileSdk version in ${gradleFile.path}:\n'
+      'The dependency $dependency requires projects that depend on it to use the same or a higher compileSdk.\n'
+      'Fix this issue by raising the compileSdk version in ${gradleFile.path} '
+      '(or in gradle/libs.versions.toml if your project uses a version catalog) '
+      'to at least the version shown in the error above:\n'
       'android {\n'
-      '  compileSdk ${minCompileSdkVersionMatch?.group(1)}\n'
+      '  compileSdk = <version>\n'
       '}',
       title: _boxTitle,
     );
