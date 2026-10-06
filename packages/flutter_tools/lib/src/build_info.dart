@@ -57,6 +57,7 @@ class BuildInfo {
     this.useLocalCanvasKit = false,
     this.includeUnsupportedPlatformLibraryStubs = false,
     this.webEnableHotReload = false,
+    this.deprecatedJsInterop,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -105,6 +106,7 @@ class BuildInfo {
       includeUnsupportedPlatformLibraryStubs:
           includeUnsupportedPlatformLibraryStubs ?? this.includeUnsupportedPlatformLibraryStubs,
       webEnableHotReload: webEnableHotReload,
+      deprecatedJsInterop: deprecatedJsInterop,
       treeShakeIcons: treeShakeIcons,
     );
   }
@@ -260,6 +262,16 @@ class BuildInfo {
 
   /// If set, web builds with DDC will run with support for hot reload.
   final bool webEnableHotReload;
+
+  /// Whether the web compilers (dart2js and DDC) allow the deprecated JS
+  /// interop libraries, such as `dart:html` and `dart:js`.
+  ///
+  /// When `false`, importing these libraries is a compile-time error and
+  /// conditional imports on them resolve to `false`. When `null`, no flag is
+  /// passed and the compiler's default is used.
+  ///
+  /// See [deprecatedJsInteropCompilerFlags].
+  final bool? deprecatedJsInterop;
 
   /// Can be used when the actual information is not needed.
   static const dummy = BuildInfo(
@@ -969,8 +981,8 @@ String getMacOSBuildDirectory({Config? config, FileSystem? fileSystem}) {
 }
 
 /// Returns the web build output directory.
-String getWebBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'web');
+String getWebBuildDirectory({required Config config, required FileSystem fileSystem}) {
+  return fileSystem.path.join(getBuildDirectory(config, fileSystem), 'web');
 }
 
 /// Returns the Linux build output directory.
@@ -1197,6 +1209,20 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
 
 /// Indicates the module system DDC is targeting.
 enum DdcModuleFormat { amd, ddc }
+
+/// Returns the compiler flags that select whether the deprecated JS interop
+/// libraries (such as `dart:html` and `dart:js`) may be used.
+///
+/// Both dart2js and the frontend server (for the `dartdevc` target) accept
+/// these flags. Returns no flags when [deprecatedJsInterop] is `null`, so
+/// that the compiler's default is used and Dart SDKs without the flag keep
+/// working.
+List<String> deprecatedJsInteropCompilerFlags(bool? deprecatedJsInterop) =>
+    switch (deprecatedJsInterop) {
+      null => const <String>[],
+      true => const <String>['--deprecated-js-interop'],
+      false => const <String>['--no-deprecated-js-interop'],
+    };
 
 // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
 ({DdcModuleFormat? ddcModuleFormat, bool? canaryFeatures})

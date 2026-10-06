@@ -1665,7 +1665,7 @@ TEST_F(ShellTest, ReportTimingsIsCalledImmediatelyAfterTheFirstFrame) {
   ASSERT_EQ(timestamps.size(), FrameTiming::kCount);
 }
 
-TEST_F(ShellTest, WaitForFirstFrame) {
+TEST_F(ShellTest, AddFirstFrameCallbackFiresAfterFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1685,7 +1685,7 @@ TEST_F(ShellTest, WaitForFirstFrame) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, WaitForFirstFrameZeroSizeFrame) {
+TEST_F(ShellTest, AddFirstFrameCallbackDeferredIfZeroSizeFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1706,7 +1706,7 @@ TEST_F(ShellTest, WaitForFirstFrameZeroSizeFrame) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, WaitForFirstFrameTimeout) {
+TEST_F(ShellTest, AddFirstFrameCallbackDeferredIfNoFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1726,7 +1726,7 @@ TEST_F(ShellTest, WaitForFirstFrameTimeout) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, WaitForFirstFrameMultiple) {
+TEST_F(ShellTest, AddFirstFrameCallbackMultiple) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1752,9 +1752,9 @@ TEST_F(ShellTest, WaitForFirstFrameMultiple) {
   DestroyShell(std::move(shell));
 }
 
-/// Makes sure that WaitForFirstFrame works if we rendered a frame with the
+/// Makes sure that AddFirstFrameCallback fires if we rendered a frame with the
 /// single-thread setup.
-TEST_F(ShellTest, WaitForFirstFrameInlined) {
+TEST_F(ShellTest, AddFirstFrameCallbackInlined) {
   Settings settings = CreateSettingsForFixture();
   auto task_runner = CreateNewThread();
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
