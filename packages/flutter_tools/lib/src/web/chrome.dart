@@ -254,22 +254,20 @@ class ChromiumLauncher {
 
     // Mutable copy so --user-data-dir can be removed after extraction.
     final List<String> mutableWebBrowserFlags = List<String>.from(webBrowserFlags);
-    final ({Directory directory, bool isCustom}) userData = _createUserDataDirectory(
+    final (:Directory directory, :bool isCustom) = _createUserDataDirectory(
       mutableWebBrowserFlags,
     );
-    final Directory userDataDir = userData.directory;
-    final bool usingCustomUserDataDir = userData.isCustom;
 
     // Only seed session cache for temporary profiles managed by the tool.
-    if (cacheDir != null && !usingCustomUserDataDir) {
-      _restoreUserSessionInformation(cacheDir, userDataDir);
+    if (cacheDir != null && !isCustom) {
+      _restoreUserSessionInformation(cacheDir, directory);
     }
 
     final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
     final args = <String>[
       chromeExecutable,
       // Essential: isolate this Chrome instance and enable the debug protocol.
-      '--user-data-dir=${userDataDir.path}',
+      '--user-data-dir=${directory.path}',
       '--remote-debugging-port=$port',
       // Flutter convenience defaults (disable with --no-web-browser-default-flags).
       if (webBrowserDefaultFlags) ...<String>[
@@ -328,13 +326,13 @@ class ChromiumLauncher {
     final Process process = spawnResult.process;
 
     // Cache/cleanup only for temporary profiles (never delete a custom profile).
-    if (cacheDir != null && !usingCustomUserDataDir) {
+    if (cacheDir != null && !isCustom) {
       unawaited(
         process.exitCode.whenComplete(() {
-          _cacheUserSessionInformation(userDataDir, cacheDir);
+          _cacheUserSessionInformation(directory, cacheDir);
           // cleanup temp dir
           try {
-            userDataDir.deleteSync(recursive: true);
+            directory.deleteSync(recursive: true);
           } on FileSystemException {
             // ignore
           }
