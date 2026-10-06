@@ -712,7 +712,7 @@ window.\$dartLoader.loader.nextAttempt();
 
   @override
   Future<void> close() => _closeMemo.runOnce(() async {
-    await Future.wait<void>(<Future<dynamic>>[
+    await Future.wait<void>(<Future<void>>[
       ?_browserManager?.close(),
       _server.close(),
       _testGoldenComparator.close(),
@@ -787,7 +787,7 @@ class BrowserManager {
 
     // Whenever we get a message, no matter which child channel it's for, we know
     // the browser is still running code which means the user isn't debugging.
-    _channel = MultiChannel<dynamic>(
+    _channel = MultiChannel<Object?>(
       webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object?> stream) {
         return stream
             .handleError((Object error) {
@@ -822,7 +822,7 @@ class BrowserManager {
   /// The channel used to communicate with the browser.
   ///
   /// This is connected to a page running `static/host.dart`.
-  late MultiChannel<dynamic> _channel;
+  late MultiChannel<Object?> _channel;
 
   /// The ID of the next suite to be loaded.
   ///
@@ -837,10 +837,10 @@ class BrowserManager {
   ///
   /// This will be `null` as long as the browser isn't displaying a pause
   /// screen.
-  CancelableCompleter<dynamic>? _pauseCompleter;
+  CancelableCompleter<void>? _pauseCompleter;
 
   /// The controller for [_BrowserEnvironment.onRestart].
-  final _onRestartController = StreamController<dynamic>.broadcast();
+  final _onRestartController = StreamController<void>.broadcast();
 
   /// The environment to attach to each suite.
   late Future<_BrowserEnvironment> _environment;
@@ -857,7 +857,7 @@ class BrowserManager {
   // this lets us detect whether they're debugging reasonably accurately.
   late RestartableTimer _timer;
 
-  final _closeMemoizer = AsyncMemoizer<dynamic>();
+  final _closeMemoizer = AsyncMemoizer<void>();
 
   /// Starts the browser identified by [runtime] and has it connect to [url].
   ///
@@ -989,11 +989,11 @@ class BrowserManager {
 
     // The virtual channel will be closed when the suite is closed, in which
     // case we should unload the iframe.
-    final VirtualChannel<dynamic> virtualChannel = _channel.virtualChannel();
+    final VirtualChannel<Object?> virtualChannel = _channel.virtualChannel();
     final int suiteChannelID = virtualChannel.id;
-    final StreamChannel<dynamic> suiteChannel = virtualChannel.transformStream(
-      StreamTransformer<dynamic, dynamic>.fromHandlers(
-        handleDone: (EventSink<dynamic> sink) {
+    final StreamChannel<Object?> suiteChannel = virtualChannel.transformStream(
+      StreamTransformer<Object?, Object?>.fromHandlers(
+        handleDone: (EventSink<Object?> sink) {
           closeIframe();
           sink.close();
           onDone!();
@@ -1028,11 +1028,11 @@ class BrowserManager {
   }
 
   /// An implementation of [Environment.displayPause].
-  CancelableOperation<dynamic> _displayPause() {
+  CancelableOperation<void> _displayPause() {
     if (_pauseCompleter != null) {
       return _pauseCompleter!.operation;
     }
-    _pauseCompleter = CancelableCompleter<dynamic>(
+    _pauseCompleter = CancelableCompleter<void>(
       onCancel: () {
         _channel.sink.add(<String, String>{'command': 'resume'});
         _pauseCompleter = null;
@@ -1047,28 +1047,25 @@ class BrowserManager {
   }
 
   /// The callback for handling messages received from the host page.
-  void _onMessage(dynamic message) {
-    assert(message is Map<String, dynamic>);
-    if (message is Map<String, dynamic>) {
-      switch (message['command'] as String?) {
-        case 'ping':
-          break;
-        case 'restart':
-          _onRestartController.add(null);
-        case 'resume':
-          if (_pauseCompleter != null) {
-            _pauseCompleter!.complete();
-          }
-        default:
-          // Unreachable.
-          assert(false);
-      }
+  void _onMessage(Object? message) {
+    switch (message) {
+      case {'command': 'ping'}:
+        break;
+      case {'command': 'restart'}:
+        _onRestartController.add(null);
+      case {'command': 'resume'}:
+        if (_pauseCompleter != null) {
+          _pauseCompleter!.complete();
+        }
+      default:
+        // Unreachable.
+        assert(false, 'Unexpected message from browser host page: $message');
     }
   }
 
   /// Closes the manager and releases any resources it owns, including closing
   /// the browser.
-  Future<dynamic> close() {
+  Future<void> close() {
     return _closeMemoizer.runOnce(() {
       _closed = true;
       _timer.cancel();
@@ -1101,8 +1098,8 @@ class _BrowserEnvironment implements Environment {
   final Uri remoteDebuggerUrl;
 
   @override
-  final Stream<dynamic> onRestart;
+  final Stream<void> onRestart;
 
   @override
-  CancelableOperation<dynamic> displayPause() => _manager._displayPause();
+  CancelableOperation<void> displayPause() => _manager._displayPause();
 }
