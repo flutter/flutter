@@ -143,6 +143,7 @@ Future<void> main(List<String> args) async {
           runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
       'android_engine_opengles_tests': () =>
           runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
+      'android_engine_hcpp_tests': runAndroidEngineHcppTests,
       'android_hardware_smoke_vulkan_tests': () =>
           runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan),
       'android_hardware_smoke_opengles_tests': () =>
@@ -251,7 +252,10 @@ Future<void> _runIntegrationToolTests() async {
 
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'hook_user_defines'));
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'link_hook'));
-  await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'data_asset_app'));
+  await runFlutterTest(
+    path.join(flutterRoot, 'dev', 'integration_tests', 'data_asset_app'),
+    environment: <String, String>{'FLUTTER_DART_DATA_ASSETS': 'true'},
+  );
 }
 
 Future<void> _runWidgetPreviewScaffoldToolTests() async {

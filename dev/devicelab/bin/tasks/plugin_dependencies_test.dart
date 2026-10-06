@@ -217,10 +217,6 @@ public class DummyPluginAClass {
           '"dependencies":[]'
           '},'
           '{'
-          '"name":"plugin_a",'
-          '"dependencies":["plugin_b","plugin_c","plugin_d"]'
-          '},'
-          '{'
           '"name":"plugin_b",'
           '"dependencies":[]'
           '},'
@@ -231,6 +227,10 @@ public class DummyPluginAClass {
           '{'
           '"name":"plugin_d",'
           '"dependencies":[]'
+          '},'
+          '{'
+          '"name":"plugin_a",'
+          '"dependencies":["plugin_b","plugin_c","plugin_d"]'
           '}'
           ']';
       final String graphString = json.encode(dependencyGraph);
