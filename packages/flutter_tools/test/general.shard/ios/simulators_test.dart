@@ -1796,32 +1796,33 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
 
       testUsingContext(
-        'startApp throws without launching the app if the log stream never becomes ready',
-        () {
+        'startApp fails without launching the app if the log stream never becomes ready',
+        () async {
+          LaunchResult? result;
           fakeAsync((FakeAsync async) {
             processManager.addCommand(
               FakeCommand(command: logStreamCommand, completer: Completer<void>()),
             );
 
-            Object? error;
             buildDevice()
                 .startApp(
                   buildPackage(),
                   prebuiltApplication: true,
                   debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
                 )
-                .then(
-                  (_) {},
-                  onError: (Object e) {
-                    error = e;
-                  },
-                );
+                .then((LaunchResult value) => result = value);
             async.elapse(const Duration(seconds: 30));
-
-            expect(error, isA<TimeoutException>());
-            expect(simControl.requests, isEmpty);
-            expect(processManager, hasNoRemainingExpectations);
           });
+          // Cancelling the log reader subscription resumes in the root zone.
+          await Future<void>.delayed(Duration.zero);
+
+          expect(result?.started, isFalse);
+          expect(
+            logger.errorText,
+            contains('The iOS simulator log stream did not start within 30 seconds.'),
+          );
+          expect(simControl.requests, isEmpty);
+          expect(processManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
           PlistParser: () => testPlistParser,
