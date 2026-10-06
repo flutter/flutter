@@ -850,6 +850,19 @@ typedef bool (*BoolPresentInfoCallback)(
     void* /* user data */,
     const FlutterPresentInfo* /* present info */);
 
+/// Callback to retrieve the 4x4 column-major UV transformation matrix for an
+/// OpenGL external texture (for example, from Android's
+/// SurfaceTexture.getTransformMatrix).
+///
+/// The `matrix_out` buffer must be populated with 16 floats in column-major
+/// order operating on normalized [0, 1] texture coordinates.
+/// Returns true if a UV transformation matrix was written to `matrix_out`,
+/// or false if no UV transformation applies to this texture.
+typedef bool (*FlutterOpenGLTextureUVTransformationCallback)(
+    void* /* user data */,
+    int64_t /* texture identifier */,
+    float* /* matrix_out (16 floats, column-major) */);
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterOpenGLRendererConfig).
   size_t struct_size;
@@ -936,6 +949,10 @@ typedef struct {
   /// engine for subsequent composition.
   FlutterHardwareBufferExternalTextureFrameCallback
       hardware_buffer_external_texture_frame_callback;
+  /// Optional callback to retrieve a 4x4 column-major UV transformation matrix
+  /// for an OpenGL external texture.
+  FlutterOpenGLTextureUVTransformationCallback
+      gl_external_texture_uv_transformation_callback;
 } FlutterOpenGLRendererConfig;
 
 /// Alias for id<MTLDevice>.
@@ -2632,6 +2649,10 @@ typedef struct {
   /// The identifier for the view that the engine will use this backing store to
   /// render into.
   FlutterViewId view_id;
+  /// True if this backing store represents an overlay layer positioned above a
+  /// platform view. False if this backing store represents the base/onscreen
+  /// layer beneath any platform views.
+  bool is_overlay;
 } FlutterBackingStoreConfig;
 
 typedef enum {
@@ -3819,6 +3840,10 @@ typedef struct {
   /// The callback invoked by the engine to compute scaled font size for
   /// nonlinear font scaling.
   FlutterGetScaledFontSizeCallback get_scaled_font_size_callback;
+
+  /// The initial route for the engine. Optional; specifying null or empty
+  /// defaults to "/".
+  const char* initial_route;
 } FlutterProjectArgs;
 
 typedef struct {
@@ -3932,6 +3957,27 @@ typedef struct {
   /// User-defined data passed to the callback.
   void* user_data;
 } FlutterVMServiceUriCallbackConfig;
+
+//------------------------------------------------------------------------------
+/// @brief      Vulkan physical device properties queried by the embedder to
+///             determine whether Impeller's Vulkan backend considers the driver
+///             known-bad.
+///
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanDriverProperties).
+  size_t struct_size;
+  /// Vulkan API version reported by VkPhysicalDeviceProperties::apiVersion.
+  uint32_t api_version;
+  /// Driver version reported by VkPhysicalDeviceProperties::driverVersion.
+  uint32_t driver_version;
+  /// PCI/Khronos vendor ID reported by VkPhysicalDeviceProperties::vendorID.
+  uint32_t vendor_id;
+  /// Device ID reported by VkPhysicalDeviceProperties::deviceID.
+  uint32_t device_id;
+  /// NUL-terminated device name string from
+  /// VkPhysicalDeviceProperties::deviceName; only read during the call.
+  const char* device_name;
+} FlutterVulkanDriverProperties;
 
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
@@ -5006,6 +5052,27 @@ FlutterEngineResult FlutterEngineRegisterImageGenerator(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterImageGeneratorRegistrationInfo* info);
 
+//------------------------------------------------------------------------------
+/// @brief      Queries whether a Vulkan physical device's driver properties
+///             match a driver that Impeller considers known-bad (ineligible for
+///             Vulkan rendering).
+///
+/// @param[in]  properties        Pointer to the Vulkan driver properties
+/// struct.
+///                               Must not be null, and struct_size must cover
+///                               all read fields.
+/// @param[out] out_is_known_bad  Pointer to receive true if the driver is
+///                               known-bad, false otherwise. Written only when
+///                               `kSuccess` is returned.
+///
+/// @return     `kSuccess` on success, or `kInvalidArguments` if arguments are
+///             invalid or if Vulkan rendering is not compiled into this build.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineQueryVulkanDriverSupport(
+    const FlutterVulkanDriverProperties* properties,
+    bool* out_is_known_bad);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -5186,6 +5253,9 @@ typedef FlutterEngineResult (*FlutterEngineRegisterVMServiceUriCallbackFnPtr)(
     intptr_t* handle_out);
 typedef FlutterEngineResult (*FlutterEngineDeregisterVMServiceUriCallbackFnPtr)(
     intptr_t handle);
+typedef FlutterEngineResult (*FlutterEngineQueryVulkanDriverSupportFnPtr)(
+    const FlutterVulkanDriverProperties* properties,
+    bool* out_is_known_bad);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -5255,6 +5325,7 @@ typedef struct {
   FlutterEngineRegisterVMServiceUriCallbackFnPtr RegisterVMServiceUriCallback;
   FlutterEngineDeregisterVMServiceUriCallbackFnPtr
       DeregisterVMServiceUriCallback;
+  FlutterEngineQueryVulkanDriverSupportFnPtr QueryVulkanDriverSupport;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

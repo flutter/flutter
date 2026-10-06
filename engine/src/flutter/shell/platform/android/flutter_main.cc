@@ -202,8 +202,6 @@ void FlutterMain::Init(JNIEnv* env,
   settings.requested_rendering_backend = vm_args.requested_rendering_backend;
   vm_args.enable_impeller = settings.enable_impeller;
   vm_args.enable_software_rendering = settings.enable_software_rendering;
-  vm_args.enable_surface_control =
-      android::ShouldEnableSurfaceControl(vm_args, android_rendering_api);
   settings.enable_surface_control = vm_args.enable_surface_control;
   if (settings.enable_impeller) {
     vm_args.command_line_args.push_back("--enable-impeller=true");
@@ -251,6 +249,18 @@ void FlutterMain::Init(JNIEnv* env,
                 auto* runner = static_cast<fml::TaskRunner*>(user_data);
                 std::string uri_str(uri ? uri : "");
                 runner->PostTask([uri_str] {
+                  if (!uri_str.empty()) {
+                    if (auto default_vm_init = android::FlutterEmbedderNative::
+                            GetDefaultVMInit()) {
+                      default_vm_init->SetVmServiceUri(uri_str);
+                    }
+#if FML_OS_ANDROID
+                    __android_log_print(
+                        ANDROID_LOG_INFO, "flutter",
+                        "The Dart VM service is listening on %s",
+                        uri_str.c_str());
+#endif
+                  }
                   JNIEnv* env = fml::jni::AttachCurrentThread();
                   if (!g_flutter_jni_class || g_flutter_jni_class->is_null()) {
                     return;

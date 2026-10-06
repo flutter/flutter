@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/android_vulkan_device_owner.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -90,6 +91,9 @@ struct AndroidEngineRecord {
 
   /// Spawn timestamp in nanoseconds.
   int64_t spawned_time_nanos = 0;
+
+  /// Shared VulkanDeviceOwner kept alive until after engine shutdown completes.
+  std::shared_ptr<VulkanDeviceOwner> vulkan_device_owner;
 
   bool operator==(const AndroidEngineRecord& other) const {
     return engine_id == other.engine_id &&
@@ -330,6 +334,12 @@ class AndroidEngineGroup {
   /// @brief De-registers an engine handle from the tracking registry without
   /// shutting it down.
   bool UnregisterEngine(int64_t engine_id);
+
+  /// @brief Associates a VulkanDeviceOwner with a registered engine so the
+  /// device outlives the engine's Shutdown call.
+  void SetEngineVulkanDeviceOwner(
+      FLUTTER_API_SYMBOL(FlutterEngine) engine_handle,
+      std::shared_ptr<VulkanDeviceOwner> vulkan_device_owner);
 
   /// @brief Returns the count of active, running engines in the group.
   size_t GetActiveEngineCount() const;

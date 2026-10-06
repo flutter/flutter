@@ -41,6 +41,7 @@ static jmethodID g_path_set_fill_type_method = nullptr;
 static jmethodID g_path_move_to_method = nullptr;
 static jmethodID g_path_line_to_method = nullptr;
 static jmethodID g_path_quad_to_method = nullptr;
+static jmethodID g_path_conic_to_method = nullptr;
 static jmethodID g_path_cubic_to_method = nullptr;
 static jmethodID g_path_close_method = nullptr;
 
@@ -112,6 +113,13 @@ bool AndroidMutatorsMapper::RegisterJNI(JNIEnv* env) {
     g_path_cubic_to_method =
         env->GetMethodID(g_path_class->obj(), "cubicTo", "(FFFFFF)V");
     g_path_close_method = env->GetMethodID(g_path_class->obj(), "close", "()V");
+
+    // conicTo(float, float, float, float, float) was added in API 34.
+    g_path_conic_to_method =
+        env->GetMethodID(g_path_class->obj(), "conicTo", "(FFFFF)V");
+    if (g_path_conic_to_method == nullptr) {
+      env->ExceptionClear();
+    }
 
     jclass fill_type_class = env->FindClass("android/graphics/Path$FillType");
     if (fill_type_class != nullptr) {
@@ -222,47 +230,97 @@ jobject AndroidMutatorsMapper::CreateJavaMutatorsStackFromRecords(
                                   g_fill_type_even_odd->obj());
             }
 
+            float cur_x = 0.0f;
+            float cur_y = 0.0f;
+            float start_x = 0.0f;
+            float start_y = 0.0f;
             for (const auto& seg : record.path_segments) {
               switch (seg.verb) {
-                case kFlutterPathVerbMove:
+                case kFlutterPathVerbMove: {
+                  float x = static_cast<float>(seg.points[0].x);
+                  float y = static_cast<float>(seg.points[0].y);
                   if (g_path_move_to_method != nullptr) {
-                    env->CallVoidMethod(java_path, g_path_move_to_method,
-                                        static_cast<jfloat>(seg.points[0].x),
-                                        static_cast<jfloat>(seg.points[0].y));
+                    env->CallVoidMethod(java_path, g_path_move_to_method, x, y);
                   }
+                  cur_x = start_x = x;
+                  cur_y = start_y = y;
                   break;
-                case kFlutterPathVerbLine:
+                }
+                case kFlutterPathVerbLine: {
+                  float x = static_cast<float>(seg.points[0].x);
+                  float y = static_cast<float>(seg.points[0].y);
                   if (g_path_line_to_method != nullptr) {
-                    env->CallVoidMethod(java_path, g_path_line_to_method,
-                                        static_cast<jfloat>(seg.points[0].x),
-                                        static_cast<jfloat>(seg.points[0].y));
+                    env->CallVoidMethod(java_path, g_path_line_to_method, x, y);
                   }
+                  cur_x = x;
+                  cur_y = y;
                   break;
-                case kFlutterPathVerbQuad:
-                case kFlutterPathVerbConic:
+                }
+                case kFlutterPathVerbQuad: {
+                  float cx = static_cast<float>(seg.points[0].x);
+                  float cy = static_cast<float>(seg.points[0].y);
+                  float x2 = static_cast<float>(seg.points[1].x);
+                  float y2 = static_cast<float>(seg.points[1].y);
                   if (g_path_quad_to_method != nullptr) {
-                    env->CallVoidMethod(java_path, g_path_quad_to_method,
-                                        static_cast<jfloat>(seg.points[0].x),
-                                        static_cast<jfloat>(seg.points[0].y),
-                                        static_cast<jfloat>(seg.points[1].x),
-                                        static_cast<jfloat>(seg.points[1].y));
+                    env->CallVoidMethod(java_path, g_path_quad_to_method, cx,
+                                        cy, x2, y2);
                   }
+                  cur_x = x2;
+                  cur_y = y2;
                   break;
-                case kFlutterPathVerbCubic:
+                }
+                case kFlutterPathVerbConic: {
+                  float cx = static_cast<float>(seg.points[0].x);
+                  float cy = static_cast<float>(seg.points[0].y);
+                  float x2 = static_cast<float>(seg.points[1].x);
+                  float y2 = static_cast<float>(seg.points[1].y);
+                  float w = static_cast<float>(seg.conic_weight);
+                  if (!std::isfinite(w) || w <= 0.0f) {
+                    w = 1.0f;
+                  }
+                  if (g_path_conic_to_method != nullptr) {
+                    env->CallVoidMethod(java_path, g_path_conic_to_method, cx,
+                                        cy, x2, y2, w);
+                  } else if (g_path_quad_to_method != nullptr) {
+                    // Subdivide rational quadratic conic at t = 0.5 into 2
+                    // quadratic Bezier curves for API < 34 compatibility.
+                    float inv_one_plus_w = 1.0f / (1.0f + w);
+                    float q0x = (cur_x + w * cx) * inv_one_plus_w;
+                    float q0y = (cur_y + w * cy) * inv_one_plus_w;
+                    float q1x = (w * cx + x2) * inv_one_plus_w;
+                    float q1y = (w * cy + y2) * inv_one_plus_w;
+                    float mx = 0.5f * (q0x + q1x);
+                    float my = 0.5f * (q0y + q1y);
+                    env->CallVoidMethod(java_path, g_path_quad_to_method, q0x,
+                                        q0y, mx, my);
+                    env->CallVoidMethod(java_path, g_path_quad_to_method, q1x,
+                                        q1y, x2, y2);
+                  }
+                  cur_x = x2;
+                  cur_y = y2;
+                  break;
+                }
+                case kFlutterPathVerbCubic: {
+                  float c1x = static_cast<float>(seg.points[0].x);
+                  float c1y = static_cast<float>(seg.points[0].y);
+                  float c2x = static_cast<float>(seg.points[1].x);
+                  float c2y = static_cast<float>(seg.points[1].y);
+                  float x3 = static_cast<float>(seg.points[2].x);
+                  float y3 = static_cast<float>(seg.points[2].y);
                   if (g_path_cubic_to_method != nullptr) {
-                    env->CallVoidMethod(java_path, g_path_cubic_to_method,
-                                        static_cast<jfloat>(seg.points[0].x),
-                                        static_cast<jfloat>(seg.points[0].y),
-                                        static_cast<jfloat>(seg.points[1].x),
-                                        static_cast<jfloat>(seg.points[1].y),
-                                        static_cast<jfloat>(seg.points[2].x),
-                                        static_cast<jfloat>(seg.points[2].y));
+                    env->CallVoidMethod(java_path, g_path_cubic_to_method, c1x,
+                                        c1y, c2x, c2y, x3, y3);
                   }
+                  cur_x = x3;
+                  cur_y = y3;
                   break;
+                }
                 case kFlutterPathVerbClose:
                   if (g_path_close_method != nullptr) {
                     env->CallVoidMethod(java_path, g_path_close_method);
                   }
+                  cur_x = start_x;
+                  cur_y = start_y;
                   break;
               }
             }
@@ -614,6 +672,81 @@ bool AndroidRoundedRect::operator==(const AndroidRoundedRect& other) const {
   return true;
 }
 
+bool AndroidPathSegment::operator==(const AndroidPathSegment& other) const {
+  if (verb != other.verb) {
+    return false;
+  }
+  if (!std::isfinite(conic_weight) || !std::isfinite(other.conic_weight)) {
+    return false;
+  }
+  constexpr float kEpsilon = 1e-5f;
+  if (std::abs(conic_weight - other.conic_weight) > kEpsilon) {
+    return false;
+  }
+  for (size_t i = 0; i < 6; ++i) {
+    if (!std::isfinite(points[i]) || !std::isfinite(other.points[i])) {
+      return false;
+    }
+    if (std::abs(points[i] - other.points[i]) > kEpsilon) {
+      return false;
+    }
+  }
+  return true;
+}
+
+AndroidClipPath AndroidClipPath::FromFlutterPath(const FlutterPath& path) {
+  TRACE_EVENT0("flutter", "AndroidClipPath::FromFlutterPath");
+  AndroidClipPath result;
+  if (path.struct_size < sizeof(FlutterPath)) {
+    return result;
+  }
+  result.fill_type = (path.fill_type == kFlutterPathFillTypeEvenOdd)
+                         ? AndroidPathFillType::kEvenOdd
+                         : AndroidPathFillType::kNonZero;
+  if (path.segments != nullptr && path.segments_count > 0) {
+    result.segments.reserve(path.segments_count);
+    for (size_t i = 0; i < path.segments_count; ++i) {
+      const FlutterPathSegment& src = path.segments[i];
+      AndroidPathSegment dst;
+      switch (src.verb) {
+        case kFlutterPathVerbMove:
+          dst.verb = AndroidPathVerb::kMove;
+          break;
+        case kFlutterPathVerbLine:
+          dst.verb = AndroidPathVerb::kLine;
+          break;
+        case kFlutterPathVerbQuad:
+          dst.verb = AndroidPathVerb::kQuad;
+          break;
+        case kFlutterPathVerbConic:
+          dst.verb = AndroidPathVerb::kConic;
+          break;
+        case kFlutterPathVerbCubic:
+          dst.verb = AndroidPathVerb::kCubic;
+          break;
+        case kFlutterPathVerbClose:
+          dst.verb = AndroidPathVerb::kClose;
+          break;
+      }
+      for (size_t p = 0; p < 3; ++p) {
+        float px = static_cast<float>(src.points[p].x);
+        float py = static_cast<float>(src.points[p].y);
+        dst.points[p * 2] = std::isfinite(px) ? px : 0.0f;
+        dst.points[p * 2 + 1] = std::isfinite(py) ? py : 0.0f;
+      }
+      float w = static_cast<float>(src.conic_weight);
+      dst.conic_weight = (std::isfinite(w) && w > 0.0f) ? w : 1.0f;
+      result.segments.push_back(dst);
+    }
+  }
+  return result;
+}
+
+bool AndroidClipPath::operator==(const AndroidClipPath& other) const {
+  return fill_type == other.fill_type && segments == other.segments &&
+         accumulated_transform == other.accumulated_transform;
+}
+
 // ============================================================================
 // AndroidMutator Implementation
 // ============================================================================
@@ -650,6 +783,14 @@ AndroidMutator AndroidMutator::MakeOpacity(float op) {
   return m;
 }
 
+AndroidMutator AndroidMutator::MakeClipPath(const AndroidClipPath& path) {
+  TRACE_EVENT0("flutter", "AndroidMutator::MakeClipPath");
+  AndroidMutator m;
+  m.type = AndroidMutatorType::kClipPath;
+  m.data = std::make_shared<const AndroidClipPath>(path);
+  return m;
+}
+
 bool AndroidMutator::operator==(const AndroidMutator& other) const {
   if (type != other.type) {
     return false;
@@ -668,6 +809,16 @@ bool AndroidMutator::operator==(const AndroidMutator& other) const {
         return false;
       }
       return std::abs(op1 - op2) < 1e-5f;
+    }
+    case AndroidMutatorType::kClipPath: {
+      const auto& lhs_ptr =
+          std::get<std::shared_ptr<const AndroidClipPath>>(data);
+      const auto& rhs_ptr =
+          std::get<std::shared_ptr<const AndroidClipPath>>(other.data);
+      if (lhs_ptr == rhs_ptr) {
+        return true;
+      }
+      return GetClipPath() == other.GetClipPath();
     }
   }
   return true;
@@ -711,6 +862,19 @@ void AndroidMutatorsStack::PushClipRRect(const FlutterRoundedRect& rrect) {
   PushClipRRect(AndroidRoundedRect::FromFlutterRoundedRect(rrect));
 }
 
+void AndroidMutatorsStack::PushClipPath(const AndroidClipPath& clip_path) {
+  TRACE_EVENT0("flutter", "AndroidMutatorsStack::PushClipPath(clip_path)");
+  AndroidClipPath stored = clip_path;
+  stored.accumulated_transform = final_matrix_;
+  mutators_.push_back(AndroidMutator::MakeClipPath(stored));
+  final_clip_paths_.push_back(std::move(stored));
+}
+
+void AndroidMutatorsStack::PushClipPath(const FlutterPath& clip_path) {
+  TRACE_EVENT0("flutter", "AndroidMutatorsStack::PushClipPath(flutter_path)");
+  PushClipPath(AndroidClipPath::FromFlutterPath(clip_path));
+}
+
 void AndroidMutatorsStack::PushOpacity(float opacity) {
   TRACE_EVENT0("flutter", "AndroidMutatorsStack::PushOpacity");
   float clamped_op =
@@ -726,6 +890,7 @@ void AndroidMutatorsStack::Clear() {
   final_opacity_ = 1.0f;
   final_clip_rects_.clear();
   final_clip_rrects_.clear();
+  final_clip_paths_.clear();
 }
 
 AndroidMatrix3x3 AndroidMutatorsStack::GetPlatformViewMatrix(
@@ -750,6 +915,17 @@ std::vector<uint8_t> AndroidMutatorsStack::Serialize() const {
     buffer.insert(buffer.end(), ptr, ptr + sizeof(val));
   };
 
+  auto write_clip_path = [&write_pod](const AndroidClipPath& cp) {
+    uint32_t fill_val = static_cast<uint32_t>(cp.fill_type);
+    write_pod(fill_val);
+    write_pod(cp.accumulated_transform);
+    uint32_t seg_count = static_cast<uint32_t>(cp.segments.size());
+    write_pod(seg_count);
+    for (const auto& seg : cp.segments) {
+      write_pod(seg);
+    }
+  };
+
   write_pod(kMutatorsStackMagic);
   write_pod(kMutatorsStackVersion);
 
@@ -772,6 +948,9 @@ std::vector<uint8_t> AndroidMutatorsStack::Serialize() const {
       case AndroidMutatorType::kOpacity:
         write_pod(mutator.GetOpacity());
         break;
+      case AndroidMutatorType::kClipPath:
+        write_clip_path(mutator.GetClipPath());
+        break;
     }
   }
 
@@ -788,6 +967,12 @@ std::vector<uint8_t> AndroidMutatorsStack::Serialize() const {
   write_pod(clip_rrects_count);
   for (const auto& rr : final_clip_rrects_) {
     write_pod(rr);
+  }
+
+  uint32_t clip_paths_count = static_cast<uint32_t>(final_clip_paths_.size());
+  write_pod(clip_paths_count);
+  for (const auto& cp : final_clip_paths_) {
+    write_clip_path(cp);
   }
 
   return buffer;
@@ -811,6 +996,40 @@ std::optional<AndroidMutatorsStack> AndroidMutatorsStack::Deserialize(
     return true;
   };
 
+  constexpr uint32_t kMaxMutators = 1024;
+  constexpr uint32_t kMaxSegments = 65536;
+
+  auto read_clip_path = [&read_pod, size,
+                         &offset](AndroidClipPath& cp) -> bool {
+    uint32_t fill_val = 0;
+    if (!read_pod(fill_val) || fill_val > 1) {
+      return false;
+    }
+    cp.fill_type = static_cast<AndroidPathFillType>(fill_val);
+    if (!read_pod(cp.accumulated_transform)) {
+      return false;
+    }
+    uint32_t seg_count = 0;
+    if (!read_pod(seg_count) || seg_count > kMaxSegments ||
+        seg_count > (size - offset) / sizeof(AndroidPathSegment)) {
+      return false;
+    }
+    cp.segments.clear();
+    cp.segments.reserve(seg_count);
+    for (uint32_t s = 0; s < seg_count; ++s) {
+      AndroidPathSegment seg;
+      if (!read_pod(seg)) {
+        return false;
+      }
+      uint32_t verb_val = static_cast<uint32_t>(seg.verb);
+      if (verb_val > static_cast<uint32_t>(AndroidPathVerb::kClose)) {
+        return false;
+      }
+      cp.segments.push_back(seg);
+    }
+    return true;
+  };
+
   uint32_t magic = 0;
   if (!read_pod(magic) || magic != kMutatorsStackMagic) {
     return std::nullopt;
@@ -826,7 +1045,6 @@ std::optional<AndroidMutatorsStack> AndroidMutatorsStack::Deserialize(
     return std::nullopt;
   }
 
-  constexpr uint32_t kMaxMutators = 1024;
   if (count > kMaxMutators || count > (size - offset) / sizeof(uint32_t)) {
     return std::nullopt;
   }
@@ -872,6 +1090,15 @@ std::optional<AndroidMutatorsStack> AndroidMutatorsStack::Deserialize(
         stack.PushOpacity(opacity);
         break;
       }
+      case AndroidMutatorType::kClipPath: {
+        AndroidClipPath cp;
+        if (!read_clip_path(cp) ||
+            cp.accumulated_transform != stack.final_matrix_) {
+          return std::nullopt;
+        }
+        stack.PushClipPath(cp);
+        break;
+      }
       default:
         return std::nullopt;
     }
@@ -914,6 +1141,18 @@ std::optional<AndroidMutatorsStack> AndroidMutatorsStack::Deserialize(
     }
   }
 
+  uint32_t clip_paths_count = 0;
+  if (!read_pod(clip_paths_count) || clip_paths_count > kMaxMutators ||
+      clip_paths_count != stack.final_clip_paths_.size()) {
+    return std::nullopt;
+  }
+  for (size_t i = 0; i < clip_paths_count; ++i) {
+    AndroidClipPath cp;
+    if (!read_clip_path(cp) || stack.final_clip_paths_[i] != cp) {
+      return std::nullopt;
+    }
+  }
+
   if (offset != size) {
     return std::nullopt;
   }
@@ -925,7 +1164,8 @@ bool AndroidMutatorsStack::operator==(const AndroidMutatorsStack& other) const {
   return mutators_ == other.mutators_ && final_matrix_ == other.final_matrix_ &&
          std::abs(final_opacity_ - other.final_opacity_) < 1e-5f &&
          final_clip_rects_ == other.final_clip_rects_ &&
-         final_clip_rrects_ == other.final_clip_rrects_;
+         final_clip_rrects_ == other.final_clip_rrects_ &&
+         final_clip_paths_ == other.final_clip_paths_;
 }
 
 // ============================================================================
@@ -974,7 +1214,10 @@ std::optional<AndroidMutator> AndroidMutatorsMapper::MapMutation(
       return AndroidMutator::MakeTransform(
           AndroidMatrix3x3::FromFlutterTransformation(mutation.transformation));
     case kFlutterPlatformViewMutationTypeClipPath:
-      // Vector clip paths are not currently supported by AndroidMutator.
+      if (mutation.clip_path.struct_size >= sizeof(FlutterPath)) {
+        return AndroidMutator::MakeClipPath(
+            AndroidClipPath::FromFlutterPath(mutation.clip_path));
+      }
       break;
   }
   return std::nullopt;
@@ -1010,6 +1253,9 @@ AndroidMutatorsStack AndroidMutatorsMapper::MapMutations(
         break;
       case AndroidMutatorType::kTransform:
         stack.PushTransform(mapped->GetMatrix());
+        break;
+      case AndroidMutatorType::kClipPath:
+        stack.PushClipPath(mapped->GetClipPath());
         break;
     }
   }

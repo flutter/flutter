@@ -196,6 +196,8 @@ class DriverInfoVK {
  public:
   explicit DriverInfoVK(const vk::PhysicalDevice& device);
 
+  explicit DriverInfoVK(const vk::PhysicalDeviceProperties& props);
+
   ~DriverInfoVK();
 
   DriverInfoVK(const DriverInfoVK&) = delete;

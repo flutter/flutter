@@ -84,6 +84,12 @@ class MockableJNIEnv : public JNIEnv {
     jni_.RegisterNatives = WrapRegisterNatives;
     jni_.GetArrayLength = WrapGetArrayLength;
     jni_.GetIntArrayRegion = WrapGetIntArrayRegion;
+    jni_.NewString = WrapNewString;
+    jni_.NewDirectByteBuffer = WrapNewDirectByteBuffer;
+    jni_.NewObject = WrapNewObject;
+    jni_.NewObjectV = WrapNewObjectV;
+    jni_.NewObjectArray = WrapNewObjectArray;
+    jni_.SetObjectArrayElement = WrapSetObjectArrayElement;
   }
 
   virtual jclass GetObjectClass(jobject) = 0;
@@ -113,6 +119,15 @@ class MockableJNIEnv : public JNIEnv {
   virtual jsize GetArrayLength(jarray) = 0;
   virtual void GetIntArrayRegion(jintArray, jsize, jsize, jint*) = 0;
   virtual jboolean IsInstanceOf(jobject obj, jclass clazz) = 0;
+  virtual jstring NewString(const jchar* unicode, jsize len) = 0;
+  virtual jobject NewDirectByteBuffer(void* address, jlong capacity) = 0;
+  virtual jobject NewObjectV(jclass, jmethodID, va_list) = 0;
+  virtual jobjectArray NewObjectArray(jsize length,
+                                      jclass element_class,
+                                      jobject initial_element) = 0;
+  virtual void SetObjectArrayElement(jobjectArray array,
+                                     jsize index,
+                                     jobject val) = 0;
 
  private:
   static jclass WrapGetObjectClass(JNIEnv* env, jobject obj) {
@@ -274,6 +289,44 @@ class MockableJNIEnv : public JNIEnv {
     static_cast<MockableJNIEnv*>(env)->GetIntArrayRegion(array, start, len,
                                                          buf);
   }
+  static jstring WrapNewString(JNIEnv* env, const jchar* unicode, jsize len) {
+    return static_cast<MockableJNIEnv*>(env)->NewString(unicode, len);
+  }
+  static jobject WrapNewDirectByteBuffer(JNIEnv* env,
+                                         void* address,
+                                         jlong capacity) {
+    return static_cast<MockableJNIEnv*>(env)->NewDirectByteBuffer(address,
+                                                                  capacity);
+  }
+  static jobject WrapNewObject(JNIEnv* env,
+                               jclass clazz,
+                               jmethodID methodID,
+                               ...) {
+    va_list args;
+    va_start(args, methodID);
+    jobject result = WrapNewObjectV(env, clazz, methodID, args);
+    va_end(args);
+    return result;
+  }
+  static jobject WrapNewObjectV(JNIEnv* env,
+                                jclass clazz,
+                                jmethodID methodID,
+                                va_list args) {
+    return static_cast<MockableJNIEnv*>(env)->NewObjectV(clazz, methodID, args);
+  }
+  static jobjectArray WrapNewObjectArray(JNIEnv* env,
+                                         jsize length,
+                                         jclass element_class,
+                                         jobject initial_element) {
+    return static_cast<MockableJNIEnv*>(env)->NewObjectArray(
+        length, element_class, initial_element);
+  }
+  static void WrapSetObjectArrayElement(JNIEnv* env,
+                                        jobjectArray array,
+                                        jsize index,
+                                        jobject val) {
+    static_cast<MockableJNIEnv*>(env)->SetObjectArrayElement(array, index, val);
+  }
 
   JNINativeInterface jni_ = {};
 };
@@ -301,6 +354,16 @@ class MockJNIEnv : public MockableJNIEnv {
     ON_CALL(*this, GetObjectClass(::testing::_))
         .WillByDefault(
             ::testing::Return(reinterpret_cast<jclass>(kMockDefaultClassRef)));
+    // 0x600 is mock string reference in tests
+    constexpr uintptr_t kMockDefaultStringRef = 0x600;
+    ON_CALL(*this, NewString(::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(
+            reinterpret_cast<jstring>(kMockDefaultStringRef)));
+    // 0x700 is mock direct byte buffer reference in tests
+    constexpr uintptr_t kMockDefaultDirectBufferRef = 0x700;
+    ON_CALL(*this, NewDirectByteBuffer(::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(
+            reinterpret_cast<jobject>(kMockDefaultDirectBufferRef)));
     ON_CALL(*this, CallBooleanMethodV(::testing::_, ::testing::_, ::testing::_))
         .WillByDefault(::testing::Return(JNI_TRUE));
     ON_CALL(*this, CallIntMethodV(::testing::_, ::testing::_, ::testing::_))
@@ -359,6 +422,17 @@ class MockJNIEnv : public MockableJNIEnv {
   MOCK_METHOD(void,
               GetIntArrayRegion,
               (jintArray, jsize, jsize, jint*),
+              (override));
+  MOCK_METHOD(jstring, NewString, (const jchar*, jsize), (override));
+  MOCK_METHOD(jobject, NewDirectByteBuffer, (void*, jlong), (override));
+  MOCK_METHOD(jobject, NewObjectV, (jclass, jmethodID, va_list), (override));
+  MOCK_METHOD(jobjectArray,
+              NewObjectArray,
+              (jsize, jclass, jobject),
+              (override));
+  MOCK_METHOD(void,
+              SetObjectArrayElement,
+              (jobjectArray, jsize, jobject),
               (override));
 };
 

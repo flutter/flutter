@@ -130,6 +130,60 @@ TEST(AllocatorVKTest, RetriesUncompressedOnCompressionExhausted) {
   EXPECT_EQ(std::count(called->begin(), called->end(), "vkCreateImage"), 2);
 }
 
+TEST(AllocatorVKTest, LargeHostVisibleBufferUsesDedicatedMemory) {
+  auto const context = MockVulkanContextBuilder().Build();
+  ASSERT_TRUE(context);
+  auto allocator = context->GetResourceAllocator();
+  ASSERT_TRUE(allocator);
+
+  // 1 MB buffer should succeed (routes to staging buffer pool if created).
+  constexpr size_t kOneMegaByte = 1024 * 1024;
+  auto small_buffer = allocator->CreateBuffer(DeviceBufferDescriptor{
+      .storage_mode = StorageMode::kHostVisible,
+      .size = kOneMegaByte,
+  });
+  ASSERT_TRUE(small_buffer);
+  EXPECT_NE(small_buffer->OnGetContents(), nullptr);
+
+  // 4 MB buffer (e.g. initial 4096x1024 A8 glyph atlas bitmap) suballocates
+  // cleanly from the 16 MB staging buffer pool.
+  constexpr size_t kFourMegaBytes = 4 * 1024 * 1024;
+  auto large_buffer = allocator->CreateBuffer(DeviceBufferDescriptor{
+      .storage_mode = StorageMode::kHostVisible,
+      .size = kFourMegaBytes,
+  });
+  ASSERT_TRUE(large_buffer);
+  EXPECT_EQ(large_buffer->GetDeviceBufferDescriptor().size, kFourMegaBytes);
+  EXPECT_NE(large_buffer->OnGetContents(), nullptr);
+
+  // Verify that full-range copying across the 4 MB buffer (including the
+  // critical tail bytes that previously triggered a SEGV_ACCERR overshoot)
+  // succeeds without faulting.
+  std::vector<uint8_t> payload(kFourMegaBytes, 0xAB);
+  EXPECT_TRUE(
+      large_buffer->CopyHostBuffer(payload.data(), Range{0, kFourMegaBytes}));
+
+  const uint8_t* contents = large_buffer->OnGetContents();
+  ASSERT_NE(contents, nullptr);
+  // Verify start, middle, and tail (including the final 16 bytes).
+  EXPECT_EQ(contents[0], 0xAB);
+  EXPECT_EQ(contents[kFourMegaBytes / 2], 0xAB);
+  EXPECT_EQ(contents[kFourMegaBytes - 16], 0xAB);
+  EXPECT_EQ(contents[kFourMegaBytes - 1], 0xAB);
+
+  // 16 MB buffer exceeds the 8 MB staging pool threshold and routes to
+  // dedicated device memory with aliasing enabled.
+  constexpr size_t kSixteenMegaBytes = 16 * 1024 * 1024;
+  auto dedicated_buffer = allocator->CreateBuffer(DeviceBufferDescriptor{
+      .storage_mode = StorageMode::kHostVisible,
+      .size = kSixteenMegaBytes,
+  });
+  ASSERT_TRUE(dedicated_buffer);
+  EXPECT_EQ(dedicated_buffer->GetDeviceBufferDescriptor().size,
+            kSixteenMegaBytes);
+  EXPECT_NE(dedicated_buffer->OnGetContents(), nullptr);
+}
+
 #ifdef IMPELLER_DEBUG
 
 TEST(AllocatorVKTest, RecreateSwapchainWhenSizeChanges) {

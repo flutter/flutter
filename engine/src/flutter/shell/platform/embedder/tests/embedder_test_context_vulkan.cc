@@ -52,7 +52,17 @@ EmbedderTestContextVulkan::EmbedderTestContextVulkan(std::string assets_path)
   };
 }
 
-EmbedderTestContextVulkan::~EmbedderTestContextVulkan() {}
+EmbedderTestContextVulkan::~EmbedderTestContextVulkan() {
+  // Destroy the surface and base-class compositor before tearing down
+  // vulkan_context_, and abandon GrDirectContext resources to break the
+  // TestVulkanContext -> GrDirectContext -> GrVkImage -> TestVulkanImage ->
+  // TestVulkanContext reference cycle when unsubmitted command buffers exist.
+  surface_.reset();
+  compositor_.reset();
+  if (vulkan_context_ && vulkan_context_->GetGrDirectContext()) {
+    vulkan_context_->GetGrDirectContext()->releaseResourcesAndAbandonContext();
+  }
+}
 
 EmbedderTestContextType EmbedderTestContextVulkan::GetContextType() const {
   return EmbedderTestContextType::kVulkanContext;
@@ -114,7 +124,7 @@ void EmbedderTestContextVulkan::SetupCompositor() {
   FML_CHECK(surface_)
       << "Set up the Vulkan surface before setting up a compositor.";
   compositor_ = std::make_unique<EmbedderTestCompositorVulkan>(
-      surface_size_, vulkan_context_->GetGrDirectContext());
+      surface_size_, vulkan_context_->GetGrDirectContext(), vulkan_context_);
 }
 
 }  // namespace flutter::testing

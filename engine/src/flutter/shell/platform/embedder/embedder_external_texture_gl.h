@@ -16,9 +16,12 @@ class EmbedderExternalTextureGL : public flutter::Texture {
  public:
   using ExternalTextureCallback = std::function<
       std::unique_ptr<FlutterOpenGLTexture>(int64_t, size_t, size_t)>;
+  using UVTransformationCallback = std::function<bool(int64_t, DlMatrix*)>;
 
-  EmbedderExternalTextureGL(int64_t texture_identifier,
-                            const ExternalTextureCallback& callback);
+  EmbedderExternalTextureGL(
+      int64_t texture_identifier,
+      ExternalTextureCallback callback,
+      UVTransformationCallback uv_transformation_callback = {});
 
   ~EmbedderExternalTextureGL();
 
@@ -41,8 +44,11 @@ class EmbedderExternalTextureGL : public flutter::Texture {
   void OnTextureUnregistered() override;
 
  private:
-  const ExternalTextureCallback& external_texture_callback_;
+  ExternalTextureCallback external_texture_callback_;
+  UVTransformationCallback uv_transformation_callback_;
   sk_sp<DlImage> last_image_;
+  DlMatrix uv_transformation_;
+  bool has_uv_transformation_ = false;
 
   sk_sp<DlImage> ResolveTexture(int64_t texture_id,
                                 GrDirectContext* context,

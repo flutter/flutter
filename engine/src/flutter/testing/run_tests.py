@@ -466,6 +466,7 @@ def run_cc_tests(
       make_test('embedder_a11y_unittests'),
       make_test('embedder_proctable_unittests'),
       make_test('embedder_unittests'),
+      make_test('vulkan_queue_guard_unittests'),
       make_test('fml_unittests'),
       make_test('geometry_unittests'),
       make_test('gpu_surface_unittests'),
@@ -837,6 +838,9 @@ def run_android_tests(
   run_android_unittest('flutter_shell_native_unittests', android_variant, adb_path)
   run_android_unittest('impeller_toolkit_android_unittests', android_variant, adb_path)
   run_android_unittest('impeller_vulkan_android_unittests', android_variant, adb_path)
+  # Last, because run_android_unittest raises on the first failure: a failure
+  # in this large suite must not hide the results of the suites above.
+  run_android_unittest('flutter_embedder_native_unittests', android_variant, adb_path)
 
 
 def run_objc_tests(

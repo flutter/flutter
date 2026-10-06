@@ -11,8 +11,12 @@ namespace flutter {
 
 #ifdef SHELL_ENABLE_GL
 EmbedderExternalTextureResolver::EmbedderExternalTextureResolver(
-    EmbedderExternalTextureGL::ExternalTextureCallback gl_callback)
-    : gl_callback_(std::move(gl_callback)) {}
+    EmbedderExternalTextureGL::ExternalTextureCallback gl_callback,
+    EmbedderExternalTextureGL::UVTransformationCallback
+        gl_uv_transformation_callback)
+    : gl_callback_(std::move(gl_callback)),
+      gl_uv_transformation_callback_(std::move(gl_uv_transformation_callback)) {
+}
 #endif
 
 #ifdef SHELL_ENABLE_METAL
@@ -31,8 +35,8 @@ std::unique_ptr<Texture>
 EmbedderExternalTextureResolver::ResolveExternalTexture(int64_t texture_id) {
 #ifdef SHELL_ENABLE_GL
   if (gl_callback_) {
-    return std::make_unique<EmbedderExternalTextureGL>(texture_id,
-                                                       gl_callback_);
+    return std::make_unique<EmbedderExternalTextureGL>(
+        texture_id, gl_callback_, gl_uv_transformation_callback_);
   }
 #endif
 

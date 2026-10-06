@@ -4,6 +4,10 @@
 
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 
+#include <utility>
+
+#include "flutter/display_list/dl_canvas.h"
+#include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/logging.h"
 #include "impeller/core/texture_descriptor.h"
@@ -31,8 +35,11 @@ namespace flutter {
 
 EmbedderExternalTextureGL::EmbedderExternalTextureGL(
     int64_t texture_identifier,
-    const ExternalTextureCallback& callback)
-    : Texture(texture_identifier), external_texture_callback_(callback) {
+    ExternalTextureCallback callback,
+    UVTransformationCallback uv_transformation_callback)
+    : Texture(texture_identifier),
+      external_texture_callback_(std::move(callback)),
+      uv_transformation_callback_(std::move(uv_transformation_callback)) {
   FML_DCHECK(external_texture_callback_);
 }
 
@@ -56,6 +63,38 @@ void EmbedderExternalTextureGL::Paint(PaintContext& context,
   const DlPaint* paint = context.paint;
 
   if (last_image_) {
+    if (has_uv_transformation_) {
+      if (!uv_transformation_.IsInvertible()) {
+        FML_LOG(ERROR) << "Invalid (not invertible) external texture UV "
+                          "transformation matrix.";
+        return;
+      }
+      DlMatrix transform = uv_transformation_.Invert();
+
+      DlAutoCanvasRestore auto_restore(canvas, true);
+
+      // The incoming texture is vertically flipped, so we flip it back.
+      // OpenGL's coordinate system has Positive Y equivalent to up, while
+      // Skia/Impeller's coordinate system has Negative Y equivalent to up.
+      canvas->Translate(bounds.GetX(), bounds.GetY() + bounds.GetHeight());
+      canvas->Scale(bounds.GetWidth(), -bounds.GetHeight());
+
+      // Normalized [0, 1] unit quad matching the 1x1 DlImage dimensions.
+      constexpr DlScalar kUnitQuadSize = 1.0f;
+      auto source =
+          DlColorSource::MakeImage(last_image_, DlTileMode::kClamp,
+                                   DlTileMode::kClamp, sampling, &transform);
+
+      DlPaint paint_with_shader;
+      if (paint) {
+        paint_with_shader = *paint;
+      }
+      paint_with_shader.setColorSource(source);
+      canvas->DrawRect(DlRect::MakeWH(kUnitQuadSize, kUnitQuadSize),
+                       paint_with_shader);
+      return;
+    }
+
     DlRect image_bounds = DlRect::Make(last_image_->GetBounds());
     if (bounds != image_bounds) {
       canvas->DrawImageRect(last_image_, image_bounds, bounds, sampling, paint);
@@ -94,13 +133,29 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureSkia(
     return nullptr;
   }
 
+  has_uv_transformation_ = false;
+  uv_transformation_ = DlMatrix();
+  if (uv_transformation_callback_) {
+    DlMatrix uv_matrix;
+    if (uv_transformation_callback_(texture_id, &uv_matrix)) {
+      uv_transformation_ = uv_matrix;
+      has_uv_transformation_ = true;
+    }
+  }
+
   GrGLTextureInfo gr_texture_info = {texture->target, texture->name,
                                      texture->format};
 
   size_t width = size.width();
   size_t height = size.height();
 
-  if (texture->width != 0 && texture->height != 0) {
+  if (has_uv_transformation_) {
+    // Wrap UV-transformed external textures as a 1x1 unit texture so shader
+    // coordinate normalization operates directly in [0, 1] UV space.
+    constexpr size_t kUnitTextureDimension = 1;
+    width = kUnitTextureDimension;
+    height = kUnitTextureDimension;
+  } else if (texture->width != 0 && texture->height != 0) {
     width = texture->width;
     height = texture->height;
   }
@@ -150,6 +205,16 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     return nullptr;
   }
 
+  has_uv_transformation_ = false;
+  uv_transformation_ = DlMatrix();
+  if (uv_transformation_callback_) {
+    DlMatrix uv_matrix;
+    if (uv_transformation_callback_(texture_id, &uv_matrix)) {
+      uv_transformation_ = uv_matrix;
+      has_uv_transformation_ = true;
+    }
+  }
+
   // Call the destruction callback if an error occurs.
   fml::ScopedCleanupClosure scoped_cleanup([&texture]() {
     if (texture->destruction_callback) {
@@ -163,7 +228,14 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
   }
 
   impeller::TextureDescriptor desc;
-  desc.size = impeller::ISize(texture->width, texture->height);
+  if (has_uv_transformation_) {
+    // Wrap UV-transformed external textures as a 1x1 unit texture so Impeller
+    // shader coordinate normalization operates directly in [0, 1] UV space.
+    constexpr int64_t kUnitTextureDimension = 1;
+    desc.size = impeller::ISize(kUnitTextureDimension, kUnitTextureDimension);
+  } else {
+    desc.size = impeller::ISize(texture->width, texture->height);
+  }
   desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
   if (texture->target == GL_TEXTURE_EXTERNAL_OES) {
     desc.type = impeller::TextureType::kTextureExternalOES;

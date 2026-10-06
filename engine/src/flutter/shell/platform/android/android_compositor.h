@@ -48,6 +48,21 @@ class AndroidCompositorPlatformViewDelegate {
 
   /// Invoked after all layers in a frame have been presented.
   virtual void OnFramePresented() = 0;
+
+  /// Records the root OpenGL backing store FBO and dimensions for the current
+  /// frame so the delegate can re-present to a newly attached FlutterImageView
+  /// when convertToImageView() switches the native window during
+  /// OnFramePresented.
+  virtual void SetPendingRootOpenGLBackingStore(uint32_t fbo,
+                                                size_t width,
+                                                size_t height) {}
+
+  /// Returns true if the onscreen surface requires an empty frame presentation
+  /// when no background layer is drawn (i.e. FlutterView was converted to
+  /// FlutterImageView in legacy Hybrid Composition).
+  virtual bool RequiresOnscreenClearanceWhenNoBackgroundLayer() const {
+    return false;
+  }
 };
 
 /// @brief Implements the Flutter Embedder C-API compositor interface for
@@ -101,7 +116,14 @@ class AndroidCompositor {
   struct OffscreenTracker {
     AndroidSurfaceManager::OffscreenFBO fbo;
   };
+  struct VulkanBackingStoreTracker {
+    FlutterVulkanImage image;
+    bool is_onscreen = false;
+    ANativeWindow* overlay_window = nullptr;
+  };
   std::atomic<size_t> backing_stores_created_in_frame_{0};
+  std::atomic<size_t> overlay_backing_stores_created_in_frame_{0};
+  std::atomic<bool> has_active_onscreen_vulkan_backing_store_{false};
 
   const std::shared_ptr<AndroidSurfaceManager> surface_manager_;
   std::shared_ptr<AndroidCompositorPlatformViewDelegate>

@@ -2446,6 +2446,9 @@ public class PlatformViewsControllerTest {
     public void onSurfaceWindowChanged(Surface surface) {}
 
     @Implementation
+    public void onSurfaceWindowChanged(Surface surface, boolean isImageView) {}
+
+    @Implementation
     public void setViewportMetrics(
         float devicePixelRatio,
         int physicalWidth,

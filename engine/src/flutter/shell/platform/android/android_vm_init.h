@@ -17,6 +17,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
+#include "flutter/shell/platform/android/android_vulkan_eligibility.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
 #include "flutter/shell/platform/android/os_library_loader.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -121,7 +122,7 @@ struct AndroidVMArgs {
   bool enable_surface_control = false;
 
   /// Whether platform and UI threads are merged.
-  bool merged_platform_ui_thread = false;
+  bool merged_platform_ui_thread = true;
 
   /// Initial VM service URI (if available).
   std::string vm_service_uri;
@@ -165,12 +166,27 @@ struct AndroidVMArgs {
 /// @brief Determines the appropriate rendering API for the Android device.
 AndroidRenderingAPI SelectRenderingAPI(
     const AndroidVMArgs& args,
-    std::optional<bool> is_vivante = std::nullopt);
+    std::optional<bool> is_vivante = std::nullopt,
+    const std::optional<DeviceProperties>& device_properties = std::nullopt,
+    bool is_release_build =
+#ifdef FLUTTER_RELEASE
+        true
+#else
+        false
+#endif
+);
 
 /// @brief Determines whether SurfaceControl / HCPP is supported for the given
 /// VM arguments and resolved rendering API.
 bool ShouldEnableSurfaceControl(const AndroidVMArgs& args,
-                                AndroidRenderingAPI rendering_api);
+                                AndroidRenderingAPI rendering_api,
+                                bool is_release_build =
+#ifdef FLUTTER_RELEASE
+                                    true
+#else
+                                    false
+#endif
+);
 
 /// @brief Abstract interface for font collection prefetching.
 ///
@@ -341,7 +357,9 @@ class AndroidVMInit {
   static std::optional<AndroidVMArgs> GetGlobalVMArgs();
 
   /// @brief Initializes the global VM settings and configurations.
-  bool Init(const AndroidVMArgs& args);
+  bool Init(
+      const AndroidVMArgs& args,
+      const std::optional<DeviceProperties>& device_properties = std::nullopt);
 
   /// @brief Prefetches the default font collection.
   bool PrefetchDefaultFontManager();

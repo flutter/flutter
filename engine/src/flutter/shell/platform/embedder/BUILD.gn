@@ -372,6 +372,7 @@ if (enable_unittests) {
       ]
 
       public_deps += [
+        "//flutter/shell/platform/android/vulkan_queue_guard",
         "//flutter/testing:vulkan",
         "//flutter/vulkan",
         "//flutter/vulkan/procs",

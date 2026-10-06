@@ -17,8 +17,10 @@ namespace testing {
 
 EmbedderTestCompositorVulkan::EmbedderTestCompositorVulkan(
     DlISize surface_size,
-    sk_sp<GrDirectContext> context)
-    : EmbedderTestCompositor(surface_size, std::move(context)) {}
+    sk_sp<GrDirectContext> context,
+    fml::RefPtr<TestVulkanContext> test_vulkan_context)
+    : EmbedderTestCompositor(surface_size, std::move(context)),
+      test_vulkan_context_(std::move(test_vulkan_context)) {}
 
 EmbedderTestCompositorVulkan::~EmbedderTestCompositorVulkan() = default;
 
@@ -28,8 +30,8 @@ void EmbedderTestCompositorVulkan::SetRenderTargetType(
   switch (type) {
     case EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage:
       backingstore_producer_ =
-          std::make_unique<EmbedderTestBackingStoreProducerVulkan>(context_,
-                                                                   type);
+          std::make_unique<EmbedderTestBackingStoreProducerVulkan>(
+              context_, type, test_vulkan_context_);
       return;
     case EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture:
     case EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer:

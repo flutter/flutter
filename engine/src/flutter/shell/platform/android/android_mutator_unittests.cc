@@ -576,6 +576,13 @@ TEST(AndroidMutatorTest, AndroidMutatorVariantStorage) {
   AndroidMutator m = AndroidMutator::MakeClipRect(r);
   EXPECT_EQ(m.type, AndroidMutatorType::kClipRect);
   EXPECT_EQ(m.GetRect(), r);
+
+  AndroidClipPath cp;
+  cp.fill_type = AndroidPathFillType::kEvenOdd;
+  AndroidMutator m_path = AndroidMutator::MakeClipPath(cp);
+  EXPECT_EQ(m_path.type, AndroidMutatorType::kClipPath);
+  EXPECT_EQ(m_path.GetClipPath(), cp);
+  EXPECT_EQ(m_path, AndroidMutator::MakeClipPath(cp));
 }
 
 }  // namespace testing

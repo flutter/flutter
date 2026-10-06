@@ -78,6 +78,12 @@ class JvmInvoker {
 
   /// @brief Handles platform message dispatch to
   /// FlutterJNI.handlePlatformMessage.
+  /// @return False if the method id was not resolved at registration, the
+  /// Java call threw (the exception is logged and cleared), or the payload
+  /// copy could not be allocated. True otherwise, including when no Java
+  /// object or JNIEnv is available (the call is dropped). On false, ownership
+  /// of any buffer this method allocated is undefined; callers must not free
+  /// `message_data`.
   virtual bool HandlePlatformMessage(const std::string& channel,
                                      const uint8_t* message,
                                      size_t message_size,
@@ -86,12 +92,20 @@ class JvmInvoker {
 
   /// @brief Handles message response dispatch to
   /// FlutterJNI.handlePlatformMessageResponse.
+  /// @return False if the method id was not resolved at registration or the
+  /// Java call threw (the exception is logged and cleared). True otherwise,
+  /// including when no Java object or JNIEnv is available (the call is
+  /// dropped).
   virtual bool HandlePlatformMessageResponse(int32_t response_id,
                                              const uint8_t* data,
                                              size_t data_size) = 0;
 
   /// @brief Dispatches accessibility semantics update to
   /// FlutterJNI.updateSemantics.
+  /// @return False if the method id was not resolved at registration or the
+  /// Java call threw (the exception is logged and cleared). True otherwise,
+  /// including when no Java object or JNIEnv is available (the call is
+  /// dropped).
   virtual bool UpdateSemantics(
       const std::vector<uint8_t>& buffer,
       const std::vector<std::string>& strings,
@@ -99,26 +113,62 @@ class JvmInvoker {
 
   /// @brief Dispatches custom accessibility actions to
   /// FlutterJNI.updateCustomAccessibilityActions.
+  /// @return False if the method id was not resolved at registration or the
+  /// Java call threw (the exception is logged and cleared). True otherwise,
+  /// including when no Java object or JNIEnv is available (the call is
+  /// dropped).
   virtual bool UpdateCustomAccessibilityActions(
       const std::vector<uint8_t>& actions_buffer,
       const std::vector<std::string>& action_strings) = 0;
 
   /// @brief Enables or disables accessibility tree via
   /// FlutterJNI.setSemanticsTreeEnabled.
+  /// @return False if the method id was not resolved at registration or the
+  /// Java call threw (the exception is logged and cleared). True otherwise,
+  /// including when no Java object or JNIEnv is available (the call is
+  /// dropped).
   virtual bool SetSemanticsTreeEnabled(bool enabled) = 0;
 
   /// @brief Sets application locale via FlutterJNI.setApplicationLocale.
+  /// @return False if the method id was not resolved at registration or the
+  /// Java call threw (the exception is logged and cleared). True otherwise,
+  /// including when no Java object or JNIEnv is available (the call is
+  /// dropped).
   virtual bool SetApplicationLocale(const std::string& locale) = 0;
 
   /// @brief Notifies FlutterJNI.onFirstFrame.
+  /// @return False if the method id was not resolved at registration or the
+  /// Java call threw (the exception is logged and cleared). True otherwise,
+  /// including when no Java object or JNIEnv is available (the call is
+  /// dropped).
   virtual bool OnFirstFrame() = 0;
 
   /// @brief Notifies FlutterJNI.onPreEngineRestart.
+  /// @return False if the method id was not resolved at registration or the
+  /// Java call threw (the exception is logged and cleared). True otherwise,
+  /// including when no Java object or JNIEnv is available (the call is
+  /// dropped).
   virtual bool OnPreEngineRestart() = 0;
 
   /// @brief Requests deferred library loading via
   /// FlutterJNI.requestDartDeferredLibrary.
   virtual bool RequestDartDeferredLibrary(int loading_unit_id) = 0;
+
+  /// @brief Scales a font size via FlutterJNI.getScaledFontSize.
+  virtual double GetScaledFontSize(double unscaled_font_size,
+                                   int configuration_id) {
+    (void)unscaled_font_size;
+    (void)configuration_id;
+    return -1.0;
+  }
+
+  /// @brief Computes the platform-resolved locale via
+  /// FlutterJNI.computePlatformResolvedLocale.
+  virtual std::vector<std::string> ComputePlatformResolvedLocale(
+      const std::vector<std::string>& supported_locales_data) {
+    (void)supported_locales_data;
+    return {};
+  }
 
   /// @brief Decodes an image from buffer bytes via FlutterJNI.decodeImage.
   virtual bool DecodeImage(const uint8_t* data,
@@ -249,6 +299,10 @@ class DefaultJvmInvoker : public JvmInvoker {
   bool OnFirstFrame() override;
   bool OnPreEngineRestart() override;
   bool RequestDartDeferredLibrary(int loading_unit_id) override;
+  double GetScaledFontSize(double unscaled_font_size,
+                           int configuration_id) override;
+  std::vector<std::string> ComputePlatformResolvedLocale(
+      const std::vector<std::string>& supported_locales_data) override;
   bool DecodeImage(const uint8_t* data,
                    size_t size,
                    int64_t generator_handle) override;
@@ -348,6 +402,10 @@ class AndroidJvmInvoker : public JvmInvoker {
   bool OnFirstFrame() override;
   bool OnPreEngineRestart() override;
   bool RequestDartDeferredLibrary(int loading_unit_id) override;
+  double GetScaledFontSize(double unscaled_font_size,
+                           int configuration_id) override;
+  std::vector<std::string> ComputePlatformResolvedLocale(
+      const std::vector<std::string>& supported_locales_data) override;
   bool DecodeImage(const uint8_t* data,
                    size_t size,
                    int64_t generator_handle) override;

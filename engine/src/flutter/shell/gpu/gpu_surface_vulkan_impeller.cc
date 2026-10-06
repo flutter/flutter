@@ -14,6 +14,7 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
 #include "impeller/renderer/render_target.h"
@@ -55,8 +56,9 @@ class WrappedTextureSourceVK : public impeller::TextureSourceVK {
 
 GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
     GPUSurfaceVulkanDelegate* delegate,
-    std::shared_ptr<impeller::Context> context)
-    : delegate_(delegate) {
+    std::shared_ptr<impeller::Context> context,
+    bool render_to_surface)
+    : delegate_(delegate), render_to_surface_(render_to_surface) {
   if (!context || !context->IsValid()) {
     return;
   }
@@ -91,6 +93,28 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
   if (size.IsEmpty()) {
     FML_LOG(ERROR) << "Vulkan surface was asked for an empty frame.";
     return nullptr;
+  }
+
+  if (!render_to_surface_) {
+    return std::make_unique<SurfaceFrame>(
+        nullptr, SurfaceFrame::FramebufferInfo{.supports_readback = true},
+        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
+          return true;
+        },
+        [impeller_context =
+             impeller_context_](const SurfaceFrame& surface_frame) {
+          if (impeller_context) {
+            auto& context_vk = impeller::ContextVK::Cast(*impeller_context);
+            if (auto pipeline_library = context_vk.GetPipelineLibrary()) {
+              impeller::PipelineLibraryVK::Cast(*pipeline_library)
+                  .DidAcquireSurfaceFrame();
+            }
+            context_vk.DisposeThreadLocalCachedResources();
+            context_vk.GetResourceAllocator()->DebugTraceMemoryStatistics();
+          }
+          return true;
+        },
+        size);
   }
 
   if (delegate_ == nullptr) {

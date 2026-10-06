@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <dlfcn.h>
+#include <array>
+#include <functional>
 #include <future>
+#include <ostream>
 #include <thread>
 #include <vector>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/icu_util.h"
 #include "flutter/fml/paths.h"
@@ -81,6 +86,14 @@ class MockJvmInvoker : public JvmInvoker {
   MOCK_METHOD(bool,
               RequestDartDeferredLibrary,
               (int loading_unit_id),
+              (override));
+  MOCK_METHOD(double,
+              GetScaledFontSize,
+              (double unscaled_font_size, int configuration_id),
+              (override));
+  MOCK_METHOD(std::vector<std::string>,
+              ComputePlatformResolvedLocale,
+              (const std::vector<std::string>& supported_locales_data),
               (override));
 
   MOCK_METHOD(bool,
@@ -440,12 +453,30 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->HandlePlatformMessage("flutter/test", msg, 42, 1001L));
 
+  // 1b. HandlePlatformMessage with empty vector preserves non-null pointer
+  // (size 0)
+  std::vector<uint8_t> empty_msg;
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessage("flutter/test", ::testing::Ne(nullptr), 0,
+                                    43, 1002L))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(
+      delegate->HandlePlatformMessage("flutter/test", empty_msg, 43, 1002L));
+
   // 2. HandlePlatformMessageResponse
   std::vector<uint8_t> resp = {'o', 'k'};
   EXPECT_CALL(*mock_invoker,
               HandlePlatformMessageResponse(42, resp.data(), resp.size()))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->HandlePlatformMessageResponse(42, resp));
+
+  // 2b. HandlePlatformMessageResponse with empty vector preserves non-null
+  // pointer (size 0)
+  std::vector<uint8_t> empty_resp;
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessageResponse(43, ::testing::Ne(nullptr), 0))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->HandlePlatformMessageResponse(43, empty_resp));
 
   // 3. UpdateSemantics
   std::vector<uint8_t> semantics_buffer = {0x01, 0x02};
@@ -497,6 +528,26 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
   }
 
   EXPECT_FALSE(delegate->LookupCallbackInformation(999L).has_value());
+}
+
+TEST(FlutterEmbedderNativeTest, JniRouterEmptyVectorDoesNotCollapseToNull) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto delegate = std::make_shared<JniDelegate>(mock_invoker);
+  auto router = std::make_unique<JniRouter>(delegate);
+
+  std::vector<uint8_t> empty_msg;
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessage("flutter/test", ::testing::Ne(nullptr), 0,
+                                    44, 1003L))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(
+      router->RoutePlatformMessage("flutter/test", empty_msg, 44, 1003L));
+
+  std::vector<uint8_t> empty_resp;
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessageResponse(44, ::testing::Ne(nullptr), 0))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RoutePlatformMessageResponse(44, empty_resp));
 }
 
 TEST(FlutterEmbedderNativeTest, TargetFlipDefaultState) {
@@ -587,6 +638,84 @@ TEST(FlutterEmbedderNativeTest, DynamicInstanceRouterWithCustomInvoker) {
   EXPECT_TRUE(native.GetRouter()->RouteFirstFrame());
 
   FlutterEmbedderNative::SetEmbedderEnabled(true);
+}
+
+TEST(FlutterEmbedderNativeTest, OnPlatformMessageCallbackZeroBytePayload) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  FlutterEmbedderNative native(mock_invoker, legacy_delegate);
+
+  uint8_t dummy = 0xAA;
+  FlutterPlatformMessage msg = {};
+  msg.struct_size = sizeof(FlutterPlatformMessage);
+  msg.channel = "binary-msg";
+  msg.message = &dummy;
+  msg.message_size = 0;
+  msg.response_handle = nullptr;
+
+  EXPECT_CALL(*mock_invoker, HandlePlatformMessage(
+                                 "binary-msg", ::testing::Ne(nullptr), 0, 0, 0))
+      .WillOnce(Return(true));
+
+  FlutterEmbedderNative::OnPlatformMessageCallback(&msg, &native);
+}
+
+TEST(FlutterEmbedderNativeTest,
+     OnPlatformMessageCallbackNullPayloadSanitizesSize) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  FlutterEmbedderNative native(mock_invoker, legacy_delegate);
+
+  FlutterPlatformMessage msg = {};
+  msg.struct_size = sizeof(FlutterPlatformMessage);
+  msg.channel = "binary-msg";
+  msg.message = nullptr;
+  msg.message_size = 42;  // dirty size
+  msg.response_handle = nullptr;
+
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessage("binary-msg", ::testing::IsNull(), 0, 0, 0))
+      .WillOnce(Return(true));
+
+  FlutterEmbedderNative::OnPlatformMessageCallback(&msg, &native);
+}
+
+TEST(FlutterEmbedderNativeTest,
+     SendPlatformMessageResponseZeroByteBeforeLaunch) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  FlutterEmbedderNative native(mock_invoker, legacy_delegate);
+
+  const auto* mock_handle =
+      reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(0x1234);
+  int32_t response_id = native.RegisterResponseHandle(mock_handle);
+  ASSERT_NE(response_id, 0);
+
+  uint8_t dummy = 0xBB;
+  EXPECT_CALL(*mock_invoker, HandlePlatformMessageResponse(
+                                 response_id, ::testing::Ne(nullptr), 0))
+      .WillOnce(Return(true));
+
+  EXPECT_EQ(native.SendPlatformMessageResponse(response_id, &dummy, 0),
+            kSuccess);
+}
+
+TEST(FlutterEmbedderNativeTest, SendPlatformMessageResponseNullBeforeLaunch) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  FlutterEmbedderNative native(mock_invoker, legacy_delegate);
+
+  const auto* mock_handle =
+      reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(0x1235);
+  int32_t response_id = native.RegisterResponseHandle(mock_handle);
+  ASSERT_NE(response_id, 0);
+
+  EXPECT_CALL(*mock_invoker, HandlePlatformMessageResponse(
+                                 response_id, ::testing::IsNull(), 0))
+      .WillOnce(Return(true));
+
+  EXPECT_EQ(native.SendPlatformMessageResponse(response_id, nullptr, 42),
+            kSuccess);
 }
 
 TEST(FlutterEmbedderNativeTest, NativeWindowManagement) {
@@ -1572,6 +1701,7 @@ TEST(OSLibraryLoaderTest, ThreadSafeConcurrentValidityAndResolution) {
   });
 
   std::vector<std::future<void>> readers;
+  readers.reserve(4);
   for (int i = 0; i < 4; ++i) {
     readers.push_back(std::async(std::launch::async, [&]() {
       for (int j = 0; j < 500; ++j) {
@@ -3406,6 +3536,7 @@ TEST(WindowMetricsTranslationTest, ConcurrentProviderReplacementInNative) {
   FlutterEmbedderNative native;
   std::atomic<bool> running{true};
   std::vector<std::thread> threads;
+  threads.reserve(3);
 
   for (int i = 0; i < 2; ++i) {
     threads.emplace_back([&]() {
@@ -3574,10 +3705,11 @@ TEST(VsyncRoutingTest, JniDelegateVsyncOperations) {
 
   EXPECT_EQ(delegate->GetVsyncWaiter(), vsync_waiter);
 
-  // 1. OnVsync dispatches to JVM (and ConsumePendingVsync also notifies JVM)
+  // 1. OnVsync dispatches to JVM (ConsumePendingVsync does not redundantly
+  // notify JVM)
   EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-      .Times(2)
-      .WillRepeatedly(Return(true));
+      .Times(1)
+      .WillOnce(Return(true));
   EXPECT_TRUE(delegate->OnVsync(1000000LL, 2000000LL));
 
   // 2. AsyncWaitForVsync routes to AndroidVsyncWaiter
@@ -3614,8 +3746,8 @@ TEST(VsyncRoutingTest, JniRouterVsyncDirectRouting) {
     JniRouter::SetEmbedderEnabled(flag);
 
     EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-        .Times(2)
-        .WillRepeatedly(Return(true));
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_TRUE(router.RouteVsync(5000LL, 10000LL));
 
     EXPECT_TRUE(router.RouteAsyncWaitForVsync(456));
@@ -3662,8 +3794,7 @@ TEST(VsyncRoutingTest, FlutterEmbedderNativeVsyncIntegration) {
   EXPECT_EQ(vsync_waiter->GetVsyncRequestCount(), 1u);
   EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
 
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _)).Times(0);
   mock_choreographer->TriggerPendingCallbacks(10000000LL);
   EXPECT_EQ(delivered_baton, 8888);
   EXPECT_EQ(delivered_start, 10000000LL);
@@ -3897,8 +4028,7 @@ TEST(GlobalVMInitializationTest, FlutterEmbedderNativeVMIntegration) {
   EXPECT_TRUE(native.InitVM(args));
   EXPECT_TRUE(native.IsVMInitialized());
   EXPECT_TRUE(native.GetVMArgs().has_value());
-  EXPECT_EQ(native.GetSelectedRenderingAPI(),
-            AndroidRenderingAPI::kImpellerAutoselect);
+  EXPECT_EQ(native.GetSelectedRenderingAPI(), SelectRenderingAPI(args));
 
   const FlutterProjectArgs* project_args = native.GetProjectArgs();
   ASSERT_NE(project_args, nullptr);
@@ -4319,6 +4449,7 @@ TEST(HardwareBufferTest, ConcurrentProviderReplacementInNative) {
   FlutterEmbedderNative native;
   std::atomic<bool> running{true};
   std::vector<std::thread> threads;
+  threads.reserve(3);
 
   for (int i = 0; i < 2; ++i) {
     threads.emplace_back([&]() {
@@ -4671,6 +4802,7 @@ TEST(VulkanExternalTextureTest, ConcurrentProviderReplacementInNative) {
   FlutterEmbedderNative native;
   std::atomic<bool> running{true};
   std::vector<std::thread> threads;
+  threads.reserve(4);
 
   for (int i = 0; i < 2; ++i) {
     threads.emplace_back([&native, &running]() {
@@ -6191,8 +6323,8 @@ TEST(Phase54LegacyDeletionGraphicsPipelineTest,
     // 1. VSync routing
     EXPECT_CALL(*mock_invoker,
                 InvokeVoidMethod("onVsync", "(JJ)V", ::testing::_))
-        .Times(2)
-        .WillRepeatedly(::testing::Return(true));
+        .Times(1)
+        .WillOnce(::testing::Return(true));
     EXPECT_TRUE(router->RouteVsync(1000000LL, 2000000LL));
     EXPECT_TRUE(router->RouteAsyncWaitForVsync(999));
     EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
@@ -7535,7 +7667,8 @@ TEST_F(Phase61JniRegistrationCutoverTest,
   using IsVariationSelectorFn = jboolean (*)(JNIEnv*, jobject, jint);
   using IsRegionalIndicatorFn = jboolean (*)(JNIEnv*, jobject, jint);
   using SurfaceCreatedFn = void (*)(JNIEnv*, jobject, jlong, jobject);
-  using SurfaceWindowChangedFn = void (*)(JNIEnv*, jobject, jlong, jobject);
+  using SurfaceWindowChangedFn =
+      void (*)(JNIEnv*, jobject, jlong, jobject, jboolean);
   using SurfaceChangedFn = void (*)(JNIEnv*, jobject, jlong, jint, jint);
   using SurfaceDestroyedFn = void (*)(JNIEnv*, jobject, jlong);
   using ScheduleFrameFn = void (*)(JNIEnv*, jobject, jlong);
@@ -7707,8 +7840,8 @@ TEST_F(Phase61JniRegistrationCutoverTest,
   // Surface lifecycle calls with nullptr surfaces (safe for unit tests without
   // a real Android Surface)
   surface_created_fn(&mock_env_, flutter_jni_obj, native_handle, nullptr);
-  surface_window_changed_fn(&mock_env_, flutter_jni_obj, native_handle,
-                            nullptr);
+  surface_window_changed_fn(&mock_env_, flutter_jni_obj, native_handle, nullptr,
+                            /*is_image_view=*/JNI_FALSE);
   surface_changed_fn(&mock_env_, flutter_jni_obj, native_handle, 1080, 1920);
   schedule_frame_fn(&mock_env_, flutter_jni_obj, native_handle);
   dispatch_pointer_data_packet_fn(&mock_env_, flutter_jni_obj, native_handle,
@@ -7897,6 +8030,430 @@ TEST_F(Phase61JniRegistrationCutoverTest,
 }
 
 TEST_F(Phase61JniRegistrationCutoverTest,
+       AndroidJvmInvokerZeroByteMessageDirectBufferAndCleanupLifecycle) {
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  const jfieldID kShellHolderField = reinterpret_cast<jfieldID>(200);
+  const jmethodID kJniConstructor = reinterpret_cast<jmethodID>(300);
+  const jmethodID kHandleMessageMethod = reinterpret_cast<jmethodID>(401);
+  // Any non-null handle distinct from the others in this test.
+  const jmethodID kLongValueOfMethod = reinterpret_cast<jmethodID>(301);
+
+  EXPECT_CALL(mock_env_, FindClass(_))
+      .WillRepeatedly([&](const char* name) -> jclass {
+        if (strcmp(name, "io/flutter/embedding/engine/FlutterJNI") == 0) {
+          return kFlutterJNIClass;
+        }
+        return reinterpret_cast<jclass>(109);
+      });
+
+  EXPECT_CALL(mock_env_, GetFieldID(kFlutterJNIClass, "nativeShellHolderId",
+                                    "Ljava/lang/Long;"))
+      .WillRepeatedly(Return(kShellHolderField));
+  // gmock matches the newest expectation first, so the catch-all must be
+  // declared before the specific handlePlatformMessage lookup.
+  EXPECT_CALL(mock_env_, GetMethodID(_, _, _))
+      .WillRepeatedly(Return(kJniConstructor));
+  EXPECT_CALL(
+      mock_env_,
+      GetMethodID(
+          kFlutterJNIClass, ::testing::StrEq("handlePlatformMessage"),
+          ::testing::StrEq("(Ljava/lang/String;Ljava/nio/ByteBuffer;IJ)V")))
+      .WillRepeatedly(Return(kHandleMessageMethod));
+  // RegisterJni fails if the static Long.valueOf(long) lookup returns null.
+  EXPECT_CALL(mock_env_,
+              GetStaticMethodID(_, ::testing::StrEq("valueOf"),
+                                ::testing::StrEq("(J)Ljava/lang/Long;")))
+      .WillRepeatedly(Return(kLongValueOfMethod));
+
+  EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env_, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env_, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  std::vector<JNINativeMethod> registered_methods;
+  EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
+      .WillOnce(
+          [&](jclass clazz, const JNINativeMethod* methods, jint nMethods) {
+            registered_methods.assign(methods, methods + nMethods);
+            return 0;
+          });
+
+  ASSERT_TRUE(FlutterEmbedderNative::RegisterJni(&mock_env_));
+
+  jobject flutter_jni_obj = reinterpret_cast<jobject>(500);
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  native_instance->AttachJavaObject(&mock_env_, flutter_jni_obj);
+
+  auto jvm_invoker = native_instance->GetJvmInvoker();
+  ASSERT_NE(jvm_invoker, nullptr);
+
+  // When HandlePlatformMessage is called with a 0-byte non-null buffer:
+  // 1. AndroidJvmInvoker allocates 1 byte on the heap (malloc(1)).
+  // 2. Calls NewDirectByteBuffer(buffer_copy, 0).
+  // 3. Dispatches to Java FlutterJNI.handlePlatformMessage.
+  // 4. Returns message_data (the heap address).
+  static const uint8_t kEmptyByte = 0;
+  void* allocated_buffer = nullptr;
+  EXPECT_CALL(mock_env_, NewDirectByteBuffer(::testing::Ne(nullptr), 0))
+      .WillOnce([&](void* address, jlong capacity) -> jobject {
+        allocated_buffer = address;
+        return reinterpret_cast<jobject>(0x700);
+      });
+  EXPECT_CALL(mock_env_, CallVoidMethodV(_, kHandleMessageMethod, _)).Times(1);
+
+  // response_id = 100 (arbitrary non-zero test id)
+  // message_data = 0 (instructs AndroidJvmInvoker to allocate heap buffer)
+  EXPECT_TRUE(
+      jvm_invoker->HandlePlatformMessage("binary-msg", &kEmptyByte, 0, 100, 0));
+  ASSERT_NE(allocated_buffer, nullptr);
+
+  // Find nativeCleanupMessageData in the registered methods and invoke it to
+  // free the buffer.
+  auto it =
+      std::find_if(registered_methods.begin(), registered_methods.end(),
+                   [](const JNINativeMethod& m) {
+                     return strcmp(m.name, "nativeCleanupMessageData") == 0;
+                   });
+  ASSERT_NE(it, registered_methods.end());
+  ASSERT_NE(it->fnPtr, nullptr);
+
+  typedef void (*CleanupMessageDataFn)(JNIEnv*, jobject, jlong);
+  auto cleanup_fn = reinterpret_cast<CleanupMessageDataFn>(it->fnPtr);
+  // Free the buffer allocated by AndroidJvmInvoker.
+  cleanup_fn(&mock_env_, nullptr, reinterpret_cast<jlong>(allocated_buffer));
+}
+
+// A FlutterJNI method that AndroidJvmInvoker resolves in RegisterJni and
+// dispatches to with CallVoidMethod.
+struct FlutterJniDispatchMethod {
+  const char* name;
+  const char* signature;
+  // The jmethodID the test's GetMethodID stub returns for this method.
+  uintptr_t id;
+};
+
+// Ids 401-408 are arbitrary. Each method gets its own so a test can tell
+// which FlutterJNI method a CallVoidMethodV call targeted.
+constexpr FlutterJniDispatchMethod kHandlePlatformMessageMethod = {
+    "handlePlatformMessage", "(Ljava/lang/String;Ljava/nio/ByteBuffer;IJ)V",
+    401};
+constexpr FlutterJniDispatchMethod kHandlePlatformMessageResponseMethod = {
+    "handlePlatformMessageResponse", "(ILjava/nio/ByteBuffer;)V", 402};
+constexpr FlutterJniDispatchMethod kUpdateSemanticsMethod = {
+    "updateSemantics",
+    "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V", 403};
+constexpr FlutterJniDispatchMethod kUpdateCustomAccessibilityActionsMethod = {
+    "updateCustomAccessibilityActions",
+    "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V", 404};
+constexpr FlutterJniDispatchMethod kSetSemanticsTreeEnabledMethod = {
+    "setSemanticsTreeEnabled", "(Z)V", 405};
+constexpr FlutterJniDispatchMethod kSetApplicationLocaleMethod = {
+    "setApplicationLocale", "(Ljava/lang/String;)V", 406};
+constexpr FlutterJniDispatchMethod kOnFirstFrameMethod = {"onFirstFrame", "()V",
+                                                          407};
+constexpr FlutterJniDispatchMethod kOnPreEngineRestartMethod = {
+    "onPreEngineRestart", "()V", 408};
+
+// All eight are required by AndroidJvmInvoker::RegisterJni.
+constexpr std::array<FlutterJniDispatchMethod, 8> kFlutterJniDispatchMethods = {
+    kHandlePlatformMessageMethod,
+    kHandlePlatformMessageResponseMethod,
+    kUpdateSemanticsMethod,
+    kUpdateCustomAccessibilityActionsMethod,
+    kSetSemanticsTreeEnabledMethod,
+    kSetApplicationLocaleMethod,
+    kOnFirstFrameMethod,
+    kOnPreEngineRestartMethod,
+};
+
+static jmethodID ToMethodId(const FlutterJniDispatchMethod& method) {
+  return reinterpret_cast<jmethodID>(method.id);
+}
+
+struct JvmInvokerDispatchCase {
+  // Used as the gtest parameter name.
+  const char* name;
+  FlutterJniDispatchMethod method;
+  // Calls the AndroidJvmInvoker method under test with representative
+  // arguments and returns its result.
+  std::function<bool(AndroidJvmInvoker&)> invoke;
+};
+
+static void PrintTo(const JvmInvokerDispatchCase& dispatch_case,
+                    std::ostream* os) {
+  *os << dispatch_case.name;
+}
+
+static const std::vector<JvmInvokerDispatchCase>& JvmInvokerDispatchCases() {
+  // Arbitrary payload bytes and response id. The dispatch result doesn't
+  // depend on their values.
+  static const uint8_t kPayload[] = {1, 2, 3};
+  static const uint8_t kResponseData[] = {4, 5};
+  constexpr int32_t kResponseId = 7;
+  static const std::vector<JvmInvokerDispatchCase> cases = {
+      {"HandlePlatformMessageWithPayload", kHandlePlatformMessageMethod,
+       [](AndroidJvmInvoker& invoker) {
+         // A non-zero message_data means the caller owns the buffer, so the
+         // invoker doesn't malloc a copy that this test would have to free.
+         return invoker.HandlePlatformMessage(
+             "test/channel", kPayload, sizeof(kPayload), kResponseId,
+             reinterpret_cast<int64_t>(kPayload));
+       }},
+      {"HandlePlatformMessageWithoutPayload", kHandlePlatformMessageMethod,
+       [](AndroidJvmInvoker& invoker) {
+         return invoker.HandlePlatformMessage("test/channel", nullptr, 0,
+                                              kResponseId, 0);
+       }},
+      {"HandlePlatformMessageResponse", kHandlePlatformMessageResponseMethod,
+       [](AndroidJvmInvoker& invoker) {
+         return invoker.HandlePlatformMessageResponse(
+             kResponseId, kResponseData, sizeof(kResponseData));
+       }},
+      {"UpdateSemantics", kUpdateSemanticsMethod,
+       [](AndroidJvmInvoker& invoker) {
+         return invoker.UpdateSemantics({1, 2, 3, 4}, {"label"}, {{9}});
+       }},
+      {"UpdateCustomAccessibilityActions",
+       kUpdateCustomAccessibilityActionsMethod,
+       [](AndroidJvmInvoker& invoker) {
+         return invoker.UpdateCustomAccessibilityActions({1, 2}, {"action"});
+       }},
+      {"SetSemanticsTreeEnabled", kSetSemanticsTreeEnabledMethod,
+       [](AndroidJvmInvoker& invoker) {
+         return invoker.SetSemanticsTreeEnabled(true);
+       }},
+      {"SetApplicationLocale", kSetApplicationLocaleMethod,
+       [](AndroidJvmInvoker& invoker) {
+         return invoker.SetApplicationLocale("en-US");
+       }},
+      {"OnFirstFrame", kOnFirstFrameMethod,
+       [](AndroidJvmInvoker& invoker) { return invoker.OnFirstFrame(); }},
+      {"OnPreEngineRestart", kOnPreEngineRestartMethod,
+       [](AndroidJvmInvoker& invoker) { return invoker.OnPreEngineRestart(); }},
+  };
+  return cases;
+}
+
+// Runs the real AndroidJvmInvoker against MockJNIEnv. The JNI exception state
+// is a flag owned by the fixture: only the test's own Java call sets it, and
+// ExceptionClear resets it. A sticky ExceptionCheck() == JNI_TRUE would trip
+// the ASSERT_NO_EXCEPTION checks in the jni_util string/array helpers and abort
+// the whole binary.
+class AndroidJvmInvokerDispatchTest
+    : public Phase61JniRegistrationCutoverTest,
+      public ::testing::WithParamInterface<JvmInvokerDispatchCase> {
+ public:
+  void SetUp() override {
+    Phase61JniRegistrationCutoverTest::SetUp();
+    InstallExceptionStateFake();
+    InstallRegistrationStubs();
+    ExpectDispatchMethodIds();
+    // The eight method ids are file-static in jvm_invoker.cc and are only
+    // written by registration.
+    ASSERT_TRUE(FlutterEmbedderNative::RegisterJni(&mock_env_));
+  }
+
+  void TearDown() override {
+    // ReturnsFalseWhenMethodIdUnresolved leaves one id null. Restore all eight
+    // here rather than at the end of that test, so an assertion that bails out
+    // early can't leave a null id behind for later tests in the binary. The
+    // new expectations are the newest, so they take precedence.
+    ExpectDispatchMethodIds();
+    EXPECT_TRUE(AndroidJvmInvoker::RegisterJni(&mock_env_, kFlutterJNIClass));
+    Phase61JniRegistrationCutoverTest::TearDown();
+  }
+
+ protected:
+  std::unique_ptr<AndroidJvmInvoker> MakeAttachedInvoker() {
+    return std::make_unique<AndroidJvmInvoker>(
+        std::make_shared<fml::jni::JavaObjectWeakGlobalRef>(&mock_env_,
+                                                            kFlutterJNIObject),
+        /*platform_task_runner=*/nullptr);
+  }
+
+  void ExpectDispatchMethodIds() {
+    for (const FlutterJniDispatchMethod& method : kFlutterJniDispatchMethods) {
+      EXPECT_CALL(mock_env_,
+                  GetMethodID(kFlutterJNIClass, ::testing::StrEq(method.name),
+                              ::testing::StrEq(method.signature)))
+          .WillRepeatedly(Return(ToMethodId(method)));
+    }
+  }
+
+  // Arbitrary non-null JNI handles. They only need to be distinct from each
+  // other. 100, 0x600 and 0x700 match the FlutterJNI class, string and direct
+  // buffer handles that MockJNIEnv and the rest of this file use.
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  const jclass kOtherClass = reinterpret_cast<jclass>(109);
+  const jfieldID kShellHolderField = reinterpret_cast<jfieldID>(200);
+  const jmethodID kOtherMethod = reinterpret_cast<jmethodID>(300);
+  const jmethodID kLongValueOfMethod = reinterpret_cast<jmethodID>(301);
+  const jobject kFlutterJNIObject = reinterpret_cast<jobject>(500);
+  const jstring kJavaString = reinterpret_cast<jstring>(0x600);
+  const jobject kDirectBuffer = reinterpret_cast<jobject>(0x700);
+  const jobjectArray kObjectArray = reinterpret_cast<jobjectArray>(0x800);
+  const jthrowable kPendingThrowable = reinterpret_cast<jthrowable>(0x900);
+
+  bool exception_pending_ = false;
+
+ private:
+  void InstallExceptionStateFake() {
+    EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly([this]() {
+      return exception_pending_ ? JNI_TRUE : JNI_FALSE;
+    });
+    EXPECT_CALL(mock_env_, ExceptionClear()).WillRepeatedly([this]() {
+      exception_pending_ = false;
+    });
+    EXPECT_CALL(mock_env_, ExceptionDescribe()).WillRepeatedly(Return());
+    // Catch-all first: the ScopedJavaLocalRef destructors (channel string,
+    // buffers, GetJavaExceptionInfo's locals) also call DeleteLocalRef, and
+    // gmock matches the newest expectation first. Tests that count the
+    // throwable's DeleteLocalRef declare that expectation after this one.
+    EXPECT_CALL(mock_env_, DeleteLocalRef(_)).WillRepeatedly(Return());
+    // Java calls that don't throw, including Throwable.printStackTrace from
+    // GetJavaExceptionInfo, which runs with a different method id.
+    EXPECT_CALL(mock_env_, CallVoidMethodV(_, _, _)).WillRepeatedly(Return());
+    // GetJavaExceptionInfo builds its stream objects with NewObject and reads
+    // the trace with CallObjectMethod. A null jstring makes JavaStringToString
+    // return "" before it touches GetStringChars.
+    EXPECT_CALL(mock_env_, NewObjectV(_, _, _)).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(mock_env_, CallObjectMethodV(_, _, _))
+        .WillRepeatedly(Return(nullptr));
+  }
+
+  void InstallRegistrationStubs() {
+    EXPECT_CALL(mock_env_, FindClass(_))
+        .WillRepeatedly([this](const char* name) -> jclass {
+          if (strcmp(name, "io/flutter/embedding/engine/FlutterJNI") == 0) {
+            return kFlutterJNIClass;
+          }
+          return kOtherClass;
+        });
+    EXPECT_CALL(mock_env_, GetFieldID(kFlutterJNIClass,
+                                      ::testing::StrEq("nativeShellHolderId"),
+                                      ::testing::StrEq("Ljava/lang/Long;")))
+        .WillRepeatedly(Return(kShellHolderField));
+    // Declared before the eight specific ids so it doesn't shadow them.
+    EXPECT_CALL(mock_env_, GetMethodID(_, _, _))
+        .WillRepeatedly(Return(kOtherMethod));
+    // FlutterEmbedderNative::RegisterJni fails if Long.valueOf(long) is null.
+    EXPECT_CALL(mock_env_,
+                GetStaticMethodID(_, ::testing::StrEq("valueOf"),
+                                  ::testing::StrEq("(J)Ljava/lang/Long;")))
+        .WillRepeatedly(Return(kLongValueOfMethod));
+    EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
+        .WillRepeatedly(Return(0));
+
+    EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mock_env_, NewWeakGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(mock_env_, DeleteWeakGlobalRef(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mock_env_, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(mock_env_, GetObjectRefType(_))
+        .WillRepeatedly(Return(JNILocalRefType));
+
+    EXPECT_CALL(mock_env_, NewString(_, _)).WillRepeatedly(Return(kJavaString));
+    EXPECT_CALL(mock_env_, NewDirectByteBuffer(_, _))
+        .WillRepeatedly(Return(kDirectBuffer));
+    EXPECT_CALL(mock_env_, NewObjectArray(_, _, _))
+        .WillRepeatedly(Return(kObjectArray));
+    EXPECT_CALL(mock_env_, SetObjectArrayElement(_, _, _))
+        .WillRepeatedly(Return());
+  }
+};
+
+// (a) The Java call returns normally.
+TEST_P(AndroidJvmInvokerDispatchTest, ReturnsTrueWhenJavaCallSucceeds) {
+  const JvmInvokerDispatchCase& dispatch_case = GetParam();
+  auto invoker = MakeAttachedInvoker();
+
+  EXPECT_CALL(mock_env_, ExceptionOccurred()).Times(0);
+  EXPECT_CALL(mock_env_, CallVoidMethodV(_, _, _)).Times(0);
+  EXPECT_CALL(mock_env_, CallVoidMethodV(kFlutterJNIObject,
+                                         ToMethodId(dispatch_case.method), _))
+      .Times(1);
+
+  EXPECT_TRUE(dispatch_case.invoke(*invoker));
+}
+
+// (b) The Java call throws.
+TEST_P(AndroidJvmInvokerDispatchTest,
+       ReturnsFalseAndClearsExceptionWhenJavaCallThrows) {
+  const JvmInvokerDispatchCase& dispatch_case = GetParam();
+  auto invoker = MakeAttachedInvoker();
+
+  EXPECT_CALL(mock_env_, CallVoidMethodV(kFlutterJNIObject,
+                                         ToMethodId(dispatch_case.method), _))
+      .WillOnce(
+          [this](jobject, jmethodID, va_list) { exception_pending_ = true; });
+  EXPECT_CALL(mock_env_, ExceptionOccurred())
+      .WillOnce(Return(kPendingThrowable));
+  EXPECT_CALL(mock_env_, ExceptionClear()).WillOnce([this]() {
+    exception_pending_ = false;
+  });
+  EXPECT_CALL(mock_env_,
+              DeleteLocalRef(static_cast<jobject>(kPendingThrowable)))
+      .Times(1);
+
+  EXPECT_FALSE(dispatch_case.invoke(*invoker));
+  EXPECT_FALSE(exception_pending_);
+}
+
+// (c) The method id wasn't resolved at registration.
+TEST_P(AndroidJvmInvokerDispatchTest, ReturnsFalseWhenMethodIdUnresolved) {
+  const JvmInvokerDispatchCase& dispatch_case = GetParam();
+  EXPECT_CALL(
+      mock_env_,
+      GetMethodID(kFlutterJNIClass, ::testing::StrEq(dispatch_case.method.name),
+                  ::testing::StrEq(dispatch_case.method.signature)))
+      .WillRepeatedly(Return(nullptr));
+  // All eight ids are required, so registration reports the missing one.
+  EXPECT_FALSE(FlutterEmbedderNative::RegisterJni(&mock_env_));
+
+  auto invoker = MakeAttachedInvoker();
+  EXPECT_CALL(mock_env_, CallVoidMethodV(_, _, _)).Times(0);
+
+  EXPECT_FALSE(dispatch_case.invoke(*invoker));
+}
+
+// (d) No Java object is attached, so the call is dropped.
+TEST_P(AndroidJvmInvokerDispatchTest,
+       ReturnsTrueAndDropsCallWithoutJavaObject) {
+  const JvmInvokerDispatchCase& dispatch_case = GetParam();
+  AndroidJvmInvoker invoker(/*java_object=*/nullptr,
+                            /*platform_task_runner=*/nullptr);
+  EXPECT_CALL(mock_env_, CallVoidMethodV(_, _, _)).Times(0);
+
+  EXPECT_TRUE(dispatch_case.invoke(invoker));
+}
+
+// (e) The thread has no JNIEnv, so the call is dropped.
+TEST_P(AndroidJvmInvokerDispatchTest, ReturnsTrueAndDropsCallWithoutJNIEnv) {
+  const JvmInvokerDispatchCase& dispatch_case = GetParam();
+  auto invoker = MakeAttachedInvoker();
+  EXPECT_CALL(mock_env_, CallVoidMethodV(_, _, _)).Times(0);
+
+  jvm_.SetJNIEnv(nullptr);
+  {
+    // The invoker's weak ref is released through the attached env, so the env
+    // has to be back before |invoker| is destroyed.
+    fml::ScopedCleanupClosure restore_env(
+        [this]() { jvm_.SetJNIEnv(&mock_env_); });
+    EXPECT_TRUE(dispatch_case.invoke(*invoker));
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    AllDispatchMethods,
+    AndroidJvmInvokerDispatchTest,
+    ::testing::ValuesIn(JvmInvokerDispatchCases()),
+    [](const ::testing::TestParamInfo<JvmInvokerDispatchCase>& info) {
+      return std::string(info.param.name);
+    });
+
+TEST_F(Phase61JniRegistrationCutoverTest,
        SendPointerDataPacketUnpacksEmbedderId) {
   auto native_instance = std::make_unique<FlutterEmbedderNative>();
 
@@ -8068,8 +8625,7 @@ TEST_F(Phase63FinalGNIntegrationTest, VMInitAndProjectArgsIsolation) {
   ASSERT_TRUE(vm_init_->Init(args));
   EXPECT_TRUE(vm_init_->IsInitialized());
   EXPECT_EQ(vm_init_->GetVmServiceUri(), "http://127.0.0.1:8888/auth/");
-  EXPECT_EQ(vm_init_->GetSelectedRenderingAPI(),
-            AndroidRenderingAPI::kImpellerAutoselect);
+  EXPECT_EQ(vm_init_->GetSelectedRenderingAPI(), SelectRenderingAPI(args));
 
   const FlutterProjectArgs* project_args = vm_init_->GetProjectArgs();
   ASSERT_NE(project_args, nullptr);
@@ -8115,12 +8671,18 @@ TEST_F(Phase63FinalGNIntegrationTest, RenderingAPISelectionMatrix) {
     EXPECT_EQ(SelectRenderingAPI(args), AndroidRenderingAPI::kSkiaOpenGLES);
   }
 
-  // Test API level >= 29 selects Impeller Autoselect
+  // Test API level >= 29 selects Impeller Autoselect on eligible device
   {
     AndroidVMArgs args;
     args.enable_impeller = true;
     args.api_level = 29;  // Android 10 Q API level 29.
-    EXPECT_EQ(SelectRenderingAPI(args),
+    DeviceProperties eligible_device;
+    eligible_device.hardware = "tensor";
+    eligible_device.product_model = "Pixel 8";
+    eligible_device.client_id_base = "android-google";
+    eligible_device.product_board = "shiba";
+    eligible_device.vendor_api_level = 34;  // Android 14 vendor API level 34.
+    EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/false, eligible_device),
               AndroidRenderingAPI::kImpellerAutoselect);
   }
 
@@ -8172,8 +8734,7 @@ TEST_F(Phase63FinalGNIntegrationTest, ConcurrentMultithreadedOperations) {
         if (!thread_vm->IsInitialized()) {
           return false;
         }
-        if (thread_vm->GetSelectedRenderingAPI() !=
-            AndroidRenderingAPI::kImpellerAutoselect) {
+        if (thread_vm->GetSelectedRenderingAPI() != SelectRenderingAPI(args)) {
           return false;
         }
       }
@@ -8202,10 +8763,13 @@ TEST_F(Phase63FinalGNIntegrationTest,
   FlutterEmbedderNative::SetDefaultVMArgs(args);
 
   EXPECT_EQ(FlutterEmbedderNative::GetDefaultVMInit(), vm_init);
-  ASSERT_TRUE(FlutterEmbedderNative::GetDefaultVMArgs().has_value());
-  EXPECT_EQ(FlutterEmbedderNative::GetDefaultVMArgs()->api_level, 34);
-  EXPECT_EQ(FlutterEmbedderNative::GetDefaultVMArgs()->engine_caches_path,
-            "/data/user/0/com.example/cache");
+  auto default_vm_args = FlutterEmbedderNative::GetDefaultVMArgs();
+  ASSERT_TRUE(default_vm_args.has_value());
+  if (default_vm_args.has_value()) {
+    EXPECT_EQ(default_vm_args->api_level, 34);
+    EXPECT_EQ(default_vm_args->engine_caches_path,
+              "/data/user/0/com.example/cache");
+  }
 
   // Verify that an instantiated FlutterEmbedderNative picks up the default
   // VMInit
@@ -8213,7 +8777,7 @@ TEST_F(Phase63FinalGNIntegrationTest,
   EXPECT_EQ(native_instance->GetVMInit(), vm_init);
   EXPECT_TRUE(native_instance->IsVMInitialized());
   EXPECT_EQ(native_instance->GetSelectedRenderingAPI(),
-            AndroidRenderingAPI::kImpellerAutoselect);
+            native_instance->GetSurfaceManager()->GetRenderingAPI());
 
   // Clean up global state
   FlutterEmbedderNative::ResetDefaults();
@@ -8637,6 +9201,182 @@ TEST(FlutterEmbedderNativeHcppGatingTest,
 }
 
 TEST(FlutterEmbedderNativeHcppGatingTest,
+     EffectiveBackendControlsHcppAndNotifiesJava) {
+  auto make_tracking_invoker = [](bool* out_java_hcpp_enabled,
+                                  int* out_set_calls) {
+    auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+    ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+        .WillByDefault(Return(true));
+    ON_CALL(*mock_invoker, InvokeVoidMethod(Eq("setHcppEnabled"), _, _))
+        .WillByDefault([out_java_hcpp_enabled, out_set_calls](
+                           const std::string&, const std::string&,
+                           const std::vector<uint8_t>& payload) {
+          if (!payload.empty()) {
+            *out_java_hcpp_enabled = (payload[0] != 0);
+          }
+          ++(*out_set_calls);
+          return true;
+        });
+    ON_CALL(*mock_invoker, InvokeBooleanMethod(Eq("isHcppEnabled"), _, _))
+        .WillByDefault([out_java_hcpp_enabled](const std::string&,
+                                               const std::string&,
+                                               const std::vector<uint8_t>&) {
+          return *out_java_hcpp_enabled;
+        });
+    return mock_invoker;
+  };
+
+  // 1. Autoselect + probe "bad" on API 35 -> falls back to kImpellerOpenGLES,
+  // ShouldEnableSurfaceControl == false, Java sees HCPP disabled.
+  {
+    constexpr int kAndroid15ApiLevel = 35;
+    bool java_hcpp_enabled = true;
+    int set_calls = 0;
+    auto mock_invoker = make_tracking_invoker(&java_hcpp_enabled, &set_calls);
+
+    auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker);
+    AndroidVMArgs args;
+    args.enable_surface_control = true;
+    args.enable_impeller = true;
+    args.api_level = kAndroid15ApiLevel;
+    ASSERT_TRUE(vm_init->Init(args));
+
+    auto bad_probe = [](const FlutterVulkanDriverProperties& /*props*/,
+                        bool* out_is_known_bad) -> FlutterEngineResult {
+      *out_is_known_bad = true;
+      return kSuccess;
+    };
+    std::shared_ptr<AndroidSurfaceManager> surface_manager =
+        AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerAutoselect,
+                                      bad_probe);
+    ASSERT_NE(surface_manager, nullptr);
+    EXPECT_EQ(surface_manager->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerOpenGLES);
+    EXPECT_FALSE(
+        ShouldEnableSurfaceControl(args, surface_manager->GetRenderingAPI()));
+
+    FlutterEmbedderNative native(
+        mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, vm_init, nullptr,
+        nullptr, nullptr, nullptr, nullptr, surface_manager);
+    EXPECT_EQ(native.GetSurfaceManager()->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerOpenGLES);
+    EXPECT_FALSE(native.IsHcppEnabled());
+    EXPECT_FALSE(java_hcpp_enabled);
+    EXPECT_GE(set_calls, 1);
+  }
+
+  // 2. Autoselect + probe "good" on API 34 -> resolves to kImpellerVulkan,
+  // ShouldEnableSurfaceControl == true, Java sees HCPP enabled.
+  {
+    constexpr int kAndroid14ApiLevel = 34;
+    bool java_hcpp_enabled = false;
+    int set_calls = 0;
+    auto mock_invoker = make_tracking_invoker(&java_hcpp_enabled, &set_calls);
+
+    auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker);
+    AndroidVMArgs args;
+    args.enable_surface_control = true;
+    args.enable_impeller = true;
+    args.api_level = kAndroid14ApiLevel;
+    ASSERT_TRUE(vm_init->Init(args));
+
+    auto good_probe = [](const FlutterVulkanDriverProperties& /*props*/,
+                         bool* out_is_known_bad) -> FlutterEngineResult {
+      *out_is_known_bad = false;
+      return kSuccess;
+    };
+    std::shared_ptr<AndroidSurfaceManager> surface_manager =
+        AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerAutoselect,
+                                      good_probe);
+    ASSERT_NE(surface_manager, nullptr);
+    EXPECT_EQ(surface_manager->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerVulkan);
+    EXPECT_TRUE(
+        ShouldEnableSurfaceControl(args, surface_manager->GetRenderingAPI()));
+
+    FlutterEmbedderNative native(
+        mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, vm_init, nullptr,
+        nullptr, nullptr, nullptr, nullptr, surface_manager);
+    EXPECT_EQ(native.GetSurfaceManager()->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerVulkan);
+    EXPECT_TRUE(native.IsHcppEnabled());
+    EXPECT_TRUE(java_hcpp_enabled);
+    EXPECT_GE(set_calls, 1);
+  }
+
+  // 3. Explicit Vulkan with forced init failure on the device path -> falls
+  // back to kImpellerOpenGLES, HCPP disabled.
+  {
+    constexpr int kAndroid15ApiLevel = 35;
+    bool java_hcpp_enabled = true;
+    int set_calls = 0;
+    auto mock_invoker = make_tracking_invoker(&java_hcpp_enabled, &set_calls);
+
+    auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker);
+    AndroidVMArgs args;
+    args.enable_surface_control = true;
+    args.enable_impeller = true;
+    args.api_level = kAndroid15ApiLevel;
+    args.requested_rendering_backend = "vulkan";
+    ASSERT_TRUE(vm_init->Init(args));
+
+    std::shared_ptr<AndroidSurfaceManager> surface_manager =
+        AndroidSurfaceManager::CreateWithForcedVulkanInitFailureForTesting(
+            AndroidRenderingAPI::kImpellerVulkan);
+    ASSERT_NE(surface_manager, nullptr);
+    EXPECT_EQ(surface_manager->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerOpenGLES);
+    EXPECT_FALSE(
+        ShouldEnableSurfaceControl(args, surface_manager->GetRenderingAPI()));
+
+    FlutterEmbedderNative native(
+        mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, vm_init, nullptr,
+        nullptr, nullptr, nullptr, nullptr, surface_manager);
+    EXPECT_EQ(native.GetSurfaceManager()->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerOpenGLES);
+    EXPECT_FALSE(native.IsHcppEnabled());
+    EXPECT_FALSE(java_hcpp_enabled);
+    EXPECT_GE(set_calls, 1);
+  }
+
+  // 4. Fake-window path preserves kImpellerVulkan.
+  {
+    constexpr int kAndroid15ApiLevel = 35;
+    bool java_hcpp_enabled = false;
+    int set_calls = 0;
+    auto mock_invoker = make_tracking_invoker(&java_hcpp_enabled, &set_calls);
+
+    auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker);
+    AndroidVMArgs args;
+    args.enable_surface_control = true;
+    args.enable_impeller = true;
+    args.api_level = kAndroid15ApiLevel;
+    args.requested_rendering_backend = "vulkan";
+    ASSERT_TRUE(vm_init->Init(args));
+
+    std::shared_ptr<AndroidSurfaceManager> surface_manager =
+        AndroidSurfaceManager::CreateForFakeWindow(
+            AndroidRenderingAPI::kImpellerVulkan);
+    ASSERT_NE(surface_manager, nullptr);
+    EXPECT_EQ(surface_manager->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerVulkan);
+
+    FlutterEmbedderNative native(
+        mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, vm_init, nullptr,
+        nullptr, nullptr, nullptr, nullptr, surface_manager);
+    EXPECT_EQ(native.GetSurfaceManager()->GetRenderingAPI(),
+              AndroidRenderingAPI::kImpellerVulkan);
+    EXPECT_TRUE(native.IsHcppEnabled());
+    EXPECT_TRUE(java_hcpp_enabled);
+    EXPECT_GE(set_calls, 1);
+  }
+}
+
+TEST(FlutterEmbedderNativeHcppGatingTest,
      NonHcppPlatformViewPresentedSynchronouslyWaitsForPlatformTaskRunner) {
   auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
   ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
@@ -8682,6 +9422,1921 @@ TEST(FlutterEmbedderNativeHcppGatingTest,
   EXPECT_TRUE(mutators_pushed_on_platform_thread.load());
 
   native.NotifySurfaceDestroyed();
+}
+
+TEST(FlutterEmbedderNativeTest, RequiresOnscreenClearanceLifecycle) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  bool hcpp_enabled = false;
+  ON_CALL(*mock_invoker, InvokeVoidMethod(Eq("setHcppEnabled"), _, _))
+      .WillByDefault([&hcpp_enabled](const std::string&, const std::string&,
+                                     const std::vector<uint8_t>& payload) {
+        if (!payload.empty()) {
+          hcpp_enabled = (payload[0] != 0);
+        }
+        return true;
+      });
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(Eq("isHcppEnabled"), _, _))
+      .WillByDefault([&hcpp_enabled](const std::string&, const std::string&,
+                                     const std::vector<uint8_t>&) {
+        return hcpp_enabled;
+      });
+
+  FlutterEmbedderNative native(mock_invoker);
+
+  // Initial state: HCPP disabled, no surface attached -> clearance not
+  // required.
+  EXPECT_TRUE(native.SetHcppEnabled(false));
+  EXPECT_FALSE(native.IsHcppEnabled());
+  EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+  // NotifySurfaceCreated sets is_image_view_surface_active_ to false
+  // (SurfaceView state).
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+  EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+  // NotifySurfaceWindowChanged with nullptr keeps clearance disabled.
+  native.NotifySurfaceWindowChanged(nullptr, /*is_fake_window=*/true);
+  EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+#if FML_OS_ANDROID
+  void* mediandk = dlopen("libmediandk.so", RTLD_NOW);
+  if (mediandk) {
+    typedef struct AImageReader AImageReader;
+    typedef int32_t (*AImageReader_newWithUsage_fn)(
+        int32_t width, int32_t height, int32_t format, uint64_t usage,
+        int32_t maxImages, AImageReader** reader);
+    typedef int32_t (*AImageReader_getWindow_fn)(AImageReader* reader,
+                                                 ANativeWindow** window);
+    typedef void (*AImageReader_delete_fn)(AImageReader* reader);
+
+    auto newWithUsage = reinterpret_cast<AImageReader_newWithUsage_fn>(
+        dlsym(mediandk, "AImageReader_newWithUsage"));
+    auto getWindow = reinterpret_cast<AImageReader_getWindow_fn>(
+        dlsym(mediandk, "AImageReader_getWindow"));
+    auto deleteReader = reinterpret_cast<AImageReader_delete_fn>(
+        dlsym(mediandk, "AImageReader_delete"));
+
+    if (newWithUsage && getWindow && deleteReader) {
+      // (1ULL << 8) is AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE
+      // (1ULL << 9) is AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT
+      constexpr uint64_t kUsage = (1ULL << 8) | (1ULL << 9);
+      AImageReader* reader = nullptr;
+      // 640 and 480 are test buffer dimensions.
+      // 1 is AIMAGE_FORMAT_RGBA_8888.
+      // 3 is maxImages buffer queue depth.
+      constexpr int32_t kWidth = 640;
+      constexpr int32_t kHeight = 480;
+      constexpr int32_t kFormatRgba8888 = 1;
+      constexpr int32_t kMaxImages = 3;
+      int32_t status = newWithUsage(kWidth, kHeight, kFormatRgba8888, kUsage,
+                                    kMaxImages, &reader);
+      if (status == 0 && reader != nullptr) {
+        ANativeWindow* window = nullptr;
+        if (getWindow(reader, &window) == 0 && window != nullptr) {
+          // WindowChanged with is_image_view=false does not activate clearance.
+          native.NotifySurfaceWindowChanged(window, /*is_fake_window=*/false,
+                                            /*is_image_view=*/false);
+          EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+          // WindowChanged with is_image_view=true activates clearance
+          // (FlutterImageView state).
+          native.NotifySurfaceWindowChanged(window, /*is_fake_window=*/false,
+                                            /*is_image_view=*/true);
+          EXPECT_TRUE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+          // When HCPP is enabled, onscreen clearance is bypassed even with
+          // active FlutterImageView.
+          EXPECT_TRUE(native.SetHcppEnabled(true));
+          EXPECT_TRUE(native.IsHcppEnabled());
+          EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+          // Disabling HCPP restores clearance requirement.
+          EXPECT_TRUE(native.SetHcppEnabled(false));
+          EXPECT_FALSE(native.IsHcppEnabled());
+          EXPECT_TRUE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+          // WindowChanged with nullptr resets clearance even with
+          // is_image_view=true.
+          native.NotifySurfaceWindowChanged(nullptr, /*is_fake_window=*/false,
+                                            /*is_image_view=*/true);
+          EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+          // Re-attach window with is_image_view=true and then destroy surface.
+          native.NotifySurfaceWindowChanged(window, /*is_fake_window=*/false,
+                                            /*is_image_view=*/true);
+          EXPECT_TRUE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+
+          native.NotifySurfaceDestroyed();
+          EXPECT_FALSE(native.RequiresOnscreenClearanceWhenNoBackgroundLayer());
+        }
+        deleteReader(reader);
+      }
+    }
+    dlclose(mediandk);
+  }
+#endif
+}
+
+namespace {
+
+VKAPI_ATTR VkResult VKAPI_CALL
+FakeGroupVkQueueSubmit(VkQueue queue,
+                       uint32_t submitCount,
+                       const VkSubmitInfo* pSubmits,
+                       VkFence fence) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL FakeGroupVkQueueWaitIdle(VkQueue queue) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+FakeGroupVkQueuePresentKHR(VkQueue queue,
+                           const VkPresentInfoKHR* pPresentInfo) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL FakeGroupVkDeviceWaitIdle(VkDevice device) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+FakeGroupVkDestroyDevice(VkDevice device,
+                         const VkAllocationCallbacks* pAllocator) {}
+
+VKAPI_ATTR void VKAPI_CALL
+FakeGroupVkDestroyInstance(VkInstance instance,
+                           const VkAllocationCallbacks* pAllocator) {}
+
+VKAPI_ATTR void VKAPI_CALL FakeGroupNoopVulkanProc() {}
+
+VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL
+FakeGroupVulkanGetInstanceProcAddr(VkInstance instance, const char* pName) {
+  if (pName == nullptr || std::strcmp(pName, "vkGetDeviceProcAddr") == 0) {
+    return nullptr;
+  }
+  if (std::strcmp(pName, "vkQueueSubmit") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeGroupVkQueueSubmit);
+  }
+  if (std::strcmp(pName, "vkQueueWaitIdle") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeGroupVkQueueWaitIdle);
+  }
+  if (std::strcmp(pName, "vkQueuePresentKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeGroupVkQueuePresentKHR);
+  }
+  if (std::strcmp(pName, "vkDeviceWaitIdle") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeGroupVkDeviceWaitIdle);
+  }
+  if (std::strcmp(pName, "vkDestroyDevice") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeGroupVkDestroyDevice);
+  }
+  if (std::strcmp(pName, "vkDestroyInstance") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&FakeGroupVkDestroyInstance);
+  }
+  return &FakeGroupNoopVulkanProc;
+}
+
+std::shared_ptr<VulkanDeviceOwner> CreateFakeGroupVulkanDeviceOwner(
+    uintptr_t tag = 0x8000) {
+  auto fake_instance = reinterpret_cast<VkInstance>(tag + 1);
+  auto fake_phys_dev = reinterpret_cast<VkPhysicalDevice>(tag + 2);
+  auto fake_device = reinterpret_cast<VkDevice>(tag + 3);
+  auto fake_queue = reinterpret_cast<VkQueue>(tag + 4);
+  return std::make_shared<VulkanDeviceOwner>(
+      /*vulkan_lib_handle=*/nullptr, fake_instance, fake_phys_dev, fake_device,
+      fake_queue, /*graphics_queue_family_index=*/0, VK_API_VERSION_1_1,
+      std::vector<std::string>{"VK_KHR_surface", "VK_KHR_android_surface"},
+      std::vector<std::string>{"VK_KHR_swapchain"},
+      &FakeGroupVulkanGetInstanceProcAddr, &FakeGroupVkDestroyDevice,
+      &FakeGroupVkDestroyInstance);
+}
+
+}  // namespace
+
+TEST(VulkanDeviceOwnerTest, EngineOutlivesSurfaceManager) {
+  VulkanQueueGuard::ResetForTesting();
+  FlutterEmbedderNative::ResetDefaults();
+  AndroidVMArgs vm_args;
+  vm_args.enable_impeller = true;
+  vm_args.requested_rendering_backend = "vulkan";
+  FlutterEmbedderNative::SetDefaultVMArgs(vm_args);
+
+  auto owner = CreateFakeGroupVulkanDeviceOwner(0x8100);
+  int owner_destroyed_count = 0;
+  owner->SetDestructionCallbackForTesting(
+      [&owner_destroyed_count]() { ++owner_destroyed_count; });
+  VkInstance shared_instance = owner->GetInstance();
+  VkDevice shared_device = owner->GetDevice();
+
+  auto native = std::make_unique<FlutterEmbedderNative>(owner);
+  owner.reset();
+  ASSERT_NE(native->GetSurfaceManager(), nullptr);
+  ASSERT_TRUE(native->GetSurfaceManager()->IsVulkanInitialized());
+  EXPECT_EQ(native->GetSurfaceManager()->GetVulkanDevice(), shared_device);
+
+  auto fake_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x9001);
+  native->SetEngine(fake_engine);
+  bool deinit_called = false;
+  native->SetDeinitializeEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) -> FlutterEngineResult {
+        EXPECT_EQ(engine, fake_engine);
+        // The owner must still be alive while the engine deinitializes, even
+        // after the surface manager has torn down its Vulkan state.
+        EXPECT_EQ(owner_destroyed_count, 0);
+        auto trampoline = VulkanQueueGuard::GetInstanceProcAddrTrampoline();
+        auto wait_idle = reinterpret_cast<PFN_vkDeviceWaitIdle>(
+            trampoline(shared_instance, "vkDeviceWaitIdle"));
+        EXPECT_NE(wait_idle, nullptr);
+        if (wait_idle != nullptr) {
+          EXPECT_EQ(wait_idle(shared_device), VK_SUCCESS);
+        }
+        deinit_called = true;
+        return kSuccess;
+      });
+
+  // Tear down the surface manager before the engine shuts down.
+  native->GetSurfaceManager()->TeardownVulkan();
+  EXPECT_FALSE(native->GetSurfaceManager()->IsVulkanInitialized());
+  EXPECT_EQ(owner_destroyed_count, 0);
+
+  // Destroying native runs engine shutdown/deinitialization while the owner is
+  // still alive, then drops the last owner reference.
+  native.reset();
+  EXPECT_TRUE(deinit_called);
+  EXPECT_EQ(owner_destroyed_count, 1);
+
+  FlutterEmbedderNative::ResetDefaults();
+  VulkanQueueGuard::ResetForTesting();
+}
+
+TEST(FlutterEmbedderNativeTest, SpawnedEngineSharesParentVkDevice) {
+  VulkanQueueGuard::ResetForTesting();
+  FlutterEmbedderNative::ResetDefaults();
+  AndroidVMArgs vm_args;
+  vm_args.enable_impeller = true;
+  vm_args.requested_rendering_backend = "vulkan";
+  FlutterEmbedderNative::SetDefaultVMArgs(vm_args);
+
+  auto owner = CreateFakeGroupVulkanDeviceOwner(0x8200);
+  auto parent = std::make_unique<FlutterEmbedderNative>(owner);
+  owner.reset();
+
+  ASSERT_NE(parent->GetSurfaceManager(), nullptr);
+  ASSERT_TRUE(parent->GetSurfaceManager()->IsVulkanInitialized());
+  VkDevice parent_device = parent->GetSurfaceManager()->GetVulkanDevice();
+  ASSERT_NE(parent_device, static_cast<VkDevice>(VK_NULL_HANDLE));
+
+  AndroidEngineSpawnArgs spawn_args;
+  spawn_args.entrypoint = "childMain";
+  spawn_args.engine_id = 42;
+  auto child = parent->SpawnChild(nullptr, nullptr, spawn_args);
+  ASSERT_NE(child, nullptr);
+  ASSERT_NE(child->GetSurfaceManager(), nullptr);
+  EXPECT_TRUE(child->GetSurfaceManager()->IsVulkanInitialized());
+  EXPECT_EQ(child->GetSurfaceManager()->GetVulkanDevice(), parent_device);
+  EXPECT_EQ(child->GetSurfaceManager()->GetVulkanDeviceOwner(),
+            parent->GetSurfaceManager()->GetVulkanDeviceOwner());
+
+  child.reset();
+  parent.reset();
+  FlutterEmbedderNative::ResetDefaults();
+  VulkanQueueGuard::ResetForTesting();
+}
+
+TEST(FlutterEmbedderNativeTest, SpawnedEngineOutlivesParent) {
+  VulkanQueueGuard::ResetForTesting();
+  FlutterEmbedderNative::ResetDefaults();
+  AndroidVMArgs vm_args;
+  vm_args.enable_impeller = true;
+  vm_args.requested_rendering_backend = "vulkan";
+  FlutterEmbedderNative::SetDefaultVMArgs(vm_args);
+
+  auto owner = CreateFakeGroupVulkanDeviceOwner(0x8300);
+  int owner_destroyed_count = 0;
+  owner->SetDestructionCallbackForTesting(
+      [&owner_destroyed_count]() { ++owner_destroyed_count; });
+  VkInstance shared_instance = owner->GetInstance();
+  VkDevice shared_device = owner->GetDevice();
+  VkQueue shared_queue = owner->GetQueue();
+
+  auto parent = std::make_unique<FlutterEmbedderNative>(owner);
+  owner.reset();
+
+  AndroidEngineSpawnArgs spawn_args;
+  spawn_args.entrypoint = "childMain";
+  spawn_args.engine_id = 43;
+  auto child = parent->SpawnChild(nullptr, nullptr, spawn_args);
+  ASSERT_NE(child, nullptr);
+  ASSERT_NE(child->GetSurfaceManager(), nullptr);
+  EXPECT_EQ(child->GetSurfaceManager()->GetVulkanDevice(), shared_device);
+
+  // Destroy the parent first while the child remains active.
+  parent.reset();
+  EXPECT_EQ(owner_destroyed_count, 0);
+  EXPECT_TRUE(child->GetSurfaceManager()->IsVulkanInitialized());
+  EXPECT_EQ(child->GetSurfaceManager()->GetVulkanDevice(), shared_device);
+
+  // Render a frame on the child and perform a guarded queue submit and image
+  // decode on the shared device after the parent is gone.
+  EXPECT_TRUE(child->GetSurfaceManager()->SetNativeWindow(
+      nullptr, /*is_fake_window=*/true));
+  FlutterFrameInfo frame_info = {};
+  frame_info.struct_size = sizeof(FlutterFrameInfo);
+  frame_info.size = {128, 128};
+  FlutterVulkanImage img =
+      child->GetSurfaceManager()->GetNextImage(&frame_info);
+  EXPECT_NE(img.image, 0u);
+  EXPECT_TRUE(child->GetSurfaceManager()->PresentImage(&img));
+
+  auto trampoline = VulkanQueueGuard::GetInstanceProcAddrTrampoline();
+  auto guarded_submit = reinterpret_cast<PFN_vkQueueSubmit>(
+      trampoline(shared_instance, "vkQueueSubmit"));
+  ASSERT_NE(guarded_submit, nullptr);
+  EXPECT_EQ(guarded_submit(shared_queue, 0, nullptr, VK_NULL_HANDLE),
+            VK_SUCCESS);
+
+  // Decode an image via the child's ImageDecoderProvider to exercise the IO
+  // decode path while the parent is already destroyed.
+  auto mock_decoder = std::make_shared<InMemoryImageDecoderProvider>();
+  child->SetImageDecoderProvider(mock_decoder);
+  std::vector<uint8_t> encoded_bytes = {0x89, 0x50, 0x4E, 0x47};
+  EXPECT_TRUE(child->DecodeImage(encoded_bytes.data(), encoded_bytes.size(),
+                                 /*generator_handle=*/1));
+  EXPECT_EQ(owner_destroyed_count, 0);
+
+  // Destroy the child; the shared VulkanDeviceOwner destructor must run
+  // exactly once after the child is destroyed.
+  child.reset();
+  EXPECT_EQ(owner_destroyed_count, 1);
+
+  FlutterEmbedderNative::ResetDefaults();
+  VulkanQueueGuard::ResetForTesting();
+}
+
+TEST(AndroidMutatorsMapperClipPathTest,
+     MapsClipPathVerbsAndRoundTripsSerialization) {
+  FlutterPathSegment segments[6] = {};
+  // 0: MoveTo(10, 20)
+  segments[0].verb = kFlutterPathVerbMove;
+  segments[0].points[0] = {10.0, 20.0};
+
+  // 1: LineTo(50, 20)
+  segments[1].verb = kFlutterPathVerbLine;
+  segments[1].points[0] = {50.0, 20.0};
+
+  // 2: QuadTo(70, 20, 70, 40)
+  segments[2].verb = kFlutterPathVerbQuad;
+  segments[2].points[0] = {70.0, 20.0};
+  segments[2].points[1] = {70.0, 40.0};
+
+  // 3: ConicTo(70, 60, 50, 60, w=0.70710678)
+  constexpr double kInvSqrt2 = 0.70710678;
+  segments[3].verb = kFlutterPathVerbConic;
+  segments[3].points[0] = {70.0, 60.0};
+  segments[3].points[1] = {50.0, 60.0};
+  segments[3].conic_weight = kInvSqrt2;
+
+  // 4: CubicTo(30, 60, 10, 50, 10, 30)
+  segments[4].verb = kFlutterPathVerbCubic;
+  segments[4].points[0] = {30.0, 60.0};
+  segments[4].points[1] = {10.0, 50.0};
+  segments[4].points[2] = {10.0, 30.0};
+
+  // 5: Close
+  segments[5].verb = kFlutterPathVerbClose;
+
+  FlutterPath flutter_path = {};
+  flutter_path.struct_size = sizeof(FlutterPath);
+  flutter_path.fill_type = kFlutterPathFillTypeEvenOdd;
+  flutter_path.segments_count = 6;
+  flutter_path.segments = segments;
+
+  FlutterPlatformViewMutation tx_mutation = {};
+  tx_mutation.type = kFlutterPlatformViewMutationTypeTransformation;
+  tx_mutation.transformation = {
+      .scaleX = 1.0,
+      .skewX = 0.0,
+      .transX = 5.0,
+      .skewY = 0.0,
+      .scaleY = 1.0,
+      .transY = 15.0,
+      .pers0 = 0.0,
+      .pers1 = 0.0,
+      .pers2 = 1.0,
+  };
+
+  FlutterPlatformViewMutation path_mutation = {};
+  path_mutation.type = kFlutterPlatformViewMutationTypeClipPath;
+  path_mutation.clip_path = flutter_path;
+
+  const FlutterPlatformViewMutation* mutations[] = {&tx_mutation,
+                                                    &path_mutation};
+  FlutterPlatformView pv = {};
+  pv.struct_size = sizeof(FlutterPlatformView);
+  pv.identifier = 7;
+  pv.mutations_count = 2;
+  pv.mutations = mutations;
+
+  AndroidMutatorsStack stack = AndroidMutatorsMapper::MapPlatformView(pv);
+  ASSERT_EQ(stack.GetMutatorsCount(), 2u);
+  EXPECT_EQ(stack.GetMutators()[1].type, AndroidMutatorType::kClipPath);
+
+  ASSERT_EQ(stack.GetFinalClipPaths().size(), 1u);
+  const AndroidClipPath& stored_path = stack.GetFinalClipPaths()[0];
+  EXPECT_EQ(stored_path.fill_type, AndroidPathFillType::kEvenOdd);
+  EXPECT_FLOAT_EQ(stored_path.accumulated_transform.values[2], 5.0f);
+  EXPECT_FLOAT_EQ(stored_path.accumulated_transform.values[5], 15.0f);
+  ASSERT_EQ(stored_path.segments.size(), 6u);
+  EXPECT_EQ(stored_path.segments[0].verb, AndroidPathVerb::kMove);
+  EXPECT_FLOAT_EQ(stored_path.segments[0].points[0], 10.0f);
+  EXPECT_FLOAT_EQ(stored_path.segments[0].points[1], 20.0f);
+  EXPECT_EQ(stored_path.segments[3].verb, AndroidPathVerb::kConic);
+  EXPECT_NEAR(stored_path.segments[3].conic_weight,
+              static_cast<float>(kInvSqrt2), 1e-5f);
+
+  std::vector<uint8_t> bytes = stack.Serialize();
+  auto deserialized =
+      AndroidMutatorsStack::Deserialize(bytes.data(), bytes.size());
+  ASSERT_TRUE(deserialized.has_value());
+  EXPECT_EQ(*deserialized, stack);
+  EXPECT_EQ(deserialized->GetFinalClipPaths(), stack.GetFinalClipPaths());
+}
+
+TEST(
+    FlutterEmbedderNativeCompositorTest,
+    ScaledPlatformViewPassesTransformedContainerBoundsAndUnscaledInnerViewSize) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+
+  int32_t captured_x = -1;
+  int32_t captured_y = -1;
+  int32_t captured_width = -1;
+  int32_t captured_height = -1;
+  int32_t captured_view_width = -1;
+  int32_t captured_view_height = -1;
+
+  ON_CALL(*mock_invoker, PushPlatformViewMutators(_, _, _, _, _, _, _, _))
+      .WillByDefault([&](int64_t /*view_id*/, int32_t x, int32_t y,
+                         int32_t width, int32_t height, int32_t view_width,
+                         int32_t view_height, const std::vector<uint8_t>&) {
+        captured_x = x;
+        captured_y = y;
+        captured_width = width;
+        captured_height = height;
+        captured_view_width = view_width;
+        captured_view_height = view_height;
+        return true;
+      });
+
+  FlutterEmbedderNative native(mock_invoker);
+  EXPECT_TRUE(native.SetHcppEnabled(false));
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+
+  FlutterPlatformViewMutation scale_tx = {};
+  scale_tx.type = kFlutterPlatformViewMutationTypeTransformation;
+  scale_tx.transformation = {
+      .scaleX = 2.0,
+      .skewX = 0.0,
+      .transX = 100.0,
+      .skewY = 0.0,
+      .scaleY = 2.0,
+      .transY = 200.0,
+      .pers0 = 0.0,
+      .pers1 = 0.0,
+      .pers2 = 1.0,
+  };
+  const FlutterPlatformViewMutation* mutations[] = {&scale_tx};
+
+  FlutterPlatformView pv = {};
+  pv.struct_size = sizeof(FlutterPlatformView);
+  pv.identifier = 11;
+  pv.mutations_count = 1;
+  pv.mutations = mutations;
+
+  FlutterLayer pv_layer = {};
+  pv_layer.struct_size = sizeof(FlutterLayer);
+  pv_layer.type = kFlutterLayerContentTypePlatformView;
+  pv_layer.platform_view = &pv;
+  pv_layer.offset = FlutterPoint{100.0, 200.0};
+  pv_layer.size = FlutterSize{50.0, 80.0};
+
+  const FlutterLayer* layers[] = {&pv_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+
+  // Container width/height are scaled by 2x (100x160), while inner view
+  // dimensions remain unscaled (50x80).
+  EXPECT_EQ(captured_x, 100);
+  EXPECT_EQ(captured_y, 200);
+  EXPECT_EQ(captured_width, 100);
+  EXPECT_EQ(captured_height, 160);
+  EXPECT_EQ(captured_view_width, 50);
+  EXPECT_EQ(captured_view_height, 80);
+
+  native.NotifySurfaceDestroyed();
+}
+
+TEST(FlutterEmbedderNativeCompositorTest,
+     HcppPlatformViewHideDiffAndSingleOverlayVisibilityLifecycle) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  bool hcpp_enabled = true;
+  std::vector<int32_t> hidden_view_ids;
+  int show_overlay_calls = 0;
+  int hide_overlay_calls = 0;
+  int display_overlay_calls = 0;
+
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault([&](const std::string& method_name,
+                         const std::string& /*signature*/,
+                         const std::vector<uint8_t>& payload) {
+        if (method_name == "setHcppEnabled" && !payload.empty()) {
+          hcpp_enabled = (payload[0] != 0);
+        } else if ((method_name == "hidePlatformView2" ||
+                    method_name == "hidePlatformView") &&
+                   payload.size() >= sizeof(int32_t)) {
+          int32_t id = 0;
+          std::memcpy(&id, payload.data(), sizeof(int32_t));
+          hidden_view_ids.push_back(id);
+        } else if (method_name == "showOverlaySurface2") {
+          ++show_overlay_calls;
+        } else if (method_name == "hideOverlaySurface2") {
+          ++hide_overlay_calls;
+        } else if (method_name == "onDisplayOverlaySurface") {
+          ++display_overlay_calls;
+        }
+        return true;
+      });
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(Eq("isHcppEnabled"), _, _))
+      .WillByDefault([&](const std::string&, const std::string&,
+                         const std::vector<uint8_t>&) { return hcpp_enabled; });
+  ON_CALL(*mock_invoker, PushPlatformViewMutators(_, _, _, _, _, _, _, _))
+      .WillByDefault(Return(true));
+
+  FlutterEmbedderNative native(mock_invoker);
+  EXPECT_TRUE(native.SetHcppEnabled(true));
+  EXPECT_TRUE(native.IsHcppEnabled());
+  // In HCPP mode, overlay indices > 0 must return nullptr so multiple overlays
+  // coalesce into the single top-level HCPP overlay surface.
+  EXPECT_EQ(native.GetOverlayWindow(1), nullptr);
+
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+
+  FlutterPlatformView pv1 = {.struct_size = sizeof(FlutterPlatformView),
+                             .identifier = 1};
+  FlutterPlatformView pv2 = {.struct_size = sizeof(FlutterPlatformView),
+                             .identifier = 2};
+
+  FlutterBackingStore root_store = {};
+  root_store.struct_size = sizeof(FlutterBackingStore);
+  FlutterBackingStore overlay_store = {};
+  overlay_store.struct_size = sizeof(FlutterBackingStore);
+
+  FlutterLayer root_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &root_store,
+      .size = FlutterSize{100.0, 100.0},
+  };
+  FlutterLayer pv1_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypePlatformView,
+      .platform_view = &pv1,
+      .size = FlutterSize{40.0, 40.0},
+  };
+  FlutterLayer pv2_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypePlatformView,
+      .platform_view = &pv2,
+      .size = FlutterSize{40.0, 40.0},
+  };
+  FlutterLayer overlay_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &overlay_store,
+      .size = FlutterSize{100.0, 100.0},
+  };
+
+  // Frame 1: root + pv1 + pv2 + overlay
+  const FlutterLayer* frame1_layers[] = {&root_layer, &pv1_layer, &pv2_layer,
+                                         &overlay_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(frame1_layers, 4));
+
+  EXPECT_TRUE(hidden_view_ids.empty());
+  EXPECT_EQ(show_overlay_calls, 1);
+  EXPECT_EQ(hide_overlay_calls, 0);
+  EXPECT_EQ(display_overlay_calls, 0);
+
+  // Frame 2: root + pv1 only (pv2 and overlay removed)
+  const FlutterLayer* frame2_layers[] = {&root_layer, &pv1_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(frame2_layers, 2));
+
+  ASSERT_EQ(hidden_view_ids.size(), 1u);
+  EXPECT_EQ(hidden_view_ids[0], 2);
+  EXPECT_EQ(show_overlay_calls, 1);
+  EXPECT_EQ(hide_overlay_calls, 1);
+  EXPECT_EQ(display_overlay_calls, 0);
+
+  native.NotifySurfaceDestroyed();
+}
+
+TEST(FlutterEmbedderNativeSurfaceTest,
+     NotifySurfaceChangedInvokesMaybeResizeSurfaceView) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  int32_t resized_width = -1;
+  int32_t resized_height = -1;
+  int resize_calls = 0;
+
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault([&](const std::string& method_name,
+                         const std::string& signature,
+                         const std::vector<uint8_t>& payload) {
+        if (method_name == "maybeResizeSurfaceView" && signature == "(II)V" &&
+            payload.size() >= 2 * sizeof(int32_t)) {
+          std::memcpy(&resized_width, payload.data(), sizeof(int32_t));
+          std::memcpy(&resized_height, payload.data() + sizeof(int32_t),
+                      sizeof(int32_t));
+          ++resize_calls;
+        }
+        return true;
+      });
+
+  FlutterEmbedderNative native(mock_invoker);
+  constexpr int32_t kNewWidth = 1080;
+  constexpr int32_t kNewHeight = 2400;
+  native.NotifySurfaceChanged(kNewWidth, kNewHeight);
+
+  EXPECT_EQ(resize_calls, 1);
+  EXPECT_EQ(resized_width, kNewWidth);
+  EXPECT_EQ(resized_height, kNewHeight);
+}
+
+TEST(FlutterEmbedderNativeSurfaceTest,
+     FirstFrameIsNotConsumedOrRoutedBeforeSurfaceCreated) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  int first_frame_calls = 0;
+  ON_CALL(*mock_invoker, OnFirstFrame()).WillByDefault([&]() {
+    ++first_frame_calls;
+    return true;
+  });
+
+  FlutterEmbedderNative native(mock_invoker);
+  JniRouter::SetEmbedderEnabled(true);
+  ASSERT_NE(native.GetCompositor(), nullptr);
+  ASSERT_NE(native.GetSurfaceManager(), nullptr);
+
+  FlutterBackingStore root_store = {};
+  root_store.struct_size = sizeof(FlutterBackingStore);
+  FlutterLayer root_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &root_store,
+      .size = FlutterSize{100.0, 100.0},
+  };
+  const FlutterLayer* layers[] = {&root_layer};
+
+  // 1. With no surface attached and no native/fake window on surface_manager,
+  // PresentLayers does not route OnFirstFrame.
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 0);
+
+  // 2. Even if surface_manager has a fake window set directly while
+  // FlutterEmbedderNative::surface_attached_ is still false,
+  // HandleCompositorFramePresented must not consume first_frame_presented_ or
+  // route OnFirstFrame.
+  EXPECT_TRUE(native.GetSurfaceManager()->SetNativeWindow(
+      nullptr, /*is_fake_window=*/true));
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 0);
+
+  // 3. Once NotifySurfaceCreated attaches the surface, the first presented
+  // frame routes OnFirstFrame exactly once.
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+  EXPECT_TRUE(native.GetSurfaceManager()->IsFakeWindow());
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 1);
+
+  // 4. Subsequent frames do not route OnFirstFrame again.
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 1);
+
+  // 5. Synthetic non-null fake window pointers must not invoke
+  // ANativeWindow_acquire or ANativeWindow_release.
+  auto* synthetic_window = reinterpret_cast<ANativeWindow*>(0x1234);
+  native.NotifySurfaceWindowChanged(synthetic_window, /*is_fake_window=*/true);
+  EXPECT_TRUE(native.GetSurfaceManager()->IsFakeWindow());
+  EXPECT_EQ(native.AcquireNativeWindow(), synthetic_window);
+
+  native.NotifySurfaceDestroyed();
+  EXPECT_FALSE(native.GetSurfaceManager()->IsFakeWindow());
+}
+
+TEST(AndroidSurfaceManagerVulkanTest,
+     ClearAndPresentOnscreenSurfaceLazilyCreatesSwapchainForFakeWindow) {
+  VulkanQueueGuard::ResetForTesting();
+  auto owner = CreateFakeGroupVulkanDeviceOwner(0x8400);
+  auto surface_manager = AndroidSurfaceManager::Create(
+      AndroidRenderingAPI::kImpellerVulkan, owner);
+  ASSERT_NE(surface_manager, nullptr);
+  ASSERT_TRUE(surface_manager->IsVulkanInitialized());
+  EXPECT_TRUE(
+      surface_manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+
+  // Without calling GetNextImage first, vk_swapchain_ is not yet created.
+  // ClearAndPresentOnscreenSurface must lazily create the swapchain and
+  // present a cleared image.
+  EXPECT_TRUE(surface_manager->ClearAndPresentOnscreenSurface());
+
+  // Also verify GetNextOverlayImage uses FlutterFrameInfo dimensions on a fake
+  // overlay window.
+  auto* fake_overlay_window = reinterpret_cast<ANativeWindow*>(0x9001);
+  FlutterFrameInfo overlay_frame_info = {};
+  overlay_frame_info.struct_size = sizeof(FlutterFrameInfo);
+  overlay_frame_info.size = {320, 240};
+  FlutterVulkanImage overlay_img = surface_manager->GetNextOverlayImage(
+      fake_overlay_window, &overlay_frame_info);
+  EXPECT_NE(overlay_img.image, 0u);
+  EXPECT_TRUE(
+      surface_manager->PresentOverlayImage(fake_overlay_window, &overlay_img));
+
+  surface_manager.reset();
+  owner.reset();
+  VulkanQueueGuard::ResetForTesting();
+}
+
+namespace {
+
+struct MockSwapchainState {
+  uint32_t create_swapchain_calls = 0;
+  VkExtent2D last_swapchain_extent = {0, 0};
+  VkSurfaceTransformFlagBitsKHR last_pre_transform =
+      VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+  VkResult acquire_result = VK_SUBOPTIMAL_KHR;
+  VkResult present_result = VK_SUBOPTIMAL_KHR;
+  uint64_t next_handle = 0x5000;
+};
+
+MockSwapchainState* g_mock_swapchain_state = nullptr;
+
+VKAPI_ATTR VkResult VKAPI_CALL MockVkCreateAndroidSurfaceKHR(
+    VkInstance /*instance*/,
+    const VkAndroidSurfaceCreateInfoKHR* /*pCreateInfo*/,
+    const VkAllocationCallbacks* /*pAllocator*/,
+    VkSurfaceKHR* pSurface) {
+  *pSurface =
+      reinterpret_cast<VkSurfaceKHR>(++g_mock_swapchain_state->next_handle);
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+MockVkDestroySurfaceKHR(VkInstance /*instance*/,
+                        VkSurfaceKHR /*surface*/,
+                        const VkAllocationCallbacks* /*pAllocator*/) {}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkGetPhysicalDeviceSurfaceSupportKHR(VkPhysicalDevice /*physicalDevice*/,
+                                         uint32_t /*queueFamilyIndex*/,
+                                         VkSurfaceKHR /*surface*/,
+                                         VkBool32* pSupported) {
+  *pSupported = VK_TRUE;
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL MockVkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+    VkPhysicalDevice /*physicalDevice*/,
+    VkSurfaceKHR /*surface*/,
+    VkSurfaceCapabilitiesKHR* pSurfaceCapabilities) {
+  std::memset(pSurfaceCapabilities, 0, sizeof(VkSurfaceCapabilitiesKHR));
+  // 2 minimum swapchain images, 3 maximum swapchain images.
+  pSurfaceCapabilities->minImageCount = 2;
+  pSurfaceCapabilities->maxImageCount = 3;
+  // Simulate Android ANativeWindow reporting stale portrait buffer dimensions
+  // (1080x2400) while the device is rotated 90 degrees into landscape.
+  constexpr uint32_t kPortraitWidth = 1080;
+  constexpr uint32_t kPortraitHeight = 2400;
+  constexpr uint32_t kMaxDimension = 4096;
+  pSurfaceCapabilities->currentExtent = {kPortraitWidth, kPortraitHeight};
+  pSurfaceCapabilities->minImageExtent = {1, 1};
+  pSurfaceCapabilities->maxImageExtent = {kMaxDimension, kMaxDimension};
+  pSurfaceCapabilities->maxImageArrayLayers = 1;
+  pSurfaceCapabilities->supportedTransforms =
+      VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR |
+      VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR;
+  pSurfaceCapabilities->currentTransform =
+      VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR;
+  pSurfaceCapabilities->supportedCompositeAlpha =
+      VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR |
+      VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR |
+      VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+  pSurfaceCapabilities->supportedUsageFlags =
+      VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+      VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkGetPhysicalDeviceSurfaceFormatsKHR(VkPhysicalDevice /*physicalDevice*/,
+                                         VkSurfaceKHR /*surface*/,
+                                         uint32_t* pSurfaceFormatCount,
+                                         VkSurfaceFormatKHR* pSurfaceFormats) {
+  *pSurfaceFormatCount = 1;
+  if (pSurfaceFormats != nullptr) {
+    pSurfaceFormats[0].format = VK_FORMAT_R8G8B8A8_UNORM;
+    pSurfaceFormats[0].colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+  }
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkCreateSwapchainKHR(VkDevice /*device*/,
+                         const VkSwapchainCreateInfoKHR* pCreateInfo,
+                         const VkAllocationCallbacks* /*pAllocator*/,
+                         VkSwapchainKHR* pSwapchain) {
+  ++g_mock_swapchain_state->create_swapchain_calls;
+  g_mock_swapchain_state->last_swapchain_extent = pCreateInfo->imageExtent;
+  g_mock_swapchain_state->last_pre_transform = pCreateInfo->preTransform;
+  *pSwapchain =
+      reinterpret_cast<VkSwapchainKHR>(++g_mock_swapchain_state->next_handle);
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+MockVkDestroySwapchainKHR(VkDevice /*device*/,
+                          VkSwapchainKHR /*swapchain*/,
+                          const VkAllocationCallbacks* /*pAllocator*/) {}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkGetSwapchainImagesKHR(VkDevice /*device*/,
+                            VkSwapchainKHR /*swapchain*/,
+                            uint32_t* pSwapchainImageCount,
+                            VkImage* pSwapchainImages) {
+  // 2 swapchain images for double-buffered mock swapchain.
+  constexpr uint32_t kImageCount = 2;
+  *pSwapchainImageCount = kImageCount;
+  if (pSwapchainImages != nullptr) {
+    for (uint32_t i = 0; i < kImageCount; ++i) {
+      // Base handle 0x7000 for mock VkImage handles.
+      constexpr uint64_t kBaseImageHandle = 0x7000;
+      pSwapchainImages[i] = reinterpret_cast<VkImage>(kBaseImageHandle + i);
+    }
+  }
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkAcquireNextImageKHR(VkDevice /*device*/,
+                          VkSwapchainKHR /*swapchain*/,
+                          uint64_t /*timeout*/,
+                          VkSemaphore /*semaphore*/,
+                          VkFence /*fence*/,
+                          uint32_t* pImageIndex) {
+  *pImageIndex = 0;
+  return g_mock_swapchain_state->acquire_result;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkQueuePresentKHR(VkQueue /*queue*/,
+                      const VkPresentInfoKHR* /*pPresentInfo*/) {
+  return g_mock_swapchain_state->present_result;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkCreateCommandPool(VkDevice /*device*/,
+                        const VkCommandPoolCreateInfo* /*pCreateInfo*/,
+                        const VkAllocationCallbacks* /*pAllocator*/,
+                        VkCommandPool* pCommandPool) {
+  *pCommandPool =
+      reinterpret_cast<VkCommandPool>(++g_mock_swapchain_state->next_handle);
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+MockVkDestroyCommandPool(VkDevice /*device*/,
+                         VkCommandPool /*commandPool*/,
+                         const VkAllocationCallbacks* /*pAllocator*/) {}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkAllocateCommandBuffers(VkDevice /*device*/,
+                             const VkCommandBufferAllocateInfo* pAllocateInfo,
+                             VkCommandBuffer* pCommandBuffers) {
+  for (uint32_t i = 0; i < pAllocateInfo->commandBufferCount; ++i) {
+    pCommandBuffers[i] = reinterpret_cast<VkCommandBuffer>(
+        ++g_mock_swapchain_state->next_handle);
+  }
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+MockVkFreeCommandBuffers(VkDevice /*device*/,
+                         VkCommandPool /*commandPool*/,
+                         uint32_t /*commandBufferCount*/,
+                         const VkCommandBuffer* /*pCommandBuffers*/) {}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkBeginCommandBuffer(VkCommandBuffer /*commandBuffer*/,
+                         const VkCommandBufferBeginInfo* /*pBeginInfo*/) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkEndCommandBuffer(VkCommandBuffer /*commandBuffer*/) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkResetCommandBuffer(VkCommandBuffer /*commandBuffer*/,
+                         VkCommandBufferResetFlags /*flags*/) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL MockVkCmdPipelineBarrier(
+    VkCommandBuffer /*commandBuffer*/,
+    VkPipelineStageFlags /*srcStageMask*/,
+    VkPipelineStageFlags /*dstStageMask*/,
+    VkDependencyFlags /*dependencyFlags*/,
+    uint32_t /*memoryBarrierCount*/,
+    const VkMemoryBarrier* /*pMemoryBarriers*/,
+    uint32_t /*bufferMemoryBarrierCount*/,
+    const VkBufferMemoryBarrier* /*pBufferMemoryBarriers*/,
+    uint32_t /*imageMemoryBarrierCount*/,
+    const VkImageMemoryBarrier* /*pImageMemoryBarriers*/) {}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+MockVkCreateFence(VkDevice /*device*/,
+                  const VkFenceCreateInfo* /*pCreateInfo*/,
+                  const VkAllocationCallbacks* /*pAllocator*/,
+                  VkFence* pFence) {
+  *pFence = reinterpret_cast<VkFence>(++g_mock_swapchain_state->next_handle);
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR void VKAPI_CALL
+MockVkDestroyFence(VkDevice /*device*/,
+                   VkFence /*fence*/,
+                   const VkAllocationCallbacks* /*pAllocator*/) {}
+
+VKAPI_ATTR VkResult VKAPI_CALL MockVkWaitForFences(VkDevice /*device*/,
+                                                   uint32_t /*fenceCount*/,
+                                                   const VkFence* /*pFences*/,
+                                                   VkBool32 /*waitAll*/,
+                                                   uint64_t /*timeout*/) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL MockVkResetFences(VkDevice /*device*/,
+                                                 uint32_t /*fenceCount*/,
+                                                 const VkFence* /*pFences*/) {
+  return VK_SUCCESS;
+}
+
+VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL
+MockSwapchainGetInstanceProcAddr(VkInstance instance, const char* pName) {
+  if (pName == nullptr || std::strcmp(pName, "vkGetDeviceProcAddr") == 0) {
+    return nullptr;
+  }
+  if (std::strcmp(pName, "vkCreateAndroidSurfaceKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkCreateAndroidSurfaceKHR);
+  }
+  if (std::strcmp(pName, "vkDestroySurfaceKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkDestroySurfaceKHR);
+  }
+  if (std::strcmp(pName, "vkGetPhysicalDeviceSurfaceSupportKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        &MockVkGetPhysicalDeviceSurfaceSupportKHR);
+  }
+  if (std::strcmp(pName, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        &MockVkGetPhysicalDeviceSurfaceCapabilitiesKHR);
+  }
+  if (std::strcmp(pName, "vkGetPhysicalDeviceSurfaceFormatsKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        &MockVkGetPhysicalDeviceSurfaceFormatsKHR);
+  }
+  if (std::strcmp(pName, "vkCreateSwapchainKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkCreateSwapchainKHR);
+  }
+  if (std::strcmp(pName, "vkDestroySwapchainKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkDestroySwapchainKHR);
+  }
+  if (std::strcmp(pName, "vkGetSwapchainImagesKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkGetSwapchainImagesKHR);
+  }
+  if (std::strcmp(pName, "vkAcquireNextImageKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkAcquireNextImageKHR);
+  }
+  if (std::strcmp(pName, "vkQueuePresentKHR") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkQueuePresentKHR);
+  }
+  if (std::strcmp(pName, "vkCreateCommandPool") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkCreateCommandPool);
+  }
+  if (std::strcmp(pName, "vkDestroyCommandPool") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkDestroyCommandPool);
+  }
+  if (std::strcmp(pName, "vkAllocateCommandBuffers") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkAllocateCommandBuffers);
+  }
+  if (std::strcmp(pName, "vkFreeCommandBuffers") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkFreeCommandBuffers);
+  }
+  if (std::strcmp(pName, "vkBeginCommandBuffer") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkBeginCommandBuffer);
+  }
+  if (std::strcmp(pName, "vkEndCommandBuffer") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkEndCommandBuffer);
+  }
+  if (std::strcmp(pName, "vkResetCommandBuffer") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkResetCommandBuffer);
+  }
+  if (std::strcmp(pName, "vkCmdPipelineBarrier") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkCmdPipelineBarrier);
+  }
+  if (std::strcmp(pName, "vkCreateFence") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkCreateFence);
+  }
+  if (std::strcmp(pName, "vkDestroyFence") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkDestroyFence);
+  }
+  if (std::strcmp(pName, "vkWaitForFences") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkWaitForFences);
+  }
+  if (std::strcmp(pName, "vkResetFences") == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(&MockVkResetFences);
+  }
+  return FakeGroupVulkanGetInstanceProcAddr(instance, pName);
+}
+
+}  // namespace
+
+TEST(AndroidSurfaceManagerVulkanTest,
+     SwapchainUsesFrameInfoExtentIdentityTransformAndIgnoresSuboptimal) {
+  VulkanQueueGuard::ResetForTesting();
+  MockSwapchainState state;
+  g_mock_swapchain_state = &state;
+
+  // Base tag 0x8600 for mock Vulkan handles.
+  constexpr uintptr_t kTag = 0x8600;
+  auto fake_instance = reinterpret_cast<VkInstance>(kTag + 1);
+  auto fake_phys_dev = reinterpret_cast<VkPhysicalDevice>(kTag + 2);
+  auto fake_device = reinterpret_cast<VkDevice>(kTag + 3);
+  auto fake_queue = reinterpret_cast<VkQueue>(kTag + 4);
+  auto owner = std::make_shared<VulkanDeviceOwner>(
+      /*vulkan_lib_handle=*/nullptr, fake_instance, fake_phys_dev, fake_device,
+      fake_queue, /*graphics_queue_family_index=*/0, VK_API_VERSION_1_1,
+      std::vector<std::string>{"VK_KHR_surface", "VK_KHR_android_surface"},
+      std::vector<std::string>{"VK_KHR_swapchain"},
+      &MockSwapchainGetInstanceProcAddr, &FakeGroupVkDestroyDevice,
+      &FakeGroupVkDestroyInstance);
+
+  auto surface_manager = AndroidSurfaceManager::Create(
+      AndroidRenderingAPI::kImpellerVulkan, owner);
+  ASSERT_NE(surface_manager, nullptr);
+  ASSERT_TRUE(surface_manager->IsVulkanInitialized());
+
+  // 1. Overlay swapchain path: even when caps.currentExtent is portrait
+  // (1080x2400) and caps.currentTransform is ROTATE_90, a landscape
+  // FlutterFrameInfo (2400x1080) must create the swapchain at 2400x1080 with
+  // VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR.
+  constexpr uint32_t kLandscapeWidth = 2400;
+  constexpr uint32_t kLandscapeHeight = 1080;
+  constexpr uint32_t kPortraitWidth = 1080;
+  constexpr uint32_t kPortraitHeight = 2400;
+  auto* overlay_window = reinterpret_cast<ANativeWindow*>(0x9101);
+  FlutterFrameInfo landscape_frame = {};
+  landscape_frame.struct_size = sizeof(FlutterFrameInfo);
+  landscape_frame.size = {kLandscapeWidth, kLandscapeHeight};
+
+  FlutterVulkanImage overlay_img1 =
+      surface_manager->GetNextOverlayImage(overlay_window, &landscape_frame);
+  EXPECT_NE(overlay_img1.image, 0u);
+  EXPECT_EQ(state.create_swapchain_calls, 1u);
+  EXPECT_EQ(state.last_swapchain_extent.width, kLandscapeWidth);
+  EXPECT_EQ(state.last_swapchain_extent.height, kLandscapeHeight);
+  EXPECT_EQ(state.last_pre_transform, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
+  EXPECT_TRUE(
+      surface_manager->PresentOverlayImage(overlay_window, &overlay_img1));
+
+  // 2. Subsequent frame at the same landscape size must NOT recreate the
+  // swapchain even when vkAcquireNextImageKHR and vkQueuePresentKHR return
+  // VK_SUBOPTIMAL_KHR.
+  FlutterVulkanImage overlay_img2 =
+      surface_manager->GetNextOverlayImage(overlay_window, &landscape_frame);
+  EXPECT_NE(overlay_img2.image, 0u);
+  EXPECT_EQ(state.create_swapchain_calls, 1u);
+  EXPECT_TRUE(
+      surface_manager->PresentOverlayImage(overlay_window, &overlay_img2));
+
+  // 3. Rotating back to portrait (1080x2400) in FlutterFrameInfo must trigger
+  // swapchain recreation with the new 1080x2400 extent and identity transform.
+  FlutterFrameInfo portrait_frame = {};
+  portrait_frame.struct_size = sizeof(FlutterFrameInfo);
+  portrait_frame.size = {kPortraitWidth, kPortraitHeight};
+  FlutterVulkanImage overlay_img3 =
+      surface_manager->GetNextOverlayImage(overlay_window, &portrait_frame);
+  EXPECT_NE(overlay_img3.image, 0u);
+  EXPECT_EQ(state.create_swapchain_calls, 2u);
+  EXPECT_EQ(state.last_swapchain_extent.width, kPortraitWidth);
+  EXPECT_EQ(state.last_swapchain_extent.height, kPortraitHeight);
+  EXPECT_EQ(state.last_pre_transform, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
+  EXPECT_TRUE(
+      surface_manager->PresentOverlayImage(overlay_window, &overlay_img3));
+
+  // 4. Onscreen swapchain path: verify SetNativeWindow + GetNextImage
+  // + PresentImage also prioritize FlutterFrameInfo extent, use identity
+  // preTransform, and do not thrash on VK_SUBOPTIMAL_KHR.
+  auto verify_onscreen_path = [&](ANativeWindow* onscreen_window) {
+    EXPECT_TRUE(surface_manager->SetNativeWindow(onscreen_window,
+                                                 /*is_fake_window=*/false));
+    // Initial SetNativeWindow has fallback_w=0, fallback_h=0, so it uses
+    // caps.currentExtent (1080x2400) with identity preTransform.
+    EXPECT_EQ(state.create_swapchain_calls, 3u);
+    EXPECT_EQ(state.last_swapchain_extent.width, kPortraitWidth);
+    EXPECT_EQ(state.last_swapchain_extent.height, kPortraitHeight);
+    EXPECT_EQ(state.last_pre_transform, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
+
+    // First landscape frame updates the onscreen swapchain to 2400x1080.
+    FlutterVulkanImage onscreen_img1 =
+        surface_manager->GetNextImage(&landscape_frame);
+    EXPECT_NE(onscreen_img1.image, 0u);
+    EXPECT_EQ(state.create_swapchain_calls, 4u);
+    EXPECT_EQ(state.last_swapchain_extent.width, kLandscapeWidth);
+    EXPECT_EQ(state.last_swapchain_extent.height, kLandscapeHeight);
+    EXPECT_EQ(state.last_pre_transform, VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
+    EXPECT_TRUE(surface_manager->PresentImage(&onscreen_img1));
+
+    // Second landscape frame does not recreate the onscreen swapchain despite
+    // VK_SUBOPTIMAL_KHR.
+    FlutterVulkanImage onscreen_img2 =
+        surface_manager->GetNextImage(&landscape_frame);
+    EXPECT_NE(onscreen_img2.image, 0u);
+    EXPECT_EQ(state.create_swapchain_calls, 4u);
+    EXPECT_TRUE(surface_manager->PresentImage(&onscreen_img2));
+    surface_manager->ClearNativeWindow();
+  };
+
+#if FML_OS_ANDROID
+  void* mediandk = dlopen("libmediandk.so", RTLD_NOW);
+  if (mediandk != nullptr) {
+    typedef struct AImageReader AImageReader;
+    typedef int32_t (*AImageReader_newWithUsage_fn)(
+        int32_t width, int32_t height, int32_t format, uint64_t usage,
+        int32_t maxImages, AImageReader** reader);
+    typedef int32_t (*AImageReader_getWindow_fn)(AImageReader* reader,
+                                                 ANativeWindow** window);
+    typedef void (*AImageReader_delete_fn)(AImageReader* reader);
+
+    auto new_with_usage = reinterpret_cast<AImageReader_newWithUsage_fn>(
+        dlsym(mediandk, "AImageReader_newWithUsage"));
+    auto get_window = reinterpret_cast<AImageReader_getWindow_fn>(
+        dlsym(mediandk, "AImageReader_getWindow"));
+    auto delete_reader = reinterpret_cast<AImageReader_delete_fn>(
+        dlsym(mediandk, "AImageReader_delete"));
+
+    if (new_with_usage && get_window && delete_reader) {
+      // (1ULL << 8) is AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE.
+      // (1ULL << 9) is AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT.
+      constexpr uint64_t kUsage = (1ULL << 8) | (1ULL << 9);
+      // 640 and 480 are test buffer dimensions; 1 is AIMAGE_FORMAT_RGBA_8888;
+      // 3 is maxImages buffer queue depth.
+      constexpr int32_t kWidth = 640;
+      constexpr int32_t kHeight = 480;
+      constexpr int32_t kFormatRgba8888 = 1;
+      constexpr int32_t kMaxImages = 3;
+      AImageReader* reader = nullptr;
+      if (new_with_usage(kWidth, kHeight, kFormatRgba8888, kUsage, kMaxImages,
+                         &reader) == 0 &&
+          reader != nullptr) {
+        ANativeWindow* window = nullptr;
+        if (get_window(reader, &window) == 0 && window != nullptr) {
+          verify_onscreen_path(window);
+        }
+        delete_reader(reader);
+      }
+    }
+    dlclose(mediandk);
+  }
+#else
+  verify_onscreen_path(reinterpret_cast<ANativeWindow*>(0x9102));
+#endif
+
+  surface_manager.reset();
+  owner.reset();
+  g_mock_swapchain_state = nullptr;
+  VulkanQueueGuard::ResetForTesting();
+}
+
+TEST(FlutterEmbedderNativeImageTextureTest,
+     VulkanRendererConfigWiresExternalTextureCallback) {
+  VulkanQueueGuard::ResetForTesting();
+  FlutterEmbedderNative::ResetDefaults();
+  AndroidVMArgs vm_args;
+  vm_args.enable_impeller = true;
+  vm_args.requested_rendering_backend = "vulkan";
+  FlutterEmbedderNative::SetDefaultVMArgs(vm_args);
+
+  // 0x8500 is a unique pointer tag for the fake VulkanDeviceOwner handles.
+  auto owner = CreateFakeGroupVulkanDeviceOwner(0x8500);
+  auto native = std::make_unique<FlutterEmbedderNative>(owner);
+  owner.reset();
+  ASSERT_NE(native->GetSurfaceManager(), nullptr);
+  ASSERT_TRUE(native->GetSurfaceManager()->IsVulkanInitialized());
+
+  FlutterRendererConfig renderer_config = {};
+  native->PopulateRendererConfig(&renderer_config);
+  ASSERT_EQ(renderer_config.type, kVulkan);
+  ASSERT_NE(renderer_config.vulkan.external_texture_frame_callback, nullptr);
+
+  // 301 is a test external texture ID; 128x128 is a test frame extent.
+  constexpr int64_t kTextureId = 301;
+  constexpr size_t kWidth = 128;
+  constexpr size_t kHeight = 128;
+  FlutterVulkanExternalTexture frame_out = {};
+
+  // Unregistered texture returns false cleanly.
+  EXPECT_FALSE(renderer_config.vulkan.external_texture_frame_callback(
+      native.get(), kTextureId, kWidth, kHeight, &frame_out));
+
+  // Registered ImageTexture without a Java ImageConsumer returns false cleanly.
+  native->RegisterImageTexture(kTextureId, nullptr,
+                               /*reset_on_background=*/false);
+  EXPECT_FALSE(renderer_config.vulkan.external_texture_frame_callback(
+      native.get(), kTextureId, kWidth, kHeight, &frame_out));
+  native->UnregisterImageTexture(kTextureId);
+
+  native.reset();
+  FlutterEmbedderNative::ResetDefaults();
+  VulkanQueueGuard::ResetForTesting();
+}
+
+TEST(FlutterEmbedderNativeImageTextureTest,
+     PreLaunchRegisteredTexturesAreRegisteredWithEngineOnLaunch) {
+  auto native = std::make_unique<FlutterEmbedderNative>();
+  ASSERT_NE(native, nullptr);
+
+  // 201 and 202 are distinct external texture IDs registered before Launch().
+  constexpr int64_t kImageTextureId = 201;
+  constexpr int64_t kSurfaceTextureId = 202;
+  // 1 is a test engine ID passed to Launch().
+  constexpr int64_t kTestEngineId = 1;
+
+  std::vector<int64_t> registered_with_engine;
+  // 0xBEEF is a synthetic non-null FlutterEngine handle for testing.
+  auto mock_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xBEEF);
+
+  native->SetRegisterExternalTextureFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+          int64_t texture_identifier) -> FlutterEngineResult {
+        EXPECT_EQ(engine, mock_engine);
+        registered_with_engine.push_back(texture_identifier);
+        return kSuccess;
+      });
+
+  // Register both texture types before Launch() while engine_ is still nullptr.
+  native->RegisterImageTexture(kImageTextureId, nullptr,
+                               /*reset_on_background=*/false);
+  native->RegisterSurfaceTexture(kSurfaceTextureId,
+                                 fml::jni::ScopedJavaGlobalRef<jobject>());
+  EXPECT_TRUE(registered_with_engine.empty());
+
+  native->SetInitializeEngineFnForTesting(
+      [&](const FlutterRendererConfig* /*config*/,
+          const FlutterProjectArgs* /*args*/, void* /*user_data*/,
+          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        *engine_out = mock_engine;
+        return kSuccess;
+      });
+  native->SetRunInitializedEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_EQ(engine, mock_engine);
+        return kSuccess;
+      });
+  native->SetDeinitializeEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_EQ(engine, mock_engine);
+        return kSuccess;
+      });
+
+  EXPECT_EQ(native->Launch("main", "", {}, kTestEngineId), kSuccess);
+  ASSERT_EQ(registered_with_engine.size(), 2u);
+  EXPECT_NE(std::find(registered_with_engine.begin(),
+                      registered_with_engine.end(), kImageTextureId),
+            registered_with_engine.end());
+  EXPECT_NE(std::find(registered_with_engine.begin(),
+                      registered_with_engine.end(), kSurfaceTextureId),
+            registered_with_engine.end());
+}
+
+TEST(FlutterEmbedderNativeSurfaceTest,
+     NotifySurfaceDestroyedAndRecreatedResetsFirstFramePresented) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  int first_frame_calls = 0;
+  ON_CALL(*mock_invoker, OnFirstFrame()).WillByDefault([&]() {
+    ++first_frame_calls;
+    return true;
+  });
+
+  FlutterEmbedderNative native(mock_invoker);
+  JniRouter::SetEmbedderEnabled(true);
+
+  // 100.0 is a test root backing store layer dimension.
+  constexpr double kLayerSize = 100.0;
+  FlutterBackingStore root_store = {};
+  root_store.struct_size = sizeof(FlutterBackingStore);
+  FlutterLayer root_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &root_store,
+      .size = FlutterSize{kLayerSize, kLayerSize},
+  };
+  const FlutterLayer* layers[] = {&root_layer};
+
+  // Initial surface creation and first frame presentation fires OnFirstFrame.
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 1);
+
+  // Subsequent frame on the same surface does not fire OnFirstFrame again.
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 1);
+
+  // NotifySurfaceWindowChanged (e.g. convertToImageView) must NOT reset
+  // first_frame_presented_.
+  native.NotifySurfaceWindowChanged(nullptr, /*is_fake_window=*/true);
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 1);
+
+  // Destroying and recreating the surface resets first_frame_presented_ so the
+  // next presented frame fires OnFirstFrame again.
+  native.NotifySurfaceDestroyed();
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_EQ(first_frame_calls, 2);
+
+  native.NotifySurfaceDestroyed();
+}
+
+TEST(
+    FlutterEmbedderNativeCompositorTest,
+    HybridCompositionCommitsBeginDisplayOverlayAndEndFrameInSinglePlatformTask) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  bool hcpp_enabled = false;
+  std::mutex events_mutex;
+  std::vector<std::string> ordered_events;
+  std::vector<std::thread::id> ui_commit_thread_ids;
+
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(Eq("isHcppEnabled"), _, _))
+      .WillByDefault([&](const std::string&, const std::string&,
+                         const std::vector<uint8_t>&) { return hcpp_enabled; });
+  // 7 is a synthetic overlay surface ID returned by createOverlaySurfaceId.
+  constexpr int64_t kOverlaySurfaceId = 7;
+  ON_CALL(*mock_invoker, InvokeIntMethod(Eq("createOverlaySurfaceId"), _, _))
+      .WillByDefault(
+          [&](const std::string&, const std::string&,
+              const std::vector<uint8_t>&) { return kOverlaySurfaceId; });
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault([&](const std::string& method_name,
+                         const std::string& /*signature*/,
+                         const std::vector<uint8_t>& payload) {
+        if (method_name == "setHcppEnabled" && !payload.empty()) {
+          hcpp_enabled = (payload[0] != 0);
+          return true;
+        }
+        if (method_name == "onBeginFrame" ||
+            method_name == "onDisplayOverlaySurface" ||
+            method_name == "onEndFrame") {
+          std::scoped_lock lock(events_mutex);
+          ordered_events.push_back(method_name);
+          ui_commit_thread_ids.push_back(std::this_thread::get_id());
+        }
+        return true;
+      });
+  ON_CALL(*mock_invoker, PushPlatformViewMutators(_, _, _, _, _, _, _, _))
+      .WillByDefault([&](int64_t, int32_t, int32_t, int32_t, int32_t, int32_t,
+                         int32_t, const std::vector<uint8_t>&) {
+        std::scoped_lock lock(events_mutex);
+        ordered_events.push_back("pushPlatformViewMutators");
+        ui_commit_thread_ids.push_back(std::this_thread::get_id());
+        return true;
+      });
+  ON_CALL(*mock_invoker, OnFirstFrame()).WillByDefault([&]() {
+    std::scoped_lock lock(events_mutex);
+    ordered_events.push_back("onFirstFrame");
+    ui_commit_thread_ids.push_back(std::this_thread::get_id());
+    return true;
+  });
+
+  FlutterEmbedderNative native(mock_invoker);
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(native.SetHcppEnabled(false));
+  EXPECT_FALSE(native.IsHcppEnabled());
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+
+  // 1 is a test platform view ID; 100.0 and 50.0 are test layer dimensions.
+  constexpr int64_t kPlatformViewId = 1;
+  constexpr double kRootSize = 100.0;
+  constexpr double kPvSize = 50.0;
+
+  FlutterBackingStore root_store = {};
+  root_store.struct_size = sizeof(FlutterBackingStore);
+  FlutterBackingStore overlay_store = {};
+  overlay_store.struct_size = sizeof(FlutterBackingStore);
+
+  FlutterPlatformView pv = {
+      .struct_size = sizeof(FlutterPlatformView),
+      .identifier = kPlatformViewId,
+  };
+
+  FlutterLayer root_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &root_store,
+      .size = FlutterSize{kRootSize, kRootSize},
+  };
+  FlutterLayer pv_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypePlatformView,
+      .platform_view = &pv,
+      .size = FlutterSize{kPvSize, kPvSize},
+  };
+  FlutterLayer overlay_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &overlay_store,
+      .size = FlutterSize{kRootSize, kRootSize},
+  };
+
+  // 3 layers: root backing store + platform view + overlay backing store.
+  constexpr size_t kLayerCount = 3;
+  const FlutterLayer* layers[kLayerCount] = {&root_layer, &pv_layer,
+                                             &overlay_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, kLayerCount));
+
+  std::scoped_lock lock(events_mutex);
+  const std::vector<std::string> expected_order = {
+      "onBeginFrame",
+      "pushPlatformViewMutators",
+      "onDisplayOverlaySurface",
+      "onEndFrame",
+      "onFirstFrame",
+  };
+  EXPECT_EQ(ordered_events, expected_order);
+  ASSERT_EQ(ui_commit_thread_ids.size(), expected_order.size());
+  for (size_t i = 1; i < ui_commit_thread_ids.size(); ++i) {
+    EXPECT_EQ(ui_commit_thread_ids[i], ui_commit_thread_ids[0]);
+  }
+
+  native.NotifySurfaceDestroyed();
+}
+
+TEST(
+    FlutterEmbedderNativeCompositorTest,
+    NotifySurfaceDestroyedTearsDownOverlaySurfacesAndResetsCompositorStateForCachedEngine) {
+  class OverlayWindowMockJvmInvoker : public NiceMock<MockJvmInvoker> {
+   public:
+    ANativeWindow* GetOverlayWindow(int32_t id) override {
+      auto it = active_overlay_windows.find(id);
+      return it != active_overlay_windows.end() ? it->second : nullptr;
+    }
+    std::unordered_map<int32_t, ANativeWindow*> active_overlay_windows;
+  };
+
+  auto mock_invoker = std::make_shared<OverlayWindowMockJvmInvoker>();
+  bool hcpp_enabled = true;
+  int create_overlay_calls = 0;
+  int destroy_overlay_calls = 0;
+  int show_overlay_calls = 0;
+  int hide_overlay_calls = 0;
+  std::vector<int32_t> hidden_view_ids;
+
+  // Synthetic ANativeWindow pointers representing overlay surfaces created for
+  // Activity 1 and Activity 2 on a cached FlutterEngine.
+  auto* overlay_window_activity_1 = reinterpret_cast<ANativeWindow*>(0x1001);
+  auto* overlay_window_activity_2 = reinterpret_cast<ANativeWindow*>(0x2002);
+  auto& active_overlay_windows = mock_invoker->active_overlay_windows;
+
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(Eq("isHcppEnabled"), _, _))
+      .WillByDefault([&](const std::string&, const std::string&,
+                         const std::vector<uint8_t>&) { return hcpp_enabled; });
+  ON_CALL(*mock_invoker, InvokeIntMethod(Eq("createOverlaySurface2Id"), _, _))
+      .WillByDefault([&](const std::string&, const std::string&,
+                         const std::vector<uint8_t>&) {
+        ++create_overlay_calls;
+        // PlatformViewsController2.createOverlaySurface() always returns ID 0.
+        constexpr int32_t kHcppOverlaySurfaceId = 0;
+        active_overlay_windows[kHcppOverlaySurfaceId] =
+            (create_overlay_calls == 1) ? overlay_window_activity_1
+                                        : overlay_window_activity_2;
+        return static_cast<int64_t>(kHcppOverlaySurfaceId);
+      });
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault([&](const std::string& method_name,
+                         const std::string& /*signature*/,
+                         const std::vector<uint8_t>& payload) {
+        if (method_name == "setHcppEnabled" && !payload.empty()) {
+          hcpp_enabled = (payload[0] != 0);
+        } else if (method_name == "destroyOverlaySurface2" ||
+                   method_name == "destroyOverlaySurfaces") {
+          ++destroy_overlay_calls;
+          active_overlay_windows.clear();
+        } else if (method_name == "showOverlaySurface2") {
+          ++show_overlay_calls;
+        } else if (method_name == "hideOverlaySurface2") {
+          ++hide_overlay_calls;
+        } else if ((method_name == "hidePlatformView2" ||
+                    method_name == "hidePlatformView") &&
+                   payload.size() >= sizeof(int32_t)) {
+          int32_t id = 0;
+          std::memcpy(&id, payload.data(), sizeof(int32_t));
+          hidden_view_ids.push_back(id);
+        }
+        return true;
+      });
+
+  FlutterEmbedderNative native(mock_invoker);
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(native.SetHcppEnabled(true));
+  EXPECT_TRUE(native.IsHcppEnabled());
+
+  // 42 is a test platform view identifier; 100.0 and 50.0 are test layer
+  // dimensions.
+  constexpr int64_t kActivity1ViewId = 42;
+  constexpr double kRootSize = 100.0;
+  constexpr double kPvSize = 50.0;
+
+  FlutterBackingStore root_store = {};
+  root_store.struct_size = sizeof(FlutterBackingStore);
+  FlutterBackingStore overlay_store = {};
+  overlay_store.struct_size = sizeof(FlutterBackingStore);
+  overlay_store.type = kFlutterBackingStoreTypeSoftware;
+  FlutterPlatformView pv1 = {
+      .struct_size = sizeof(FlutterPlatformView),
+      .identifier = kActivity1ViewId,
+  };
+  FlutterLayer root_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &root_store,
+      .size = FlutterSize{kRootSize, kRootSize},
+  };
+  FlutterLayer pv1_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypePlatformView,
+      .platform_view = &pv1,
+      .size = FlutterSize{kPvSize, kPvSize},
+  };
+  FlutterLayer overlay_layer = {
+      .struct_size = sizeof(FlutterLayer),
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &overlay_store,
+      .size = FlutterSize{kRootSize, kRootSize},
+  };
+
+  // --- Activity 1 attaches and renders a platform view with an overlay ---
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+  EXPECT_EQ(native.GetOverlayWindowForTesting(0), overlay_window_activity_1);
+  EXPECT_EQ(create_overlay_calls, 1);
+
+  // 3 layers: root backing store + platform view + overlay backing store.
+  constexpr size_t kCompositeLayerCount = 3;
+  const FlutterLayer* activity1_layers[kCompositeLayerCount] = {
+      &root_layer, &pv1_layer, &overlay_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(activity1_layers,
+                                                    kCompositeLayerCount));
+  EXPECT_EQ(show_overlay_calls, 1);
+  EXPECT_EQ(hide_overlay_calls, 0);
+  EXPECT_TRUE(hidden_view_ids.empty());
+
+  // --- Activity 1 detaches and destroys its FlutterSurfaceView ---
+  native.NotifySurfaceDestroyed();
+  EXPECT_EQ(destroy_overlay_calls, 1);
+  EXPECT_TRUE(active_overlay_windows.empty());
+
+  // --- Activity 2 attaches to the same cached FlutterEngine ---
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+
+  // Frame 1 in Activity 2 has no platform views or overlays (e.g. textTest).
+  // Because NotifySurfaceDestroyed() reset views_visible_last_frame_ and
+  // overlay_layer_is_shown_, no stale hidePlatformView2(42) or
+  // hideOverlaySurface2() calls should be emitted for Activity 1's destroyed
+  // surface.
+  constexpr size_t kRootOnlyLayerCount = 1;
+  const FlutterLayer* root_only_layers[kRootOnlyLayerCount] = {&root_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(root_only_layers,
+                                                    kRootOnlyLayerCount));
+  EXPECT_TRUE(hidden_view_ids.empty());
+  EXPECT_EQ(hide_overlay_calls, 0);
+
+  // Frame 2 in Activity 2 renders a platform view with an overlay (e.g.
+  // platformViewTextureLayerTest). GetOverlayWindow(0) must allocate a fresh
+  // overlay surface on Activity 2 rather than returning Activity 1's stale
+  // window.
+  EXPECT_EQ(native.GetOverlayWindowForTesting(0), overlay_window_activity_2);
+  EXPECT_EQ(create_overlay_calls, 2);
+
+  native.NotifySurfaceDestroyed();
+  EXPECT_EQ(destroy_overlay_calls, 2);
+}
+
+TEST(Google3RegressionFixesTest, MergedPlatformUIThreadDefaultTrue) {
+  AndroidVMArgs default_args;
+  EXPECT_TRUE(default_args.merged_platform_ui_thread);
+
+  FlutterEmbedderNative native;
+  auto runners = native.GetTaskRunners();
+  ASSERT_NE(runners, nullptr);
+  EXPECT_EQ(runners->GetPlatformTaskRunner().get(),
+            runners->GetUITaskRunner().get());
+}
+
+TEST(Google3RegressionFixesTest,
+     LaunchExtractsParentDirectoryWhenKernelPathIsFile) {
+  auto vm_init = std::make_shared<AndroidVMInit>();
+  AndroidVMArgs args;
+  args.kernel_path = "/data/user/0/com.example/app_flutter/kernel_blob.bin";
+  args.icu_data_path = "/data/user/0/com.example/app_flutter/icudtl.dat";
+  EXPECT_TRUE(vm_init->Init(args));
+
+  FlutterEmbedderNative native;
+  native.SetVMInit(vm_init);
+
+  std::string captured_assets_path;
+  native.SetInitializeEngineFnForTesting(
+      [&](const FlutterRendererConfig* config, const FlutterProjectArgs* p_args,
+          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        if (p_args && p_args->assets_path) {
+          captured_assets_path = p_args->assets_path;
+        }
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x1);
+        return kSuccess;
+      });
+  native.SetRunInitializedEngineFnForTesting(
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine) { return kSuccess; });
+
+  EXPECT_EQ(native.Launch("main", "", {}, 1), kSuccess);
+  EXPECT_EQ(captured_assets_path, "/data/user/0/com.example/app_flutter");
+  native.SetEngine(nullptr);
+}
+
+TEST(Google3RegressionFixesTest,
+     ProjectArgsCallbacksWiredAndDispatchedInLaunchAndSpawn) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto vm_init = std::make_shared<AndroidVMInit>();
+  AndroidVMArgs args;
+  args.assets_path = "/tmp/assets";
+  args.icu_data_path = "/tmp/icudtl.dat";
+  EXPECT_TRUE(vm_init->Init(args));
+
+  const FlutterProjectArgs* vm_init_args = vm_init->GetProjectArgs();
+  ASSERT_NE(vm_init_args, nullptr);
+  EXPECT_NE(vm_init_args->compute_platform_resolved_locale_callback, nullptr);
+  EXPECT_NE(vm_init_args->on_pre_engine_restart_callback, nullptr);
+  EXPECT_NE(vm_init_args->dart_deferred_library_loader_callback, nullptr);
+  EXPECT_NE(vm_init_args->get_scaled_font_size_callback, nullptr);
+
+  FlutterEmbedderNative native(mock_invoker);
+  native.SetVMInit(vm_init);
+
+  FlutterProjectArgs captured_launch_args = {};
+  void* captured_launch_user_data = nullptr;
+  native.SetInitializeEngineFnForTesting(
+      [&](const FlutterRendererConfig* config, const FlutterProjectArgs* p_args,
+          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        if (p_args) {
+          captured_launch_args = *p_args;
+        }
+        captured_launch_user_data = user_data;
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x2);
+        return kSuccess;
+      });
+  native.SetRunInitializedEngineFnForTesting(
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine) { return kSuccess; });
+
+  EXPECT_EQ(native.Launch("main", "", {}, 1), kSuccess);
+  ASSERT_NE(captured_launch_args.compute_platform_resolved_locale_callback,
+            nullptr);
+  ASSERT_NE(captured_launch_args.on_pre_engine_restart_callback, nullptr);
+  ASSERT_NE(captured_launch_args.dart_deferred_library_loader_callback,
+            nullptr);
+  ASSERT_NE(captured_launch_args.get_scaled_font_size_callback, nullptr);
+  ASSERT_NE(captured_launch_args.log_message_callback, nullptr);
+
+  // Verify OnPreEngineRestartCallback routes to JvmInvoker::OnPreEngineRestart
+  EXPECT_CALL(*mock_invoker, OnPreEngineRestart()).WillOnce(Return(true));
+  captured_launch_args.on_pre_engine_restart_callback(
+      captured_launch_user_data);
+
+  // Verify OnDartDeferredLibraryLoaderCallback routes to
+  // JvmInvoker::RequestDartDeferredLibrary
+  constexpr int64_t kTestLoadingUnitId = 7;
+  EXPECT_CALL(*mock_invoker,
+              RequestDartDeferredLibrary(static_cast<int>(kTestLoadingUnitId)))
+      .WillOnce(Return(true));
+  captured_launch_args.dart_deferred_library_loader_callback(
+      kTestLoadingUnitId, captured_launch_user_data);
+
+  // Verify OnGetScaledFontSizeCallback routes to JvmInvoker::GetScaledFontSize
+  constexpr double kUnscaledFontSize = 14.0;
+  constexpr int kConfigId = 3;
+  constexpr double kExpectedScaledSize = 21.0;
+  EXPECT_CALL(*mock_invoker, GetScaledFontSize(kUnscaledFontSize, kConfigId))
+      .WillOnce(Return(kExpectedScaledSize));
+  EXPECT_DOUBLE_EQ(captured_launch_args.get_scaled_font_size_callback(
+                       kUnscaledFontSize, kConfigId, captured_launch_user_data),
+                   kExpectedScaledSize);
+
+  // Verify OnComputePlatformResolvedLocaleCallback routes to
+  // JvmInvoker::ComputePlatformResolvedLocale
+  FlutterLocale locale_en = {};
+  locale_en.struct_size = sizeof(FlutterLocale);
+  locale_en.language_code = "en";
+  locale_en.country_code = "US";
+  locale_en.script_code = "Latn";
+  const FlutterLocale* locales[1] = {&locale_en};
+
+  EXPECT_CALL(*mock_invoker, ComputePlatformResolvedLocale(
+                                 std::vector<std::string>{"en", "US", "Latn"}))
+      .WillOnce(Return(std::vector<std::string>{"en", "GB", ""}));
+  const FlutterLocale* resolved =
+      captured_launch_args.compute_platform_resolved_locale_callback(locales,
+                                                                     1);
+  ASSERT_NE(resolved, nullptr);
+  EXPECT_STREQ(resolved->language_code, "en");
+  EXPECT_STREQ(resolved->country_code, "GB");
+  EXPECT_EQ(resolved->script_code, nullptr);
+
+  // Verify SpawnChild also wires all callbacks
+  class CapturingEngineGroupProvider
+      : public InMemoryAndroidEngineGroupProvider {
+   public:
+    FlutterProjectArgs captured_args = {};
+    bool spawn_called = false;
+
+    FlutterEngineResult SpawnEngine(FLUTTER_API_SYMBOL(FlutterEngine)
+                                        parent_engine,
+                                    const FlutterEngineSpawnConfig* config,
+                                    FLUTTER_API_SYMBOL(FlutterEngine) *
+                                        engine_out) override {
+      spawn_called = true;
+      if (config && config->project_args) {
+        captured_args = *config->project_args;
+      }
+      if (engine_out) {
+        *engine_out = nullptr;
+      }
+      return kInvalidArguments;
+    }
+  };
+
+  auto group_provider = std::make_shared<CapturingEngineGroupProvider>();
+  auto mock_group =
+      std::make_shared<AndroidEngineGroup>(group_provider, mock_invoker);
+  native.SetEngineGroup(mock_group);
+
+  AndroidEngineSpawnArgs spawn_args;
+  spawn_args.entrypoint = "spawnMain";
+  spawn_args.engine_id = 2;
+  auto child = native.SpawnChild(nullptr, nullptr, spawn_args);
+  ASSERT_NE(child, nullptr);
+  ASSERT_TRUE(group_provider->spawn_called);
+  EXPECT_NE(
+      group_provider->captured_args.compute_platform_resolved_locale_callback,
+      nullptr);
+  EXPECT_NE(group_provider->captured_args.on_pre_engine_restart_callback,
+            nullptr);
+  EXPECT_NE(group_provider->captured_args.dart_deferred_library_loader_callback,
+            nullptr);
+  EXPECT_NE(group_provider->captured_args.get_scaled_font_size_callback,
+            nullptr);
+  EXPECT_NE(group_provider->captured_args.log_message_callback, nullptr);
+
+  child->SetEngine(nullptr);
+  native.SetEngine(nullptr);
+}
+
+TEST(Google3RegressionFixesTest, SoftwareRenderingFlagQuery) {
+  auto prev_default = FlutterEmbedderNative::GetDefaultVMArgs();
+
+  AndroidVMArgs args;
+  args.enable_software_rendering = true;
+  FlutterEmbedderNative::SetDefaultVMArgs(args);
+  ASSERT_TRUE(FlutterEmbedderNative::GetDefaultVMArgs().has_value());
+  EXPECT_TRUE(
+      FlutterEmbedderNative::GetDefaultVMArgs()->enable_software_rendering);
+
+  args.enable_software_rendering = false;
+  FlutterEmbedderNative::SetDefaultVMArgs(args);
+  EXPECT_FALSE(
+      FlutterEmbedderNative::GetDefaultVMArgs()->enable_software_rendering);
+
+  if (prev_default.has_value()) {
+    FlutterEmbedderNative::SetDefaultVMArgs(*prev_default);
+  }
+}
+
+TEST(Google3RegressionFixesTest,
+     LaunchReusesVMInitAOTDataWithoutDuplicateCreate) {
+  auto vm_aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  auto vm_init =
+      std::make_shared<AndroidVMInit>(nullptr, nullptr, vm_aot_provider);
+
+  AndroidVMArgs args;
+  args.aot_library_path = "/data/app/libapp.so";
+  EXPECT_TRUE(vm_init->Init(args));
+  EXPECT_EQ(vm_aot_provider->GetCreateCount(), 1u);
+  ASSERT_NE(vm_init->GetProjectArgs(), nullptr);
+  FlutterEngineAOTData vm_aot_handle = vm_init->GetProjectArgs()->aot_data;
+  ASSERT_NE(vm_aot_handle, nullptr);
+
+  FlutterEmbedderNative native;
+  auto native_aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  // Call SetAOTProvider before SetVMInit so native_aot_provider is not
+  // forwarded onto vm_init.
+  native.SetAOTProvider(native_aot_provider);
+  native.SetVMInit(vm_init);
+
+  FlutterEngineAOTData captured_aot_data = nullptr;
+  native.SetInitializeEngineFnForTesting(
+      [&](const FlutterRendererConfig* config, const FlutterProjectArgs* p_args,
+          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        if (p_args) {
+          captured_aot_data = p_args->aot_data;
+        }
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x4);
+        return kSuccess;
+      });
+  native.SetRunInitializedEngineFnForTesting(
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine) { return kSuccess; });
+
+  EXPECT_EQ(native.Launch("main", "", {}, 1), kSuccess);
+  EXPECT_EQ(native_aot_provider->GetCreateCount(), 0u);
+  EXPECT_EQ(captured_aot_data, vm_aot_handle);
+  native.SetEngine(nullptr);
+}
+
+TEST(Google3RegressionFixesTest, SurfaceTextureUVTransformationLifecycle) {
+  constexpr int64_t kSurfaceTextureId = 42;
+  constexpr int64_t kImageTextureId = 99;
+
+  FlutterEmbedderNative native;
+  FlutterRendererConfig config = {};
+  native.PopulateRendererConfig(&config);
+  ASSERT_EQ(config.type, kOpenGL);
+  ASSERT_NE(config.open_gl.gl_external_texture_uv_transformation_callback,
+            nullptr);
+
+  std::array<float, FlutterEmbedderNative::kSurfaceTextureTransformMatrixSize>
+      queried_matrix{};
+
+  // 1. Unregistered texture returns false.
+  EXPECT_FALSE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kSurfaceTextureId, queried_matrix.data()));
+
+  // 2. Registered SurfaceTexture without a captured UV matrix returns false.
+  native.RegisterSurfaceTexture(kSurfaceTextureId,
+                                fml::jni::ScopedJavaGlobalRef<jobject>());
+  EXPECT_FALSE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kSurfaceTextureId, queried_matrix.data()));
+
+  // 3. Registered SurfaceTexture with a vertical flip UV matrix returns true
+  // and copies all 16 column-major floats.
+  const std::array<float,
+                   FlutterEmbedderNative::kSurfaceTextureTransformMatrixSize>
+      expected_flip_v = {
+          1.0f, 0.0f,  0.0f, 0.0f,  //
+          0.0f, -1.0f, 0.0f, 0.0f,  //
+          0.0f, 0.0f,  1.0f, 0.0f,  //
+          0.0f, 1.0f,  0.0f, 1.0f,  //
+  };
+  native.SetSurfaceTextureUVTransformForTesting(kSurfaceTextureId,
+                                                expected_flip_v);
+  EXPECT_TRUE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kSurfaceTextureId, queried_matrix.data()));
+  EXPECT_EQ(queried_matrix, expected_flip_v);
+
+  // 4. ImageConsumer textures do not have a SurfaceTexture UV transform and
+  // return false.
+  native.RegisterImageTexture(kImageTextureId, nullptr, false);
+  EXPECT_FALSE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kImageTextureId, queried_matrix.data()));
+  native.UnregisterImageTexture(kImageTextureId);
+
+  // 5. Re-registering or unregistering the SurfaceTexture clears the cached UV
+  // transformation matrix.
+  native.RegisterSurfaceTexture(kSurfaceTextureId,
+                                fml::jni::ScopedJavaGlobalRef<jobject>());
+  EXPECT_FALSE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kSurfaceTextureId, queried_matrix.data()));
+
+  native.SetSurfaceTextureUVTransformForTesting(kSurfaceTextureId,
+                                                expected_flip_v);
+  EXPECT_TRUE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kSurfaceTextureId, queried_matrix.data()));
+  native.UnregisterSurfaceTexture(kSurfaceTextureId);
+  EXPECT_FALSE(config.open_gl.gl_external_texture_uv_transformation_callback(
+      &native, kSurfaceTextureId, queried_matrix.data()));
 }
 
 }  // namespace testing

@@ -229,6 +229,10 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
 
   last_engine_id_ = configuration.GetEngineId();
 
+  if (!configuration.GetInitialRoute().empty()) {
+    initial_route_ = configuration.GetInitialRoute();
+  }
+
   UpdateAssetManager(configuration.GetAssetManager());
 
   if (runtime_controller_->IsRootIsolateRunning()) {

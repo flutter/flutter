@@ -547,6 +547,29 @@ VkResult vkAllocateMemory(VkDevice device,
   return VK_SUCCESS;
 }
 
+void vkFreeMemory(VkDevice device,
+                  VkDeviceMemory memory,
+                  const VkAllocationCallbacks* pAllocator) {}
+
+VkResult vkMapMemory(VkDevice device,
+                     VkDeviceMemory memory,
+                     VkDeviceSize offset,
+                     VkDeviceSize size,
+                     VkMemoryMapFlags flags,
+                     void** ppData) {
+  static std::vector<uint8_t> dummy_memory(64 * 1024 * 1024, 0);
+  *ppData = dummy_memory.data() + offset;
+  return VK_SUCCESS;
+}
+
+void vkUnmapMemory(VkDevice device, VkDeviceMemory memory) {}
+
+VkResult vkFlushMappedMemoryRanges(VkDevice device,
+                                   uint32_t memoryRangeCount,
+                                   const VkMappedMemoryRange* pMemoryRanges) {
+  return VK_SUCCESS;
+}
+
 VkResult vkBindImageMemory(VkDevice device,
                            VkImage image,
                            VkDeviceMemory memory,
@@ -1164,6 +1187,14 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
         vkGetImageMemoryRequirements2KHR);
   } else if (strcmp("vkAllocateMemory", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkAllocateMemory);
+  } else if (strcmp("vkFreeMemory", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkFreeMemory);
+  } else if (strcmp("vkMapMemory", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkMapMemory);
+  } else if (strcmp("vkUnmapMemory", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkUnmapMemory);
+  } else if (strcmp("vkFlushMappedMemoryRanges", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkFlushMappedMemoryRanges);
   } else if (strcmp("vkBindImageMemory", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkBindImageMemory);
   } else if (strcmp("vkCreateImageView", pName) == 0) {

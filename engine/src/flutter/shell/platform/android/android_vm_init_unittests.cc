@@ -20,7 +20,7 @@ using ::testing::_;
 using ::testing::Eq;
 using ::testing::Return;
 
-class MockJvmInvoker : public JvmInvoker {
+class MockJvmInvokerForVMInit : public JvmInvoker {
  public:
   MOCK_METHOD(bool, EnsureAttachedToThread, (), (override));
   MOCK_METHOD(void, DetachFromThread, (), (override));
@@ -64,6 +64,16 @@ class MockJvmInvoker : public JvmInvoker {
   MOCK_METHOD(bool,
               RequestDartDeferredLibrary,
               (int loading_unit_id),
+              (override));
+
+  MOCK_METHOD(double,
+              GetScaledFontSize,
+              (double unscaled_font_size, int configuration_id),
+              (override));
+
+  MOCK_METHOD(std::vector<std::string>,
+              ComputePlatformResolvedLocale,
+              (const std::vector<std::string>& supported_locales_data),
               (override));
 
   MOCK_METHOD(bool,
@@ -151,30 +161,35 @@ TEST(AndroidVMInitTest, RenderingAPISelectionMatrix) {
   args.requested_rendering_backend = "vulkan";
   EXPECT_EQ(SelectRenderingAPI(args), AndroidRenderingAPI::kImpellerVulkan);
 
-  // 4. Impeller Autoselect on modern Android (API 29+)
+  // 4. Impeller Autoselect on modern Android (API 29+) with eligible device
+  DeviceProperties eligible_device;
+  eligible_device.hardware = "tangorpro";
+  eligible_device.product_board = "tangorpro";
+  eligible_device.vendor_api_level = 34;
+
   args.requested_rendering_backend.clear();
   args.api_level = 29;
   args.enable_impeller = true;
-  EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/false),
+  EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/false, eligible_device),
             AndroidRenderingAPI::kImpellerAutoselect);
 
   args.api_level = 34;
-  EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/false),
+  EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/false, eligible_device),
             AndroidRenderingAPI::kImpellerAutoselect);
 
   // 5. Vivante GPU driver workaround -> fallback to SkiaOpenGLES
-  EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/true),
+  EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/true, eligible_device),
             AndroidRenderingAPI::kSkiaOpenGLES);
 
   // 6. Legacy Android API level (<29) -> fallback to SkiaOpenGLES
   args.api_level = 28;
-  EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/false),
+  EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/false, eligible_device),
             AndroidRenderingAPI::kSkiaOpenGLES);
 
   // 7. Impeller disabled explicitly -> fallback to SkiaOpenGLES
   args.api_level = 34;
   args.enable_impeller = false;
-  EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/false),
+  EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/false, eligible_device),
             AndroidRenderingAPI::kSkiaOpenGLES);
 }
 
@@ -361,7 +376,7 @@ TEST(AndroidVMInitTest, AndroidVMInitIdempotency) {
 }
 
 TEST(AndroidVMInitTest, AndroidVMInitLifecycleAndDispatch) {
-  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto mock_invoker = std::make_shared<MockJvmInvokerForVMInit>();
   auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
   auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
 
@@ -383,7 +398,12 @@ TEST(AndroidVMInitTest, AndroidVMInitLifecycleAndDispatch) {
               InvokeVoidMethod("setVmServiceUri", "(Ljava/lang/String;)V", _))
       .WillOnce(Return(true));
 
-  EXPECT_TRUE(vm_init.Init(args));
+  DeviceProperties eligible_device;
+  eligible_device.hardware = "tangorpro";
+  eligible_device.product_board = "tangorpro";
+  eligible_device.vendor_api_level = 34;
+
+  EXPECT_TRUE(vm_init.Init(args, eligible_device));
   EXPECT_TRUE(vm_init.IsInitialized());
   auto vm_args = vm_init.GetVMArgs();
   ASSERT_TRUE(vm_args.has_value());
@@ -598,13 +618,16 @@ TEST(AndroidVMInitTest, ShouldEnableSurfaceControlRequiresVulkanAndApi34) {
   EXPECT_TRUE(ShouldEnableSurfaceControl(vulkan_35,
                                          SelectRenderingAPI(vulkan_35, false)));
 
-  // 2. Autoselect on API 34 with enable_surface_control = true -> enabled.
+  // 2. Unresolved kImpellerAutoselect on API 34 -> disabled; once resolved by
+  // AndroidSurfaceManager to kImpellerVulkan -> enabled.
   AndroidVMArgs autoselect_34;
   autoselect_34.enable_surface_control = true;
   autoselect_34.enable_impeller = true;
   autoselect_34.api_level = 34;
-  EXPECT_TRUE(ShouldEnableSurfaceControl(
-      autoselect_34, SelectRenderingAPI(autoselect_34, false)));
+  EXPECT_FALSE(ShouldEnableSurfaceControl(
+      autoselect_34, AndroidRenderingAPI::kImpellerAutoselect));
+  EXPECT_TRUE(ShouldEnableSurfaceControl(autoselect_34,
+                                         AndroidRenderingAPI::kImpellerVulkan));
 
   // 3. OpenGLES on API 35 with enable_surface_control = true -> disabled.
   AndroidVMArgs gles_35;
@@ -615,7 +638,7 @@ TEST(AndroidVMInitTest, ShouldEnableSurfaceControlRequiresVulkanAndApi34) {
   EXPECT_FALSE(
       ShouldEnableSurfaceControl(gles_35, SelectRenderingAPI(gles_35, false)));
   EXPECT_FALSE(ShouldEnableSurfaceControl(
-      gles_35, AndroidRenderingAPI::kImpellerAutoselect));
+      gles_35, AndroidRenderingAPI::kImpellerOpenGLES));
 
   // 4. Vulkan on API 33 (below API 34 threshold) -> disabled.
   AndroidVMArgs vulkan_33 = vulkan_35;
@@ -634,6 +657,183 @@ TEST(AndroidVMInitTest, ShouldEnableSurfaceControlRequiresVulkanAndApi34) {
   sc_off.enable_surface_control = false;
   EXPECT_FALSE(
       ShouldEnableSurfaceControl(sc_off, AndroidRenderingAPI::kImpellerVulkan));
+}
+
+TEST(AndroidVMInitTest, VulkanEligibilityTable) {
+  struct EligibilityTestCase {
+    const char* name;
+    DeviceProperties props;
+    VulkanIneligibleReason expected_reason;
+    AndroidRenderingAPI expected_api;
+  };
+
+  const std::vector<EligibilityTestCase> kCases = {
+      {
+          "ranchu_emulator",
+          DeviceProperties{.hardware = "ranchu", .vendor_api_level = 36},
+          VulkanIneligibleReason::kEmulator,
+          AndroidRenderingAPI::kImpellerOpenGLES,
+      },
+      {
+          "goldfish_emulator",
+          DeviceProperties{.hardware = "goldfish", .vendor_api_level = 35},
+          VulkanIneligibleReason::kEmulator,
+          AndroidRenderingAPI::kImpellerOpenGLES,
+      },
+      {
+          "qemu_emulator",
+          DeviceProperties{.hardware = "qemu", .vendor_api_level = 34},
+          VulkanIneligibleReason::kEmulator,
+          AndroidRenderingAPI::kImpellerOpenGLES,
+      },
+      {
+          "gphone_model_emulator",
+          DeviceProperties{.hardware = "generic",
+                           .product_model = "sdk_gphone64_x86_64",
+                           .vendor_api_level = 36},
+          VulkanIneligibleReason::kEmulator,
+          AndroidRenderingAPI::kImpellerOpenGLES,
+      },
+      {
+          "qemu_pipe_emulator",
+          DeviceProperties{.hardware = "custom_hw",
+                           .vendor_api_level = 35,
+                           .has_qemu_pipe = true},
+          VulkanIneligibleReason::kEmulator,
+          AndroidRenderingAPI::kImpellerOpenGLES,
+      },
+      {
+          "huawei_clientidbase",
+          DeviceProperties{.hardware = "kirin990",
+                           .client_id_base = "android-huawei",
+                           .vendor_api_level = 34},
+          VulkanIneligibleReason::kHuawei,
+          AndroidRenderingAPI::kImpellerOpenGLES,
+      },
+      {
+          "mediatek_vendor_api_31_ineligible",
+          DeviceProperties{.hardware = "mt6765",
+                           .product_board = "k65v1_64",
+                           .vendor_api_level = 31,
+                           .has_mediatek_platform = true},
+          VulkanIneligibleReason::kOldMediaTek,
+          AndroidRenderingAPI::kImpellerOpenGLES,
+      },
+      {
+          "mediatek_vendor_api_32_eligible",
+          DeviceProperties{.hardware = "mt6893",
+                           .product_board = "k6893v1_64",
+                           .vendor_api_level = 32,
+                           .has_mediatek_platform = true},
+          VulkanIneligibleReason::kNone,
+          AndroidRenderingAPI::kImpellerAutoselect,
+      },
+      {
+          "non_mediatek_vendor_api_31_eligible",
+          DeviceProperties{.hardware = "qcom",
+                           .product_board = "kona",
+                           .vendor_api_level = 31,
+                           .has_mediatek_platform = false},
+          VulkanIneligibleReason::kNone,
+          AndroidRenderingAPI::kImpellerAutoselect,
+      },
+      {
+          "exynos9820_bad_soc",
+          DeviceProperties{.hardware = "exynos9820",
+                           .product_board = "exynos9820",
+                           .vendor_api_level = 31},
+          VulkanIneligibleReason::kBadSoc,
+          AndroidRenderingAPI::kImpellerOpenGLES,
+      },
+      {
+          "rk30sdk_bad_soc",
+          DeviceProperties{.hardware = "rk30board",
+                           .product_board = "rk30sdk",
+                           .vendor_api_level = 33},
+          VulkanIneligibleReason::kBadSoc,
+          AndroidRenderingAPI::kImpellerOpenGLES,
+      },
+      {
+          "tangorpro_pixel_tablet_eligible",
+          DeviceProperties{.hardware = "tangorpro",
+                           .product_model = "Pixel Tablet",
+                           .client_id_base = "android-google",
+                           .product_board = "tangorpro",
+                           .vendor_api_level = 34},
+          VulkanIneligibleReason::kNone,
+          AndroidRenderingAPI::kImpellerAutoselect,
+      },
+      {
+          "mokey_mt6768_vendor_api_32_eligible",
+          DeviceProperties{.hardware = "mt6768",
+                           .product_model = "mokey",
+                           .product_board = "mokey",
+                           .vendor_api_level = 32,
+                           .has_mediatek_platform = true},
+          VulkanIneligibleReason::kNone,
+          AndroidRenderingAPI::kImpellerAutoselect,
+      },
+  };
+
+  AndroidVMArgs args;
+  args.enable_impeller = true;
+  args.api_level = 34;
+
+  for (const auto& tc : kCases) {
+    SCOPED_TRACE(tc.name);
+    EXPECT_EQ(CheckVulkanEligibility(tc.props), tc.expected_reason);
+    EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/false, tc.props),
+              tc.expected_api);
+  }
+}
+
+TEST(AndroidVMInitTest, SelectRenderingAPIDebugVsRelease) {
+  DeviceProperties emulator_props;
+  emulator_props.hardware = "ranchu";
+  emulator_props.vendor_api_level = 36;
+
+  AndroidVMArgs explicit_vk_args;
+  explicit_vk_args.enable_impeller = true;
+  explicit_vk_args.api_level = 36;
+  explicit_vk_args.requested_rendering_backend = "vulkan";
+
+  // In non-release builds, explicit "vulkan" is honored even on an emulator.
+  EXPECT_EQ(SelectRenderingAPI(explicit_vk_args, /*is_vivante=*/false,
+                               emulator_props, /*is_release_build=*/false),
+            AndroidRenderingAPI::kImpellerVulkan);
+
+  // In release builds, requested_rendering_backend is ignored and the emulator
+  // eligibility gate downgrades autoselect to OpenGLES.
+  EXPECT_EQ(SelectRenderingAPI(explicit_vk_args, /*is_vivante=*/false,
+                               emulator_props, /*is_release_build=*/true),
+            AndroidRenderingAPI::kImpellerOpenGLES);
+
+  DeviceProperties eligible_props;
+  eligible_props.hardware = "tangorpro";
+  eligible_props.product_board = "tangorpro";
+  eligible_props.vendor_api_level = 35;
+
+  AndroidVMArgs explicit_gles_args;
+  explicit_gles_args.enable_impeller = true;
+  explicit_gles_args.api_level = 35;
+  explicit_gles_args.requested_rendering_backend = "opengles";
+  explicit_gles_args.enable_surface_control = true;
+
+  EXPECT_EQ(SelectRenderingAPI(explicit_gles_args, /*is_vivante=*/false,
+                               eligible_props, /*is_release_build=*/false),
+            AndroidRenderingAPI::kImpellerOpenGLES);
+  EXPECT_EQ(SelectRenderingAPI(explicit_gles_args, /*is_vivante=*/false,
+                               eligible_props, /*is_release_build=*/true),
+            AndroidRenderingAPI::kImpellerAutoselect);
+
+  // ShouldEnableSurfaceControl only honors requested_rendering_backend ==
+  // "opengles" in non-release builds.
+  EXPECT_FALSE(ShouldEnableSurfaceControl(explicit_gles_args,
+                                          AndroidRenderingAPI::kImpellerVulkan,
+                                          /*is_release_build=*/false));
+  EXPECT_TRUE(ShouldEnableSurfaceControl(explicit_gles_args,
+                                         AndroidRenderingAPI::kImpellerVulkan,
+                                         /*is_release_build=*/true));
 }
 
 }  // namespace testing

@@ -64,8 +64,11 @@ static bool IsVivanteDevice() {
   return strcmp(product_model, "VIVANTE") == 0;
 }
 
-AndroidRenderingAPI SelectRenderingAPI(const AndroidVMArgs& args,
-                                       std::optional<bool> is_vivante) {
+AndroidRenderingAPI SelectRenderingAPI(
+    const AndroidVMArgs& args,
+    std::optional<bool> is_vivante,
+    const std::optional<DeviceProperties>& device_properties,
+    bool is_release_build) {
   TRACE_EVENT0("flutter", "SelectRenderingAPI");
 #if !SLIMPELLER
   if (args.enable_software_rendering) {
@@ -78,34 +81,64 @@ AndroidRenderingAPI SelectRenderingAPI(const AndroidVMArgs& args,
   }
 #endif  // !SLIMPELLER
 
-  if (args.requested_rendering_backend == "opengles" && args.enable_impeller) {
-    return AndroidRenderingAPI::kImpellerOpenGLES;
+#ifndef FLUTTER_RELEASE
+  if (!is_release_build) {
+    if (args.requested_rendering_backend == "opengles" &&
+        args.enable_impeller) {
+      return AndroidRenderingAPI::kImpellerOpenGLES;
+    }
+    if (args.requested_rendering_backend == "vulkan" && args.enable_impeller) {
+      return AndroidRenderingAPI::kImpellerVulkan;
+    }
   }
-  if (args.requested_rendering_backend == "vulkan" && args.enable_impeller) {
-    return AndroidRenderingAPI::kImpellerVulkan;
-  }
+#else
+  (void)is_release_build;
+#endif  // !FLUTTER_RELEASE
 
 #if !SLIMPELLER
   bool vivante = is_vivante.value_or(IsVivanteDevice());
   if (args.enable_impeller &&
       args.api_level >= kMinimumAndroidApiLevelForImpeller && !vivante) {
+    DeviceProperties props =
+        device_properties.value_or(ReadDeviceProperties(args.api_level));
+    VulkanIneligibleReason reason = CheckVulkanEligibility(props);
+    if (reason != VulkanIneligibleReason::kNone) {
+      FML_LOG(INFO) << "Impeller Vulkan autoselect disabled ("
+                    << VulkanIneligibleReasonToString(reason)
+                    << "), falling back to OpenGLES.";
+      return AndroidRenderingAPI::kImpellerOpenGLES;
+    }
     return AndroidRenderingAPI::kImpellerAutoselect;
   }
 
   return AndroidRenderingAPI::kSkiaOpenGLES;
 #else
+  DeviceProperties props =
+      device_properties.value_or(ReadDeviceProperties(args.api_level));
+  VulkanIneligibleReason reason = CheckVulkanEligibility(props);
+  if (reason != VulkanIneligibleReason::kNone) {
+    FML_LOG(INFO) << "Impeller Vulkan autoselect disabled ("
+                  << VulkanIneligibleReasonToString(reason)
+                  << "), falling back to OpenGLES.";
+    return AndroidRenderingAPI::kImpellerOpenGLES;
+  }
   return AndroidRenderingAPI::kImpellerAutoselect;
 #endif  // !SLIMPELLER
 }
 
 bool ShouldEnableSurfaceControl(const AndroidVMArgs& args,
-                                AndroidRenderingAPI rendering_api) {
+                                AndroidRenderingAPI rendering_api,
+                                bool is_release_build) {
   if (!args.enable_surface_control || !args.enable_impeller) {
     return false;
   }
-  if (args.requested_rendering_backend == "opengles") {
+#ifndef FLUTTER_RELEASE
+  if (!is_release_build && args.requested_rendering_backend == "opengles") {
     return false;
   }
+#else
+  (void)is_release_build;
+#endif  // !FLUTTER_RELEASE
   int32_t effective_api_level = args.api_level;
 #if FML_OS_ANDROID
   if (effective_api_level <= 0) {
@@ -119,8 +152,7 @@ bool ShouldEnableSurfaceControl(const AndroidVMArgs& args,
   if (effective_api_level < kMinimumAndroidApiLevelForSurfaceControl) {
     return false;
   }
-  return rendering_api == AndroidRenderingAPI::kImpellerVulkan ||
-         rendering_api == AndroidRenderingAPI::kImpellerAutoselect;
+  return rendering_api == AndroidRenderingAPI::kImpellerVulkan;
 }
 
 // ---------------------------------------------------------------------------
@@ -401,6 +433,14 @@ void AndroidProjectArgsHolder::Populate(const AndroidVMArgs& args,
   project_args_.vsync_callback = &FlutterEmbedderNative::OnVsyncCallback;
   project_args_.update_semantics_callback2 =
       &FlutterEmbedderNative::OnUpdateSemantics2;
+  project_args_.compute_platform_resolved_locale_callback =
+      &FlutterEmbedderNative::OnComputePlatformResolvedLocaleCallback;
+  project_args_.on_pre_engine_restart_callback =
+      &FlutterEmbedderNative::OnPreEngineRestartCallback;
+  project_args_.dart_deferred_library_loader_callback =
+      &FlutterEmbedderNative::OnDartDeferredLibraryLoaderCallback;
+  project_args_.get_scaled_font_size_callback =
+      &FlutterEmbedderNative::OnGetScaledFontSizeCallback;
 }
 
 const FlutterProjectArgs* AndroidProjectArgsHolder::GetProjectArgs() const {
@@ -458,7 +498,9 @@ std::optional<AndroidVMArgs> AndroidVMInit::GetGlobalVMArgs() {
   return g_global_vm_args;
 }
 
-bool AndroidVMInit::Init(const AndroidVMArgs& args) {
+bool AndroidVMInit::Init(
+    const AndroidVMArgs& args,
+    const std::optional<DeviceProperties>& device_properties) {
   TRACE_EVENT0("flutter", "AndroidVMInit::Init");
   std::scoped_lock lock(mutex_);
   if (initialized_) {
@@ -466,9 +508,8 @@ bool AndroidVMInit::Init(const AndroidVMArgs& args) {
     return true;
   }
   vm_args_ = args;
-  rendering_api_ = SelectRenderingAPI(vm_args_);
-  vm_args_.enable_surface_control =
-      ShouldEnableSurfaceControl(vm_args_, rendering_api_);
+  rendering_api_ =
+      SelectRenderingAPI(vm_args_, std::nullopt, device_properties);
 
   if (aot_data_ && aot_provider_) {
     aot_provider_->CollectAOTData(aot_data_);

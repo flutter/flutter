@@ -5,9 +5,11 @@
 #define FML_USED_ON_EMBEDDER
 #define RAPIDJSON_HAS_STDSTRING 1
 
+#include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <string>
 #include <vector>
@@ -113,9 +115,11 @@ extern const intptr_t kPlatformStrongDillSize;
 #ifdef IMPELLER_SUPPORTS_RENDERING
 #include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"  // nogncheck
 #include "flutter/shell/platform/embedder/embedder_surface_vulkan_impeller.h"  // nogncheck
-#include "impeller/core/texture.h"                                // nogncheck
-#include "impeller/renderer/backend/vulkan/context_vk.h"          // nogncheck
-#include "impeller/renderer/backend/vulkan/formats_vk.h"          // nogncheck
+#include "impeller/core/texture.h"                            // nogncheck
+#include "impeller/renderer/backend/vulkan/context_vk.h"      // nogncheck
+#include "impeller/renderer/backend/vulkan/driver_info_vk.h"  // nogncheck
+#include "impeller/renderer/backend/vulkan/formats_vk.h"      // nogncheck
+#include "impeller/renderer/backend/vulkan/swapchain/swapchain_transients_vk.h"  // nogncheck
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"   // nogncheck
 #include "impeller/renderer/backend/vulkan/texture_vk.h"          // nogncheck
 #include "impeller/renderer/backend/vulkan/texture_wrapper_vk.h"  // nogncheck
@@ -641,7 +645,8 @@ InferVulkanPlatformViewCreationCallback(
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
     bool enable_impeller,
-    impeller::Flags impeller_flags) {
+    impeller::Flags impeller_flags,
+    bool enable_vulkan_validation = false) {
   if (config->type != kVulkan) {
     return nullptr;
   }
@@ -705,7 +710,7 @@ InferVulkanPlatformViewCreationCallback(
             static_cast<VkDevice>(config->vulkan.device),
             config->vulkan.queue_family_index,
             static_cast<VkQueue>(config->vulkan.queue), vulkan_dispatch_table,
-            view_embedder, impeller_flags);
+            view_embedder, impeller_flags, enable_vulkan_validation);
 
     return fml::MakeCopyable(
         [embedder_surface = std::move(embedder_surface),
@@ -842,7 +847,8 @@ InferPlatformViewCreationCallback(
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
     bool enable_impeller,
-    impeller::Flags impeller_flags) {
+    impeller::Flags impeller_flags,
+    bool enable_vulkan_validation = false) {
   if (config == nullptr) {
     return nullptr;
   }
@@ -863,7 +869,8 @@ InferPlatformViewCreationCallback(
     case kVulkan:
       return InferVulkanPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder), enable_impeller, impeller_flags);
+          std::move(external_view_embedder), enable_impeller, impeller_flags,
+          enable_vulkan_validation);
     default:
       return nullptr;
   }
@@ -1078,6 +1085,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
     if (captures->destruction_callback) {
       captures->destruction_callback(captures->user_data);
     }
+    delete captures;
   };
 
   auto surface =
@@ -1085,7 +1093,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
                              const_cast<void*>(software->allocation),  // pixels
                              software->row_bytes,  // row bytes
                              release_proc,         // release proc
-                             captures.release()    // release context
+                             captures.get()        // release context
       );
 
   if (!surface) {
@@ -1095,6 +1103,9 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
       software->destruction_callback(software->user_data);
     }
     return nullptr;
+  }
+  if (surface) {
+    captures.release();  // Skia has assumed ownership of the struct.
   }
   return surface;
 }
@@ -1332,16 +1343,81 @@ MakeRenderTargetFromBackingStoreImpeller(
 #endif
 }
 
+#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
+struct VulkanBackingStoreTransientsCache {
+  // Maximum number of distinct (context, size, format) transient attachment
+  // pairs retained simultaneously. A capacity of 4 supports multi-layer and
+  // multi-view composition with distinct layer dimensions without per-frame
+  // reallocation while bounding peak memory during continuous window resizing.
+  static constexpr size_t kMaxCachedEntries = 4u;
+
+  struct Entry {
+    std::weak_ptr<impeller::Context> context;
+    impeller::ISize size;
+    impeller::PixelFormat format = impeller::PixelFormat::kUnknown;
+    std::shared_ptr<impeller::SwapchainTransientsVK> transients;
+  };
+
+  std::mutex mutex;
+  std::vector<Entry> entries;
+
+  std::shared_ptr<impeller::SwapchainTransientsVK> GetOrCreate(
+      const std::shared_ptr<impeller::Context>& current_context,
+      const impeller::TextureDescriptor& resolve_desc) {
+    std::scoped_lock lock(mutex);
+    entries.erase(std::remove_if(entries.begin(), entries.end(),
+                                 [](const Entry& entry) {
+                                   return entry.context.expired();
+                                 }),
+                  entries.end());
+    for (auto it = entries.begin(); it != entries.end(); ++it) {
+      if (it->context.lock() == current_context &&
+          it->size == resolve_desc.size && it->format == resolve_desc.format &&
+          it->transients) {
+        auto result = it->transients;
+        if (std::next(it) != entries.end()) {
+          Entry mru = std::move(*it);
+          entries.erase(it);
+          entries.push_back(std::move(mru));
+        }
+        return result;
+      }
+    }
+    auto transients = std::make_shared<impeller::SwapchainTransientsVK>(
+        current_context, resolve_desc, /*enable_msaa=*/true);
+    if (entries.size() >= kMaxCachedEntries) {
+      entries.erase(entries.begin());
+    }
+    entries.push_back(Entry{
+        .context = current_context,
+        .size = resolve_desc.size,
+        .format = resolve_desc.format,
+        .transients = transients,
+    });
+    return transients;
+  }
+};
+#else
+struct VulkanBackingStoreTransientsCache {};
+#endif
+
 static std::unique_ptr<flutter::EmbedderRenderTarget>
 MakeRenderTargetFromBackingStoreImpeller(
     FlutterBackingStore backing_store,
     const fml::closure& on_release,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     const FlutterBackingStoreConfig& config,
-    const FlutterVulkanBackingStore* vulkan) {
+    const FlutterVulkanBackingStore* vulkan,
+    const std::shared_ptr<VulkanBackingStoreTransientsCache>&
+        vulkan_transients_cache) {
 #if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
   if (!aiks_context || !aiks_context->GetContext()) {
     FML_LOG(ERROR) << "AiksContext or Impeller Context was null.";
+    return nullptr;
+  }
+
+  if (!vulkan_transients_cache) {
+    FML_LOG(ERROR) << "Vulkan backing store transients cache was null.";
     return nullptr;
   }
 
@@ -1392,22 +1468,19 @@ MakeRenderTargetFromBackingStoreImpeller(
 
   resolve_tex->SetLabel("ImpellerBackingStoreResolve");
 
-  impeller::TextureDescriptor msaa_tex_desc;
-  msaa_tex_desc.storage_mode = impeller::StorageMode::kDeviceTransient;
-  msaa_tex_desc.type = impeller::TextureType::kTexture2DMultisample;
-  msaa_tex_desc.sample_count = impeller::SampleCount::kCount4;
-  msaa_tex_desc.format = resolve_tex->GetTextureDescriptor().format;
-  msaa_tex_desc.size = size;
-  msaa_tex_desc.usage = impeller::TextureUsage::kRenderTarget;
-
-  auto msaa_tex =
-      aiks_context->GetContext()->GetResourceAllocator()->CreateTexture(
-          msaa_tex_desc);
+  auto transients = vulkan_transients_cache->GetOrCreate(
+      aiks_context->GetContext(), resolve_tex_desc);
+  auto msaa_tex = transients->GetMSAATexture();
   if (!msaa_tex) {
     FML_LOG(ERROR) << "Could not allocate MSAA color texture.";
     return nullptr;
   }
-  msaa_tex->SetLabel("ImpellerBackingStoreColorMSAA");
+
+  auto depth_stencil_tex = transients->GetDepthStencilTexture();
+  if (!depth_stencil_tex) {
+    FML_LOG(ERROR) << "Could not allocate depth/stencil texture.";
+    return nullptr;
+  }
 
   impeller::ColorAttachment color0;
   color0.texture = msaa_tex;
@@ -1422,7 +1495,9 @@ MakeRenderTargetFromBackingStoreImpeller(
       *aiks_context->GetContext(),
       *aiks_context->GetContext()->GetResourceAllocator(), size,
       /*msaa=*/true,
-      /*label=*/"ImpellerBackingStore");
+      /*label=*/"ImpellerBackingStore",
+      impeller::RenderTarget::kDefaultStencilAttachmentConfig,
+      depth_stencil_tex);
 
   if (!render_target_desc.GetDepthAttachment().has_value() ||
       !render_target_desc.GetStencilAttachment().has_value()) {
@@ -1520,7 +1595,9 @@ CreateEmbedderRenderTarget(
     const FlutterBackingStoreConfig& config,
     GrDirectContext* context,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
-    bool enable_impeller) {
+    bool enable_impeller,
+    const std::shared_ptr<VulkanBackingStoreTransientsCache>&
+        vulkan_transients_cache) {
   FlutterBackingStore backing_store = {};
   backing_store.struct_size = sizeof(backing_store);
 
@@ -1653,7 +1730,7 @@ CreateEmbedderRenderTarget(
       if (enable_impeller) {
         render_target = MakeRenderTargetFromBackingStoreImpeller(
             backing_store, collect_callback.Release(), aiks_context, config,
-            &backing_store.vulkan);
+            &backing_store.vulkan, vulkan_transients_cache);
         break;
       } else {
         auto skia_surface = MakeSkSurfaceFromBackingStore(
@@ -1707,16 +1784,18 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
   }
 
   FlutterCompositor captured_compositor = *compositor;
+  auto vulkan_transients_cache =
+      std::make_shared<VulkanBackingStoreTransientsCache>();
 
   flutter::EmbedderExternalViewEmbedder::CreateRenderTargetCallback
       create_render_target_callback =
-          [captured_compositor, enable_impeller](
+          [captured_compositor, enable_impeller, vulkan_transients_cache](
               GrDirectContext* context,
               const std::shared_ptr<impeller::AiksContext>& aiks_context,
               const auto& config) {
-            return CreateEmbedderRenderTarget(&captured_compositor, config,
-                                              context, aiks_context,
-                                              enable_impeller);
+            return CreateEmbedderRenderTarget(
+                &captured_compositor, config, context, aiks_context,
+                enable_impeller, vulkan_transients_cache);
           };
 
   flutter::EmbedderExternalViewEmbedder::PresentCallback present_callback;
@@ -2451,8 +2530,36 @@ CreateExternalTextureResolver(const FlutterRendererConfig* config,
         }
         return texture;
       };
-      external_texture_resolver =
-          std::make_unique<ExternalTextureResolver>(external_texture_callback);
+      flutter::EmbedderExternalTextureGL::UVTransformationCallback
+          uv_transformation_callback = nullptr;
+      if (SAFE_ACCESS(open_gl_config,
+                      gl_external_texture_uv_transformation_callback,
+                      nullptr) != nullptr) {
+        uv_transformation_callback =
+            [ptr =
+                 open_gl_config->gl_external_texture_uv_transformation_callback,
+             user_data](int64_t texture_identifier,
+                        flutter::DlMatrix* matrix_out) -> bool {
+          if (!matrix_out) {
+            return false;
+          }
+          // 16 elements in a 4x4 column-major UV transformation matrix.
+          constexpr size_t kMatrix4x4ElementCount = 16;
+          float m[kMatrix4x4ElementCount] = {};
+          if (!ptr(user_data, texture_identifier, m)) {
+            return false;
+          }
+          *matrix_out =
+              flutter::DlMatrix::MakeColumn(m[0], m[1], m[2], m[3],     //
+                                            m[4], m[5], m[6], m[7],     //
+                                            m[8], m[9], m[10], m[11],   //
+                                            m[12], m[13], m[14], m[15]  //
+              );
+          return true;
+        };
+      }
+      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
+          external_texture_callback, uv_transformation_callback);
     }
   }
 #endif
@@ -2707,7 +2814,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
       std::move(external_view_embedder_result.value()),
-      settings.enable_impeller, impeller_flags);
+      settings.enable_impeller, impeller_flags,
+      settings.enable_vulkan_validation);
 
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(
@@ -2854,6 +2962,10 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   if (SAFE_ACCESS(args, engine_id, 0) != 0) {
     run_configuration.SetEngineId(args->engine_id);
+  }
+
+  if (SAFE_ACCESS(args, initial_route, nullptr) != nullptr) {
+    run_configuration.SetInitialRoute(args->initial_route);
   }
 
   std::vector<flutter::ImageGeneratorFactoryRegistration> image_generators;
@@ -3484,13 +3596,20 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
   }
 
   std::unique_ptr<flutter::PlatformMessage> message;
-  if (message_size == 0) {
+  if (message_size == 0 && message_data == nullptr) {
     message = std::make_unique<flutter::PlatformMessage>(
         flutter_message->channel, response);
   } else {
+    auto make_mapping = [&]() -> fml::MallocMapping {
+      if (message_size == 0) {
+        // Allocate 1 byte so mapping.GetMapping() is non-null, with size 0.
+        return fml::MallocMapping(reinterpret_cast<uint8_t*>(malloc(1)), 0);
+      }
+      return fml::MallocMapping::Copy(message_data, message_size);
+    };
+    fml::MallocMapping mapping = make_mapping();
     message = std::make_unique<flutter::PlatformMessage>(
-        flutter_message->channel,
-        fml::MallocMapping::Copy(message_data, message_size), response);
+        flutter_message->channel, std::move(mapping), response);
   }
 
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)
@@ -3565,11 +3684,11 @@ FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
   auto response = handle->message->response();
 
   if (response) {
-    if (data_length == 0) {
+    if (data_length == 0 && data == nullptr) {
       response->CompleteEmpty();
     } else {
       response->Complete(std::make_unique<fml::DataMapping>(
-          std::vector<uint8_t>({data, data + data_length})));
+          std::vector<uint8_t>(data, data + data_length)));
     }
   }
 
@@ -4320,7 +4439,8 @@ FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine) engine,
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       renderer_config, user_data, platform_dispatch_table,
       std::move(external_view_embedder_result.value()),
-      parent_settings.enable_impeller, impeller_flags);
+      parent_settings.enable_impeller, impeller_flags,
+      parent_settings.enable_vulkan_validation);
 
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(
@@ -4451,6 +4571,15 @@ FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine) engine,
     run_configuration.SetEngineId(spawned_engine_id);
   }
 
+  const char* initial_route_arg = SAFE_ACCESS(config, initial_route, nullptr);
+  if ((initial_route_arg == nullptr || initial_route_arg[0] == '\0') &&
+      args != nullptr) {
+    initial_route_arg = SAFE_ACCESS(args, initial_route, nullptr);
+  }
+  if (initial_route_arg != nullptr && initial_route_arg[0] != '\0') {
+    run_configuration.SetInitialRoute(initial_route_arg);
+  }
+
   bool has_custom_image_generators = false;
   if (args != nullptr) {
     has_custom_image_generators =
@@ -4486,14 +4615,14 @@ FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine) engine,
         "Could not infer the Flutter project to run for spawned engine.");
   }
 
-  std::string initial_route = "/";
-  if (SAFE_ACCESS(config, initial_route, nullptr) != nullptr) {
-    initial_route = config->initial_route;
+  std::string spawn_initial_route = "/";
+  if (initial_route_arg != nullptr && initial_route_arg[0] != '\0') {
+    spawn_initial_route = initial_route_arg;
   }
 
   auto spawned_engine = parent_engine->Spawn(
-      thread_host, task_runners, std::move(run_configuration), initial_route,
-      on_create_platform_view, on_create_rasterizer,
+      thread_host, task_runners, std::move(run_configuration),
+      spawn_initial_route, on_create_platform_view, on_create_rasterizer,
       std::move(external_texture_resolver));
 
   if (!spawned_engine) {
@@ -4969,6 +5098,45 @@ FlutterEngineResult FlutterEngineDeregisterVMServiceUriCallback(
                             "Could not deregister VM service URI callback.");
 }
 
+FlutterEngineResult FlutterEngineQueryVulkanDriverSupport(
+    const FlutterVulkanDriverProperties* properties,
+    bool* out_is_known_bad) {
+  if (properties == nullptr || out_is_known_bad == nullptr) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "properties and out_is_known_bad must not be null.");
+  }
+
+  constexpr size_t kMinStructSize =
+      offsetof(FlutterVulkanDriverProperties, device_name) +
+      sizeof(FlutterVulkanDriverProperties::device_name);
+  if (properties->struct_size < kMinStructSize) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "FlutterVulkanDriverProperties struct_size is too small.");
+  }
+
+#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
+  impeller::vk::PhysicalDeviceProperties vk_props{};
+  vk_props.apiVersion = properties->api_version;
+  vk_props.driverVersion = properties->driver_version;
+  vk_props.vendorID = properties->vendor_id;
+  vk_props.deviceID = properties->device_id;
+  vk_props.deviceType = impeller::vk::PhysicalDeviceType::eIntegratedGpu;
+  if (properties->device_name != nullptr) {
+    std::strncpy(vk_props.deviceName.data(), properties->device_name,
+                 VK_MAX_PHYSICAL_DEVICE_NAME_SIZE - 1);
+    vk_props.deviceName[VK_MAX_PHYSICAL_DEVICE_NAME_SIZE - 1] = '\0';
+  }
+  impeller::DriverInfoVK driver_info(vk_props);
+  *out_is_known_bad = driver_info.IsKnownBadDriver();
+  return kSuccess;
+#else
+  return LOG_EMBEDDER_ERROR(
+      kInvalidArguments,
+      "Vulkan rendering is not compiled into this embedder build.");
+#endif
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -5045,6 +5213,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
            FlutterEngineRegisterVMServiceUriCallback);
   SET_PROC(DeregisterVMServiceUriCallback,
            FlutterEngineDeregisterVMServiceUriCallback);
+  SET_PROC(QueryVulkanDriverSupport, FlutterEngineQueryVulkanDriverSupport);
 #undef SET_PROC
 
   return kSuccess;
