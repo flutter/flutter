@@ -769,6 +769,15 @@ void Shell::NotifyLowMemoryWarning() const {
   // to purge them.
 }
 
+void Shell::ClearRenderTargetCache() const {
+  task_runners_.GetRasterTaskRunner()->PostTask(
+      [rasterizer = rasterizer_->GetWeakPtr()]() {
+        if (rasterizer) {
+          rasterizer->ClearRenderTargetCache();
+        }
+      });
+}
+
 void Shell::FlushMicrotaskQueue() const {
   if (engine_) {
     engine_->FlushMicrotaskQueue();
@@ -1137,11 +1146,6 @@ void Shell::OnPlatformViewScheduleFrame() {
   fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
                                     [engine = engine_->GetWeakPtr()]() {
                                       if (engine) {
-                                        // This is an engine requested repaint
-                                        // so force all views to redraw.
-                                        // Without this only views with dirty
-                                        // render objects would get repainted.
-                                        engine->MarkAllViewsNeedRender();
                                         engine->ScheduleFrame();
                                       }
                                     });
@@ -1360,19 +1364,13 @@ void Shell::OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) {
         texture->MarkNewFrameAvailable();
       });
 
-  // Notify the framework that a texture has new content available.
-  // This marks the texture render object as needing paint, ensuring the view
-  // containing the texture is recomposited even if no other render objects
-  // are dirty. Also schedule a new frame without having to rebuild the layer
-  // tree.
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetUITaskRunner(),
-      [engine = engine_->GetWeakPtr(), texture_id]() {
-        if (engine) {
-          engine->NotifyTextureFrameAvailable(texture_id);
-          engine->ScheduleFrame(/*regenerate_layer_trees=*/false);
-        }
-      });
+  // Schedule a new frame without having to rebuild the layer tree.
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
+                                    [engine = engine_->GetWeakPtr()]() {
+                                      if (engine) {
+                                        engine->ScheduleFrame(false);
+                                      }
+                                    });
 }
 
 // |PlatformView::Delegate|
@@ -1757,6 +1755,11 @@ double Shell::GetScaledFontSize(double unscaled_font_size,
                                 int configuration_id) const {
   return platform_view_->GetScaledFontSize(unscaled_font_size,
                                            configuration_id);
+}
+
+// |Engine::Delegate|
+void Shell::OnEngineResetInternalState() {
+  ClearRenderTargetCache();
 }
 
 void Shell::RequestViewFocusChange(const ViewFocusChangeRequest& request) {
