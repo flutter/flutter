@@ -259,10 +259,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
       TRACE_EVENT0("flutter", "GPUSurfaceVulkan::PresentImage");
 
       {
+        const auto& context = impeller::ContextVK::Cast(*impeller_context);
+
         //----------------------------------------------------------------------------
         /// Transition the image to color-attachment-optimal.
         ///
-        auto cmd_buffer = impeller_context->CreateCommandBuffer();
+        auto cmd_buffer = context.CreateCommandBuffer();
 
         auto vk_final_cmd_buffer =
             impeller::CommandBufferVK::Cast(*cmd_buffer).GetCommandBuffer();
@@ -283,7 +285,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
             return false;
           }
         }
-        if (!impeller_context->GetCommandQueue()->Submit({cmd_buffer}).ok()) {
+        if (!context.GetCommandQueue()->Submit({cmd_buffer}).ok()) {
           return false;
         }
       }
