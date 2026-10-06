@@ -1008,6 +1008,33 @@ void main() {
     expect(called, isFalse);
   });
 
+  testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
+    // Regression Test for https://github.com/flutter/flutter/issues/61346.
+    Widget buildNavigator() {
+      return Navigator(
+        pages: const <Page<void>>[TestPage<void>(child: Placeholder())],
+        onPopPage: (Route<Object?> route, Object? result) => false,
+      );
+    }
+
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestDependencies(
+        child: PageView(
+          controller: controller,
+          children: <Widget>[buildNavigator(), buildNavigator(), buildNavigator()],
+        ),
+      ),
+    );
+
+    controller.jumpToPage(2);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Page-based route pop before push finishes', (WidgetTester tester) async {
     var pages = <Page<void>>[const TestPage<void>(child: Text('Page 1'))];
     final navigator = GlobalKey<NavigatorState>();
