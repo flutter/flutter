@@ -176,7 +176,7 @@ void main() {
       projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
     );
     return BuildLinuxCommand(
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       featureFlags: effectiveFeatureFlags,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -908,8 +908,7 @@ set(BINARY_NAME "fizz_bar")
 }
 
 class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  CustomFakeOperatingSystemUtils({HostPlatform hostPlatform = HostPlatform.linux_x64})
-    : _hostPlatform = hostPlatform;
+  CustomFakeOperatingSystemUtils({this._hostPlatform = HostPlatform.linux_x64});
 
   final HostPlatform _hostPlatform;
 

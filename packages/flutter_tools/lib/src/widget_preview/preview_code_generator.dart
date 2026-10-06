@@ -340,9 +340,9 @@ class PreviewCodeGenerator {
 
     return cb.refer(_kBuildWidgetPreview, _kUtilsUri).call([], {
       ...args,
-      _kTransformedPreview: cb.CodeExpression(
-        cb.Code(preview.previewAnnotation),
-      ).property(_kTransform).call([]),
+      _kTransformedPreview: cb.CodeExpression(cb.Code(preview.previewAnnotation))
+          .property(_kTransform)
+          .call([]),
     });
   }
 }
@@ -393,11 +393,11 @@ extension on DartObject {
     return switch (variable) {
       FieldElement(
         isEnumConstant: true,
-        displayName: final enumValue,
-        enclosingElement: EnumElement(displayName: final enumName),
+        displayName: final String enumValue,
+        enclosingElement: EnumElement(displayName: final String enumName),
       ) =>
         cb.refer('$enumName.$enumValue', _elementToLibraryIdentifier(variable)),
-      PropertyInducingElement(:final displayName) => cb.refer(
+      PropertyInducingElement(:final String displayName) => cb.refer(
         displayName,
         _elementToLibraryIdentifier(variable),
       ),

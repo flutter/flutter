@@ -4,9 +4,18 @@
 
 import '../../build_info.dart';
 import '../flutter_command.dart';
+import '../flutter_command_runner.dart';
 
 /// Common typed option descriptors across flutter commands.
 abstract final class CommonOptions {
+  static const ci = FlagOptionDescriptor(
+    name: FlutterGlobalOptions.kContinuousIntegrationFlag,
+    negatable: false,
+    scope: OptionScope.global,
+    verboseOnly: true,
+    help: 'Enable a set of CI-specific test debug settings.',
+  );
+
   static const treeShakeIcons = FlagOptionDescriptor(
     name: 'tree-shake-icons',
     defaultsTo: true,
@@ -192,6 +201,7 @@ abstract final class BuildInfoOptions {
   static const androidGradleDaemon = FlagOptionDescriptor(
     name: FlutterOptions.kAndroidGradleDaemon,
     defaultsTo: true,
+    verboseOnly: true,
     help: 'Whether to enable the Gradle daemon when performing an Android build.',
   );
 
@@ -199,6 +209,7 @@ abstract final class BuildInfoOptions {
     name: FlutterOptions.kAndroidProjectArgs,
     abbr: 'P',
     aliases: <String>['android-project-args'],
+    verboseOnly: true,
     help:
         'Additional arguments specified as key=value that are passed directly to the gradle project '
         'via the -P flag. These can be accessed in build.gradle via the "project.property" API.',
@@ -207,6 +218,7 @@ abstract final class BuildInfoOptions {
   static const androidProjectCacheDir = StringOptionDescriptor(
     name: FlutterOptions.kAndroidGradleProjectCacheDir,
     valueHelp: 'path/to/project/cache/',
+    verboseOnly: true,
     help:
         'In an Android build, this flag allows the Gradle project cache directory to be specified '
         'to an absolute path. Setting this is roughly equivalent to setting the '
@@ -215,12 +227,30 @@ abstract final class BuildInfoOptions {
 
   static const androidSkipBuildDependencyValidation = FlagOptionDescriptor(
     name: FlutterOptions.kAndroidSkipBuildDependencyValidation,
+    verboseOnly: true,
     help: 'Skips Android Gradle project dependency verification.',
   );
 
   static const performanceMeasurementFile = StringOptionDescriptor(
     name: FlutterOptions.kPerformanceMeasurementFile,
     help: 'Output file name for performance measurement file.',
+  );
+
+  static const shrink = FlagOptionDescriptor(
+    name: 'shrink',
+    verboseOnly: true,
+    help:
+        'This flag has no effect. Code shrinking is always enabled in release builds. '
+        'To learn more, see: https://developer.android.com/studio/build/shrink-code',
+  );
+
+  static const ignoreDeprecation = FlagOptionDescriptor(
+    name: 'ignore-deprecation',
+    negatable: false,
+    help:
+        'Indicates that the app should ignore deprecation warnings and continue to build '
+        'using deprecated APIs. Use of this flag may cause your app to fail to build when '
+        'deprecated APIs are removed.',
   );
 
   static const flavor = StringOptionDescriptor(
@@ -236,6 +266,15 @@ abstract final class BuildInfoOptions {
     name: FlutterOptions.kCodesign,
     defaultsTo: true,
     help: 'Whether to code-sign XCFrameworks.',
+  );
+
+  static const codesignIdentity = StringOptionDescriptor(
+    name: FlutterOptions.kCodesignIdentity,
+    help:
+        'The identity to use for code-signing XCFrameworks. If an identity is not provided and '
+        '"${FlutterOptions.kCodesign}" is enabled, a code signing identity will be selected '
+        "automatically from the Flutter app's Xcode project settings or Flutter config. To see "
+        'a list of valid identities run "security find-identity -p codesigning -v".',
   );
 
   static const frontendServerStarterPath = StringOptionDescriptor(
@@ -342,11 +381,10 @@ class DartCompileOptionsBundle extends OptionBundle {
     CommonOptions.dartDefines,
     CommonOptions.dartDefineFromFile,
     CommonOptions.enableExperiment,
-    CommonOptions.nativeNullAssertions,
   ];
 }
 
-/// A bundle encapsulating basic build parameters (target, output-dir, pub, build-number/name).
+/// A bundle encapsulating basic build parameters (target, pub, build-number/name).
 class CommonBuildOptionsBundle extends OptionBundle {
   const CommonBuildOptionsBundle();
 
@@ -360,10 +398,110 @@ class CommonBuildOptionsBundle extends OptionBundle {
   List<OptionDescriptor<Object?>> get descriptors => const [
     CommonOptions.treeShakeIcons,
     CommonOptions.target,
-    CommonOptions.outputDir,
     CommonOptions.pub,
     CommonOptions.buildNumber,
     CommonOptions.buildName,
+  ];
+}
+
+/// A bundle encapsulating Gradle-specific Android build options.
+class AndroidGradleOptionsBundle extends OptionBundle {
+  const AndroidGradleOptionsBundle();
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    BuildInfoOptions.androidGradleDaemon,
+    BuildInfoOptions.androidSkipBuildDependencyValidation,
+    BuildInfoOptions.androidProjectArg,
+    BuildInfoOptions.androidProjectCacheDir,
+  ];
+}
+
+/// A bundle encapsulating general options for Android builds.
+class AndroidBuildOptionsBundle extends OptionBundle {
+  const AndroidBuildOptionsBundle();
+
+  @override
+  List<OptionBundle> get subBundles => const [AndroidGradleOptionsBundle()];
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    BuildInfoOptions.flavor,
+    BuildInfoOptions.shrink,
+    BuildInfoOptions.splitDebugInfo,
+    BuildInfoOptions.obfuscate,
+    BuildInfoOptions.extraFrontEndOptions,
+    BuildInfoOptions.extraGenSnapshotOptions,
+    BuildInfoOptions.performanceMeasurementFile,
+    BuildInfoOptions.analyzeSize,
+    BuildInfoOptions.codeSizeDirectory,
+    BuildInfoOptions.trackWidgetCreation,
+    BuildInfoOptions.ignoreDeprecation,
+    DebuggingOptionDescriptors.enableHcpp,
+  ];
+}
+
+/// A bundle encapsulating general options for Apple (iOS and macOS) builds.
+class AppleBuildOptionsBundle extends OptionBundle {
+  const AppleBuildOptionsBundle();
+
+  static const configOnly = FlagOptionDescriptor(
+    name: 'config-only',
+    help:
+        'Update the project configuration without performing a build. '
+        'This can be used in CI/CD process that create an archive to avoid '
+        'performing duplicate work.',
+  );
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    BuildInfoOptions.flavor,
+    BuildInfoOptions.splitDebugInfo,
+    BuildInfoOptions.obfuscate,
+    BuildInfoOptions.extraFrontEndOptions,
+    BuildInfoOptions.extraGenSnapshotOptions,
+    BuildInfoOptions.performanceMeasurementFile,
+    BuildInfoOptions.analyzeSize,
+    BuildInfoOptions.codeSizeDirectory,
+  ];
+}
+
+/// A bundle encapsulating Darwin XCFramework code-signing options (`--codesign` and `--codesign-identity`).
+class DarwinCodeSignXCFrameworksOptionsBundle extends OptionBundle {
+  const DarwinCodeSignXCFrameworksOptionsBundle();
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    BuildInfoOptions.codesign,
+    BuildInfoOptions.codesignIdentity,
+  ];
+}
+
+/// A bundle encapsulating shared options for Darwin Add-to-App builds (`build ios-framework`, `build macos-framework`, and `build swift-package`).
+class DarwinAddToAppOptionsBundle extends OptionBundle {
+  const DarwinAddToAppOptionsBundle();
+
+  @override
+  void onRegister(FlutterCommand command) {
+    command.enableUsesTargetOption();
+    command.enableUsesPubOption();
+  }
+
+  @override
+  List<OptionBundle> get subBundles => const [
+    DartCompileOptionsBundle(),
+    DarwinCodeSignXCFrameworksOptionsBundle(),
+  ];
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    CommonOptions.treeShakeIcons,
+    CommonOptions.target,
+    CommonOptions.pub,
+    BuildInfoOptions.splitDebugInfo,
+    BuildInfoOptions.obfuscate,
+    BuildInfoOptions.extraFrontEndOptions,
+    BuildInfoOptions.extraGenSnapshotOptions,
   ];
 }
 
@@ -443,13 +581,36 @@ abstract final class DebuggingOptionDescriptors {
         'not already connected to the target application.',
   );
 
-  static const ddsPort = StringOptionDescriptor(
+  static const ddsPort = DefaultedIntOptionDescriptor(
     name: 'dds-port',
+    defaultsTo: 0,
     help:
         'When this value is provided, the Dart Development Service (DDS) will be '
         'bound to the provided port.\n'
         'Specifying port 0 (the default) will find a random free port.',
   );
+
+  static const publishPort = FlagOptionDescriptor(
+    name: 'publish-port',
+    defaultsTo: true,
+    verboseOnly: true,
+    help:
+        'Publish the VM service port over mDNS. Disable to prevent the '
+        'local network permission app dialog in debug and profile build modes (iOS devices only).',
+  );
+
+  static FlagOptionDescriptor publishPortOption({bool enabledByDefault = true}) {
+    if (enabledByDefault) {
+      return publishPort;
+    }
+    return const FlagOptionDescriptor(
+      name: 'publish-port',
+      verboseOnly: true,
+      help:
+          'Publish the VM service port over mDNS. Disable to prevent the '
+          'local network permission app dialog in debug and profile build modes (iOS devices only).',
+    );
+  }
 
   static const disableDds = FlagOptionDescriptor(
     name: 'disable-dds',
@@ -721,8 +882,7 @@ abstract final class DebuggingOptionDescriptors {
   static const iosProfileDebugger = NullableFlagOptionDescriptor(
     name: 'ios-profile-debugger',
     negatable: false,
-    help:
-        'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
+    help: 'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
   );
 
   static const useTestFonts = FlagOptionDescriptor(
