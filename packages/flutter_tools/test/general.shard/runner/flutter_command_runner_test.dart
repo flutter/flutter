@@ -735,9 +735,11 @@ void main() {
               processManager: FakeProcessManager.any(),
             );
             final fakeCommand = FakeFlutterCommand();
-            final runner =
-                createTestCommandRunner(fakeCommand, null, localToolContext)
-                    as FlutterCommandRunner;
+            final runner = createTestCommandRunner(
+              fakeCommand,
+              null,
+              localToolContext,
+            ) as FlutterCommandRunner;
 
             Artifacts? artifactsInsideCommand;
             fakeCommand.onRun = () {

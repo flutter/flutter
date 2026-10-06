@@ -93,6 +93,12 @@ void main() {
       );
 
       try {
+        await processManager.run(<String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'pub',
+          'get',
+        ], workingDirectory: workingDirectory);
         final buildCommand = <String>[
           flutterBin,
           '--local-engine=host_debug',
