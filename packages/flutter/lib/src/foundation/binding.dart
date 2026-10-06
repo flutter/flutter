@@ -5,11 +5,16 @@
 /// @docImport 'dart:convert';
 /// @docImport 'dart:ui';
 ///
+/// @docImport 'package:flutter/foundation.dart' as foundation;
+/// @docImport 'package:flutter/gestures.dart' as gestures;
 /// @docImport 'package:flutter/rendering.dart';
 /// @docImport 'package:flutter/scheduler.dart';
 /// @docImport 'package:flutter/services.dart';
+/// @docImport 'package:flutter/services.dart' as services;
 /// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter/widgets.dart' as widgets;
 /// @docImport 'package:flutter_test/flutter_test.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart' as flutter_test;
 library;
 
 import 'dart:async';
