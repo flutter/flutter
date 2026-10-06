@@ -484,7 +484,7 @@ class BrowserPlatform extends PlatformPlugin {
     } finally {
       stallTimer.cancel();
       if (stopwatch.elapsed >= _slowScreenshotPhaseThreshold) {
-        print('Golden $filename: $phase finished after ${stopwatch.elapsedMilliseconds}ms.');
+        print('Golden $filename: $phase took ${stopwatch.elapsedMilliseconds}ms.');
       }
     }
   }
