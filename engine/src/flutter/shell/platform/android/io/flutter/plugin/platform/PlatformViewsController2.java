@@ -798,16 +798,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
   }
 
-  // Retained for tests that drive the controller directly, without the native JNI caller that
-  // would otherwise be responsible for calling submitTransaction.
-  @VisibleForTesting
-  @RequiresApi(API_LEVELS.API_34)
-  public SurfaceControl.Transaction createTransaction() {
-    final SurfaceControl.Transaction tx = createUnpublishedTransaction();
-    submitTransaction(tx);
-    return tx;
-  }
-
   /** Allocates a transaction so tests can spy on the instance retained by the controller. */
   @VisibleForTesting
   @RequiresApi(API_LEVELS.API_34)

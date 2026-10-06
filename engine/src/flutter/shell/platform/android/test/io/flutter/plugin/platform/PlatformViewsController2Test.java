@@ -590,8 +590,8 @@ public class PlatformViewsController2Test {
     SurfaceControl.Transaction platformTx = controller.transactions.get(0);
 
     // The JNI entry point always creates raster transactions, even on this test's main thread.
-    SurfaceControl.Transaction rasterTx1 = controller.createTransaction();
-    SurfaceControl.Transaction rasterTx2 = controller.createTransaction();
+    SurfaceControl.Transaction rasterTx1 = createAndSubmitRasterTransaction(controller);
+    SurfaceControl.Transaction rasterTx2 = createAndSubmitRasterTransaction(controller);
     assertNotSame(platformTx, rasterTx1);
     assertNotSame(platformTx, rasterTx2);
     assertNotSame(rasterTx1, rasterTx2);
@@ -655,9 +655,9 @@ public class PlatformViewsController2Test {
         new Thread(
             () -> {
               try {
-                SurfaceControl.Transaction tx = controller.createTransaction();
+                SurfaceControl.Transaction tx = createAndSubmitRasterTransaction(controller);
                 published.countDown();
-                // Model native code retaining the borrowed transaction after createTransaction().
+                // Model native code retaining the borrowed transaction after submitting it.
                 if (!releaseProducer.await(10, TimeUnit.SECONDS)) {
                   throw new AssertionError("Platform thread did not release the producer");
                 }
@@ -705,7 +705,7 @@ public class PlatformViewsController2Test {
     when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
     controller.attachToView(flutterView);
 
-    SurfaceControl.Transaction rasterTx = controller.createTransaction();
+    SurfaceControl.Transaction rasterTx = createAndSubmitRasterTransaction(controller);
 
     controller.swapTransactions();
     controller.onEndFrame();
@@ -813,7 +813,7 @@ public class PlatformViewsController2Test {
                   for (int round = 0; round < rounds && running.get(); round++) {
                     roundStart.await(timeoutMs, TimeUnit.MILLISECONDS);
                     for (int present = 0; present < presentsPerRound; present++) {
-                      controller.createTransaction();
+                      createAndSubmitRasterTransaction(controller);
                     }
                   }
                 } catch (TimeoutException e) {
@@ -881,7 +881,7 @@ public class PlatformViewsController2Test {
     when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
 
     controller.attachToView(mockFlutterView);
-    controller.createTransaction();
+    createAndSubmitRasterTransaction(controller);
     controller.swapTransactions();
     controller.detachFromView();
 
@@ -904,7 +904,7 @@ public class PlatformViewsController2Test {
     when(mockFlutterView.getRootSurfaceControl()).thenReturn(null);
 
     controller.attachToView(mockFlutterView);
-    controller.createTransaction();
+    createAndSubmitRasterTransaction(controller);
     controller.swapTransactions();
 
     controller.onEndFrame();
@@ -1318,6 +1318,17 @@ public class PlatformViewsController2Test {
     public SurfaceHolder getHolder() {
       return holder;
     }
+  }
+
+  /**
+   * Mirrors the native raster-thread flow: create an unpublished transaction, then submit it once
+   * native writes are done. Tests that do not model in-flight writes submit immediately.
+   */
+  private static SurfaceControl.Transaction createAndSubmitRasterTransaction(
+      PlatformViewsController2 controller) {
+    final SurfaceControl.Transaction tx = controller.createUnpublishedTransaction();
+    controller.submitTransaction(tx);
+    return tx;
   }
 
   /** Records every transaction merged into another, so tests can see what a frame picked up. */

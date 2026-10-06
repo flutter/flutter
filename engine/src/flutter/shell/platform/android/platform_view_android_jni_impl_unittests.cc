@@ -108,7 +108,7 @@ TEST_F(PlatformViewAndroidJNIImplTest, ImageGetHardwareBufferException) {
 }
 
 TEST_F(PlatformViewAndroidJNIImplTest,
-       CreateTransactionWithSubmitCallbackRetainsGlobalRefUntilSubmitted) {
+       CreateTransactionRetainsGlobalRefUntilSubmitted) {
   MockJNIEnvProvider env_provider;
   MockJNIEnv& mock_env = env_provider.env();
 
@@ -117,12 +117,9 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   ASurfaceTransaction* const kNativeTx =
       reinterpret_cast<ASurfaceTransaction*>(0x3003);
 
-  // Stub the NDK call so the fake Java object is never dereferenced. This is
-  // the same cast GetMutableProcTable() performs; that accessor is only
-  // declared for TESTING builds, which this target is not.
-  auto& from_java_proc = const_cast<impeller::android::ProcTable&>(
-                             impeller::android::GetProcTable())
-                             .ASurfaceTransaction_fromJava;
+  // Stub the NDK call so the fake Java object is never dereferenced.
+  auto& from_java_proc =
+      impeller::android::GetMutableProcTable().ASurfaceTransaction_fromJava;
   auto* real_from_java = from_java_proc.proc;
   from_java_proc.proc = [](JNIEnv*, jobject) -> ASurfaceTransaction* {
     return reinterpret_cast<ASurfaceTransaction*>(0x3003);
@@ -167,8 +164,7 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
 
   std::function<void()> submit_cb;
-  ASurfaceTransaction* tx =
-      android_jni.createTransactionWithSubmitCallback(&submit_cb);
+  ASurfaceTransaction* tx = android_jni.createTransaction(&submit_cb);
   EXPECT_EQ(tx, kNativeTx);
   ASSERT_NE(submit_cb, nullptr);
   EXPECT_TRUE(global_ref_alive);

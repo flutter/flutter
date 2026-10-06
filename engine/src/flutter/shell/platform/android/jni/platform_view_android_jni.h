@@ -230,29 +230,27 @@ class PlatformViewAndroidJNI {
   virtual void FlutterViewDestroyOverlaySurfaces() = 0;
 
   // New Platform View Support.
-  virtual ASurfaceTransaction* createTransaction() = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a transaction that is not yet visible to the platform
   ///             thread, along with a callback that publishes it once the
   ///             caller has finished writing into it.
   ///
-  ///             Callers that write into the transaction after creating it
-  ///             (for example, to set buffers or completion callbacks) must
-  ///             use this instead of `createTransaction`, otherwise the
-  ///             platform thread may merge, apply, or close the transaction
-  ///             while those writes are still in flight.
+  ///             The caller must invoke the submit callback only after its
+  ///             last write into the transaction (for example, setting buffers
+  ///             or completion callbacks). Until then the platform thread
+  ///             cannot merge, apply, or close it, and the underlying Java
+  ///             object is kept alive.
+  ///
+  /// @note       Must be called from the raster thread.
   ///
   /// @param[out] out_submit_callback  Receives the callback that publishes the
-  ///                                  transaction. May be null.
+  ///                                  transaction. Must not be null.
   ///
-  virtual ASurfaceTransaction* createTransactionWithSubmitCallback(
-      std::function<void()>* out_submit_callback) {
-    if (out_submit_callback != nullptr) {
-      *out_submit_callback = nullptr;
-    }
-    return createTransaction();
-  }
+  /// @return     The native transaction, or null if one could not be created.
+  ///
+  virtual ASurfaceTransaction* createTransaction(
+      std::function<void()>* out_submit_callback) = 0;
 
   virtual void swapTransaction() = 0;
 

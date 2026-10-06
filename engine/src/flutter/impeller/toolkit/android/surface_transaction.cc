@@ -15,10 +15,6 @@ SurfaceTransaction::SurfaceTransaction()
           GetProcTable().ASurfaceTransaction_create(), /*owned=*/true,
           /*submit_callback=*/nullptr}) {}
 
-SurfaceTransaction::SurfaceTransaction(ASurfaceTransaction* transaction)
-    : transaction_(WrappedSurfaceTransaction{transaction, /*owned=*/false,
-                                             /*submit_callback=*/nullptr}) {}
-
 SurfaceTransaction::SurfaceTransaction(ASurfaceTransaction* transaction,
                                        std::function<void()> submit_callback)
     : transaction_(WrappedSurfaceTransaction{transaction, /*owned=*/false,

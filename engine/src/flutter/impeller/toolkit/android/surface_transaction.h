@@ -67,8 +67,6 @@ class SurfaceTransaction {
 
   SurfaceTransaction& operator=(const SurfaceTransaction&) = delete;
 
-  explicit SurfaceTransaction(ASurfaceTransaction* transaction);
-
   //----------------------------------------------------------------------------
   /// @brief      Wraps a transaction borrowed from Java.
   ///
