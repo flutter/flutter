@@ -217,7 +217,14 @@ void main() {
     );
 
     testUsingContext('accepts --[no-]deprecated-js-interop', () {
-      expectAcceptsDeprecatedJsInteropFlag(RunCommand());
+      expectAcceptsDeprecatedJsInteropFlag(
+        RunCommand(
+          appleContext: FakeAppleContext(),
+          buildSystem: globals.buildSystem,
+          buildTargets: globals.buildTargets,
+          toolContext: _createToolContext(),
+        ),
+      );
     });
 
     group('run app', () {
