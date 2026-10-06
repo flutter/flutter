@@ -62,7 +62,7 @@ void Paint::ConvertStops(const flutter::DlGradientColorSourceBase* gradient,
 }
 
 std::shared_ptr<ColorSourceContents> Paint::CreateContents(
-    const ContentContext& renderer,
+    ContentContext& renderer,
     const Geometry* geometry,
     const std::optional<Matrix>& geometry_transform) const {
   if (color_source == nullptr) {
@@ -284,7 +284,7 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
 }
 
 std::shared_ptr<Contents> Paint::WithFilters(
-    const ContentContext& renderer,
+    ContentContext& renderer,
     std::shared_ptr<Contents> input) const {
   input = WithColorFilter(input, ColorFilterContents::AbsorbOpacity::kYes);
   auto image_filter = WithImageFilter(renderer, input, Matrix(),
@@ -296,7 +296,7 @@ std::shared_ptr<Contents> Paint::WithFilters(
 }
 
 std::shared_ptr<Contents> Paint::WithFiltersForSubpassTarget(
-    const ContentContext& renderer,
+    ContentContext& renderer,
     std::shared_ptr<Contents> input,
     const Matrix& effect_transform) const {
   auto image_filter =
@@ -320,7 +320,7 @@ std::shared_ptr<Contents> Paint::WithMaskBlur(std::shared_ptr<Contents> input,
 }
 
 std::shared_ptr<FilterContents> Paint::WithImageFilter(
-    const ContentContext& renderer,
+    ContentContext& renderer,
     const FilterInput::Variant& input,
     const Matrix& effect_transform,
     Entity::RenderingMode rendering_mode) const {
@@ -404,7 +404,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
 
 std::shared_ptr<Contents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     const Paint& paint,
-    const ContentContext& renderer,
+    ContentContext& renderer,
     const Geometry* geometry,
     std::shared_ptr<ColorSourceContents> contents,
     bool needs_color_filter,

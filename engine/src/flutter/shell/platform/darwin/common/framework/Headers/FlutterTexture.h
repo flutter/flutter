@@ -52,6 +52,8 @@ FLUTTER_DARWIN_EXPORT
 /**
  * Notifies Flutter that the content of the previously registered texture has been updated.
  *
+ * Must be called on the platform thread.
+ *
  * This will trigger a call to `-[FlutterTexture copyPixelBuffer]` on the raster thread.
  */
 - (void)textureFrameAvailable:(int64_t)textureId;

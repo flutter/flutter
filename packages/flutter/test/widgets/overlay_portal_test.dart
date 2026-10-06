@@ -1015,7 +1015,7 @@ void main() {
         'OverlayPortal widgets require an Overlay widget ancestor.\n'
         'An overlay lets widgets float on top of other widget children.\n'
         'To introduce an Overlay widget, you can either directly include one, or use a widget '
-        'that contains an Overlay itself, such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.\n'
+        'that contains an Overlay itself, such as a Navigator or WidgetsApp.\n'
         'The specific widget that could not find a Overlay ancestor was:\n',
       ),
     );
@@ -3241,6 +3241,60 @@ void main() {
             ..paragraph(),
         ),
       );
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/189902 and
+    // https://github.com/flutter/flutter/issues/187198.
+    testWidgets('toggling an overlay child does not leave a parentless attached semantics node', (
+      WidgetTester tester,
+    ) async {
+      final controller = OverlayPortalController();
+      final siblingController = OverlayPortalController();
+
+      // A second anchor is required: the fragment whose conflict changes is the
+      // sibling's, not the one belonging to the portal being toggled.
+      final Widget sibling = OverlayPortal.overlayChildLayoutBuilder(
+        controller: siblingController,
+        overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) =>
+            const SizedBox.shrink(),
+        child: Semantics(explicitChildNodes: true, child: const Text('sibling')),
+      );
+
+      Widget portal = OverlayPortal.overlayChildLayoutBuilder(
+        controller: controller,
+        overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) =>
+            const Align(alignment: Alignment.topLeft, child: Text('overlay child')),
+        child: Semantics(explicitChildNodes: true, child: const Text('anchor')),
+      );
+      portal = Overlay.wrap(child: ExcludeSemantics(child: portal));
+      portal = SizedBox(width: 200, height: 100, child: portal);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay.wrap(
+            child: Semantics(container: true, child: Column(children: <Widget>[sibling, portal])),
+          ),
+        ),
+      );
+
+      // Showing the overlay child gives the sibling anchor a sibling conflict,
+      // and hiding it takes that conflict away again. The conflict feeds
+      // shouldFormSemanticsNode, so the sibling's fragment stops producing a
+      // node of its own while keeping the one it cached. Its children are taken
+      // by an ancestor while it is out of the tree, and it used to be handed
+      // back in still holding them, leaving a SemanticsNode that was attached
+      // but had no parent. That only becomes observable on the second round
+      // trip.
+      for (var i = 0; i < 2; i += 1) {
+        controller.show();
+        await tester.pumpAndSettle();
+        expect(find.text('overlay child'), findsOneWidget);
+
+        controller.hide();
+        await tester.pumpAndSettle();
+        expect(find.text('overlay child'), findsNothing);
+      }
     });
   });
 

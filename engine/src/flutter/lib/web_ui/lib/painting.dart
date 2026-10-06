@@ -367,8 +367,15 @@ abstract class Gradient implements Shader {
     TileMode tileMode = TileMode.clamp,
     Float64List? matrix4,
   ]) {
-    final Float32List? matrix = matrix4 == null ? null : engine.toMatrix32(matrix4);
-    return engine.renderer.createLinearGradient(from, to, colors, colorStops, tileMode, matrix);
+    _validateColorStops(colors, colorStops);
+    return engine.EngineGradient.linear(
+      from,
+      to,
+      colors,
+      colorStops,
+      tileMode,
+      matrix4 != null ? engine.toMatrix32(matrix4) : null,
+    );
   }
 
   factory Gradient.radial(
@@ -382,34 +389,18 @@ abstract class Gradient implements Shader {
     double focalRadius = 0.0,
   ]) {
     _validateColorStops(colors, colorStops);
-    // If focal is null or focal radius is null, this should be treated as a regular radial gradient
-    // If focal == center and the focal radius is 0.0, it's still a regular radial gradient
-    final Float32List? matrix32 = matrix4 != null ? engine.toMatrix32(matrix4) : null;
-    if (focal == null || (focal == center && focalRadius == 0.0)) {
-      return engine.renderer.createRadialGradient(
-        center,
-        radius,
-        colors,
-        colorStops,
-        tileMode,
-        matrix32,
-      );
-    } else {
-      assert(
-        center != Offset.zero || focal != Offset.zero,
-      ); // will result in exception(s) in Skia side
-      return engine.renderer.createConicalGradient(
-        focal,
-        focalRadius,
-        center,
-        radius,
-        colors,
-        colorStops,
-        tileMode,
-        matrix32,
-      );
-    }
+    return engine.EngineGradient.radial(
+      center,
+      radius,
+      colors,
+      colorStops,
+      tileMode,
+      matrix4 != null ? engine.toMatrix32(matrix4) : null,
+      focal,
+      focalRadius,
+    );
   }
+
   factory Gradient.sweep(
     Offset center,
     List<Color> colors, [
@@ -418,15 +409,18 @@ abstract class Gradient implements Shader {
     double startAngle = 0.0,
     double endAngle = math.pi * 2,
     Float64List? matrix4,
-  ]) => engine.renderer.createSweepGradient(
-    center,
-    colors,
-    colorStops,
-    tileMode,
-    startAngle,
-    endAngle,
-    matrix4 != null ? engine.toMatrix32(matrix4) : null,
-  );
+  ]) {
+    _validateColorStops(colors, colorStops);
+    return engine.EngineGradient.sweep(
+      center,
+      colors,
+      colorStops,
+      tileMode,
+      startAngle,
+      endAngle,
+      matrix4 != null ? engine.toMatrix32(matrix4) : null,
+    );
+  }
 }
 
 typedef ImageEventCallback = void Function(Image image);
@@ -998,7 +992,7 @@ abstract class ImageShader implements Shader {
     TileMode tmy,
     Float64List matrix4, {
     FilterQuality? filterQuality,
-  }) => engine.renderer.createImageShader(image, tmx, tmy, matrix4, filterQuality);
+  }) => engine.EngineImageShader(image, tmx, tmy, matrix4, filterQuality: filterQuality);
 
   @override
   void dispose();

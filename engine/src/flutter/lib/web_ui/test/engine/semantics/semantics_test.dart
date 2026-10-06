@@ -940,7 +940,23 @@ class MockSemanticsEnabler implements SemanticsEnabler {
   bool get isWaitingToEnableSemantics => throw UnimplementedError();
 
   @override
-  DomElement get accessibilityPlaceholder => throw UnimplementedError();
+  List<DomElement> get placeholders => throw UnimplementedError();
+
+  @override
+  DomElement? placeholderHostFor(DomElement viewRoot) => throw UnimplementedError();
+
+  @override
+  void removeAllPlaceholders() {}
+
+  @override
+  void addPlaceholderForView(DomElement viewRoot) {
+    throw UnimplementedError();
+  }
+
+  @override
+  void removePlaceholderForView(DomElement viewRoot) {
+    throw UnimplementedError();
+  }
 
   @override
   void updatePlaceholderLabel(String message) {
@@ -1801,8 +1817,7 @@ void _testContainer() {
       expect(
         element.style.pointerEvents,
         'none',
-        reason:
-            'Framework declaration (Tier 1) should take precedence over interactive behaviors (Tier 2)',
+        reason: 'Framework declaration (Tier 1) should take precedence over interactive behaviors (Tier 2)',
       );
     });
 
@@ -2430,9 +2445,9 @@ void _testVerticalScrolling() {
     final expectedOffset = Float64List(2);
     expectedOffset[0] = 0.0;
     expectedOffset[1] = 20.0;
-    var message =
-        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
-            as Float64List;
+    var message = const StandardMessageCodec().decodeMessage(
+      capturedEvent.arguments! as ByteData,
+    ) as Float64List;
     expect(message, expectedOffset);
 
     // Update scrollPosition to scrollTop value.
@@ -2459,9 +2474,9 @@ void _testVerticalScrolling() {
     expect(capturedEvent.arguments, isNotNull);
     expectedOffset[0] = 0.0;
     expectedOffset[1] = 5.0;
-    message =
-        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
-            as Float64List;
+    message = const StandardMessageCodec().decodeMessage(
+      capturedEvent.arguments! as ByteData,
+    ) as Float64List;
     expect(message, expectedOffset);
   });
 
@@ -2658,9 +2673,9 @@ void _testHorizontalScrolling() {
     final expectedOffset = Float64List(2);
     expectedOffset[0] = 20.0;
     expectedOffset[1] = 0.0;
-    var message =
-        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
-            as Float64List;
+    var message = const StandardMessageCodec().decodeMessage(
+      capturedEvent.arguments! as ByteData,
+    ) as Float64List;
     expect(message, expectedOffset);
 
     // Update scrollPosition to scrollLeft value.
@@ -2687,9 +2702,9 @@ void _testHorizontalScrolling() {
     expect(capturedEvent.arguments, isNotNull);
     expectedOffset[0] = 5.0;
     expectedOffset[1] = 0.0;
-    message =
-        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
-            as Float64List;
+    message = const StandardMessageCodec().decodeMessage(
+      capturedEvent.arguments! as ByteData,
+    ) as Float64List;
     expect(message, expectedOffset);
   });
 }
@@ -2916,6 +2931,39 @@ void _testIncrementables() {
     expect(capturedActions, isEmpty);
 
     semantics().semanticsEnabled = false;
+  });
+
+  test('propagates aria-label to inner slider input and cleans up when cleared', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+    addTearDown(() {
+      semantics().semanticsEnabled = false;
+    });
+
+    void pumpSlider({required String label}) {
+      final tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        label: label,
+        hasIncrease: true,
+        hasDecrease: true,
+        flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue),
+        value: '50%',
+        increasedValue: '60%',
+        decreasedValue: '40%',
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+    }
+
+    pumpSlider(label: 'Volume');
+    final DomElement input = owner().debugSemanticsTree![0]!.element.querySelector('input')!;
+    expect(input.getAttribute('aria-label'), 'Volume');
+
+    pumpSlider(label: '');
+    expect(input.getAttribute('aria-label'), isNull);
   });
 }
 
@@ -4301,7 +4349,7 @@ void _testRoute() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-      <sem aria-label="this is a route label"><sem></sem></sem>
+      <sem role="region" aria-label="this is a route label"><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -5290,6 +5338,46 @@ void _testMenus() {
       object.element.getAttribute('aria-owns'),
       'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
     );
+  });
+
+  test('menu sets role="none" on unlabeled intermediate generic and scrollable containers', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.menu,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: 2,
+              flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+              actions: ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
+              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+              children: <SemanticsNodeUpdate>[
+                tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
+                tester.updateNode(id: 4, role: ui.SemanticsRole.menuItem),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject menuObject = tester.getSemanticsObject(0);
+    final SemanticsObject outerGenericObject = tester.getSemanticsObject(1);
+    final SemanticsObject scrollableObject = tester.getSemanticsObject(2);
+    expect(menuObject.element.getAttribute('aria-owns'), 'flt-semantic-node-3 flt-semantic-node-4');
+    expect(outerGenericObject.element.getAttribute('role'), 'none');
+    expect(scrollableObject.element.getAttribute('role'), 'none');
+    semantics().semanticsEnabled = false;
   });
 
   test('nested menus have correct menu item nodes', () {
@@ -6466,6 +6554,173 @@ void _testLoadingSpinner() {
 
     final SemanticsObject object = pumpSemantics();
     expect(object.semanticRole?.kind, EngineSemanticsRole.loadingSpinner);
+  });
+
+  test('preserves active DOM focus when ancestor role updates (#192792)', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          flags: const ui.SemanticsFlags(
+            isTextField: true,
+            isFocused: ui.Tristate.isTrue,
+            isEnabled: ui.Tristate.isTrue,
+          ),
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+      ],
+    );
+    tester.apply();
+
+    final DomElement textFieldInput = owner().debugSemanticsTree![1]!.element.querySelector(
+      'input',
+    )!;
+    expect(domDocument.activeElement, textFieldInput);
+
+    // Trigger a role change on ancestor node 0 (e.g. GenericRole -> SemanticScrollable).
+    tester.updateNode(
+      id: 0,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+      actions: 0 | ui.SemanticsAction.scrollUp.index,
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          flags: const ui.SemanticsFlags(
+            isTextField: true,
+            isFocused: ui.Tristate.isTrue,
+            isEnabled: ui.Tristate.isTrue,
+          ),
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expect(domDocument.activeElement, textFieldInput);
+  });
+
+  test('respects isAccessibilityFocusBlocked on leaf and container nodes and restores label on unblock (#191484)', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    // 1. Start unblocked so leaf text node creates SizedSpanRepresentation (<span>Status ready</span>).
+    tester.updateNode(
+      id: 0,
+      label: 'Blocked container',
+      flags: const ui.SemanticsFlags(isFocused: ui.Tristate.isFalse),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          label: 'Status ready',
+          flags: const ui.SemanticsFlags(isLiveRegion: true),
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+        tester.updateNode(
+          id: 2,
+          label: 'Accessible child',
+          rect: const ui.Rect.fromLTRB(0, 50, 100, 100),
+        ),
+        tester.updateNode(
+          id: 3,
+          label: 'Blocked button',
+          flags: const ui.SemanticsFlags(isButton: true, isFocused: ui.Tristate.isFalse),
+          rect: const ui.Rect.fromLTRB(0, 100, 100, 150),
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject blockedContainer = tester.getSemanticsObject(0);
+    final SemanticsObject blockedLeaf = tester.getSemanticsObject(1);
+    final SemanticsObject blockedButton = tester.getSemanticsObject(3);
+    expect(blockedLeaf.element.text, 'Status ready');
+
+    // 2. Block nodes.
+    tester.updateNode(
+      id: 0,
+      label: 'Blocked container',
+      flags: const ui.SemanticsFlags(
+        isAccessibilityFocusBlocked: true,
+        isFocused: ui.Tristate.isFalse,
+      ),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          label: 'Status ready',
+          flags: const ui.SemanticsFlags(isAccessibilityFocusBlocked: true, isLiveRegion: true),
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+        tester.updateNode(
+          id: 2,
+          label: 'Accessible child',
+          rect: const ui.Rect.fromLTRB(0, 50, 100, 100),
+        ),
+        tester.updateNode(
+          id: 3,
+          label: 'Blocked button',
+          flags: const ui.SemanticsFlags(
+            isButton: true,
+            isAccessibilityFocusBlocked: true,
+            isFocused: ui.Tristate.isFalse,
+          ),
+          rect: const ui.Rect.fromLTRB(0, 100, 100, 150),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expect(blockedContainer.isFocusable, isFalse);
+    expect(blockedContainer.element.getAttribute('role'), 'none');
+    expect(blockedContainer.element.getAttribute('aria-label'), isNull);
+    expect(blockedLeaf.element.getAttribute('aria-hidden'), 'true');
+    expect(blockedLeaf.element.text, isEmpty);
+    expect(blockedButton.isFocusable, isFalse);
+    expect(blockedButton.element.getAttribute('aria-hidden'), 'true');
+    expect(blockedButton.element.getAttribute('tabindex'), isNull);
+
+    // 3. Unblock nodes and verify label and focusability are restored.
+    tester.updateNode(
+      id: 0,
+      label: 'Blocked container',
+      flags: const ui.SemanticsFlags(isFocused: ui.Tristate.isFalse),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          label: 'Status ready',
+          flags: const ui.SemanticsFlags(isLiveRegion: true),
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+        tester.updateNode(
+          id: 2,
+          label: 'Accessible child',
+          rect: const ui.Rect.fromLTRB(0, 50, 100, 100),
+        ),
+        tester.updateNode(
+          id: 3,
+          label: 'Blocked button',
+          flags: const ui.SemanticsFlags(isButton: true, isFocused: ui.Tristate.isFalse),
+          rect: const ui.Rect.fromLTRB(0, 100, 100, 150),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expect(blockedContainer.isFocusable, isTrue);
+    expect(blockedContainer.element.getAttribute('role'), 'group');
+    expect(blockedContainer.element.getAttribute('aria-label'), 'Blocked container');
+    expect(blockedLeaf.element.getAttribute('aria-hidden'), isNull);
+    expect(blockedLeaf.element.text, 'Status ready');
+    expect(blockedButton.isFocusable, isTrue);
+    expect(blockedButton.element.getAttribute('aria-hidden'), isNull);
+    expect(blockedButton.element.getAttribute('tabindex'), '0');
   });
 
   semantics().semanticsEnabled = false;

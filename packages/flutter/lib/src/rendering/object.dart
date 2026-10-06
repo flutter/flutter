@@ -9,6 +9,7 @@
 /// @docImport 'box.dart';
 /// @docImport 'paragraph.dart';
 /// @docImport 'proxy_box.dart';
+/// @docImport 'sliver.dart';
 /// @docImport 'view.dart';
 /// @docImport 'viewport.dart';
 library;
@@ -1406,6 +1407,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     } else if (_semanticsOwner != null) {
       _semanticsOwner?.dispose();
       _semanticsOwner = null;
+      // Deferred updates would otherwise retain their render objects until
+      // this owner is disposed; re-enabling semantics rebuilds from scratch.
+      _deferredNodesNeedingSemanticsGeometryUpdate.clear();
       onSemanticsOwnerDisposed?.call();
     }
   }
@@ -1434,6 +1438,15 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// Compare to [_nodesNeedingSemanticsUpdate], which tracks semantics boundaries of dirty nodes,
   /// this set only tracks the dirty nodes that need their semantics geometry updated directly.
   final Set<RenderObject> _nodesNeedingSemanticsGeometryUpdate = <RenderObject>{};
+
+  /// Nodes whose geometry update was skipped by [flushSemantics] because they
+  /// were not part of the semantics tree at the time, e.g. their branch was
+  /// blocked by [BlockSemantics].
+  ///
+  /// A blocked node can still move, so the update is retried on every flush
+  /// instead of dropped; otherwise the node would rejoin the tree with stale
+  /// geometry.
+  final Set<RenderObject> _deferredNodesNeedingSemanticsGeometryUpdate = <RenderObject>{};
 
   /// Update the semantics for render objects marked as needing a semantics
   /// update.
@@ -1506,12 +1519,30 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       // It is possible the updateChildren above caused some nodes to be added
       // to _nodesNeedingSemanticsGeometryUpdate. Therefore, we need to
       // process them here.
-      final List<RenderObject> nodesToProcessGeometry = _nodesNeedingSemanticsGeometryUpdate
-          .where(
-            (RenderObject object) =>
-                !object._needsLayout && object.owner == this && !object._semantics.parentDataDirty,
-          )
-          .toList();
+      //
+      // Deferred geometry updates are retried as well; if their branch
+      // rejoined the tree in the updateChildren phase above, they can now be
+      // applied.
+      if (_deferredNodesNeedingSemanticsGeometryUpdate.isNotEmpty) {
+        _nodesNeedingSemanticsGeometryUpdate.addAll(_deferredNodesNeedingSemanticsGeometryUpdate);
+        _deferredNodesNeedingSemanticsGeometryUpdate.clear();
+      }
+      final nodesToProcessGeometry = <RenderObject>[];
+      for (final RenderObject object in _nodesNeedingSemanticsGeometryUpdate) {
+        if (object._needsLayout || object.owner != this) {
+          // A node that still needs layout marks itself again after its next
+          // layout; a node that left this owner no longer needs the update.
+          continue;
+        }
+        if (object._semantics.parentDataDirty) {
+          // Not part of the semantics tree right now (e.g. blocked by
+          // BlockSemantics), but the node may still move. Defer the update
+          // until the branch rejoins instead of dropping it.
+          _deferredNodesNeedingSemanticsGeometryUpdate.add(object);
+          continue;
+        }
+        nodesToProcessGeometry.add(object);
+      }
       _nodesNeedingSemanticsGeometryUpdate.clear();
 
       // For every node in this list, needs to clear geometry immediate _RenderObjectSemantics
@@ -1536,32 +1567,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           continue;
         }
 
-        if (!node._semantics.contributesToSemanticsTree) {
-          // This node merely presents its subtree in the mergeup, so we need to clear
-          // the geometry for all the semantics nodes in the mergeup.
-          for (final _RenderObjectSemantics child
-              in node._semantics.mergeUp.whereType<_RenderObjectSemantics>()) {
-            if (child.shouldFormSemanticsNode) {
-              child.geometry = null;
-            } else {
-              // Even though this node does not form a semantics node, it still
-              // represents a group of render objects in the subtree, where a node that
-              // forms a semantics node is in its _children.
-              for (final _RenderObjectSemantics nodeInSubtree in child._children) {
-                assert(nodeInSubtree.shouldFormSemanticsNode);
-                nodeInSubtree.geometry = null;
-              }
-            }
-          }
-          continue;
-        }
-        // If we reach here, this node either forms a node but not a relayout boundary,
-        // or it does not form a node but still contributes to the semantics tree.
-        // In both cases, we need to clear the geometry for all the semantics nodes in
-        // the subtree.
-        for (final _RenderObjectSemantics child in node._semantics._children) {
-          child.geometry = null;
-        }
+        node._semantics._clearImmediateChildrenGeometry();
       }
 
       // Used to invalidate the [_RenderObjectSemantics.firstAncestorNodeWithCleanGeometry] cache.
@@ -1818,6 +1824,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     _nodesNeedingCompositingBitsUpdate.clear();
     _nodesNeedingPaint.clear();
     _nodesNeedingSemanticsUpdate.clear();
+    _deferredNodesNeedingSemanticsGeometryUpdate.clear();
   }
 }
 
@@ -5515,19 +5522,19 @@ typedef _MergeUpAndSiblingMergeGroups = (
 ///
 /// Merge all fragments from [mergeUp] and decide which [_RenderObjectSemantics]
 /// should form a node, i.e. [shouldFormSemanticsNode] is true. Stores the
-/// [_RenderObjectSemantics] that should form a node into [_children].
+/// [_RenderObjectSemantics] that should form a node into [_childrenInSemanticsTree].
 ///
-/// At this point, walking the [_children] forms a tree
+/// At this point, walking the [_childrenInSemanticsTree] forms a tree
 /// that exactly resemble the resulting semantics node tree.
 ///
 /// ### Phase 3
 ///
-/// Walks the [_children] and calculate their
+/// Walks the [_childrenInSemanticsTree] and calculate their
 /// [_SemanticsGeometry] based on renderObject relationship.
 ///
 /// ### Phase 4
 ///
-/// Walks the [_children] and produce semantics node for
+/// Walks the [_childrenInSemanticsTree] and produce semantics node for
 /// each [_RenderObjectSemantics] plus the sibling nodes.
 ///
 /// Phase 2, 3, 4 each depends on previous step to finished updating the
@@ -5585,7 +5592,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   /// A list to store immediate child [_RenderObjectSemantics]s that will form
   /// semantics nodes.
-  final List<_RenderObjectSemantics> _children = <_RenderObjectSemantics>[];
+  final List<_RenderObjectSemantics> _childrenInSemanticsTree = <_RenderObjectSemantics>[];
 
   /// Merge groups that will form additional sibling nodes.
   final List<List<_SemanticsFragment>> siblingMergeGroups = <List<_SemanticsFragment>>[];
@@ -5729,7 +5736,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   static void debugCheckForBuilds(_RenderObjectSemantics node) {
     assert(node.built);
-    node._children.forEach(debugCheckForBuilds);
+    node._childrenInSemanticsTree.forEach(debugCheckForBuilds);
   }
 
   /// Whether this render object semantics will block other render object
@@ -5784,7 +5791,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   /// Updates the [parentData] for the [_RenderObjectSemantics]s in the
   /// rendering subtree and forms a [_RenderObjectSemantics] tree where children
-  /// are stored in [_children].
+  /// are stored in [_childrenInSemanticsTree].
   ///
   /// This method does the phase 1 and 2 of the four phases documented on
   /// [_RenderObjectSemantics].
@@ -5800,7 +5807,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Merge all fragments from [mergeUp] and decide which [_RenderObjectSemantics]
   /// should form a node. i.e. [shouldFormSemanticsNode] is true. Stores the
   /// [_RenderObjectSemantics] that should form a node with elevation adjustments
-  /// into [_children].
+  /// into [_childrenInSemanticsTree].
   void updateChildren() {
     assert(parentData != null || isRoot, 'parent data can only be null for root rendering object');
     configProvider.reset();
@@ -5847,8 +5854,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     siblingMergeGroups.addAll(result.$2);
 
     // Construct tree for nodes that will form semantics nodes.
-    final Set<_RenderObjectSemantics> oldChildren = _children.toSet();
-    _children.clear();
+    final Set<_RenderObjectSemantics> oldChildren = _childrenInSemanticsTree.toSet();
+    _childrenInSemanticsTree.clear();
     if (!contributesToSemanticsTree) {
       return;
     }
@@ -5867,7 +5874,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         in result.$1.whereType<_RenderObjectSemantics>()) {
       assert(childSemantics.contributesToSemanticsTree);
       if (childSemantics.shouldFormSemanticsNode) {
-        for (final _RenderObjectSemantics child in childSemantics._children) {
+        for (final _RenderObjectSemantics child in childSemantics._childrenInSemanticsTree) {
           child.parentInSemanticsTree = childSemantics;
         }
         // In general geometry is only dirty during the first build or markNeedsLayout.
@@ -5889,12 +5896,16 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         // Frame 2: B is marked dirty again and decide C should be included
         // in the semantics tree. We will run into this situation where C's geometry
         // is dirty but it is not in the _nodesNeedingSemanticsGeometryUpdate.
+        //
+        // A node that moved while its branch was blocked has stale, not
+        // dirty, geometry, so this check misses it. That case is covered by
+        // PipelineOwner._deferredNodesNeedingSemanticsGeometryUpdate.
         if (childSemantics.geometryDirty) {
           renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(childSemantics.renderObject);
         }
-        _children.add(childSemantics);
+        _childrenInSemanticsTree.add(childSemantics);
       } else {
-        _children.addAll(childSemantics._children);
+        _childrenInSemanticsTree.addAll(childSemantics._childrenInSemanticsTree);
         siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
       }
     }
@@ -5902,11 +5913,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     // Otherwise, we won't know if this node shouldFormSemanticsNode until the parent
     // of this node determines it.
     if (isRoot || configProvider.effective.isSemanticBoundary) {
-      for (final _RenderObjectSemantics child in _children) {
+      for (final _RenderObjectSemantics child in _childrenInSemanticsTree) {
         child.parentInSemanticsTree = this;
       }
     }
-    oldChildren.removeAll(_children);
+    oldChildren.removeAll(_childrenInSemanticsTree);
     for (final removedChild in oldChildren) {
       if (removedChild.parentInSemanticsTree == this) {
         removedChild.parentInSemanticsTree = null;
@@ -6088,9 +6099,13 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     if (parentData == newParentData) {
       return;
     }
+    final bool wasParentDataDirty = parentDataDirty;
     // Parent data changes may result in node formation changes.
     markNeedsBuild();
     parentData = newParentData;
+    if (wasParentDataDirty) {
+      geometry = null;
+    }
     updateChildren();
   }
 
@@ -6102,7 +6117,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   /// Updates the [geometry] for this [_RenderObjectSemantics]s and the dirty
-  /// children's subtree in [_children].
+  /// children's subtree in [_childrenInSemanticsTree].
   ///
   /// This method does the phase 3 of the four phases documented on
   /// [_RenderObjectSemantics].
@@ -6124,7 +6139,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   void _updateChildGeometry({bool onlyDirtyChildren = false}) {
     assert(geometry != null);
     final _SemanticsGeometry parentGeometry = geometry!;
-    for (final _RenderObjectSemantics child in _children) {
+    for (final _RenderObjectSemantics child in _childrenInSemanticsTree) {
       if (onlyDirtyChildren && !child.geometryDirty) {
         continue;
       }
@@ -6137,15 +6152,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       );
       child._updateGeometry(newGeometry: childGeometry);
     }
-    for (final _RenderObjectSemantics explicitSiblingChild
-        in siblingMergeGroups
-            .expand<_SemanticsFragment>((List<_SemanticsFragment> group) => group)
-            .whereType<_RenderObjectSemantics>()
-            .expand(
-              (_RenderObjectSemantics siblingChild) => siblingChild.shouldFormSemanticsNode
-                  ? <_RenderObjectSemantics>[siblingChild]
-                  : siblingChild._children,
-            )) {
+    for (final _RenderObjectSemantics explicitSiblingChild in _getExplicitSiblingChildren()) {
       if (onlyDirtyChildren && !explicitSiblingChild.geometryDirty) {
         continue;
       }
@@ -6157,6 +6164,58 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         child: explicitSiblingChild,
       );
       explicitSiblingChild._updateGeometry(newGeometry: childGeometry);
+    }
+  }
+
+  Iterable<_RenderObjectSemantics> _getExplicitSiblingChildren() {
+    return siblingMergeGroups
+        .expand<_SemanticsFragment>((List<_SemanticsFragment> group) => group)
+        .whereType<_RenderObjectSemantics>()
+        .expand(
+          (_RenderObjectSemantics siblingChild) => siblingChild.shouldFormSemanticsNode
+              ? <_RenderObjectSemantics>[siblingChild]
+              : siblingChild._childrenInSemanticsTree,
+        );
+  }
+
+  /// Clears the geometry of all immediate child semantics nodes, including any
+  /// explicit sibling children in sibling merge groups.
+  ///
+  /// This is called during [PipelineOwner.flushSemantics] when this render
+  /// object's geometry (such as size, transform, or clip) changes.
+  ///
+  /// Changes to a render object's geometry only affect the relative positions of
+  /// the immediate semantics-forming children directly beneath it. Descendants
+  /// further down the tree have geometries positioned relative to their
+  /// respective parent semantics node, so their geometries remain valid and do
+  /// not need to be cleared.
+  void _clearImmediateChildrenGeometry() {
+    if (!contributesToSemanticsTree) {
+      // This node merely presents its subtree in the mergeup, so we need to clear
+      // the geometry for all the semantics nodes in the mergeup.
+      for (final _RenderObjectSemantics child in mergeUp.whereType<_RenderObjectSemantics>()) {
+        if (child.shouldFormSemanticsNode) {
+          child.geometry = null;
+        } else {
+          // Even though this child does not form a semantics node, it still
+          // represents a group of render objects in the subtree, where a node that
+          // forms a semantics node is in its _childrenInSemanticsTree.
+          for (final _RenderObjectSemantics nodeInSubtree in child._childrenInSemanticsTree) {
+            assert(nodeInSubtree.shouldFormSemanticsNode);
+            nodeInSubtree.geometry = null;
+          }
+        }
+      }
+    } else {
+      // There won't be mergup for this node. So just clearing its _childrenInSemanticsTree
+      // geometry should be enough.
+      for (final _RenderObjectSemantics child in _childrenInSemanticsTree) {
+        child.geometry = null;
+      }
+    }
+    // Sibling merge groups may also contribute explicit semantics nodes.
+    for (final _RenderObjectSemantics child in _getExplicitSiblingChildren()) {
+      child.geometry = null;
     }
   }
 
@@ -6245,7 +6304,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Builds the semantics subtree under the [cachedSemanticsNode].
   void _buildSemanticsSubtree({required Set<int> usedSemanticsIds}) {
     final children = <SemanticsNode>[];
-    for (final _RenderObjectSemantics child in _children) {
+    for (final _RenderObjectSemantics child in _childrenInSemanticsTree) {
       if (child.parentDataDirty) {
         continue;
       }
@@ -6348,7 +6407,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
             assert(fragment.configToMergeUp == null);
             continue;
           }
-          explicitChildren.addAll(fragment._children);
+          explicitChildren.addAll(fragment._childrenInSemanticsTree);
         }
         if (fragment.configToMergeUp != null) {
           fragment.mergesToSibling = true;
@@ -6400,7 +6459,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
             node.tags!.addAll(tags);
           }
         }
-        node.isMergedIntoParent = parentData?.mergeIntoParent ?? false;
+        node.isMergedIntoParent =
+            configProvider.effective.isMergingSemanticsOfDescendants ||
+            (parentData?.mergeIntoParent ?? false);
       }
     }
     _updateSiblingNodesGeometries();
@@ -6545,9 +6606,13 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   void _marksConflictsInMergeGroup(List<_SemanticsFragment> mergeGroup, {bool isMergeUp = false}) {
+    final wasConflicting = <_RenderObjectSemantics>{};
     final hasSiblingConflict = <_SemanticsFragment>{};
     for (var i = 0; i < mergeGroup.length; i += 1) {
       final _SemanticsFragment fragment = mergeGroup[i];
+      if (fragment is _RenderObjectSemantics && fragment._hasSiblingConflict) {
+        wasConflicting.add(fragment);
+      }
       // Remove old value
       fragment.markSiblingConfigurationConflict(false);
       if (fragment.configToMergeUp == null) {
@@ -6565,8 +6630,18 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         }
       }
     }
+    // A sibling conflict feeds shouldFormSemanticsNode, so gaining or losing one
+    // changes whether the fragment produces a semantics node of its own. What it
+    // has cached is stale until it is rebuilt.
     for (final fragment in hasSiblingConflict) {
       fragment.markSiblingConfigurationConflict(true);
+      if (fragment is _RenderObjectSemantics && !wasConflicting.remove(fragment)) {
+        fragment.markNeedsBuild();
+      }
+    }
+    // Whatever is left in wasConflicting stopped conflicting in this pass.
+    for (final fragment in wasConflicting) {
+      fragment.markNeedsBuild();
     }
   }
 
@@ -6580,14 +6655,14 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     _containsIncompleteFragment = false;
     mergeUp.clear();
     siblingMergeGroups.clear();
-    _children.clear();
+    _childrenInSemanticsTree.clear();
     semanticsNodes.clear();
     configProvider.clear();
   }
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return _children
+    return _childrenInSemanticsTree
         .map<DiagnosticsNode>((_RenderObjectSemantics child) => child.toDiagnosticsNode())
         .toList();
   }

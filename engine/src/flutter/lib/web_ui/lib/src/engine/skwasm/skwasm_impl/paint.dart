@@ -35,7 +35,8 @@ class SkwasmPaint implements ui.Paint {
       paintSetColorFilter(rawPaint, backendFilter.handle);
     }
 
-    final ShaderHandle? shaderHandle = _shader?.handle;
+    final ShaderHandle? shaderHandle =
+        (_shader?.getBackendShader(filterQuality) as SkwasmShader?)?.handle;
     if (shaderHandle != null) {
       paintSetShader(rawPaint, shaderHandle);
     }
@@ -54,9 +55,9 @@ class SkwasmPaint implements ui.Paint {
       } else {
         engineFilter = filter as EngineImageFilter;
       }
-      final backendFilter =
-          engineFilter.getBackendFilter(defaultBlurTileMode: defaultBlurTileMode)
-              as SkwasmImageFilter;
+      final backendFilter = engineFilter.getBackendFilter(
+        defaultBlurTileMode: defaultBlurTileMode,
+      ) as SkwasmImageFilter;
       final ImageFilterHandle nativeHandle = backendFilter.nativeFilter;
       if (nativeHandle != nullptr) {
         paintSetImageFilter(rawPaint, nativeHandle);
@@ -106,11 +107,10 @@ class SkwasmPaint implements ui.Paint {
 
   @override
   set shader(ui.Shader? uiShader) {
-    uiShader as SkwasmShader?;
-    _shader = uiShader;
+    _shader = uiShader as EngineShader?;
   }
 
-  SkwasmShader? _shader;
+  EngineShader? _shader;
 
   @override
   ui.FilterQuality filterQuality = ui.FilterQuality.none;

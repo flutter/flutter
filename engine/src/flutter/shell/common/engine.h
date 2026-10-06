@@ -354,6 +354,10 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     /// @param[in]  request  The request to change the focus state of the view.
     virtual void RequestViewFocusChange(
         const ViewFocusChangeRequest& request) = 0;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Notifies the shell to reset internal engine caches.
+    virtual void OnEngineResetInternalState() = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -897,6 +901,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
 
   // |RuntimeDelegate|
   FontCollection& GetFontCollection() override;
+
+  // |RuntimeDelegate|
+  void ResetInternalState() override;
 
   // |RuntimeDelegate|
   std::shared_ptr<AssetManager> GetAssetManager() override;

@@ -26,6 +26,7 @@ import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'android_builder.dart';
 import 'android_console.dart';
+import 'android_engine_cli_flags.dart';
 import 'android_sdk.dart';
 import 'application_package.dart';
 import 'gradle_utils.dart' as gradle_utils;
@@ -64,16 +65,12 @@ class AndroidDevice extends Device {
     this.deviceCodeName,
     required super.logger,
     required ProcessManager processManager,
-    required Platform platform,
-    required AndroidSdk androidSdk,
-    required FileSystem fileSystem,
-    AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
+    required this._platform,
+    required this._androidSdk,
+    required this._fileSystem,
+    this._androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
   }) : _logger = logger,
        _processManager = processManager,
-       _androidSdk = androidSdk,
-       _platform = platform,
-       _fileSystem = fileSystem,
-       _androidConsoleSocketFactory = androidConsoleSocketFactory,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(category: Category.mobile, platformType: PlatformType.android, ephemeral: true);
 
@@ -570,7 +567,9 @@ class AndroidDevice extends Device {
       final releaseManifestEngineShellArgs = <String>[
         if (debuggingOptions.buildInfo.mode == BuildMode.release) ...<String>[
           ...debuggingOptions.getAndroidLaunchArguments(),
-          if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
+          if (platformArgs[AndroidEngineCliFlags.traceStartup] as bool? ?? false)
+            '--${AndroidEngineCliFlags.traceStartup}',
+          if (route != null) '--${AndroidEngineCliFlags.route}=$route',
         ],
       ];
 
@@ -587,12 +586,10 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage =
-          await ApplicationPackageFactory.instance!.getPackageForPlatform(
-                devicePlatform,
-                buildInfo: debuggingOptions.buildInfo,
-              )
-              as AndroidApk?;
+      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+        devicePlatform,
+        buildInfo: debuggingOptions.buildInfo,
+      ) as AndroidApk?;
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {
@@ -606,7 +603,7 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
+    final bool traceStartup = platformArgs[AndroidEngineCliFlags.traceStartup] as bool? ?? false;
     ProtocolDiscovery? vmServiceDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
@@ -614,7 +611,12 @@ class AndroidDevice extends Device {
         // Avoid using getLogReader, which returns a singleton instance, because the
         // VM Service discovery will dispose at the end. creating a new logger here allows
         // logs to be surfaced normally during `flutter drive`.
-        await AdbLogReader.createLogReader(this, _processManager, _logger),
+        await AdbLogReader.createLogReader(
+          this,
+          _processManager,
+          _logger,
+          adbLogFiltering: debuggingOptions.adbLogFiltering,
+        ),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -628,9 +630,11 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
-      if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
-      if (route != null) ...<String>['--es', 'route', route],
+      if (debuggingOptions.buildInfo.mode != BuildMode.release) ...<String>[
+        ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
+        if (traceStartup) ...<String>['--ez', AndroidEngineCliFlags.traceStartup, 'true'],
+        if (route != null) ...<String>['--es', AndroidEngineCliFlags.route, route],
+      ],
       if (debuggingOptions.debuggingEnabled && userIdentifier != null) ...<String>[
         '--user',
         userIdentifier,
@@ -739,6 +743,7 @@ class AndroidDevice extends Device {
   FutureOr<DeviceLogReader> getLogReader({
     ApplicationPackage? app,
     bool includePastLogs = false,
+    bool adbLogFiltering = true,
   }) async {
     // The Android log reader isn't app-specific. The `app` parameter isn't used.
     if (includePastLogs) {
@@ -747,9 +752,15 @@ class AndroidDevice extends Device {
         _processManager,
         _logger,
         includePastLogs: true,
+        adbLogFiltering: adbLogFiltering,
       );
     } else {
-      return _logReader ??= await AdbLogReader.createLogReader(this, _processManager, _logger);
+      return _logReader ??= await AdbLogReader.createLogReader(
+        this,
+        _processManager,
+        _logger,
+        adbLogFiltering: adbLogFiltering,
+      );
     }
   }
 
@@ -998,10 +1009,17 @@ class AndroidMemoryInfo extends MemoryInfo {
 
 /// A log reader that logs from `adb logcat`.
 class AdbLogReader extends DeviceLogReader {
-  AdbLogReader._(this._adbProcess, this.name, this._logger);
+  AdbLogReader._(this._adbProcess, this.name, this._logger, {this.adbLogFiltering = true});
 
   @visibleForTesting
-  factory AdbLogReader.test(Process adbProcess, String name, Logger logger) = AdbLogReader._;
+  factory AdbLogReader.test(
+    Process adbProcess,
+    String name,
+    Logger logger, {
+    bool adbLogFiltering = true,
+  }) {
+    return AdbLogReader._(adbProcess, name, logger, adbLogFiltering: adbLogFiltering);
+  }
 
   /// Create a new [AdbLogReader] from an [AndroidDevice] instance.
   static Future<AdbLogReader> createLogReader(
@@ -1009,6 +1027,7 @@ class AdbLogReader extends DeviceLogReader {
     ProcessManager processManager,
     Logger logger, {
     bool includePastLogs = false,
+    bool adbLogFiltering = true,
   }) async {
     // logcat -T is not supported on Android releases before Lollipop.
     const kLollipopVersionCode = 21;
@@ -1036,7 +1055,7 @@ class AdbLogReader extends DeviceLogReader {
       ]);
     }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
-    return AdbLogReader._(process, device.displayName, logger);
+    return AdbLogReader._(process, device.displayName, logger, adbLogFiltering: adbLogFiltering);
   }
 
   int? _appPid;
@@ -1044,6 +1063,8 @@ class AdbLogReader extends DeviceLogReader {
   final Process _adbProcess;
 
   final Logger _logger;
+
+  final bool adbLogFiltering;
 
   @override
   final String name;
@@ -1158,7 +1179,9 @@ class AdbLogReader extends DeviceLogReader {
     if (logMatch != null) {
       var acceptLine = false;
 
-      if (_fatalCrash) {
+      if (!adbLogFiltering) {
+        acceptLine = true;
+      } else if (_fatalCrash) {
         // While a fatal crash is going on, only accept lines from the crash
         // Otherwise the crash log in the console may get interrupted
 
@@ -1221,11 +1244,9 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
   AndroidDevicePortForwarder({
     required ProcessManager processManager,
     required Logger logger,
-    required String deviceId,
-    required String adbPath,
-  }) : _deviceId = deviceId,
-       _adbPath = adbPath,
-       _logger = logger,
+    required this._deviceId,
+    required this._adbPath,
+  }) : _logger = logger,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final String _deviceId;

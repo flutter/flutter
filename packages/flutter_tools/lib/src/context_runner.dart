@@ -32,14 +32,12 @@ import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
-import 'device.dart';
 import 'devtools_launcher.dart';
 import 'doctor.dart';
 import 'emulator.dart';
 import 'features.dart';
 import 'flutter_application_package.dart';
 import 'flutter_cache.dart';
-import 'flutter_device_manager.dart';
 import 'flutter_features.dart';
 import 'flutter_features_config.dart';
 import 'flutter_manifest.dart';
@@ -183,26 +181,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         flutterProjectFactory: globals.projectFactory,
       ),
       DevFSConfig: () => DevFSConfig(),
-      DeviceManager: () => FlutterDeviceManager(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        androidSdk: globals.androidSdk,
-        iosSimulatorUtils: globals.iosSimulatorUtils!,
-        featureFlags: featureFlags,
-        fileSystem: globals.fs,
-        iosWorkflow: globals.iosWorkflow!,
-        artifacts: globals.artifacts!,
-        flutterVersion: globals.flutterVersion,
-        androidWorkflow: androidWorkflow!,
-        xcDevice: globals.xcdevice!,
-        userMessages: globals.userMessages,
-        windowsWorkflow: windowsWorkflow!,
-        macOSWorkflow: MacOSWorkflow(platform: globals.platform, featureFlags: featureFlags),
-        operatingSystemUtils: globals.os,
-        customDevicesConfig: globals.customDevicesConfig,
-        nativeAssetsBuilder: globals.nativeAssetsBuilder,
-      ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
         artifacts: globals.artifacts!,
@@ -348,7 +326,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
         xcode: globals.xcode!,
         iproxy: IProxy(
-          iproxyPath: globals.artifacts!.getHostArtifact(HostArtifact.iproxy).path,
+          artifacts: globals.artifacts!,
           logger: globals.logger,
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,

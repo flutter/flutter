@@ -91,6 +91,51 @@ void main() {
     );
 
     testUsingContext(
+      'empty pubspec with data assets from hook',
+      () async {
+        writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'my_app');
+        globals.fs.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync('');
+        final File dataAssetFile = globals.fs.file('data/foo.txt')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('hello');
+
+        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+          flutterHookResult: FlutterHookResult(
+            buildStart: DateTime.now(),
+            buildEnd: DateTime.now(),
+            dataAssets: <HookAsset>[
+              HookAsset(file: dataAssetFile.uri, name: 'data/foo.txt', package: 'my_app'),
+            ],
+            dependencies: <Uri>[dataAssetFile.uri],
+          ),
+        );
+        expect(bundle.entries.keys, contains('packages/my_app/data/foo.txt'));
+        expect(
+          const StandardMessageCodec().decodeMessage(
+            ByteData.sublistView(
+              Uint8List.fromList(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()),
+            ),
+          ),
+          <Object?, Object?>{
+            'packages/my_app/data/foo.txt': <Object?>[
+              <Object?, Object?>{'asset': 'packages/my_app/data/foo.txt'},
+            ],
+          },
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        Platform: () => platform,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
       'wildcard directories do not include subdirectories',
       () async {
         writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'my_app');
@@ -591,19 +636,17 @@ flutter:
       );
     });
 
-    testWithoutContext(
-      "AssetBundleEntry::content::isModified is true when an asset's transformers change in between builds",
-      () async {
-        final FileSystem fileSystem = MemoryFileSystem.test();
+    testWithoutContext("AssetBundleEntry::content::isModified is true when an asset's transformers change in between builds", () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
 
-        fileSystem.file('my-asset.txt').createSync();
+      fileSystem.file('my-asset.txt').createSync();
 
-        final logger = BufferLogger.test();
-        final platform = FakePlatform();
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-        fileSystem.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
+      final logger = BufferLogger.test();
+      final platform = FakePlatform();
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
@@ -611,35 +654,35 @@ flutter:
       transformers:
         - package: my-transformer-one
 ''');
-        final bundle = ManifestAssetBundle(
-          logger: logger,
-          fileSystem: fileSystem,
+      final bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: Cache.defaultFlutterRoot(
           platform: platform,
-          flutterRoot: Cache.defaultFlutterRoot(
-            platform: platform,
-            fileSystem: fileSystem,
-            userMessages: UserMessages(),
-          ),
-        );
+          fileSystem: fileSystem,
+          userMessages: UserMessages(),
+        ),
+      );
 
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
-        );
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        targetPlatform: TargetPlatform.tester,
+      );
 
-        expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
-        bundle.entries['my-asset.txt']!.content.markClean();
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
+      bundle.entries['my-asset.txt']!.content.markClean();
 
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
-        );
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        targetPlatform: TargetPlatform.tester,
+      );
 
-        expect(bundle.entries['my-asset.txt']!.content.isModified, isFalse);
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isFalse);
 
-        fileSystem.file('pubspec.yaml').writeAsStringSync(r'''
+      fileSystem.file('pubspec.yaml').writeAsStringSync(r'''
 name: my_app
 flutter:
   assets:
@@ -649,15 +692,14 @@ flutter:
         - package: my-transformer-two
 ''');
 
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
-        );
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        targetPlatform: TargetPlatform.tester,
+      );
 
-        expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
-      },
-    );
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
+    });
   });
 
   group('AssetBundle.build (web builds)', () {
@@ -737,9 +779,8 @@ flutter:
 
         final Uint8List manifestBinJsonBytes = base64.decode(
           json.decode(
-                utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()),
-              )
-              as String,
+            utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()),
+          ) as String,
         );
 
         final manifestBinBytes = Uint8List.fromList(
