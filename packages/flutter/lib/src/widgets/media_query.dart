@@ -363,13 +363,12 @@ class MediaQueryData {
   /// this method again when it changes to keep the constructed [MediaQueryData]
   /// updated.
   ///
-  /// In debug mode there is one exception: a [debugViewMetricsOverrides] entry
-  /// for `view` supersedes the platform-wide values `platformData` supplies, so
-  /// while one is installed — and on the notification that reports it being
-  /// removed — the last three matter even when `platformData` is provided.
-  /// [MediaQuery.fromView] handles this; a caller that reproduces the
-  /// `platformData` early out itself would miss overrides being installed and
-  /// removed.
+  /// A [debugViewMetricsOverrides] entry for `view` is applied by the view and
+  /// its [dart:ui.PlatformDispatcher], so it reaches this constructor only
+  /// through what they report: its geometry always, and its platform-wide
+  /// values only when `platformData` does not supply them. An ancestor
+  /// [MediaQuery] that does supply them is not overridden, just as it is not
+  /// overridden by the real platform settings.
   ///
   /// In general, [MediaQuery.of], and its associated "...Of" methods, are the
   /// appropriate way to obtain [MediaQueryData] from a widget. This `fromView`
@@ -382,169 +381,78 @@ class MediaQueryData {
   ///    [FlutterView], makes it available to descendant widgets, and sets up
   ///    the appropriate notification listeners to keep the data updated.
   MediaQueryData.fromView(ui.FlutterView view, {MediaQueryData? platformData})
-    : this._fromOverrideAwareView(
-        // A view of a PlatformDispatcher the framework wrapped applies no
-        // override of its own; the one this returns for it does. Everything
-        // below then reads a single view that agrees with
-        // debugViewMetricsOverrides about what is overridden.
-        debugViewWithMetricsOverrides(view),
-        platformData: platformData,
-      );
+    : this._fromView(debugViewWithMetricsOverrides(view), platformData: platformData);
 
-  // A hop, rather than more arguments to [fromView], because a redirecting
-  // constructor cannot bind the override-aware view to a name and the two
-  // arguments below have to be read from that same view.
-  MediaQueryData._fromOverrideAwareView(
-    ui.FlutterView view, {
-    required MediaQueryData? platformData,
-  }) : this._fromView(
-         view,
-         platformData: platformData,
-         accessibilityFeatures: _accessibilityFeaturesReader(view),
-         debugViewMetricsOverride: _debugViewMetricsOverrideFor(view),
-       );
+  // A hop, so that everything below reads the view that applies the
+  // [debugViewMetricsOverrides] entry registered for `view`: a view read
+  // straight from a PlatformDispatcher the framework wrapped applies none of
+  // its own, and the one [debugViewWithMetricsOverrides] returns for it does.
+  MediaQueryData._fromView(ui.FlutterView view, {required MediaQueryData? platformData})
+    : size = view.physicalSize / view.devicePixelRatio,
+      devicePixelRatio = view.devicePixelRatio,
+      _textScaleFactor = 1.0, // _textScaler is the source of truth.
+      _textScaler = _textScalerFromView(view, platformData),
+      // A scaler taken from `platformData` keeps the provenance it had there.
+      // One built here is a [SystemTextScaler], which answers for itself.
+      _debugTextScalerOverrideFallback =
+          kDebugMode && (platformData?._debugTextScalerIsOverridden ?? false),
+      platformBrightness =
+          platformData?.platformBrightness ?? view.platformDispatcher.platformBrightness,
+      padding = EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio),
+      viewPadding = EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio),
+      viewInsets = EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio),
+      systemGestureInsets = EdgeInsets.fromViewPadding(
+        view.systemGestureInsets,
+        view.devicePixelRatio,
+      ),
+      accessibleNavigation =
+          platformData?.accessibleNavigation ??
+          view.platformDispatcher.accessibilityFeatures.accessibleNavigation,
+      invertColors =
+          platformData?.invertColors ?? view.platformDispatcher.accessibilityFeatures.invertColors,
+      disableAnimations =
+          platformData?.disableAnimations ??
+          view.platformDispatcher.accessibilityFeatures.disableAnimations,
+      reduceMotion =
+          platformData?.reduceMotion ?? view.platformDispatcher.accessibilityFeatures.reduceMotion,
+      boldText = platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
+      supportsAnnounce =
+          platformData?.supportsAnnounce ??
+          view.platformDispatcher.accessibilityFeatures.supportsAnnounce,
+      highContrast =
+          platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
+      onOffSwitchLabels =
+          platformData?.onOffSwitchLabels ??
+          view.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
+      alwaysUse24HourFormat =
+          platformData?.alwaysUse24HourFormat ?? view.platformDispatcher.alwaysUse24HourFormat,
+      navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
+      gestureSettings = DeviceGestureSettings.fromView(view),
+      displayFeatures = view.displayFeatures,
+      supportsShowingSystemContextMenu =
+          platformData?.supportsShowingSystemContextMenu ??
+          view.platformDispatcher.supportsShowingSystemContextMenu,
+      lineHeightScaleFactorOverride =
+          platformData?.lineHeightScaleFactorOverride ??
+          view.platformDispatcher.lineHeightScaleFactorOverride,
+      letterSpacingOverride =
+          platformData?.letterSpacingOverride ?? view.platformDispatcher.letterSpacingOverride,
+      wordSpacingOverride =
+          platformData?.wordSpacingOverride ?? view.platformDispatcher.wordSpacingOverride,
+      paragraphSpacingOverride =
+          platformData?.paragraphSpacingOverride ??
+          view.platformDispatcher.paragraphSpacingOverride,
+      displayCornerRadii = _displayCornerRadiiFromView(view);
 
-  // Every platform-wide metric resolves the same way, through [_resolve]: an
-  // override registered for this view makes the value come from this view's
-  // PlatformDispatcher — which is where that override is applied, and where a
-  // value set explicitly on a TestPlatformDispatcher or TestFlutterView
-  // supersedes it — rather than from the platform data an ancestor MediaQuery
-  // supplied. That relies on the view reporting a dispatcher bound to its own
-  // id, which is asserted where the two are paired.
-  MediaQueryData._fromView(
-    ui.FlutterView view, {
-    required MediaQueryData? platformData,
-    required ui.AccessibilityFeatures Function() accessibilityFeatures,
-    required DebugViewMetricsOverride? debugViewMetricsOverride,
-  }) : size = view.physicalSize / view.devicePixelRatio,
-       devicePixelRatio = view.devicePixelRatio,
-       _textScaleFactor = 1.0, // _textScaler is the source of truth.
-       _textScaler = _textScalerFromView(view, platformData, debugViewMetricsOverride),
-       // Preserve provenance for custom scalers inherited from parent data.
-       // Known system and clamped scalers also expose it through the getter.
-       _debugTextScalerOverrideFallback =
-           kDebugMode &&
-           (debugViewMetricsOverride?.textScaleFactor != null ||
-               (platformData?._debugTextScalerIsOverridden ?? false)),
-       platformBrightness = _resolve(
-         debugViewMetricsOverride?.platformBrightness,
-         platformData?.platformBrightness,
-         () => view.platformDispatcher.platformBrightness,
-       ),
-       padding = EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio),
-       viewPadding = EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio),
-       viewInsets = EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio),
-       systemGestureInsets = EdgeInsets.fromViewPadding(
-         view.systemGestureInsets,
-         view.devicePixelRatio,
-       ),
-       accessibleNavigation = _resolve(
-         debugViewMetricsOverride?.accessibleNavigation,
-         platformData?.accessibleNavigation,
-         () => accessibilityFeatures().accessibleNavigation,
-       ),
-       invertColors = _resolve(
-         debugViewMetricsOverride?.invertColors,
-         platformData?.invertColors,
-         () => accessibilityFeatures().invertColors,
-       ),
-       disableAnimations = _resolve(
-         debugViewMetricsOverride?.disableAnimations,
-         platformData?.disableAnimations,
-         () => accessibilityFeatures().disableAnimations,
-       ),
-       reduceMotion = _resolve(
-         debugViewMetricsOverride?.reduceMotion,
-         platformData?.reduceMotion,
-         () => accessibilityFeatures().reduceMotion,
-       ),
-       boldText = _resolve(
-         debugViewMetricsOverride?.boldText,
-         platformData?.boldText,
-         () => accessibilityFeatures().boldText,
-       ),
-       supportsAnnounce = _resolve(
-         debugViewMetricsOverride?.supportsAnnounce,
-         platformData?.supportsAnnounce,
-         () => accessibilityFeatures().supportsAnnounce,
-       ),
-       highContrast = _resolve(
-         debugViewMetricsOverride?.highContrast,
-         platformData?.highContrast,
-         () => accessibilityFeatures().highContrast,
-       ),
-       onOffSwitchLabels = _resolve(
-         debugViewMetricsOverride?.onOffSwitchLabels,
-         platformData?.onOffSwitchLabels,
-         () => accessibilityFeatures().onOffSwitchLabels,
-       ),
-       alwaysUse24HourFormat = _resolve(
-         debugViewMetricsOverride?.alwaysUse24HourFormat,
-         platformData?.alwaysUse24HourFormat,
-         () => view.platformDispatcher.alwaysUse24HourFormat,
-       ),
-       navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
-       gestureSettings = DeviceGestureSettings.fromView(view),
-       displayFeatures = view.displayFeatures,
-       supportsShowingSystemContextMenu =
-           platformData?.supportsShowingSystemContextMenu ??
-           view.platformDispatcher.supportsShowingSystemContextMenu,
-       lineHeightScaleFactorOverride =
-           platformData?.lineHeightScaleFactorOverride ??
-           view.platformDispatcher.lineHeightScaleFactorOverride,
-       letterSpacingOverride =
-           platformData?.letterSpacingOverride ?? view.platformDispatcher.letterSpacingOverride,
-       wordSpacingOverride =
-           platformData?.wordSpacingOverride ?? view.platformDispatcher.wordSpacingOverride,
-       paragraphSpacingOverride =
-           platformData?.paragraphSpacingOverride ??
-           view.platformDispatcher.paragraphSpacingOverride,
-       displayCornerRadii = _displayCornerRadiiFromView(view);
-
-  /// Resolves one platform-wide metric.
-  ///
-  /// [overridden] is what a [debugViewMetricsOverrides] entry for this view
-  /// sets for the metric, or null when it sets nothing; only whether it is null
-  /// matters here, never its value. [reported] is what this view's
-  /// [ui.PlatformDispatcher] says, which already has that override applied —
-  /// and in which a value set explicitly for a test supersedes it, as
-  /// [DebugViewMetricsOverride] documents. Taking the value from there rather
-  /// than from the override keeps [MediaQueryData] and the dispatcher in
-  /// agreement about what the platform currently reports.
-  ///
-  /// [inherited] is what an ancestor [MediaQuery] supplies, which an override
-  /// supersedes so that a per-view override reaches a nested [MediaQuery].
-  static T _resolve<T>(T? overridden, T? inherited, T Function() reported) =>
-      overridden != null ? reported() : inherited ?? reported();
-
-  // Keep platform reads lazy when inherited data supplies the value, while
-  // reading the accessibility snapshot at most once when it is needed.
-  static ui.AccessibilityFeatures Function() _accessibilityFeaturesReader(ui.FlutterView view) {
-    ui.AccessibilityFeatures? features;
-    return () => features ??= view.platformDispatcher.accessibilityFeatures;
-  }
-
-  /// The [debugViewMetricsOverrides] entry `view` applies, or null.
-  ///
-  /// A registry entry alone does not prove that a custom view and its
-  /// dispatcher apply that view's override. Built-in wrappers are recognized;
-  /// other adapters opt in with [debugMarkViewAppliesItsOwnMetricsOverride].
-  static DebugViewMetricsOverride? _debugViewMetricsOverrideFor(ui.FlutterView view) =>
-      debugViewMetricsOverrideApplied(view);
-
-  static TextScaler _textScalerFromView(
-    ui.FlutterView view,
-    MediaQueryData? platformData,
-    DebugViewMetricsOverride? debugViewMetricsOverride,
-  ) {
-    // The same rule as [_resolve], written out because the override carries a
-    // factor while the metric is a [TextScaler]: what the override sets is the
-    // factor the view's dispatcher already scales font sizes by.
-    final overridden = debugViewMetricsOverride?.textScaleFactor != null;
-    if (!overridden && platformData != null) {
-      return platformData.textScaler;
-    }
-    return SystemTextScaler._(view.platformDispatcher, debugScalesLinearly: overridden);
+  static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
+    return platformData?.textScaler ??
+        SystemTextScaler._(
+          view.platformDispatcher,
+          // The dispatcher of a view that applies an overridden factor already
+          // scales font sizes by it; [SystemTextScaler._debugScalesLinearly]
+          // says why the scaler has to know that too.
+          debugScalesLinearly: debugViewMetricsOverrideApplied(view)?.textScaleFactor != null,
+        );
   }
 
   static BorderRadius? _displayCornerRadiiFromView(ui.FlutterView view) {
@@ -2736,75 +2644,22 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
     _data = null; // _updateData must be called again after changing parent data.
   }
 
-  // Whether a debug view metrics override is what supplied the brightness,
-  // which [build] needs and [MediaQueryData] does not carry.
-  //
-  // Kept here rather than worked out in [build], because two override states
-  // can produce the same data — an override that reports the brightness the
-  // platform already reports does — and a change that leaves the data alone
-  // would then never reach [build] to be acted on. Always false in release,
-  // where there are no overrides.
-  bool _debugBrightnessIsOverridden = false;
-
-  // Whether a debug view metrics override supplies any of this view's
-  // platform-wide metrics, which is what makes the PlatformDispatcher rather
-  // than an ancestor MediaQuery the source they have to be re-read from; see
-  // [_shouldUpdateOnPlatformChange].
-  //
-  // Remembered rather than looked up on demand so that the notification
-  // reporting an override being *removed* is still acted on: by the time it
-  // arrives there is no entry left in debugViewMetricsOverrides to find.
-  // Always false in release, where there are no overrides.
-  bool _debugMetricsAreOverridden = false;
-
-  // Whether a platform-wide metric changing can affect this data.
-  //
-  // Without a parent it always can, because the metric is read straight from
-  // the PlatformDispatcher. With one, the parent dictates the value and the
-  // notification can be ignored — unless a debug view metrics override for this
-  // view supersedes what the parent supplied.
-  //
-  // kDebugMode is a compile-time constant, so release builds keep the early out
-  // whole. An application with no override registered behaves exactly as it
-  // does in release, because the rest of the condition is false as well: that
-  // is what keeps this from becoming a debug-only code path that profile builds
-  // never take.
-  bool get _shouldUpdateOnPlatformChange =>
-      _parentData == null ||
-      (kDebugMode && (debugViewMetricsOverrides.isNotEmpty || _debugMetricsAreOverridden));
-
   void _updateData() {
-    // Normalized once. [MediaQueryData.fromView] normalizes what it is given
-    // anyway, and the override applied to the result is needed here too.
-    final FlutterView view = debugViewWithMetricsOverrides(widget.view);
-    final newData = MediaQueryData.fromView(view, platformData: _parentData);
-    // Asked of the view that applies the entry, and only when it applies one,
-    // for the reason [MediaQueryData.fromView] asks that way: an entry
-    // registered for a view that resolves nothing did not supersede
-    // [_parentData], so replacing the brightness below would drop what the
-    // parent supplied in favour of a value nothing asked for.
-    final DebugViewMetricsOverride? override = kDebugMode
-        ? debugViewMetricsOverrideApplied(view)
-        : null;
-    final newBrightnessIsOverridden = override?.platformBrightness != null;
-    // Assigned outside setState: nothing built reads it, and a change to it
-    // alone is not a reason to rebuild.
-    _debugMetricsAreOverridden = override != null;
-    if (newData != _data || newBrightnessIsOverridden != _debugBrightnessIsOverridden) {
+    final newData = MediaQueryData.fromView(widget.view, platformData: _parentData);
+    if (newData != _data) {
       setState(() {
         _data = newData;
-        _debugBrightnessIsOverridden = newBrightnessIsOverridden;
       });
     }
   }
 
   @override
   void didChangeAccessibilityFeatures() {
-    // If we have a parent, it dictates our accessibility features, unless an
-    // override for this view supersedes it. Otherwise we get them straight from
-    // the PlatformDispatcher and need to update our data in response to the
+    // If we have a parent, it dictates our accessibility features. If we don't
+    // have a parent, we get our accessibility features straight from the
+    // PlatformDispatcher and need to update our data in response to the
     // PlatformDispatcher changing its accessibility features setting.
-    if (_shouldUpdateOnPlatformChange) {
+    if (_parentData == null) {
       _updateData();
     }
   }
@@ -2816,22 +2671,22 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
 
   @override
   void didChangeTextScaleFactor() {
-    // If we have a parent, it dictates our text scale factor, unless an
-    // override for this view supersedes it. Otherwise we get it from the
-    // PlatformDispatcher and need to update our data in response to the
-    // PlatformDispatcher changing its text scale factor setting.
-    if (_shouldUpdateOnPlatformChange) {
+    // If we have a parent, it dictates our text scale factor. If we don't have
+    // a parent, we get our text scale factor from the PlatformDispatcher and
+    // need to update our data in response to the PlatformDispatcher changing
+    // its text scale factor setting.
+    if (_parentData == null) {
       _updateData();
     }
   }
 
   @override
   void didChangePlatformBrightness() {
-    // If we have a parent, it dictates our platform brightness, unless an
-    // override for this view supersedes it. Otherwise we get it from the
-    // PlatformDispatcher and need to update our data in response to the
-    // PlatformDispatcher changing its platform brightness setting.
-    if (_shouldUpdateOnPlatformChange) {
+    // If we have a parent, it dictates our platform brightness. If we don't
+    // have a parent, we get our platform brightness from the PlatformDispatcher
+    // and need to update our data in response to the PlatformDispatcher
+    // changing its platform brightness setting.
+    if (_parentData == null) {
       _updateData();
     }
   }
@@ -2845,12 +2700,10 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   @override
   Widget build(BuildContext context) {
     MediaQueryData effectiveData = _data!;
-    // If we get our platformBrightness from the PlatformDispatcher, either
-    // because there is no parent data or because a per-view override supersedes
-    // it, replace it with debugBrightnessOverride in non-release mode.
+    // If we get our platformBrightness from the PlatformDispatcher (i.e. we have no parentData) replace it
+    // with the debugBrightnessOverride in non-release mode.
     if (!kReleaseMode &&
-        (_parentData == null || _debugBrightnessIsOverridden) &&
-        debugBrightnessOverride != null &&
+        _parentData == null &&
         effectiveData.platformBrightness != debugBrightnessOverride) {
       effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
     }

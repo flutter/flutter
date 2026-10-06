@@ -122,8 +122,7 @@ ui.PlatformDispatcher debugApplyViewMetricsOverridesForView(
 /// reports, while [debugViewMetricsOverrides] has an entry for its id. Reading
 /// it through the wrapper instead keeps what a view reports and what the
 /// registry says in agreement, which is what [MediaQueryData.fromView] relies
-/// on when it lets an override supersede the platform data an ancestor
-/// [MediaQuery] supplies.
+/// on: it reads the override only through the view, never from the registry.
 ///
 /// Engine views are normalized even before the binding wraps their dispatcher.
 /// A view this library produced already applies its own override and is
@@ -159,9 +158,8 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
     // one — retains its own behavior, even if its reported dispatcher has a
     // cached wrapper. Whether that dispatcher is one an override change is
     // reported to does not come into it: a view that is credited with an
-    // override — see [MediaQueryData.fromView] — has to be one that applies it,
-    // or it reports neither the override nor what an ancestor supplied.
-    // Announcing the change is the caller's part, and
+    // override — see [debugViewMetricsOverrideApplied] — has to be one that
+    // applies it. Announcing the change is the caller's part, and
     // [BindingBase.platformDispatcher] says how.
     if (_viewsApplyingTheirOwnOverride[view] != null) {
       return true;
@@ -331,10 +329,10 @@ T debugReadViewMetrics<T>(
 /// The [debugViewMetricsOverrides] entry `view` applies, or null.
 ///
 /// Null for a view that applies none, which includes a view an entry is
-/// registered for that does not resolve it. [MediaQueryData.fromView] lets an
-/// override supersede the platform data an ancestor [MediaQuery] supplies, so
-/// crediting a view with one it does not apply would leave the data reporting
-/// neither the override nor what the ancestor supplied.
+/// registered for that does not resolve it. [MediaQueryData.fromView] asks
+/// this to learn whether the factor the view's dispatcher scales text by came
+/// from an override, so crediting a view with one it does not apply would
+/// misdescribe how its text is scaled.
 ///
 /// A view this library built applies its own entry. Any other view has to say
 /// so through [debugMarkViewAppliesItsOwnMetricsOverride]: a view that resolves

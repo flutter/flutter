@@ -23,7 +23,7 @@ import 'multi_view_testing.dart';
 ///
 /// A metric that is in neither this table nor [_notSurfacedByMediaQuery] is one
 /// [MediaQueryData] could silently stop honoring, which is the failure the
-/// per-view resolution in `MediaQueryData.fromView` exists to prevent.
+/// tests over this table exist to catch.
 final Map<String, (DebugViewMetricsOverride, Object? Function(MediaQueryData), Object?)>
 _surfacedMetrics = <String, (DebugViewMetricsOverride, Object? Function(MediaQueryData), Object?)>{
   'devicePixelRatio': (
@@ -111,6 +111,17 @@ _surfacedMetrics = <String, (DebugViewMetricsOverride, Object? Function(MediaQue
     (MediaQueryData data) => data.supportsAnnounce,
     false,
   ),
+};
+
+/// The metrics [MediaQueryData.fromView] always reads from the view itself,
+/// rather than taking from the `platformData` an ancestor [MediaQuery] supplies.
+const Set<String> _viewGeometryMetrics = <String>{
+  'devicePixelRatio',
+  'physicalSize',
+  'padding',
+  'viewPadding',
+  'viewInsets',
+  'systemGestureInsets',
 };
 
 /// Accessibility flags [DebugViewMetricsOverride] can set that [MediaQueryData]
@@ -531,9 +542,13 @@ void main() {
       debugClearViewMetricsOverrides();
     });
 
-    testWidgets('view overrides selectively replace inherited platform data', (
+    testWidgets('inherited platform data outranks a view override, and geometry does not', (
       WidgetTester tester,
     ) async {
+      // An ancestor MediaQuery that supplies the platform-wide values dictates
+      // them, override or not, just as it does when the real platform settings
+      // change. Geometry is never inherited: MediaQueryData.fromView reads it
+      // from the view, so an override of it still shows.
       late MediaQueryData data;
       final MediaQueryData inherited = MediaQueryData.fromView(tester.view).copyWith(
         textScaler: const TextScaler.linear(4.0),
@@ -552,11 +567,17 @@ void main() {
         ),
       );
 
-      expect(data.textScaler.scale(10), 40);
-      expect(data.platformBrightness, ui.Brightness.light);
-      expect(data.alwaysUse24HourFormat, isFalse);
-      expect(data.boldText, isFalse);
-      expect(data.highContrast, isTrue);
+      void expectInheritedValues(String when) {
+        expect(data.textScaler.scale(10), 40, reason: when);
+        expect(data.platformBrightness, ui.Brightness.light, reason: when);
+        expect(data.alwaysUse24HourFormat, isFalse, reason: when);
+        expect(data.boldText, isFalse, reason: when);
+        expect(data.highContrast, isTrue, reason: when);
+      }
+
+      expectInheritedValues('with no override registered');
+      expect(data.devicePixelRatio, 3.0);
+      expect(data.size, const Size(800, 600));
 
       debugSetViewMetricsOverride(
         tester.view.viewId,
@@ -565,24 +586,21 @@ void main() {
           platformBrightness: ui.Brightness.dark,
           alwaysUse24HourFormat: true,
           boldText: true,
+          devicePixelRatio: 6.0,
+          physicalSize: ui.Size(600, 900),
         ),
       );
       await tester.pump();
 
-      expect(data.textScaler.scale(10), 20);
-      expect(data.platformBrightness, ui.Brightness.dark);
-      expect(data.alwaysUse24HourFormat, isTrue);
-      expect(data.boldText, isTrue);
-      // The parent still supplies fields the view override does not name.
-      expect(data.highContrast, isTrue);
+      expectInheritedValues('with an override registered');
+      expect(data.devicePixelRatio, 6.0);
+      expect(data.size, const Size(100, 150));
 
       debugClearViewMetricsOverrides();
       await tester.pump();
-      expect(data.textScaler.scale(10), 40);
-      expect(data.platformBrightness, ui.Brightness.light);
-      expect(data.alwaysUse24HourFormat, isFalse);
-      expect(data.boldText, isFalse);
-      expect(data.highContrast, isTrue);
+      expectInheritedValues('after the override was removed');
+      expect(data.devicePixelRatio, 3.0);
+      expect(data.size, const Size(800, 600));
     });
 
     testWidgets("a nested view resolves its own override, not the wrapped view's", (
@@ -597,22 +615,15 @@ void main() {
       expect(nested.viewId, isNot(tester.view.viewId));
 
       late MediaQueryData data;
-      final MediaQueryData inherited = MediaQueryData.fromView(tester.view)
-          .copyWith(textScaler: const TextScaler.linear(4.0), boldText: false, highContrast: true);
       await tester.pumpWidget(
-        MediaQuery(
-          data: inherited,
-          child: MediaQuery.fromView(
-            view: nested,
-            child: _capture((MediaQueryData value) => data = value),
-          ),
-        ),
+        View(view: nested, child: _capture((MediaQueryData value) => data = value)),
+        wrapWithView: false,
       );
-      expect(data.textScaler.scale(10), 40);
+      expect(data.textScaler.scale(10), 10);
       expect(data.boldText, isFalse);
 
-      // An override on the nested view wins over the inherited data, and takes
-      // the value that was registered for it.
+      // An override on the nested view takes the value that was registered
+      // for it.
       debugSetViewMetricsOverride(
         nested.viewId,
         const DebugViewMetricsOverride(textScaleFactor: 5.0, boldText: true),
@@ -620,7 +631,6 @@ void main() {
       await tester.pump();
       expect(data.textScaler.scale(10), 50);
       expect(data.boldText, isTrue);
-      expect(data.highContrast, isTrue, reason: 'the parent still supplies unnamed metrics');
       debugClearViewMetricsOverrides();
       await tester.pump();
 
@@ -630,7 +640,7 @@ void main() {
         const DebugViewMetricsOverride(textScaleFactor: 7.0, boldText: true),
       );
       await tester.pump();
-      expect(data.textScaler.scale(10), 40, reason: 'view ${tester.view.viewId} must not leak');
+      expect(data.textScaler.scale(10), 10, reason: 'view ${tester.view.viewId} must not leak');
       expect(data.boldText, isFalse, reason: 'view ${tester.view.viewId} must not leak');
       expect(
         nested.platformDispatcher.textScaleFactor,
@@ -879,11 +889,8 @@ void main() {
     ) async {
       // MediaQueryData.fromView documents that its view may come from
       // PlatformDispatcher.views. Such a view applies no override itself, so
-      // resolving one against it reported neither the override nor the
-      // inherited value.
+      // the constructor reads it through the one that does.
       final ui.FlutterView rawView = ui.PlatformDispatcher.instance.implicitView!;
-      final MediaQueryData inherited = MediaQueryData.fromView(rawView)
-          .copyWith(boldText: false, highContrast: true);
       debugSetViewMetricsOverride(
         rawView.viewId,
         const DebugViewMetricsOverride(
@@ -893,13 +900,10 @@ void main() {
         ),
       );
 
-      final data = MediaQueryData.fromView(rawView, platformData: inherited);
+      final data = MediaQueryData.fromView(rawView);
       expect(data.boldText, isTrue);
-      // The view geometry the override sets reaches it too.
       expect(data.devicePixelRatio, 4.0);
       expect(data.size, const Size(100, 200));
-      // What the override does not name still comes from the parent.
-      expect(data.highContrast, isTrue);
 
       debugClearViewMetricsOverrides();
     });
@@ -990,15 +994,18 @@ void main() {
         platformDispatcher: tester.platformDispatcher,
       );
       expect(debugViewWithMetricsOverrides(view), same(view));
-      const inherited = MediaQueryData(textScaler: TextScaler.linear(4), highContrast: true);
       debugSetViewMetricsOverride(
         view.viewId,
-        const DebugViewMetricsOverride(textScaleFactor: 3, highContrast: false),
+        const DebugViewMetricsOverride(textScaleFactor: 3, highContrast: true),
       );
-      final data = MediaQueryData.fromView(view, platformData: inherited);
+      expect(debugViewMetricsOverrideApplied(view), isNull);
+      final data = MediaQueryData.fromView(view);
       debugClearViewMetricsOverrides();
-      expect(data.textScaler, same(inherited.textScaler));
-      expect(data.highContrast, isTrue);
+      // The dispatcher it reports never had the entry applied, so the data
+      // describes the platform, and its scaler is not recorded as overridden.
+      expect(data.textScaler.scale(10), 10);
+      expect(data.highContrast, isFalse);
+      expect(data.toString(), isNot(contains('(overridden)')));
     });
 
     testWidgets('inherited platform data does not read unused dispatcher metrics', (
@@ -1299,25 +1306,20 @@ void main() {
       // reports: installing an override of that same factor leaves the factor
       // alone and replaces the curve, which widgets that scale text have to be
       // told about.
-      final dispatcher = _CurvedTextScalingPlatformDispatcher();
+      final dispatcher = _RenderableViewPlatformDispatcher();
       final ui.FlutterView view = debugApplyViewMetricsOverrides(dispatcher).implicitView!;
       var builds = 0;
       late MediaQueryData data;
       await tester.pumpWidget(
-        MediaQuery(
-          // The platform data an ancestor would supply, taken from the same
-          // platform, so that the only thing the override changes below is how
-          // the factor both of them report is applied.
-          data: MediaQueryData.fromView(view),
-          child: MediaQuery.fromView(
-            view: view,
-            child: Builder(
-              builder: (BuildContext context) {
-                builds += 1;
-                data = MediaQuery.of(context);
-                return const SizedBox.expand();
-              },
-            ),
+        wrapWithView: false,
+        View(
+          view: view,
+          child: Builder(
+            builder: (BuildContext context) {
+              builds += 1;
+              data = MediaQuery.of(context);
+              return const SizedBox.expand();
+            },
           ),
         ),
       );
@@ -1361,24 +1363,22 @@ void main() {
       // wraps this one, and the material and cupertino libraries put it above a
       // great deal of text. What it wraps has to keep deciding whether the
       // subtree rebuilds.
-      final dispatcher = _CurvedTextScalingPlatformDispatcher();
+      final dispatcher = _RenderableViewPlatformDispatcher();
       final ui.FlutterView view = debugApplyViewMetricsOverrides(dispatcher).implicitView!;
       var builds = 0;
       late TextScaler scaler;
       await tester.pumpWidget(
-        MediaQuery(
-          data: MediaQueryData.fromView(view),
-          child: MediaQuery.fromView(
-            view: view,
-            child: MediaQuery.withClampedTextScaling(
-              maxScaleFactor: 3.0,
-              child: Builder(
-                builder: (BuildContext context) {
-                  builds += 1;
-                  scaler = MediaQuery.textScalerOf(context);
-                  return const SizedBox.expand();
-                },
-              ),
+        wrapWithView: false,
+        View(
+          view: view,
+          child: MediaQuery.withClampedTextScaling(
+            maxScaleFactor: 3.0,
+            child: Builder(
+              builder: (BuildContext context) {
+                builds += 1;
+                scaler = MediaQuery.textScalerOf(context);
+                return const SizedBox.expand();
+              },
             ),
           ),
         ),
@@ -1403,20 +1403,65 @@ void main() {
   });
 
   group('every overridable metric MediaQuery surfaces', () {
-    testWidgets('is honored over inherited platform data', (WidgetTester tester) async {
-      // The table is the enumeration, checked against the class itself, so a
-      // metric added to DebugViewMetricsOverride has to be classified rather
-      // than silently never applying under a parent MediaQuery.
+    // The table is the enumeration, checked against the class itself, so a
+    // metric added to DebugViewMetricsOverride has to be classified rather
+    // than silently never reaching MediaQuery.
+    void expectTableIsComplete() {
       expect(<String>{
         ..._surfacedMetrics.keys,
         ..._notSurfacedByMediaQuery,
       }, unorderedEquals(_allOverridableMetrics()));
+      expect(_viewGeometryMetrics, everyElement(isIn(_surfacedMetrics.keys)));
+    }
+
+    testWidgets('is honored', (WidgetTester tester) async {
+      expectTableIsComplete();
       expect(tester.view.physicalSize, const Size(2400, 1800));
       expect(tester.view.devicePixelRatio, 3.0);
 
       late MediaQueryData data;
-      // A parent that disagrees with every override in the table, so inheriting
-      // from it instead of honoring the override is visible.
+      await tester.pumpWidget(_capture((MediaQueryData value) => data = value));
+
+      for (final MapEntry<
+            String,
+            (DebugViewMetricsOverride, Object? Function(MediaQueryData), Object?)
+          >
+          entry
+          in _surfacedMetrics.entries) {
+        final (
+          DebugViewMetricsOverride override,
+          Object? Function(MediaQueryData) read,
+          Object? expected,
+        ) = entry.value;
+        final Object? reported = read(data);
+        debugSetViewMetricsOverride(tester.view.viewId, override);
+        await tester.pump();
+        final Object? overridden = read(data);
+        debugSetViewMetricsOverride(tester.view.viewId, null);
+        await tester.pump();
+
+        expect(overridden, expected, reason: '${entry.key} was not honored');
+        expect(
+          reported,
+          isNot(expected),
+          reason:
+              '${entry.key} would read the same without the override, so the '
+              'test cannot tell whether it was honored',
+        );
+        expect(read(data), reported, reason: '${entry.key} was not restored');
+      }
+      debugClearViewMetricsOverrides();
+      await tester.pump();
+    });
+
+    testWidgets('defers to inherited platform data, except for geometry', (
+      WidgetTester tester,
+    ) async {
+      expectTableIsComplete();
+
+      late MediaQueryData data;
+      // A parent that disagrees with every override in the table, so honoring
+      // an override instead of inheriting is visible.
       final MediaQueryData parent = MediaQueryData.fromView(tester.view).copyWith(
         textScaler: const TextScaler.linear(9.0),
         platformBrightness: ui.Brightness.light,
@@ -1458,7 +1503,6 @@ void main() {
         debugSetViewMetricsOverride(tester.view.viewId, null);
         await tester.pump();
 
-        expect(overridden, expected, reason: '${entry.key} was not honored');
         expect(
           inherited,
           isNot(expected),
@@ -1466,6 +1510,12 @@ void main() {
               '${entry.key} would read the same without the override, so the '
               'test cannot tell whether it was honored',
         );
+        if (_viewGeometryMetrics.contains(entry.key)) {
+          expect(overridden, expected, reason: '${entry.key} is read from the view');
+        } else {
+          expect(overridden, inherited, reason: '${entry.key} is dictated by the parent');
+        }
+        expect(read(data), inherited, reason: '${entry.key} was not restored');
       }
       debugClearViewMetricsOverrides();
       await tester.pump();
@@ -1524,10 +1574,8 @@ void main() {
           secondary.platformDispatcher.accessibilityFeatures.disableAnimations;
       late MediaQueryData secondaryData;
       await tester.pumpWidget(
-        MediaQuery.fromView(
-          view: secondary,
-          child: _capture((MediaQueryData value) => secondaryData = value),
-        ),
+        View(view: secondary, child: _capture((MediaQueryData value) => secondaryData = value)),
+        wrapWithView: false,
       );
       final bool secondaryMediaQuery = secondaryData.disableAnimations;
       debugClearViewMetricsOverrides();
@@ -1925,40 +1973,39 @@ void main() {
       expect(tester.platformDispatcher.views, contains(second.rootView));
       final views = <ui.FlutterView>[first.rootView, second.rootView];
       final List<ui.Size> before = views.map((ui.FlutterView view) => view.physicalSize).toList();
-      const inherited = MediaQueryData(
-        textScaler: TextScaler.linear(4),
-        platformBrightness: ui.Brightness.dark,
-        highContrast: true,
-      );
       final data = <int, MediaQueryData>{};
       await tester.pumpWidget(
         wrapWithView: false,
         ViewCollection(
           views: <Widget>[
             for (final ui.FlutterView view in views)
-              MediaQuery(
-                data: inherited,
-                child: View(
-                  view: view,
-                  child: Builder(
-                    builder: (BuildContext context) {
-                      data[view.viewId] = MediaQuery.of(context);
-                      return const SizedBox.expand();
-                    },
-                  ),
+              View(
+                view: view,
+                child: Builder(
+                  builder: (BuildContext context) {
+                    data[view.viewId] = MediaQuery.of(context);
+                    return const SizedBox.expand();
+                  },
                 ),
               ),
           ],
         ),
       );
+      // Chosen to differ from what the platform reports, whatever that is.
+      final MediaQueryData initial = data[views.first.viewId]!;
+      expect(initial.textScaler.textScaleFactor, isNot(3));
+      final ui.Brightness overriddenBrightness = initial.platformBrightness == ui.Brightness.light
+          ? ui.Brightness.dark
+          : ui.Brightness.light;
+      final bool overriddenContrast = !initial.highContrast;
       debugSetViewMetricsOverride(
         views.first.viewId,
-        const DebugViewMetricsOverride(
-          physicalSize: Size(1200, 400),
+        DebugViewMetricsOverride(
+          physicalSize: const Size(1200, 400),
           devicePixelRatio: 4,
           textScaleFactor: 3,
-          platformBrightness: ui.Brightness.light,
-          highContrast: false,
+          platformBrightness: overriddenBrightness,
+          highContrast: overriddenContrast,
         ),
       );
       await tester.pump();
@@ -1973,15 +2020,18 @@ void main() {
       expect(applied.size, const Size(300, 100));
       expect(applied.devicePixelRatio, 4);
       expect(applied.textScaler.textScaleFactor, 3);
-      expect(applied.platformBrightness, ui.Brightness.light);
-      expect(applied.highContrast, isFalse);
-      expect(untouched.textScaler.textScaleFactor, 4);
-      expect(untouched.platformBrightness, ui.Brightness.dark);
-      expect(untouched.highContrast, isTrue);
+      expect(applied.platformBrightness, overriddenBrightness);
+      expect(applied.highContrast, overriddenContrast);
+      expect(untouched.textScaler.textScaleFactor, initial.textScaler.textScaleFactor);
+      expect(untouched.platformBrightness, initial.platformBrightness);
+      expect(untouched.highContrast, initial.highContrast);
       for (var i = 0; i < views.length; i++) {
         expect(views[i].physicalSize, before[i]);
-        expect(data[views[i].viewId]!.textScaler.textScaleFactor, 4);
-        expect(data[views[i].viewId]!.highContrast, isTrue);
+        expect(
+          data[views[i].viewId]!.textScaler.textScaleFactor,
+          initial.textScaler.textScaleFactor,
+        );
+        expect(data[views[i].viewId]!.highContrast, initial.highContrast);
       }
     });
 
@@ -2008,10 +2058,7 @@ void main() {
           textScaleFactor: 3,
         ),
       );
-      final data = MediaQueryData.fromView(
-        view,
-        platformData: const MediaQueryData(textScaler: TextScaler.linear(7)),
-      );
+      final data = MediaQueryData.fromView(view);
       debugClearViewMetricsOverrides();
       expect(view.physicalSize, const Size(900, 600));
       expect(view.devicePixelRatio, 6);
@@ -2023,12 +2070,9 @@ void main() {
       WidgetTester tester,
     ) async {
       // A custom adapter can report geometry from one view and a dispatcher
-      // belonging to another. Its own registry entry is not thereby applied.
-      //
-      // Crediting it with that entry would make MediaQueryData.fromView supersede
-      // the platform data an ancestor supplies with values read from a view and a
-      // dispatcher that never had the override applied, so the data would carry
-      // neither the override nor what the ancestor supplied.
+      // belonging to another. Its own registry entry is not thereby applied:
+      // the platform-wide values an ancestor supplies are inherited either way,
+      // and the geometry stays the view's own.
       final controller = WindowController(size: const Size(400, 300));
       addTearDown(controller.destroy);
       final ui.FlutterView window = _UnwrappedView(
@@ -2096,67 +2140,12 @@ void main() {
       expectInheritedValuesAndItsOwnGeometry(data, 'after the override was removed');
     });
 
-    testWidgets('a custom view that resolves no override keeps its inherited brightness', (
+    testWidgets('an inherited brightness is kept from debugBrightnessOverride, override or not', (
       WidgetTester tester,
     ) async {
       // MediaQuery.fromView replaces the brightness with debugBrightnessOverride
-      // when the value came from the PlatformDispatcher rather than from a
-      // parent, and a per-view override is one way of making that true. An entry
-      // registered for a view that resolves nothing does not make it true, so
-      // acting on the entry alone would drop what the parent supplied in favour
-      // of a value nothing asked for.
-      debugBrightnessOverride = ui.Brightness.light;
-      final controller = WindowController(size: const Size(400, 300));
-      addTearDown(controller.destroy);
-      final ui.FlutterView window = _UnwrappedView(
-        controller.rootView,
-        tester.view.platformDispatcher,
-      );
-
-      late MediaQueryData data;
-      await tester.pumpWidget(
-        MediaQuery(
-          data: MediaQueryData.fromView(tester.view)
-              .copyWith(platformBrightness: ui.Brightness.dark),
-          child: MediaQuery.fromView(
-            view: window,
-            child: Builder(
-              builder: (BuildContext context) {
-                data = MediaQuery.of(context);
-                return const SizedBox.expand();
-              },
-            ),
-          ),
-        ),
-      );
-      expect(data.platformBrightness, ui.Brightness.dark);
-
-      // Installed while the tree is up, so this also covers the state noticing an
-      // override that leaves the data it computes unchanged.
-      debugSetViewMetricsOverride(
-        window.viewId,
-        const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
-      );
-      await tester.pump();
-      final ui.Brightness afterInstalling = data.platformBrightness;
-      debugClearViewMetricsOverrides();
-      debugBrightnessOverride = null;
-      await tester.pump();
-
-      expect(
-        afterInstalling,
-        ui.Brightness.dark,
-        reason: 'the parent supplies it, so debugBrightnessOverride does not replace it',
-      );
-      expect(data.platformBrightness, ui.Brightness.dark);
-    });
-
-    testWidgets('a window whose view does apply one takes debugBrightnessOverride', (
-      WidgetTester tester,
-    ) async {
-      // The other direction: the implicit view does apply its own entry, so an
-      // override of its brightness is what supersedes the parent — and that is
-      // what lets debugBrightnessOverride replace it.
+      // only when the value came from the PlatformDispatcher rather than from a
+      // parent. A per-view override does not change where it came from.
       debugBrightnessOverride = ui.Brightness.light;
 
       late MediaQueryData data;
@@ -2189,10 +2178,10 @@ void main() {
 
       expect(
         afterInstalling,
-        ui.Brightness.light,
-        reason: 'the override supersedes the parent, so the debug brightness applies',
+        ui.Brightness.dark,
+        reason: 'the parent still supplies it, so debugBrightnessOverride does not replace it',
       );
-      expect(data.platformBrightness, ui.Brightness.dark, reason: 'and is undone with it');
+      expect(data.platformBrightness, ui.Brightness.dark);
     });
   });
 }
