@@ -625,6 +625,9 @@ enum EngineSemanticsRole {
 
   /// An area that represents a form.
   form,
+
+  /// A graphic object that can be incremented or decremented as a slider.
+  slider,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -893,6 +896,12 @@ abstract class SemanticRole {
   /// the object.
   @mustCallSuper
   void update() {
+    if (semanticsObject.isAccessibilityFocusBlocked && !semanticsObject.hasChildren) {
+      setAttribute('aria-hidden', 'true');
+    } else {
+      removeAttribute('aria-hidden');
+    }
+
     if (semanticsObject.isValidationResultDirty) {
       updateValidationResult();
     }
@@ -1022,6 +1031,20 @@ abstract class SemanticRole {
   bool get isDisposed => _isDisposed;
   bool _isDisposed = false;
 
+  /// Whether any ancestor of [semanticsObject] has the [EngineSemanticsRole.menu]
+  /// or [EngineSemanticsRole.menuBar] role.
+  bool get hasMenuAncestor {
+    SemanticsObject? current = semanticsObject.parent;
+    while (current != null) {
+      final EngineSemanticsRole? kind = current.semanticRole?.kind;
+      if (kind == EngineSemanticsRole.menu || kind == EngineSemanticsRole.menuBar) {
+        return true;
+      }
+      current = current.parent;
+    }
+    return false;
+  }
+
   /// Called when [semanticsObject] is removed, or when it changes its role such
   /// that this role is no longer relevant.
   ///
@@ -1074,12 +1097,32 @@ final class GenericRole extends SemanticRole {
 
   @override
   void update() {
+    if (semanticsObject.isAccessibilityFocusBlocked) {
+      if (semanticsObject.hasChildren) {
+        setAriaRole('none');
+      } else {
+        removeAttribute('role');
+      }
+      super.update();
+      return;
+    }
+
     if (!semanticsObject.hasLabel) {
       // The node didn't get a more specific role, and it has no label. It is
       // likely that this node is simply there for positioning its children and
-      // has no other role for the screen reader to be aware of. In this case,
-      // the element does not need a `role` attribute at all.
+      // has no other role for the screen reader to be aware of. Normally the
+      // element does not need a `role` attribute at all, except when nested
+      // inside a menu/menubar (such as the outer ListView semantics node in
+      // DropdownButton), where omitting `role="none"` causes the browser to
+      // expose the element as an extra generic child of `role="menu"`.
       super.update();
+      semanticsObject.owner.addOneTimePostUpdateCallback(() {
+        if (!semanticsObject.hasLabel && !semanticsObject.isTappable && hasMenuAncestor) {
+          setAriaRole('none');
+        } else {
+          removeAttribute('role');
+        }
+      });
       return;
     }
 
@@ -1092,6 +1135,7 @@ final class GenericRole extends SemanticRole {
     //   In HTML text has no ARIA role. It's just a DOM node with text inside
     //   it. Previously, role="text" was used, but it was only supported by
     //   Safari, and it was removed starting Safari 17.
+
     if (semanticsObject.hasChildren) {
       labelAndValue!.preferredRepresentation = LabelRepresentation.ariaLabel;
       setAriaRole('group');
@@ -1107,6 +1151,9 @@ final class GenericRole extends SemanticRole {
 
   @override
   bool focusAsRouteDefault() {
+    if (semanticsObject.isAccessibilityFocusBlocked) {
+      return false;
+    }
     // Case 1: current node has input focus. Let the input focus system decide
     // default focusability.
     if (semanticsObject.isFocusable) {
@@ -1735,8 +1782,11 @@ class SemanticsObject {
   /// Whether [actions] contains the given action.
   bool hasAction(ui.SemanticsAction action) => (_actions! & action.index) != 0;
 
+  /// Whether accessibility focus on this node is blocked.
+  bool get isAccessibilityFocusBlocked => flags.isAccessibilityFocusBlocked;
+
   /// Whether this object represents a widget that can receive input focus.
-  bool get isFocusable => flags.isFocused != ui.Tristate.none;
+  bool get isFocusable => flags.isFocused != ui.Tristate.none && !isAccessibilityFocusBlocked;
 
   /// Whether this object currently has input focus.
   ///
@@ -2264,6 +2314,8 @@ class SemanticsObject {
         return EngineSemanticsRole.loadingSpinner;
       case ui.SemanticsRole.progressBar:
         return EngineSemanticsRole.progressBar;
+      case ui.SemanticsRole.slider:
+        return EngineSemanticsRole.slider;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.dragHandle:
@@ -2308,6 +2360,7 @@ class SemanticsObject {
     return switch (role) {
       EngineSemanticsRole.textField => SemanticTextField(this),
       EngineSemanticsRole.scrollable => SemanticScrollable(this),
+      EngineSemanticsRole.slider => SemanticIncrementable(this, EngineSemanticsRole.slider),
       EngineSemanticsRole.incrementable => SemanticIncrementable(this),
       EngineSemanticsRole.button => SemanticButton(this),
       EngineSemanticsRole.radioGroup => SemanticRadioGroup(this),
@@ -2354,6 +2407,11 @@ class SemanticsObject {
     SemanticRole? currentSemanticRole = semanticRole;
     final EngineSemanticsRole kind = _getEngineSemanticsRole();
     final DomElement? previousElement = semanticRole?.element;
+    final DomElement? previouslyFocusedElement = domDocument.activeElement;
+    final bool hadSubtreeFocus =
+        previouslyFocusedElement != null &&
+        previousElement != null &&
+        previousElement.contains(previouslyFocusedElement);
 
     if (currentSemanticRole != null) {
       if (currentSemanticRole.kind == kind) {
@@ -2384,15 +2442,24 @@ class SemanticsObject {
 
     // Reparent element.
     if (previousElement != element) {
+      final DomElement? parent = previousElement?.parent;
+      if (parent != null) {
+        parent.insertBefore(element, previousElement);
+      }
       if (_currentChildrenInRenderOrder != null) {
         for (final SemanticsObject child in _currentChildrenInRenderOrder!) {
           element.append(child.element);
         }
       }
-      final DomElement? parent = previousElement?.parent;
       if (parent != null) {
-        parent.insertBefore(element, previousElement);
         previousElement!.remove();
+      }
+      if (hadSubtreeFocus && domDocument.activeElement != previouslyFocusedElement) {
+        if (element.contains(previouslyFocusedElement)) {
+          previouslyFocusedElement.focusWithoutScroll();
+        } else {
+          element.focusWithoutScroll();
+        }
       }
     }
   }

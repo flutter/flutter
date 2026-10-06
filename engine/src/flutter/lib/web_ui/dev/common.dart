@@ -259,13 +259,14 @@ final String gitRevision = () {
 }();
 
 final String contentHash = () {
+  final String scriptDir = path.join(environment.flutterRootDir.path, 'bin', 'internal');
   final String executable;
   final List<String> args;
   if (io.Platform.isWindows) {
     executable = 'powershell';
-    args = <String>[path.join('bin', 'internal', 'content_aware_hash.ps1')];
+    args = <String>['-File', path.join(scriptDir, 'content_aware_hash.ps1')];
   } else {
-    executable = path.join('bin', 'internal', 'content_aware_hash.sh');
+    executable = path.join(scriptDir, 'content_aware_hash.sh');
     args = <String>[];
   }
   final io.ProcessResult result = io.Process.runSync(

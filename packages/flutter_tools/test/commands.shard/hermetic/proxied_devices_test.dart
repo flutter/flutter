@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -70,9 +71,10 @@ void main() {
     testUsingContext('can list devices', () async {
       daemon = Daemon(
         serverDaemonConnection,
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: TestFeatureFlags(),
-        fileSystem: MemoryFileSystem.test(),
       );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
@@ -93,9 +95,10 @@ void main() {
     testUsingContext('calls supportsRuntimeMode', () async {
       daemon = Daemon(
         serverDaemonConnection,
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: TestFeatureFlags(),
-        fileSystem: MemoryFileSystem.test(),
       );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
@@ -115,9 +118,10 @@ void main() {
     testUsingContext('redirects logs', () async {
       daemon = Daemon(
         serverDaemonConnection,
+        analytics: const NoOpAnalytics(),
+        toolContext: const DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: TestFeatureFlags(),
-        fileSystem: MemoryFileSystem.test(),
       );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
@@ -149,9 +153,10 @@ void main() {
       () async {
         daemon = Daemon(
           serverDaemonConnection,
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: TestFeatureFlags(),
-          fileSystem: MemoryFileSystem.test(),
         );
         fakeDevice = FakeAndroidDevice();
         final discoverer = FakePollingDeviceDiscovery();
@@ -211,9 +216,10 @@ void main() {
       () async {
         daemon = Daemon(
           serverDaemonConnection,
+          analytics: const NoOpAnalytics(),
+          toolContext: const DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: TestFeatureFlags(),
-          fileSystem: MemoryFileSystem.test(),
         );
         fakeDevice = FakeAndroidDevice();
         final discoverer = FakePollingDeviceDiscovery();

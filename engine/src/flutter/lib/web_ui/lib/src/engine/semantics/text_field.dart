@@ -415,6 +415,9 @@ class SemanticTextField extends SemanticRole {
     editableElement.addEventListener(
       'blur',
       createDomEventListener((DomEvent event) {
+        if (semanticsObject.owner.phase != SemanticsUpdatePhase.idle && semanticsObject.hasFocus) {
+          return;
+        }
         SemanticsTextEditingStrategy._instance?.deactivate(this);
       }),
     );
