@@ -850,6 +850,19 @@ typedef bool (*BoolPresentInfoCallback)(
     void* /* user data */,
     const FlutterPresentInfo* /* present info */);
 
+/// Callback to retrieve the 4x4 column-major UV transformation matrix for an
+/// OpenGL external texture (for example, from Android's
+/// SurfaceTexture.getTransformMatrix).
+///
+/// The `matrix_out` buffer must be populated with 16 floats in column-major
+/// order operating on normalized [0, 1] texture coordinates.
+/// Returns true if a UV transformation matrix was written to `matrix_out`,
+/// or false if no UV transformation applies to this texture.
+typedef bool (*FlutterOpenGLTextureUVTransformationCallback)(
+    void* /* user data */,
+    int64_t /* texture identifier */,
+    float* /* matrix_out (16 floats, column-major) */);
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterOpenGLRendererConfig).
   size_t struct_size;
@@ -936,6 +949,10 @@ typedef struct {
   /// engine for subsequent composition.
   FlutterHardwareBufferExternalTextureFrameCallback
       hardware_buffer_external_texture_frame_callback;
+  /// Optional callback to retrieve a 4x4 column-major UV transformation matrix
+  /// for an OpenGL external texture.
+  FlutterOpenGLTextureUVTransformationCallback
+      gl_external_texture_uv_transformation_callback;
 } FlutterOpenGLRendererConfig;
 
 /// Alias for id<MTLDevice>.

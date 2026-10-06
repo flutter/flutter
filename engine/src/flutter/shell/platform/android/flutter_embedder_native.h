@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_FLUTTER_EMBEDDER_NATIVE_H_
 
 #include <jni.h>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <map>
@@ -933,6 +934,16 @@ class FlutterEmbedderNative {
       int64_t texture_id,
       std::unique_ptr<AndroidHardwareBuffer> buffer);
 
+  /// 16 floats in a 4x4 column-major UV transformation matrix.
+  static constexpr size_t kSurfaceTextureTransformMatrixSize = 16;
+
+  /// @brief Test helper to populate a 4x4 column-major UV transformation matrix
+  /// for a registered SurfaceTexture.
+  void SetSurfaceTextureUVTransformForTesting(
+      int64_t texture_id,
+      const std::array<float, kSurfaceTextureTransformMatrixSize>&
+          uv_transform);
+
   /// @brief Registers an opaque C-API response handle and assigns an integer
   /// ID.
   int32_t RegisterResponseHandle(
@@ -1359,6 +1370,10 @@ class FlutterEmbedderNative {
       surface_textures_;
   mutable std::unordered_map<int64_t, uint32_t> surface_texture_gl_ids_;
   mutable std::unordered_set<int64_t> surface_texture_attached_;
+  mutable std::unordered_map<
+      int64_t,
+      std::array<float, kSurfaceTextureTransformMatrixSize>>
+      surface_texture_uv_transforms_;
   mutable std::unordered_map<int64_t, std::unique_ptr<AndroidHardwareBuffer>>
       surface_texture_vulkan_buffers_;
   std::unordered_map<int64_t, ImageTextureEntry> image_textures_;
