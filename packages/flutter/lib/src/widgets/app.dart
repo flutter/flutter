@@ -451,7 +451,8 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * Without a [routeInformationParser], no route information is parsed at
   ///    all, and a [routeInformationProvider] must not be provided either. The
-  ///    app then navigates only in response to the [routerDelegate].
+  ///    app then navigates only in response to its own state changes reported
+  ///    through the [routerDelegate], and to the back button.
   ///  * With a [routeInformationParser] but no [routeInformationProvider], a
   ///    [PlatformRouteInformationProvider] is created, starting at
   ///    [dart:ui.PlatformDispatcher.defaultRouteName].
@@ -459,10 +460,9 @@ class WidgetsApp extends StatefulWidget {
   ///    created, so that platform back navigation (such as the Android system
   ///    back button) pops the app's routes.
   ///
-  /// Every other argument behaves as it does on the default constructor. The
-  /// [Navigator] specific arguments ([navigatorKey], [home], [routes],
-  /// [initialRoute], [onGenerateRoute], [onGenerateInitialRoutes],
-  /// [onUnknownRoute], and [navigatorObservers]) are not available here, since
+  /// Every other argument behaves as it does on the default constructor.
+  /// [Navigator] specific arguments, such as [navigatorKey], [home], [routes],
+  /// [initialRoute], and [onGenerateRoute], are not available here, since
   /// building the navigating widget is the [routerDelegate]'s job.
   ///
   /// See also:
@@ -471,7 +471,8 @@ class WidgetsApp extends StatefulWidget {
   ///    chained together, and the asynchrony involved.
   ///  * [RouterConfig], which bundles the delegates into a single object.
   ///  * [restorationScopeId], which enables state restoration; the [Router]
-  ///    restores its configuration from the [RouteInformation] it saved.
+  ///    restores its configuration from the [RouteInformation] it saved (this
+  ///    requires a [routeInformationParser]).
   ///  * <https://docs.flutter.dev/ui/navigation>, an overview of the routing
   ///    options a Flutter app has.
   /// {@endtemplate}
