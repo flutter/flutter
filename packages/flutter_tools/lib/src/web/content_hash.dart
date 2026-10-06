@@ -56,6 +56,10 @@ class WebAssetHashResult {
   final Map<String, String> extraAssets;
 }
 
+/// The short content hash embedded in hashed web output filenames.
+String computeShortContentHash(List<int> bytes) =>
+    crypto.sha256.convert(bytes).toString().substring(0, 8);
+
 String computeHashedBasename(String oldBasename, String contentHash, FileSystem fileSystem) {
   final String doubleExt = fileSystem.path.extension(oldBasename, 2);
   final String ext = _kKnownHashedExtensions.contains(doubleExt)
@@ -93,10 +97,7 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
     final String relativePath = fileSystem.path.relative(file.path, from: assetsDir.path);
     final List<String> segments = fileSystem.path.split(relativePath);
     final String basename = fileSystem.path.basename(file.path);
-    final String contentHash = crypto.sha256
-        .convert(file.readAsBytesSync())
-        .toString()
-        .substring(0, 8);
+    final String contentHash = computeShortContentHash(file.readAsBytesSync());
     final String newBasename = computeHashedBasename(basename, contentHash, fileSystem);
 
     final newSegments = <String>[...segments.sublist(0, segments.length - 1), newBasename];
@@ -532,7 +533,7 @@ File? updatePrecacheManifest(
     }
 
     final Uint8List bytes = file.readAsBytesSync();
-    final String shortHash = crypto.sha256.convert(bytes).toString().substring(0, 8);
+    final String shortHash = computeShortContentHash(bytes);
     final bool urlHashed = basename.contains('.$shortHash.') || basename.endsWith('.$shortHash');
 
     entries.add(<String, Object>{
