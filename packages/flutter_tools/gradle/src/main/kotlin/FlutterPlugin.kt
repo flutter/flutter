@@ -486,6 +486,11 @@ class FlutterPlugin : Plugin<Project> {
             projectToAddTasksTo,
             getPluginHandler(projectToAddTasksTo).getPluginList()
         )
+        FlutterPluginUtils.addTaskForValidatingHostAppCompileSdk(
+            moduleProject = projectToAddTasksTo,
+            hostAppProject = appProject,
+            pluginList = getPluginHandler(projectToAddTasksTo).getPluginList()
+        )
         FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
             projectToAddTasksTo
         )

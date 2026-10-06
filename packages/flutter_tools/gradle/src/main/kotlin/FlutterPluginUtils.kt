@@ -18,6 +18,7 @@ import com.flutter.gradle.tasks.EnableHcppManifestTask
 import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.ValidateCompileSdkVersionTask
+import com.flutter.gradle.tasks.ValidateHostAppCompileSdkTask
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -804,6 +805,144 @@ object FlutterPluginUtils {
         project.tasks.named("preBuild").configure {
             dependsOn(validateTask)
         }
+    }
+
+    /**
+     * Add-to-app only: registers [ValidateHostAppCompileSdkTask] on the Flutter module
+     * [moduleProject] and makes the host app's `preBuild` depend on it.
+     *
+     * Starting with AGP 9, AGP fails the host app's `check<Variant>AarMetadata` task if the host
+     * compiles against a lower SDK than any AAR it consumes. Running this task first replaces
+     * AGP's message with one that names the host app, each Flutter AAR, and the file to edit.
+     *
+     * All values are read lazily because the host app and plugin projects may not be configured
+     * yet when the Flutter Gradle plugin is applied to the module.
+     */
+    @JvmStatic
+    @JvmName("addTaskForValidatingHostAppCompileSdk")
+    internal fun addTaskForValidatingHostAppCompileSdk(
+        moduleProject: Project,
+        hostAppProject: Project,
+        pluginList: List<Map<String?, Any?>>
+    ) {
+        val flutterAars = moduleProject.provider { collectFlutterAarRequirements(moduleProject, pluginList) }
+        val validateTask =
+            moduleProject.tasks.register(
+                ValidateHostAppCompileSdkTask.TASK_NAME,
+                ValidateHostAppCompileSdkTask::class.java
+            ) {
+                hostProjectPath.set(hostAppProject.path)
+                hostProjectDir.set(hostAppProject.projectDir.absolutePath)
+                hostBuildFile.set(hostAppProject.buildFile.absolutePath)
+                rootDir.set(hostAppProject.rootDir.absolutePath)
+                hostCompileSdk.set(moduleProject.provider { getCompileSdkFromProject(hostAppProject).apiLevel })
+                hostCompileSdkPreview.set(
+                    moduleProject.provider { getCompileSdkFromProject(hostAppProject).previewCodename }
+                )
+                flutterAarMinCompileSdks.set(
+                    flutterAars.map { aars -> aars.associate { it.projectPath to it.minCompileSdk } }
+                )
+                flutterAarDescriptions.set(flutterAars.map { aars -> aars.associate { it.projectPath to it.description } })
+                flutterAarDirectories.set(
+                    flutterAars.map { aars -> aars.associate { it.projectPath to it.projectDir.absolutePath } }
+                )
+            }
+
+        // The host app's preBuild task is registered by AGP while the host app is configured.
+        hostAppProject.tasks.configureEach {
+            if (name == "preBuild") {
+                dependsOn(validateTask)
+            }
+        }
+    }
+
+    /** A Flutter module or plugin library and the `minCompileSdk` its AAR requires of consumers. */
+    private data class FlutterAarRequirement(
+        val projectPath: String,
+        val description: String,
+        val projectDir: File,
+        val minCompileSdk: Int
+    )
+
+    private fun collectFlutterAarRequirements(
+        moduleProject: Project,
+        pluginList: List<Map<String?, Any?>>
+    ): List<FlutterAarRequirement> {
+        val agpVersion = VersionFetcher.getAGPVersion(moduleProject)
+        val enforcedByDefault = agpVersion != null && agpVersion.major >= AGP_MAJOR_ENFORCING_MIN_COMPILE_SDK
+        val requirements = mutableListOf<FlutterAarRequirement>()
+        getAarMinCompileSdk(moduleProject, enforcedByDefault)?.let { minCompileSdk ->
+            requirements.add(
+                FlutterAarRequirement(
+                    projectPath = moduleProject.path,
+                    description = "Flutter module AAR \"${getFlutterModuleName(moduleProject)}\"",
+                    projectDir = moduleProject.projectDir,
+                    minCompileSdk = minCompileSdk
+                )
+            )
+        }
+        pluginList.forEach { plugin ->
+            val name = plugin["name"] as? String ?: return@forEach
+            val pluginProject = moduleProject.rootProject.findProject(":$name") ?: return@forEach
+            val minCompileSdk = getAarMinCompileSdk(pluginProject, enforcedByDefault) ?: return@forEach
+            requirements.add(
+                FlutterAarRequirement(
+                    projectPath = pluginProject.path,
+                    description = "Flutter plugin AAR \"$name\"",
+                    projectDir = pluginProject.projectDir,
+                    minCompileSdk = minCompileSdk
+                )
+            )
+        }
+        return requirements
+    }
+
+    /** The first AGP major version that defaults a library's `minCompileSdk` to its `compileSdk`. */
+    private const val AGP_MAJOR_ENFORCING_MIN_COMPILE_SDK = 9
+
+    /**
+     * Returns the `minCompileSdk` that [libraryProject]'s AAR metadata requires of consumers, or
+     * null if none is enforced.
+     *
+     * An explicit `android.defaultConfig.aarMetadata.minCompileSdk` always wins. Otherwise AGP 9+
+     * uses the library's numeric `compileSdk`, and older AGP versions don't enforce a minimum.
+     */
+    @JvmStatic
+    @JvmName("getAarMinCompileSdk")
+    internal fun getAarMinCompileSdk(
+        libraryProject: Project,
+        enforcedByDefault: Boolean
+    ): Int? {
+        val libraryExtension = libraryProject.extensions.findByName("android") as? LibraryExtension ?: return null
+        val explicitMinCompileSdk = libraryExtension.defaultConfig.aarMetadata.minCompileSdk
+        if (explicitMinCompileSdk != null) {
+            return explicitMinCompileSdk
+        }
+        if (!enforcedByDefault) {
+            return null
+        }
+        return getCompileSdkFromProject(libraryProject).apiLevel
+    }
+
+    /** Returns the `name` from the Flutter module's pubspec.yaml, or its directory name as a fallback. */
+    private fun getFlutterModuleName(moduleProject: Project): String {
+        val flutterSourceDirectory =
+            try {
+                getFlutterSourceDirectory(moduleProject)
+            } catch (e: RuntimeException) {
+                // Only used for display; fall back to the Gradle project name.
+                return moduleProject.name
+            }
+        val pubspec = File(flutterSourceDirectory, "pubspec.yaml")
+        val name =
+            if (pubspec.isFile) {
+                pubspec.useLines { lines ->
+                    lines.firstNotNullOfOrNull { Regex("""^name:\s*(\S+)""").find(it)?.groupValues?.get(1) }
+                }
+            } else {
+                null
+            }
+        return name ?: flutterSourceDirectory.name
     }
 
     /**
