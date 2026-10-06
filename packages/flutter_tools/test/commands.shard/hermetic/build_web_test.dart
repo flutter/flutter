@@ -591,6 +591,65 @@ void main() {
     await runner.run(<String>['build', 'web', '--no-pub', '--no-wasm-dry-run']);
   });
 
+  testWithoutContext('Passes --no-deprecated-js-interop to dart2js but not dart2wasm', () async {
+    final buildCommand = TestWebBuildCommand(
+      fileSystem: fileSystem,
+      platform: fakePlatform,
+      processManager: processManager,
+      buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
+        expect(configs, hasLength(2));
+        final WebCompilerConfig wasmConfig = configs[0];
+        final WebCompilerConfig jsConfig = configs[1];
+        expect(wasmConfig.compileTarget, CompileTarget.wasm);
+        expect(jsConfig.compileTarget, CompileTarget.js);
+        expect(
+          jsConfig.toCommandOptions(BuildMode.release),
+          contains('--no-deprecated-js-interop'),
+        );
+        expect(
+          wasmConfig.toCommandOptions(BuildMode.release),
+          isNot(contains('--no-deprecated-js-interop')),
+        );
+      }),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+    setupFileSystemForEndToEndTest(fileSystem);
+    await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--no-deprecated-js-interop']);
+  });
+
+  for (final (List<String> flags, bool expectedOmit) in <(List<String>, bool)>[
+    (<String>[], false),
+    (<String>['--deprecated-js-interop'], false),
+    (<String>['--no-deprecated-js-interop'], true),
+  ]) {
+    testWithoutContext(
+      'Wasm dry run omits deprecated JS interop findings: $expectedOmit with $flags',
+      () async {
+        final buildCommand = TestWebBuildCommand(
+          fileSystem: fileSystem,
+          platform: fakePlatform,
+          processManager: processManager,
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
+            final WasmCompilerConfig dryRunConfig = configs.whereType<WasmCompilerConfig>().single;
+            expect(dryRunConfig.dryRun, isTrue);
+            expect(dryRunConfig.omitDeprecatedJsInteropFindings, expectedOmit);
+          }),
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+        setupFileSystemForEndToEndTest(fileSystem);
+        await runner.run(<String>['build', 'web', '--no-pub', ...flags]);
+      },
+    );
+  }
+
   testWithoutContext(
     'Defaults to web renderer skwasm mode and minify for wasm when no option is specified',
     () async {
