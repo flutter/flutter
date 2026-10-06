@@ -71,6 +71,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       DebuggingOptionDescriptors.iosProfileDebugger,
     ], verboseHelp: verboseHelp);
     usesWebOptions(verboseHelp: verboseHelp);
+    usesDeprecatedJsInteropFlag(verboseHelp: verboseHelp);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
     usesIpv6Flag(verboseHelp: verboseHelp);
@@ -673,13 +674,8 @@ class RunCommand extends RunCommandBase {
         flutterProject: flutterProject,
         debuggingOptions: debuggingOptions,
         stayResident: stayResident,
-        fileSystem: globals.fs,
         analytics: globals.analytics,
-        logger: globals.logger,
-        terminal: globals.terminal,
-        platform: globals.platform,
-        outputPreferences: globals.outputPreferences,
-        systemClock: globals.systemClock,
+        toolContext: toolContext!,
         webDefines: extractWebDefines(),
       );
     }
