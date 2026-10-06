@@ -245,7 +245,11 @@ class DaemonServer {
     });
 
     // Wait indefinitely until the server closes.
-    await subscription.cancel();
+    try {
+      await subscription.asFuture<void>();
+    } finally {
+      await subscription.cancel();
+    }
   }
 }
 
