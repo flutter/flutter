@@ -409,8 +409,15 @@ class Slider extends StatefulWidget {
   /// A label to show above the slider when the slider is active and
   /// [SliderThemeData.showValueIndicator] is satisfied.
   ///
-  /// It is used to display the value of a discrete slider, and it is displayed
-  /// as part of the value indicator shape.
+  /// It is used to display the value of a slider, and it is displayed as part
+  /// of the value indicator shape.
+  ///
+  /// By default, the value indicator is only shown for discrete sliders
+  /// (sliders where [divisions] is non-null), so a [label] has no visible
+  /// effect on a continuous slider (where [divisions] is null). To show the
+  /// label on a continuous slider, set [Slider.showValueIndicator] or
+  /// [SliderThemeData.showValueIndicator] to a value such as
+  /// [ShowValueIndicator.onlyForContinuous] or [ShowValueIndicator.onDrag].
   ///
   /// The label is rendered using the active [ThemeData]'s [TextTheme.bodyLarge]
   /// text style, with the theme data's [ColorScheme.onPrimary] color. The

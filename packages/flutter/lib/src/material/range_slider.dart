@@ -321,6 +321,14 @@ class RangeSlider extends StatefulWidget {
   /// [ColorScheme.onPrimary] color. The label's text style can be overridden
   /// with [SliderThemeData.valueIndicatorTextStyle].
   ///
+  /// By default, the value indicator is only shown for discrete sliders
+  /// (sliders where [divisions] is non-null), so [labels] have no visible
+  /// effect on a continuous range slider (where [divisions] is null). To show
+  /// the labels on a continuous range slider, set
+  /// [SliderThemeData.showValueIndicator] to a value such as
+  /// [ShowValueIndicator.onlyForContinuous] or [ShowValueIndicator.onDrag],
+  /// for example with a [SliderTheme] ancestor.
+  ///
   /// If null, then the value indicator will not be displayed.
   ///
   /// See also:
