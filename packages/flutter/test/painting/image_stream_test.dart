@@ -593,7 +593,7 @@ void main() {
     final emittedImages = <ImageInfo>[];
     addTearDown(() {
       for (final image in emittedImages) {
-          image.dispose();
+        image.dispose();
       }
     });
     final listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
