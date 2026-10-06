@@ -353,6 +353,30 @@ TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferLoadsComputeMetadata) {
   EXPECT_EQ(storage_layouts, 2u);
 }
 
+// A storage buffer entry without a name, as a malformed `fromBytes` payload
+// could carry, is skipped instead of dereferenced.
+TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferSkipsUnnamedStorageBuffer) {
+  // The object API leaves an empty string field out of the buffer entirely.
+  auto bundle =
+      BuildComputeBundle({{.name = "Data", .ext_res_0 = 0, .binding = 0},
+                          {.name = "", .ext_res_0 = 1, .binding = 1}},
+                         std::array<uint32_t, 3>{1, 1, 1});
+  auto library = ShaderLibrary::MakeFromFlatbuffer(
+      impeller::Context::BackendType::kMetal, CreateMappingFromVector(bundle),
+      "test_bundle");
+  ASSERT_TRUE(library);
+  auto shader = library->FindShaderForTesting("test");
+  ASSERT_TRUE(shader);
+  EXPECT_NE(shader->GetStorageBuffer("Data"), nullptr);
+  size_t storage_layouts = 0;
+  for (const auto& layout : shader->GetDescriptorSetLayouts()) {
+    if (layout.descriptor_type == impeller::DescriptorType::kStorageBuffer) {
+      storage_layouts++;
+    }
+  }
+  EXPECT_EQ(storage_layouts, 1u);
+}
+
 // A compute shader without a workgroup size cannot be dispatched, so it is
 // left out of the library.
 TEST(FlutterGpuShaderLibraryTest,

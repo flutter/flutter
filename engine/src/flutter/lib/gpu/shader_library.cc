@@ -344,6 +344,11 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
         storage_buffers;
     if (backend_shader->storage_buffers() != nullptr) {
       for (const auto& storage_buffer : *backend_shader->storage_buffers()) {
+        if (storage_buffer->name() == nullptr) {
+          // A malformed bundle from `ShaderLibrary.fromBytes`; the verifier
+          // does not require optional fields to be present.
+          continue;
+        }
         if (storage_buffer->ext_res_0() == impeller::kOptimizedOutBinding) {
           // Dropped for the same reason as the optimized-out uniforms above.
           continue;
