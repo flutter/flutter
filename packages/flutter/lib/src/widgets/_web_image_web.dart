@@ -34,11 +34,9 @@ class ImgElementPlatformView extends StatefulWidget {
     assert(!_registered);
     _registered = true;
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId, {Object? params}) {
-      final paramsMap = params! as Map<Object?, Object?>;
       // Create a new <img> element. The browser is able to display the image
       // without fetching it over the network again.
       final img = web.document.createElement('img') as web.HTMLImageElement;
-      img.src = paramsMap['src']! as String;
       // Set `width` and `height`, otherwise the engine will issue a warning.
       img.style
         ..width = '100%'
@@ -57,19 +55,19 @@ class ImgElementPlatformView extends StatefulWidget {
 
 class _ImgElementPlatformViewState extends State<ImgElementPlatformView> {
   web.HTMLImageElement? _imgElement;
-  bool _srcUpdatedBeforeCreated = false;
 
   void _onPlatformViewCreated(int viewId) {
     final img = ui_web.platformViewRegistry.getViewById(viewId) as web.HTMLImageElement;
+    // Platform view creation is asynchronous. If this State was already
+    // disposed (or widget.src became null) before the creation callback fired,
+    // clear the <img> element's src immediately.
     if (!mounted || widget.src == null) {
       img.src = '';
       return;
     }
+    _imgElement?.src = '';
     _imgElement = img;
-    if (_srcUpdatedBeforeCreated) {
-      _srcUpdatedBeforeCreated = false;
-      img.src = widget.src!;
-    }
+    img.src = widget.src!;
   }
 
   @override
@@ -79,11 +77,8 @@ class _ImgElementPlatformViewState extends State<ImgElementPlatformView> {
       if (widget.src == null) {
         _imgElement?.src = '';
         _imgElement = null;
-        _srcUpdatedBeforeCreated = false;
-      } else if (_imgElement != null) {
-        _imgElement!.src = widget.src!;
-      } else if (oldWidget.src != null) {
-        _srcUpdatedBeforeCreated = true;
+      } else {
+        _imgElement?.src = widget.src!;
       }
     }
   }
@@ -105,7 +100,6 @@ class _ImgElementPlatformViewState extends State<ImgElementPlatformView> {
     return HtmlElementView(
       viewType: ImgElementPlatformView._viewType,
       onPlatformViewCreated: _onPlatformViewCreated,
-      creationParams: <String, String?>{'src': widget.src},
       hitTestBehavior: PlatformViewHitTestBehavior.transparent,
     );
   }
