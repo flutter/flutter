@@ -1190,12 +1190,13 @@ class BrowserManager {
     if (wipConnection != null) {
       try {
         final WipResponse response = await wipConnection
-            .sendCommand('Runtime.evaluate', <String, dynamic>{'expression': '1 + 1'})
+            .sendCommand('Runtime.evaluate', <String, Object?>{'expression': '1 + 1'})
             .timeout(const Duration(seconds: 2));
-        final result = response.result?['result'] as Map<String, dynamic>?;
-        isCdpResponsive = result?['value'] == 2;
-      } on Object catch (_) {
-        isCdpResponsive = false;
+        if (response.result case {'result': {'value': 2}}) {
+          isCdpResponsive = true;
+        }
+      } on Object {
+        // CDP timed out or the connection is gone; isCdpResponsive stays false.
       }
       report.writeln(
         '  Chrome Host CDP Responsiveness: ${isCdpResponsive ? "Responsive" : "Unresponsive / Timed out"}',
@@ -1266,30 +1267,25 @@ class CdpNetworkTracker {
         return;
       }
       _subscription = connection.onNotification.listen((WipEvent event) {
-        final Map<String, dynamic>? params = event.params;
-        if (params == null) {
-          return;
-        }
-        switch (event.method) {
-          case 'Network.requestWillBeSent':
-            final requestId = params['requestId'] as String?;
-            final request = params['request'] as Map<String, dynamic>?;
-            final url = request?['url'] as String?;
-            if (requestId != null && url != null) {
-              _pendingRequests[requestId] = _PendingRequestInfo(
-                url: url,
-                startTime: _systemClock.now(),
-              );
-            }
-          case 'Network.loadingFinished':
-          case 'Network.loadingFailed':
-            final requestId = params['requestId'] as String?;
-            if (requestId != null) {
-              _pendingRequests.remove(requestId);
-            }
+        switch (event) {
+          case WipEvent(
+            method: 'Network.requestWillBeSent',
+            params: {'requestId': final String requestId, 'request': {'url': final String url}},
+          ):
+            _pendingRequests[requestId] = _PendingRequestInfo(
+              url: url,
+              startTime: _systemClock.now(),
+            );
+          case WipEvent(
+            method: 'Network.loadingFinished' || 'Network.loadingFailed',
+            params: {'requestId': final String requestId},
+          ):
+            _pendingRequests.remove(requestId);
         }
       });
-    } on Object catch (_) {}
+    } on Object {
+      // Network tracking is best-effort diagnostics; never fail the test run over it.
+    }
   }
 
   List<String> getStalledRequests({Duration threshold = const Duration(seconds: 5)}) {
