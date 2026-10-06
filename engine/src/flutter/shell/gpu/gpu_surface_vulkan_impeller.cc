@@ -94,8 +94,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
   // Skipping it when the compositor presents would leave the raster thread
   // holding those pools for the life of the engine.
   if (impeller_context_) {
-    impeller::ContextVK::Cast(*impeller_context_)
-        .DisposeThreadLocalCachedResources();
+    impeller_context_->DisposeThreadLocalCachedResources();
   }
 
   // Nothing to acquire or present when an external view embedder owns
@@ -260,12 +259,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
       TRACE_EVENT0("flutter", "GPUSurfaceVulkan::PresentImage");
 
       {
-        const auto& context = impeller::ContextVK::Cast(*impeller_context);
-
         //----------------------------------------------------------------------------
         /// Transition the image to color-attachment-optimal.
         ///
-        auto cmd_buffer = context.CreateCommandBuffer();
+        auto cmd_buffer = impeller_context->CreateCommandBuffer();
 
         auto vk_final_cmd_buffer =
             impeller::CommandBufferVK::Cast(*cmd_buffer).GetCommandBuffer();
@@ -286,7 +283,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
             return false;
           }
         }
-        if (!context.GetCommandQueue()->Submit({cmd_buffer}).ok()) {
+        if (!impeller_context->GetCommandQueue()->Submit({cmd_buffer}).ok()) {
           return false;
         }
       }
