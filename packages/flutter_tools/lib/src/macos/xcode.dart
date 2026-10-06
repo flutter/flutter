@@ -311,6 +311,8 @@ EnvironmentType environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem
     return sdkName.contains('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
   }
   throwToolExit(
-    'Unsupported iOS SDK root "$sdkroot". Expected an iPhoneOS or iPhoneSimulator SDK.',
+    'Unsupported iOS SDK root "$sdkroot". Expected an iPhoneOS or iPhoneSimulator SDK. '
+    "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+    '(SDKROOT) and Supported Destinations in Xcode.',
   );
 }

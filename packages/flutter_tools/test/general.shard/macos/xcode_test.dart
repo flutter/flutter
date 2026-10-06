@@ -2047,19 +2047,28 @@ void main() {
         expect(
           () => environmentTypeFromSdkroot('/path/to/MacOSX.sdk', fileSystem),
           throwsToolExit(
-            message: 'Unsupported iOS SDK root "/path/to/MacOSX.sdk". Expected an iPhoneOS or iPhoneSimulator SDK.',
+            message:
+                'Unsupported iOS SDK root "/path/to/MacOSX.sdk". Expected an iPhoneOS or iPhoneSimulator SDK. '
+                "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+                '(SDKROOT) and Supported Destinations in Xcode.',
           ),
         );
         expect(
           () => environmentTypeFromSdkroot('/path/to/XROS1.0.sdk', fileSystem),
           throwsToolExit(
-            message: 'Unsupported iOS SDK root "/path/to/XROS1.0.sdk". Expected an iPhoneOS or iPhoneSimulator SDK.',
+            message:
+                'Unsupported iOS SDK root "/path/to/XROS1.0.sdk". Expected an iPhoneOS or iPhoneSimulator SDK. '
+                "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+                '(SDKROOT) and Supported Destinations in Xcode.',
           ),
         );
         expect(
           () => environmentTypeFromSdkroot('/path/to/WatchOS.sdk', fileSystem),
           throwsToolExit(
-            message: 'Unsupported iOS SDK root "/path/to/WatchOS.sdk". Expected an iPhoneOS or iPhoneSimulator SDK.',
+            message:
+                'Unsupported iOS SDK root "/path/to/WatchOS.sdk". Expected an iPhoneOS or iPhoneSimulator SDK. '
+                "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+                '(SDKROOT) and Supported Destinations in Xcode.',
           ),
         );
       });
