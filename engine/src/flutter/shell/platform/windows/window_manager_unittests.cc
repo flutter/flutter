@@ -1132,6 +1132,36 @@ TEST_F(WindowManagerTest,
   EXPECT_EQ(style & WS_THICKFRAME, 0L);
 }
 
+TEST_F(WindowManagerTest,
+       OnPreEngineRestartDestroysWindowsWithoutDispatchingMessages) {
+  IsolateScope isolate_scope(isolate());
+
+  static bool received_message = false;
+  WindowingInitRequest init_request{
+      .on_message = [](WindowsMessage* message) { received_message = true; }};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const int64_t first_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND first_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), first_view_id);
+  const int64_t second_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND second_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), second_view_id);
+
+  received_message = false;
+  EngineModifier{engine()}.Restart();
+
+  EXPECT_FALSE(received_message);
+  EXPECT_FALSE(IsWindow(first_window_handle));
+  EXPECT_FALSE(IsWindow(second_window_handle));
+}
+
 // Verifies that |OnEngineShutdown| destroys popup windows BEFORE clearing
 // |on_message_|, so the WM_DESTROY round-trip reaches the isolate. Without
 // this, |PopupWindowControllerWin32._destroyed| would never be set during

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/semantics.dart';
+library;
+
 // ignore_for_file: avoid_dynamic_calls
 
 import 'dart:convert';
@@ -148,7 +151,7 @@ class AndroidSemanticsNode {
     return Size(rect.bottom - rect.top, rect.right - rect.left);
   }
 
-  /// Gets a list of [AndroidSemanticsActions] which are defined for the node.
+  /// Gets a list of [AndroidSemanticsAction]s which are defined for the node.
   List<AndroidSemanticsAction> getActions() {
     final List<int>? actions = (_values['actions'] as List<dynamic>?)?.cast<int>();
     if (actions == null) {
