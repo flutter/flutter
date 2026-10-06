@@ -755,16 +755,23 @@ object FlutterPluginUtils {
             ?.toBoolean() ?: true
     }
 
-    /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
+    /**
+     * Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project.
+     *
+     * Set [checkCompileSdk] to false for add-to-app modules: there, AGP compares the host app (not
+     * the module) against every AAR, which [addTaskForValidatingHostAppCompileSdk] checks instead.
+     */
     @JvmStatic
     @JvmName("detectLowCompileSdkVersionOrNdkVersion")
     internal fun detectLowCompileSdkVersionOrNdkVersion(
         project: Project,
-        pluginList: List<Map<String?, Any?>>
+        pluginList: List<Map<String?, Any?>>,
+        checkCompileSdk: Boolean = true
     ) {
         val validateTask =
             project.tasks.register("validateCompileSdkVersion", ValidateCompileSdkVersionTask::class.java) {
                 this.projectDir.set(project.layout.projectDirectory)
+                this.checkCompileSdk.set(checkCompileSdk)
             }
 
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)

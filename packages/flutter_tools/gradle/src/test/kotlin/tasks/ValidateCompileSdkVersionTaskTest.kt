@@ -240,4 +240,43 @@ class ValidateCompileSdkVersionTaskTest {
             )
         }
     }
+
+    @Test
+    fun `performValidation skips compileSdk warnings but keeps ndkVersion warnings when checkCompileSdk is false`(
+        @TempDir tempDir: Path
+    ) {
+        val buildGradleFile =
+            tempDir
+                .resolve("app")
+                .createDirectory()
+                .resolve("build.gradle")
+                .toFile()
+        buildGradleFile.createNewFile()
+        val projectDir = tempDir.resolve("app").toFile()
+        val mockLogger = mockk<Logger>()
+        every { mockLogger.error(any()) } returns Unit
+
+        val cameraName = cameraDependency["name"] as String
+
+        ValidateCompileSdkVersionTask.performValidation(
+            projSdk = 33,
+            projNdk = "24.3.11579264",
+            pluginCompileSdks = mapOf(cameraName to 35),
+            pluginNdkVersions = mapOf(cameraName to "26.3.11579264"),
+            logger = mockLogger,
+            projectDir = projectDir,
+            checkCompileSdk = false
+        )
+
+        verify(exactly = 0) {
+            mockLogger.error(
+                match { it.contains("Android SDK") || it.contains("compileSdk") }
+            )
+        }
+        verify {
+            mockLogger.error(
+                "Your project is configured with Android NDK 24.3.11579264, but the following plugin(s) depend on a different Android NDK version:"
+            )
+        }
+    }
 }

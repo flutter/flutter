@@ -33,8 +33,20 @@ abstract class ValidateCompileSdkVersionTask : DefaultTask() {
     @get:Input
     abstract val pluginNdkVersions: MapProperty<String, String>
 
+    /**
+     * Whether to compare the project's compileSdk against the plugins'. Disabled for add-to-app
+     * modules, where the host app's compileSdk is checked by [ValidateHostAppCompileSdkTask]
+     * instead.
+     */
+    @get:Input
+    abstract val checkCompileSdk: Property<Boolean>
+
     @get:Internal
     abstract val projectDir: DirectoryProperty
+
+    init {
+        checkCompileSdk.convention(true)
+    }
 
     @TaskAction
     fun run() {
@@ -44,7 +56,8 @@ abstract class ValidateCompileSdkVersionTask : DefaultTask() {
             pluginCompileSdks = pluginCompileSdks.get(),
             pluginNdkVersions = pluginNdkVersions.get(),
             logger = logger,
-            projectDir = projectDir.get().asFile
+            projectDir = projectDir.get().asFile,
+            checkCompileSdk = checkCompileSdk.get()
         )
     }
 
@@ -55,7 +68,8 @@ abstract class ValidateCompileSdkVersionTask : DefaultTask() {
             pluginCompileSdks: Map<String, Int>,
             pluginNdkVersions: Map<String, String>,
             logger: Logger,
-            projectDir: File
+            projectDir: File,
+            checkCompileSdk: Boolean = true
         ) {
             var maxPluginCompileSdkVersion = projSdk
             var maxPluginNdkVersion = projNdk
@@ -63,10 +77,12 @@ abstract class ValidateCompileSdkVersionTask : DefaultTask() {
             val pluginsWithHigherSdkVersion = mutableListOf<PluginVersionPair>()
             val pluginsWithDifferentNdkVersion = mutableListOf<PluginVersionPair>()
 
-            pluginCompileSdks.forEach { (name, sdk) ->
-                maxPluginCompileSdkVersion = maxOf(maxPluginCompileSdkVersion, sdk)
-                if (sdk > projSdk) {
-                    pluginsWithHigherSdkVersion.add(PluginVersionPair(name, sdk.toString()))
+            if (checkCompileSdk) {
+                pluginCompileSdks.forEach { (name, sdk) ->
+                    maxPluginCompileSdkVersion = maxOf(maxPluginCompileSdkVersion, sdk)
+                    if (sdk > projSdk) {
+                        pluginsWithHigherSdkVersion.add(PluginVersionPair(name, sdk.toString()))
+                    }
                 }
             }
 

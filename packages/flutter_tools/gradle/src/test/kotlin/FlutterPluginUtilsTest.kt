@@ -869,6 +869,33 @@ class FlutterPluginUtilsTest {
         }
     }
 
+    @Test
+    fun `detectLowCompileSdkVersionOrNdkVersion forwards checkCompileSdk to the task`() {
+        val project = mockk<Project>(relaxed = true)
+        val taskContainer = mockk<org.gradle.api.tasks.TaskContainer>(relaxed = true)
+        val taskProvider = mockk<org.gradle.api.tasks.TaskProvider<com.flutter.gradle.tasks.ValidateCompileSdkVersionTask>>()
+        every { project.tasks } returns taskContainer
+        val registerAction = slot<Action<com.flutter.gradle.tasks.ValidateCompileSdkVersionTask>>()
+        every {
+            taskContainer.register(
+                "validateCompileSdkVersion",
+                com.flutter.gradle.tasks.ValidateCompileSdkVersionTask::class.java,
+                capture(registerAction)
+            )
+        } returns taskProvider
+        val androidComponents = mockk<AndroidComponentsExtension<Any, VariantBuilder, Variant>>()
+        every {
+            project.extensions.getByType(AndroidComponentsExtension::class.java)
+        } returns androidComponents as AndroidComponentsExtension<*, *, *>
+        every { androidComponents.finalizeDsl(match<(Any) -> Unit> { true }) } returns Unit
+
+        FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(project, emptyList(), checkCompileSdk = false)
+
+        val task = mockk<com.flutter.gradle.tasks.ValidateCompileSdkVersionTask>(relaxed = true)
+        registerAction.captured.execute(task)
+        verify { task.checkCompileSdk.set(false) }
+    }
+
     // getAarMinCompileSdk
     private fun mockLibraryProject(
         compileSdk: Int?,
