@@ -4,7 +4,6 @@
 
 #include "impeller/compiler/shader_bundle.h"
 
-#include <algorithm>
 #include <filesystem>
 #include <sstream>
 
@@ -196,8 +195,8 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
   // a literal `local_size`.
   if (const auto& workgroup_size = bundle_data->GetWorkgroupSize();
       workgroup_size.has_value() &&
-      std::find(workgroup_size->begin(), workgroup_size->end(), 0u) !=
-          workgroup_size->end()) {
+      ((*workgroup_size)[0] == 0u || (*workgroup_size)[1] == 0u ||
+       (*workgroup_size)[2] == 0u)) {
     std::cerr << "Compute shader \"" << shader_name
               << "\" sizes its workgroup with a specialization constant "
                  "(local_size_x_id, local_size_y_id or local_size_z_id). "
