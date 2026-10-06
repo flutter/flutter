@@ -1976,6 +1976,7 @@ void main() {
   testWidgets(
     'Offstage size-determining OverlayEntry can be rebuilt in an unconstrained environment',
     (WidgetTester tester) async {
+      final GlobalKey childKey = GlobalKey();
       final childWidth = ValueNotifier<double>(100);
       addTearDown(childWidth.dispose);
       final offstageEntry = OverlayEntry(
@@ -1985,7 +1986,7 @@ void main() {
           return ValueListenableBuilder<double>(
             valueListenable: childWidth,
             builder: (BuildContext context, double value, Widget? child) {
-              return SizedBox(width: value, height: 100);
+              return SizedBox(key: childKey, width: value, height: 100);
             },
           );
         },
@@ -2018,9 +2019,17 @@ void main() {
       // in RenderObject.markNeedsLayout.
       childWidth.value = 110;
       await tester.pump();
+      expect(
+        tester.renderObject(find.byKey(childKey, skipOffstage: false)).debugNeedsLayout,
+        isFalse,
+      );
       childWidth.value = 120;
       await tester.pump();
       expect(tester.takeException(), isNull);
+      expect(
+        tester.renderObject(find.byKey(childKey, skipOffstage: false)).debugNeedsLayout,
+        isFalse,
+      );
       expect(tester.getSize(find.byType(Overlay)), const Size(50, 50));
 
       opaqueEntry.remove();
@@ -2073,9 +2082,17 @@ void main() {
 
     childWidth.value = 110;
     await tester.pump();
+    expect(
+      tester.renderObject(find.byKey(childKey, skipOffstage: false)).debugNeedsLayout,
+      isFalse,
+    );
     childWidth.value = 120;
     await tester.pump();
     expect(tester.takeException(), isNull);
+    expect(
+      tester.renderObject(find.byKey(childKey, skipOffstage: false)).debugNeedsLayout,
+      isFalse,
+    );
 
     opaqueEntry.remove();
     await tester.pump();
