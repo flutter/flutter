@@ -32,9 +32,8 @@ class WebMemoryFS {
     final Map<String, Object?> manifest = castStringKeyedMap(
       json.decode(manifestFile.readAsStringSync()),
     )!;
-    for (final MapEntry<String, Object?> entry in manifest.entries) {
-      final String filePath = entry.key;
-      if (entry.value case {
+    for (final MapEntry(key: filePath, value: offsets) in manifest.entries) {
+      if (offsets case {
         'code': [final int codeStart, final int codeEnd],
         'sourcemap': [final int sourcemapStart, final int sourcemapEnd],
         'metadata': [final int metadataStart, final int metadataEnd],
