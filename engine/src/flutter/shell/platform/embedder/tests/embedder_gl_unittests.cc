@@ -5371,15 +5371,31 @@ TEST_F(EmbedderTest, ExternalTextureGLAppliesUVTransformation) {
   TestGLSurface gl_surface(DlISize(kSurfaceDimension, kSurfaceDimension));
   ASSERT_TRUE(gl_surface.MakeCurrent());
 
+  auto gl_gen_textures = reinterpret_cast<PFNGLGENTEXTURESPROC>(
+      gl_surface.GetProcAddress("glGenTextures"));
+  auto gl_bind_texture = reinterpret_cast<PFNGLBINDTEXTUREPROC>(
+      gl_surface.GetProcAddress("glBindTexture"));
+  auto gl_tex_parameteri = reinterpret_cast<PFNGLTEXPARAMETERIPROC>(
+      gl_surface.GetProcAddress("glTexParameteri"));
+  auto gl_tex_image_2d = reinterpret_cast<PFNGLTEXIMAGE2DPROC>(
+      gl_surface.GetProcAddress("glTexImage2D"));
+  auto gl_delete_textures = reinterpret_cast<PFNGLDELETETEXTURESPROC>(
+      gl_surface.GetProcAddress("glDeleteTextures"));
+  ASSERT_NE(gl_gen_textures, nullptr);
+  ASSERT_NE(gl_bind_texture, nullptr);
+  ASSERT_NE(gl_tex_parameteri, nullptr);
+  ASSERT_NE(gl_tex_image_2d, nullptr);
+  ASSERT_NE(gl_delete_textures, nullptr);
+
   // Create a 2x2 GL_TEXTURE_2D with top row red and bottom row blue.
   GLuint tex_id = 0;
-  glGenTextures(1, &tex_id);
+  gl_gen_textures(1, &tex_id);
   ASSERT_NE(tex_id, 0u);
-  glBindTexture(GL_TEXTURE_2D, tex_id);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  gl_bind_texture(GL_TEXTURE_2D, tex_id);
+  gl_tex_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  gl_tex_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  gl_tex_parameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  gl_tex_parameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
   const uint32_t pixels[kTextureDimension * kTextureDimension] = {
       kRedPixelRgba,
@@ -5387,9 +5403,9 @@ TEST_F(EmbedderTest, ExternalTextureGLAppliesUVTransformation) {
       kBluePixelRgba,
       kBluePixelRgba,  // Row 1
   };
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, kTextureDimension, kTextureDimension,
-               0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-  glBindTexture(GL_TEXTURE_2D, 0);
+  gl_tex_image_2d(GL_TEXTURE_2D, 0, GL_RGBA, kTextureDimension,
+                  kTextureDimension, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  gl_bind_texture(GL_TEXTURE_2D, 0);
 
   auto gr_context = gl_surface.GetGrContext();
   ASSERT_NE(gr_context, nullptr);
@@ -5504,7 +5520,7 @@ TEST_F(EmbedderTest, ExternalTextureGLAppliesUVTransformation) {
       flipped_bitmap.getColor(kSurfaceDimension - 1, kSurfaceDimension - 1),
       identity_top_right);
 
-  glDeleteTextures(1, &tex_id);
+  gl_delete_textures(1, &tex_id);
 }
 
 INSTANTIATE_TEST_SUITE_P(
