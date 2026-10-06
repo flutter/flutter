@@ -871,7 +871,9 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   ///
   /// `log stream` is ready once it prints its first line (a "Filtering the log
   /// data using ..." header); events logged before that are dropped.
-  final _ready = Completer<void>();
+  ///
+  /// Recreated on every listen, since each one starts a new `log stream`.
+  var _ready = Completer<void>();
 
   @override
   @visibleForTesting
@@ -888,12 +890,15 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   String get name => device.name;
 
   Future<void> _start() async {
+    // Use a local so that a previous process exiting late cannot complete it.
+    _ready = Completer<void>();
+    final Completer<void> ready = _ready;
     // Unified logging iOS 11 and greater (introduced in iOS 10).
     if (await device.sdkMajorVersion >= 11) {
       _deviceProcess = await launchDeviceUnifiedLogging(device, _appName);
       _deviceProcess?.stdout.transform(utf8LineDecoder).listen((String line) {
-        if (!_ready.isCompleted) {
-          _ready.complete();
+        if (!ready.isCompleted) {
+          ready.complete();
         }
         _onUnifiedLoggingLine(line);
       });
@@ -918,8 +923,8 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
     // cleanup in the callback.
     unawaited(
       _deviceProcess?.exitCode.whenComplete(() {
-        if (!_ready.isCompleted) {
-          _ready.complete();
+        if (!ready.isCompleted) {
+          ready.complete();
         }
         if (_linesController.hasListener) {
           _linesController.close();

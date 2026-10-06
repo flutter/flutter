@@ -1720,24 +1720,50 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
 
       testUsingContext(
-        'startApp waits for the log stream to be ready before launching the app',
+        'startApp waits for the log stream to be ready before each launch',
         () {
           // Regression test for https://github.com/flutter/flutter/issues/181771.
           fakeAsync((FakeAsync async) {
-            final logProcess = FakeStreamingProcess();
-            processManager.addCommand(FakeCommand(command: logStreamCommand, process: logProcess));
+            final firstLogProcess = FakeStreamingProcess();
+            final secondLogProcess = FakeStreamingProcess();
+            processManager.addCommand(
+              FakeCommand(command: logStreamCommand, process: firstLogProcess),
+            );
+            processManager.addCommand(
+              FakeCommand(command: logStreamCommand, process: secondLogProcess),
+            );
+            final IOSSimulator device = buildDevice();
+            final IOSApp package = buildPackage();
 
-            buildDevice().startApp(
-              buildPackage(),
+            device.startApp(
+              package,
               prebuiltApplication: true,
               debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
             );
             async.elapse(const Duration(seconds: 1));
             expect(simControl.requests, isEmpty);
 
-            logProcess.write('Filtering the log data using "type == 1024"\n');
+            firstLogProcess.write('Filtering the log data using "type == 1024"\n');
             async.flushMicrotasks();
             expect(simControl.requests, hasLength(1));
+
+            firstLogProcess.write(
+              '"eventMessage" : "The Dart VM service is listening on http://127.0.0.1:1234/abcdef/"\n',
+            );
+            async.elapse(const Duration(seconds: 1));
+
+            // The first launch stopped the log stream, so this one starts a new one.
+            device.startApp(
+              package,
+              prebuiltApplication: true,
+              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+            );
+            async.elapse(const Duration(seconds: 1));
+            expect(simControl.requests, hasLength(1));
+
+            secondLogProcess.write('Filtering the log data using "type == 1024"\n');
+            async.flushMicrotasks();
+            expect(simControl.requests, hasLength(2));
             expect(processManager, hasNoRemainingExpectations);
           });
         },
