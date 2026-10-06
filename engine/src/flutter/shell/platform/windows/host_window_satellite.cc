@@ -278,7 +278,7 @@ LRESULT HostWindowSatellite::HandleMessage(HWND hwnd,
       if (is_in_move_size_loop_ || is_following_parent_) {
         break;
       }
-      
+
       // Otherwise the DPI change was not caused by the user moving the
       // satellite (e.g. it followed its parent onto another monitor). Apply the
       // suggested rectangle for its new size, without treating the
