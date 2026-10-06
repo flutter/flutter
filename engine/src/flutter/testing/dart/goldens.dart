@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -94,6 +95,7 @@ class ImageComparer {
     }
 
     var differentPixels = 0;
+    var maxObservedDelta = 0;
     final int totalPixels = golden.width * golden.height;
 
     for (var y = 0; y < golden.height; y++) {
@@ -107,18 +109,27 @@ class ImageComparer {
         final int aDiff = (goldenData.getUint8(offset + 3) - testImageData.getUint8(offset + 3))
             .abs();
 
-        if (rDiff > maxColorDelta ||
-            gDiff > maxColorDelta ||
-            bDiff > maxColorDelta ||
-            aDiff > maxColorDelta) {
+        final int pixelMax = math.max(math.max(rDiff, gDiff), math.max(bDiff, aDiff));
+        if (pixelMax > maxObservedDelta) {
+          maxObservedDelta = pixelMax;
+        }
+
+        if (pixelMax > maxColorDelta) {
           differentPixels++;
-          if (maxDifferentPixelsRate == 0.0) {
-            return false;
-          }
         }
       }
     }
-    return (differentPixels / totalPixels) <= maxDifferentPixelsRate;
+    final double diffRate = differentPixels / totalPixels;
+    if (diffRate > maxDifferentPixelsRate) {
+      print(
+        'fuzzyCompareImages failed: '
+        'maxObservedDelta=$maxObservedDelta (threshold=$maxColorDelta), '
+        'differentPixels=$differentPixels/$totalPixels '
+        '(${(diffRate * 100).toStringAsFixed(3)}%, maxAllowed=${(maxDifferentPixelsRate * 100).toStringAsFixed(3)}%)',
+      );
+      return false;
+    }
+    return true;
   }
 }
 
