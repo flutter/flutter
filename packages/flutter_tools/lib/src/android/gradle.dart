@@ -5,6 +5,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
@@ -1117,7 +1118,7 @@ void printHowToConsumeAar({
 
   logger.printStatus('\nConsuming the Module', emphasis: true);
   logger.printStatus('''
-  1. Open ${fileSystem.path.join('<host>', 'app', 'build.gradle')}
+  1. Open ${fileSystem.path.join('<host>', 'app', 'build.gradle(.kts)')}
   2. Ensure you have the repositories configured, otherwise add them:
 
       String storageUrl = System.env.$kFlutterStorageBaseUrl ?: "https://storage.googleapis.com"
@@ -1143,10 +1144,11 @@ void printHowToConsumeAar({
     }
 ''');
 
+  var nextStep = 4;
   if (buildModes.contains('profile')) {
     logger.printStatus('''
 
-  4. Add the `profile` build type:
+  ${nextStep++}. Add the `profile` build type:
 
     android {
       buildTypes {
@@ -1158,7 +1160,77 @@ void printHowToConsumeAar({
 ''');
   }
 
+  final Map<File, int> aarMinCompileSdks = findAarMinCompileSdks(repoDirectory);
+  if (aarMinCompileSdks.isNotEmpty) {
+    final int requiredCompileSdk = aarMinCompileSdks.values.reduce(max);
+    final List<File> aars = aarMinCompileSdks.keys.toList()
+      ..sort((File a, File b) => a.path.compareTo(b.path));
+    final buffer = StringBuffer()
+      ..writeln()
+      ..writeln(
+        '  $nextStep. Ensure the host app compiles against Android SDK $requiredCompileSdk or higher.',
+      )
+      ..writeln(
+        "     Starting with Android Gradle plugin 9, the host app's compileSdk must be the same or",
+      )
+      ..writeln('     higher than the compileSdk required by each Flutter AAR:')
+      ..writeln();
+    for (final aar in aars) {
+      buffer.writeln('       ${aar.basename}  (compileSdk ${aarMinCompileSdks[aar]}+)');
+      buffer.writeln('         ${aar.path}');
+    }
+    buffer
+      ..writeln()
+      ..writeln(
+        '     Set it in ${fileSystem.path.join('<host>', 'app', 'build.gradle(.kts)')} '
+        '(or in gradle/libs.versions.toml if you use a version catalog):',
+      )
+      ..writeln()
+      ..writeln('    android {')
+      ..writeln('      compileSdk = $requiredCompileSdk')
+      ..writeln('    }');
+    logger.printStatus(buffer.toString());
+  }
+
   logger.printStatus('To learn more, visit https://flutter.dev/to/integrate-android-archive');
+}
+
+/// The path of the metadata file that the Android Gradle plugin writes into every AAR.
+const _kAarMetadataPath = 'META-INF/com/android/build/gradle/aar-metadata.properties';
+
+final _aarMinCompileSdkPattern = RegExp(r'^minCompileSdk=(\d+)\s*$', multiLine: true);
+
+/// Returns the `minCompileSdk` from the AAR metadata of each `.aar` under [repoDirectory].
+///
+/// AARs without metadata, without a `minCompileSdk`, or that can't be read are skipped.
+@visibleForTesting
+Map<File, int> findAarMinCompileSdks(Directory repoDirectory) {
+  final aarMinCompileSdks = <File, int>{};
+  if (!repoDirectory.existsSync()) {
+    return aarMinCompileSdks;
+  }
+  for (final FileSystemEntity entity in repoDirectory.listSync(recursive: true)) {
+    if (entity is! File || !entity.path.endsWith('.aar')) {
+      continue;
+    }
+    try {
+      final Archive archive = ZipDecoder().decodeBytes(entity.readAsBytesSync());
+      final ArchiveFile? metadata = archive.findFile(_kAarMetadataPath);
+      if (metadata == null) {
+        continue;
+      }
+      final String contents = utf8.decode(metadata.content as List<int>);
+      final Match? match = _aarMinCompileSdkPattern.firstMatch(contents);
+      if (match != null) {
+        aarMinCompileSdks[entity] = int.parse(match.group(1)!);
+      }
+    } on ArchiveException {
+      continue;
+    } on FileSystemException {
+      continue;
+    }
+  }
+  return aarMinCompileSdks;
 }
 
 /// Calculates the SHA-1 hash of the given [file] using chunked reading.

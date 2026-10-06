@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 
@@ -698,7 +700,7 @@ flutter:
         contains(
           '\n'
           'Consuming the Module\n'
-          '  1. Open <host>/app/build.gradle\n'
+          '  1. Open <host>/app/build.gradle(.kts)\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
           '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
@@ -749,7 +751,7 @@ flutter:
         contains(
           '\n'
           'Consuming the Module\n'
-          '  1. Open <host>/app/build.gradle\n'
+          '  1. Open <host>/app/build.gradle(.kts)\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
           '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
@@ -787,7 +789,7 @@ flutter:
         contains(
           '\n'
           'Consuming the Module\n'
-          '  1. Open <host>/app/build.gradle\n'
+          '  1. Open <host>/app/build.gradle(.kts)\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
           '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
@@ -826,7 +828,7 @@ flutter:
         contains(
           '\n'
           'Consuming the Module\n'
-          '  1. Open <host>/app/build.gradle\n'
+          '  1. Open <host>/app/build.gradle(.kts)\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
           '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
@@ -860,6 +862,95 @@ flutter:
         ),
       );
     });
+
+    testWithoutContext('stdout tells the host app which compileSdk the AARs require', () async {
+      final Directory repoDirectory = fileSystem.directory('build/host/outputs/repo');
+      writeTestAar(
+        repoDirectory.childFile('com/mycompany/flutter_debug/1.0/flutter_debug-1.0.aar'),
+        minCompileSdk: 36,
+      );
+      writeTestAar(
+        repoDirectory.childFile('io/flutter/plugins/camera/camera_debug/1.0/camera_debug-1.0.aar'),
+        minCompileSdk: 37,
+      );
+
+      printHowToConsumeAar(
+        buildModes: const <String>{'debug', 'profile'},
+        androidPackage: 'com.mycompany',
+        repoDirectory: repoDirectory,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+
+      expect(
+        logger.statusText,
+        contains(
+          '\n'
+          '  5. Ensure the host app compiles against Android SDK 37 or higher.\n'
+          "     Starting with Android Gradle plugin 9, the host app's compileSdk must be the same or\n"
+          '     higher than the compileSdk required by each Flutter AAR:\n'
+          '\n'
+          '       flutter_debug-1.0.aar  (compileSdk 36+)\n'
+          '         build/host/outputs/repo/com/mycompany/flutter_debug/1.0/flutter_debug-1.0.aar\n'
+          '       camera_debug-1.0.aar  (compileSdk 37+)\n'
+          '         build/host/outputs/repo/io/flutter/plugins/camera/camera_debug/1.0/camera_debug-1.0.aar\n'
+          '\n'
+          '     Set it in <host>/app/build.gradle(.kts) (or in gradle/libs.versions.toml if you use a version catalog):\n'
+          '\n'
+          '    android {\n'
+          '      compileSdk = 37\n'
+          '    }\n',
+        ),
+      );
+    });
+
+    testWithoutContext('stdout omits the compileSdk step when no AAR declares one', () async {
+      final Directory repoDirectory = fileSystem.directory('build/host/outputs/repo');
+      writeTestAar(
+        repoDirectory.childFile('com/mycompany/flutter_debug/1.0/flutter_debug-1.0.aar'),
+      );
+
+      printHowToConsumeAar(
+        buildModes: const <String>{'debug'},
+        androidPackage: 'com.mycompany',
+        repoDirectory: repoDirectory,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+
+      expect(logger.statusText, isNot(contains('Ensure the host app compiles against')));
+    });
+  });
+
+  group('findAarMinCompileSdks', () {
+    late FileSystem fileSystem;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+    });
+
+    testWithoutContext('returns empty when the repo directory does not exist', () {
+      expect(findAarMinCompileSdks(fileSystem.directory('missing')), isEmpty);
+    });
+
+    testWithoutContext('reads minCompileSdk from each AAR and skips unreadable files', () {
+      final Directory repoDirectory = fileSystem.directory('repo');
+      final File aar = repoDirectory.childFile('a/flutter_release-1.0.aar');
+      writeTestAar(aar, minCompileSdk: 36);
+      writeTestAar(repoDirectory.childFile('b/no_min_compile_sdk-1.0.aar'));
+      repoDirectory.childFile('c/not_a_zip-1.0.aar')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('not a zip');
+      repoDirectory.childFile('a/flutter_release-1.0.pom')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('<project/>');
+
+      final Map<File, int> result = findAarMinCompileSdks(repoDirectory);
+
+      expect(result.length, 1);
+      expect(result.keys.single.path, aar.path);
+      expect(result.values.single, 36);
+    });
   });
 
   group('calculateSha', () {
@@ -891,4 +982,24 @@ flutter:
       expect(calculateSha(file), expectedHash);
     });
   });
+}
+
+/// Writes a minimal AAR (zip) to [aar] whose AAR metadata declares [minCompileSdk], if non-null.
+void writeTestAar(File aar, {int? minCompileSdk}) {
+  final metadata = StringBuffer('aarFormatVersion=1.0\naarMetadataVersion=1.0\n');
+  if (minCompileSdk != null) {
+    metadata.writeln('minCompileSdk=$minCompileSdk');
+  }
+  final List<int> metadataBytes = utf8.encode(metadata.toString());
+  final archive = Archive()
+    ..addFile(
+      ArchiveFile(
+        'META-INF/com/android/build/gradle/aar-metadata.properties',
+        metadataBytes.length,
+        metadataBytes,
+      ),
+    );
+  aar
+    ..createSync(recursive: true)
+    ..writeAsBytesSync(ZipEncoder().encode(archive)!);
 }
