@@ -10,7 +10,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 // Regression test for https://github.com/flutter/flutter/issues/111285
 void main() {
-  testWidgets('Can load asset from same package without error', (WidgetTester tester) async {
+  testWidgets('Loading an asset from the same package reaches image decoding', (
+    WidgetTester tester,
+  ) async {
+    // foo.png is intentionally empty, so decoding it must fail. Waiting for
+    // that error lets us verify that package asset lookup succeeded.
     await tester.runAsync(() async {
       final imageError = Completer<void>();
       final FlutterExceptionHandler? originalOnError = FlutterError.onError;
@@ -30,8 +34,7 @@ void main() {
       }
     });
 
-    // If this asset couldn't be loaded, the exception message would be
-    // "asset failed to load"
+    // Expect a decoding error rather than "asset failed to load".
     expect(tester.takeException().toString(), contains('Invalid image data'));
   });
 }
