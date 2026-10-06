@@ -56,8 +56,8 @@ class AccessibilityInspector {
       callback: _getSemanticsTree,
     );
     registerServiceExtension(
-      name: AccessibilityServiceExtensions.getEvaluations.extensionName,
-      callback: _getEvaluations,
+      name: AccessibilityServiceExtensions.getIssuesAndSemanticsTree.extensionName,
+      callback: _getIssuesAndSemanticsTree,
     );
     registerServiceExtension(
       name: AccessibilityServiceExtensions.enableSemantics.extensionName,
@@ -114,15 +114,7 @@ class AccessibilityInspector {
     return (semanticsOwner, root);
   }
 
-  /// Returns the semantics tree hierarchy of the application.
-  Future<Map<String, Object?>> _getSemanticsTree(Map<String, String> parameters) async {
-    final errorMap = <String, Object?>{};
-    final (SemanticsOwner, SemanticsNode)? result = _getSemanticsOwnerAndRoot(errorMap);
-    if (result == null) {
-      return errorMap;
-    }
-    final (SemanticsOwner _, SemanticsNode root) = result;
-
+  Map<String, Object?> _buildSemanticsNodes(SemanticsNode root) {
     final nodes = <String, Object?>{};
     final visited = <int>{};
     final queue = <SemanticsNode>[root];
@@ -149,18 +141,30 @@ class AccessibilityInspector {
         }
       }
     }
-
-    return <String, Object?>{AccessibilityInspectorKeys.data: nodes};
+    return nodes;
   }
 
-  /// Evaluates accessibility rules and returns detected issues.
-  Future<Map<String, Object?>> _getEvaluations(Map<String, String> parameters) async {
+  /// Returns the semantics tree hierarchy of the application.
+  Future<Map<String, Object?>> _getSemanticsTree(Map<String, String> parameters) async {
+    final errorMap = <String, Object?>{};
+    final (SemanticsOwner, SemanticsNode)? result = _getSemanticsOwnerAndRoot(errorMap);
+    if (result == null) {
+      return errorMap;
+    }
+    final (SemanticsOwner _, SemanticsNode root) = result;
+
+    return <String, Object?>{AccessibilityInspectorKeys.data: _buildSemanticsNodes(root)};
+  }
+
+  /// Evaluates accessibility rules and returns detected issues along with the
+  /// semantics tree hierarchy from the same frame.
+  Future<Map<String, Object?>> _getIssuesAndSemanticsTree(Map<String, String> parameters) async {
     final errorMap = <String, Object?>{};
     final (SemanticsOwner, SemanticsNode)? ownerAndRoot = _getSemanticsOwnerAndRoot(errorMap);
     if (ownerAndRoot == null) {
       return errorMap;
     }
-    final (SemanticsOwner semanticsOwner, SemanticsNode _) = ownerAndRoot;
+    final (SemanticsOwner semanticsOwner, SemanticsNode root) = ownerAndRoot;
 
     // The violations are displayed in Devtool.
     // TODO(hannah-hyj): If we add a "target platforms" option on the devtool side,
@@ -193,7 +197,10 @@ class AccessibilityInspector {
       }
     }
 
-    return <String, Object?>{AccessibilityInspectorKeys.issues: issues};
+    return <String, Object?>{
+      AccessibilityInspectorKeys.data: _buildSemanticsNodes(root),
+      AccessibilityInspectorKeys.issues: issues,
+    };
   }
 
   // TODO(hannah-hyj): https://github.com/flutter/devtools/issues/9991 - This returns the first RenderView with a SemanticsOwner.

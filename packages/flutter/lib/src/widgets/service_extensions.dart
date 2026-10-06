@@ -561,7 +561,8 @@ enum AccessibilityServiceExtensions {
   getSemanticsTree,
 
   /// Name of service extension that, when called, performs accessibility
-  /// evaluations on the widget tree and returns any detected issues.
+  /// evaluations on the widget tree and returns any detected issues along
+  /// with the semantics tree hierarchy from the same frame.
   ///
   /// This extension should only be called after semantics has been enabled
   /// (for example, by calling [enableSemantics]).
@@ -570,7 +571,7 @@ enum AccessibilityServiceExtensions {
   ///
   /// * [AccessibilityInspector.initServiceExtensions], where the service
   ///   extension is registered.
-  getEvaluations,
+  getIssuesAndSemanticsTree,
 
   /// Name of service extension that, when called, enables semantics in the app
   /// by creating a [SemanticsHandle].

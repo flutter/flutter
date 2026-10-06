@@ -158,7 +158,7 @@ void main() {
     AccessibilityInspector.instance.resetAllState();
   }, semanticsEnabled: false);
 
-  testWidgets('ext.flutter.accessibility.getEvaluations detects accessibility issues', (
+  testWidgets('ext.flutter.accessibility.getIssuesAndSemanticsTree detects accessibility issues', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -214,12 +214,13 @@ void main() {
       AccessibilityServiceExtensions.getSemanticsTree.extensionName,
     );
     expect(treeResult[AccessibilityInspectorKeys.error], isNull);
-    final nodes = treeResult[AccessibilityInspectorKeys.data]! as Map<String, Object?>;
 
     final Map<String, Object?> evaluationsResult = await callExtension(
-      AccessibilityServiceExtensions.getEvaluations.extensionName,
+      AccessibilityServiceExtensions.getIssuesAndSemanticsTree.extensionName,
     );
     expect(evaluationsResult[AccessibilityInspectorKeys.error], isNull);
+    expect(evaluationsResult[AccessibilityInspectorKeys.data], isA<Map<String, Object?>>());
+    final nodes = evaluationsResult[AccessibilityInspectorKeys.data]! as Map<String, Object?>;
     final List<Map<String, Object?>> issues =
         (evaluationsResult[AccessibilityInspectorKeys.issues]! as List<Object?>)
             .cast<Map<String, Object?>>();
