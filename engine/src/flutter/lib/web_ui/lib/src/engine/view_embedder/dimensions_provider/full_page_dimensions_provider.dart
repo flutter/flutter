@@ -87,10 +87,10 @@ class FullPageDimensionsProvider extends DimensionsProvider {
 
     if (viewport != null) {
       if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        /// Chrome on iOS reports incorrect viewport.height when app
-        /// starts in portrait orientation and the phone is rotated to
-        /// landscape, so the size is read from documentElement instead. See
-        /// [_iOSHeight] for when the height comes from the visual viewport.
+        // Chrome on iOS reports incorrect viewport.height when app
+        // starts in portrait orientation and the phone is rotated to
+        // landscape, so the size is read from documentElement instead. See
+        // `_iOSHeight` for when the height comes from the visual viewport.
         windowInnerWidth = domDocument.documentElement!.clientWidth * devicePixelRatio;
         windowInnerHeight = _iOSHeight(viewport) * devicePixelRatio;
       } else {

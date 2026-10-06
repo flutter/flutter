@@ -12,12 +12,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui show Size;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-@JS('Object.defineProperty')
-external void _defineProperty(JSObject target, JSString name, JSAny descriptor);
-
-@JS('Reflect.deleteProperty')
-external bool _deleteProperty(JSObject target, JSString name);
-
 void main() {
   internalBootstrapBrowserTest(() => doTests);
 }
@@ -332,10 +326,10 @@ void doTests() {
 
     // Shadows a read-only browser property with a fixed value until tearDown.
     void fake(JSObject target, String name, double value) {
-      _defineProperty(
+      objectConstructor.defineProperty(
         target,
-        name.toJS,
-        <String, Object>{'value': value, 'configurable': true}.jsify()!,
+        name,
+        DomPropertyDataDescriptor(value: value, configurable: true),
       );
       fakes.add((target, name));
     }
@@ -358,7 +352,7 @@ void doTests() {
     tearDown(() {
       provider.close();
       for (final (JSObject target, String name) in fakes) {
-        _deleteProperty(target, name.toJS);
+        target.delete(name.toJS);
       }
       fakes.clear();
       ui_web.browser.debugOperatingSystemOverride = null;
