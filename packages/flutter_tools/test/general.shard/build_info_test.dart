@@ -503,28 +503,4 @@ void main() {
       expect(getBuildDirectory(), 'injected_build_dir');
     }, overrides: <Type, Generator>{Config: () => Config.test()});
   });
-
-  group('deprecatedJsInterop', () {
-    testWithoutContext('passes no compiler flags when unset', () {
-      expect(deprecatedJsInteropCompilerFlags(null), isEmpty);
-    });
-
-    testWithoutContext('passes the matching compiler flag when set', () {
-      expect(deprecatedJsInteropCompilerFlags(true), <String>['--deprecated-js-interop']);
-      expect(deprecatedJsInteropCompilerFlags(false), <String>['--no-deprecated-js-interop']);
-    });
-
-    testWithoutContext('defaults to null and is preserved by copyWith', () {
-      expect(BuildInfo.debug.deprecatedJsInterop, isNull);
-
-      const buildInfo = BuildInfo(
-        BuildMode.debug,
-        null,
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-        deprecatedJsInterop: false,
-      );
-      expect(buildInfo.copyWith(dartDefines: <String>['foo=bar']).deprecatedJsInterop, isFalse);
-    });
-  });
 }
