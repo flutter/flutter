@@ -461,6 +461,7 @@ config("compiler") {
       # Currently defaults to 4k, but Android will be moving to 16k page size,
       # and for future-proofing, 64k boundaries will be required.
       "-Wl,-z,max-page-size=65536",
+      "-Wl,-z,common-page-size=16384",
     ]
 
     if (current_cpu == "arm") {
