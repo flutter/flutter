@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <atomic>
+#include <string>
+#include <thread>
+
 #include "flutter/fml/logging.h"
 #include "flutter/fml/time/time_point.h"
 #include "impeller/base/validation.h"
@@ -65,6 +69,57 @@ namespace testing {
 
 using RendererTest = PlaygroundTest;
 INSTANTIATE_PLAYGROUND_SUITE(RendererTest);
+
+TEST_P(RendererTest, PipelineLibraryAllowsConcurrentGetPipeline) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
+    GTEST_SKIP() << "GLES pipelines are created by the reactor thread.";
+  }
+  using VS = BoxFadeVertexShader;
+  using FS = BoxFadeFragmentShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+  auto library = context->GetPipelineLibrary();
+  ASSERT_TRUE(library);
+  ASSERT_TRUE(library->GetPipeline(desc.value()).Get());
+
+  constexpr int kVariantCount = 64;
+  auto variant = [&](int i) {
+    PipelineDescriptor result = desc.value();
+    result.SetLabel("Variant " + std::to_string(i));
+    return result;
+  };
+
+  std::atomic_bool done = false;
+  std::thread reader([&] {
+    while (!done) {
+      EXPECT_TRUE(library->HasPipeline(desc.value()));
+      EXPECT_TRUE(library->GetPipeline(desc.value()).IsValid());
+    }
+  });
+  std::thread forward([&] {
+    for (int i = 0; i < kVariantCount; i++) {
+      library->GetPipeline(variant(i));
+    }
+  });
+  std::thread backward([&] {
+    for (int i = kVariantCount - 1; i >= 0; i--) {
+      library->GetPipeline(variant(i));
+    }
+  });
+  forward.join();
+  backward.join();
+  done = true;
+  reader.join();
+
+  for (int i = 0; i < kVariantCount; i++) {
+    auto pipeline = library->GetPipeline(variant(i)).Get();
+    ASSERT_TRUE(pipeline);
+    EXPECT_TRUE(pipeline->IsValid());
+  }
+}
 
 TEST_P(RendererTest, CanCreateBoxPrimitive) {
   using VS = BoxFadeVertexShader;

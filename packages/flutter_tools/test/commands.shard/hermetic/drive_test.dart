@@ -991,6 +991,16 @@ void main() {}
     },
   );
 
+  testUsingContext('accepts --[no-]deprecated-js-interop', () {
+    expectAcceptsDeprecatedJsInteropFlag(
+      DriveCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: createToolContext(),
+      ),
+    );
+  });
+
   for (final String flag in AndroidEngineCliFlags.allFlags) {
     testUsingContext(
       'fails when --use-application-binary is provided with --release and --$flag for Android',
