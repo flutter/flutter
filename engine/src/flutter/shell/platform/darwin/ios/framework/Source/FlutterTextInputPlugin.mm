@@ -1363,11 +1363,29 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   if (success && !wasFirstResponder && self.isFirstResponder &&
       _shouldNotifyFrameworkOnFirstResponderRestore) {
     _shouldNotifyFrameworkOnFirstResponderRestore = NO;
+    int client = _textInputClient;
+    __weak FlutterTextInputView* weakSelf = self;
+    FlutterResult handleResult = ^(id result) {
+      [weakSelf handleFirstResponderRestoreResult:result client:client];
+    };
     // Existing framework client and FocusNode guards decide whether to accept the restored focus.
     [self.textInputDelegate flutterTextInputView:self
-        didRestoreFirstResponderWithTextInputClient:_textInputClient];
+        didRestoreFirstResponderWithTextInputClient:client
+                                             result:handleResult];
   }
   return success;
+}
+
+- (void)handleFirstResponderRestoreResult:(id)result client:(int)client {
+  if ([result isKindOfClass:[NSNumber class]] && [result boolValue]) {
+    return;
+  }
+  // The framework declined the restored focus or failed to answer. Don't leave the keyboard up
+  // without a framework client behind it, unless the view has been given another client since the
+  // restore was reported.
+  if (client == _textInputClient && self.isFirstResponder) {
+    [self resignFirstResponderFromFramework];
+  }
 }
 
 - (BOOL)resignFirstResponder {

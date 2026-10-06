@@ -494,12 +494,23 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine setBinaryMessenger:mockBinaryMessenger];
   [engine runWithEntrypoint:FlutterDefaultDartEntrypoint initialRoute:@"test"];
-  [engine flutterTextInputView:nil didRestoreFirstResponderWithTextInputClient:123];
   FlutterMethodCall* methodCall =
       [FlutterMethodCall methodCallWithMethodName:@"TextInputClient.onFocusReceived"
                                         arguments:@[ @(123) ]];
   NSData* encodedMethodCall = [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:methodCall];
-  OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/textinput" message:encodedMethodCall]);
+  NSData* encodedReply = [[FlutterJSONMethodCodec sharedInstance] encodeSuccessEnvelope:@NO];
+  id mockBinaryReply = [OCMArg invokeBlockWithArgs:encodedReply, nil];
+  OCMStub([mockBinaryMessenger sendOnChannel:@"flutter/textinput"
+                                     message:encodedMethodCall
+                                 binaryReply:mockBinaryReply]);
+
+  __block id focusReceivedResult;
+  [engine flutterTextInputView:nil
+      didRestoreFirstResponderWithTextInputClient:123
+                                           result:^(id result) {
+                                             focusReceivedResult = result;
+                                           }];
+  XCTAssertEqualObjects(focusReceivedResult, @NO);
 }
 
 - (void)testFlutterEngineUpdatesDisplays {
