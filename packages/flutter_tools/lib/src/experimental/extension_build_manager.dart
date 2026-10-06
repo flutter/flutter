@@ -56,25 +56,24 @@ base class ExtensionBuildManager {
         if (connection.capabilities.services.contains(BuildService.serviceNamespace)) connection,
     ];
 
-    final List<List<ExtensionBuildTarget>> connectionTargets = await Future.wait(
-      connections.map((ExtensionConnection connection) async {
-        try {
-          final Object? rpcResult = await connection
-              .sendRequest(BuildService.getBuildTargetsMethod)
-              .timeout(_kGetBuildTargetsTimeout);
-          return ExtensionBuildTarget.listFromJson(rpcResult);
-        } on Object catch (e) {
-          _logger.printTrace(
-            'Failed to get results from extension for ${BuildService.getBuildTargetsMethod}: $e',
-          );
-          return const <ExtensionBuildTarget>[];
-        }
-      }),
-    );
+    final List<(ExtensionConnection, List<ExtensionBuildTarget>)> connectionTargets =
+        await Future.wait(
+          connections.map((ExtensionConnection connection) async {
+            try {
+              final Object? result = await connection
+                  .sendRequest(BuildService.getBuildTargetsMethod)
+                  .timeout(_kGetBuildTargetsTimeout);
+              return (connection, ExtensionBuildTarget.listFromJson(result));
+            } on Object catch (e) {
+              _logger.printTrace('Failed to query build targets from extension: $e');
+              return (connection, const <ExtensionBuildTarget>[]);
+            }
+          }),
+        );
 
-    for (var i = 0; i < connections.length; i++) {
-      final ExtensionConnection connection = connections[i];
-      for (final ExtensionBuildTarget target in connectionTargets[i]) {
+    for (final (ExtensionConnection connection, List<ExtensionBuildTarget> targetList)
+        in connectionTargets) {
+      for (final target in targetList) {
         if (target.name.isEmpty) {
           continue;
         }

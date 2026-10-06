@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/args.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -22,7 +21,6 @@ import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
-import '../experimental/extension_arg_parser.dart';
 import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../macos/xcode.dart';
@@ -43,7 +41,7 @@ import 'build_web.dart';
 import 'build_windows.dart';
 import 'darwin_add_to_app.dart';
 
-class BuildCommand extends FlutterCommand with ExtensionArgParserMixin {
+class BuildCommand extends FlutterCommand {
   BuildCommand({
     required AndroidContext androidContext,
     required AppleContext appleContext,
@@ -209,9 +207,6 @@ class BuildCommand extends FlutterCommand with ExtensionArgParserMixin {
   }
 
   final ExtensionBuildManager? _extensionBuildManager;
-
-  @override
-  ArgParser buildDynamicArgParser(ArgParser dynamicParser) => dynamicParser;
 
   @override
   Future<void> initializeDynamicOptions() async {
