@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
@@ -15,6 +16,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -560,9 +562,20 @@ class FlutterCommandRunner extends CommandRunner<void> {
       packagePath: topLevelResults[FlutterGlobalOptions.kPackagesOption] as String?,
     );
     if (engineBuildPaths != null) {
+      final ToolContext(
+        :Cache cache,
+        :FileSystem fs,
+        :OperatingSystemUtils os,
+        :Platform platform,
+        :ProcessManager processManager,
+      ) = _toolContext;
       final Artifacts localArtifacts = Artifacts.getLocalEngine(
         engineBuildPaths,
-        toolContext: _toolContext,
+        cache: cache,
+        fileSystem: fs,
+        operatingSystemUtils: os,
+        platform: platform,
+        processManager: processManager,
       );
       contextOverrides.addAll(<Type, Object?>{Artifacts: localArtifacts});
       // Update the artifacts the commands were created with.

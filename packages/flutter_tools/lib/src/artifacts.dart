@@ -14,7 +14,6 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
-import 'context/tool_context.dart';
 import 'globals.dart' as globals;
 
 //////////////////////////////////////////////////////////////////////
@@ -297,31 +296,27 @@ abstract class Artifacts {
 
   static Artifacts getLocalEngine(
     EngineBuildPaths engineBuildPaths, {
-    required ToolContext toolContext,
+    required Cache cache,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessManager processManager,
   }) {
-    final ToolContext(
-      :Cache cache,
-      :FileSystem fs,
-      :OperatingSystemUtils os,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = toolContext;
-
     Artifacts artifacts = CachedArtifacts(
-      fileSystem: fs,
+      fileSystem: fileSystem,
       platform: platform,
       cache: cache,
-      operatingSystemUtils: os,
+      operatingSystemUtils: operatingSystemUtils,
     );
     if (engineBuildPaths.hostEngine != null && engineBuildPaths.targetEngine != null) {
       artifacts = CachedLocalEngineArtifacts(
         engineBuildPaths.hostEngine!,
         engineOutPath: engineBuildPaths.targetEngine!,
         cache: cache,
-        fileSystem: fs,
+        fileSystem: fileSystem,
         processManager: processManager,
         platform: platform,
-        operatingSystemUtils: os,
+        operatingSystemUtils: operatingSystemUtils,
         parent: artifacts,
       );
     }
@@ -329,9 +324,9 @@ abstract class Artifacts {
       artifacts = CachedLocalWebSdkArtifacts(
         parent: artifacts,
         webSdkPath: engineBuildPaths.webSdk!,
-        fileSystem: fs,
+        fileSystem: fileSystem,
         platform: platform,
-        operatingSystemUtils: os,
+        operatingSystemUtils: operatingSystemUtils,
       );
     }
     return artifacts;
