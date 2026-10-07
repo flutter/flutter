@@ -79,16 +79,27 @@ class ImageComparer {
     if (golden.width != testImage.width || golden.height != testImage.height) {
       return false;
     }
-    final ByteData goldenData = (await golden.toByteData())!;
-    final ByteData testImageData = (await testImage.toByteData())!;
+    final ByteData? goldenData = await golden.toByteData();
+    final ByteData? testImageData = await testImage.toByteData();
+    if (goldenData == null || testImageData == null) {
+      return false;
+    }
 
     final int totalPixels = golden.width * golden.height;
 
     // When no tolerance thresholds are specified, compare full 32-bit RGBA pixel
     // values directly in a single pass with early exit on first mismatch.
     if (maxColorDelta == 0 && maxDifferentPixelsRate == 0.0) {
+      final Uint32List goldenUint32 = goldenData.buffer.asUint32List(
+        goldenData.offsetInBytes,
+        totalPixels,
+      );
+      final Uint32List testUint32 = testImageData.buffer.asUint32List(
+        testImageData.offsetInBytes,
+        totalPixels,
+      );
       for (var i = 0; i < totalPixels; i++) {
-        if (goldenData.getUint32(i * 4) != testImageData.getUint32(i * 4)) {
+        if (goldenUint32[i] != testUint32[i]) {
           return false;
         }
       }
@@ -101,8 +112,17 @@ class ImageComparer {
     var differentPixels = 0;
     var maxObservedDelta = 0;
 
+    final Uint8List goldenBytes = goldenData.buffer.asUint8List(
+      goldenData.offsetInBytes,
+      totalPixels * 4,
+    );
+    final Uint8List testBytes = testImageData.buffer.asUint8List(
+      testImageData.offsetInBytes,
+      totalPixels * 4,
+    );
+
     for (var i = 0; i < totalPixels; i++) {
-      final int pixelDelta = _maxChannelDelta(goldenData, testImageData, i * 4);
+      final int pixelDelta = _maxChannelDelta(goldenBytes, testBytes, i * 4);
       if (pixelDelta > maxObservedDelta) {
         maxObservedDelta = pixelDelta;
       }
@@ -124,10 +144,10 @@ class ImageComparer {
     return true;
   }
 
-  static int _maxChannelDelta(ByteData a, ByteData b, int offset) {
-    var maxDelta = (a.getUint8(offset) - b.getUint8(offset)).abs();
+  static int _maxChannelDelta(Uint8List a, Uint8List b, int offset) {
+    var maxDelta = (a[offset] - b[offset]).abs();
     for (var c = 1; c < 4; c++) {
-      final int diff = (a.getUint8(offset + c) - b.getUint8(offset + c)).abs();
+      final int diff = (a[offset + c] - b[offset + c]).abs();
       if (diff > maxDelta) {
         maxDelta = diff;
       }
