@@ -706,7 +706,9 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
       fl_gtk_runtime_supports_native_accessibility_text();
   // Do not evaluate the text-node type check unless GTK 4.14 is available:
   // evaluating its GType registers the dynamically resolved interface.
-  if (self == nullptr ||
+  // GTK roles are immutable after construction. Replace the native object,
+  // retaining descendants through the semantics-ID cache below.
+  if (self == nullptr || self->role != role ||
       (supports_text && !FL_IS_GTK4_TEXT_ACCESSIBLE_NODE(self))) {
     self = supports_text ? FL_GTK4_ACCESSIBLE_NODE(
                                g_object_new(FL_TYPE_GTK4_TEXT_ACCESSIBLE_NODE,
@@ -715,9 +717,6 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
                                g_object_new(FL_TYPE_GTK4_ACCESSIBLE_NODE,
                                             "accessible-role", role, nullptr));
     g_object_ref_sink(self);
-  } else if (self->role != role) {
-    g_object_set(self, "accessible-role", role, nullptr);
-    g_clear_object(&self->at_context);
   }
   self->view = view;
   self->view_id = view_id;
@@ -921,6 +920,10 @@ static FlGtk4AccessibleNode* fl_view_gtk4_accessibility_build_native_node(
   node = fl_gtk4_accessible_node_update(self->view, self->view_id, semantics,
                                         node);
   if (node != previous_node) {
+    if (previous_node != nullptr) {
+      // Clients can retain the replaced object after the cache releases it.
+      fl_gtk4_accessible_node_detach(previous_node);
+    }
     g_hash_table_insert(self->native_nodes_by_id,
                         GINT_TO_POINTER(semantics->id), node);
   }
@@ -1087,6 +1090,7 @@ void fl_view_gtk4_accessibility_handle_update(
         auto* updated = fl_gtk4_accessible_node_update(
             self->view, self->view_id, semantics, node);
         if (updated != node) {
+          fl_gtk4_accessible_node_detach(node);
           g_hash_table_insert(self->native_nodes_by_id, GINT_TO_POINTER(id),
                               updated);
           rebuild = TRUE;

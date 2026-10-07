@@ -362,6 +362,158 @@ TEST_F(FlViewGtk4AccessibilityTest, ViewDisposalDetachesRetainedNodes) {
   }
 }
 
+TEST_F(FlViewGtk4AccessibilityTest, RoleChangesReplaceAndDetachNativeNodes) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlEngine* engine = fl_view_get_engine(view);
+  StartEngine(engine);
+  size_t calls = 0;
+  fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
+      SendSemanticsAction, ([&](auto, const FlutterSendSemanticsActionInfo*) {
+        calls++;
+        return kSuccess;
+      }));
+  int32_t children[] = {1, 2};
+  int32_t grandchildren[] = {3};
+  FlutterSemanticsFlags root_flags = {};
+  FlutterSemanticsFlags child_flags = {};
+  child_flags.is_button = true;
+  FlutterSemanticsNode2 root = {};
+  root.child_count = 2;
+  root.children_in_traversal_order = children;
+  root.flags2 = &root_flags;
+  root.actions = kFlutterSemanticsActionTap;
+  FlutterSemanticsNode2 child = {};
+  child.id = 1;
+  child.child_count = 1;
+  child.children_in_traversal_order = grandchildren;
+  child.flags2 = &child_flags;
+  child.actions = kFlutterSemanticsActionTap;
+  FlutterSemanticsNode2 sibling = {};
+  sibling.id = 2;
+  FlutterSemanticsNode2 grandchild = {};
+  grandchild.id = 3;
+  FlutterSemanticsNode2* nodes[] = {&root, &child, &sibling, &grandchild};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 4;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) old_root =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  g_autoptr(GtkAccessible) old_child =
+      fl_gtk_runtime_accessible_get_first_accessible_child(old_root);
+  g_autoptr(GtkAccessible) retained_grandchild =
+      fl_gtk_runtime_accessible_get_first_accessible_child(old_child);
+  g_autoptr(GtkAccessible) retained_sibling =
+      fl_view_gtk4_accessibility_ref_next_native_sibling_for_testing(old_child);
+  ASSERT_NE(retained_grandchild, nullptr);
+  ASSERT_NE(retained_sibling, nullptr);
+  gtk_widget_activate_action(GTK_WIDGET(old_child), "flutter.tap", nullptr);
+  EXPECT_EQ(calls, 1u);
+
+  // A partial role update replaces only this node, preserving its descendants.
+  child_flags.is_button = false;
+  child_flags.is_checked = kFlutterCheckStateTrue;
+  update.node_count = 1;
+  update.nodes = &nodes[1];
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) new_child =
+      fl_gtk_runtime_accessible_get_first_accessible_child(old_root);
+  ASSERT_NE(new_child, nullptr);
+  ASSERT_NE(new_child, old_child);
+  EXPECT_EQ(gtk_accessible_get_accessible_role(old_child),
+            GTK_ACCESSIBLE_ROLE_BUTTON);
+  EXPECT_EQ(gtk_accessible_get_accessible_role(new_child),
+            GTK_ACCESSIBLE_ROLE_CHECKBOX);
+  g_autoptr(GtkAccessible) new_grandchild =
+      fl_gtk_runtime_accessible_get_first_accessible_child(new_child);
+  EXPECT_EQ(new_grandchild, retained_grandchild);
+  g_autoptr(GtkAccessible) new_sibling =
+      fl_view_gtk4_accessibility_ref_next_native_sibling_for_testing(new_child);
+  EXPECT_EQ(new_sibling, retained_sibling);
+  gtk_widget_activate_action(GTK_WIDGET(old_child), "flutter.tap", nullptr);
+  EXPECT_EQ(calls, 1u);
+  gtk_widget_activate_action(GTK_WIDGET(new_child), "flutter.tap", nullptr);
+  EXPECT_EQ(calls, 2u);
+
+  // Root replacement must also update the render widget's exported child.
+  root_flags.is_header = true;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) new_root =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  ASSERT_NE(new_root, nullptr);
+  ASSERT_NE(new_root, old_root);
+  EXPECT_EQ(gtk_accessible_get_accessible_role(old_root),
+            GTK_ACCESSIBLE_ROLE_GROUP);
+  EXPECT_EQ(gtk_accessible_get_accessible_role(new_root),
+            GTK_ACCESSIBLE_ROLE_HEADING);
+  g_autoptr(GtkAccessible) exported_root =
+      fl_gtk_runtime_accessible_get_first_accessible_child(
+          GTK_ACCESSIBLE(view->render_area));
+  EXPECT_EQ(exported_root, new_root);
+  g_autoptr(GtkAccessible) retained_child =
+      fl_gtk_runtime_accessible_get_first_accessible_child(new_root);
+  EXPECT_EQ(retained_child, new_child);
+  auto* child_iface = reinterpret_cast<FlGtkAccessibleInterface4_10*>(
+      GTK_ACCESSIBLE_GET_IFACE(new_child));
+  g_autoptr(GtkAccessible) parent =
+      child_iface->get_accessible_parent(new_child);
+  EXPECT_EQ(parent, new_root);
+  gtk_widget_activate_action(GTK_WIDGET(old_root), "flutter.tap", nullptr);
+  EXPECT_EQ(calls, 2u);
+
+  // A structural batch takes the rebuild path rather than the incremental path.
+  children[0] = 2;
+  children[1] = 1;
+  child_flags.is_in_mutually_exclusive_group = true;
+  update.node_count = 2;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) reordered_first =
+      fl_gtk_runtime_accessible_get_first_accessible_child(new_root);
+  EXPECT_EQ(reordered_first, retained_sibling);
+  g_autoptr(GtkAccessible) radio =
+      fl_view_gtk4_accessibility_ref_next_native_sibling_for_testing(
+          reordered_first);
+  ASSERT_NE(radio, nullptr);
+  ASSERT_NE(radio, new_child);
+  EXPECT_EQ(gtk_accessible_get_accessible_role(radio),
+            GTK_ACCESSIBLE_ROLE_RADIO);
+  g_autoptr(GtkAccessible) radio_child =
+      fl_gtk_runtime_accessible_get_first_accessible_child(radio);
+  EXPECT_EQ(radio_child, retained_grandchild);
+  gtk_widget_activate_action(GTK_WIDGET(new_child), "flutter.tap", nullptr);
+  EXPECT_EQ(calls, 2u);
+  gtk_widget_activate_action(GTK_WIDGET(radio), "flutter.tap", nullptr);
+  EXPECT_EQ(calls, 3u);
+
+  for (GtkAccessible* obsolete : {old_root, old_child, new_child}) {
+    auto* iface = reinterpret_cast<FlGtkAccessibleInterface4_10*>(
+        GTK_ACCESSIBLE_GET_IFACE(obsolete));
+    g_autoptr(GtkAccessible) obsolete_parent =
+        iface->get_accessible_parent(obsolete);
+    g_autoptr(GtkAccessible) obsolete_child =
+        iface->get_first_accessible_child(obsolete);
+    g_autoptr(GtkAccessible) obsolete_sibling =
+        iface->get_next_accessible_sibling(obsolete);
+    EXPECT_EQ(obsolete_parent, nullptr);
+    EXPECT_EQ(obsolete_child, nullptr);
+    EXPECT_EQ(obsolete_sibling, nullptr);
+    EXPECT_FALSE(
+        iface->get_bounds(obsolete, nullptr, nullptr, nullptr, nullptr));
+  }
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
@@ -640,6 +792,14 @@ TEST_F(FlViewGtk4AccessibilityTest, ObscuredValueIsNotExported) {
   g_autoptr(GtkAccessible) readable =
       fl_view_gtk4_accessibility_ref_native_root_for_testing(
           view->accessibility_backend);
+  ASSERT_NE(readable, native);
+  auto* obsolete_iface = reinterpret_cast<FlGtkAccessibleInterface4_10*>(
+      GTK_ACCESSIBLE_GET_IFACE(native));
+  g_autoptr(GtkAccessible) obsolete_parent =
+      obsolete_iface->get_accessible_parent(native);
+  EXPECT_EQ(obsolete_parent, nullptr);
+  EXPECT_FALSE(
+      obsolete_iface->get_bounds(native, nullptr, nullptr, nullptr, nullptr));
   g_autoptr(GBytes) before =
       fl_view_gtk4_accessibility_ref_native_text_for_testing(readable);
   ASSERT_NE(before, nullptr);
