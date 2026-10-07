@@ -595,23 +595,26 @@ void main() {
       expect(result.metrics.first.metricKey, 'draw_rect.canvaskit.totalUiFrame.average');
     });
 
-    test('Hostile: regressionThreshold of 0.0 correctly flags strictly positive deltas as regressions', () {
-      // ignore: unused_local_variable
-      final comp = compareResults(
-        baseline: {'a.average': 100.0, 'b.average': 100.0},
-        current: {'a.average': 100.0001, 'b.average': 100.0},
-        regressionThreshold: 0.0,
-      );
-      expect(comp.hasRegressions, true);
-      final metricA = comp.metrics.firstWhere((m) => m.metricKey == 'a.average');
-      final metricB = comp.metrics.firstWhere((m) => m.metricKey == 'b.average');
-      expect(metricA.isRegression, true);
-      expect(metricB.isRegression, false);
-    });
+    test(
+      'Hostile: regressionThreshold of 0.0 correctly flags strictly positive deltas as regressions',
+      () {
+        // ignore: unused_local_variable
+        final BenchmarkComparison comp = compareResults(
+          baseline: {'a.average': 100.0, 'b.average': 100.0},
+          current: {'a.average': 100.0001, 'b.average': 100.0},
+          regressionThreshold: 0.0,
+        );
+        expect(comp.hasRegressions, true);
+        final MetricComparison metricA = comp.metrics.firstWhere((m) => m.metricKey == 'a.average');
+        final MetricComparison metricB = comp.metrics.firstWhere((m) => m.metricKey == 'b.average');
+        expect(metricA.isRegression, true);
+        expect(metricB.isRegression, false);
+      },
+    );
 
     test('Hostile: compareResults with completely empty baseline and current maps', () {
       // ignore: unused_local_variable
-      final comp = compareResults(baseline: {}, current: {});
+      final BenchmarkComparison comp = compareResults(baseline: {}, current: {});
       expect(comp.hasRegressions, false);
       expect(comp.metrics.isEmpty, true);
       expect(comp.missingMetrics.isEmpty, true);
@@ -684,7 +687,7 @@ void main() {
       'Status column: displays FAIL when isRegression: true, and PASS when isRegression: false',
       () {
         // ignore: unused_local_variable
-      final comp = BenchmarkComparison(
+        final comp = BenchmarkComparison(
           regressionThreshold: 10.0,
           metrics: [
             MetricComparison(
@@ -765,7 +768,7 @@ void main() {
     test('Hostile: empty metrics list generates empty table output', () {
       // ignore: unused_local_variable
       final comp = BenchmarkComparison(regressionThreshold: 10.0, metrics: [], missingMetrics: []);
-      final table = formatAnsiSummaryTable(comp);
+      final String table = formatAnsiSummaryTable(comp);
       expect(table.trim(), isEmpty);
     });
   });
@@ -810,7 +813,7 @@ void main() {
     });
 
     test('Hostile: empty profiles and metadata', () {
-      final result = formatStructuredJson(
+      final Map<String, dynamic> result = formatStructuredJson(
         profiles: <Map<String, dynamic>>[],
         metadata: {},
       );
