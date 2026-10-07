@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fakes.dart' show FakeToolContext, TestFeatureFlags;
@@ -22,6 +23,7 @@ void main() {
     final bindPorts = <int>[];
 
     final server = DaemonServer(
+      analytics: const NoOpAnalytics(),
       toolContext: FakeToolContext(),
       port: 123,
       logger: logger,
@@ -48,6 +50,7 @@ void main() {
     final bindPorts = <int>[];
 
     final server = DaemonServer(
+      analytics: const NoOpAnalytics(),
       toolContext: FakeToolContext(),
       port: 123,
       logger: logger,
@@ -67,10 +70,37 @@ void main() {
     expect(bindAddresses, <Object?>[InternetAddress.loopbackIPv4, InternetAddress.loopbackIPv6]);
     expect(bindPorts, <int>[123, 123]);
   });
+
+  testWithoutContext('waits for server socket stream to close', () async {
+    final socket = FakeServerSocket(closeImmediately: false);
+    final logger = BufferLogger.test();
+
+    final server = DaemonServer(
+      analytics: const NoOpAnalytics(),
+      toolContext: FakeToolContext(),
+      port: 123,
+      logger: logger,
+      featureFlags: TestFeatureFlags(),
+      bind: (Object? address, int port) async => socket,
+    );
+
+    var completed = false;
+    final Future<void> runFuture = server.run().whenComplete(() {
+      completed = true;
+    });
+    await pumpEventQueue();
+    expect(completed, isFalse);
+
+    await socket.controller.close();
+    await runFuture;
+    expect(completed, isTrue);
+  });
 }
 
 class FakeServerSocket extends Fake implements ServerSocket {
-  FakeServerSocket();
+  FakeServerSocket({this.closeImmediately = true});
+
+  final bool closeImmediately;
 
   @override
   int get port => 1;
@@ -85,10 +115,12 @@ class FakeServerSocket extends Fake implements ServerSocket {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    // Close the controller immediately for testing purpose.
-    scheduleMicrotask(() {
-      controller.close();
-    });
+    if (closeImmediately) {
+      // Close the controller immediately for testing purpose.
+      scheduleMicrotask(() {
+        controller.close();
+      });
+    }
     return controller.stream.listen(
       onData,
       onError: onError,
