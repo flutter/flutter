@@ -12,9 +12,6 @@ import '../features.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
 
-const Duration _kGetBuildTargetsTimeout = Duration(seconds: 5);
-const Duration _kBuildTimeout = Duration(minutes: 5);
-
 /// Manages querying build targets and running custom builds from extension isolates.
 base class ExtensionBuildManager {
   ExtensionBuildManager({
@@ -60,9 +57,9 @@ base class ExtensionBuildManager {
         await Future.wait(
           connections.map((ExtensionConnection connection) async {
             try {
-              final Object? result = await connection
-                  .sendRequest(BuildService.getBuildTargetsMethod)
-                  .timeout(_kGetBuildTargetsTimeout);
+              final Object? result = await connection.sendRequest(
+                BuildService.getBuildTargetsMethod,
+              );
               return (connection, ExtensionBuildTarget.listFromJson(result));
             } on Object catch (e) {
               _logger.printTrace('Failed to query build targets from extension: $e');
@@ -127,14 +124,16 @@ base class ExtensionBuildManager {
     }
 
     try {
-      final Object? result = await connection
-          .sendRequest(BuildService.buildMethod, <String, Object?>{
-            BuildService.buildModeParam: buildMode,
-            BuildService.mainPathParam: mainPath,
-            BuildService.projectRootParam: projectRoot,
-            BuildService.targetNameParam: targetName,
-          })
-          .timeout(_kBuildTimeout);
+      final Object? result = await connection.sendRequest(
+        BuildService.buildMethod,
+        <String, Object?>{
+          BuildService.buildModeParam: buildMode,
+          BuildService.mainPathParam: mainPath,
+          BuildService.projectRootParam: projectRoot,
+          BuildService.targetNameParam: targetName,
+        },
+        null,
+      );
       if (result case final Map<String, Object?> resultMap) {
         return ExtensionBuildResult.fromJson(resultMap);
       }

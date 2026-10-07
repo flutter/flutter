@@ -36,14 +36,15 @@ class ExtensionConnection {
   Future<Object?> sendRequest(
     String method, [
     Object? params,
-    Duration timeout = const Duration(seconds: 5),
+    Duration? timeout = const Duration(seconds: 5),
   ]) async {
     if (_isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }
     _logger.printTrace('ExtensionConnection sending RPC request "$method"...');
     try {
-      final Object? result = await _peer.sendRequest(method, params).timeout(timeout);
+      final Future<Object?> request = _peer.sendRequest(method, params);
+      final Object? result = await (timeout != null ? request.timeout(timeout) : request);
       _logger.printTrace('ExtensionConnection received response for RPC request "$method".');
       return result;
     } catch (error) {

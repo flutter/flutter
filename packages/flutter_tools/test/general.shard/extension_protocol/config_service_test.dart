@@ -67,7 +67,7 @@ class _FakeExtensionConnection extends Fake implements ExtensionConnection {
   Future<Object?> sendRequest(
     String method, [
     Object? params,
-    Duration timeout = const Duration(seconds: 5),
+    Duration? timeout = const Duration(seconds: 5),
   ]) async => response;
 }
 
