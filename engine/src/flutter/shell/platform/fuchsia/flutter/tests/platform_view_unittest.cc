@@ -521,7 +521,7 @@ class PlatformViewBuilder {
   OnSemanticsNodeUpdateCallback on_semantics_node_update_callback_;
   OnRequestAnnounceCallback on_request_announce_callback_;
   OnShaderWarmupCallback on_shader_warmup_callback_;
-  bool intercept_all_input_{true};
+  bool intercept_all_input_{false};
 
   bool built_{false};
 };
@@ -1490,7 +1490,14 @@ TEST_F(PlatformViewTests, OnShaderWarmup) {
   EXPECT_EQ(expected_result_string, response->result_string);
 }
 
-TEST_F(PlatformViewTests, TouchSourceLogicalToPhysicalConversion) {
+class PlatformViewTouchTests : public PlatformViewTests,
+                               public ::testing::WithParamInterface<bool> {};
+
+INSTANTIATE_TEST_SUITE_P(InterceptAllInput,
+                         PlatformViewTouchTests,
+                         ::testing::Bool());
+
+TEST_P(PlatformViewTouchTests, TouchSourceLogicalToPhysicalConversion) {
   constexpr uint32_t width = 640;
   constexpr uint32_t height = 480;
   constexpr std::array<std::array<float, 2>, 2> kRect = {
@@ -1499,6 +1506,7 @@ TEST_F(PlatformViewTests, TouchSourceLogicalToPhysicalConversion) {
   constexpr fuchsia::ui::pointer::TouchInteractionId kIxnOne = {
       .device_id = 0u, .pointer_id = 1u, .interaction_id = 2u};
 
+  const bool intercept_all_input = GetParam();
   MockPlatformViewDelegate delegate;
   flutter::TaskRunners task_runners("test_runners", nullptr, nullptr, nullptr,
                                     nullptr);
@@ -1511,7 +1519,14 @@ TEST_F(PlatformViewTests, TouchSourceLogicalToPhysicalConversion) {
       PlatformViewBuilder(delegate, std::move(task_runners))
           .SetParentViewportWatcher(viewport_watcher.GetHandle())
           .SetTouchSource(std::move(touch_handle))
+          .SetInterceptAllInput(intercept_all_input)
           .Build();
+  if (!intercept_all_input) {
+    auto msg_response = FakePlatformMessageResponse::Create();
+    platform_view.HandlePlatformMessage(msg_response->WithMessage(
+        "flutter/platform_views",
+        R"({"method":"View.setGestureResponsePolicy","args":{"defaultResponse":"YES"}})"));
+  }
   RunLoopUntilIdle();
   EXPECT_EQ(delegate.pointer_packets().size(), 0u);
 

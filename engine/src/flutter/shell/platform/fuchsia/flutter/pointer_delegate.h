@@ -56,7 +56,7 @@ class PointerDelegate {
  public:
   PointerDelegate(fuchsia::ui::pointer::TouchSourceHandle touch_source,
                   fuchsia::ui::pointer::MouseSourceHandle mouse_source,
-                  bool intercept_all_input = true);
+                  bool intercept_all_input = false);
 
   void SetGestureResponsePolicy(GestureResponsePolicy policy);
 
@@ -73,7 +73,7 @@ class PointerDelegate {
 
   // Channel for touch events from Scenic.
   fuchsia::ui::pointer::TouchSourcePtr touch_source_;
-  [[maybe_unused]] bool intercept_all_input_ = true;
+  [[maybe_unused]] bool intercept_all_input_ = false;
   [[maybe_unused]] std::optional<GestureResponsePolicy> policy_;
 
   // Receive touch events from Scenic. Must be copyable.
