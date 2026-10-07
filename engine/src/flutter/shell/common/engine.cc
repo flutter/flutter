@@ -301,10 +301,6 @@ void Engine::ReportTimings(std::vector<int64_t> timings) {
   runtime_controller_->ReportTimings(std::move(timings));
 }
 
-void Engine::NotifyTextureFrameAvailable(int64_t texture_id) {
-  runtime_controller_->NotifyTextureFrameAvailable(texture_id);
-}
-
 void Engine::NotifyIdle(fml::TimeDelta deadline) {
   runtime_controller_->NotifyIdle(deadline);
 }
@@ -391,7 +387,6 @@ bool Engine::HandleLifecyclePlatformMessage(PlatformMessage* message) {
   // https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1622956-applicationdidbecomeactive?language=objc
   if (state == "AppLifecycleState.resumed" ||
       state == "AppLifecycleState.inactive") {
-    MarkAllViewsNeedRender();
     ScheduleFrame();
   }
   runtime_controller_->SetInitialLifecycleState(state);
@@ -512,10 +507,6 @@ std::string Engine::DefaultRouteName() {
   return "/";
 }
 
-void Engine::MarkAllViewsNeedRender() {
-  runtime_controller_->MarkAllViewsNeedRender();
-}
-
 void Engine::ScheduleFrame(bool regenerate_layer_trees) {
   animator_->RequestFrame(regenerate_layer_trees);
 }
@@ -591,6 +582,10 @@ void Engine::SetNeedsReportTimings(bool needs_reporting) {
 
 FontCollection& Engine::GetFontCollection() {
   return *font_collection_;
+}
+
+void Engine::ResetInternalState() {
+  delegate_.OnEngineResetInternalState();
 }
 
 void Engine::DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,
