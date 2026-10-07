@@ -36,9 +36,11 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/emulator.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -817,6 +819,9 @@ class FakeFlutterProjectFactory implements FlutterProjectFactory {
 
   @override
   Map<String, FlutterProject> get projects => throw UnimplementedError();
+
+  @override
+  void invalidate(Directory directory) {}
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
@@ -863,6 +868,9 @@ class FakeJava extends Fake implements Java {
 
   @override
   Map<String, String> get environment => _environment;
+
+  @override
+  Map<String, String> get gradleEnvironment => _environment;
 
   @override
   Version? version;
@@ -1114,6 +1122,9 @@ class FakeCache extends Fake implements Cache {
   Directory getWebSdkDirectory() => _fileSystem.directory('/bin/cache/flutter_web_sdk');
 
   @override
+  String get dartSdkBuild => '12345';
+
+  @override
   MapEntry<String, String> get dyLdLibEntry =>
       const MapEntry<String, String>('DYLD_LIBRARY_PATH', 'fake_path');
 }
@@ -1139,12 +1150,19 @@ class FakeBuildTargets extends Fake implements BuildTargets {}
 class FakeCrashReporter extends Fake implements CrashReporter {}
 
 class FakeDoctor extends Fake implements Doctor {
-  FakeDoctor({this.canListEmulators = true, this.canLaunchAnything = true});
+  FakeDoctor({
+    this.canLaunchAnything = true,
+    this.canListAnything = true,
+    this.canListEmulators = true,
+  });
 
   final bool canListEmulators;
 
   @override
   final bool canLaunchAnything;
+
+  @override
+  final bool canListAnything;
 
   @override
   List<Workflow> get workflows => <Workflow>[FakeWorkflow(canListEmulators: canListEmulators)];
@@ -1196,8 +1214,10 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this._buildSystem,
     this._buildTargets,
     this._crashReporter,
+    this._deviceManager,
     this._doctor,
     this._emulatorManager,
+    this.extensionManager,
     this._featureFlags,
     this._toolContext,
   });
@@ -1208,6 +1228,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final BuildSystem? _buildSystem;
   final BuildTargets? _buildTargets;
   final CrashReporter? _crashReporter;
+  final DeviceManager? _deviceManager;
   final Doctor? _doctor;
   final EmulatorManager? _emulatorManager;
   final FeatureFlags? _featureFlags;
@@ -1232,10 +1253,16 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   CrashReporter get crashReporter => _crashReporter ?? FakeCrashReporter();
 
   @override
+  late final DeviceManager deviceManager = _deviceManager ?? FakeDeviceManager();
+
+  @override
   Doctor get doctor => _doctor ?? FakeDoctor();
 
   @override
   EmulatorManager get emulatorManager => _emulatorManager ?? FakeEmulatorManager();
+
+  @override
+  final ExtensionManager? extensionManager;
 
   @override
   FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();
@@ -1401,8 +1428,8 @@ class FakeToolContext extends Fake implements ToolContext {
 }
 
 /// A [ToolContext] that dynamically delegates to [globals] for use in [testUsingContext].
-class DelegatingToolContext extends Fake implements ToolContext {
-  DelegatingToolContext({
+class DelegatingToolContext with Fake implements ToolContext {
+  const DelegatingToolContext({
     this._artifacts,
     this._botDetector,
     this._cache,
@@ -1457,7 +1484,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
   final UserMessages? _userMessages;
 
   @override
-  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
+  Artifacts get artifacts => _artifacts ?? globals.artifacts ?? Artifacts.test();
 
   @override
   BotDetector get botDetector => _botDetector ?? globals.botDetector;
@@ -1552,12 +1579,19 @@ class DelegatingToolContext extends Fake implements ToolContext {
 }
 
 class FakeAndroidContext extends Fake implements AndroidContext {
-  FakeAndroidContext({this._androidSdk, this._androidStudio, this._gradleUtils, this._java});
+  FakeAndroidContext({
+    this._androidSdk,
+    this._androidStudio,
+    this._gradleUtils,
+    this._java,
+    this._javaBuilder,
+  });
 
   final AndroidSdk? _androidSdk;
   final AndroidStudio? _androidStudio;
   final GradleUtils? _gradleUtils;
   final Java? _java;
+  final Java? Function()? _javaBuilder;
 
   @override
   AndroidSdk? get androidSdk => _androidSdk;
@@ -1569,7 +1603,7 @@ class FakeAndroidContext extends Fake implements AndroidContext {
   late final GradleUtils gradleUtils = _gradleUtils ?? FakeGradleUtils();
 
   @override
-  Java? get java => _java;
+  Java? get java => _javaBuilder != null ? _javaBuilder() : _java;
 }
 
 class FakeAppleContext extends Fake implements AppleContext {

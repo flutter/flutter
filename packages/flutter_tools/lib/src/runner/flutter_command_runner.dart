@@ -32,6 +32,8 @@ import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
 import 'local_engine.dart';
+import 'options/common_options.dart';
+import 'options/option_descriptor.dart';
 
 /// Common flutter command line options.
 abstract final class FlutterGlobalOptions {
@@ -250,12 +252,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       hide: !verboseHelp,
       help: 'List the special "web-server" device in device listings.',
     );
-    argParser.addFlag(
-      FlutterGlobalOptions.kContinuousIntegrationFlag,
-      negatable: false,
-      help: 'Enable a set of CI-specific test debug settings.',
-      hide: !verboseHelp,
-    );
+    argParser.addDescriptor(CommonOptions.ci, verboseHelp: verboseHelp);
     argParser.addOption(
       FlutterGlobalOptions.kDebugLogsDirectoryFlag,
       help: 'Path to a directory where logs for debugging may be added.',
@@ -328,6 +325,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   /// The [ToolContext] instance.
   ToolContext get toolContext => _toolContext;
+
+  /// The [FeatureFlags] instance, if provided.
+  FeatureFlags? get featureFlags => _featureFlags;
 
   // See https://github.com/flutter/flutter/issues/145158.
   late bool _machineFlagPresentInAnyCliArg;
@@ -605,6 +605,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
               commandPath: 'version',
               result: 'success',
               commandHasTerminal: stdio.hasTerminal,
+              hostArch: _toolContext.os.hostPlatform.cliName,
             ),
           );
           final FlutterVersion version = flutterVersion.fetchTagsAndGetVersion(clock: systemClock);
@@ -657,6 +658,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
         .toList();
   }
 
+  /// Directory names to skip when scanning repository packages to avoid
+  /// traversing build caches and generated artifacts.
+  static const _ignoredDirectoryNames = <String>{'.dart_tool', 'build'};
+
   static List<String> _gatherProjectPaths(FileSystem fs, String rootPath) {
     if (fs.isFileSync(fs.path.join(rootPath, '.dartignore'))) {
       return <String>[];
@@ -669,7 +674,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final List<String> projectPaths = directory.listSync(followLinks: false).expand((
       FileSystemEntity entity,
     ) {
-      if (entity is Directory && fs.path.basename(entity.path) != '.dart_tool') {
+      if (entity is Directory && !_ignoredDirectoryNames.contains(fs.path.basename(entity.path))) {
         return _gatherProjectPaths(fs, entity.path);
       }
       return <String>[];

@@ -425,8 +425,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'success',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.cliName,
+            maxRss: 10,
           ),
         ),
       );
@@ -449,8 +450,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'warning',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.cliName,
+            maxRss: 10,
           ),
         ),
       );
@@ -472,8 +474,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'fail',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.cliName,
+            maxRss: 10,
           ),
         ),
       );
@@ -578,8 +581,9 @@ void main() {
               Event.flutterCommandResult(
                 commandPath: 'dummy',
                 result: 'killed',
-                maxRss: 10,
                 commandHasTerminal: false,
+                hostArch: globals.os.hostPlatform.cliName,
+                maxRss: 10,
               ),
             ),
           );
@@ -778,6 +782,26 @@ void main() {
           defaultBuildInfo.toGradleConfig(),
           isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
         );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'reports --[no-]deprecated-js-interop in BuildInfo only when passed',
+      () async {
+        Future<bool?> deprecatedJsInteropFor(List<String> args) async {
+          final command = DummyDeprecatedJsInteropFlutterCommand();
+          await createTestCommandRunner(command).run(<String>['dummy', ...args]);
+          final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
+          return buildInfo.deprecatedJsInterop;
+        }
+
+        expect(await deprecatedJsInteropFor(<String>['--deprecated-js-interop']), isTrue);
+        expect(await deprecatedJsInteropFor(<String>['--no-deprecated-js-interop']), isFalse);
+        expect(await deprecatedJsInteropFor(<String>[]), isNull);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -2135,6 +2159,7 @@ Use the "flutter config" command to enable feature flags.''',
         'FLUTTER_ENABLED_FEATURE_FLAGS is set in dartDefines',
         () async {
           final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          createTestCommandRunner(flutterCommand);
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,
           );
@@ -2403,6 +2428,12 @@ class DummyMachineFlutterCommand extends DummyFlutterCommand {
 class DummyHcppFlutterCommand extends DummyFlutterCommand {
   DummyHcppFlutterCommand() : super(name: 'dummy') {
     addEnableHcppFlag(verboseHelp: false);
+  }
+}
+
+class DummyDeprecatedJsInteropFlutterCommand extends DummyFlutterCommand {
+  DummyDeprecatedJsInteropFlutterCommand() : super(name: 'dummy') {
+    usesDeprecatedJsInteropFlag(verboseHelp: false);
   }
 }
 

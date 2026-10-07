@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -84,6 +85,7 @@ void main() {
       expect(dependencies.buildSystem, isNotNull);
       expect(dependencies.buildTargets, isNull);
       expect(dependencies.crashReporter, isNotNull);
+      expect(dependencies.deviceManager, isA<FlutterDeviceManager>());
       expect(dependencies.doctor, isNotNull);
       expect(dependencies.emulatorManager, isNotNull);
       expect(dependencies.featureFlags, isNotNull);
@@ -141,6 +143,20 @@ void main() {
       );
 
       expect(dependencies.buildTargets, same(mockBuildTargets));
+    });
+
+    testUsingContext('respects explicit overrides for DeviceManager', () async {
+      final mockDeviceManager = FakeDeviceManager();
+
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        deviceManager: mockDeviceManager,
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+
+      expect(dependencies.deviceManager, same(mockDeviceManager));
     });
 
     testUsingContext('respects explicit overrides for FeatureFlags', () async {

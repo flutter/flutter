@@ -20,7 +20,7 @@ DeviceLab tests are located under [`/dev/devicelab/bin/tasks`](https://github.co
   * Use `bringup: true` in .ci.yaml
   * Monitor the test execution in the [flutter dashboard](https://flutter-dashboard.appspot.com/#/build)
 * If no flakiness issue pops up, then enable the test in the prod env.
-  * Switch `bringup` to `true`.
+  * Remove `bringup: true` (or set it to `false`) in .ci.yaml, see [CI_YAML.md](https://github.com/flutter/cocoon/blob/main/CI_YAML.md#adding-new-targets).
 
 # Detecting flaky tests
 
