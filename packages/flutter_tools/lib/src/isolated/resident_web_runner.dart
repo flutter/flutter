@@ -493,7 +493,7 @@ class ResidentWebRunner extends ResidentRunner {
               ),
             );
           }
-          return OperationResult(1, 'Failed to recompile application.', updateFSReport: report);
+          return OperationResult(1, 'Failed to recompile application.');
         }
       } else {
         report = null;
