@@ -236,7 +236,7 @@ class PlatformViewAndroidJNI {
   ///             thread, along with a callback that publishes it once the
   ///             caller has finished writing into it.
   ///
-  ///             The caller must invoke the submit callback only after its
+  ///             The caller must invoke the publish callback only after its
   ///             last write into the transaction (for example, setting buffers
   ///             or completion callbacks). Until then the platform thread
   ///             cannot merge, apply, or close it, and the underlying Java
@@ -244,13 +244,13 @@ class PlatformViewAndroidJNI {
   ///
   /// @note       Must be called from the raster thread.
   ///
-  /// @param[out] out_submit_callback  Receives the callback that publishes the
-  ///                                  transaction. Must not be null.
+  /// @param[out] out_publish_callback  Receives the callback that publishes
+  ///                                   the transaction. Must not be null.
   ///
   /// @return     The native transaction, or null if one could not be created.
   ///
   virtual ASurfaceTransaction* createTransaction(
-      std::function<void()>* out_submit_callback) = 0;
+      std::function<void()>* out_publish_callback) = 0;
 
   virtual void swapTransaction() = 0;
 

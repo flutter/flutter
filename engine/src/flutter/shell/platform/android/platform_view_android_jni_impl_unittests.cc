@@ -108,7 +108,7 @@ TEST_F(PlatformViewAndroidJNIImplTest, ImageGetHardwareBufferException) {
 }
 
 TEST_F(PlatformViewAndroidJNIImplTest,
-       CreateTransactionRetainsGlobalRefUntilSubmitted) {
+       CreateTransactionRetainsGlobalRefUntilPublished) {
   MockJNIEnvProvider env_provider;
   MockJNIEnv& mock_env = env_provider.env();
 
@@ -150,28 +150,28 @@ TEST_F(PlatformViewAndroidJNIImplTest,
     global_ref_alive = false;
   });
 
-  bool submit_called = false;
+  bool publish_called = false;
   EXPECT_CALL(mock_env, CallVoidMethodV(kFlutterJniObj, _, _))
       .WillOnce([&](jobject, jmethodID, va_list args) {
-        // submitTransaction must receive the same transaction, while the
+        // publishTransaction must receive the same transaction, while the
         // global ref is still keeping it alive.
         EXPECT_EQ(va_arg(args, jobject), kJavaTxObj);
         EXPECT_TRUE(global_ref_alive);
-        submit_called = true;
+        publish_called = true;
       });
 
   fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
   PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
 
-  std::function<void()> submit_cb;
-  ASurfaceTransaction* tx = android_jni.createTransaction(&submit_cb);
+  std::function<void()> publish_cb;
+  ASurfaceTransaction* tx = android_jni.createTransaction(&publish_cb);
   EXPECT_EQ(tx, kNativeTx);
-  ASSERT_NE(submit_cb, nullptr);
+  ASSERT_NE(publish_cb, nullptr);
   EXPECT_TRUE(global_ref_alive);
-  EXPECT_FALSE(submit_called);
+  EXPECT_FALSE(publish_called);
 
-  submit_cb();
-  EXPECT_TRUE(submit_called);
+  publish_cb();
+  EXPECT_TRUE(publish_called);
   EXPECT_FALSE(global_ref_alive);
 }
 

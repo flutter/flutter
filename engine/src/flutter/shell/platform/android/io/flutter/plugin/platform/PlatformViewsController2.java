@@ -775,7 +775,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
    * <p>The native caller continues to write into the transaction after this returns (setting the
    * buffer and the completion callback). Publishing it here would let {@link #swapTransactions()}
    * and {@link #onEndFrame()} merge and close it while those writes are in flight. The caller must
-   * call {@link #submitTransaction} once it is done writing.
+   * call {@link #publishTransaction} once it is done writing.
    */
   // Called from the raster thread through FlutterJNI.
   @RequiresApi(API_LEVELS.API_34)
@@ -789,7 +789,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
    */
   // Called from the raster thread through FlutterJNI.
   @RequiresApi(API_LEVELS.API_34)
-  public void submitTransaction(SurfaceControl.Transaction tx) {
+  public void publishTransaction(SurfaceControl.Transaction tx) {
     if (tx == null) {
       return;
     }

@@ -78,9 +78,9 @@ static jfieldID g_jni_shell_holder_field = nullptr;
   V(g_on_begin_frame_method, onBeginFrame, "()V")                             \
   V(g_on_end_frame_method, onEndFrame, "()V")                                 \
   V(g_on_display_overlay_surface_method, onDisplayOverlaySurface, "(IIIII)V") \
-  V(g_create_transaction_method, createTransaction,                           \
+  V(g_create_unpublished_transaction_method, createUnpublishedTransaction,    \
     "()Landroid/view/SurfaceControl$Transaction;")                            \
-  V(g_submit_transaction_method, submitTransaction,                           \
+  V(g_publish_transaction_method, publishTransaction,                         \
     "(Landroid/view/SurfaceControl$Transaction;)V")                           \
   V(g_swap_transaction_method, swapTransactions, "()V")                       \
   V(g_create_overlay_surface2_method, createOverlaySurface2,                  \
@@ -2068,8 +2068,8 @@ bool PlatformViewAndroidJNIImpl::RequestDartDeferredLibrary(
 // New Platform View Support.
 
 ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction(
-    std::function<void()>* out_submit_callback) {
-  FML_DCHECK(out_submit_callback != nullptr);
+    std::function<void()>* out_publish_callback) {
+  FML_DCHECK(out_publish_callback != nullptr);
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
   fml::jni::ScopedJavaLocalRef<jobject> java_object = java_object_.get(env);
@@ -2078,8 +2078,8 @@ ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction(
   }
 
   fml::jni::ScopedJavaLocalRef<jobject> transaction(
-      env,
-      env->CallObjectMethod(java_object.obj(), g_create_transaction_method));
+      env, env->CallObjectMethod(java_object.obj(),
+                                 g_create_unpublished_transaction_method));
   if (transaction.is_null()) {
     return nullptr;
   }
@@ -2101,12 +2101,12 @@ ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction(
           env, transaction.obj());
   fml::jni::JavaObjectWeakGlobalRef weak_java_object = java_object_;
 
-  *out_submit_callback = [weak_java_object, global_tx]() {
+  *out_publish_callback = [weak_java_object, global_tx]() {
     JNIEnv* cb_env = fml::jni::AttachCurrentThread();
     fml::jni::ScopedJavaLocalRef<jobject> cb_java_obj =
         weak_java_object.get(cb_env);
     if (!cb_java_obj.is_null() && !global_tx->is_null()) {
-      cb_env->CallVoidMethod(cb_java_obj.obj(), g_submit_transaction_method,
+      cb_env->CallVoidMethod(cb_java_obj.obj(), g_publish_transaction_method,
                              global_tx->obj());
       FML_CHECK(fml::jni::CheckException(cb_env));
     }

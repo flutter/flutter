@@ -1359,11 +1359,11 @@ public class FlutterJNI {
   // ----- New Platform Views ----------
 
   // Called from the raster thread for AHB swapchain presentation. The returned transaction is not
-  // yet visible to the platform thread; the caller must pass it to submitTransaction once it has
+  // yet visible to the platform thread; the caller must pass it to publishTransaction once it has
   // finished writing into it.
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
-  public SurfaceControl.Transaction createTransaction() {
+  public SurfaceControl.Transaction createUnpublishedTransaction() {
     if (platformViewsController2 == null) {
       throw new RuntimeException("");
     }
@@ -1371,14 +1371,14 @@ public class FlutterJNI {
   }
 
   // Called from the raster thread once it is done writing into a transaction returned by
-  // createTransaction.
+  // createUnpublishedTransaction.
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
-  public void submitTransaction(SurfaceControl.Transaction tx) {
+  public void publishTransaction(SurfaceControl.Transaction tx) {
     if (platformViewsController2 == null) {
       throw new RuntimeException("");
     }
-    platformViewsController2.submitTransaction(tx);
+    platformViewsController2.publishTransaction(tx);
   }
 
   @SuppressWarnings("unused")
