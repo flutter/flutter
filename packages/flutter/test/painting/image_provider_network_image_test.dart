@@ -333,6 +333,30 @@ void main() {
     debugNetworkImageHttpClientProvider = null;
   }, skip: isBrowser); // [intended] Browser does not resolve images this way.
 
+  test('Network image headers replace the HttpClient defaults', () async {
+    httpClient.request.response
+      ..statusCode = HttpStatus.ok
+      ..contentLength = kTransparentImage.length
+      ..content = <Uint8List>[Uint8List.fromList(kTransparentImage)];
+    // HttpClient sets its default user agent on every request it opens.
+    httpClient.request.headers.set(HttpHeaders.userAgentHeader, 'Dart/3.0 (dart:io)');
+
+    final imageAvailable = Completer<void>();
+    final ImageProvider imageProvider = NetworkImage(
+      nonconst('testing.url'),
+      headers: nonconst(<String, String>{'User-Agent': 'custom-agent'}),
+    );
+    final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+    result.addListener(
+      ImageStreamListener((ImageInfo image, bool synchronousCall) {
+        imageAvailable.complete();
+      }),
+    );
+    await imageAvailable.future;
+
+    expect(httpClient.request.headers[HttpHeaders.userAgentHeader], <String>['custom-agent']);
+  }, skip: isBrowser); // [intended] Browser does not resolve images this way.
+
   test('Network image sets tag', () async {
     const url = 'http://test.png';
     const chunkSize = 8;
@@ -428,6 +452,18 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
 }
 
 class _FakeHttpHeaders extends Fake implements HttpHeaders {
+  final Map<String, List<String>> values = <String, List<String>>{};
+
   @override
-  void add(String name, Object value, {bool preserveHeaderCase = false}) {}
+  List<String>? operator [](String name) => values[name.toLowerCase()];
+
+  @override
+  void add(String name, Object value, {bool preserveHeaderCase = false}) {
+    values.putIfAbsent(name.toLowerCase(), () => <String>[]).add('$value');
+  }
+
+  @override
+  void set(String name, Object value, {bool preserveHeaderCase = false}) {
+    values[name.toLowerCase()] = <String>['$value'];
+  }
 }
