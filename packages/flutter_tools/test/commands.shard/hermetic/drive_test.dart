@@ -992,7 +992,13 @@ void main() {}
   );
 
   testUsingContext('accepts --[no-]deprecated-js-interop', () {
-    expectAcceptsDeprecatedJsInteropFlag(DriveCommand(toolContext: createToolContext()));
+    expectAcceptsDeprecatedJsInteropFlag(
+      DriveCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: createToolContext(),
+      ),
+    );
   });
 
   for (final String flag in AndroidEngineCliFlags.allFlags) {
