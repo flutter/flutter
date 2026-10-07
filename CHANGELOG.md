@@ -32,6 +32,9 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.47 Changes
 
+### [3.47.7](https://github.com/flutter/flutter/releases/tag/3.47.7)
+- [flutter/193420](https://github.com/flutter/flutter/pull/193420) When a route shows an OverlayPortal on iOS, accessibility frames are shrunk by the device pixel ratio and anchored to the top-left, so VoiceOver focus and XCUITest taps miss the visible controls.
+
 ### [3.47.6](https://github.com/flutter/flutter/releases/tag/3.47.6)
 - [flutter/192513](https://github.com/flutter/flutter/issues/192513) Fixed an issue that caused Windows production apps to hang.
 
