@@ -110,7 +110,7 @@ class TestApp {
     final childLogicalSize = size * 0.25;
     final childLogicalOffset = windowCenter - childLogicalSize.center(Offset.zero);
     final childLogicalBounds = childLogicalOffset & childLogicalSize;
-    final List<Map<String, Object>> policyRegions = <Map<String, Object>>[];
+    final policyRegions = <Map<String, Object>>[];
 
     if (showOverlay) {
       final containerSize = size * 0.5;

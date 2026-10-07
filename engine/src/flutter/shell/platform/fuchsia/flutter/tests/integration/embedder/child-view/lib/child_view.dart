@@ -20,7 +20,7 @@ class TestApp {
   Color _backgroundColor = _pink;
 
   void run() {
-    final ByteData policyMessage = ByteData.sublistView(
+    final policyMessage = ByteData.sublistView(
       utf8.encode(
         json.encode(<String, Object>{
           'method': 'View.setGestureResponsePolicy',

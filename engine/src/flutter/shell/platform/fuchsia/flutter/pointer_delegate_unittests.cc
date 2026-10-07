@@ -56,8 +56,8 @@ class PointerDelegateTest : public ::testing::Test {
   }
 
   void ResetPointerDelegate(bool intercept_all_input) {
-    touch_source_bindings_.CloseAll();
-    mouse_source_bindings_.CloseAll();
+    touch_source_bindings_.CloseAll(ZX_OK);
+    mouse_source_bindings_.CloseAll(ZX_OK);
     touch_source_ = std::make_unique<FakeTouchSource>();
     mouse_source_ = std::make_unique<FakeMouseSource>();
     pointer_delegate_ = std::make_unique<flutter_runner::PointerDelegate>(
@@ -891,6 +891,7 @@ TEST_F(PointerDelegateTest, GesturePolicy_FlagTrueNoPolicyAnswersYes) {
     ASSERT_TRUE(r.has_response_type());
     EXPECT_EQ(r.response_type(), fup_TouchResponseType::YES);
   }
+  pointer_delegate_.reset();
 }
 
 TEST_F(PointerDelegateTest, GesturePolicy_FlagFalseRegionsAndDefaultResponses) {
@@ -1199,6 +1200,7 @@ TEST_F(PointerDelegateTest,
           break;
         }
       }
+      pointer_delegate_.reset();
     }
   }
 }

@@ -340,15 +340,17 @@ void FlutterEmbedderTest::LaunchParentViewInRealm(
       config_directory_contents.AddFile("args.csv", csv);
     }
 
-    std::vector<RouteEndpoint> targets = {kParentViewRef};
     if (intercept_all_input) {
-      targets.push_back(kFlutterJitRunnerRef);
-      targets.push_back(kFlutterJitProductRunnerRef);
-      targets.push_back(kFlutterAotRunnerRef);
-      targets.push_back(kFlutterAotProductRunnerRef);
+      realm_builder_.RouteReadOnlyDirectory(
+          "config-data",
+          {kParentViewRef, kFlutterJitRunnerRef, kFlutterJitProductRunnerRef,
+           kFlutterAotRunnerRef, kFlutterAotProductRunnerRef},
+          std::move(config_directory_contents));
+    } else {
+      realm_builder_.RouteReadOnlyDirectory(
+          "config-data", {kParentViewRef},
+          std::move(config_directory_contents));
     }
-    realm_builder_.RouteReadOnlyDirectory("config-data", std::move(targets),
-                                          std::move(config_directory_contents));
   }
   realm_ = std::make_unique<RealmRoot>(realm_builder_.Build());
 

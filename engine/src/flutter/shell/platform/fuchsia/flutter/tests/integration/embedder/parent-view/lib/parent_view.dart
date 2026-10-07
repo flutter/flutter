@@ -112,7 +112,7 @@ class TestApp {
     final childLogicalSize = windowSize * 0.33;
     final childLogicalOffset = windowCenter - childLogicalSize.center(Offset.zero);
     final childLogicalBounds = childLogicalOffset & childLogicalSize;
-    final List<Map<String, Object>> policyRegions = <Map<String, Object>>[];
+    final policyRegions = <Map<String, Object>>[];
 
     if (showOverlay) {
       final containerSize = windowSize * .66;
@@ -144,7 +144,7 @@ class TestApp {
       final overlayCullRect = Offset.zero & overlayPhysicalSize; // in canvas physical coordinates
       final canvas = Canvas(recorder, overlayCullRect);
       canvas.scale(pixelRatio);
-      final paint = Paint()..color = Color.fromARGB(255, 0, 255, 0);
+      final paint = Paint()..color = const Color.fromARGB(255, 0, 255, 0);
       canvas.drawRect(Offset.zero & overlaySize, paint);
       final overlayPicture = recorder.endRecording();
       sceneBuilder
@@ -162,7 +162,7 @@ class TestApp {
       ],
       'response': 'NO',
     });
-    final ByteData policyMessage = ByteData.sublistView(
+    final policyMessage = ByteData.sublistView(
       utf8.encode(
         json.encode(<String, Object>{
           'method': 'View.setGestureResponsePolicy',
