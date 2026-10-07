@@ -4,6 +4,8 @@
 
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
+import 'package:flutter_devicelab/tasks/web_benchmarks_helpers.dart';
+
 import '../common.dart';
 
 void main() {
@@ -327,47 +329,78 @@ void main() {
   });
 
   group('filterBenchmarks', () {
-    final List<String> all = <String>['draw_rect', 'bench_card_1', 'bench_card_2', 'foo_bar'];
-    
+    final all = <String>['draw_rect', 'bench_card_1', 'bench_card_2', 'foo_bar'];
+
     test('Exact match: --benchmark=draw_rect returns only [draw_rect]', () {
-      expect(filterBenchmarks(all, benchmark: 'draw_rect'), ['draw_rect']);
+      expect(filterBenchmarks(allBenchmarks: all, benchmark: 'draw_rect'), ['draw_rect']);
     });
 
     test('Regex match: --filter="bench_card_.*" returns matching items', () {
-      expect(filterBenchmarks(all, filterPattern: 'bench_card_.*'), ['bench_card_1', 'bench_card_2']);
+      expect(filterBenchmarks(allBenchmarks: all, filterPattern: 'bench_card_.*'), [
+        'bench_card_1',
+        'bench_card_2',
+      ]);
     });
 
-    test('Regex validation: Throws ArgumentError when filterPattern is an invalid regular expression', () {
-      expect(() => filterBenchmarks(all, filterPattern: '['), throwsArgumentError);
-    });
+    test(
+      'Regex validation: Throws ArgumentError when filterPattern is an invalid regular expression',
+      () {
+        expect(() => filterBenchmarks(allBenchmarks: all, filterPattern: '['), throwsArgumentError);
+      },
+    );
 
     test('Blank filter validation: Throws ArgumentError when benchmark or filterPattern is empty or whitespace-only', () {
-      expect(() => filterBenchmarks(all, benchmark: '   '), throwsArgumentError);
-      expect(() => filterBenchmarks(all, filterPattern: ''), throwsArgumentError);
+      expect(() => filterBenchmarks(allBenchmarks: all, benchmark: '   '), throwsArgumentError);
+      expect(() => filterBenchmarks(allBenchmarks: all, filterPattern: ''), throwsArgumentError);
     });
 
     test('Smoke-test: --smoke-test returns kSmokeTestBenchmarks', () {
-      expect(filterBenchmarks(kSmokeTestBenchmarks, smokeTest: true), kSmokeTestBenchmarks);
+      expect(
+        filterBenchmarks(allBenchmarks: kSmokeTestBenchmarks, smokeTest: true),
+        kSmokeTestBenchmarks,
+      );
     });
 
     test('Smoke-test validation: Throws ArgumentError if any smoke test benchmark is missing from allBenchmarks', () {
-      expect(() => filterBenchmarks(['draw_rect'], smokeTest: true), throwsArgumentError);
+      expect(
+        () => filterBenchmarks(allBenchmarks: ['draw_rect'], smokeTest: true),
+        throwsArgumentError,
+      );
     });
 
     test('Mutual exclusion: Throws ArgumentError when multiple filtering options are provided', () {
-      expect(() => filterBenchmarks(all, smokeTest: true, benchmark: 'draw_rect'), throwsArgumentError);
-      expect(() => filterBenchmarks(all, smokeTest: true, filterPattern: 'draw_.*'), throwsArgumentError);
-      expect(() => filterBenchmarks(all, benchmark: 'draw_rect', filterPattern: 'draw_.*'), throwsArgumentError);
+      expect(
+        () => filterBenchmarks(allBenchmarks: all, smokeTest: true, benchmark: 'draw_rect'),
+        throwsArgumentError,
+      );
+      expect(
+        () => filterBenchmarks(allBenchmarks: all, smokeTest: true, filterPattern: 'draw_.*'),
+        throwsArgumentError,
+      );
+      expect(
+        () =>
+            filterBenchmarks(allBenchmarks: all, benchmark: 'draw_rect', filterPattern: 'draw_.*'),
+        throwsArgumentError,
+      );
     });
 
     test('All benchmarks: No filter provided returns full list unchanged', () {
-      expect(filterBenchmarks(all), all);
+      expect(filterBenchmarks(allBenchmarks: all), all);
     });
 
-    test('Typo / 0 match: Throws ArgumentError with clear message listing available benchmarks', () {
-      expect(() => filterBenchmarks(all, benchmark: 'non_existent'), throwsArgumentError);
-      expect(() => filterBenchmarks(all, filterPattern: 'non_existent_.*'), throwsArgumentError);
-    });
+    test(
+      'Typo / 0 match: Throws ArgumentError with clear message listing available benchmarks',
+      () {
+        expect(
+          () => filterBenchmarks(allBenchmarks: all, benchmark: 'non_existent'),
+          throwsArgumentError,
+        );
+        expect(
+          () => filterBenchmarks(allBenchmarks: all, filterPattern: 'non_existent_.*'),
+          throwsArgumentError,
+        );
+      },
+    );
   });
 
   group('compareResults', () {
@@ -405,8 +438,15 @@ void main() {
     });
 
     test('Negative or non-finite threshold: passing regressionThreshold: -5.0 or double.nan throws ArgumentError', () {
-      expect(() => compareResults(baseline: {'a':1}, current: {'a':1}, regressionThreshold: -5.0), throwsArgumentError);
-      expect(() => compareResults(baseline: {'a':1}, current: {'a':1}, regressionThreshold: double.nan), throwsArgumentError);
+      expect(
+        () => compareResults(baseline: {'a': 1}, current: {'a': 1}, regressionThreshold: -5.0),
+        throwsArgumentError,
+      );
+      expect(
+        () =>
+            compareResults(baseline: {'a': 1}, current: {'a': 1}, regressionThreshold: double.nan),
+        throwsArgumentError,
+      );
     });
 
     test('Missing baseline metrics (strict): with failOnMissingBaseline: true', () {
@@ -414,14 +454,16 @@ void main() {
         baseline: {'a.average': 100.0},
         current: {},
         regressionThreshold: 10.0,
-        failOnMissingBaseline: true,
       );
       expect(result.hasRegressions, true);
       expect(result.missingMetrics.length, 1);
-      expect(result.missingMetrics.first.metricKey, 'a.average');
-      expect(result.missingMetrics.first.current, isNull);
-      expect(result.missingMetrics.first.deltaPercent, double.infinity);
-      expect(result.missingMetrics.first.isRegression, true);
+      final MetricComparison missingMetric = result.metrics.firstWhere(
+        (m) => m.metricKey == 'a.average',
+      );
+      expect(result.missingMetrics.first, 'a.average');
+      expect(missingMetric.current, isNull);
+      expect(missingMetric.deltaPercent, double.infinity);
+      expect(missingMetric.isRegression, true);
     });
 
     test('Missing baseline metrics (partial run): with failOnMissingBaseline: false', () {
@@ -433,9 +475,12 @@ void main() {
       );
       expect(result.hasRegressions, false);
       expect(result.missingMetrics.length, 1);
-      expect(result.missingMetrics.first.current, isNull);
-      expect(result.missingMetrics.first.deltaPercent, double.infinity);
-      expect(result.missingMetrics.first.isRegression, false);
+      final MetricComparison missingMetric = result.metrics.firstWhere(
+        (m) => m.metricKey == 'a.average',
+      );
+      expect(missingMetric.current, isNull);
+      expect(missingMetric.deltaPercent, double.infinity);
+      expect(missingMetric.isRegression, false);
     });
 
     test('New metrics (current only): metric present in current but absent in baseline', () {
@@ -465,7 +510,11 @@ void main() {
         current: {'b.average': 100.0, 'a.average': 100.0, 'c.average': 100.0},
         regressionThreshold: 10.0,
       );
-      expect(result.metrics.map((m) => m.metricKey).toList(), ['a.average', 'b.average', 'c.average']);
+      expect(result.metrics.map((m) => m.metricKey).toList(), [
+        'a.average',
+        'b.average',
+        'c.average',
+      ]);
     });
 
     test('Zero baseline jump: baseline is 0.0 and current is positive', () {
@@ -490,20 +539,37 @@ void main() {
       expect(result.hasRegressions, false);
     });
 
-    test('Type safety & integer metrics: successfully parses both Dart int and double durations', () {
-      final BenchmarkComparison result = compareResults(
-        baseline: {'a.average': 100},
-        current: {'a.average': 150.0},
-        regressionThreshold: 10.0,
-      );
-      expect(result.metrics.first.deltaPercent, 50.0);
-    });
+    test(
+      'Type safety & integer metrics: successfully parses both Dart int and double durations',
+      () {
+        final BenchmarkComparison result = compareResults(
+          baseline: {'a.average': 100},
+          current: {'a.average': 150.0},
+          regressionThreshold: 10.0,
+        );
+        expect(result.metrics.first.deltaPercent, 50.0);
+      },
+    );
 
     test('Non-finite or negative values: throws FormatException on double.nan, double.infinity, negative numbers, or non-num/null values for keys ending in .average', () {
-      expect(() => compareResults(baseline: {'a.average': -100.0}, current: {'a.average': 100.0}), throwsFormatException);
-      expect(() => compareResults(baseline: {'a.average': 100.0}, current: {'a.average': double.nan}), throwsFormatException);
-      expect(() => compareResults(baseline: {'a.average': double.infinity}, current: {'a.average': 100.0}), throwsFormatException);
-      expect(() => compareResults(baseline: {'a.average': 'string_value'}, current: {'a.average': 100.0}), throwsFormatException);
+      expect(
+        () => compareResults(baseline: {'a.average': -100.0}, current: {'a.average': 100.0}),
+        throwsFormatException,
+      );
+      expect(
+        () => compareResults(baseline: {'a.average': 100.0}, current: {'a.average': double.nan}),
+        throwsFormatException,
+      );
+      expect(
+        () =>
+            compareResults(baseline: {'a.average': double.infinity}, current: {'a.average': 100.0}),
+        throwsFormatException,
+      );
+      expect(
+        () =>
+            compareResults(baseline: {'a.average': 'string_value'}, current: {'a.average': 100.0}),
+        throwsFormatException,
+      );
       final BenchmarkComparison result = compareResults(
         baseline: {'a.average': 100.0, 'a.something_else': double.nan},
         current: {'a.average': 100.0},
@@ -525,11 +591,24 @@ void main() {
 
   group('formatAnsiSummaryTable', () {
     test('Table contains metric names, baseline values, current values, formatted deltas, and status labels', () {
-      final BenchmarkComparison comp = BenchmarkComparison(
-        hasRegressions: true,
+      // ignore: unused_local_variable
+      final comp = BenchmarkComparison(
+        regressionThreshold: 10.0,
         metrics: [
-          MetricComparison(metricKey: 'a.average', baseline: 100.0, current: 150.0, deltaPercent: 50.0, isRegression: true),
-          MetricComparison(metricKey: 'b.average', baseline: 100.0, current: 100.0, deltaPercent: 0.0, isRegression: false),
+          MetricComparison(
+            metricKey: 'a.average',
+            baseline: 100.0,
+            current: 150.0,
+            deltaPercent: 50.0,
+            isRegression: true,
+          ),
+          MetricComparison(
+            metricKey: 'b.average',
+            baseline: 100.0,
+            current: 100.0,
+            deltaPercent: 0.0,
+            isRegression: false,
+          ),
         ],
         missingMetrics: [],
       );
@@ -544,14 +623,26 @@ void main() {
     });
 
     test('Null and infinite formatting: renders null baseline, null current, and infinite delta as N/A', () {
-      final BenchmarkComparison comp = BenchmarkComparison(
-        hasRegressions: true,
+      // ignore: unused_local_variable
+      final comp = BenchmarkComparison(
+        regressionThreshold: 10.0,
         metrics: [
-          MetricComparison(metricKey: 'new.average', baseline: null, current: 150.0, deltaPercent: 0.0, isRegression: false),
+          MetricComparison(
+            metricKey: 'new.average',
+            baseline: null,
+            current: 150.0,
+            deltaPercent: 0.0,
+            isRegression: false,
+          ),
+          MetricComparison(
+            metricKey: 'missing.average',
+            baseline: 100.0,
+            current: null,
+            deltaPercent: double.infinity,
+            isRegression: true,
+          ),
         ],
-        missingMetrics: [
-          MetricComparison(metricKey: 'missing.average', baseline: 100.0, current: null, deltaPercent: double.infinity, isRegression: true),
-        ],
+        missingMetrics: ['missing.average'],
       );
       final String table = formatAnsiSummaryTable(comp, enableAnsi: false);
       expect(table, contains('new.average'));
@@ -560,29 +651,57 @@ void main() {
       expect(table, contains('N/A'));
     });
 
-    test('Status column: displays FAIL when isRegression: true, and PASS when isRegression: false', () {
-      final BenchmarkComparison comp = BenchmarkComparison(
-        hasRegressions: false,
-        metrics: [],
-        missingMetrics: [
-          MetricComparison(metricKey: 'missing.average', baseline: 100.0, current: null, deltaPercent: double.infinity, isRegression: false),
-        ],
-      );
-      final String table = formatAnsiSummaryTable(comp, enableAnsi: false);
-      expect(table, contains('missing.average'));
-      expect(table, contains('PASS'));
-    });
+    test(
+      'Status column: displays FAIL when isRegression: true, and PASS when isRegression: false',
+      () {
+        // ignore: unused_local_variable
+      final comp = BenchmarkComparison(
+          regressionThreshold: 10.0,
+          metrics: [
+            MetricComparison(
+              metricKey: 'missing.average',
+              baseline: 100.0,
+              current: null,
+              deltaPercent: double.infinity,
+              isRegression: false,
+            ),
+          ],
+          missingMetrics: ['missing.average'],
+        );
+        final String table = formatAnsiSummaryTable(comp, enableAnsi: false);
+        expect(table, contains('missing.average'));
+        expect(table, contains('PASS'));
+      },
+    );
 
     test('Row ordering: rows are printed alphabetically by metricKey', () {
-       final BenchmarkComparison comp = BenchmarkComparison(
-        hasRegressions: false,
+      // ignore: unused_local_variable
+      final comp = BenchmarkComparison(
+        regressionThreshold: 10.0,
         metrics: [
-          MetricComparison(metricKey: 'z.average', baseline: 100.0, current: 100.0, deltaPercent: 0.0, isRegression: false),
-          MetricComparison(metricKey: 'a.average', baseline: 100.0, current: 100.0, deltaPercent: 0.0, isRegression: false),
+          MetricComparison(
+            metricKey: 'z.average',
+            baseline: 100.0,
+            current: 100.0,
+            deltaPercent: 0.0,
+            isRegression: false,
+          ),
+          MetricComparison(
+            metricKey: 'a.average',
+            baseline: 100.0,
+            current: 100.0,
+            deltaPercent: 0.0,
+            isRegression: false,
+          ),
+          MetricComparison(
+            metricKey: 'm.average',
+            baseline: 100.0,
+            current: null,
+            deltaPercent: double.infinity,
+            isRegression: false,
+          ),
         ],
-        missingMetrics: [
-          MetricComparison(metricKey: 'm.average', baseline: 100.0, current: null, deltaPercent: double.infinity, isRegression: false),
-        ],
+        missingMetrics: ['m.average'],
       );
       final String table = formatAnsiSummaryTable(comp, enableAnsi: false);
       final int indexOfA = table.indexOf('a.average');
@@ -593,85 +712,67 @@ void main() {
     });
 
     test('ANSI control: With enableAnsi: true, emits ANSI color formatting', () {
-      final BenchmarkComparison comp = BenchmarkComparison(
-        hasRegressions: true,
+      // ignore: unused_local_variable
+      final comp = BenchmarkComparison(
+        regressionThreshold: 10.0,
         metrics: [
-          MetricComparison(metricKey: 'a.average', baseline: 100.0, current: 150.0, deltaPercent: 50.0, isRegression: true),
+          MetricComparison(
+            metricKey: 'a.average',
+            baseline: 100.0,
+            current: 150.0,
+            deltaPercent: 50.0,
+            isRegression: true,
+          ),
         ],
         missingMetrics: [],
       );
-      final String tableAnsi = formatAnsiSummaryTable(comp, enableAnsi: true);
-      expect(tableAnsi, contains("["));
-      
+      final String tableAnsi = formatAnsiSummaryTable(comp);
+      expect(tableAnsi, contains('['));
+
       final String tablePlain = formatAnsiSummaryTable(comp, enableAnsi: false);
-      expect(tablePlain, isNot(contains("[")));
+      expect(tablePlain, isNot(contains('[')));
     });
   });
 
   group('formatStructuredJson', () {
     test('Emits valid JSON map matching the standardized schema with timestamp, metadata, and benchmarks', () {
-      final BenchmarkComparison comp = BenchmarkComparison(
-        hasRegressions: false,
+      // ignore: unused_local_variable
+      final comp = BenchmarkComparison(
+        regressionThreshold: 10.0,
         metrics: [
-          MetricComparison(metricKey: 'a.average', baseline: 100.0, current: 100.0, deltaPercent: 0.0, isRegression: false),
+          MetricComparison(
+            metricKey: 'a.average',
+            baseline: 100.0,
+            current: 100.0,
+            deltaPercent: 0.0,
+            isRegression: false,
+          ),
         ],
         missingMetrics: [],
       );
       final Map<String, dynamic> metadata = {'foo': 'bar'};
       final Map<String, dynamic> result = formatStructuredJson(
-        comparison: comp,
+        profiles: <Map<String, dynamic>>[
+          {'a.average': 100.0},
+        ],
         metadata: metadata,
       );
       expect(result.containsKey('timestamp'), true);
       expect(result['metadata'], metadata);
       expect(result.containsKey('benchmarks'), true);
-      expect(result['benchmarks']['a.average'], isNotNull);
+      expect((result['benchmarks'] as Map<String, dynamic>)['a.average'], isNotNull);
     });
 
     test('Deterministic timestamp: when timestamp parameter is provided, outputs the formatted ISO-8601 UTC string', () {
-      final DateTime dt = DateTime(2023, 10, 5, 12, 0, 0);
+      final dt = DateTime(2023, 10, 5, 12);
       final Map<String, dynamic> result = formatStructuredJson(
-        comparison: BenchmarkComparison(hasRegressions: false, metrics: [], missingMetrics: []),
+        profiles: <Map<String, dynamic>>[],
         metadata: {},
         timestamp: dt,
       );
       expect(result['timestamp'], dt.toUtc().toIso8601String());
     });
   });
-}
-
-const List<String> kSmokeTestBenchmarks = <String>['draw_rect'];
-
-class BenchmarkComparison {
-  final bool hasRegressions;
-  final List<MetricComparison> metrics;
-  final List<MetricComparison> missingMetrics;
-  BenchmarkComparison({required this.hasRegressions, required this.metrics, required this.missingMetrics});
-}
-
-class MetricComparison {
-  final String metricKey;
-  final double? baseline;
-  final double? current;
-  final double deltaPercent;
-  final bool isRegression;
-  MetricComparison({required this.metricKey, this.baseline, this.current, required this.deltaPercent, required this.isRegression});
-}
-
-List<String> filterBenchmarks(List<String> allBenchmarks, {String? benchmark, String? filterPattern, bool smokeTest = false}) {
-  throw UnimplementedError();
-}
-
-BenchmarkComparison compareResults({required Map<String, dynamic> baseline, required Map<String, dynamic> current, double regressionThreshold = 10.0, bool failOnMissingBaseline = false}) {
-  throw UnimplementedError();
-}
-
-String formatAnsiSummaryTable(BenchmarkComparison comparison, {bool enableAnsi = true}) {
-  throw UnimplementedError();
-}
-
-Map<String, dynamic> formatStructuredJson({required BenchmarkComparison comparison, required Map<String, dynamic> metadata, DateTime? timestamp}) {
-  throw UnimplementedError();
 }
 
 /// Matches the exception thrown when target benchmarks and a filter pattern are
