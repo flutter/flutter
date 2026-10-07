@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
 
 import 'protocol_base/service.dart';
 
@@ -11,17 +12,21 @@ abstract base class DeviceService extends ToolExtensionService {
   /// Service namespace identifier for device services.
   static const String serviceNamespace = 'device';
 
+  static const String _getDevicesRpcMethod = 'getDevices';
+  static const String _isSupportedForProjectRpcMethod = 'isSupportedForProject';
+
   /// RPC method identifier to query contributed target devices.
-  static const String getDevicesMethod = 'device.getDevices';
+  static const String getDevicesMethod = '$serviceNamespace.$_getDevicesRpcMethod';
 
   /// RPC method identifier to query whether a target device is supported for a project.
-  static const String isSupportedForProjectMethod = 'device.isSupportedForProject';
+  static const String isSupportedForProjectMethod =
+      '$serviceNamespace.$_isSupportedForProjectRpcMethod';
 
   /// RPC parameter key for the target device ID.
   static const String deviceIdParam = 'deviceId';
 
-  /// RPC parameter key for the project root URI.
-  static const String projectRootParam = 'projectRoot';
+  /// RPC parameter key for the serialized [ExtensionFlutterProject].
+  static const String projectParam = 'project';
 
   @override
   String get namespace => serviceNamespace;
@@ -29,15 +34,17 @@ abstract base class DeviceService extends ToolExtensionService {
   /// Returns the target devices contributed by this extension.
   Future<List<TargetDevice>> getDevices();
 
-  /// Returns whether the target device with [deviceId] is supported for the
-  /// Flutter project at [projectRoot].
-  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot});
+  /// Returns whether the target device with [deviceId] is supported for [project].
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  });
 
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
     return <String, ExtensionRpcHandler>{
-      'getDevices': _getDevicesRpc,
-      'isSupportedForProject': _isSupportedForProjectRpc,
+      _getDevicesRpcMethod: _getDevicesRpc,
+      _isSupportedForProjectRpcMethod: _isSupportedForProjectRpc,
     };
   }
 
@@ -50,8 +57,17 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<bool> _isSupportedForProjectRpc(Map<String, Object?> params) async {
-    final String deviceId = params[deviceIdParam] as String? ?? '';
-    final String projectRootStr = params[projectRootParam] as String? ?? '';
-    return isSupportedForProject(deviceId: deviceId, projectRoot: Uri.parse(projectRootStr));
+    if (params case {
+      deviceIdParam: final String deviceId,
+      projectParam: final Map<String, Object?> projectMap,
+    }) {
+      return isSupportedForProject(
+        deviceId: deviceId,
+        project: ExtensionFlutterProject.fromJson(projectMap),
+      );
+    }
+    throw RpcException.invalidParams(
+      'Invalid or missing parameters for $isSupportedForProjectMethod.',
+    );
   }
 }
