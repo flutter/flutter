@@ -45,6 +45,10 @@ const FlGtkRuntimeApi* fl_gtk_runtime_api_get() {
     FlGtkRuntimeApi result = {};
     result.gtk_at_least_4_10 = gtk_runtime_at_least(4, 10, 0);
     result.gtk_at_least_4_14 = gtk_runtime_at_least(4, 14, 0);
+    result.gtk_at_least_4_18 = gtk_runtime_at_least(4, 18, 0);
+    result.gtk_accessible_update_platform_state =
+        lookup_symbol<decltype(result.gtk_accessible_update_platform_state)>(
+            "gtk_accessible_update_platform_state");
     result.gtk_accessible_text_get_type =
         lookup_symbol<decltype(result.gtk_accessible_text_get_type)>(
             "gtk_accessible_text_get_type");
@@ -123,6 +127,25 @@ const FlGtkRuntimeApi* fl_gtk_runtime_api_get() {
     return result;
   }();
   return &api;
+}
+
+void fl_gtk_runtime_accessible_update_platform_state(
+    GtkAccessible* self, FlGtkAccessiblePlatformState state) {
+#if defined(FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT)
+  const FlGtkRuntimeApi* api = fl_gtk_runtime_api_get();
+  if (api->gtk_at_least_4_18 &&
+      api->gtk_accessible_update_platform_state != nullptr) {
+    api->gtk_accessible_update_platform_state(self, state);
+    return;
+  }
+  log_fallback_once("gtk_accessible_update_platform_state",
+                    "query-only platform state");
+#elif GTK_CHECK_VERSION(4, 18, 0)
+  gtk_accessible_update_platform_state(self, state);
+#else
+  (void)self;
+  (void)state;
+#endif
 }
 
 gboolean fl_gtk_runtime_supports_dmabuf_textures() {

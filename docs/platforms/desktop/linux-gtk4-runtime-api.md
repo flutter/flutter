@@ -70,6 +70,7 @@ and the complete symbol set used by that capability:
 | Native accessible tree | GTK 4.10 | View exports the widget-backed render surface instead of the native semantics tree |
 | Accessible text | GTK 4.14 | No native text interface; text notification wrappers do nothing |
 | Announcements | GTK 4.14 | Announcement wrapper does nothing |
+| Platform-state notifications | GTK 4.18 | Native nodes retain queryable focus state but do not emit these notifications |
 | DMA-BUF texture APIs | GTK 4.14 | Compositor cannot select the DMA-BUF texture route |
 
 These are the implementation's capability groups, not a claim of complete
@@ -103,7 +104,8 @@ tree argument requires runtime API compatibility. Consequently,
 To omit it, set both native-tree arguments to false.
 
 For a direct-call reference build, use suitable newer headers and libraries
-(GTK 4.14 or newer for the current text and DMA-BUF paths):
+(GTK 4.14 or newer for text and DMA-BUF paths, GTK 4.18 for platform-state
+notifications):
 
 ```gn
 gtk4_runtime_api_compat = false
@@ -167,7 +169,7 @@ When adding an optional API:
 
 [Runtime API tests](../../../engine/src/flutter/shell/platform/linux/fl_gtk4_runtime_api_test.cc)
 cover installed-runtime capabilities and conditional fallbacks.
-[The compatibility validation helper](../../../dev/tools/validate_gtk4_runtime_compat.py)
+[The compatibility validation helper](../../../engine/src/flutter/shell/platform/linux/testing/validate_gtk4_runtime_compat.py)
 supports build and runtime checks; use its `--help` for invocation options.
 Its optional-symbol audit currently covers only part of the table, so extend
 the audit alongside new bindings rather than treating it as exhaustive.

@@ -47,6 +47,12 @@ using FlGtkAccessibleAnnouncementPriority = gint;
 
 #if GTK_CHECK_VERSION(4, 10, 0)
 using FlGtkAccessiblePlatformState = GtkAccessiblePlatformState;
+constexpr auto FL_GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSABLE =
+    GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSABLE;
+constexpr auto FL_GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSED =
+    GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSED;
+constexpr auto FL_GTK_ACCESSIBLE_PLATFORM_STATE_ACTIVE =
+    GTK_ACCESSIBLE_PLATFORM_STATE_ACTIVE;
 #else
 enum FlGtkAccessiblePlatformState {
   FL_GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSABLE = 0,
@@ -123,6 +129,11 @@ struct FlGtkAccessibleTextInterface4_14 {
 struct FlGtkRuntimeApi {
   gboolean gtk_at_least_4_10;
   gboolean gtk_at_least_4_14;
+  gboolean gtk_at_least_4_18;
+
+  void (*gtk_accessible_update_platform_state)(
+      GtkAccessible* self,
+      FlGtkAccessiblePlatformState state);
 
   GType (*gtk_accessible_text_get_type)();
   void (*gtk_accessible_text_update_caret_position)(GtkAccessible* self);
@@ -188,6 +199,9 @@ struct FlGtkRuntimeApi {
 };
 
 const FlGtkRuntimeApi* fl_gtk_runtime_api_get();
+void fl_gtk_runtime_accessible_update_platform_state(
+    GtkAccessible* self,
+    FlGtkAccessiblePlatformState state);
 gboolean fl_gtk_runtime_supports_native_accessibility_tree();
 gboolean fl_gtk_runtime_supports_native_accessibility_text();
 GType fl_gtk_runtime_accessible_text_get_type();

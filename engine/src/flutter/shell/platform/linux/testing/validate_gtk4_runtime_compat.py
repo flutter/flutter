@@ -17,6 +17,7 @@ import sys
 import tempfile
 
 OPTIONAL_SYMBOLS = (
+    "gtk_accessible_update_platform_state",
     "gtk_accessible_get_first_accessible_child",
     "gtk_accessible_set_accessible_parent",
     "gtk_accessible_announce",
@@ -99,6 +100,7 @@ def dynamic_symbols(repo: Path, library: Path) -> str:
 def verify_sysroot_symbols(repo: Path, sysroot: Path, version: tuple[int, int, int]) -> None:
   symbols = dynamic_symbols(repo, find_gtk_library(sysroot))
   expected = {
+      "gtk_accessible_update_platform_state": version >= (4, 18, 0),
       "gtk_accessible_get_first_accessible_child": version >= (4, 10, 0),
       "gtk_accessible_set_accessible_parent": version >= (4, 10, 0),
       "gtk_accessible_announce": version >= (4, 14, 0),
