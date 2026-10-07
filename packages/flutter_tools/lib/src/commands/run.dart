@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
-import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
@@ -685,7 +684,6 @@ class RunCommand extends RunCommandBase {
     required FlutterProject flutterProject,
   }) async {
     final FileSystem fs = toolContext.fs;
-    final Analytics analytics = this.analytics;
 
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
     final webMode = webDevServerConfig != null;
@@ -703,7 +701,7 @@ class RunCommand extends RunCommandBase {
         projectRootPath: stringArg('project-root'),
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
-        analytics: analytics,
+        analytics: this.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
         dartBuilder: hookRunner,
         buildSystem: buildSystem,
@@ -718,7 +716,7 @@ class RunCommand extends RunCommandBase {
         flutterProject: flutterProject,
         debuggingOptions: debuggingOptions,
         stayResident: stayResident,
-        analytics: analytics,
+        analytics: this.analytics,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: toolContext,
@@ -734,7 +732,7 @@ class RunCommand extends RunCommandBase {
       applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
       stayResident: stayResident,
       dartBuilder: hookRunner,
-      analytics: analytics,
+      analytics: this.analytics,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
       toolContext: toolContext,
@@ -744,14 +742,13 @@ class RunCommand extends RunCommandBase {
 
   @visibleForTesting
   Daemon createMachineDaemon() {
-    final Analytics analytics = this.analytics;
     return Daemon.createMachineDaemon(
+      analytics: this.analytics,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
       featureFlags: featureFlags,
       toolContext: toolContext,
       xcode: appleContext.xcode,
-      analytics: analytics,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,
       deviceManager: deviceManager,
