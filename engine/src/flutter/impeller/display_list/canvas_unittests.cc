@@ -613,7 +613,7 @@ TEST_P(AiksTest, BlendModeCompatibilityWithSDFRendering) {
       }
     }
 
-    Paint paint = {.blend_mode = blend_mode};
+    Paint paint = {.blend_mode = blend_mode, .anti_alias = true};
     EXPECT_EQ(blend_mode_is_compatible,
               Canvas::IsCompatibleWithSDFRendering(paint))
         << "Failure for BlendMode: " << BlendModeToString(blend_mode);
@@ -628,6 +628,7 @@ TEST(CanvasTest, NonAntialiasedPaintIncompatibleWithSDFRendering) {
 
 TEST(CanvasTest, AntialiasedPaintCompatibleWithSDFRendering) {
   Paint paint;
+  paint.anti_alias = true;
   EXPECT_TRUE(Canvas::IsCompatibleWithSDFRendering(paint));
 }
 

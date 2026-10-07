@@ -39,6 +39,7 @@ TEST(DisplayListPaint, ConstructorDefaults) {
   EXPECT_EQ(DlPaint::kDefaultColor, DlColor::kBlack());
   EXPECT_EQ(DlPaint::kDefaultWidth, 0.0);
   EXPECT_EQ(DlPaint::kDefaultMiter, 4.0);
+  EXPECT_FALSE(DlPaint::kDefaultAntiAlias);
 
   EXPECT_EQ(paint, DlPaint());
   EXPECT_EQ(paint, DlPaint(DlColor::kBlack()));
