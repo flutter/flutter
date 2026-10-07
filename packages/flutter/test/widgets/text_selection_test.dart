@@ -1446,7 +1446,7 @@ void main() {
     },
   );
 
-  testWidgets('preserves the selected character when dragging the end handle on iOS', (
+  testWidgets('preserves the selected character when dragging the start handle on iOS', (
     WidgetTester tester,
   ) async {
     final controller = TextEditingController(text: 'abcdefgh');
@@ -1483,13 +1483,13 @@ void main() {
     );
     expect(endpoints, hasLength(2));
 
-    // The end handle is positioned at the second selection endpoint.
-    final Offset endHandlePosition = renderEditable.localToGlobal(endpoints.last.point);
+    // The start handle is positioned at the first selection endpoint.
+    final Offset startHandlePosition = renderEditable.localToGlobal(endpoints.first.point);
 
-    // Drag the end handle right, past "f" and "g".
-    final Offset newPosition = textOffsetToPosition(tester, 7);
+    // Drag the start handle left, past "d" and "c".
+    final Offset newPosition = textOffsetToPosition(tester, 2);
 
-    final TestGesture gesture = await tester.startGesture(endHandlePosition);
+    final TestGesture gesture = await tester.startGesture(startHandlePosition);
     await tester.pump();
 
     await gesture.moveTo(newPosition);
@@ -1498,8 +1498,10 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    // The original "e" must remain selected, resulting in "efg".
-    expect(controller.selection, const TextSelection(baseOffset: 4, extentOffset: 7));
+    // The originally selected "e" must remain selected.
+    // The selection direction is reversed after the start handle crosses
+    // the original selection.
+    expect(controller.selection, const TextSelection(baseOffset: 5, extentOffset: 2));
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   group('SelectionOverlay', () {

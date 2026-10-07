@@ -867,21 +867,28 @@ class TextSelectionOverlay {
           _handleSelectionHandleChanged(currentSelection);
           return;
         }
-        // Keep the original selection boundaries while dragging the end handle.
-        final int endMin = math.min(
+        // Use this instead of _dragStartSelection.isNormalized because TextRange.isNormalized
+        // always returns true for a TextSelection.
+        final bool dragStartSelectionNormalized =
+            _dragStartSelection!.extentOffset >= _dragStartSelection!.baseOffset;
+        final int selectionStart = math.min(
           _dragStartSelection!.baseOffset,
           _dragStartSelection!.extentOffset,
         );
-        final int endMax = math.max(
+        final int selectionEnd = math.max(
           _dragStartSelection!.baseOffset,
           _dragStartSelection!.extentOffset,
         );
-        // Reverse the selection direction when the end handle crosses
-        // the opposite boundary.
-        if (position.offset <= endMin) {
-          newSelection = TextSelection(baseOffset: endMax, extentOffset: position.offset);
+
+        if (selectionEnd - selectionStart == 1 && position.offset < selectionStart) {
+          newSelection = TextSelection(baseOffset: selectionEnd, extentOffset: position.offset);
         } else {
-          newSelection = TextSelection(baseOffset: endMin, extentOffset: position.offset);
+          newSelection = TextSelection(
+            baseOffset: dragStartSelectionNormalized
+                ? _dragStartSelection!.baseOffset
+                : _dragStartSelection!.extentOffset,
+            extentOffset: position.offset,
+          );
         }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
