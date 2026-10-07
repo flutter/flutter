@@ -114,12 +114,7 @@ Future<void> main(List<String> args) async {
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
-      final manager = ExtensionManager(
-        hostPlatform: globals.os.hostPlatform,
-        logger: globals.logger,
-        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-        featureFlags: featureFlags,
-      );
+      final ExtensionManager manager = toolDependencies.extensionManager!;
       final templateManager = ExtensionTemplateManager(
         extensionManager: manager,
         fileSystem: toolDependencies.toolContext.fs,
@@ -130,10 +125,10 @@ Future<void> main(List<String> args) async {
         toolDependencies: toolDependencies,
         verboseHelp: verboseHelp,
         verbose: verbose,
-        extensionManager: manager,
         extensionTemplateManager: templateManager,
       );
     },
+    extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
     verbose: verbose,
     muteCommandLogging: muteCommandLogging,
     verboseHelp: verboseHelp,
@@ -232,7 +227,6 @@ List<FlutterCommand> generateCommands({
   required ToolDependencies toolDependencies,
   required bool verbose,
   required bool verboseHelp,
-  ExtensionManager? extensionManager,
   ExtensionTemplateManager? extensionTemplateManager,
 }) => <FlutterCommand>[
   AnalyzeCommand(
@@ -256,14 +250,11 @@ List<FlutterCommand> generateCommands({
     verboseHelp: verboseHelp,
   ),
   AttachCommand(
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: const BuildTargetsImpl(),
+    toolContext: toolDependencies.toolContext,
+    xcode: toolDependencies.appleContext.xcode,
     verboseHelp: verboseHelp,
-    stdio: toolDependencies.toolContext.stdio,
-    logger: toolDependencies.toolContext.logger,
-    terminal: toolDependencies.toolContext.terminal,
-    signals: toolDependencies.toolContext.signals,
-    platform: toolDependencies.toolContext.platform,
-    processInfo: ProcessInfo(toolDependencies.toolContext.fs),
-    fileSystem: toolDependencies.toolContext.fs,
   ),
   BuildCommand(
     androidBuilder: AndroidGradleBuilder.fromContexts(
@@ -291,7 +282,7 @@ List<FlutterCommand> generateCommands({
     androidContext: toolDependencies.androidContext,
     toolContext: toolDependencies.toolContext,
     featureFlags: featureFlags,
-    extensionManager: extensionManager,
+    extensionManager: toolDependencies.extensionManager,
   ),
   CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
   CreateCommand(
@@ -305,13 +296,16 @@ List<FlutterCommand> generateCommands({
   DaemonCommand(
     androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,
-    deviceManager: globals.deviceManager,
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: const BuildTargetsImpl(),
+    deviceManager: toolDependencies.deviceManager,
     hidden: !verboseHelp,
     toolContext: toolDependencies.toolContext,
+    xcode: toolDependencies.appleContext.xcode,
   ),
   DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(
-    deviceManager: globals.deviceManager!,
+    deviceManager: toolDependencies.deviceManager,
     doctor: globals.doctor!,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
@@ -322,17 +316,14 @@ List<FlutterCommand> generateCommands({
     // Provide the shared singleton from globals until dependent commands
     // (e.g. DevicesCommand, EmulatorsCommand) are migrated to DI.
     doctor: globals.doctor,
-    extensionManager: extensionManager,
+    extensionManager: toolDependencies.extensionManager,
   ),
   DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DriveCommand(
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: const BuildTargetsImpl(),
+    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
-    fileSystem: toolDependencies.toolContext.fs,
-    logger: toolDependencies.toolContext.logger,
-    platform: toolDependencies.toolContext.platform,
-    terminal: toolDependencies.toolContext.terminal,
-    outputPreferences: toolDependencies.toolContext.outputPreferences,
-    signals: toolDependencies.toolContext.signals,
   ),
   EmulatorsCommand(
     doctor: toolDependencies.doctor,
@@ -356,15 +347,21 @@ List<FlutterCommand> generateCommands({
     platform: toolDependencies.toolContext.platform,
     featureFlags: featureFlags,
   ),
-  RunCommand(verboseHelp: verboseHelp),
+  RunCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(toolContext: toolDependencies.toolContext),
   TestCommand(
+    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     verbose: verbose,
     nativeAssetsBuilder: toolDependencies.toolContext.nativeAssetsBuilder,
   ),
-  WidgetPreviewCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
+  WidgetPreviewCommand(
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: const BuildTargetsImpl(),
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
+  ),
   UpgradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   SymbolizeCommand(toolContext: toolDependencies.toolContext),
   // Development-only commands. These are always hidden,
