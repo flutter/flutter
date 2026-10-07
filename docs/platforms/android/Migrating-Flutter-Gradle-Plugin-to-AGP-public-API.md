@@ -262,20 +262,23 @@ else serializes through `FlutterPlugin.kt` / `FlutterPluginUtils.kt`.
    `com.android.library` plugin and does not read `android.libraryVariants` or AGP's
    internal `publishing.singleVariants`.
    - Flutter declares `singleVariant` publishing (with sources and javadoc jars) for each
-     variant. A variant that the project's build file already declared keeps that
-     declaration; AGP's duplicate-declaration error is matched by its message and ignored.
-     The deleted guard skipped Flutter's declarations for every variant once the build file
-     declared any, so a module that declared only `release` failed every `flutter build aar`
-     with `Task with name 'assembleAarDebug' not found in project ':flutter'`. With this
-     change that build succeeds.
+     variant of the module and of each Android plugin. A variant that the project's build
+     file already declared keeps that declaration; AGP's duplicate-declaration error is
+     matched by its message and ignored. The deleted guard skipped all of Flutter's
+     declarations for a project whose build file declared any variant. For a module with at
+     least one Android plugin that declared only `release`, every `flutter build aar` failed
+     with `Task with name 'assembleAarDebug' not found in project ':flutter'`; that build
+     succeeds.
    - Each plugin publishes its AAR from its own `assembleAar<Variant>` task, which Gradle
      runs because the tool requests the task by name. The module's task does not depend
      on the plugins' tasks.
-   - If an Android plugin has no variant with the requested module variant's name (the
-     module and the plugin declare different product flavors), the build fails with an
-     error that names the plugin and asks for matching product flavors. The deleted code
-     failed in the same cases with `Task with name 'assembleAar<Variant>' not found in
-     project ':<plugin>'`.
+   - The build fails with an error that names the project if the module or an Android
+     plugin has no variant with the requested name (for example, the module and the plugin
+     declare different product flavors, or `--flavor` is missing for a flavored module).
+     Only the requested variant is checked. The deleted code failed with
+     `Task with name 'assembleAar<Variant>' not found in project ':<plugin>'` when a plugin
+     lacked any module variant, requested or not, and did not check that the module had
+     the requested variant.
 9. **newDsl flip**: new projects lose the opt-out; the removal migrator deletes
    only marker-tagged `android.newDsl` lines (template marker "This newDsl flag
    was added by the Flutter template"; migrator marker "This newDsl flag was

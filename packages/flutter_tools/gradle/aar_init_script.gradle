@@ -119,22 +119,35 @@ static boolean isDuplicateSingleVariantError(Exception e, String variantName) {
     return e.message == duplicateMessage
 }
 
-// The module's POM depends on each plugin's AAR for the same variant name, and only the plugin's
-// own `assembleAar<Variant>` task publishes that AAR.
-void checkPluginHasRequestedVariants(Project moduleProject, Project pluginProject) {
-    if (!pluginProject.hasProperty("android")) {
-        return
+// The tool requests `assembleAar<Variant>` by name, without a project path. Gradle runs that task
+// in every project that has it and skips projects that don't, so a project without the variant
+// would leave the repo without its AAR. The module's POM depends on each plugin's AAR for the same
+// variant name.
+void checkProjectsHaveRequestedVariants(Project moduleProject, Collection<Project> pluginProjects) {
+    List<String> requestedAarTasks = moduleProject.gradle.startParameter.taskNames.findAll {
+        it.startsWith("assembleAar")
     }
-    List<String> requestedTasks = moduleProject.gradle.startParameter.taskNames
-    moduleProject.components.forEach { component ->
-        String taskName = aarTaskName(component.name)
-        if (requestedTasks.contains(taskName) && !pluginProject.tasks.names.contains(taskName)) {
+    requestedAarTasks.each { taskName ->
+        String variantName = taskName.substring("assembleAar".length()).uncapitalize()
+        if (!moduleProject.tasks.names.contains(taskName)) {
+            String moduleVariants = moduleProject.components.collect { it.name }.sort().join(", ")
             throw new GradleException(
-                    "Flutter can't build the AAR for variant '${component.name}' because plugin " +
-                    "project '${pluginProject.path}' has no variant with that name, so the " +
-                    "plugin AAR that the module depends on can't be published. Declare the " +
-                    "same product flavors in the module and in '${pluginProject.path}'."
+                    "Flutter can't build the AAR for variant '$variantName' because module " +
+                    "project '${moduleProject.path}' has no variant with that name. Its variants " +
+                    "are: $moduleVariants. Pass the module's product flavor with --flavor, or " +
+                    "omit --flavor if the module has no product flavors."
             )
+        }
+        pluginProjects.findAll { it.hasProperty("android") }.each { pluginProject ->
+            if (!pluginProject.tasks.names.contains(taskName)) {
+                throw new GradleException(
+                        "Flutter can't build the AAR for variant '$variantName' because plugin " +
+                        "project '${pluginProject.path}' has no variant with that name, so the " +
+                        "plugin AAR that the module depends on can't be published. " +
+                        "`flutter build aar` requires the module and each of its Android " +
+                        "plugins to declare the same product flavors."
+                )
+            }
         }
     }
 }
@@ -153,7 +166,8 @@ afterProject { project ->
         return
     }
 
-    // The project's build file has already run, so a variant it declared keeps that declaration.
+    // afterProject runs after the project's build file, so AGP rejects a variant that the build
+    // file already declared. Ignoring that error keeps the build file's declaration.
     Closure addSingleVariant = { String variantName ->
         try {
             project.android.publishing.singleVariant(variantName) {
@@ -210,6 +224,6 @@ projectsEvaluated {
     // in every project that has it, and each plugin publishes its own AAR.
     modulePlugins.each { pluginProject ->
         configurePlugin(pluginProject, moduleProject.property("output-dir"))
-        checkPluginHasRequestedVariants(moduleProject, pluginProject)
     }
+    checkProjectsHaveRequestedVariants(moduleProject, modulePlugins)
 }

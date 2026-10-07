@@ -266,14 +266,9 @@ Future<void> main() async {
 
       final androidDir = Directory(path.join(projectDir.path, '.android'));
       final gradleProperties = File(path.join(androidDir.path, 'gradle.properties'));
-      gradleProperties.writeAsStringSync(
-        gradleProperties
-            .readAsStringSync()
-            .replaceFirst('android.newDsl=false', 'android.newDsl=true')
-            // The plugin template uses Kotlin, which needs built-in Kotlin with newDsl=true.
-            .replaceFirst('android.builtInKotlin=false', 'android.builtInKotlin=true'),
-        flush: true,
-      );
+      _setGradleProperty(gradleProperties, 'android.newDsl', 'true');
+      // The plugin template uses Kotlin, which needs built-in Kotlin with newDsl=true.
+      _setGradleProperty(gradleProperties, 'android.builtInKotlin', 'true');
       final moduleBuildFile = File(path.join(androidDir.path, 'Flutter', 'build.gradle'));
       const userDeclaration = 'android.publishing.singleVariant("release") { withSourcesJar() }';
       moduleBuildFile.writeAsStringSync(
@@ -317,6 +312,35 @@ Future<void> main() async {
         );
       }
 
+      section('Check variant mismatch errors for a module with a product flavor');
+
+      // The `release` declaration is replaced because the flavor renames the variant to `demoRelease`.
+      moduleBuildFile.writeAsStringSync(
+        moduleBuildFile.readAsStringSync().replaceFirst(
+          userDeclaration,
+          'android {${Platform.lineTerminator}'
+          '  flavorDimensions = ["env"]${Platform.lineTerminator}'
+          '  productFlavors { demo { dimension = "env" } }${Platform.lineTerminator}'
+          '}',
+        ),
+        flush: true,
+      );
+
+      // Without --flavor, only the plugin has the requested `debug` variant.
+      await _checkBuildAarFails(projectDir, <String>[
+        'aar',
+        '--no-profile',
+        '--no-release',
+      ], "module project ':flutter' has no variant with that name");
+      // With --flavor demo, only the module has the requested `demoDebug` variant.
+      await _checkBuildAarFails(projectDir, <String>[
+        'aar',
+        '--no-profile',
+        '--no-release',
+        '--flavor',
+        'demo',
+      ], "plugin project ':plugin_with_android' has no variant with that name");
+
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
@@ -327,4 +351,30 @@ Future<void> main() async {
       rmTree(tempDir);
     }
   });
+}
+
+/// Sets [name] to [value] in [gradleProperties], adding the line if it is missing.
+void _setGradleProperty(File gradleProperties, String name, String value) {
+  final String content = gradleProperties.readAsStringSync();
+  final pattern = RegExp('^${RegExp.escape(name)}=.*\$', multiLine: true);
+  gradleProperties.writeAsStringSync(
+    content.contains(pattern)
+        ? content.replaceFirst(pattern, '$name=$value')
+        : '$content${Platform.lineTerminator}$name=$value${Platform.lineTerminator}',
+    flush: true,
+  );
+}
+
+/// Runs `flutter build` with [options] in [projectDir] and checks that it fails with [message].
+Future<void> _checkBuildAarFails(Directory projectDir, List<String> options, String message) async {
+  final ProcessResult result = await inDirectory(projectDir, () {
+    return executeFlutter('build', options: options, canFail: true);
+  });
+  final output = '${result.stdout}${result.stderr}';
+  if (result.exitCode == 0 || !output.contains(message)) {
+    throw TaskResult.failure(
+      'Expected `flutter build ${options.join(' ')}` to fail with "$message". '
+      'Exit code: ${result.exitCode}. Output:\n$output',
+    );
+  }
 }
