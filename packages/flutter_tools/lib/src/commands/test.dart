@@ -9,10 +9,10 @@ import 'package:process/process.dart';
 import '../artifacts.dart';
 import '../asset.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
@@ -525,21 +525,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       uninstallApp: boolArg('uninstall'),
     );
 
-    var targetProject = flutterProject;
-    if (_testFileUris.isNotEmpty) {
-      final String firstTestPath = _testFileUris.first.toFilePath();
-      final String startDir = fs.isDirectorySync(firstTestPath)
-          ? firstTestPath
-          : fs.path.dirname(firstTestPath);
-      final String? projectRoot = findProjectRoot(fs, startDir);
-      if (projectRoot != null) {
-        final FlutterProject candidate = projectFactory.fromDirectory(fs.directory(projectRoot));
-        if (candidate.directory.path == flutterProject.directory.path ||
-            candidate.workspaceRoot?.directory.path == flutterProject.directory.path) {
-          targetProject = candidate;
-        }
-      }
-    }
+    final testPaths = <String>[
+      for (final Uri uri in _testFileUris) uri.replace(query: '').toFilePath(),
+    ];
+    final FlutterProject targetProject = testPaths.isEmpty
+        ? flutterProject
+        : _findTargetProject(flutterProject, testPaths);
 
     final (:Uri? nativeAssetsManifest, :FlutterHookResult? flutterHookResult) = _isIntegrationTest
         ? (
@@ -851,16 +842,30 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
   }
 
+  /// Returns the most deeply nested pub workspace member of [project] whose
+  /// directory contains every path in [testPaths], or [project] if no single
+  /// member contains all of them.
+  FlutterProject _findTargetProject(FlutterProject project, List<String> testPaths) {
+    final FileSystem fs = _toolContext.fs;
+    for (final FlutterProject member in project.workspaceProjects) {
+      if (testPaths.every((String testPath) => fs.path.isWithin(member.directory.path, testPath))) {
+        return _findTargetProject(member, testPaths);
+      }
+    }
+    return project;
+  }
+
   Future<void> _buildTestAsset({
     required BuildMode buildMode,
+    required String? flavor,
     required FlutterProject flutterProject,
     required ImpellerStatus impellerStatus,
     required String packageConfigPath,
-    required String? flavor,
     FlutterHookResult? flutterHookResult,
   }) async {
     final ToolContext(
       :Artifacts artifacts,
+      :Config config,
       :FileSystem fs,
       :Logger logger,
       :ProcessManager processManager,
@@ -879,11 +884,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit('Error: Failed to build asset bundle');
     }
     if (_needsRebuild(assetBundle.entries, flavor, flutterHookResult, flutterProject)) {
-      final Directory unitTestAssetsDir = flutterProject.buildDirectory.childDirectory(
-        'unit_test_assets',
+      final Directory buildDirectory = flutterProject.directory.childDirectory(
+        getBuildDirectory(config, fs),
       );
       await writeBundle(
-        unitTestAssetsDir,
+        buildDirectory.childDirectory('unit_test_assets'),
         assetBundle.entries,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
@@ -895,7 +900,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         buildMode: buildMode,
       );
 
-      final File cachedFlavorFile = flutterProject.buildDirectory
+      final File cachedFlavorFile = buildDirectory
           .childDirectory('test_cache')
           .childFile('flavor.txt');
       if (cachedFlavorFile.existsSync()) {
@@ -918,10 +923,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     //  schema of the contents of the asset manifest file and the user does not
     //  perform a `flutter clean` after upgrading.
     //  See https://github.com/flutter/flutter/issues/128563.
-    final ToolContext(:FileSystem fs) = _toolContext;
-    final Directory unitTestAssetsDir = flutterProject.buildDirectory.childDirectory(
-      'unit_test_assets',
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+    final Directory buildDirectory = flutterProject.directory.childDirectory(
+      getBuildDirectory(config, fs),
     );
+    final Directory unitTestAssetsDir = buildDirectory.childDirectory('unit_test_assets');
     final File manifest = unitTestAssetsDir.childFile('AssetManifest.bin');
     if (!manifest.existsSync()) {
       return true;
@@ -951,7 +957,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       }
     }
 
-    final File cachedFlavorFile = flutterProject.buildDirectory
+    final File cachedFlavorFile = buildDirectory
         .childDirectory('test_cache')
         .childFile('flavor.txt');
     final String? cachedFlavor = cachedFlavorFile.existsSync()

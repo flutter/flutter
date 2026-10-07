@@ -1531,18 +1531,24 @@ dev_dependencies:
     },
   );
 
-  testUsingContext(
-    'builds asset bundle for member package when flutter test is invoked from workspace root with member test path',
-    () async {
-      final testRunner = FakeFlutterTestRunner(0);
-      final Directory workspaceRoot = fs.directory('/workspace_root')..createSync(recursive: true);
-      final Directory memberDir = workspaceRoot.childDirectory('member')
-        ..createSync(recursive: true);
-      final Directory assetPkgDir = workspaceRoot.childDirectory('asset_pkg')
-        ..createSync(recursive: true);
+  for (final testPath in <String>[
+    'member/test/member_test.dart',
+    'member/test/member_test.dart?name=foo',
+  ]) {
+    testUsingContext(
+      'builds asset bundle for member package when flutter test is invoked from workspace root with $testPath',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+        final String root = fs.path.rootPrefix(fs.currentDirectory.absolute.path);
+        final Directory workspaceRoot = fs.directory('${root}workspace_root').absolute
+          ..createSync(recursive: true);
+        final Directory memberDir = workspaceRoot.childDirectory('member')
+          ..createSync(recursive: true);
+        final Directory assetPkgDir = workspaceRoot.childDirectory('asset_pkg')
+          ..createSync(recursive: true);
 
-      // Root pubspec defining the pub workspace.
-      workspaceRoot.childFile('pubspec.yaml').writeAsStringSync('''
+        // Root pubspec defining the pub workspace.
+        workspaceRoot.childFile('pubspec.yaml').writeAsStringSync('''
 name: workspace_root
 environment:
   sdk: ^3.7.0
@@ -1551,9 +1557,9 @@ workspace:
   - asset_pkg
 ''');
 
-      // Asset package providing an asset.
-      assetPkgDir.childDirectory('lib').createSync(recursive: true);
-      assetPkgDir.childFile('pubspec.yaml').writeAsStringSync('''
+        // Asset package providing an asset.
+        assetPkgDir.childDirectory('lib').createSync(recursive: true);
+        assetPkgDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: asset_pkg
 environment:
   sdk: ^3.7.0
@@ -1562,13 +1568,13 @@ flutter:
   assets:
     - asset.txt
 ''');
-      assetPkgDir.childFile('asset.txt').writeAsStringSync('asset content');
+        assetPkgDir.childFile('asset.txt').writeAsStringSync('asset content');
 
-      // Member package depending on asset_pkg and containing tests.
-      memberDir.childDirectory('test').childFile('member_test.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('void main() {}');
-      memberDir.childFile('pubspec.yaml').writeAsStringSync('''
+        // Member package depending on asset_pkg and containing tests.
+        memberDir.childDirectory('test').childFile('member_test.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
+        memberDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: member
 environment:
   sdk: ^3.7.0
@@ -1580,79 +1586,81 @@ dev_dependencies:
     sdk: flutter
 ''');
 
-      // Write package config and package graph at workspace root.
-      writePackageConfigFiles(
-        directory: workspaceRoot,
-        mainLibName: 'workspace_root',
-        packages: <String, String>{
-          'member': 'member',
-          'asset_pkg': 'asset_pkg',
-          'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
-          'flutter_test': 'file:///path/to/flutter/packages/flutter_test',
-        },
-        dependencies: <String>[],
-      );
-      workspaceRoot
-          .childDirectory('.dart_tool')
-          .childFile('package_graph.json')
-          .writeAsStringSync(
-            json.encode(<String, Object?>{
-              'roots': <String>['workspace_root', 'member', 'asset_pkg'],
-              'packages': <Map<String, Object?>>[
-                <String, Object?>{
-                  'name': 'workspace_root',
-                  'dependencies': <String>[],
-                  'devDependencies': <String>[],
-                },
-                <String, Object?>{
-                  'name': 'member',
-                  'dependencies': <String>['asset_pkg'],
-                  'devDependencies': <String>['flutter_test'],
-                },
-                <String, Object?>{
-                  'name': 'asset_pkg',
-                  'dependencies': <String>[],
-                  'devDependencies': <String>[],
-                },
-                <String, Object?>{
-                  'name': 'test_api',
-                  'dependencies': <String>[],
-                  'devDependencies': <String>[],
-                },
-                <String, Object?>{
-                  'name': 'flutter_test',
-                  'dependencies': <String>['test_api'],
-                  'devDependencies': <String>[],
-                },
-              ],
-              'configVersion': 1,
-            }),
-          );
+        // Write package config and package graph at workspace root.
+        writePackageConfigFiles(
+          directory: workspaceRoot,
+          mainLibName: 'workspace_root',
+          packages: <String, String>{
+            'member': 'member',
+            'asset_pkg': 'asset_pkg',
+            'test_api':
+                'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+            'flutter_test': 'file:///path/to/flutter/packages/flutter_test',
+          },
+          dependencies: <String>[],
+        );
+        workspaceRoot
+            .childDirectory('.dart_tool')
+            .childFile('package_graph.json')
+            .writeAsStringSync(
+              json.encode(<String, Object?>{
+                'roots': <String>['workspace_root', 'member', 'asset_pkg'],
+                'packages': <Map<String, Object?>>[
+                  <String, Object?>{
+                    'name': 'workspace_root',
+                    'dependencies': <String>[],
+                    'devDependencies': <String>[],
+                  },
+                  <String, Object?>{
+                    'name': 'member',
+                    'dependencies': <String>['asset_pkg'],
+                    'devDependencies': <String>['flutter_test'],
+                  },
+                  <String, Object?>{
+                    'name': 'asset_pkg',
+                    'dependencies': <String>[],
+                    'devDependencies': <String>[],
+                  },
+                  <String, Object?>{
+                    'name': 'test_api',
+                    'dependencies': <String>[],
+                    'devDependencies': <String>[],
+                  },
+                  <String, Object?>{
+                    'name': 'flutter_test',
+                    'dependencies': <String>['test_api'],
+                    'devDependencies': <String>[],
+                  },
+                ],
+                'configVersion': 1,
+              }),
+            );
 
-      fs.currentDirectory = workspaceRoot;
+        fs.currentDirectory = workspaceRoot;
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-      await commandRunner.run(const <String>['test', '--no-pub', 'member/test/member_test.dart']);
+        await commandRunner.run(<String>['test', '--no-pub', testPath]);
 
-      final File memberAssetFile = memberDir.childFile(
-        fs.path.join('build', 'unit_test_assets', 'packages', 'asset_pkg', 'asset.txt'),
-      );
-      expect(memberAssetFile, exists);
-      expect(testRunner.lastFlutterProject?.directory.path, memberDir.path);
-      expect(
-        testRunner.lastTestAssetDirectory,
-        fs.path.join(memberDir.path, 'build', 'unit_test_assets'),
-      );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => _FakeDeviceManager(<Device>[]),
-      Logger: () => logger,
-    },
-  );
+        final File memberAssetFile = memberDir.childFile(
+          fs.path.join('build', 'unit_test_assets', 'packages', 'asset_pkg', 'asset.txt'),
+        );
+        expect(memberAssetFile, exists);
+        expect(testRunner.lastFlutterProject?.directory.path, memberDir.path);
+        expect(
+          testRunner.lastTestAssetDirectory,
+          fs.path.join(memberDir.path, 'build', 'unit_test_assets'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => _FakeDeviceManager(<Device>[]),
+        Logger: () => logger,
+      },
+    );
+  }
 
   group('Fatal Logs', () {
     testUsingContext(
