@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -392,6 +393,49 @@ name: my_app
         targetModel: TargetModel.dartdevc,
       );
       expect(await fileSystem.file(expectedPath).readAsString(), 'ABC');
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'WebRunner caches app.dill where the resident compiler initializes from',
+    () async {
+      const buildInfo = BuildInfo(
+        BuildMode.debug,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+        webEnableHotReload: true,
+        deprecatedJsInterop: false,
+      );
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        debuggingOptions: DebuggingOptions.enabled(buildInfo),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+
+      residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+
+      final compiler = const ResidentCompilerFactory().create(
+        targetPlatform: TargetPlatform.web_javascript,
+        buildInfo: buildInfo,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.any(),
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(),
+        fileSystem: fileSystem,
+        shutdownHooks: test_fakes.FakeShutdownHooks(),
+        config: globals.config,
+      ) as DefaultResidentCompiler;
+      expect(await fileSystem.file(compiler.initializeFromDill).readAsString(), 'ABC');
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -2560,6 +2604,67 @@ flutter:
         Pub: ThrowingPub.new,
       },
     );
+  });
+
+  group('JsCompilerConfig deprecated JS interop', () {
+    WebCompilerConfig? capturedConfig;
+
+    for (final deprecatedJsInterop in <bool?>[null, true, false]) {
+      testUsingContext(
+        'ResidentWebRunner passes deprecatedJsInterop: $deprecatedJsInterop '
+        'to dart2js in release mode',
+        () async {
+          capturedConfig = null;
+          fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+          setupMocks();
+
+          final residentWebRunner = ResidentWebRunner(
+            flutterDevice,
+            flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+            debuggingOptions: DebuggingOptions.enabled(
+              BuildInfo(
+                BuildMode.release,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+                deprecatedJsInterop: deprecatedJsInterop,
+              ),
+            ),
+            stayResident: false,
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+            terminal: Terminal.test(),
+            platform: FakePlatform(),
+            outputPreferences: OutputPreferences.test(),
+            analytics: globals.analytics,
+            systemClock: globals.systemClock,
+          );
+
+          expect(await residentWebRunner.run(), 0);
+          expect(
+            capturedConfig,
+            isA<JsCompilerConfig>().having(
+              (JsCompilerConfig config) => config.deprecatedJsInterop,
+              'deprecatedJsInterop',
+              deprecatedJsInterop,
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            if (target is WebServiceWorker) {
+              capturedConfig = target.compileConfigs.first;
+            }
+          }),
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Pub: ThrowingPub.new,
+        },
+      );
+    }
   });
 }
 
