@@ -132,6 +132,8 @@ base class ExtensionBuildManager {
           BuildService.projectRootParam: projectRoot,
           BuildService.targetNameParam: targetName,
         },
+        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+        // https://github.com/flutter/flutter/issues/193955.
         null,
       );
       if (result case final Map<String, Object?> resultMap) {
