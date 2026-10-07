@@ -20,7 +20,6 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
-import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -326,15 +325,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   /// [_PendingReload.hotRestart] if a full restart is requested) without
   /// queueing duplicate tasks on [_reloadMutex].
   _PendingReload? _pendingReload;
-
-  /// The location of the widget_preview_scaffold for the current execution of the command.
-  ///
-  /// This is only meant for testing as there's no simple mapping from the target project to the
-  /// scaffold project.
-  // TODO(bkonyi): remove once https://github.com/flutter/flutter/issues/179036 is resolved.
-  @visibleForTesting
-  static late Directory widgetPreviewScaffold;
-
   @override
   Future<FlutterCommandResult> runCommand() async {
     assert(toolContext.logger is WidgetPreviewMachineAwareLogger);
@@ -346,7 +336,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     await WidgetPreviewGitignoreMigration(rootProject, logger).migrate();
 
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
-    widgetPreviewScaffold = customPreviewScaffoldOutput != null
+    final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
         ? fs.directory(customPreviewScaffoldOutput)
         : rootProject.widgetPreviewScaffold;
 
@@ -354,9 +344,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     // generate one.
     final bool generateScaffoldProject =
         customPreviewScaffoldOutput != null || _previewManifest.shouldGenerateProject();
-    // TODO(bkonyi): can this be moved?
     widgetPreviewScaffold.createSync(recursive: true);
-    fs.currentDirectory = widgetPreviewScaffold;
 
     if (generateScaffoldProject) {
       // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
@@ -651,7 +639,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           webRunHeadless: boolArg(kHeadless),
           devToolsServerAddress: devToolsServerAddress,
         );
-        final String target = bundle.defaultMainPath;
+        final String target = widgetPreviewScaffoldProject.directory
+            .childDirectory('lib')
+            .childFile('main.dart')
+            .absolute
+            .path;
         final FlutterDevice flutterDevice = await FlutterDevice.create(
           device,
           toolContext: toolContext,
