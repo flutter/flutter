@@ -165,6 +165,52 @@ TEST_F(FlViewGtk4AccessibilityTest, RemovedParentPreservesReparentedChild) {
   EXPECT_EQ(current_parent, native_root);
 }
 
+TEST_F(FlViewGtk4AccessibilityTest, ViewDisposalDetachesRetainedNodes) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  int32_t children[] = {1, 2};
+  FlutterSemanticsNode2 root = {};
+  root.child_count = 2;
+  root.children_in_traversal_order = children;
+  FlutterSemanticsNode2 child = {};
+  child.id = 1;
+  FlutterSemanticsNode2 sibling = {};
+  sibling.id = 2;
+  FlutterSemanticsNode2* nodes[] = {&root, &child, &sibling};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 3;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) retained_root =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  g_autoptr(GtkAccessible) retained_child =
+      fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
+          retained_root);
+  ASSERT_NE(retained_child, nullptr);
+
+  g_object_run_dispose(G_OBJECT(view));
+  g_clear_object(&view);
+
+  for (GtkAccessible* node : {retained_root, retained_child}) {
+    auto* iface = reinterpret_cast<FlGtkAccessibleInterface4_10*>(
+        GTK_ACCESSIBLE_GET_IFACE(node));
+    g_autoptr(GtkAccessible) parent = iface->get_accessible_parent(node);
+    EXPECT_EQ(parent, nullptr);
+    g_autoptr(GtkAccessible) first_child =
+        iface->get_first_accessible_child(node);
+    EXPECT_EQ(first_child, nullptr);
+    g_autoptr(GtkAccessible) next = iface->get_next_accessible_sibling(node);
+    EXPECT_EQ(next, nullptr);
+    EXPECT_FALSE(iface->get_bounds(node, nullptr, nullptr, nullptr, nullptr));
+  }
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";

@@ -376,6 +376,20 @@ static gboolean fl_gtk4_accessible_node_get_bounds(GtkAccessible* accessible,
   return TRUE;
 }
 
+static void fl_gtk4_accessible_node_detach(FlGtk4AccessibleNode* self) {
+  self->parent = nullptr;
+  self->next_sibling = nullptr;
+  self->view = nullptr;
+  self->has_bounds = FALSE;
+  self->focusable = FALSE;
+  self->focused = FALSE;
+  self->active = FALSE;
+  g_ptr_array_set_size(self->children, 0);
+  fl_gtk_runtime_accessible_set_accessible_parent(GTK_ACCESSIBLE(self), nullptr,
+                                                  nullptr);
+  g_clear_object(&self->at_context);
+}
+
 static void fl_gtk4_accessible_node_dispose(GObject* object) {
   FlGtk4AccessibleNode* self = FL_GTK4_ACCESSIBLE_NODE(object);
 
@@ -928,12 +942,7 @@ static void fl_view_gtk4_accessibility_rebuild_native_tree(
   while (g_hash_table_iter_next(&nodes_iter, &node_key, &node_value)) {
     if (!g_hash_table_contains(visited, node_key)) {
       auto* node = FL_GTK4_ACCESSIBLE_NODE(node_value);
-      node->parent = nullptr;
-      node->next_sibling = nullptr;
-      node->view = nullptr;
-      g_ptr_array_set_size(node->children, 0);
-      fl_gtk_runtime_accessible_set_accessible_parent(
-          GTK_ACCESSIBLE(node_value), nullptr, nullptr);
+      fl_gtk4_accessible_node_detach(node);
     }
   }
   g_hash_table_iter_init(&nodes_iter, self->native_nodes_by_id);
@@ -969,6 +978,14 @@ void fl_view_gtk4_accessibility_dispose(FlViewGtk4Accessibility* self) {
         FL_RENDER_TEXTURE_GTK4(self->view->render_area), nullptr);
   }
   self->root_node = nullptr;
+  // Clients can retain native objects after the view is destroyed. Disconnect
+  // every node before releasing the table's ownership of parents and siblings.
+  GHashTableIter iter;
+  gpointer value = nullptr;
+  g_hash_table_iter_init(&iter, self->native_nodes_by_id);
+  while (g_hash_table_iter_next(&iter, nullptr, &value)) {
+    fl_gtk4_accessible_node_detach(FL_GTK4_ACCESSIBLE_NODE(value));
+  }
   g_clear_pointer(&self->native_nodes_by_id, g_hash_table_unref);
 #endif
   g_clear_object(&self->semantics_store);
