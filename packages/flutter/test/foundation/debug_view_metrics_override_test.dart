@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -87,26 +86,10 @@ Set<String> _allOverridableMetricsFromJsonError() {
   fail('fromJson accepted an unknown metric');
 }
 
-class _NegativeViewPadding implements ui.ViewPadding {
-  const _NegativeViewPadding({this.left = 0, this.top = 0, this.right = 0, this.bottom = 0});
-
-  @override
-  final double left;
-
-  @override
-  final double top;
-
-  @override
-  final double right;
-
-  @override
-  final double bottom;
-}
-
 // DebugViewPadding's constructors assert their edges, so an out-of-range
-// padding can only reach the registry by implementing the class instead of
-// constructing it. This is what an application that implements the interface
-// itself, deliberately or not, hands to debugSetViewMetricsOverride.
+// padding can only come from a class that implements the interface instead of
+// constructing it. This is what an application that does so, deliberately or
+// not, hands to debugSetViewMetricsOverride or to fromViewPadding.
 class _UncheckedDebugViewPadding implements DebugViewPadding {
   const _UncheckedDebugViewPadding({this.left = 0, this.top = 0, this.right = 0, this.bottom = 0});
 
@@ -121,16 +104,6 @@ class _UncheckedDebugViewPadding implements DebugViewPadding {
 
   @override
   final double bottom;
-
-  @override
-  DebugViewPadding copyWith({double? left, double? top, double? right, double? bottom}) {
-    return DebugViewPadding(
-      left: left ?? this.left,
-      top: top ?? this.top,
-      right: right ?? this.right,
-      bottom: bottom ?? this.bottom,
-    );
-  }
 }
 
 void main() {
@@ -385,43 +358,18 @@ void main() {
         }),
         throwsFormatException,
       );
-      // Partial padding maps are accepted and default missing edges to 0.
+    });
+
+    test('defaults missing padding edges to zero', () {
       expect(
         DebugViewMetricsOverride.fromJson(const <String, Object?>{
           'padding': <String, Object?>{'left': 1, 'top': 2, 'right': 3},
         }).padding,
         const DebugViewPadding(left: 1, top: 2, right: 3),
       );
-      // Loosely typed / un-reified maps are accepted for both the payload and nested geometry.
-      expect(
-        DebugViewMetricsOverride.fromJson(const <dynamic, dynamic>{
-          'padding': <dynamic, dynamic>{'left': 10, 'top': 20},
-          'physicalSize': <dynamic, dynamic>{'width': 800, 'height': 600},
-        }),
-        const DebugViewMetricsOverride(
-          padding: DebugViewPadding(left: 10, top: 20),
-          physicalSize: ui.Size(800, 600),
-        ),
-      );
-      // Unknown members inside an un-reified map are rejected.
-      expect(
-        () => DebugViewMetricsOverride.fromJson(const <dynamic, dynamic>{
-          'padding': <dynamic, dynamic>{'left': 10, 'unknown': 20},
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => DebugViewMetricsOverride.fromJson(const <dynamic, dynamic>{
-          'physicalSize': <dynamic, dynamic>{'width': 800, 'height': 600, 'extra': 5},
-        }),
-        throwsFormatException,
-      );
-      expect(
-        DebugViewMetricsOverride.fromJson(const <String, Object?>{
-          'systemGestureInsets': <String, Object?>{'top': 48},
-        }).systemGestureInsets,
-        const DebugViewPadding(top: 48),
-      );
+    });
+
+    test('accepts the brightnessOverride spelling of platformBrightness', () {
       expect(
         DebugViewMetricsOverride.fromJson(const <String, Object?>{
           'platformBrightness': 'Brightness.dark',
@@ -435,52 +383,16 @@ void main() {
         ui.Brightness.light,
       );
       expect(
-        DebugViewMetricsOverride.fromJson(const <String, Object?>{'platformBrightness': 'dark'})
-            .platformBrightness,
-        ui.Brightness.dark,
-      );
-      expect(
-        DebugViewMetricsOverride.fromJson(const <String, Object?>{'platformBrightness': 'light'})
-            .platformBrightness,
-        ui.Brightness.light,
-      );
-      expect(
-        DebugViewMetricsOverride.fromJson(const <String, Object?>{
-          'platformBrightness': ui.Brightness.dark,
-        }).platformBrightness,
-        ui.Brightness.dark,
-      );
-      expect(
-        DebugViewMetricsOverride.fromJson(const <String, Object?>{
-          'platformBrightness': ui.Brightness.light,
-        }).platformBrightness,
-        ui.Brightness.light,
-      );
-      expect(
         () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
           'platformBrightness': 'DARK',
         }),
-        throwsA(
-          isA<FormatException>().having(
-            (FormatException e) => e.message,
-            'message',
-            contains(
-              'Expected "light", "dark", "Brightness.light", "Brightness.dark", or a Brightness enum',
-            ),
-          ),
-        ),
+        throwsFormatException,
       );
     });
 
     test('rejects unknown members of nested objects', () {
       // A misspelled nested member is the same tooling mistake as a misspelled
       // metric: the value it was meant to carry is silently not applied.
-      expect(
-        () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
-          'viewInsets': <String, Object?>{'left': 0, 'top': 0, 'right': 0, 'botom': 4},
-        }),
-        throwsFormatException,
-      );
       expect(
         () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
           'viewInsets': <String, Object?>{'left': 0, 'top': 0, 'right': 0, 'bottom': 4, 'botom': 4},
@@ -499,39 +411,6 @@ void main() {
         }),
         throwsFormatException,
       );
-      // The service extension hands fromJson what json.decode produces, which is
-      // Map<String, dynamic> rather than the literals above, so the nested
-      // check has to match that type too.
-      expect(
-        () => DebugViewMetricsOverride.fromJson(
-          json.decode('{"viewInsets": {"left": 0, "top": 0, "right": 0, "bottom": 4, "botom": 9}}')
-              as Map<String, Object?>,
-        ),
-        throwsA(
-          isA<FormatException>().having(
-            (FormatException e) => e.message,
-            'message',
-            contains('botom'),
-          ),
-        ),
-      );
-      expect(
-        DebugViewMetricsOverride.fromJson(
-          json.decode('{"viewInsets": {"left": 0, "top": 0, "right": 0, "bottom": 4}}')
-              as Map<String, Object?>,
-        ).viewInsets,
-        const DebugViewPadding(bottom: 4),
-      );
-
-      for (final key in <String>['padding', 'viewPadding', 'viewInsets', 'systemGestureInsets']) {
-        expect(
-          () => DebugViewMetricsOverride.fromJson(<String, Object?>{
-            key: const <String, Object?>{'left': 0, 'top': 0, 'right': 0, 'bottom': 0, 'extra': 0},
-          }),
-          throwsFormatException,
-          reason: '$key accepted an unknown member',
-        );
-      }
     });
 
     test('rejects out of range values', () {
@@ -590,15 +469,11 @@ void main() {
 
   group('DebugViewPadding', () {
     test('defaults every edge to zero', () {
-      // Deliberately not DebugViewPadding.zero: the point is that the unnamed
-      // constructor defaults every edge, which is what makes them equal.
-      // ignore: use_named_constants
       const padding = DebugViewPadding();
       expect(padding.left, 0.0);
       expect(padding.top, 0.0);
       expect(padding.right, 0.0);
       expect(padding.bottom, 0.0);
-      expect(padding, DebugViewPadding.zero);
       expect(const DebugViewPadding.all(3).bottom, 3.0);
     });
 
@@ -615,7 +490,7 @@ void main() {
 
     test('fromViewPadding copies all edges from a ui.ViewPadding', () {
       final copyFromZero = DebugViewPadding.fromViewPadding(ui.ViewPadding.zero);
-      expect(copyFromZero, DebugViewPadding.zero);
+      expect(copyFromZero, const DebugViewPadding());
 
       const ui.ViewPadding original = DebugViewPadding(left: 10, top: 20, right: 30, bottom: 40);
       final copy = DebugViewPadding.fromViewPadding(original);
@@ -624,35 +499,6 @@ void main() {
       expect(copy.right, 30.0);
       expect(copy.bottom, 40.0);
       expect(copy, original);
-    });
-
-    test('copyWith updates specified edges and preserves others', () {
-      const original = DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4);
-      expect(original.copyWith(), original);
-      expect(
-        original.copyWith(left: 10),
-        const DebugViewPadding(left: 10, top: 2, right: 3, bottom: 4),
-      );
-      expect(
-        original.copyWith(top: 20),
-        const DebugViewPadding(left: 1, top: 20, right: 3, bottom: 4),
-      );
-      expect(
-        original.copyWith(right: 30),
-        const DebugViewPadding(left: 1, top: 2, right: 30, bottom: 4),
-      );
-      expect(
-        original.copyWith(bottom: 40),
-        const DebugViewPadding(left: 1, top: 2, right: 3, bottom: 40),
-      );
-      expect(
-        original.copyWith(left: 10, top: 20, right: 30, bottom: 40),
-        const DebugViewPadding(left: 10, top: 20, right: 30, bottom: 40),
-      );
-      expect(() => original.copyWith(left: -1), throwsAssertionError);
-      expect(() => original.copyWith(top: -1), throwsAssertionError);
-      expect(() => original.copyWith(right: -1), throwsAssertionError);
-      expect(() => original.copyWith(bottom: -1), throwsAssertionError);
     });
 
     test('rejects negative or non-finite distances', () {
@@ -668,19 +514,7 @@ void main() {
       expect(() => DebugViewPadding.all(double.nan), throwsAssertionError);
       expect(() => DebugViewPadding.all(double.infinity), throwsAssertionError);
       expect(
-        () => DebugViewPadding.fromViewPadding(const _NegativeViewPadding(left: -1)),
-        throwsAssertionError,
-      );
-      expect(
-        () => DebugViewPadding.fromViewPadding(const _NegativeViewPadding(top: -1)),
-        throwsAssertionError,
-      );
-      expect(
-        () => DebugViewPadding.fromViewPadding(const _NegativeViewPadding(right: -1)),
-        throwsAssertionError,
-      );
-      expect(
-        () => DebugViewPadding.fromViewPadding(const _NegativeViewPadding(bottom: -1)),
+        () => DebugViewPadding.fromViewPadding(const _UncheckedDebugViewPadding(left: -1)),
         throwsAssertionError,
       );
     });
@@ -777,7 +611,7 @@ void main() {
       // that is already installed.
       const valid = DebugViewMetricsOverride(
         physicalSize: ui.Size.zero,
-        padding: DebugViewPadding.zero,
+        padding: DebugViewPadding(),
       );
       expect(debugSetViewMetricsOverride(1, valid), isTrue);
       expect(

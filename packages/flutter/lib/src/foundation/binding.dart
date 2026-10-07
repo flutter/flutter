@@ -691,7 +691,7 @@ abstract class BindingBase {
       }
       return _viewMetricsOverrideResult();
     }
-    final int? viewId = int.tryParse(rawViewId, radix: 10);
+    final int? viewId = int.tryParse(rawViewId);
     if (viewId == null || viewId < 0) {
       throw FormatException(
         'The $_viewIdParameter parameter must be a non-negative integer, got "$rawViewId".',

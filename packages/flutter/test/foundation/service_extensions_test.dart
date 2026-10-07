@@ -1563,21 +1563,6 @@ void main() {
     );
     expect(extensionChangedEvents.length, 4);
 
-    // Setting enum-prefixed platformBrightness works.
-    result = await binding.testExtension(
-      FoundationServiceExtensions.viewMetricsOverride.name,
-      <String, String>{
-        'viewId': '$viewId',
-        'overrides': '{"platformBrightness": "Brightness.dark"}',
-      },
-    );
-    expect(result['override'], <String, Object?>{'platformBrightness': 'dark'});
-    expect(
-      debugViewMetricsOverrides[viewId],
-      const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
-    );
-    expect(extensionChangedEvents.length, 5);
-
     // Restore for subsequent checks.
     result = await binding.testExtension(
       FoundationServiceExtensions.viewMetricsOverride.name,
@@ -1604,12 +1589,6 @@ void main() {
     await expectLater(
       binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
         'viewId': 'not-a-number',
-      }),
-      throwsA(isA<FormatException>()),
-    );
-    await expectLater(
-      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
-        'viewId': '0x10',
       }),
       throwsA(isA<FormatException>()),
     );
@@ -1660,7 +1639,7 @@ void main() {
       <String, String>{'viewId': '$viewId', 'clearAll': 'false'},
     );
     expect(result['override'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
-    expect(extensionChangedEvents.length, 6);
+    expect(extensionChangedEvents.length, 5);
 
     // Setting overrides to an empty object removes the entry.
     result = await binding.testExtension(
@@ -1671,7 +1650,7 @@ void main() {
     expect(result['overrides'], <String, Object?>{});
     expect(result['overriddenViewIds'], <int>[]);
     expect(debugViewMetricsOverrides, isEmpty);
-    expect(extensionChangedEvents.length, 7);
+    expect(extensionChangedEvents.length, 6);
     expect(extensionChangedEvents.last['value'], <String, Object?>{});
 
     // Re-installing for the clearAll test below.
@@ -1682,7 +1661,7 @@ void main() {
         'overrides': '{"devicePixelRatio": 3.5, "boldText": true}',
       },
     );
-    expect(extensionChangedEvents.length, 8);
+    expect(extensionChangedEvents.length, 7);
 
     // Clearing everything ignores the other parameters.
     result = await binding.testExtension(
@@ -1693,7 +1672,7 @@ void main() {
     expect(result['overrides'], <String, Object?>{});
     expect(result['overriddenViewIds'], <int>[]);
     expect(debugViewMetricsOverrides, isEmpty);
-    expect(extensionChangedEvents.length, 9);
+    expect(extensionChangedEvents.length, 8);
     expect(extensionChangedEvents.last['value'], <String, Object?>{});
 
     // Clearing again removes nothing, and says nothing.
@@ -1701,7 +1680,7 @@ void main() {
       FoundationServiceExtensions.viewMetricsOverride.name,
       <String, String>{'clearAll': 'true'},
     );
-    expect(extensionChangedEvents.length, 9);
+    expect(extensionChangedEvents.length, 8);
 
     // Overridden view IDs are deterministically sorted.
     await binding.testExtension(

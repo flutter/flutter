@@ -4,10 +4,8 @@
 
 /// @docImport 'dart:developer';
 ///
-/// @docImport 'package:flutter/animation.dart';
 /// @docImport 'package:flutter/foundation.dart';
 /// @docImport 'package:flutter/rendering.dart';
-/// @docImport 'package:flutter/semantics.dart';
 /// @docImport 'package:flutter/widgets.dart';
 ///
 /// @docImport 'binding.dart';
@@ -15,9 +13,6 @@
 library;
 
 import 'dart:collection';
-// The view metric override types at the bottom of this file are value holders
-// for metrics `dart:ui` defines, so they name the `dart:ui` types they stand in
-// for. Nothing that uses them runs outside of debug mode.
 import 'dart:ui'
     as ui
     show
@@ -227,26 +222,7 @@ class DebugViewPadding implements ui.ViewPadding {
 
   /// Creates a view padding with the same distances as [padding].
   DebugViewPadding.fromViewPadding(ui.ViewPadding padding)
-    : assert(
-        padding.left >= 0.0 && padding.left < double.infinity,
-        'left must be non-negative and finite.',
-      ),
-      assert(
-        padding.top >= 0.0 && padding.top < double.infinity,
-        'top must be non-negative and finite.',
-      ),
-      assert(
-        padding.right >= 0.0 && padding.right < double.infinity,
-        'right must be non-negative and finite.',
-      ),
-      assert(
-        padding.bottom >= 0.0 && padding.bottom < double.infinity,
-        'bottom must be non-negative and finite.',
-      ),
-      left = padding.left,
-      top = padding.top,
-      right = padding.right,
-      bottom = padding.bottom;
+    : this(left: padding.left, top: padding.top, right: padding.right, bottom: padding.bottom);
 
   @override
   final double left;
@@ -259,19 +235,6 @@ class DebugViewPadding implements ui.ViewPadding {
 
   @override
   final double bottom;
-
-  /// Creates a copy of this object with the given fields replaced.
-  DebugViewPadding copyWith({double? left, double? top, double? right, double? bottom}) {
-    return DebugViewPadding(
-      left: left ?? this.left,
-      top: top ?? this.top,
-      right: right ?? this.right,
-      bottom: bottom ?? this.bottom,
-    );
-  }
-
-  /// A view padding that is zero on all four edges.
-  static const DebugViewPadding zero = DebugViewPadding();
 
   // Only compares equal to other DebugViewPaddings, never to a ui.ViewPadding
   // reported by the platform. ui.ViewPadding does not define == at all, so
@@ -346,15 +309,10 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// value would produce infinite or NaN sizes throughout the render tree.
   /// [textScaleFactor], if given, must be finite and non-negative.
   ///
-  /// [physicalSize] is subject to similar requirements, which cannot be
-  /// asserted here because reading a field off a [ui.Size] is not a constant
-  /// expression and would make this constructor unusable in a `const`
-  /// expression ([padding], [viewPadding], [viewInsets], and
-  /// [systemGestureInsets] assert their own edges when constructed via
-  /// [DebugViewPadding]).
-  /// [DebugViewMetricsOverride.fromJson] rejects invalid values, which covers
-  /// everything arriving from developer tooling, and
-  /// [debugSetViewMetricsOverride] checks all geometry before installing it.
+  /// [physicalSize] must have finite, non-negative dimensions too, but a
+  /// `const` constructor cannot inspect a [ui.Size], so that is checked by
+  /// [DebugViewMetricsOverride.fromJson] and [debugSetViewMetricsOverride]
+  /// instead. The paddings are checked by the [DebugViewPadding] constructors.
   const DebugViewMetricsOverride({
     this.devicePixelRatio,
     this.physicalSize,
@@ -394,9 +352,9 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// service extension boundary instead of as a metric that silently failed to
   /// apply.
   ///
-  /// For [platformBrightness], values may be [ui.Brightness] enum instances, or
-  /// strings `'light'`, `'dark'`, `'Brightness.light'`, or `'Brightness.dark'`
-  /// for compatibility with [FoundationServiceExtensions.brightnessOverride].
+  /// [platformBrightness] is `'light'` or `'dark'`. `'Brightness.light'` and
+  /// `'Brightness.dark'`, the spelling
+  /// [FoundationServiceExtensions.brightnessOverride] uses, are accepted too.
   factory DebugViewMetricsOverride.fromJson(Map<Object?, Object?> json) {
     final Iterable<Object?> unknownKeys = json.keys.where(
       (Object? key) => !_jsonKeys.contains(key),
@@ -425,10 +383,10 @@ class DebugViewMetricsOverride with Diagnosticable {
       },
       platformBrightness: switch (json['platformBrightness']) {
         null => null,
-        'light' || 'Brightness.light' || ui.Brightness.light => ui.Brightness.light,
-        'dark' || 'Brightness.dark' || ui.Brightness.dark => ui.Brightness.dark,
+        'light' || 'Brightness.light' => ui.Brightness.light,
+        'dark' || 'Brightness.dark' => ui.Brightness.dark,
         final Object? value => throw FormatException(
-          'Expected "light", "dark", "Brightness.light", "Brightness.dark", or a Brightness enum for platformBrightness, got $value.',
+          'Expected "light" or "dark" for platformBrightness, got $value.',
         ),
       },
       padding: _viewPaddingFromJson(json, 'padding'),
@@ -509,21 +467,6 @@ class DebugViewMetricsOverride with Diagnosticable {
   final bool? invertColors;
 
   /// Overrides [ui.AccessibilityFeatures.disableAnimations].
-  ///
-  /// This reaches [MediaQueryData.disableAnimations], and so
-  /// [MediaQuery.disableAnimationsOf], for the view it is registered for, along
-  /// with the [ui.AccessibilityFeatures] that view's [ui.PlatformDispatcher]
-  /// reports.
-  ///
-  /// It does not reach [AnimationController]s built with
-  /// [AnimationBehavior.normal], which shorten their duration according to
-  /// [SemanticsBinding.disableAnimations]. That is process-wide: the binding
-  /// caches it from its own [ui.PlatformDispatcher], which has no view to
-  /// resolve against and so uses the override of
-  /// [ui.PlatformDispatcher.implicitView]. An override on the implicit view
-  /// therefore shortens those animations in every view, and an override on any
-  /// other view shortens them in none. Only widgets that read the value out of
-  /// [MediaQuery] honor it per view.
   final bool? disableAnimations;
 
   /// Overrides [ui.AccessibilityFeatures.boldText].
@@ -531,9 +474,8 @@ class DebugViewMetricsOverride with Diagnosticable {
 
   /// Overrides [ui.AccessibilityFeatures.reduceMotion].
   ///
-  /// This is a separate platform setting from [disableAnimations] (on iOS it is
-  /// "Reduce Motion" rather than "Prefer Cross-Fade Transitions"), so overriding
-  /// one does not imply the other.
+  /// This is a separate platform setting from [disableAnimations], so
+  /// overriding one does not imply the other.
   final bool? reduceMotion;
 
   /// Overrides [ui.AccessibilityFeatures.highContrast].
@@ -878,26 +820,19 @@ class DebugViewMetricsOverride with Diagnosticable {
         'Expected {"left": num, "top": num, "right": num, "bottom": num} for $key, got $value.',
       );
     }
-    num? checkEdge(String edge) {
-      final Object? edgeValue = value[edge];
-      if (edgeValue == null) {
-        return null;
-      }
-      if (edgeValue is! num) {
-        throw FormatException('$key.$edge must be a number, got $edgeValue.');
-      }
-      return edgeValue;
+    double edgeExtent(String edge) {
+      return switch (value[edge]) {
+        null => 0.0,
+        final num extent => _checkedExtent(extent, key, edge),
+        final Object other => throw FormatException('$key.$edge must be a number, got $other.'),
+      };
     }
 
-    final num? left = checkEdge('left');
-    final num? top = checkEdge('top');
-    final num? right = checkEdge('right');
-    final num? bottom = checkEdge('bottom');
     return DebugViewPadding(
-      left: left != null ? _checkedExtent(left, key, 'left') : 0.0,
-      top: top != null ? _checkedExtent(top, key, 'top') : 0.0,
-      right: right != null ? _checkedExtent(right, key, 'right') : 0.0,
-      bottom: bottom != null ? _checkedExtent(bottom, key, 'bottom') : 0.0,
+      left: edgeExtent('left'),
+      top: edgeExtent('top'),
+      right: edgeExtent('right'),
+      bottom: edgeExtent('bottom'),
     );
   }
 
