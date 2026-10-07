@@ -390,7 +390,16 @@ class FlutterPluginTest {
 
         verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
         val logger = env.project.logger
-        verify { logger.warn(match<String> { it.contains("variant 'debug'") && it.contains("declares no versionCode") }) }
+        verify {
+            logger.error(
+                match<String> {
+                    it.contains("variant 'debug'") &&
+                        it.contains("declares no versionCode") &&
+                        it.contains("versionCode = flutter.versionCode")
+                }
+            )
+        }
+        verify(exactly = 0) { logger.warn(any<String>()) }
     }
 
     @Test
