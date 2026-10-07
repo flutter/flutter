@@ -145,7 +145,7 @@ class ImageComparer {
   }
 
   static int _maxChannelDelta(Uint8List a, Uint8List b, int offset) {
-    var maxDelta = (a[offset] - b[offset]).abs();
+    int maxDelta = (a[offset] - b[offset]).abs();
     for (var c = 1; c < 4; c++) {
       final int diff = (a[offset + c] - b[offset + c]).abs();
       if (diff > maxDelta) {
