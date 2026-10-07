@@ -756,11 +756,13 @@ class FlutterPlugin : Plugin<Project> {
                 return
             }
             if (baseVersionCode == null) {
-                project.logger.warn(
-                    "Flutter did not apply per-ABI versionCodes to variant '${variant.name}' " +
-                        "because its android {} block declares no versionCode. Set versionCode " +
-                        "in defaultConfig or a product flavor, so each split APK gets a distinct " +
-                        "versionCode."
+                // logger.error, not warn: the flutter tool runs Gradle with -q, which hides warn.
+                project.logger.error(
+                    "Warning: Flutter could not give each split APK of variant '${variant.name}' a " +
+                        "distinct versionCode because its android {} block declares no versionCode, " +
+                        "so Google Play will not accept these APKs together. Set " +
+                        "versionCode = flutter.versionCode in defaultConfig, or set versionCode on " +
+                        "each product flavor."
                 )
                 return
             }
