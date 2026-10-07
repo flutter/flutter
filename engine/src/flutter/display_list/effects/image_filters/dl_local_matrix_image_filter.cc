@@ -33,11 +33,12 @@ DlRect* DlLocalMatrixImageFilter::map_local_bounds(
     return nullptr;
   }
   DlRect filter_bounds = input_bounds.TransformAndClipBounds(matrix_.Invert());
-  if (!image_filter_->map_local_bounds(filter_bounds, filter_bounds)) {
+  DlRect mapped_bounds;
+  if (!image_filter_->map_local_bounds(filter_bounds, mapped_bounds)) {
     output_bounds = input_bounds;
     return nullptr;
   }
-  output_bounds = filter_bounds.TransformAndClipBounds(matrix_);
+  output_bounds = mapped_bounds.TransformAndClipBounds(matrix_);
   return &output_bounds;
 }
 
