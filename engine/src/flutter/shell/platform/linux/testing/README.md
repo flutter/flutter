@@ -1,0 +1,97 @@
+# Linux GTK compatibility tests
+
+GTK3 and GTK4 unit tests are built as separate targets. They must not load both
+GTK major versions into one process. Build the GTK4 tests from the repository root:
+
+```sh
+autoninja -C engine/src/out/host_debug_unopt flutter_linux_gtk4 flutter_linux_gtk4_unittests
+```
+
+## Runtime compatibility
+
+The optional runtime validator configures an isolated output directory, checks
+the selected sysroot's GTK symbols, checks that the engine does not directly
+import the listed optional APIs, and runs GoogleTest against a selected runtime.
+It is a local integration check, not a replacement for the engine unit tests or
+an automatically scheduled CI job.
+
+```sh
+bash dev/tools/test_gtk4_runtime_compat.sh \
+  --sysroot=bullseye --native-tree-compat --runtime-loader=container \
+  --container-image=localhost/flutter-gtk4-tests:bookworm
+```
+
+Requirements: an x86-64 Linux host, the engine build dependencies, the selected installed sysroot,
+`readelf`, Python 3.10 or later, and Xvfb. The shell entry point forwards all
+arguments to `validate_gtk4_runtime_compat.py` in this directory. It can be run
+from any working directory.
+
+Runtime modes have different guarantees:
+
+- `host` stages the selected sysroot's GTK dependencies but uses the host's
+  libc and loader. It checks the resolved GTK/GLib libraries for accidental
+  host fallback. This is not a full distribution compatibility test. Patched
+  build-sysroot binaries can fail in the loader before any tests execute;
+  use container runtimes for compatibility evidence in that case.
+- `sysroot` uses the sysroot's loader and libraries and rejects dependencies
+  outside that root or the build output. Some build sysroots omit runtime files.
+- `container` requires an explicit, already available `--container-image` with
+  GTK4, EGL, epoxy, their dependencies, Xvfb and `xauth`. Prepare and preferably
+  pin that image separately. The test does not pull images, install packages,
+  or use the network. `--sysroot` selects build headers; the image independently
+  selects runtime libraries. Use Bookworm for GTK 4.8 and a suitable newer image
+  for native-tree coverage. Stock Bullseye does not contain the GTK backport.
+
+For local image preparation, a minimal Containerfile is:
+
+```dockerfile
+ARG BASE_IMAGE=debian:bookworm
+FROM ${BASE_IMAGE}
+RUN apt-get update -qq && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      libgtk-4-1 libegl1 libepoxy0 libgl1-mesa-dri dbus-x11 xvfb xauth && \
+    rm -rf /var/lib/apt/lists/*
+```
+
+Build it with `podman build -t localhost/flutter-gtk4-tests:bookworm .`.
+Use `--build-arg BASE_IMAGE=debian:trixie` and a different tag for Trixie.
+Image preparation needs network access. Record the resulting image ID/digest
+and installed GTK version with results; tags alone do not fix package versions.
+
+To test an existing binary against Trixie libraries without reconfiguring it:
+
+```sh
+bash dev/tools/test_gtk4_runtime_compat.sh \
+  --skip-build --output-dir=engine/src/out/host_debug_unopt \
+  --sysroot=trixie --native-tree-compat --runtime-loader=container \
+  --container-image=localhost/flutter-gtk4-tests:trixie
+```
+
+Native-tree tests require a capable runtime and may skip on GTK 4.8. The runtime
+API tests still exercise capability detection and fallback. A skip does not
+establish native-tree parity. `--skip-runtime` performs artifact checks only.
+
+Test the validator's configuration and failure checks without building Flutter:
+
+```sh
+python3 -m unittest discover \
+  -s engine/src/flutter/shell/platform/linux/testing \
+  -p validate_gtk4_runtime_compat_test.py
+```
+
+## Native AT-SPI activation
+
+```sh
+python3 engine/src/flutter/shell/platform/linux/testing/run_gtk4_atspi_action_test.py \
+  engine/src/out/host_debug_unopt/flutter_linux_gtk4_unittests
+```
+
+This separate integration test needs a GTK runtime with native accessible-tree
+support, PyGObject with Atspi introspection, `dbus-run-session`, Xvfb, `xauth`,
+and the AT-SPI bus launcher and registry. It creates a private session/display,
+finds its fixture by PID, and invokes the exported action. The fixture asserts
+the resulting Flutter embedder action. It does not validate a Dart callback,
+Orca behavior, or full text-editing support.
+
+The external-client fixture skips in ordinary GoogleTest runs. The runtime
+validator tests do not require access to the user's accessibility bus.
