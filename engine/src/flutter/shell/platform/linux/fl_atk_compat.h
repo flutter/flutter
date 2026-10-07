@@ -5,10 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_ATK_COMPAT_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_ATK_COMPAT_H_
 
-#ifdef __cplusplus
-// Newer GLib headers include C++ templates; load them outside C linkage.
-#include <type_traits>
-#endif
+// Let GLib load its C++ support headers outside the ATK C linkage block.
+#include <glib.h>
 
 // Workaround missing C code compatibility in ATK header.
 // Fixed in https://gitlab.gnome.org/GNOME/at-spi2-core/-/merge_requests/219
