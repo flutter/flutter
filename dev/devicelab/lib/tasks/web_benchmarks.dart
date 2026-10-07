@@ -915,10 +915,21 @@ Future<int> runBenchmarkCli(
     }
 
     if (baseline != null) {
+      final dynamic currentBenchmarksObj = result['benchmarks'];
+      if (currentBenchmarksObj != null && currentBenchmarksObj is! Map) {
+        err('benchmarks in current results must be a Map');
+        return 2;
+      }
       final Map<String, dynamic> currentBenchmarks =
-          result['benchmarks'] as Map<String, dynamic>? ?? <String, dynamic>{};
+          currentBenchmarksObj as Map<String, dynamic>? ?? <String, dynamic>{};
+
+      final dynamic baselineBenchmarksObj = baseline['benchmarks'];
+      if (baselineBenchmarksObj != null && baselineBenchmarksObj is! Map) {
+        err('benchmarks in baseline must be a Map');
+        return 2;
+      }
       final Map<String, dynamic> baselineBenchmarks =
-          baseline['benchmarks'] as Map<String, dynamic>? ?? <String, dynamic>{};
+          baselineBenchmarksObj as Map<String, dynamic>? ?? <String, dynamic>{};
 
       final flatCurrent = <String, dynamic>{};
       for (final MapEntry<String, dynamic> entry in currentBenchmarks.entries) {

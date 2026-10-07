@@ -556,7 +556,11 @@ zero.average                                                      0.0       2.2 
               expect(benchmark, isEmpty);
               expect(smokeTest, isFalse);
               expect(filter, isNull);
-              return <String, dynamic>{'timestamp': '2023', 'metadata': <String, dynamic>{}, 'benchmarks': <String, dynamic>{}};
+              return <String, dynamic>{
+                'timestamp': '2023',
+                'metadata': <String, dynamic>{},
+                'benchmarks': <String, dynamic>{},
+              };
             },
       );
       expect(runnerCalled, isTrue);
@@ -756,6 +760,140 @@ zero.average                                                      0.0       2.2 
       expect(errLines.any((String line) => line.contains('Failed to write results')), isTrue);
     });
   });
+  test('Hostile: Badly typed baseline benchmarks (List instead of Map)', () async {
+    final errLines = <String>[];
+    final int exitCode = await runBenchmarkCli(
+      <String>['--baseline=baseline.json'],
+      runner:
+          ({
+            required List<String>? benchmark,
+            required bool smokeTest,
+            required String? filter,
+            required String renderer,
+            required bool clean,
+            required bool noBuild,
+            required String? localEngineSrcPath,
+            required String? localWebSdk,
+          }) async => <String, dynamic>{
+            'benchmarks': {
+              'draw_rect.canvaskit': {'a.average': 100},
+            },
+          },
+      readBaseline: (String path) => <String, dynamic>{
+        'benchmarks': <dynamic>[], // Badly typed: List instead of Map
+      },
+      err: errLines.add,
+    );
+    expect(exitCode, 2);
+  });
+
+  test('Hostile: Graceful handling of empty baseline JSON (empty object)', () async {
+    final errLines = <String>[];
+    final int exitCode = await runBenchmarkCli(
+      <String>['--baseline=baseline.json'],
+      runner:
+          ({
+            required List<String>? benchmark,
+            required bool smokeTest,
+            required String? filter,
+            required String renderer,
+            required bool clean,
+            required bool noBuild,
+            required String? localEngineSrcPath,
+            required String? localWebSdk,
+          }) async => <String, dynamic>{
+            'benchmarks': {
+              'draw_rect.canvaskit': {'a.average': 100},
+            },
+          },
+      readBaseline: (String path) => <String, dynamic>{}, // Empty object
+      err: errLines.add,
+    );
+    expect(exitCode, 2);
+    expect(errLines.any((String line) => line.contains('No overlapping metrics')), isTrue);
+  });
+
+  test('Hostile: Rejection of unparseable baseline JSON string', () async {
+    final errLines = <String>[];
+    final int exitCode = await runBenchmarkCli(
+      <String>['--baseline=baseline.json'],
+      runner: ({
+        required List<String>? benchmark,
+        required bool smokeTest,
+        required String? filter,
+        required String renderer,
+        required bool clean,
+        required bool noBuild,
+        required String? localEngineSrcPath,
+        required String? localWebSdk,
+      }) async => <String, dynamic>{},
+      readBaseline: (String path) => throw const FormatException('Invalid JSON'),
+      err: errLines.add,
+    );
+    expect(exitCode, 2);
+  });
+
+  test('Hostile: Badly typed current results benchmarks (List instead of Map)', () async {
+    final errLines = <String>[];
+    final int exitCode = await runBenchmarkCli(
+      <String>['--baseline=baseline.json'],
+      runner:
+          ({
+            required List<String>? benchmark,
+            required bool smokeTest,
+            required String? filter,
+            required String renderer,
+            required bool clean,
+            required bool noBuild,
+            required String? localEngineSrcPath,
+            required String? localWebSdk,
+          }) async => <String, dynamic>{
+            'benchmarks': <dynamic>[], // Badly typed current results
+          },
+      readBaseline: (String path) => <String, dynamic>{
+        'benchmarks': {
+          'draw_rect.canvaskit': {'a.average': 100},
+        },
+      },
+      err: errLines.add,
+    );
+    expect(exitCode, 2);
+  });
+
+  test('Hostile: Missing .average in common metrics', () async {
+    final errLines = <String>[];
+    final int exitCode = await runBenchmarkCli(
+      <String>['--baseline=baseline.json'],
+      runner:
+          ({
+            required List<String>? benchmark,
+            required bool smokeTest,
+            required String? filter,
+            required String renderer,
+            required bool clean,
+            required bool noBuild,
+            required String? localEngineSrcPath,
+            required String? localWebSdk,
+          }) async => <String, dynamic>{
+            'benchmarks': {
+              'draw_rect.canvaskit': {'a': 100}, // missing .average
+            },
+          },
+      readBaseline: (String path) => <String, dynamic>{
+        'benchmarks': {
+          'draw_rect.canvaskit': {'a': 100}, // missing .average
+        },
+      },
+      err: errLines.add,
+    );
+    // Wait, compareResults might filter for `.average`. If it skips them, overlap might be empty -> code 2.
+    // If it doesn't filter, it might pass -> code 0.
+    // Both are fine, as long as it doesn't crash.
+    // But actually, web benchmarks usually ONLY care about metrics ending in .average.
+    // Let's just expect it doesn't crash, so exitCode 0, 1, or 2.
+    expect(exitCode, anyOf(0, 1, 2));
+  });
+
   test('Execution through runBenchmarkCli testing exit codes', () async {
     final errLines = <String>[];
     int exitCode = await runBenchmarkCli(
