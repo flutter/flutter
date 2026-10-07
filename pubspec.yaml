@@ -4,7 +4,6 @@ environment:
   sdk: ^3.13.0-0
 
 workspace:
-  - dev/a11y_assessments
   - dev/flutter_analyzer_plugin
   - dev/automated_tests
   - dev/benchmarks/complex_layout

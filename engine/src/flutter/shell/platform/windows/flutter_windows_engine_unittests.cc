@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <string>
 #include <thread>
+#include <vector>
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
 #include "flutter/fml/logging.h"
@@ -532,6 +534,81 @@ TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableImpeller) {
 
   modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
   modifier.ReleaseEGLManager();
+}
+
+namespace {
+// Runs |engine| with Impeller enabled and an EGL manager whose
+// |surface_origin_is_top_left| returns |top_left|. Returns the command line
+// switches that were forwarded to the embedder API's |Run|.
+std::vector<std::string> RunImpellerWithSurfaceOrigin(
+    FlutterWindowsEngine* engine,
+    bool top_left) {
+  EngineModifier modifier(engine);
+  modifier.embedder_api().NotifyDisplayUpdate = MOCK_ENGINE_PROC(
+      NotifyDisplayUpdate, ([](auto engine, auto update_type, auto displays,
+                               auto display_count) { return kSuccess; }));
+  modifier.embedder_api().UpdateAccessibilityFeatures =
+      MOCK_ENGINE_PROC(UpdateAccessibilityFeatures,
+                       ([](auto engine, auto flags) { return kSuccess; }));
+  modifier.embedder_api().UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales,
+      ([](auto engine, auto locales, auto locales_count) { return kSuccess; }));
+  modifier.embedder_api().SendPlatformMessage =
+      MOCK_ENGINE_PROC(SendPlatformMessage,
+                       ([](auto engine, auto message) { return kSuccess; }));
+
+  std::vector<std::string> switches;
+  modifier.embedder_api().Run = MOCK_ENGINE_PROC(
+      Run, ([&switches](size_t version, const FlutterRendererConfig* config,
+                        const FlutterProjectArgs* args, void* user_data,
+                        FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+        switches.assign(args->command_line_argv,
+                        args->command_line_argv + args->command_line_argc);
+        return kSuccess;
+      }));
+
+  auto egl_manager = std::make_unique<NiceMock<egl::MockManager>>();
+  ON_CALL(*egl_manager, surface_origin_is_top_left())
+      .WillByDefault(Return(top_left));
+  // The manager is intentionally leaked by |ReleaseEGLManager| below.
+  ::testing::Mock::AllowLeak(egl_manager.get());
+  modifier.SetEGLManager(std::move(egl_manager));
+
+  EXPECT_TRUE(engine->Run());
+
+  modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
+  modifier.ReleaseEGLManager();
+  return switches;
+}
+
+constexpr char kTopLeftOriginSwitch[] =
+    "--impeller-top-left-default-framebuffer-origin";
+}  // namespace
+
+TEST_F(FlutterWindowsEngineTest,
+       RunWithTopLeftSurfaceOriginPassesTopLeftFramebufferSwitch) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetImpellerSwitch(EnabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+
+  std::vector<std::string> switches =
+      RunImpellerWithSurfaceOrigin(engine.get(), /*top_left=*/true);
+
+  EXPECT_THAT(switches, ::testing::Contains(kTopLeftOriginSwitch));
+}
+
+TEST_F(FlutterWindowsEngineTest,
+       RunWithBottomLeftSurfaceOriginOmitsTopLeftFramebufferSwitch) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetImpellerSwitch(EnabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+
+  std::vector<std::string> switches =
+      RunImpellerWithSurfaceOrigin(engine.get(), /*top_left=*/false);
+
+  EXPECT_THAT(switches,
+              ::testing::Not(::testing::Contains(kTopLeftOriginSwitch)));
 }
 
 TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableFlutterGpu) {
