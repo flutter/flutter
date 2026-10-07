@@ -72,7 +72,8 @@ TEST_F(FlViewGtk4AccessibilityTest, NativeActionsRespectCurrentSemantics) {
           native_root);
   ASSERT_TRUE(GTK_IS_WIDGET(native_button));
   GtkWidget* widget = GTK_WIDGET(native_button);
-  EXPECT_EQ(gtk_widget_get_parent(widget), nullptr);
+  EXPECT_EQ(gtk_widget_get_parent(widget), view->render_area);
+  EXPECT_FALSE(gtk_widget_get_child_visible(widget));
   EXPECT_FALSE(gtk_widget_get_mapped(widget));
   EXPECT_FALSE(gtk_widget_get_can_target(widget));
   EXPECT_TRUE(gtk_widget_activate_action(widget, "flutter.tap", nullptr));
@@ -111,6 +112,90 @@ TEST_F(FlViewGtk4AccessibilityTest, NativeActionsRespectCurrentSemantics) {
   EXPECT_EQ(calls, 3u);
 }
 
+TEST_F(FlViewGtk4AccessibilityTest,
+       NativeProxyUsesSurfaceLifecycleWithoutLayout) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  GtkWidget* surface = view->render_area;
+  int minimum_before = 0;
+  int natural_before = 0;
+  gtk_widget_measure(surface, GTK_ORIENTATION_HORIZONTAL, -1, &minimum_before,
+                     &natural_before, nullptr, nullptr);
+  FlutterSemanticsFlags flags = {};
+  flags.is_button = true;
+  FlutterSemanticsNode2 root = {};
+  root.rect.right = 10000;
+  root.rect.bottom = 10000;
+  root.flags2 = &flags;
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) native =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  ASSERT_NE(native, nullptr);
+  GtkWidget* proxy = GTK_WIDGET(native);
+  EXPECT_EQ(gtk_widget_get_parent(proxy), surface);
+  EXPECT_FALSE(gtk_widget_get_child_visible(proxy));
+  EXPECT_FALSE(gtk_widget_get_can_target(proxy));
+  EXPECT_FALSE(gtk_widget_get_focusable(proxy));
+  EXPECT_FALSE(gtk_widget_get_realized(proxy));
+  int minimum_after = 0;
+  int natural_after = 0;
+  gtk_widget_measure(surface, GTK_ORIENTATION_HORIZONTAL, -1, &minimum_after,
+                     &natural_after, nullptr, nullptr);
+  EXPECT_EQ(minimum_after, minimum_before);
+  EXPECT_EQ(natural_after, natural_before);
+
+  // Exercise the real surface lifecycle without starting Flutter GL rendering.
+  g_object_ref(surface);
+  g_signal_handlers_disconnect_by_data(surface, view);
+  gtk_box_remove(GTK_BOX(view), surface);
+  g_autoptr(GtkWindow) window = GTK_WINDOW(gtk_window_new());
+  g_object_ref_sink(window);
+  gtk_window_set_child(window, surface);
+  gtk_window_present(window);
+  EXPECT_TRUE(gtk_widget_get_realized(proxy));
+  EXPECT_FALSE(gtk_widget_get_mapped(proxy));
+  EXPECT_EQ(gtk_widget_get_width(proxy), 0);
+  EXPECT_EQ(gtk_widget_get_height(proxy), 0);
+  // Replacement after realization must acquire the same lifecycle immediately.
+  flags.is_button = false;
+  flags.is_header = true;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) replacement =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  ASSERT_NE(replacement, native);
+  EXPECT_EQ(gtk_widget_get_parent(proxy), nullptr);
+  EXPECT_FALSE(gtk_widget_get_realized(proxy));
+  proxy = GTK_WIDGET(replacement);
+  EXPECT_TRUE(gtk_widget_get_realized(proxy));
+  EXPECT_FALSE(gtk_widget_get_child_visible(proxy));
+  EXPECT_FALSE(gtk_widget_get_mapped(proxy));
+  gtk_widget_unrealize(surface);
+  EXPECT_FALSE(gtk_widget_get_realized(proxy));
+  gtk_widget_realize(surface);
+  EXPECT_TRUE(gtk_widget_get_realized(proxy));
+  EXPECT_FALSE(gtk_widget_get_mapped(proxy));
+  gtk_window_set_child(window, nullptr);
+  gtk_box_append(GTK_BOX(view), surface);
+  g_object_unref(surface);
+  gtk_window_destroy(window);
+
+  g_object_run_dispose(G_OBJECT(view));
+  EXPECT_EQ(gtk_widget_get_parent(proxy), nullptr);
+  EXPECT_FALSE(gtk_widget_get_realized(proxy));
+}
+
 // Run with the external AT-SPI client; ordinary unit runs do not require a bus.
 TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   if (g_strcmp0(g_getenv("FLUTTER_TEST_ATSPI_ACTION"), "1") != 0) {
@@ -123,16 +208,11 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   StartEngine(view_engine);
   size_t calls = 0;
   const FlutterViewId view_id = fl_view_get_id(view);
-  fl_engine_get_embedder_api(view_engine)->SendSemanticsAction =
-      MOCK_ENGINE_PROC(SendSemanticsAction,
-                       ([&](auto, const FlutterSendSemanticsActionInfo* info) {
-                         EXPECT_EQ(info->view_id, view_id);
-                         EXPECT_EQ(info->node_id, 0u);
-                         EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
-                         calls++;
-                         g_main_loop_quit(loop);
-                         return kSuccess;
-                       }));
+  const bool check_focus =
+      g_strcmp0(g_getenv("FLUTTER_TEST_ATSPI_FOCUS"), "1") == 0;
+  if (check_focus) {
+    ASSERT_EQ(gtk_check_version(4, 18, 0), nullptr);
+  }
   FlutterSemanticsFlags flags = {};
   flags.is_button = true;
   FlutterSemanticsNode2 button = {};
@@ -144,6 +224,31 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   update.view_id = view_id;
   update.node_count = 1;
   update.nodes = nodes;
+  fl_engine_get_embedder_api(view_engine)->SendSemanticsAction =
+      MOCK_ENGINE_PROC(SendSemanticsAction,
+                       ([&](auto, const FlutterSendSemanticsActionInfo* info) {
+                         EXPECT_EQ(info->view_id, view_id);
+                         EXPECT_EQ(info->node_id, 0u);
+                         EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
+                         calls++;
+                         if (check_focus && calls <= 2) {
+                           flags.is_focused = calls == 1
+                                                  ? kFlutterTristateTrue
+                                                  : kFlutterTristateFalse;
+                           fl_view_gtk4_accessibility_handle_update(
+                               view->accessibility_backend, &update);
+                           // Neither a geometry-only change nor a repeated
+                           // batch should duplicate the focus notification.
+                           button.rect.right++;
+                           fl_view_gtk4_accessibility_handle_update(
+                               view->accessibility_backend, &update);
+                           fl_view_gtk4_accessibility_handle_update(
+                               view->accessibility_backend, &update);
+                         } else {
+                           g_main_loop_quit(loop);
+                         }
+                         return kSuccess;
+                       }));
   fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
                                            &update);
 
@@ -165,7 +270,7 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
       loop);
   g_main_loop_run(loop);
   g_source_remove(timeout);
-  EXPECT_EQ(calls, 1u);
+  EXPECT_EQ(calls, check_focus ? 3u : 1u);
   gtk_window_set_child(window, nullptr);
   gtk_box_append(GTK_BOX(view), surface);
   gtk_window_destroy(window);

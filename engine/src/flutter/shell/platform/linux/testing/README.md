@@ -95,3 +95,11 @@ Orca behavior, or full text-editing support.
 
 The external-client fixture skips in ordinary GoogleTest runs. The runtime
 validator tests do not require access to the user's accessibility bus.
+
+On GTK 4.18 or later, add `--check-focus` to the AT-SPI command to verify focus
+gain/loss notifications and their corresponding exported states. It also checks
+that repeated identical semantics batches do not duplicate those notifications.
+GTK 4.10 through 4.16 can expose the cached platform states on query, but lack
+the public `gtk_accessible_update_platform_state()` notification API. Runtime
+compatibility builds resolve this API optionally; direct-call builds require
+GTK 4.18 headers to enable these notifications.

@@ -46,7 +46,8 @@ struct _FlViewGtk4Accessibility {
 
 struct _FlGtk4AccessibleNode {
   // GTK exports AT-SPI actions through GtkWidget's action muxer. These nodes
-  // belong only to the accessible tree, never the layout or painting tree.
+  // are hidden children of the render surface for GTK lifecycle support.
+  // The surface never measures, allocates, or snapshots them.
   GtkWidget parent_instance;
 
   FlView* view;
@@ -283,23 +284,11 @@ static gboolean fl_gtk4_accessible_node_get_platform_state(
     FlGtkAccessiblePlatformState state) {
   FlGtk4AccessibleNode* self = FL_GTK4_ACCESSIBLE_NODE(accessible);
   switch (state) {
-#if GTK_CHECK_VERSION(4, 10, 0)
-    case GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSABLE:
-#else
     case FL_GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSABLE:
-#endif
       return self->focusable;
-#if GTK_CHECK_VERSION(4, 10, 0)
-    case GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSED:
-#else
     case FL_GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSED:
-#endif
       return self->focused;
-#if GTK_CHECK_VERSION(4, 10, 0)
-    case GTK_ACCESSIBLE_PLATFORM_STATE_ACTIVE:
-#else
     case FL_GTK_ACCESSIBLE_PLATFORM_STATE_ACTIVE:
-#endif
       return self->active;
   }
   return FALSE;
@@ -382,19 +371,47 @@ static gboolean fl_gtk4_accessible_node_get_bounds(GtkAccessible* accessible,
   return TRUE;
 }
 
+static void fl_gtk4_accessible_node_set_platform_states(
+    FlGtk4AccessibleNode* self,
+    gboolean focusable,
+    gboolean focused,
+    gboolean active) {
+  const gboolean focusable_changed = self->focusable != focusable;
+  const gboolean focused_changed = self->focused != focused;
+  const gboolean active_changed = self->active != active;
+  self->focusable = focusable;
+  self->focused = focused;
+  self->active = active;
+  // These nonvisual widgets take focus state from Flutter semantics, so GTK's
+  // widget focus machinery does not emit the notifications on their behalf.
+  if (focusable_changed) {
+    fl_gtk_runtime_accessible_update_platform_state(
+        GTK_ACCESSIBLE(self), FL_GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSABLE);
+  }
+  if (focused_changed) {
+    fl_gtk_runtime_accessible_update_platform_state(
+        GTK_ACCESSIBLE(self), FL_GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSED);
+  }
+  if (active_changed) {
+    fl_gtk_runtime_accessible_update_platform_state(
+        GTK_ACCESSIBLE(self), FL_GTK_ACCESSIBLE_PLATFORM_STATE_ACTIVE);
+  }
+}
+
 static void fl_gtk4_accessible_node_detach(FlGtk4AccessibleNode* self) {
+  fl_gtk4_accessible_node_set_platform_states(self, FALSE, FALSE, FALSE);
   self->parent = nullptr;
   self->next_sibling = nullptr;
   self->view = nullptr;
   self->has_bounds = FALSE;
-  self->focusable = FALSE;
-  self->focused = FALSE;
-  self->active = FALSE;
   self->actions_enabled = FALSE;
   self->actions = 0;
   gtk_widget_action_set_enabled(GTK_WIDGET(self), "flutter.tap", FALSE);
   gtk_widget_action_set_enabled(GTK_WIDGET(self), "flutter.long-press", FALSE);
   g_ptr_array_set_size(self->children, 0);
+  if (gtk_widget_get_parent(GTK_WIDGET(self)) != nullptr) {
+    gtk_widget_unparent(GTK_WIDGET(self));
+  }
   fl_gtk_runtime_accessible_set_accessible_parent(GTK_ACCESSIBLE(self), nullptr,
                                                   nullptr);
   g_clear_object(&self->at_context);
@@ -483,6 +500,7 @@ static void fl_gtk4_accessible_node_init(FlGtk4AccessibleNode* self) {
   self->children = g_ptr_array_new_with_free_func(g_object_unref);
   gtk_widget_set_can_target(GTK_WIDGET(self), FALSE);
   gtk_widget_set_focusable(GTK_WIDGET(self), FALSE);
+  gtk_widget_set_child_visible(GTK_WIDGET(self), FALSE);
   gtk_widget_action_set_enabled(GTK_WIDGET(self), "flutter.tap", FALSE);
   gtk_widget_action_set_enabled(GTK_WIDGET(self), "flutter.long-press", FALSE);
 }
@@ -743,14 +761,14 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
       self->actions_enabled &&
           (self->actions & kFlutterSemanticsActionLongPress));
 
-  self->focusable =
+  const gboolean is_focusable =
       is_enabled &&
       (semantics->actions != 0 || flags->is_button || flags->is_text_field ||
        flags->is_link || flags->is_slider ||
        flags->is_checked != kFlutterCheckStateNone ||
        flags->is_toggled != kFlutterTristateNone);
-  self->focused = is_focused;
-  self->active = is_focused;
+  fl_gtk4_accessible_node_set_platform_states(self, is_focusable, is_focused,
+                                              is_focused);
   self->has_bounds = TRUE;
   self->bounds_x =
       static_cast<int>(semantics->rect.left + semantics->transform.transX);
@@ -853,6 +871,14 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
     fl_gtk4_accessible_node_reset_state(self, GTK_ACCESSIBLE_STATE_PRESSED);
   }
 
+  // GTK suppresses state notifications for unrealized widgets. Give the proxy
+  // the surface's lifecycle while excluding it from layout, drawing and input.
+  if (gtk_widget_get_parent(GTK_WIDGET(self)) == nullptr) {
+    gtk_widget_set_parent(GTK_WIDGET(self), view->render_area);
+    if (gtk_widget_get_realized(view->render_area)) {
+      gtk_widget_realize(GTK_WIDGET(self));
+    }
+  }
   return self;
 }
 

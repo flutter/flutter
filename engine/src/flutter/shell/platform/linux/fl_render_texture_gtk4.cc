@@ -78,8 +78,21 @@ static void fl_render_texture_gtk4_dispose(GObject* object) {
 
   g_clear_object(&self->texture);
   g_clear_object(&self->accessible_child);
+  while (GtkWidget* child = gtk_widget_get_first_child(GTK_WIDGET(self))) {
+    gtk_widget_unparent(child);
+  }
 
   G_OBJECT_CLASS(fl_render_texture_gtk4_parent_class)->dispose(object);
+}
+
+static void fl_render_texture_gtk4_realize(GtkWidget* widget) {
+  GTK_WIDGET_CLASS(fl_render_texture_gtk4_parent_class)->realize(widget);
+  // Nonvisual accessibility proxies need realization to emit AT-SPI events,
+  // but remain child-invisible so GTK does not map or hit-test them.
+  for (GtkWidget* child = gtk_widget_get_first_child(widget); child != nullptr;
+       child = gtk_widget_get_next_sibling(child)) {
+    gtk_widget_realize(child);
+  }
 }
 
 static void fl_render_texture_gtk4_measure(GtkWidget* widget,
@@ -151,6 +164,7 @@ static void fl_render_texture_gtk4_class_init(FlRenderTextureGtk4Class* klass) {
   object_class->dispose = fl_render_texture_gtk4_dispose;
 
   GtkWidgetClass* widget_class = GTK_WIDGET_CLASS(klass);
+  widget_class->realize = fl_render_texture_gtk4_realize;
 #if GTK_CHECK_VERSION(4, 0, 0)
 #if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
   gtk_widget_class_set_accessible_role(

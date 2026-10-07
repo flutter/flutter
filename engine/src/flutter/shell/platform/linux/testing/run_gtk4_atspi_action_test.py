@@ -58,7 +58,7 @@ def wait_until(predicate, description, seconds=10):
   raise RuntimeError(f'Timed out waiting for {description}')
 
 
-def run_fixture(binary, output):
+def run_fixture(binary, output, check_focus=False):
   import gi
   gi.require_version('Atspi', '2.0')
   from gi.repository import Atspi, Gio, GLib
@@ -119,16 +119,48 @@ def run_fixture(binary, output):
         names = [action.get_action_name(i) for i in range(action.get_n_actions())]
         if names != ['flutter.tap']:
           raise RuntimeError(f'Unexpected native actions: {names}')
+        if check_focus:
+          focus_events = []
+
+          def on_focus(event, *_):
+            if (event.source.get_process_id() == fixture.pid and
+                event.source.get_name() == 'Flutter AT-SPI activation fixture'):
+              focus_events.append(bool(event.detail1))
+
+          listener = Atspi.EventListener.new(on_focus, None)
+          listener.register('object:state-changed:focused')
+          try:
+            for expected in (True, False):
+              if not action.do_action(0):
+                raise RuntimeError('AT-SPI rejected focus-transition trigger')
+
+              def received_focus():
+                context = GLib.MainContext.default()
+                while context.pending():
+                  context.iteration(False)
+                return focus_events and focus_events[-1] == expected
+
+              wait_until(received_focus, f'focused={expected} notification', seconds=5)
+              node.clear_cache()
+              if node.get_state_set().contains(Atspi.StateType.FOCUSED) != expected:
+                raise RuntimeError('Focus event disagrees with exported state')
+            if focus_events != [True, False]:
+              raise RuntimeError(f'Unexpected focus notifications: {focus_events}')
+          finally:
+            listener.deregister('object:state-changed:focused')
         if not action.do_action(0):
           raise RuntimeError('AT-SPI rejected flutter.tap')
         if fixture.wait(timeout=10) != 0:
           raise RuntimeError('Engine did not receive the expected semantics action')
         print('PASS: AT-SPI flutter.tap reached the Flutter embedder')
+        if check_focus:
+          print('PASS: AT-SPI observed focus gain and loss without duplicate events')
 
 
 def main():
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('binary', type=lambda value: str(Path(value).resolve()))
+  parser.add_argument('--check-focus', action='store_true', help='Verify focus events (GTK 4.18+)')
   parser.add_argument('--isolated-session', action='store_true', help=argparse.SUPPRESS)
   args = parser.parse_args()
   if not Path(args.binary).is_file():
@@ -143,18 +175,20 @@ def main():
         GDK_DISABLE='gl,vulkan',
         GSK_RENDERER='cairo',
         GIO_USE_VFS='local',
-        FLUTTER_TEST_ATSPI_ACTION='1'
+        FLUTTER_TEST_ATSPI_ACTION='1',
+        FLUTTER_TEST_ATSPI_FOCUS='1' if args.check_focus else '0'
     )
     return subprocess.run([
         'xvfb-run', '-a', 'dbus-run-session', '--', sys.executable,
-        str(Path(__file__).resolve()), '--isolated-session', args.binary
+        str(Path(__file__).resolve()), '--isolated-session', args.binary,
+        *(['--check-focus'] if args.check_focus else [])
     ],
                           env=environment,
                           timeout=45,
                           check=False).returncode
   with tempfile.TemporaryFile(mode='w+') as output:
     try:
-      run_fixture(args.binary, output)
+      run_fixture(args.binary, output, args.check_focus)
     finally:
       output.seek(0)
       print(output.read(), end='')
