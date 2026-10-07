@@ -944,7 +944,26 @@ class TextLayout {
     return ui.TextRange(start: start, end: end);
   }
 
-  ui.TextRange getLineBoundary(int codepointPosition) {
+  ui.TextRange getLineBoundary(ui.TextPosition position) {
+    final ui.TextRange line = _lineBoundaryAtOffset(position.offset);
+
+    // A line's end equals the next line's start at a soft wrap, so the lookup
+    // above cannot tell the two apart on its own and always answers with the
+    // earlier line, as if the affinity were upstream. A downstream position
+    // sitting exactly on that seam belongs to the next line instead. This
+    // mirrors the native implementation in `lib/ui/text.dart`.
+    final ui.TextRange nextLine = _lineBoundaryAtOffset(position.offset + 1);
+    if (nextLine.isValid &&
+        position.affinity == ui.TextAffinity.downstream &&
+        line != nextLine &&
+        position.offset == line.end &&
+        line.end == nextLine.start) {
+      return nextLine;
+    }
+    return line;
+  }
+
+  ui.TextRange _lineBoundaryAtOffset(int codepointPosition) {
     for (final TextLine line in lines) {
       // This is the condition that SkParagraph is using
       if (line.allLineTextRange.start <= codepointPosition &&
