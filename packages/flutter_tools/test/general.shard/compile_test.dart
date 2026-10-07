@@ -383,7 +383,6 @@ void main() {
           null,
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
-          webEnableHotReload: true,
           deprecatedJsInterop: deprecatedJsInterop,
         ),
         logger: BufferLogger.test(),

@@ -337,14 +337,13 @@ name: my_app
   testUsingContext(
     'WebRunner copies compiled app.dill to cache during startup',
     () async {
-      final debuggingOptions = DebuggingOptions.enabled(
-        const BuildInfo(
-          BuildMode.debug,
-          null,
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
+      const buildInfo = BuildInfo(
+        BuildMode.debug,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
       );
+      final debuggingOptions = DebuggingOptions.enabled(buildInfo);
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
         debuggingOptions: debuggingOptions,
@@ -363,6 +362,7 @@ name: my_app
         config: globals.config,
         fileSystem: fileSystem,
         targetModel: TargetModel.dartdevc,
+        extraFrontEndOptions: ddcFrontEndOptions(buildInfo),
       );
       expect(await fileSystem.file(expectedPath).readAsString(), 'ABC');
     },
@@ -391,6 +391,7 @@ name: my_app
         config: globals.config,
         fileSystem: fileSystem,
         targetModel: TargetModel.dartdevc,
+        extraFrontEndOptions: kDdcLibraryBundleFlags,
       );
       expect(await fileSystem.file(expectedPath).readAsString(), 'ABC');
     },
@@ -409,7 +410,6 @@ name: my_app
         null,
         treeShakeIcons: false,
         packageConfigPath: '.dart_tool/package_config.json',
-        webEnableHotReload: true,
         deprecatedJsInterop: false,
       );
       final ResidentRunner residentWebRunner = setUpResidentRunner(
@@ -1762,25 +1762,7 @@ name: my_app
   );
 
   testUsingContext(
-    'printHelp without details shows only hot restart help message',
-    () async {
-      final logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      residentWebRunner.printHelp(details: false);
-
-      expect(logger.statusText, contains('Hot restart'));
-      expect(logger.statusText.contains('Hot reload'), false);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
-
-  testUsingContext(
-    'printHelp without details shows hot restart and hot reload help message '
-    'if using DDC library bundle format',
+    'printHelp without details shows hot restart and hot reload help message',
     () async {
       final logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(
