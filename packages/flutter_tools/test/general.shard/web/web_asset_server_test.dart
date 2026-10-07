@@ -894,35 +894,39 @@ void main() {
           });
 
           final logger = BufferLogger.test();
-          final WebAssetServer server = await WebAssetServer.start(
-            null,
-            null,
-            false,
-            false,
-            false,
-            buildInfo,
-            false,
-            const DartDevelopmentServiceConfiguration(enable: false),
-            Uri.base,
-            null,
-            crossOriginIsolation: false,
-            webDevServerConfig: WebDevServerConfig(
-              host: 'localhost',
-              proxy: <ProxyRule>[
-                PrefixProxyRule(prefix: '/get', target: 'http://localhost:${backendServer.port}/'),
-              ],
-            ),
-            webRenderer: webRenderer,
-            isWasm: isWasm,
-            useLocalCanvasKit: false,
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: platform,
-          );
-          server.markReady();
-
+          WebAssetServer? server;
           final client = HttpClient();
           try {
+            server = await WebAssetServer.start(
+              null,
+              null,
+              false,
+              false,
+              false,
+              buildInfo,
+              false,
+              const DartDevelopmentServiceConfiguration(enable: false),
+              Uri.base,
+              null,
+              crossOriginIsolation: false,
+              webDevServerConfig: WebDevServerConfig(
+                host: 'localhost',
+                proxy: <ProxyRule>[
+                  PrefixProxyRule(
+                    prefix: '/get',
+                    target: 'http://localhost:${backendServer.port}/',
+                  ),
+                ],
+              ),
+              webRenderer: webRenderer,
+              isWasm: isWasm,
+              useLocalCanvasKit: false,
+              fileSystem: fileSystem,
+              logger: logger,
+              platform: platform,
+            );
+            server.markReady();
+
             // 1. Proxied GET request should reach backendServer instead of returning index.html.
             final HttpClientRequest getRequest = await client.getUrl(
               Uri.parse('http://localhost:${server.selectedPort}/get'),
@@ -958,7 +962,7 @@ void main() {
             expect(await utf8.decoder.bind(spaResponse).join(), '<html>index</html>');
           } finally {
             client.close();
-            await server.dispose();
+            await server?.dispose();
             await backendServer.close(force: true);
           }
         },
