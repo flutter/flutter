@@ -6,6 +6,7 @@
 
 #if FLUTTER_LINUX_GTK4
 
+#include <cmath>
 #include <cstddef>
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
@@ -369,6 +370,45 @@ static gboolean fl_gtk4_accessible_node_get_bounds(GtkAccessible* accessible,
     *height = self->bounds_height;
   }
   return TRUE;
+}
+
+static void fl_gtk4_accessible_node_get_transformed_bounds(
+    const FlutterRect& rect,
+    const FlutterTransformation& transform,
+    int* x,
+    int* y,
+    int* width,
+    int* height) {
+  // Export the axis-aligned bounds of all four transformed corners rather
+  // than only applying translation, which loses scale and skew.
+  const double points[4][2] = {{rect.left, rect.top},
+                               {rect.right, rect.top},
+                               {rect.left, rect.bottom},
+                               {rect.right, rect.bottom}};
+  // Zero-initialized FlutterTransformation values represent the identity in
+  // embedder test fixtures and older semantics payloads.
+  const double scale_x = transform.scaleX == 0.0 ? 1.0 : transform.scaleX;
+  const double scale_y = transform.scaleY == 0.0 ? 1.0 : transform.scaleY;
+  double min_x = G_MAXDOUBLE;
+  double min_y = G_MAXDOUBLE;
+  double max_x = -G_MAXDOUBLE;
+  double max_y = -G_MAXDOUBLE;
+  for (const auto& point : points) {
+    const double transformed_x =
+        scale_x * point[0] + transform.skewX * point[1] + transform.transX;
+    const double transformed_y =
+        transform.skewY * point[0] + scale_y * point[1] + transform.transY;
+    min_x = MIN(min_x, transformed_x);
+    min_y = MIN(min_y, transformed_y);
+    max_x = MAX(max_x, transformed_x);
+    max_y = MAX(max_y, transformed_y);
+  }
+  const double floored_x = floor(min_x);
+  const double floored_y = floor(min_y);
+  *x = static_cast<int>(floored_x);
+  *y = static_cast<int>(floored_y);
+  *width = static_cast<int>(ceil(max_x) - floored_x);
+  *height = static_cast<int>(ceil(max_y) - floored_y);
 }
 
 static void fl_gtk4_accessible_node_set_platform_states(
@@ -770,14 +810,9 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
   fl_gtk4_accessible_node_set_platform_states(self, is_focusable, is_focused,
                                               is_focused);
   self->has_bounds = TRUE;
-  self->bounds_x =
-      static_cast<int>(semantics->rect.left + semantics->transform.transX);
-  self->bounds_y =
-      static_cast<int>(semantics->rect.top + semantics->transform.transY);
-  self->bounds_width =
-      static_cast<int>(semantics->rect.right - semantics->rect.left);
-  self->bounds_height =
-      static_cast<int>(semantics->rect.bottom - semantics->rect.top);
+  fl_gtk4_accessible_node_get_transformed_bounds(
+      semantics->rect, semantics->transform, &self->bounds_x, &self->bounds_y,
+      &self->bounds_width, &self->bounds_height);
 
   const gchar* value = flags->is_obscured ? nullptr : semantics->value;
   const gchar* label = semantics->label;

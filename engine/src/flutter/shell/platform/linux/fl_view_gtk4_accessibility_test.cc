@@ -714,6 +714,12 @@ TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
 
   FlutterSemanticsNode2 updated_button = button;
   updated_button.label = "updated button";
+  updated_button.transform.scaleX = 2;
+  updated_button.transform.scaleY = 3;
+  updated_button.transform.skewX = 0.5;
+  updated_button.transform.skewY = 0.25;
+  updated_button.transform.transX = 10;
+  updated_button.transform.transY = 20;
   FlutterSemanticsNode2* updated_nodes[] = {&updated_button};
   FlutterSemanticsUpdate2 updated_update = {
       .node_count = 1,
@@ -731,6 +737,13 @@ TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
       fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
           updated_root);
   EXPECT_EQ(updated_first_child, first_child);
+
+  EXPECT_TRUE(fl_view_gtk4_accessibility_get_native_bounds_for_testing(
+      updated_first_child, &x, &y, &width, &height));
+  EXPECT_EQ(x, 21);
+  EXPECT_EQ(y, 39);
+  EXPECT_EQ(width, 55);
+  EXPECT_EQ(height, 95);
 
   g_autoptr(GtkAccessible) second_child =
       fl_view_gtk4_accessibility_ref_next_native_sibling_for_testing(
