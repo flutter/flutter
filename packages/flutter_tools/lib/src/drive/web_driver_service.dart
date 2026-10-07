@@ -100,6 +100,8 @@ class WebDriverService extends DriverService {
       webDefines: webDefines,
       flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
       analytics: _analytics,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
       toolContext: _toolContext,
     );
     final appStartedCompleter = Completer<void>.sync();

@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
@@ -26,6 +27,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
@@ -40,6 +42,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fakes.dart';
+import '../../../src/test_build_system.dart';
 import '../../../src/test_flutter_command_runner.dart';
 import '../utils/project_testing_utils.dart';
 
@@ -298,6 +301,8 @@ void main() {
     ResidentRunnerFactory? residentRunnerFactoryOverride,
   }) {
     return WidgetPreviewCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const BuildTargetsImpl(),
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         cache: Cache.test(processManager: loggingProcessManager, platform: platform),

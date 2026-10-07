@@ -5,9 +5,11 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -17,6 +19,8 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
+import '../src/test_build_system.dart';
 import 'hot_shared.dart';
 
 void main() {
@@ -48,8 +52,12 @@ void main() {
       () async {
         final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildTargets: const BuildTargetsImpl(),
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          toolContext: FakeToolContext(fs: fileSystem),
+          xcode: null,
           analytics: _FakeAnalytics(),
         );
 
@@ -69,8 +77,12 @@ void main() {
       () async {
         final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildTargets: const BuildTargetsImpl(),
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          toolContext: FakeToolContext(fs: fileSystem),
+          xcode: null,
           analytics: _FakeAnalytics(),
         );
 
@@ -90,8 +102,12 @@ void main() {
       () async {
         final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildTargets: const BuildTargetsImpl(),
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          toolContext: FakeToolContext(fs: fileSystem),
+          xcode: null,
           analytics: _FakeAnalytics(),
         );
 
@@ -123,8 +139,12 @@ void main() {
       () async {
         final runner = HotRunner(
           flutterDevices,
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildTargets: const BuildTargetsImpl(),
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          toolContext: FakeToolContext(fs: fileSystem),
+          xcode: null,
           analytics: _FakeAnalytics(),
         );
 
