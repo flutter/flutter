@@ -20,11 +20,14 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/analysis.dart';
+import '../devfs.dart';
 import '../device.dart';
 import '../features.dart';
 import '../isolated/resident_web_runner.dart';
@@ -55,6 +58,8 @@ typedef ResidentRunnerFactory = ResidentRunner Function(
 
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
@@ -63,6 +68,8 @@ class WidgetPreviewCommand extends FlutterCommand {
   }) {
     addSubcommand(
       WidgetPreviewStartCommand(
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: toolContext,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
         dtdServicesOverride: dtdServicesOverride,
@@ -134,7 +141,8 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
 /// The type of reload operation queued to run once [WidgetPreviewStartCommand._reloadMutex]
 /// is available.
 enum _PendingReload {
-  /// Perform a hot reload (`restart(fullRestart: false)`).
+  /// Perform a hot reload via [WidgetPreviewStartCommand.handleReload], which
+  /// falls back to a hot restart if the reload is rejected.
   hotReload,
 
   /// Perform a full hot restart (`restart(fullRestart: true)`).
@@ -143,6 +151,8 @@ enum _PendingReload {
 
 final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with CreateBase {
   WidgetPreviewStartCommand({
+    required this._buildSystem,
+    required this._buildTargets,
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
@@ -211,6 +221,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       'Failed to locate browser. Make sure you are using an up-to-date Chrome or Edge. '
       'Otherwise, consider running with --$kWebServer instead.';
 
+  @visibleForTesting
+  static const kHotReloadRejectedMessage =
+      'Hot reload rejected due to unsupported changes. Performing hot restart instead.';
+
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     // Ensure the Flutter Web SDK is installed.
@@ -224,6 +238,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   String get name => 'start';
 
   final bool verbose;
+
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
 
   @override
   WidgetPreviewMachineAwareLogger get logger =>
@@ -310,6 +327,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   @visibleForTesting
   ResidentRunner? get widgetPreviewApp => _widgetPreviewApp;
+
+  @visibleForTesting
+  set widgetPreviewApp(ResidentRunner? value) => _widgetPreviewApp = value;
 
   /// Serializes initial preview scaffold startup and subsequent hot reload / hot
   /// restart operations so reloads cannot execute before the debug connection is
@@ -493,6 +513,18 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
   }
 
+  /// Hot reloads the previewer, falling back to a hot restart if the reload is
+  /// rejected due to unsupported changes.
+  @visibleForTesting
+  Future<OperationResult?> handleReload() async {
+    final OperationResult? result = await _widgetPreviewApp?.restart();
+    if (result case OperationResult(updateFSReport: UpdateFSReport(hotReloadRejected: true))) {
+      logger.printStatus(kHotReloadRejectedMessage);
+      return _widgetPreviewApp?.restart(fullRestart: true);
+    }
+    return result;
+  }
+
   Future<void> _triggerReload(_PendingReload requested) async {
     // Record the requested reload type. If a task is already queued waiting for
     // [_reloadMutex], coalesce this request into the pending one (upgrading a
@@ -515,7 +547,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         return;
       }
       try {
-        await _widgetPreviewApp?.restart(fullRestart: pending == .hotRestart);
+        switch (pending) {
+          case .hotReload:
+            await handleReload();
+          case .hotRestart:
+            await _widgetPreviewApp?.restart(fullRestart: true);
+        }
       } on Object catch (e, st) {
         logger.printTrace('Error during widget preview reload: $e\n$st');
       }
@@ -672,16 +709,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
                 )
               : ResidentWebRunner(
                   flutterDevice,
+                  buildSystem: _buildSystem,
+                  buildTargets: _buildTargets,
+                  toolContext: toolContext,
                   target: target,
                   debuggingOptions: debuggingOptions,
                   analytics: analytics,
                   flutterProject: widgetPreviewScaffoldProject,
-                  fileSystem: fs,
-                  logger: logger,
-                  terminal: terminal,
-                  platform: platform,
-                  outputPreferences: toolContext.outputPreferences,
-                  systemClock: toolContext.systemClock,
                   // Explicitly provide the project root path rather than relying on the current directory
                   // as the current directory exists within $TMP. At least on MacOS, when setting the
                   // current directory to the widget_preview_scaffold project created under
