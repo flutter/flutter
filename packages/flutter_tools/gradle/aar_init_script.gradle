@@ -10,7 +10,7 @@ void configureProject(Project project, String outputDir) {
     if (!project.hasProperty("android")) {
         throw new GradleException("Android property not found.")
     }
-    if (!project.android.hasProperty("libraryVariants")) {
+    if (!project.pluginManager.hasPlugin("com.android.library")) {
         throw new GradleException("Can't generate AAR on a non Android library project.")
     }
 
@@ -84,9 +84,12 @@ static String getFlutterRoot(Project project) {
     return project.property("flutter-root")
 }
 
+static String aarTaskName(String variantName) {
+    return "assembleAar${variantName.capitalize()}"
+}
+
 void addAarTask(Project project, component) {
-    String variantName = component.name.capitalize()
-    String taskName = "assembleAar$variantName"
+    String taskName = aarTaskName(component.name)
     project.tasks.create(name: taskName) {
         // This check is required to be able to configure the archives before `publish` runs.
         if (!project.gradle.startParameter.taskNames.contains(taskName)) {
@@ -106,6 +109,36 @@ void addAarTask(Project project, component) {
     }
 }
 
+// AGP reports this error when `singleVariant` is declared twice for one variant
+// (`AbstractPublishing.checkSingleVariantUniqueness`; same text in AGP 8.11.1, 9.1.0 and 9.3.1).
+// Its class, com.android.builder.errors.EvalIssueException, is not public AGP API and is not on
+// this script's classpath, so the error is matched by its message.
+static boolean isDuplicateSingleVariantError(Exception e, String variantName) {
+    String duplicateMessage = "Using singleVariant publishing DSL multiple times to publish " +
+            "variant \"$variantName\" to component \"$variantName\" is not allowed."
+    return e.message == duplicateMessage
+}
+
+// The module's POM depends on each plugin's AAR for the same variant name, and only the plugin's
+// own `assembleAar<Variant>` task publishes that AAR.
+void checkPluginHasRequestedVariants(Project moduleProject, Project pluginProject) {
+    if (!pluginProject.hasProperty("android")) {
+        return
+    }
+    List<String> requestedTasks = moduleProject.gradle.startParameter.taskNames
+    moduleProject.components.forEach { component ->
+        String taskName = aarTaskName(component.name)
+        if (requestedTasks.contains(taskName) && !pluginProject.tasks.names.contains(taskName)) {
+            throw new GradleException(
+                    "Flutter can't build the AAR for variant '${component.name}' because plugin " +
+                    "project '${pluginProject.path}' has no variant with that name, so the " +
+                    "plugin AAR that the module depends on can't be published. Declare the " +
+                    "same product flavors in the module and in '${pluginProject.path}'."
+            )
+        }
+    }
+}
+
 // maven-publish has to be applied _before_ the project gets evaluated, but some of the code in
 // `configureProject` requires the project to be evaluated. Apply the maven plugin to all projects, but
 // only configure it if it matches the conditions in `projectsEvaluated`
@@ -115,32 +148,32 @@ allprojects {
 }
 
 afterProject { project ->
-    // Exit early if either:
-    // 1. The project doesn't have the Android Gradle plugin applied.
-    // 2. The project has already defined which variants to publish (trying to re-define which
-    //    variants to publish will result in an error).
+    // Exit early if the project doesn't have the Android Gradle plugin applied.
     if (!project.hasProperty("android")) {
         return
     }
-    if (project.android.publishing.singleVariants.size() != 0) {
-        return
+
+    // The project's build file has already run, so a variant it declared keeps that declaration.
+    Closure addSingleVariant = { String variantName ->
+        try {
+            project.android.publishing.singleVariant(variantName) {
+                withSourcesJar()
+                withJavadocJar()
+            }
+        } catch (Exception e) {
+            if (!isDuplicateSingleVariantError(e, variantName)) {
+                throw e
+            }
+        }
     }
 
     Closure addSingleVariants = {buildType ->
         if (!project.android.productFlavors.isEmpty()) {
             project.android.productFlavors.all{productFlavor ->
-                project.android.publishing.singleVariant(
-                        productFlavor.name + buildType.name.capitalize()
-                ) {
-                    withSourcesJar()
-                    withJavadocJar()
-                }
+                addSingleVariant(productFlavor.name + buildType.name.capitalize())
             }
         } else {
-            project.android.publishing.singleVariant(buildType.name) {
-                withSourcesJar()
-                withJavadocJar()
-            }
+            addSingleVariant(buildType.name)
         }
     }
 
@@ -173,18 +206,10 @@ projectsEvaluated {
     // because the module POM's file will include a dependency on the plugin Maven artifact.
     // This is due to the Android Gradle Plugin expecting all library subprojects to be published
     // as Maven artifacts.
+    // The tool requests `assembleAar<Variant>` by name, without a project path, so Gradle runs it
+    // in every project that has it, and each plugin publishes its own AAR.
     modulePlugins.each { pluginProject ->
         configurePlugin(pluginProject, moduleProject.property("output-dir"))
-        moduleProject.android.libraryVariants.all { variant ->
-            // Configure the `assembleAar<variantName>` task for each plugin's projects and make
-            // the module's equivalent task depend on the plugin's task.
-            String variantName = variant.name.capitalize()
-
-                Task moduleProjectTask = moduleProject.tasks.named("assembleAar$variantName").get()
-                assert(moduleProjectTask != null)
-                Task pluginProjectTask = pluginProject.tasks.named("assembleAar$variantName").get()
-                assert(pluginProjectTask != null)
-                moduleProjectTask.dependsOn(pluginProjectTask)
-        }
+        checkPluginHasRequestedVariants(moduleProject, pluginProject)
     }
 }

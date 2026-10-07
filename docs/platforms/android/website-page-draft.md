@@ -231,10 +231,16 @@ aliases:
 
 ### `flutter build aar`
 
-Variant enumeration for AAR builds now uses the public `components` API. If
-your module's build script declares `singleVariant(...)` publishing itself,
-Flutter detects the overlap and reports it with an actionable error instead of
-failing inside AGP.
+- If your module's build file declares `android.publishing.singleVariant(...)`
+  for a variant, Flutter uses your declaration for that variant and declares
+  publishing (with sources and javadoc jars) for the other variants. Flutter
+  releases that skipped all of their declarations in that case failed with
+  `Task with name 'assembleAarDebug' not found in project ':flutter'` when your
+  file declared only some variants.
+- Each Android plugin that your module uses must have a variant with the same
+  name as the module variant you build. If the module and a plugin declare
+  different product flavors, the build fails with an error that names the
+  plugin. Declare the same product flavors in both.
 
 ## Escape hatch (temporary)
 

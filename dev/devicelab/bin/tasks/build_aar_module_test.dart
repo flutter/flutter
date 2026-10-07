@@ -262,6 +262,61 @@ Future<void> main() async {
 
       checkCollectionContains<String>(<String>[...flutterAssets, ...debugAssets], debugAar);
 
+      section('Build AARs with android.newDsl=true and a module singleVariant declaration');
+
+      final androidDir = Directory(path.join(projectDir.path, '.android'));
+      final gradleProperties = File(path.join(androidDir.path, 'gradle.properties'));
+      gradleProperties.writeAsStringSync(
+        gradleProperties
+            .readAsStringSync()
+            .replaceFirst('android.newDsl=false', 'android.newDsl=true')
+            // The plugin template uses Kotlin, which needs built-in Kotlin with newDsl=true.
+            .replaceFirst('android.builtInKotlin=false', 'android.builtInKotlin=true'),
+        flush: true,
+      );
+      final moduleBuildFile = File(path.join(androidDir.path, 'Flutter', 'build.gradle'));
+      const userDeclaration = 'android.publishing.singleVariant("release") { withSourcesJar() }';
+      moduleBuildFile.writeAsStringSync(
+        '${Platform.lineTerminator}$userDeclaration${Platform.lineTerminator}',
+        mode: FileMode.append,
+        flush: true,
+      );
+      rmTree(Directory(repoPath));
+
+      await inDirectory(projectDir, () async {
+        await flutter('build', options: <String>['aar', '--no-profile']);
+      });
+
+      // The tool regenerates `.android` when it is stale; the edits must still be there.
+      checkFileContains(<String>['android.newDsl=true'], gradleProperties.path);
+      checkFileContains(<String>[userDeclaration], moduleBuildFile.path);
+
+      section('Check that the module declaration is used for release only');
+
+      final String helloDir = path.join(repoPath, 'io', 'flutter', 'devicelab', 'hello');
+      checkFileExists(path.join(helloDir, 'flutter_release', '1.0', 'flutter_release-1.0.aar'));
+      checkFileExists(
+        path.join(helloDir, 'flutter_release', '1.0', 'flutter_release-1.0-sources.jar'),
+      );
+      checkFileNotExists(
+        path.join(helloDir, 'flutter_release', '1.0', 'flutter_release-1.0-javadoc.jar'),
+      );
+      checkFileExists(path.join(helloDir, 'flutter_debug', '1.0', 'flutter_debug-1.0-javadoc.jar'));
+      for (final mode in <String>['release', 'debug']) {
+        checkFileExists(
+          path.join(
+            repoPath,
+            'io',
+            'flutter',
+            'devicelab',
+            'plugin_with_android',
+            'plugin_with_android_$mode',
+            '1.0',
+            'plugin_with_android_$mode-1.0.aar',
+          ),
+        );
+      }
+
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
