@@ -8,6 +8,8 @@
 
 #include <cstring>
 
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #include "flutter/shell/platform/linux/fl_renderable.h"
@@ -19,6 +21,95 @@
 namespace {
 
 class FlViewGtk4AccessibilityTest : public flutter::testing::LinuxTest {};
+
+TEST_F(FlViewGtk4AccessibilityTest, NativeActionsRespectCurrentSemantics) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) primary_view = fl_view_new(project);
+  g_object_ref_sink(primary_view);
+  FlEngine* view_engine = fl_view_get_engine(primary_view);
+  StartEngine(view_engine);
+  g_autoptr(FlView) view = fl_view_new_for_engine(view_engine);
+  g_object_ref_sink(view);
+  size_t calls = 0;
+  FlutterSemanticsAction expected = kFlutterSemanticsActionTap;
+  const FlutterViewId view_id = fl_view_get_id(view);
+  ASSERT_NE(view_id, 0);
+  fl_engine_get_embedder_api(view_engine)->SendSemanticsAction =
+      MOCK_ENGINE_PROC(SendSemanticsAction,
+                       ([&](auto, const FlutterSendSemanticsActionInfo* info) {
+                         EXPECT_EQ(info->view_id, view_id);
+                         EXPECT_EQ(info->node_id, 42u);
+                         EXPECT_EQ(info->action, expected);
+                         EXPECT_EQ(info->data_length, 0u);
+                         calls++;
+                         return kSuccess;
+                       }));
+  int32_t children[] = {42};
+  FlutterSemanticsNode2 root = {};
+  root.child_count = 1;
+  root.children_in_traversal_order = children;
+  FlutterSemanticsFlags flags = {};
+  flags.is_button = true;
+  FlutterSemanticsNode2 button = {};
+  button.id = 42;
+  button.actions = static_cast<FlutterSemanticsAction>(
+      kFlutterSemanticsActionTap | kFlutterSemanticsActionLongPress);
+  button.flags2 = &flags;
+  FlutterSemanticsNode2* nodes[] = {&root, &button};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = view_id;
+  update.node_count = 2;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) native_root =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  g_autoptr(GtkAccessible) native_button =
+      fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
+          native_root);
+  ASSERT_TRUE(GTK_IS_WIDGET(native_button));
+  GtkWidget* widget = GTK_WIDGET(native_button);
+  EXPECT_EQ(gtk_widget_get_parent(widget), nullptr);
+  EXPECT_FALSE(gtk_widget_get_mapped(widget));
+  EXPECT_FALSE(gtk_widget_get_can_target(widget));
+  EXPECT_TRUE(gtk_widget_activate_action(widget, "flutter.tap", nullptr));
+  EXPECT_EQ(calls, 1u);
+  expected = kFlutterSemanticsActionLongPress;
+  EXPECT_TRUE(
+      gtk_widget_activate_action(widget, "flutter.long-press", nullptr));
+  EXPECT_EQ(calls, 2u);
+
+  // Action removal, disabled and hidden semantics must all block dispatch.
+  button.actions = kFlutterSemanticsActionTap;
+  update.node_count = 1;
+  update.nodes = &nodes[1];
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  gtk_widget_activate_action(widget, "flutter.long-press", nullptr);
+  flags.is_enabled = kFlutterTristateFalse;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  gtk_widget_activate_action(widget, "flutter.tap", nullptr);
+  flags.is_enabled = kFlutterTristateTrue;
+  flags.is_hidden = true;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  gtk_widget_activate_action(widget, "flutter.tap", nullptr);
+  EXPECT_EQ(calls, 2u);
+
+  flags.is_hidden = false;
+  expected = kFlutterSemanticsActionTap;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  EXPECT_TRUE(gtk_widget_activate_action(widget, "flutter.tap", nullptr));
+  EXPECT_EQ(calls, 3u);
+  g_object_run_dispose(G_OBJECT(view));
+  gtk_widget_activate_action(widget, "flutter.tap", nullptr);
+  EXPECT_EQ(calls, 3u);
+}
 
 TEST_F(FlViewGtk4AccessibilityTest, PresentBeforeRealizeDoesNotWarn) {
   FlView* view = fl_view_new(project);

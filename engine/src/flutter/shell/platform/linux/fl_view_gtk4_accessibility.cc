@@ -8,6 +8,7 @@
 
 #include <cstddef>
 
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
@@ -44,13 +45,18 @@ struct _FlViewGtk4Accessibility {
   (G_TYPE_CHECK_INSTANCE_TYPE((obj), FL_TYPE_GTK4_TEXT_ACCESSIBLE_NODE))
 
 struct _FlGtk4AccessibleNode {
-  GObject parent_instance;
+  // GTK exports AT-SPI actions through GtkWidget's action muxer. These nodes
+  // belong only to the accessible tree, never the layout or painting tree.
+  GtkWidget parent_instance;
 
   FlView* view;
   FlutterViewId view_id;
   GtkAccessibleRole role;
   GtkATContext* at_context;
   guint64 semantics_revision;
+  int32_t semantics_id;
+  uint64_t actions;
+  gboolean actions_enabled;
 
   gchar* text;
   guint text_selection_base;
@@ -71,7 +77,7 @@ struct _FlGtk4AccessibleNode {
 };
 
 struct _FlGtk4AccessibleNodeClass {
-  GObjectClass parent_class;
+  GtkWidgetClass parent_class;
 };
 
 struct _FlGtk4TextAccessibleNode {
@@ -135,7 +141,7 @@ static void fl_gtk4_text_accessible_node_text_iface_init(
 G_DEFINE_TYPE_WITH_CODE(
     FlGtk4AccessibleNode,
     fl_gtk4_accessible_node,
-    G_TYPE_OBJECT,
+    GTK_TYPE_WIDGET,
     G_IMPLEMENT_INTERFACE(GTK_TYPE_ACCESSIBLE,
                           fl_gtk4_accessible_node_accessible_iface_init))
 
@@ -384,6 +390,10 @@ static void fl_gtk4_accessible_node_detach(FlGtk4AccessibleNode* self) {
   self->focusable = FALSE;
   self->focused = FALSE;
   self->active = FALSE;
+  self->actions_enabled = FALSE;
+  self->actions = 0;
+  gtk_widget_action_set_enabled(GTK_WIDGET(self), "flutter.tap", FALSE);
+  gtk_widget_action_set_enabled(GTK_WIDGET(self), "flutter.long-press", FALSE);
   g_ptr_array_set_size(self->children, 0);
   fl_gtk_runtime_accessible_set_accessible_parent(GTK_ACCESSIBLE(self), nullptr,
                                                   nullptr);
@@ -432,12 +442,34 @@ static void fl_gtk4_accessible_node_set_property(GObject* object,
   }
 }
 
+static void fl_gtk4_accessible_node_activate(GtkWidget* widget,
+                                             const char* name,
+                                             GVariant*) {
+  auto* self = FL_GTK4_ACCESSIBLE_NODE(widget);
+  const FlutterSemanticsAction action = g_str_equal(name, "flutter.tap")
+                                            ? kFlutterSemanticsActionTap
+                                            : kFlutterSemanticsActionLongPress;
+  if (self->view == nullptr || !self->actions_enabled ||
+      (self->actions & action) == 0) {
+    return;
+  }
+  fl_engine_dispatch_semantics_action(fl_view_get_engine(self->view),
+                                      self->view_id, self->semantics_id, action,
+                                      nullptr);
+}
+
 static void fl_gtk4_accessible_node_class_init(
     FlGtk4AccessibleNodeClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
   object_class->get_property = fl_gtk4_accessible_node_get_property;
   object_class->set_property = fl_gtk4_accessible_node_set_property;
   object_class->dispose = fl_gtk4_accessible_node_dispose;
+
+  GtkWidgetClass* widget_class = GTK_WIDGET_CLASS(klass);
+  gtk_widget_class_install_action(widget_class, "flutter.tap", nullptr,
+                                  fl_gtk4_accessible_node_activate);
+  gtk_widget_class_install_action(widget_class, "flutter.long-press", nullptr,
+                                  fl_gtk4_accessible_node_activate);
 
   g_object_class_install_property(
       object_class, PROP_GTK4_ACCESSIBLE_NODE_ACCESSIBLE_ROLE,
@@ -449,6 +481,10 @@ static void fl_gtk4_accessible_node_class_init(
 
 static void fl_gtk4_accessible_node_init(FlGtk4AccessibleNode* self) {
   self->children = g_ptr_array_new_with_free_func(g_object_unref);
+  gtk_widget_set_can_target(GTK_WIDGET(self), FALSE);
+  gtk_widget_set_focusable(GTK_WIDGET(self), FALSE);
+  gtk_widget_action_set_enabled(GTK_WIDGET(self), "flutter.tap", FALSE);
+  gtk_widget_action_set_enabled(GTK_WIDGET(self), "flutter.long-press", FALSE);
 }
 
 static void fl_gtk4_accessible_node_accessible_iface_init(
@@ -665,6 +701,7 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
                          : FL_GTK4_ACCESSIBLE_NODE(
                                g_object_new(FL_TYPE_GTK4_ACCESSIBLE_NODE,
                                             "accessible-role", role, nullptr));
+    g_object_ref_sink(self);
   } else if (self->role != role) {
     g_object_set(self, "accessible-role", role, nullptr);
     g_clear_object(&self->at_context);
@@ -672,6 +709,8 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
   self->view = view;
   self->view_id = view_id;
   self->semantics_revision = semantics->revision;
+  self->semantics_id = semantics->id;
+  self->actions = semantics->actions;
 
   const FlutterSemanticsFlags* flags = &semantics->flags;
   const gboolean is_enabled = flags->is_enabled != kFlutterTristateFalse;
@@ -682,6 +721,15 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
   const gboolean is_required = flags->is_required == kFlutterTristateTrue;
   const gboolean is_read_only = flags->is_text_field && flags->is_read_only;
   const gboolean is_multiline = flags->is_text_field && flags->is_multiline;
+
+  self->actions_enabled = is_enabled && !is_hidden;
+  gtk_widget_action_set_enabled(
+      GTK_WIDGET(self), "flutter.tap",
+      self->actions_enabled && (self->actions & kFlutterSemanticsActionTap));
+  gtk_widget_action_set_enabled(
+      GTK_WIDGET(self), "flutter.long-press",
+      self->actions_enabled &&
+          (self->actions & kFlutterSemanticsActionLongPress));
 
   self->focusable =
       is_enabled &&
