@@ -16,7 +16,6 @@ void main() {
       expect(targets, hasLength(1));
       final ExtensionBuildTarget target = targets.first;
       expect(target.name, LinuxBuildService.customLinuxBuildTargetName);
-      expect(target.targetPlatform, LinuxBuildService.linuxX64TargetPlatform);
       expect(target.description, 'A custom Linux build target from prototype extension.');
     });
 
@@ -24,18 +23,18 @@ void main() {
       final service = LinuxBuildService();
 
       final ExtensionBuildResult successResult = await service.build(
-        buildMode: 'debug',
+        buildMode: .debug,
         mainPath: 'lib/main.dart',
-        projectRoot: '/project',
+        projectRoot: Uri.parse('/project'),
         targetName: LinuxBuildService.customLinuxBuildTargetName,
       );
       expect(successResult.success, isTrue);
       expect(successResult.errorMessage, isNull);
 
       final ExtensionBuildResult failureResult = await service.build(
-        buildMode: 'debug',
+        buildMode: .debug,
         mainPath: 'lib/main.dart',
-        projectRoot: '/project',
+        projectRoot: Uri.parse('/project'),
         targetName: 'unknown-target',
       );
       expect(failureResult.success, isFalse);
@@ -113,6 +112,38 @@ void main() {
           BuildService.targetNameParam: 'custom-linux-build',
           BuildService.projectRootParam: '/project',
           BuildService.mainPathParam: 'lib/main.dart',
+        }),
+        throwsA(
+          isA<Object>().having(
+            (Object e) => e.toString(),
+            'toString',
+            contains('Missing or invalid "${BuildService.buildModeParam}" parameter.'),
+          ),
+        ),
+      );
+
+      await expectLater(
+        () => buildHandler(<String, Object?>{
+          BuildService.targetNameParam: 'custom-linux-build',
+          BuildService.projectRootParam: 'relative/path',
+          BuildService.mainPathParam: 'lib/main.dart',
+          BuildService.buildModeParam: 'debug',
+        }),
+        throwsA(
+          isA<Object>().having(
+            (Object e) => e.toString(),
+            'toString',
+            contains('Missing or invalid "${BuildService.projectRootParam}" parameter.'),
+          ),
+        ),
+      );
+
+      await expectLater(
+        () => buildHandler(<String, Object?>{
+          BuildService.targetNameParam: 'custom-linux-build',
+          BuildService.projectRootParam: '/project',
+          BuildService.mainPathParam: 'lib/main.dart',
+          BuildService.buildModeParam: 'invalid_mode',
         }),
         throwsA(
           isA<Object>().having(

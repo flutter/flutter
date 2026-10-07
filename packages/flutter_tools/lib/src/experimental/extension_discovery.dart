@@ -34,10 +34,10 @@ class ExtensionConnection {
 
   /// Sends an RPC request to the extension isolate.
   Future<Object?> sendRequest(
-    String method, [
+    String method, {
     Object? params,
     Duration? timeout = const Duration(seconds: 5),
-  ]) async {
+  }) async {
     if (_isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }

@@ -31,29 +31,17 @@ final class _FailingAndConflictingBuildService extends BuildService {
   @override
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
     return const <ExtensionBuildTarget>[
-      ExtensionBuildTarget(
-        description: 'Failing custom build target.',
-        name: 'failing-build',
-        targetPlatform: 'linux-x64',
-      ),
-      ExtensionBuildTarget(
-        description: 'Conflicting bundle target.',
-        name: 'bundle',
-        targetPlatform: 'linux-x64',
-      ),
-      ExtensionBuildTarget(
-        description: 'Empty target name that should be skipped.',
-        name: '',
-        targetPlatform: 'linux-x64',
-      ),
+      ExtensionBuildTarget(description: 'Failing custom build target.', name: 'failing-build'),
+      ExtensionBuildTarget(description: 'Conflicting bundle target.', name: 'bundle'),
+      ExtensionBuildTarget(description: 'Empty target name that should be skipped.', name: ''),
     ];
   }
 
   @override
   Future<ExtensionBuildResult> build({
-    required String buildMode,
+    required BuildMode buildMode,
     required String mainPath,
-    required String projectRoot,
+    required Uri projectRoot,
     required String targetName,
   }) async {
     return const ExtensionBuildResult(
@@ -75,19 +63,15 @@ final class _FirstDuplicateBuildService extends BuildService {
   @override
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
     return const <ExtensionBuildTarget>[
-      ExtensionBuildTarget(
-        description: 'First extension shared target.',
-        name: 'shared-target',
-        targetPlatform: 'linux-x64',
-      ),
+      ExtensionBuildTarget(description: 'First extension shared target.', name: 'shared-target'),
     ];
   }
 
   @override
   Future<ExtensionBuildResult> build({
-    required String buildMode,
+    required BuildMode buildMode,
     required String mainPath,
-    required String projectRoot,
+    required Uri projectRoot,
     required String targetName,
   }) async {
     return const ExtensionBuildResult(success: true);
@@ -106,19 +90,15 @@ final class _SecondDuplicateBuildService extends BuildService {
   @override
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
     return const <ExtensionBuildTarget>[
-      ExtensionBuildTarget(
-        description: 'Second extension shared target.',
-        name: 'shared-target',
-        targetPlatform: 'linux-x64',
-      ),
+      ExtensionBuildTarget(description: 'Second extension shared target.', name: 'shared-target'),
     ];
   }
 
   @override
   Future<ExtensionBuildResult> build({
-    required String buildMode,
+    required BuildMode buildMode,
     required String mainPath,
-    required String projectRoot,
+    required Uri projectRoot,
     required String targetName,
   }) async {
     return const ExtensionBuildResult(
@@ -183,9 +163,9 @@ void main() {
         );
 
         final ExtensionBuildResult result = await buildManager.build(
-          buildMode: 'debug',
+          buildMode: .debug,
           mainPath: 'lib/main.dart',
-          projectRoot: '/',
+          projectRoot: Uri.parse('/'),
           targetName: 'custom-linux-build',
         );
         expect(result.success, isFalse);
@@ -265,8 +245,40 @@ void main() {
         final targets = <ExtensionBuildTarget>[...await buildManager.getBuildTargets()];
         expect(targets, hasLength(1));
         expect(targets.first.name, equals('custom-linux-build'));
-        expect(targets.first.targetPlatform, equals('linux-x64'));
         expect(buildManager.cachedTargets, equals(targets));
+
+        await manager.dispose();
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
+      },
+    );
+
+    testUsingContext(
+      'ExtensionBuildManager.build() throws ArgumentError when projectRoot is relative',
+      () async {
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: testLogger,
+          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+          featureFlags: featureFlags,
+        );
+        final buildManager = ExtensionBuildManager(
+          extensionManager: manager,
+          featureFlags: featureFlags,
+          logger: testLogger,
+        );
+
+        await expectLater(
+          () => buildManager.build(
+            buildMode: .debug,
+            mainPath: 'lib/main.dart',
+            projectRoot: Uri.parse('relative/path'),
+            targetName: 'custom-linux-build',
+          ),
+          throwsArgumentError,
+        );
 
         await manager.dispose();
       },
@@ -292,9 +304,9 @@ void main() {
         );
 
         final ExtensionBuildResult result = await buildManager.build(
-          buildMode: 'debug',
+          buildMode: .debug,
           mainPath: 'lib/main.dart',
-          projectRoot: '/',
+          projectRoot: Uri.parse('/'),
           targetName: 'non-existent-target',
         );
         expect(result.success, isFalse);
@@ -333,11 +345,15 @@ void main() {
         expect(targets, hasLength(1));
         expect(targets.first.name, 'shared-target');
         expect(targets.first.description, 'First extension shared target.');
+        expect(
+          testLogger.warningText,
+          contains('Skipping duplicate build target "shared-target" from extension.'),
+        );
 
         final ExtensionBuildResult result = await buildManager.build(
-          buildMode: 'debug',
+          buildMode: .debug,
           mainPath: 'lib/main.dart',
-          projectRoot: '/',
+          projectRoot: Uri.parse('/'),
           targetName: 'shared-target',
         );
         expect(result.success, isTrue);
@@ -420,9 +436,15 @@ void main() {
 
         await expectLater(
           () => commandRunner.run(<String>['build', 'failing-build', '--no-pub']),
-          throwsToolExit(message: 'Custom build compilation error.'),
+          throwsToolExit(message: 'Build failed: Custom build compilation error.'),
         );
 
+        expect(
+          testLogger.warningText,
+          contains(
+            'Skipping custom build target "bundle" because a subcommand with that name already exists.',
+          ),
+        );
         expect(command.subcommands['bundle'], isA<BuildBundleCommand>());
         expect(command.subcommands.containsKey(''), isFalse);
 

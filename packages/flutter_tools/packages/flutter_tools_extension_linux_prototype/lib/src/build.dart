@@ -10,25 +10,21 @@ final class LinuxBuildService extends BuildService {
   /// Target name for the prototype Linux build target.
   static const String customLinuxBuildTargetName = 'custom-linux-build';
 
-  /// Target platform for the prototype Linux build target.
-  static const String linuxX64TargetPlatform = 'linux-x64';
-
   @override
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
     return const <ExtensionBuildTarget>[
       ExtensionBuildTarget(
         description: 'A custom Linux build target from prototype extension.',
         name: customLinuxBuildTargetName,
-        targetPlatform: linuxX64TargetPlatform,
       ),
     ];
   }
 
   @override
   Future<ExtensionBuildResult> build({
-    required String buildMode,
+    required BuildMode buildMode,
     required String mainPath,
-    required String projectRoot,
+    required Uri projectRoot,
     required String targetName,
   }) async {
     if (targetName == customLinuxBuildTargetName) {

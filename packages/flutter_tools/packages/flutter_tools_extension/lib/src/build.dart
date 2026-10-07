@@ -43,9 +43,9 @@ abstract base class BuildService extends ToolExtensionService {
 
   /// Triggers a custom build for the given [targetName].
   Future<ExtensionBuildResult> build({
-    required String buildMode,
+    required BuildMode buildMode,
     required String mainPath,
-    required String projectRoot,
+    required Uri projectRoot,
     required String targetName,
   });
 
@@ -66,20 +66,6 @@ abstract base class BuildService extends ToolExtensionService {
   }
 
   Future<Map<String, Object?>> _buildRpc(Map<String, Object?> params) async {
-    if (params case {
-      buildModeParam: final String buildMode,
-      mainPathParam: final String mainPath,
-      projectRootParam: final String projectRoot,
-      targetNameParam: final String targetName,
-    }) {
-      final ExtensionBuildResult result = await build(
-        buildMode: buildMode,
-        mainPath: mainPath,
-        projectRoot: projectRoot,
-        targetName: targetName,
-      );
-      return result.toMap();
-    }
     if (params[targetNameParam] is! String) {
       throw RpcException.invalidParams('Missing or invalid "$targetNameParam" parameter.');
     }
@@ -92,6 +78,30 @@ abstract base class BuildService extends ToolExtensionService {
     if (params[buildModeParam] is! String) {
       throw RpcException.invalidParams('Missing or invalid "$buildModeParam" parameter.');
     }
-    throw RpcException.invalidParams('Invalid build parameters.');
+
+    final targetName = params[targetNameParam]! as String;
+    final projectRoot = params[projectRootParam]! as String;
+    final mainPath = params[mainPathParam]! as String;
+    final buildMode = params[buildModeParam]! as String;
+
+    final Uri? projectRootUri = Uri.tryParse(projectRoot);
+    if (projectRootUri == null || !projectRootUri.hasAbsolutePath) {
+      throw RpcException.invalidParams('Missing or invalid "$projectRootParam" parameter.');
+    }
+
+    final BuildMode mode;
+    try {
+      mode = BuildMode.fromCliName(buildMode);
+    } on ArgumentError {
+      throw RpcException.invalidParams('Missing or invalid "$buildModeParam" parameter.');
+    }
+
+    final ExtensionBuildResult result = await build(
+      buildMode: mode,
+      mainPath: mainPath,
+      projectRoot: projectRootUri,
+      targetName: targetName,
+    );
+    return result.toMap();
   }
 }

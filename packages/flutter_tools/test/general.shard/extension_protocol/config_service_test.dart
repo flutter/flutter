@@ -65,10 +65,10 @@ class _FakeExtensionConnection extends Fake implements ExtensionConnection {
 
   @override
   Future<Object?> sendRequest(
-    String method, [
+    String method, {
     Object? params,
     Duration? timeout = const Duration(seconds: 5),
-  ]) async => response;
+  }) async => response;
 }
 
 void _secondaryExtensionEntryPoint(SendPort sendPort) {

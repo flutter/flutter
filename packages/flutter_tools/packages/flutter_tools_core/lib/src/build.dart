@@ -4,14 +4,82 @@
 
 import 'package:meta/meta.dart';
 
+final _upperRegex = RegExp(r'[A-Z]');
+
+/// Convert `fooBar` to `foo_bar`.
+String _snakeCase(String str) {
+  return str.replaceAllMapped(
+    _upperRegex,
+    (Match m) => '${m.start == 0 ? '' : '_'}${m[0]!.toLowerCase()}',
+  );
+}
+
+/// Converts `fooBar` to `FooBar`.
+String _sentenceCase(String str) =>
+    str.isEmpty ? str : '${str[0].toUpperCase()}${str.substring(1)}';
+
+/// A summary of the compilation strategy used for Dart.
+enum BuildMode {
+  /// Built in JIT mode with no optimizations, enabled asserts, and a VM service.
+  debug,
+
+  /// Built in AOT mode with some optimizations and a VM service.
+  profile,
+
+  /// Built in AOT mode with all optimizations and no VM service.
+  release,
+
+  /// Built in JIT mode with all optimizations and no VM service.
+  jitRelease;
+
+  factory BuildMode.fromCliName(String value) => values.singleWhere(
+    (BuildMode element) => element.cliName == value,
+    orElse: () => throw ArgumentError('$value is not a supported build mode'),
+  );
+
+  static const releaseModes = <BuildMode>{release, jitRelease};
+  static const jitModes = <BuildMode>{debug, jitRelease};
+
+  /// Whether this mode is considered release.
+  ///
+  /// Useful for determining whether we should enable/disable asserts or
+  /// other development features.
+  bool get isRelease => releaseModes.contains(this);
+
+  /// Whether this mode is using the JIT runtime.
+  bool get isJit => jitModes.contains(this);
+
+  /// Whether this mode is using the precompiled runtime.
+  bool get isPrecompiled => !isJit;
+
+  /// [name] formatted in snake case.
+  ///
+  /// (e.g. debug, profile, release, jit_release)
+  String get cliName => _snakeCase(name);
+
+  /// [cliName] formatted in sentence case.
+  ///
+  /// (e.g. Debug, Profile, Release, Jit_release)
+  String get uppercaseName => _sentenceCase(cliName);
+
+  /// [cliName] with `_` replaced with a space.
+  ///
+  /// (e.g. debug, profile, release, jit release)
+  String get friendlyName => cliName.replaceAll('_', ' ');
+
+  /// [friendlyName] formatted in sentence case.
+  ///
+  /// (e.g. Debug, Profile, Release, Jit release)
+  String get uppercaseFriendlyName => _sentenceCase(friendlyName);
+
+  @override
+  String toString() => cliName;
+}
+
 /// Representation of a custom build target provided by a tool extension.
 @immutable
 class ExtensionBuildTarget {
-  const ExtensionBuildTarget({
-    required this.description,
-    required this.name,
-    required this.targetPlatform,
-  });
+  const ExtensionBuildTarget({required this.description, required this.name});
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
@@ -24,10 +92,6 @@ class ExtensionBuildTarget {
         final String value => value,
         _ => '',
       },
-      targetPlatform: switch (json[targetPlatformKey]) {
-        final String value => value,
-        _ => '',
-      },
     );
   }
 
@@ -36,9 +100,6 @@ class ExtensionBuildTarget {
 
   /// Map key for [name].
   static const String nameKey = 'name';
-
-  /// Map key for [targetPlatform].
-  static const String targetPlatformKey = 'targetPlatform';
 
   /// Deserializes a list of [ExtensionBuildTarget] objects from RPC response data.
   static List<ExtensionBuildTarget> listFromJson(Object? rpcResult) {
@@ -57,31 +118,20 @@ class ExtensionBuildTarget {
   /// The name of this build target (e.g. `'custom-apk'`).
   final String name;
 
-  /// The target platform string (e.g. `'android-arm64'`).
-  final String targetPlatform;
-
   /// Serializes the build target to a JSON-serializable map.
-  Map<String, Object?> toMap() => <String, Object?>{
-    descriptionKey: description,
-    nameKey: name,
-    targetPlatformKey: targetPlatform,
-  };
+  Map<String, Object?> toMap() => <String, Object?>{descriptionKey: description, nameKey: name};
 
   @override
-  String toString() =>
-      'ExtensionBuildTarget(name: $name, targetPlatform: $targetPlatform, description: $description)';
+  String toString() => 'ExtensionBuildTarget(name: $name, description: $description)';
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other is ExtensionBuildTarget &&
-            other.description == description &&
-            other.name == name &&
-            other.targetPlatform == targetPlatform);
+        (other is ExtensionBuildTarget && other.description == description && other.name == name);
   }
 
   @override
-  int get hashCode => Object.hash(description, name, targetPlatform);
+  int get hashCode => Object.hash(description, name);
 }
 
 /// Representation of a build result returned by a tool extension.

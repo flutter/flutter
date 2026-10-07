@@ -223,7 +223,7 @@ class BuildCommand extends FlutterCommand {
             ),
           );
         } else {
-          toolContext.logger.printTrace(
+          toolContext.logger.printWarning(
             'Skipping custom build target "${target.name}" because a subcommand with that name already exists.',
           );
         }
@@ -310,22 +310,24 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String projectRoot = toolContext.fs.currentDirectory.path;
-    final String mainPath = targetFile;
     final BuildInfo buildInfo = await getBuildInfo();
-    final String buildModeName = buildInfo.mode.name;
 
     final ExtensionBuildResult result = await _buildManager.build(
-      buildMode: buildModeName,
-      mainPath: mainPath,
-      projectRoot: projectRoot,
+      buildMode: buildInfo.mode,
+      mainPath: targetFile,
+      projectRoot: toolContext.fs.currentDirectory.uri,
       targetName: target.name,
     );
 
     if (result.success) {
       return FlutterCommandResult.success();
     } else {
-      throwToolExit(result.errorMessage ?? 'Build failed.');
+      final String? errorMessage = result.errorMessage;
+      throwToolExit(
+        errorMessage != null && errorMessage.isNotEmpty
+            ? 'Build failed: $errorMessage'
+            : 'Build failed.',
+      );
     }
   }
 }

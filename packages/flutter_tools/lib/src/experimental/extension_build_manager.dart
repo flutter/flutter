@@ -75,7 +75,8 @@ base class ExtensionBuildManager {
           continue;
         }
         if (_targetToConnection.containsKey(target.name)) {
-          _logger.printTrace('Skipping duplicate build target "${target.name}" from extension.');
+          // TODO(bkonyi): Include conflicting extension names once extension manifest metadata is wired into ExtensionConnection.
+          _logger.printWarning('Skipping duplicate build target "${target.name}" from extension.');
           continue;
         }
         targets.add(target);
@@ -89,11 +90,14 @@ base class ExtensionBuildManager {
 
   /// Triggers a custom build for the given [targetName] by routing to the active extension.
   Future<ExtensionBuildResult> build({
-    required String buildMode,
+    required BuildMode buildMode,
     required String mainPath,
-    required String projectRoot,
+    required Uri projectRoot,
     required String targetName,
   }) async {
+    if (!projectRoot.hasAbsolutePath) {
+      throw ArgumentError.value(projectRoot, 'projectRoot', 'Must be an absolute path.');
+    }
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const ExtensionBuildResult(
         success: false,
@@ -126,15 +130,15 @@ base class ExtensionBuildManager {
     try {
       final Object? result = await connection.sendRequest(
         BuildService.buildMethod,
-        <String, Object?>{
-          BuildService.buildModeParam: buildMode,
+        params: <String, Object?>{
+          BuildService.buildModeParam: buildMode.cliName,
           BuildService.mainPathParam: mainPath,
-          BuildService.projectRootParam: projectRoot,
+          BuildService.projectRootParam: projectRoot.toString(),
           BuildService.targetNameParam: targetName,
         },
         // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
         // https://github.com/flutter/flutter/issues/193955.
-        null,
+        timeout: null,
       );
       if (result case final Map<String, Object?> resultMap) {
         return ExtensionBuildResult.fromJson(resultMap);
