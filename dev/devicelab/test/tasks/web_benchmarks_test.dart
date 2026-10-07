@@ -388,6 +388,13 @@ void main() {
       expect(filterBenchmarks(allBenchmarks: all), all);
     });
 
+    test('Hostile: allBenchmarks is empty list throws ArgumentError when filter applied', () {
+      expect(
+        () => filterBenchmarks(allBenchmarks: <String>[], filterPattern: '.*'),
+        throwsArgumentError,
+      );
+    });
+
     test(
       'Typo / 0 match: Throws ArgumentError with clear message listing available benchmarks',
       () {
@@ -587,6 +594,28 @@ void main() {
       expect(result.metrics.length, 1);
       expect(result.metrics.first.metricKey, 'draw_rect.canvaskit.totalUiFrame.average');
     });
+
+    test('Hostile: regressionThreshold of 0.0 correctly flags strictly positive deltas as regressions', () {
+      // ignore: unused_local_variable
+      final comp = compareResults(
+        baseline: {'a.average': 100.0, 'b.average': 100.0},
+        current: {'a.average': 100.0001, 'b.average': 100.0},
+        regressionThreshold: 0.0,
+      );
+      expect(comp.hasRegressions, true);
+      final metricA = comp.metrics.firstWhere((m) => m.metricKey == 'a.average');
+      final metricB = comp.metrics.firstWhere((m) => m.metricKey == 'b.average');
+      expect(metricA.isRegression, true);
+      expect(metricB.isRegression, false);
+    });
+
+    test('Hostile: compareResults with completely empty baseline and current maps', () {
+      // ignore: unused_local_variable
+      final comp = compareResults(baseline: {}, current: {});
+      expect(comp.hasRegressions, false);
+      expect(comp.metrics.isEmpty, true);
+      expect(comp.missingMetrics.isEmpty, true);
+    });
   });
 
   group('formatAnsiSummaryTable', () {
@@ -732,6 +761,13 @@ void main() {
       final String tablePlain = formatAnsiSummaryTable(comp, enableAnsi: false);
       expect(tablePlain, isNot(contains('[')));
     });
+
+    test('Hostile: empty metrics list generates empty table output', () {
+      // ignore: unused_local_variable
+      final comp = BenchmarkComparison(regressionThreshold: 10.0, metrics: [], missingMetrics: []);
+      final table = formatAnsiSummaryTable(comp);
+      expect(table.trim(), isEmpty);
+    });
   });
 
   group('formatStructuredJson', () {
@@ -771,6 +807,15 @@ void main() {
         timestamp: dt,
       );
       expect(result['timestamp'], dt.toUtc().toIso8601String());
+    });
+
+    test('Hostile: empty profiles and metadata', () {
+      final result = formatStructuredJson(
+        profiles: <Map<String, dynamic>>[],
+        metadata: {},
+      );
+      expect(result['metadata'], isEmpty);
+      expect((result['benchmarks'] as Map).isEmpty, true);
     });
   });
 }
