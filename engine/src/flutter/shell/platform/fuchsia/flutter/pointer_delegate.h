@@ -73,8 +73,8 @@ class PointerDelegate {
 
   // Channel for touch events from Scenic.
   fuchsia::ui::pointer::TouchSourcePtr touch_source_;
-  bool intercept_all_input_ = true;
-  std::optional<GestureResponsePolicy> policy_;
+  [[maybe_unused]] bool intercept_all_input_ = true;
+  [[maybe_unused]] std::optional<GestureResponsePolicy> policy_;
 
   // Receive touch events from Scenic. Must be copyable.
   std::function<void(std::vector<fuchsia::ui::pointer::TouchEvent>)>

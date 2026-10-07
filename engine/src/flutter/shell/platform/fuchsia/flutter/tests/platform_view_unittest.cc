@@ -1579,10 +1579,9 @@ TEST_F(PlatformViewTests, TouchGestureResponsePolicy_InterceptAllInputTrue) {
   // Even without a policy (and even if a policy with NO is set), flag TRUE
   // answers YES (8) to every sample.
   auto msg_response = FakePlatformMessageResponse::Create();
-  static_cast<flutter::PlatformView*>(&platform_view)
-      ->HandlePlatformMessage(msg_response->WithMessage(
-          "flutter/platform_views",
-          R"({"method":"View.setGestureResponsePolicy","args":{"defaultResponse":"NO"}})"));
+  platform_view.HandlePlatformMessage(msg_response->WithMessage(
+      "flutter/platform_views",
+      R"({"method":"View.setGestureResponsePolicy","args":{"defaultResponse":"NO"}})"));
   EXPECT_TRUE(msg_response->IsCompleted());
 
   std::vector<fuchsia::ui::pointer::TouchEvent> events;
@@ -1642,10 +1641,9 @@ TEST_F(PlatformViewTests,
   (void)touch_server.UploadedResponses();
 
   auto msg_response = FakePlatformMessageResponse::Create();
-  static_cast<flutter::PlatformView*>(&platform_view)
-      ->HandlePlatformMessage(
-          msg_response->WithMessage("flutter/platform_views",
-                                    R"({
+  platform_view.HandlePlatformMessage(
+      msg_response->WithMessage("flutter/platform_views",
+                                R"({
             "method": "View.setGestureResponsePolicy",
             "args": {
               "defaultResponse": "NO",
@@ -1750,10 +1748,9 @@ TEST_F(PlatformViewTests,
   (void)touch_server.UploadedResponses();
 
   auto msg_response = FakePlatformMessageResponse::Create();
-  static_cast<flutter::PlatformView*>(&platform_view)
-      ->HandlePlatformMessage(
-          msg_response->WithMessage("flutter/platform_views",
-                                    R"({
+  platform_view.HandlePlatformMessage(
+      msg_response->WithMessage("flutter/platform_views",
+                                R"({
             "method": "View.setGestureResponsePolicy",
             "args": {
               "defaultResponse": "NO",
