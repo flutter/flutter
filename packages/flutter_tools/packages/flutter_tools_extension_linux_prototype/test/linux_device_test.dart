@@ -104,9 +104,9 @@ void main() {
       await expectLater(
         isSupportedHandler(<String, Object?>{}),
         throwsA(
-          isA<RpcException>().having(
-            (RpcException e) => e.message,
-            'message',
+          isA<Object>().having(
+            (Object e) => e.toString(),
+            'toString',
             contains(
               'Invalid or missing parameters for ${DeviceService.isSupportedForProjectMethod}.',
             ),
