@@ -279,9 +279,9 @@ class AndroidStudio {
       return manuallyConfigured;
     }
 
-    studios.sort(_compareCandidates);
+    final sortedStudios = List<AndroidStudio>.of(studios)..sort(_compareCandidates);
 
-    for (final studio in studios) {
+    for (final studio in sortedStudios) {
       if (studio.isValid) {
         return studio;
       }

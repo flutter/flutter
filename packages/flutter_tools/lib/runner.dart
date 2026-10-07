@@ -64,8 +64,8 @@ Future<int> run(
     reportCrashes ??= !await globals.isRunningOnBot;
     final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
       analytics: globals.analytics,
-      androidSdk: globals.androidSdk,
-      androidStudio: globals.androidStudio,
+      androidSdkBuilder: () => globals.androidSdk,
+      androidStudioBuilder: () => globals.androidStudio,
       androidWorkflow: androidWorkflow,
       artifacts: globals.artifacts,
       botDetector: globals.botDetector,
@@ -85,10 +85,10 @@ Future<int> run(
       flutterVersion: globals.flutterVersion,
       fs: globals.fs,
       git: globals.git,
-      gradleUtils: globals.gradleUtils,
+      gradleUtilsBuilder: () => globals.gradleUtils!,
       iosSimulatorUtils: globals.iosSimulatorUtils,
       iosWorkflow: globals.iosWorkflow,
-      java: globals.java,
+      javaBuilder: () => globals.java,
       localEngineLocator: globals.localEngineLocator,
       logger: globals.logger,
       nativeAssetsBuilder: globals.nativeAssetsBuilder,

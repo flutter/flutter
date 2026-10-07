@@ -5,14 +5,17 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:test/fake.dart';
 
@@ -281,6 +284,70 @@ void main() {
       expect(dependencies.androidContext.androidSdk, same(mockSdk));
       expect(sdkEvaluations, 1);
     });
+
+    testUsingContext('lazily evaluates gradleUtils upon first access in AndroidContext', () async {
+      var gradleEvaluations = 0;
+      final mockGradle = FakeGradleUtils();
+
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        gradleUtilsBuilder: () {
+          gradleEvaluations++;
+          return mockGradle;
+        },
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+
+      // GradleUtils is not evaluated during bootstrap.
+      expect(gradleEvaluations, 0);
+
+      // GradleUtils is not evaluated until accessed.
+      final GradleUtils gradle = dependencies.androidContext.gradleUtils;
+      expect(gradleEvaluations, 1);
+      expect(gradle, same(mockGradle));
+
+      // Subsequent access does not re-evaluate.
+      expect(dependencies.androidContext.gradleUtils, same(mockGradle));
+      expect(gradleEvaluations, 1);
+    });
+  });
+
+  group('runInContext fallback generators', () {
+    var sdkEvaluations = 0;
+    var javaEvaluations = 0;
+
+    setUp(() {
+      sdkEvaluations = 0;
+      javaEvaluations = 0;
+    });
+
+    testUsingContext(
+      'AndroidWorkflow and EmulatorManager do not eagerly evaluate AndroidSdk or Java',
+      () {
+        expect(androidWorkflow, isNotNull);
+        expect(emulatorManager, isNotNull);
+        expect(sdkEvaluations, 0);
+        expect(javaEvaluations, 0);
+      },
+      overrides: <Type, Generator>{
+        AndroidSdk: () {
+          sdkEvaluations++;
+          return FakeAndroidSdk();
+        },
+        Java: () {
+          javaEvaluations++;
+          return FakeJava();
+        },
+        FileSystem: () => MemoryFileSystem.test(),
+        Logger: () => BufferLogger.test(),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ROOT': '/flutter', 'HOME': '/home/user'},
+        ),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
   });
 
   group('AndroidContext', () {

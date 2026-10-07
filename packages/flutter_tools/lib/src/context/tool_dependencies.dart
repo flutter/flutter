@@ -170,6 +170,7 @@ class ToolDependencies {
     FileSystem? fs,
     Git? git,
     GradleUtils? gradleUtils,
+    GradleUtils Function()? gradleUtilsBuilder,
     IOSSimulatorUtils? iosSimulatorUtils,
     IOSWorkflow? iosWorkflow,
     Java? java,
@@ -203,6 +204,10 @@ class ToolDependencies {
     assert(
       androidStudio == null || androidStudioBuilder == null,
       'Cannot provide both androidStudio and androidStudioBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      gradleUtils == null || gradleUtilsBuilder == null,
+      'Cannot provide both gradleUtils and gradleUtilsBuilder to ToolDependencies.bootstrap.',
     );
     assert(
       java == null || javaBuilder == null,
@@ -515,19 +520,21 @@ class ToolDependencies {
                 processManager: finalProcessManager,
               ));
 
-    final GradleUtils Function() gradleUtilsBuilder = gradleUtils != null
-        ? () => gradleUtils
-        : () => GradleUtils(
-            platform: finalPlatform,
-            logger: finalLogger,
-            cache: finalCache,
-            operatingSystemUtils: finalOS,
-          );
+    final GradleUtils Function() finalGradleUtilsBuilder =
+        gradleUtilsBuilder ??
+        (gradleUtils != null
+            ? () => gradleUtils
+            : () => GradleUtils(
+                platform: finalPlatform,
+                logger: finalLogger,
+                cache: finalCache,
+                operatingSystemUtils: finalOS,
+              ));
 
     finalAndroidContext = AndroidContext(
       androidSdkBuilder: finalAndroidSdkBuilder,
       androidStudioBuilder: finalAndroidStudioBuilder,
-      gradleUtilsBuilder: gradleUtilsBuilder,
+      gradleUtilsBuilder: finalGradleUtilsBuilder,
       javaBuilder: finalJavaBuilder,
     );
 
@@ -574,7 +581,7 @@ class ToolDependencies {
           platform: finalPlatform,
           processManager: finalProcessManager,
           fileSystem: finalFS,
-          androidSdk: finalAndroidContext.androidSdk,
+          androidSdkBuilder: () => finalAndroidContext.androidSdk,
           featureFlags: finalFeatureFlags,
           iosSimulatorUtils: finalIOSSimulatorUtils,
           xcDevice: finalXCDevice,
