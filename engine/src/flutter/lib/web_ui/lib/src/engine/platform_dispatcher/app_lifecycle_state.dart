@@ -106,14 +106,17 @@ class _BrowserAppLifecycleState extends AppLifecycleState {
   void _onViewMoved(int viewId) {
     // The view's window/document changed. Detach from the old ones and re-attach
     // to the new ones.
-    _detachView(viewId);
+    // Update aggregated state after move is done, otherwise apps get a detached
+    // event and might start cleanups
+    _detachView(viewId, updateAggregateState: false);
     final EngineFlutterView? view = _viewManager[viewId];
     if (view != null) {
-      _attachView(view);
+      _attachView(view, updateAggregateState: false);
     }
+    _updateAggregateState();
   }
 
-  void _attachView(EngineFlutterView view) {
+  void _attachView(EngineFlutterView view, {bool updateAggregateState = true}) {
     assert(!_trackers.containsKey(view.viewId), 'View ${view.viewId} is already being tracked.');
     final tracker = _ViewLifecycleTracker(
       domDocument: view.viewDomDocument,
@@ -121,12 +124,16 @@ class _BrowserAppLifecycleState extends AppLifecycleState {
       onStateChanged: _updateAggregateState,
     );
     _trackers[view.viewId] = tracker;
-    _updateAggregateState();
+    if (updateAggregateState) {
+      _updateAggregateState();
+    }
   }
 
-  void _detachView(int viewId) {
+  void _detachView(int viewId, {bool updateAggregateState = true}) {
     _trackers.remove(viewId)?.dispose();
-    _updateAggregateState();
+    if (updateAggregateState) {
+      _updateAggregateState();
+    }
   }
 
   void _updateAggregateState() {
