@@ -33,7 +33,8 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 ## Flutter 3.47 Changes
 
 ### [3.47.7](https://github.com/flutter/flutter/releases/tag/3.47.7)
-- [flutter/193420](https://github.com/flutter/flutter/pull/193420) When a route shows an OverlayPortal on iOS, accessibility frames are shrunk by the device pixel ratio and anchored to the top-left, so VoiceOver focus and XCUITest taps miss the visible controls.
+- [flutter/182604](https://github.com/flutter/flutter/issues/182604) When an OverlayPortal is displayed on iOS, accessibility frames are shrunk by the device pixel ratio and anchored to the top-left, so VoiceOver focus and XCUITest taps miss the visible controls.
+- [flutter/100946](https://github.com/flutter/flutter/issues/100946) When using VoiceOver on iOS with a ReorderableListView, Semantics focus is incorrectly shifted to the top left of the screen.
 
 ### [3.47.6](https://github.com/flutter/flutter/releases/tag/3.47.6)
 - [flutter/192513](https://github.com/flutter/flutter/issues/192513) Fixed an issue that caused Windows production apps to hang.
