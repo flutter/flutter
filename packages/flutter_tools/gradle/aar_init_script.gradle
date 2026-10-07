@@ -24,10 +24,8 @@ void configureProject(Project project, String outputDir) {
         project.version = project.property("buildNumber")
     }
 
-    project.components.forEach { component ->
-        if (component.name != "all") {
-            addAarTask(project, component)
-        }
+    aarComponents(project).each { component ->
+        addAarTask(project, component)
     }
 
     project.publishing {
@@ -84,33 +82,44 @@ static String getFlutterRoot(Project project) {
     return project.property("flutter-root")
 }
 
+// The software components that AGP creates for `singleVariant` publishing. `addAarTask` registers
+// one `assembleAar<Variant>` task for each of them.
+static Collection<SoftwareComponent> aarComponents(Project project) {
+    return project.components.findAll { it.name != "all" }
+}
+
+// Builds the task name that the tool requests (`getAarTaskFor` in
+// packages/flutter_tools/lib/src/android/gradle.dart).
 static String aarTaskName(String variantName) {
     return "assembleAar${variantName.capitalize()}"
 }
 
 void addAarTask(Project project, component) {
     String taskName = aarTaskName(component.name)
-    project.tasks.create(name: taskName) {
-        // This check is required to be able to configure the archives before `publish` runs.
-        if (!project.gradle.startParameter.taskNames.contains(taskName)) {
-            return
-        }
-
-        // Create a default MavenPublication for the variant (except "all" since that is used to publish artifacts in the new way)
-        project.publishing.publications.create(component.name, MavenPublication) { pub ->
-            groupId = "${pub.groupId}"
-            artifactId = "${pub.artifactId}_${pub.name}"
-            version = "${pub.version}"
-            from component
-        }
-
+    project.tasks.register(taskName) {
         // Generate the Maven artifacts.
         finalizedBy "publish"
+    }
+
+    // This check is required to be able to configure the archives before `publish` runs.
+    if (!project.gradle.startParameter.taskNames.contains(taskName)) {
+        return
+    }
+
+    // Create a default MavenPublication for the variant (except "all" since that is used to publish artifacts in the new way)
+    // This runs outside the task's configuration action because maven-publish registers tasks for
+    // each publication, and Gradle doesn't allow registering tasks while it realizes a task.
+    project.publishing.publications.create(component.name, MavenPublication) { pub ->
+        groupId = "${pub.groupId}"
+        artifactId = "${pub.artifactId}_${pub.name}"
+        version = "${pub.version}"
+        from component
     }
 }
 
 // AGP reports this error when `singleVariant` is declared twice for one variant
-// (`AbstractPublishing.checkSingleVariantUniqueness`; same text in AGP 8.11.1, 9.1.0 and 9.3.1).
+// (`checkSingleVariantUniqueness`, same text in AGP 8.11.1, 9.1.0 and 9.3.1:
+// https://android.googlesource.com/platform/tools/base/+/refs/tags/studio-2025.3.2/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/dsl/AbstractPublishing.kt#38).
 // Its class, com.android.builder.errors.EvalIssueException, is not public AGP API and is not on
 // this script's classpath, so the error is matched by its message.
 static boolean isDuplicateSingleVariantError(Exception e, String variantName) {
@@ -119,18 +128,24 @@ static boolean isDuplicateSingleVariantError(Exception e, String variantName) {
     return e.message == duplicateMessage
 }
 
-// The tool requests `assembleAar<Variant>` by name, without a project path. Gradle runs that task
-// in every project that has it and skips projects that don't, so a project without the variant
-// would leave the repo without its AAR. The module's POM depends on each plugin's AAR for the same
-// variant name.
+// Checks that the module and each Android plugin have every variant whose `assembleAar<Variant>`
+// task the tool requested. Returns normally if they do. Otherwise throws a GradleException that
+// names the variant and the first project without it.
+//
+// A project without the requested variant publishes no AAR, and the module's POM depends on each
+// plugin's AAR for the same variant name.
 void checkProjectsHaveRequestedVariants(Project moduleProject, Collection<Project> pluginProjects) {
-    List<String> requestedAarTasks = moduleProject.gradle.startParameter.taskNames.findAll {
-        it.startsWith("assembleAar")
+    Collection<Project> androidPlugins = pluginProjects.findAll { it.hasProperty("android") }
+    Map<Project, Set<String>> variantsByProject = ([moduleProject] + androidPlugins).collectEntries {
+        [(it): aarComponents(it).collect { component -> component.name } as Set]
     }
-    requestedAarTasks.each { taskName ->
-        String variantName = taskName.substring("assembleAar".length()).uncapitalize()
-        if (!moduleProject.tasks.names.contains(taskName)) {
-            String moduleVariants = moduleProject.components.collect { it.name }.sort().join(", ")
+    List<String> requestedTasks = moduleProject.gradle.startParameter.taskNames
+    Set<String> requestedVariants = variantsByProject.values().flatten().findAll {
+        requestedTasks.contains(aarTaskName(it))
+    } as Set
+    requestedVariants.each { variantName ->
+        if (!variantsByProject[moduleProject].contains(variantName)) {
+            String moduleVariants = variantsByProject[moduleProject].sort().join(", ")
             throw new GradleException(
                     "Flutter can't build the AAR for variant '$variantName' because module " +
                     "project '${moduleProject.path}' has no variant with that name. Its variants " +
@@ -138,8 +153,8 @@ void checkProjectsHaveRequestedVariants(Project moduleProject, Collection<Projec
                     "omit --flavor if the module has no product flavors."
             )
         }
-        pluginProjects.findAll { it.hasProperty("android") }.each { pluginProject ->
-            if (!pluginProject.tasks.names.contains(taskName)) {
+        androidPlugins.each { pluginProject ->
+            if (!variantsByProject[pluginProject].contains(variantName)) {
                 throw new GradleException(
                         "Flutter can't build the AAR for variant '$variantName' because plugin " +
                         "project '${pluginProject.path}' has no variant with that name, so the " +
@@ -167,7 +182,9 @@ afterProject { project ->
     }
 
     // afterProject runs after the project's build file, so AGP rejects a variant that the build
-    // file already declared. Ignoring that error keeps the build file's declaration.
+    // file already declared. The public `Publishing` DSL can declare variants but not list them,
+    // so ignoring only that error is how the build file's declaration is kept. Any other error
+    // fails the build.
     Closure addSingleVariant = { String variantName ->
         try {
             project.android.publishing.singleVariant(variantName) {

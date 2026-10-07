@@ -258,27 +258,11 @@ else serializes through `FlutterPlugin.kt` / `FlutterPluginUtils.kt`.
 7. **Task realization/type**: flutter tasks become lazy `TaskProvider`s, and
    `copyFlutterAssets<V>` changes type from `org.gradle.api.tasks.Copy` to a
    custom task class — `tasks.named(..., Copy::class)` casts fail.
-8. **`flutter build aar`**: the init script detects a library project by the
-   `com.android.library` plugin and does not read `android.libraryVariants` or AGP's
-   internal `publishing.singleVariants`.
-   - Flutter declares `singleVariant` publishing (with sources and javadoc jars) for each
-     variant of the module and of each Android plugin. A variant that the project's build
-     file already declared keeps that declaration; AGP's duplicate-declaration error is
-     matched by its message and ignored. The deleted guard skipped all of Flutter's
-     declarations for a project whose build file declared any variant. For a module with at
-     least one Android plugin that declared only `release`, every `flutter build aar` failed
-     with `Task with name 'assembleAarDebug' not found in project ':flutter'`; that build
-     succeeds.
-   - Each plugin publishes its AAR from its own `assembleAar<Variant>` task, which Gradle
-     runs because the tool requests the task by name. The module's task does not depend
-     on the plugins' tasks.
-   - The build fails with an error that names the project if the module or an Android
-     plugin has no variant with the requested name (for example, the module and the plugin
-     declare different product flavors, or `--flavor` is missing for a flavored module).
-     Only the requested variant is checked. The deleted code failed with
-     `Task with name 'assembleAar<Variant>' not found in project ':<plugin>'` when a plugin
-     lacked any module variant, requested or not, and did not check that the module had
-     the requested variant.
+8. **`flutter build aar`**: Flutter declares `singleVariant` publishing (with sources and
+   javadoc jars) for each variant of the module and of each Android plugin. For a variant that
+   the project's build file declares, the build file's declaration wins. The requested variant
+   must exist in the module and in each Android plugin; otherwise the build fails, and the fix
+   is to build a variant that all of them declare (`--flavor`, matching product flavors).
 9. **newDsl flip**: new projects lose the opt-out; the removal migrator deletes
    only marker-tagged `android.newDsl` lines (template marker "This newDsl flag
    was added by the Flutter template"; migrator marker "This newDsl flag was

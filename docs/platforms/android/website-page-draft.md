@@ -234,16 +234,11 @@ aliases:
 - If your module's or a plugin's build file declares
   `android.publishing.singleVariant(...)` for a variant, Flutter uses that
   declaration for that variant and declares publishing (with sources and javadoc
-  jars) for the other variants. Flutter releases that skipped all of their
-  declarations in that case failed with a `Task with name 'assembleAar<Variant>'
-  not found` error when the file declared only some variants and the module used
-  an Android plugin.
-- The module and each Android plugin that it uses must have a variant with the
-  name you build. If one of them doesn't, for example because the module and a
-  plugin declare different product flavors, the build fails with an error that
-  names the project. Build a variant that all of them have: pass `--flavor` for
-  a module with product flavors, and use plugins that declare the same product
-  flavors as the module.
+  jars) for the other variants.
+- The variant you build must exist in the module and in each Android plugin
+  that it uses. If it doesn't, the build fails. Build a variant that all of them
+  declare: pass `--flavor` for a module with product flavors, and use plugins
+  that declare the same product flavors as the module.
 
 ## Escape hatch (temporary)
 
