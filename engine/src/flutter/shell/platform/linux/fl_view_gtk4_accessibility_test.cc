@@ -534,6 +534,76 @@ TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
             nullptr);
 }
 
+TEST_F(FlViewGtk4AccessibilityTest, TextSelectionUsesCharacterOffsets) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing() ||
+      !fl_gtk_runtime_supports_native_accessibility_text()) {
+    GTEST_SKIP() << "Native accessible text requires GTK 4.14+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlutterSemanticsFlags flags = {};
+  flags.is_text_field = true;
+  FlutterSemanticsNode2 root = {};
+  // A, an emoji (two UTF-16 code units), e, and a combining acute accent.
+  root.value =
+      "A\xF0\x9F\x98\x80"
+      "e\xCC\x81";
+  root.flags2 = &flags;
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+
+  struct SelectionCase {
+    gint base;
+    gint extent;
+    guint caret;
+    gsize start;
+    gsize length;
+  };
+  const SelectionCase cases[] = {
+      {1, 3, 2, 1, 1}, {3, 1, 1, 1, 1},   {3, 3, 2, 0, 0},   {0, 5, 4, 0, 4},
+      {4, 5, 4, 3, 1}, {-1, -1, 0, 0, 0}, {0, 100, 4, 0, 4}, {2, 3, 2, 1, 1},
+  };
+  for (const SelectionCase& selection : cases) {
+    SCOPED_TRACE(testing::Message()
+                 << selection.base << ":" << selection.extent);
+    root.text_selection_base = selection.base;
+    root.text_selection_extent = selection.extent;
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+    g_autoptr(GtkAccessible) native =
+        fl_view_gtk4_accessibility_ref_native_root_for_testing(
+            view->accessibility_backend);
+    ASSERT_NE(native, nullptr);
+    auto* iface = static_cast<FlGtkAccessibleTextInterface4_14*>(
+        g_type_interface_peek(G_OBJECT_GET_CLASS(native),
+                              fl_gtk_runtime_accessible_text_get_type()));
+    ASSERT_NE(iface, nullptr);
+    EXPECT_EQ(iface->get_caret_position(native), selection.caret);
+    gsize n_ranges = 0;
+    FlGtkAccessibleTextRange4_14* ranges = nullptr;
+    EXPECT_EQ(iface->get_selection(native, &n_ranges, &ranges),
+              selection.length != 0);
+    g_autofree FlGtkAccessibleTextRange4_14* owned_ranges = ranges;
+    if (selection.length != 0) {
+      ASSERT_EQ(n_ranges, 1u);
+      ASSERT_NE(ranges, nullptr);
+      EXPECT_EQ(ranges[0].start, selection.start);
+      EXPECT_EQ(ranges[0].length, selection.length);
+      g_autoptr(GBytes) contents = iface->get_contents(
+          native, ranges[0].start, ranges[0].start + ranges[0].length);
+      g_autofree gchar* expected = g_utf8_substring(
+          root.value, selection.start, selection.start + selection.length);
+      EXPECT_EQ(g_bytes_get_size(contents), strlen(expected));
+      EXPECT_EQ(memcmp(g_bytes_get_data(contents, nullptr), expected,
+                       strlen(expected)),
+                0);
+    }
+  }
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, ObscuredValueIsNotExported) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";

@@ -630,6 +630,23 @@ static void fl_gtk4_text_accessible_node_text_iface_init(
       fl_gtk4_text_accessible_node_get_default_attributes;
 }
 
+static guint utf16_offset_to_character_offset(const gchar* text, gint offset) {
+  guint characters = 0;
+  // Flutter selections count UTF-16 code units; GTK counts Unicode code points.
+  // Clamp invalid offsets to a character boundary without splitting a
+  // surrogate.
+  while (*text != '\0' && offset > 0) {
+    const gint units = g_utf8_get_char(text) > 0xffff ? 2 : 1;
+    if (offset < units) {
+      break;
+    }
+    offset -= units;
+    characters++;
+    text = g_utf8_next_char(text);
+  }
+  return characters;
+}
+
 static void fl_gtk4_text_accessible_node_set_text(FlGtk4AccessibleNode* self,
                                                   const gchar* text,
                                                   gint selection_base,
@@ -649,13 +666,9 @@ static void fl_gtk4_text_accessible_node_set_text(FlGtk4AccessibleNode* self,
 
   const guint text_length = fl_gtk4_text_accessible_node_get_text_length(self);
   const guint new_base =
-      selection_base <= 0
-          ? 0
-          : MIN(static_cast<guint>(selection_base), text_length);
+      utf16_offset_to_character_offset(new_text, selection_base);
   const guint new_extent =
-      selection_extent <= 0
-          ? 0
-          : MIN(static_cast<guint>(selection_extent), text_length);
+      utf16_offset_to_character_offset(new_text, selection_extent);
   const gboolean caret_changed = self->text_selection_extent != new_extent;
   const gboolean selection_changed =
       self->text_selection_base != new_base || caret_changed;
