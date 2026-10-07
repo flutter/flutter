@@ -68,13 +68,18 @@ and the complete symbol set used by that capability:
 | Capability | Runtime threshold | Behavior when unavailable |
 | --- | --- | --- |
 | Native accessible tree | GTK 4.10 | View exports the widget-backed render surface instead of the native semantics tree |
-| Accessible text | GTK 4.14 | No native text interface; text notification wrappers do nothing |
+| Accessible text queries | GTK 4.14 | Contents, caret, and selection queries are available; this is not editable-text parity |
+| Accessible text extents/offsets | GTK 4.16 | Interface slots exist, but Flutter does not currently provide the layout data needed to implement them accurately |
+| Accessible text mutation | GTK 4.22 | Caret/selection setters are not bound; newer interface fields cannot be added safely by symbol lookup |
 | Announcements | GTK 4.14 | Announcement wrapper does nothing |
 | Platform-state notifications | GTK 4.18 | Native nodes retain queryable focus state but do not emit these notifications |
 | DMA-BUF texture APIs | GTK 4.14 | Compositor cannot select the DMA-BUF texture route |
 
 These are the implementation's capability groups, not a claim of complete
-accessibility support at each version. DMA-BUF API availability is also only
+accessibility support at each version. In particular, native text support is
+query-only: GTK version availability does not create editable-text actions,
+per-character geometry, or point-to-offset mapping in the absence of matching
+Flutter semantics data. DMA-BUF API availability is also only
 one prerequisite: display formats, EGL support, synchronization, and buffer
 ownership are checked by the rendering code.
 
@@ -127,8 +132,12 @@ does not access the pointed-to layout.
 
 Native accessibility is a deliberate exception to opaque-only handling.
 The layer maintains private GTK 4.10 accessible and GTK 4.14 text interface
-mirrors. The accessibility implementation installs callbacks only after its
-runtime capability gate succeeds. With suitable newer headers, compile-time
+mirrors. The text interface has additional GTK 4.16 slots for extents and
+offset mapping; those slots must not be installed unless their exact ABI and
+capability gate are validated. GTK 4.22 adds caret and selection setters, but
+those are interface methods rather than independently resolvable symbols.
+The accessibility implementation installs callbacks only after its runtime
+capability gate succeeds. With suitable newer headers, compile-time
 size and offset assertions check parts of those layouts against GTK.
 
 These mirrors are handwritten ABI contracts, not generated replacements for

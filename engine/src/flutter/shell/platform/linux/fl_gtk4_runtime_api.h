@@ -79,8 +79,11 @@ struct FlGtkAccessibleInterface4_10 {
 };
 
 // GTK 4.14 introduced GtkAccessibleText. Keep this ABI mirror independent of
-// the build headers so a GTK 4.8-header build can use the interface when the
-// loaded GTK library exports it.
+// the build headers so a GTK 4.8-header build can use the query interface when
+// the loaded GTK library exports it. The trailing extents/offset callbacks
+// were added in GTK 4.16 and must not be installed without a separately
+// validated 4.16 layout gate. GTK 4.22 setter callbacks are intentionally not
+// represented: runtime symbol lookup cannot append interface fields safely.
 struct FlGtkAccessibleTextRange4_14 {
   gsize start;
   gsize length;
