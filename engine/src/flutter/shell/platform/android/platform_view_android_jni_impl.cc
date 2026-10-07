@@ -2079,10 +2079,12 @@ ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction(
   fml::jni::ScopedJavaLocalRef<jobject> transaction(
       env, env->CallObjectMethod(java_object.obj(),
                                  g_create_unpublished_transaction_method));
-  if (transaction.is_null()) {
+  // Check (and clear) any exception before looking at the result, so a failure
+  // here falls back to a natively owned transaction instead of leaving an
+  // exception pending on the raster thread.
+  if (!fml::jni::CheckException(env) || transaction.is_null()) {
     return nullptr;
   }
-  FML_CHECK(fml::jni::CheckException(env));
 
   ASurfaceTransaction* native_tx =
       impeller::android::GetProcTable().ASurfaceTransaction_fromJava(
@@ -2100,14 +2102,26 @@ ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction(
           env, transaction.obj());
   fml::jni::JavaObjectWeakGlobalRef weak_java_object = java_object_;
 
-  out_publish_callback = [weak_java_object, global_tx]() {
+  out_publish_callback = [weak_java_object, global_tx, native_tx]() {
+    if (global_tx->is_null()) {
+      // Already handed off; the transaction may now be owned by Java.
+      return;
+    }
     JNIEnv* cb_env = fml::jni::AttachCurrentThread();
     fml::jni::ScopedJavaLocalRef<jobject> cb_java_obj =
         weak_java_object.get(cb_env);
-    if (!cb_java_obj.is_null() && !global_tx->is_null()) {
+    bool published = false;
+    if (!cb_java_obj.is_null()) {
       cb_env->CallVoidMethod(cb_java_obj.obj(), g_publish_transaction_method,
                              global_tx->obj());
-      FML_CHECK(fml::jni::CheckException(cb_env));
+      published = fml::jni::CheckException(cb_env);
+    }
+    if (!published) {
+      // The platform thread will never see this transaction, so apply it here.
+      // This keeps the completion callback registered by
+      // `SurfaceTransaction::Apply` from being dropped, which would leak the
+      // buffer it holds. The global ref keeps `native_tx` valid until Reset.
+      impeller::android::GetProcTable().ASurfaceTransaction_apply(native_tx);
     }
     global_tx->Reset();
   };

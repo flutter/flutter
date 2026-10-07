@@ -1371,12 +1371,14 @@ public class FlutterJNI {
   }
 
   // Called from the raster thread once it is done writing into a transaction returned by
-  // createUnpublishedTransaction.
+  // createUnpublishedTransaction. If this throws, the native caller logs the exception and applies
+  // the transaction itself rather than dropping it.
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
   public void publishTransaction(SurfaceControl.Transaction tx) {
     if (platformViewsController2 == null) {
-      throw new RuntimeException("");
+      throw new IllegalStateException(
+          "publishTransaction called without a PlatformViewsController2");
     }
     platformViewsController2.publishTransaction(tx);
   }
