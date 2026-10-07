@@ -23,7 +23,7 @@
 /// 1.0, the blabla is blabla blabla blabla an blabla blabla.
 ///
 /// {@tool snippet}
-/// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
+/// Bla blabla blabla some `Text` when the `_blabla` blabla blabla is true, and
 /// blabla it when it is blabla:
 ///
 /// ```dart
@@ -35,7 +35,7 @@
 /// {@end-tool}
 ///
 /// {@tool snippet}
-/// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
+/// Bla blabla blabla some `Text` when the `_blabla` blabla blabla is true, and
 /// blabla it when it is blabla:
 ///
 /// ```dart
@@ -55,7 +55,7 @@
 /// {@end-tool}
 ///
 /// {@tool snippet}
-/// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
+/// Bla blabla blabla some `Text` when the `_blabla` blabla blabla is true, and
 /// blabla finale blabla:
 ///
 /// ```dart
