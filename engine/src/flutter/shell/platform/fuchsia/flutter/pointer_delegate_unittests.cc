@@ -80,7 +80,24 @@ class PointerDelegateTest : public ::testing::Test {
   FML_DISALLOW_COPY_AND_ASSIGN(PointerDelegateTest);
 };
 
-TEST_F(PointerDelegateTest, Data_FuchsiaTimeVersusFlutterTime) {
+class PointerDelegateTouchTest : public PointerDelegateTest,
+                                 public ::testing::WithParamInterface<bool> {
+ protected:
+  void SetUp() override {
+    const bool intercept_all_input = GetParam();
+    ResetPointerDelegate(intercept_all_input);
+    if (!intercept_all_input) {
+      pointer_delegate_->SetGestureResponsePolicy(
+          {.default_response = fup_TouchResponseType::YES});
+    }
+  }
+};
+
+INSTANTIATE_TEST_SUITE_P(InterceptAllInput,
+                         PointerDelegateTouchTest,
+                         ::testing::Bool());
+
+TEST_P(PointerDelegateTouchTest, Data_FuchsiaTimeVersusFlutterTime) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -106,7 +123,7 @@ TEST_F(PointerDelegateTest, Data_FuchsiaTimeVersusFlutterTime) {
   EXPECT_EQ((*pointers)[1].time_stamp, /* in microseconds */ 1111u);
 }
 
-TEST_F(PointerDelegateTest, Phase_FlutterPhasesAreSynthesized) {
+TEST_P(PointerDelegateTouchTest, Phase_FlutterPhasesAreSynthesized) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -157,7 +174,7 @@ TEST_F(PointerDelegateTest, Phase_FlutterPhasesAreSynthesized) {
   EXPECT_EQ((*pointers)[1].change, flutter::PointerData::Change::kRemove);
 }
 
-TEST_F(PointerDelegateTest, Phase_FuchsiaCancelBecomesFlutterCancel) {
+TEST_P(PointerDelegateTouchTest, Phase_FuchsiaCancelBecomesFlutterCancel) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -195,7 +212,7 @@ TEST_F(PointerDelegateTest, Phase_FuchsiaCancelBecomesFlutterCancel) {
   EXPECT_EQ((*pointers)[0].change, flutter::PointerData::Change::kCancel);
 }
 
-TEST_F(PointerDelegateTest, Coordinates_CorrectMapping) {
+TEST_P(PointerDelegateTouchTest, Coordinates_CorrectMapping) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -262,7 +279,7 @@ TEST_F(PointerDelegateTest, Coordinates_CorrectMapping) {
   EXPECT_FLOAT_EQ((*pointers)[0].physical_y, 10.f);
 }
 
-TEST_F(PointerDelegateTest, Coordinates_DownEventClampedToView) {
+TEST_P(PointerDelegateTouchTest, Coordinates_DownEventClampedToView) {
   const float kSmallDiscrepancy = -0.00003f;
 
   std::optional<std::vector<flutter::PointerData>> pointers;
@@ -295,7 +312,7 @@ TEST_F(PointerDelegateTest, Coordinates_DownEventClampedToView) {
   EXPECT_EQ(down_event.physical_y, 0.f);
 }
 
-TEST_F(PointerDelegateTest, Protocol_FirstResponseIsEmpty) {
+TEST_P(PointerDelegateTouchTest, Protocol_FirstResponseIsEmpty) {
   bool called = false;
   pointer_delegate_->WatchLoop(
       [&called](std::vector<flutter::PointerData> events) { called = true; });
@@ -308,7 +325,7 @@ TEST_F(PointerDelegateTest, Protocol_FirstResponseIsEmpty) {
   ASSERT_EQ(responses->size(), 0u);
 }
 
-TEST_F(PointerDelegateTest, Protocol_ResponseMatchesEarlierEvents) {
+TEST_P(PointerDelegateTouchTest, Protocol_ResponseMatchesEarlierEvents) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -367,7 +384,7 @@ TEST_F(PointerDelegateTest, Protocol_ResponseMatchesEarlierEvents) {
   EXPECT_EQ(responses.value()[3].response_type(), fup_TouchResponseType::YES);
 }
 
-TEST_F(PointerDelegateTest, Protocol_LateGrant) {
+TEST_P(PointerDelegateTouchTest, Protocol_LateGrant) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -431,7 +448,7 @@ TEST_F(PointerDelegateTest, Protocol_LateGrant) {
   pointers = {};
 }
 
-TEST_F(PointerDelegateTest, Protocol_LateGrantCombo) {
+TEST_P(PointerDelegateTouchTest, Protocol_LateGrantCombo) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -487,7 +504,7 @@ TEST_F(PointerDelegateTest, Protocol_LateGrantCombo) {
   pointers = {};
 }
 
-TEST_F(PointerDelegateTest, Protocol_EarlyGrant) {
+TEST_P(PointerDelegateTouchTest, Protocol_EarlyGrant) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -526,7 +543,7 @@ TEST_F(PointerDelegateTest, Protocol_EarlyGrant) {
   pointers = {};
 }
 
-TEST_F(PointerDelegateTest, Protocol_LateDeny) {
+TEST_P(PointerDelegateTouchTest, Protocol_LateDeny) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -573,7 +590,7 @@ TEST_F(PointerDelegateTest, Protocol_LateDeny) {
   pointers = {};
 }
 
-TEST_F(PointerDelegateTest, Protocol_LateDenyCombo) {
+TEST_P(PointerDelegateTouchTest, Protocol_LateDenyCombo) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -621,7 +638,7 @@ TEST_F(PointerDelegateTest, Protocol_LateDenyCombo) {
   pointers = {};
 }
 
-TEST_F(PointerDelegateTest, Protocol_PointersAreIndependent) {
+TEST_P(PointerDelegateTouchTest, Protocol_PointersAreIndependent) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
