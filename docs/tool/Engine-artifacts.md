@@ -86,17 +86,9 @@ These include:
 - `engine/`: The entire engine subfolder[^4].
 - `bin/internal/release-candidate-branch.version`: A signal for release builds, keeping builds hermetic.
 
-The Flutter project has a plethora of users: engineers working from local branches, release branches, GitHub merge queues, and downstream shallow consumers to name the known ones. The following table shows where the content hash is calculated from:
+The content hash is always calculated from `HEAD` (or a specified git ref). When bootstrapping the Dart SDK (`bin/internal/update_dart_sdk.{sh,ps1}`), Flutter first attempts to download the artifacts for the `HEAD` content hash. If those artifacts are not available in cloud storage (for example, when working with local engine changes that have not been built on CI), Flutter logs a warning and falls back to the content hash of the `merge-base` between `HEAD` and `(upstream|origin)/(master|main)`, recording the fallback in `bin/cache/engine_fallback.stamp`.
 
-| Branch                  | Hashed From                                                          |
-| ----------------------- | -------------------------------------------------------------------- |
-| `main`,`master`         | HEAD                                                                 |
-| `stable`, `beta`        | HEAD                                                                 |
-| GitHub Merge Queue      | HEAD                                                                 |
-| `flutter-*-candidate.x` | HEAD                                                                 |
-| `HEAD`                  | HEAD                                                                 |
-| Shallow Clones          | HEAD                                                                 |
-| **Everything Else**.    | `merge-base` between `HEAD` and`(origin or upstream)/(main or master)` |
+To disable this fallback and require exact engine artifacts for `HEAD`, set `FLUTTER_STRICT_ENGINE_VERSION=true` (this is enabled by default when `LUCI_CONTEXT` is set), or delete `bin/cache/engine_fallback.stamp` to retry downloading artifacts for `HEAD`.
 
 [^4]: This is suboptimal from an artifact building perspective, but optimal for the speed of each `dart` and `flutter` call. Flutter is called more often than it is built.
 
