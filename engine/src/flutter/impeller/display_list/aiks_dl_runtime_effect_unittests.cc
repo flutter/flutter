@@ -15,6 +15,7 @@
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
 #include "imgui.h"
+#include "impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/vector.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
@@ -23,6 +24,7 @@ namespace impeller {
 namespace testing {
 
 using namespace flutter;
+using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 namespace {
 absl::StatusOr<std::shared_ptr<DlColorSource>> MakeRuntimeEffect(

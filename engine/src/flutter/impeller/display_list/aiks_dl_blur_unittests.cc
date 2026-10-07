@@ -16,6 +16,7 @@
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
+#include "impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 
 #include "gmock/gmock.h"
 #include "impeller/display_list/dl_dispatcher.h"
@@ -34,6 +35,7 @@ namespace impeller {
 namespace testing {
 
 using namespace flutter;
+using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 // The shapes of these ovals should appear equal. They are demonstrating the
 // difference between the fast pass and not.

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/display_list/dl_golden_unittests.h"
+#include "impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
@@ -17,6 +18,7 @@ namespace flutter {
 namespace testing {
 
 using impeller::Font;
+using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 TEST_P(DlGoldenTest, TextBlurMaskFilterRespectCTM) {
   impeller::Point content_scale = GetContentScale();

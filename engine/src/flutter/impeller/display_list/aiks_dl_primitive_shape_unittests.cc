@@ -4,6 +4,7 @@
 
 #include "display_list/display_list.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
+#include "impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
@@ -26,10 +27,10 @@ using flutter::DisplayListBuilder;
 using flutter::DlBlendMode;
 using flutter::DlColor;
 using flutter::DlDrawStyle;
-using flutter::DlPaint;
 using flutter::DlPoint;
 using flutter::DlRect;
 using flutter::DlScalar;
+using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 enum class RenderType {
   kSquare,

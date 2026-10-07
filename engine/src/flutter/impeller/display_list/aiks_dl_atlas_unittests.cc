@@ -8,6 +8,7 @@
 #include "display_list/effects/image_filters/dl_matrix_image_filter.h"
 #include "display_list/geometry/dl_geometry_types.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
+#include "impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -25,6 +26,7 @@ namespace impeller {
 namespace testing {
 
 using namespace flutter;
+using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 namespace {
 RSTransform MakeTranslation(Scalar tx, Scalar ty) {
