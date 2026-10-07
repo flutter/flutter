@@ -298,7 +298,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
-      os: Mac-15.7|Mac-26.6
+      os: Mac-15.7
       device_os: iOS-18|iOS-26
       $flutter/osx_sdk : >-
         {
@@ -316,7 +316,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
-      os: Mac-15.7|Mac-26.6
+      os: Mac-15.7
       cpu: x86
       device_os: iOS-18|iOS-26
       $flutter/osx_sdk : >-
@@ -335,7 +335,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "none"}
         ]
-      os: Mac-15.7|Mac-26.6
+      os: Mac-15.7
       cpu: arm64
       device_os: iOS-18|iOS-26
       $flutter/osx_sdk : >-
