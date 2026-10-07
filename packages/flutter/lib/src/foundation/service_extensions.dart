@@ -81,26 +81,50 @@ enum FoundationServiceExtensions {
   ///   registered.
   brightnessOverride,
 
-  /// Name of service extension that, when called, gets, sets, or clears the
-  /// view metric overrides of an individual view.
+  /// Name of service extension that, when called, reads or changes the view
+  /// metric overrides in [debugViewMetricsOverrides].
   ///
-  /// Recognized parameters:
+  /// The extension takes these parameters, all optional:
   ///
-  ///  * `viewId`: the [FlutterView.viewId] to act on, as a non-negative integer string.
-  ///    Required when `overrides` is present, optional for reads, and ignored
-  ///    when `clearAll` is `'true'`.
-  ///  * `overrides`: a JSON-encoded string representing an object in the format
-  ///    [DebugViewMetricsOverride.fromJson] accepts, or `'null'`. When present,
-  ///    it replaces the override currently registered for `viewId`. An empty
-  ///    object or `'null'` removes it.
-  ///  * `clearAll`: when `'true'`, removes every override and ignores `viewId`.
+  ///  * `viewId`: the [FlutterView.viewId] to act on, as a non-negative integer
+  ///    string.
+  ///  * `overrides`: a JSON-encoded object, in the format
+  ///    [DebugViewMetricsOverride.fromJson] accepts.
+  ///  * `clearAll`: `'true'` to remove every override.
   ///
-  /// With neither `overrides` nor `clearAll`, the call is a read.
+  /// Other parameters are ignored.
   ///
-  /// Every call returns `overrides` (every override now installed, keyed by
-  /// stringified view id) and `overriddenViewIds` (the same ids as a sorted
-  /// `List<int>`). A call that acted on a single view also returns `override`
-  /// (the entry now in effect for that view, or null).
+  /// A call does the first of these that applies:
+  ///
+  ///  * If `clearAll` is `'true'`, it removes every override and ignores the
+  ///    other parameters.
+  ///  * If `overrides` is present, it replaces the override registered for the
+  ///    view that `viewId` names, which is then required. An empty object
+  ///    (`{}`) removes that view's override.
+  ///  * Otherwise, it is a read, and changes nothing.
+  ///
+  /// A malformed `viewId` or `overrides` fails the call, and nothing changes.
+  ///
+  /// Every reply contains these two keys, whatever the call was, so that a
+  /// client can resynchronize from any reply without remembering which call
+  /// produced it:
+  ///
+  ///  * `overrides`: every override installed once the call is done, keyed by
+  ///    stringified view id (JSON object keys must be strings), each in the
+  ///    format [DebugViewMetricsOverride.toJson] produces.
+  ///  * `overriddenViewIds`: the same view ids, as a sorted list of integers.
+  ///
+  /// The reply to a call that has a `viewId` and does not clear every override
+  /// also contains:
+  ///
+  ///  * `override`: the override now registered for that view, or null if it
+  ///    has none.
+  ///
+  /// A call that changes an override also posts a
+  /// `Flutter.ServiceExtensionStateChanged` event whose `value` is every
+  /// override installed, in the same format as the reply's `overrides`, so that
+  /// clients other than the caller learn about the change too. A call that
+  /// changes nothing posts no event.
   ///
   /// See also:
   ///

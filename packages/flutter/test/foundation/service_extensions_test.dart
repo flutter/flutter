@@ -1464,7 +1464,7 @@ void main() {
       const DebugViewMetricsOverride(devicePixelRatio: 3.5, boldText: true),
     );
     expect(extensionChangedEvents.length, 1);
-    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{
+    expect(extensionChangedEvents.last['value'], <String, Object?>{
       '$viewId': <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true},
     });
 
@@ -1486,7 +1486,7 @@ void main() {
       <String, String>{'viewId': '${viewId + 1}', 'overrides': '{"textScaleFactor": 2.0}'},
     );
     expect(extensionChangedEvents.length, 2);
-    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{
+    expect(extensionChangedEvents.last['value'], <String, Object?>{
       '$viewId': <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true},
       '${viewId + 1}': <String, Object?>{'textScaleFactor': 2.0},
     });
@@ -1610,58 +1610,49 @@ void main() {
       throwsA(isA<FormatException>()),
     );
 
-    // A non-object/non-null overrides parameter is rejected.
-    await expectLater(
-      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
-        'viewId': '$viewId',
-        'overrides': '123',
-      }),
-      throwsA(isA<FormatException>()),
+    // An overrides parameter that is not a JSON object, including null, is
+    // rejected and leaves the installed override alone.
+    for (final overrides in <String>['123', 'null']) {
+      await expectLater(
+        binding.testExtension(
+          FoundationServiceExtensions.viewMetricsOverride.name,
+          <String, String>{'viewId': '$viewId', 'overrides': overrides},
+        ),
+        throwsA(isA<FormatException>()),
+      );
+    }
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(devicePixelRatio: 3.5, boldText: true),
     );
 
-    // Unknown parameter keys are rejected.
-    await expectLater(
-      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
-        'view_id': '$viewId',
-      }),
-      throwsA(isA<FormatException>()),
-    );
-
-    // Invalid clearAll values are rejected.
-    await expectLater(
-      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
-        'clearAll': 'TRUE',
-      }),
-      throwsA(isA<FormatException>()),
-    );
-
-    // Providing overrides when clearAll is true is rejected.
-    await expectLater(
-      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
-        'clearAll': 'true',
-        'overrides': '{}',
-      }),
-      throwsA(isA<FormatException>()),
-    );
-
-    // Passing isolateId (as the VM service does) is accepted.
+    // Parameters the extension does not use, such as the isolateId that every
+    // service extension call carries, are ignored.
     result = await binding.testExtension(
       FoundationServiceExtensions.viewMetricsOverride.name,
       <String, String>{'viewId': '$viewId', 'isolateId': 'isolates/123'},
     );
     expect(result['override'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
 
-    // Setting overrides to 'null' removes the entry.
+    // Only a clearAll of 'true' clears.
     result = await binding.testExtension(
       FoundationServiceExtensions.viewMetricsOverride.name,
-      <String, String>{'viewId': '$viewId', 'overrides': 'null'},
+      <String, String>{'viewId': '$viewId', 'clearAll': 'false'},
+    );
+    expect(result['override'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+    expect(extensionChangedEvents.length, 6);
+
+    // Setting overrides to an empty object removes the entry.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '$viewId', 'overrides': '{}'},
     );
     expect(result['override'], isNull);
     expect(result['overrides'], <String, Object?>{});
     expect(result['overriddenViewIds'], <int>[]);
     expect(debugViewMetricsOverrides, isEmpty);
     expect(extensionChangedEvents.length, 7);
-    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{});
+    expect(extensionChangedEvents.last['value'], <String, Object?>{});
 
     // Re-installing for the clearAll test below.
     result = await binding.testExtension(
@@ -1673,16 +1664,17 @@ void main() {
     );
     expect(extensionChangedEvents.length, 8);
 
-    // Clearing everything.
+    // Clearing everything ignores the other parameters.
     result = await binding.testExtension(
       FoundationServiceExtensions.viewMetricsOverride.name,
-      <String, String>{'clearAll': 'true'},
+      <String, String>{'clearAll': 'true', 'viewId': '$viewId', 'overrides': '{"boldText": true}'},
     );
+    expect(result.containsKey('override'), isFalse);
     expect(result['overrides'], <String, Object?>{});
     expect(result['overriddenViewIds'], <int>[]);
     expect(debugViewMetricsOverrides, isEmpty);
     expect(extensionChangedEvents.length, 9);
-    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{});
+    expect(extensionChangedEvents.last['value'], <String, Object?>{});
 
     // Clearing again removes nothing, and says nothing.
     await binding.testExtension(
