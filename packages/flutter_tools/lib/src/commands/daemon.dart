@@ -254,7 +254,8 @@ class Daemon {
     final ToolContext(:ProcessManager processManager, :FlutterProjectFactory projectFactory) =
         toolContext;
     final AndroidWorkflow workflow =
-        androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: featureFlags);
+        androidWorkflow ??
+        AndroidWorkflow(androidSdkBuilder: () => androidSdk, featureFlags: featureFlags);
 
     // Set up domains.
     registerDomain(
@@ -1825,8 +1826,8 @@ class EmulatorDomain extends Domain {
            EmulatorManager(
              fileSystem: fileSystem,
              logger: logger,
-             java: java,
-             androidSdk: androidSdk,
+             javaBuilder: () => java,
+             androidSdkBuilder: () => androidSdk,
              processManager: processManager,
              androidWorkflow: androidWorkflow,
            ),

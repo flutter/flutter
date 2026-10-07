@@ -24,20 +24,14 @@ class AndroidEmulators extends EmulatorDiscovery {
     required this._fileSystem,
     required Logger logger,
     required ProcessManager processManager,
-    AndroidSdk? androidSdk,
-    AndroidSdk? Function()? androidSdkBuilder,
-  }) : assert(
-         androidSdk == null || androidSdkBuilder == null,
-         'Cannot provide both androidSdk and androidSdkBuilder to AndroidEmulators.',
-       ),
-       _logger = logger,
+    this._androidSdkBuilder,
+  }) : _logger = logger,
        _processManager = processManager,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _androidSdkBuilder = androidSdkBuilder ?? (() => androidSdk);
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final AndroidWorkflow _androidWorkflow;
-  final AndroidSdk? Function() _androidSdkBuilder;
-  late final AndroidSdk? _androidSdk = _androidSdkBuilder();
+  final AndroidSdk? Function()? _androidSdkBuilder;
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder?.call();
   final FileSystem _fileSystem;
   final Logger _logger;
   final ProcessManager _processManager;
