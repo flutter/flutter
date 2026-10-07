@@ -159,8 +159,9 @@ class FakeCustomBrowserDevice extends Fake implements ChromiumDevice {
 }
 
 class FakeResidentRunner extends Fake implements ResidentRunner {
-  FakeResidentRunner({this.waitForAppToFinishCompleter});
+  FakeResidentRunner({this.onRestart, this.waitForAppToFinishCompleter});
 
+  final OperationResult Function(bool fullRestart)? onRestart;
   final Completer<int>? waitForAppToFinishCompleter;
   int restartCount = 0;
   int concurrentRestarts = 0;
@@ -199,7 +200,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
       await currentRestartCompleter!.future;
     }
     concurrentRestarts--;
-    return OperationResult.ok;
+    return onRestart?.call(fullRestart) ?? OperationResult.ok;
   }
 
   @override
@@ -1139,7 +1140,19 @@ List<_i1.WidgetPreview> previews() => [
       'serializes, coalesces, and gates reloads across previewer lifecycle',
       () async {
         final Directory rootProject = await createRootProject();
+        var rejectNextHotReload = false;
         final fakeResidentRunner = FakeResidentRunner(
+          onRestart: (bool fullRestart) {
+            if (!fullRestart && rejectNextHotReload) {
+              rejectNextHotReload = false;
+              return OperationResult(
+                1,
+                'Failed to recompile application.',
+                updateFSReport: UpdateFSReport(hotReloadRejected: true),
+              );
+            }
+            return OperationResult.ok;
+          },
           waitForAppToFinishCompleter: Completer<int>(),
         );
 
@@ -1243,13 +1256,35 @@ List<_i1.WidgetPreview> previews() => [
         expect(fakeResidentRunner.maxConcurrentRestarts, 1);
         expect(fakeResidentRunner.fullRestartRequests, <bool>[false, false, false, false, true]);
 
-        // 4. Ignore reload requests after the previewer has finished.
+        // 4. A rejected hot reload falls back to a hot restart under the mutex,
+        // before any reload queued while the rejected reload was in flight.
+        rejectNextHotReload = true;
+        final rejectedReloadCompleter = Completer<OperationResult>();
+        fakeResidentRunner.currentRestartCompleter = rejectedReloadCompleter;
+
+        triggerChange();
+        await pumpEventQueue();
+        triggerChange();
+
+        fakeResidentRunner.currentRestartCompleter = null;
+        rejectedReloadCompleter.complete(OperationResult.ok);
+        await pumpEventQueue();
+
+        expect(fakeResidentRunner.restartCount, 8);
+        expect(fakeResidentRunner.maxConcurrentRestarts, 1);
+        expect(fakeResidentRunner.fullRestartRequests.skip(5), <bool>[false, true, false]);
+        expect(
+          asLogger<BufferLogger>(logger).statusText,
+          contains(WidgetPreviewStartCommand.kHotReloadRejectedMessage),
+        );
+
+        // 5. Ignore reload requests after the previewer has finished.
         fakeResidentRunner.waitForAppToFinishCompleter!.complete(0);
         await runFuture;
 
         triggerChange();
         await pumpEventQueue();
-        expect(fakeResidentRunner.restartCount, 5);
+        expect(fakeResidentRunner.restartCount, 8);
       },
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
@@ -1266,5 +1301,87 @@ List<_i1.WidgetPreview> previews() => [
         ),
       },
     );
+
+    WidgetPreviewStartCommand createStartCommand(FakeResidentRunner runner) {
+      final command = WidgetPreviewCommand(
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          platform: platform,
+          artifacts: Artifacts.test(),
+        ),
+        dtdServicesOverride: fakeDtdServices,
+      );
+      return (command.subcommands['start']! as WidgetPreviewStartCommand)
+        ..widgetPreviewApp = runner;
+    }
+
+    testWithoutContext('triggers hot restart if hot reload is rejected', () async {
+      final fakeResidentRunner = FakeResidentRunner(
+        onRestart: (bool fullRestart) {
+          if (!fullRestart) {
+            return OperationResult(
+              1,
+              'Failed to recompile application.',
+              updateFSReport: UpdateFSReport(hotReloadRejected: true),
+            );
+          }
+          return OperationResult.ok;
+        },
+      );
+      final WidgetPreviewStartCommand startCommand = createStartCommand(fakeResidentRunner);
+
+      final OperationResult? result = await startCommand.handleReload();
+
+      final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
+      expect(fakeResidentRunner.fullRestartRequests, <bool>[false, true]);
+      expect(result?.isOk, isTrue);
+      expect(
+        bufferLogger.statusText,
+        contains(WidgetPreviewStartCommand.kHotReloadRejectedMessage),
+      );
+    });
+
+    testWithoutContext(
+      'does not trigger hot restart if hot reload fails for other reasons',
+      () async {
+        final fakeResidentRunner = FakeResidentRunner(
+          onRestart: (bool fullRestart) {
+            return OperationResult(
+              1,
+              'Failed to recompile application.',
+              updateFSReport: UpdateFSReport(),
+            );
+          },
+        );
+        final WidgetPreviewStartCommand startCommand = createStartCommand(fakeResidentRunner);
+
+        final OperationResult? result = await startCommand.handleReload();
+
+        final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
+        expect(fakeResidentRunner.fullRestartRequests, <bool>[false]);
+        expect(result?.isOk, isFalse);
+        expect(
+          bufferLogger.statusText,
+          isNot(contains(WidgetPreviewStartCommand.kHotReloadRejectedMessage)),
+        );
+      },
+    );
+
+    testWithoutContext('does not trigger hot restart if hot reload succeeds', () async {
+      final fakeResidentRunner = FakeResidentRunner();
+      final WidgetPreviewStartCommand startCommand = createStartCommand(fakeResidentRunner);
+
+      final OperationResult? result = await startCommand.handleReload();
+
+      final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
+      expect(fakeResidentRunner.fullRestartRequests, <bool>[false]);
+      expect(result?.isOk, isTrue);
+      expect(
+        bufferLogger.statusText,
+        isNot(contains(WidgetPreviewStartCommand.kHotReloadRejectedMessage)),
+      );
+    });
   });
 }
