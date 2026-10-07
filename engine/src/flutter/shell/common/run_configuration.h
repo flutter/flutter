@@ -203,6 +203,14 @@ class RunConfiguration {
   /// @return     Engine identifier to be passed to the platform dispatcher.
   std::optional<int64_t> GetEngineId() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Sets the initial route for the root isolate.
+  void SetInitialRoute(std::string initial_route);
+
+  //----------------------------------------------------------------------------
+  /// @return     The initial route for the root isolate.
+  const std::string& GetInitialRoute() const;
+
  private:
   std::unique_ptr<IsolateConfiguration> isolate_configuration_;
   std::shared_ptr<AssetManager> asset_manager_;
@@ -210,6 +218,7 @@ class RunConfiguration {
   std::string entrypoint_library_ = "";
   std::vector<std::string> entrypoint_args_;
   std::optional<int64_t> engine_id_;
+  std::string initial_route_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RunConfiguration);
 };

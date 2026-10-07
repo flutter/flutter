@@ -60,7 +60,17 @@ EmbedderTestContextVulkan::EmbedderTestContextVulkan(std::string assets_path)
   };
 }
 
-EmbedderTestContextVulkan::~EmbedderTestContextVulkan() {}
+EmbedderTestContextVulkan::~EmbedderTestContextVulkan() {
+  // Destroy the surface and base-class compositor before tearing down
+  // vulkan_context_, and abandon GrDirectContext resources to break the
+  // TestVulkanContext -> GrDirectContext -> GrVkImage -> TestVulkanImage ->
+  // TestVulkanContext reference cycle when unsubmitted command buffers exist.
+  surface_.reset();
+  compositor_.reset();
+  if (vulkan_context_ && vulkan_context_->GetGrDirectContext()) {
+    vulkan_context_->GetGrDirectContext()->releaseResourcesAndAbandonContext();
+  }
+}
 
 EmbedderTestContextType EmbedderTestContextVulkan::GetContextType() const {
   return EmbedderTestContextType::kVulkanContext;
@@ -69,6 +79,21 @@ EmbedderTestContextType EmbedderTestContextVulkan::GetContextType() const {
 void EmbedderTestContextVulkan::SetVulkanInstanceProcAddressCallback(
     FlutterVulkanInstanceProcAddressCallback callback) {
   renderer_config_.vulkan.get_instance_proc_address_callback = callback;
+}
+
+void EmbedderTestContextVulkan::SetExternalTextureCallback(
+    TestExternalTextureCallback external_texture_frame_callback) {
+  external_texture_frame_callback_ = std::move(external_texture_frame_callback);
+  renderer_config_.vulkan.external_texture_frame_callback =
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterVulkanExternalTexture* texture_out) -> bool {
+    auto context = reinterpret_cast<EmbedderTestContextVulkan*>(user_data);
+    if (context->external_texture_frame_callback_) {
+      return context->external_texture_frame_callback_(texture_id, width,
+                                                       height, texture_out);
+    }
+    return false;
+  };
 }
 
 size_t EmbedderTestContextVulkan::GetSurfacePresentCount() const {
@@ -108,7 +133,7 @@ void EmbedderTestContextVulkan::SetupCompositor() {
   FML_CHECK(surface_)
       << "Set up the Vulkan surface before setting up a compositor.";
   compositor_ = std::make_unique<EmbedderTestCompositorVulkan>(
-      surface_size_, vulkan_context_->GetGrDirectContext());
+      surface_size_, vulkan_context_->GetGrDirectContext(), vulkan_context_);
 }
 
 }  // namespace flutter::testing

@@ -11,6 +11,7 @@
 
 #include "GLES3/gl3.h"
 #include "flutter/display_list/image/dl_image_skia.h"
+#include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
@@ -25,6 +26,7 @@
 #include "flutter/fml/thread.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 #include "flutter/shell/platform/embedder/embedder_surface_gl_impeller.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
@@ -2580,6 +2582,11 @@ TEST_P(EmbedderTestMultiBackend, PlatformViewMutatorsAreValid) {
                 FML_CHECK(false)
                     << "There should be no transformation in the test.";
                 break;
+              case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+              case kFlutterPlatformViewMutationTypeClipPath:
+                FML_CHECK(false) << "There should be no path or superellipse "
+                                    "clip in the test.";
+                break;
             }
 
             ASSERT_EQ(*platform_view.mutations[i], mutation);
@@ -2690,6 +2697,11 @@ TEST_F(EmbedderTest, PlatformViewMutatorsAreValidWithPixelRatio) {
                 mutation.type = kFlutterPlatformViewMutationTypeTransformation;
                 mutation.transformation = FlutterTransformationMake(
                     DlMatrix::MakeScale({2.0, 2.0, 1}));
+                break;
+              case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+              case kFlutterPlatformViewMutationTypeClipPath:
+                FML_CHECK(false) << "There should be no path or superellipse "
+                                    "clip in the test.";
                 break;
             }
 
@@ -2809,6 +2821,11 @@ TEST_F(EmbedderTest,
                 mutation.transformation =
                     FlutterTransformationMake(root_surface_transformation);
 
+                break;
+              case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+              case kFlutterPlatformViewMutationTypeClipPath:
+                FML_CHECK(false) << "There should be no path or superellipse "
+                                    "clip in the test.";
                 break;
             }
 
@@ -5342,6 +5359,168 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneToOpenGLSurfaces) {
 
   // There should no present calls on the root surface.
   ASSERT_EQ(context.GetSurfacePresentCount(), 0u);
+}
+
+TEST_F(EmbedderTest, ExternalTextureGLAppliesUVTransformation) {
+  constexpr int kSurfaceDimension = 4;
+  constexpr int kTextureDimension = 2;
+  constexpr int64_t kTextureId = 1;
+  constexpr uint32_t kRedPixelRgba = 0xFF0000FF;
+  constexpr uint32_t kBluePixelRgba = 0xFFFF0000;
+
+  TestGLSurface gl_surface(DlISize(kSurfaceDimension, kSurfaceDimension));
+  ASSERT_TRUE(gl_surface.MakeCurrent());
+
+  auto gl_gen_textures = reinterpret_cast<PFNGLGENTEXTURESPROC>(
+      gl_surface.GetProcAddress("glGenTextures"));
+  auto gl_bind_texture = reinterpret_cast<PFNGLBINDTEXTUREPROC>(
+      gl_surface.GetProcAddress("glBindTexture"));
+  auto gl_tex_parameteri = reinterpret_cast<PFNGLTEXPARAMETERIPROC>(
+      gl_surface.GetProcAddress("glTexParameteri"));
+  auto gl_tex_image_2d = reinterpret_cast<PFNGLTEXIMAGE2DPROC>(
+      gl_surface.GetProcAddress("glTexImage2D"));
+  auto gl_delete_textures = reinterpret_cast<PFNGLDELETETEXTURESPROC>(
+      gl_surface.GetProcAddress("glDeleteTextures"));
+  ASSERT_NE(gl_gen_textures, nullptr);
+  ASSERT_NE(gl_bind_texture, nullptr);
+  ASSERT_NE(gl_tex_parameteri, nullptr);
+  ASSERT_NE(gl_tex_image_2d, nullptr);
+  ASSERT_NE(gl_delete_textures, nullptr);
+
+  // Create a 2x2 GL_TEXTURE_2D with top row red and bottom row blue.
+  GLuint tex_id = 0;
+  gl_gen_textures(1, &tex_id);
+  ASSERT_NE(tex_id, 0u);
+  gl_bind_texture(GL_TEXTURE_2D, tex_id);
+  gl_tex_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  gl_tex_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  gl_tex_parameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  gl_tex_parameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  const uint32_t pixels[kTextureDimension * kTextureDimension] = {
+      kRedPixelRgba,
+      kRedPixelRgba,  // Row 0
+      kBluePixelRgba,
+      kBluePixelRgba,  // Row 1
+  };
+  gl_tex_image_2d(GL_TEXTURE_2D, 0, GL_RGBA, kTextureDimension,
+                  kTextureDimension, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  gl_bind_texture(GL_TEXTURE_2D, 0);
+
+  auto gr_context = gl_surface.GetGrContext();
+  ASSERT_NE(gr_context, nullptr);
+
+  auto surface = gl_surface.GetOnscreenSurface();
+  ASSERT_NE(surface, nullptr);
+
+  EmbedderExternalTextureGL::ExternalTextureCallback external_texture_callback =
+      [tex_id](int64_t texture_id, size_t width,
+               size_t height) -> std::unique_ptr<FlutterOpenGLTexture> {
+    auto desc = std::make_unique<FlutterOpenGLTexture>();
+    desc->target = GL_TEXTURE_2D;
+    desc->name = tex_id;
+    desc->format = GL_RGBA8;
+    desc->width = kTextureDimension;
+    desc->height = kTextureDimension;
+    return desc;
+  };
+
+  // 1. Identity UV transformation: verify full bounds scaling (no 1x1 shortcut)
+  // and record baseline top/bottom pixel colors.
+  EmbedderExternalTextureGL identity_texture(
+      kTextureId, external_texture_callback,
+      [](int64_t id, DlMatrix* matrix_out) -> bool {
+        *matrix_out = DlMatrix();
+        return true;
+      });
+
+  surface->getCanvas()->clear(SK_ColorTRANSPARENT);
+  {
+    DlSkCanvasAdapter dl_canvas(surface->getCanvas());
+    Texture::PaintContext paint_context = {
+        .canvas = &dl_canvas,
+        .gr_context = gr_context.get(),
+        .aiks_context = nullptr,
+        .paint = nullptr,
+    };
+    identity_texture.Paint(paint_context,
+                           DlRect::MakeWH(kSurfaceDimension, kSurfaceDimension),
+                           false, DlImageSampling::kNearestNeighbor);
+  }
+  gr_context->flushAndSubmit();
+
+  SkBitmap identity_bitmap;
+  identity_bitmap.allocN32Pixels(kSurfaceDimension, kSurfaceDimension);
+  ASSERT_TRUE(surface->readPixels(identity_bitmap, 0, 0));
+
+  const SkColor identity_top_left = identity_bitmap.getColor(0, 0);
+  const SkColor identity_top_right =
+      identity_bitmap.getColor(kSurfaceDimension - 1, 0);
+  const SkColor identity_bottom_left =
+      identity_bitmap.getColor(0, kSurfaceDimension - 1);
+  const SkColor identity_bottom_right =
+      identity_bitmap.getColor(kSurfaceDimension - 1, kSurfaceDimension - 1);
+
+  // Verify the texture scaled across the full 4x4 target bounds rather than
+  // rendering only into a 1x1 pixel corner.
+  EXPECT_EQ(identity_top_left, identity_top_right);
+  EXPECT_EQ(identity_bottom_left, identity_bottom_right);
+  EXPECT_NE(identity_top_left, static_cast<SkColor>(SK_ColorTRANSPARENT));
+  EXPECT_NE(identity_bottom_left, static_cast<SkColor>(SK_ColorTRANSPARENT));
+  EXPECT_NE(identity_top_left, identity_bottom_left);
+
+  // 2. Vertical flip UV transformation (Android SurfaceTexture mtxFlipV:
+  // diag(1, -1, 1, 1) + translation(0, 1, 0)): verify top and bottom rows swap,
+  // passing an inline rvalue closure to verify value-storage lifetime safety.
+  EmbedderExternalTextureGL flipped_texture(
+      kTextureId,
+      [tex_id](int64_t texture_id, size_t width,
+               size_t height) -> std::unique_ptr<FlutterOpenGLTexture> {
+        auto desc = std::make_unique<FlutterOpenGLTexture>();
+        desc->target = GL_TEXTURE_2D;
+        desc->name = tex_id;
+        desc->format = GL_RGBA8;
+        desc->width = kTextureDimension;
+        desc->height = kTextureDimension;
+        return desc;
+      },
+      [](int64_t id, DlMatrix* matrix_out) -> bool {
+        *matrix_out = DlMatrix::MakeColumn(1.0f, 0.0f, 0.0f, 0.0f,   //
+                                           0.0f, -1.0f, 0.0f, 0.0f,  //
+                                           0.0f, 0.0f, 1.0f, 0.0f,   //
+                                           0.0f, 1.0f, 0.0f, 1.0f);
+        return true;
+      });
+
+  surface->getCanvas()->clear(SK_ColorTRANSPARENT);
+  {
+    DlSkCanvasAdapter dl_canvas(surface->getCanvas());
+    Texture::PaintContext paint_context = {
+        .canvas = &dl_canvas,
+        .gr_context = gr_context.get(),
+        .aiks_context = nullptr,
+        .paint = nullptr,
+    };
+    flipped_texture.Paint(paint_context,
+                          DlRect::MakeWH(kSurfaceDimension, kSurfaceDimension),
+                          false, DlImageSampling::kNearestNeighbor);
+  }
+  gr_context->flushAndSubmit();
+
+  SkBitmap flipped_bitmap;
+  flipped_bitmap.allocN32Pixels(kSurfaceDimension, kSurfaceDimension);
+  ASSERT_TRUE(surface->readPixels(flipped_bitmap, 0, 0));
+
+  EXPECT_EQ(flipped_bitmap.getColor(0, 0), identity_bottom_left);
+  EXPECT_EQ(flipped_bitmap.getColor(kSurfaceDimension - 1, 0),
+            identity_bottom_right);
+  EXPECT_EQ(flipped_bitmap.getColor(0, kSurfaceDimension - 1),
+            identity_top_left);
+  EXPECT_EQ(
+      flipped_bitmap.getColor(kSurfaceDimension - 1, kSurfaceDimension - 1),
+      identity_top_right);
+
+  gl_delete_textures(1, &tex_id);
 }
 
 INSTANTIATE_TEST_SUITE_P(

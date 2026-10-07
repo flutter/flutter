@@ -30,7 +30,9 @@ class EmbedderExternalTextureResolver {
 
 #ifdef SHELL_ENABLE_GL
   explicit EmbedderExternalTextureResolver(
-      EmbedderExternalTextureGL::ExternalTextureCallback gl_callback);
+      EmbedderExternalTextureGL::ExternalTextureCallback gl_callback,
+      EmbedderExternalTextureGL::UVTransformationCallback
+          gl_uv_transformation_callback = {});
 #endif
 
 #ifdef SHELL_ENABLE_METAL
@@ -50,6 +52,8 @@ class EmbedderExternalTextureResolver {
  private:
 #ifdef SHELL_ENABLE_GL
   EmbedderExternalTextureGL::ExternalTextureCallback gl_callback_;
+  EmbedderExternalTextureGL::UVTransformationCallback
+      gl_uv_transformation_callback_;
 #endif
 
 #ifdef SHELL_ENABLE_METAL
@@ -59,6 +63,7 @@ class EmbedderExternalTextureResolver {
 #ifdef SHELL_ENABLE_VULKAN
   EmbedderExternalTextureVulkan::ExternalTextureCallback vulkan_callback_;
 #endif
+
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureResolver);
 };
 }  // namespace flutter

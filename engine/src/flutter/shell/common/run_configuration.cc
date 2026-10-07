@@ -114,6 +114,14 @@ std::optional<int64_t> RunConfiguration::GetEngineId() const {
   return engine_id_;
 }
 
+void RunConfiguration::SetInitialRoute(std::string initial_route) {
+  initial_route_ = std::move(initial_route);
+}
+
+const std::string& RunConfiguration::GetInitialRoute() const {
+  return initial_route_;
+}
+
 std::unique_ptr<IsolateConfiguration>
 RunConfiguration::TakeIsolateConfiguration() {
   return std::move(isolate_configuration_);

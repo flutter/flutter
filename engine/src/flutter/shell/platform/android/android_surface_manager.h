@@ -1,0 +1,482 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_MANAGER_H_
+#define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_MANAGER_H_
+
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include "flutter/fml/build_config.h"
+#include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/android_rendering_selector.h"
+#include "flutter/shell/platform/android/android_vulkan_device_owner.h"
+#include "flutter/shell/platform/embedder/embedder.h"
+
+#if FML_OS_ANDROID
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <android/native_window.h>
+#else
+// Stubs and type aliases for host unit testing
+typedef void* EGLDisplay;
+typedef void* EGLConfig;
+typedef void* EGLContext;
+typedef void* EGLSurface;
+typedef int32_t EGLint;
+struct ANativeWindow;
+#ifndef EGL_NO_DISPLAY
+#define EGL_NO_DISPLAY ((EGLDisplay)0)
+#endif
+#ifndef EGL_NO_CONTEXT
+#define EGL_NO_CONTEXT ((EGLContext)0)
+#endif
+#ifndef EGL_NO_SURFACE
+#define EGL_NO_SURFACE ((EGLSurface)0)
+#endif
+#ifndef EGL_DEFAULT_DISPLAY
+#define EGL_DEFAULT_DISPLAY ((EGLDisplay)0)
+#endif
+#endif  // FML_OS_ANDROID
+
+#include <vulkan/vulkan.h>
+#if !defined(VK_USE_PLATFORM_ANDROID_KHR)
+typedef VkFlags VkAndroidSurfaceCreateFlagsKHR;
+typedef struct VkAndroidSurfaceCreateInfoKHR {
+  VkStructureType sType;
+  const void* pNext;
+  VkAndroidSurfaceCreateFlagsKHR flags;
+  struct ANativeWindow* window;
+} VkAndroidSurfaceCreateInfoKHR;
+typedef VkResult(VKAPI_PTR* PFN_vkCreateAndroidSurfaceKHR)(
+    VkInstance instance,
+    const VkAndroidSurfaceCreateInfoKHR* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkSurfaceKHR* pSurface);
+#ifndef VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR
+#define VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR \
+  ((VkStructureType)1000008000)
+#endif
+#endif
+
+namespace flutter {
+
+namespace testing {
+class AndroidSurfaceManagerTest;
+}  // namespace testing
+
+struct AndroidSurfaceDimensions {
+  int32_t width = 0;
+  int32_t height = 0;
+};
+
+/// @brief Selected Vulkan validation layers and instance extensions.
+struct VulkanValidationConfig {
+  std::vector<std::string> layers;
+  std::vector<std::string> instance_extensions;
+};
+
+/// @brief Selects the Vulkan validation layer and debug utils extension from
+///        the enumerated layer and extension lists and logs the resulting
+///        state.
+VulkanValidationConfig SelectVulkanValidationConfig(
+    bool requested,
+    const std::vector<VkLayerProperties>& available_layers,
+    const std::vector<VkExtensionProperties>& available_instance_extensions,
+    const std::vector<VkExtensionProperties>& validation_layer_extensions);
+
+/// @brief Manages platform window and graphics rendering contexts (EGL, Vulkan,
+///        Software) for the Flutter Android Embedder, handling thread-safe
+///        lifecycle, resource context pooling, and surface presentation.
+class AndroidSurfaceManager {
+ public:
+  using VulkanDriverProbe =
+      std::function<FlutterEngineResult(const FlutterVulkanDriverProperties&,
+                                        bool*)>;
+
+  /// Returns the default Vulkan driver probe backed by the embedder proc table.
+  static VulkanDriverProbe DefaultVulkanDriverProbe();
+
+  /// Creates a new surface manager configured for the specified rendering API.
+  static std::unique_ptr<AndroidSurfaceManager> Create(
+      AndroidRenderingAPI rendering_api,
+      VulkanDriverProbe vulkan_driver_probe = DefaultVulkanDriverProbe());
+
+  static std::unique_ptr<AndroidSurfaceManager> Create(
+      AndroidRenderingAPI rendering_api,
+      std::shared_ptr<VulkanDeviceOwner> shared_vulkan_device_owner,
+      VulkanDriverProbe vulkan_driver_probe = DefaultVulkanDriverProbe());
+
+  /// Creates a surface manager for fake-window unit tests, preserving
+  /// GetRenderingAPI() == kImpellerVulkan backed by EGL.
+  static std::unique_ptr<AndroidSurfaceManager> CreateForFakeWindow(
+      AndroidRenderingAPI rendering_api);
+
+  /// Creates a surface manager with a forced Vulkan initialization failure for
+  /// testing the device fallback path.
+  static std::unique_ptr<AndroidSurfaceManager>
+  CreateWithForcedVulkanInitFailureForTesting(
+      AndroidRenderingAPI rendering_api);
+
+  explicit AndroidSurfaceManager(
+      AndroidRenderingAPI rendering_api,
+      std::shared_ptr<VulkanDeviceOwner> shared_vulkan_device_owner = nullptr,
+      VulkanDriverProbe vulkan_driver_probe = DefaultVulkanDriverProbe(),
+      bool preserve_vulkan_api_for_fake_window = false,
+      bool force_vulkan_init_failure_for_testing = false);
+  virtual ~AndroidSurfaceManager();
+
+  AndroidRenderingAPI GetRenderingAPI() const { return rendering_api_; }
+
+  /// Returns true if graphics subsystem was initialized successfully.
+  bool IsValid() const;
+
+  /// Associates the manager with a native window (e.g. from SurfaceView /
+  /// SurfaceTexture). Thread-safe.
+  bool SetNativeWindow(ANativeWindow* window, bool is_fake_window = false);
+
+  /// Detaches and releases the native window reference. Thread-safe.
+  void ClearNativeWindow();
+
+  /// Returns current native window pointer. Thread-safe.
+  ANativeWindow* GetNativeWindow() const;
+
+  /// Returns dimensions of currently attached native window.
+  AndroidSurfaceDimensions GetNativeWindowSize() const;
+
+  /// Returns true if this manager is backed by a fake window (in unit testing).
+  bool IsFakeWindow() const;
+
+  // ---------------------------------------------------------------------------
+  // OpenGL ES / EGL Lifecycle Methods
+  // ---------------------------------------------------------------------------
+
+  /// Makes the onscreen EGL context and surface current on the calling thread.
+  bool MakeCurrent();
+
+  /// If the onscreen EGL surface is currently bound on the calling thread,
+  /// binds the fallback pbuffer (or surfaceless) surface to the onscreen
+  /// context so that another thread can safely replace the onscreen window
+  /// surface.
+  void BindOffscreenPbufferIfCurrent();
+
+  /// Clears the current EGL context and surface on the calling thread.
+  bool ClearCurrent();
+
+  /// Makes the offscreen/resource EGL context current on the calling thread.
+  bool MakeResourceCurrent();
+
+  /// Swaps buffers on the onscreen surface.
+  virtual bool Present();
+
+  /// Blits an offscreen FBO to FBO 0 of the current onscreen surface and
+  /// swaps buffers.
+  virtual bool BlitAndPresentOnscreenSurface(uint32_t offscreen_fbo,
+                                             size_t width,
+                                             size_t height);
+
+  /// Clears the current onscreen surface to transparent and swaps buffers.
+  virtual bool ClearAndPresentOnscreenSurface();
+
+  /// Returns the current FBO (typically 0 for onscreen window surfaces).
+  uint32_t GetFBO() const;
+
+  /// Returns the EGLDisplay handle.
+  EGLDisplay GetEGLDisplay() const;
+
+  /// Returns the EGLConfig handle.
+  EGLConfig GetEGLConfig() const { return egl_config_; }
+
+  /// Returns the resource EGLContext handle.
+  EGLContext GetResourceContext() const;
+
+  // ---------------------------------------------------------------------------
+  // Software Surface Lifecycle Methods
+  // ---------------------------------------------------------------------------
+
+  /// Returns the active software pixel format for the attached native window
+  /// (kFlutterSoftwarePixelFormatRGB565 for WINDOW_FORMAT_RGB_565 surfaces,
+  /// or kFlutterSoftwarePixelFormatRGBA8888 otherwise). Thread-safe.
+  FlutterSoftwarePixelFormat GetSoftwarePixelFormat() const;
+
+  /// Overrides the active software pixel format for unit testing. Thread-safe.
+  void SetSoftwarePixelFormatForTesting(FlutterSoftwarePixelFormat format);
+
+  /// Copies or converts a software-rendered pixel buffer into a locked
+  /// native window buffer. Exposed for deterministic host unit testing.
+  static bool CopySoftwarePixelsToWindowBuffer(void* dst_bits,
+                                               int32_t dst_width,
+                                               int32_t dst_height,
+                                               int32_t dst_stride,
+                                               int32_t dst_format,
+                                               const void* src_allocation,
+                                               size_t src_row_bytes,
+                                               size_t src_height);
+
+  /// Presents a software-rendered pixel buffer to the native window.
+  bool PresentSoftware(const void* allocation, size_t row_bytes, size_t height);
+
+  // ---------------------------------------------------------------------------
+  // Vulkan Lifecycle Methods
+  // ---------------------------------------------------------------------------
+
+  /// Returns true if the Vulkan subsystem was initialized successfully.
+  bool InitializeVulkan();
+
+  /// Returns true if the Vulkan instance and device were initialized.
+  bool IsVulkanInitialized() const { return vk_instance_ != VK_NULL_HANDLE; }
+
+  /// Returns the native VkInstance handle.
+  VkInstance GetVulkanInstance() const { return vk_instance_; }
+
+  /// Returns the native VkDevice handle.
+  VkDevice GetVulkanDevice() const { return vk_device_; }
+
+  /// Returns the native VkQueue handle.
+  VkQueue GetVulkanQueue() const { return vk_queue_; }
+
+  /// Returns the shared VulkanDeviceOwner, or nullptr if Vulkan is not active.
+  std::shared_ptr<VulkanDeviceOwner> GetVulkanDeviceOwner() const {
+    return vulkan_device_owner_;
+  }
+
+  /// Tears down the Vulkan instance and device resources.
+  void TeardownVulkan();
+
+  /// Populates the Vulkan renderer config struct for engine startup.
+  void PopulateVulkanRendererConfig(FlutterVulkanRendererConfig* config);
+
+  /// Acquires the next swapchain image for rendering.
+  FlutterVulkanImage GetNextImage(const FlutterFrameInfo* frame_info);
+
+  /// Presents the rendered image to the swapchain.
+  virtual bool PresentImage(const FlutterVulkanImage* image);
+
+  /// Acquires the next swapchain image for an overlay surface.
+  virtual FlutterVulkanImage GetNextOverlayImage(
+      ANativeWindow* overlay_window,
+      const FlutterFrameInfo* frame_info = nullptr);
+
+  /// Presents the rendered image to the overlay swapchain.
+  virtual bool PresentOverlayImage(ANativeWindow* overlay_window,
+                                   const FlutterVulkanImage* image);
+
+  /// Resolves Vulkan function pointers dynamically.
+  void* GetInstanceProcAddress(FlutterVulkanInstanceHandle instance,
+                               const char* name);
+
+  /// Returns the image usage flags configured on the active Vulkan swapchain.
+  VkImageUsageFlags GetVulkanSwapchainUsage() const {
+    return vk_swapchain_usage_;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Embedder C-API Configuration Helpers
+  // ---------------------------------------------------------------------------
+
+  /// Populates OpenGL renderer config for
+  /// FlutterEngineInitialize/FlutterEngineRun.
+  void PopulateGLRendererConfig(FlutterOpenGLRendererConfig* config);
+
+  /// Populates Software renderer config for
+  /// FlutterEngineInitialize/FlutterEngineRun.
+  void PopulateSoftwareRendererConfig(FlutterSoftwareRendererConfig* config);
+
+  // ---------------------------------------------------------------------------
+  // Overlay Surface & Offscreen Framebuffer Management
+  // ---------------------------------------------------------------------------
+
+  struct OffscreenFBO {
+    uint32_t fbo = 0;
+    uint32_t texture = 0;
+    size_t width = 0;
+    size_t height = 0;
+  };
+
+  /// Acquires an offscreen framebuffer object for rendering overlays.
+  OffscreenFBO AcquireOffscreenFBO(size_t width, size_t height);
+
+  /// Releases an offscreen framebuffer object back to the pool.
+  void ReleaseOffscreenFBO(const OffscreenFBO& fbo);
+
+  /// Blits the contents of offscreen_fbo to overlay_window and swaps its
+  /// buffers.
+  bool BlitAndSwapOverlaySurface(ANativeWindow* overlay_window,
+                                 uint32_t offscreen_fbo,
+                                 size_t width,
+                                 size_t height);
+
+  /// Destroys all cached overlay EGLSurfaces.
+  void DestroyOverlaySurfaces();
+
+ private:
+  friend class testing::AndroidSurfaceManagerTest;
+
+  struct VulkanOverlaySurface {
+    VkSurfaceKHR surface = VK_NULL_HANDLE;
+    VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+    VkSurfaceFormatKHR format = {};
+    VkExtent2D extent = {0, 0};
+    std::vector<VkImage> images;
+    std::vector<VkCommandBuffer> command_buffers;
+    VkCommandPool command_pool = VK_NULL_HANDLE;
+    VkFence acquire_fence = VK_NULL_HANDLE;
+    VkSurfaceTransformFlagBitsKHR transform =
+        VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+    uint32_t current_image_index = 0;
+    bool has_acquired_image = false;
+    bool swapchain_out_of_date = false;
+    bool surface_lost = false;
+    bool reserved_bool_1 = false;
+    bool reserved_bool_2 = false;
+    bool reserved_bool_3 = false;
+    bool reserved_bool_4 = false;
+    bool reserved_bool_5 = false;
+  };
+
+  bool InitializeEGL();
+  void TeardownEGL();
+  bool CreateOrUpdateOnscreenSurfaceLocked();
+  void DestroyOnscreenSurfaceLocked();
+  bool CreateOrUpdateVulkanSurfaceLocked(uint32_t fallback_width = 0,
+                                         uint32_t fallback_height = 0);
+  void DestroyVulkanSurfaceLocked();
+  void DestroyVulkanSwapchainLocked();
+  bool CreateOrUpdateOverlayVulkanSurfaceLocked(ANativeWindow* window,
+                                                VulkanOverlaySurface& entry,
+                                                uint32_t fallback_width = 0,
+                                                uint32_t fallback_height = 0);
+  void DestroyOverlayVulkanSurfaceLocked(VulkanOverlaySurface& entry);
+  void DestroyOverlayVulkanSwapchainLocked(VulkanOverlaySurface& entry);
+
+  // 8-byte aligned members (mutexes, maps, vectors, pointers, 64-bit handles)
+  mutable std::mutex window_mutex_;
+  ANativeWindow* native_window_ = nullptr;
+
+  // EGL state
+  EGLDisplay egl_display_ = EGL_NO_DISPLAY;
+  EGLConfig egl_config_ = nullptr;
+  EGLContext egl_onscreen_context_ = EGL_NO_CONTEXT;
+  EGLContext egl_resource_context_ = EGL_NO_CONTEXT;
+  EGLSurface egl_onscreen_surface_ = EGL_NO_SURFACE;
+  EGLSurface egl_onscreen_pbuffer_surface_ = EGL_NO_SURFACE;
+  EGLSurface egl_resource_pbuffer_surface_ = EGL_NO_SURFACE;
+
+  mutable std::mutex offscreen_fbo_mutex_;
+  std::vector<OffscreenFBO> offscreen_fbo_pool_;
+
+  mutable std::mutex overlay_surfaces_mutex_;
+#if FML_OS_ANDROID
+  std::unordered_map<ANativeWindow*, EGLSurface> overlay_egl_surfaces_;
+#endif
+
+  // Vulkan state
+  std::shared_ptr<VulkanDeviceOwner> vulkan_device_owner_;
+  VulkanDriverProbe vulkan_driver_probe_;
+  void* vulkan_lib_handle_ = nullptr;
+  VkInstance vk_instance_ = VK_NULL_HANDLE;
+  VkPhysicalDevice vk_physical_device_ = VK_NULL_HANDLE;
+  VkDevice vk_device_ = VK_NULL_HANDLE;
+  VkQueue vk_queue_ = VK_NULL_HANDLE;
+  VkSurfaceKHR vk_surface_ = VK_NULL_HANDLE;
+  VkSwapchainKHR vk_swapchain_ = VK_NULL_HANDLE;
+  std::vector<VkImage> vk_swapchain_images_;
+  std::vector<VkCommandBuffer> vk_command_buffers_;
+  VkCommandPool vk_command_pool_ = VK_NULL_HANDLE;
+  VkFence vk_acquire_fence_ = VK_NULL_HANDLE;
+
+  std::vector<std::string> enabled_instance_extensions_;
+  std::vector<const char*> enabled_instance_extensions_ptrs_;
+  std::vector<std::string> enabled_device_extensions_;
+  std::vector<const char*> enabled_device_extensions_ptrs_;
+
+  // Vulkan function pointers
+  PFN_vkGetInstanceProcAddr vk_get_instance_proc_addr_fn_ = nullptr;
+  PFN_vkCreateInstance vk_create_instance_fn_ = nullptr;
+  PFN_vkDestroyInstance vk_destroy_instance_fn_ = nullptr;
+  PFN_vkEnumerateInstanceExtensionProperties
+      vk_enumerate_instance_extension_properties_fn_ = nullptr;
+  PFN_vkEnumerateInstanceLayerProperties
+      vk_enumerate_instance_layer_properties_fn_ = nullptr;
+  PFN_vkEnumeratePhysicalDevices vk_enumerate_physical_devices_fn_ = nullptr;
+  PFN_vkGetPhysicalDeviceProperties vk_get_physical_device_properties_fn_ =
+      nullptr;
+  PFN_vkGetPhysicalDeviceQueueFamilyProperties
+      vk_get_physical_device_queue_family_properties_fn_ = nullptr;
+  PFN_vkEnumerateDeviceExtensionProperties
+      vk_enumerate_device_extension_properties_fn_ = nullptr;
+  PFN_vkCreateDevice vk_create_device_fn_ = nullptr;
+  PFN_vkDestroyDevice vk_destroy_device_fn_ = nullptr;
+  PFN_vkGetDeviceQueue vk_get_device_queue_fn_ = nullptr;
+  PFN_vkDeviceWaitIdle vk_device_wait_idle_fn_ = nullptr;
+  PFN_vkQueueWaitIdle vk_queue_wait_idle_fn_ = nullptr;
+  PFN_vkCreateAndroidSurfaceKHR vk_create_android_surface_khr_fn_ = nullptr;
+  PFN_vkDestroySurfaceKHR vk_destroy_surface_khr_fn_ = nullptr;
+  PFN_vkGetPhysicalDeviceSurfaceSupportKHR
+      vk_get_physical_device_surface_support_khr_fn_ = nullptr;
+  PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR
+      vk_get_physical_device_surface_capabilities_khr_fn_ = nullptr;
+  PFN_vkGetPhysicalDeviceSurfaceFormatsKHR
+      vk_get_physical_device_surface_formats_khr_fn_ = nullptr;
+  PFN_vkGetPhysicalDeviceSurfacePresentModesKHR
+      vk_get_physical_device_surface_present_modes_khr_fn_ = nullptr;
+  PFN_vkCreateSwapchainKHR vk_create_swapchain_khr_fn_ = nullptr;
+  PFN_vkDestroySwapchainKHR vk_destroy_swapchain_khr_fn_ = nullptr;
+  PFN_vkGetSwapchainImagesKHR vk_get_swapchain_images_khr_fn_ = nullptr;
+  PFN_vkAcquireNextImageKHR vk_acquire_next_image_khr_fn_ = nullptr;
+  PFN_vkQueuePresentKHR vk_queue_present_khr_fn_ = nullptr;
+  PFN_vkCreateCommandPool vk_create_command_pool_fn_ = nullptr;
+  PFN_vkDestroyCommandPool vk_destroy_command_pool_fn_ = nullptr;
+  PFN_vkAllocateCommandBuffers vk_allocate_command_buffers_fn_ = nullptr;
+  PFN_vkFreeCommandBuffers vk_free_command_buffers_fn_ = nullptr;
+  PFN_vkBeginCommandBuffer vk_begin_command_buffer_fn_ = nullptr;
+  PFN_vkEndCommandBuffer vk_end_command_buffer_fn_ = nullptr;
+  PFN_vkResetCommandBuffer vk_reset_command_buffer_fn_ = nullptr;
+  PFN_vkCmdPipelineBarrier vk_cmd_pipeline_barrier_fn_ = nullptr;
+  PFN_vkCmdClearColorImage vk_cmd_clear_color_image_fn_ = nullptr;
+  PFN_vkQueueSubmit vk_queue_submit_fn_ = nullptr;
+  PFN_vkCreateFence vk_create_fence_fn_ = nullptr;
+  PFN_vkDestroyFence vk_destroy_fence_fn_ = nullptr;
+  PFN_vkWaitForFences vk_wait_for_fences_fn_ = nullptr;
+  PFN_vkResetFences vk_reset_fences_fn_ = nullptr;
+
+  std::unordered_map<ANativeWindow*, VulkanOverlaySurface>
+      overlay_vulkan_surfaces_;
+
+  // 4-byte aligned members
+  AndroidRenderingAPI rendering_api_;
+  uint32_t vk_version_ = VK_API_VERSION_1_1;
+  uint32_t vk_graphics_queue_family_index_ = 0;
+  VkImageUsageFlags vk_swapchain_usage_ = 0;
+  uint32_t current_image_index_ = 0;
+  VkSurfaceFormatKHR vk_surface_format_ = {};
+  VkExtent2D vk_swapchain_extent_ = {0, 0};
+  VkSurfaceTransformFlagBitsKHR vk_surface_transform_ =
+      VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+  FlutterSoftwarePixelFormat software_pixel_format_ =
+      kFlutterSoftwarePixelFormatRGBA8888;
+
+  // 1-byte aligned booleans
+  bool is_fake_window_ = false;
+  bool is_valid_ = false;
+  bool has_surfaceless_context_ = false;
+  bool has_acquired_image_ = false;
+  bool vk_swapchain_out_of_date_ = false;
+  bool vk_surface_lost_ = false;
+  bool preserve_vulkan_api_for_fake_window_ = false;
+  bool force_vulkan_init_failure_for_testing_ = false;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceManager);
+};
+
+}  // namespace flutter
+
+#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_MANAGER_H_

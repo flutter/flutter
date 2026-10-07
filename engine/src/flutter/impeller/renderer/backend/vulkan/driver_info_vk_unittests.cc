@@ -304,4 +304,41 @@ TEST(DriverInfoVKTest, PowerVRBSeries) {
             std::optional<PowerVRGPU>(PowerVRGPU::kBXM));
 }
 
+TEST(DriverInfoVKTest, PropertiesConstructorMatchesDeviceConstructor) {
+  VkPhysicalDeviceProperties raw_props = {};
+  std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(
+              [&raw_props](VkPhysicalDevice device,
+                           VkPhysicalDeviceProperties* prop) {
+                prop->vendorID = 0x168C;  // Qualcomm
+                prop->deviceID = 0x06040001;
+                prop->driverVersion = 512;
+                prop->apiVersion = VK_MAKE_API_VERSION(0, 1, 3, 0);
+                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+                std::string name = "Adreno (TM) 640";
+                name.copy(prop->deviceName, name.size());
+                raw_props = *prop;
+              })
+          .Build();
+
+  ASSERT_NE(context, nullptr);
+  const auto& from_device = context->GetDriverInfo();
+  ASSERT_NE(from_device, nullptr);
+
+  vk::PhysicalDeviceProperties vk_props(raw_props);
+  DriverInfoVK from_props(vk_props);
+
+  EXPECT_EQ(from_props.GetAPIVersion(), from_device->GetAPIVersion());
+  EXPECT_EQ(from_props.GetVendor(), from_device->GetVendor());
+  EXPECT_EQ(from_props.GetDeviceType(), from_device->GetDeviceType());
+  EXPECT_EQ(from_props.GetDriverName(), from_device->GetDriverName());
+  EXPECT_EQ(from_props.IsEmulator(), from_device->IsEmulator());
+  EXPECT_EQ(from_props.IsKnownBadDriver(), from_device->IsKnownBadDriver());
+  EXPECT_EQ(from_props.GetAdrenoGPUInfo(), from_device->GetAdrenoGPUInfo());
+  EXPECT_EQ(from_props.GetMaliGPUInfo(), from_device->GetMaliGPUInfo());
+  EXPECT_EQ(from_props.GetPowerVRGPUInfo(), from_device->GetPowerVRGPUInfo());
+  EXPECT_TRUE(from_props.IsKnownBadDriver());
+}
+
 }  // namespace impeller::testing
