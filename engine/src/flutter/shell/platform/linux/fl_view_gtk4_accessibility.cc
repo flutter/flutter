@@ -701,10 +701,11 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
   self->bounds_height =
       static_cast<int>(semantics->rect.bottom - semantics->rect.top);
 
+  const gchar* value = flags->is_obscured ? nullptr : semantics->value;
   const gchar* label = semantics->label;
-  if ((label == nullptr || label[0] == '\0') && semantics->value != nullptr &&
-      semantics->value[0] != '\0' && semantics->child_count == 0) {
-    label = semantics->value;
+  if ((label == nullptr || label[0] == '\0') && value != nullptr &&
+      value[0] != '\0' && semantics->child_count == 0) {
+    label = value;
   }
   fl_gtk4_accessible_node_set_string_property(
       self, GTK_ACCESSIBLE_PROPERTY_LABEL, label);
@@ -725,11 +726,15 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
       self, GTK_ACCESSIBLE_PROPERTY_DESCRIPTION, description);
 
   fl_gtk4_accessible_node_set_string_property(
-      self, GTK_ACCESSIBLE_PROPERTY_VALUE_TEXT, semantics->value);
-  if (supports_text) {
-    fl_gtk4_text_accessible_node_set_text(self, semantics->value,
-                                          semantics->text_selection_base,
-                                          semantics->text_selection_extent);
+      self, GTK_ACCESSIBLE_PROPERTY_VALUE_TEXT, value);
+  // A text node may survive a transition to obscured or non-text semantics.
+  // Clear its cached contents as well as the properties exposed above.
+  if (fl_gtk_runtime_supports_native_accessibility_text() &&
+      FL_IS_GTK4_TEXT_ACCESSIBLE_NODE(self)) {
+    fl_gtk4_text_accessible_node_set_text(
+        self, supports_text ? value : nullptr,
+        supports_text ? semantics->text_selection_base : 0,
+        supports_text ? semantics->text_selection_extent : 0);
   }
   if (semantics->heading_level > 0) {
     fl_gtk4_accessible_node_set_int_property(

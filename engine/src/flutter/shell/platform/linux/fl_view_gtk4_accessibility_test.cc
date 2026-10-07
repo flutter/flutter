@@ -383,4 +383,61 @@ TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
             nullptr);
 }
 
+TEST_F(FlViewGtk4AccessibilityTest, ObscuredValueIsNotExported) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlutterSemanticsFlags flags = {};
+  flags.is_text_field = true;
+  flags.is_obscured = true;
+  FlutterSemanticsNode2 root = {};
+  root.value = "private value";
+  root.flags2 = &flags;
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) native =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  EXPECT_FALSE(
+      gtk_test_accessible_has_property(native, GTK_ACCESSIBLE_PROPERTY_LABEL));
+  EXPECT_FALSE(gtk_test_accessible_has_property(
+      native, GTK_ACCESSIBLE_PROPERTY_VALUE_TEXT));
+
+  if (!fl_gtk_runtime_supports_native_accessibility_text()) {
+    return;
+  }
+  flags.is_obscured = false;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) readable =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  g_autoptr(GBytes) before =
+      fl_view_gtk4_accessibility_ref_native_text_for_testing(readable);
+  ASSERT_NE(before, nullptr);
+  EXPECT_EQ(g_bytes_get_size(before), strlen(root.value));
+
+  flags.is_obscured = true;
+  root.label = "Password";
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autofree gchar* mismatch = gtk_test_accessible_check_property(
+      readable, GTK_ACCESSIBLE_PROPERTY_LABEL, "Password");
+  EXPECT_EQ(mismatch, nullptr);
+  EXPECT_FALSE(gtk_test_accessible_has_property(
+      readable, GTK_ACCESSIBLE_PROPERTY_VALUE_TEXT));
+  g_autoptr(GBytes) after =
+      fl_view_gtk4_accessibility_ref_native_text_for_testing(readable);
+  ASSERT_NE(after, nullptr);
+  ASSERT_EQ(g_bytes_get_size(after), 1u);
+  EXPECT_EQ(*static_cast<const char*>(g_bytes_get_data(after, nullptr)), '\0');
+}
+
 }  // namespace
