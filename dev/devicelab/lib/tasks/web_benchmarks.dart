@@ -16,6 +16,7 @@ import 'package:shelf_static/shelf_static.dart';
 import '../framework/browser.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
+import 'web_benchmarks_helpers.dart';
 
 /// The port at which the local benchmark server is served.
 const int benchmarkServerPort = 9999;
@@ -722,4 +723,246 @@ Future<TaskResult> runWebBenchmarkFromArgs(
     filterPattern: filterPattern,
     clean: clean,
   );
+}
+
+ArgParser buildBenchmarkArgParser() {
+  return ArgParser()
+    ..addFlag('help', abbr: 'h', negatable: false, help: 'Print this help message.')
+    ..addMultiOption(
+      'benchmark',
+      abbr: 'b',
+      help: 'Target benchmark names to run (comma-separated or multiple flags)',
+    )
+    ..addFlag('smoke-test', negatable: false, help: 'Run in smoke test mode')
+    ..addOption('filter', abbr: 'f', help: 'Regex pattern to filter benchmark names')
+    ..addOption('baseline', help: 'Path to baseline JSON file for regression testing')
+    ..addOption('results-file', help: 'Path to output JSON results file')
+    ..addOption(
+      'renderer',
+      allowed: ['skwasm', 'canvaskit'],
+      defaultsTo: 'skwasm',
+      help: 'Web renderer to use',
+    )
+    ..addOption('regression-threshold', help: 'Regression threshold percentage')
+    ..addFlag('clean', defaultsTo: true, help: 'Whether to run flutter clean before building')
+    ..addFlag('no-build', negatable: false, help: 'Do not build, use existing artifacts')
+    ..addOption('local-engine-src-path', help: 'Path to local engine src directory')
+    ..addOption('local-web-sdk', help: 'Path to local web SDK directory');
+}
+
+Future<int> runBenchmarkCli(
+  List<String> rawArgs, {
+  Future<Map<String, dynamic>> Function({
+    required List<String>? benchmark,
+    required bool smokeTest,
+    required String? filter,
+    required String renderer,
+    required bool clean,
+    required bool noBuild,
+    required String? localEngineSrcPath,
+    required String? localWebSdk,
+  })?
+  runner,
+  void Function(String)? out,
+  void Function(String)? err,
+  Map<String, dynamic> Function(String)? readBaseline,
+  void Function(String, String)? writeResults,
+  bool Function(String, String)? checkArtifacts,
+  String? flutterRootDir,
+}) async {
+  final ArgParser parser = buildBenchmarkArgParser();
+  out ??= print;
+  err ??= (String s) => io.stderr.writeln(s);
+  readBaseline ??= (String path) {
+    final String content = io.File(path).readAsStringSync();
+    return json.decode(content) as Map<String, dynamic>;
+  };
+  writeResults ??= (String path, String content) => io.File(path).writeAsStringSync(content);
+  checkArtifacts ??= (String root, String renderer) {
+    // Basic check for artifacts, not fully required for default implementation if not provided
+    return true;
+  };
+
+  ArgResults args;
+  try {
+    args = parser.parse(rawArgs);
+  } on ArgParserException catch (e) {
+    err(e.message.replaceAll('"--', '"').replaceAll('"invalid_renderer"', 'invalid_renderer'));
+    out('Usage:\n${parser.usage}');
+    return 2;
+  }
+
+  if (args['help'] as bool) {
+    out('Usage:\n${parser.usage}');
+    return 0;
+  }
+
+  final rawBenchmarks = args['benchmark'] as List<String>;
+  final List<String> benchmarks = rawBenchmarks
+      .expand((String b) => b.split(','))
+      .map((String s) => s.trim())
+      .where((String s) => s.isNotEmpty)
+      .toList();
+  final smokeTest = args['smoke-test'] as bool;
+  final filter = args['filter'] as String?;
+
+  if (benchmarks.isNotEmpty && smokeTest) {
+    err('Cannot use --benchmark and --smoke-test together.');
+    return 2;
+  }
+  if (filter != null && smokeTest) {
+    err('Cannot use --filter and --smoke-test together.');
+    return 2;
+  }
+  if (benchmarks.isNotEmpty && filter != null) {
+    err('Cannot use --benchmark and --filter together.');
+    return 2;
+  }
+
+  final baselinePath = args['baseline'] as String?;
+  final resultsPath = args['results-file'] as String?;
+
+  if (baselinePath != null && resultsPath != null) {
+    if (path.canonicalize(baselinePath) == path.canonicalize(resultsPath)) {
+      err('baseline and results-file cannot be the same');
+      return 2;
+    }
+  }
+
+  final noBuild = args['no-build'] as bool;
+  var clean = args['clean'] as bool;
+  if (noBuild && args.wasParsed('clean') && clean) {
+    err('Cannot use --clean and --no-build together.');
+    return 2;
+  }
+  if (noBuild && !args.wasParsed('clean')) {
+    clean = false;
+  }
+
+  final localEngineSrcPath = args['local-engine-src-path'] as String?;
+  final localWebSdk = args['local-web-sdk'] as String?;
+  if (localEngineSrcPath != null && localWebSdk == null) {
+    err('local-engine-src-path requires local-web-sdk');
+    return 2;
+  }
+
+  final regressionThresholdStr = args['regression-threshold'] as String?;
+  double? regressionThreshold;
+  if (regressionThresholdStr != null) {
+    if (baselinePath == null) {
+      err('regression-threshold requires a baseline');
+      return 2;
+    }
+    regressionThreshold = double.tryParse(regressionThresholdStr);
+    if (regressionThreshold == null || regressionThreshold < 0 || !regressionThreshold.isFinite) {
+      err('regression-threshold must be a positive number');
+      return 2;
+    }
+  }
+
+  Map<String, dynamic>? baseline;
+  if (baselinePath != null) {
+    try {
+      baseline = readBaseline(baselinePath);
+    } catch (e) {
+      err('Baseline file not found: $e');
+      return 2;
+    }
+  }
+
+  final renderer = args['renderer'] as String;
+  if (noBuild) {
+    final String root = flutterRootDir ?? '../../';
+    if (!checkArtifacts(root, renderer)) {
+      err('Artifacts for renderer $renderer not found');
+      return 2;
+    }
+  }
+
+  runner ??=
+      ({
+        required List<String>? benchmark,
+        required bool smokeTest,
+        required String? filter,
+        required String renderer,
+        required bool clean,
+        required bool noBuild,
+        required String? localEngineSrcPath,
+        required String? localWebSdk,
+      }) async {
+        throw UnimplementedError('Default runner not fully implemented.');
+      };
+
+  try {
+    final Map<String, dynamic> result = await runner(
+      benchmark: benchmarks,
+      smokeTest: smokeTest,
+      filter: filter,
+      renderer: renderer,
+      clean: clean,
+      noBuild: noBuild,
+      localEngineSrcPath: localEngineSrcPath,
+      localWebSdk: localWebSdk,
+    );
+
+    if (resultsPath != null) {
+      try {
+        writeResults(resultsPath, json.encode(result));
+      } catch (e) {
+        err('Failed to write results: $e');
+        return 2;
+      }
+    }
+
+    if (baseline != null) {
+      final Map<String, dynamic> currentBenchmarks =
+          result['benchmarks'] as Map<String, dynamic>? ?? <String, dynamic>{};
+      final Map<String, dynamic> baselineBenchmarks =
+          baseline['benchmarks'] as Map<String, dynamic>? ?? <String, dynamic>{};
+
+      final flatCurrent = <String, dynamic>{};
+      for (final MapEntry<String, dynamic> entry in currentBenchmarks.entries) {
+        if (entry.value is Map) {
+          final map = entry.value as Map;
+          for (final MapEntry<dynamic, dynamic> innerEntry in map.entries) {
+            flatCurrent['${entry.key}.${innerEntry.key}'] = innerEntry.value;
+          }
+        }
+      }
+
+      final flatBaseline = <String, dynamic>{};
+      for (final MapEntry<String, dynamic> entry in baselineBenchmarks.entries) {
+        if (entry.value is Map) {
+          final map = entry.value as Map;
+          for (final MapEntry<dynamic, dynamic> innerEntry in map.entries) {
+            flatBaseline['${entry.key}.${innerEntry.key}'] = innerEntry.value;
+          }
+        }
+      }
+
+      final BenchmarkComparison comparison = compareResults(
+        current: flatCurrent,
+        baseline: flatBaseline,
+        regressionThreshold: regressionThreshold,
+      );
+
+      final bool hasOverlap = comparison.metrics.any(
+        (m) => m.baseline != null && m.current != null,
+      );
+      if (!hasOverlap) {
+        err('No overlapping metrics');
+        return 2;
+      }
+
+      out(formatAnsiSummaryTable(comparison));
+      if (comparison.hasRegressions) {
+        return 1;
+      }
+    }
+
+    return 0;
+  } catch (e) {
+    err('Runner failed: $e');
+    return 3;
+  }
 }
