@@ -20,15 +20,14 @@ class TestApp {
   Color _backgroundColor = _pink;
 
   void run() {
-    final ByteData policyMessage = utf8
-        .encode(
-          json.encode(<String, Object>{
-            'method': 'View.setGestureResponsePolicy',
-            'args': <String, Object>{'defaultResponse': 'YES'},
-          }),
-        )
-        .buffer
-        .asByteData();
+    final policyMessage = ByteData.sublistView(
+      utf8.encode(
+        json.encode(<String, Object>{
+          'method': 'View.setGestureResponsePolicy',
+          'args': <String, Object>{'defaultResponse': 'YES'},
+        }),
+      ),
+    );
     PlatformDispatcher.instance.sendPlatformMessage('flutter/platform_views', policyMessage, null);
 
     // Set up window callbacks.

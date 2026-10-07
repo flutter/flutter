@@ -161,15 +161,14 @@ class TestApp {
       ],
       'response': 'NO',
     });
-    final ByteData policyMessage = utf8
-        .encode(
-          json.encode(<String, Object>{
-            'method': 'View.setGestureResponsePolicy',
-            'args': <String, Object>{'defaultResponse': 'YES', 'regions': policyRegions},
-          }),
-        )
-        .buffer
-        .asByteData();
+    final policyMessage = ByteData.sublistView(
+      utf8.encode(
+        json.encode(<String, Object>{
+          'method': 'View.setGestureResponsePolicy',
+          'args': <String, Object>{'defaultResponse': 'YES', 'regions': policyRegions},
+        }),
+      ),
+    );
     PlatformDispatcher.instance.sendPlatformMessage('flutter/platform_views', policyMessage, null);
 
     sceneBuilder.pop();
