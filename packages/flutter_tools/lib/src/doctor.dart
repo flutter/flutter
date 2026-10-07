@@ -355,7 +355,7 @@ class Doctor {
     bool sendEvent = true,
     ExtensionManager? extensionManager,
   }) async {
-    final bool showColor = globals.terminal.supportsColor;
+    final bool showColor = _logger.terminal.supportsColor;
     if (androidLicenses && androidLicenseValidator != null) {
       return androidLicenseValidator.runLicenseManager();
     }
@@ -500,13 +500,13 @@ class Doctor {
 
     if (issues > 0) {
       _logger.printStatus(
-        '${showColor ? globals.terminal.color('!', TerminalColor.yellow) : '!'}'
+        '${showColor ? _logger.terminal.color('!', TerminalColor.yellow) : '!'}'
         ' Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.',
         hangingIndent: 2,
       );
     } else {
       _logger.printStatus(
-        '${showColor ? globals.terminal.color('•', TerminalColor.green) : '•'}'
+        '${showColor ? _logger.terminal.color('•', TerminalColor.green) : '•'}'
         ' No issues found!',
         hangingIndent: 2,
       );

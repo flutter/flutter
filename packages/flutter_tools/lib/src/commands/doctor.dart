@@ -4,6 +4,7 @@
 
 import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
+import '../context/tool_context.dart';
 import '../doctor.dart';
 import '../experimental/extension_manager.dart';
 import '../runner/flutter_command.dart';
@@ -13,16 +14,15 @@ import '../runner/flutter_command.dart';
 class DoctorCommand extends FlutterCommand {
   /// Creates a new [DoctorCommand].
   ///
-  /// If [doctor] is omitted, a new [Doctor] instance is created using
-  /// [toolContext]. If [_androidLicenseValidator] is omitted, it is lazily
-  /// resolved from the active context when `--android-licenses` is supplied.
+  /// If [_androidLicenseValidator] is omitted, it is lazily resolved from the
+  /// active context when `--android-licenses` is supplied.
   DoctorCommand({
-    required super.toolContext,
+    required this._doctor,
+    required ToolContext super.toolContext,
     this._androidLicenseValidator,
-    Doctor? doctor,
     this.extensionManager,
     this.verbose = false,
-  }) : _explicitDoctor = doctor {
+  }) {
     argParser.addFlag(
       'android-licenses',
       negatable: false,
@@ -38,14 +38,13 @@ class DoctorCommand extends FlutterCommand {
     );
   }
 
-  final Doctor? _explicitDoctor;
+  final Doctor _doctor;
   final android_workflow.AndroidLicenseValidator? _androidLicenseValidator;
   final bool verbose;
   final ExtensionManager? extensionManager;
 
-  late final Doctor _doctor =
-      _explicitDoctor ??
-      Doctor(logger: toolContext!.logger, clock: toolContext!.systemClock, analytics: analytics);
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'doctor';

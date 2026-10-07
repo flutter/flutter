@@ -50,31 +50,31 @@ String flutterSpecifiedDeviceUnpaired(String deviceName) =>
 class TargetDevices {
   factory TargetDevices({
     required DeviceManager deviceManager,
+    required Doctor doctor,
     required ToolContext toolContext,
     DeviceConnectionInterface? deviceConnectionInterface,
-    Doctor? doctor,
   }) {
     if (toolContext.platform.isMacOS) {
       return TargetDevicesWithExtendedWirelessDeviceDiscovery(
         deviceManager: deviceManager,
+        doctor: doctor,
         toolContext: toolContext,
         deviceConnectionInterface: deviceConnectionInterface,
-        doctor: doctor,
       );
     }
     return TargetDevices._private(
       deviceManager: deviceManager,
-      toolContext: toolContext,
       deviceConnectionInterface: deviceConnectionInterface,
       doctor: doctor,
+      toolContext: toolContext,
     );
   }
 
   TargetDevices._private({
     required this._deviceManager,
-    required ToolContext toolContext,
     required this.deviceConnectionInterface,
-    this._doctor,
+    required this._doctor,
+    required ToolContext toolContext,
   }) : _logger = toolContext.logger,
        _terminal = toolContext.terminal,
        _userMessages = toolContext.userMessages;
@@ -82,7 +82,7 @@ class TargetDevices {
   final DeviceManager _deviceManager;
   final Logger _logger;
   final DeviceConnectionInterface? deviceConnectionInterface;
-  final Doctor? _doctor;
+  final Doctor _doctor;
   final AnsiTerminal _terminal;
   final UserMessages _userMessages;
 
@@ -163,7 +163,7 @@ class TargetDevices {
     Duration? deviceDiscoveryTimeout,
     bool includeDevicesUnsupportedByProject = false,
   }) async {
-    if (!(_doctor?.canLaunchAnything ?? true)) {
+    if (!_doctor.canLaunchAnything) {
       _logger.printError(_userMessages.flutterNoDevelopmentDevice);
       return null;
     }
@@ -371,7 +371,7 @@ $platformMessage
 
   Future<String> _readUserInput(int deviceCount) async {
     if (deviceCount >= 10) {
-      return _readDeviceChoiceLine(deviceCount: deviceCount, logger: _logger, terminal: _terminal);
+      return _readDeviceChoiceLine(terminal: _terminal, logger: _logger, deviceCount: deviceCount);
     }
     _terminal.usesTerminalUi = true;
     final String result = await _terminal.promptForCharInput(
@@ -388,9 +388,9 @@ $platformMessage
 class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   TargetDevicesWithExtendedWirelessDeviceDiscovery({
     required super.deviceManager,
+    required super.doctor,
     required super.toolContext,
     super.deviceConnectionInterface,
-    super.doctor,
   }) : super._private();
 
   Future<void>? _wirelessDevicesRefresh;
@@ -478,7 +478,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     bool includeDevicesUnsupportedByProject = false,
   }) async {
     try {
-      if (!(_doctor?.canLaunchAnything ?? true)) {
+      if (!_doctor.canLaunchAnything) {
         _logger.printError(_userMessages.flutterNoDevelopmentDevice);
         return null;
       }
@@ -647,8 +647,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       return <Device>[ephemeralDevice];
     }
 
-    final bool stdinHasTerminal = _terminal.stdinHasTerminal;
-    if (!canPrompt || !stdinHasTerminal || !_logger.supportsColor) {
+    if (!canPrompt || !_terminal.stdinHasTerminal || !_logger.supportsColor) {
       _logger.printStatus(_checkingForWirelessDevicesMessage);
       final List<Device> wirelessDevices = await futureWirelessDevices;
       if (attachedDevices.length + wirelessDevices.length == 1) {
@@ -657,7 +656,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       _logger.printStatus('');
       // If the terminal has stdin but does not support color/ANSI (which is
       // needed to clear lines), fallback to standard selection of device.
-      if (canPrompt && stdinHasTerminal && !_logger.supportsColor) {
+      if (canPrompt && _terminal.stdinHasTerminal && !_logger.supportsColor) {
         return _handleMultipleDevices(attachedDevices, wirelessDevices, canPrompt: canPrompt);
       }
       // If terminal does not have stdin, print out device list.
@@ -824,9 +823,9 @@ class TargetDeviceSelection {
   Future<String> readUserInput() async {
     if (devices.length >= 10) {
       return _readDeviceChoiceLine(
-        deviceCount: devices.length,
-        logger: _logger,
         terminal: _terminal,
+        logger: _logger,
+        deviceCount: devices.length,
         onInvalidInput: () {
           invalidAttempts++;
         },
@@ -849,9 +848,9 @@ class TargetDeviceSelection {
 }
 
 Future<String> _readDeviceChoiceLine({
-  required int deviceCount,
-  required Logger logger,
   required Terminal terminal,
+  required Logger logger,
+  required int deviceCount,
   void Function()? onInvalidInput,
 }) async {
   while (true) {
