@@ -111,6 +111,66 @@ TEST_F(FlViewGtk4AccessibilityTest, NativeActionsRespectCurrentSemantics) {
   EXPECT_EQ(calls, 3u);
 }
 
+// Run with the external AT-SPI client; ordinary unit runs do not require a bus.
+TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
+  if (g_strcmp0(g_getenv("FLUTTER_TEST_ATSPI_ACTION"), "1") != 0) {
+    GTEST_SKIP() << "Requires an external AT-SPI action client";
+  }
+  ASSERT_TRUE(fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing());
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlEngine* view_engine = fl_view_get_engine(view);
+  StartEngine(view_engine);
+  size_t calls = 0;
+  const FlutterViewId view_id = fl_view_get_id(view);
+  fl_engine_get_embedder_api(view_engine)->SendSemanticsAction =
+      MOCK_ENGINE_PROC(SendSemanticsAction,
+                       ([&](auto, const FlutterSendSemanticsActionInfo* info) {
+                         EXPECT_EQ(info->view_id, view_id);
+                         EXPECT_EQ(info->node_id, 0u);
+                         EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
+                         calls++;
+                         g_main_loop_quit(loop);
+                         return kSuccess;
+                       }));
+  FlutterSemanticsFlags flags = {};
+  flags.is_button = true;
+  FlutterSemanticsNode2 button = {};
+  button.label = "Flutter AT-SPI activation fixture";
+  button.actions = kFlutterSemanticsActionTap;
+  button.flags2 = &flags;
+  FlutterSemanticsNode2* nodes[] = {&button};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = view_id;
+  update.node_count = 1;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+
+  // Export the real render widget and native tree without starting GL
+  // rendering.
+  g_autoptr(GtkWidget) surface = GTK_WIDGET(g_object_ref(view->render_area));
+  g_signal_handlers_disconnect_by_data(surface, view);
+  gtk_box_remove(GTK_BOX(view), surface);
+  g_autoptr(GtkWindow) window = GTK_WINDOW(gtk_window_new());
+  g_object_ref_sink(window);
+  gtk_window_set_child(window, surface);
+  gtk_window_present(window);
+  guint timeout = g_timeout_add_seconds(
+      15,
+      [](gpointer data) -> gboolean {
+        g_main_loop_quit(static_cast<GMainLoop*>(data));
+        return G_SOURCE_CONTINUE;
+      },
+      loop);
+  g_main_loop_run(loop);
+  g_source_remove(timeout);
+  EXPECT_EQ(calls, 1u);
+  gtk_window_set_child(window, nullptr);
+  gtk_box_append(GTK_BOX(view), surface);
+  gtk_window_destroy(window);
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, PresentBeforeRealizeDoesNotWarn) {
   FlView* view = fl_view_new(project);
   ASSERT_NE(view, nullptr);
