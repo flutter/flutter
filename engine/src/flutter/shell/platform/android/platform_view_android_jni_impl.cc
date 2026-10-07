@@ -2068,8 +2068,7 @@ bool PlatformViewAndroidJNIImpl::RequestDartDeferredLibrary(
 // New Platform View Support.
 
 ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction(
-    std::function<void()>* out_publish_callback) {
-  FML_DCHECK(out_publish_callback != nullptr);
+    std::function<void()>& out_publish_callback) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
   fml::jni::ScopedJavaLocalRef<jobject> java_object = java_object_.get(env);
@@ -2101,7 +2100,7 @@ ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction(
           env, transaction.obj());
   fml::jni::JavaObjectWeakGlobalRef weak_java_object = java_object_;
 
-  *out_publish_callback = [weak_java_object, global_tx]() {
+  out_publish_callback = [weak_java_object, global_tx]() {
     JNIEnv* cb_env = fml::jni::AttachCurrentThread();
     fml::jni::ScopedJavaLocalRef<jobject> cb_java_obj =
         weak_java_object.get(cb_env);

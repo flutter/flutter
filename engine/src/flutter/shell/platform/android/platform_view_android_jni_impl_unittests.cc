@@ -164,7 +164,7 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
 
   std::function<void()> publish_cb;
-  ASurfaceTransaction* tx = android_jni.createTransaction(&publish_cb);
+  ASurfaceTransaction* tx = android_jni.createTransaction(publish_cb);
   EXPECT_EQ(tx, kNativeTx);
   ASSERT_NE(publish_cb, nullptr);
   EXPECT_TRUE(global_ref_alive);

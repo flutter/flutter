@@ -245,12 +245,12 @@ class PlatformViewAndroidJNI {
   /// @note       Must be called from the raster thread.
   ///
   /// @param[out] out_publish_callback  Receives the callback that publishes
-  ///                                   the transaction. Must not be null.
+  ///                                   the transaction.
   ///
   /// @return     The native transaction, or null if one could not be created.
   ///
   virtual ASurfaceTransaction* createTransaction(
-      std::function<void()>* out_publish_callback) = 0;
+      std::function<void()>& out_publish_callback) = 0;
 
   virtual void swapTransaction() = 0;
 

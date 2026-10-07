@@ -88,7 +88,7 @@ bool AndroidSurfaceVKImpeller::SetNativeWindow(
   impeller::CreateTransactionCB cb = [jni_facade = jni_facade]() {
     FML_CHECK(jni_facade) << "JNI was nullptr";
     std::function<void()> publish_callback;
-    ASurfaceTransaction* tx = jni_facade->createTransaction(&publish_callback);
+    ASurfaceTransaction* tx = jni_facade->createTransaction(publish_callback);
     if (tx == nullptr) {
       return impeller::android::SurfaceTransaction();
     }

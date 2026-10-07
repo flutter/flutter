@@ -125,7 +125,7 @@ class JNIMock final : public PlatformViewAndroidJNI {
 
   MOCK_METHOD(ASurfaceTransaction*,
               createTransaction,
-              (std::function<void()>*),
+              (std::function<void()>&),
               (override));
 
   MOCK_METHOD(void, swapTransaction, (), (override));
