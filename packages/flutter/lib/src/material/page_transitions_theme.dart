@@ -365,6 +365,7 @@ class _FadeForwardsPageTransition extends StatelessWidget {
   const _FadeForwardsPageTransition({
     required this.animation,
     required this.secondaryAnimation,
+    required this.allowSnapshotting,
     this.backgroundColor,
     this.child,
   });
@@ -372,6 +373,10 @@ class _FadeForwardsPageTransition extends StatelessWidget {
   final Animation<double> animation;
 
   final Animation<double> secondaryAnimation;
+
+  // Whether the entering and exiting pages may be painted from a snapshot
+  // while animating. See [_FadeForwardsSnapshot].
+  final bool allowSnapshotting;
 
   final Color? backgroundColor;
 
@@ -398,7 +403,11 @@ class _FadeForwardsPageTransition extends StatelessWidget {
           opacity: FadeForwardsPageTransitionsBuilder._fadeInTransition.animate(animation),
           child: SlideTransition(
             position: _forwardTranslationTween.animate(animation),
-            child: child,
+            child: _FadeForwardsSnapshot(
+              animation: animation,
+              allowSnapshotting: allowSnapshotting,
+              child: child,
+            ),
           ),
         );
       },
@@ -409,7 +418,11 @@ class _FadeForwardsPageTransition extends StatelessWidget {
             opacity: FadeForwardsPageTransitionsBuilder._fadeOutTransition.animate(animation),
             child: SlideTransition(
               position: _backwardTranslationTween.animate(animation),
-              child: child,
+              child: _FadeForwardsSnapshot(
+                animation: animation,
+                allowSnapshotting: allowSnapshotting,
+                child: child,
+              ),
             ),
           ),
         );
@@ -418,8 +431,104 @@ class _FadeForwardsPageTransition extends StatelessWidget {
         context,
         secondaryAnimation,
         backgroundColor,
+        allowSnapshotting,
         child,
       ),
+    );
+  }
+}
+
+// Paints a snapshot of its child instead of the live child while `animation`
+// is running.
+//
+// The child is rasterized once at the start of the animation. On each
+// following frame, the enclosing FadeTransition and SlideTransition only have
+// to composite a single image, and because a single image draw can absorb the
+// opacity of the parent OpacityLayer, the engine can skip the offscreen
+// saveLayer that a partially transparent live page would otherwise require.
+//
+// This means that animations inside of the child (e.g. ink splashes or
+// progress indicators) are frozen for the duration of the transition, which is
+// the same tradeoff made by [ZoomPageTransitionsBuilder]. If the child contains
+// a platform view, the live child is painted instead (see
+// [SnapshotMode.permissive]).
+class _FadeForwardsSnapshot extends StatefulWidget {
+  const _FadeForwardsSnapshot({
+    required this.animation,
+    required this.allowSnapshotting,
+    this.child,
+  });
+
+  final Animation<double> animation;
+
+  final bool allowSnapshotting;
+
+  final Widget? child;
+
+  @override
+  State<_FadeForwardsSnapshot> createState() => _FadeForwardsSnapshotState();
+}
+
+class _FadeForwardsSnapshotState extends State<_FadeForwardsSnapshot> {
+  final SnapshotController _controller = SnapshotController();
+
+  // See SnapshotWidget doc comment, this is disabled on web because the
+  // canvaskit backend uses a single thread for UI and raster work which
+  // diminishes the impact of this performance improvement.
+  bool get _useSnapshot => !kIsWeb && widget.allowSnapshotting;
+
+  @override
+  void initState() {
+    super.initState();
+    _addListeners(widget.animation);
+    _updateSnapshotting();
+  }
+
+  // Listen to value changes as well as status changes. DualTransitionBuilder
+  // may replace its proxy animation's parent without a status notification, so
+  // a status listener alone can miss the start of an animation.
+  void _addListeners(Animation<double> animation) {
+    animation.addListener(_updateSnapshotting);
+    animation.addStatusListener(_handleStatusChange);
+  }
+
+  void _removeListeners(Animation<double> animation) {
+    animation.removeListener(_updateSnapshotting);
+    animation.removeStatusListener(_handleStatusChange);
+  }
+
+  void _handleStatusChange(AnimationStatus status) {
+    _updateSnapshotting();
+  }
+
+  void _updateSnapshotting() {
+    _controller.allowSnapshotting = _useSnapshot && widget.animation.isAnimating;
+  }
+
+  @override
+  void didUpdateWidget(_FadeForwardsSnapshot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animation != widget.animation) {
+      _removeListeners(oldWidget.animation);
+      _addListeners(widget.animation);
+    }
+    _updateSnapshotting();
+  }
+
+  @override
+  void dispose() {
+    _removeListeners(widget.animation);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SnapshotWidget(
+      controller: _controller,
+      mode: SnapshotMode.permissive,
+      autoresize: true,
+      child: widget.child,
     );
   }
 }
@@ -480,7 +589,13 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
         Animation<double> secondaryAnimation,
         bool allowSnapshotting,
         Widget? child,
-      ) => _delegatedTransition(context, secondaryAnimation, backgroundColor, child);
+      ) => _delegatedTransition(
+        context,
+        secondaryAnimation,
+        backgroundColor,
+        !ZoomPageTransitionsBuilder._kProfileForceDisableSnapshotting && allowSnapshotting,
+        child,
+      );
 
   // Used by all of the sliding transition animations.
   static const Curve _transitionCurve = Curves.easeInOutCubicEmphasized;
@@ -513,6 +628,7 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     BuildContext context,
     Animation<double> secondaryAnimation,
     Color? backgroundColor,
+    bool allowSnapshotting,
     Widget? child,
   ) {
     final Widget builder = DualTransitionBuilder(
@@ -522,7 +638,11 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
           opacity: _fadeInTransition.animate(animation),
           child: SlideTransition(
             position: _secondaryForwardTranslationTween.animate(animation),
-            child: child,
+            child: _FadeForwardsSnapshot(
+              animation: animation,
+              allowSnapshotting: allowSnapshotting,
+              child: child,
+            ),
           ),
         );
       },
@@ -531,7 +651,11 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
           opacity: _fadeOutTransition.animate(animation),
           child: SlideTransition(
             position: _secondaryBackwardTranslationTween.animate(animation),
-            child: child,
+            child: _FadeForwardsSnapshot(
+              animation: animation,
+              allowSnapshotting: allowSnapshotting,
+              child: child,
+            ),
           ),
         );
       },
@@ -563,6 +687,9 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     return _FadeForwardsPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
+      allowSnapshotting:
+          !ZoomPageTransitionsBuilder._kProfileForceDisableSnapshotting &&
+          (route?.allowSnapshotting ?? true),
       backgroundColor: backgroundColor,
       child: child,
     );

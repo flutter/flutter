@@ -842,6 +842,108 @@ void main() {
     skip: kIsWeb, // [intended] rasterization is not used on the web.
   );
 
+  group('FadeForwardsPageTransitionsBuilder snapshotting', () {
+    Widget fadeForwardsApp({bool secondRouteAllowSnapshotting = true}) {
+      return MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+            },
+          ),
+        ),
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == '/') {
+            return MaterialPageRoute<void>(builder: (_) => const Material(child: Text('Page 1')));
+          }
+          return MaterialPageRoute<void>(
+            builder: (_) => const Material(child: Text('Page 2')),
+            allowSnapshotting: secondRouteAllowSnapshotting,
+          );
+        },
+      );
+    }
+
+    // Whether any SnapshotWidget above `text` is currently snapshotting.
+    bool isSnapshotting(WidgetTester tester, String text) {
+      return tester
+          .widgetList<SnapshotWidget>(
+            find.ancestor(of: find.text(text), matching: find.byType(SnapshotWidget)),
+          )
+          .any((SnapshotWidget widget) => widget.controller.allowSnapshotting);
+    }
+
+    // Partially transparent OpacityLayers. When the page under one of these is
+    // snapshotted, the layer contains only a single picture (the image draw),
+    // which lets the engine apply the opacity without a saveLayer.
+    Iterable<OpacityLayer> fadingLayers(WidgetTester tester) {
+      return tester.layers.whereType<OpacityLayer>().where(
+        (OpacityLayer layer) => layer.alpha! > 0 && layer.alpha! < 255,
+      );
+    }
+
+    bool containsOnlyAPicture(OpacityLayer layer) {
+      return layer.firstChild is PictureLayer && layer.firstChild == layer.lastChild;
+    }
+
+    testWidgets(
+      'snapshots the entering and exiting routes only while animating',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(fadeForwardsApp());
+        expect(isSnapshotting(tester, 'Page 1'), isFalse);
+
+        // Push. 50ms into the 450ms transition, both pages are partially
+        // transparent.
+        tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/2');
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(isSnapshotting(tester, 'Page 1'), isTrue);
+        expect(isSnapshotting(tester, 'Page 2'), isTrue);
+        expect(fadingLayers(tester), hasLength(2));
+        expect(fadingLayers(tester).every(containsOnlyAPicture), isTrue);
+
+        await tester.pumpAndSettle();
+        expect(isSnapshotting(tester, 'Page 2'), isFalse);
+
+        // Pop.
+        tester.state<NavigatorState>(find.byType(Navigator)).pop();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(isSnapshotting(tester, 'Page 1'), isTrue);
+        expect(isSnapshotting(tester, 'Page 2'), isTrue);
+        expect(fadingLayers(tester), hasLength(2));
+        expect(fadingLayers(tester).every(containsOnlyAPicture), isTrue);
+
+        await tester.pumpAndSettle();
+        expect(find.text('Page 2'), findsNothing);
+        expect(isSnapshotting(tester, 'Page 1'), isFalse);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+      skip: kIsWeb, // [intended] rasterization is not used on the web.
+    );
+
+    testWidgets(
+      'PageRoute.allowSnapshotting = false disables snapshotting for that route only',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(fadeForwardsApp(secondRouteAllowSnapshotting: false));
+
+        tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/2');
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(isSnapshotting(tester, 'Page 1'), isTrue);
+        expect(isSnapshotting(tester, 'Page 2'), isFalse);
+
+        // The live entering page is composited under its OpacityLayer.
+        expect(fadingLayers(tester), hasLength(2));
+        expect(fadingLayers(tester).where(containsOnlyAPicture), hasLength(1));
+
+        await tester.pumpAndSettle();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+      skip: kIsWeb, // [intended] rasterization is not used on the web.
+    );
+  });
+
   testWidgets('_ZoomPageTransition only causes child widget built once', (
     WidgetTester tester,
   ) async {
