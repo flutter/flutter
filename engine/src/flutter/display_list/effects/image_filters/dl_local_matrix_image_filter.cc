@@ -28,7 +28,17 @@ DlRect* DlLocalMatrixImageFilter::map_local_bounds(
     output_bounds = input_bounds;
     return &output_bounds;
   }
-  return image_filter_->map_local_bounds(input_bounds, output_bounds);
+  if (!matrix_.IsInvertible()) {
+    output_bounds = input_bounds;
+    return nullptr;
+  }
+  DlRect filter_bounds = input_bounds.TransformAndClipBounds(matrix_.Invert());
+  if (!image_filter_->map_local_bounds(filter_bounds, filter_bounds)) {
+    output_bounds = input_bounds;
+    return nullptr;
+  }
+  output_bounds = filter_bounds.TransformAndClipBounds(matrix_);
+  return &output_bounds;
 }
 
 DlIRect* DlLocalMatrixImageFilter::map_device_bounds(
