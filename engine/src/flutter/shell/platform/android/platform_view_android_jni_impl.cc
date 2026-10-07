@@ -73,7 +73,7 @@ static jfieldID g_jni_shell_holder_field = nullptr;
     "(Ljava/lang/String;)V")                                                  \
   V(g_set_semantics_tree_enabled_method, setSemanticsTreeEnabled, "(Z)V")     \
   V(g_on_display_platform_view_method, onDisplayPlatformView,                 \
-    "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
+    "(IIIIIIIFLio/flutter/embedding/engine/mutatorsstack/"                    \
     "FlutterMutatorsStack;)V")                                                \
   V(g_on_begin_frame_method, onBeginFrame, "()V")                             \
   V(g_on_end_frame_method, onEndFrame, "()V")                                 \
@@ -85,7 +85,7 @@ static jfieldID g_jni_shell_holder_field = nullptr;
     "()Lio/flutter/embedding/engine/FlutterOverlaySurface;")                  \
   V(g_destroy_overlay_surface2_method, destroyOverlaySurface2, "()V")         \
   V(g_on_display_platform_view2_method, onDisplayPlatformView2,               \
-    "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
+    "(IIIIIIIFLio/flutter/embedding/engine/mutatorsstack/"                    \
     "FlutterMutatorsStack;)V")                                                \
   V(g_hide_platform_view2_method, hidePlatformView2, "(I)V")                  \
   V(g_on_end_frame2_method, endFrame2, "()V")                                 \
@@ -1752,6 +1752,7 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
     int height,
     int viewWidth,
     int viewHeight,
+    double device_pixel_ratio,
     MutatorsStack mutators_stack) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
   auto java_object = java_object_.get(env);
@@ -1852,7 +1853,7 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
 
   env->CallVoidMethod(java_object.obj(), g_on_display_platform_view_method,
                       view_id, x, y, width, height, viewWidth, viewHeight,
-                      mutatorsStack);
+                      static_cast<jfloat>(device_pixel_ratio), mutatorsStack);
 
   FML_CHECK(fml::jni::CheckException(env));
 }
@@ -2224,6 +2225,7 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
     int32_t height,
     int32_t viewWidth,
     int32_t viewHeight,
+    double device_pixel_ratio,
     MutatorsStack mutators_stack) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
   auto java_object = java_object_.get(env);
@@ -2352,7 +2354,7 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
 
   env->CallVoidMethod(java_object.obj(), g_on_display_platform_view2_method,
                       view_id, x, y, width, height, viewWidth, viewHeight,
-                      mutatorsStack);
+                      static_cast<jfloat>(device_pixel_ratio), mutatorsStack);
 
   FML_CHECK(fml::jni::CheckException(env));
 }

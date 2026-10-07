@@ -93,6 +93,7 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
                                         int height,
                                         int viewWidth,
                                         int viewHeight,
+                                        double device_pixel_ratio,
                                         MutatorsStack mutators_stack) override;
 
   void FlutterViewDisplayOverlaySurface(int surface_id,
@@ -144,6 +145,7 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
                               int32_t height,
                               int32_t viewWidth,
                               int32_t viewHeight,
+                              double device_pixel_ratio,
                               MutatorsStack mutators_stack) override;
 
   void hidePlatformView2(int32_t view_id) override;

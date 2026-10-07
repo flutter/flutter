@@ -31,7 +31,7 @@ import io.flutter.util.ViewUtils;
  */
 public class FlutterMutatorView extends FrameLayout {
   private FlutterMutatorsStack mutatorsStack;
-  private float screenDensity;
+  private float devicePixelRatio;
   private int left;
   private int top;
 
@@ -40,15 +40,16 @@ public class FlutterMutatorView extends FrameLayout {
   private Paint paint;
 
   /**
-   * Initialize the FlutterMutatorView. Use this to set the screenDensity, which will be used to
-   * correct the final transform matrix.
+   * Initialize the FlutterMutatorView. {@code screenDensity} only seeds the scale divisor; every
+   * frame carries the ratio it was rendered at, and {@link #readyToDisplay} replaces this value
+   * before the view is drawn.
    */
   public FlutterMutatorView(
       @NonNull Context context,
       float screenDensity,
       @Nullable AndroidTouchProcessor androidTouchProcessor) {
     super(context, null);
-    this.screenDensity = screenDensity;
+    this.devicePixelRatio = screenDensity;
     this.androidTouchProcessor = androidTouchProcessor;
     this.paint = new Paint();
   }
@@ -98,12 +99,22 @@ public class FlutterMutatorView extends FrameLayout {
 
   /**
    * Pass the necessary parameters to the view so it can apply correct mutations to its children.
+   *
+   * <p>{@code devicePixelRatio} is the ratio the frame being displayed was rendered at. It arrives
+   * with the frame rather than being read from {@code Resources}, which can report a new density
+   * before the engine has produced a frame at it.
    */
   public void readyToDisplay(
-      @NonNull FlutterMutatorsStack mutatorsStack, int left, int top, int width, int height) {
+      @NonNull FlutterMutatorsStack mutatorsStack,
+      int left,
+      int top,
+      int width,
+      int height,
+      float devicePixelRatio) {
     this.mutatorsStack = mutatorsStack;
     this.left = left;
     this.top = top;
+    this.devicePixelRatio = devicePixelRatio;
     FrameLayout.LayoutParams layoutParams =
         new FrameLayout.LayoutParams(width, height, Gravity.LEFT | Gravity.TOP);
     layoutParams.leftMargin = left;
@@ -152,14 +163,14 @@ public class FlutterMutatorView extends FrameLayout {
   private Matrix getPlatformViewMatrix() {
     Matrix finalMatrix = new Matrix(mutatorsStack.getFinalMatrix());
 
-    // Reverse scale based on screen scale.
+    // Reverse scale based on the ratio this frame was rendered at.
     //
     // The Android frame is set based on the logical resolution instead of physical.
     // (https://developer.android.com/training/multiscreen/screendensities).
     // However, flow is based on the physical resolution. For example, 1000 pixels in flow equals
     // 500 points in Android. And until this point, we did all the calculation based on the flow
     // resolution. So we need to scale down to match Android's logical resolution.
-    finalMatrix.preScale(1 / screenDensity, 1 / screenDensity);
+    finalMatrix.preScale(1 / devicePixelRatio, 1 / devicePixelRatio);
 
     // Reverse the current offset.
     //

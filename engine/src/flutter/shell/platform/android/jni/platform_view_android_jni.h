@@ -157,6 +157,12 @@ class PlatformViewAndroidJNI {
   ///
   /// @note       Must be called from the platform thread.
   ///
+  /// @note       `device_pixel_ratio` is the ratio this frame was rendered at,
+  ///             and is the divisor the Java side must use to convert the
+  ///             mutators back to Android's logical resolution. It travels with
+  ///             the frame because Android `Resources` can report a new density
+  ///             before the engine has produced a frame at it.
+  ///
   virtual void FlutterViewOnDisplayPlatformView(
       int view_id,
       int x,
@@ -165,6 +171,7 @@ class PlatformViewAndroidJNI {
       int height,
       int viewWidth,
       int viewHeight,
+      double device_pixel_ratio,
       MutatorsStack mutators_stack) = 0;
 
   //----------------------------------------------------------------------------
@@ -247,6 +254,7 @@ class PlatformViewAndroidJNI {
                                       int32_t height,
                                       int32_t viewWidth,
                                       int32_t viewHeight,
+                                      double device_pixel_ratio,
                                       MutatorsStack mutators_stack) = 0;
 
   virtual void hidePlatformView2(int32_t view_id) = 0;
