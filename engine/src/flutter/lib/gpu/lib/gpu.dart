@@ -30,6 +30,7 @@ import 'dart:ui' as ui;
 
 import 'package:vector_math/vector_math.dart' as vm;
 
+part 'src/binding_set.dart';
 part 'src/buffer.dart';
 part 'src/command_buffer.dart';
 part 'src/context.dart';

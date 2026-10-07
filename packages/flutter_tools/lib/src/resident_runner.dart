@@ -1212,10 +1212,15 @@ abstract class ResidentRunner extends ResidentHandlers {
     if (outputDill.existsSync()) {
       final TargetPlatform? targetPlatform = flutterDevices.firstOrNull?.targetPlatform;
       final TargetModel targetModel = TargetModel.fromTargetPlatform(targetPlatform);
+      final BuildInfo buildInfo = debuggingOptions.buildInfo;
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,
-        dartDefines: debuggingOptions.buildInfo.dartDefines,
-        extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
+        dartDefines: buildInfo.dartDefines,
+        // Must match the options the resident compiler uses to compute the
+        // path it initializes from.
+        extraFrontEndOptions: targetModel == TargetModel.dartdevc
+            ? ddcFrontEndOptions(buildInfo)
+            : buildInfo.extraFrontEndOptions,
         config: globals.config,
         fileSystem: globals.fs,
         targetModel: targetModel,
