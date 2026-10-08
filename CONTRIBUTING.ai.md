@@ -35,8 +35,7 @@ For example:
   generating the PR.
 
 Overall, regardless of the forum and whether by way of automation or manual
-unedited copy-and-paste, do not use AI to substitute for you in human
-discussion.
+unedited copy-and-paste, do not use AI to substitute for human discussion.
 
 ## Our CLA
 
@@ -63,8 +62,10 @@ helpful.
   must verify their output. For example, if you use an AI tool to create a
   reduced test case, make sure that you can actually reproduce the issue before
   posting it.
-* Edit AI-generated text to focus on the important details. Longer is not better
-  in issues, and AI output is often verbose.
+* Reproducible and concise issues respect maintainers' time. AI-generated output
+  is often too verbose, inaccurate, and difficult to triage. You likely must
+  **edit AI-generated text** to improve readability and focus on what is
+  important.
 
 ## Pull requests
 
@@ -113,7 +114,9 @@ that have any of the following red flags:
   * If the contributor did not review the changes enough to notice and remove
     these files, they have not followed the AI contribution policy.
 
-As always when closing a PR, explain why and provide next steps.
+As always when closing a PR, explain why and provide next steps. In the case
+that the PR is closed for failing to follow our AI policies, the next steps
+would include linking to this document.
 
 As a guiding principle, if at any point in the process you feel that you are
 getting unfiltered or minimally filtered AI output as code and/or comment
