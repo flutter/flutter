@@ -121,17 +121,35 @@ class PipelineLibraryGLES final
 
   const std::shared_ptr<ReactorGLES>& GetReactor() const;
 
-  static std::shared_ptr<PipelineGLES> CreatePipeline(
-      const std::weak_ptr<PipelineLibrary>& weak_library,
+  //----------------------------------------------------------------------------
+  /// @brief      Allocates a new program object and compiles and links the
+  ///             descriptor's shaders into it. Must be called on the reactor.
+  ///
+  /// @return     The linked program, or nullptr on failure.
+  ///
+  static std::shared_ptr<UniqueHandleGLES> CreateProgram(
+      const std::shared_ptr<ReactorGLES>& reactor,
       const PipelineDescriptor& desc,
-      const std::shared_ptr<const ShaderFunction>& vert_shader,
-      const std::shared_ptr<const ShaderFunction>& frag_shader,
+      const std::shared_ptr<const ShaderFunction>& vert_function,
+      const std::shared_ptr<const ShaderFunction>& frag_function,
       bool threadsafe);
 
-  std::shared_ptr<UniqueHandleGLES> GetProgramForKey(const ProgramKey& key);
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a pipeline for the descriptor that uses the given,
+  ///             already linked, program. Must be called on the reactor.
+  ///
+  /// @return     The pipeline, or nullptr on failure.
+  ///
+  static std::shared_ptr<PipelineGLES> CreatePipeline(
+      const std::weak_ptr<PipelineLibrary>& weak_library,
+      const std::shared_ptr<ReactorGLES>& reactor,
+      const PipelineDescriptor& desc,
+      std::shared_ptr<UniqueHandleGLES> program_handle);
 
-  void SetProgramForKey(const ProgramKey& key,
-                        std::shared_ptr<UniqueHandleGLES> program);
+  std::shared_ptr<UniqueHandleGLES> GetCachedProgram(const ProgramKey& key);
+
+  void CacheProgram(const ProgramKey& key,
+                    std::shared_ptr<UniqueHandleGLES> program);
   // |PipelineLibrary|
   PipelineCompileQueue* GetPipelineCompileQueue() const override;
 };
