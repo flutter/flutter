@@ -25,14 +25,14 @@ PipelineCompileQueueGLES::PipelineCompileQueueGLES(
 PipelineCompileQueueGLES::~PipelineCompileQueueGLES() {
   // Flush any jobs still pending. Tasks already posted to the worker only hold
   // a weak reference to the queue and become no-ops.
-  while (auto job = TakeNextJob()) {
-    job();
+  while (Job job = TakeNextJob()) {
+    job(/*eager=*/true);
   }
 }
 
 bool PipelineCompileQueueGLES::PostJobForDescriptor(
     const PipelineDescriptor& desc,
-    const fml::closure& job) {
+    const Job& job) {
   if (!job) {
     return false;
   }
@@ -55,7 +55,7 @@ bool PipelineCompileQueueGLES::PostJobForDescriptor(
     // eagerly.
     FML_LOG(WARNING) << "Got multiple compile jobs for the same descriptor. "
                         "Running eagerly.";
-    worker_task_runner_->PostTask(job);
+    worker_task_runner_->PostTask([job]() { job(/*eager=*/false); });
   } else if (should_schedule) {
     ScheduleNextJob();
   }
@@ -64,7 +64,7 @@ bool PipelineCompileQueueGLES::PostJobForDescriptor(
 
 void PipelineCompileQueueGLES::PerformJobEagerly(
     const PipelineDescriptor& desc) {
-  fml::closure job;
+  Job job;
   {
     Lock lock(mutex_);
     auto found = pending_jobs_.find(desc);
@@ -85,7 +85,11 @@ void PipelineCompileQueueGLES::PerformJobEagerly(
     job = std::move(found->second);
     pending_jobs_.erase(found);
   }
-  job();
+  job(/*eager=*/true);
+}
+
+void PipelineCompileQueueGLES::PostTask(const fml::closure& task) {
+  worker_task_runner_->PostTask(task);
 }
 
 void PipelineCompileQueueGLES::ScheduleNextJob() {
@@ -94,21 +98,21 @@ void PipelineCompileQueueGLES::ScheduleNextJob() {
     if (!queue) {
       return;
     }
-    if (auto job = queue->TakeNextJob()) {
-      job();
+    if (Job job = queue->TakeNextJob()) {
+      job(/*eager=*/false);
       queue->ScheduleNextJob();
     }
   });
 }
 
-fml::closure PipelineCompileQueueGLES::TakeNextJob() {
+PipelineCompileQueueGLES::Job PipelineCompileQueueGLES::TakeNextJob() {
   Lock lock(mutex_);
   if (pending_jobs_.empty()) {
     is_processing_ = false;
     return nullptr;
   }
   auto job_iterator = pending_jobs_.begin();
-  auto job = std::move(job_iterator->second);
+  Job job = std::move(job_iterator->second);
   pending_jobs_.erase(job_iterator);
   return job;
 }
