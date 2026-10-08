@@ -56,6 +56,14 @@
                     "script": "flutter/ci/test/ban_generated_plugin_registrant_java_test.sh"
                 },
                 {
+                    "language": "dart",
+                    "name": "Android embedder convergence ratchet",
+                    "script": "flutter/ci/bin/android_embedder_ratchet.dart",
+                    "parameters": [
+                        "check"
+                    ]
+                },
+                {
                     "language": "python3",
                     "name": "test: Host_Tests_for_host_debug_unopt",
                     "script": "flutter/testing/run_tests.py",
