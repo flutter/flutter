@@ -92,6 +92,15 @@ Shell& GetShell(FLUTTER_API_SYMBOL(FlutterEngine) engine) {
   return reinterpret_cast<EmbedderEngine*>(engine)->GetShell();
 }
 
+FlutterEngineProcTable LoadEmbedderApi() {
+  FlutterEngineProcTable embedder_api = {};
+  embedder_api.struct_size = sizeof(FlutterEngineProcTable);
+  FlutterEngineResult result = FlutterEngineGetProcAddresses(&embedder_api);
+  FML_CHECK(result == kSuccess)
+      << "FlutterEngineGetProcAddresses failed: " << result;
+  return embedder_api;
+}
+
 }  // namespace
 
 AndroidShellHolder::AndroidShellHolder(
@@ -100,6 +109,7 @@ AndroidShellHolder::AndroidShellHolder(
     AndroidRenderingAPI android_rendering_api)
     : settings_(settings),
       jni_facade_(jni_facade),
+      embedder_api_(LoadEmbedderApi()),
       android_rendering_api_(android_rendering_api) {
   static size_t thread_host_count = 1;
   auto thread_label = std::to_string(thread_host_count++);
@@ -220,6 +230,7 @@ AndroidShellHolder::AndroidShellHolder(
       platform_view_(platform_view),
       thread_host_(thread_host),
       engine_(std::move(engine)),
+      embedder_api_(LoadEmbedderApi()),
       apk_asset_provider_(std::move(apk_asset_provider)),
       android_rendering_api_(rendering_api) {
   FML_DCHECK(jni_facade);
@@ -366,6 +377,34 @@ AndroidShellHolder::GetPlatformMessageHandler() const {
 
 Shell* AndroidShellHolder::GetShellForTesting() const {
   return engine_ ? &GetShell(engine_.get()) : nullptr;
+}
+
+void AndroidShellHolder::SetSemanticsEnabled(bool enabled) {
+  FlutterEngineResult result =
+      embedder_api_.UpdateSemanticsEnabled(engine_.get(), enabled);
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineUpdateSemanticsEnabled failed: " << result;
+  }
+}
+
+void AndroidShellHolder::SetAccessibilityFeatures(int32_t flags) {
+  FlutterEngineResult result = embedder_api_.UpdateAccessibilityFeatures(
+      engine_.get(), static_cast<FlutterAccessibilityFeature>(flags));
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineUpdateAccessibilityFeatures failed: "
+                   << result;
+  }
+}
+
+void AndroidShellHolder::ScheduleFrame() {
+  FlutterEngineResult result = embedder_api_.ScheduleFrame(engine_.get());
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineScheduleFrame failed: " << result;
+  }
+}
+
+FlutterEngineProcTable& AndroidShellHolder::GetEmbedderApiForTesting() {
+  return embedder_api_;
 }
 
 std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(

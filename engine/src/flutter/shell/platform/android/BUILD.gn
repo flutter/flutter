@@ -62,6 +62,7 @@ executable("flutter_shell_native_unittests") {
     "//flutter/fml",
     "//flutter/shell/platform/android/jni:jni_mock",
     "//flutter/shell/platform/android/jni:mock_jni_env",
+    "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
   ]

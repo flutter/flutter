@@ -18,6 +18,8 @@
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
+#include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 
 namespace flutter {
 namespace testing {
@@ -184,6 +186,7 @@ namespace {
 // Signatures of FlutterJNI natives registered by PlatformViewAndroid::Register.
 using SetSemanticsEnabledFn = void (*)(JNIEnv*, jobject, jlong, jboolean);
 using SetAccessibilityFeaturesFn = void (*)(JNIEnv*, jobject, jlong, jint);
+using ScheduleFrameFn = void (*)(JNIEnv*, jobject, jlong);
 
 // Runs PlatformViewAndroid::Register against |mock_env| and returns the
 // function registered for the FlutterJNI native called |name|, or nullptr.
@@ -303,6 +306,90 @@ TEST_F(PlatformViewAndroidJNIImplTest,
 
   set_accessibility_features(&mock_env, jcaller, shell_holder, 0);
   EXPECT_EQ(RuntimePlatformData(*holder).accessibility_feature_flags_, 0);
+}
+
+// The natives below must reach the engine only through the holder's embedder
+// API proc table. Each test replaces the proc with a mock that does not
+// forward, so the runtime state must stay unchanged while the mock records
+// the call. The tests above cover the same natives with the real procs.
+
+TEST_F(PlatformViewAndroidJNIImplTest, SetSemanticsEnabledCallsEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto set_semantics_enabled = reinterpret_cast<SetSemanticsEnabledFn>(
+      RegisterNativesAndFind(mock_env, "nativeSetSemanticsEnabled"));
+  ASSERT_NE(set_semantics_enabled, nullptr);
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+  std::vector<bool> calls;
+  holder->GetEmbedderApiForTesting().UpdateSemanticsEnabled = MOCK_ENGINE_PROC(
+      UpdateSemanticsEnabled,
+      ([&calls](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
+        EXPECT_NE(engine, nullptr);
+        calls.push_back(enabled);
+        return kSuccess;
+      }));
+
+  set_semantics_enabled(&mock_env, reinterpret_cast<jobject>(123),
+                        reinterpret_cast<jlong>(holder.get()), JNI_TRUE);
+
+  EXPECT_THAT(calls, ElementsAre(true));
+  EXPECT_FALSE(RuntimePlatformData(*holder).semantics_enabled);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       SetAccessibilityFeaturesCallsEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto set_accessibility_features =
+      reinterpret_cast<SetAccessibilityFeaturesFn>(
+          RegisterNativesAndFind(mock_env, "nativeSetAccessibilityFeatures"));
+  ASSERT_NE(set_accessibility_features, nullptr);
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+  std::vector<int32_t> calls;
+  holder->GetEmbedderApiForTesting().UpdateAccessibilityFeatures =
+      MOCK_ENGINE_PROC(UpdateAccessibilityFeatures,
+                       ([&calls](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                 FlutterAccessibilityFeature features) {
+                         EXPECT_NE(engine, nullptr);
+                         calls.push_back(static_cast<int32_t>(features));
+                         return kSuccess;
+                       }));
+
+  const int32_t flags =
+      static_cast<int32_t>(AccessibilityFeatureFlag::kDisableAnimations) |
+      static_cast<int32_t>(AccessibilityFeatureFlag::kBoldText);
+  set_accessibility_features(&mock_env, reinterpret_cast<jobject>(123),
+                             reinterpret_cast<jlong>(holder.get()), flags);
+
+  EXPECT_THAT(calls, ElementsAre(flags));
+  EXPECT_EQ(RuntimePlatformData(*holder).accessibility_feature_flags_, 0);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest, ScheduleFrameCallsEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto schedule_frame = reinterpret_cast<ScheduleFrameFn>(
+      RegisterNativesAndFind(mock_env, "nativeScheduleFrame"));
+  ASSERT_NE(schedule_frame, nullptr);
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+  int calls = 0;
+  holder->GetEmbedderApiForTesting().ScheduleFrame = MOCK_ENGINE_PROC(
+      ScheduleFrame, ([&calls](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_NE(engine, nullptr);
+        calls++;
+        return kSuccess;
+      }));
+
+  schedule_frame(&mock_env, reinterpret_cast<jobject>(123),
+                 reinterpret_cast<jlong>(holder.get()));
+
+  EXPECT_EQ(calls, 1);
 }
 
 // The load order is exercised with an injected loader rather than real

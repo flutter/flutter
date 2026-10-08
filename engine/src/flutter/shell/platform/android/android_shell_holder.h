@@ -106,8 +106,31 @@ class AndroidShellHolder {
 
   void UpdateDisplayMetrics();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Tells the engine whether the platform's accessibility
+  ///             services want semantics, through the embedder API.
+  ///
+  void SetSemanticsEnabled(bool enabled);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Sends the platform's accessibility features through the
+  ///             embedder API.
+  ///
+  /// @param[in]  flags  A bitmask of AccessibilityFeatureFlag values, which
+  ///             FlutterAccessibilityFeature shares.
+  ///
+  void SetAccessibilityFeatures(int32_t flags);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Asks the engine for a frame through the embedder API.
+  ///
+  void ScheduleFrame();
+
   // Visible for testing.
   Shell* GetShellForTesting() const;
+
+  // Visible for testing. Replacing an entry changes what the holder calls.
+  FlutterEngineProcTable& GetEmbedderApiForTesting();
 
  private:
   // Destroys the engine behind an embedder API handle.
@@ -124,6 +147,8 @@ class AndroidShellHolder {
   fml::WeakPtr<PlatformViewAndroid> platform_view_;
   std::shared_ptr<ThreadHost> thread_host_;
   UniqueEngine engine_;
+  // The embedder API functions that the holder calls engine_ through.
+  FlutterEngineProcTable embedder_api_;
   bool is_valid_ = false;
   uint64_t next_pointer_flow_id_ = 0;
   std::unique_ptr<APKAssetProvider> apk_asset_provider_;
