@@ -345,9 +345,6 @@ class BuildInfo {
   /// so the uncapitalized flavor name is used to compute the output file name
   String? get uncapitalizedFlavor => _uncapitalize(flavor);
 
-  /// Whether to enable canary features when using DDC.
-  bool get canaryFeatures => extraFrontEndOptions.contains('--dartdevc-canary');
-
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
   ///

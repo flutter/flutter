@@ -70,7 +70,6 @@ class WebDevFS implements DevFS {
     required this.expressionCompiler,
     required this.chromiumLauncher,
     required this.nativeNullAssertions,
-    required this.canaryFeatures,
     required this.webDevServerConfig,
     required this.webRenderer,
     required this.isWasm,
@@ -83,10 +82,7 @@ class WebDevFS implements DevFS {
     required this.platform,
     this.testMode = false,
     this._webDefines = const <String, String>{},
-  })
-    // TODO(srujzs): Remove this assertion when the library bundle format is
-    // supported without canary mode.
-    : assert(canaryFeatures == buildInfo.canaryFeatures) {
+  }) {
     _assetTransformer = DevelopmentAssetTransformer(
       transformer: AssetTransformer(
         processManager: globals.processManager,
@@ -109,7 +105,6 @@ class WebDevFS implements DevFS {
   final bool enableDwds;
   final DartDevelopmentServiceConfiguration ddsConfig;
   final bool testMode;
-  final bool canaryFeatures;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
   final bool nativeNullAssertions;
@@ -220,7 +215,6 @@ class WebDevFS implements DevFS {
       isWasm: isWasm,
       useLocalCanvasKit: useLocalCanvasKit,
       testMode: testMode,
-      canaryFeatures: canaryFeatures,
       webDevServerConfig: webDevServerConfig,
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
       fileSystem: fileSystem,
@@ -373,8 +367,9 @@ class WebDevFS implements DevFS {
         return UpdateFSReport();
       }
       if (dirtyEntries.isNotEmpty) {
-        await LocalDevFSWriter(fileSystem: fileSystem)
-            .write(dirtyEntries, fileSystem.path.toUri(assetDirectory));
+        await LocalDevFSWriter(
+          fileSystem: fileSystem,
+        ).write(dirtyEntries, fileSystem.path.toUri(assetDirectory));
       }
     }
     await _validateTemplateFile('index.html');

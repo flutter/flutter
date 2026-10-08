@@ -264,25 +264,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     ),
   );
 
-  File get _dartSdk {
-    // TODO(srujzs): Remove this assertion when the library bundle format is
-    // supported without canary mode.
-    assert(buildInfo.canaryFeatures);
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = buildInfo.canaryFeatures
-        ? kDDCCanarySdkArtifactMap
-        : kDDCStableSdkArtifactMap;
-    return _fileSystem.file(_artifacts.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
-  }
+  File get _dartSdk =>
+      _fileSystem.file(_artifacts.getHostArtifact(kDDCSdkArtifactMap[webRenderer]!));
 
-  File get _dartSdkSourcemaps {
-    // TODO(srujzs): Remove this assertion when the library bundle format is
-    // supported without canary mode.
-    assert(buildInfo.canaryFeatures);
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = buildInfo.canaryFeatures
-        ? kDDCCanarySdkSourcemapsArtifactMap
-        : kDDCStableSdkSourcemapsArtifactMap;
-    return _fileSystem.file(_artifacts.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
-  }
+  File get _dartSdkSourcemaps =>
+      _fileSystem.file(_artifacts.getHostArtifact(kDDCSdkSourcemapsArtifactMap[webRenderer]!));
 
   File _canvasKitFile(String relativePath) {
     final String canvasKitPath = _fileSystem.path.join(

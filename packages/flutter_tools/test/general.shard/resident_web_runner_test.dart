@@ -859,16 +859,7 @@ name: my_app
         flutterDevice,
         logger: logger,
         systemClock: SystemClock.fixed(DateTime(2001)),
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-        ),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
@@ -964,16 +955,7 @@ name: my_app
         flutterDevice,
         logger: logger,
         systemClock: SystemClock.fixed(DateTime(2001)),
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-        ),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
 
       fakeVmServiceHost = FakeVmServiceHost(
@@ -1082,16 +1064,7 @@ name: my_app
         flutterDevice,
         logger: logger,
         systemClock: SystemClock.fixed(DateTime(2001)),
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-        ),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
@@ -1165,17 +1138,7 @@ name: my_app
         flutterDevice,
         logger: logger,
         systemClock: SystemClock.fixed(DateTime(2001)),
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-          webUseWasm: true,
-        ),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, webUseWasm: true),
       );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
@@ -1243,16 +1206,7 @@ name: my_app
         flutterDevice,
         logger: logger,
         systemClock: SystemClock.fixed(DateTime(2001)),
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-        ),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
@@ -1683,16 +1637,7 @@ name: my_app
     () async {
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-        ),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
@@ -1724,16 +1669,7 @@ name: my_app
     () async {
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-        ),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
@@ -1768,16 +1704,7 @@ name: my_app
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
         logger: logger,
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-        ),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       residentWebRunner.printHelp(details: false);

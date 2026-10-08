@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/compile.dart' show kDdcLibraryBundleFlags;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_web_platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -122,7 +121,6 @@ void main() {
           '',
           packageConfigPath: '.dart_tool/package_config.json',
           treeShakeIcons: false,
-          extraFrontEndOptions: kDdcLibraryBundleFlags,
         ),
         chromiumLauncher: chromiumLauncher,
         crossOriginIsolation: false,
@@ -195,7 +193,6 @@ void main() {
           '',
           packageConfigPath: '.dart_tool/package_config.json',
           treeShakeIcons: false,
-          extraFrontEndOptions: kDdcLibraryBundleFlags,
         ),
         chromiumLauncher: chromiumLauncher,
         crossOriginIsolation: false,
@@ -267,7 +264,6 @@ void main() {
           '',
           packageConfigPath: '.dart_tool/package_config.json',
           treeShakeIcons: false,
-          extraFrontEndOptions: kDdcLibraryBundleFlags,
         ),
         chromiumLauncher: recordingLauncher,
         crossOriginIsolation: false,

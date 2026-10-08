@@ -8,6 +8,8 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/bundle.dart' show getDefaultCachedKernelPath;
+import 'package:flutter_tools/src/compile.dart' show TargetModel, kDdcLibraryBundleFlags;
 import 'package:flutter_tools/src/test/web_test_compiler.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/expect.dart';
@@ -34,8 +36,16 @@ void main() {
       logger: logger,
       platform: platform,
     );
+    final String cachedKernelPath = getDefaultCachedKernelPath(
+      trackWidgetCreation: false,
+      dartDefines: const <String>[],
+      config: config,
+      fileSystem: fileSystem,
+      targetModel: TargetModel.dartdevc,
+      extraFrontEndOptions: kDdcLibraryBundleFlags,
+    );
     final processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(
+      FakeCommand(
         command: <Pattern>[
           'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
           'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
@@ -60,13 +70,11 @@ void main() {
           '--filesystem-scheme',
           'org-dartlang-app',
           '--initialize-from-dill',
-          'build/471e67e273aac2e3e05542afef95ef7f.cache.dill',
+          cachedKernelPath,
           '--platform',
           'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
           '--verbosity=error',
-          '--dartdevc-module-format=ddc',
-          '--dartdevc-canary',
-          '--no-js-strongly-connected-components',
+          ...kDdcLibraryBundleFlags,
         ],
         stdout: 'result abc\nline0\nline1\nabc\nabc build/out 0',
       ),

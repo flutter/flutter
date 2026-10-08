@@ -24,6 +24,7 @@ import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../compile.dart' show kDdcCanaryFeatures;
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart' as globals;
@@ -72,18 +73,14 @@ class WebAssetServer implements AssetReader {
     this._packages,
     this.internetAddress,
     this._modules,
-    this._digests,
-    this._canaryFeatures, {
+    this._digests, {
     required this.webRenderer,
     required this.useLocalCanvasKit,
     required this.fileSystem,
     required this.logger,
     this._baseHref,
     this._webDefines = const <String, String>{},
-  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)),
-       // TODO(srujzs): Remove this assertion when the library bundle format is
-       // supported without canary mode.
-       assert(_canaryFeatures);
+  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex));
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -217,8 +214,6 @@ class WebAssetServer implements AssetReader {
     required bool useLocalCanvasKit,
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
-    // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
-    bool canaryFeatures = false,
     bool useDwdsWebSocketConnection = false,
     required FileSystem fileSystem,
     required Logger logger,
@@ -232,9 +227,6 @@ class WebAssetServer implements AssetReader {
     final Map<String, String> extraHeaders = webDevServerConfig.headers;
     final List<ProxyRule> proxy = webDevServerConfig.proxy;
 
-    // TODO(srujzs): Remove this assertion when the library bundle format is
-    // supported without canary mode.
-    assert(canaryFeatures);
     final InternetAddress address;
     if (hostname == webDevAnyHostDefault) {
       address = InternetAddress.anyIPv4;
@@ -285,7 +277,6 @@ class WebAssetServer implements AssetReader {
       address,
       modules,
       digests,
-      canaryFeatures,
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
       fileSystem: fileSystem,
@@ -370,7 +361,7 @@ class WebAssetServer implements AssetReader {
             appEntrypoint: packageConfig.toPackageUriForWorkspace(
               fileSystem.file(entrypoint).absolute.uri,
             ),
-            canaryFeatures: canaryFeatures,
+            canaryFeatures: kDdcCanaryFeatures,
           ),
           packageConfigPath: buildInfo.packageConfigPath,
           reloadedSourcesUri: reloadedSourcesUri,
@@ -412,7 +403,6 @@ class WebAssetServer implements AssetReader {
     return server;
   }
 
-  final bool _canaryFeatures;
   final Map<String, String> _webDefines;
   final String? _baseHref;
   final HttpServer _httpServer;
@@ -774,19 +764,12 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     return fileSystem.currentDirectory.childFile('.non_existent_file');
   }
 
-  File get _resolveDartSdkJsFile {
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _canaryFeatures
-        ? kDDCCanarySdkArtifactMap
-        : kDDCStableSdkArtifactMap;
-    return fileSystem.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
-  }
+  File get _resolveDartSdkJsFile =>
+      fileSystem.file(globals.artifacts!.getHostArtifact(kDDCSdkArtifactMap[webRenderer]!));
 
-  File get _resolveDartSdkJsMapFile {
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _canaryFeatures
-        ? kDDCCanarySdkSourcemapsArtifactMap
-        : kDDCStableSdkSourcemapsArtifactMap;
-    return fileSystem.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
-  }
+  File get _resolveDartSdkJsMapFile => fileSystem.file(
+    globals.artifacts!.getHostArtifact(kDDCSdkSourcemapsArtifactMap[webRenderer]!),
+  );
 
   @override
   Future<String?> dartSourceContents(String serverPath) async {
