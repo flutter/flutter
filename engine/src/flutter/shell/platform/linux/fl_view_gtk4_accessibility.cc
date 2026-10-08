@@ -372,6 +372,40 @@ static gboolean fl_gtk4_accessible_node_get_bounds(GtkAccessible* accessible,
   return TRUE;
 }
 
+static FlutterTransformation fl_gtk4_accessibility_identity_transform() {
+  return {.scaleX = 1.0, .scaleY = 1.0, .pers2 = 1.0};
+}
+
+static FlutterTransformation fl_gtk4_accessibility_compose_transforms(
+    const FlutterTransformation& parent,
+    const FlutterTransformation& local) {
+  const double a[3][3] = {
+      {parent.scaleX, parent.skewX, parent.transX},
+      {parent.skewY, parent.scaleY, parent.transY},
+      {parent.pers0, parent.pers1, parent.pers2 == 0.0 ? 1.0 : parent.pers2}};
+  const double b[3][3] = {
+      {local.scaleX == 0.0 ? 1.0 : local.scaleX, local.skewX, local.transX},
+      {local.skewY, local.scaleY == 0.0 ? 1.0 : local.scaleY, local.transY},
+      {local.pers0, local.pers1, local.pers2 == 0.0 ? 1.0 : local.pers2}};
+  double c[3][3] = {};
+  for (int row = 0; row < 3; row++) {
+    for (int column = 0; column < 3; column++) {
+      for (int i = 0; i < 3; i++) {
+        c[row][column] += a[row][i] * b[i][column];
+      }
+    }
+  }
+  return {.scaleX = c[0][0],
+          .skewX = c[0][1],
+          .transX = c[0][2],
+          .skewY = c[1][0],
+          .scaleY = c[1][1],
+          .transY = c[1][2],
+          .pers0 = c[2][0],
+          .pers1 = c[2][1],
+          .pers2 = c[2][2]};
+}
+
 static void fl_gtk4_accessible_node_get_transformed_bounds(
     const FlutterRect& rect,
     const FlutterTransformation& transform,
@@ -766,6 +800,7 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
     FlView* view,
     FlutterViewId view_id,
     const FlAccessibilitySemanticsNode* semantics,
+    const FlutterTransformation& transform,
     FlGtk4AccessibleNode* self) {
   if (self != nullptr && self->semantics_revision == semantics->revision) {
     return self;
@@ -823,7 +858,7 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
                                               is_focused);
   self->has_bounds = TRUE;
   fl_gtk4_accessible_node_get_transformed_bounds(
-      semantics->rect, semantics->transform, &self->bounds_x, &self->bounds_y,
+      semantics->rect, transform, &self->bounds_x, &self->bounds_y,
       &self->bounds_width, &self->bounds_height);
 
   const gchar* value = flags->is_obscured ? nullptr : semantics->value;
@@ -977,6 +1012,7 @@ static void fl_gtk4_accessible_node_attach_children(
 static FlGtk4AccessibleNode* fl_view_gtk4_accessibility_build_native_node(
     FlViewGtk4Accessibility* self,
     const FlAccessibilitySemanticsNode* semantics,
+    const FlutterTransformation& parent_transform,
     GHashTable* visited) {
   if (semantics == nullptr) {
     return nullptr;
@@ -990,8 +1026,11 @@ static FlGtk4AccessibleNode* fl_view_gtk4_accessibility_build_native_node(
   FlGtk4AccessibleNode* node = FL_GTK4_ACCESSIBLE_NODE(g_hash_table_lookup(
       self->native_nodes_by_id, GINT_TO_POINTER(semantics->id)));
   FlGtk4AccessibleNode* previous_node = node;
+  const FlutterTransformation transform =
+      fl_gtk4_accessibility_compose_transforms(parent_transform,
+                                               semantics->transform);
   node = fl_gtk4_accessible_node_update(self->view, self->view_id, semantics,
-                                        node);
+                                        transform, node);
   if (node != previous_node) {
     if (previous_node != nullptr) {
       // Clients can retain the replaced object after the cache releases it.
@@ -1014,7 +1053,8 @@ static FlGtk4AccessibleNode* fl_view_gtk4_accessibility_build_native_node(
       }
 
       FlGtk4AccessibleNode* child_node =
-          fl_view_gtk4_accessibility_build_native_node(self, child, visited);
+          fl_view_gtk4_accessibility_build_native_node(self, child, transform,
+                                                       visited);
       if (child_node != nullptr) {
         g_ptr_array_add(children, child_node);
       }
@@ -1025,6 +1065,36 @@ static FlGtk4AccessibleNode* fl_view_gtk4_accessibility_build_native_node(
   return node;
 }
 #endif  // defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
+
+static gboolean fl_view_gtk4_accessibility_find_transform(
+    FlViewGtk4Accessibility* self,
+    const FlAccessibilitySemanticsNode* semantics,
+    int32_t target_id,
+    const FlutterTransformation& parent_transform,
+    FlutterTransformation* result) {
+  if (semantics == nullptr) {
+    return FALSE;
+  }
+  const FlutterTransformation transform =
+      fl_gtk4_accessibility_compose_transforms(parent_transform,
+                                               semantics->transform);
+  if (semantics->id == target_id) {
+    *result = transform;
+    return TRUE;
+  }
+  if (semantics->children_in_traversal_order == nullptr) {
+    return FALSE;
+  }
+  for (size_t i = 0; i < semantics->child_count; i++) {
+    const auto* child = fl_accessibility_semantics_store_lookup_node(
+        self->semantics_store, semantics->children_in_traversal_order[i]);
+    if (fl_view_gtk4_accessibility_find_transform(self, child, target_id,
+                                                  transform, result)) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
 
 static const gchar* fl_view_gtk4_accessibility_get_root_label(
     FlViewGtk4Accessibility* self) {
@@ -1068,8 +1138,8 @@ static void fl_view_gtk4_accessibility_rebuild_native_tree(
   g_autoptr(GHashTable) visited =
       g_hash_table_new(g_direct_hash, g_direct_equal);
   FlGtk4AccessibleNode* previous_root = self->root_node;
-  self->root_node =
-      fl_view_gtk4_accessibility_build_native_node(self, root, visited);
+  self->root_node = fl_view_gtk4_accessibility_build_native_node(
+      self, root, fl_gtk4_accessibility_identity_transform(), visited);
   if (self->root_node != nullptr && self->root_node != previous_root) {
     fl_gtk_runtime_accessible_set_accessible_parent(
         GTK_ACCESSIBLE(self->root_node),
@@ -1150,6 +1220,11 @@ void fl_view_gtk4_accessibility_handle_update(
     gboolean rebuild = self->root_node == nullptr ||
                        fl_accessibility_semantics_store_structure_changed(
                            self->semantics_store);
+    // A changed ancestor transform affects every descendant. Rebuild the
+    // hierarchy for such batches; leaf-only updates retain the fast path.
+    for (size_t i = 0; !rebuild && i < update->node_count; i++) {
+      rebuild = update->nodes[i]->child_count != 0;
+    }
     if (!rebuild) {
       for (size_t i = 0; i < update->node_count; i++) {
         const int32_t id = update->nodes[i]->id;
@@ -1160,8 +1235,17 @@ void fl_view_gtk4_accessibility_handle_update(
         if (node == nullptr || semantics == nullptr) {
           continue;
         }
+        FlutterTransformation transform =
+            fl_gtk4_accessibility_identity_transform();
+        const auto* root = fl_accessibility_semantics_store_lookup_node(
+            self->semantics_store, 0);
+        if (!fl_view_gtk4_accessibility_find_transform(
+                self, root, id, fl_gtk4_accessibility_identity_transform(),
+                &transform)) {
+          continue;
+        }
         auto* updated = fl_gtk4_accessible_node_update(
-            self->view, self->view_id, semantics, node);
+            self->view, self->view_id, semantics, transform, node);
         if (updated != node) {
           fl_gtk4_accessible_node_detach(node);
           g_hash_table_insert(self->native_nodes_by_id, GINT_TO_POINTER(id),
