@@ -191,12 +191,32 @@ class TextLayout {
 
     final wrapper = TextWrapper(this);
     wrapper.breakLines(width);
+
+    // `TextHeightBehavior.applyHeightToFirstAscent` is handled in `addLine`, where the first line
+    // is known before its placeholders are positioned and its advance is computed. The last line
+    // is only known once wrapping is done, so `applyHeightToLastDescent` is handled here. It only
+    // changes the last line's own height, so nothing else needs to be re-laid out
+    double height = wrapper.height;
+    final ui.TextHeightBehavior? textHeightBehavior = paragraph.paragraphStyle.textHeightBehavior;
+    if (textHeightBehavior != null && !textHeightBehavior.applyHeightToLastDescent) {
+      final TextLine lastLine = lines.last;
+      height -= lastLine.height;
+      lastLine.fontBoundingBoxDescent = lastLine.rawFontBoundingBoxDescent;
+      lastLine.advance = ui.Rect.fromLTWH(
+        lastLine.advance.left,
+        lastLine.advance.top,
+        lastLine.advance.width,
+        lastLine.height,
+      );
+      height += lastLine.height;
+    }
+
     paragraph.width = width;
     paragraph.maxIntrinsicWidth = wrapper.maxIntrinsicWidth;
     paragraph.minIntrinsicWidth = wrapper.minIntrinsicWidth;
     paragraph.longestLine = wrapper.longestLine;
     paragraph.maxLineWidthWithTrailingSpaces = wrapper.maxLineWidthWithTrailingSpaces;
-    paragraph.height = wrapper.height;
+    paragraph.height = height;
     // It's exactly how it's implemented in SkParagraph
     // but it only makes sense if we have one line
     paragraph.alphabeticBaseline = lines.first.fontBoundingBoxAscent;
@@ -276,9 +296,15 @@ class TextLayout {
     );
 
     if (isSyntheticEmptyLine) {
+      // The synthetic empty line after a trailing `\n` inherits the metrics of the previous line
+      // (raw ones included, so that `TextHeightBehavior` can still revert its descent in
+      // `wrapText`). SkParagraph does the same: the wrapper doesn't reset the line metrics in
+      // this case
       if (lines.isNotEmpty) {
         line.fontBoundingBoxAscent = lines.last.fontBoundingBoxAscent;
         line.fontBoundingBoxDescent = lines.last.fontBoundingBoxDescent;
+        line.rawFontBoundingBoxAscent = lines.last.rawFontBoundingBoxAscent;
+        line.rawFontBoundingBoxDescent = lines.last.rawFontBoundingBoxDescent;
         line.paintBoundsAscent = lines.last.paintBoundsAscent;
         line.paintBoundsDescent = lines.last.paintBoundsDescent;
       }
@@ -478,6 +504,17 @@ class TextLayout {
       }
       block.calculatePlaceholderTop(line.fontBoundingBoxAscent, line.fontBoundingBoxDescent);
       line.updateBoundingBox(block);
+    }
+
+    // `TextHeightBehavior.applyHeightToFirstAscent` applies to the first line only, which is known
+    // right here. Doing it before computing the advance means the wrapper sees the final height of
+    // the first line and all subsequent line tops are correct as they are. (The last line is
+    // handled in `wrapText`, once wrapping is done)
+    final ui.TextHeightBehavior? textHeightBehavior = paragraph.paragraphStyle.textHeightBehavior;
+    if (lines.isEmpty &&
+        textHeightBehavior != null &&
+        !textHeightBehavior.applyHeightToFirstAscent) {
+      line.fontBoundingBoxAscent = line.rawFontBoundingBoxAscent;
     }
 
     line.advance = ui.Rect.fromLTWH(
@@ -1202,12 +1239,14 @@ abstract class LineBlock {
     final double runHeight = span.style.height! * fontSize;
     final double fontHeight = span.fontBoundingBoxAscent + span.fontBoundingBoxDescent;
     switch (span.style.leadingDistribution) {
-      case null:
       case ui.TextLeadingDistribution.even:
+        // Split extra leading equally above ascent and below descent (half-leading).
         final double extraLeading = (runHeight - fontHeight) / 2;
         _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent + extraLeading;
         _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent + extraLeading;
+      case null:
       case ui.TextLeadingDistribution.proportional:
+        // Default to proportional scaling of ascent and descent, matching SkParagraph.
         final double multiplier = fontHeight == 0 ? 1.0 : runHeight / fontHeight;
         _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent * multiplier;
         _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent * multiplier;
@@ -1475,8 +1514,13 @@ class TextLine {
   bool lastLine = false;
 
   ui.Rect advance = ui.Rect.zero;
+  // Raw metrics (no height multipliers) are needed to revert the first line ascent / last line
+  // descent when TextHeightBehavior asks for it
   double fontBoundingBoxAscent = 0.0;
   double fontBoundingBoxDescent = 0.0;
+  double rawFontBoundingBoxAscent = 0.0;
+  double rawFontBoundingBoxDescent = 0.0;
+  bool _hasLineMetrics = false;
 
   double paintBoundsAscent = 0.0;
   double paintBoundsDescent = 0.0;
@@ -1491,27 +1535,43 @@ class TextLine {
   List<LineBlock> visualBlocks = <LineBlock>[];
 
   void updateBoundingBox(LineBlock block) {
+    final double blockAscent;
+    final double blockDescent;
+    final double blockRawAscent;
+    final double blockRawDescent;
     if (block is TextBlock) {
-      // Line always counts multipled metrics.
-      fontBoundingBoxAscent = math.max(
-        fontBoundingBoxAscent,
-        block.multipliedFontBoundingBoxAscent,
-      );
-      fontBoundingBoxDescent = math.max(
-        fontBoundingBoxDescent,
-        block.multipliedFontBoundingBoxDescent,
-      );
+      // Line always counts multiplied metrics
+      blockAscent = block.multipliedFontBoundingBoxAscent;
+      blockDescent = block.multipliedFontBoundingBoxDescent;
+      blockRawAscent = block.rawFontBoundingBoxAscent;
+      blockRawDescent = block.rawFontBoundingBoxDescent;
       paintBoundsAscent = math.max(paintBoundsAscent, block.paintBoundsAscent);
       paintBoundsDescent = math.max(paintBoundsDescent, block.paintBoundsDescent);
       paintBoundsLeft = math.min(paintBoundsLeft, block.paintBounds.left);
       paintBoundsRight = math.max(paintBoundsRight, block.paintBounds.right);
     } else if (block is PlaceholderBlock) {
-      fontBoundingBoxAscent = math.max(fontBoundingBoxAscent, block.ascent);
-      fontBoundingBoxDescent = math.max(fontBoundingBoxDescent, block.descent);
+      // Placeholders have no height multiplier, so their raw and scaled metrics are the same
+      blockAscent = block.ascent;
+      blockDescent = block.descent;
+      blockRawAscent = block.ascent;
+      blockRawDescent = block.descent;
       // There's no need to update paint bounds because placeholders aren't painted by the
-      // paragraph.
+      // paragraph
     } else {
       throw UnsupportedError('Unknown block type: $block');
+    }
+
+    if (!_hasLineMetrics) {
+      fontBoundingBoxAscent = blockAscent;
+      fontBoundingBoxDescent = blockDescent;
+      rawFontBoundingBoxAscent = blockRawAscent;
+      rawFontBoundingBoxDescent = blockRawDescent;
+      _hasLineMetrics = true;
+    } else {
+      fontBoundingBoxAscent = math.max(fontBoundingBoxAscent, blockAscent);
+      fontBoundingBoxDescent = math.max(fontBoundingBoxDescent, blockDescent);
+      rawFontBoundingBoxAscent = math.max(rawFontBoundingBoxAscent, blockRawAscent);
+      rawFontBoundingBoxDescent = math.max(rawFontBoundingBoxDescent, blockRawDescent);
     }
   }
 }
