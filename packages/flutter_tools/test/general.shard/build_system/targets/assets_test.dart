@@ -1089,8 +1089,10 @@ flutter:
         packages: <String, String>{'bar': 'bar'},
       );
 
-      // `package:bar` provides the icon font through its build hook.
-      final File hookFont = fileSystem.file('bar/fonts/BarIcons.ttf')
+      // `package:bar` provides the icon font through its build hook. Hooks
+      // report absolute file URIs; a relative one would not round-trip through
+      // `Uri.toFilePath` on Windows hosts with this posix memory file system.
+      final File hookFont = fileSystem.currentDirectory.childFile('bar/fonts/BarIcons.ttf')
         ..createSync(recursive: true)
         ..writeAsBytesSync(<int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112]);
       environment.buildDir
