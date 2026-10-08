@@ -1648,7 +1648,7 @@ class WebCompileTest {
     });
   }
 
-  /// Obtains the size and gzipped size of both [dartBundleFile] and [buildDir].
+  /// Obtains the size and gzipped size of the given [files] and [directories].
   static Future<Map<String, int>> getSize({
     /// Mapping of metric key name to file system path for directories to measure
     Map<String, String> directories = const <String, String>{},

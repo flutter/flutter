@@ -196,6 +196,67 @@ Future<void> testMain() async {
     );
   });
 
+  test('Paragraph getLineBoundary respects affinity at a soft wrap', () {
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+
+    final builder = ui.ParagraphBuilder(paragraphStyle);
+    builder.addText('Test Text');
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 150));
+    // Wraps to 'Test ' and 'Text'.
+    expect(paragraph.computeLineMetrics(), hasLength(2));
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+      const ui.TextRange(start: 0, end: 5),
+    );
+
+    // Offset 5 is both the end of the first line and the start of the second,
+    // so only the affinity distinguishes the two.
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 5)),
+      const ui.TextRange(start: 5, end: 9),
+    );
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 5, affinity: ui.TextAffinity.upstream),
+      ),
+      const ui.TextRange(start: 0, end: 5),
+    );
+
+    // The end of the last line has no following line to move to.
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 9)),
+      const ui.TextRange(start: 5, end: 9),
+    );
+  });
+
+  test('Paragraph getLineBoundary is unaffected by affinity at a hard line break', () {
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+
+    final builder = ui.ParagraphBuilder(paragraphStyle);
+    builder.addText('Test\nText');
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    // Unlike a soft wrap, the newline occupies an offset of its own, so the
+    // first line's end and the second line's start are not the same position
+    // and there is no seam for the affinity to disambiguate.
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 4)),
+      const ui.TextRange(start: 0, end: 4),
+    );
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 4, affinity: ui.TextAffinity.upstream),
+      ),
+      const ui.TextRange(start: 0, end: 4),
+    );
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 5)),
+      const ui.TextRange(start: 5, end: 9),
+    );
+  });
+
   test('Paragraph computeLineMetrics/getLineMetricsAt', () {
     final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
