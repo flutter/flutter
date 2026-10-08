@@ -203,7 +203,7 @@ class FrameService {
   /// Prefers a visible registered window so that rendering continues when the
   /// original tab is hidden but a Flutter view is visible in another window
   /// (e.g. Document Picture-in-Picture). Falls back to the global [domWindow]
-  /// when no windows are registered.
+  /// when no registered window is visible.
   DomWindow _pickWindowForFrame() {
     for (final DomWindow window in _registeredWindows) {
       final document = window.document as DomHTMLDocument?;
@@ -211,7 +211,7 @@ class FrameService {
         return window;
       }
     }
-    return _registeredWindows.isNotEmpty ? _registeredWindows.first : domWindow;
+    return domWindow;
   }
 
   void _renderFrame(double highResTime) {
