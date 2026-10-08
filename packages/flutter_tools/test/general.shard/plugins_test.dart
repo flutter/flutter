@@ -2360,10 +2360,7 @@ platforms:
           fileSystem: globals.fs,
           isDevDependency: false,
         );
-        expect(
-          plugin.pluginDartClassPlatforms['windows']?.dartFileName,
-          'sample_plugin.dart',
-        );
+        expect(plugin.pluginDartClassPlatforms['windows']?.dartFileName, 'sample_plugin.dart');
       });
 
       testUsingContext(
