@@ -11,7 +11,6 @@
 #include "flutter/fml/task_runner.h"
 #include "impeller/base/comparable.h"
 #include "impeller/base/thread.h"
-#include "impeller/renderer/pipeline_compile_queue.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "third_party/abseil-cpp/absl/container/linked_hash_map.h"
 
@@ -27,25 +26,37 @@ namespace impeller {
 ///             it runs.
 ///
 class PipelineCompileQueueVulkan final
-    : public PipelineCompileQueue,
-      public std::enable_shared_from_this<PipelineCompileQueueVulkan> {
+    : public std::enable_shared_from_this<PipelineCompileQueueVulkan> {
  public:
   static std::shared_ptr<PipelineCompileQueueVulkan> Create(
       std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
-  ~PipelineCompileQueueVulkan() override;
+  ~PipelineCompileQueueVulkan();
 
   PipelineCompileQueueVulkan(const PipelineCompileQueueVulkan&) = delete;
 
   PipelineCompileQueueVulkan& operator=(const PipelineCompileQueueVulkan&) =
       delete;
 
-  // |PipelineCompileQueue|
+  //----------------------------------------------------------------------------
+  /// @brief      Post a compile job for the specified descriptor.
+  ///
+  /// @param[in]  desc  The description
+  /// @param[in]  job   The job
+  ///
+  /// @return     If the job was successfully posted to the worker task runner.
+  ///
   bool PostJobForDescriptor(const PipelineDescriptor& desc,
-                            const fml::closure& job) override;
+                            const fml::closure& job);
 
-  // |PipelineCompileQueue|
-  void PerformJobEagerly(const PipelineDescriptor& desc) override;
+  //----------------------------------------------------------------------------
+  /// @brief      If the task has not yet been done, perform it eagerly on the
+  ///             calling thread. This can be used in lieu of an idle wait for
+  ///             the task completion on the calling thread.
+  ///
+  /// @param[in]  desc  The description
+  ///
+  void PerformJobEagerly(const PipelineDescriptor& desc);
 
  private:
   explicit PipelineCompileQueueVulkan(
