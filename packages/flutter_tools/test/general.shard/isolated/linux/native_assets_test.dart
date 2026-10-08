@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/linux/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
+import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -253,7 +254,7 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
       await environment.outputDir.childFile('mock_clang++').create();
 
       final CCompilerConfig? result = await cCompilerConfigLinux(
-        cmakeDirectory: throwingFileSystem.directory(environment.outputDir.path),
+        cmakeDirectory: _FakeDirectory(throwingFileSystem, environment.outputDir.path),
         throwIfNotFound: false,
       );
       expect(result, isNull);
@@ -282,7 +283,7 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
 
       expect(
         cCompilerConfigLinux(
-          cmakeDirectory: throwingFileSystem.directory(environment.outputDir.path),
+          cmakeDirectory: _FakeDirectory(throwingFileSystem, environment.outputDir.path),
         ),
         throwsA(isA<FileSystemException>()),
       );
@@ -298,9 +299,6 @@ class _ThrowingResolveFileSystem extends ForwardingFileSystem {
   final String throwingPath;
 
   @override
-  Directory directory(Object? path) => _ThrowingResolveDirectory(this, super.directory(path));
-
-  @override
   File file(Object? path) {
     final File delegateFile = super.file(path);
     if (delegateFile.path == throwingPath) {
@@ -310,34 +308,17 @@ class _ThrowingResolveFileSystem extends ForwardingFileSystem {
   }
 }
 
-class _ThrowingResolveDirectory extends ForwardingFileSystemEntity<Directory, io.Directory>
-    with ForwardingDirectory<Directory> {
-  _ThrowingResolveDirectory(this.fileSystem, this.delegate);
-
-  @override
-  final io.Directory delegate;
+class _FakeDirectory extends Fake implements Directory {
+  _FakeDirectory(this.fileSystem, this.path);
 
   @override
   final FileSystem fileSystem;
 
   @override
-  Directory wrapDirectory(io.Directory delegate) => _ThrowingResolveDirectory(fileSystem, delegate);
-
-  @override
-  File wrapFile(io.File delegate) => fileSystem.file(delegate);
-
-  @override
-  Link wrapLink(io.Link delegate) => throw UnimplementedError();
-
-  @override
-  Directory childDirectory(String basename) =>
-      fileSystem.directory(fileSystem.path.join(path, basename));
+  final String path;
 
   @override
   File childFile(String basename) => fileSystem.file(fileSystem.path.join(path, basename));
-
-  @override
-  Link childLink(String basename) => fileSystem.link(fileSystem.path.join(path, basename));
 }
 
 class _ThrowingResolveFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
