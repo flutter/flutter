@@ -90,6 +90,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     addMachineOutputFlag(verboseHelp: verboseHelp);
     addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
     addEnableHcppFlag(verboseHelp: verboseHelp);
+    usesDeprecatedJsInteropFlag(verboseHelp: verboseHelp);
 
     argParser
       ..addFlag(
@@ -524,9 +525,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       uninstallApp: boolArg('uninstall'),
     );
 
-    final Uri? nativeAssetsJson = _isIntegrationTest
-        ? null // Don't build for host when running integration tests.
-        : await nativeAssetsBuilder?.build(buildInfo);
+    final (:Uri? nativeAssetsManifest, :FlutterHookResult? flutterHookResult) = _isIntegrationTest
+        ? (
+            nativeAssetsManifest: null,
+            flutterHookResult: null,
+          ) // Don't build for host when running integration tests.
+        : (await nativeAssetsBuilder?.buildWithHookResult(buildInfo) ??
+              (nativeAssetsManifest: null, flutterHookResult: null));
     String? testAssetPath;
     if (buildTestAssets) {
       await _buildTestAsset(
@@ -534,18 +539,21 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         impellerStatus: debuggingOptions.enableImpeller,
         buildMode: debuggingOptions.buildInfo.mode,
         packageConfigPath: buildInfo.packageConfigPath,
+        flutterHookResult: flutterHookResult,
       );
     }
-    if (buildTestAssets || nativeAssetsJson != null) {
+    if (buildTestAssets || nativeAssetsManifest != null) {
       testAssetPath = fs.path.join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
-    if (nativeAssetsJson != null) {
+    if (nativeAssetsManifest != null) {
       final Directory testAssetDirectory = fs.directory(testAssetPath);
       if (!testAssetDirectory.existsSync()) {
         await testAssetDirectory.create(recursive: true);
       }
-      final File nativeAssetsManifest = testAssetDirectory.childFile('NativeAssetsManifest.json');
-      await fs.file(nativeAssetsJson).copy(nativeAssetsManifest.path);
+      final File copiedNativeAssetsManifest = testAssetDirectory.childFile(
+        'NativeAssetsManifest.json',
+      );
+      await fs.file(nativeAssetsManifest).copy(copiedNativeAssetsManifest.path);
     }
 
     final String? concurrencyString = stringArg('concurrency');
@@ -831,6 +839,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     required ImpellerStatus impellerStatus,
     required BuildMode buildMode,
     required String packageConfigPath,
+    FlutterHookResult? flutterHookResult,
   }) async {
     final ToolContext(
       :Artifacts artifacts,
@@ -841,6 +850,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     ) = _toolContext;
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
+      flutterHookResult: flutterHookResult,
       packageConfigPath: packageConfigPath,
       flavor: flavor,
       includeAssetsFromDevDependencies: true,
@@ -849,7 +859,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (_needsRebuild(assetBundle.entries, flavor)) {
+    if (_needsRebuild(assetBundle.entries, flavor, flutterHookResult)) {
       await writeBundle(
         fs.directory(fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets')),
         assetBundle.entries,
@@ -876,29 +886,45 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
   }
 
-  bool _needsRebuild(Map<String, AssetBundleEntry> entries, String? flavor) {
+  bool _needsRebuild(
+    Map<String, AssetBundleEntry> entries,
+    String? flavor,
+    FlutterHookResult? flutterHookResult,
+  ) {
     // TODO(andrewkolos): This logic might fail in the future if we change the
     //  schema of the contents of the asset manifest file and the user does not
     //  perform a `flutter clean` after upgrading.
     //  See https://github.com/flutter/flutter/issues/128563.
     final ToolContext(:Config config, :FileSystem fs) = _toolContext;
-    final File manifest = fs.file(
-      fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets', 'AssetManifest.bin'),
+    final String unitTestAssetsDir = fs.path.join(
+      getBuildDirectory(config, fs),
+      'unit_test_assets',
     );
+    final File manifest = fs.file(fs.path.join(unitTestAssetsDir, 'AssetManifest.bin'));
     if (!manifest.existsSync()) {
       return true;
     }
     final DateTime lastModified = manifest.lastModifiedSync();
     final File pub = fs.file('pubspec.yaml');
-    if (pub.lastModifiedSync().isAfter(lastModified)) {
+    if (pub.existsSync() && pub.lastModifiedSync().isAfter(lastModified)) {
       return true;
     }
 
-    final Iterable<DevFSFileContent> files = entries.values
-        .map((AssetBundleEntry asset) => asset.content)
-        .whereType<DevFSFileContent>();
-    for (final entry in files) {
-      if (entry.isModifiedAfter(lastModified)) {
+    for (final MapEntry<String, AssetBundleEntry> entry in entries.entries) {
+      final DevFSContent content = entry.value.content;
+      if (content is DevFSFileContent) {
+        if (!fs.file(fs.path.join(unitTestAssetsDir, entry.key)).existsSync()) {
+          return true;
+        }
+        if (content.isModifiedAfter(lastModified)) {
+          return true;
+        }
+      }
+    }
+
+    for (final Uri dependency in flutterHookResult?.dependencies ?? const <Uri>[]) {
+      final FileStat stat = fs.statSync(dependency.toFilePath());
+      if (stat.type == FileSystemEntityType.notFound || stat.modified.isAfter(lastModified)) {
         return true;
       }
     }

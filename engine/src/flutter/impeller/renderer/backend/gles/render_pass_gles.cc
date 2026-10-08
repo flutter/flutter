@@ -5,6 +5,9 @@
 #include "impeller/renderer/backend/gles/render_pass_gles.h"
 
 #include <cstdint>
+#include <optional>
+#include <tuple>
+#include <utility>
 
 #include "flutter/fml/trace_event.h"
 #include "fml/closure.h"
@@ -43,80 +46,171 @@ void RenderPassGLES::OnSetLabel(std::string_view label) {
   label_ = label;
 }
 
-void ConfigureBlending(const ProcTableGLES& gl,
-                       const ColorAttachmentDescriptor* color) {
-  if (color->blending_enabled) {
-    gl.Enable(GL_BLEND);
-    gl.BlendFuncSeparate(
-        ToBlendFactor(color->src_color_blend_factor),  // src color
-        ToBlendFactor(color->dst_color_blend_factor),  // dst color
-        ToBlendFactor(color->src_alpha_blend_factor),  // src alpha
-        ToBlendFactor(color->dst_alpha_blend_factor)   // dst alpha
-    );
-    gl.BlendEquationSeparate(
-        ToBlendOperation(color->color_blend_op),  // mode color
-        ToBlendOperation(color->alpha_blend_op)   // mode alpha
-    );
-  } else {
-    gl.Disable(GL_BLEND);
-  }
+namespace {
 
-  {
-    const auto is_set = [](ColorWriteMask mask,
-                           ColorWriteMask check) -> GLboolean {
-      return (mask & check) ? GL_TRUE : GL_FALSE;
-    };
+struct BlendStateCache {
+  bool blending_enabled = false;
+  ColorWriteMask write_mask = ColorWriteMaskBits::kAll;
+  std::optional<std::tuple<BlendFactor, BlendFactor, BlendFactor, BlendFactor>>
+      blend_factors;
+  std::optional<std::pair<BlendOperation, BlendOperation>> blend_ops;
 
-    gl.ColorMask(
-        is_set(color->write_mask, ColorWriteMaskBits::kRed),    // red
-        is_set(color->write_mask, ColorWriteMaskBits::kGreen),  // green
-        is_set(color->write_mask, ColorWriteMaskBits::kBlue),   // blue
-        is_set(color->write_mask, ColorWriteMaskBits::kAlpha)   // alpha
-    );
-  }
-}
+  void Configure(const ProcTableGLES& gl,
+                 const ColorAttachmentDescriptor* color) {
+    if (color->blending_enabled) {
+      if (!blending_enabled) {
+        gl.Enable(GL_BLEND);
+        blending_enabled = true;
+      }
+      const auto factors = std::make_tuple(
+          color->src_color_blend_factor, color->dst_color_blend_factor,
+          color->src_alpha_blend_factor, color->dst_alpha_blend_factor);
+      if (blend_factors != factors) {
+        gl.BlendFuncSeparate(
+            ToBlendFactor(color->src_color_blend_factor),  // src color
+            ToBlendFactor(color->dst_color_blend_factor),  // dst color
+            ToBlendFactor(color->src_alpha_blend_factor),  // src alpha
+            ToBlendFactor(color->dst_alpha_blend_factor)   // dst alpha
+        );
+        blend_factors = factors;
+      }
+      const auto ops =
+          std::make_pair(color->color_blend_op, color->alpha_blend_op);
+      if (blend_ops != ops) {
+        gl.BlendEquationSeparate(
+            ToBlendOperation(color->color_blend_op),  // mode color
+            ToBlendOperation(color->alpha_blend_op)   // mode alpha
+        );
+        blend_ops = ops;
+      }
+    } else if (blending_enabled) {
+      gl.Disable(GL_BLEND);
+      blending_enabled = false;
+    }
 
-void ConfigureStencil(GLenum face,
-                      const ProcTableGLES& gl,
-                      const StencilAttachmentDescriptor& stencil,
-                      uint32_t stencil_reference) {
-  gl.StencilOpSeparate(
-      face,                                    // face
-      ToStencilOp(stencil.stencil_failure),    // stencil fail
-      ToStencilOp(stencil.depth_failure),      // depth fail
-      ToStencilOp(stencil.depth_stencil_pass)  // depth stencil pass
-  );
-  gl.StencilFuncSeparate(face,                                        // face
-                         ToCompareFunction(stencil.stencil_compare),  // func
-                         stencil_reference,                           // ref
-                         stencil.read_mask                            // mask
-  );
-  gl.StencilMaskSeparate(face, stencil.write_mask);
-}
+    if (write_mask != color->write_mask) {
+      const auto is_set = [](ColorWriteMask mask,
+                             ColorWriteMask check) -> GLboolean {
+        return (mask & check) ? GL_TRUE : GL_FALSE;
+      };
 
-void ConfigureStencil(const ProcTableGLES& gl,
-                      const PipelineDescriptor& pipeline,
-                      uint32_t stencil_reference) {
-  if (!pipeline.HasStencilAttachmentDescriptors()) {
-    gl.Disable(GL_STENCIL_TEST);
-    return;
+      gl.ColorMask(
+          is_set(color->write_mask, ColorWriteMaskBits::kRed),    // red
+          is_set(color->write_mask, ColorWriteMaskBits::kGreen),  // green
+          is_set(color->write_mask, ColorWriteMaskBits::kBlue),   // blue
+          is_set(color->write_mask, ColorWriteMaskBits::kAlpha)   // alpha
+      );
+      write_mask = color->write_mask;
+    }
   }
+};
 
-  gl.Enable(GL_STENCIL_TEST);
-  const auto& front = pipeline.GetFrontStencilAttachmentDescriptor();
-  const auto& back = pipeline.GetBackStencilAttachmentDescriptor();
+struct StencilFaceStateCache {
+  std::optional<
+      std::tuple<StencilOperation, StencilOperation, StencilOperation>>
+      ops;
+  std::optional<std::tuple<CompareFunction, uint32_t, uint32_t>> func;
+  uint32_t write_mask = 0xFFFFFFFF;
 
-  if (front.has_value() && back.has_value() && front == back) {
-    ConfigureStencil(GL_FRONT_AND_BACK, gl, *front, stencil_reference);
-    return;
+  void Configure(GLenum face,
+                 const ProcTableGLES& gl,
+                 const StencilAttachmentDescriptor& stencil,
+                 uint32_t stencil_reference) {
+    const auto new_ops =
+        std::make_tuple(stencil.stencil_failure, stencil.depth_failure,
+                        stencil.depth_stencil_pass);
+    if (ops != new_ops) {
+      gl.StencilOpSeparate(
+          face,                                    // face
+          ToStencilOp(stencil.stencil_failure),    // stencil fail
+          ToStencilOp(stencil.depth_failure),      // depth fail
+          ToStencilOp(stencil.depth_stencil_pass)  // depth stencil pass
+      );
+      ops = new_ops;
+    }
+    const auto new_func = std::make_tuple(stencil.stencil_compare,
+                                          stencil_reference, stencil.read_mask);
+    if (func != new_func) {
+      gl.StencilFuncSeparate(
+          face,                                        // face
+          ToCompareFunction(stencil.stencil_compare),  // func
+          stencil_reference,                           // ref
+          stencil.read_mask                            // mask
+      );
+      func = new_func;
+    }
+    if (write_mask != stencil.write_mask) {
+      gl.StencilMaskSeparate(face, stencil.write_mask);
+      write_mask = stencil.write_mask;
+    }
   }
-  if (front.has_value()) {
-    ConfigureStencil(GL_FRONT, gl, *front, stencil_reference);
+};
+
+struct StencilStateCache {
+  bool stencil_test_enabled = false;
+  StencilFaceStateCache front;
+  StencilFaceStateCache back;
+
+  void Configure(const ProcTableGLES& gl,
+                 const PipelineDescriptor& pipeline,
+                 uint32_t stencil_reference) {
+    if (!pipeline.HasStencilAttachmentDescriptors()) {
+      if (stencil_test_enabled) {
+        gl.Disable(GL_STENCIL_TEST);
+        stencil_test_enabled = false;
+      }
+      return;
+    }
+
+    if (!stencil_test_enabled) {
+      gl.Enable(GL_STENCIL_TEST);
+      stencil_test_enabled = true;
+    }
+    const auto& front_desc = pipeline.GetFrontStencilAttachmentDescriptor();
+    const auto& back_desc = pipeline.GetBackStencilAttachmentDescriptor();
+
+    if (front_desc.has_value() && back_desc.has_value() &&
+        front_desc == back_desc && front.ops == back.ops &&
+        front.func == back.func && front.write_mask == back.write_mask) {
+      front.Configure(GL_FRONT_AND_BACK, gl, *front_desc, stencil_reference);
+      back = front;
+      return;
+    }
+    if (front_desc.has_value()) {
+      front.Configure(GL_FRONT, gl, *front_desc, stencil_reference);
+    }
+    if (back_desc.has_value()) {
+      back.Configure(GL_BACK, gl, *back_desc, stencil_reference);
+    }
   }
-  if (back.has_value()) {
-    ConfigureStencil(GL_BACK, gl, *back, stencil_reference);
+};
+
+struct DepthStateCache {
+  bool depth_test_enabled = false;
+  std::optional<CompareFunction> depth_compare;
+  bool depth_write_enabled = true;
+
+  void Configure(const ProcTableGLES& gl,
+                 const std::optional<DepthAttachmentDescriptor>& depth) {
+    if (depth.has_value()) {
+      if (!depth_test_enabled) {
+        gl.Enable(GL_DEPTH_TEST);
+        depth_test_enabled = true;
+      }
+      if (depth_compare != depth->depth_compare) {
+        gl.DepthFunc(ToCompareFunction(depth->depth_compare));
+        depth_compare = depth->depth_compare;
+      }
+      if (depth_write_enabled != depth->depth_write_enabled) {
+        gl.DepthMask(depth->depth_write_enabled ? GL_TRUE : GL_FALSE);
+        depth_write_enabled = depth->depth_write_enabled;
+      }
+    } else if (depth_test_enabled) {
+      gl.Disable(GL_DEPTH_TEST);
+      depth_test_enabled = false;
+    }
   }
-}
+};
 
 //------------------------------------------------------------------------------
 /// @brief      Encapsulates data that will be needed in the reactor for the
@@ -152,6 +246,159 @@ struct RenderPassData {
 
   std::string label;
 };
+
+struct RenderPassStateCache {
+  std::optional<Viewport> viewport;
+  std::optional<IRect32> scissor;
+  BlendStateCache blend;
+  StencilStateCache stencil;
+  DepthStateCache depth;
+  std::optional<HandleGLES> program;
+  CullMode cull_mode = CullMode::kNone;
+  WindingOrder winding_order = WindingOrder::kClockwise;
+
+  void ConfigureBlending(const ProcTableGLES& gl,
+                         const ColorAttachmentDescriptor* color) {
+    blend.Configure(gl, color);
+  }
+
+  void ConfigureStencil(const ProcTableGLES& gl,
+                        const PipelineDescriptor& pipeline,
+                        uint32_t stencil_reference) {
+    stencil.Configure(gl, pipeline, stencil_reference);
+  }
+
+  void ConfigureDepth(
+      const ProcTableGLES& gl,
+      const std::optional<DepthAttachmentDescriptor>& depth_desc) {
+    depth.Configure(gl, depth_desc);
+  }
+
+  void ConfigureViewport(const ProcTableGLES& gl,
+                         const RenderPassData& pass_data,
+                         const std::optional<Viewport>& command_viewport,
+                         const ISize& target_size,
+                         bool flip_y) {
+    auto new_viewport = command_viewport.value_or(pass_data.viewport);
+
+    if (viewport.has_value() && viewport.value() == new_viewport) {
+      // The viewport is the same as the last command. Skip an unnecessary call.
+      return;
+    }
+
+    viewport = new_viewport;
+
+    // FBO passes flip in the vertex shader; swapchain keeps the old
+    // top-down -> bottom-up viewport conversion.
+    const auto viewport_y_gl = flip_y ? new_viewport.rect.GetY()
+                                      : target_size.height -
+                                            new_viewport.rect.GetY() -
+                                            new_viewport.rect.GetHeight();
+    gl.Viewport(new_viewport.rect.GetX(),  // x
+                viewport_y_gl,             // y
+                new_viewport.rect.GetWidth(), new_viewport.rect.GetHeight());
+    if (pass_data.depth_attachment) {
+      if (gl.DepthRangef.IsAvailable()) {
+        gl.DepthRangef(new_viewport.depth_range.z_near,
+                       new_viewport.depth_range.z_far);
+      } else {
+        gl.DepthRange(new_viewport.depth_range.z_near,
+                      new_viewport.depth_range.z_far);
+      }
+    }
+  }
+
+  // Note: RenderPass::SetScissor only populates pending_.scissor for the next
+  // Draw() call (which moves pending_ into commands_ and resets pending_).
+  // Subsequent Draw() calls within the same clip scope have
+  // command_scissor == std::nullopt, meaning the active scissor rect remains
+  // unchanged (matching Metal and Vulkan; see flutter/engine#56494).
+  void ConfigureScissor(const ProcTableGLES& gl,
+                        const std::optional<IRect32>& command_scissor,
+                        const ISize& target_size,
+                        bool flip_y) {
+    if (!command_scissor.has_value() || scissor == command_scissor) {
+      return;
+    }
+    const auto& new_scissor = command_scissor.value();
+    if (!scissor.has_value()) {
+      gl.Enable(GL_SCISSOR_TEST);
+    }
+    // Same flip handling as the viewport above.
+    const auto scissor_y_gl = flip_y ? new_scissor.GetY()
+                                     : target_size.height - new_scissor.GetY() -
+                                           new_scissor.GetHeight();
+    gl.Scissor(new_scissor.GetX(),  // x
+               scissor_y_gl,        // y
+               new_scissor.GetWidth(), new_scissor.GetHeight());
+    scissor = new_scissor;
+  }
+
+  void ConfigureCullMode(const ProcTableGLES& gl, CullMode pipeline_cull_mode) {
+    if (cull_mode == pipeline_cull_mode) {
+      return;
+    }
+    switch (pipeline_cull_mode) {
+      case CullMode::kNone:
+        gl.Disable(GL_CULL_FACE);
+        break;
+      case CullMode::kFrontFace:
+        gl.Enable(GL_CULL_FACE);
+        gl.CullFace(GL_FRONT);
+        break;
+      case CullMode::kBackFace:
+        gl.Enable(GL_CULL_FACE);
+        gl.CullFace(GL_BACK);
+        break;
+    }
+    cull_mode = pipeline_cull_mode;
+  }
+
+  void ConfigureWindingOrder(const ProcTableGLES& gl,
+                             WindingOrder pipeline_winding_order,
+                             bool flip_y) {
+    if (winding_order == pipeline_winding_order) {
+      return;
+    }
+    switch (pipeline_winding_order) {
+      case WindingOrder::kClockwise:
+        gl.FrontFace(flip_y ? GL_CCW : GL_CW);
+        break;
+      case WindingOrder::kCounterClockwise:
+        gl.FrontFace(flip_y ? GL_CW : GL_CCW);
+        break;
+    }
+    winding_order = pipeline_winding_order;
+  }
+
+  [[nodiscard]] bool BindProgram(const ProcTableGLES& gl,
+                                 const PipelineGLES& pipeline,
+                                 float y_flip_value) {
+    // HandleGLES::Equal compares HandleGLES::name_, which is a monotonically
+    // increasing 64-bit UniqueID (impeller/base/comparable.cc), not a raw
+    // OpenGL GLuint that could be recycled by the driver. In addition, each
+    // Command in the pass holds a strong PipelineRef keeping its
+    // UniqueHandleGLES alive for the entire pass.
+    const HandleGLES& program_handle = pipeline.GetProgramHandle();
+    if (program.has_value() && HandleGLES::Equal{}(*program, program_handle)) {
+      return true;
+    }
+    if (!pipeline.BindProgram()) {
+      return false;
+    }
+
+    // Bind the y-flip uniform if the vertex shader declares it.
+    const GLint y_flip_loc = pipeline.GetYFlipUniformLocation();
+    if (y_flip_loc >= 0) {
+      gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);
+    }
+
+    program = program_handle;
+    return true;
+  }
+};
+
+}  // namespace
 
 static bool BindVertexBuffer(const ProcTableGLES& gl,
                              BufferBindingsGLES* vertex_desc_gles,
@@ -196,42 +443,6 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   gl.DepthMask(GL_TRUE);
   gl.StencilMaskSeparate(GL_FRONT, 0xFFFFFFFF);
   gl.StencilMaskSeparate(GL_BACK, 0xFFFFFFFF);
-}
-
-static void EncodeViewport(const ProcTableGLES& gl,
-                           const RenderPassData& pass_data,
-                           const std::optional<Viewport>& command_viewport,
-                           const ISize& target_size,
-                           bool flip_y,
-                           std::optional<Viewport>& current_viewport) {
-  auto new_viewport = command_viewport.value_or(pass_data.viewport);
-
-  if (current_viewport.has_value() &&
-      current_viewport.value() == new_viewport) {
-    // The viewport is the same as the last command. Skip an unnecessary call.
-    return;
-  }
-
-  current_viewport = new_viewport;
-
-  // FBO passes flip in the vertex shader; swapchain keeps the old
-  // top-down -> bottom-up viewport conversion.
-  const auto viewport_y_gl = flip_y ? new_viewport.rect.GetY()
-                                    : target_size.height -
-                                          new_viewport.rect.GetY() -
-                                          new_viewport.rect.GetHeight();
-  gl.Viewport(new_viewport.rect.GetX(),  // x
-              viewport_y_gl,             // y
-              new_viewport.rect.GetWidth(), new_viewport.rect.GetHeight());
-  if (pass_data.depth_attachment) {
-    if (gl.DepthRangef.IsAvailable()) {
-      gl.DepthRangef(new_viewport.depth_range.z_near,
-                     new_viewport.depth_range.z_far);
-    } else {
-      gl.DepthRange(new_viewport.depth_range.z_near,
-                    new_viewport.depth_range.z_far);
-    }
-  }
 }
 
 [[nodiscard]] bool EncodeCommandsInReactor(
@@ -356,14 +567,24 @@ static void EncodeViewport(const ProcTableGLES& gl,
   // is bottom left origin, so we convert the coordinates here.
   ISize target_size = pass_data.color_attachment->GetSize();
 
-  // Offscreen FBO passes flip in the vertex shader (the swapchain is
-  // left alone); see https://github.com/flutter/flutter/issues/186554.
-  const bool flip_y = !is_wrapped_fbo;
+  // Offscreen (non-wrapped) FBOs always flip in the vertex shader so they are
+  // stored with a top-left origin, matching Impeller's coordinate system. See
+  // https://github.com/flutter/flutter/issues/186554.
+  //
+  // Wrapped FBOs match the embedder's default framebuffer origin:
+  // - Bottom-left (the OpenGL default): no flip.
+  // - Top-left (currently only the Windows embedder, via ANGLE's
+  //   EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE): flip, like offscreen FBOs.
+  //   The whole pipeline is then in one orientation, so the blit that
+  //   presents a wrapped framebuffer to the swapchain is a straight 1:1 copy,
+  //   which lets the driver resolve or DMA it instead of running a
+  //   full-screen shader pass to flip it.
+  const bool top_left_default_framebuffer_origin =
+      ContextGLES::Cast(*impeller_context).HasTopLeftDefaultFramebufferOrigin();
+  const bool flip_y = !is_wrapped_fbo || top_left_default_framebuffer_origin;
   const float y_flip_value = flip_y ? -1.0f : 1.0f;
 
-  std::optional<Viewport> current_viewport;
-  CullMode current_cull_mode = CullMode::kNone;
-  WindingOrder current_winding_order = WindingOrder::kClockwise;
+  RenderPassStateCache state_cache;
   // Inverted to keep front-facing consistent under the vertex y-flip.
   gl.FrontFace(flip_y ? GL_CCW : GL_CW);
 
@@ -391,90 +612,42 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Configure blending.
     ///
-    ConfigureBlending(gl, color_attachment);
+    state_cache.ConfigureBlending(gl, color_attachment);
 
     //--------------------------------------------------------------------------
     /// Setup stencil.
     ///
-    ConfigureStencil(gl, pipeline.GetDescriptor(), command.stencil_reference);
+    state_cache.ConfigureStencil(gl, pipeline.GetDescriptor(),
+                                 command.stencil_reference);
 
     //--------------------------------------------------------------------------
     /// Configure depth.
     ///
-    if (auto depth =
-            pipeline.GetDescriptor().GetDepthStencilAttachmentDescriptor();
-        depth.has_value()) {
-      gl.Enable(GL_DEPTH_TEST);
-      gl.DepthFunc(ToCompareFunction(depth->depth_compare));
-      gl.DepthMask(depth->depth_write_enabled ? GL_TRUE : GL_FALSE);
-    } else {
-      gl.Disable(GL_DEPTH_TEST);
-    }
+    state_cache.ConfigureDepth(
+        gl, pipeline.GetDescriptor().GetDepthStencilAttachmentDescriptor());
 
     //--------------------------------------------------------------------------
     /// Setup the viewport.
     ///
-    EncodeViewport(gl,                //
-                   pass_data,         //
-                   command.viewport,  //
-                   target_size,       //
-                   flip_y,            //
-                   current_viewport   //
-    );
+    state_cache.ConfigureViewport(gl, pass_data, command.viewport, target_size,
+                                  flip_y);
 
     //--------------------------------------------------------------------------
     /// Setup the scissor rect.
     ///
-    if (command.scissor.has_value()) {
-      const auto& scissor = command.scissor.value();
-      gl.Enable(GL_SCISSOR_TEST);
-      // Same flip handling as the viewport above.
-      const auto scissor_y_gl =
-          flip_y ? scissor.GetY()
-                 : target_size.height - scissor.GetY() - scissor.GetHeight();
-      gl.Scissor(scissor.GetX(),  // x
-                 scissor_y_gl,    // y
-                 scissor.GetWidth(), scissor.GetHeight());
-    }
+    state_cache.ConfigureScissor(gl, command.scissor, target_size, flip_y);
 
     //--------------------------------------------------------------------------
     /// Setup culling.
     ///
-    CullMode pipeline_cull_mode = pipeline.GetDescriptor().GetCullMode();
-    if (current_cull_mode != pipeline_cull_mode) {
-      switch (pipeline_cull_mode) {
-        case CullMode::kNone:
-          gl.Disable(GL_CULL_FACE);
-          break;
-        case CullMode::kFrontFace:
-          gl.Enable(GL_CULL_FACE);
-          gl.CullFace(GL_FRONT);
-          break;
-        case CullMode::kBackFace:
-          gl.Enable(GL_CULL_FACE);
-          gl.CullFace(GL_BACK);
-          break;
-      }
-      current_cull_mode = pipeline_cull_mode;
-    }
+    state_cache.ConfigureCullMode(gl, pipeline.GetDescriptor().GetCullMode());
 
     //--------------------------------------------------------------------------
     /// Setup winding order. The pipeline's winding is inverted when
     /// `flip_y` is in effect (the vertex flip reverses the rasterizer's
     /// view of winding).
-    WindingOrder pipeline_winding_order =
-        pipeline.GetDescriptor().GetWindingOrder();
-    if (current_winding_order != pipeline_winding_order) {
-      switch (pipeline.GetDescriptor().GetWindingOrder()) {
-        case WindingOrder::kClockwise:
-          gl.FrontFace(flip_y ? GL_CCW : GL_CW);
-          break;
-        case WindingOrder::kCounterClockwise:
-          gl.FrontFace(flip_y ? GL_CW : GL_CCW);
-          break;
-      }
-      current_winding_order = pipeline_winding_order;
-    }
+    state_cache.ConfigureWindingOrder(
+        gl, pipeline.GetDescriptor().GetWindingOrder(), flip_y);
 
     BufferBindingsGLES* vertex_desc_gles = pipeline.GetBufferBindings();
 
@@ -496,15 +669,8 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Bind the pipeline program.
     ///
-    if (!pipeline.BindProgram()) {
+    if (!state_cache.BindProgram(gl, pipeline, y_flip_value)) {
       return false;
-    }
-
-    //--------------------------------------------------------------------------
-    /// Bind the y-flip uniform if the vertex shader declares it.
-    const GLint y_flip_loc = pipeline.GetYFlipUniformLocation();
-    if (y_flip_loc >= 0) {
-      gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);
     }
 
     //--------------------------------------------------------------------------

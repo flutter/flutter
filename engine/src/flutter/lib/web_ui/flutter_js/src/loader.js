@@ -87,7 +87,7 @@ export class FlutterLoader {
       switch (renderer) {
         case "skwasm":
           if (!supportsDart2Wasm) {
-            return "Skwasm requires WasmGC support; this browser does not implement it yet.";
+            return "Skwasm requires WebAssembly features (WasmGC, SIMD, js-string builtins, try_table) that this browser does not support.";
           }
           if (!(browserEnvironment.webGLVersion > 0)) {
             return "Skwasm requires WebGL support; this browser does not provide it.";
@@ -106,7 +106,7 @@ export class FlutterLoader {
     const buildIncompatibilityReason = (build) => {
       if (build.compileTarget === "dart2wasm") {
         if (!supportsDart2Wasm) {
-          return "dart2wasm requires WasmGC support; this browser does not implement it yet.";
+          return "dart2wasm requires WebAssembly features (WasmGC, SIMD, js-string builtins, try_table) that this browser does not support.";
         }
         if (!enableWasm) {
           if (config.wasmAllowList?.[browserEnvironment.browserEngine] === false) {
