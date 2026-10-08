@@ -45,6 +45,8 @@ class CapturingTaskRunner final : public fml::BasicTaskRunner {
     return count;
   }
 
+  size_t PendingTaskCount() const { return tasks_.size(); }
+
  private:
   std::deque<fml::closure> tasks_;
 };
@@ -63,15 +65,31 @@ TEST(PipelineCompileQueueGLESTest, CreateSucceedsWithValidTaskRunner) {
   thread.Join();
 }
 
-TEST(PipelineCompileQueueGLESTest, PostJobDoesNothingWithNullClosure) {
-  fml::Thread thread;
-  auto queue = PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
+TEST(PipelineCompileQueueGLESTest, KeepsAtMostOneTaskOutstanding) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueGLES::Create(runner);
   ASSERT_NE(queue, nullptr);
-  queue->PostJob(nullptr);
-  thread.Join();
+
+  int executed = 0;
+  for (int i = 0; i < 3; i++) {
+    PipelineDescriptor desc;
+    desc.SetLabel(std::to_string(i));
+    ASSERT_TRUE(queue->PostJobForDescriptor(desc, [&executed] { executed++; }));
+  }
+  EXPECT_EQ(runner->PendingTaskCount(), 1u);
+
+  runner->RunAll();
+  EXPECT_EQ(executed, 3);
+
+  // Once drained, a new job must restart processing.
+  ASSERT_TRUE(queue->PostJobForDescriptor(PipelineDescriptor{},
+                                          [&executed] { executed++; }));
+  EXPECT_EQ(runner->PendingTaskCount(), 1u);
+  runner->RunAll();
+  EXPECT_EQ(executed, 4);
 }
 
-TEST(PipelineCompileQueueGLESTest, OnJobAddedProcessesJobsSequentially) {
+TEST(PipelineCompileQueueGLESTest, ProcessesJobsSequentially) {
   fml::Thread thread;
   auto queue = PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(thread));
   ASSERT_NE(queue, nullptr);

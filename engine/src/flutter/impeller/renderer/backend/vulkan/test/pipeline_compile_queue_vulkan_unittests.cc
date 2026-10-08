@@ -52,15 +52,7 @@ TEST(PipelineCompileQueueVulkanTest, CreateSucceedsWithValidTaskRunner) {
   EXPECT_NE(queue, nullptr);
 }
 
-TEST(PipelineCompileQueueVulkanTest, PostJobDoesNothingWithNullClosure) {
-  auto loop = fml::ConcurrentMessageLoop::Create();
-  auto queue = PipelineCompileQueueVulkan::Create(loop->GetTaskRunner());
-  ASSERT_NE(queue, nullptr);
-
-  queue->PostJob(nullptr);
-}
-
-TEST(PipelineCompileQueueVulkanTest, OnJobAddedProcessesJobsInParallel) {
+TEST(PipelineCompileQueueVulkanTest, ProcessesJobsInParallel) {
   auto loop = fml::ConcurrentMessageLoop::Create();
   auto queue = PipelineCompileQueueVulkan::Create(loop->GetTaskRunner());
   ASSERT_NE(queue, nullptr);

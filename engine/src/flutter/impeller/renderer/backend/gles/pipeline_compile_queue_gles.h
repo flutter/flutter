@@ -21,22 +21,11 @@ namespace impeller {
 /// @brief      A task queue designed for managing compilation of pipeline state
 ///             objects for OpenGL ES backend.
 ///
-///             This implementation uses a fml::TaskRunner as the worker task
-///             runner and implements a sequential job processing mechanism to
-///             prevent blocking the IO task runner.
-///
-///             Key characteristics:
-///             - Uses fml::RefPtr<fml::TaskRunner> for worker_task_runner_
-///             - Processes jobs sequentially: loads one job at a time before
-///               proceeding to the next, preventing IO task runner blocking
-///             - Uses DrainPendingJobs() to recursively process jobs one by one
-///             - Employs is_processing_ flag and processing_mutex_ to control
-///               sequential processing
-///
-///             The sequential processing ensures that pipeline compilation jobs
-///             do not overwhelm the task runner, which is particularly
-///             important for GLES backend where resource loading patterns
-///             differ from Vulkan.
+///             Jobs are processed sequentially in insertion order: at most one
+///             task is outstanding on the worker task runner at a time, and
+///             each task performs a single job before scheduling the next one.
+///             This prevents pipeline compilation from monopolizing the worker
+///             (IO) task runner, letting other tasks interleave between jobs.
 ///
 class PipelineCompileQueueGLES final
     : public PipelineCompileQueue,
@@ -58,47 +47,27 @@ class PipelineCompileQueueGLES final
   // |PipelineCompileQueue|
   void PerformJobEagerly(const PipelineDescriptor& desc) override;
 
-  //----------------------------------------------------------------------------
-  /// @brief      Post a job directly to the worker task runner, bypassing the
-  ///             pending job queue.
-  ///
-  /// @param[in]  job  The job closure to post. Null closures are ignored.
-  ///
-  void PostJob(const fml::closure& job);
-
  private:
   explicit PipelineCompileQueueGLES(
       std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
-  /// Starts draining the pending jobs if a drain is not already in progress.
-  void OnJobAdded();
+  /// Posts a task to the worker that performs the next pending job and then
+  /// schedules itself again. Stops once the queue is empty.
+  void ScheduleNextJob();
 
-  /// Executes one pending job and reposts itself until no jobs remain.
-  void DrainPendingJobs();
-
-  /// Adds a job for the descriptor. Returns false if one already exists.
-  bool AddJob(const PipelineDescriptor& desc, const fml::closure& job);
-
-  bool HasPendingJobs();
-
-  fml::closure TakeJob(const PipelineDescriptor& desc);
-
+  /// Removes and returns the oldest pending job. If there are none, marks the
+  /// queue as no longer processing and returns null.
   fml::closure TakeNextJob();
 
-  void DoOneJob();
-
-  void FinishAllJobs();
-
   std::shared_ptr<fml::BasicTaskRunner> worker_task_runner_;
-  Mutex processing_mutex_;
-  bool is_processing_ IPLR_GUARDED_BY(processing_mutex_) = false;
-  Mutex pending_jobs_mutex_;
+  Mutex mutex_;
   absl::linked_hash_map<PipelineDescriptor,
                         fml::closure,
                         ComparableHash<PipelineDescriptor>,
                         ComparableEqual<PipelineDescriptor>>
-      pending_jobs_ IPLR_GUARDED_BY(pending_jobs_mutex_);
-  size_t priorities_elevated_ IPLR_GUARDED_BY(pending_jobs_mutex_) = {};
+      pending_jobs_ IPLR_GUARDED_BY(mutex_);
+  bool is_processing_ IPLR_GUARDED_BY(mutex_) = false;
+  size_t priorities_elevated_ IPLR_GUARDED_BY(mutex_) = 0;
 };
 
 }  // namespace impeller
