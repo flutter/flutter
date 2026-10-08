@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SHELL_HOLDER_H_
 
 #include <memory>
+#include <type_traits>
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/run_configuration.h"
@@ -15,6 +16,7 @@
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 
@@ -100,21 +102,28 @@ class AndroidShellHolder {
   void NotifyLowMemoryWarning();
 
   const std::shared_ptr<PlatformMessageHandler>& GetPlatformMessageHandler()
-      const {
-    return shell_->GetPlatformMessageHandler();
-  }
+      const;
 
   void UpdateDisplayMetrics();
 
   // Visible for testing.
-  const std::unique_ptr<Shell>& GetShellForTesting() const { return shell_; }
+  Shell* GetShellForTesting() const;
 
  private:
+  // Destroys the engine behind an embedder API handle.
+  struct EngineDeleter {
+    void operator()(FLUTTER_API_SYMBOL(FlutterEngine) engine) const;
+  };
+  // Owns an engine through its embedder API handle.
+  using UniqueEngine =
+      std::unique_ptr<std::remove_pointer_t<FLUTTER_API_SYMBOL(FlutterEngine)>,
+                      EngineDeleter>;
+
   const flutter::Settings settings_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   fml::WeakPtr<PlatformViewAndroid> platform_view_;
   std::shared_ptr<ThreadHost> thread_host_;
-  std::unique_ptr<Shell> shell_;
+  UniqueEngine engine_;
   bool is_valid_ = false;
   uint64_t next_pointer_flow_id_ = 0;
   std::unique_ptr<APKAssetProvider> apk_asset_provider_;
@@ -134,7 +143,7 @@ class AndroidShellHolder {
   AndroidShellHolder(const flutter::Settings& settings,
                      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
                      const std::shared_ptr<ThreadHost>& thread_host,
-                     std::unique_ptr<Shell> shell,
+                     UniqueEngine engine,
                      std::unique_ptr<APKAssetProvider> apk_asset_provider,
                      const fml::WeakPtr<PlatformViewAndroid>& platform_view,
                      AndroidRenderingAPI rendering_api);

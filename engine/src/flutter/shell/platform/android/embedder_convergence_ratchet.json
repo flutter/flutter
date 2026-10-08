@@ -2,19 +2,19 @@
   "comment": "Coupling counts for shell/platform/android. Maintained by ci/bin/android_embedder_ratchet.dart; run its \"update\" command instead of editing counts by hand.",
   "metrics": {
     "shell_refs": {
-      "count": 14,
+      "count": 11,
       "enforce": "ratchet"
     },
     "get_shell_calls": {
-      "count": 1,
+      "count": 14,
       "enforce": "ratchet"
     },
     "embedder_engine_refs": {
-      "count": 0,
+      "count": 5,
       "enforce": "ratchet"
     },
     "embedder_internal_includes": {
-      "count": 0,
+      "count": 1,
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
@@ -34,5 +34,24 @@
       "enforce": "report"
     }
   },
-  "history": []
+  "history": [
+    {
+      "metric": "get_shell_calls",
+      "from": 1,
+      "to": 14,
+      "reason": "AndroidShellHolder now holds its engine as a FlutterEngine handle backed by EmbedderEngine. Each remaining use of the Shell behind the handle is a counted GetShell() call or EmbedderEngine cast until embedder.h covers it."
+    },
+    {
+      "metric": "embedder_engine_refs",
+      "from": 0,
+      "to": 5,
+      "reason": "AndroidShellHolder now holds its engine as a FlutterEngine handle backed by EmbedderEngine. Each remaining use of the Shell behind the handle is a counted GetShell() call or EmbedderEngine cast until embedder.h covers it."
+    },
+    {
+      "metric": "embedder_internal_includes",
+      "from": 0,
+      "to": 1,
+      "reason": "AndroidShellHolder now holds its engine as a FlutterEngine handle backed by EmbedderEngine. Each remaining use of the Shell behind the handle is a counted GetShell() call or EmbedderEngine cast until embedder.h covers it."
+    }
+  ]
 }
