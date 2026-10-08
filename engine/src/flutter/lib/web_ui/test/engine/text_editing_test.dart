@@ -4534,9 +4534,12 @@ Future<void> testMain() async {
 
       expect(input.style.color, contains('transparent'));
       if (isSafari) {
-        // macOS 13 returns different values than macOS 12.
+        // macOS 13+ / 26 returns different values than macOS 12.
         expect(input.style.background, anyOf(contains('transparent'), contains('none')));
-        expect(input.style.outline, anyOf(contains('none'), contains('currentcolor')));
+        expect(
+          input.style.outline,
+          anyOf(contains('none'), contains('currentcolor'), contains('medium')),
+        );
         expect(input.style.border, anyOf(contains('none'), contains('medium')));
       } else {
         expect(input.style.background, contains('transparent'));
