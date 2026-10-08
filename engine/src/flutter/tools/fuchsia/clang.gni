@@ -28,10 +28,66 @@ if (is_fuchsia) {
   assert(false, "OS not supported")
 }
 
-clang_manifest = rebase_path("$clang_base/runtime.json")
-clang_manifest_json = exec_script("//flutter/tools/fuchsia/parse_manifest.py",
-                                  [
-                                    "--input=${clang_manifest}",
-                                    "--clang-cpu=${clang_cpu}",
-                                  ],
-                                  "json")
+# The clang toolchain ships a manifest describing, per target triple and set of
+# compiler flags, where the runtime shared libraries (libc++, libc++abi,
+# libunwind, sanitizer runtimes) live. GN reads it directly; the directories
+# below are relative to $clang_base and are consumed by fuchsia_libs.gni to
+# bundle the runtime into Fuchsia packages.
+#
+# Note: these always describe the *Fuchsia* runtime for the current CPU, even
+# when evaluated in a host toolchain, which is what the Fuchsia packaging
+# templates need.
+_clang_fuchsia_target = "${clang_cpu}-fuchsia"
+_clang_runtime_manifest = read_file("$clang_base/runtime.json", "json")
+
+# Runtime directory for the default (non-instrumented) configuration.
+clang_fuchsia_libcxx_dir = ""
+clang_fuchsia_libcxx_abi_dir = ""
+clang_fuchsia_libunwind_dir = ""
+
+# Runtime directories for the AddressSanitizer configuration.
+clang_fuchsia_asan_libcxx_dir = ""
+clang_fuchsia_asan_libcxx_abi_dir = ""
+clang_fuchsia_asan_libunwind_dir = ""
+clang_fuchsia_asan_rt_dir = ""
+
+foreach(entry, _clang_runtime_manifest) {
+  # Entries whose target list contains our triple. (GN refuses to overwrite a
+  # non-empty list, hence the reset.)
+  _targets = []
+  _targets = entry.target
+  if (_targets + [ _clang_fuchsia_target ] - [ _clang_fuchsia_target ] !=
+      _targets) {
+    if (entry.cflags == [] && entry.ldflags == []) {
+      foreach(runtime, entry.runtime) {
+        _dir = get_path_info(runtime.dist, "dir")
+        if (runtime.soname == "libc++.so.2") {
+          clang_fuchsia_libcxx_dir = _dir
+        } else if (runtime.soname == "libc++abi.so.1") {
+          clang_fuchsia_libcxx_abi_dir = _dir
+        } else if (runtime.soname == "libunwind.so.1") {
+          clang_fuchsia_libunwind_dir = _dir
+        }
+      }
+    } else if (entry.cflags == [ "-fsanitize=address" ] &&
+               entry.ldflags == []) {
+      foreach(runtime, entry.runtime) {
+        _dir = get_path_info(runtime.dist, "dir")
+        if (runtime.soname == "libc++.so.2") {
+          clang_fuchsia_asan_libcxx_dir = _dir
+        } else if (runtime.soname == "libc++abi.so.1") {
+          clang_fuchsia_asan_libcxx_abi_dir = _dir
+        } else if (runtime.soname == "libunwind.so.1") {
+          clang_fuchsia_asan_libunwind_dir = _dir
+        } else if (runtime.soname == "libclang_rt.asan.so") {
+          clang_fuchsia_asan_rt_dir = _dir
+        }
+      }
+    }
+  }
+}
+
+assert(clang_fuchsia_libcxx_dir != "" && clang_fuchsia_libcxx_abi_dir != "" &&
+           clang_fuchsia_libunwind_dir != "",
+       "Could not find the $_clang_fuchsia_target runtime in " +
+           "$clang_base/runtime.json")

@@ -11,21 +11,15 @@ sysroot_lib = "$fuchsia_arch_root/sysroot/lib"
 sysroot_dist_lib = "$fuchsia_arch_root/sysroot/dist/lib"
 
 ld_so_path = ""
-libcxx_so_2_path = "${clang_manifest_json.md5_19df03aecdc9eb27bc8b4038352f2b27}"
-libcxx_abi_so_1_path =
-    "${clang_manifest_json.md5_6aff1b5f218d4a9278d85d63d0695af8}"
-libunwind_so_1_path =
-    "${clang_manifest_json.md5_fb2bd871885ef42c2cf3138655f901ed}"
+libcxx_so_2_path = clang_fuchsia_libcxx_dir
+libcxx_abi_so_1_path = clang_fuchsia_libcxx_abi_dir
+libunwind_so_1_path = clang_fuchsia_libunwind_dir
 if (is_asan) {
   ld_so_path = "asan/"
-  libcxx_so_2_path =
-      "${clang_manifest_json.md5_07cbd4a04b921d2ca61badc1b15a3b0b}"
-  libcxx_abi_so_1_path =
-      "${clang_manifest_json.md5_18f605e8fd52a92c5f9c6fde9be8206c}"
-  libunwind_so_1_path =
-      "${clang_manifest_json.md5_85b659ccd825be02f123e3479f1bc280}"
-  libclang_rt_so_path =
-      "${clang_manifest_json.md5_b76b69d6ab2c13408b7a3608f925b0c6}"
+  libcxx_so_2_path = clang_fuchsia_asan_libcxx_dir
+  libcxx_abi_so_1_path = clang_fuchsia_asan_libcxx_abi_dir
+  libunwind_so_1_path = clang_fuchsia_asan_libunwind_dir
+  libclang_rt_so_path = clang_fuchsia_asan_rt_dir
 }
 
 common_libs = [
@@ -64,9 +58,8 @@ common_libs = [
   },
 ]
 
-# Note, for clang libs we use the md5 hashes here because of gn limitations of
-# json parsing.
-# This is a hack, and we can migrate to a better way soon.
+# The clang runtime directories come from the toolchain's runtime.json (see
+# clang.gni), so they follow clang rolls automatically.
 common_libs += [
   {
     name = "libc++.so.2"
