@@ -4,6 +4,9 @@
 
 #include <memory>
 
+#include "flutter/runtime/runtime_controller.h"
+#include "flutter/shell/common/engine.h"
+#include "flutter/shell/common/shell.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -225,6 +228,28 @@ TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
   EXPECT_NE(
       holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner(),
       holder->GetShellForTesting()->GetTaskRunners().GetPlatformTaskRunner());
+}
+
+TEST(AndroidShellHolder, StartsWithDetachedLifecycleState) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  // With merged threads the UI thread is the test thread, so the runtime
+  // controller can be read directly.
+  ASSERT_EQ(settings.merged_platform_ui_thread,
+            Settings::MergedPlatformUIThread::kEnabled);
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+
+  // Frames stay off until Java reports a lifecycle state over
+  // flutter/lifecycle.
+  EXPECT_EQ(holder->GetShellForTesting()
+                ->GetEngine()
+                ->GetRuntimeController()
+                ->GetPlatformData()
+                .lifecycle_state,
+            "AppLifecycleState.detached");
 }
 
 }  // namespace testing
