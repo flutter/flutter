@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/gles/pipeline_compile_queue_gles.h"
 
+#include <algorithm>
+
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 
@@ -28,8 +30,8 @@ PipelineCompileQueueGLES::PipelineCompileQueueGLES(
 PipelineCompileQueueGLES::~PipelineCompileQueueGLES() {
   // Tasks already posted to the worker only hold a weak reference to the queue
   // and become no-ops.
-  JobMap inactive_jobs;
-  JobMap active_jobs;
+  InactiveJobMap inactive_jobs;
+  ActiveJobMap active_jobs;
   {
     Lock lock(mutex_);
     inactive_jobs.swap(inactive_jobs_);
@@ -41,9 +43,9 @@ PipelineCompileQueueGLES::~PipelineCompileQueueGLES() {
   }
   // Jobs that have been started must be finished on the worker, the thread
   // that started them.
-  for (auto& [desc, job] : active_jobs) {
+  for (auto& [desc, active_job] : active_jobs) {
     worker_task_runner_->PostTask(
-        [job = std::shared_ptr<CompileJob>(std::move(job))]() {
+        [job = std::shared_ptr<CompileJob>(std::move(active_job.job))]() {
           // Jobs report their own errors.
           job->Finish().IgnoreError();
         });
@@ -91,10 +93,16 @@ void PipelineCompileQueueGLES::PerformJobEagerly(
   std::unique_ptr<CompileJob> job;
   {
     Lock lock(mutex_);
-    JobMap::iterator found = inactive_jobs_.find(desc);
+    InactiveJobMap::iterator found = inactive_jobs_.find(desc);
     if (found == inactive_jobs_.end()) {
+      ActiveJobMap::iterator active_job = active_jobs_.find(desc);
+      if (active_job == active_jobs_.end()) {
+        return;
+      }
       // A job that has been started must be finished by the worker, the
-      // thread that started it, so wait for that instead.
+      // thread that started it. Have the worker finish it next and wait for
+      // that.
+      active_job->second.awaited = true;
       active_job_removed_.Wait(mutex_, [&]() IPLR_REQUIRES(mutex_) {
         return !active_jobs_.contains(desc);
       });
@@ -126,17 +134,16 @@ void PipelineCompileQueueGLES::ScheduleRun() {
 }
 
 void PipelineCompileQueueGLES::Run() {
-  JobMap::iterator active_job;
+  ActiveJobMap::iterator active_job;
   bool should_start = false;
   {
     Lock lock(mutex_);
-    if (active_jobs_.size() < max_active_jobs_ && !inactive_jobs_.empty()) {
-      JobMap::iterator inactive_job = inactive_jobs_.begin();
-      active_job =
-          active_jobs_
-              .try_emplace(inactive_job->first, std::move(inactive_job->second))
-              .first;
-      inactive_jobs_.erase(inactive_job);
+    if (ActiveJobMap::iterator awaited_job = FindAwaitedActiveJob();
+        awaited_job != active_jobs_.end()) {
+      active_job = awaited_job;
+    } else if (active_jobs_.size() < max_active_jobs_ &&
+               !inactive_jobs_.empty()) {
+      active_job = ActivateOldestInactiveJob();
       should_start = true;
     } else if (!active_jobs_.empty()) {
       active_job = active_jobs_.begin();
@@ -155,23 +162,46 @@ void PipelineCompileQueueGLES::Run() {
   ScheduleRun();
 }
 
-void PipelineCompileQueueGLES::StartActiveJob(JobMap::iterator active_job) {
-  if (!active_job->second->Start().ok()) {
+PipelineCompileQueueGLES::ActiveJobMap::iterator
+PipelineCompileQueueGLES::FindAwaitedActiveJob() {
+  return std::find_if(active_jobs_.begin(), active_jobs_.end(),
+                      [](const ActiveJobMap::value_type& entry) {
+                        return entry.second.awaited;
+                      });
+}
+
+PipelineCompileQueueGLES::ActiveJobMap::iterator
+PipelineCompileQueueGLES::ActivateOldestInactiveJob() {
+  InactiveJobMap::iterator inactive_job = inactive_jobs_.begin();
+  ActiveJobMap::iterator active_job =
+      active_jobs_
+          .try_emplace(inactive_job->first,
+                       ActiveJob{.job = std::move(inactive_job->second)})
+          .first;
+  inactive_jobs_.erase(inactive_job);
+  return active_job;
+}
+
+void PipelineCompileQueueGLES::StartActiveJob(
+    ActiveJobMap::iterator active_job) {
+  if (!active_job->second.job->Start().ok()) {
     RemoveActiveJob(active_job);
   }
 }
 
-void PipelineCompileQueueGLES::FinishActiveJob(JobMap::iterator active_job) {
+void PipelineCompileQueueGLES::FinishActiveJob(
+    ActiveJobMap::iterator active_job) {
   // Jobs report their own errors.
-  active_job->second->Finish().IgnoreError();
+  active_job->second.job->Finish().IgnoreError();
   RemoveActiveJob(active_job);
 }
 
-void PipelineCompileQueueGLES::RemoveActiveJob(JobMap::iterator active_job) {
+void PipelineCompileQueueGLES::RemoveActiveJob(
+    ActiveJobMap::iterator active_job) {
   std::unique_ptr<CompileJob> job;
   {
     Lock lock(mutex_);
-    job = std::move(active_job->second);
+    job = std::move(active_job->second.job);
     active_jobs_.erase(active_job);
   }
   active_job_removed_.NotifyAll();

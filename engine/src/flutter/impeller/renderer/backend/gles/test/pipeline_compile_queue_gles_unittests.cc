@@ -478,6 +478,43 @@ TEST(PipelineCompileQueueGLESTest, PerformJobEagerlyWaitsForActiveJob) {
   EXPECT_TRUE(performed);
 }
 
+TEST(PipelineCompileQueueGLESTest, AwaitedActiveJobIsFinishedFirst) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueGLES::Create(runner, /*max_active_jobs=*/3);
+  ASSERT_NE(queue, nullptr);
+
+  std::vector<std::unique_ptr<MockCompileJob>> jobs;
+  for (int i = 0; i < 3; i++) {
+    jobs.push_back(std::make_unique<MockCompileJob>());
+  }
+  {
+    ::testing::InSequence sequence;
+    EXPECT_CALL(*jobs[0], Start());
+    EXPECT_CALL(*jobs[1], Start());
+    // Job 1 is awaited, so it is finished before the older job 0 and before
+    // job 2 is started.
+    EXPECT_CALL(*jobs[1], Finish());
+    EXPECT_CALL(*jobs[2], Start());
+    EXPECT_CALL(*jobs[0], Finish());
+    EXPECT_CALL(*jobs[2], Finish());
+  }
+  std::vector<PipelineDescriptor> descs(3);
+  for (int i = 0; i < 3; i++) {
+    descs[i].SetLabel(std::to_string(i));
+    ASSERT_TRUE(queue->PostJobForDescriptor(descs[i], std::move(jobs[i])));
+  }
+  runner->RunOne();  // Starts job 0.
+  runner->RunOne();  // Starts job 1.
+
+  std::thread waiter(
+      [&queue, &descs]() { queue->PerformJobEagerly(descs[1]); });
+  // Give the waiter a chance to mark job 1 as awaited.
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+  runner->RunAll();
+  waiter.join();
+}
+
 TEST(PipelineCompileQueueGLESTest, DestructorFinishesActiveJobsOnWorker) {
   auto runner = std::make_shared<CapturingTaskRunner>();
   auto queue = PipelineCompileQueueGLES::Create(runner);
