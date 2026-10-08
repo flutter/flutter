@@ -251,7 +251,17 @@ class LocalEngineInfo {
   /// The [targetOutPath] and [hostOutPath] are assumed to be resolvable
   /// paths to the built engine artifacts for the target (device) and host
   /// (build) platforms, respectively.
-  const LocalEngineInfo({required this.targetOutPath, required this.hostOutPath});
+  LocalEngineInfo({
+    required this.targetOutPath,
+    required this.hostOutPath,
+    FileSystem? fileSystem,
+    path.Context? pathContext,
+  }) : _pathContext =
+           pathContext ??
+           fileSystem?.path ??
+           (targetOutPath.contains(r'\') || hostOutPath.contains(r'\')
+               ? path.windows
+               : path.context);
 
   /// The path to the engine artifacts for the target (device) platform.
   ///
@@ -267,11 +277,13 @@ class LocalEngineInfo {
   /// (platform), see [localHostName].
   final String hostOutPath;
 
+  final path.Context _pathContext;
+
   /// The name of the target (device) platform, i.e. `android_debug_unopt`.
-  String get localTargetName => path.basename(targetOutPath);
+  String get localTargetName => _pathContext.basename(targetOutPath);
 
   /// The name of the host (build) platform, e.g. `host_debug_unopt`.
-  String get localHostName => path.basename(hostOutPath);
+  String get localHostName => _pathContext.basename(hostOutPath);
 }
 
 // Manages the engine artifacts of Flutter.
@@ -1054,6 +1066,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
        localEngineInfo = LocalEngineInfo(
          targetOutPath: engineOutPath,
          hostOutPath: _hostEngineOutPath,
+         fileSystem: fileSystem,
        ),
        _platform = platform,
        _operatingSystemUtils = operatingSystemUtils,
@@ -1481,6 +1494,7 @@ class _TestLocalEngine extends _TestArtifacts {
     : localEngineInfo = LocalEngineInfo(
         targetOutPath: engineOutPath,
         hostOutPath: engineHostOutPath,
+        fileSystem: fileSystem,
       );
 
   @override

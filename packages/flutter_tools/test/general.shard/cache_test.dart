@@ -1940,7 +1940,7 @@ class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
 
 class FakeLocalEngineArtifacts extends Fake implements Artifacts {
   @override
-  LocalEngineInfo get localEngineInfo => const LocalEngineInfo(
+  LocalEngineInfo get localEngineInfo => LocalEngineInfo(
     targetOutPath: 'out/android_debug_unopt',
     hostOutPath: 'out/host_debug_unopt',
   );

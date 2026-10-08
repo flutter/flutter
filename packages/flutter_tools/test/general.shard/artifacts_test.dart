@@ -824,6 +824,7 @@ void main() {
           'out',
           'host_debug_unopt',
         ),
+        fileSystem: fileSystem,
       );
 
       expect(localEngineInfo.localTargetName, 'android_debug_unopt');
@@ -843,11 +844,22 @@ void main() {
             'out',
             'host_debug_unopt',
           ),
+          fileSystem: fileSystem,
         );
 
         expect(localEngineInfo.localHostName, 'host_debug_unopt');
       },
     );
+
+    testWithoutContext('determines engine names from Windows-style paths', () {
+      final windowsInfo = LocalEngineInfo(
+        targetOutPath: r'C:\engine\src\out\android_debug_unopt',
+        hostOutPath: r'C:\engine\src\out\host_debug_unopt',
+      );
+
+      expect(windowsInfo.localTargetName, 'android_debug_unopt');
+      expect(windowsInfo.localHostName, 'host_debug_unopt');
+    });
 
     testWithoutContext('Artifacts.getLocalEngine constructs local engine artifacts', () {
       final String targetEngine = fileSystem.path.join(
