@@ -131,7 +131,6 @@ dependencies:
   http_parser: 4.1.2
   intl: ^0.20.3
   io: 1.1.0
-  isolate: 2.1.1
   js: 0.7.2
   json_annotation: 4.12.0
   leak_tracker: 11.0.2
@@ -225,4 +224,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 4ccg7b
+# PUBSPEC CHECKSUM: cglae1
