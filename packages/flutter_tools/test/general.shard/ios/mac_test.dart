@@ -94,6 +94,7 @@ void main() {
   group('Diagnose Xcode build failure', () {
     late Map<String, String> buildSettings;
     late FakeAnalytics fakeAnalytics;
+    late ProcessUtils processUtils;
 
     setUp(() {
       buildSettings = <String, String>{'PRODUCT_BUNDLE_IDENTIFIER': 'test.app'};
@@ -103,6 +104,7 @@ void main() {
         fs: fs,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
+      processUtils = ProcessUtils(processManager: FakeProcessManager.any(), logger: logger);
     });
 
     testWithoutContext('Sends analytics when bitcode fails', () async {
@@ -124,7 +126,9 @@ void main() {
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: null,
       );
       expect(
         fakeAnalytics.sentEvents,
@@ -215,7 +219,9 @@ Error launching application on iPhone.''',
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: null,
       );
       expect(logger.errorText, contains(noProvisioningProfileInstruction));
     });
@@ -257,7 +263,9 @@ Error launching application on iPhone.''',
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: null,
       );
       expect(logger.errorText, contains(missingPlatformInstructions('iOS 17.0')));
     });
@@ -301,7 +309,9 @@ Could not build the precompiled application for the device.''',
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -358,7 +368,9 @@ Could not build the precompiled application for the device.''',
           analytics: fakeAnalytics,
           fileSystem: fs,
           platform: FlutterDarwinPlatform.ios,
+          processUtils: processUtils,
           project: FakeFlutterProject(fileSystem: fs),
+          xcode: null,
         );
         expect(logger.errorText, contains('Error (Xcode): Target aot_assembly_release failed'));
         expect(
@@ -395,7 +407,9 @@ Could not build the precompiled application for the device.''',
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -454,7 +468,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -506,7 +522,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -557,7 +575,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -625,7 +645,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -665,7 +687,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -715,7 +739,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -846,7 +872,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
 
       expect(
@@ -896,7 +924,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: project,
+        xcode: null,
       );
 
       expect(
@@ -931,7 +961,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         analytics: fakeAnalytics,
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: null,
       );
       expect(
         logger.errorText,
@@ -967,7 +999,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           analytics: fakeAnalytics,
           fileSystem: fs,
           platform: FlutterDarwinPlatform.ios,
+          processUtils: processUtils,
           project: FakeFlutterProject(fileSystem: fs),
+          xcode: null,
         );
         expect(
           logger.errorText,

@@ -179,7 +179,6 @@ void main() {
           projectInfo: projectInfo,
         ),
         Xcode: () => xcode,
-        Analytics: () => fakeAnalytics,
         Artifacts: () => artifacts,
       },
     );
@@ -478,7 +477,7 @@ void main() {
             fileSystem: fileSystem,
             processManager: processManager,
             logger: logger,
-            artifacts: fakeArtifacts,
+            artifacts: artifacts,
             xcode: xcode,
           );
           setUpIOSProject(fileSystem);
@@ -585,7 +584,7 @@ void main() {
             fileSystem: fileSystem,
             processManager: processManager,
             logger: logger,
-            artifacts: fakeArtifacts,
+            artifacts: artifacts,
             xcode: xcode,
           );
           setUpIOSProject(fileSystem);
@@ -1627,6 +1626,7 @@ name: my_app
 }
 
 IOSDevice setUpIOSDevice({
+  required Xcode xcode,
   String sdkVersion = '13.0.1',
   FileSystem? fileSystem,
   Logger? logger,
@@ -1638,7 +1638,6 @@ IOSDevice setUpIOSDevice({
   FakeXcodeDebug? xcodeDebug,
   CpuArch cpuArchitecture = CpuArch.arm64,
   Analytics? analytics,
-  Xcode? xcode,
 }) {
   artifacts ??= Artifacts.test();
   final cache = Cache.test(
@@ -1953,11 +1952,6 @@ class FakeArtifacts extends Fake implements Artifacts {
     EnvironmentType? environmentType,
   }) {
     return frameworkPath;
-  }
-
-  @override
-  FileSystemEntity getHostArtifact(HostArtifact artifact) {
-    return Artifacts.test().getHostArtifact(artifact);
   }
 
   @override

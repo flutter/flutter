@@ -120,8 +120,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   required Analytics analytics,
   required BuildableIOSApp app,
   required BuildInfo buildInfo,
+  required CocoaPods? cocoaPods,
   required PlistParser plistParser,
   required ToolContext toolContext,
+  required Xcode? xcode,
   required XcodeProjectInterpreter xcodeProjectInterpreter,
   String? targetOverride,
   EnvironmentType environmentType = EnvironmentType.physical,
@@ -132,8 +134,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   bool disablePortPublication = false,
   bool verboseLogging = false,
-  CocoaPods? cocoaPods,
-  Xcode? xcode,
 }) async {
   final ToolContext(
     :Artifacts artifacts,
@@ -206,10 +206,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   await migration.run();
 
   if (!_checkXcodeVersion(
-        platform: platform,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
-        xcode: xcode,
         logger: logger,
+        platform: platform,
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
       ) ||
       xcode == null) {
     return XcodeBuildResult(success: false);
@@ -227,11 +227,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
 
   await removeExtendedAttributesForProject(
-    xcodeProject: app.project,
-    processUtils: processUtils,
-    logger: logger,
-    fileSystem: fs,
     config: config,
+    fileSystem: fs,
+    logger: logger,
+    processUtils: processUtils,
+    xcodeProject: app.project,
     xcodeProjectInterpreter: xcodeProjectInterpreter,
   );
 
@@ -318,13 +318,15 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final String buildDirectoryPath = getIosBuildDirectory(config: config, fileSystem: fs);
 
-  final Map<String, String>? projectBuildSettings = await app.project.buildSettingsForBuildInfo(
-    buildInfo,
-    environmentType: environmentType,
-    deviceId: deviceID,
-  );
+  final Map<String, String> buildSettings =
+      await app.project.buildSettingsForBuildInfo(
+        buildInfo,
+        environmentType: environmentType,
+        deviceId: deviceID,
+      ) ??
+      <String, String>{};
 
-  if (projectBuildSettings == null || projectBuildSettings.isEmpty) {
+  if (buildSettings.isEmpty) {
     // xcodebuild should have printed possible error messages already, as when
     // it fails, it returns an empty build settings Map.
     logger.printError(
@@ -332,7 +334,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
     return XcodeBuildResult(success: false);
   }
-  final Map<String, String> buildSettings = projectBuildSettings;
 
   final String? targetBuildDirPath = buildSettings['TARGET_BUILD_DIR'];
   final Directory? targetBuildDir = targetBuildDirPath != null
@@ -350,12 +351,12 @@ Future<XcodeBuildResult> buildXcodeProject({
   // Check the public headers before checking Xcode version so headers fingerprinter is created
   // regardless of Xcode version.
   final bool headersChanged = publicHeadersChanged(
-    environmentType: environmentType,
-    mode: buildInfo.mode,
-    buildDirectory: buildDirectoryPath,
     artifacts: artifacts,
+    buildDirectory: buildDirectoryPath,
+    environmentType: environmentType,
     fileSystem: fs,
     logger: logger,
+    mode: buildInfo.mode,
   );
   final Version? xcodeVersion = xcode.currentVersion;
   if (headersChanged &&
@@ -589,8 +590,8 @@ Future<XcodeBuildResult> buildXcodeProject({
       buildCommands,
       app,
       resultBundleDirectory,
-      processUtils: processUtils,
       logger: logger,
+      processUtils: processUtils,
     );
 
     // Notifies listener that no more output is coming.
@@ -674,8 +675,8 @@ Future<XcodeBuildResult> buildXcodeProject({
 
       await ensureTargetBuildDirAttribute(
         targetBuildDir,
-        processUtils: processUtils,
         logger: logger,
+        processUtils: processUtils,
       );
       final String? appBundle = buildSettings['WRAPPER_NAME'];
       final String expectedOutputDirectory = fs.path.join(targetBuildDir, appBundle);
@@ -726,8 +727,8 @@ Future<XcodeBuildResult> buildXcodeProject({
 /// When using SwiftPM, this attribute is missing. This is required for `xcodebuild clean`.
 Future<void> ensureTargetBuildDirAttribute(
   String targetBuildDirPath, {
-  required ProcessUtils processUtils,
   required Logger logger,
+  required ProcessUtils processUtils,
 }) async {
   final RunResult result = await processUtils.run(<String>[
     'xattr',
@@ -748,12 +749,12 @@ Future<void> ensureTargetBuildDirAttribute(
 
 /// Check if the Flutter framework's public headers have changed since last built.
 bool publicHeadersChanged({
-  required BuildMode mode,
-  required EnvironmentType environmentType,
-  required String buildDirectory,
   required Artifacts? artifacts,
+  required String buildDirectory,
+  required EnvironmentType environmentType,
   required FileSystem fileSystem,
   required Logger logger,
+  required BuildMode mode,
 }) {
   final String? basePath = artifacts?.getArtifactPath(
     Artifact.flutterFramework,
@@ -772,7 +773,7 @@ bool publicHeadersChanged({
   }
   final List<String> files = headersDirectory
       .listSync()
-      .map((FileSystemEntity header) => header.path)
+      .map<String>((FileSystemEntity header) => header.path)
       .toList();
 
   final String fingerprintPath = fileSystem.path.join(
@@ -802,11 +803,11 @@ bool publicHeadersChanged({
 /// user reporting images in the root of their project also need to have the attributes removed.
 /// See https://github.com/flutter/flutter/pull/81435.
 Future<void> removeExtendedAttributesForProject({
-  required XcodeBasedProject xcodeProject,
-  required ProcessUtils processUtils,
-  required Logger logger,
-  required FileSystem fileSystem,
   required Config config,
+  required FileSystem fileSystem,
+  required Logger logger,
+  required ProcessUtils processUtils,
+  required XcodeBasedProject xcodeProject,
   required XcodeProjectInterpreter xcodeProjectInterpreter,
 }) async {
   final Directory projectDirectory = xcodeProject.parent.directory;
@@ -878,8 +879,8 @@ Future<RunResult?> _runBuildWithRetries(
   List<String> buildCommands,
   BuildableIOSApp app,
   Directory resultBundleDirectory, {
-  required ProcessUtils processUtils,
   required Logger logger,
+  required ProcessUtils processUtils,
 }) async {
   var buildRetryDelaySeconds = 1;
   var remainingTries = 8;
@@ -931,13 +932,13 @@ bool _isXcodeConcurrentBuildFailure(RunResult result) {
 Future<void> diagnoseXcodeBuildFailure(
   XcodeBuildResult result, {
   required Analytics analytics,
-  required Logger logger,
   required FileSystem fileSystem,
+  required Logger logger,
   required FlutterDarwinPlatform platform,
+  required ProcessUtils processUtils,
   required FlutterProject project,
+  required Xcode? xcode,
   Device? device,
-  ProcessUtils? processUtils,
-  Xcode? xcode,
 }) async {
   final XcodeBuildExecution? xcodeBuildExecution = result.xcodeBuildExecution;
   if (xcodeBuildExecution != null &&
@@ -962,14 +963,14 @@ Future<void> diagnoseXcodeBuildFailure(
   final bool issueDetected = await _handleIssues(
     result,
     xcodeBuildExecution,
-    project: project,
-    platform: platform,
-    logger: logger,
-    fileSystem: fileSystem,
     analytics: analytics,
-    device: device,
+    fileSystem: fileSystem,
+    logger: logger,
+    platform: platform,
     processUtils: processUtils,
+    project: project,
     xcode: xcode,
+    device: device,
   );
 
   if (!issueDetected && xcodeBuildExecution != null) {
@@ -1035,10 +1036,10 @@ class XcodeBuildExecution {
 final _xcodeRequirement = 'Xcode $xcodeRequiredVersion or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion({
-  required Platform platform,
-  required XcodeProjectInterpreter xcodeProjectInterpreter,
-  required Xcode? xcode,
   required Logger logger,
+  required Platform platform,
+  required Xcode? xcode,
+  required XcodeProjectInterpreter xcodeProjectInterpreter,
 }) {
   if (!platform.isMacOS) {
     return false;
@@ -1195,14 +1196,14 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
 Future<bool> _handleIssues(
   XcodeBuildResult result,
   XcodeBuildExecution? xcodeBuildExecution, {
-  required FlutterProject project,
-  required FlutterDarwinPlatform platform,
-  required Logger logger,
-  required FileSystem fileSystem,
   required Analytics analytics,
+  required FileSystem fileSystem,
+  required Logger logger,
+  required FlutterDarwinPlatform platform,
+  required ProcessUtils processUtils,
+  required FlutterProject project,
+  required Xcode? xcode,
   Device? device,
-  ProcessUtils? processUtils,
-  Xcode? xcode,
 }) async {
   var requiresProvisioningProfile = false;
   var hasProvisioningProfileIssue = false;
@@ -1342,8 +1343,7 @@ Future<bool> _handleIssues(
   } else if (unableToFindArmDestination &&
       xcodeBuildExecution != null &&
       xcodeBuildExecution.environmentType == EnvironmentType.simulator &&
-      device != null &&
-      processUtils != null) {
+      device != null) {
     final bool simulatorSupportsIntel = await _simulatorSupportsIntel(
       device,
       processUtils: processUtils,

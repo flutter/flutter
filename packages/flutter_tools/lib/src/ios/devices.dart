@@ -563,10 +563,12 @@ class IOSDevice extends Device {
         await diagnoseXcodeBuildFailure(
           buildResult,
           analytics: _analytics,
-          fileSystem: globals.fs,
-          logger: globals.logger,
+          fileSystem: _fileSystem,
+          logger: _logger,
           platform: FlutterDarwinPlatform.ios,
+          processUtils: _processUtils,
           project: package.project.parent,
+          xcode: _xcode,
           device: this,
         );
         _logger.printError('');
