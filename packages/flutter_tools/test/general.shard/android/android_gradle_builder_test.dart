@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -562,16 +561,12 @@ void main() {
               },
               handler:
                   ({
+                    required GradleUtils gradleUtils,
                     required String line,
-                    required Logger logger,
                     required FlutterProject project,
+                    required ToolContext toolContext,
                     required bool usesAndroidX,
-                    BotDetector? botDetector,
-                    FileSystem? fileSystem,
-                    GradleUtils? gradleUtils,
                     Java? java,
-                    Platform? platform,
-                    ProcessUtils? processUtils,
                   }) async {
                     handlerCalled = true;
                     return GradleBuildStatus.exit;
@@ -761,16 +756,12 @@ void main() {
               },
               handler:
                   ({
+                    required GradleUtils gradleUtils,
                     required String line,
-                    required Logger logger,
                     required FlutterProject project,
+                    required ToolContext toolContext,
                     required bool usesAndroidX,
-                    BotDetector? botDetector,
-                    FileSystem? fileSystem,
-                    GradleUtils? gradleUtils,
                     Java? java,
-                    Platform? platform,
-                    ProcessUtils? processUtils,
                   }) async {
                     return GradleBuildStatus.retry;
                   },
@@ -864,16 +855,12 @@ void main() {
                 test: (String line) => line.contains('Some gradle message'),
                 handler:
                     ({
+                      required GradleUtils gradleUtils,
                       required String line,
-                      required Logger logger,
                       required FlutterProject project,
+                      required ToolContext toolContext,
                       required bool usesAndroidX,
-                      BotDetector? botDetector,
-                      FileSystem? fileSystem,
-                      GradleUtils? gradleUtils,
                       Java? java,
-                      Platform? platform,
-                      ProcessUtils? processUtils,
                     }) async {
                       return GradleBuildStatus.retry;
                     },
@@ -975,16 +962,12 @@ void main() {
               },
               handler:
                   ({
+                    required GradleUtils gradleUtils,
                     required String line,
-                    required Logger logger,
                     required FlutterProject project,
+                    required ToolContext toolContext,
                     required bool usesAndroidX,
-                    BotDetector? botDetector,
-                    FileSystem? fileSystem,
-                    GradleUtils? gradleUtils,
                     Java? java,
-                    Platform? platform,
-                    ProcessUtils? processUtils,
                   }) async {
                     handlerCalled = true;
                     return GradleBuildStatus.exit;
@@ -1161,16 +1144,12 @@ void main() {
             },
             handler:
                 ({
+                  required GradleUtils gradleUtils,
                   required String line,
-                  required Logger logger,
                   required FlutterProject project,
+                  required ToolContext toolContext,
                   required bool usesAndroidX,
-                  BotDetector? botDetector,
-                  FileSystem? fileSystem,
-                  GradleUtils? gradleUtils,
                   Java? java,
-                  Platform? platform,
-                  ProcessUtils? processUtils,
                 }) async {
                   return GradleBuildStatus.retry;
                 },

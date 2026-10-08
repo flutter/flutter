@@ -11,6 +11,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
+import '../context/tool_context.dart';
 import '../project.dart';
 import 'gradle_utils.dart' as utils;
 import 'java.dart';
@@ -18,15 +19,11 @@ import 'java.dart';
 typedef GradleErrorTest = bool Function(String);
 
 typedef GradleErrorHandler = Future<GradleBuildStatus> Function({
-  required FileSystem fileSystem,
+  required utils.GradleUtils gradleUtils,
   required String line,
-  required Logger logger,
-  required Platform platform,
-  required ProcessUtils processUtils,
   required FlutterProject project,
+  required ToolContext toolContext,
   required bool usesAndroidX,
-  BotDetector? botDetector,
-  utils.GradleUtils? gradleUtils,
   Java? java,
 });
 
@@ -108,17 +105,14 @@ final permissionDeniedErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>['Permission denied']),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         logger.printBox(
           '${logger.terminal.warningMark} Gradle does not have execution permission.\n'
           'You should change the ownership of the project directory to your user, '
@@ -148,17 +142,14 @@ final networkErrorHandler = GradleHandledError(
   ]),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         logger.printError(
           '${logger.terminal.warningMark} '
           'Gradle threw an error while downloading artifacts from the network.',
@@ -184,23 +175,24 @@ final zipExceptionHandler = GradleHandledError(
   test: _lineMatcher(const <String>['java.util.zip.ZipException: error in opening zip file']),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final ToolContext(
+          :BotDetector botDetector,
+          :FileSystem fs,
+          :Logger logger,
+          :Platform platform,
+        ) = toolContext;
         logger.printError(
           '${logger.terminal.warningMark} '
           'Your .gradle directory under the home directory might be corrupted.',
         );
-        bool shouldDeleteUserGradle =
-            await (botDetector?.isRunningOnBot ?? Future<bool>.value(false));
+        bool shouldDeleteUserGradle = await botDetector.isRunningOnBot;
         if (!shouldDeleteUserGradle && logger.terminal.stdinHasTerminal) {
           try {
             final String selection = await logger.terminal.promptForCharInput(
@@ -222,9 +214,7 @@ final zipExceptionHandler = GradleHandledError(
             );
             return GradleBuildStatus.retry;
           }
-          final Directory userGradle = fileSystem.directory(
-            fileSystem.path.join(homeDir, '.gradle'),
-          );
+          final Directory userGradle = fs.directory(fs.path.join(homeDir, '.gradle'));
           logger.printStatus('Deleting ${userGradle.path}');
           try {
             ErrorHandlingFileSystem.deleteIfExists(userGradle, recursive: true);
@@ -247,17 +237,14 @@ final licenseNotAcceptedHandler = GradleHandledError(
   ]),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         const licenseNotAcceptedMatcher =
             r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
 
@@ -288,43 +275,38 @@ final flavorUndefinedHandler = GradleHandledError(
   },
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final ToolContext(:Logger logger, :ProcessUtils processUtils) = toolContext;
         final productFlavors = <String>{};
-        if (gradleUtils != null) {
-          final RunResult tasksRunResult = await processUtils.run(
-            <String>[gradleUtils.getExecutable(project), 'app:tasks', '--all', '--console=auto'],
-            throwOnError: true,
-            workingDirectory: project.android.hostAppGradleRoot.path,
-            environment: java?.environment,
-          );
-          // Extract build types and product flavors.
-          final variants = <String>{};
-          for (final String task in tasksRunResult.stdout.split('\n')) {
-            final Match? match = _assembleTaskPattern.matchAsPrefix(task);
-            if (match != null) {
-              final String variant = match.group(1)!.toLowerCase();
-              if (!variant.endsWith('test')) {
-                variants.add(variant);
-              }
+        final RunResult tasksRunResult = await processUtils.run(
+          <String>[gradleUtils.getExecutable(project), 'app:tasks', '--all', '--console=auto'],
+          throwOnError: true,
+          workingDirectory: project.android.hostAppGradleRoot.path,
+          environment: java?.gradleEnvironment,
+        );
+        // Extract build types and product flavors.
+        final variants = <String>{};
+        for (final String task in tasksRunResult.stdout.split('\n')) {
+          final Match? match = _assembleTaskPattern.matchAsPrefix(task);
+          if (match != null) {
+            final String variant = match.group(1)!.toLowerCase();
+            if (!variant.endsWith('test')) {
+              variants.add(variant);
             }
           }
-          for (final variant1 in variants) {
-            for (final variant2 in variants) {
-              if (variant2.startsWith(variant1) && variant2 != variant1) {
-                final String buildType = variant2.substring(variant1.length);
-                if (variants.contains(buildType)) {
-                  productFlavors.add(variant1);
-                }
+        }
+        for (final variant1 in variants) {
+          for (final variant2 in variants) {
+            if (variant2.startsWith(variant1) && variant2 != variant1) {
+              final String buildType = variant2.substring(variant1.length);
+              if (variants.contains(buildType)) {
+                productFlavors.add(variant1);
               }
             }
           }
@@ -366,17 +348,14 @@ final minSdkVersionHandler = GradleHandledError(
   },
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         final File gradleFile = project.android.appGradleFile;
         final Match? minSdkVersionMatch = _minSdkVersionPattern.firstMatch(line);
         assert(minSdkVersionMatch?.groupCount == 3);
@@ -411,17 +390,14 @@ final transformInputIssueHandler = GradleHandledError(
   },
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         final File gradleFile = project.android.appGradleFile;
         final String textInBold = logger.terminal.bolden(
           'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
@@ -447,17 +423,14 @@ final javaHeapSpaceHandler = GradleHandledError(
   test: _lineMatcher(const <String>['Java heap space']),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         final String textInBold = logger.terminal.bolden(
           'Adjust the maximum Java heap allocation according to the documentation:\n'
           'https://docs.gradle.org/current/userguide/config_gradle.html#sec:configuring_jvm_memory',
@@ -480,17 +453,14 @@ final lockFileDepMissingHandler = GradleHandledError(
   },
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final ToolContext(:Logger logger, :Platform platform) = toolContext;
         final File gradleFile = project.android.hostAppGradleFile;
         final generatedGradleCommand = platform.isWindows ? r'.\gradlew.bat' : './gradlew';
         final String textInBold = logger.terminal.bolden(
@@ -513,17 +483,14 @@ final incompatibleKotlinVersionHandler = GradleHandledError(
   test: _lineMatcher(const <String>['was compiled with an incompatible version of Kotlin']),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         final File gradleFile = project.android.hostAppGradleFile;
         final File settingsFile = project.directory
             .childDirectory('android')
@@ -552,17 +519,14 @@ final outdatedGradleHandler = GradleHandledError(
   test: _outdatedGradlePattern.hasMatch,
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         final File gradleFile = project.android.hostAppGradleFile;
         final File gradlePropertiesFile = project.android.gradleWrapperPropertiesFile;
         logger.printBox(
@@ -588,17 +552,14 @@ final minCompileSdkVersionHandler = GradleHandledError(
   test: _minCompileSdkVersionPattern.hasMatch,
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
         assert(minCompileSdkVersionMatch?.groupCount == 1);
 
@@ -632,17 +593,14 @@ final incompatibleJavaAndAgpVersionsHandler = GradleHandledError(
   },
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         final String helpfulGradleError = line.trim().substring(2);
 
         logger.printBox(
@@ -667,17 +625,14 @@ final sslExceptionHandler = GradleHandledError(
   ]),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         logger.printError(
           '${logger.terminal.warningMark} '
           'Gradle threw an error while downloading artifacts from the network.',
@@ -701,17 +656,14 @@ final incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
   },
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         final File gradlePropertiesFile = project.android.gradleWrapperPropertiesFile;
         logger.printBox(
           "${logger.terminal.warningMark} Your project's Gradle version "
@@ -734,17 +686,14 @@ final remoteTerminatedHandshakeHandler = GradleHandledError(
   test: (String line) => line.contains('Remote host terminated the handshake'),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         logger.printError(
           '${logger.terminal.warningMark} '
           'Gradle threw an error while downloading artifacts from the network.',
@@ -760,17 +709,14 @@ final couldNotOpenCacheDirectoryHandler = GradleHandledError(
   test: (String line) => line.contains('> Could not open cache directory '),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         logger.printError(
           '${logger.terminal.warningMark} '
           'Gradle threw an error while resolving dependencies.',
@@ -798,17 +744,14 @@ final incompatibleCompileSdk35AndAgpVersionHandler = GradleHandledError(
       line.contains('RES_TABLE_TYPE_TYPE entry offsets overlap actual entry data'),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         logger.printBox(
           '${logger.terminal.warningMark} Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.'
           ' \n Please upgrade to a newer AGP version.${_getAgpLocation(project)}\n\n Finally, if you have a'
@@ -828,17 +771,14 @@ final r8DexingBugInAgp73Handler = GradleHandledError(
       line.contains(': Unused argument with users'),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         logger.printBox('''
 ${logger.terminal.warningMark} Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug which causes this error (see more info at https://issuetracker.google.com/issues/242308990).
 To fix this error, update to a newer version of AGP (at least 7.4.0).
@@ -858,17 +798,14 @@ final usageOfV1EmbeddingReferencesHandler = GradleHandledError(
       line.contains('io.flutter.plugin.common.PluginRegistry.Registrar registrar'),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         logger.printBox(
           '''
 ${logger.terminal.warningMark} Consult the error logs above to identify any broken plugins, specifically those containing "error: cannot find symbol..."
@@ -888,17 +825,14 @@ final jlinkErrorWithJava21AndSourceCompatibility = GradleHandledError(
   test: (String line) => line.contains('> Error while executing process') && line.contains('jlink'),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         logger.printBox('''
 ${logger.terminal.warningMark} This is likely due to a known bug in Android Gradle Plugin (AGP) versions less than 8.2.1, when
   1. setting a value for SourceCompatibility and
@@ -924,17 +858,14 @@ final missingNdkSourcePropertiesFile = GradleHandledError(
   test: (String line) => _missingNdkSourcePropertiesRegexp.hasMatch(line),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         final String path = _missingNdkSourcePropertiesRegexp.firstMatch(line)!.group(1)!;
         logger.printBox('''
     ${logger.terminal.warningMark} This is likely due to a malformed download of the NDK.
@@ -968,17 +899,14 @@ final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
   },
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         logger.printBox('''
 ${logger.terminal.warningMark} Starting AGP 9+, the default has become built-in Kotlin.
 This results in a build failure when applying the kotlin-android plugin.
@@ -993,25 +921,25 @@ To resolve this, migrate to built-in Kotlin.
 /// Handler when using the new AGP DSL interfaces. Starting AGP 9+, only the new
 /// DSL interfaces are used. This results in a failure because we still depend
 /// on old DSL types.
+///
+/// This only matches the `NullPointerException` line. Gradle prints
+/// `> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'` for every
+/// exception thrown while applying the Flutter Gradle plugin (for example,
+/// unsupported dependency version errors), so matching that line would show
+/// this box for unrelated failures.
 @visibleForTesting
 final useNewAgpDslErrorHandler = GradleHandledError(
-  test: _lineMatcher(const <String>[
-    "> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'",
-    '> java.lang.NullPointerException (no error message)',
-  ]),
+  test: _lineMatcher(const <String>['> java.lang.NullPointerException (no error message)']),
   handler:
       ({
-        required FileSystem fileSystem,
+        required utils.GradleUtils gradleUtils,
         required String line,
-        required Logger logger,
-        required Platform platform,
-        required ProcessUtils processUtils,
         required FlutterProject project,
+        required ToolContext toolContext,
         required bool usesAndroidX,
-        BotDetector? botDetector,
-        utils.GradleUtils? gradleUtils,
         Java? java,
       }) async {
+        final Logger logger = toolContext.logger;
         final File appGradleFile = project.android.appGradleFile;
         logger.printBox(
           '''

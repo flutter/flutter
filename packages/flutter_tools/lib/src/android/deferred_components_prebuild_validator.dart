@@ -32,13 +32,12 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   DeferredComponentsPrebuildValidator(
     Directory projectDir, {
     required this._templateRenderer,
-    required ToolContext toolContext,
+    required this._toolContext,
     super.exitOnFail,
     super.outputDir,
     this._templatesDir,
     super.title,
-  }) : _toolContext = toolContext,
-       super(projectDir, toolContext.logger, toolContext.platform);
+  }) : super(projectDir, _toolContext.logger, _toolContext.platform);
 
   final Directory? _templatesDir;
   final TemplateRenderer _templateRenderer;
@@ -219,14 +218,14 @@ class _DeferredComponentAndroidFiles {
     required this.projectDir,
     required this.templateRenderer,
     required this.toolContext,
-    this.templatesDir,
+    this._templatesDir,
   });
 
   // The name of the deferred component.
   final String name;
   final Directory projectDir;
   final TemplateRenderer templateRenderer;
-  final Directory? templatesDir;
+  final Directory? _templatesDir;
   final ToolContext toolContext;
 
   Directory get androidDir => projectDir.childDirectory('android');
@@ -269,8 +268,8 @@ class _DeferredComponentAndroidFiles {
     final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
         toolContext;
     Template template;
-    if (templatesDir != null) {
-      final Directory templateComponentDir = templatesDir!.childDirectory(
+    if (_templatesDir != null) {
+      final Directory templateComponentDir = _templatesDir.childDirectory(
         'module${fs.path.separator}android${fs.path.separator}deferred_component',
       );
       template = Template(
