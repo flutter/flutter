@@ -294,6 +294,14 @@ void main() {
           .runtimeType,
       WidgetSpan,
     );
+
+    // Upstream affinity resolves the leading edge to the preceding TextSpan.
+    expect(
+      (textSpan.getSpanForPosition(
+        const TextPosition(offset: 2, affinity: TextAffinity.upstream),
+      ) as TextSpan?)?.text,
+      'b',
+    );
   });
 
   test('GetSpanForPosition with adjacent WidgetSpans', () {
@@ -307,6 +315,13 @@ void main() {
       same(first),
     );
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 1)), same(second));
+
+    // At the end of the text only upstream affinity resolves to a span.
+    expect(
+      textSpan.getSpanForPosition(const TextPosition(offset: 2, affinity: TextAffinity.upstream)),
+      same(second),
+    );
+    expect(textSpan.getSpanForPosition(const TextPosition(offset: 2)), isNull);
   });
 
   test('TextSpan computeSemanticsInformation', () {
