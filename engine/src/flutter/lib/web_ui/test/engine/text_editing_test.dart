@@ -1424,6 +1424,73 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
     });
 
+    group('updateConfig on a focused autofill field', () {
+      final Map<String, dynamic> configA = createFlutterConfig('text', autofillHint: 'username');
+      final Map<String, dynamic> configB = createFlutterConfig('text', autofillHint: 'email');
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+
+      void focusField(int clientId, Map<String, dynamic> config) {
+        final setClient = MethodCall('TextInput.setClient', <dynamic>[clientId, config]);
+        sendFrameworkMessage(codec.encodeMethodCall(setClient));
+        const show = MethodCall('TextInput.show');
+        sendFrameworkMessage(codec.encodeMethodCall(show));
+        sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+      }
+
+      void updateConfigOfA() {
+        final updateConfig = MethodCall(
+          'TextInput.updateConfig',
+          createFlutterConfig('text', autofillHint: 'username', obscureText: true),
+        );
+        sendFrameworkMessage(codec.encodeMethodCall(updateConfig));
+      }
+
+      tearDown(() {
+        hideKeyboard();
+        const finishAutofillContext = MethodCall('TextInput.finishAutofillContext', false);
+        sendFrameworkMessage(codec.encodeMethodCall(finishAutofillContext));
+      });
+
+      // Regression test for https://github.com/flutter/flutter/issues/192544
+      test('keeps the field editable after its form was reused', () {
+        // A's form goes dormant when B takes focus, then A reuses it.
+        focusField(1, configA);
+        focusField(2, configB);
+        focusField(3, configA);
+        updateConfigOfA();
+        final DomElement firstInputA = textEditing!.strategy.domElement!;
+
+        focusField(4, configB);
+        expect(
+          firstInputA.isConnected,
+          isTrue,
+          reason: 'The blurred field should stay in its dormant form.',
+        );
+
+        focusField(5, configA);
+        final DomElement secondInputA = textEditing!.strategy.domElement!;
+        expect(secondInputA.isConnected, isTrue);
+        expect(domDocument.activeElement, secondInputA);
+        expect(spy.messages, isEmpty);
+      });
+
+      test('keeps one form when the field moves after the update', () {
+        focusField(1, configA);
+        updateConfigOfA();
+        // A scroll or resize sends new geometry while the field is focused.
+        sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+        final DomElement inputA = textEditing!.strategy.domElement!;
+        expect(defaultTextEditingRoot.querySelectorAll('form'), hasLength(1));
+        expect(domDocument.activeElement, inputA);
+        expect(spy.messages, isEmpty);
+      });
+    });
+
     test('Does not align content in autofill group elements', () {
       final setClient = MethodCall('TextInput.setClient', <dynamic>[
         123,

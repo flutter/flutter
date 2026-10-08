@@ -753,6 +753,33 @@ void testMain() {
       expect(dormantForms[form.formIdentifier], form);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/192544
+    test('demotes into the live form after updateConfig', () {
+      final (form: EngineAutofillForm form, textField: _) = activateGroup();
+      final DomHTMLFormElement formElement = form.formElement!;
+
+      // A config update, for example an obscureText toggle, arrives with a new
+      // form built from the same fields.
+      final List<Map<String, Object?>> fields = _autofillFields(
+        <String>['username', 'password'],
+        <String>['field1', 'field2'],
+      );
+      final focusedMap = fields.first['autofill']! as Map<String, Object?>;
+      testTextEditing.configuration = InputConfiguration(
+        viewId: kImplicitViewId,
+        obscureText: true,
+        autofill: AutofillInfo.fromFrameworkMessage(focusedMap),
+        autofillGroup: EngineAutofillForm.fromFrameworkMessage(kImplicitViewId, focusedMap, fields),
+      );
+      const TextInputUpdateConfig().run(testTextEditing);
+
+      strategy.disable();
+
+      final EngineAutofillForm? dormant = dormantForms[form.formIdentifier];
+      expect(dormant?.formElement, formElement);
+      expect(formElement.contains(dormant!.elements['field1']), isTrue);
+    });
+
     // Focus A, autofill A, focus B, autofill a different credential, focus A
     // again, then assert each field is represented in the form exactly once
     // with its latest value and the focused field is linked by attribute (not

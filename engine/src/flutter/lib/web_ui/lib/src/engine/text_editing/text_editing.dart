@@ -390,16 +390,7 @@ class EngineAutofillForm {
 
       if (existingForm != null) {
         // If the form already has a dormant DOM element, let's use it instead of creating a new one.
-        formElement = existingForm.formElement;
-        elements.addAll(existingForm.elements);
-        // Carry over the per-field tracking so the reused form remembers the
-        // last framework value and the last value forwarded for each field.
-        // Each text input connection builds a new form instance, so without
-        // this the tracking would reset on every focus change and the form
-        // could not tell a programmatic framework update apart from a browser
-        // autofill.
-        _lastFrameworkText.addAll(existingForm._lastFrameworkText);
-        _lastSentAutofillText.addAll(existingForm._lastSentAutofillText);
+        _adopt(existingForm);
       } else {
         formElement = _createFormElementAndFields(focusedElement, focusedAutofill);
         _insertEditingElementInView(formElement!, viewId);
@@ -431,6 +422,21 @@ class EngineAutofillForm {
     }
 
     _updateFieldValues();
+  }
+
+  /// Takes over the DOM form and elements of [other], which has the same
+  /// [formIdentifier] but belongs to an earlier configuration.
+  void _adopt(EngineAutofillForm other) {
+    formElement = other.formElement;
+    elements.addAll(other.elements);
+    // Carry over the per-field tracking so the reused form remembers the
+    // last framework value and the last value forwarded for each field.
+    // Each text input configuration builds a new form instance, so without
+    // this the tracking would reset on every focus change and the form
+    // could not tell a programmatic framework update apart from a browser
+    // autofill.
+    _lastFrameworkText.addAll(other._lastFrameworkText);
+    _lastSentAutofillText.addAll(other._lastSentAutofillText);
   }
 
   /// Demotes a field that is losing focus in semantics mode back to a synthetic
@@ -2441,7 +2447,22 @@ class TextInputUpdateConfig extends TextInputCommand {
 
   @override
   void run(HybridTextEditing textEditing) {
-    textEditing.strategy.applyConfiguration(textEditing.configuration!);
+    InputConfiguration config = textEditing.configuration!;
+    final EngineAutofillForm? liveForm = textEditing.strategy.inputConfiguration.autofillGroup;
+    final EngineAutofillForm? newForm = config.autofillGroup;
+    // The message builds a new form that was never woken up, while the editing
+    // element still sits in the live form. Hand the live form over, otherwise
+    // blur cannot put it to sleep and the next placement builds a second form.
+    if (liveForm?.formElement != null &&
+        newForm != null &&
+        newForm.formIdentifier == liveForm!.formIdentifier) {
+      final EngineAutofillForm form = newForm.copyWith(
+        associateFocusedElementByAttribute: liveForm.associateFocusedElementByAttribute,
+      ).._adopt(liveForm);
+      config = config.copyWith(autofillGroup: form);
+      textEditing.configuration = config;
+    }
+    textEditing.strategy.applyConfiguration(config);
   }
 }
 
