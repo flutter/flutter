@@ -318,12 +318,10 @@ List<FlutterCommand> generateCommands({
     verboseHelp: verboseHelp,
   ),
   DoctorCommand(
-    verbose: verbose,
-    toolContext: toolDependencies.toolContext,
-    // Provide the shared singleton from globals until dependent commands
-    // (e.g. DevicesCommand, EmulatorsCommand) are migrated to DI.
-    doctor: globals.doctor,
+    doctor: toolDependencies.doctor,
     extensionManager: toolDependencies.extensionManager,
+    toolContext: toolDependencies.toolContext,
+    verbose: verbose,
   ),
   DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DriveCommand(
