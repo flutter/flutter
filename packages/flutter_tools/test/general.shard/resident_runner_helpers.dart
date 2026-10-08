@@ -9,22 +9,126 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/hook_runner.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
+
+HotRunner createHotRunner(
+  List<FlutterDevice> flutterDevices, {
+  required DebuggingOptions debuggingOptions,
+  required String target,
+  Analytics? analytics,
+  File? applicationBinary,
+  bool benchmarkMode = false,
+  BuildSystem? buildSystem,
+  BuildTargets? buildTargets,
+  FlutterHookRunner? dartBuilder,
+  String? dillOutputPath,
+  bool hostIsIde = false,
+  HotRunnerConfig? hotRunnerConfig,
+  bool machine = false,
+  String? nativeAssetsYamlFile,
+  ProjectFileInvalidator? projectFileInvalidator,
+  String? projectRootPath,
+  ReassembleHelper? reassembleHelper,
+  ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
+  bool stayResident = true,
+  StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+  ToolContext toolContext = const DelegatingToolContext(),
+  Xcode? xcode,
+}) {
+  buildSystem ??= FlutterBuildSystem(
+    fileSystem: toolContext.fs,
+    logger: toolContext.logger,
+    platform: toolContext.platform,
+  );
+
+  return HotRunner(
+    flutterDevices,
+    analytics: analytics ?? const NoOpAnalytics(),
+    buildSystem: buildSystem,
+    buildTargets: buildTargets ?? const BuildTargetsImpl(),
+    debuggingOptions: debuggingOptions,
+    target: target,
+    toolContext: toolContext,
+    xcode: xcode,
+    applicationBinary: applicationBinary,
+    benchmarkMode: benchmarkMode,
+    dartBuilder: dartBuilder,
+    dillOutputPath: dillOutputPath,
+    hostIsIde: hostIsIde,
+    hotRunnerConfig: hotRunnerConfig,
+    machine: machine,
+    nativeAssetsYamlFile: nativeAssetsYamlFile,
+    projectFileInvalidator: projectFileInvalidator,
+    projectRootPath: projectRootPath,
+    reassembleHelper: reassembleHelper,
+    reloadSourcesHelper: reloadSourcesHelper,
+    stayResident: stayResident,
+    stopwatchFactory: stopwatchFactory,
+  );
+}
+
+ColdRunner createColdRunner(
+  List<FlutterDevice> flutterDevices, {
+  required DebuggingOptions debuggingOptions,
+  required String target,
+  Analytics? analytics,
+  File? applicationBinary,
+  bool awaitFirstFrameWhenTracing = true,
+  BuildSystem? buildSystem,
+  BuildTargets? buildTargets,
+  FlutterHookRunner? dartBuilder,
+  bool machine = false,
+  bool stayResident = true,
+  ToolContext toolContext = const DelegatingToolContext(),
+  bool traceStartup = false,
+  Xcode? xcode,
+}) {
+  return ColdRunner(
+    flutterDevices,
+    analytics: analytics ?? const NoOpAnalytics(),
+    buildSystem:
+        buildSystem ??
+        FlutterBuildSystem(
+          fileSystem: toolContext.fs,
+          logger: toolContext.logger,
+          platform: toolContext.platform,
+        ),
+    buildTargets: buildTargets ?? const BuildTargetsImpl(),
+    debuggingOptions: debuggingOptions,
+    target: target,
+    toolContext: toolContext,
+    xcode: xcode,
+    applicationBinary: applicationBinary,
+    awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
+    dartBuilder: dartBuilder,
+    machine: machine,
+    stayResident: stayResident,
+    traceStartup: traceStartup,
+  );
+}
 
 final fakeUnpausedEvent = vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0);
 
