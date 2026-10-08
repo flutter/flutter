@@ -2,27 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 
+/// The font family that `hook/build.dart` provides.
+const String kHookFontFamily = 'RobotoFromHook';
+
 void main() {
-  runApp(const MainApp());
+  runApp(const FontAssetsApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class FontAssetsApp extends StatelessWidget {
+  const FontAssetsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Custom Fonts',
+    return const MaterialApp(
+      title: 'Font Assets',
       home: Scaffold(
         body: Center(
           child: Column(
-            children: [
-              const Icon(Icons.abc),
-              Text('Hello world', style: TextStyle(fontFamily: 'BBHBartle')),
-              Text('Hello world'),
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text('Regular from hook', style: TextStyle(fontFamily: kHookFontFamily)),
+              Text(
+                'Bold from hook',
+                style: TextStyle(fontFamily: kHookFontFamily, fontWeight: FontWeight.bold),
+              ),
             ],
           ),
         ),

@@ -136,7 +136,7 @@ void main() {
     );
 
     testUsingContext(
-      'empty pubspec with font assets from hook (multiple weights/styles and dependency packages)',
+      'font assets from hooks are bundled as fonts next to the fonts from the pubspec',
       () async {
         writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
@@ -145,7 +145,17 @@ void main() {
         );
         globals.fs.file('pubspec.yaml')
           ..createSync()
-          ..writeAsStringSync('');
+          ..writeAsStringSync('''
+name: my_app
+flutter:
+  fonts:
+    - family: FromPubspec
+      fonts:
+        - asset: fonts/FromPubspec.ttf
+''');
+        globals.fs.file('fonts/FromPubspec.ttf')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('pubspec');
         final File regularFont = globals.fs.file('fonts/Roboto-Regular.ttf')
           ..createSync(recursive: true)
           ..writeAsStringSync('regular');
@@ -157,7 +167,7 @@ void main() {
           ..writeAsStringSync('icons');
 
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(
+        final int result = await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
           flutterHookResult: FlutterHookResult(
@@ -191,9 +201,11 @@ void main() {
             dependencies: <Uri>[regularFont.uri, boldItalicFont.uri, pkgFont.uri],
           ),
         );
+        expect(result, 0);
         expect(
           bundle.entries.keys,
           containsAll(<String>[
+            'fonts/FromPubspec.ttf',
             'packages/my_app/fonts/Roboto-Regular.ttf',
             'packages/my_app/fonts/Roboto-BoldItalic.ttf',
             'packages/other_pkg/fonts/CustomIcons.ttf',
@@ -201,10 +213,30 @@ void main() {
             'AssetManifest.bin',
           ]),
         );
+        // Hook fonts get the same asset kind as pubspec fonts, which is what
+        // makes `copyAssets` run the icon tree shaker on them.
+        for (final key in <String>[
+          'fonts/FromPubspec.ttf',
+          'packages/my_app/fonts/Roboto-Regular.ttf',
+          'packages/my_app/fonts/Roboto-BoldItalic.ttf',
+          'packages/other_pkg/fonts/CustomIcons.ttf',
+        ]) {
+          expect(bundle.entries[key]!.kind, AssetKind.font, reason: key);
+        }
+        expect(
+          await bundle.entries['packages/other_pkg/fonts/CustomIcons.ttf']!.contentsAsBytes(),
+          utf8.encode('icons'),
+        );
         final Object? fontManifest = json.decode(
           utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()),
         );
         expect(fontManifest, <Object?>[
+          <String, Object?>{
+            'family': 'FromPubspec',
+            'fonts': <Object?>[
+              <String, Object?>{'asset': 'fonts/FromPubspec.ttf'},
+            ],
+          },
           <String, Object?>{
             'family': 'Roboto',
             'fonts': <Object?>[

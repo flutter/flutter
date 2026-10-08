@@ -459,7 +459,7 @@ packages:
     description:
       path: "."
       ref: hooks-v2
-      resolved-ref: "145c218b183964cf19fe0cf6c0e985ddea062a9c"
+      resolved-ref: "4bce1d5a3f21dfd0f2329dabc2ab1436e6f71b80"
       url: "https://github.com/mosuem/font_asset.git"
     source: git
     version: "0.1.0"

@@ -52,6 +52,11 @@ class FlutterCodeAsset {
 
 /// Matching [CodeAsset], [DataAsset], and [FontAsset] in native assets - but
 /// Flutter could support more asset types in the future.
+///
+/// [fontAssets] are gated behind the same experiment as [dataAssets]
+/// (`enable-dart-data-assets`): a font is a data asset that the tool
+/// additionally registers in `FontManifest.json` and subsets with the icon
+/// tree shaker.
 enum SupportedAssetTypes { codeAssets, dataAssets, fontAssets }
 
 /// Hook options specific to building code assets.
@@ -238,8 +243,10 @@ List<AssetBuildTarget> _getTargets({
   final supportedAssetTypes = <SupportedAssetTypes>[
     if (featureFlags.isNativeAssetsEnabled && buildCodeAssets != null)
       SupportedAssetTypes.codeAssets,
-    if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) SupportedAssetTypes.dataAssets,
-    SupportedAssetTypes.fontAssets,
+    if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) ...<SupportedAssetTypes>[
+      SupportedAssetTypes.dataAssets,
+      SupportedAssetTypes.fontAssets,
+    ],
   ];
 
   final BuildMode buildMode = _getBuildMode(
@@ -276,8 +283,10 @@ Future<({List<AssetBuildTarget> targets, BuildMode buildMode, bool linkingEnable
   final supportedAssetTypes = <SupportedAssetTypes>[
     if (featureFlags.isNativeAssetsEnabled && buildCodeAssets != null)
       SupportedAssetTypes.codeAssets,
-    if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) SupportedAssetTypes.dataAssets,
-    SupportedAssetTypes.fontAssets,
+    if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) ...<SupportedAssetTypes>[
+      SupportedAssetTypes.dataAssets,
+      SupportedAssetTypes.fontAssets,
+    ],
   ];
 
   final BuildMode buildMode = _getBuildMode(

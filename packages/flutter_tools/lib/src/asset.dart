@@ -429,25 +429,12 @@ class ManifestAssetBundle implements AssetBundle {
       deferredComponentsEntries.clear();
     }
 
-    final bool hookProvidesMaterialFonts =
-        flutterHookResult?.fontAssets.any(
-          (FontHookAsset asset) => asset.fontFamily == 'MaterialIcons',
-        ) ??
-        false;
-    final bool includesMaterialFonts =
-        flutterManifest.usesMaterialDesign || hookProvidesMaterialFonts;
-    final String? primaryPackageName = flutterManifest.appName.isNotEmpty
-        ? flutterManifest.appName
-        : packageConfig
-              .packageOf(_fileSystem.file(_fileSystem.path.join(assetBasePath, 'pubspec.yaml')).uri)
-              ?.name;
+    final bool includesMaterialFonts = flutterManifest.usesMaterialDesign;
     final List<Map<String, Object?>> fonts = _parseFonts(
       flutterManifest,
       packageConfig,
       primary: true,
-      hookProvidesMaterialFonts: hookProvidesMaterialFonts,
-      primaryPackageName: primaryPackageName,
-      fontAssets: flutterHookResult?.fontAssets,
+      hookFontAssets: flutterHookResult?.fontAssets ?? const <FontHookAsset>[],
     );
 
     // Add fonts, assets, and licenses from packages in the project's
@@ -566,7 +553,17 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
     for (final HookAsset dataAsset in flutterHookResult?.dataAssets ?? <HookAsset>[]) {
-      final _Asset asset = _parseAsset(packageConfig, dataAsset, AssetKind.regular);
+      final Package package = packageConfig[dataAsset.package]!;
+      final Uri fileUri = dataAsset.file;
+
+      final String filePath = fileUri.toFilePath();
+
+      final asset = _Asset(
+        baseDir: _fileSystem.path.dirname(filePath),
+        relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
+        entryUri: Uri.parse(_fileSystem.path.join('packages', dataAsset.package, dataAsset.name)),
+        package: package,
+      );
       if (assetVariants.containsKey(asset)) {
         _logger.printError(
           'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
@@ -576,8 +573,18 @@ class ManifestAssetBundle implements AssetBundle {
       assetVariants[asset] = <_Asset>[asset];
     }
 
+    // Fonts from hooks are bundled with [AssetKind.font], exactly like fonts
+    // from the `fonts:` section of the pubspec, so that the icon tree shaker
+    // in `copyAssets` applies to them.
     for (final FontHookAsset fontAsset in flutterHookResult?.fontAssets ?? <FontHookAsset>[]) {
-      final _Asset asset = _parseAsset(packageConfig, fontAsset, AssetKind.regular);
+      final String filePath = fontAsset.file.toFilePath();
+      final asset = _Asset(
+        baseDir: _fileSystem.path.dirname(filePath),
+        relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
+        entryUri: _hookFontEntryUri(fontAsset),
+        package: packageConfig[fontAsset.package],
+        kind: AssetKind.font,
+      );
       if (assetVariants.containsKey(asset)) {
         _logger.printError(
           'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
@@ -664,7 +671,7 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
     final materialAndFrameworkAssets = <_Asset>[
-      if (flutterManifest.usesMaterialDesign && !hookProvidesMaterialFonts) ..._getMaterialFonts(),
+      if (flutterManifest.usesMaterialDesign) ..._getMaterialFonts(),
       // For all platforms, include the shaders unconditionally. They are
       // small, and whether they're used is determined only by the app source
       // code and not by the Flutter manifest.
@@ -730,25 +737,17 @@ class ManifestAssetBundle implements AssetBundle {
     return 0;
   }
 
-  static Uri _hookAssetEntryUri(HookAsset asset) {
+  /// The key under which a font from a hook is bundled: `packages/<package>/<name>`.
+  ///
+  /// Built from path segments (rather than [FileSystem.path]) so that the key is
+  /// identical on all host platforms and never contains backslashes.
+  static Uri _hookFontEntryUri(FontHookAsset asset) {
     return Uri(
       pathSegments: <String>[
         'packages',
         asset.package,
-        ...Uri(path: asset.name.replaceAll(r'\', '/')).pathSegments
-            .where((String s) => s.isNotEmpty),
+        ...Uri(path: asset.name).pathSegments.where((String s) => s.isNotEmpty),
       ],
-    );
-  }
-
-  _Asset _parseAsset(PackageConfig packageConfig, HookAsset asset, AssetKind kind) {
-    final String filePath = asset.file.toFilePath();
-    return _Asset(
-      baseDir: _fileSystem.path.dirname(filePath),
-      relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
-      entryUri: _hookAssetEntryUri(asset),
-      package: packageConfig[asset.package],
-      kind: kind,
     );
   }
 
@@ -917,38 +916,36 @@ class ManifestAssetBundle implements AssetBundle {
     PackageConfig packageConfig, {
     String? packageName,
     required bool primary,
-    bool hookProvidesMaterialFonts = false,
-    String? primaryPackageName,
-    List<FontHookAsset>? fontAssets,
+    List<FontHookAsset> hookFontAssets = const <FontHookAsset>[],
   }) {
     return <Map<String, Object?>>[
-      if (primary && manifest.usesMaterialDesign && !hookProvidesMaterialFonts) ...kMaterialFonts,
-      if (fontAssets != null && fontAssets.isNotEmpty)
-        ..._parseHookFonts(fontAssets, primaryPackageName),
+      if (primary && manifest.usesMaterialDesign) ...kMaterialFonts,
       if (packageName == null)
         ...manifest.fontsDescriptor
       else
         for (final Font font in _parsePackageFonts(manifest, packageName, packageConfig))
           font.descriptor,
+      ..._parseHookFonts(hookFontAssets, appPackageName: manifest.appName),
     ];
   }
 
+  /// Converts the fonts declared by hooks into `FontManifest.json` entries.
+  ///
+  /// Mirrors the naming of pubspec fonts: a family of the app package itself is
+  /// listed as `<family>`, a family of a dependency as
+  /// `packages/<package>/<family>`. All files of one family (e.g. different
+  /// weights and styles) end up in a single entry.
   List<Map<String, Object?>> _parseHookFonts(
-    List<FontHookAsset> fontAssets,
-    String? primaryPackageName,
-  ) {
+    List<FontHookAsset> hookFontAssets, {
+    required String appPackageName,
+  }) {
     final fontsByFamily = <String, List<FontAsset>>{};
-    for (final fontAsset in fontAssets) {
-      final bool isPrimary =
-          primaryPackageName == null ||
-          fontAsset.package == primaryPackageName ||
-          fontAsset.fontFamily == 'MaterialIcons';
-      final String familyName = isPrimary
+    for (final fontAsset in hookFontAssets) {
+      final String familyName = fontAsset.package == appPackageName
           ? fontAsset.fontFamily
           : 'packages/${fontAsset.package}/${fontAsset.fontFamily}';
-      final Uri entryUri = _hookAssetEntryUri(fontAsset);
       (fontsByFamily[familyName] ??= <FontAsset>[]).add(
-        FontAsset(entryUri, weight: fontAsset.weight, style: fontAsset.style),
+        FontAsset(_hookFontEntryUri(fontAsset), weight: fontAsset.weight, style: fontAsset.style),
       );
     }
     return <Map<String, Object?>>[

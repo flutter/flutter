@@ -14,8 +14,10 @@ import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart'
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart'
     show BuildCodeAssetsOptions, runFlutterSpecificHooks;
 import 'package:font_asset/font_asset.dart';
+import 'package:hooks/hooks.dart' show BuildInput;
 
-import '../../src/common.dart' show containsAll, expect, returnsNormally, setUp, throwsToolExit;
+import '../../src/common.dart'
+    show contains, containsAll, expect, isNot, returnsNormally, setUp, throwsToolExit;
 import '../../src/context.dart'
     show FakeProcessManager, Generator, ProcessManager, testUsingContext;
 import '../../src/fakes.dart' show TestFeatureFlags;
@@ -47,10 +49,57 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
+  for (final dataAssetsEnabled in <bool>[false, true]) {
+    testUsingContext(
+      'Font assets: hooks are ${dataAssetsEnabled ? '' : 'not '}asked for fonts when '
+      'enable-dart-data-assets is ${dataAssetsEnabled ? 'on' : 'off'}',
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(
+          isNativeAssetsEnabled: true,
+          isDartDataAssetsEnabled: dataAssetsEnabled,
+        ),
+        ProcessManager: FakeProcessManager.empty,
+      },
+      () async {
+        final File packageConfig = environment.projectDir.childFile(
+          '.dart_tool/package_config.json',
+        );
+        await packageConfig.parent.create();
+        await packageConfig.create();
+
+        final requestedAssetTypes = <String>[];
+        await runFlutterSpecificHooks(
+          environmentDefines: <String, String>{kBuildMode: BuildMode.release.cliName},
+          targetPlatform: TargetPlatform.linux_x64,
+          projectUri: projectUri,
+          buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+          buildDataAssets: true,
+          recordedUsesFile: null,
+          fileSystem: fileSystem,
+          buildRunner: FakeFlutterNativeAssetsBuildRunner(
+            packagesWithNativeAssetsResult: <String>['bar'],
+            onBuild: (BuildInput input) {
+              requestedAssetTypes.addAll(input.config.buildAssetTypes);
+              return FakeFlutterNativeAssetsBuilderResult.fromAssets();
+            },
+          ),
+        );
+
+        // Fonts are an extension of data assets and ride on the same experiment
+        // flag, so a hook only sees the font asset type when that flag is on.
+        expect(
+          requestedAssetTypes,
+          dataAssetsEnabled ? contains(fontAssetType) : isNot(contains(fontAssetType)),
+        );
+      },
+    );
+  }
+
   testUsingContext(
     'Font assets: build, link, filesToBeBundled, and JSON serialization',
     overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+      FeatureFlags: () =>
+          TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
       ProcessManager: FakeProcessManager.empty,
     },
     () async {
@@ -115,7 +164,8 @@ void main() {
   testUsingContext(
     'Font assets: duplicate font assets with linking throws',
     overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+      FeatureFlags: () =>
+          TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
       ProcessManager: FakeProcessManager.empty,
     },
     () async {
