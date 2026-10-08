@@ -75,10 +75,10 @@ and the complete symbol set used by that capability:
 | Platform-state notifications | GTK 4.18 | Native nodes retain queryable focus state but do not emit these notifications |
 | DMA-BUF texture APIs | GTK 4.14 | Compositor cannot select the DMA-BUF texture route |
 
-Accessibility bounds currently apply the affine scale, skew, and translation
-components to the transformed corners. Perspective components and full
-coordinate-space conversion remain unsupported and are not implied by the GTK
-version gate.
+Accessibility bounds apply Flutter’s affine and projective transform to the
+rectangle corners. Singular projective points are clamped to a finite fallback;
+full coordinate-space conversion across nested views remains outside this
+backend’s current scope and is not implied by the GTK version gate.
 
 These are the implementation's capability groups, not a claim of complete
 accessibility support at each version. In particular, native text support is
