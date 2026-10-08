@@ -87,8 +87,7 @@ void main(List<String> args) {
 /// Checks the examples in `examples/**` libraries for cross imports.
 ///
 /// Excludes known examples that contain cross imports, i.e.
-/// [ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports] and
-/// [ExamplesCrossImportChecker.knownExamplesImageListCrossImports].
+/// [ExamplesCrossImportChecker.knownExamplesCrossImports].
 ///
 /// No examples should import Material or Cupertino.
 /// Any Material or Cupertino specific examples should go in
