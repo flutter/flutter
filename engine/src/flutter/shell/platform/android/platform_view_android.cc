@@ -44,7 +44,6 @@
 #include "flutter/shell/platform/android/platform_message_response_android.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 #include "flutter/shell/platform/android/surface/snapshot_surface_producer.h"
-#include "flutter/shell/platform/android/vsync_waiter_android.h"
 
 namespace flutter {
 
@@ -136,7 +135,8 @@ PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
     const flutter::TaskRunners& task_runners,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    AndroidRenderingAPI rendering_api)
+    AndroidRenderingAPI rendering_api,
+    PlatformDispatchTable platform_dispatch_table)
     : PlatformViewAndroid(
           delegate,
           task_runners,
@@ -146,14 +146,18 @@ PlatformViewAndroid::PlatformViewAndroid(
               rendering_api,
               delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing,
               CreateContextSettings(delegate.OnPlatformViewGetSettings()),
-              delegate.OnPlatformViewGetShutdownSafeIOTaskRunner())) {}
+              delegate.OnPlatformViewGetShutdownSafeIOTaskRunner()),
+          std::move(platform_dispatch_table)) {}
 
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
     const flutter::TaskRunners& task_runners,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    const std::shared_ptr<flutter::AndroidContext>& android_context)
-    : PlatformViewEmbedder(delegate, task_runners, PlatformDispatchTable{}),
+    const std::shared_ptr<flutter::AndroidContext>& android_context,
+    PlatformDispatchTable platform_dispatch_table)
+    : PlatformViewEmbedder(delegate,
+                           task_runners,
+                           std::move(platform_dispatch_table)),
       jni_facade_(jni_facade),
       android_context_(android_context),
       platform_view_android_delegate_(jni_facade),
@@ -415,11 +419,6 @@ void PlatformViewAndroid::RegisterImageTexture(
       FML_CHECK(false);
       break;
   }
-}
-
-// |PlatformView|
-std::unique_ptr<VsyncWaiter> PlatformViewAndroid::CreateVSyncWaiter() {
-  return std::make_unique<VsyncWaiterAndroid>(task_runners_);
 }
 
 // |PlatformView|

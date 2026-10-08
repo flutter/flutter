@@ -19,7 +19,6 @@ namespace flutter {
 /// Abstract Base Class that represents a platform specific mechanism for
 /// getting callbacks when a vsync event happens.
 ///
-/// @see VsyncWaiterAndroid
 /// @see VsyncWaiterEmbedder
 class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
  public:
@@ -38,7 +37,6 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
  protected:
   // On some backends, the |FireCallback| needs to be made from a static C
   // method.
-  friend class VsyncWaiterAndroid;
   friend class VsyncWaiterEmbedder;
 
   const TaskRunners task_runners_;

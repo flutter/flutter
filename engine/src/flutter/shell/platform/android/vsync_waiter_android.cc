@@ -4,13 +4,15 @@
 
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
 
+#include <atomic>
+#include <chrono>
 #include <cmath>
 #include <utility>
 
-#include "flutter/common/task_runners.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/toolkit/android/choreographer.h"
 
@@ -20,35 +22,102 @@ static fml::jni::ScopedJavaGlobalRef<jclass>* g_vsync_waiter_class = nullptr;
 static jmethodID g_async_wait_for_vsync_method_ = nullptr;
 static std::atomic_uint g_refresh_rate_ = 60;
 
+namespace {
+
+// Nanoseconds per second, to turn the refresh rate into a frame interval.
+constexpr double kNanosecondsPerSecond = 1000000000.0;
+
+// The cookie of the Java fallback, passed through
+// FlutterJNI.asyncWaitForVsync. OnVsyncFromJava deletes it.
+struct JavaVsyncRequest {
+  std::weak_ptr<VsyncWaiterAndroid> waiter;
+  intptr_t baton;
+};
+
+fml::TimeDelta FrameInterval() {
+  return fml::TimeDelta::FromNanoseconds(kNanosecondsPerSecond /
+                                         g_refresh_rate_);
+}
+
+uint64_t ToEmbedderNanos(fml::TimePoint time) {
+  return static_cast<uint64_t>(time.ToEpochDelta().ToNanoseconds());
+}
+
+}  // namespace
+
 VsyncWaiterAndroid::VsyncWaiterAndroid(const flutter::TaskRunners& task_runners)
-    : VsyncWaiter(task_runners) {}
+    : task_runners_(task_runners) {}
 
 VsyncWaiterAndroid::~VsyncWaiterAndroid() = default;
 
-// |VsyncWaiter|
-void VsyncWaiterAndroid::AwaitVSync() {
+void VsyncWaiterAndroid::Attach(FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                const FlutterEngineProcTable* embedder_api) {
+  FML_DCHECK(engine != nullptr && embedder_api != nullptr);
+  std::scoped_lock lock(mutex_);
+  FML_DCHECK(state_ == State::kWaitingForEngine);
+  engine_ = engine;
+  embedder_api_ = embedder_api;
+  state_ = State::kAttached;
+}
+
+void VsyncWaiterAndroid::Detach() {
+  std::scoped_lock lock(mutex_);
+  if (state_ == State::kAttached) {
+    const fml::TimePoint now = fml::TimePoint::Now();
+    for (intptr_t baton : outstanding_batons_) {
+      ReturnBatonLocked(baton, now, now + FrameInterval());
+    }
+  } else if (!outstanding_batons_.empty()) {
+    FML_LOG(WARNING) << outstanding_batons_.size()
+                     << " vsync batons leak: the engine never got a handle.";
+  }
+  outstanding_batons_.clear();
+  state_ = State::kDetached;
+  engine_ = nullptr;
+  embedder_api_ = nullptr;
+}
+
+void VsyncWaiterAndroid::AwaitVSync(intptr_t baton) {
+  {
+    std::scoped_lock lock(mutex_);
+    if (state_ == State::kDetached) {
+      // The engine is being destroyed on the platform thread, and only a call
+      // that returns before that starts is allowed.
+      FML_DLOG(WARNING) << "Vsync requested during engine shutdown; its baton "
+                           "leaks.";
+      return;
+    }
+    outstanding_batons_.insert(baton);
+  }
+  RequestFrame(baton);
+}
+
+void VsyncWaiterAndroid::RequestFrame(intptr_t baton) {
   const static bool use_choreographer =
       impeller::android::Choreographer::IsAvailableOnPlatform();
   if (use_choreographer) {
-    auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
-    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     fml::TaskRunner::RunNowOrPostTask(
-        task_runners_.GetUITaskRunner(), [weak_this]() {
+        task_runners_.GetUITaskRunner(),
+        [weak_this = weak_from_this(), baton]() {
           const auto& choreographer =
               impeller::android::Choreographer::GetInstance();
-          choreographer.PostFrameCallback([weak_this](auto time) {
-            auto time_ns =
-                std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
-                    .time_since_epoch()
-                    .count();
-            OnVsyncFromNDK(time_ns, weak_this);
-          });
+          bool posted =
+              choreographer.PostFrameCallback([weak_this, baton](auto time) {
+                auto time_ns =
+                    std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
+                        .time_since_epoch()
+                        .count();
+                OnVsyncFromNDK(time_ns, weak_this, baton);
+              });
+          if (!posted) {
+            FML_LOG(ERROR) << "Could not post a Choreographer frame callback.";
+          }
         });
   } else {
     // TODO(99798): Remove it when we drop support for API level < 29 and 32-bit
     // devices.
-    auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
-    jlong java_baton = reinterpret_cast<jlong>(weak_this);
+    auto* request = new JavaVsyncRequest{weak_from_this(), baton};
+    jlong java_baton = reinterpret_cast<jlong>(request);
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     task_runners_.GetPlatformTaskRunner()->PostTask([java_baton]() {
       JNIEnv* env = fml::jni::AttachCurrentThread();
@@ -61,23 +130,26 @@ void VsyncWaiterAndroid::AwaitVSync() {
 }
 
 // static
-void VsyncWaiterAndroid::OnVsyncFromNDK(int64_t frame_nanos, void* data) {
+void VsyncWaiterAndroid::OnVsyncFromNDK(
+    int64_t frame_nanos,
+    const std::weak_ptr<VsyncWaiterAndroid>& weak_this,
+    intptr_t baton) {
   auto frame_time = fml::TimePoint::FromEpochDelta(
       fml::TimeDelta::FromNanoseconds(frame_nanos));
   auto now = fml::TimePoint::Now();
   if (frame_time > now) {
     frame_time = now;
   }
-  auto target_time = frame_time + fml::TimeDelta::FromNanoseconds(
-                                      1000000000.0 / g_refresh_rate_);
+  auto target_time = frame_time + FrameInterval();
 
   TRACE_EVENT2_INT("flutter", "PlatformVsync", "frame_start_time",
                    frame_time.ToEpochDelta().ToMicroseconds(),
                    "frame_target_time",
                    target_time.ToEpochDelta().ToMicroseconds());
 
-  auto* weak_this = reinterpret_cast<std::weak_ptr<VsyncWaiter>*>(data);
-  ConsumePendingCallback(weak_this, frame_time, target_time);
+  if (std::shared_ptr<VsyncWaiterAndroid> shared_this = weak_this.lock()) {
+    shared_this->OnFrame(baton, frame_time, target_time);
+  }
 }
 
 // static
@@ -96,20 +168,45 @@ void VsyncWaiterAndroid::OnVsyncFromJava(JNIEnv* env,
                    "frame_target_time",
                    target_time.ToEpochDelta().ToMicroseconds());
 
-  auto* weak_this = reinterpret_cast<std::weak_ptr<VsyncWaiter>*>(java_baton);
-  ConsumePendingCallback(weak_this, frame_time, target_time);
+  std::unique_ptr<JavaVsyncRequest> request(
+      reinterpret_cast<JavaVsyncRequest*>(java_baton));
+  if (std::shared_ptr<VsyncWaiterAndroid> waiter = request->waiter.lock()) {
+    waiter->OnFrame(request->baton, frame_time, target_time);
+  }
 }
 
-// static
-void VsyncWaiterAndroid::ConsumePendingCallback(
-    std::weak_ptr<VsyncWaiter>* weak_this,
-    fml::TimePoint frame_start_time,
-    fml::TimePoint frame_target_time) {
-  auto shared_this = weak_this->lock();
-  delete weak_this;
+void VsyncWaiterAndroid::OnFrame(intptr_t baton,
+                                 fml::TimePoint frame_start_time,
+                                 fml::TimePoint frame_target_time) {
+  {
+    std::scoped_lock lock(mutex_);
+    switch (state_) {
+      case State::kAttached:
+        if (outstanding_batons_.erase(baton) == 0) {
+          FML_LOG(ERROR) << "Vsync frame for a baton that was not outstanding.";
+          return;
+        }
+        ReturnBatonLocked(baton, frame_start_time, frame_target_time);
+        return;
+      case State::kDetached:
+        // Detach() returned the baton.
+        return;
+      case State::kWaitingForEngine:
+        break;
+    }
+  }
+  // A spawned engine asked before its holder attached the handle.
+  RequestFrame(baton);
+}
 
-  if (shared_this) {
-    shared_this->FireCallback(frame_start_time, frame_target_time);
+void VsyncWaiterAndroid::ReturnBatonLocked(intptr_t baton,
+                                           fml::TimePoint frame_start_time,
+                                           fml::TimePoint frame_target_time) {
+  FlutterEngineResult result =
+      embedder_api_->OnVsync(engine_, baton, ToEmbedderNanos(frame_start_time),
+                             ToEmbedderNanos(frame_target_time));
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineOnVsync failed: " << result;
   }
 }
 

@@ -42,9 +42,10 @@ class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
 };
 
 // Renders on its own (Android surfaces and contexts) and takes the remaining
-// platform callbacks from the PlatformViewEmbedder dispatch table. The table
-// is empty for now, so every override below still decides the behavior. An
-// override that is deleted falls back to the embedder API callback for it.
+// platform callbacks from the PlatformViewEmbedder dispatch table. An override
+// that is deleted falls back to the embedder API callback for it, which the
+// holder puts in the table. So far that is the vsync callback; every override
+// below still decides its own behavior.
 class PlatformViewAndroid final : public PlatformViewEmbedder {
  public:
   static bool Register(JNIEnv* env);
@@ -52,7 +53,8 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   PlatformViewAndroid(PlatformView::Delegate& delegate,
                       const flutter::TaskRunners& task_runners,
                       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-                      AndroidRenderingAPI rendering_api);
+                      AndroidRenderingAPI rendering_api,
+                      PlatformDispatchTable platform_dispatch_table);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a new PlatformViewAndroid but using an existing
@@ -63,7 +65,8 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
       PlatformView::Delegate& delegate,
       const flutter::TaskRunners& task_runners,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-      const std::shared_ptr<flutter::AndroidContext>& android_context);
+      const std::shared_ptr<flutter::AndroidContext>& android_context,
+      PlatformDispatchTable platform_dispatch_table);
 
   ~PlatformViewAndroid() override;
 
@@ -161,9 +164,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
 
   // |PlatformView|
   void OnPreEngineRestart() const override;
-
-  // |PlatformView|
-  std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;

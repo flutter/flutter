@@ -16,6 +16,7 @@
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
+#include "flutter/shell/platform/android/vsync_waiter_android.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
@@ -149,6 +150,9 @@ class AndroidShellHolder {
   UniqueEngine engine_;
   // The embedder API functions that the holder calls engine_ through.
   FlutterEngineProcTable embedder_api_;
+  // Answers the vsync callback of the platform view. Detached before engine_
+  // is destroyed.
+  std::shared_ptr<VsyncWaiterAndroid> vsync_waiter_;
   bool is_valid_ = false;
   uint64_t next_pointer_flow_id_ = 0;
   std::unique_ptr<APKAssetProvider> apk_asset_provider_;
@@ -171,6 +175,7 @@ class AndroidShellHolder {
                      UniqueEngine engine,
                      std::unique_ptr<APKAssetProvider> apk_asset_provider,
                      const fml::WeakPtr<PlatformViewAndroid>& platform_view,
+                     std::shared_ptr<VsyncWaiterAndroid> vsync_waiter,
                      AndroidRenderingAPI rendering_api);
   static void ThreadDestructCallback(void* value);
   std::optional<RunConfiguration> BuildRunConfiguration(

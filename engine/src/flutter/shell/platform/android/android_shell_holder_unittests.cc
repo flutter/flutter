@@ -17,6 +17,7 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/vsync_waiter.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "shell/platform/android/jni/platform_view_android_jni.h"
@@ -421,6 +422,61 @@ TEST(AndroidShellHolder, PendingVsyncIsDeliveredOnceAfterHolderIsDestroyed) {
   EXPECT_TRUE(frames[0].on_ui_thread);
   EXPECT_LE(frames[0].start, frames[0].delivered);
   EXPECT_EQ(frames[0].target - frames[0].start, kDefaultFrameInterval);
+}
+
+TEST(AndroidShellHolder, VsyncBatonsReturnThroughFlutterEngineOnVsync) {
+  struct OnVsyncCall {
+    intptr_t baton;
+    uint64_t frame_start_time_nanos;
+    uint64_t frame_target_time_nanos;
+    bool on_ui_thread;
+  };
+  // Declared before the holder, which can still return batons while it is
+  // destroyed.
+  std::vector<OnVsyncCall> calls;
+  std::unique_ptr<AndroidShellHolder> holder =
+      CreateHolderWithoutSurface(Settings::MergedPlatformUIThread::kEnabled);
+  ASSERT_TRUE(holder->IsValid());
+  fml::RefPtr<fml::TaskRunner> ui_task_runner =
+      holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner();
+  // With merged threads every call below happens on the test thread.
+  ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
+
+  FlutterEngineProcTable& embedder_api = holder->GetEmbedderApiForTesting();
+  // Forwarding to the real function keeps the frame coming.
+  FlutterEngineOnVsyncFnPtr real_on_vsync = embedder_api.OnVsync;
+  embedder_api.OnVsync = MOCK_ENGINE_PROC(
+      OnVsync,
+      ([&calls, ui_task_runner, real_on_vsync](
+           FLUTTER_API_SYMBOL(FlutterEngine) engine, intptr_t baton,
+           uint64_t frame_start_time_nanos, uint64_t frame_target_time_nanos) {
+        calls.push_back({
+            .baton = baton,
+            .frame_start_time_nanos = frame_start_time_nanos,
+            .frame_target_time_nanos = frame_target_time_nanos,
+            .on_ui_thread = ui_task_runner->RunsTasksOnCurrentThread(),
+        });
+        return real_on_vsync(engine, baton, frame_start_time_nanos,
+                             frame_target_time_nanos);
+      }));
+
+  PlatformView& platform_view = *holder->GetPlatformView();
+  std::shared_ptr<VsyncWaiter> vsync_waiter = platform_view.CreateVSyncWaiter();
+  auto recorder = std::make_shared<VsyncFrameRecorder>(ui_task_runner);
+  vsync_waiter->AsyncWaitForVsync(recorder->Callback());
+  ASSERT_TRUE(PumpLooperUntil([&] { return !recorder->frames().empty(); },
+                              kVsyncTimeout));
+  PumpLooperFor(kSettleTime);
+
+  ASSERT_EQ(calls.size(), 1u);
+  EXPECT_NE(calls[0].baton, 0);
+  EXPECT_TRUE(calls[0].on_ui_thread);
+  EXPECT_EQ(calls[0].frame_target_time_nanos - calls[0].frame_start_time_nanos,
+            static_cast<uint64_t>(kDefaultFrameInterval.ToNanoseconds()));
+  std::vector<VsyncFrameRecorder::Frame> frames = recorder->frames();
+  ASSERT_EQ(frames.size(), 1u);
+  EXPECT_EQ(frames[0].start.ToEpochDelta().ToNanoseconds(),
+            static_cast<int64_t>(calls[0].frame_start_time_nanos));
 }
 
 }  // namespace testing

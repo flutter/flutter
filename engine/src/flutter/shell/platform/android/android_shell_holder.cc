@@ -101,6 +101,32 @@ FlutterEngineProcTable LoadEmbedderApi() {
   return embedder_api;
 }
 
+// The embedder API callbacks of the PlatformView overrides that
+// PlatformViewAndroid no longer has.
+PlatformViewAndroid::PlatformDispatchTable MakePlatformDispatchTable(
+    const std::shared_ptr<VsyncWaiterAndroid>& vsync_waiter) {
+  return {
+      .vsync_callback =
+          [vsync_waiter](intptr_t baton) { vsync_waiter->AwaitVSync(baton); },
+  };
+}
+
+// Gives the vsync source the engine handle once the holder owns the engine,
+// or retires it when there is no engine. There is no source when the Shell
+// failed before it created the platform view.
+void AttachVsyncWaiter(VsyncWaiterAndroid* vsync_waiter,
+                       FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                       const FlutterEngineProcTable* embedder_api) {
+  if (vsync_waiter == nullptr) {
+    return;
+  }
+  if (engine != nullptr) {
+    vsync_waiter->Attach(engine, embedder_api);
+  } else {
+    vsync_waiter->Detach();
+  }
+}
+
 }  // namespace
 
 AndroidShellHolder::AndroidShellHolder(
@@ -138,15 +164,20 @@ AndroidShellHolder::AndroidShellHolder(
   thread_host_ = std::make_shared<ThreadHost>(host_config);
 
   fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
+  std::shared_ptr<VsyncWaiterAndroid> vsync_waiter;
   AndroidRenderingAPI rendering_api = android_rendering_api_;
   Shell::CreateCallback<PlatformView> on_create_platform_view =
-      [&jni_facade, &weak_platform_view, rendering_api](Shell& shell) {
+      [&jni_facade, &weak_platform_view, &vsync_waiter,
+       rendering_api](Shell& shell) {
+        vsync_waiter =
+            std::make_shared<VsyncWaiterAndroid>(shell.GetTaskRunners());
         std::unique_ptr<PlatformViewAndroid> platform_view_android;
         platform_view_android = std::make_unique<PlatformViewAndroid>(
-            shell,                   // delegate
-            shell.GetTaskRunners(),  // task runners
-            jni_facade,              // JNI interop
-            rendering_api            // rendering API
+            shell,                                   // delegate
+            shell.GetTaskRunners(),                  // task runners
+            jni_facade,                              // JNI interop
+            rendering_api,                           // rendering API
+            MakePlatformDispatchTable(vsync_waiter)  // embedder callbacks
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;
@@ -214,6 +245,8 @@ AndroidShellHolder::AndroidShellHolder(
 
   platform_view_ = weak_platform_view;
   FML_DCHECK(platform_view_);
+  vsync_waiter_ = std::move(vsync_waiter);
+  AttachVsyncWaiter(vsync_waiter_.get(), engine_.get(), &embedder_api_);
   is_valid_ = engine_ != nullptr;
 }
 
@@ -224,6 +257,7 @@ AndroidShellHolder::AndroidShellHolder(
     UniqueEngine engine,
     std::unique_ptr<APKAssetProvider> apk_asset_provider,
     const fml::WeakPtr<PlatformViewAndroid>& platform_view,
+    std::shared_ptr<VsyncWaiterAndroid> vsync_waiter,
     AndroidRenderingAPI rendering_api)
     : settings_(settings),
       jni_facade_(jni_facade),
@@ -231,6 +265,7 @@ AndroidShellHolder::AndroidShellHolder(
       thread_host_(thread_host),
       engine_(std::move(engine)),
       embedder_api_(LoadEmbedderApi()),
+      vsync_waiter_(std::move(vsync_waiter)),
       apk_asset_provider_(std::move(apk_asset_provider)),
       android_rendering_api_(rendering_api) {
   FML_DCHECK(jni_facade);
@@ -238,10 +273,15 @@ AndroidShellHolder::AndroidShellHolder(
   FML_DCHECK(GetShell(engine_.get()).IsSetup());
   FML_DCHECK(platform_view_);
   FML_DCHECK(thread_host_);
+  // The spawned engine may already wait for a vsync; see VsyncWaiterAndroid.
+  AttachVsyncWaiter(vsync_waiter_.get(), engine_.get(), &embedder_api_);
   is_valid_ = engine_ != nullptr;
 }
 
 AndroidShellHolder::~AndroidShellHolder() {
+  if (vsync_waiter_) {
+    vsync_waiter_->Detach();
+  }
   engine_.reset();
   thread_host_.reset();
 }
@@ -292,14 +332,19 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
   FML_DCHECK(android_context);
 
   // This is a synchronous call, so the captures don't have race checks.
+  std::shared_ptr<VsyncWaiterAndroid> vsync_waiter;
   Shell::CreateCallback<PlatformView> on_create_platform_view =
-      [&jni_facade, android_context, &weak_platform_view](Shell& shell) {
+      [&jni_facade, android_context, &weak_platform_view,
+       &vsync_waiter](Shell& shell) {
+        vsync_waiter =
+            std::make_shared<VsyncWaiterAndroid>(shell.GetTaskRunners());
         std::unique_ptr<PlatformViewAndroid> platform_view_android;
         platform_view_android = std::make_unique<PlatformViewAndroid>(
-            shell,                   // delegate
-            shell.GetTaskRunners(),  // task runners
-            jni_facade,              // JNI interop
-            android_context          // Android context
+            shell,                                   // delegate
+            shell.GetTaskRunners(),                  // task runners
+            jni_facade,                              // JNI interop
+            android_context,                         // Android context
+            MakePlatformDispatchTable(vsync_waiter)  // embedder callbacks
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;
@@ -327,7 +372,7 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
 
   return std::unique_ptr<AndroidShellHolder>(new AndroidShellHolder(
       GetSettings(), jni_facade, thread_host_, std::move(engine),
-      apk_asset_provider_->Clone(), weak_platform_view,
+      apk_asset_provider_->Clone(), weak_platform_view, std::move(vsync_waiter),
       android_context->RenderingApi()));
 }
 
