@@ -357,9 +357,11 @@ ImageDecoderImpeller::DecompressTexture(
                                       std::max(options.target_width, 1u),
                                   static_cast<double>(max_texture_size.height) /
                                       std::max(options.target_height, 1u));
-    target_size =
-        SkISize::Make(std::max(1L, std::lround(options.target_width * scale)),
-                      std::max(1L, std::lround(options.target_height * scale)));
+    target_size = SkISize::Make(
+        std::max(1,
+                 static_cast<int>(std::lround(options.target_width * scale))),
+        std::max(1,
+                 static_cast<int>(std::lround(options.target_height * scale))));
   }
 
   // Fast path for when the input requires no decompressing or conversion.
