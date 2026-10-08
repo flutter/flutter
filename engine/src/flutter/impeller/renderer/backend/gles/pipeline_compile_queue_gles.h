@@ -6,14 +6,13 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_PIPELINE_COMPILE_QUEUE_GLES_H_
 
 #include <memory>
-#include <optional>
 
-#include "flutter/fml/closure.h"
 #include "flutter/fml/task_runner.h"
 #include "impeller/base/comparable.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "third_party/abseil-cpp/absl/container/linked_hash_map.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -30,6 +29,28 @@ namespace impeller {
 class PipelineCompileQueueGLES final
     : public std::enable_shared_from_this<PipelineCompileQueueGLES> {
  public:
+  //----------------------------------------------------------------------------
+  /// @brief      A compile job, performed in two steps that are always run in
+  ///             order on the same thread.
+  ///
+  class CompileJob {
+   public:
+    virtual ~CompileJob() = default;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Starts the job.
+    ///
+    /// @return     An error if the job failed, in which case `Finish` is not
+    ///             called.
+    ///
+    virtual absl::Status Start() = 0;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Finishes the job. Only called if `Start` succeeded.
+    ///
+    virtual absl::Status Finish() = 0;
+  };
+
   static std::shared_ptr<PipelineCompileQueueGLES> Create(
       std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
@@ -42,25 +63,21 @@ class PipelineCompileQueueGLES final
   //----------------------------------------------------------------------------
   /// @brief      Post a compile job for the specified descriptor.
   ///
-  ///             A job has two steps, `start` and `finish`, which are always
-  ///             run in that order on the same thread. When the job is run by
-  ///             the worker, `finish` is posted as a separate task to the
-  ///             worker task runner, giving work started by `start` (such as
-  ///             the driver linking a program) time to progress. That task
-  ///             can't be performed eagerly. When the job is performed eagerly
-  ///             (see `PerformJobEagerly`) or flushed because the queue is
-  ///             being destroyed, both steps run back to back on the calling
-  ///             thread.
+  ///             When the job is run by the worker, `Finish` is posted as a
+  ///             separate task to the worker task runner, giving work started
+  ///             by `Start` (such as the driver linking a program) time to
+  ///             progress. That task can't be performed eagerly. When the job
+  ///             is performed eagerly (see `PerformJobEagerly`) or flushed
+  ///             because the queue is being destroyed, both steps run back to
+  ///             back on the calling thread.
   ///
-  /// @param[in]  desc    The description
-  /// @param[in]  start   The first step of the job
-  /// @param[in]  finish  The second step of the job
+  /// @param[in]  desc  The description
+  /// @param[in]  job   The job
   ///
   /// @return     If the job was successfully posted to the worker task runner.
   ///
   bool PostJobForDescriptor(const PipelineDescriptor& desc,
-                            const fml::closure& start,
-                            const fml::closure& finish);
+                            std::unique_ptr<CompileJob> job);
 
   //----------------------------------------------------------------------------
   /// @brief      If the job has not yet been done, perform it eagerly on the
@@ -72,11 +89,6 @@ class PipelineCompileQueueGLES final
   void PerformJobEagerly(const PipelineDescriptor& desc);
 
  private:
-  struct Job {
-    fml::closure start;
-    fml::closure finish;
-  };
-
   explicit PipelineCompileQueueGLES(
       std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
@@ -85,22 +97,22 @@ class PipelineCompileQueueGLES final
   void ScheduleNextJob();
 
   /// Removes and returns the oldest pending job. If there are none, marks the
-  /// queue as no longer processing and returns nullopt.
-  std::optional<Job> TakeNextJob();
+  /// queue as no longer processing and returns null.
+  std::unique_ptr<CompileJob> TakeNextJob();
 
-  /// Runs the start of the job and posts its finish as a separate task to the
-  /// worker task runner. Must be called on the worker task runner.
+  /// Starts the job and posts its finish as a separate task to the worker task
+  /// runner. Must be called on the worker task runner.
   static void PerformJobOnWorker(
       const std::shared_ptr<fml::BasicTaskRunner>& worker_task_runner,
-      const Job& job);
+      std::shared_ptr<CompileJob> job);
 
-  /// Runs the start and finish of the job back to back on the calling thread.
-  static void PerformJobImmediately(const Job& job);
+  /// Starts and finishes the job back to back on the calling thread.
+  static void PerformJobImmediately(CompileJob& job);
 
   std::shared_ptr<fml::BasicTaskRunner> worker_task_runner_;
   Mutex mutex_;
   absl::linked_hash_map<PipelineDescriptor,
-                        Job,
+                        std::unique_ptr<CompileJob>,
                         ComparableHash<PipelineDescriptor>,
                         ComparableEqual<PipelineDescriptor>>
       pending_jobs_ IPLR_GUARDED_BY(mutex_);

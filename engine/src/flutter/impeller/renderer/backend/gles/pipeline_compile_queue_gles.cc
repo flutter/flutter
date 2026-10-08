@@ -25,25 +25,24 @@ PipelineCompileQueueGLES::PipelineCompileQueueGLES(
 PipelineCompileQueueGLES::~PipelineCompileQueueGLES() {
   // Flush any jobs still pending. Tasks already posted to the worker only hold
   // a weak reference to the queue and become no-ops.
-  while (std::optional<Job> job = TakeNextJob()) {
+  while (std::unique_ptr<CompileJob> job = TakeNextJob()) {
     PerformJobImmediately(*job);
   }
 }
 
 bool PipelineCompileQueueGLES::PostJobForDescriptor(
     const PipelineDescriptor& desc,
-    const fml::closure& start,
-    const fml::closure& finish) {
-  if (!start || !finish) {
+    std::unique_ptr<CompileJob> job) {
+  if (!job) {
     return false;
   }
-  Job job{start, finish};
 
   bool inserted = false;
   bool should_schedule = false;
   {
     Lock lock(mutex_);
-    inserted = pending_jobs_.insert({desc, job}).second;
+    // `try_emplace` leaves `job` untouched if the descriptor is already queued.
+    inserted = pending_jobs_.try_emplace(desc, std::move(job)).second;
     should_schedule = inserted && !is_processing_;
     if (should_schedule) {
       is_processing_ = true;
@@ -58,8 +57,9 @@ bool PipelineCompileQueueGLES::PostJobForDescriptor(
     FML_LOG(WARNING) << "Got multiple compile jobs for the same descriptor. "
                         "Running eagerly.";
     worker_task_runner_->PostTask(
-        [worker_task_runner = worker_task_runner_, job]() {
-          PerformJobOnWorker(worker_task_runner, job);
+        [worker_task_runner = worker_task_runner_,
+         shared_job = std::shared_ptr<CompileJob>(std::move(job))]() {
+          PerformJobOnWorker(worker_task_runner, shared_job);
         });
   } else if (should_schedule) {
     ScheduleNextJob();
@@ -69,7 +69,7 @@ bool PipelineCompileQueueGLES::PostJobForDescriptor(
 
 void PipelineCompileQueueGLES::PerformJobEagerly(
     const PipelineDescriptor& desc) {
-  Job job;
+  std::unique_ptr<CompileJob> job;
   {
     Lock lock(mutex_);
     auto found = pending_jobs_.find(desc);
@@ -90,7 +90,7 @@ void PipelineCompileQueueGLES::PerformJobEagerly(
     job = std::move(found->second);
     pending_jobs_.erase(found);
   }
-  PerformJobImmediately(job);
+  PerformJobImmediately(*job);
 }
 
 void PipelineCompileQueueGLES::ScheduleNextJob() {
@@ -99,36 +99,44 @@ void PipelineCompileQueueGLES::ScheduleNextJob() {
     if (!queue) {
       return;
     }
-    if (std::optional<Job> job = queue->TakeNextJob()) {
-      PerformJobOnWorker(queue->worker_task_runner_, *job);
+    if (std::unique_ptr<CompileJob> job = queue->TakeNextJob()) {
+      PerformJobOnWorker(queue->worker_task_runner_, std::move(job));
       queue->ScheduleNextJob();
     }
   });
 }
 
-std::optional<PipelineCompileQueueGLES::Job>
+std::unique_ptr<PipelineCompileQueueGLES::CompileJob>
 PipelineCompileQueueGLES::TakeNextJob() {
   Lock lock(mutex_);
   if (pending_jobs_.empty()) {
     is_processing_ = false;
-    return std::nullopt;
+    return nullptr;
   }
   auto job_iterator = pending_jobs_.begin();
-  Job job = std::move(job_iterator->second);
+  std::unique_ptr<CompileJob> job = std::move(job_iterator->second);
   pending_jobs_.erase(job_iterator);
   return job;
 }
 
 void PipelineCompileQueueGLES::PerformJobOnWorker(
     const std::shared_ptr<fml::BasicTaskRunner>& worker_task_runner,
-    const Job& job) {
-  job.start();
-  worker_task_runner->PostTask(job.finish);
+    std::shared_ptr<CompileJob> job) {
+  if (!job->Start().ok()) {
+    return;
+  }
+  worker_task_runner->PostTask([job = std::move(job)]() {
+    // Jobs report their own errors.
+    job->Finish().IgnoreError();
+  });
 }
 
-void PipelineCompileQueueGLES::PerformJobImmediately(const Job& job) {
-  job.start();
-  job.finish();
+void PipelineCompileQueueGLES::PerformJobImmediately(CompileJob& job) {
+  if (!job.Start().ok()) {
+    return;
+  }
+  // Jobs report their own errors.
+  job.Finish().IgnoreError();
 }
 
 }  // namespace impeller

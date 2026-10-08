@@ -282,8 +282,8 @@ void PipelineLibraryGLES::StartPipelineCreation(PipelineCreation& creation) {
     return;
   }
 
-  std::shared_ptr<PendingProgram> pending_program =
-      std::make_shared<PendingProgram>(
+  std::unique_ptr<PendingProgram> pending_program =
+      std::make_unique<PendingProgram>(
           reactor, creation.descriptor, creation.vert_function,
           creation.frag_function, creation.threadsafe);
   if (absl::Status status = pending_program->Compile(); !status.ok()) {
@@ -296,7 +296,7 @@ void PipelineLibraryGLES::StartPipelineCreation(PipelineCreation& creation) {
 
 void PipelineLibraryGLES::FinishPipelineCreation(PipelineCreation& creation) {
   // Taking the program ensures it is destroyed here, on the reactor.
-  std::shared_ptr<PendingProgram> pending_program =
+  std::unique_ptr<PendingProgram> pending_program =
       std::move(creation.pending_program);
   if (!pending_program) {
     // The promise was already fulfilled by `StartPipelineCreation`.
@@ -327,6 +327,42 @@ void PipelineLibraryGLES::FinishPipelineCreation(PipelineCreation& creation) {
       CreatePipeline(creation.weak_library, library.GetReactor(),
                      creation.descriptor, *std::move(program)));
 }
+
+class PipelineLibraryGLES::PipelineCompileJob final
+    : public PipelineCompileQueueGLES::CompileJob {
+ public:
+  PipelineCompileJob(std::shared_ptr<PipelineCreation> creation,
+                     std::shared_ptr<ReactorGLES> reactor)
+      : creation_(std::move(creation)), reactor_(std::move(reactor)) {}
+
+  // |CompileJob|
+  absl::Status Start() override {
+    if (creation_->weak_library.expired()) {
+      creation_->promise->set_value(nullptr);
+      return absl::CancelledError("The pipeline library was collected.");
+    }
+    AddReactorOperation(&StartPipelineCreation);
+    return absl::OkStatus();
+  }
+
+  // |CompileJob|
+  absl::Status Finish() override {
+    AddReactorOperation(&FinishPipelineCreation);
+    return absl::OkStatus();
+  }
+
+ private:
+  /// Runs the step on the reactor. Reactor operations added on the same thread
+  /// run in order, so the finish step always runs after the start step.
+  void AddReactorOperation(void (*step)(PipelineCreation&)) {
+    const bool result = reactor_->AddOperation(
+        [creation = creation_, step](const ReactorGLES&) { step(*creation); });
+    FML_CHECK(result);
+  }
+
+  std::shared_ptr<PipelineCreation> creation_;
+  std::shared_ptr<ReactorGLES> reactor_;
+};
 
 // |PipelineLibrary|
 PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
@@ -371,29 +407,13 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
           .frag_function = frag_function,
           .threadsafe = threadsafe,
       });
-  std::shared_ptr<ReactorGLES> reactor = reactor_;
-  // Reactor operations added on the same thread run in order, so the finish
-  // operation always runs after the start operation.
-  fml::closure start = [creation, reactor]() {
-    if (creation->weak_library.expired()) {
-      creation->promise->set_value(nullptr);
-      return;
-    }
-    const bool result = reactor->AddOperation(
-        [creation](const ReactorGLES&) { StartPipelineCreation(*creation); });
-    FML_CHECK(result);
-  };
-  fml::closure finish = [creation, reactor]() {
-    const bool result = reactor->AddOperation(
-        [creation](const ReactorGLES&) { FinishPipelineCreation(*creation); });
-    FML_CHECK(result);
-  };
+  std::unique_ptr<PipelineCompileJob> job =
+      std::make_unique<PipelineCompileJob>(std::move(creation), reactor_);
 
   if (async && compile_queue_) {
-    compile_queue_->PostJobForDescriptor(descriptor, start, finish);
-  } else {
-    start();
-    finish();
+    compile_queue_->PostJobForDescriptor(descriptor, std::move(job));
+  } else if (job->Start().ok()) {
+    job->Finish().IgnoreError();
   }
 
   return pipeline_future;

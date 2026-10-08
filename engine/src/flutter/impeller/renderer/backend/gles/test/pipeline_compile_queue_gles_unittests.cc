@@ -15,6 +15,7 @@
 #include "flutter/fml/task_runner_util.h"
 #include "flutter/fml/thread.h"
 #include "flutter/testing/testing.h"
+#include "gmock/gmock.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 
 namespace impeller {
@@ -55,11 +56,21 @@ class CapturingTaskRunner final : public fml::BasicTaskRunner {
   std::deque<fml::closure> tasks_;
 };
 
+class MockCompileJob : public PipelineCompileQueueGLES::CompileJob {
+ public:
+  MOCK_METHOD(absl::Status, Start, (), (override));
+  MOCK_METHOD(absl::Status, Finish, (), (override));
+};
+
 /// Posts a job whose work is done entirely in its start step.
 bool PostJob(PipelineCompileQueueGLES& queue,
              const PipelineDescriptor& desc,
              const fml::closure& start) {
-  return queue.PostJobForDescriptor(desc, start, [] {});
+  auto job = std::make_unique<::testing::NiceMock<MockCompileJob>>();
+  ON_CALL(*job, Start())
+      .WillByDefault(::testing::DoAll(::testing::InvokeWithoutArgs(start),
+                                      ::testing::Return(absl::OkStatus())));
+  return queue.PostJobForDescriptor(desc, std::move(job));
 }
 
 }  // namespace
@@ -251,10 +262,7 @@ TEST(PipelineCompileQueueGLESTest, PostJobForDescriptorRejectsNullJob) {
   auto queue = PipelineCompileQueueGLES::Create(runner);
   ASSERT_NE(queue, nullptr);
 
-  EXPECT_FALSE(
-      queue->PostJobForDescriptor(PipelineDescriptor{}, nullptr, [] {}));
-  EXPECT_FALSE(
-      queue->PostJobForDescriptor(PipelineDescriptor{}, [] {}, nullptr));
+  EXPECT_FALSE(queue->PostJobForDescriptor(PipelineDescriptor{}, nullptr));
   EXPECT_EQ(runner->RunAll(), 0u);
 }
 
@@ -331,17 +339,20 @@ TEST(PipelineCompileQueueGLESTest, WorkerRunsFinishAsSeparateTask) {
   auto queue = PipelineCompileQueueGLES::Create(runner);
   ASSERT_NE(queue, nullptr);
 
-  std::vector<std::string> events;
-  ASSERT_TRUE(queue->PostJobForDescriptor(
-      PipelineDescriptor{}, [&events] { events.push_back("start"); },
-      [&events] { events.push_back("finish"); }));
+  auto job = std::make_unique<MockCompileJob>();
+  ::testing::MockFunction<void()> after_first_task;
+  {
+    ::testing::InSequence sequence;
+    EXPECT_CALL(*job, Start());
+    EXPECT_CALL(after_first_task, Call());
+    EXPECT_CALL(*job, Finish());
+  }
+  ASSERT_TRUE(
+      queue->PostJobForDescriptor(PipelineDescriptor{}, std::move(job)));
 
   runner->RunOne();
-  EXPECT_EQ(events, std::vector<std::string>{"start"});
-  EXPECT_GE(runner->PendingTaskCount(), 1u);
-
+  after_first_task.Call();
   runner->RunAll();
-  EXPECT_EQ(events, (std::vector<std::string>{"start", "finish"}));
 }
 
 TEST(PipelineCompileQueueGLESTest, WorkerFinishesJobBeforeStartingNext) {
@@ -349,18 +360,16 @@ TEST(PipelineCompileQueueGLESTest, WorkerFinishesJobBeforeStartingNext) {
   auto queue = PipelineCompileQueueGLES::Create(runner);
   ASSERT_NE(queue, nullptr);
 
-  std::vector<std::string> events;
+  ::testing::InSequence sequence;
   for (int i = 0; i < 2; i++) {
+    auto job = std::make_unique<MockCompileJob>();
+    EXPECT_CALL(*job, Start());
+    EXPECT_CALL(*job, Finish());
     PipelineDescriptor desc;
     desc.SetLabel(std::to_string(i));
-    ASSERT_TRUE(queue->PostJobForDescriptor(
-        desc, [&events, i] { events.push_back("start" + std::to_string(i)); },
-        [&events, i] { events.push_back("finish" + std::to_string(i)); }));
+    ASSERT_TRUE(queue->PostJobForDescriptor(desc, std::move(job)));
   }
   runner->RunAll();
-
-  EXPECT_EQ(events, (std::vector<std::string>{"start0", "finish0", "start1",
-                                              "finish1"}));
 }
 
 TEST(PipelineCompileQueueGLESTest, PerformJobEagerlyRunsStartAndFinish) {
@@ -368,16 +377,20 @@ TEST(PipelineCompileQueueGLESTest, PerformJobEagerlyRunsStartAndFinish) {
   auto queue = PipelineCompileQueueGLES::Create(runner);
   ASSERT_NE(queue, nullptr);
 
+  auto job = std::make_unique<MockCompileJob>();
+  ::testing::MockFunction<void()> after_perform;
+  {
+    ::testing::InSequence sequence;
+    EXPECT_CALL(*job, Start());
+    EXPECT_CALL(*job, Finish());
+    EXPECT_CALL(after_perform, Call());
+  }
   PipelineDescriptor desc;
-  std::vector<std::string> events;
-  ASSERT_TRUE(queue->PostJobForDescriptor(
-      desc, [&events] { events.push_back("start"); },
-      [&events] { events.push_back("finish"); }));
-  queue->PerformJobEagerly(desc);
-  EXPECT_EQ(events, (std::vector<std::string>{"start", "finish"}));
+  ASSERT_TRUE(queue->PostJobForDescriptor(desc, std::move(job)));
 
+  queue->PerformJobEagerly(desc);
+  after_perform.Call();
   runner->RunAll();
-  EXPECT_EQ(events, (std::vector<std::string>{"start", "finish"}));
 }
 
 TEST(PipelineCompileQueueGLESTest, DestructorRunsStartAndFinish) {
@@ -385,13 +398,19 @@ TEST(PipelineCompileQueueGLESTest, DestructorRunsStartAndFinish) {
   auto queue = PipelineCompileQueueGLES::Create(runner);
   ASSERT_NE(queue, nullptr);
 
-  std::vector<std::string> events;
-  ASSERT_TRUE(queue->PostJobForDescriptor(
-      PipelineDescriptor{}, [&events] { events.push_back("start"); },
-      [&events] { events.push_back("finish"); }));
-  queue.reset();
+  auto job = std::make_unique<MockCompileJob>();
+  ::testing::MockFunction<void()> after_reset;
+  {
+    ::testing::InSequence sequence;
+    EXPECT_CALL(*job, Start());
+    EXPECT_CALL(*job, Finish());
+    EXPECT_CALL(after_reset, Call());
+  }
+  ASSERT_TRUE(
+      queue->PostJobForDescriptor(PipelineDescriptor{}, std::move(job)));
 
-  EXPECT_EQ(events, (std::vector<std::string>{"start", "finish"}));
+  queue.reset();
+  after_reset.Call();
 }
 
 TEST(PipelineCompileQueueGLESTest, StartedJobCannotBePerformedEagerly) {
@@ -399,18 +418,52 @@ TEST(PipelineCompileQueueGLESTest, StartedJobCannotBePerformedEagerly) {
   auto queue = PipelineCompileQueueGLES::Create(runner);
   ASSERT_NE(queue, nullptr);
 
+  auto job = std::make_unique<MockCompileJob>();
+  ::testing::MockFunction<void()> after_perform;
+  {
+    ::testing::InSequence sequence;
+    EXPECT_CALL(*job, Start());
+    EXPECT_CALL(after_perform, Call());
+    EXPECT_CALL(*job, Finish());
+  }
   PipelineDescriptor desc;
-  int finished = 0;
-  ASSERT_TRUE(
-      queue->PostJobForDescriptor(desc, [] {}, [&finished] { finished++; }));
+  ASSERT_TRUE(queue->PostJobForDescriptor(desc, std::move(job)));
   runner->RunOne();
 
   // The finish step is waiting on the worker, so it isn't stolen.
   queue->PerformJobEagerly(desc);
-  EXPECT_EQ(finished, 0);
+  after_perform.Call();
+  runner->RunAll();
+}
+
+TEST(PipelineCompileQueueGLESTest, WorkerSkipsFinishIfStartFails) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueGLES::Create(runner);
+  ASSERT_NE(queue, nullptr);
+
+  auto job = std::make_unique<MockCompileJob>();
+  EXPECT_CALL(*job, Start())
+      .WillOnce(::testing::Return(absl::InternalError("Start failed.")));
+  EXPECT_CALL(*job, Finish()).Times(0);
+  ASSERT_TRUE(
+      queue->PostJobForDescriptor(PipelineDescriptor{}, std::move(job)));
 
   runner->RunAll();
-  EXPECT_EQ(finished, 1);
+}
+
+TEST(PipelineCompileQueueGLESTest, PerformJobEagerlySkipsFinishIfStartFails) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueGLES::Create(runner);
+  ASSERT_NE(queue, nullptr);
+
+  auto job = std::make_unique<MockCompileJob>();
+  EXPECT_CALL(*job, Start())
+      .WillOnce(::testing::Return(absl::InternalError("Start failed.")));
+  EXPECT_CALL(*job, Finish()).Times(0);
+  PipelineDescriptor desc;
+  ASSERT_TRUE(queue->PostJobForDescriptor(desc, std::move(job)));
+
+  queue->PerformJobEagerly(desc);
 }
 
 }  // namespace testing
