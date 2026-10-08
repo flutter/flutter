@@ -193,8 +193,8 @@ void testWidgets(
             } finally {
               await variant.tearDown(value, memento);
               maybeTearDownLeakTrackingForTest();
+              semanticsHandle?.dispose();
             }
-            semanticsHandle?.dispose();
           },
           tester._endOfTestVerifications,
           description: combinedDescription,
