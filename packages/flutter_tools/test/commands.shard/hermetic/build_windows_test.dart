@@ -318,6 +318,40 @@ void main() {
   );
 
   testUsingContext(
+    'Windows build config-only writes CMake configuration with local engine options',
+    () async {
+      fileSystem.directory(r'C:\engine\src\out\host_debug').createSync(recursive: true);
+      final fakeVisualStudio = FakeVisualStudio();
+      setUpMockProjectFilesForBuild();
+      processManager = FakeProcessManager.list(<FakeCommand>[cmakeGenerationCommand()]);
+
+      final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
+      await createTestCommandRunner(command).run(const <String>[
+        r'--local-engine=host_debug',
+        r'--local-engine-host=host_debug',
+        r'--local-engine-src-path=C:\engine\src',
+        'windows',
+        '--config-only',
+        '--no-pub',
+      ]);
+      final File configFile = fileSystem.file(
+        r'C:\windows\flutter\ephemeral\generated_config.cmake',
+      );
+      expect(configFile, exists);
+      final String configContent = configFile.readAsStringSync();
+      expect(configContent, contains(r'"LOCAL_ENGINE=host_debug"'));
+      expect(configContent, contains(r'"LOCAL_ENGINE_HOST=host_debug"'));
+      expect(configContent, contains(r'"FLUTTER_ENGINE=C:\\engine\\src"'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => windowsPlatform,
+      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    },
+  );
+
+  testUsingContext(
     'Windows build extracts errors from stdout',
     () async {
       final fakeVisualStudio = FakeVisualStudio();

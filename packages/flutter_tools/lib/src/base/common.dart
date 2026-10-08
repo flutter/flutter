@@ -49,6 +49,18 @@ final class ToolExit implements Exception {
   String toString() => 'Error: $message';
 }
 
+/// [ToolExit] extensions on [Completer].
+extension CompleterToolExit<T> on Completer<T> {
+  /// Completes this completer with a [ToolExit] error carrying [message] and
+  /// [exitCode].
+  ///
+  /// Equivalent to catching the exception thrown by [throwToolExit] and
+  /// forwarding it to [Completer.completeError].
+  void completeWithToolExit(String? message, {int? exitCode}) {
+    completeError(ToolExit._(message, exitCode: exitCode), StackTrace.current);
+  }
+}
+
 /// Error handling extensions on [Future].
 extension FutureErrorHandling<T> on Future<T> {
   /// Handles errors on this future without requiring an empty `.then` callback.
