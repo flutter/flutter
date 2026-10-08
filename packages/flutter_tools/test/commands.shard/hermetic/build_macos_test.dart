@@ -501,7 +501,6 @@ STDERR STUFF
 
       final BuildCommand command = createFakeBuildCommand(
         fileSystem: fileSystem,
-        logger: logger,
         osUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         platform: macosPlatform,
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
@@ -748,6 +747,7 @@ STDERR STUFF
     );
 
     final bool supported = BuildMacosCommand(
+      appleContext: FakeAppleContext(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       featureFlags: TestFeatureFlags(),
       toolContext: FakeToolContext(),
@@ -764,6 +764,7 @@ STDERR STUFF
     () {
       expect(
         BuildMacosCommand(
+          appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           featureFlags: TestFeatureFlags(),
           toolContext: FakeToolContext(platform: macosPlatform),
@@ -783,6 +784,7 @@ STDERR STUFF
     () {
       expect(
         BuildMacosCommand(
+          appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           featureFlags: TestFeatureFlags(isMacOSEnabled: true),
           toolContext: FakeToolContext(platform: macosPlatform),

@@ -26,7 +26,6 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'bundle.dart' as bundle;
 import 'cache.dart';
-import 'context/tool_context.dart';
 import 'convert.dart';
 import 'darwin/darwin.dart';
 import 'features.dart';
@@ -46,25 +45,17 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform {
-  XcodeBasedProject({
-    this._featureFlags,
-    this._toolContext,
-    this._xcode,
-    this._xcodeProjectInterpreter,
-  });
+  XcodeBasedProject({this._xcodeProjectInterpreter});
 
   static const _defaultHostAppName = 'Runner';
 
-  final FeatureFlags? _featureFlags;
-  final ToolContext? _toolContext;
-  final Xcode? _xcode;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
-  FileSystem get _fileSystem => _toolContext?.fs ?? parent.directory.fileSystem;
-  Cache get _projectCache => _toolContext?.cache ?? parent.projectCache;
-  FeatureFlags get _projectFeatureFlags => _featureFlags ?? parent.projectFeatureFlags;
-  Logger get _projectLogger => _toolContext?.logger ?? parent.projectLogger;
-  Xcode? get _projectXcode => _xcode ?? parent.projectXcode;
+  FileSystem get _fileSystem => parent.directory.fileSystem;
+  Cache get _projectCache => parent.projectCache;
+  FeatureFlags get _projectFeatureFlags => parent.projectFeatureFlags;
+  Logger get _projectLogger => parent.projectLogger;
+  Xcode? get _projectXcode => parent.projectXcode;
   XcodeProjectInterpreter? get _projectXcodeProjectInterpreter =>
       _xcodeProjectInterpreter ?? parent.projectXcodeProjectInterpreter;
 
@@ -478,32 +469,18 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter module projects.
 class IosProject extends XcodeBasedProject {
-  IosProject.fromFlutter(
-    this.parent, {
-    super.featureFlags,
-    this._plistParser,
-    this._templateRenderer,
-    super.toolContext,
-    super.xcode,
-    super.xcodeProjectInterpreter,
-  });
+  IosProject.fromFlutter(this.parent, {super.xcodeProjectInterpreter});
 
   @override
   final FlutterProject parent;
 
-  final PlistParser? _plistParser;
-  final TemplateRenderer? _templateRenderer;
-
-  Config get _projectConfig => _toolContext?.config ?? parent.projectConfig;
-  FileSystemUtils get _projectFileSystemUtils =>
-      _toolContext?.fileSystemUtils ?? parent.projectFileSystemUtils;
-  Platform get _projectPlatform => _toolContext?.platform ?? parent.projectPlatform;
-  PlistParser get _projectPlistParser => _plistParser ?? parent.projectPlistParser;
-  ProcessManager get _projectProcessManager =>
-      _toolContext?.processManager ?? parent.projectProcessManager;
-  TemplateRenderer get _projectTemplateRenderer =>
-      _templateRenderer ?? parent.projectTemplateRenderer;
-  AnsiTerminal get _projectTerminal => _toolContext?.terminal ?? parent.projectTerminal;
+  Config get _projectConfig => parent.projectConfig;
+  FileSystemUtils get _projectFileSystemUtils => parent.projectFileSystemUtils;
+  Platform get _projectPlatform => parent.projectPlatform;
+  PlistParser get _projectPlistParser => parent.projectPlistParser;
+  ProcessManager get _projectProcessManager => parent.projectProcessManager;
+  TemplateRenderer get _projectTemplateRenderer => parent.projectTemplateRenderer;
+  AnsiTerminal get _projectTerminal => parent.projectTerminal;
 
   @override
   String get pluginConfigKey => IOSPlugin.kConfigKey;
@@ -1256,13 +1233,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
 
 /// The macOS sub project.
 class MacOSProject extends XcodeBasedProject {
-  MacOSProject.fromFlutter(
-    this.parent, {
-    super.featureFlags,
-    super.toolContext,
-    super.xcode,
-    super.xcodeProjectInterpreter,
-  });
+  MacOSProject.fromFlutter(this.parent);
 
   @override
   final FlutterProject parent;

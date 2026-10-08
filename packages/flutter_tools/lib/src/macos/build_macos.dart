@@ -17,6 +17,7 @@ import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
@@ -86,20 +87,17 @@ final _filteredOutput = RegExp(
 /// Builds the macOS project through xcodebuild.
 // TODO(zanderso): refactor to share code with the existing iOS code.
 Future<void> buildMacOS({
+  required AppleContext appleContext,
   required BuildInfo buildInfo,
+  required FeatureFlags featureFlags,
   required FlutterProject flutterProject,
   required ToolContext toolContext,
   required bool verboseLogging,
   Analytics analytics = const NoOpAnalytics(),
-  CocoaPods? cocoaPods,
   bool configOnly = false,
-  FeatureFlags? featureFlags,
-  PlistParser? plistParser,
   SizeAnalyzer? sizeAnalyzer,
   String? targetOverride,
   bool usingCISystem = false,
-  Xcode? xcode,
-  XcodeProjectInterpreter? xcodeProjectInterpreter,
 }) async {
   final Directory xcodeProject = flutterProject.macos.xcodeProject;
   if (!xcodeProject.existsSync()) {
@@ -110,6 +108,12 @@ Future<void> buildMacOS({
     );
   }
 
+  final AppleContext(
+    :CocoaPods cocoaPods,
+    :PlistParser plistParser,
+    :Xcode xcode,
+    :XcodeProjectInterpreter xcodeProjectInterpreter,
+  ) = appleContext;
   final ToolContext(
     :Config config,
     :FileSystem fs,
@@ -122,16 +126,9 @@ Future<void> buildMacOS({
     :AnsiTerminal terminal,
     :UserMessages userMessages,
   ) = toolContext;
-  final XcodeProjectInterpreter? interpreter =
-      xcodeProjectInterpreter ?? flutterProject.projectXcodeProjectInterpreter;
-  if (interpreter == null || !interpreter.isInstalled) {
+  if (!xcodeProjectInterpreter.isInstalled) {
     throwToolExit(userMessages.xcodeMissing);
   }
-
-  final PlistParser parser = plistParser ?? flutterProject.projectPlistParser;
-  final FeatureFlags flags = featureFlags ?? flutterProject.projectFeatureFlags;
-  final CocoaPods? pods = cocoaPods ?? flutterProject.projectCocoaPods;
-  final Xcode? projectXcode = xcode ?? flutterProject.projectXcode;
 
   // The .xcworkspace may not exist (e.g. a project using Swift Package Manager
   // without CocoaPods). When absent, xcodebuild builds the .xcodeproj directly.
@@ -144,17 +141,17 @@ Future<void> buildMacOS({
     XcodeProjectObjectVersionMigration(flutterProject.macos, logger),
     XcodeScriptBuildPhaseMigration(flutterProject.macos, logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(flutterProject.macos, logger),
-    FlutterApplicationMigration(flutterProject.macos, logger, plistParser: parser),
+    FlutterApplicationMigration(flutterProject.macos, logger, plistParser: plistParser),
     NSApplicationMainDeprecationMigration(flutterProject.macos, logger),
     SecureRestorableStateMigration(flutterProject.macos, logger),
     SwiftPackageManagerIntegrationMigration(
       flutterProject.macos,
       darwinPlatform,
       buildInfo,
-      xcodeProjectInterpreter: interpreter,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
       logger: logger,
       fileSystem: fs,
-      plistParser: parser,
+      plistParser: plistParser,
       config: config,
       analytics: analytics,
       hostPlatform: platform,
@@ -175,9 +172,9 @@ Future<void> buildMacOS({
     plugins: await flutterProject.macos.getPlugins(),
     fileSystem: fs,
     logger: logger,
-    cocoapods: pods,
+    cocoapods: cocoaPods,
     analytics: analytics,
-    featureFlags: flags,
+    featureFlags: featureFlags,
   );
 
   final String buildDirectoryPath = getMacOSBuildDirectory();
@@ -190,7 +187,7 @@ Future<void> buildMacOS({
   // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
   // regardless of the project name so long as there is exactly one project.
   final String? xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
-  final XcodeProjectInfo? projectInfo = await interpreter.getInfo(
+  final XcodeProjectInfo? projectInfo = await xcodeProjectInterpreter.getInfo(
     flutterProject.macos,
     projectFilename: xcodeProjectName,
     buildDirectory: flutterBuildDir,
@@ -283,7 +280,7 @@ Future<void> buildMacOS({
   } else {
     // Release builds default to universal binary unless isMacOSArm64OnlyEnabled is set.
     destination = XcodeSdk.MacOSX.genericPlatform;
-    archs = flags.isMacOSArm64OnlyEnabled ? 'arm64' : null;
+    archs = featureFlags.isMacOSArm64OnlyEnabled ? 'arm64' : null;
   }
 
   // Get EXCLUDED_ARCHS from Xcode project build settings
@@ -296,7 +293,7 @@ Future<void> buildMacOS({
 
   final bool binaryContainsX86Slice =
       archs == null && (excludedArchs == null || !excludedArchs.contains('x86_64'));
-  final bool allowsArm64Only = switch (interpreter.version?.major) {
+  final bool allowsArm64Only = switch (xcodeProjectInterpreter.version?.major) {
     null || < 27 => false,
     _ => true,
   };
@@ -319,7 +316,7 @@ Future<void> buildMacOS({
         'Consider removing arm64 from EXCLUDED_ARCHS.',
       );
     }
-    final List<String> xcodebuildCommandArgs = await projectXcode!
+    final List<String> xcodebuildCommandArgs = await xcode
         .fetchDependenciesAndGenerateXcodebuildArgs(
           flutterProject.macos,
           fs.directory(buildDirectoryPath),
@@ -405,7 +402,7 @@ Future<void> buildMacOS({
     final String plistPath = builtInfoPlist.existsSync()
         ? builtInfoPlist.path
         : flutterProject.macos.defaultHostInfoPlist.path;
-    final bool? impellerEnabled = parser.getValueFromFile<bool>(
+    final bool? impellerEnabled = plistParser.getValueFromFile<bool>(
       plistPath,
       PlistParser.kFLTEnableImpellerKey,
     );

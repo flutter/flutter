@@ -10,6 +10,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
 import '../macos/build_macos.dart';
@@ -20,6 +21,7 @@ import 'build.dart';
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({
+    required this.appleContext,
     required this.buildSystem,
     required this.featureFlags,
     required ToolContext super.toolContext,
@@ -36,6 +38,9 @@ class BuildMacosCommand extends BuildSubCommand {
       AppleBuildOptionsBundle.configOnly,
     ], verboseHelp: verboseHelp);
   }
+
+  /// Holds Apple-specific dependencies.
+  final AppleContext appleContext;
 
   /// The build system used to execute targets.
   final BuildSystem buildSystem;
@@ -81,6 +86,7 @@ class BuildMacosCommand extends BuildSubCommand {
 
     await buildMacOS(
       analytics: analytics,
+      appleContext: appleContext,
       buildInfo: buildInfo,
       configOnly: configOnly,
       featureFlags: featureFlags,

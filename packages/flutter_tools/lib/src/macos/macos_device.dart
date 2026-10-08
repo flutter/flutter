@@ -8,11 +8,12 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
+import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../features.dart';
 import '../project.dart';
 import 'application_package.dart';
 import 'build_macos.dart';
@@ -21,19 +22,28 @@ import 'macos_workflow.dart';
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-    required this._toolContext,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _operatingSystemUtils = operatingSystemUtils,
-       super('macos', platformType: PlatformType.macos, ephemeral: false);
+    required this._appleContext,
+    required this._featureFlags,
+    required ToolContext toolContext,
+  }) : _logger = toolContext.logger,
+       _operatingSystemUtils = toolContext.os,
+       _processManager = toolContext.processManager,
+       _toolContext = toolContext,
+       super(
+         'macos',
+         fileSystem: toolContext.fs,
+         logger: toolContext.logger,
+         operatingSystemUtils: toolContext.os,
+         platformType: PlatformType.macos,
+         processManager: toolContext.processManager,
+         ephemeral: false,
+       );
 
-  final ProcessManager _processManager;
+  final AppleContext _appleContext;
+  final FeatureFlags _featureFlags;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
+  final ProcessManager _processManager;
   final ToolContext _toolContext;
 
   @override
@@ -70,9 +80,12 @@ class MacOSDevice extends DesktopDevice {
     String? mainPath,
     bool usingCISystem = false,
   }) async {
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
     await buildMacOS(
+      appleContext: _appleContext,
       buildInfo: buildInfo,
-      flutterProject: FlutterProject.current(),
+      featureFlags: _featureFlags,
+      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
       targetOverride: mainPath,
       toolContext: _toolContext,
       usingCISystem: usingCISystem,
@@ -106,25 +119,19 @@ class MacOSDevice extends DesktopDevice {
 
 class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices({
-    required this._platform,
+    required this._appleContext,
+    required this._featureFlags,
     required this._macOSWorkflow,
-    required this._processManager,
-    required this._logger,
-    required this._fileSystem,
-    required this._operatingSystemUtils,
     required this._toolContext,
   }) : super('macOS devices');
 
+  final AppleContext _appleContext;
+  final FeatureFlags _featureFlags;
   final MacOSWorkflow _macOSWorkflow;
-  final Platform _platform;
-  final ProcessManager _processManager;
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final OperatingSystemUtils _operatingSystemUtils;
   final ToolContext _toolContext;
 
   @override
-  bool get supportsPlatform => _platform.isMacOS;
+  bool get supportsPlatform => _toolContext.platform.isMacOS;
 
   @override
   bool get canListAnything => _macOSWorkflow.canListDevices;
@@ -139,10 +146,8 @@ class MacOSDevices extends PollingDeviceDiscovery {
     }
     return <Device>[
       MacOSDevice(
-        processManager: _processManager,
-        logger: _logger,
-        fileSystem: _fileSystem,
-        operatingSystemUtils: _operatingSystemUtils,
+        appleContext: _appleContext,
+        featureFlags: _featureFlags,
         toolContext: _toolContext,
       ),
     ];

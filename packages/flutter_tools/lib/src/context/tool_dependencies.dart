@@ -563,6 +563,17 @@ class ToolDependencies {
       logger: finalLogger,
     );
 
+    final appleContext = AppleContext(
+      cocoaPods: finalCocoaPods,
+      cocoapodsValidator: finalCocoapodsValidator,
+      iosSimulatorUtils: finalIOSSimulatorUtils,
+      iosWorkflow: finalIOSWorkflow,
+      plistParser: finalPlistParser,
+      xcdevice: finalXCDevice,
+      xcode: finalXcode,
+      xcodeProjectInterpreter: finalXcodeProjectInterpreter,
+    );
+
     final DeviceManager finalDeviceManager =
         deviceManager ??
         FlutterDeviceManager(
@@ -571,6 +582,7 @@ class ToolDependencies {
           processManager: finalProcessManager,
           fileSystem: finalFS,
           androidSdk: finalAndroidSdk,
+          appleContext: appleContext,
           featureFlags: finalFeatureFlags,
           iosSimulatorUtils: finalIOSSimulatorUtils,
           xcDevice: finalXCDevice,
@@ -596,16 +608,7 @@ class ToolDependencies {
         gradleUtils: finalGradleUtils,
         java: finalJava,
       ),
-      appleContext: AppleContext(
-        cocoaPods: finalCocoaPods,
-        cocoapodsValidator: finalCocoapodsValidator,
-        iosSimulatorUtils: finalIOSSimulatorUtils,
-        iosWorkflow: finalIOSWorkflow,
-        plistParser: finalPlistParser,
-        xcdevice: finalXCDevice,
-        xcode: finalXcode,
-        xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-      ),
+      appleContext: appleContext,
       buildSystem: finalBuildSystem,
       crashReporter: finalCrashReporter,
       deviceManager: finalDeviceManager,
