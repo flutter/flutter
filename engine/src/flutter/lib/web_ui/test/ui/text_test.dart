@@ -56,36 +56,48 @@ void testMain() {
       expect(boxes.single.direction, equals(ui.TextDirection.ltr));
     });
 
-    test(
-      'Renders tab as space instead of tofu',
-      () async {
-        // Skia renders a tofu if the font does not have a glyph for a
-        // character. However, Flutter opts-in to a Skia feature to render
-        // tabs as a single space.
-        // See: https://github.com/flutter/flutter/issues/79153
-        Future<ui.Image> drawText(String text) {
-          const bounds = ui.Rect.fromLTRB(0, 0, 100, 100);
-          final recorder = ui.PictureRecorder();
-          final canvas = ui.Canvas(recorder, bounds);
-          final ui.Paragraph paragraph = makeSimpleText(text);
-
+    test('Renders tab as space instead of tofu', () async {
+      // Skia renders a tofu if the font does not have a glyph for a
+      // character. However, Flutter opts-in to a Skia feature to render
+      // tabs as a single space.
+      // See: https://github.com/flutter/flutter/issues/79153
+      Future<ui.Image> drawText(String text) async {
+        const bounds = ui.Rect.fromLTRB(0, 0, 100, 100);
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, bounds);
+        final ui.Paragraph paragraph = makeSimpleText(text);
+        try {
           canvas.drawParagraph(paragraph, ui.Offset.zero);
           final ui.Picture picture = recorder.endRecording();
-          return picture.toImage(100, 100);
+          try {
+            final ui.Image image = await picture.toImage(100, 100);
+            addTearDown(image.dispose);
+            return image;
+          } finally {
+            picture.dispose();
+          }
+        } finally {
+          paragraph.dispose();
         }
+      }
 
-        // The backspace character, \b, does not have a corresponding glyph and
-        // is rendered as a tofu.
-        final ui.Image tabImage = await drawText('>\t<');
-        final ui.Image spaceImage = await drawText('> <');
-        final ui.Image tofuImage = await drawText('>\b<');
+      // The backspace character, \b, and unassigned codepoint \u0378 do not
+      // have corresponding glyphs and are rendered as tofu boxes.
+      final ui.Image tabImage = await drawText('>\t<');
+      final ui.Image spaceImage = await drawText('> <');
+      final ui.Image tofuImage = await drawText('>\b<');
+      final ui.Image noMidImage = await drawText('><');
+      final ui.Image onlyTofuImage = await drawText('\b');
+      final ui.Image unassignedTofuImage = await drawText('\u{0378}');
+      final ui.Image emptyImage = await drawText('');
 
-        expect(await matchImage(tabImage, spaceImage), isTrue);
-        expect(await matchImage(tabImage, tofuImage), isFalse);
-      },
-      skip: isWimp || isSafari || isFirefox,
-    ); // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
-    // TODO(jacksongardner): https://github.com/flutter/flutter/issues/183944
+      expect(await matchImage(tabImage, spaceImage), isTrue);
+      expect(await matchImage(tabImage, tofuImage), isFalse);
+      expect(await matchImage(tofuImage, noMidImage), isFalse);
+      expect(await matchImage(onlyTofuImage, emptyImage), isFalse);
+      expect(await matchImage(unassignedTofuImage, emptyImage), isFalse);
+    });
+    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
 }
 

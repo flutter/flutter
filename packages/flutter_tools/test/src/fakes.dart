@@ -36,9 +36,12 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/emulator.dart';
+import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -868,6 +871,9 @@ class FakeJava extends Fake implements Java {
   Map<String, String> get environment => _environment;
 
   @override
+  Map<String, String> get gradleEnvironment => _environment;
+
+  @override
   Version? version;
 
   @override
@@ -1145,12 +1151,19 @@ class FakeBuildTargets extends Fake implements BuildTargets {}
 class FakeCrashReporter extends Fake implements CrashReporter {}
 
 class FakeDoctor extends Fake implements Doctor {
-  FakeDoctor({this.canListEmulators = true, this.canLaunchAnything = true});
+  FakeDoctor({
+    this.canLaunchAnything = true,
+    this.canListAnything = true,
+    this.canListEmulators = true,
+  });
 
   final bool canListEmulators;
 
   @override
   final bool canLaunchAnything;
+
+  @override
+  final bool canListAnything;
 
   @override
   List<Workflow> get workflows => <Workflow>[FakeWorkflow(canListEmulators: canListEmulators)];
@@ -1202,8 +1215,11 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this._buildSystem,
     this._buildTargets,
     this._crashReporter,
+    this._deviceManager,
     this._doctor,
     this._emulatorManager,
+    this.extensionBuildManager,
+    this.extensionManager,
     this._featureFlags,
     this._toolContext,
   });
@@ -1214,6 +1230,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final BuildSystem? _buildSystem;
   final BuildTargets? _buildTargets;
   final CrashReporter? _crashReporter;
+  final DeviceManager? _deviceManager;
   final Doctor? _doctor;
   final EmulatorManager? _emulatorManager;
   final FeatureFlags? _featureFlags;
@@ -1238,10 +1255,19 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   CrashReporter get crashReporter => _crashReporter ?? FakeCrashReporter();
 
   @override
+  late final DeviceManager deviceManager = _deviceManager ?? FakeDeviceManager();
+
+  @override
   Doctor get doctor => _doctor ?? FakeDoctor();
 
   @override
   EmulatorManager get emulatorManager => _emulatorManager ?? FakeEmulatorManager();
+
+  @override
+  final ExtensionBuildManager? extensionBuildManager;
+
+  @override
+  final ExtensionManager? extensionManager;
 
   @override
   FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();
@@ -1407,8 +1433,8 @@ class FakeToolContext extends Fake implements ToolContext {
 }
 
 /// A [ToolContext] that dynamically delegates to [globals] for use in [testUsingContext].
-class DelegatingToolContext extends Fake implements ToolContext {
-  DelegatingToolContext({
+class DelegatingToolContext with Fake implements ToolContext {
+  const DelegatingToolContext({
     this._artifacts,
     this._botDetector,
     this._cache,
