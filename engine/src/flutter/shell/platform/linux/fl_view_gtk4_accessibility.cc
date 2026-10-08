@@ -802,9 +802,6 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
     const FlAccessibilitySemanticsNode* semantics,
     const FlutterTransformation& transform,
     FlGtk4AccessibleNode* self) {
-  if (self != nullptr && self->semantics_revision == semantics->revision) {
-    return self;
-  }
   const GtkAccessibleRole role = fl_view_gtk4_accessibility_get_role(semantics);
   const gboolean supports_text =
       semantics->flags.is_text_field && !semantics->flags.is_obscured &&

@@ -755,6 +755,23 @@ TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
   EXPECT_EQ(width, 28);
   EXPECT_EQ(height, 48);
 
+  // Changing an ancestor must recompute the descendant's composed bounds.
+  root.transform.transX = 100;
+  FlutterSemanticsNode2* ancestor_update_nodes[] = {&root, &updated_button};
+  FlutterSemanticsUpdate2 ancestor_update = {
+      .node_count = 2,
+      .nodes = ancestor_update_nodes,
+      .view_id = fl_view_get_id(view),
+  };
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &ancestor_update);
+  EXPECT_TRUE(fl_view_gtk4_accessibility_get_native_bounds_for_testing(
+      updated_first_child, &x, &y, &width, &height));
+  EXPECT_EQ(x, 110);
+  EXPECT_EQ(y, 19);
+  EXPECT_EQ(width, 28);
+  EXPECT_EQ(height, 48);
+
   g_autoptr(GtkAccessible) second_child =
       fl_view_gtk4_accessibility_ref_next_native_sibling_for_testing(
           first_child);
