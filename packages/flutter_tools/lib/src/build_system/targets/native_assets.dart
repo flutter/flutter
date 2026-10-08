@@ -316,10 +316,9 @@ class InstallCodeAssets extends Target {
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
 
     Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-    final String osName = targetPlatform.osName;
-    if (osName == 'linux' || osName == 'windows') {
+    if (targetPlatform.os case .linux || .windows) {
       // Avoid needing migration for CMake files, keep old directory structure.
-      targetUri = targetUri.resolve('$osName/');
+      targetUri = targetUri.resolve('${targetPlatform.osName}/');
     }
 
     final List<File> installedFiles = await installCodeAssets(

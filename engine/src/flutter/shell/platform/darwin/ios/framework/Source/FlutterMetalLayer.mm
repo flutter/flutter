@@ -18,12 +18,9 @@ FLUTTER_ASSERT_ARC
 @class FlutterTexture;
 @class FlutterDrawable;
 
-extern CFTimeInterval display_link_target;
-
 @interface FlutterMetalLayer () {
   id<MTLDevice> _preferredDevice;
   CGSize _drawableSize;
-  FlutterDisplayLinkManager* _displayLinkManager;
 
   NSUInteger _nextDrawableId;
 
@@ -31,24 +28,8 @@ extern CFTimeInterval display_link_target;
   NSMutableSet<FlutterTexture*>* _availableTextures;
   NSUInteger _totalTextures;
   FlutterTexture* _front;
-
-  // There must be a CADisplayLink scheduled *on main thread* otherwise
-  // core animation only updates layers 60 times a second.
-  CADisplayLink* _displayLink;
-  NSUInteger _displayLinkPauseCountdown;
-
-  // Used to track whether the content was set during this display link.
-  // When unlocking phone the layer (main thread) display link and raster thread
-  // display link get out of sync for several seconds. Even worse, layer display
-  // link does not seem to reflect actual vsync. Forcing the layer link
-  // to max rate (instead range) temporarily seems to fix the issue.
-  BOOL _didSetContentsDuringThisDisplayLinkPeriod;
-
-  // Whether layer displayLink is forced to max rate.
-  BOOL _displayLinkForcedMaxRate;
 }
 
-- (void)onDisplayLink:(CADisplayLink*)link;
 - (void)presentTexture:(FlutterTexture*)texture;
 - (void)returnTexture:(FlutterTexture*)texture;
 
@@ -154,26 +135,6 @@ extern CFTimeInterval display_link_target;
 
 @end
 
-@interface FlutterMetalLayerDisplayLinkProxy : NSObject {
-  __weak FlutterMetalLayer* _layer;
-}
-
-@end
-
-@implementation FlutterMetalLayerDisplayLinkProxy
-- (instancetype)initWithLayer:(FlutterMetalLayer*)layer {
-  if (self = [super init]) {
-    _layer = layer;
-  }
-  return self;
-}
-
-- (void)onDisplayLink:(CADisplayLink*)link {
-  [_layer onDisplayLink:link];
-}
-
-@end
-
 @implementation FlutterMetalLayer
 
 - (instancetype)init {
@@ -182,13 +143,7 @@ extern CFTimeInterval display_link_target;
     self.device = self.preferredDevice;
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
-    _displayLinkManager = FlutterDisplayLinkManager.shared;
 
-    FlutterMetalLayerDisplayLinkProxy* proxy =
-        [[FlutterMetalLayerDisplayLinkProxy alloc] initWithLayer:self];
-    _displayLink = [CADisplayLink displayLinkWithTarget:proxy selector:@selector(onDisplayLink:)];
-    [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:NO];
-    [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground:)
                                                  name:UIApplicationDidEnterBackgroundNotification
@@ -198,36 +153,7 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)dealloc {
-  [_displayLink invalidate];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void)setMaxRefreshRate:(double)refreshRate forceMax:(BOOL)forceMax {
-  // This is copied from vsync_waiter_ios.mm. The vsync waiter has display link scheduled on UI
-  // thread which does not trigger actual core animation frame. As a workaround FlutterMetalLayer
-  // has it's own displaylink scheduled on main thread, which is used to trigger core animation
-  // frame allowing for 120hz updates.
-  if (!_displayLinkManager.maxRefreshRateEnabledOnIPhone) {
-    return;
-  }
-  double maxFrameRate = fmax(refreshRate, 60);
-  double minFrameRate = fmax(maxFrameRate / 2, 60);
-  _displayLink.preferredFrameRateRange =
-      CAFrameRateRangeMake(forceMax ? maxFrameRate : minFrameRate, maxFrameRate, maxFrameRate);
-}
-
-- (void)onDisplayLink:(CADisplayLink*)link {
-  _didSetContentsDuringThisDisplayLinkPeriod = NO;
-  // Do not pause immediately, this seems to prevent 120hz while touching.
-  if (_displayLinkPauseCountdown == 3) {
-    _displayLink.paused = YES;
-    if (_displayLinkForcedMaxRate) {
-      [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:NO];
-      _displayLinkForcedMaxRate = NO;
-    }
-  } else {
-    ++_displayLinkPauseCountdown;
-  }
 }
 
 - (BOOL)isKindOfClass:(Class)aClass {
@@ -255,7 +181,6 @@ extern CFTimeInterval display_link_target;
     [_availableTextures removeAllObjects];
     _totalTextures = _front != nil ? 1 : 0;
   }
-  _displayLink.paused = YES;
 }
 
 - (CGSize)drawableSize {
@@ -414,14 +339,6 @@ extern CFTimeInterval display_link_target;
   [CATransaction setDisableActions:YES];
   self.contents = texture.surface;
   [CATransaction commit];
-  _displayLink.paused = NO;
-  _displayLinkPauseCountdown = 0;
-  if (!_didSetContentsDuringThisDisplayLinkPeriod) {
-    _didSetContentsDuringThisDisplayLinkPeriod = YES;
-  } else if (!_displayLinkForcedMaxRate) {
-    _displayLinkForcedMaxRate = YES;
-    [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:YES];
-  }
 }
 
 - (void)presentTexture:(FlutterTexture*)texture {

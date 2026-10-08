@@ -8,7 +8,6 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 
 import 'base/async_guard.dart';
 import 'base/terminal.dart';
-import 'globals.dart' as globals;
 
 class ValidatorTask {
   ValidatorTask(this.validator, this.result);
@@ -149,8 +148,8 @@ extension ValidationResultFormatting on ValidationResult {
     _ => type.name,
   };
 
-  String get coloredLeadingBox {
-    return globals.terminal.color(leadingBox, switch (type) {
+  String coloredLeadingBox(Terminal terminal) {
+    return terminal.color(leadingBox, switch (type) {
       ValidationType.success => TerminalColor.green,
       ValidationType.crash || ValidationType.missing => TerminalColor.red,
       ValidationType.notAvailable || ValidationType.partial => TerminalColor.yellow,
@@ -167,8 +166,8 @@ extension ValidationMessageFormatting on ValidationMessage {
     ValidationMessageType.information => '•',
   };
 
-  String get coloredIndicator {
-    return globals.terminal.color(indicator, switch (type) {
+  String coloredIndicator(Terminal terminal) {
+    return terminal.color(indicator, switch (type) {
       ValidationMessageType.error => TerminalColor.red,
       ValidationMessageType.hint => TerminalColor.yellow,
       ValidationMessageType.information => TerminalColor.green,

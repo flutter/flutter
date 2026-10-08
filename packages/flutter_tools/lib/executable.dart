@@ -10,6 +10,7 @@ import 'runner.dart' as runner;
 import 'src/android/android_workflow.dart' as android_workflow;
 import 'src/android/gradle.dart';
 import 'src/base/context.dart';
+import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/template.dart';
@@ -102,12 +103,17 @@ Future<void> main(List<String> args) async {
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
-      final ExtensionManager manager = toolDependencies.extensionManager!;
+      final ToolDependencies(
+        :ExtensionManager? extensionManager,
+        :FeatureFlags featureFlags,
+        toolContext: ToolContext(:FileSystem fs, :Logger logger),
+      ) = toolDependencies;
+      final ExtensionManager manager = extensionManager!;
       final templateManager = ExtensionTemplateManager(
         extensionManager: manager,
-        fileSystem: toolDependencies.toolContext.fs,
-        logger: toolDependencies.toolContext.logger,
         featureFlags: featureFlags,
+        fileSystem: fs,
+        logger: logger,
         cache: toolDependencies.toolContext.cache,
       );
       return generateCommands(
@@ -262,6 +268,7 @@ List<FlutterCommand> generateCommands({
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
     buildSystem: toolDependencies.buildSystem,
+    extensionBuildManager: toolDependencies.extensionBuildManager,
     featureFlags: toolDependencies.featureFlags,
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: toolDependencies.toolContext,
@@ -308,12 +315,10 @@ List<FlutterCommand> generateCommands({
     verboseHelp: verboseHelp,
   ),
   DoctorCommand(
-    verbose: verbose,
-    toolContext: toolDependencies.toolContext,
-    // Provide the shared singleton from globals until dependent commands
-    // (e.g. DevicesCommand, EmulatorsCommand) are migrated to DI.
-    doctor: globals.doctor,
+    doctor: toolDependencies.doctor,
     extensionManager: toolDependencies.extensionManager,
+    toolContext: toolDependencies.toolContext,
+    verbose: verbose,
   ),
   DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DriveCommand(

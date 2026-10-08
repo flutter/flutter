@@ -281,7 +281,7 @@ class Doctor {
         // We're generating a summary, so drop the stack trace.
         result = ValidationResult.crash(exception);
       }
-      lineBuffer.write('${result.coloredLeadingBox} ${validator.title}: ');
+      lineBuffer.write('${result.coloredLeadingBox(_logger.terminal)} ${validator.title}: ');
       switch (result.type) {
         case ValidationType.crash:
           lineBuffer.write('the doctor check crashed without a result.');
@@ -354,7 +354,8 @@ class Doctor {
     bool sendEvent = true,
     ExtensionManager? extensionManager,
   }) async {
-    final bool showColor = globals.terminal.supportsColor;
+    final Terminal terminal = _logger.terminal;
+    final bool showColor = terminal.supportsColor;
     if (androidLicenses && androidLicenseValidator != null) {
       return androidLicenseValidator.runLicenseManager();
     }
@@ -446,7 +447,7 @@ class Doctor {
         return ' [$formatted]';
       }();
 
-      final String leadingBox = showColor ? result.coloredLeadingBox : result.leadingBox;
+      final String leadingBox = showColor ? result.coloredLeadingBox(terminal) : result.leadingBox;
       if (result.statusInfo != null) {
         _logger.printStatus(
           '$leadingBox ${validator.title} (${result.statusInfo})$executionDuration',
@@ -463,7 +464,9 @@ class Doctor {
         if (!message.isInformation || verbose) {
           var hangingIndent = 2;
           var indent = 4;
-          final String indicator = showColor ? message.coloredIndicator : message.indicator;
+          final String indicator = showColor
+              ? message.coloredIndicator(terminal)
+              : message.indicator;
           for (final String line
               in '$indicator ${showPii ? message.message : message.piiStrippedMessage}'.split(
                 '\n',
@@ -495,13 +498,13 @@ class Doctor {
 
     if (issues > 0) {
       _logger.printStatus(
-        '${showColor ? globals.terminal.color('!', TerminalColor.yellow) : '!'}'
+        '${showColor ? terminal.color('!', TerminalColor.yellow) : '!'}'
         ' Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.',
         hangingIndent: 2,
       );
     } else {
       _logger.printStatus(
-        '${showColor ? globals.terminal.color('•', TerminalColor.green) : '•'}'
+        '${showColor ? terminal.color('•', TerminalColor.green) : '•'}'
         ' No issues found!',
         hangingIndent: 2,
       );

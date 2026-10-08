@@ -783,8 +783,42 @@ class FlutterPlatform extends PlatformPlugin {
     return outOfBandError;
   }
 
+  static const _kListenerBuildDirectoryName = 'test';
+
   String _createListenerDart(List<Finalizer> finalizers, int ourTestCount, String testPath) {
     final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final Uri testUrl = fs.path.toUri(fs.path.absolute(testPath));
+    // When running integration tests on a target device, the listener path is
+    // supplied as TargetFile to the build system, which includes TargetFile in
+    // the Environment.buildPrefix hash. Use a deterministic path inside the
+    // project's build directory so subsequent test runs reuse the build cache.
+    // Regular flutter_tester unit/widget tests do not use the build system and
+    // must use an isolated temporary directory to avoid file lock collisions
+    // across concurrent or nested test runs.
+    final FlutterProject? project = flutterProject;
+    if (_isIntegrationTest && project != null) {
+      final File listenerFile =
+          project.buildDirectory
+              .childDirectory(_kListenerBuildDirectoryName)
+              .childFile('listener_$ourTestCount.dart')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(_generateTestMain(testUrl: testUrl));
+      finalizers.add(() async {
+        logger.printTrace('test $ourTestCount: deleting test listener file');
+        // TestCompiler copies '<listener>.dill' beside the listener for --start-paused expression compilation.
+        for (final file in <File>[listenerFile, fs.file('${listenerFile.path}.dill')]) {
+          try {
+            if (file.existsSync()) {
+              file.deleteSync();
+            }
+          } on FileSystemException catch (error) {
+            logger.printTrace('test $ourTestCount: failed to delete ${file.path}: $error');
+          }
+        }
+      });
+      return listenerFile.path;
+    }
+
     // Prepare a temporary directory to store the Dart file that will talk to us.
     final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_test_listener.');
     finalizers.add(() async {
@@ -795,9 +829,7 @@ class FlutterPlatform extends PlatformPlugin {
     // Prepare the Dart file that will talk to us and start the test.
     final File listenerFile = fs.file('${tempDir.path}/listener.dart');
     listenerFile.createSync();
-    listenerFile.writeAsStringSync(
-      _generateTestMain(testUrl: fs.path.toUri(fs.path.absolute(testPath))),
-    );
+    listenerFile.writeAsStringSync(_generateTestMain(testUrl: testUrl));
     return listenerFile.path;
   }
 
