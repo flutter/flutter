@@ -45,11 +45,8 @@ abstract class ViewRasterizer {
   /// The context which is persisted between frames.
   final CompositorContext context = CompositorContext();
 
-  /// The platform view embedder.
-  late final PlatformViewEmbedder viewEmbedder = PlatformViewEmbedder(sceneElement, this);
-
   /// A factory for creating overlays.
-  DisplayCanvasFactory<DisplayCanvas> get displayFactory;
+  DisplayCanvasFactory<DisplayCanvas> get displayFactory => throw UnimplementedError();
 
   /// The DOM element which this rasterizer should raster into.
   final DomElement sceneElement = domDocument.createElement('flt-scene');
@@ -59,52 +56,17 @@ abstract class ViewRasterizer {
 
   /// Draws the [layerTree] to the screen for the view associated with this
   /// rasterizer.
-  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
-    final ui.Size frameSize = view.physicalSize;
-    if (frameSize.isEmpty) {
-      // Available drawing area is empty. Skip drawing.
-      // Record all the draw steps as happening instantly so we don't crash
-      // when submitting frame timings.
-      recorder?.recordBuildFinish();
-      recorder?.recordRasterStart();
-      recorder?.recordRasterFinish();
-      return;
-    }
-
-    // The [frameSize] may be slightly imprecise if the `devicePixelRatio` isn't
-    // an integer. For example, is you zoom to 110% in Chrome on a Macbook, the
-    // `devicePixelRatio` is `2.200000047683716`, so when the physical size is
-    // computed by multiplying the logical size by the device pixel ratio, the
-    // result is slightly imprecise as well. Nevertheless, the number should
-    // be close to an integer, so round the frame size to be more precice.
-    final bitmapSize = BitmapSize.fromSize(frameSize);
-
-    currentFrameSize = bitmapSize;
-    viewEmbedder.frameSize = currentFrameSize;
-    final Frame compositorFrame = context.acquireFrame(viewEmbedder);
-
-    compositorFrame.raster(layerTree, currentFrameSize, recorder);
-    _lastRenderedLayerTree = layerTree;
-
-    await prepareToDraw();
-    await viewEmbedder.submitFrame(recorder);
-  }
+  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder);
 
   /// Do some initialization to prepare to draw a frame.
-  ///
-  /// For example, in the [OffscreenCanvasRasterizer], this ensures the backing
-  /// [OffscreenCanvas] is the correct size to draw the frame.
-  Future<void> prepareToDraw();
+  Future<void> prepareToDraw() async {}
 
   /// Rasterizes the given [pictures] into the [displayCanvases].
-  ///
-  /// Throws an [ArgumentError] if [displayCanvases] and [pictures] are not
-  /// the same length.
   Future<void> rasterize(
     List<DisplayCanvas> displayCanvases,
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
-  );
+  ) async {}
 
   /// Get a [DisplayCanvas] to use as an overlay.
   DisplayCanvas getOverlay() {
@@ -127,14 +89,10 @@ abstract class ViewRasterizer {
   }
 
   /// Disposes this rasterizer.
-  void dispose() {
-    viewEmbedder.dispose();
-  }
+  void dispose() {}
 
   /// Clears the state. Used in tests.
-  void debugClear() {
-    viewEmbedder.debugClear();
-  }
+  void debugClear() {}
 
   /// Returns helpful debug information.
   Map<String, dynamic>? dumpDebugInfo() {

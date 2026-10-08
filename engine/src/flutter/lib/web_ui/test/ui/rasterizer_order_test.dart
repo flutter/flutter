@@ -13,50 +13,15 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-class MockViewEmbedder extends PlatformViewEmbedder {
-  MockViewEmbedder(super.sceneHost, super.rasterizer);
-
-  bool optimizeCompositionCalled = false;
-  BitmapSize? frameSizeDuringOptimize;
-  BitmapSize? _capturedFrameSize;
-
-  @override
-  set frameSize(BitmapSize size) {
-    _capturedFrameSize = size;
-    super.frameSize = size;
-  }
-
-  @override
-  void optimizeComposition() {
-    optimizeCompositionCalled = true;
-    frameSizeDuringOptimize = _capturedFrameSize;
-  }
-
-  @override
-  Future<void> submitFrame(FrameTimingRecorder? recorder) async {
-    await rasterizer.rasterize(<DisplayCanvas>[], <ui.Picture>[], recorder);
-  }
-
-  @override
-  Iterable<LayerCanvas> getOptimizedCanvases() => <LayerCanvas>[];
-}
-
 class OrderVerifyingRasterizer extends ViewRasterizer {
   OrderVerifyingRasterizer(super.view);
 
   bool prepareToDrawCalled = false;
   bool rasterizeCalled = false;
 
-  // We track the state of these flags when each method is called
-  bool? optimizeCompositionCalledDuringPrepare;
   bool? prepareToDrawCalledDuringRasterize;
   BitmapSize? sizeDuringPrepare;
   BitmapSize? sizeDuringRasterize;
-
-  late final MockViewEmbedder _viewEmbedder = MockViewEmbedder(sceneElement, this);
-
-  @override
-  MockViewEmbedder get viewEmbedder => _viewEmbedder;
 
   @override
   DisplayCanvasFactory<DisplayCanvas> get displayFactory => throw UnimplementedError();
@@ -65,7 +30,6 @@ class OrderVerifyingRasterizer extends ViewRasterizer {
   Future<void> prepareToDraw() async {
     prepareToDrawCalled = true;
     sizeDuringPrepare = currentFrameSize;
-    optimizeCompositionCalledDuringPrepare = viewEmbedder.optimizeCompositionCalled;
   }
 
   @override
@@ -78,13 +42,24 @@ class OrderVerifyingRasterizer extends ViewRasterizer {
     sizeDuringRasterize = currentFrameSize;
     prepareToDrawCalledDuringRasterize = prepareToDrawCalled;
   }
+
+  @override
+  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
+    final ui.Size frameSize = view.physicalSize;
+    if (frameSize.isEmpty) {
+      return;
+    }
+    currentFrameSize = BitmapSize.fromSize(frameSize);
+    await prepareToDraw();
+    await rasterize(<DisplayCanvas>[], <ui.Picture>[], recorder);
+  }
 }
 
 void testMain() {
   group('Rasterizer order', () {
     setUpUnitTests();
 
-    test('calls prepareToDraw after raster (optimizeComposition) and before rasterize', () async {
+    test('calls prepareToDraw before rasterize', () async {
       final view = EngineFlutterView(
         EnginePlatformDispatcher.instance,
         domDocument.createElement('div'),
@@ -100,26 +75,12 @@ void testMain() {
 
       await rasterizer.draw(layerTree, null);
 
-      final MockViewEmbedder mockEmbedder = rasterizer.viewEmbedder;
-
-      expect(
-        mockEmbedder.optimizeCompositionCalled,
-        isTrue,
-        reason: 'optimizeComposition should be called',
-      );
       expect(rasterizer.prepareToDrawCalled, isTrue, reason: 'prepareToDraw should be called');
       expect(rasterizer.rasterizeCalled, isTrue, reason: 'rasterize should be called');
-
-      expect(
-        rasterizer.optimizeCompositionCalledDuringPrepare,
-        isTrue,
-        reason: 'optimizeComposition (part of raster) should have been called before prepareToDraw',
-      );
-
       expect(
         rasterizer.prepareToDrawCalledDuringRasterize,
         isTrue,
-        reason: 'prepareToDraw should have been called before rasterize (part of submitFrame)',
+        reason: 'prepareToDraw should have been called before rasterize',
       );
     });
 
@@ -147,7 +108,6 @@ void testMain() {
         domDocument.createElement('div'),
       );
       final rasterizer = OrderVerifyingRasterizer(view);
-      final MockViewEmbedder mockEmbedder = rasterizer.viewEmbedder;
 
       final rootLayer = RootLayer();
       final layerTree = LayerTree(rootLayer);
@@ -157,7 +117,6 @@ void testMain() {
       view.debugForceResize();
       await rasterizer.draw(layerTree, null);
 
-      expect(mockEmbedder.frameSizeDuringOptimize, const BitmapSize(100, 200));
       expect(rasterizer.sizeDuringPrepare, const BitmapSize(100, 200));
       expect(rasterizer.sizeDuringRasterize, const BitmapSize(100, 200));
 
@@ -166,7 +125,6 @@ void testMain() {
       view.debugForceResize();
       await rasterizer.draw(layerTree, null);
 
-      expect(mockEmbedder.frameSizeDuringOptimize, const BitmapSize(300, 400));
       expect(rasterizer.sizeDuringPrepare, const BitmapSize(300, 400));
       expect(rasterizer.sizeDuringRasterize, const BitmapSize(300, 400));
     });
