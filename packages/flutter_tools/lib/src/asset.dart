@@ -30,6 +30,7 @@ class FlutterHookResult {
     required this.buildStart,
     required this.buildEnd,
     required this.dataAssets,
+    this.fontAssets = const <FontHookAsset>[],
     required this.dependencies,
   });
 
@@ -38,10 +39,12 @@ class FlutterHookResult {
         buildStart: DateTime.fromMillisecondsSinceEpoch(0),
         buildEnd: DateTime.fromMillisecondsSinceEpoch(0),
         dataAssets: <HookAsset>[],
+        fontAssets: <FontHookAsset>[],
         dependencies: <Uri>[],
       );
 
   final List<HookAsset> dataAssets;
+  final List<FontHookAsset> fontAssets;
 
   /// The timestamp at which we start a build - so the timestamp of the inputs.
   final DateTime buildStart;
@@ -64,11 +67,10 @@ class FlutterHookResult {
   /// the output may be existing on disc and not be produced by the build
   /// itself - in which case we may not need to re-build if the file changes,
   /// but we may need to make a new asset bundle with the modified file).
-  bool isOutputDirty(FileSystem fileSystem) => _wasAnyFileModifiedSince(
-    fileSystem,
-    buildEnd,
-    dataAssets.map((HookAsset e) => e.file).toList(),
-  );
+  bool isOutputDirty(FileSystem fileSystem) => _wasAnyFileModifiedSince(fileSystem, buildEnd, <Uri>[
+    for (final HookAsset e in dataAssets) e.file,
+    for (final FontHookAsset e in fontAssets) e.file,
+  ]);
 
   static bool _wasAnyFileModifiedSince(FileSystem fileSystem, DateTime since, List<Uri> uris) {
     for (final uri in uris) {
@@ -82,7 +84,7 @@ class FlutterHookResult {
 
   @override
   String toString() {
-    return dataAssets.toString();
+    return 'FlutterHookResult(dataAssets: $dataAssets, fontAssets: $fontAssets)';
   }
 }
 
@@ -100,6 +102,27 @@ class HookAsset {
   @override
   String toString() {
     return 'HookAsset(file: $file, name: $name, package: $package)';
+  }
+}
+
+class FontHookAsset extends HookAsset {
+  FontHookAsset({
+    required super.file,
+    required super.name,
+    required this.fontFamily,
+    required super.package,
+    this.weight,
+    this.style,
+  });
+
+  final String fontFamily;
+  final int? weight;
+  final String? style;
+
+  @override
+  String toString() {
+    return 'FontHookAsset(file: $file, name: $name, fontFamily: $fontFamily, '
+        'package: $package, weight: $weight, style: $style)';
   }
 }
 
@@ -337,7 +360,9 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     _lastHookResult = flutterHookResult ?? FlutterHookResult.empty();
-    if (flutterManifest.isEmpty && (flutterHookResult?.dataAssets.isEmpty ?? true)) {
+    if (flutterManifest.isEmpty &&
+        (flutterHookResult?.dataAssets.isEmpty ?? true) &&
+        (flutterHookResult?.fontAssets.isEmpty ?? true)) {
       final ByteData emptyAssetManifest = const StandardMessageCodec().encodeMessage(
         <dynamic, dynamic>{},
       )!;
@@ -404,11 +429,25 @@ class ManifestAssetBundle implements AssetBundle {
       deferredComponentsEntries.clear();
     }
 
-    final bool includesMaterialFonts = flutterManifest.usesMaterialDesign;
+    final bool hookProvidesMaterialFonts =
+        flutterHookResult?.fontAssets.any(
+          (FontHookAsset asset) => asset.fontFamily == 'MaterialIcons',
+        ) ??
+        false;
+    final bool includesMaterialFonts =
+        flutterManifest.usesMaterialDesign || hookProvidesMaterialFonts;
+    final String? primaryPackageName = flutterManifest.appName.isNotEmpty
+        ? flutterManifest.appName
+        : packageConfig
+              .packageOf(_fileSystem.file(_fileSystem.path.join(assetBasePath, 'pubspec.yaml')).uri)
+              ?.name;
     final List<Map<String, Object?>> fonts = _parseFonts(
       flutterManifest,
       packageConfig,
       primary: true,
+      hookProvidesMaterialFonts: hookProvidesMaterialFonts,
+      primaryPackageName: primaryPackageName,
+      fontAssets: flutterHookResult?.fontAssets,
     );
 
     // Add fonts, assets, and licenses from packages in the project's
@@ -527,17 +566,18 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
     for (final HookAsset dataAsset in flutterHookResult?.dataAssets ?? <HookAsset>[]) {
-      final Package package = packageConfig[dataAsset.package]!;
-      final Uri fileUri = dataAsset.file;
+      final _Asset asset = _parseAsset(packageConfig, dataAsset, AssetKind.regular);
+      if (assetVariants.containsKey(asset)) {
+        _logger.printError(
+          'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
+        );
+        return 1;
+      }
+      assetVariants[asset] = <_Asset>[asset];
+    }
 
-      final String filePath = fileUri.toFilePath();
-
-      final asset = _Asset(
-        baseDir: _fileSystem.path.dirname(filePath),
-        relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
-        entryUri: Uri.parse(_fileSystem.path.join('packages', dataAsset.package, dataAsset.name)),
-        package: package,
-      );
+    for (final FontHookAsset fontAsset in flutterHookResult?.fontAssets ?? <FontHookAsset>[]) {
+      final _Asset asset = _parseAsset(packageConfig, fontAsset, AssetKind.regular);
       if (assetVariants.containsKey(asset)) {
         _logger.printError(
           'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
@@ -624,7 +664,7 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
     final materialAndFrameworkAssets = <_Asset>[
-      if (flutterManifest.usesMaterialDesign) ..._getMaterialFonts(),
+      if (flutterManifest.usesMaterialDesign && !hookProvidesMaterialFonts) ..._getMaterialFonts(),
       // For all platforms, include the shaders unconditionally. They are
       // small, and whether they're used is determined only by the app source
       // code and not by the Flutter manifest.
@@ -688,6 +728,28 @@ class ManifestAssetBundle implements AssetBundle {
     _setIfChanged(kFontManifestJson, fontManifest, AssetKind.regular);
     _setLicenseIfChanged(licenseResult.combinedLicenses, targetPlatform);
     return 0;
+  }
+
+  static Uri _hookAssetEntryUri(HookAsset asset) {
+    return Uri(
+      pathSegments: <String>[
+        'packages',
+        asset.package,
+        ...Uri(path: asset.name.replaceAll(r'\', '/')).pathSegments
+            .where((String s) => s.isNotEmpty),
+      ],
+    );
+  }
+
+  _Asset _parseAsset(PackageConfig packageConfig, HookAsset asset, AssetKind kind) {
+    final String filePath = asset.file.toFilePath();
+    return _Asset(
+      baseDir: _fileSystem.path.dirname(filePath),
+      relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
+      entryUri: _hookAssetEntryUri(asset),
+      package: packageConfig[asset.package],
+      kind: kind,
+    );
   }
 
   @override
@@ -855,14 +917,43 @@ class ManifestAssetBundle implements AssetBundle {
     PackageConfig packageConfig, {
     String? packageName,
     required bool primary,
+    bool hookProvidesMaterialFonts = false,
+    String? primaryPackageName,
+    List<FontHookAsset>? fontAssets,
   }) {
     return <Map<String, Object?>>[
-      if (primary && manifest.usesMaterialDesign) ...kMaterialFonts,
+      if (primary && manifest.usesMaterialDesign && !hookProvidesMaterialFonts) ...kMaterialFonts,
+      if (fontAssets != null && fontAssets.isNotEmpty)
+        ..._parseHookFonts(fontAssets, primaryPackageName),
       if (packageName == null)
         ...manifest.fontsDescriptor
       else
         for (final Font font in _parsePackageFonts(manifest, packageName, packageConfig))
           font.descriptor,
+    ];
+  }
+
+  List<Map<String, Object?>> _parseHookFonts(
+    List<FontHookAsset> fontAssets,
+    String? primaryPackageName,
+  ) {
+    final fontsByFamily = <String, List<FontAsset>>{};
+    for (final fontAsset in fontAssets) {
+      final bool isPrimary =
+          primaryPackageName == null ||
+          fontAsset.package == primaryPackageName ||
+          fontAsset.fontFamily == 'MaterialIcons';
+      final String familyName = isPrimary
+          ? fontAsset.fontFamily
+          : 'packages/${fontAsset.package}/${fontAsset.fontFamily}';
+      final Uri entryUri = _hookAssetEntryUri(fontAsset);
+      (fontsByFamily[familyName] ??= <FontAsset>[]).add(
+        FontAsset(entryUri, weight: fontAsset.weight, style: fontAsset.style),
+      );
+    }
+    return <Map<String, Object?>>[
+      for (final MapEntry<String, List<FontAsset>> entry in fontsByFamily.entries)
+        Font(entry.key, entry.value).descriptor,
     ];
   }
 

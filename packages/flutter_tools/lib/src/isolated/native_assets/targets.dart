@@ -5,6 +5,7 @@
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:file/file.dart' show Directory, FileSystem;
+import 'package:font_asset/font_asset.dart' show FontAssetsExtension;
 import 'package:hooks/hooks.dart';
 
 import '../../base/common.dart' show throwToolExit;
@@ -49,6 +50,10 @@ sealed class AssetBuildTarget {
 
   List<DataAssetsExtension> get dataAssetExtensions => <DataAssetsExtension>[
     if (supportedAssetTypes.contains(SupportedAssetTypes.dataAssets)) DataAssetsExtension(),
+  ];
+
+  List<FontAssetsExtension> get fontAssetExtensions => <FontAssetsExtension>[
+    if (supportedAssetTypes.contains(SupportedAssetTypes.fontAssets)) FontAssetsExtension(),
   ];
 
   /// Build the list of [AssetBuildTarget]s for a given [TargetPlatform].
@@ -197,7 +202,10 @@ final class WebAssetTarget extends AssetBuildTarget {
   WebAssetTarget({required super.supportedAssetTypes});
 
   @override
-  List<ProtocolExtension> get extensions => <ProtocolExtension>[...dataAssetExtensions];
+  List<ProtocolExtension> get extensions => <ProtocolExtension>[
+    ...dataAssetExtensions,
+    ...fontAssetExtensions,
+  ];
 
   @override
   String get targetString => 'web';
@@ -253,6 +261,7 @@ class WindowsAssetTarget extends CodeAssetTarget {
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
     ...codeAssetExtensions,
     ...dataAssetExtensions,
+    ...fontAssetExtensions,
   ];
 
   @override
@@ -285,6 +294,7 @@ final class LinuxAssetTarget extends CodeAssetTarget {
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
     ...codeAssetExtensions,
     ...dataAssetExtensions,
+    ...fontAssetExtensions,
   ];
 }
 
@@ -324,6 +334,7 @@ final class IOSAssetTarget extends CodeAssetTarget {
           iOS: _getIOSConfig(environmentDefines, fileSystem),
         ),
       ...dataAssetExtensions,
+      ...fontAssetExtensions,
     ];
   }
 }
@@ -344,6 +355,7 @@ final class MacOSAssetTarget extends CodeAssetTarget {
           macOS: MacOSCodeConfig(targetVersion: targetMacOSVersion),
         ),
       ...dataAssetExtensions,
+      ...fontAssetExtensions,
     ];
   }
 
@@ -379,6 +391,7 @@ final class AndroidAssetTarget extends CodeAssetTarget {
         android: _androidCodeConfig,
       ),
     ...dataAssetExtensions,
+    ...fontAssetExtensions,
   ];
 }
 
