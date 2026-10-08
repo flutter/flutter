@@ -30,6 +30,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'localizations.dart';
 import 'magnifier.dart';
 import 'media_query.dart';
 import 'overlay.dart';
@@ -253,40 +254,29 @@ class SelectableRegion extends StatefulWidget {
     this.focusNode,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.onSelectionChanged,
-    this.enableSelection = true,
     this.enableFind = true,
     this.findController,
     this.findBarBuilder,
     required this.selectionControls,
     required this.child,
-  });
+  }) : _enableSelection = true,
+       _isFallbackFindHost = false;
 
-  /// Creates a [SelectableRegion] in "Find-Only" mode (`enableSelection: false`,
-  /// `enableFind: true`, `selectionControls: emptyTextSelectionControls`).
-  ///
-  /// In this mode, [Text] and [RichText] widgets in [child] register with this
-  /// region for Find-in-Page (`Cmd+F` / `Ctrl+F`) highlighting and scrolling
-  /// without altering button mouse cursors or competing for drag gestures.
-  SelectableRegion.findOnly({
-    super.key,
-    this.focusNode,
+  SelectableRegion._findOnlyHost({
+    required this.enableFind,
     this.findController,
     this.findBarBuilder,
     required this.child,
-  }) : selectionControls = emptyTextSelectionControls,
-       contextMenuBuilder = null,
+  }) : contextMenuBuilder = null,
+       focusNode = null,
        magnifierConfiguration = TextMagnifierConfiguration.disabled,
        onSelectionChanged = null,
-       enableSelection = false,
-       enableFind = true;
+       selectionControls = emptyTextSelectionControls,
+       _enableSelection = false,
+       _isFallbackFindHost = true;
 
-  /// Whether user pointer/keyboard text selection is enabled in this region.
-  ///
-  /// When false and [enableFind] is true, [Text] widgets in the subtree still
-  /// register with this region for Find-in-Page (`Cmd+F` / `Ctrl+F`) highlighting
-  /// and scrolling without changing mouse cursors to [SystemMouseCursors.text]
-  /// or competing for drag gestures.
-  final bool enableSelection;
+  final bool _enableSelection;
+  final bool _isFallbackFindHost;
 
   /// Whether Find-in-Page (`Cmd+F` / `Ctrl+F`) is enabled in this region.
   final bool enableFind;
@@ -446,20 +436,20 @@ class SelectableRegionState extends State<SelectableRegion>
   };
 
   FindInPageController? _localFindController;
-  FindInPageScope? _findScope;
+  _InheritedFindInPageScope? _findScope;
   FindInPageController? _attachedFindController;
 
-  bool get _effectiveEnableSelection => _findScope?.enableSelection ?? widget.enableSelection;
+  bool get _effectiveEnableSelection => widget._enableSelection;
 
-  bool get _effectiveEnableFind => _findScope?.enableFind ?? widget.enableFind;
+  bool get _effectiveEnableFind => _findScope?.scope.enableFind ?? widget.enableFind;
 
   SelectableRegionFindBarBuilder? get _effectiveFindBarBuilder =>
-      widget.findBarBuilder ?? _findScope?.findBarBuilder;
+      widget.findBarBuilder ?? _findScope?.scope.findBarBuilder;
 
   /// The [FindInPageController] managing Find-in-Page state for this region.
   FindInPageController get findController =>
       widget.findController ??
-      _findScope?.controller ??
+      _findScope?.effectiveController ??
       (_localFindController ??= FindInPageController());
 
   bool _scheduledFallbackFocus = false;
@@ -472,7 +462,9 @@ class SelectableRegionState extends State<SelectableRegion>
     SchedulerBinding.instance.addPostFrameCallback((_) {
       scheduleMicrotask(() {
         _scheduledFallbackFocus = false;
-        if (!mounted || !_effectiveEnableFind) {
+        if (!mounted ||
+            !_effectiveEnableFind ||
+            !findController._isActiveHost(_selectionDelegate)) {
           return;
         }
         FocusManager.instance.applyFocusChangesIfNeeded();
@@ -504,12 +496,16 @@ class SelectableRegionState extends State<SelectableRegion>
         enableSelection: _effectiveEnableSelection,
         regionFocusNode: _focusNode,
         regionContext: context,
+        findBarBuilder: _effectiveFindBarBuilder,
+        isFallbackHost: widget._isFallbackFindHost,
       );
     } else {
       target._updateHostConfig(
+        _selectionDelegate,
         enableSelection: _effectiveEnableSelection,
         regionFocusNode: _focusNode,
         regionContext: context,
+        findBarBuilder: _effectiveFindBarBuilder,
       );
     }
     _scheduleFallbackFocusIfNeeded();
@@ -602,7 +598,7 @@ class SelectableRegionState extends State<SelectableRegion>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _findScope = FindInPageScope.maybeOf(context);
+    _findScope = widget._isFallbackFindHost ? null : _InheritedFindInPageScope.maybeOf(context);
     _syncFindControllerAttachment();
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -2072,6 +2068,20 @@ class SelectableRegionState extends State<SelectableRegion>
 
   @protected
   @override
+  void activate() {
+    super.activate();
+    _attachedFindController?._setHostActive(_selectionDelegate, true);
+  }
+
+  @protected
+  @override
+  void deactivate() {
+    _attachedFindController?._setHostActive(_selectionDelegate, false);
+    super.deactivate();
+  }
+
+  @protected
+  @override
   void dispose() {
     _selectable?.removeListener(_updateSelectionStatus);
     _selectable?.pushHandleLayers(null, null);
@@ -2100,7 +2110,7 @@ class SelectableRegionState extends State<SelectableRegion>
   @protected
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasOverlay(context));
+    assert(!_effectiveEnableSelection || debugCheckHasOverlay(context));
     Widget result = SelectableRegionSelectionStatusScope._(
       key: _selectionStatusScopeKey,
       selectionStatusNotifier: _selectionStatusNotifier,
@@ -2108,8 +2118,21 @@ class SelectableRegionState extends State<SelectableRegion>
     );
     if (!_effectiveEnableSelection) {
       result = DefaultSelectionStyle.merge(mouseCursor: MouseCursor.defer, child: result);
-    } else if (_webContextMenuEnabled) {
-      result = PlatformSelectableRegionContextMenu(child: result);
+    } else {
+      if (_findScope != null) {
+        final DefaultSelectionStyle currentStyle = DefaultSelectionStyle.of(context);
+        result = DefaultSelectionStyle(
+          cursorColor: currentStyle.cursorColor,
+          selectionColor: currentStyle.selectionColor,
+          searchHighlightColor: currentStyle.searchHighlightColor,
+          activeSearchHighlightColor: currentStyle.activeSearchHighlightColor,
+          mouseCursor: _findScope!.ambientMouseCursor,
+          child: result,
+        );
+      }
+      if (_webContextMenuEnabled) {
+        result = PlatformSelectableRegionContextMenu(child: result);
+      }
     }
     result = RawGestureDetector(
       gestures: _effectiveEnableSelection
@@ -2121,31 +2144,35 @@ class SelectableRegionState extends State<SelectableRegion>
     );
     if (_effectiveEnableFind) {
       final content = result;
+      final bool ownsFindOverlay = _findScope == null || widget.findController != null;
       result = ListenableBuilder(
         listenable: findController,
         builder: (BuildContext context, Widget? _) {
+          Widget body = content;
+          if (ownsFindOverlay) {
+            final SelectableRegionFindBarBuilder? barBuilder =
+                findController._activeFindBarBuilder ?? _effectiveFindBarBuilder;
+            body = Stack(
+              fit: StackFit.passthrough,
+              children: <Widget>[
+                content,
+                if (findController.isOpen)
+                  PositionedDirectional(
+                    top: 0,
+                    end: 0,
+                    child: SelectionContainer.disabled(
+                      child:
+                          barBuilder?.call(context, findController) ??
+                          SelectableRegionFindBar(controller: findController),
+                    ),
+                  ),
+              ],
+            );
+          }
           return Shortcuts(
             includeSemantics: false,
             shortcuts: findController.regionShortcuts,
-            child: Actions(
-              actions: findController.actions,
-              child: Stack(
-                fit: StackFit.passthrough,
-                children: <Widget>[
-                  content,
-                  if (findController.isOpen)
-                    PositionedDirectional(
-                      top: 0,
-                      end: 0,
-                      child: SelectionContainer.disabled(
-                        child:
-                            _effectiveFindBarBuilder?.call(context, findController) ??
-                            SelectableRegionFindBar(controller: findController),
-                      ),
-                    ),
-                ],
-              ),
-            ),
+            child: Actions(actions: findController.actions, child: body),
           );
         },
       );
@@ -4031,52 +4058,131 @@ class SelectableSearchMatch {
   int get hashCode => Object.hash(selectable, range.startOffset, range.endOffset, text);
 }
 
-/// An [InheritedWidget] that configures Find-in-Page (`Cmd+F` / `Ctrl+F`)
-/// behavior for a descendant [SelectableRegion] or [SelectionArea].
+/// Enables Find-in-Page (`Cmd+F` / `Ctrl+F`) search, highlighting, and scrolling
+/// for all descendant [Text] and [RichText] widgets in [child].
 ///
-/// Wrapping a [SelectionArea] or [SelectableRegion] in a [FindInPageScope]
-/// attaches a [FindInPageController], custom [findBarBuilder], or "Find-Only"
-/// mode (`enableSelection: false`) via ambient context lookup without requiring
-/// constructor parameters on [SelectionArea].
-class FindInPageScope extends InheritedWidget {
+/// When [child] does not contain a [SelectionArea] or [SelectableRegion],
+/// [FindInPageScope] automatically provides a standalone "Find-Only" host so
+/// [Text] widgets register for Find-in-Page without altering button mouse
+/// cursors or competing for drag gestures.
+///
+/// When [FindInPageScope] wraps a descendant [SelectionArea] or [SelectableRegion],
+/// the descendant region claims this scope's [controller] and [findBarBuilder]
+/// so selection seeding on `open()` and selection handoff on `Escape` work
+/// seamlessly without duplicate overlays.
+class FindInPageScope extends StatefulWidget {
   /// Creates a [FindInPageScope].
   const FindInPageScope({
     super.key,
     this.controller,
     this.enableFind = true,
-    this.enableSelection,
     this.findBarBuilder,
-    required super.child,
+    required this.child,
   });
 
-  /// The [FindInPageController] to attach to the descendant [SelectableRegion].
+  /// The [FindInPageController] to attach to this scope or a descendant [SelectableRegion].
   final FindInPageController? controller;
 
-  /// Whether Find-in-Page (`Cmd+F` / `Ctrl+F`) is enabled in the descendant
-  /// [SelectableRegion].
+  /// Whether Find-in-Page (`Cmd+F` / `Ctrl+F`) is enabled in this scope.
   final bool enableFind;
-
-  /// Optional override for whether pointer/keyboard text selection is enabled
-  /// in the descendant [SelectableRegion] (e.g. `false` for "Find-Only" mode
-  /// inside a [SelectionArea]).
-  final bool? enableSelection;
 
   /// Optional builder for the Find-in-Page bar overlay when [controller] is open.
   final SelectableRegionFindBarBuilder? findBarBuilder;
 
+  /// The widget below this widget in the tree.
+  final Widget child;
+
   /// Returns the closest enclosing [FindInPageScope] in [context], or `null`
   /// if none is present.
   static FindInPageScope? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<FindInPageScope>();
+    return _InheritedFindInPageScope.maybeOf(context)?.scope;
   }
 
   @override
-  bool updateShouldNotify(FindInPageScope oldWidget) {
-    return controller != oldWidget.controller ||
-        enableFind != oldWidget.enableFind ||
-        enableSelection != oldWidget.enableSelection ||
-        findBarBuilder != oldWidget.findBarBuilder;
+  State<FindInPageScope> createState() => _FindInPageScopeState();
+}
+
+class _FindInPageScopeState extends State<FindInPageScope> {
+  FindInPageController? _internalController;
+
+  FindInPageController get _effectiveController =>
+      widget.controller ?? (_internalController ??= FindInPageController());
+
+  @override
+  void didUpdateWidget(FindInPageScope oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != null && _internalController != null) {
+      _internalController!.dispose();
+      _internalController = null;
+    }
   }
+
+  @override
+  void dispose() {
+    _internalController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final FindInPageController effectiveController = _effectiveController;
+    final MouseCursor? ambientMouseCursor = DefaultSelectionStyle.of(context).mouseCursor;
+    return SelectableRegion._findOnlyHost(
+      enableFind: widget.enableFind,
+      findController: effectiveController,
+      findBarBuilder: widget.findBarBuilder,
+      child: _InheritedFindInPageScope(
+        scope: widget,
+        effectiveController: effectiveController,
+        ambientMouseCursor: ambientMouseCursor,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class _InheritedFindInPageScope extends InheritedWidget {
+  const _InheritedFindInPageScope({
+    required this.scope,
+    required this.effectiveController,
+    required this.ambientMouseCursor,
+    required super.child,
+  });
+
+  final FindInPageScope scope;
+  final FindInPageController effectiveController;
+  final MouseCursor? ambientMouseCursor;
+
+  static _InheritedFindInPageScope? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_InheritedFindInPageScope>();
+  }
+
+  @override
+  bool updateShouldNotify(_InheritedFindInPageScope oldWidget) {
+    return effectiveController != oldWidget.effectiveController ||
+        ambientMouseCursor != oldWidget.ambientMouseCursor ||
+        scope.enableFind != oldWidget.scope.enableFind ||
+        scope.findBarBuilder != oldWidget.scope.findBarBuilder;
+  }
+}
+
+class _FindControllerHost {
+  _FindControllerHost({
+    required this.delegate,
+    required this.enableSelection,
+    required this.regionFocusNode,
+    required this.regionContext,
+    required this.findBarBuilder,
+    required this.isFallbackHost,
+  });
+
+  final MultiSelectableSelectionContainerDelegate delegate;
+  bool enableSelection;
+  FocusNode regionFocusNode;
+  BuildContext? regionContext;
+  SelectableRegionFindBarBuilder? findBarBuilder;
+  final bool isFallbackHost;
+  bool isActive = true;
 }
 
 /// Controls Find-in-Page (`Cmd+F` / `Ctrl+F`) search state, highlight painting, and
@@ -4203,9 +4309,19 @@ class FindInPageController extends ChangeNotifier {
     ),
   };
 
-  MultiSelectableSelectionContainerDelegate? _delegate;
-  bool _enableSelection = true;
-  FocusNode? _regionFocusNode;
+  _FindControllerHost? _primaryHost;
+  _FindControllerHost? _fallbackHost;
+
+  _FindControllerHost? get _activeHost => _primaryHost ?? _fallbackHost;
+  MultiSelectableSelectionContainerDelegate? get _delegate => _activeHost?.delegate;
+  bool get _enableSelection => _activeHost?.enableSelection ?? true;
+  FocusNode? get _regionFocusNode => _activeHost?.regionFocusNode;
+  BuildContext? get _regionContext => _activeHost?.regionContext;
+  SelectableRegionFindBarBuilder? get _activeFindBarBuilder =>
+      _primaryHost?.findBarBuilder ?? _fallbackHost?.findBarBuilder;
+
+  bool _isActiveHost(MultiSelectableSelectionContainerDelegate delegate) =>
+      _activeHost?.delegate == delegate;
 
   Selectable? _pendingAnchorSelectable;
   int _pendingAnchorStartOffset = -1;
@@ -4276,13 +4392,21 @@ class FindInPageController extends ChangeNotifier {
 
   bool _isRecomputing = false;
   bool _pendingScrollToActiveOnNextMatch = false;
-  BuildContext? _regionContext;
   final Map<RenderViewport, double?> _savedViewportCacheExtents = <RenderViewport, double?>{};
   List<(Selectable, String)>? _lastSelectableTextSnapshot;
 
   bool _activateScannerMode() {
-    final RenderObject? root = _regionContext?.findRenderObject();
-    if (root == null || scannerCacheExtent <= 0) {
+    final _FindControllerHost? host = _activeHost;
+    final BuildContext? context = host?.regionContext;
+    if (host == null ||
+        !host.isActive ||
+        context == null ||
+        !context.mounted ||
+        scannerCacheExtent <= 0) {
+      return false;
+    }
+    final RenderObject? root = context.findRenderObject();
+    if (root == null) {
       return false;
     }
     var expandedAny = false;
@@ -4338,17 +4462,68 @@ class FindInPageController extends ChangeNotifier {
     required bool enableSelection,
     required FocusNode regionFocusNode,
     BuildContext? regionContext,
+    SelectableRegionFindBarBuilder? findBarBuilder,
+    bool isFallbackHost = false,
   }) {
-    _enableSelection = enableSelection;
-    _regionFocusNode = regionFocusNode;
-    _regionContext = regionContext;
-    if (_delegate == delegate) {
+    if (isFallbackHost) {
+      if (_fallbackHost?.delegate == delegate) {
+        _fallbackHost!
+          ..enableSelection = enableSelection
+          ..regionFocusNode = regionFocusNode
+          ..regionContext = regionContext
+          ..findBarBuilder = findBarBuilder;
+        return;
+      }
+      _fallbackHost?.delegate._onSelectablesChanged = null;
+      _fallbackHost = _FindControllerHost(
+        delegate: delegate,
+        enableSelection: enableSelection,
+        regionFocusNode: regionFocusNode,
+        regionContext: regionContext,
+        findBarBuilder: findBarBuilder,
+        isFallbackHost: true,
+      );
+      if (_primaryHost == null) {
+        _lastSelectableTextSnapshot = null;
+        delegate._onSelectablesChanged = _handleSelectablesChanged;
+        if (_isOpen) {
+          _activateScannerMode();
+          if (_query.isNotEmpty) {
+            _recomputeMatches(scrollToActive: false);
+          }
+        }
+      }
       return;
     }
-    _delegate?._onSelectablesChanged = null;
-    _delegate = delegate;
+
+    if (_primaryHost?.delegate == delegate) {
+      _primaryHost!
+        ..enableSelection = enableSelection
+        ..regionFocusNode = regionFocusNode
+        ..regionContext = regionContext
+        ..findBarBuilder = findBarBuilder;
+      return;
+    }
+    if (_fallbackHost != null && _primaryHost == null) {
+      _restoreScannerMode();
+      _clearHighlightsForDelegate(_fallbackHost!.delegate);
+      _fallbackHost!.delegate._onSelectablesChanged = null;
+    }
+    if (_primaryHost != null) {
+      _restoreScannerMode();
+      _clearHighlightsForDelegate(_primaryHost!.delegate);
+      _primaryHost!.delegate._onSelectablesChanged = null;
+    }
+    _primaryHost = _FindControllerHost(
+      delegate: delegate,
+      enableSelection: enableSelection,
+      regionFocusNode: regionFocusNode,
+      regionContext: regionContext,
+      findBarBuilder: findBarBuilder,
+      isFallbackHost: false,
+    );
     _lastSelectableTextSnapshot = null;
-    _delegate!._onSelectablesChanged = _handleSelectablesChanged;
+    delegate._onSelectablesChanged = _handleSelectablesChanged;
     if (_isOpen) {
       _activateScannerMode();
       if (_query.isNotEmpty) {
@@ -4357,38 +4532,73 @@ class FindInPageController extends ChangeNotifier {
     }
   }
 
-  void _updateHostConfig({
+  void _updateHostConfig(
+    MultiSelectableSelectionContainerDelegate delegate, {
     required bool enableSelection,
     required FocusNode regionFocusNode,
     BuildContext? regionContext,
+    SelectableRegionFindBarBuilder? findBarBuilder,
   }) {
-    _enableSelection = enableSelection;
-    _regionFocusNode = regionFocusNode;
-    _regionContext = regionContext;
+    final _FindControllerHost? host = _primaryHost?.delegate == delegate
+        ? _primaryHost
+        : (_fallbackHost?.delegate == delegate ? _fallbackHost : null);
+    if (host != null) {
+      host
+        ..enableSelection = enableSelection
+        ..regionFocusNode = regionFocusNode
+        ..regionContext = regionContext
+        ..findBarBuilder = findBarBuilder;
+    }
+  }
+
+  void _setHostActive(MultiSelectableSelectionContainerDelegate delegate, bool isActive) {
+    if (_primaryHost?.delegate == delegate) {
+      _primaryHost!.isActive = isActive;
+    } else if (_fallbackHost?.delegate == delegate) {
+      _fallbackHost!.isActive = isActive;
+    }
   }
 
   void _detach(MultiSelectableSelectionContainerDelegate delegate) {
-    if (_delegate != delegate) {
+    if (_primaryHost?.delegate == delegate) {
+      _restoreScannerMode();
+      _clearHighlightsForDelegate(delegate);
+      delegate._onSelectablesChanged = null;
+      _primaryHost = null;
+      _lastSelectableTextSnapshot = null;
+      if (_fallbackHost != null) {
+        _fallbackHost!.delegate._onSelectablesChanged = _handleSelectablesChanged;
+        if (_isOpen &&
+            _fallbackHost!.isActive &&
+            (_fallbackHost!.regionContext?.mounted ?? false)) {
+          _activateScannerMode();
+          if (_query.isNotEmpty) {
+            _recomputeMatches(scrollToActive: false);
+          }
+        }
+      }
       return;
     }
-    _restoreScannerMode();
-    _clearAllHighlights();
-    _delegate!._onSelectablesChanged = null;
-    _delegate = null;
-    _lastSelectableTextSnapshot = null;
-    _regionFocusNode = null;
-    _regionContext = null;
+    if (_fallbackHost?.delegate == delegate) {
+      if (_primaryHost == null) {
+        _restoreScannerMode();
+        _clearHighlightsForDelegate(delegate);
+        _lastSelectableTextSnapshot = null;
+      }
+      delegate._onSelectablesChanged = null;
+      _fallbackHost = null;
+    }
   }
 
   @override
   void dispose() {
     _restoreScannerMode();
     _clearAllHighlights();
-    _delegate?._onSelectablesChanged = null;
-    _delegate = null;
+    _primaryHost?.delegate._onSelectablesChanged = null;
+    _fallbackHost?.delegate._onSelectablesChanged = null;
+    _primaryHost = null;
+    _fallbackHost = null;
     _lastSelectableTextSnapshot = null;
-    _regionFocusNode = null;
-    _regionContext = null;
     super.dispose();
   }
 
@@ -4658,13 +4868,16 @@ class FindInPageController extends ChangeNotifier {
     }
   }
 
-  void _clearAllHighlights() {
-    final MultiSelectableSelectionContainerDelegate? delegate = _delegate;
-    if (delegate == null) {
-      return;
-    }
+  void _clearHighlightsForDelegate(MultiSelectableSelectionContainerDelegate delegate) {
     for (final Selectable selectable in delegate.getLeafSelectables()) {
       selectable.setSearchHighlights(SelectionHighlightRanges.empty);
+    }
+  }
+
+  void _clearAllHighlights() {
+    final MultiSelectableSelectionContainerDelegate? delegate = _delegate;
+    if (delegate != null) {
+      _clearHighlightsForDelegate(delegate);
     }
   }
 }
@@ -4770,6 +4983,9 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
     final int total = widget.controller.matchCount;
     final int current = total == 0 ? 0 : widget.controller.activeMatchIndex + 1;
     final counterText = '$current / $total';
+    final String noResultsLabel =
+        Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations)?.noResultsFound ??
+        const DefaultWidgetsLocalizations().noResultsFound;
     const textStyle = TextStyle(
       fontSize: 13.0,
       color: Color(0xFF1F1F1F),
@@ -4814,7 +5030,7 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
                   Semantics(
                     container: true,
                     liveRegion: true,
-                    label: total == 0 ? 'No matches' : 'Match $current of $total',
+                    label: total == 0 ? noResultsLabel : 'Match $current of $total',
                     child: ExcludeSemantics(
                       child: RichText(
                         text: TextSpan(

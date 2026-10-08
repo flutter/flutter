@@ -54,7 +54,6 @@ Future<void> _loadRealFonts() async {
 Widget _buildMultiWidgetTestBench({
   required FindInPageController findController,
   required ScrollController listScrollController,
-  bool enableSelection = false,
 }) {
   const baseRoboto = TextStyle(
     fontFamily: 'Roboto',
@@ -82,202 +81,198 @@ Widget _buildMultiWidgetTestBench({
                     const SingleActivator(LogicalKeyboardKey.keyF, meta: true): findController.open,
                   },
                   child: FindInPageScope(
-                    enableSelection: enableSelection,
                     controller: findController,
-                    child: SelectableRegion(
-                      selectionControls: emptyTextSelectionControls,
-                      child: ColoredBox(
-                        color: const Color(0xFFF8FAFD),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            Container(
-                              height: 52,
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              color: const Color(0xFF0B57D0),
-                              alignment: Alignment.centerLeft,
-                              child: const Text(
-                                'Flutter Find-in-Page (Cmd+F) — Multi-Widget Showcase',
-                                style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 17,
-                                  color: Color(0xFFFFFFFF),
-                                ),
+                    child: ColoredBox(
+                      color: const Color(0xFFF8FAFD),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Container(
+                            height: 52,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            color: const Color(0xFF0B57D0),
+                            alignment: Alignment.centerLeft,
+                            child: const Text(
+                              'Flutter Find-in-Page (Cmd+F) — Multi-Widget Showcase',
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 17,
+                                color: Color(0xFFFFFFFF),
                               ),
                             ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(14.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    // 1. RichText / Card with inline WidgetSpan
-                                    DecoratedBox(
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(14.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: <Widget>[
+                                  // 1. RichText / Card with inline WidgetSpan
+                                  DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFFFFF),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: const Color(0xFFD3E3FD)),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14.0,
+                                        vertical: 10.0,
+                                      ),
+                                      child: Text.rich(
+                                        TextSpan(
+                                          style: baseRoboto.copyWith(fontSize: 14),
+                                          children: <InlineSpan>[
+                                            const TextSpan(
+                                              text: 'Hero Banner: ',
+                                              style: TextStyle(fontWeight: FontWeight.w700),
+                                            ),
+                                            const TextSpan(
+                                              text: 'Wrap any screen in SelectionArea to unlock app-level ',
+                                            ),
+                                            const TextSpan(
+                                              text: 'Flutter',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xFF0B57D0),
+                                              ),
+                                            ),
+                                            const TextSpan(text: ' search across '),
+                                            WidgetSpan(
+                                              alignment: PlaceholderAlignment.middle,
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 8,
+                                                  vertical: 2,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFFE8F0FE),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                    color: const Color(0xFF0B57D0),
+                                                  ),
+                                                ),
+                                                child: const Text(
+                                                  'Inline WidgetSpan: Flutter Chip',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Roboto',
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Color(0xFF0B57D0),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const TextSpan(
+                                              text: ' and docs at flutter.dev/to/find-in-page.',
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  // 2. 3-Column Metric Cards Row
+                                  const Row(
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: _MetricCard(
+                                          title: 'Engine Layer',
+                                          subtitle: 'Flutter Impeller Canvas',
+                                          detail: 'Paints highlights inside RenderParagraph',
+                                        ),
+                                      ),
+                                      SizedBox(width: 10),
+                                      Expanded(
+                                        child: _MetricCard(
+                                          title: 'Widgets Layer',
+                                          subtitle: 'Flutter SelectableRegion',
+                                          detail: 'Find-only mode keeps native button cursors',
+                                        ),
+                                      ),
+                                      SizedBox(width: 10),
+                                      Expanded(
+                                        child: _MetricCard(
+                                          title: 'Platform Shortcuts',
+                                          subtitle: 'Flutter Web & Desktop',
+                                          detail: 'Cmd+F, Ctrl+F, F3, Shift+F3, and Escape',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  // 3. Interactive Controls Row
+                                  const Row(
+                                    children: <Widget>[
+                                      _ActionButton(label: 'Deploy Flutter App', primary: true),
+                                      SizedBox(width: 10),
+                                      _ActionButton(label: 'Run Flutter Golden Suite'),
+                                      SizedBox(width: 10),
+                                      _ActionButton(label: 'Status: flutter-ready'),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  // 4. Clipped Scrollable ListView
+                                  Expanded(
+                                    child: DecoratedBox(
                                       decoration: BoxDecoration(
                                         color: const Color(0xFFFFFFFF),
                                         borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(color: const Color(0xFFD3E3FD)),
+                                        border: Border.all(color: const Color(0xFFC4C7C5)),
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14.0,
-                                          vertical: 10.0,
-                                        ),
-                                        child: Text.rich(
-                                          TextSpan(
-                                            style: baseRoboto.copyWith(fontSize: 14),
-                                            children: <InlineSpan>[
-                                              const TextSpan(
-                                                text: 'Hero Banner: ',
-                                                style: TextStyle(fontWeight: FontWeight.w700),
-                                              ),
-                                              const TextSpan(
-                                                text: 'Wrap any screen in SelectionArea to unlock app-level ',
-                                              ),
-                                              const TextSpan(
-                                                text: 'Flutter',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w700,
-                                                  color: Color(0xFF0B57D0),
-                                                ),
-                                              ),
-                                              const TextSpan(text: ' search across '),
-                                              WidgetSpan(
-                                                alignment: PlaceholderAlignment.middle,
-                                                child: Container(
-                                                  padding: const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 2,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: const Color(0xFFE8F0FE),
-                                                    borderRadius: BorderRadius.circular(12),
-                                                    border: Border.all(
-                                                      color: const Color(0xFF0B57D0),
-                                                    ),
-                                                  ),
-                                                  child: const Text(
-                                                    'Inline WidgetSpan: Flutter Chip',
-                                                    style: TextStyle(
-                                                      fontFamily: 'Roboto',
-                                                      fontSize: 11,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: Color(0xFF0B57D0),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              const TextSpan(
-                                                text: ' and docs at flutter.dev/to/find-in-page.',
-                                              ),
-                                            ],
-                                          ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: ListView(
+                                          controller: listScrollController,
+                                          padding: const EdgeInsets.all(10),
+                                          children: const <Widget>[
+                                            _LogRow(
+                                              index: 1,
+                                              text: 'Row 1: Visible viewport item — Flutter RenderParagraph painting active.',
+                                            ),
+                                            _LogRow(
+                                              index: 2,
+                                              text: 'Row 2: Visible viewport item — Passive yellow (#66FFEB3B) under glyphs.',
+                                            ),
+                                            _LogRow(
+                                              index: 3,
+                                              text: 'Row 3: Visible viewport item — Flutter SelectionRegistrar tree order.',
+                                            ),
+                                            _LogRow(
+                                              index: 4,
+                                              text: 'Row 4: Initially below fold — Scrollable viewport clip boundary test.',
+                                            ),
+                                            _LogRow(
+                                              index: 5,
+                                              text: 'Row 5: Viewport edge — Nested SliverViewport offset calculation.',
+                                            ),
+                                            _LogRow(
+                                              index: 6,
+                                              text: 'Row 6: Below fold — ClipRRect hides off-screen highlight rects.',
+                                            ),
+                                            _LogRow(
+                                              index: 7,
+                                              text: 'Row 7: Below fold — Scrollable cacheExtent pre-indexes matches.',
+                                            ),
+                                            _LogRow(
+                                              index: 8,
+                                              text: 'Row 8: Off-screen match — Flutter showOnScreen auto-scrolled here!',
+                                            ),
+                                            _LogRow(
+                                              index: 9,
+                                              text: 'Row 9: Off-screen match — Final flutter.dev verification row.',
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(height: 10),
-                                    // 2. 3-Column Metric Cards Row
-                                    const Row(
-                                      children: <Widget>[
-                                        Expanded(
-                                          child: _MetricCard(
-                                            title: 'Engine Layer',
-                                            subtitle: 'Flutter Impeller Canvas',
-                                            detail: 'Paints highlights inside RenderParagraph',
-                                          ),
-                                        ),
-                                        SizedBox(width: 10),
-                                        Expanded(
-                                          child: _MetricCard(
-                                            title: 'Widgets Layer',
-                                            subtitle: 'Flutter SelectableRegion',
-                                            detail: 'Find-only mode keeps native button cursors',
-                                          ),
-                                        ),
-                                        SizedBox(width: 10),
-                                        Expanded(
-                                          child: _MetricCard(
-                                            title: 'Platform Shortcuts',
-                                            subtitle: 'Flutter Web & Desktop',
-                                            detail: 'Cmd+F, Ctrl+F, F3, Shift+F3, and Escape',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
-                                    // 3. Interactive Controls Row
-                                    const Row(
-                                      children: <Widget>[
-                                        _ActionButton(label: 'Deploy Flutter App', primary: true),
-                                        SizedBox(width: 10),
-                                        _ActionButton(label: 'Run Flutter Golden Suite'),
-                                        SizedBox(width: 10),
-                                        _ActionButton(label: 'Status: flutter-ready'),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
-                                    // 4. Clipped Scrollable ListView
-                                    Expanded(
-                                      child: DecoratedBox(
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFFFFFFF),
-                                          borderRadius: BorderRadius.circular(10),
-                                          border: Border.all(color: const Color(0xFFC4C7C5)),
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: ListView(
-                                            controller: listScrollController,
-                                            padding: const EdgeInsets.all(10),
-                                            children: const <Widget>[
-                                              _LogRow(
-                                                index: 1,
-                                                text: 'Row 1: Visible viewport item — Flutter RenderParagraph painting active.',
-                                              ),
-                                              _LogRow(
-                                                index: 2,
-                                                text: 'Row 2: Visible viewport item — Passive yellow (#66FFEB3B) under glyphs.',
-                                              ),
-                                              _LogRow(
-                                                index: 3,
-                                                text: 'Row 3: Visible viewport item — Flutter SelectionRegistrar tree order.',
-                                              ),
-                                              _LogRow(
-                                                index: 4,
-                                                text: 'Row 4: Initially below fold — Scrollable viewport clip boundary test.',
-                                              ),
-                                              _LogRow(
-                                                index: 5,
-                                                text: 'Row 5: Viewport edge — Nested SliverViewport offset calculation.',
-                                              ),
-                                              _LogRow(
-                                                index: 6,
-                                                text: 'Row 6: Below fold — ClipRRect hides off-screen highlight rects.',
-                                              ),
-                                              _LogRow(
-                                                index: 7,
-                                                text: 'Row 7: Below fold — Scrollable cacheExtent pre-indexes matches.',
-                                              ),
-                                              _LogRow(
-                                                index: 8,
-                                                text: 'Row 8: Off-screen match — Flutter showOnScreen auto-scrolled here!',
-                                              ),
-                                              _LogRow(
-                                                index: 9,
-                                                text: 'Row 9: Off-screen match — Final flutter.dev verification row.',
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -485,23 +480,19 @@ void main() {
                       Animation<double> secondaryAnimation,
                     ) {
                       return FindInPageScope(
-                        enableSelection: false,
                         controller: findController,
-                        child: SelectableRegion(
-                          selectionControls: emptyTextSelectionControls,
-                          child: const Column(
-                            children: <Widget>[
-                              Row(children: <Widget>[Text('Hel'), Text('lo')]),
-                              Text.rich(
-                                TextSpan(
-                                  children: <InlineSpan>[
-                                    TextSpan(text: 'Hel'),
-                                    TextSpan(text: 'lo'),
-                                  ],
-                                ),
+                        child: const Column(
+                          children: <Widget>[
+                            Row(children: <Widget>[Text('Hel'), Text('lo')]),
+                            Text.rich(
+                              TextSpan(
+                                children: <InlineSpan>[
+                                  TextSpan(text: 'Hel'),
+                                  TextSpan(text: 'lo'),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       );
                     },

@@ -16,26 +16,27 @@ Widget _buildTestApp({
 }) {
   return WidgetsApp(
     color: const Color(0xFF0B57D0),
-    builder: (BuildContext context, Widget? navigator) {
-      return Overlay(
-        initialEntries: <OverlayEntry>[
-          OverlayEntry(
-            builder: (BuildContext context) {
-              return FindInPageScope(
-                enableSelection: enableSelection,
-                enableFind: enableFind,
-                controller: controller,
-                child: SelectableRegion(
-                  selectionControls: emptyTextSelectionControls,
-                  onSelectionChanged: onSelectionChanged,
-                  child: child,
-                ),
-              );
-            },
-          ),
-        ],
+    pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+      return PageRouteBuilder<T>(
+        settings: settings,
+        pageBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) => builder(context),
       );
     },
+    home: FindInPageScope(
+      enableFind: enableFind,
+      controller: controller,
+      child: enableSelection
+          ? SelectableRegion(
+              selectionControls: emptyTextSelectionControls,
+              onSelectionChanged: onSelectionChanged,
+              child: child,
+            )
+          : child,
+    ),
   );
 }
 
@@ -252,7 +253,7 @@ void main() {
         await tester.pumpAndSettle();
 
         final SelectableRegionState regionState = tester.state<SelectableRegionState>(
-          find.byType(SelectableRegion),
+          find.byType(SelectableRegion).last,
         );
         expect(selectableController.isOpen, isFalse);
         expect(regionState.selectionDelegate.getSelectedContent()?.plainText, 'Skwasm');
@@ -270,33 +271,16 @@ void main() {
           contains(const TextSelection(baseOffset: 7, extentOffset: 13)),
         );
 
-        // Part B: SelectableRegion.findOnly ("Find-Only" mode must NOT leave a stranded selection on close).
+        // Part B: Standalone FindInPageScope ("Find-Only" mode must NOT leave a stranded selection on close).
         final findOnlyController = FindInPageController();
         addTearDown(findOnlyController.dispose);
 
         await tester.pumpWidget(
-          WidgetsApp(
-            color: const Color(0xFF0B57D0),
-            onGenerateRoute: (RouteSettings settings) {
-              return PageRouteBuilder<void>(
-                pageBuilder:
-                    (
-                      BuildContext context,
-                      Animation<double> animation,
-                      Animation<double> secondaryAnimation,
-                    ) {
-                      return SelectableRegion.findOnly(
-                        findController: findOnlyController,
-                        child: const Column(
-                          children: <Widget>[
-                            Text('First Impeller item'),
-                            Text('Second Impeller item'),
-                          ],
-                        ),
-                      );
-                    },
-              );
-            },
+          _buildTestApp(
+            controller: findOnlyController,
+            child: const Column(
+              children: <Widget>[Text('First Impeller item'), Text('Second Impeller item')],
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -344,7 +328,7 @@ void main() {
 
         // Select "CanvasKit" in the SECOND line ('Line 1: CanvasKit pipeline', offset 8..17).
         final SelectableRegionState regionState = tester.state<SelectableRegionState>(
-          find.byType(SelectableRegion),
+          find.byType(SelectableRegion).last,
         );
         final MultiSelectableSelectionContainerDelegate delegate = regionState.selectionDelegate;
         final List<Selectable> leaves = delegate.getLeafSelectables();
@@ -780,7 +764,7 @@ void main() {
         // Now select ' WasmGC ' (with leading and trailing spaces, offset 6..14) in Row 1,
         // which also moves focus away from the FindBar.
         final SelectableRegionState regionState = tester.state<SelectableRegionState>(
-          find.byType(SelectableRegion),
+          find.byType(SelectableRegion).last,
         );
         final List<Selectable> leaves = regionState.selectionDelegate.getLeafSelectables();
         regionState.selectionDelegate.selectRangeForSelectable(
@@ -820,29 +804,29 @@ void main() {
         await tester.pumpWidget(
           WidgetsApp(
             color: const Color(0xFF0B57D0),
-            builder: (BuildContext context, Widget? navigator) {
-              return Overlay(
-                initialEntries: <OverlayEntry>[
-                  OverlayEntry(
-                    builder: (BuildContext context) {
-                      return StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                          outerSetState = setState;
-                          return FindInPageScope(
-                            controller: activeController,
-                            enableFind: enableFind,
-                            child: SelectableRegion(
-                              selectionControls: emptyTextSelectionControls,
-                              child: const Text('Persistent highlight check'),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
+            pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+              return PageRouteBuilder<T>(
+                settings: settings,
+                pageBuilder: (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) => builder(context),
               );
             },
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                outerSetState = setState;
+                return FindInPageScope(
+                  controller: activeController,
+                  enableFind: enableFind,
+                  child: SelectableRegion(
+                    selectionControls: emptyTextSelectionControls,
+                    child: const Text('Persistent highlight check'),
+                  ),
+                );
+              },
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -915,7 +899,7 @@ void main() {
 
         // 2. Select all (multi-line selection across both lines) and verify open() clears the multi-line selection!
         final SelectableRegionState regionState = tester.state<SelectableRegionState>(
-          find.byType(SelectableRegion),
+          find.byType(SelectableRegion).last,
         );
         regionState.selectAll();
         await tester.pumpAndSettle();
@@ -1076,10 +1060,10 @@ void main() {
 
         controller.query = 'nonexistent';
         await tester.pumpAndSettle();
-        expect(find.bySemanticsLabel('No matches'), findsOneWidget);
+        expect(find.bySemanticsLabel('No results found'), findsOneWidget);
         expect(
           tester
-              .getSemantics(find.bySemanticsLabel('No matches'))
+              .getSemantics(find.bySemanticsLabel('No results found'))
               .hasFlag(SemanticsFlag.isLiveRegion),
           isTrue,
         );
