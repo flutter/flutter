@@ -51,10 +51,13 @@ final class ExtensionDeviceClient extends DeviceService {
     );
     try {
       final Object? rawResult = await connection
-          .sendRequest(DeviceService.isSupportedForProjectMethod, <String, Object?>{
-            DeviceService.deviceIdParam: deviceId,
-            DeviceService.projectRootParam: projectRoot.toString(),
-          })
+          .sendRequest(
+            DeviceService.isSupportedForProjectMethod,
+            params: <String, Object?>{
+              DeviceService.deviceIdParam: deviceId,
+              DeviceService.projectRootParam: projectRoot.toString(),
+            },
+          )
           .timeout(const Duration(seconds: 5));
       if (rawResult case final bool supported) {
         return supported;

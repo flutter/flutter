@@ -286,7 +286,8 @@ void ShellTest::DispatchFakePointerData(Shell* shell, double x) {
 void ShellTest::DispatchPointerData(Shell* shell,
                                     std::unique_ptr<PointerDataPacket> packet) {
   fml::AutoResetWaitableEvent latch;
-  shell->GetTaskRunners().GetPlatformTaskRunner()->PostTask(
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
       [&latch, shell, &packet]() {
         // Goes through PlatformView to ensure packet is corrected converted.
         shell->GetPlatformView()->DispatchPointerDataPacket(std::move(packet));
