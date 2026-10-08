@@ -198,6 +198,42 @@ class PipelineLibraryGLES final
       const PipelineDescriptor& desc,
       std::shared_ptr<UniqueHandleGLES> program_handle);
 
+  using PipelinePromise =
+      std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>;
+
+  //----------------------------------------------------------------------------
+  /// @brief      The first step of creating a pipeline. Uses a cached program
+  ///             if there is one, otherwise compiles a new one and then
+  ///             finishes with `FinishPipelineCreation`. Must be called on the
+  ///             reactor.
+  ///
+  /// @param[in]  eager  If true, `FinishPipelineCreation` is called
+  ///                    immediately. Otherwise it is posted as a separate event
+  ///                    to the IO task runner, giving the driver time to link
+  ///                    the program in between.
+  ///
+  static void StartPipelineCreation(
+      const std::shared_ptr<PipelinePromise>& promise,
+      const std::weak_ptr<PipelineLibrary>& weak_library,
+      const PipelineDescriptor& descriptor,
+      const std::shared_ptr<const ShaderFunction>& vert_function,
+      const std::shared_ptr<const ShaderFunction>& frag_function,
+      bool threadsafe,
+      bool eager);
+
+  //----------------------------------------------------------------------------
+  /// @brief      The second step of creating a pipeline. Waits for the program
+  ///             to link, caches it, and fulfills the promise with the new
+  ///             pipeline. Must be called on the reactor, on the same thread
+  ///             that compiled the program.
+  ///
+  static void FinishPipelineCreation(
+      const std::shared_ptr<PipelinePromise>& promise,
+      const std::weak_ptr<PipelineLibrary>& weak_library,
+      const PipelineDescriptor& descriptor,
+      const ProgramKey& program_key,
+      const std::shared_ptr<PendingProgram>& pending_program);
+
   std::shared_ptr<UniqueHandleGLES> GetCachedProgram(const ProgramKey& key);
 
   void CacheProgram(const ProgramKey& key,
