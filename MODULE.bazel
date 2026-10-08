@@ -28,3 +28,15 @@ module(
 # together with Skia rolls rather than independently.
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_cc", version = "0.1.5")
+
+# Dependencies from DEPS: synced trees consumed in place, and toolchains that
+# can also be downloaded from CIPD (see extensions.bzl).
+synced_deps = use_extension("//engine/src/flutter/build/bazel:extensions.bzl", "synced_deps")
+use_repo(
+    synced_deps,
+    "abseil-cpp",
+    "clang_linux_x64",
+    "gn",
+    "googletest",
+)
