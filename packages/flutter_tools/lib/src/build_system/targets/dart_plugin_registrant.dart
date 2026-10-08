@@ -74,6 +74,6 @@ class DartPluginRegistrantTarget extends Target {
 
   @override
   List<Source> get outputs => <Source>[
-    Source.fromProject((FlutterProject project) => project.dartPluginRegistrant, optional: true),
+    ProjectSource((FlutterProject project) => project.dartPluginRegistrant, optional: true),
   ];
 }

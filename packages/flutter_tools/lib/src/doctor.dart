@@ -4,7 +4,8 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart'
+    hide Artifact, BuildMode, HostArtifact, Source, Target;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';

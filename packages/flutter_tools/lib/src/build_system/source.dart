@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_core/flutter_tools_core.dart' as core;
+
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
@@ -32,7 +34,7 @@ abstract class ResolvedFiles {
 }
 
 /// Collects sources for a [Target] into a single list of [FileSystemEntity].
-class SourceVisitor implements ResolvedFiles {
+class SourceVisitor implements ResolvedFiles, core.SourceVisitor {
   /// Create a new [SourceVisitor] from an [Environment].
   SourceVisitor(this.environment, [this.inputs = true]);
 
@@ -78,6 +80,7 @@ class SourceVisitor implements ResolvedFiles {
   /// The URL may include constants defined in an [Environment]. If
   /// [optional] is true, the file is not required to exist. In this case, it
   /// is never resolved as an input.
+  @override
   void visitPattern(String pattern, bool optional) {
     // perform substitution of the environmental values and then
     // of the local values.
@@ -148,7 +151,8 @@ class SourceVisitor implements ResolvedFiles {
   /// To increase the performance of builds that use a known revision of Flutter,
   /// these are updated to point towards the `engine.stamp` file instead of
   /// the artifact itself.
-  void visitArtifact(Artifact artifact, TargetPlatform? platform, BuildMode? mode) {
+  @override
+  void visitArtifact(core.Artifact artifact, String? platformName, BuildMode? mode) {
     // This is not a local engine.
     if (environment.engineVersion != null) {
       sources.add(
@@ -159,8 +163,15 @@ class SourceVisitor implements ResolvedFiles {
       );
       return;
     }
+    final Artifact hostArtifact = Artifact.values.firstWhere(
+      (Artifact e) => e.name == artifact.name,
+      orElse: () => throw ArgumentError.value(artifact.name, 'artifact', 'Unknown artifact name.'),
+    );
+    final TargetPlatform? platform = platformName != null
+        ? TargetPlatform.fromName(platformName)
+        : null;
     final String path = environment.artifacts.getArtifactPath(
-      artifact,
+      hostArtifact,
       platform: platform,
       mode: mode,
     );
@@ -181,7 +192,8 @@ class SourceVisitor implements ResolvedFiles {
   /// To increase the performance of builds that use a known revision of Flutter,
   /// these are updated to point towards the `engine.stamp` file instead of
   /// the artifact itself.
-  void visitHostArtifact(HostArtifact artifact) {
+  @override
+  void visitHostArtifact(core.HostArtifact artifact) {
     // This is not a local engine.
     if (environment.engineVersion != null) {
       sources.add(
@@ -192,7 +204,12 @@ class SourceVisitor implements ResolvedFiles {
       );
       return;
     }
-    final FileSystemEntity entity = environment.artifacts.getHostArtifact(artifact);
+    final HostArtifact hostArtifact = HostArtifact.values.firstWhere(
+      (HostArtifact e) => e.name == artifact.name,
+      orElse: () =>
+          throw ArgumentError.value(artifact.name, 'artifact', 'Unknown host artifact name.'),
+    );
+    final FileSystemEntity entity = environment.artifacts.getHostArtifact(hostArtifact);
     if (entity is Directory) {
       sources.addAll(<File>[
         for (final FileSystemEntity entity in entity.listSync(recursive: true))
@@ -215,103 +232,28 @@ class SourceVisitor implements ResolvedFiles {
   }
 }
 
-/// A description of an input or output of a [Target].
-abstract class Source {
-  /// This source is a file URL which contains some references to magic
-  /// environment variables defined in [Environment].
-  ///
-  /// If [optional] is true, the file is not required to exist. In this case, it
-  /// is never resolved as an input.
-  const factory Source.pattern(String pattern, {bool optional}) = _PatternSource;
-
-  /// The source is provided by an [Artifact].
-  ///
-  /// If [artifact] points to a directory then all child files are included.
-  const factory Source.artifact(Artifact artifact, {TargetPlatform? platform, BuildMode? mode}) =
-      _ArtifactSource;
-
-  /// The source is provided by an [HostArtifact].
-  ///
-  /// If [artifact] points to a directory then all child files are included.
-  const factory Source.hostArtifact(HostArtifact artifact) = _HostArtifactSource;
-
-  /// The source is provided by a [FlutterProject].
-  ///
-  /// If [optional] is true, the file is not required to exist. In this case, it
-  /// is never resolved as an input.
-  ///
-  /// Example:
-  ///
-  /// ```dart
-  /// // A project's `pubspec.yaml` file:
-  /// Source.fromProject((FlutterProject project) => project.pubspecFile);
-  /// ```
-  const factory Source.fromProject(ProjectSourceBuilder sourceBuilder, {bool optional}) =
-      _ProjectSource;
-
-  /// Visit the particular source type.
-  void accept(SourceVisitor visitor);
-
-  /// Whether the output source provided can be known before executing the rule.
-  ///
-  /// This does not apply to inputs, which are always explicit and must be
-  /// evaluated before the build.
-  ///
-  /// For example, [Source.pattern] is not implicit
-  /// provided they do not use any wildcards.
-  bool get implicit;
-}
-
-class _PatternSource implements Source {
-  const _PatternSource(this.value, {this.optional = false});
-
-  final String value;
-  final bool optional;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitPattern(value, optional);
-
-  @override
-  bool get implicit => value.contains('*');
-}
-
-class _ArtifactSource implements Source {
-  const _ArtifactSource(this.artifact, {this.platform, this.mode});
-
-  final Artifact artifact;
-  final TargetPlatform? platform;
-  final BuildMode? mode;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitArtifact(artifact, platform, mode);
-
-  @override
-  bool get implicit => false;
-}
-
-class _HostArtifactSource implements Source {
-  const _HostArtifactSource(this.artifact);
-
-  final HostArtifact artifact;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitHostArtifact(artifact);
-
-  @override
-  bool get implicit => false;
-}
+/// Alias for [core.Source] to keep [Source] in scope for files importing
+/// `build_system.dart` or `source.dart`.
+typedef Source = core.Source;
 
 typedef ProjectSourceBuilder = File Function(FlutterProject);
 
-class _ProjectSource implements Source {
-  const _ProjectSource(this.builder, {this.optional = false});
+class ProjectSource implements core.Source {
+  const ProjectSource(this.builder, {this.optional = false});
 
   final ProjectSourceBuilder builder;
   final bool optional;
 
   @override
-  void accept(SourceVisitor visitor) => visitor.visitProjectSource(builder, optional);
+  void accept(core.SourceVisitor visitor) {
+    if (visitor is SourceVisitor) {
+      visitor.visitProjectSource(builder, optional);
+    }
+  }
 
   @override
   bool get implicit => false;
+
+  @override
+  Map<String, Object?> toJson() => throw StateError('Project sources cannot be serialized.');
 }
