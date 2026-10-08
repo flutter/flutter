@@ -6,6 +6,7 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
+import 'package:font_asset/font_asset.dart' show FontAsset, FontAssetExt;
 import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
 import 'package:logging/logging.dart' as logging;
@@ -49,9 +50,14 @@ class FlutterCodeAsset {
   String get targetString => '${os.name}_${architecture.name}';
 }
 
-/// Matching [CodeAsset] and [DataAsset] in native assets - but Flutter could
-/// support more asset types in the future.
-enum SupportedAssetTypes { codeAssets, dataAssets }
+/// Matching [CodeAsset], [DataAsset], and [FontAsset] in native assets - but
+/// Flutter could support more asset types in the future.
+///
+/// [fontAssets] are gated behind the same experiment as [dataAssets]
+/// (`enable-dart-data-assets`): a font is a data asset that the tool
+/// additionally registers in `FontManifest.json` and subsets with the icon
+/// tree shaker.
+enum SupportedAssetTypes { codeAssets, dataAssets, fontAssets }
 
 /// Hook options specific to building code assets.
 final class BuildCodeAssetsOptions {
@@ -140,6 +146,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     buildEnd: combinedResult.buildEnd,
     codeAssets: combinedResult.codeAssets,
     dataAssets: combinedResult.dataAssets,
+    fontAssets: combinedResult.fontAssets,
     dependencies: combinedResult.dependencies,
   );
 }
@@ -186,10 +193,11 @@ runFlutterSpecificBuildHooks({
   final dependencies = <Uri>{};
   final codeAssets = <FlutterCodeAsset>[];
   final dataAssets = <DataAsset>[];
+  final fontAssets = <FontAsset>[];
 
   for (var i = 0; i < targets.length; i++) {
     final AssetBuildTarget target = targets[i];
-    // Only run non-code extensions (like data assets) for the first target,
+    // Only run non-code extensions (like data and font assets) for the first target,
     // as they are architecture-independent and don't need to be rebuilt for each architecture.
     final List<ProtocolExtension> extensions = i > 0
         ? target.extensions.whereType<CodeAssetExtension>().toList()
@@ -202,9 +210,15 @@ runFlutterSpecificBuildHooks({
       target: target,
       codeAssetsAccumulator: codeAssets,
       dataAssetsAccumulator: dataAssets,
+      fontAssetsAccumulator: fontAssets,
     );
   }
-  _checkForDuplicateAssets(codeAssets: codeAssets, dataAssets: dataAssets, targets: targets);
+  _checkForDuplicateAssets(
+    codeAssets: codeAssets,
+    dataAssets: dataAssets,
+    fontAssets: fontAssets,
+    targets: targets,
+  );
   globals.logger.printTrace('Running build hooks for $targetString done.');
   return (
     results: results,
@@ -213,6 +227,7 @@ runFlutterSpecificBuildHooks({
       buildEnd: DateTime.now(),
       codeAssets: codeAssets,
       dataAssets: dataAssets,
+      fontAssets: fontAssets,
       dependencies: dependencies.toList(),
     ),
   );
@@ -228,7 +243,10 @@ List<AssetBuildTarget> _getTargets({
   final supportedAssetTypes = <SupportedAssetTypes>[
     if (featureFlags.isNativeAssetsEnabled && buildCodeAssets != null)
       SupportedAssetTypes.codeAssets,
-    if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) SupportedAssetTypes.dataAssets,
+    if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) ...<SupportedAssetTypes>[
+      SupportedAssetTypes.dataAssets,
+      SupportedAssetTypes.fontAssets,
+    ],
   ];
 
   final BuildMode buildMode = _getBuildMode(
@@ -265,7 +283,10 @@ Future<({List<AssetBuildTarget> targets, BuildMode buildMode, bool linkingEnable
   final supportedAssetTypes = <SupportedAssetTypes>[
     if (featureFlags.isNativeAssetsEnabled && buildCodeAssets != null)
       SupportedAssetTypes.codeAssets,
-    if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) SupportedAssetTypes.dataAssets,
+    if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) ...<SupportedAssetTypes>[
+      SupportedAssetTypes.dataAssets,
+      SupportedAssetTypes.fontAssets,
+    ],
   ];
 
   final BuildMode buildMode = _getBuildMode(
@@ -323,11 +344,12 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
 
   final codeAssets = <FlutterCodeAsset>[];
   final dataAssets = <DataAsset>[];
+  final fontAssets = <FontAsset>[];
   final dependencies = <Uri>{};
 
   for (var i = 0; i < targets.length; i++) {
     final AssetBuildTarget target = targets[i];
-    // Only run non-code extensions (like data assets) for the first target,
+    // Only run non-code extensions (like data and font assets) for the first target,
     // as they are architecture-independent and don't need to be rebuilt for each architecture.
     final List<ProtocolExtension> extensions = i > 0
         ? target.extensions.whereType<CodeAssetExtension>().toList()
@@ -352,12 +374,18 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
         target: target,
         codeAssetsAccumulator: codeAssets,
         dataAssetsAccumulator: dataAssets,
+        fontAssetsAccumulator: fontAssets,
       );
       dependencies.addAll(linkResult.dependencies);
     }
   }
 
-  _checkForDuplicateAssets(codeAssets: codeAssets, dataAssets: dataAssets, targets: targets);
+  _checkForDuplicateAssets(
+    codeAssets: codeAssets,
+    dataAssets: dataAssets,
+    fontAssets: fontAssets,
+    targets: targets,
+  );
 
   globals.logger.printTrace('Running link hooks for $targetString done.');
 
@@ -366,13 +394,14 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
     buildEnd: DateTime.now(),
     codeAssets: codeAssets,
     dataAssets: dataAssets,
+    fontAssets: fontAssets,
     dependencies: dependencies.toList(),
   );
 }
 
 /// Combines build-stage and link-stage results into a single, combined [DartHooksResult].
 ///
-/// The combined result contains all code and data assets from both stages,
+/// The combined result contains all code, data, and font assets from both stages,
 /// and the union of all dependencies from both stages.
 DartHooksResult combineBuildAndLinkResults({
   required Map<String, String> environmentDefines,
@@ -393,6 +422,7 @@ DartHooksResult combineBuildAndLinkResults({
 
   final codeAssets = <FlutterCodeAsset>[...linkResult.codeAssets];
   final dataAssets = <DataAsset>[...linkResult.dataAssets];
+  final fontAssets = <FontAsset>[...linkResult.fontAssets];
   final dependencies = <Uri>{...linkResult.dependencies};
 
   for (final target in targets) {
@@ -406,31 +436,40 @@ DartHooksResult combineBuildAndLinkResults({
       target: target,
       codeAssetsAccumulator: codeAssets,
       dataAssetsAccumulator: dataAssets,
+      fontAssetsAccumulator: fontAssets,
     );
     dependencies.addAll(buildResult.dependencies);
   }
 
-  _checkForDuplicateAssets(codeAssets: codeAssets, dataAssets: dataAssets, targets: targets);
+  _checkForDuplicateAssets(
+    codeAssets: codeAssets,
+    dataAssets: dataAssets,
+    fontAssets: fontAssets,
+    targets: targets,
+  );
 
   return DartHooksResult(
     buildStart: linkResult.buildStart,
     buildEnd: linkResult.buildEnd,
     codeAssets: codeAssets,
     dataAssets: dataAssets,
+    fontAssets: fontAssets,
     dependencies: dependencies.toList(),
   );
 }
 
-/// Extracts and categorizes code and data assets from [encodedAssets] for the given [target].
+/// Extracts and categorizes code, data, and font assets from [encodedAssets] for the given [target].
 ///
 /// The extracted assets are appended to the optional accumulator lists:
 /// - [codeAssetsAccumulator]: Collects matching [FlutterCodeAsset]s.
 /// - [dataAssetsAccumulator]: Collects matching [DataAsset]s.
+/// - [fontAssetsAccumulator]: Collects matching [FontAsset]s.
 void _decodeAssets({
   required Iterable<EncodedAsset> encodedAssets,
   required AssetBuildTarget target,
   List<FlutterCodeAsset>? codeAssetsAccumulator,
   List<DataAsset>? dataAssetsAccumulator,
+  List<FontAsset>? fontAssetsAccumulator,
 }) {
   if (target is CodeAssetTarget) {
     final Iterable<FlutterCodeAsset> filteredCode = _filterCodeAssets(
@@ -442,11 +481,14 @@ void _decodeAssets({
   }
   final Iterable<DataAsset> filteredData = _filterDataAssets(encodedAssets);
   dataAssetsAccumulator?.addAll(filteredData);
+  final Iterable<FontAsset> filteredFont = _filterFontAssets(encodedAssets);
+  fontAssetsAccumulator?.addAll(filteredFont);
 }
 
 void _checkForDuplicateAssets({
   required List<FlutterCodeAsset> codeAssets,
   required List<DataAsset> dataAssets,
+  required List<FontAsset> fontAssets,
   required List<AssetBuildTarget> targets,
 }) {
   final List<String> targetStrings = targets.map((AssetBuildTarget e) => e.targetString).toList();
@@ -462,6 +504,21 @@ void _checkForDuplicateAssets({
     throwToolExit(
       'Found duplicates in the data assets: '
       '${duplicateDataAssetIds.toList()} while compiling for '
+      '$targetStrings.',
+    );
+  }
+
+  final fontAssetIds = <String>{};
+  final duplicateFontAssetIds = <String>{};
+  for (final asset in fontAssets) {
+    if (!fontAssetIds.add(asset.id)) {
+      duplicateFontAssetIds.add(asset.id);
+    }
+  }
+  if (duplicateFontAssetIds.isNotEmpty) {
+    throwToolExit(
+      'Found duplicates in the font assets: '
+      '${duplicateFontAssetIds.toList()} while compiling for '
       '$targetStrings.',
     );
   }
@@ -854,6 +911,9 @@ Iterable<FlutterCodeAsset> _filterCodeAssets(
 
 Iterable<DataAsset> _filterDataAssets(Iterable<EncodedAsset> assets) =>
     assets.where((EncodedAsset asset) => asset.isDataAsset).map<DataAsset>(DataAsset.fromEncoded);
+
+Iterable<FontAsset> _filterFontAssets(Iterable<EncodedAsset> assets) =>
+    assets.where((EncodedAsset asset) => asset.isFontAsset).map<FontAsset>(FontAsset.fromEncoded);
 
 Future<BuildResult> _build(
   FlutterNativeAssetsBuildRunner buildRunner,

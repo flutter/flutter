@@ -454,6 +454,15 @@ packages:
       relative: true
     source: path
     version: "0.0.0"
+  font_asset:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: hooks-v2
+      resolved-ref: "4bce1d5a3f21dfd0f2329dabc2ab1436e6f71b80"
+      url: "https://github.com/mosuem/font_asset.git"
+    source: git
+    version: "0.1.0"
   frontend_server_client:
     dependency: "direct main"
     description:

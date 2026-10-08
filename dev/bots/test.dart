@@ -256,6 +256,7 @@ Future<void> _runIntegrationToolTests() async {
     path.join(flutterRoot, 'dev', 'integration_tests', 'data_asset_app'),
     environment: <String, String>{'FLUTTER_DART_DATA_ASSETS': 'true'},
   );
+  await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'font_assets'));
 }
 
 Future<void> _runWidgetPreviewScaffoldToolTests() async {

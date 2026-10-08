@@ -136,6 +136,138 @@ void main() {
     );
 
     testUsingContext(
+      'font assets from hooks are bundled as fonts next to the fonts from the pubspec',
+      () async {
+        writePackageConfigFiles(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'other_pkg': 'other_pkg'},
+        );
+        globals.fs.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync('''
+name: my_app
+flutter:
+  fonts:
+    - family: FromPubspec
+      fonts:
+        - asset: fonts/FromPubspec.ttf
+''');
+        globals.fs.file('fonts/FromPubspec.ttf')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('pubspec');
+        final File regularFont = globals.fs.file('fonts/Roboto-Regular.ttf')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('regular');
+        final File boldItalicFont = globals.fs.file('fonts/Roboto-BoldItalic.ttf')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('bold-italic');
+        final File pkgFont = globals.fs.file('other_pkg/fonts/CustomIcons.ttf')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('icons');
+
+        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final int result = await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+          flutterHookResult: FlutterHookResult(
+            buildStart: DateTime.now(),
+            buildEnd: DateTime.now(),
+            dataAssets: const <HookAsset>[],
+            fontAssets: <FontHookAsset>[
+              FontHookAsset(
+                file: regularFont.uri,
+                name: 'fonts/Roboto-Regular.ttf',
+                fontFamily: 'Roboto',
+                package: 'my_app',
+                weight: 400,
+                style: 'normal',
+              ),
+              FontHookAsset(
+                file: boldItalicFont.uri,
+                name: 'fonts/Roboto-BoldItalic.ttf',
+                fontFamily: 'Roboto',
+                package: 'my_app',
+                weight: 700,
+                style: 'italic',
+              ),
+              FontHookAsset(
+                file: pkgFont.uri,
+                name: 'fonts/CustomIcons.ttf',
+                fontFamily: 'CustomIcons',
+                package: 'other_pkg',
+              ),
+            ],
+            dependencies: <Uri>[regularFont.uri, boldItalicFont.uri, pkgFont.uri],
+          ),
+        );
+        expect(result, 0);
+        expect(
+          bundle.entries.keys,
+          containsAll(<String>[
+            'fonts/FromPubspec.ttf',
+            'packages/my_app/fonts/Roboto-Regular.ttf',
+            'packages/my_app/fonts/Roboto-BoldItalic.ttf',
+            'packages/other_pkg/fonts/CustomIcons.ttf',
+            'FontManifest.json',
+            'AssetManifest.bin',
+          ]),
+        );
+        // Hook fonts get the same asset kind as pubspec fonts, which is what
+        // makes `copyAssets` run the icon tree shaker on them.
+        for (final key in <String>[
+          'fonts/FromPubspec.ttf',
+          'packages/my_app/fonts/Roboto-Regular.ttf',
+          'packages/my_app/fonts/Roboto-BoldItalic.ttf',
+          'packages/other_pkg/fonts/CustomIcons.ttf',
+        ]) {
+          expect(bundle.entries[key]!.kind, AssetKind.font, reason: key);
+        }
+        expect(
+          await bundle.entries['packages/other_pkg/fonts/CustomIcons.ttf']!.contentsAsBytes(),
+          utf8.encode('icons'),
+        );
+        final Object? fontManifest = json.decode(
+          utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()),
+        );
+        expect(fontManifest, <Object?>[
+          <String, Object?>{
+            'family': 'FromPubspec',
+            'fonts': <Object?>[
+              <String, Object?>{'asset': 'fonts/FromPubspec.ttf'},
+            ],
+          },
+          <String, Object?>{
+            'family': 'Roboto',
+            'fonts': <Object?>[
+              <String, Object?>{
+                'asset': 'packages/my_app/fonts/Roboto-Regular.ttf',
+                'weight': 400,
+                'style': 'normal',
+              },
+              <String, Object?>{
+                'asset': 'packages/my_app/fonts/Roboto-BoldItalic.ttf',
+                'weight': 700,
+                'style': 'italic',
+              },
+            ],
+          },
+          <String, Object?>{
+            'family': 'packages/other_pkg/CustomIcons',
+            'fonts': <Object?>[
+              <String, Object?>{'asset': 'packages/other_pkg/fonts/CustomIcons.ttf'},
+            ],
+          },
+        ]);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        Platform: () => platform,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
       'wildcard directories do not include subdirectories',
       () async {
         writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'my_app');

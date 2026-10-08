@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:args/args.dart';
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:data_assets/data_assets.dart' show DataAsset;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -17,12 +19,19 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart' show LinkHooks;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart'
+    show DartHooksResult;
+import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart' show FlutterCodeAsset;
+import 'package:font_asset/font_asset.dart' show FontAsset;
+import 'package:record_use/record_use.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
+import '../../../src/fakes.dart' show CompleterIOSink;
 import '../../../src/package_config.dart';
 
 void main() {
@@ -1047,6 +1056,134 @@ flutter:
 ''');
 
       expect(() async => const CopyAssets().build(environment), throwsException);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'Icon fonts from hooks are subset by the icon tree shaker like fonts from the pubspec',
+    () async {
+      final artifacts = Artifacts.test();
+      final String fontSubsetPath = artifacts.getArtifactPath(Artifact.fontSubset);
+      fileSystem.file(fontSubsetPath).createSync(recursive: true);
+      final processManager = FakeProcessManager.empty();
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        defines: <String, String>{
+          kBuildMode: BuildMode.release.cliName,
+          kIconTreeShakerFlag: 'true',
+        },
+      );
+      environment.buildDir.createSync(recursive: true);
+      writePackageConfigFiles(
+        directory: globals.fs.currentDirectory,
+        mainLibName: 'example',
+        packages: <String, String>{'bar': 'bar'},
+      );
+
+      // `package:bar` provides the icon font through its build hook. Hooks
+      // report absolute file URIs; a relative one would not round-trip through
+      // `Uri.toFilePath` on Windows hosts with this posix memory file system.
+      final File hookFont = fileSystem.currentDirectory.childFile('bar/fonts/BarIcons.ttf')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112]);
+      environment.buildDir
+          .childFile(LinkHooks.resultFilename)
+          .writeAsStringSync(
+            json.encode(
+              DartHooksResult(
+                buildStart: DateTime(2024),
+                buildEnd: DateTime(2024),
+                codeAssets: const <FlutterCodeAsset>[],
+                dataAssets: const <DataAsset>[],
+                fontAssets: <FontAsset>[
+                  FontAsset(
+                    package: 'bar',
+                    name: 'fonts/BarIcons.ttf',
+                    family: 'BarIcons',
+                    file: hookFont.uri,
+                  ),
+                ],
+                dependencies: <Uri>[hookFont.uri],
+              ).toJson(),
+            ),
+          );
+      // The app uses `const IconData(0xe84e, fontFamily: 'BarIcons', fontPackage: 'bar')`.
+      const iconDataClass = Class(
+        'IconData',
+        Library('package:flutter/src/widgets/icon_data.dart'),
+      );
+      environment.buildDir
+          .childFile('recorded_uses.json')
+          .writeAsStringSync(
+            json.encode(
+              Recordings(
+                calls: const <DefinitionWithStaticCalls, List<CallReference>>{},
+                instances: <DefinitionWithInstances, List<InstanceReference>>{
+                  iconDataClass: const <InstanceReference>[
+                    InstanceConstantReference(
+                      instanceConstant: InstanceConstant(
+                        definition: iconDataClass,
+                        fields: <String, Constant>{
+                          'codePoint': IntConstant(59470),
+                          'fontFamily': StringConstant('BarIcons'),
+                          'fontPackage': StringConstant('bar'),
+                        },
+                      ),
+                      loadingUnit: LoadingUnit('root'),
+                    ),
+                  ],
+                },
+              ).toJson(),
+            ),
+          );
+
+      final File bundledFont = environment.buildDir
+          .childDirectory('flutter_assets')
+          .childFile('packages/bar/fonts/BarIcons.ttf');
+      final stdinSink = CompleterIOSink();
+      processManager.addCommand(
+        FakeCommand(
+          command: <Pattern>[fontSubsetPath, bundledFont.path, hookFont.path],
+          stdin: stdinSink,
+          onRun: (List<String> command) {
+            fileSystem.file(command[1])
+              ..createSync(recursive: true)
+              ..writeAsBytesSync(<int>[0]);
+          },
+        ),
+      );
+
+      await const CopyAssets().build(environment);
+
+      expect(logger.errorText, isEmpty);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(stdinSink.getAndClear(), '59470\n');
+      expect(bundledFont, exists);
+      expect(
+        json.decode(
+          environment.buildDir
+              .childDirectory('flutter_assets')
+              .childFile('FontManifest.json')
+              .readAsStringSync(),
+        ),
+        <Object?>[
+          <String, Object?>{
+            'family': 'packages/bar/BarIcons',
+            'fonts': <Object?>[
+              <String, Object?>{'asset': 'packages/bar/fonts/BarIcons.ttf'},
+            ],
+          },
+        ],
+      );
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

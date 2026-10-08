@@ -33,6 +33,7 @@ workspace:
   - dev/integration_tests/external_textures
   - dev/integration_tests/flavors
   - dev/integration_tests/flutter_gallery
+  - dev/integration_tests/font_assets
   # - dev/integration_tests/hook_user_defines  # Intentionally not part of the workspace to test user-defines in its pubspec.
   - dev/integration_tests/hybrid_android_views
   - dev/integration_tests/ios_add2app_life_cycle/flutterapp
@@ -124,6 +125,7 @@ dependencies:
   googleapis_auth: 2.3.4
   hooks: 2.2.0
   data_assets: 0.20.0
+  font_asset: 0.1.0
   record_use: 1.1.1
   html: 0.15.7
   http: 1.6.0
@@ -224,4 +226,10 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: cglae1
+dependency_overrides:
+  font_asset:
+    git:
+      url: https://github.com/mosuem/font_asset.git
+      ref: hooks-v2
+
+# PUBSPEC CHECKSUM: gqo08r

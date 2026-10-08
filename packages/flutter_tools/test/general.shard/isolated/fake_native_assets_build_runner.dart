@@ -9,6 +9,7 @@ import 'package:data_assets/data_assets.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
+import 'package:font_asset/font_asset.dart';
 import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
 
@@ -137,25 +138,35 @@ final class FakeFlutterNativeAssetsBuilderResult implements BuildResult, LinkRes
   factory FakeFlutterNativeAssetsBuilderResult.fromAssets({
     List<CodeAsset> codeAssets = const <CodeAsset>[],
     List<DataAsset> dataAssets = const <DataAsset>[],
+    List<FontAsset> fontAssets = const <FontAsset>[],
     Map<String, List<CodeAsset>> codeAssetsForLinking = const <String, List<CodeAsset>>{},
     Map<String, List<DataAsset>> dataAssetsForLinking = const <String, List<DataAsset>>{},
+    Map<String, List<FontAsset>> fontAssetsForLinking = const <String, List<FontAsset>>{},
     List<Uri> dependencies = const <Uri>[],
   }) {
+    final encodedAssetsForLinking = <String, List<EncodedAsset>>{};
+    for (final String linkerName in codeAssetsForLinking.keys) {
+      (encodedAssetsForLinking[linkerName] ??= <EncodedAsset>[]).addAll(<EncodedAsset>[
+        for (final CodeAsset codeAsset in codeAssetsForLinking[linkerName]!) codeAsset.encode(),
+      ]);
+    }
+    for (final String linkerName in dataAssetsForLinking.keys) {
+      (encodedAssetsForLinking[linkerName] ??= <EncodedAsset>[]).addAll(<EncodedAsset>[
+        for (final DataAsset dataAsset in dataAssetsForLinking[linkerName]!) dataAsset.encode(),
+      ]);
+    }
+    for (final String linkerName in fontAssetsForLinking.keys) {
+      (encodedAssetsForLinking[linkerName] ??= <EncodedAsset>[]).addAll(<EncodedAsset>[
+        for (final FontAsset fontAsset in fontAssetsForLinking[linkerName]!) fontAsset.encode(),
+      ]);
+    }
     return FakeFlutterNativeAssetsBuilderResult(
       encodedAssets: <EncodedAsset>[
         for (final CodeAsset codeAsset in codeAssets) codeAsset.encode(),
         for (final DataAsset dataAsset in dataAssets) dataAsset.encode(),
+        for (final FontAsset fontAsset in fontAssets) fontAsset.encode(),
       ],
-      encodedAssetsForLinking: <String, List<EncodedAsset>>{
-        for (final String linkerName in codeAssetsForLinking.keys)
-          linkerName: <EncodedAsset>[
-            for (final CodeAsset codeAsset in codeAssetsForLinking[linkerName]!) codeAsset.encode(),
-          ],
-        for (final String linkerName in dataAssetsForLinking.keys)
-          linkerName: <EncodedAsset>[
-            for (final DataAsset dataAsset in dataAssetsForLinking[linkerName]!) dataAsset.encode(),
-          ],
-      },
+      encodedAssetsForLinking: encodedAssetsForLinking,
       dependencies: dependencies,
     );
   }
