@@ -48,14 +48,15 @@ PipelineFuture<ComputePipelineDescriptor> CreatePipelineFuture(
 }
 
 std::shared_ptr<Pipeline<PipelineDescriptor>>
-GenericRenderPipelineHandle::WaitAndGet(PipelineLibrary& library) {
+GenericRenderPipelineHandle::WaitAndGet() {
   if (did_wait_) {
     return pipeline_;
   }
   did_wait_ = true;
   if (pipeline_future_.IsValid()) {
-    if (pipeline_future_.descriptor.has_value()) {
-      library.PerformEagerly(pipeline_future_.descriptor.value());
+    std::shared_ptr<PipelineLibrary> library = pipeline_future_.library.lock();
+    if (library && pipeline_future_.descriptor.has_value()) {
+      library->PerformEagerly(pipeline_future_.descriptor.value());
     }
     pipeline_ = pipeline_future_.Get();
   }

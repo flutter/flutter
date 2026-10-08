@@ -28,6 +28,8 @@ template <typename T>
 struct PipelineFuture {
   std::optional<T> descriptor;
   std::shared_future<std::shared_ptr<Pipeline<T>>> future;
+  /// The library that is creating the pipeline, if any.
+  std::weak_ptr<PipelineLibrary> library;
 
   const std::shared_ptr<Pipeline<T>> Get() const { return future.get(); }
 
@@ -127,14 +129,11 @@ class GenericRenderPipelineHandle {
 
   //----------------------------------------------------------------------------
   /// @brief      Waits for the pipeline to be created and returns it. If the
-  ///             pipeline creation is still pending, the library is asked to
-  ///             perform it eagerly on the calling thread instead of idly
-  ///             waiting.
+  ///             pipeline creation is still pending, the library creating it is
+  ///             asked to perform it eagerly on the calling thread instead of
+  ///             idly waiting.
   ///
-  /// @param[in]  library  The library the pipeline was requested from.
-  ///
-  std::shared_ptr<Pipeline<PipelineDescriptor>> WaitAndGet(
-      PipelineLibrary& library);
+  std::shared_ptr<Pipeline<PipelineDescriptor>> WaitAndGet();
 
   std::optional<PipelineDescriptor> GetDescriptor() const {
     return pipeline_future_.descriptor;

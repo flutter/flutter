@@ -161,8 +161,7 @@ template <class RenderPipelineHandleT>
 RenderPipelineHandleT* CreateIfNeeded(
     const ContentContext* context,
     Variants<RenderPipelineHandleT>& container,
-    ContentContextOptions opts,
-    PipelineLibrary& library) {
+    ContentContextOptions opts) {
   if (!context->IsValid()) {
     return nullptr;
   }
@@ -181,7 +180,7 @@ RenderPipelineHandleT* CreateIfNeeded(
   FML_CHECK(default_handle != nullptr);
 
   const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline =
-      default_handle->WaitAndGet(library);
+      default_handle->WaitAndGet();
   if (!pipeline) {
     return nullptr;
   }
@@ -202,12 +201,11 @@ template <class TypedPipeline>
 PipelineRef GetPipeline(const ContentContext* context,
                         Variants<TypedPipeline>& container,
                         ContentContextOptions opts) {
-  PipelineLibrary& library = *context->GetContext()->GetPipelineLibrary();
-  TypedPipeline* pipeline = CreateIfNeeded(context, container, opts, library);
+  TypedPipeline* pipeline = CreateIfNeeded(context, container, opts);
   if (!pipeline) {
     return raw_ptr<Pipeline<PipelineDescriptor>>();
   }
-  return raw_ptr(pipeline->WaitAndGet(library));
+  return raw_ptr(pipeline->WaitAndGet());
 }
 
 }  // namespace
