@@ -5,7 +5,11 @@ repository during the GN → Bazel migration of the engine build.
 
 Nothing here is needed to build with GN. Bazel is driven through `bazelisk`
 from the repository root (see the root `MODULE.bazel`, `.bazelrc` and
-`.bazelversion`).
+`.bazelversion`). Install bazelisk yourself — see
+<https://github.com/bazelbuild/bazelisk#installation> — and make sure it is on
+`PATH`; it is a local prerequisite like git and depot_tools, and is
+intentionally not part of `DEPS`. The Bazel version it downloads is pinned by
+`.bazelversion`.
 
 ## `bin/gen_deps.dart`
 
