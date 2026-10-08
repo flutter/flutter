@@ -745,6 +745,16 @@ TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
   EXPECT_EQ(width, 55);
   EXPECT_EQ(height, 95);
 
+  updated_button.transform.pers2 = 2;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &updated_update);
+  EXPECT_TRUE(fl_view_gtk4_accessibility_get_native_bounds_for_testing(
+      updated_first_child, &x, &y, &width, &height));
+  EXPECT_EQ(x, 10);
+  EXPECT_EQ(y, 19);
+  EXPECT_EQ(width, 28);
+  EXPECT_EQ(height, 48);
+
   g_autoptr(GtkAccessible) second_child =
       fl_view_gtk4_accessibility_ref_next_native_sibling_for_testing(
           first_child);

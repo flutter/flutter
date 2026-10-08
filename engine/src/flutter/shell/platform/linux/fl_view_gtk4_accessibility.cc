@@ -389,15 +389,27 @@ static void fl_gtk4_accessible_node_get_transformed_bounds(
   // embedder test fixtures and older semantics payloads.
   const double scale_x = transform.scaleX == 0.0 ? 1.0 : transform.scaleX;
   const double scale_y = transform.scaleY == 0.0 ? 1.0 : transform.scaleY;
+  const double perspective_scale =
+      transform.pers0 == 0.0 && transform.pers1 == 0.0 && transform.pers2 == 0.0
+          ? 1.0
+          : transform.pers2;
   double min_x = G_MAXDOUBLE;
   double min_y = G_MAXDOUBLE;
   double max_x = -G_MAXDOUBLE;
   double max_y = -G_MAXDOUBLE;
   for (const auto& point : points) {
+    const double denominator = transform.pers0 * point[0] +
+                               transform.pers1 * point[1] + perspective_scale;
+    // A singular projective transform has no finite accessible rectangle.
+    // Keep the affine envelope rather than exporting infinities or NaNs.
+    const double safe_denominator =
+        std::abs(denominator) < 1e-12 ? 1.0 : denominator;
     const double transformed_x =
-        scale_x * point[0] + transform.skewX * point[1] + transform.transX;
+        (scale_x * point[0] + transform.skewX * point[1] + transform.transX) /
+        safe_denominator;
     const double transformed_y =
-        transform.skewY * point[0] + scale_y * point[1] + transform.transY;
+        (transform.skewY * point[0] + scale_y * point[1] + transform.transY) /
+        safe_denominator;
     min_x = MIN(min_x, transformed_x);
     min_y = MIN(min_y, transformed_y);
     max_x = MAX(max_x, transformed_x);
