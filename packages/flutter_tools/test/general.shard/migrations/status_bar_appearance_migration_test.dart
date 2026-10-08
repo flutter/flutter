@@ -12,16 +12,21 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart';
+
+const statusBarAppearanceKey = 'UIViewControllerBasedStatusBarAppearance';
 
 void main() {
   late File infoPlist;
   late BufferLogger logger;
   late FakeXcode xcode;
+  late RecordingPlistParser plistParser;
 
   setUp(() {
     infoPlist = MemoryFileSystem.test().file('Info.plist');
     logger = BufferLogger.test();
     xcode = FakeXcode();
+    plistParser = RecordingPlistParser();
   });
 
   StatusBarAppearanceMigration migration({
@@ -31,79 +36,55 @@ void main() {
     logger,
     xcode: xcode,
     environmentType: environmentType,
+    plistParser: plistParser,
   );
 
-  testWithoutContext('skips missing Info.plist without querying the SDK', () async {
+  testWithoutContext('skips missing Info.plist without parsing or querying the SDK', () async {
     await migration().migrate();
 
     expect(infoPlist.existsSync(), isFalse);
+    expect(plistParser.readPaths, isEmpty);
+    expect(plistParser.replacements, isEmpty);
     expect(xcode.queriedEnvironments, isEmpty);
     expect(logger.statusText, isEmpty);
   });
 
-  for (final MapEntry<String, String> entry in <String, String>{
-    'missing key': '',
-    'true value': '<key>UIViewControllerBasedStatusBarAppearance</key><true/>',
-    'string value': '<key>UIViewControllerBasedStatusBarAppearance</key><string>false</string>',
-    'commented-out key': '<!-- <key>UIViewControllerBasedStatusBarAppearance</key><false/> -->',
-    'nested key':
-        '<key>Nested</key><dict>'
-        '<key>UIViewControllerBasedStatusBarAppearance</key><false/>'
-        '</dict>',
-    'duplicate keys':
-        '<key>UIViewControllerBasedStatusBarAppearance</key><false/>'
-        '<key>UIViewControllerBasedStatusBarAppearance</key><true/>',
-  }.entries) {
-    testWithoutContext('leaves ${entry.key} unchanged without querying the SDK', () async {
-      final contents = '<plist version="1.0"><dict>${entry.value}</dict></plist>';
-      infoPlist.writeAsStringSync(contents);
+  for (final value in <Object?>[null, true, 'false', 0]) {
+    testWithoutContext('leaves value $value unchanged without querying the SDK', () async {
+      infoPlist.createSync();
+      if (value != null) {
+        plistParser.setProperty(statusBarAppearanceKey, value);
+      }
 
       await migration().migrate();
 
-      expect(infoPlist.readAsStringSync(), contents);
+      expect(plistParser.readPaths, <String>[infoPlist.path]);
+      expect(plistParser.replacements, isEmpty);
       expect(xcode.queriedEnvironments, isEmpty);
       expect(logger.statusText, isEmpty);
     });
   }
 
-  testWithoutContext('skips malformed XML without querying the SDK', () async {
-    const contents =
-        '<plist><dict>'
-        '<key>UIViewControllerBasedStatusBarAppearance</key><false/>';
-    infoPlist.writeAsStringSync(contents);
+  testWithoutContext('leaves nested status bar appearance settings unchanged', () async {
+    infoPlist.createSync();
+    plistParser.setProperty('Nested', <String, Object>{statusBarAppearanceKey: false});
 
     await migration().migrate();
 
-    expect(infoPlist.readAsStringSync(), contents);
+    expect(plistParser.replacements, isEmpty);
     expect(xcode.queriedEnvironments, isEmpty);
-    expect(logger.traceText, contains('Unable to parse Info.plist'));
-    expect(logger.statusText, isEmpty);
-  });
-
-  testWithoutContext('skips non-UTF8 Info.plist without querying the SDK', () async {
-    const contents = <int>[0xff, 0xfe, 0x3c, 0x00];
-    infoPlist.writeAsBytesSync(contents);
-
-    await migration().migrate();
-
-    expect(infoPlist.readAsBytesSync(), contents);
-    expect(xcode.queriedEnvironments, isEmpty);
-    expect(logger.traceText, contains('Unable to read Info.plist'));
-    expect(logger.statusText, isEmpty);
   });
 
   for (final sdkVersion in <Version?>[null, Version(26, 5, 0)]) {
     testWithoutContext('does not migrate with SDK version $sdkVersion', () async {
-      const contents =
-          '<plist><dict>'
-          '<key>UIViewControllerBasedStatusBarAppearance</key><false/>'
-          '</dict></plist>';
-      infoPlist.writeAsStringSync(contents);
+      infoPlist.createSync();
+      plistParser.setProperty(statusBarAppearanceKey, false);
       xcode.sdkVersion = sdkVersion;
 
       await migration().migrate();
 
-      expect(infoPlist.readAsStringSync(), contents);
+      expect(plistParser.getValueFromFile<bool>(infoPlist.path, statusBarAppearanceKey), isFalse);
+      expect(plistParser.replacements, isEmpty);
       expect(xcode.queriedEnvironments, <EnvironmentType>[EnvironmentType.physical]);
       expect(logger.statusText, isEmpty);
     });
@@ -111,75 +92,58 @@ void main() {
 
   for (final EnvironmentType environmentType in EnvironmentType.values) {
     testWithoutContext('queries the $environmentType SDK before migrating', () async {
-      const contents =
-          '<plist><dict>'
-          '<key>UIViewControllerBasedStatusBarAppearance</key><false/>'
-          '</dict></plist>';
-      infoPlist.writeAsStringSync(contents);
+      infoPlist.createSync();
+      plistParser.setProperty(statusBarAppearanceKey, false);
 
       await migration(environmentType: environmentType).migrate();
 
-      expect(infoPlist.readAsStringSync(), contents.replaceFirst('<false/>', '<true/>'));
+      expect(plistParser.replacements, <(String, String, bool)>[
+        (infoPlist.path, statusBarAppearanceKey, true),
+      ]);
+      expect(plistParser.getValueFromFile<bool>(infoPlist.path, statusBarAppearanceKey), isTrue);
       expect(xcode.queriedEnvironments, <EnvironmentType>[environmentType]);
       expect(logger.statusText, contains('view controller-based status bar appearance'));
     });
   }
 
-  testWithoutContext(
-    'only replaces the top-level boolean and preserves the UIStatusBarHidden setting',
-    () async {
-      const contents = '''
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version='1.0'>
-<dict>
-  <!-- <key>UIViewControllerBasedStatusBarAppearance</key><false/> -->
-  <key>Nested</key><dict>
-    <key>UIViewControllerBasedStatusBarAppearance</key><false/>
-  </dict>
-  <key>UIStatusBarHidden</key>
-  <true/>
-  <key>UIViewControllerBasedStatusBarAppearance</key>
-  <!-- Keep this comment. -->
-  <false />
-  <key>Unrelated</key><string>A &amp; B</string>
-</dict>
-</plist>''';
-      infoPlist.writeAsStringSync(contents);
-      xcode.sdkVersion = Version(27, 1, 0);
-
-      await migration().migrate();
-
-      expect(infoPlist.readAsStringSync(), contents.replaceFirst('<false />', '<true/>'));
-    },
-  );
-
-  testWithoutContext('migrates a boolean with an explicit closing tag', () async {
-    const contents =
-        '<plist><dict>'
-        '<key>UIViewControllerBasedStatusBarAppearance</key><false></false>'
-        '</dict></plist>';
-    infoPlist.writeAsStringSync(contents);
+  testWithoutContext('preserves other settings when migrating with a later SDK', () async {
+    infoPlist.createSync();
+    plistParser.setProperty(statusBarAppearanceKey, false);
+    plistParser.setProperty('UIStatusBarHidden', true);
+    plistParser.setProperty('Nested', <String, Object>{statusBarAppearanceKey: false});
+    xcode.sdkVersion = Version(27, 1, 0);
 
     await migration().migrate();
 
-    expect(infoPlist.readAsStringSync(), contents.replaceFirst('<false></false>', '<true/>'));
+    expect(plistParser.parseFile(infoPlist.path), <String, Object>{
+      statusBarAppearanceKey: true,
+      'UIStatusBarHidden': true,
+      'Nested': <String, Object>{statusBarAppearanceKey: false},
+    });
+  });
+
+  testWithoutContext('does not report success when updating the plist fails', () async {
+    infoPlist.createSync();
+    plistParser.setProperty(statusBarAppearanceKey, false);
+    plistParser.replaceSucceeds = false;
+
+    await migration().migrate();
+
+    expect(plistParser.getValueFromFile<bool>(infoPlist.path, statusBarAppearanceKey), isFalse);
+    expect(logger.statusText, isEmpty);
+    expect(logger.traceText, contains('Unable to update Info.plist'));
   });
 
   testWithoutContext('does not migrate or query the SDK again after updating the plist', () async {
-    infoPlist.writeAsStringSync(
-      '<plist><dict>'
-      '<key>UIViewControllerBasedStatusBarAppearance</key><false/>'
-      '</dict></plist>',
-    );
+    infoPlist.createSync();
+    plistParser.setProperty(statusBarAppearanceKey, false);
     final StatusBarAppearanceMigration migrator = migration();
     await migrator.migrate();
-    final String contents = infoPlist.readAsStringSync();
     logger.clear();
 
     await migrator.migrate();
 
-    expect(infoPlist.readAsStringSync(), contents);
+    expect(plistParser.replacements, hasLength(1));
     expect(xcode.queriedEnvironments, <EnvironmentType>[EnvironmentType.physical]);
     expect(logger.statusText, isEmpty);
   });
@@ -193,5 +157,23 @@ class FakeXcode extends Fake implements Xcode {
   Future<Version?> sdkPlatformVersion(EnvironmentType environmentType) async {
     queriedEnvironments.add(environmentType);
     return sdkVersion;
+  }
+}
+
+class RecordingPlistParser extends FakePlistParser {
+  bool replaceSucceeds = true;
+  final readPaths = <String>[];
+  final replacements = <(String, String, bool)>[];
+
+  @override
+  T? getValueFromFile<T>(String plistFilePath, String key) {
+    readPaths.add(plistFilePath);
+    return super.getValueFromFile<T>(plistFilePath, key);
+  }
+
+  @override
+  bool replaceKeyWithBoolean(String plistFilePath, {required String key, required bool value}) {
+    replacements.add((plistFilePath, key, value));
+    return replaceSucceeds && super.replaceKeyWithBoolean(plistFilePath, key: key, value: value);
   }
 }

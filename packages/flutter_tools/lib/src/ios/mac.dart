@@ -316,6 +316,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         globals.logger,
         xcode: globals.xcode!,
         environmentType: environmentType,
+        plistParser: globals.plistParser,
       ).migrate();
     }
   }

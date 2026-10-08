@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:xml/xml.dart' show XmlException;
-import 'package:xml/xml_events.dart';
-
 import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../base/version.dart';
 import '../../build_info.dart';
 import '../../macos/xcode.dart';
+import '../plist_parser.dart';
 
 const _viewControllerBasedStatusBarAppearance = 'UIViewControllerBasedStatusBarAppearance';
 
@@ -23,11 +21,13 @@ class StatusBarAppearanceMigration extends ProjectMigrator {
     super.logger, {
     required this._xcode,
     required this._environmentType,
+    required this._plistParser,
   });
 
   final File _infoPlist;
   final Xcode _xcode;
   final EnvironmentType _environmentType;
+  final PlistParser _plistParser;
 
   @override
   Future<void> migrate() async {
@@ -36,17 +36,11 @@ class StatusBarAppearanceMigration extends ProjectMigrator {
       return;
     }
 
-    final String contents;
-    try {
-      contents = _infoPlist.readAsStringSync();
-    } on FileSystemException catch (error) {
-      logger.printTrace(
-        'Unable to read Info.plist, skipping status bar appearance migration: $error',
-      );
-      return;
-    }
-    final (int, int)? legacyValue = _legacyValueRange(contents);
-    if (legacyValue == null) {
+    if (_plistParser.getValueFromFile<Object>(
+          _infoPlist.path,
+          _viewControllerBasedStatusBarAppearance,
+        ) !=
+        false) {
       return;
     }
 
@@ -58,66 +52,17 @@ class StatusBarAppearanceMigration extends ProjectMigrator {
       return;
     }
 
-    final (int start, int end) = legacyValue;
-    _infoPlist.writeAsStringSync(contents.replaceRange(start, end, '<true/>'));
+    if (!_plistParser.replaceKeyWithBoolean(
+      _infoPlist.path,
+      key: _viewControllerBasedStatusBarAppearance,
+      value: true,
+    )) {
+      logger.printTrace('Unable to update Info.plist, skipping status bar appearance migration.');
+      return;
+    }
     logger.printStatus(
       'Updating ${_infoPlist.path} to use view controller-based status bar appearance '
       'for the iOS 27 SDK or later.',
     );
-  }
-
-  (int, int)? _legacyValueRange(String contents) {
-    final List<XmlEvent> events;
-    try {
-      events = parseEvents(
-        contents,
-        validateNesting: true,
-        validateDocument: true,
-        withLocation: true,
-        withParent: true,
-      ).toList();
-    } on XmlException {
-      logger.printTrace('Unable to parse Info.plist, skipping status bar appearance migration.');
-      return null;
-    }
-
-    // Use source locations to preserve formatting and comments, and only
-    // consider keys in the root dictionary, not nested or commented-out keys.
-    final List<XmlStartElementEvent> entries = events
-        .whereType<XmlStartElementEvent>()
-        .where(
-          (event) =>
-              event.parent?.name == 'dict' &&
-              event.parent?.parent?.name == 'plist' &&
-              event.parent?.parent?.parent == null,
-        )
-        .toList();
-    final values = <XmlStartElementEvent>[];
-    for (var index = 0; index + 1 < entries.length; index += 1) {
-      final XmlStartElementEvent entry = entries[index];
-      if (entry.name != 'key') {
-        continue;
-      }
-      final String key = events
-          .whereType<XmlTextEvent>()
-          .where((event) => identical(event.parent, entry))
-          .map((event) => event.text)
-          .join();
-      if (key == _viewControllerBasedStatusBarAppearance) {
-        values.add(entries[index + 1]);
-      }
-    }
-    // Duplicate keys are ambiguous; leave them for the developer to resolve.
-    if (values.length != 1 || values.single.name != 'false') {
-      return null;
-    }
-    final XmlStartElementEvent value = values.single;
-    final int end = value.isSelfClosing
-        ? value.stop!
-        : events
-              .whereType<XmlEndElementEvent>()
-              .singleWhere((event) => identical(event.parent, value))
-              .stop!;
-    return (value.start!, end);
   }
 }

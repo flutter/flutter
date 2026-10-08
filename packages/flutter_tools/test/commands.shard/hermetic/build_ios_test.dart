@@ -381,6 +381,8 @@ void main() {
     'ios config-only build migrates the selected custom status bar plist',
     () async {
       createMinimalMockProjectFiles();
+      final plistParser = RecordingPlistParser();
+      testPlistUtils = plistParser;
       const contents = '''
 <plist version="1.0">
 <dict>
@@ -398,6 +400,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(contents);
       testPlistUtils.setProperty('CFBundleIdentifier', 'io.flutter.someProject');
+      testPlistUtils.setProperty('UIViewControllerBasedStatusBarAppearance', false);
       processManager.addCommand(
         const FakeCommand(
           command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-platform-version'],
@@ -408,13 +411,9 @@ void main() {
       await createTestCommandRunner(createBuildCommand())
           .run(const <String>['build', 'ios', '--no-pub', '--config-only']);
 
-      expect(
-        customInfoPlist.readAsStringSync(),
-        contents.replaceFirst(
-          '<key>UIViewControllerBasedStatusBarAppearance</key><false/>',
-          '<key>UIViewControllerBasedStatusBarAppearance</key><true/>',
-        ),
-      );
+      expect(plistParser.replacements, <(String, String, bool)>[
+        (customInfoPlist.absolute.path, 'UIViewControllerBasedStatusBarAppearance', true),
+      ]);
       expect(defaultInfoPlist.readAsStringSync(), contents);
       expect(processManager.hasRemainingExpectations, isFalse);
     },
@@ -1682,4 +1681,14 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   int? getDirectorySize(Directory directory) => 1024;
+}
+
+class RecordingPlistParser extends FakePlistParser {
+  final replacements = <(String, String, bool)>[];
+
+  @override
+  bool replaceKeyWithBoolean(String plistFilePath, {required String key, required bool value}) {
+    replacements.add((plistFilePath, key, value));
+    return super.replaceKeyWithBoolean(plistFilePath, key: key, value: value);
+  }
 }
