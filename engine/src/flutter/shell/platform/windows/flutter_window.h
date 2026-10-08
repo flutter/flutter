@@ -327,6 +327,14 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // Once set, they are not reset to nullptr.
   void CreateAxFragmentRoot();
 
+  // Returns true if a WM_IME_COMPOSITION message carrying a result string
+  // (GCS_RESULTSTR) is already queued for this window.
+  bool HasQueuedImeResult();
+
+  // Ends the current IME composition: destroys the IME window and notifies the
+  // delegate that composing has ended.
+  void EndImeComposition();
+
   // A pointer to a FlutterWindowsView that can be used to update engine
   // windowing and input state.
   WindowBindingHandlerDelegate* binding_handler_delegate_ = nullptr;
@@ -359,6 +367,15 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // Keeps track of the last key code produced by a WM_KEYDOWN or WM_SYSKEYDOWN
   // message.
   int keycode_for_char_message_ = 0;
+
+  // True while an IME composition is in progress, i.e. between
+  // WM_IME_STARTCOMPOSITION and the WM_IME_ENDCOMPOSITION that ends it.
+  bool ime_composing_ = false;
+
+  // True if a WM_IME_ENDCOMPOSITION message was received while the
+  // WM_IME_COMPOSITION message carrying the result string was still queued
+  // behind it. The composition is ended once that result has been processed.
+  bool ime_end_composition_deferred_ = false;
 
   // Keeps track of the last mouse coordinates by a WM_MOUSEMOVE message.
   double mouse_x_ = 0;
