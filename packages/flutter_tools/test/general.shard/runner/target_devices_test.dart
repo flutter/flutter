@@ -2952,15 +2952,13 @@ class TestTargetDevicesWithExtendedWirelessDeviceDiscovery
     required super.doctor,
     required super.toolContext,
     super.deviceConnectionInterface,
-  }) : _deviceSelection = TestTargetDeviceSelection(
+  }) : deviceSelection = TestTargetDeviceSelection(
          toolContext.logger,
          terminal: toolContext.terminal,
        );
 
-  final TestTargetDeviceSelection _deviceSelection;
-
   @override
-  TestTargetDeviceSelection get deviceSelection => _deviceSelection;
+  final TestTargetDeviceSelection deviceSelection;
 }
 
 class TestTargetDeviceSelection extends TargetDeviceSelection {

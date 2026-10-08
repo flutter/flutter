@@ -64,27 +64,27 @@ class TargetDevices {
     }
     return TargetDevices._private(
       deviceManager: deviceManager,
-      deviceConnectionInterface: deviceConnectionInterface,
       doctor: doctor,
       toolContext: toolContext,
+      deviceConnectionInterface: deviceConnectionInterface,
     );
   }
 
   TargetDevices._private({
     required this._deviceManager,
-    required this.deviceConnectionInterface,
     required this._doctor,
-    required ToolContext toolContext,
-  }) : _logger = toolContext.logger,
-       _terminal = toolContext.terminal,
-       _userMessages = toolContext.userMessages;
+    required this._toolContext,
+    this.deviceConnectionInterface,
+  });
 
   final DeviceManager _deviceManager;
-  final Logger _logger;
-  final DeviceConnectionInterface? deviceConnectionInterface;
   final Doctor _doctor;
-  final AnsiTerminal _terminal;
-  final UserMessages _userMessages;
+  final ToolContext _toolContext;
+  final DeviceConnectionInterface? deviceConnectionInterface;
+
+  Logger get _logger => _toolContext.logger;
+  AnsiTerminal get _terminal => _toolContext.terminal;
+  UserMessages get _userMessages => _toolContext.userMessages;
 
   bool get _includeAttachedDevices =>
       deviceConnectionInterface == null ||
@@ -371,7 +371,7 @@ $platformMessage
 
   Future<String> _readUserInput(int deviceCount) async {
     if (deviceCount >= 10) {
-      return _readDeviceChoiceLine(terminal: _terminal, logger: _logger, deviceCount: deviceCount);
+      return _readDeviceChoiceLine(deviceCount: deviceCount, logger: _logger, terminal: _terminal);
     }
     _terminal.usesTerminalUi = true;
     final String result = await _terminal.promptForCharInput(
@@ -398,8 +398,10 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   @visibleForTesting
   bool waitForWirelessBeforeInput = false;
 
+  late final _deviceSelection = TargetDeviceSelection(_logger, terminal: _terminal);
+
   @visibleForTesting
-  late final deviceSelection = TargetDeviceSelection(_logger, terminal: _terminal);
+  TargetDeviceSelection get deviceSelection => _deviceSelection;
 
   @override
   void startExtendedWirelessDeviceDiscovery({Duration? deviceDiscoveryTimeout}) {
@@ -823,9 +825,9 @@ class TargetDeviceSelection {
   Future<String> readUserInput() async {
     if (devices.length >= 10) {
       return _readDeviceChoiceLine(
-        terminal: _terminal,
-        logger: _logger,
         deviceCount: devices.length,
+        logger: _logger,
+        terminal: _terminal,
         onInvalidInput: () {
           invalidAttempts++;
         },
@@ -848,9 +850,9 @@ class TargetDeviceSelection {
 }
 
 Future<String> _readDeviceChoiceLine({
-  required Terminal terminal,
-  required Logger logger,
   required int deviceCount,
+  required Logger logger,
+  required Terminal terminal,
   void Function()? onInvalidInput,
 }) async {
   while (true) {
