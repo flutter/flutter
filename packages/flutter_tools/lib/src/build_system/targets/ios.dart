@@ -79,7 +79,7 @@ abstract class AotAssemblyBase extends Target {
       throw Exception('aot_assembly is only supported for iOS applications.');
     }
 
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
     );
@@ -277,7 +277,7 @@ abstract class UnpackIOS extends UnpackDarwin {
     }
 
     // Copy Flutter framework.
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
     );
@@ -531,7 +531,7 @@ class DebugIosLLDBInit extends Target {
     if (sdkRoot == null) {
       throw MissingDefineException(kSdkRoot, name);
     }
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
     );
@@ -886,7 +886,7 @@ Future<void> _createStubAppFramework(
   static const int Moo = 88;
   ''');
 
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, fileSystem);
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot, fileSystem);
 
     await globals.xcode!.clang(<String>[
       '-x',

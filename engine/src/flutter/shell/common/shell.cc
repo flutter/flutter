@@ -59,7 +59,6 @@ namespace {
 
 std::unique_ptr<Engine> CreateEngine(
     Engine::Delegate& delegate,
-    const PointerDataDispatcherMaker& dispatcher_maker,
     DartVM& vm,
     const fml::RefPtr<const DartSnapshot>& isolate_snapshot,
     const TaskRunners& task_runners,
@@ -73,7 +72,6 @@ std::unique_ptr<Engine> CreateEngine(
     const std::shared_future<impeller::RuntimeStageBackend>&
         runtime_stage_backend) {
   return std::make_unique<Engine>(delegate,             //
-                                  dispatcher_maker,     //
                                   vm,                   //
                                   isolate_snapshot,     //
                                   task_runners,         //
@@ -391,10 +389,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         io_manager->NotifyResourceContextAvailable(resource_context);
       });
 
-  // Send dispatcher_maker to the engine constructor because shell won't have
-  // platform_view set until Shell::Setup is called later.
-  auto dispatcher_maker = platform_view->GetDispatcherMaker();
-
   // Create the engine on the UI thread.
   std::promise<std::unique_ptr<Engine>> engine_promise;
   auto engine_future = engine_promise.get_future();
@@ -402,7 +396,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       shell->GetTaskRunners().GetUITaskRunner(),
       fml::MakeCopyable([&engine_promise,                                 //
                          shell = shell.get(),                             //
-                         &dispatcher_maker,                               //
                          &platform_data,                                  //
                          isolate_snapshot = std::move(isolate_snapshot),  //
                          vsync_waiter = std::move(vsync_waiter),          //
@@ -421,7 +414,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 
         engine_promise.set_value(
             on_create_engine(*shell,                               //
-                             dispatcher_maker,                     //
                              *shell->GetDartVM(),                  //
                              std::move(isolate_snapshot),          //
                              task_runners,                         //
@@ -721,8 +713,7 @@ std::unique_ptr<Shell> Shell::Spawn(
       vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
       on_create_rasterizer,
       [engine = this->engine_.get(), initial_route](
-          Engine::Delegate& delegate,
-          const PointerDataDispatcherMaker& dispatcher_maker, DartVM& vm,
+          Engine::Delegate& delegate, DartVM& vm,
           const fml::RefPtr<const DartSnapshot>& isolate_snapshot,
           const TaskRunners& task_runners, const PlatformData& platform_data,
           const Settings& settings, std::unique_ptr<Animator> animator,
@@ -734,7 +725,6 @@ std::unique_ptr<Shell> Shell::Spawn(
               runtime_stage_backend) {
         return engine->Spawn(
             /*delegate=*/delegate,
-            /*dispatcher_maker=*/dispatcher_maker,
             /*settings=*/settings,
             /*animator=*/std::move(animator),
             /*initial_route=*/initial_route,
@@ -767,6 +757,15 @@ void Shell::NotifyLowMemoryWarning() const {
       });
   // The IO Manager uses resource cache limits of 0, so it is not necessary
   // to purge them.
+}
+
+void Shell::ClearRenderTargetCache() const {
+  task_runners_.GetRasterTaskRunner()->PostTask(
+      [rasterizer = rasterizer_->GetWeakPtr()]() {
+        if (rasterizer) {
+          rasterizer->ClearRenderTargetCache();
+        }
+      });
 }
 
 void Shell::FlushMicrotaskQueue() const {
@@ -1231,13 +1230,25 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  task_runners_.GetUITaskRunner()->PostTask(
+  auto task =
       fml::MakeCopyable([engine = weak_engine_, packet = std::move(packet),
                          flow_id = next_pointer_flow_id_]() mutable {
         if (engine) {
           engine->DispatchPointerDataPacket(std::move(packet), flow_id);
         }
-      }));
+      });
+
+  // Dispatch the event synchronously if possible to reduce latency.
+  // If the event dispatch is somehow triggered from Dart code though
+  // the task will be dispatched asynchronously in order to avoid re-entrancy
+  // issues.
+  if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() &&
+      Dart_CurrentIsolate() == nullptr) {
+    task();
+  } else {
+    task_runners_.GetUITaskRunner()->PostTask(task);
+  }
+
   next_pointer_flow_id_++;
 }
 
@@ -1746,6 +1757,11 @@ double Shell::GetScaledFontSize(double unscaled_font_size,
                                 int configuration_id) const {
   return platform_view_->GetScaledFontSize(unscaled_font_size,
                                            configuration_id);
+}
+
+// |Engine::Delegate|
+void Shell::OnEngineResetInternalState() {
+  ClearRenderTargetCache();
 }
 
 void Shell::RequestViewFocusChange(const ViewFocusChangeRequest& request) {
