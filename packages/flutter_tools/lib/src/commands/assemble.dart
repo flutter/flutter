@@ -249,6 +249,10 @@ class AssembleCommand extends FlutterCommand {
             buildTarget: target,
             dependencyResolver: resolveDependency,
           );
+        } else {
+          _toolContext.logger.printWarning(
+            'Skipping custom assemble target "${target.name}" because a target with that name already exists.',
+          );
         }
       }
     }
@@ -374,8 +378,7 @@ class AssembleCommand extends FlutterCommand {
     if (_extensionBuildManager case final ExtensionBuildManager extensionBuildManager?) {
       await extensionBuildManager.getBuildTargets();
     }
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final List<Target> targets = createTargets();
     final nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];

@@ -4,13 +4,13 @@
 
 import 'package:meta/meta.dart';
 
-import 'build/constants.dart';
-import 'build/source.dart';
+import 'build_system/constants.dart';
+import 'build_system/source.dart';
 
-export 'build/constants.dart';
-export 'build/enums.dart';
-export 'build/source.dart';
-export 'build/target.dart';
+export 'build_system/constants.dart';
+export 'build_system/enums.dart';
+export 'build_system/source.dart';
+export 'build_system/target.dart';
 
 /// Representation of a custom build target provided by a tool extension.
 @immutable
@@ -139,8 +139,8 @@ class ExtensionBuildTarget {
     descriptionKey: description,
     isTopLevelKey: isTopLevel,
     dependenciesKey: dependencies,
-    inputsKey: inputs.map((Source s) => s.toJson()).toList(),
-    outputsKey: outputs.map((Source s) => s.toJson()).toList(),
+    inputsKey: inputs.map((Source s) => s.toMap()).toList(),
+    outputsKey: outputs.map((Source s) => s.toMap()).toList(),
     outputDirKey: outputDir,
   };
 

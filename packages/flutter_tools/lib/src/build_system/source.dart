@@ -255,5 +255,5 @@ class ProjectSource implements core.Source {
   bool get implicit => false;
 
   @override
-  Map<String, Object?> toJson() => throw StateError('Project sources cannot be serialized.');
+  Map<String, Object?> toMap() => throw StateError('Project sources cannot be serialized.');
 }

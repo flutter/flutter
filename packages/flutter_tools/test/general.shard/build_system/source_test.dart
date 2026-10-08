@@ -297,6 +297,7 @@ void main() {
 
       expect(visitor.sources.single.absolute.path, path);
       expect(visitor.sources.single, exists);
+      expect(pluginsSource.toMap, throwsStateError);
     }),
   );
 

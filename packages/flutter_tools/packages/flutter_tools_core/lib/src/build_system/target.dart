@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'constants.dart';
 import 'source.dart';
 
@@ -34,6 +36,7 @@ abstract class Target {
 /// A simple concrete implementation of [Target] to represent static metadata.
 ///
 /// Used for declaring built-in target constants in core.
+@immutable
 class SimpleTarget extends Target {
   const SimpleTarget({
     required this.name,

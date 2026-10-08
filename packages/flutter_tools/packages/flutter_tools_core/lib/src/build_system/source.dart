@@ -102,7 +102,7 @@ abstract class Source {
   bool get implicit;
 
   /// Serializes the source to a JSON-serializable map.
-  Map<String, Object?> toJson();
+  Map<String, Object?> toMap();
 }
 
 @immutable
@@ -119,7 +119,7 @@ class _PatternSource extends Source {
   bool get implicit => value.contains('*');
 
   @override
-  Map<String, Object?> toJson() => <String, Object?>{
+  Map<String, Object?> toMap() => <String, Object?>{
     Source.typeKey: Source.patternType,
     Source.valueKey: value,
     Source.optionalKey: optional,
@@ -152,7 +152,7 @@ class _ArtifactSource extends Source {
   bool get implicit => false;
 
   @override
-  Map<String, Object?> toJson() => <String, Object?>{
+  Map<String, Object?> toMap() => <String, Object?>{
     Source.typeKey: Source.artifactType,
     Source.artifactKey: artifact.name,
     Source.platformKey: ?platform,
@@ -187,7 +187,7 @@ class _HostArtifactSource extends Source {
   bool get implicit => false;
 
   @override
-  Map<String, Object?> toJson() => <String, Object?>{
+  Map<String, Object?> toMap() => <String, Object?>{
     Source.typeKey: Source.hostArtifactType,
     Source.artifactKey: artifact.name,
   };

@@ -35,6 +35,7 @@ final class _TestExtensionTarget extends ExtensionTarget {
     required super.description,
     required this.name,
     this.errorMessage,
+    super.isTopLevel,
     this.shouldSucceed = true,
     super.targetPlatform = 'linux-x64',
   });
@@ -55,8 +56,10 @@ final class _TestExtensionTarget extends ExtensionTarget {
   List<Source> get outputs => const <Source>[];
 
   @override
-  Future<Map<String, Object?>> build(ExtensionBuildContext context) async {
-    return <String, Object?>{'success': shouldSucceed, 'errorMessage': ?errorMessage};
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    return shouldSucceed
+        ? const ExtensionBuildResult.success()
+        : ExtensionBuildResult.failure(message: errorMessage ?? 'Build failed.');
   }
 }
 
@@ -75,6 +78,11 @@ final class _FailingAndConflictingBuildService extends BuildService {
       targetPlatform: 'invalid-platform',
     ),
     _TestExtensionTarget(description: 'Conflicting bundle target.', name: 'bundle'),
+    _TestExtensionTarget(
+      description: 'Conflicting copy_assets target.',
+      name: 'copy_assets',
+      isTopLevel: false,
+    ),
     _TestExtensionTarget(description: 'Empty target name that should be skipped.', name: ''),
   ];
 }
@@ -600,6 +608,32 @@ void main() {
         );
         expect(command.subcommands['bundle'], isA<BuildBundleCommand>());
         expect(command.subcommands.containsKey(''), isFalse);
+
+        final assembleCommand = AssembleCommand(
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          extensionBuildManager: buildManager,
+          featureFlags: featureFlags,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(fileSystem: fs),
+            fs: fs,
+            logger: testLogger,
+          ),
+        );
+        final CommandRunner<void> assembleRunner = createTestCommandRunner(assembleCommand);
+        await assembleRunner.run(<String>[
+          'assemble',
+          '-o',
+          '/out',
+          '-d',
+          'BuildMode=debug',
+          'copy_assets',
+        ]);
+        expect(
+          testLogger.warningText,
+          contains(
+            'Skipping custom assemble target "copy_assets" because a target with that name already exists.',
+          ),
+        );
 
         await manager.dispose();
       },

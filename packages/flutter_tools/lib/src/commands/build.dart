@@ -329,25 +329,11 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
           .replaceAll(kTargetPlatformPlaceholder, target.targetPlatform),
     );
 
-    TargetPlatform? targetPlatform;
-    if (target.targetPlatform.isNotEmpty) {
-      try {
-        targetPlatform = TargetPlatform.fromName(target.targetPlatform);
-      } on Exception {
-        throwToolExit(
-          'Invalid target platform "${target.targetPlatform}" for extension build target "${target.name}".',
-        );
-      }
-    }
-
-    final resolver = ArtifactResolver(
+    final Map<String, String> resolvedArtifacts = ArtifactResolver.resolveInputs(
       artifacts: artifacts,
       buildMode: buildInfo.mode,
-      targetPlatform: targetPlatform,
+      target: target,
     );
-    for (final Source input in target.inputs) {
-      input.accept(resolver);
-    }
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildDir: fs.directory(buildDir).uri,
@@ -355,7 +341,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
       mainPath: targetFile,
       outputDir: fs.directory(outputDir).uri,
       projectRoot: fs.currentDirectory.uri,
-      resolvedArtifacts: resolver.resolvedArtifacts,
+      resolvedArtifacts: resolvedArtifacts,
       targetName: target.name,
     );
 

@@ -31,7 +31,7 @@ class ExtensionAssembleTarget extends Target {
   String get name => buildTarget.name;
 
   @override
-  List<Target> get dependencies => buildTarget.dependencies.map(_dependencyResolver).toList();
+  late final List<Target> dependencies = buildTarget.dependencies.map(_dependencyResolver).toList();
 
   @override
   List<Source> get inputs => buildTarget.inputs;
@@ -62,25 +62,11 @@ class ExtensionAssembleTarget extends Target {
     }
     final mode = BuildMode.fromCliName(buildMode);
 
-    TargetPlatform? targetPlatform;
-    if (buildTarget.targetPlatform.isNotEmpty) {
-      try {
-        targetPlatform = TargetPlatform.fromName(buildTarget.targetPlatform);
-      } on Exception {
-        throwToolExit(
-          'Invalid target platform "${buildTarget.targetPlatform}" for extension build target "${buildTarget.name}".',
-        );
-      }
-    }
-
-    final resolver = ArtifactResolver(
+    final Map<String, String> resolvedArtifacts = ArtifactResolver.resolveInputs(
       artifacts: artifacts,
       buildMode: mode,
-      targetPlatform: targetPlatform,
+      target: buildTarget,
     );
-    for (final Source input in buildTarget.inputs) {
-      input.accept(resolver);
-    }
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildDir: buildDir.uri,
@@ -88,7 +74,7 @@ class ExtensionAssembleTarget extends Target {
       mainPath: mainPath,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,
-      resolvedArtifacts: resolver.resolvedArtifacts,
+      resolvedArtifacts: resolvedArtifacts,
       targetName: buildTarget.name,
     );
 
@@ -104,6 +90,36 @@ class ArtifactResolver implements core.SourceVisitor {
     required this.buildMode,
     required this.targetPlatform,
   });
+
+  /// Resolves all artifact inputs declared on [target] using [artifacts] and [buildMode].
+  ///
+  /// Throws a [ToolExit] if [ExtensionBuildTarget.targetPlatform] or any artifact platform
+  /// name is invalid.
+  static Map<String, String> resolveInputs({
+    required Artifacts artifacts,
+    required BuildMode buildMode,
+    required ExtensionBuildTarget target,
+  }) {
+    TargetPlatform? targetPlatform;
+    if (target.targetPlatform.isNotEmpty) {
+      try {
+        targetPlatform = TargetPlatform.fromName(target.targetPlatform);
+      } on Exception {
+        throwToolExit(
+          'Invalid target platform "${target.targetPlatform}" for extension build target "${target.name}".',
+        );
+      }
+    }
+    final resolver = ArtifactResolver(
+      artifacts: artifacts,
+      buildMode: buildMode,
+      targetPlatform: targetPlatform,
+    );
+    for (final core.Source input in target.inputs) {
+      input.accept(resolver);
+    }
+    return resolver.resolvedArtifacts;
+  }
 
   final Artifacts artifacts;
   final BuildMode buildMode;

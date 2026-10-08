@@ -27,7 +27,6 @@ const String _kLibAppSo = 'libapp.so';
 const String _kKernelBlob = 'kernel_blob.bin';
 const String _kAppDill = 'app.dill';
 const String _kGeneratedConfigCmake = 'generated_config.cmake';
-const String _kExecutablePathKey = 'executablePath';
 
 class CustomLinuxBuildTarget extends ExtensionTarget {
   const CustomLinuxBuildTarget()
@@ -57,12 +56,12 @@ class CustomLinuxBuildTarget extends ExtensionTarget {
   List<Target> get dependencies => const <Target>[];
 
   @override
-  Future<Map<String, Object?>> build(ExtensionBuildContext context) async {
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
     final projectDir = Directory.fromUri(context.projectRoot);
     final buildDir = Directory.fromUri(context.outputDir);
     final cmakeFile = File('${projectDir.path}/linux/CMakeLists.txt');
     if (!cmakeFile.existsSync()) {
-      return <String, Object?>{_kExecutablePathKey: '${buildDir.path}/bundle/custom_linux_app'};
+      return const ExtensionBuildResult.success();
     }
 
     final String? flutterRoot = Platform.environment['FLUTTER_ROOT'];
@@ -157,20 +156,7 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
       throw Exception('Failed to run ninja: $e');
     }
 
-    // 4. Resolve the executable name from pubspec.yaml
-    final pubspec = File('${projectDir.path}/pubspec.yaml');
-    var appName = 'app';
-    if (pubspec.existsSync()) {
-      final String pubspecContent = pubspec.readAsStringSync();
-      final nameRegExp = RegExp(r'^name:\s+(\w+)', multiLine: true);
-      final Match? match = nameRegExp.firstMatch(pubspecContent);
-      if (match != null) {
-        appName = match.group(1)!;
-      }
-    }
-
-    final executablePath = '${buildDir.path}/bundle/$appName';
-    return <String, Object?>{_kExecutablePathKey: File(executablePath).absolute.path};
+    return const ExtensionBuildResult.success();
   }
 }
 
@@ -205,7 +191,7 @@ abstract class CustomLinuxAssembleOnlyTarget extends ExtensionTarget {
   ];
 
   @override
-  Future<Map<String, Object?>> build(ExtensionBuildContext context) async {
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
     final outputDir = Directory.fromUri(context.outputDir);
     final buildDir = Directory.fromUri(context.buildDir);
 
@@ -242,7 +228,7 @@ abstract class CustomLinuxAssembleOnlyTarget extends ExtensionTarget {
     if (srcApp.existsSync()) {
       _copyFile(srcApp, destApp);
     }
-    return const <String, Object?>{};
+    return const ExtensionBuildResult.success();
   }
 }
 
@@ -359,7 +345,7 @@ abstract class CustomLinuxAotElf extends ExtensionTarget {
   List<Target> get dependencies => const <Target>[];
 
   @override
-  Future<Map<String, Object?>> build(ExtensionBuildContext context) async {
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
     final String? genSnapshotPath = context.resolvedArtifacts[BuiltInArtifacts.genSnapshot.name];
     if (genSnapshotPath == null) {
       throw Exception('Missing genSnapshot artifact');
@@ -387,7 +373,7 @@ abstract class CustomLinuxAotElf extends ExtensionTarget {
     if (exitCode != 0) {
       throw Exception('gen_snapshot failed with exit code $exitCode');
     }
-    return const <String, Object?>{};
+    return const ExtensionBuildResult.success();
   }
 }
 

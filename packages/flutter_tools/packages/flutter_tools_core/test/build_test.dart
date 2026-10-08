@@ -106,7 +106,7 @@ void main() {
       const patternSource = Source.pattern('{PROJECT_DIR}/pubspec.yaml', optional: true);
       expect(patternSource.implicit, isFalse);
       expect(const Source.pattern('{OUTPUT_DIR}/bundle/*').implicit, isTrue);
-      expect(Source.fromJson(patternSource.toJson()), equals(patternSource));
+      expect(Source.fromJson(patternSource.toMap()), equals(patternSource));
       expect(patternSource.toString(), contains('{PROJECT_DIR}/pubspec.yaml'));
 
       const artifactSource = Source.artifact(
@@ -115,12 +115,12 @@ void main() {
         platform: 'linux-x64',
       );
       expect(artifactSource.implicit, isFalse);
-      expect(Source.fromJson(artifactSource.toJson()), equals(artifactSource));
+      expect(Source.fromJson(artifactSource.toMap()), equals(artifactSource));
       expect(artifactSource.toString(), contains('genSnapshot'));
 
       const hostArtifactSource = Source.hostArtifact(BuiltInHostArtifacts.impellerc);
       expect(hostArtifactSource.implicit, isFalse);
-      expect(Source.fromJson(hostArtifactSource.toJson()), equals(hostArtifactSource));
+      expect(Source.fromJson(hostArtifactSource.toMap()), equals(hostArtifactSource));
       expect(hostArtifactSource.toString(), contains('impellerc'));
 
       final visitor = _RecordingSourceVisitor();

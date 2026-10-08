@@ -6,10 +6,12 @@ import 'dart:async';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
+import 'package:meta/meta.dart';
 
 import 'protocol_base/service.dart';
 
 /// Context passed to the extension target's [ExtensionTarget.build] method.
+@immutable
 class ExtensionBuildContext {
   const ExtensionBuildContext({
     required this.buildDir,
@@ -44,6 +46,7 @@ class ExtensionBuildContext {
 /// Abstract target that encapsulates both metadata and build logic.
 ///
 /// Extensions should extend this class to define custom build targets.
+@immutable
 abstract class ExtensionTarget extends Target {
   const ExtensionTarget({
     required this.description,
@@ -75,8 +78,8 @@ abstract class ExtensionTarget extends Target {
   ///
   /// Access resolved artifact paths from [ExtensionBuildContext.resolvedArtifacts] using
   /// [Artifact.name] or [HostArtifact.name] as keys.
-  /// Returns a map of custom build results (e.g. `executablePath`).
-  Future<Map<String, Object?>> build(ExtensionBuildContext context);
+  /// Returns an [ExtensionBuildResult] indicating whether the build succeeded.
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context);
 }
 
 /// Extension service interface for custom builds.
@@ -233,8 +236,8 @@ abstract base class BuildService extends ToolExtensionService {
         projectRoot: projectRootUri,
         resolvedArtifacts: resolvedArtifacts,
       );
-      final Map<String, Object?> buildResultMap = await target.build(context);
-      return <String, Object?>{ExtensionBuildResult.successKey: true, ...buildResultMap};
+      final ExtensionBuildResult result = await target.build(context);
+      return result.toMap();
     } on Object catch (e, stack) {
       return ExtensionBuildResult.failure(message: '$e\n$stack').toMap();
     }
