@@ -292,4 +292,86 @@ Future<void> testMain() async {
 
     semantics().semanticsEnabled = false;
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192466
+  test('DOM text that overflows its node does not intercept hit tests', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    // The upper button is first in hit test order, so it gets the higher
+    // z-index. Its long label wraps far below its rect and over the lower
+    // button.
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 300),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          flags: const ui.SemanticsFlags(isButton: true, isEnabled: ui.Tristate.isTrue),
+          hasTap: true,
+          label:
+              'Upper control with a deliberately long accessible description. '
+              'This entire description belongs only to the upper control.',
+          transform: Matrix4.identity().toFloat64(),
+          rect: const ui.Rect.fromLTRB(0, 0, 52, 52),
+        ),
+        tester.updateNode(
+          id: 2,
+          flags: const ui.SemanticsFlags(isButton: true, isEnabled: ui.Tristate.isTrue),
+          hasTap: true,
+          label: 'Lower',
+          transform: Matrix4.identity().toFloat64(),
+          rect: const ui.Rect.fromLTRB(0, 152, 52, 204),
+        ),
+      ],
+    );
+    tester.apply();
+
+    final DomElement upper = tester.getSemanticsObject(1).element;
+    final DomElement lower = tester.getSemanticsObject(2).element;
+    expect(upper.style.zIndex, '2');
+    expect(lower.style.zIndex, '1');
+
+    final DomRect lowerRect = lower.getBoundingClientRect();
+    expect(
+      domDocument.elementFromPoint(
+        (lowerRect.left + lowerRect.width / 2).toInt(),
+        (lowerRect.top + lowerRect.height / 2).toInt(),
+      ),
+      lower,
+    );
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('DOM text clips overflow only while it is the label representation', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      label: 'Hello',
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
+    final LabelAndValue lav = node.semanticRole!.labelAndValue!;
+
+    lav.preferredRepresentation = LabelRepresentation.domText;
+    lav.update();
+    expect(node.element.style.overflow, 'hidden');
+
+    lav.preferredRepresentation = LabelRepresentation.ariaLabel;
+    lav.update();
+    expect(node.element.style.overflow, 'visible');
+
+    semantics().semanticsEnabled = false;
+  });
 }
