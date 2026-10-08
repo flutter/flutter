@@ -33,7 +33,7 @@
 
 namespace flutter {
 
-class PlatformViewEmbedder final : public PlatformView {
+class PlatformViewEmbedder : public PlatformView {
  public:
   using UpdateSemanticsCallback =
       std::function<void(int64_t view_id,
@@ -115,6 +115,20 @@ class PlatformViewEmbedder final : public PlatformView {
   // |PlatformView|
   std::shared_ptr<PlatformMessageHandler> GetPlatformMessageHandler()
       const override;
+
+ protected:
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a platform view for an embedding that renders on its
+  ///             own. There is no embedder surface and no external view
+  ///             embedder, so a subclass that renders overrides
+  ///             `CreateRenderingSurface`, `CreateExternalViewEmbedder` and
+  ///             the resource context methods. Everything else comes from
+  ///             `platform_dispatch_table`, the same as for the other
+  ///             constructors.
+  ///
+  PlatformViewEmbedder(PlatformView::Delegate& delegate,
+                       const flutter::TaskRunners& task_runners,
+                       PlatformDispatchTable platform_dispatch_table);
 
  private:
   class EmbedderPlatformMessageHandler;

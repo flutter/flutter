@@ -4,6 +4,9 @@
 
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
+#include "flutter/flow/frame_timings.h"
+#include "flutter/fml/time/time_delta.h"
+#include "flutter/fml/time/time_point.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
 
@@ -15,6 +18,11 @@
 namespace flutter {
 namespace testing {
 namespace {
+// One frame interval at 60 Hz: 1'000'000 us / 60 frames, rounded. Only used as
+// a plausible vsync target time; nothing in these tests waits for it.
+constexpr fml::TimeDelta kFrameInterval =
+    fml::TimeDelta::FromMicroseconds(16667);
+
 class MockDelegate : public PlatformView::Delegate {
   MOCK_METHOD(void,
               OnPlatformViewCreated,
@@ -114,6 +122,18 @@ class MockResponse : public PlatformMessageResponse {
  public:
   MOCK_METHOD(void, Complete, (std::unique_ptr<fml::Mapping> data), (override));
   MOCK_METHOD(void, CompleteEmpty, (), (override));
+};
+
+// An embedding that renders on its own and takes only the platform callbacks
+// from PlatformViewEmbedder, the way the Android embedding does.
+class SurfacelessPlatformViewEmbedder : public PlatformViewEmbedder {
+ public:
+  SurfacelessPlatformViewEmbedder(PlatformView::Delegate& delegate,
+                                  const TaskRunners& task_runners,
+                                  PlatformDispatchTable platform_dispatch_table)
+      : PlatformViewEmbedder(delegate,
+                             task_runners,
+                             std::move(platform_dispatch_table)) {}
 };
 }  // namespace
 
@@ -225,6 +245,79 @@ TEST(PlatformViewEmbedderTest, DeletionDisabledDispatch) {
   }
 
   EXPECT_FALSE(did_call);
+}
+
+TEST(PlatformViewEmbedderTest, SubclassWithoutSurfaceHasNoRenderingResources) {
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform);
+  flutter::TaskRunners task_runners = flutter::TaskRunners(
+      GetCurrentTestName(), thread_host.platform_thread->GetTaskRunner(),
+      nullptr, nullptr, nullptr);
+  fml::AutoResetWaitableEvent latch;
+  task_runners.GetPlatformTaskRunner()->PostTask([&latch, task_runners] {
+    MockDelegate delegate;
+    SurfacelessPlatformViewEmbedder embedder(delegate, task_runners, {});
+    // Calls go through the base class, the way the shell makes them.
+    PlatformView& platform_view = embedder;
+
+    EXPECT_FALSE(platform_view.GetImpellerContext());
+    EXPECT_FALSE(platform_view.CreateResourceContext());
+    platform_view.ReleaseResourceContext();
+    EXPECT_FALSE(platform_view.CreateExternalViewEmbedder());
+    EXPECT_TRUE(platform_view.GetPlatformMessageHandler());
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+TEST(PlatformViewEmbedderTest,
+     SubclassWithoutSurfaceDrivesFramesFromVsyncCallback) {
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform | ThreadHost::Type::kUi);
+  flutter::TaskRunners task_runners = flutter::TaskRunners(
+      GetCurrentTestName(), thread_host.platform_thread->GetTaskRunner(),
+      nullptr, thread_host.ui_thread->GetTaskRunner(), nullptr);
+
+  // Written on the UI thread, read after `frame_latch` is signaled from it.
+  int vsync_callback_calls = 0;
+  std::shared_ptr<VsyncWaiter> vsync_waiter;
+  {
+    fml::AutoResetWaitableEvent latch;
+    task_runners.GetPlatformTaskRunner()->PostTask([&] {
+      MockDelegate delegate;
+      PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table;
+      platform_dispatch_table.vsync_callback = [&vsync_callback_calls,
+                                                task_runners](intptr_t baton) {
+        ++vsync_callback_calls;
+        // Return the baton right away, as a vsync source would at the
+        // next vsync.
+        fml::TimePoint frame_start = fml::TimePoint::Now();
+        VsyncWaiterEmbedder::OnEmbedderVsync(task_runners, baton, frame_start,
+                                             frame_start + kFrameInterval);
+      };
+      SurfacelessPlatformViewEmbedder embedder(
+          delegate, task_runners, std::move(platform_dispatch_table));
+      vsync_waiter = static_cast<PlatformView&>(embedder).CreateVSyncWaiter();
+      latch.Signal();
+    });
+    latch.Wait();
+  }
+
+  bool frame_fired = false;
+  fml::AutoResetWaitableEvent frame_latch;
+  task_runners.GetUITaskRunner()->PostTask([&] {
+    vsync_waiter->AsyncWaitForVsync(
+        [&](std::unique_ptr<FrameTimingsRecorder> recorder) {
+          frame_fired = true;
+          frame_latch.Signal();
+        });
+  });
+  frame_latch.Wait();
+
+  EXPECT_TRUE(frame_fired);
+  // The timer fallback would also fire the frame, so this is what shows that
+  // the dispatch table was used.
+  EXPECT_EQ(vsync_callback_calls, 1);
 }
 
 }  // namespace testing

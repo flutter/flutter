@@ -110,6 +110,16 @@ PlatformViewEmbedder::PlatformViewEmbedder(
       platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 #endif
 
+PlatformViewEmbedder::PlatformViewEmbedder(
+    PlatformView::Delegate& delegate,
+    const flutter::TaskRunners& task_runners,
+    PlatformDispatchTable platform_dispatch_table)
+    : PlatformView(delegate, task_runners),
+      platform_message_handler_(new EmbedderPlatformMessageHandler(
+          GetWeakPtr(),
+          task_runners.GetPlatformTaskRunner())),
+      platform_dispatch_table_(std::move(platform_dispatch_table)) {}
+
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;
 
 void PlatformViewEmbedder::UpdateSemantics(
@@ -156,6 +166,10 @@ PlatformViewEmbedder::CreateExternalViewEmbedder() {
 
 std::shared_ptr<impeller::Context> PlatformViewEmbedder::GetImpellerContext()
     const {
+  if (embedder_surface_ == nullptr) {
+    FML_LOG(ERROR) << "Embedder surface was null.";
+    return nullptr;
+  }
   return embedder_surface_->CreateImpellerContext();
 }
 
