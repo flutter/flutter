@@ -219,6 +219,8 @@ class EngineFlutterView implements ui.FlutterView {
     final DomWindow newDomWindow = _computeDomWindow(newHostElement);
 
     if (newDomWindow != viewDomWindow || newDomDocument != viewDomDocument) {
+      newDomDocument.adoptNode(dom.rootElement);
+
       // move room element to new host element before the [dom] getter returns
       // a new instance after we updated [viewDomDocument]
       if (!newHostElement.contains(dom.rootElement)) {

@@ -418,6 +418,8 @@ extension type DomHTMLDocument._(JSObject _) implements DomDocument {
   external DomElement? getElementById(String id);
   external String get visibilityState;
   external bool hasFocus();
+
+  external DomNode adoptNode(DomNode node);
 }
 
 @JS('document')
