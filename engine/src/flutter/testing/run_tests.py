@@ -1074,6 +1074,7 @@ def build_dart_host_test_list() -> typing.List[str]:
       os.path.join('flutter', 'flutter_frontend_server'),
       os.path.join('flutter', 'testing', 'skia_gold_client'),
       os.path.join('flutter', 'tools', 'api_check'),
+      os.path.join('flutter', 'tools', 'bazel_tools'),
       os.path.join('flutter', 'tools', 'build_bucket_golden_scraper'),
       os.path.join('flutter', 'tools', 'clang_tidy'),
       os.path.join('flutter', 'tools', 'engine_tool'),
