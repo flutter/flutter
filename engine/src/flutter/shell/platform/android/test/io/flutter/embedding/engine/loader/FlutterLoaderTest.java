@@ -1028,17 +1028,29 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itSetsMergedPlatformUiThread() {
-    // Test debug mode.
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.MergedPlatformUIThread",
-        defaultFlagTestValue,
-        "--merged-platform-ui-thread");
+  public void itSetsMergedPlatformUiThreadFromMetadata() {
+    for (String value : new String[] {"enabled", "mergeAfterLaunch"}) {
+      // Test debug mode.
+      testFlagFromMetadataPresent(
+          "io.flutter.embedding.android.MergedPlatformUIThread",
+          value,
+          "--merged-platform-ui-thread=" + value);
 
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode(
+      // Test release mode.
+      testFlagFromMetadataPresentInReleaseMode(
+          "io.flutter.embedding.android.MergedPlatformUIThread",
+          value,
+          "--merged-platform-ui-thread=" + value);
+    }
+  }
+
+  @Test
+  public void itDoesNotSetMergedPlatformUiThreadWithoutValueFromMetadata() {
+    // The engine ignores --merged-platform-ui-thread without a value, so the flag must be passed
+    // along with the value specified in the manifest.
+    testFlagFromMetadataNotPresent(
         "io.flutter.embedding.android.MergedPlatformUIThread",
-        defaultFlagTestValue,
+        "mergeAfterLaunch",
         "--merged-platform-ui-thread");
   }
 
@@ -1388,6 +1400,15 @@ public class FlutterLoaderTest {
     testMultipleFlagsFromManifestMetadata(
         "[\"--enable-impeller=true\",\"--enable-dart-profiling\"]",
         new String[] {"--enable-impeller=true", "--enable-dart-profiling"},
+        true,
+        true);
+  }
+
+  @Test
+  public void itSetsMergedPlatformUiThreadCommandLineFlagFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--merged-platform-ui-thread=mergeAfterLaunch\"]",
+        new String[] {"--merged-platform-ui-thread=mergeAfterLaunch"},
         true,
         true);
   }
