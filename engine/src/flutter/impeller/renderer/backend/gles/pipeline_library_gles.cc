@@ -78,15 +78,15 @@ static std::string GetShaderCompilationFailureMessage(const ProcTableGLES& gl,
 
 PipelineLibraryGLES::PendingProgram::PendingProgram(
     std::shared_ptr<ReactorGLES> reactor,
-    std::shared_ptr<UniqueHandleGLES> handle,
     PipelineDescriptor desc,
     std::shared_ptr<const ShaderFunction> vert_function,
-    std::shared_ptr<const ShaderFunction> frag_function)
+    std::shared_ptr<const ShaderFunction> frag_function,
+    bool threadsafe)
     : reactor_(std::move(reactor)),
-      handle_(std::move(handle)),
       desc_(std::move(desc)),
       vert_function_(std::move(vert_function)),
-      frag_function_(std::move(frag_function)) {}
+      frag_function_(std::move(frag_function)),
+      threadsafe_(threadsafe) {}
 
 PipelineLibraryGLES::PendingProgram::~PendingProgram() {
   ReleaseShaders();
@@ -94,6 +94,12 @@ PipelineLibraryGLES::PendingProgram::~PendingProgram() {
 
 absl::Status PipelineLibraryGLES::PendingProgram::Compile() {
   TRACE_EVENT0("impeller", "PendingProgram::Compile");
+
+  handle_ =
+      threadsafe_
+          ? std::make_shared<UniqueHandleGLES>(reactor_, HandleType::kProgram)
+          : std::make_shared<UniqueHandleGLES>(UniqueHandleGLES::MakeUntracked(
+                reactor_, HandleType::kProgram));
 
   std::optional<GLuint> program = reactor_->GetGLHandle(handle_->Get());
   if (!program.has_value()) {
@@ -124,7 +130,8 @@ absl::Status PipelineLibraryGLES::PendingProgram::Compile() {
   return absl::OkStatus();
 }
 
-absl::Status PipelineLibraryGLES::PendingProgram::Wait() {
+absl::StatusOr<std::shared_ptr<UniqueHandleGLES>>
+PipelineLibraryGLES::PendingProgram::Wait() {
   TRACE_EVENT0("impeller", "PendingProgram::Wait");
   if (!link_pending_) {
     return absl::FailedPreconditionError(
@@ -133,11 +140,9 @@ absl::Status PipelineLibraryGLES::PendingProgram::Wait() {
   link_pending_ = false;
   absl::Status status = CheckLinkStatus();
   ReleaseShaders();
-  return status;
-}
-
-const std::shared_ptr<UniqueHandleGLES>&
-PipelineLibraryGLES::PendingProgram::GetHandle() const {
+  if (!status.ok()) {
+    return status;
+  }
   return handle_;
 }
 
@@ -217,21 +222,6 @@ void PipelineLibraryGLES::PendingProgram::ReleaseShaders() {
 // |PipelineLibrary|
 bool PipelineLibraryGLES::IsValid() const {
   return reactor_ != nullptr;
-}
-
-PipelineLibraryGLES::PendingProgram PipelineLibraryGLES::CreateProgram(
-    const std::shared_ptr<ReactorGLES>& reactor,
-    const PipelineDescriptor& desc,
-    const std::shared_ptr<const ShaderFunction>& vert_function,
-    const std::shared_ptr<const ShaderFunction>& frag_function,
-    bool threadsafe) {
-  auto program_handle =
-      threadsafe
-          ? std::make_shared<UniqueHandleGLES>(reactor, HandleType::kProgram)
-          : std::make_shared<UniqueHandleGLES>(
-                UniqueHandleGLES::MakeUntracked(reactor, HandleType::kProgram));
-  return PendingProgram(reactor, std::move(program_handle), desc, vert_function,
-                        frag_function);
 }
 
 std::shared_ptr<PipelineGLES> PipelineLibraryGLES::CreatePipeline(
@@ -335,19 +325,21 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
       std::shared_ptr<UniqueHandleGLES> program =
           library.GetCachedProgram(program_key);
       if (!program) {
-        PendingProgram pending_program = CreateProgram(
-            reactor, descriptor, vert_function, frag_function, threadsafe);
-        absl::Status status = pending_program.Compile();
-        if (status.ok()) {
-          status = pending_program.Wait();
+        PendingProgram pending_program(reactor, descriptor, vert_function,
+                                       frag_function, threadsafe);
+        absl::StatusOr<std::shared_ptr<UniqueHandleGLES>> linked_program;
+        if (absl::Status status = pending_program.Compile(); status.ok()) {
+          linked_program = pending_program.Wait();
+        } else {
+          linked_program = std::move(status);
         }
-        if (!status.ok()) {
+        if (!linked_program.ok()) {
           VALIDATION_LOG << "Could not link pipeline program: "
-                         << status.message();
+                         << linked_program.status().message();
           promise->set_value(nullptr);
           return;
         }
-        program = pending_program.GetHandle();
+        program = *std::move(linked_program);
         library.CacheProgram(program_key, program);
       }
       promise->set_value(
