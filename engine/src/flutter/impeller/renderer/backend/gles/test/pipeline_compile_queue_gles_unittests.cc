@@ -37,12 +37,16 @@ class CapturingTaskRunner final : public fml::BasicTaskRunner {
   size_t RunAll() {
     size_t count = 0;
     while (!tasks_.empty()) {
-      auto task = std::move(tasks_.front());
-      tasks_.pop_front();
-      task();
+      RunOne();
       count++;
     }
     return count;
+  }
+
+  void RunOne() {
+    fml::closure task = std::move(tasks_.front());
+    tasks_.pop_front();
+    task();
   }
 
   size_t PendingTaskCount() const { return tasks_.size(); }
@@ -50,6 +54,13 @@ class CapturingTaskRunner final : public fml::BasicTaskRunner {
  private:
   std::deque<fml::closure> tasks_;
 };
+
+/// Posts a job whose work is done entirely in its start step.
+bool PostJob(PipelineCompileQueueGLES& queue,
+             const PipelineDescriptor& desc,
+             const fml::closure& start) {
+  return queue.PostJobForDescriptor(desc, start, [] {});
+}
 
 }  // namespace
 
@@ -74,8 +85,7 @@ TEST(PipelineCompileQueueGLESTest, KeepsAtMostOneTaskOutstanding) {
   for (int i = 0; i < 3; i++) {
     PipelineDescriptor desc;
     desc.SetLabel(std::to_string(i));
-    ASSERT_TRUE(
-        queue->PostJobForDescriptor(desc, [&executed](bool) { executed++; }));
+    ASSERT_TRUE(PostJob(*queue, desc, [&executed]() { executed++; }));
   }
   EXPECT_EQ(runner->PendingTaskCount(), 1u);
 
@@ -83,8 +93,8 @@ TEST(PipelineCompileQueueGLESTest, KeepsAtMostOneTaskOutstanding) {
   EXPECT_EQ(executed, 3);
 
   // Once drained, a new job must restart processing.
-  ASSERT_TRUE(queue->PostJobForDescriptor(PipelineDescriptor{},
-                                          [&executed](bool) { executed++; }));
+  ASSERT_TRUE(
+      PostJob(*queue, PipelineDescriptor{}, [&executed]() { executed++; }));
   EXPECT_EQ(runner->PendingTaskCount(), 1u);
   runner->RunAll();
   EXPECT_EQ(executed, 4);
@@ -110,19 +120,19 @@ TEST(PipelineCompileQueueGLESTest, ProcessesJobsSequentially) {
   desc3.SetSampleCount(SampleCount::kCount1);
   desc3.SetCullMode(CullMode::kBackFace);
 
-  queue->PostJobForDescriptor(desc1, [&](bool) {
+  PostJob(*queue, desc1, [&]() {
     std::this_thread::sleep_for(std::chrono::milliseconds(80));
     completed_jobs++;
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc2, [&](bool) {
+  PostJob(*queue, desc2, [&]() {
     std::this_thread::sleep_for(std::chrono::milliseconds(80));
     completed_jobs++;
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc3, [&](bool) {
+  PostJob(*queue, desc3, [&]() {
     std::this_thread::sleep_for(std::chrono::milliseconds(80));
     completed_jobs++;
     latch.CountDown();
@@ -147,12 +157,12 @@ TEST(PipelineCompileQueueGLESTest,
 
   PipelineDescriptor desc;
 
-  queue->PostJobForDescriptor(desc, [&](bool) {
+  PostJob(*queue, desc, [&]() {
     first_job_count++;
     latch.CountDown();
   });
 
-  queue->PostJobForDescriptor(desc, [&](bool) {
+  PostJob(*queue, desc, [&]() {
     second_job_count++;
     latch.CountDown();
   });
@@ -171,14 +181,12 @@ TEST(PipelineCompileQueueGLESTest, IsProcessingResetsAfterAllJobsComplete) {
 
   fml::CountDownLatch latch(1);
 
-  queue->PostJobForDescriptor(PipelineDescriptor{},
-                              [&](bool) { latch.CountDown(); });
+  PostJob(*queue, PipelineDescriptor{}, [&]() { latch.CountDown(); });
 
   latch.Wait();
 
   fml::CountDownLatch latch2(1);
-  queue->PostJobForDescriptor(PipelineDescriptor{},
-                              [&](bool) { latch2.CountDown(); });
+  PostJob(*queue, PipelineDescriptor{}, [&]() { latch2.CountDown(); });
 
   latch2.Wait();
 
@@ -208,19 +216,19 @@ TEST(PipelineCompileQueueGLESTest, DestroyQueueWithPendingTasks) {
     desc3.SetSampleCount(SampleCount::kCount1);
     desc3.SetCullMode(CullMode::kBackFace);
 
-    queue->PostJobForDescriptor(desc1, [&](bool) {
+    PostJob(*queue, desc1, [&]() {
       std::this_thread::sleep_for(std::chrono::milliseconds(50));
       completed_jobs++;
       latch.CountDown();
     });
 
-    queue->PostJobForDescriptor(desc2, [&](bool) {
+    PostJob(*queue, desc2, [&]() {
       std::this_thread::sleep_for(std::chrono::milliseconds(50));
       completed_jobs++;
       latch.CountDown();
     });
 
-    queue->PostJobForDescriptor(desc3, [&](bool) {
+    PostJob(*queue, desc3, [&]() {
       std::this_thread::sleep_for(std::chrono::milliseconds(50));
       completed_jobs++;
       latch.CountDown();
@@ -243,7 +251,10 @@ TEST(PipelineCompileQueueGLESTest, PostJobForDescriptorRejectsNullJob) {
   auto queue = PipelineCompileQueueGLES::Create(runner);
   ASSERT_NE(queue, nullptr);
 
-  EXPECT_FALSE(queue->PostJobForDescriptor(PipelineDescriptor{}, nullptr));
+  EXPECT_FALSE(
+      queue->PostJobForDescriptor(PipelineDescriptor{}, nullptr, [] {}));
+  EXPECT_FALSE(
+      queue->PostJobForDescriptor(PipelineDescriptor{}, [] {}, nullptr));
   EXPECT_EQ(runner->RunAll(), 0u);
 }
 
@@ -254,8 +265,7 @@ TEST(PipelineCompileQueueGLESTest, PerformJobEagerlyExecutesPendingJob) {
 
   PipelineDescriptor desc;
   int executed = 0;
-  ASSERT_TRUE(
-      queue->PostJobForDescriptor(desc, [&executed](bool) { executed++; }));
+  ASSERT_TRUE(PostJob(*queue, desc, [&executed]() { executed++; }));
   EXPECT_EQ(executed, 0);
 
   queue->PerformJobEagerly(desc);
@@ -285,8 +295,9 @@ TEST(PipelineCompileQueueGLESTest, ExecutesJobsInInsertionOrder) {
   for (size_t i = 0; i < kJobCount; i++) {
     PipelineDescriptor desc;
     desc.SetLabel(std::to_string(i));
-    ASSERT_TRUE(queue->PostJobForDescriptor(
-        desc, [&job_order, index = i](bool) { job_order.push_back(index); }));
+    ASSERT_TRUE(PostJob(*queue, desc, [&job_order, index = i]() {
+      job_order.push_back(index);
+    }));
   }
 
   runner->RunAll();
@@ -303,8 +314,8 @@ TEST(PipelineCompileQueueGLESTest, DestructorFinishesPendingJobs) {
   ASSERT_NE(queue, nullptr);
 
   int executed = 0;
-  ASSERT_TRUE(queue->PostJobForDescriptor(PipelineDescriptor{},
-                                          [&executed](bool) { executed++; }));
+  ASSERT_TRUE(
+      PostJob(*queue, PipelineDescriptor{}, [&executed]() { executed++; }));
   EXPECT_EQ(executed, 0);
 
   queue.reset();
@@ -315,63 +326,91 @@ TEST(PipelineCompileQueueGLESTest, DestructorFinishesPendingJobs) {
   EXPECT_EQ(executed, 1);
 }
 
-TEST(PipelineCompileQueueGLESTest, WorkerRunsJobsNonEagerly) {
+TEST(PipelineCompileQueueGLESTest, WorkerRunsFinishAsSeparateTask) {
   auto runner = std::make_shared<CapturingTaskRunner>();
   auto queue = PipelineCompileQueueGLES::Create(runner);
   ASSERT_NE(queue, nullptr);
 
-  std::vector<bool> eager_values;
+  std::vector<std::string> events;
   ASSERT_TRUE(queue->PostJobForDescriptor(
-      PipelineDescriptor{},
-      [&eager_values](bool eager) { eager_values.push_back(eager); }));
-  runner->RunAll();
+      PipelineDescriptor{}, [&events] { events.push_back("start"); },
+      [&events] { events.push_back("finish"); }));
 
-  EXPECT_EQ(eager_values, std::vector<bool>{false});
+  runner->RunOne();
+  EXPECT_EQ(events, std::vector<std::string>{"start"});
+  EXPECT_GE(runner->PendingTaskCount(), 1u);
+
+  runner->RunAll();
+  EXPECT_EQ(events, (std::vector<std::string>{"start", "finish"}));
 }
 
-TEST(PipelineCompileQueueGLESTest, PerformJobEagerlyRunsJobEagerly) {
+TEST(PipelineCompileQueueGLESTest, WorkerFinishesJobBeforeStartingNext) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueGLES::Create(runner);
+  ASSERT_NE(queue, nullptr);
+
+  std::vector<std::string> events;
+  for (int i = 0; i < 2; i++) {
+    PipelineDescriptor desc;
+    desc.SetLabel(std::to_string(i));
+    ASSERT_TRUE(queue->PostJobForDescriptor(
+        desc, [&events, i] { events.push_back("start" + std::to_string(i)); },
+        [&events, i] { events.push_back("finish" + std::to_string(i)); }));
+  }
+  runner->RunAll();
+
+  EXPECT_EQ(events, (std::vector<std::string>{"start0", "finish0", "start1",
+                                              "finish1"}));
+}
+
+TEST(PipelineCompileQueueGLESTest, PerformJobEagerlyRunsStartAndFinish) {
   auto runner = std::make_shared<CapturingTaskRunner>();
   auto queue = PipelineCompileQueueGLES::Create(runner);
   ASSERT_NE(queue, nullptr);
 
   PipelineDescriptor desc;
-  std::vector<bool> eager_values;
+  std::vector<std::string> events;
   ASSERT_TRUE(queue->PostJobForDescriptor(
-      desc, [&eager_values](bool eager) { eager_values.push_back(eager); }));
+      desc, [&events] { events.push_back("start"); },
+      [&events] { events.push_back("finish"); }));
   queue->PerformJobEagerly(desc);
-
-  EXPECT_EQ(eager_values, std::vector<bool>{true});
-}
-
-TEST(PipelineCompileQueueGLESTest, DestructorRunsPendingJobsEagerly) {
-  auto runner = std::make_shared<CapturingTaskRunner>();
-  auto queue = PipelineCompileQueueGLES::Create(runner);
-  ASSERT_NE(queue, nullptr);
-
-  std::vector<bool> eager_values;
-  ASSERT_TRUE(queue->PostJobForDescriptor(
-      PipelineDescriptor{},
-      [&eager_values](bool eager) { eager_values.push_back(eager); }));
-  queue.reset();
-
-  EXPECT_EQ(eager_values, std::vector<bool>{true});
-}
-
-TEST(PipelineCompileQueueGLESTest, PostTaskBypassesJobQueue) {
-  auto runner = std::make_shared<CapturingTaskRunner>();
-  auto queue = PipelineCompileQueueGLES::Create(runner);
-  ASSERT_NE(queue, nullptr);
-
-  int executed = 0;
-  queue->PostTask([&executed] { executed++; });
-  EXPECT_EQ(runner->PendingTaskCount(), 1u);
-
-  // A posted task is not a job, so it can't be performed eagerly.
-  queue->PerformJobEagerly(PipelineDescriptor{});
-  EXPECT_EQ(executed, 0);
+  EXPECT_EQ(events, (std::vector<std::string>{"start", "finish"}));
 
   runner->RunAll();
-  EXPECT_EQ(executed, 1);
+  EXPECT_EQ(events, (std::vector<std::string>{"start", "finish"}));
+}
+
+TEST(PipelineCompileQueueGLESTest, DestructorRunsStartAndFinish) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueGLES::Create(runner);
+  ASSERT_NE(queue, nullptr);
+
+  std::vector<std::string> events;
+  ASSERT_TRUE(queue->PostJobForDescriptor(
+      PipelineDescriptor{}, [&events] { events.push_back("start"); },
+      [&events] { events.push_back("finish"); }));
+  queue.reset();
+
+  EXPECT_EQ(events, (std::vector<std::string>{"start", "finish"}));
+}
+
+TEST(PipelineCompileQueueGLESTest, StartedJobCannotBePerformedEagerly) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueGLES::Create(runner);
+  ASSERT_NE(queue, nullptr);
+
+  PipelineDescriptor desc;
+  int finished = 0;
+  ASSERT_TRUE(
+      queue->PostJobForDescriptor(desc, [] {}, [&finished] { finished++; }));
+  runner->RunOne();
+
+  // The finish step is waiting on the worker, so it isn't stolen.
+  queue->PerformJobEagerly(desc);
+  EXPECT_EQ(finished, 0);
+
+  runner->RunAll();
+  EXPECT_EQ(finished, 1);
 }
 
 }  // namespace testing

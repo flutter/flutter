@@ -202,37 +202,36 @@ class PipelineLibraryGLES final
       std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>;
 
   //----------------------------------------------------------------------------
-  /// @brief      The first step of creating a pipeline. Uses a cached program
-  ///             if there is one, otherwise compiles a new one and then
-  ///             finishes with `FinishPipelineCreation`. Must be called on the
-  ///             reactor.
+  /// @brief      The state of a pipeline being created, shared between
+  ///             `StartPipelineCreation` and `FinishPipelineCreation`.
   ///
-  /// @param[in]  eager  If true, `FinishPipelineCreation` is called
-  ///                    immediately. Otherwise it is posted as a separate event
-  ///                    to the IO task runner, giving the driver time to link
-  ///                    the program in between.
-  ///
-  static void StartPipelineCreation(
-      const std::shared_ptr<PipelinePromise>& promise,
-      const std::weak_ptr<PipelineLibrary>& weak_library,
-      const PipelineDescriptor& descriptor,
-      const std::shared_ptr<const ShaderFunction>& vert_function,
-      const std::shared_ptr<const ShaderFunction>& frag_function,
-      bool threadsafe,
-      bool eager);
+  struct PipelineCreation {
+    std::shared_ptr<PipelinePromise> promise;
+    std::weak_ptr<PipelineLibrary> weak_library;
+    PipelineDescriptor descriptor;
+    std::shared_ptr<const ShaderFunction> vert_function;
+    std::shared_ptr<const ShaderFunction> frag_function;
+    bool threadsafe = false;
+    /// Set by `StartPipelineCreation` if a program is being compiled, and
+    /// consumed by `FinishPipelineCreation`.
+    std::shared_ptr<PendingProgram> pending_program;
+  };
 
   //----------------------------------------------------------------------------
-  /// @brief      The second step of creating a pipeline. Waits for the program
-  ///             to link, caches it, and fulfills the promise with the new
-  ///             pipeline. Must be called on the reactor, on the same thread
-  ///             that compiled the program.
+  /// @brief      The first step of creating a pipeline. Uses a cached program
+  ///             if there is one, otherwise starts compiling a new one that
+  ///             `FinishPipelineCreation` will wait on. Must be called on the
+  ///             reactor.
   ///
-  static void FinishPipelineCreation(
-      const std::shared_ptr<PipelinePromise>& promise,
-      const std::weak_ptr<PipelineLibrary>& weak_library,
-      const PipelineDescriptor& descriptor,
-      const ProgramKey& program_key,
-      const std::shared_ptr<PendingProgram>& pending_program);
+  static void StartPipelineCreation(PipelineCreation& creation);
+
+  //----------------------------------------------------------------------------
+  /// @brief      The second step of creating a pipeline. If a program was
+  ///             compiled, waits for it to link, caches it, and fulfills the
+  ///             promise with the new pipeline. Must be called on the reactor,
+  ///             on the same thread that called `StartPipelineCreation`.
+  ///
+  static void FinishPipelineCreation(PipelineCreation& creation);
 
   std::shared_ptr<UniqueHandleGLES> GetCachedProgram(const ProgramKey& key);
 
