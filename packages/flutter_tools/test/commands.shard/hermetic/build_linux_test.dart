@@ -309,6 +309,44 @@ void main() {
   );
 
   testUsingContext(
+    'Linux build config-only writes CMake configuration with local engine options',
+    () async {
+      fileSystem
+          .directory('engine')
+          .childDirectory('src')
+          .childDirectory('out')
+          .childDirectory('host_debug')
+          .createSync(recursive: true);
+      final BuildCommand command = createBuildCommand();
+      setUpMockProjectFilesForBuild();
+      processManager.addCommands(<FakeCommand>[cmakeCommand('release')]);
+
+      await createTestCommandRunner(command).run(const <String>[
+        '--local-engine=host_debug',
+        '--local-engine-host=host_debug',
+        '--local-engine-src-path=./engine/src',
+        'build',
+        'linux',
+        '--config-only',
+        '--no-pub',
+      ]);
+      final File configFile = fileSystem.file('linux/flutter/ephemeral/generated_config.cmake');
+      expect(configFile, exists);
+      final String configContent = configFile.readAsStringSync();
+      expect(configContent, contains(r'"LOCAL_ENGINE=host_debug"'));
+      expect(configContent, contains(r'"LOCAL_ENGINE_HOST=host_debug"'));
+      expect(configContent, contains(r'"FLUTTER_ENGINE=engine/src"'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => linuxPlatform,
+      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+    },
+  );
+
+  testUsingContext(
     'Handles missing cmake',
     () async {
       setUpMockProjectFilesForBuild();
