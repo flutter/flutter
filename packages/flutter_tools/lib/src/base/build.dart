@@ -91,11 +91,11 @@ class GenSnapshot {
 
 class AOTSnapshotter {
   AOTSnapshotter({
-    required Logger logger,
-    required this._fileSystem,
-    this._xcode,
-    required ProcessManager processManager,
     required Artifacts artifacts,
+    required this._fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
+    this._xcode,
   }) : _logger = logger,
        _genSnapshot = GenSnapshot(
          artifacts: artifacts,
