@@ -2443,18 +2443,23 @@ void main() {
       return List<FocusNode>.generate(count, (int index) => FocusNode(debugLabel: 'node$index'));
     }
 
-    // Reproduces https://github.com/flutter/flutter/issues/185076.
-    testWidgets('disabling all siblings in the same build does not leave '
-        'primary focus on an unfocusable node', (WidgetTester tester) async {
+    // Creates ten focusable nodes, parks focus on node 8, and returns the nodes.
+    Future<List<FocusNode>> createFocusedNodes(WidgetTester tester) async {
       final List<FocusNode> nodes = createFocusNodes(10);
       addTearDown(() {
         for (final node in nodes) {
           node.dispose();
         }
       });
-
       await tester.pumpWidget(buildNodeList(nodes, <int>{}));
       await focusEveryNodeInOrder(tester, nodes);
+      return nodes;
+    }
+
+    // Reproduces https://github.com/flutter/flutter/issues/185076.
+    testWidgets('disabling all siblings in the same build does not leave '
+        'primary focus on an unfocusable node', (WidgetTester tester) async {
+      final List<FocusNode> nodes = await createFocusedNodes(tester);
 
       // The scope the nodes live in, which is still focusable.
       final FocusScopeNode enclosingScope = nodes[8].enclosingScope!;
@@ -2473,15 +2478,7 @@ void main() {
 
     testWidgets('disabling a focused sibling in the same build moves focus '
         'to the most recently focused sibling', (WidgetTester tester) async {
-      final List<FocusNode> nodes = createFocusNodes(10);
-      addTearDown(() {
-        for (final node in nodes) {
-          node.dispose();
-        }
-      });
-
-      await tester.pumpWidget(buildNodeList(nodes, <int>{}));
-      await focusEveryNodeInOrder(tester, nodes);
+      final List<FocusNode> nodes = await createFocusedNodes(tester);
 
       // Disable the current primary focus (node 8) and node 9 in a single build.
       await tester.pumpWidget(buildNodeList(nodes, <int>{8, 9}));
