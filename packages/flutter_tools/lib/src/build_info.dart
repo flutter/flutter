@@ -33,8 +33,6 @@ class BuildInfo {
     List<String>? extraFrontEndOptions,
     List<String>? extraGenSnapshotOptions,
     List<String>? fileSystemRoots,
-    this.androidProjectArgs = const <String>[],
-    this.androidGradleProjectCacheDir,
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
@@ -46,10 +44,7 @@ class BuildInfo {
     this.performanceMeasurementFile,
     required this.packageConfigPath,
     this.codeSizeDirectory,
-    this.androidGradleDaemon = true,
-    this.androidSkipBuildDependencyValidation = false,
-    this.androidEnableHcpp,
-    this.explicitAndroidEnableHcpp,
+    this.androidGradleConfig = const AndroidGradleConfig(),
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
@@ -82,8 +77,6 @@ class BuildInfo {
       extraFrontEndOptions: extraFrontEndOptions ?? this.extraFrontEndOptions,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
       fileSystemRoots: fileSystemRoots ?? this.fileSystemRoots,
-      androidProjectArgs: androidProjectArgs,
-      androidGradleProjectCacheDir: androidGradleProjectCacheDir,
       fileSystemScheme: fileSystemScheme ?? this.fileSystemScheme,
       buildNumber: buildNumber,
       buildName: buildName,
@@ -94,10 +87,7 @@ class BuildInfo {
       performanceMeasurementFile: performanceMeasurementFile,
       packageConfigPath: packageConfigPath ?? this.packageConfigPath,
       codeSizeDirectory: codeSizeDirectory,
-      androidGradleDaemon: androidGradleDaemon,
-      androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
-      androidEnableHcpp: androidEnableHcpp,
-      explicitAndroidEnableHcpp: explicitAndroidEnableHcpp,
+      androidGradleConfig: androidGradleConfig,
       packageConfig: packageConfig ?? this.packageConfig,
       initializeFromDill: initializeFromDill ?? this.initializeFromDill,
       assumeInitializeFromDillUpToDate: assumeInitializeFromDillUpToDate,
@@ -189,50 +179,8 @@ class BuildInfo {
   /// will be written for code size profiling.
   final String? codeSizeDirectory;
 
-  /// Whether to enable the Gradle daemon when performing an Android build.
-  ///
-  /// Starting the daemon is the default behavior of the gradle wrapper script created
-  /// in a Flutter project. Setting this value to false will cause the tool to pass
-  /// `--no-daemon` to the gradle wrapper script, preventing it from spawning a daemon
-  /// process.
-  ///
-  /// For one-off builds or CI systems, preventing the daemon from spawning will
-  /// reduce system resource usage, at the cost of any subsequent builds starting
-  /// up slightly slower.
-  ///
-  /// The Gradle daemon may also be disabled in the Android application's properties file.
-  final bool androidGradleDaemon;
-
-  /// Whether to skip checking of individual versions of our Android build time
-  /// dependencies.
-  final bool androidSkipBuildDependencyValidation;
-
-  /// The default `enable-hcpp` value (currently false unless the CLI flag was
-  /// passed), given to Gradle so the Flutter Gradle Plugin can inject the
-  /// corresponding manifest metadata if absent.
-  ///
-  /// The injection only happens for application projects, and only when the
-  /// merged manifest does not already contain the
-  /// `io.flutter.embedding.android.EnableHcpp` metadata, so a value in the
-  /// app's manifest takes priority over this one. Module (aar) manifests are
-  /// never injected; the add-to-app host's manifest is the source of truth.
-  /// When null, no property is passed and no injection happens.
-  final bool? androidEnableHcpp;
-
-  /// The explicit `--[no-]enable-hcpp` value passed by the user on the CLI, or
-  /// null if the user did not pass the flag explicitly.
-  ///
-  /// Passed to Gradle, which writes it into the merged manifest over any value
-  /// already there, so it takes priority over both [androidEnableHcpp] and the
-  /// app's manifest. When null, the manifest decides.
-  final bool? explicitAndroidEnableHcpp;
-
-  /// Additional key value pairs that are passed directly to the gradle project via the `-P`
-  /// flag.
-  final List<String> androidProjectArgs;
-
-  /// Specifies Gradle's project-specific cache directory.
-  final String? androidGradleProjectCacheDir;
+  /// Android and Gradle-specific configuration for the build.
+  final AndroidGradleConfig androidGradleConfig;
 
   /// The package configuration for the loaded application.
   ///
@@ -439,32 +387,64 @@ class BuildInfo {
       'FLAVOR': ?flavor,
     };
   }
+}
 
-  /// Convert this config to a series of project level arguments to be passed
-  /// on the command line to gradle.
-  List<String> toGradleConfig() {
-    // PACKAGE_CONFIG not currently supported.
-    return <String>[
-      if (dartDefines.isNotEmpty) '-Pdart-defines=${encodeDartDefines(dartDefines)}',
-      '-Pdart-obfuscation=$dartObfuscation',
-      if (frontendServerStarterPath != null)
-        '-Pfrontend-server-starter-path=$frontendServerStarterPath',
-      if (extraFrontEndOptions.isNotEmpty)
-        '-Pextra-front-end-options=${extraFrontEndOptions.join(',')}',
-      if (extraGenSnapshotOptions.isNotEmpty)
-        '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions.join(',')}',
-      if (splitDebugInfoPath != null) '-Psplit-debug-info=$splitDebugInfoPath',
-      '-Ptrack-widget-creation=$trackWidgetCreation',
-      '-Ptree-shake-icons=$treeShakeIcons',
-      if (performanceMeasurementFile != null)
-        '-Pperformance-measurement-file=$performanceMeasurementFile',
-      if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
-      if (androidEnableHcpp != null) '-Penable-hcpp=$androidEnableHcpp',
-      if (explicitAndroidEnableHcpp != null) '-Pexplicit-enable-hcpp=$explicitAndroidEnableHcpp',
-      for (final String projectArg in androidProjectArgs) '-P$projectArg',
-      if (androidGradleProjectCacheDir != null) '--project-cache-dir=$androidGradleProjectCacheDir',
-    ];
-  }
+/// Android and Gradle-specific configuration for a build.
+@immutable
+class AndroidGradleConfig {
+  const AndroidGradleConfig({
+    this.projectArgs = const <String>[],
+    this.projectCacheDir,
+    this.gradleDaemon = true,
+    this.skipBuildDependencyValidation = false,
+    this.enableHcpp,
+    this.explicitEnableHcpp,
+  });
+
+  /// Additional key value pairs that are passed directly to the gradle project via the `-P`
+  /// flag.
+  final List<String> projectArgs;
+
+  /// Specifies Gradle's project-specific cache directory.
+  final String? projectCacheDir;
+
+  /// Whether to enable the Gradle daemon when performing an Android build.
+  ///
+  /// Starting the daemon is the default behavior of the gradle wrapper script created
+  /// in a Flutter project. Setting this value to false will cause the tool to pass
+  /// `--no-daemon` to the gradle wrapper script, preventing it from spawning a daemon
+  /// process.
+  ///
+  /// For one-off builds or CI systems, preventing the daemon from spawning will
+  /// reduce system resource usage, at the cost of any subsequent builds starting
+  /// up slightly slower.
+  ///
+  /// The Gradle daemon may also be disabled in the Android application's properties file.
+  final bool gradleDaemon;
+
+  /// Whether to skip checking of individual versions of our Android build time
+  /// dependencies.
+  final bool skipBuildDependencyValidation;
+
+  /// The default `enable-hcpp` value (currently false unless the CLI flag was
+  /// passed), given to Gradle so the Flutter Gradle Plugin can inject the
+  /// corresponding manifest metadata if absent.
+  ///
+  /// The injection only happens for application projects, and only when the
+  /// merged manifest does not already contain the
+  /// `io.flutter.embedding.android.EnableHcpp` metadata, so a value in the
+  /// app's manifest takes priority over this one. Module (aar) manifests are
+  /// never injected; the add-to-app host's manifest is the source of truth.
+  /// When null, no property is passed and no injection happens.
+  final bool? enableHcpp;
+
+  /// The explicit `--[no-]enable-hcpp` value passed by the user on the CLI, or
+  /// null if the user did not pass the flag explicitly.
+  ///
+  /// Passed to Gradle, which writes it into the merged manifest over any value
+  /// already there, so it takes priority over both [enableHcpp] and the
+  /// app's manifest. When null, the manifest decides.
+  final bool? explicitEnableHcpp;
 }
 
 /// Information about an Android build to be performed or used.
@@ -495,6 +475,46 @@ class AndroidBuildInfo {
   /// options to the engine without relying on Intent extras. It is only relevant when building
   /// from source (i.e., not using a prebuilt application binary).
   final List<String>? releaseManifestEngineShellArgs;
+
+  /// Whether to enable the Gradle daemon when performing an Android build.
+  bool get gradleDaemon => buildInfo.androidGradleConfig.gradleDaemon;
+
+  /// Whether to skip checking of individual versions of our Android build time
+  /// dependencies.
+  bool get skipBuildDependencyValidation =>
+      buildInfo.androidGradleConfig.skipBuildDependencyValidation;
+
+  /// Convert this config to a series of project level arguments to be passed
+  /// on the command line to gradle.
+  List<String> toGradleConfig() {
+    final AndroidGradleConfig gradleConfig = buildInfo.androidGradleConfig;
+    // PACKAGE_CONFIG not currently supported.
+    return <String>[
+      if (buildInfo.dartDefines.isNotEmpty)
+        '-Pdart-defines=${encodeDartDefines(buildInfo.dartDefines)}',
+      '-Pdart-obfuscation=${buildInfo.dartObfuscation}',
+      if (buildInfo.frontendServerStarterPath != null)
+        '-Pfrontend-server-starter-path=${buildInfo.frontendServerStarterPath}',
+      if (buildInfo.extraFrontEndOptions.isNotEmpty)
+        '-Pextra-front-end-options=${buildInfo.extraFrontEndOptions.join(',')}',
+      if (buildInfo.extraGenSnapshotOptions.isNotEmpty)
+        '-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions.join(',')}',
+      if (buildInfo.splitDebugInfoPath != null)
+        '-Psplit-debug-info=${buildInfo.splitDebugInfoPath}',
+      '-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}',
+      '-Ptree-shake-icons=${buildInfo.treeShakeIcons}',
+      if (buildInfo.performanceMeasurementFile != null)
+        '-Pperformance-measurement-file=${buildInfo.performanceMeasurementFile}',
+      if (buildInfo.codeSizeDirectory != null)
+        '-Pcode-size-directory=${buildInfo.codeSizeDirectory}',
+      if (gradleConfig.enableHcpp != null) '-Penable-hcpp=${gradleConfig.enableHcpp}',
+      if (gradleConfig.explicitEnableHcpp != null)
+        '-Pexplicit-enable-hcpp=${gradleConfig.explicitEnableHcpp}',
+      for (final String projectArg in gradleConfig.projectArgs) '-P$projectArg',
+      if (gradleConfig.projectCacheDir != null)
+        '--project-cache-dir=${gradleConfig.projectCacheDir}',
+    ];
+  }
 }
 
 /// A summary of the compilation strategy used for Dart.

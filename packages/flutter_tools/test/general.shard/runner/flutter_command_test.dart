@@ -758,8 +758,11 @@ void main() {
         final BuildInfo enabledBuildInfo = await enabledCommand.getBuildInfo(
           forcedBuildMode: BuildMode.debug,
         );
-        expect(enabledBuildInfo.explicitAndroidEnableHcpp, isTrue);
-        expect(enabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
+        expect(enabledBuildInfo.androidGradleConfig.explicitEnableHcpp, isTrue);
+        expect(
+          AndroidBuildInfo(enabledBuildInfo).toGradleConfig(),
+          contains('-Pexplicit-enable-hcpp=true'),
+        );
 
         // The negation has to be reported too, otherwise gradle cannot tell it apart from the
         // flag being absent and would leave a manifest value of true in place.
@@ -768,8 +771,11 @@ void main() {
         final BuildInfo disabledBuildInfo = await disabledCommand.getBuildInfo(
           forcedBuildMode: BuildMode.debug,
         );
-        expect(disabledBuildInfo.explicitAndroidEnableHcpp, isFalse);
-        expect(disabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=false'));
+        expect(disabledBuildInfo.androidGradleConfig.explicitEnableHcpp, isFalse);
+        expect(
+          AndroidBuildInfo(disabledBuildInfo).toGradleConfig(),
+          contains('-Pexplicit-enable-hcpp=false'),
+        );
 
         // Without the flag nothing is reported, so the manifest decides.
         final defaultCommand = DummyHcppFlutterCommand();
@@ -777,9 +783,9 @@ void main() {
         final BuildInfo defaultBuildInfo = await defaultCommand.getBuildInfo(
           forcedBuildMode: BuildMode.debug,
         );
-        expect(defaultBuildInfo.explicitAndroidEnableHcpp, isNull);
+        expect(defaultBuildInfo.androidGradleConfig.explicitEnableHcpp, isNull);
         expect(
-          defaultBuildInfo.toGradleConfig(),
+          AndroidBuildInfo(defaultBuildInfo).toGradleConfig(),
           isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
         );
       },
@@ -815,8 +821,8 @@ void main() {
         final command = DummyHcppFlutterCommand();
         await createTestCommandRunner(command).run(<String>['dummy']);
         final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
-        expect(buildInfo.androidEnableHcpp, isTrue);
-        expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=true'));
+        expect(buildInfo.androidGradleConfig.enableHcpp, isTrue);
+        expect(AndroidBuildInfo(buildInfo).toGradleConfig(), contains('-Penable-hcpp=true'));
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
@@ -831,8 +837,8 @@ void main() {
         final command = DummyHcppFlutterCommand();
         await createTestCommandRunner(command).run(<String>['dummy', '--no-enable-hcpp']);
         final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
-        expect(buildInfo.androidEnableHcpp, isFalse);
-        expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=false'));
+        expect(buildInfo.androidGradleConfig.enableHcpp, isFalse);
+        expect(AndroidBuildInfo(buildInfo).toGradleConfig(), contains('-Penable-hcpp=false'));
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
@@ -852,8 +858,8 @@ void main() {
         );
         expect(debugBuildInfo.trackWidgetCreation, isFalse);
         expect(debugBuildInfo.treeShakeIcons, isFalse);
-        expect(debugBuildInfo.androidGradleDaemon, isTrue);
-        expect(debugBuildInfo.androidSkipBuildDependencyValidation, isTrue);
+        expect(debugBuildInfo.androidGradleConfig.gradleDaemon, isTrue);
+        expect(debugBuildInfo.androidGradleConfig.skipBuildDependencyValidation, isTrue);
 
         final BuildInfo releaseBuildInfo = await flutterCommand.getBuildInfo(
           forcedBuildMode: BuildMode.release,
@@ -877,7 +883,7 @@ void main() {
           forcedBuildMode: BuildMode.debug,
         );
         expect(debugBuildInfo.trackWidgetCreation, isTrue);
-        expect(debugBuildInfo.androidSkipBuildDependencyValidation, isFalse);
+        expect(debugBuildInfo.androidGradleConfig.skipBuildDependencyValidation, isFalse);
 
         final BuildInfo releaseBuildInfo = await command.getBuildInfo(
           forcedBuildMode: BuildMode.release,
