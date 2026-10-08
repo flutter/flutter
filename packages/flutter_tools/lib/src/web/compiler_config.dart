@@ -50,7 +50,7 @@ sealed class WebCompilerConfig {
     'optimizationLevel': ?optimizationLevel,
   };
 
-  Map<String, dynamic> get _buildKeyMap => <String, dynamic>{
+  Map<String, Object?> get _buildKeyMap => <String, Object?>{
     'optimizationLevel': optimizationLevel,
     'webRenderer': renderer.name,
     'webContentHash': webContentHash,
@@ -147,7 +147,7 @@ class JsCompilerConfig extends WebCompilerConfig {
 
   @override
   String get buildKey {
-    final settings = <String, dynamic>{
+    final settings = <String, Object?>{
       ...super._buildKeyMap,
       'csp': csp,
       'dumpInfo': dumpInfo,
@@ -227,7 +227,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
 
   @override
   String get buildKey {
-    final settings = <String, dynamic>{
+    final settings = <String, Object?>{
       ...super._buildKeyMap,
       kStripWasm: stripWasm,
       'minify': minify,

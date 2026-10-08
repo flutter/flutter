@@ -27,7 +27,6 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/analysis.dart';
-import '../devfs.dart';
 import '../device.dart';
 import '../features.dart';
 import '../isolated/resident_web_runner.dart';
@@ -141,8 +140,7 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
 /// The type of reload operation queued to run once [WidgetPreviewStartCommand._reloadMutex]
 /// is available.
 enum _PendingReload {
-  /// Perform a hot reload via [WidgetPreviewStartCommand.handleReload], which
-  /// falls back to a hot restart if the reload is rejected.
+  /// Perform a hot reload (`restart(fullRestart: false)`).
   hotReload,
 
   /// Perform a full hot restart (`restart(fullRestart: true)`).
@@ -220,10 +218,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   static const kBrowserNotFoundErrorMessage =
       'Failed to locate browser. Make sure you are using an up-to-date Chrome or Edge. '
       'Otherwise, consider running with --$kWebServer instead.';
-
-  @visibleForTesting
-  static const kHotReloadRejectedMessage =
-      'Hot reload rejected due to unsupported changes. Performing hot restart instead.';
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -327,9 +321,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   @visibleForTesting
   ResidentRunner? get widgetPreviewApp => _widgetPreviewApp;
-
-  @visibleForTesting
-  set widgetPreviewApp(ResidentRunner? value) => _widgetPreviewApp = value;
 
   /// Serializes initial preview scaffold startup and subsequent hot reload / hot
   /// restart operations so reloads cannot execute before the debug connection is
@@ -513,18 +504,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
   }
 
-  /// Hot reloads the previewer, falling back to a hot restart if the reload is
-  /// rejected due to unsupported changes.
-  @visibleForTesting
-  Future<OperationResult?> handleReload() async {
-    final OperationResult? result = await _widgetPreviewApp?.restart();
-    if (result case OperationResult(updateFSReport: UpdateFSReport(hotReloadRejected: true))) {
-      logger.printStatus(kHotReloadRejectedMessage);
-      return _widgetPreviewApp?.restart(fullRestart: true);
-    }
-    return result;
-  }
-
   Future<void> _triggerReload(_PendingReload requested) async {
     // Record the requested reload type. If a task is already queued waiting for
     // [_reloadMutex], coalesce this request into the pending one (upgrading a
@@ -547,12 +526,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         return;
       }
       try {
-        switch (pending) {
-          case .hotReload:
-            await handleReload();
-          case .hotRestart:
-            await _widgetPreviewApp?.restart(fullRestart: true);
-        }
+        await _widgetPreviewApp?.restart(fullRestart: pending == .hotRestart);
       } on Object catch (e, st) {
         logger.printTrace('Error during widget preview reload: $e\n$st');
       }
