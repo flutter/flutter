@@ -67,6 +67,7 @@ extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
 - (BOOL)supportsShowingSystemContextMenu;
 - (BOOL)stateIsActive;
 - (BOOL)stateIsBackground;
+- (void)setupViewIdentifier:(FlutterViewIdentifier)viewIdentifier;
 
 /**
  * Determines whether a UIScene notification should be handled by this view controller.

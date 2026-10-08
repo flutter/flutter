@@ -146,7 +146,11 @@ FLUTTER_ASSERT_ARC
 
   id mockEngine = OCMClassMock([FlutterEngine class]);
   id mockViewController = OCMClassMock([UIViewController class]);
-  id mockView = OCMClassMock([UIView class]);
+  // Use an instance partial mock here instead of `OCMClassMock([UIView class])`.
+  // Class mocks replace class methods globally (e.g. `+performWithoutAnimation:`),
+  // which can leak across tests and break unrelated UIKit snapshot-based tests.
+  UIView* view = [[UIView alloc] init];
+  id mockView = OCMPartialMock(view);
   id mockWindow = OCMClassMock([UIWindow class]);
   id mockWindowScene = OCMClassMock([UIWindowScene class]);
   id mockLifecycleProvider = OCMProtocolMock(@protocol(FlutterSceneLifeCycleProvider));
@@ -167,6 +171,8 @@ FLUTTER_ASSERT_ARC
   [delegate updateFlutterManagedEnginesInScene:mockWindowScene2];
   OCMVerify(times(1), [mockLifecycleDelegate addFlutterManagedEngine:mockEngine]);
   XCTAssertEqual(delegate.flutterManagedEngines.count, 0.0);
+
+  [mockView stopMocking];
 }
 
 - (void)testupdateFlutterManagedEnginesInSceneDoesNotRemoveEngineWithNilScene {

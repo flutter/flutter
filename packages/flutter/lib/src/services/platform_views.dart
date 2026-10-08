@@ -261,6 +261,7 @@ class PlatformViewsService {
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
+    int? flutterViewId,
     VoidCallback? onFocus,
   }) async {
     assert(creationParams == null || creationParamsCodec != null);
@@ -278,6 +279,7 @@ class PlatformViewsService {
       'id': id,
       'viewType': viewType,
       'gestureBlockingPolicy': gestureBlockingPolicyValue,
+      if (flutterViewId != null) 'flutterViewId': flutterViewId,
     };
     if (creationParams != null) {
       final ByteData paramsByteData = creationParamsCodec!.encodeMessage(creationParams)!;

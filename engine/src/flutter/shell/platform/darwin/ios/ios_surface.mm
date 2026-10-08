@@ -16,7 +16,8 @@ FLUTTER_ASSERT_ARC
 namespace flutter {
 
 std::unique_ptr<IOSSurface> IOSSurface::Create(const std::shared_ptr<IOSContext>& context,
-                                               CALayer* layer) {
+                                               CALayer* layer,
+                                               bool render_to_surface) {
   FML_DCHECK(layer);
   FML_DCHECK(context);
 
@@ -24,7 +25,8 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(const std::shared_ptr<IOSContext>
     if ([layer isKindOfClass:[CAMetalLayer class]]) {
       return std::make_unique<IOSSurfaceMetalImpeller>(
           static_cast<CAMetalLayer*>(layer),  // Metal layer
-          context                             // context
+          context,                            // context
+          render_to_surface                   // render_to_surface
       );
     }
   }
