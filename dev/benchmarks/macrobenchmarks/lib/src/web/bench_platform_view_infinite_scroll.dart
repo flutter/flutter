@@ -14,7 +14,7 @@ const String benchmarkViewType = 'benchmark_element';
 
 void _registerFactory() {
   ui_web.platformViewRegistry.registerViewFactory(benchmarkViewType, (int viewId) {
-    final web.HTMLElement htmlElement = web.document.createElement('div') as web.HTMLDivElement;
+    final htmlElement = web.document.createElement('div') as web.HTMLDivElement;
     htmlElement.id = '${benchmarkViewType}_$viewId';
     htmlElement.innerText = 'Google';
     htmlElement.style

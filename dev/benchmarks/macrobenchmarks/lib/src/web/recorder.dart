@@ -182,9 +182,8 @@ abstract class Recorder {
 /// }
 /// ```
 abstract class RawRecorder extends Recorder {
-  RawRecorder({required String name, bool useCustomWarmUp = false})
-    : _useCustomWarmUp = useCustomWarmUp,
-      super._(name, false);
+  RawRecorder({required String name, this._useCustomWarmUp = false})
+    : super._(name, false);
 
   /// Whether to delimit warm-up frames in a custom way.
   final bool _useCustomWarmUp;

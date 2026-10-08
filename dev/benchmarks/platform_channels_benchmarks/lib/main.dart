@@ -161,7 +161,7 @@ Future<void> _runTests() async {
   /// `Large` tests. Instead make a different test. The size of largeBuffer
   /// serialized is 14214 bytes.
   final List<Object?> largeBuffer = _makeTestBuffer(1000);
-  final ByteData largeBufferBytes = const StandardMessageCodec().encodeMessage(largeBuffer)!;
+  final ByteData largeBufferBytes = const StandardMessageCodec().encodeMessage(largeBuffer);
   final oneMB = ByteData(1024 * 1024);
 
   const numMessages = 2500;

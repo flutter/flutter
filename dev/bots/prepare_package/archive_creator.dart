@@ -83,12 +83,11 @@ class ArchiveCreator {
     required this.httpReader,
     required this.outputDir,
     required this.platform,
-    required ProcessRunner processRunner,
+    required this._processRunner,
     required this.revision,
     required this.strict,
     required this.tempDir,
   }) : assert(revision.length == 40),
-       _processRunner = processRunner,
        _flutter = flutterExecutable,
        _dart = dartExecutable;
 

@@ -394,10 +394,9 @@ class _SnippetChecker {
     this._flutterPackages, {
     String? tempDirectory,
     this.verbose = false,
-    Directory? dartUiLocation,
+    this._dartUiLocation,
   }) : _tempDirectory = _createTempDirectory(tempDirectory),
-       _keepTmp = tempDirectory != null,
-       _dartUiLocation = dartUiLocation;
+       _keepTmp = tempDirectory != null;
 
   /// The prefix of each comment line
   static const String _dartDocPrefix = '///';
