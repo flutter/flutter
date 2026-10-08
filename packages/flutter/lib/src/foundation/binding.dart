@@ -713,29 +713,25 @@ abstract class BindingBase {
       }
     }
 
-    return _viewMetricsOverrideResult(viewId: viewId);
+    return _viewMetricsOverrideResult();
   }
 
   // The reply to every `ext.flutter.viewMetricsOverride` call, as documented on
   // [FoundationServiceExtensions.viewMetricsOverride].
   //
-  // Read after the change has been applied, so that the reply describes the
+  // Built after the change has been applied, so that the reply describes the
   // registry as it stands once the call is done.
-  Map<String, Object?> _viewMetricsOverrideResult({int? viewId}) {
-    return <String, Object?>{
-      if (viewId != null) 'override': debugViewMetricsOverrides[viewId]?.toJson(),
-      'overrides': _viewMetricsOverridesJson(),
-      'overriddenViewIds': debugViewMetricsOverrides.keys.toList()..sort(),
-    };
+  Map<String, Object?> _viewMetricsOverrideResult() {
+    return <String, Object?>{'overrides': _viewMetricsOverridesWithStringKeys()};
   }
 
-  // [debugViewMetricsOverrides] with its view ids stringified, because JSON
-  // object keys must be strings and json.encode throws on an int key. Both the
-  // reply and the event carry this map.
-  Map<String, Object?> _viewMetricsOverridesJson() {
-    return <String, Object?>{
+  // [debugViewMetricsOverrides] with its view ids stringified, because
+  // json.encode accepts only String keys. It calls toJson on the values itself.
+  // Both the reply and the event carry this map.
+  Map<String, DebugViewMetricsOverride> _viewMetricsOverridesWithStringKeys() {
+    return <String, DebugViewMetricsOverride>{
       for (final MapEntry<int, DebugViewMetricsOverride> entry in debugViewMetricsOverrides.entries)
-        '${entry.key}': entry.value.toJson(),
+        '${entry.key}': entry.value,
     };
   }
 
@@ -746,7 +742,7 @@ abstract class BindingBase {
   void _postViewMetricsOverrideStateChangedEvent() {
     _postExtensionStateChangedEvent(
       FoundationServiceExtensions.viewMetricsOverride.name,
-      _viewMetricsOverridesJson(),
+      _viewMetricsOverridesWithStringKeys(),
     );
   }
 

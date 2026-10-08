@@ -105,26 +105,18 @@ enum FoundationServiceExtensions {
   ///
   /// A malformed `viewId` or `overrides` fails the call, and nothing changes.
   ///
-  /// Every reply contains these two keys, whatever the call was, so that a
-  /// client can resynchronize from any reply without remembering which call
-  /// produced it:
+  /// Every reply has one key, whatever the call was, so that a client can
+  /// resynchronize from any reply without remembering which call produced it:
   ///
   ///  * `overrides`: every override installed once the call is done, keyed by
   ///    stringified view id (JSON object keys must be strings), each in the
-  ///    format [DebugViewMetricsOverride.toJson] produces.
-  ///  * `overriddenViewIds`: the same view ids, as a sorted list of integers.
-  ///
-  /// The reply to a call that has a `viewId` and does not clear every override
-  /// also contains:
-  ///
-  ///  * `override`: the override now registered for that view, or null if it
-  ///    has none.
+  ///    format [DebugViewMetricsOverride.toJson] produces. A view without an
+  ///    entry has no override.
   ///
   /// A call that changes an override also posts a
-  /// `Flutter.ServiceExtensionStateChanged` event whose `value` is every
-  /// override installed, in the same format as the reply's `overrides`, so that
-  /// clients other than the caller learn about the change too. A call that
-  /// changes nothing posts no event.
+  /// `Flutter.ServiceExtensionStateChanged` event whose `value` is that same
+  /// map, so that clients other than the caller learn about the change too. A
+  /// call that changes nothing posts no event.
   ///
   /// See also:
   ///
