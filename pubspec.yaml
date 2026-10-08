@@ -88,7 +88,6 @@ workspace:
 dependencies:
   _discoveryapis_commons: 1.0.8
   _fe_analyzer_shared: 107.0.0
-  adaptive_breakpoints: 0.1.7
   analyzer: 14.3.0
   animations: 2.2.0
   archive: 3.6.1
@@ -131,7 +130,6 @@ dependencies:
   http_parser: 4.1.2
   intl: ^0.20.3
   io: 1.1.0
-  isolate: 2.1.1
   js: 0.7.2
   json_annotation: 4.12.0
   leak_tracker: 11.0.2
@@ -225,4 +223,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 4ccg7b
+# PUBSPEC CHECKSUM: ib6lp7
