@@ -250,11 +250,7 @@ abstract class UnpackIOS extends UnpackDarwin {
     const Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
     ),
-    Source.artifact(
-      Artifact.flutterXcframework,
-      platform: TargetPlatform.ios.getName(),
-      mode: buildMode,
-    ),
+    Source.artifact(Artifact.flutterXcframework, platform: TargetPlatform.ios, mode: buildMode),
   ];
 
   @override
@@ -482,11 +478,11 @@ class _IssueLaunchRootViewControllerAccess extends Target {
       const Source.pattern(
         '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
       ),
-      ProjectSource(
+      Source.fromProject(
         (FlutterProject project) => project.ios.appDelegateObjcImplementation,
         optional: true,
       ),
-      ProjectSource((FlutterProject project) => project.ios.appDelegateSwift, optional: true),
+      Source.fromProject((FlutterProject project) => project.ios.appDelegateSwift, optional: true),
     ];
   }
 
@@ -517,7 +513,7 @@ class DebugIosLLDBInit extends Target {
 
   @override
   List<Source> get outputs => <Source>[
-    ProjectSource((FlutterProject project) => project.ios.lldbInitFile),
+    Source.fromProject((FlutterProject project) => project.ios.lldbInitFile),
   ];
 
   @override

@@ -6,11 +6,11 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart' as core;
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -110,8 +110,8 @@ void main() {
       );
       globals.fs.file(path).createSync(recursive: true);
       const fizzSource = Source.artifact(
-        core.Artifact('windowsDesktopPath'),
-        platform: 'windows-x64',
+        Artifact.windowsDesktopPath,
+        platform: TargetPlatform.windows_x64,
       );
       fizzSource.accept(visitor);
 
@@ -276,8 +276,8 @@ void main() {
       visitor = SourceVisitor(environment);
 
       const fizzSource = Source.artifact(
-        core.Artifact('windowsDesktopPath'),
-        platform: 'windows-x64',
+        Artifact.windowsDesktopPath,
+        platform: TargetPlatform.windows_x64,
       );
       fizzSource.accept(visitor);
 
@@ -290,14 +290,13 @@ void main() {
     () => testbed.run(() {
       final String path = globals.fs.file('.flutter-plugins-dependencies').absolute.path;
       globals.fs.file(path).createSync(recursive: true);
-      final pluginsSource = ProjectSource(
+      final pluginsSource = Source.fromProject(
         (FlutterProject project) => project.flutterPluginsDependenciesFile,
       );
       pluginsSource.accept(visitor);
 
       expect(visitor.sources.single.absolute.path, path);
       expect(visitor.sources.single, exists);
-      expect(pluginsSource.toMap, throwsStateError);
     }),
   );
 
@@ -305,7 +304,7 @@ void main() {
     'can substitute nonexistent project file',
     () => testbed.run(() {
       final String path = globals.fs.file('.flutter-plugins-dependencies').absolute.path;
-      final pluginsSource = ProjectSource(
+      final pluginsSource = Source.fromProject(
         (FlutterProject project) => project.flutterPluginsDependenciesFile,
       );
       pluginsSource.accept(visitor);
@@ -320,7 +319,7 @@ void main() {
     () => testbed.run(() {
       final String path = globals.fs.file('.flutter-plugins-dependencies').absolute.path;
       globals.fs.file(path).createSync(recursive: true);
-      final pluginsSource = ProjectSource(
+      final pluginsSource = Source.fromProject(
         (FlutterProject project) => project.flutterPluginsDependenciesFile,
         optional: true,
       );
@@ -334,7 +333,7 @@ void main() {
   test(
     'skips nonexistent optional project file',
     () => testbed.run(() {
-      final pluginsSource = ProjectSource(
+      final pluginsSource = Source.fromProject(
         (FlutterProject project) => project.flutterPluginsDependenciesFile,
         optional: true,
       );

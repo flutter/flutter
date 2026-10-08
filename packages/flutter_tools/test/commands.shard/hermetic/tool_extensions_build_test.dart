@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart' hide Source;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -19,8 +19,8 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart'
-    hide Artifact, HostArtifact, Source, Target;
+import 'package:flutter_tools_core/flutter_tools_core.dart' as core;
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide Artifact, HostArtifact, Target;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 
@@ -47,7 +47,7 @@ final class _TestExtensionTarget extends ExtensionTarget {
   final bool shouldSucceed;
 
   @override
-  List<Target> get dependencies => const <Target>[];
+  List<core.Target> get dependencies => const <core.Target>[];
 
   @override
   List<Source> get inputs => const <Source>[];

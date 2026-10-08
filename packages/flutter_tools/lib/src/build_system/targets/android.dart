@@ -201,7 +201,7 @@ class AndroidAot extends AotElfBase {
     const Source.pattern('{BUILD_DIR}/app.dill'),
     const Source.artifact(Artifact.engineDartBinary),
     const Source.artifact(Artifact.skyEnginePath),
-    Source.artifact(Artifact.genSnapshot, mode: buildMode, platform: targetPlatform.getName()),
+    Source.artifact(Artifact.genSnapshot, mode: buildMode, platform: targetPlatform),
   ];
 
   @override

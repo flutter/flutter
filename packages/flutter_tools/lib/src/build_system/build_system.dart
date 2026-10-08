@@ -119,14 +119,13 @@ class BuildSystemConfig {
 /// exercise the rule, ensuring that the existing input and output verification
 /// logic can run, as well as verifying it correctly handles provided defines
 /// and meets any additional contracts present in the target.
-abstract class Target extends core.Target {
+abstract class Target {
   const Target();
 
   /// The user-readable name of the target.
   ///
   /// This information is surfaced in the assemble commands and used as an
   /// argument to build a particular target.
-  @override
   String get name;
 
   /// A name that measurements can be categorized under for this [Target].
@@ -138,19 +137,20 @@ abstract class Target extends core.Target {
   String get analyticsName => name;
 
   /// The dependencies of this target.
-  @override
   List<Target> get dependencies;
 
   /// The input [Source]s which are diffed to determine if a target should run.
-  @override
   List<Source> get inputs;
 
   /// The output [Source]s which we attempt to verify are correctly produced.
-  @override
   List<Source> get outputs;
 
+  /// The output directory pattern for this target.
+  ///
+  /// Defaults to `{BUILD_DIR}`.
+  String get outputDir => core.kBuildDirPlaceholder;
+
   /// A list of zero or more depfiles, located directly under {BUILD_DIR}.
-  @override
   List<String> get depfiles => const <String>[];
 
   /// A string that differentiates different build variants from each other

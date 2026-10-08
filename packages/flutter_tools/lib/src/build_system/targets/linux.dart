@@ -30,7 +30,7 @@ class UnpackLinux extends Target {
   final TargetPlatform targetPlatform;
 
   @override
-  String get name => 'unpack_linux_${targetPlatform.getName()}';
+  String get name => 'unpack_linux';
 
   @override
   List<Source> get inputs => const <Source>[

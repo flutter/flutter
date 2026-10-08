@@ -34,13 +34,21 @@ class ExtensionAssembleTarget extends Target {
   late final List<Target> dependencies = buildTarget.dependencies.map(_dependencyResolver).toList();
 
   @override
-  List<Source> get inputs => buildTarget.inputs;
+  late final List<Source> inputs = _convertSources(buildTarget.inputs);
 
   @override
-  List<Source> get outputs => buildTarget.outputs;
+  late final List<Source> outputs = _convertSources(buildTarget.outputs);
 
   @override
   String get outputDir => buildTarget.outputDir;
+
+  static List<Source> _convertSources(List<core.Source> sources) {
+    final converter = _SourceConverter();
+    for (final source in sources) {
+      source.accept(converter);
+    }
+    return converter.sources;
+  }
 
   @override
   Future<void> build(Environment environment) async {
@@ -81,6 +89,28 @@ class ExtensionAssembleTarget extends Target {
     if (!result.success) {
       throwToolExit(result.errorMessage ?? 'Extension build target ${buildTarget.name} failed.');
     }
+  }
+}
+
+class _SourceConverter implements core.SourceVisitor {
+  final sources = <Source>[];
+
+  @override
+  void visitPattern(String pattern, bool optional) {
+    sources.add(Source.pattern(pattern, optional: optional));
+  }
+
+  @override
+  void visitArtifact(core.Artifact artifact, String? platformName, BuildMode? mode) {
+    final Artifact hostArtifact = _resolveArtifact(artifact);
+    final TargetPlatform? platform = _resolveArtifactPlatform(platformName, artifact);
+    sources.add(Source.artifact(hostArtifact, platform: platform, mode: mode));
+  }
+
+  @override
+  void visitHostArtifact(core.HostArtifact artifact) {
+    final HostArtifact hostArtifact = _resolveHostArtifact(artifact);
+    sources.add(Source.hostArtifact(hostArtifact));
   }
 }
 
@@ -132,19 +162,8 @@ class ArtifactResolver implements core.SourceVisitor {
 
   @override
   void visitArtifact(core.Artifact artifact, String? platformName, BuildMode? mode) {
-    final Artifact hostArtifact = Artifact.values.firstWhere(
-      (Artifact e) => e.name == artifact.name,
-      orElse: () => throw ArgumentError.value(artifact.name, 'artifact', 'Unknown artifact name.'),
-    );
-    TargetPlatform? platform;
-    if (platformName != null) {
-      try {
-        platform = TargetPlatform.fromName(platformName);
-      } on Exception {
-        throwToolExit('Invalid platform name "$platformName" for artifact "${artifact.name}".');
-      }
-    }
-
+    final Artifact hostArtifact = _resolveArtifact(artifact);
+    final TargetPlatform? platform = _resolveArtifactPlatform(platformName, artifact);
     final String path = artifacts.getArtifactPath(
       hostArtifact,
       platform: platform ?? targetPlatform,
@@ -155,12 +174,34 @@ class ArtifactResolver implements core.SourceVisitor {
 
   @override
   void visitHostArtifact(core.HostArtifact artifact) {
-    final HostArtifact hostArtifact = HostArtifact.values.firstWhere(
-      (HostArtifact e) => e.name == artifact.name,
-      orElse: () =>
-          throw ArgumentError.value(artifact.name, 'artifact', 'Unknown host artifact name.'),
-    );
+    final HostArtifact hostArtifact = _resolveHostArtifact(artifact);
     final String path = artifacts.getHostArtifact(hostArtifact).path;
     resolvedArtifacts[artifact.name] = path;
   }
+}
+
+Artifact _resolveArtifact(core.Artifact artifact) {
+  return Artifact.values.firstWhere(
+    (Artifact e) => e.name == artifact.name,
+    orElse: () => throw ArgumentError.value(artifact.name, 'artifact', 'Unknown artifact name.'),
+  );
+}
+
+TargetPlatform? _resolveArtifactPlatform(String? platformName, core.Artifact artifact) {
+  if (platformName == null) {
+    return null;
+  }
+  try {
+    return TargetPlatform.fromName(platformName);
+  } on Exception {
+    throwToolExit('Invalid platform name "$platformName" for artifact "${artifact.name}".');
+  }
+}
+
+HostArtifact _resolveHostArtifact(core.HostArtifact artifact) {
+  return HostArtifact.values.firstWhere(
+    (HostArtifact e) => e.name == artifact.name,
+    orElse: () =>
+        throw ArgumentError.value(artifact.name, 'artifact', 'Unknown host artifact name.'),
+  );
 }

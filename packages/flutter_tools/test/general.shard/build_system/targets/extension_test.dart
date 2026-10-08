@@ -8,13 +8,13 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart' hide Source;
 import 'package:flutter_tools/src/build_system/targets/extension.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' as core;
 import 'package:flutter_tools_core/flutter_tools_core.dart'
-    hide Artifact, BuildMode, HostArtifact, Source, Target;
+    hide Artifact, BuildMode, HostArtifact, Target;
 import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
