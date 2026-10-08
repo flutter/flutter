@@ -166,4 +166,54 @@ void AndroidExternalViewEmbedderWrapper::Teardown() {
   }
 }
 
+// The hooks below are only meaningful for HCPP; the non-HCPP embedder
+// historically ignored them (base class no-ops).
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedderWrapper::PushFilterToVisitedPlatformViews(
+    const std::shared_ptr<DlImageFilter>& filter,
+    const DlRect& filter_rect) {
+  EnsureInitialized();
+  if (hcpp_view_embedder_) {
+    hcpp_view_embedder_->PushFilterToVisitedPlatformViews(filter, filter_rect);
+  }
+}
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedderWrapper::PushClipRectToVisitedPlatformViews(
+    const DlRect& clip_rect) {
+  EnsureInitialized();
+  if (hcpp_view_embedder_) {
+    hcpp_view_embedder_->PushClipRectToVisitedPlatformViews(clip_rect);
+  }
+}
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedderWrapper::PushClipRRectToVisitedPlatformViews(
+    const DlRoundRect& clip_rrect) {
+  EnsureInitialized();
+  if (hcpp_view_embedder_) {
+    hcpp_view_embedder_->PushClipRRectToVisitedPlatformViews(clip_rrect);
+  }
+}
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedderWrapper::
+    PushClipRSuperellipseToVisitedPlatformViews(
+        const DlRoundSuperellipse& clip_rse) {
+  EnsureInitialized();
+  if (hcpp_view_embedder_) {
+    hcpp_view_embedder_->PushClipRSuperellipseToVisitedPlatformViews(clip_rse);
+  }
+}
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedderWrapper::PushClipPathToVisitedPlatformViews(
+    const DlPath& clip_path) {
+  EnsureInitialized();
+  if (hcpp_view_embedder_) {
+    hcpp_view_embedder_->PushClipPathToVisitedPlatformViews(clip_path);
+  }
+}
+
 }  // namespace flutter

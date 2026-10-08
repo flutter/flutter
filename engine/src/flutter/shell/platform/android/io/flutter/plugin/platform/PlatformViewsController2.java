@@ -24,6 +24,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,6 +45,7 @@ import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.view.AccessibilityBridge;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -815,6 +817,191 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       overlayerSurface.release();
       overlayerSurface = null;
       overlaySurfaceControl = null;
+    }
+    releaseBackdropBlurLayers();
+  }
+
+  // ----- PROTOTYPE: native backdrop blur for HCPP platform views -----
+  //
+  // Under HCPP the platform view's pixels never reach Flutter, so a BackdropFilter blur drawn by
+  // Flutter cannot include them. Instead, the engine reports blurs that cover platform views, and we
+  // ask SurfaceFlinger to do the blur: one buffer-less layer per blur, placed above the window
+  // content (and therefore the platform views) and below the Flutter overlay (which holds the
+  // filter's children), with a background blur radius. SurfaceFlinger blurs the real composite, so
+  // there is no seam between platform view and Flutter content.
+  //
+  // The per-layer background blur API on SurfaceControl.Transaction is hidden, so this uses
+  // reflection and requires hidden API enforcement to be relaxed (prototype only).
+
+  private static final String BLUR_TAG = "HcppBackdropBlur";
+  // Z order of blur layers relative to the root surface control. The overlay is at 1000.
+  private static final int BACKDROP_BLUR_LAYER_Z = 999;
+  private static final int BLUR_FIELDS = 6;
+
+  private final ArrayList<SurfaceControl> backdropBlurLayers = new ArrayList<>();
+  private int visibleBackdropBlurLayers = 0;
+  private boolean backdropBlurReflectionResolved = false;
+  private Method setBackgroundBlurRadiusMethod;
+  private Method setCornerRadiusMethod;
+  private boolean loggedBackdropBlurUnavailable = false;
+
+  /**
+   * Applies this frame's backdrop blurs. Each blur is [left, top, right, bottom, sigma,
+   * cornerRadius] in physical pixels.
+   */
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  public void onBackdropBlurs(@NonNull float[] blurs) {
+    int count = blurs.length / BLUR_FIELDS;
+    if (count > 0 && !isBackdropBlurAvailable()) {
+      count = 0;
+    }
+
+    final SurfaceControl.Transaction tx = count > 0 || visibleBackdropBlurLayers > 0
+        ? platformTransaction()
+        : null;
+    int applied = 0;
+    for (int i = 0; i < count; i++) {
+      final SurfaceControl layer = obtainBackdropBlurLayer(i);
+      if (layer == null) {
+        break;
+      }
+      final int base = i * BLUR_FIELDS;
+      final Rect crop =
+          new Rect(
+              Math.round(blurs[base]),
+              Math.round(blurs[base + 1]),
+              Math.round(blurs[base + 2]),
+              Math.round(blurs[base + 3]));
+      final float sigma = blurs[base + 4];
+      final float corner = blurs[base + 5];
+      tx.setPosition(layer, 0, 0);
+      tx.setCrop(layer, crop);
+      tx.setVisibility(layer, true);
+      invokeQuietly(setBackgroundBlurRadiusMethod, tx, layer, sigmaToBlurRadius(sigma));
+      invokeQuietly(setCornerRadiusMethod, tx, layer, corner);
+      applied++;
+    }
+    for (int i = applied; i < visibleBackdropBlurLayers && i < backdropBlurLayers.size(); i++) {
+      tx.setVisibility(backdropBlurLayers.get(i), false);
+    }
+    visibleBackdropBlurLayers = applied;
+  }
+
+  /**
+   * Converts a Gaussian sigma to a SurfaceFlinger background blur radius. SurfaceFlinger's radius
+   * is not a sigma; the default scale is tuned by eye against Flutter's own blur and can be
+   * overridden with {@code adb shell setprop debug.flutter.blur_scale <float>}.
+   */
+  private static int sigmaToBlurRadius(float sigma) {
+    float scale = 2.0f;
+    try {
+      final Class<?> props = Class.forName("android.os.SystemProperties");
+      final String value =
+          (String) props.getMethod("get", String.class).invoke(null, "debug.flutter.blur_scale");
+      if (value != null && !value.isEmpty()) {
+        scale = Float.parseFloat(value);
+      }
+    } catch (Exception ignored) {
+      // Keep the default.
+    }
+    return Math.max(0, Math.round(sigma * scale));
+  }
+
+  @RequiresApi(API_LEVELS.API_34)
+  private boolean isBackdropBlurAvailable() {
+    if (!backdropBlurReflectionResolved) {
+      backdropBlurReflectionResolved = true;
+      try {
+        setBackgroundBlurRadiusMethod =
+            SurfaceControl.Transaction.class.getMethod(
+                "setBackgroundBlurRadius", SurfaceControl.class, int.class);
+        setCornerRadiusMethod =
+            SurfaceControl.Transaction.class.getMethod(
+                "setCornerRadius", SurfaceControl.class, float.class);
+      } catch (Exception e) {
+        Log.w(BLUR_TAG, "SurfaceControl background blur API unavailable: " + e);
+      }
+    }
+    String reason = null;
+    if (setBackgroundBlurRadiusMethod == null) {
+      reason = "the SurfaceControl blur API is not accessible";
+    } else if (flutterView == null || flutterView.getRootSurfaceControl() == null) {
+      reason = "the FlutterView is not attached";
+    } else {
+      final WindowManager wm = flutterView.getContext().getSystemService(WindowManager.class);
+      if (wm == null || !wm.isCrossWindowBlurEnabled()) {
+        reason = "cross-window blur is disabled on this device";
+      }
+    }
+    if (reason != null) {
+      if (!loggedBackdropBlurUnavailable) {
+        Log.w(
+            BLUR_TAG,
+            "A BackdropFilter blur covers a platform view, but "
+                + reason
+                + ". The platform view will not be blurred. Use a texture-based platform view"
+                + " mode if this effect is required.");
+        loggedBackdropBlurUnavailable = true;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  @Nullable
+  @RequiresApi(API_LEVELS.API_34)
+  private SurfaceControl obtainBackdropBlurLayer(int index) {
+    if (index < backdropBlurLayers.size()) {
+      return backdropBlurLayers.get(index);
+    }
+    final AttachedSurfaceControl root = flutterView.getRootSurfaceControl();
+    if (root == null) {
+      return null;
+    }
+    final SurfaceControl layer =
+        new SurfaceControl.Builder()
+            .setName("Flutter Backdrop Blur " + index)
+            .setHidden(true)
+            .build();
+    final SurfaceControl.Transaction tx = root.buildReparentTransaction(layer);
+    if (tx == null) {
+      layer.release();
+      return null;
+    }
+    tx.setLayer(layer, BACKDROP_BLUR_LAYER_Z);
+    tx.apply();
+    backdropBlurLayers.add(layer);
+    return layer;
+  }
+
+  private void releaseBackdropBlurLayers() {
+    if (backdropBlurLayers.isEmpty() || Build.VERSION.SDK_INT < API_LEVELS.API_29) {
+      return;
+    }
+    final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    for (SurfaceControl layer : backdropBlurLayers) {
+      if (layer.isValid()) {
+        tx.reparent(layer, null);
+      }
+    }
+    tx.apply();
+    for (SurfaceControl layer : backdropBlurLayers) {
+      layer.release();
+    }
+    backdropBlurLayers.clear();
+    visibleBackdropBlurLayers = 0;
+  }
+
+  private static void invokeQuietly(
+      @Nullable Method method, SurfaceControl.Transaction tx, SurfaceControl layer, Object arg) {
+    if (method == null) {
+      return;
+    }
+    try {
+      method.invoke(tx, layer, arg);
+    } catch (Exception e) {
+      Log.w(BLUR_TAG, "Failed to invoke " + method.getName() + ": " + e);
     }
   }
 

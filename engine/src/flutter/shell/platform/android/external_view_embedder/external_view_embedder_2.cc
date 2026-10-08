@@ -4,10 +4,14 @@
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "display_list/dl_color.h"
 #include "flow/view_slicer.h"
+#include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_color_filter_image_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_compose_image_filter.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/make_copyable.h"
@@ -105,6 +109,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
           for (int64_t view_id : views_visible_last_frame) {
             jni_facade->hidePlatformView2(view_id);
           }
+          // PROTOTYPE: no platform views, so no native backdrop blurs.
+          jni_facade->onBackdropBlurs2({});
 
           jni_facade->swapTransaction();
           jni_facade->onEndFrame2();
@@ -119,10 +125,11 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   }
 
   std::unordered_map<int64_t, DlRect> overlay_layers =
-      SliceViews(frame->Canvas(),     //
-                 composition_order_,  //
-                 slices_,             //
-                 view_rects           //
+      SliceViews(frame->Canvas(),          //
+                 composition_order_,       //
+                 slices_,                  //
+                 view_rects,               //
+                 backdrop_overlay_rects_   //
       );
 
   // If there is no overlay Surface, initialize one on the platform thread. This
@@ -193,6 +200,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
        slices = std::move(slices_),
        views_visible_last_frame = views_visible_last_frame_,
+       backdrop_blurs = backdrop_blurs_,
        overlay_layer_has_content_this_frame_]() mutable -> void {
         if (overlay_layer_has_content_this_frame_) {
           ShowOverlayLayerIfNeeded();
@@ -224,6 +232,10 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
           jni_facade->hidePlatformView2(view_id);
         }
 
+        // PROTOTYPE: update the native blur layers in the same platform
+        // transaction as the platform view positions for this frame.
+        jni_facade->onBackdropBlurs2(backdrop_blurs);
+
         jni_facade->swapTransaction();
         jni_facade_->onEndFrame2();
       }));
@@ -252,6 +264,127 @@ DlCanvas* AndroidExternalViewEmbedder2::GetRootCanvas() {
 void AndroidExternalViewEmbedder2::Reset() {
   composition_order_.clear();
   slices_.clear();
+  backdrop_blurs_.clear();
+  backdrop_overlay_rects_.clear();
+  pending_backdrop_clip_.reset();
+}
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedder2::PushClipRectToVisitedPlatformViews(
+    const DlRect& clip_rect) {
+  pending_backdrop_clip_ = {clip_rect.GetWidth(), clip_rect.GetHeight(), 0};
+}
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedder2::PushClipRRectToVisitedPlatformViews(
+    const DlRoundRect& clip_rrect) {
+  const DlRect& bounds = clip_rrect.GetBounds();
+  pending_backdrop_clip_ = {bounds.GetWidth(), bounds.GetHeight(),
+                            clip_rrect.GetRadii().top_left.width};
+}
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedder2::PushClipRSuperellipseToVisitedPlatformViews(
+    const DlRoundSuperellipse& clip_rse) {
+  // SurfaceFlinger only supports circular corners; approximate.
+  const DlRect& bounds = clip_rse.GetBounds();
+  pending_backdrop_clip_ = {bounds.GetWidth(), bounds.GetHeight(),
+                            clip_rse.GetRadii().top_left.width};
+}
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedder2::PushClipPathToVisitedPlatformViews(
+    const DlPath& clip_path) {
+  const DlRect bounds = clip_path.GetBounds();
+  pending_backdrop_clip_ = {bounds.GetWidth(), bounds.GetHeight(), 0};
+}
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedder2::PushFilterToVisitedPlatformViews(
+    const std::shared_ptr<DlImageFilter>& filter,
+    const DlRect& filter_rect) {
+  std::optional<std::array<DlScalar, 3>> clip = pending_backdrop_clip_;
+  pending_backdrop_clip_.reset();
+  if (!filter || composition_order_.empty()) {
+    return;
+  }
+
+  const std::optional<DlRect> rect =
+      filter_rect.Intersection(DlRect::MakeSize(frame_size_));
+  if (!rect.has_value() || rect->IsEmpty()) {
+    return;
+  }
+
+  // Only filters that cover a platform view need native help; Flutter already
+  // filters its own content correctly.
+  bool covers_platform_view = false;
+  for (int64_t view_id : composition_order_) {
+    if (GetViewRect(view_id, view_params_).IntersectsWithRect(rect.value())) {
+      covers_platform_view = true;
+      break;
+    }
+  }
+  if (!covers_platform_view) {
+    return;
+  }
+
+  const DlBlurImageFilter* blur = filter->asBlur();
+  // Cupertino surfaces (dialogs, bars, sheets) use compose(blur, saturation
+  // color filter). SurfaceFlinger can only blur, so approximate by applying
+  // the blur and dropping the color filter.
+  if (blur == nullptr && filter->asCompose() != nullptr) {
+    const DlComposeImageFilter* compose = filter->asCompose();
+    const auto& inner = compose->inner();
+    const auto& outer = compose->outer();
+    if (inner && outer) {
+      if (inner->asBlur() && outer->asColorFilter()) {
+        blur = inner->asBlur();
+      } else if (outer->asBlur() && inner->asColorFilter()) {
+        blur = outer->asBlur();
+      }
+    }
+  }
+  if (blur == nullptr) {
+    if (!logged_unsupported_backdrop_filter_) {
+      FML_LOG(WARNING)
+          << "A BackdropFilter with a non-blur filter covers a platform view. "
+             "Hybrid Composition++ can only apply backdrop blurs to platform "
+             "views; the filter will not affect the platform view. Use a "
+             "texture-based platform view mode if this effect is required.";
+      logged_unsupported_backdrop_filter_ = true;
+    }
+    return;
+  }
+
+  const float dpr = static_cast<float>(device_pixel_ratio_);
+  const float sigma = std::max(blur->sigma_x(), blur->sigma_y()) * dpr;
+
+  // Best effort: use the most recent clip's corner radius if it is the clip
+  // that bounds this filter (same size, once scaled to device pixels).
+  float corner = 0;
+  if (clip.has_value()) {
+    const float clip_w = (*clip)[0] * dpr;
+    const float clip_h = (*clip)[1] * dpr;
+    if (std::abs(clip_w - rect->GetWidth()) <= 2.0f &&
+        std::abs(clip_h - rect->GetHeight()) <= 2.0f) {
+      corner = (*clip)[2] * dpr;
+    }
+  }
+
+  backdrop_blurs_.insert(backdrop_blurs_.end(),
+                         {rect->GetLeft(), rect->GetTop(), rect->GetRight(),
+                          rect->GetBottom(), sigma, corner});
+
+  // Everything painted after the most recent platform view inside the filter
+  // region (including the filter's own children) must draw above the native
+  // blur layer, so force it into the overlay.
+  const int64_t owner = composition_order_.back();
+  auto it = backdrop_overlay_rects_.find(owner);
+  if (it == backdrop_overlay_rects_.end()) {
+    backdrop_overlay_rects_[owner] = rect.value();
+  } else {
+    it->second = it->second.Union(rect.value());
+  }
 }
 
 // |ExternalViewEmbedder|

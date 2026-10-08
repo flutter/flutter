@@ -251,6 +251,11 @@ class PlatformViewAndroidJNI {
 
   virtual void hidePlatformView2(int32_t view_id) = 0;
 
+  // PROTOTYPE: backdrop blurs covering platform views this frame, flattened as
+  // [left, top, right, bottom, sigma, corner_radius] per blur, in device
+  // pixels. An empty vector hides all native blur layers.
+  virtual void onBackdropBlurs2(const std::vector<float>& blurs) {}
+
   virtual void showOverlaySurface2() = 0;
 
   virtual void hideOverlaySurface2() = 0;
