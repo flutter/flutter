@@ -181,7 +181,8 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            mdnsClientFactory: () =>
+                FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[],
               <String, List<SrvResourceRecord>>{},
@@ -253,7 +254,8 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            mdnsClientFactory: () =>
+                FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[],
               <String, List<SrvResourceRecord>>{},
@@ -338,7 +340,8 @@ void main() {
           FileSystem: () => testFileSystem,
           Logger: () => logger,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            mdnsClientFactory: () =>
+                FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[],
               <String, List<SrvResourceRecord>>{},
@@ -405,7 +408,8 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            mdnsClientFactory: () =>
+                FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'bar')],
               <String, List<SrvResourceRecord>>{
@@ -477,7 +481,8 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            mdnsClientFactory: () =>
+                FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'srv-foo')],
               <String, List<SrvResourceRecord>>{
@@ -558,7 +563,8 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            mdnsClientFactory: () =>
+                FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[
                 PtrResourceRecord('bar', future, domainName: 'srv-bar'),
@@ -652,7 +658,8 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            mdnsClientFactory: () =>
+                FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[
                 PtrResourceRecord('bar', future, domainName: 'srv-bar'),
@@ -934,7 +941,8 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            mdnsClientFactory: () =>
+                FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[],
               <String, List<SrvResourceRecord>>{},
