@@ -1619,7 +1619,7 @@ abstract class DefaultTextEditingStrategy
     // editing element is part of a live form, keep that form. Otherwise
     // [disable] would remove the element from the form instead of letting the
     // form go dormant, and the next connection could not reuse it.
-    if (isEnabled && _appendedToForm && config.autofillGroup != null) {
+    if (isEnabled && config.autofillGroup != null) {
       final EngineAutofillForm? activeGroup = inputConfiguration.autofillGroup;
       if (activeGroup?.formElement != null) {
         config = config.copyWith(autofillGroup: activeGroup);
