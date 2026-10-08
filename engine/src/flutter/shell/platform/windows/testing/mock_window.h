@@ -111,6 +111,8 @@ class MockWindow : public FlutterWindow {
               (HWND, UINT, WPARAM, LPARAM),
               (override));
 
+  MOCK_METHOD(BOOL, Win32PeekMessage, (LPMSG, UINT, UINT, UINT), (override));
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindow);
 };
