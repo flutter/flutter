@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
@@ -15,6 +16,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -24,16 +26,14 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
-import '../experimental/extension_arg_parser.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
+import 'flutter_command.dart';
 import 'local_engine.dart';
-import 'options/common_options.dart';
-import 'options/option_descriptor.dart';
 
 /// Common flutter command line options.
 abstract final class FlutterGlobalOptions {
@@ -360,7 +360,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   /// Traverses [args] to identify the target command being invoked and triggers
-  /// dynamic option initialization (via [ExtensionArgParserMixin.initializeDynamicOptions])
+  /// dynamic option initialization (via [FlutterCommand.initializeDynamicOptions])
   /// before argument parsing begins.
   Future<void> _initializeDynamicOptions(Iterable<String> args) async {
     if (_featureFlags?.isToolExtensionsEnabled != true) {
@@ -378,8 +378,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
       Command<void>? current = command;
       while (current != null) {
-        if (current case final ExtensionArgParserMixin dynamicCommand) {
-          await dynamicCommand.initializeDynamicOptions();
+        if (current case final FlutterCommand flutterCommand) {
+          await flutterCommand.initializeDynamicOptions();
         }
         current = current.parent;
       }
@@ -560,7 +560,21 @@ class FlutterCommandRunner extends CommandRunner<void> {
       packagePath: topLevelResults[FlutterGlobalOptions.kPackagesOption] as String?,
     );
     if (engineBuildPaths != null) {
-      final Artifacts localArtifacts = Artifacts.getLocalEngine(engineBuildPaths);
+      final ToolContext(
+        :Cache cache,
+        :FileSystem fs,
+        :OperatingSystemUtils os,
+        :Platform platform,
+        :ProcessManager processManager,
+      ) = _toolContext;
+      final Artifacts localArtifacts = Artifacts.getLocalEngine(
+        engineBuildPaths,
+        cache: cache,
+        fileSystem: fs,
+        operatingSystemUtils: os,
+        platform: platform,
+        processManager: processManager,
+      );
       contextOverrides.addAll(<Type, Object?>{Artifacts: localArtifacts});
       // Update the artifacts the commands were created with.
       if (_toolContext.artifacts case final DeferredArtifacts artifacts) {

@@ -1674,28 +1674,16 @@ Future<String?> getMissingPackageHintForPlatform(
   required FileSystem fileSystem,
   required FlutterProjectFactory projectFactory,
 }) async {
-  switch (platform) {
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
+  switch (platform.os) {
+    case .android:
       final FlutterProject project = projectFactory.fromDirectory(fileSystem.currentDirectory);
       final String manifestPath = fileSystem.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
-    case TargetPlatform.ios:
+    case .ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
-    case TargetPlatform.android:
-    case TargetPlatform.darwin:
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
-    case TargetPlatform.linux_arm64:
-    case TargetPlatform.linux_riscv64:
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.tester:
-    case TargetPlatform.web_javascript:
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_arm64:
+    case .macos || .fuchsia || .linux || .tester || .web || .windows:
       return null;
-    case TargetPlatform.unsupported:
+    case .unsupported:
       TargetPlatform.throwUnsupportedTarget();
   }
 }
