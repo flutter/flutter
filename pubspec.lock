@@ -262,10 +262,10 @@ packages:
     dependency: transitive
     description:
       name: dap_adapters
-      sha256: a536d0bf43bc7b7859a3d18c0c3fdc134fb21e714a8ce3a5f1ae71b5678fb5d7
+      sha256: "6860f813e4ee81d9733631d28c8a93e333150d57caa06a668dfb7751d68cc889"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "1.1.0"
   dart_service_protocol_shared:
     dependency: transitive
     description:
@@ -606,14 +606,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  isolate:
-    dependency: "direct main"
-    description:
-      name: isolate
-      sha256: "3554ab10fdeec965d27e0074c913ccb2229887633da080d2b35a6322da14938b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.1"
   jni:
     dependency: transitive
     description:
