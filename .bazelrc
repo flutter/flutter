@@ -1,0 +1,18 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Hand-maintained Bazel settings. Build configurations mirroring the
+# `tools/gn` flag table will be generated into a separate, imported file once
+# the Bazel build produces artifacts; keep this file to repository-wide policy.
+
+# Keep the convenience symlinks (bazel-bin, bazel-out, bazel-testlogs, ...)
+# under the GN output root rather than the repository root, so running Bazel
+# leaves no trace outside directories that are already ignored.
+common --symlink_prefix=engine/src/out/bazel-
+
+# Actions must not inherit the invoking user's environment.
+build --incompatible_strict_action_env
+
+# Personal overrides (ignored by git).
+try-import %workspace%/user.bazelrc
