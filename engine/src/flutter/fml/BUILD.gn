@@ -385,9 +385,8 @@ if (enable_unittests) {
     deps = [
       ":fml_fixtures",
       "//flutter/fml",
-      "//flutter/runtime",
-      "//flutter/runtime:libdart",
-      "//flutter/testing",
+      "//flutter/testing:run_all_unittests",
+      "//flutter/testing:testing_core",
     ]
 
     if (is_fuchsia) {

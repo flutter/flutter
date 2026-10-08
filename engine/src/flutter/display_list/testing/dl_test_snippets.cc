@@ -11,6 +11,7 @@
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/impeller/display_list/dl_text_impeller.h"  // nogncheck
 #include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"  // nogncheck
+#include "flutter/testing/sk_data_fixtures.h"
 #endif
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkTypeface.h"

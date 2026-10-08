@@ -22,6 +22,7 @@
 #include "flutter/testing/elf_loader.h"
 #include "flutter/testing/fixture_test.h"
 #include "flutter/testing/post_task_sync.h"
+#include "flutter/testing/sk_data_fixtures.h"
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "flutter/testing/test_gl_surface.h"
 #include "flutter/testing/testing.h"
