@@ -3213,7 +3213,6 @@ targets:
       task_name: android_engine_flags_release_test
 
   - name: Linux_android_emu android_intent_parsing_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
