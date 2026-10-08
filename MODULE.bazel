@@ -21,5 +21,9 @@ module(
     bazel_compatibility = [">=8.0.0"],
 )
 
-bazel_dep(name = "bazel_skylib", version = "1.9.2")
-bazel_dep(name = "platforms", version = "1.1.0")
+# `.bazelversion` and the versions below track Skia's pins
+# (`engine/src/flutter/third_party/skia/{.bazelversion,MODULE.bazel}`) so that
+# the two workspaces agree once Skia is consumed as a Bazel module. Bump them
+# together with Skia rolls rather than independently.
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "platforms", version = "1.0.0")
