@@ -90,6 +90,19 @@ object FlutterPluginUtils {
         "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors"
 
     /**
+     * The URL for documentation instructing add-to-app developers how to opt their Android host app out of
+     * AGP 9 defaults.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_FOR_ADD_TO_APP_HOST =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#migrate-your-add-to-app-android-host-app"
+
+    /** The AGP Gradle property that enables the new AGP DSL. Defaults to `true` starting in AGP 9. */
+    private const val ANDROID_NEW_DSL_PROPERTY = "android.newDsl"
+
+    /** The AGP Gradle property that enables built-in Kotlin. Defaults to `true` starting in AGP 9. */
+    private const val ANDROID_BUILT_IN_KOTLIN_PROPERTY = "android.builtInKotlin"
+
+    /**
      * Matches the AGP application plugin declaration in Kotlin DSL (`build.gradle.kts`).
      * Targets `id("com.android.application")` or `alias(libs.plugins.android.application)`
      * within a `plugins { ... }` block.
@@ -595,7 +608,9 @@ object FlutterPluginUtils {
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
         val pluginsWithKGPAppliedList = mutableListOf<String>()
         val agpVersion = VersionFetcher.getAGPVersion(project)
-        var shouldLogForApp = false
+        // The app subproject that applies KGP, as (name, build file path). This isn't always
+        // [project]: in add-to-app builds, [project] is the Flutter module's `:flutter` project.
+        var appApplyingKgp: Pair<String, String>? = null
         project.rootProject.subprojects {
             val pluginState = getSubprojectPluginState(this) ?: return@subprojects
 
@@ -618,7 +633,7 @@ object FlutterPluginUtils {
 
             // Apply AGP exists and Apply KGP also exists in build.gradle
             if (pluginState.hasAppPlugin && pluginState.hasKgpPlugin) {
-                shouldLogForApp = true
+                appApplyingKgp = Pair(name, buildFile.absolutePath)
             }
 
             if (pluginState.hasLibPlugin && pluginState.hasKgpPlugin) {
@@ -627,7 +642,7 @@ object FlutterPluginUtils {
         }
 
         // If no imperative apply KGP declarations were found, there is nothing to log.
-        if (!shouldLogForApp && pluginsWithKGPAppliedList.isEmpty()) {
+        if (appApplyingKgp == null && pluginsWithKGPAppliedList.isEmpty()) {
             return
         }
 
@@ -635,10 +650,10 @@ object FlutterPluginUtils {
             if (agpVersion == null || agpVersion.major < 9) {
                 return@projectsEvaluated
             }
-            if (shouldLogForApp) {
+            appApplyingKgp?.let { (appName, appBuildFilePath) ->
                 project.logger.error(
                     """
-                    WARNING: Your Android app project: ${project.name} located at: ${project.buildFile.absolutePath}
+                    WARNING: Your Android app project: $appName located at: $appBuildFilePath
                     applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
                     Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
 
@@ -753,6 +768,121 @@ object FlutterPluginUtils {
             .orNull
             ?.toBoolean() ?: true
     }
+
+    /**
+     * Fails the build with an actionable message when an add-to-app Android host app built with
+     * AGP 9+ either has not opted out of `android.newDsl`, or has built-in Kotlin enabled while the
+     * host app or a Flutter plugin still applies the Kotlin Gradle Plugin (KGP).
+     *
+     * The Flutter tool migrators (`DisableBuiltInKotlinMigration` / `DisableNewDslMigration`) can't
+     * run for add-to-app hosts because the host is a native Android project that isn't built by the
+     * Flutter tool, so the developer has to fix the configuration by hand.
+     *
+     * This must run before the Flutter Gradle Plugin touches any old AGP DSL types. Otherwise,
+     * `android.newDsl=true` fails first with an error that doesn't explain the cause.
+     *
+     * Does nothing for normal Flutter apps, `flutter build aar`, or AGP versions below 9.
+     */
+    @JvmStatic
+    @JvmName("checkAddToAppHostAgp9Config")
+    internal fun checkAddToAppHostAgp9Config(project: Project) {
+        // Normal Flutter apps are opted out by the Flutter tool migrators.
+        if (isBuiltAsApp(project)) return
+        if (!isAddToAppHostBuild(project)) return
+        val agpVersion = VersionFetcher.getAGPVersion(project) ?: return
+        if (agpVersion.major < 9) return
+
+        // TODO(jesswon): Remove the newDsl half of this check once the Flutter Gradle Plugin
+        //  supports `android.newDsl=true`. https://github.com/flutter/flutter/issues/180137
+        val newDslNotOptedOut = !isGradlePropertyExplicitlyFalse(project, ANDROID_NEW_DSL_PROPERTY)
+
+        // Built-in Kotlin on its own is supported. It only breaks the build when something in the
+        // host build still applies KGP. The error doesn't list those projects: once the developer
+        // opts out, detectApplyingKotlinGradlePlugin warns about each of them.
+        val kgpStillApplied =
+            isBuiltInKotlinEnabled(project, agpVersion) &&
+                project.rootProject.subprojects.any { getSubprojectPluginState(it)?.hasKgpPlugin == true }
+
+        if (!newDslNotOptedOut && !kgpStillApplied) return
+
+        throw GradleException(
+            addToAppHostAgp9ErrorMessage(
+                hostGradlePropertiesPath = project.rootProject.file("gradle.properties").absolutePath,
+                agpVersion = agpVersion,
+                newDslNotOptedOut = newDslNotOptedOut,
+                kgpStillApplied = kgpStillApplied
+            )
+        )
+    }
+
+    /**
+     * Returns `true` when the Gradle root build isn't the Flutter module's own `.android/` directory.
+     *
+     * Expects [project] to be the Flutter module library project (`:flutter`), which always lives at
+     * `<module>/.android/Flutter`. With `flutter build aar` the Gradle root is `<module>/.android`. In
+     * add-to-app source inclusion the Gradle root is the native host app's directory. Comparing
+     * directories instead of project names keeps this working when the host renames its app project.
+     */
+    internal fun isAddToAppHostBuild(project: Project): Boolean {
+        val moduleAndroidDir = project.projectDir.parentFile ?: return false
+        return project.rootProject.projectDir.canonicalFile != moduleAndroidDir.canonicalFile
+    }
+
+    /**
+     * Returns `true` only when the Gradle property [name] is set to `false`. Parsing ignores case and
+     * surrounding whitespace.
+     */
+    internal fun isGradlePropertyExplicitlyFalse(
+        project: Project,
+        name: String
+    ): Boolean =
+        project.providers
+            .gradleProperty(name)
+            .orNull
+            ?.trim()
+            .equals("false", ignoreCase = true)
+
+    /**
+     * Builds the error shown by [checkAddToAppHostAgp9Config]. Each section only appears when its
+     * failure condition is true, so the developer can fix everything in a single pass.
+     */
+    internal fun addToAppHostAgp9ErrorMessage(
+        hostGradlePropertiesPath: String,
+        agpVersion: AndroidPluginVersion,
+        newDslNotOptedOut: Boolean,
+        kgpStillApplied: Boolean
+    ): String =
+        buildString {
+            val version = "${agpVersion.major}.${agpVersion.minor}.${agpVersion.micro}"
+            appendLine("Your Android host app uses Android Gradle Plugin (AGP) $version, and its current")
+            appendLine("configuration isn't compatible with the included Flutter module.")
+            appendLine()
+            appendLine("Flutter can't fix this for you automatically because your host app is a native")
+            appendLine("Android project that isn't built by the Flutter tool.")
+            if (newDslNotOptedOut) {
+                appendLine()
+                appendLine("- `$ANDROID_NEW_DSL_PROPERTY` is enabled (AGP 9 default). Flutter doesn't support the new")
+                appendLine("  AGP DSL yet. Add this line to your host app's gradle.properties file:")
+                appendLine()
+                appendLine("      $ANDROID_NEW_DSL_PROPERTY=false")
+            }
+            if (kgpStillApplied) {
+                appendLine()
+                appendLine("- Built-in Kotlin is enabled (AGP 9 default), but your host app or a Flutter")
+                appendLine("  plugin still applies the Kotlin Gradle Plugin (KGP). To unblock your build,")
+                appendLine("  add this line to your host app's gradle.properties file:")
+                appendLine()
+                appendLine("      $ANDROID_BUILT_IN_KOTLIN_PROPERTY=false")
+                appendLine()
+                appendLine("  When you rebuild, Flutter shows a warning for each project that still applies")
+                appendLine("  KGP. After they're all migrated to built-in Kotlin, remove the flag.")
+            }
+            appendLine()
+            appendLine("Host app gradle.properties: $hostGradlePropertiesPath")
+            appendLine()
+            appendLine("Then sync/rebuild your project. For more details, see:")
+            append(BUILT_IN_KOTLIN_DOCS_FOR_ADD_TO_APP_HOST)
+        }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     @JvmStatic

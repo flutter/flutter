@@ -36,9 +36,58 @@ class ModuleTest {
   ModuleTest({this.gradleVersion = '8.7'});
 
   static const String buildTarget = 'module-gradle';
+  static const String _newDslOptOut = 'android.newDsl=false';
+  static const String _builtInKotlinOptOut = 'android.builtInKotlin=false';
   final String gradleVersion;
   final StringBuffer stdout = StringBuffer();
   final StringBuffer stderr = StringBuffer();
+
+  /// Builds the debug host APK and expects the Flutter Gradle Plugin's add-to-app AGP 9 error.
+  ///
+  /// Returns a failed [TaskResult] if the build succeeds, if its output is missing any string in
+  /// [expected], or if it contains any string in [unexpected]. Returns null otherwise.
+  Future<TaskResult?> _expectAddToAppAgp9Error(
+    Directory hostApp,
+    String javaHome, {
+    required List<String> expected,
+    List<String> unexpected = const <String>[],
+  }) async {
+    final buildOutput = StringBuffer();
+    final int exitCode = await inDirectory(hostApp, () {
+      return exec(
+        gradlewExecutable,
+        <String>['app:assembleDebug'],
+        environment: <String, String>{'JAVA_HOME': javaHome, 'FLUTTER_SUPPRESS_ANALYTICS': 'true'},
+        canFail: true,
+        output: buildOutput,
+        stderr: buildOutput,
+      );
+    });
+    final output = buildOutput.toString();
+    if (exitCode == 0) {
+      return TaskResult.failure(
+        'Expected the host app build to fail with the add-to-app AGP 9 error',
+      );
+    }
+    if (!output.contains("Flutter can't fix this for you automatically")) {
+      return TaskResult.failure(
+        'Expected the add-to-app AGP 9 error, but the build failed with:\n$output',
+      );
+    }
+    for (final s in expected) {
+      if (!output.contains(s)) {
+        return TaskResult.failure('Expected the add-to-app AGP 9 error to contain "$s":\n$output');
+      }
+    }
+    for (final s in unexpected) {
+      if (output.contains(s)) {
+        return TaskResult.failure(
+          'Expected the add-to-app AGP 9 error not to contain "$s":\n$output',
+        );
+      }
+    }
+    return null;
+  }
 
   Future<TaskResult> call() async {
     section('Running: $buildTarget-$gradleVersion');
@@ -199,12 +248,67 @@ class ModuleTest {
       section(propertyContent);
       await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
+      if (!Platform.isWindows) {
+        await exec('chmod', <String>['+x', path.join(hostApp.path, 'gradlew')]);
+      }
+
+      section('Check AGP 9 error when the host app does not opt out of newDsl');
+
+      final hostGradleProperties = File(path.join(hostApp.path, 'gradle.properties'));
+      final String originalGradleProperties = await hostGradleProperties.readAsString();
+      if (!originalGradleProperties.contains(_newDslOptOut)) {
+        return TaskResult.failure(
+          'Expected the host app gradle.properties to contain $_newDslOptOut',
+        );
+      }
+      await hostGradleProperties.writeAsString(
+        originalGradleProperties.replaceFirst(_newDslOptOut, ''),
+        flush: true,
+      );
+      TaskResult? failure = await _expectAddToAppAgp9Error(
+        hostApp,
+        javaHome,
+        expected: <String>[
+          '`android.newDsl` is enabled',
+          _newDslOptOut,
+          'Host app gradle.properties:',
+        ],
+        unexpected: <String>[_builtInKotlinOptOut],
+      );
+      await hostGradleProperties.writeAsString(originalGradleProperties, flush: true);
+      if (failure != null) {
+        return failure;
+      }
+
+      section('Check AGP 9 error when the host app applies the Kotlin Gradle Plugin');
+
+      final hostAppBuildFile = File(path.join(hostApp.path, 'app', 'build.gradle.kts'));
+      final String originalHostAppBuildFile = await hostAppBuildFile.readAsString();
+      final hostAppPluginsBlock = RegExp(r'plugins\s*\{\r?\n');
+      if (!hostAppPluginsBlock.hasMatch(originalHostAppBuildFile)) {
+        return TaskResult.failure('Expected the host app build.gradle.kts to have a plugins block');
+      }
+      await hostAppBuildFile.writeAsString(
+        originalHostAppBuildFile.replaceFirstMapped(
+          hostAppPluginsBlock,
+          (Match match) => '${match[0]}    id("org.jetbrains.kotlin.android")\n',
+        ),
+        flush: true,
+      );
+      failure = await _expectAddToAppAgp9Error(
+        hostApp,
+        javaHome,
+        expected: <String>['still applies the Kotlin Gradle Plugin (KGP)', _builtInKotlinOptOut],
+        unexpected: <String>['`android.newDsl` is enabled'],
+      );
+      await hostAppBuildFile.writeAsString(originalHostAppBuildFile, flush: true);
+      if (failure != null) {
+        return failure;
+      }
+
       section('Build debug host APK');
 
       await inDirectory(hostApp, () async {
-        if (!Platform.isWindows) {
-          await exec('chmod', <String>['+x', 'gradlew']);
-        }
         await exec(
           gradlewExecutable,
           <String>['app:assembleDebug'],

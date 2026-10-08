@@ -1650,6 +1650,52 @@ class FlutterPluginUtilsTest {
                     }
 
                     @Test
+                    fun `app warning names the subproject that applies KGP, not the add-to-app Flutter module project`(
+                        @TempDir tempDir: Path
+                    ) {
+                        val testProject =
+                            setupTest(
+                                tempDir = tempDir,
+                                agpVersion = templateAgpVersion,
+                                builtInKotlin = "false",
+                                appConfig =
+                                    SubprojectConfig(
+                                        "app",
+                                        declarativelyAppliedPlugins = listOf("com.android.application", "kotlin-android")
+                                    ),
+                                pluginConfigs =
+                                    listOf(
+                                        SubprojectConfig("plugin", declarativelyAppliedPlugins = listOf("com.android.library"))
+                                    )
+                            )
+                        // In add-to-app builds, the Flutter Gradle Plugin is applied to the Flutter
+                        // module's `:flutter` project instead of the host app.
+                        val flutterModuleBuildFile = tempDir.resolve("hello/.android/Flutter/build.gradle").toFile()
+                        val flutterModuleProject = mockk<Project>()
+                        every { flutterModuleProject.name } returns "flutter"
+                        every { flutterModuleProject.buildFile } returns flutterModuleBuildFile
+                        every { flutterModuleProject.logger } returns mockLogger
+                        every { flutterModuleProject.rootProject } returns rootProject
+                        every { flutterModuleProject.providers } answers { rootProject.providers }
+                        every { flutterModuleProject.gradle } returns mockGradle
+
+                        detectApplyingKotlinGradlePlugin(flutterModuleProject)
+                        testProject.projectsEvaluatedActionSlot.captured.execute(mockGradle)
+
+                        val appBuildFilePath = testProject.appProject.buildFile.absolutePath
+                        verify {
+                            mockLogger.error(
+                                match {
+                                    it.contains("WARNING: Your Android app project: app located at: $appBuildFilePath")
+                                }
+                            )
+                        }
+                        verify(exactly = 0) {
+                            mockLogger.error(match { it.contains(flutterModuleBuildFile.absolutePath) })
+                        }
+                    }
+
+                    @Test
                     fun `logs warning when KGP is only applied in one plugin`(
                         @TempDir tempDir: Path
                     ) {
@@ -2733,5 +2779,278 @@ class FlutterPluginUtilsTest {
         // explicitly disagrees with --no-enable-hcpp.
         verify(exactly = 1) { task.requestedEnableHcpp.set(false) }
         verify(exactly = 1) { task.explicitEnableHcpp.set(false) }
+    }
+
+    @Nested
+    inner class CheckAddToAppHostAgp9ConfigTests {
+        private val agp9 = AndroidPluginVersion(9, 3, 1)
+        private val agp8 = AndroidPluginVersion(8, 11, 1)
+        private val mockLogger = mockk<Logger>(relaxed = true)
+
+        @BeforeEach
+        fun setUp() {
+            mockkObject(VersionFetcher)
+        }
+
+        @AfterEach
+        fun tearDown() {
+            unmockkObject(VersionFetcher)
+        }
+
+        /** A mock host or plugin subproject whose build script declares [plugins]. */
+        private fun createSubproject(
+            projectDir: File,
+            path: String,
+            plugins: List<String>
+        ): Project {
+            val buildFile = File(projectDir, "build.gradle")
+            writeBuildFile(buildFile, declarativelyAppliedPlugins = plugins)
+            val subproject = mockk<Project>()
+            every { subproject.path } returns path
+            every { subproject.projectDir } returns projectDir
+            every { subproject.buildFile } returns buildFile
+            every { subproject.logger } returns mockLogger
+            return subproject
+        }
+
+        /**
+         * Sets up the Flutter module library project (`:flutter` at `hello/.android/Flutter`) inside a
+         * host build rooted at `hello_host_app/`, and returns it.
+         *
+         * @param isApp whether `com.android.application` is applied to the project.
+         * @param rootIsModuleAndroidDir whether the Gradle root is the module's own `.android/`
+         *        directory, as in `flutter build aar`.
+         * @param hostKgp whether the host `:app` build script declares KGP.
+         * @param pluginKgp whether the Flutter plugin subproject's build script declares KGP.
+         */
+        private fun setupFlutterModuleProject(
+            tempDir: Path,
+            agpVersion: AndroidPluginVersion?,
+            newDsl: String?,
+            builtInKotlin: String?,
+            hostKgp: Boolean = false,
+            pluginKgp: Boolean = false,
+            isApp: Boolean = false,
+            rootIsModuleAndroidDir: Boolean = false
+        ): Project {
+            every { VersionFetcher.getAGPVersion(any()) } returns agpVersion
+
+            val moduleAndroidDir = tempDir.resolve("hello").resolve(".android").toFile()
+            val flutterProjectDir = File(moduleAndroidDir, "Flutter").apply { mkdirs() }
+            val hostDir = tempDir.resolve("hello_host_app").toFile().apply { mkdirs() }
+            val rootDir = if (rootIsModuleAndroidDir) moduleAndroidDir else hostDir
+
+            val hostApp =
+                createSubproject(
+                    File(hostDir, "app"),
+                    ":app",
+                    listOf("com.android.application") + if (hostKgp) listOf("kotlin-android") else emptyList()
+                )
+            val plugin =
+                createSubproject(
+                    tempDir
+                        .resolve("pub_cache")
+                        .resolve("some_plugin")
+                        .resolve("android")
+                        .toFile(),
+                    ":some_plugin",
+                    listOf("com.android.library") + if (pluginKgp) listOf("kotlin-android") else emptyList()
+                )
+
+            val providers = mockk<ProviderFactory>()
+            mapOf("android.newDsl" to newDsl, "android.builtInKotlin" to builtInKotlin).forEach { (name, value) ->
+                val provider = mockk<Provider<String>>()
+                every { provider.orNull } returns value
+                every { providers.gradleProperty(name) } returns provider
+            }
+
+            val rootProject = mockk<Project>()
+            every { rootProject.projectDir } returns rootDir
+            every { rootProject.file("gradle.properties") } returns File(rootDir, "gradle.properties")
+            every { rootProject.subprojects } returns setOf(hostApp, plugin)
+
+            val pluginContainer = mockk<org.gradle.api.plugins.PluginContainer>()
+            every { pluginContainer.hasPlugin("com.android.application") } returns isApp
+
+            val flutterProject = mockk<Project>()
+            every { flutterProject.projectDir } returns flutterProjectDir
+            every { flutterProject.rootProject } returns rootProject
+            every { flutterProject.providers } returns providers
+            every { flutterProject.plugins } returns pluginContainer
+            return flutterProject
+        }
+
+        private fun assertNoError(project: Project) {
+            FlutterPluginUtils.checkAddToAppHostAgp9Config(project)
+        }
+
+        private fun assertThrowsError(project: Project): String =
+            assertThrows<GradleException> {
+                FlutterPluginUtils.checkAddToAppHostAgp9Config(project)
+            }.message!!
+
+        @Test
+        fun `does nothing when AGP is lower than 9`(
+            @TempDir tempDir: Path
+        ) {
+            assertNoError(setupFlutterModuleProject(tempDir, agp8, newDsl = null, builtInKotlin = null, hostKgp = true))
+        }
+
+        @Test
+        fun `does nothing when AGP version is unknown`(
+            @TempDir tempDir: Path
+        ) {
+            assertNoError(setupFlutterModuleProject(tempDir, null, newDsl = null, builtInKotlin = null, hostKgp = true))
+        }
+
+        @Test
+        fun `does nothing for normal Flutter apps`(
+            @TempDir tempDir: Path
+        ) {
+            assertNoError(
+                setupFlutterModuleProject(tempDir, agp9, newDsl = null, builtInKotlin = null, hostKgp = true, isApp = true)
+            )
+        }
+
+        @Test
+        fun `does nothing when the Gradle root is the module's own android directory`(
+            @TempDir tempDir: Path
+        ) {
+            assertNoError(
+                setupFlutterModuleProject(
+                    tempDir,
+                    agp9,
+                    newDsl = null,
+                    builtInKotlin = null,
+                    hostKgp = true,
+                    rootIsModuleAndroidDir = true
+                )
+            )
+        }
+
+        @Test
+        fun `does nothing when both flags are opted out`(
+            @TempDir tempDir: Path
+        ) {
+            assertNoError(
+                setupFlutterModuleProject(tempDir, agp9, newDsl = "false", builtInKotlin = "false", hostKgp = true, pluginKgp = true)
+            )
+        }
+
+        @Test
+        fun `does nothing when host and plugins are migrated to built-in Kotlin and builtInKotlin is unset`(
+            @TempDir tempDir: Path
+        ) {
+            assertNoError(setupFlutterModuleProject(tempDir, agp9, newDsl = "false", builtInKotlin = null))
+        }
+
+        @Test
+        fun `does nothing when host and plugins are migrated to built-in Kotlin and builtInKotlin is true`(
+            @TempDir tempDir: Path
+        ) {
+            assertNoError(setupFlutterModuleProject(tempDir, agp9, newDsl = "false", builtInKotlin = "true"))
+        }
+
+        @Test
+        fun `does nothing when newDsl is opted out using a different case and whitespace`(
+            @TempDir tempDir: Path
+        ) {
+            assertNoError(setupFlutterModuleProject(tempDir, agp9, newDsl = " FALSE ", builtInKotlin = "false"))
+        }
+
+        private fun assertBuiltInKotlinSectionWithoutProjectList(message: String) {
+            assertContains(message, "still applies the Kotlin Gradle Plugin (KGP)")
+            assertContains(message, "android.builtInKotlin=false")
+            assertContains(message, "Flutter shows a warning for each project that still applies")
+            // The warnings logged after opting out list the projects, so the error doesn't.
+            assertFalse(message.contains(":app"))
+            assertFalse(message.contains("some_plugin"))
+        }
+
+        @Test
+        fun `throws only the built-in Kotlin section when builtInKotlin is unset and KGP is applied`(
+            @TempDir tempDir: Path
+        ) {
+            val message =
+                assertThrowsError(
+                    setupFlutterModuleProject(tempDir, agp9, newDsl = "false", builtInKotlin = null, hostKgp = true, pluginKgp = true)
+                )
+
+            assertBuiltInKotlinSectionWithoutProjectList(message)
+            assertFalse(message.contains("android.newDsl=false"))
+        }
+
+        @Test
+        fun `throws only the built-in Kotlin section when builtInKotlin is true and KGP is applied`(
+            @TempDir tempDir: Path
+        ) {
+            val message =
+                assertThrowsError(
+                    setupFlutterModuleProject(tempDir, agp9, newDsl = "false", builtInKotlin = "true", hostKgp = true)
+                )
+
+            assertBuiltInKotlinSectionWithoutProjectList(message)
+            assertFalse(message.contains("android.newDsl=false"))
+        }
+
+        @Test
+        fun `throws the built-in Kotlin section when the host is migrated but a plugin still applies KGP`(
+            @TempDir tempDir: Path
+        ) {
+            val message =
+                assertThrowsError(
+                    setupFlutterModuleProject(tempDir, agp9, newDsl = "false", builtInKotlin = null, pluginKgp = true)
+                )
+
+            assertBuiltInKotlinSectionWithoutProjectList(message)
+        }
+
+        @Test
+        fun `throws only the newDsl section when newDsl is unset and builtInKotlin is opted out`(
+            @TempDir tempDir: Path
+        ) {
+            val message =
+                assertThrowsError(
+                    setupFlutterModuleProject(tempDir, agp9, newDsl = null, builtInKotlin = "false", hostKgp = true)
+                )
+
+            assertContains(message, "android.newDsl=false")
+            assertFalse(message.contains("android.builtInKotlin=false"))
+        }
+
+        @Test
+        fun `throws only the newDsl section when newDsl is true and nothing applies KGP`(
+            @TempDir tempDir: Path
+        ) {
+            val message =
+                assertThrowsError(setupFlutterModuleProject(tempDir, agp9, newDsl = "true", builtInKotlin = null))
+
+            assertContains(message, "android.newDsl=false")
+            assertFalse(message.contains("android.builtInKotlin=false"))
+        }
+
+        @Test
+        fun `throws both sections when neither flag is set and KGP is applied`(
+            @TempDir tempDir: Path
+        ) {
+            val message =
+                assertThrowsError(setupFlutterModuleProject(tempDir, agp9, newDsl = null, builtInKotlin = null, hostKgp = true))
+
+            assertContains(message, "android.newDsl=false")
+            assertContains(message, "android.builtInKotlin=false")
+        }
+
+        @Test
+        fun `error includes the AGP version, host gradle properties path, and docs link`(
+            @TempDir tempDir: Path
+        ) {
+            val message =
+                assertThrowsError(setupFlutterModuleProject(tempDir, agp9, newDsl = null, builtInKotlin = null))
+
+            val hostGradleProperties = tempDir.resolve("hello_host_app").resolve("gradle.properties").toFile()
+            assertContains(message, "Android Gradle Plugin (AGP) 9.3.1")
+            assertContains(message, "Host app gradle.properties: ${hostGradleProperties.absolutePath}")
+            assertContains(message, FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_FOR_ADD_TO_APP_HOST)
+        }
     }
 }
