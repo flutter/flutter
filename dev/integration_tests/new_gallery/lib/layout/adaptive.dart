@@ -2,13 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
 import 'package:flutter/material.dart';
 
 import '../data/gallery_options.dart';
 
 /// The maximum width taken up by each item on the home screen.
 const double maxHomeItemWidth = 1400.0;
+
+/// The minimum width of a medium window in the Material Design breakpoint system.
+const double _mediumWindowMinWidth = 1024.0;
+
+/// The minimum width of a large window in the Material Design breakpoint system.
+const double _largeWindowMinWidth = 1440.0;
 
 /// Returns a boolean value whether the window is considered medium or large size.
 ///
@@ -21,7 +26,7 @@ bool isDisplayDesktop(BuildContext context) {
   if (GalleryOptions.maybeOf(context)?.isTestMode ?? false) {
     return false;
   }
-  return getWindowType(context) >= AdaptiveWindowType.medium;
+  return MediaQuery.sizeOf(context).width >= _mediumWindowMinWidth;
 }
 
 /// Returns boolean value whether the window is considered medium size.
@@ -31,5 +36,6 @@ bool isDisplaySmallDesktop(BuildContext context) {
   if (GalleryOptions.maybeOf(context)?.isTestMode ?? false) {
     return false;
   }
-  return getWindowType(context) == AdaptiveWindowType.medium;
+  final double width = MediaQuery.sizeOf(context).width;
+  return width >= _mediumWindowMinWidth && width < _largeWindowMinWidth;
 }
