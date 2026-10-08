@@ -8,6 +8,11 @@
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/lib/ui/window/platform_configuration.h"
+#include "flutter/runtime/platform_data.h"
+#include "flutter/runtime/runtime_controller.h"
+#include "flutter/shell/common/engine.h"
+#include "flutter/shell/common/shell.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
@@ -172,6 +177,132 @@ TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
                        reinterpret_cast<jlong>(holder.get()), 1.0f, 100, 100, 0,
                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, bounds, type, state,
                        0, 0, 0, 0, 0, 0, 0, 0);
+}
+
+namespace {
+
+// Signatures of FlutterJNI natives registered by PlatformViewAndroid::Register.
+using SetSemanticsEnabledFn = void (*)(JNIEnv*, jobject, jlong, jboolean);
+using SetAccessibilityFeaturesFn = void (*)(JNIEnv*, jobject, jlong, jint);
+
+// Runs PlatformViewAndroid::Register against |mock_env| and returns the
+// function registered for the FlutterJNI native called |name|, or nullptr.
+void* RegisterNativesAndFind(MockJNIEnv& mock_env, const char* name) {
+  // Arbitrary non-null handles. The mock env never dereferences them.
+  const jclass kPlaceholderClass = reinterpret_cast<jclass>(100);
+  const jfieldID kPlaceholderFieldID = reinterpret_cast<jfieldID>(200);
+  const jmethodID kPlaceholderMethodID = reinterpret_cast<jmethodID>(300);
+
+  EXPECT_CALL(mock_env, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteLocalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, FindClass(_)).WillRepeatedly(Return(kPlaceholderClass));
+  EXPECT_CALL(mock_env, GetFieldID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderFieldID));
+  EXPECT_CALL(mock_env, GetMethodID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderMethodID));
+  EXPECT_CALL(mock_env, GetStaticFieldID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderFieldID));
+  EXPECT_CALL(mock_env, GetStaticMethodID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderMethodID));
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  void* found = nullptr;
+  EXPECT_CALL(mock_env, RegisterNatives(_, _, _))
+      .WillRepeatedly(
+          [&](jclass clazz, const JNINativeMethod* methods, jint nMethods) {
+            for (jint i = 0; i < nMethods; ++i) {
+              if (strcmp(methods[i].name, name) == 0) {
+                found = methods[i].fnPtr;
+              }
+            }
+            return 0;
+          });
+
+  PlatformViewAndroid::Register(&mock_env);
+  return found;
+}
+
+// The PlatformData held by the holder's runtime controller.
+//
+// Only valid on the UI thread. AndroidShellHolder merges the platform and UI
+// threads by default (Settings::merged_platform_ui_thread), and the platform
+// thread is the thread that created the holder, so in these tests the UI
+// thread is the test thread. Shell applies semantics and accessibility updates
+// with RunNowAndFlushMessages, so they are visible as soon as the native
+// returns.
+const PlatformData& RuntimePlatformData(const AndroidShellHolder& holder) {
+  return holder.GetShellForTesting()
+      ->GetEngine()
+      ->GetRuntimeController()
+      ->GetPlatformData();
+}
+
+std::unique_ptr<AndroidShellHolder> CreateHolderWithMergedThreads() {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  EXPECT_EQ(settings.merged_platform_ui_thread,
+            Settings::MergedPlatformUIThread::kEnabled);
+  return std::make_unique<AndroidShellHolder>(
+      settings, std::make_shared<JNIMock>(),
+      AndroidRenderingAPI::kImpellerOpenGLES);
+}
+
+}  // namespace
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       SetSemanticsEnabledUpdatesRuntimePlatformData) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto set_semantics_enabled = reinterpret_cast<SetSemanticsEnabledFn>(
+      RegisterNativesAndFind(mock_env, "nativeSetSemanticsEnabled"));
+  ASSERT_NE(set_semantics_enabled, nullptr);
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+  const jlong shell_holder = reinterpret_cast<jlong>(holder.get());
+  jobject jcaller = reinterpret_cast<jobject>(123);
+
+  EXPECT_FALSE(RuntimePlatformData(*holder).semantics_enabled);
+
+  set_semantics_enabled(&mock_env, jcaller, shell_holder, JNI_TRUE);
+  EXPECT_TRUE(RuntimePlatformData(*holder).semantics_enabled);
+
+  set_semantics_enabled(&mock_env, jcaller, shell_holder, JNI_FALSE);
+  EXPECT_FALSE(RuntimePlatformData(*holder).semantics_enabled);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       SetAccessibilityFeaturesUpdatesRuntimePlatformData) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto set_accessibility_features =
+      reinterpret_cast<SetAccessibilityFeaturesFn>(
+          RegisterNativesAndFind(mock_env, "nativeSetAccessibilityFeatures"));
+  ASSERT_NE(set_accessibility_features, nullptr);
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+  const jlong shell_holder = reinterpret_cast<jlong>(holder.get());
+  jobject jcaller = reinterpret_cast<jobject>(123);
+
+  EXPECT_EQ(RuntimePlatformData(*holder).accessibility_feature_flags_, 0);
+
+  // The flags AccessibilityBridge sends with animations off, bold text and
+  // high contrast, the same values Java packs in
+  // AccessibilityBridge.AccessibilityFeature.
+  const int32_t flags =
+      static_cast<int32_t>(AccessibilityFeatureFlag::kDisableAnimations) |
+      static_cast<int32_t>(AccessibilityFeatureFlag::kBoldText) |
+      static_cast<int32_t>(AccessibilityFeatureFlag::kHighContrast);
+  set_accessibility_features(&mock_env, jcaller, shell_holder, flags);
+  EXPECT_EQ(RuntimePlatformData(*holder).accessibility_feature_flags_, flags);
+
+  set_accessibility_features(&mock_env, jcaller, shell_holder, 0);
+  EXPECT_EQ(RuntimePlatformData(*holder).accessibility_feature_flags_, 0);
 }
 
 // The load order is exercised with an injected loader rather than real
