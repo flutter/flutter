@@ -5,6 +5,7 @@
 /// @docImport 'build_system/build_system.dart';
 library;
 
+import 'package:flutter_tools_core/flutter_tools_core.dart' as tools_core;
 import 'package:meta/meta.dart';
 
 import 'package:package_config/package_config_types.dart';
@@ -14,7 +15,6 @@ import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
-import 'base/utils.dart';
 import 'convert.dart';
 import 'darwin/darwin.dart';
 import 'globals.dart' as globals;
@@ -498,62 +498,7 @@ class AndroidBuildInfo {
 }
 
 /// A summary of the compilation strategy used for Dart.
-enum BuildMode {
-  /// Built in JIT mode with no optimizations, enabled asserts, and a VM service.
-  debug,
-
-  /// Built in AOT mode with some optimizations and a VM service.
-  profile,
-
-  /// Built in AOT mode with all optimizations and no VM service.
-  release,
-
-  /// Built in JIT mode with all optimizations and no VM service.
-  jitRelease;
-
-  factory BuildMode.fromCliName(String value) => values.singleWhere(
-    (BuildMode element) => element.cliName == value,
-    orElse: () => throw ArgumentError('$value is not a supported build mode'),
-  );
-
-  static const releaseModes = <BuildMode>{release, jitRelease};
-  static const jitModes = <BuildMode>{debug, jitRelease};
-
-  /// Whether this mode is considered release.
-  ///
-  /// Useful for determining whether we should enable/disable asserts or
-  /// other development features.
-  bool get isRelease => releaseModes.contains(this);
-
-  /// Whether this mode is using the JIT runtime.
-  bool get isJit => jitModes.contains(this);
-
-  /// Whether this mode is using the precompiled runtime.
-  bool get isPrecompiled => !isJit;
-
-  /// [name] formatted in snake case.
-  ///
-  /// (e.g. debug, profile, release, jit_release)
-  String get cliName => snakeCase(name);
-
-  /// [cliName] formatted in sentence case.
-  ///
-  /// (e.g. Debug, Profile, Release, Jit_release)
-  String get uppercaseName => sentenceCase(cliName);
-
-  /// [cliName] with `_` replaced with a space.
-  ///
-  /// (e.g. debug, profile, release, jit release)
-  String get friendlyName => cliName.replaceAll('_', ' ');
-
-  /// [friendlyName] formatted in sentence case.
-  ///
-  /// (e.g. Debug, Profile, Release, Jit release)
-  String get uppercaseFriendlyName => sentenceCase(friendlyName);
-
-  @override
-  String toString() => cliName;
-}
+typedef BuildMode = tools_core.BuildMode;
 
 /// Environment type of the target device.
 enum EnvironmentType { physical, simulator }

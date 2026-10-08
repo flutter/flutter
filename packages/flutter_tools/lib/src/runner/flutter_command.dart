@@ -331,6 +331,11 @@ abstract class FlutterCommand extends Command<void> {
   /// easily reference it or overwrite as necessary.
   Analytics get analytics => _analytics;
 
+  /// Hook called by the command runner before parsing arguments,
+  /// allowing the command to perform asynchronous initialization
+  /// (e.g. querying extensions) to populate its dynamic options or subcommands.
+  Future<void> initializeDynamicOptions() async {}
+
   /// Registers an [OptionBundle] with this command.
   void registerOptionBundle(OptionBundle bundle) {
     bundle.register(this, argParser);
