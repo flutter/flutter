@@ -2119,6 +2119,181 @@ Future<void> testMain() async {
       expect(dormantForms, hasLength(1));
     });
 
+    test('TextInput.updateConfig preserves active autofill form', () async {
+      final Map<String, dynamic> initialConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'password',
+        autofillHintsForFields: <String>['username', 'password'],
+        obscureText: true,
+      );
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, initialConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'secret',
+        'selectionBase': 6,
+        'selectionExtent': 6,
+        'composingBase': -1,
+        'composingExtent': -1,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.identity().storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      final DefaultTextEditingStrategy strategy = textEditing!.strategy;
+      expect(strategy.appendedToForm, isTrue);
+
+      final EngineAutofillForm originalAutofillGroup = strategy.inputConfiguration.autofillGroup!;
+      final DomHTMLFormElement originalForm = originalAutofillGroup.formElement!;
+      final DomHTMLElement activeElement = strategy.activeDomElement;
+
+      expect(originalForm.contains(activeElement), isTrue);
+
+      // Simulates toggling obscureText (TextInput.updateConfig only describes
+      // the focused field, omitting 'fields').
+      final Map<String, dynamic> updatedConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'password',
+      );
+      final updateConfig = MethodCall('TextInput.updateConfig', updatedConfig);
+      sendFrameworkMessage(codec.encodeMethodCall(updateConfig));
+
+      final EngineAutofillForm updatedAutofillGroup = strategy.inputConfiguration.autofillGroup!;
+      expect(updatedAutofillGroup, same(originalAutofillGroup));
+      expect(updatedAutofillGroup.formElement, same(originalForm));
+      expect(originalForm.contains(activeElement), isTrue);
+
+      const clearClient = MethodCall('TextInput.clearClient');
+      sendFrameworkMessage(codec.encodeMethodCall(clearClient));
+
+      // The form must go dormant rather than having the DOM element removed.
+      expect(dormantForms, hasLength(1));
+      expect(dormantForms.values.single.formElement, same(originalForm));
+      expect(originalForm.isConnected, isTrue);
+    });
+
+    test(
+      'singleTextField Autofill: TextInput.updateConfig preserves form and allows dormancy',
+      () async {
+        final Map<String, dynamic> initialConfig = createFlutterConfig(
+          'text',
+          autofillHint: 'password',
+          obscureText: true,
+        );
+        final setClient = MethodCall('TextInput.setClient', <dynamic>[123, initialConfig]);
+        sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+        const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+          'text': 'secret',
+          'selectionBase': 6,
+          'selectionExtent': 6,
+          'composingBase': -1,
+          'composingExtent': -1,
+        });
+        sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+        const show = MethodCall('TextInput.show');
+        sendFrameworkMessage(codec.encodeMethodCall(show));
+
+        final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.identity().storage.toList(),
+        );
+        sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+        final DefaultTextEditingStrategy strategy = textEditing!.strategy;
+        expect(strategy.appendedToForm, isTrue);
+
+        final DomHTMLFormElement originalForm = strategy.focusedFormElement!;
+        expect(originalForm.contains(strategy.activeDomElement), isTrue);
+
+        // Toggle obscureText
+        final Map<String, dynamic> updatedConfig = createFlutterConfig(
+          'text',
+          autofillHint: 'password',
+        );
+        final updateConfig = MethodCall('TextInput.updateConfig', updatedConfig);
+        sendFrameworkMessage(codec.encodeMethodCall(updateConfig));
+
+        expect(strategy.focusedFormElement, same(originalForm));
+
+        const clearClient = MethodCall('TextInput.clearClient');
+        sendFrameworkMessage(codec.encodeMethodCall(clearClient));
+
+        expect(dormantForms, hasLength(1));
+        expect(dormantForms.values.single.formElement, same(originalForm));
+        expect(originalForm.isConnected, isTrue);
+      },
+    );
+
+    test('autofill form remains reusable after TextInput.updateConfig', () async {
+      final Map<String, dynamic> initialConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'password',
+        autofillHintsForFields: <String>['username', 'password'],
+        obscureText: true,
+      );
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, initialConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.identity().storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      final DefaultTextEditingStrategy strategy = textEditing!.strategy;
+      final DomHTMLFormElement form = strategy.focusedFormElement!;
+
+      // Toggle obscureText
+      final Map<String, dynamic> updatedConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'password',
+      );
+      final updateConfig = MethodCall('TextInput.updateConfig', updatedConfig);
+      sendFrameworkMessage(codec.encodeMethodCall(updateConfig));
+
+      // Blur
+      const clearClient = MethodCall('TextInput.clearClient');
+      sendFrameworkMessage(codec.encodeMethodCall(clearClient));
+      expect(dormantForms, hasLength(1));
+
+      // Refocus the same field with its full autofill configuration.
+      final Map<String, dynamic> reconnectConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'password',
+        autofillHintsForFields: <String>['username', 'password'],
+      );
+      final setClientAgain = MethodCall('TextInput.setClient', <dynamic>[124, reconnectConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClientAgain));
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      // The dormant form is revived and reused.
+      expect(dormantForms, hasLength(1));
+      expect(strategy.focusedFormElement, same(form));
+      expect(form.contains(strategy.activeDomElement), isTrue);
+      expect(form.isConnected, isTrue);
+
+      const finishAutofillContext = MethodCall('TextInput.finishAutofillContext', false);
+      sendFrameworkMessage(codec.encodeMethodCall(finishAutofillContext));
+      expect(dormantForms, isEmpty);
+      expect(form.isConnected, isFalse);
+    });
+
     test('No capitalization: setClient, setEditingState, show', () {
       final Map<String, dynamic> noCapitalizationConfig = createFlutterConfig('text');
       final setClient = MethodCall('TextInput.setClient', <dynamic>[123, noCapitalizationConfig]);
@@ -4534,9 +4709,12 @@ Future<void> testMain() async {
 
       expect(input.style.color, contains('transparent'));
       if (isSafari) {
-        // macOS 13 returns different values than macOS 12.
+        // macOS 13+ / 26 returns different values than macOS 12.
         expect(input.style.background, anyOf(contains('transparent'), contains('none')));
-        expect(input.style.outline, anyOf(contains('none'), contains('currentcolor')));
+        expect(
+          input.style.outline,
+          anyOf(contains('none'), contains('currentcolor'), contains('medium')),
+        );
         expect(input.style.border, anyOf(contains('none'), contains('medium')));
       } else {
         expect(input.style.background, contains('transparent'));

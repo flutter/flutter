@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart' as tools_core;
 import 'package:meta/meta.dart';
 
 import 'android/android_engine_cli_flags.dart';
@@ -24,23 +25,8 @@ import 'web/devfs_config.dart';
 
 DeviceManager? get deviceManager => context.get<DeviceManager>();
 
-/// A description of the kind of workflow the device supports.
-enum Category {
-  web._('web'),
-  desktop._('desktop'),
-  mobile._('mobile');
-
-  const Category._(this.value);
-
-  final String value;
-
-  @override
-  String toString() => value;
-
-  static Category? fromString(String category) {
-    return const <String, Category>{'web': web, 'desktop': desktop, 'mobile': mobile}[category];
-  }
-}
+/// The user-visible category of a [Device].
+typedef Category = tools_core.Category;
 
 /// The platform sub-folder that a device type supports.
 enum PlatformType {
@@ -353,11 +339,10 @@ class DeviceDiscoverySupportFilter {
   /// runner instance. Both web and fuchsia require differently configured
   /// compilers, and web requires an entirely different resident runner.
   Future<bool> isDeviceSupportedForAll(Device device) async {
-    final TargetPlatform devicePlatform = await device.targetPlatform;
+    final TargetOperatingSystem deviceOS = (await device.targetPlatform).os;
     return await device.isSupported() &&
-        devicePlatform != TargetPlatform.fuchsia_arm64 &&
-        devicePlatform != TargetPlatform.fuchsia_x64 &&
-        devicePlatform != TargetPlatform.web_javascript &&
+        deviceOS != .fuchsia &&
+        deviceOS != .web &&
         await isDeviceSupportedForProject(device);
   }
 
@@ -375,7 +360,7 @@ class DeviceDiscoverySupportFilter {
     if (_flutterProject == null) {
       return true;
     }
-    return device.isSupportedForProject(_flutterProject);
+    return await device.isSupportedForProject(_flutterProject);
   }
 }
 
@@ -675,7 +660,7 @@ abstract class Device {
   }
 
   /// Whether the device is supported for the current project directory.
-  bool isSupportedForProject(FlutterProject flutterProject);
+  FutureOr<bool> isSupportedForProject(FlutterProject flutterProject);
 
   /// Check if a version of the given app is already installed.
   ///

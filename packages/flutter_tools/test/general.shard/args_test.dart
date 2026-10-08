@@ -18,6 +18,8 @@ import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/emulator.dart';
+import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -504,6 +506,8 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     DeviceManager? deviceManager,
     Doctor? doctor,
     EmulatorManager? emulatorManager,
+    this.extensionBuildManager,
+    this.extensionManager,
     FeatureFlags? featureFlags,
     ToolContext? toolContext,
   }) : analytics = analytics ?? FakeAnalytics(),
@@ -544,6 +548,12 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   final EmulatorManager emulatorManager;
+
+  @override
+  final ExtensionBuildManager? extensionBuildManager;
+
+  @override
+  final ExtensionManager? extensionManager;
 
   @override
   final FeatureFlags featureFlags;
