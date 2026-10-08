@@ -155,7 +155,10 @@ source_set("flutter_shell_native_src") {
     ]
   }
 
-  sources += get_target_outputs(":icudtl_asm")
+  # The ICU data (icudtl.dat.S from :icudtl_asm) comes from
+  # //flutter/shell/platform/embedder:embedder_as_internal_library, which
+  # compiles it on Android. Compiling it here too would define
+  # _binary_icudtl_dat_start and _binary_icudtl_dat_size twice.
 
   public_deps = [
     ":android_gpu_configuration",
@@ -181,6 +184,7 @@ source_set("flutter_shell_native_src") {
     "//flutter/shell/platform/android/platform_view_android_delegate",
     "//flutter/shell/platform/android/surface",
     "//flutter/shell/platform/android/surface:native_window",
+    "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/skia",
     "//flutter/txt",
     "//flutter/vulkan",
