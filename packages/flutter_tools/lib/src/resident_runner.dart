@@ -91,6 +91,7 @@ class FlutterDevice {
         logger: logger,
         processManager: processManager,
         fileSystem: fs,
+        platform: platform,
       ),
       fileSystem: fs,
       logger: logger,
