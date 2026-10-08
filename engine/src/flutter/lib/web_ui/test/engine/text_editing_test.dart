@@ -2167,7 +2167,7 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(updateConfig));
 
       final EngineAutofillForm updatedAutofillGroup = strategy.inputConfiguration.autofillGroup!;
-      expect(identical(updatedAutofillGroup, originalAutofillGroup), isTrue);
+      expect(updatedAutofillGroup, same(originalAutofillGroup));
       expect(updatedAutofillGroup.formElement, same(originalForm));
       expect(originalForm.contains(activeElement), isTrue);
 
