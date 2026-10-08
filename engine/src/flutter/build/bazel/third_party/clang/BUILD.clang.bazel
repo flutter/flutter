@@ -1,0 +1,78 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @clang_linux_x64: the CIPD `fuchsia/third_party/clang`
+# package pinned in DEPS (`clang_version`). Only the pieces a C/C++ toolchain
+# needs are exposed, grouped the way `cc_toolchain` consumes them.
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(glob(["bin/*"]))
+
+# Nearly every tool in `bin/` (clang, clang++, lld, llvm-ar, llvm-objcopy, ...)
+# is a symlink to this multicall binary, so it belongs to every tool group.
+_MULTICALL = ["bin/llvm"]
+
+_TARGET = "x86_64-unknown-linux-gnu"
+
+# The compiler driver plus everything it reads implicitly: the resource
+# directory (builtin headers, compiler-rt, sanitizer ignorelists) and the
+# per-target runtime directory (libunwind, the bundled libc++).
+filegroup(
+    name = "compiler_files",
+    srcs = [
+        "bin/clang",
+        "bin/clang++",
+    ] + _MULTICALL + glob([
+        "lib/clang/*/include/**",
+        "lib/clang/*/share/**",
+        "lib/clang/*/lib/" + _TARGET + "/**",
+        "lib/" + _TARGET + "/**",
+    ]),
+)
+
+filegroup(
+    name = "linker_files",
+    srcs = [
+        "bin/clang",
+        "bin/clang++",
+        "bin/ld.lld",
+        "bin/lld",
+        "bin/llvm-ar",
+    ] + _MULTICALL + glob([
+        "lib/clang/*/lib/" + _TARGET + "/**",
+        "lib/" + _TARGET + "/**",
+    ]),
+)
+
+filegroup(
+    name = "ar_files",
+    srcs = ["bin/llvm-ar"] + _MULTICALL,
+)
+
+filegroup(
+    name = "objcopy_files",
+    srcs = ["bin/llvm-objcopy"] + _MULTICALL,
+)
+
+filegroup(
+    name = "strip_files",
+    srcs = [
+        "bin/llvm-objcopy",
+        "bin/llvm-strip",
+    ] + _MULTICALL,
+)
+
+filegroup(
+    name = "all_files",
+    srcs = [
+        "bin/llvm-nm",
+        "bin/llvm-symbolizer",
+        ":ar_files",
+        ":compiler_files",
+        ":linker_files",
+        ":objcopy_files",
+        ":strip_files",
+    ],
+)
