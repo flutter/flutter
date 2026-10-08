@@ -1,0 +1,25 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+"""The Flutter repository's Bazel module.
+
+This is the bootstrap for migrating the engine build from GN to Bazel. Nothing
+is built with Bazel yet and the GN build remains the source of truth: this
+file, `.bazelrc`, `.bazelversion` and the generated `.bazelignore` must stay
+inert for GN users. Bazel is always driven through `bazelisk`, which reads
+`.bazelversion`.
+
+Dependency pins are mirrored from `DEPS` into
+`engine/src/flutter/build/bazel/deps.lock.bzl` by
+`engine/src/flutter/tools/bazel_tools/bin/gen_deps.dart`; the trees gclient
+syncs are consumed in place and listed in `.bazelignore`.
+"""
+
+module(
+    name = "flutter",
+    bazel_compatibility = [">=8.0.0"],
+)
+
+bazel_dep(name = "bazel_skylib", version = "1.9.2")
+bazel_dep(name = "platforms", version = "1.1.0")

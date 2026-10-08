@@ -1,0 +1,9 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Bazel-only build support. This package exists so that the generated
+# `deps.lock.bzl` belongs to a Bazel package and can be loaded by module
+# extensions and tooling.
+
+exports_files(["deps.lock.bzl"])
