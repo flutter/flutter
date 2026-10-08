@@ -957,7 +957,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   late final Future<BuildableIOSApp> buildableIOSApp = () async {
     final app = await applicationPackages?.getPackageForPlatform(
-      TargetPlatform.ios,
+      // Only the OS family matters here, not the architecture.
+      TargetPlatform.ios_arm64,
       buildInfo: await cachedBuildInfo,
     ) as BuildableIOSApp?;
 
@@ -1009,7 +1010,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final logTarget = environmentType == EnvironmentType.simulator ? 'simulator' : 'device';
-    final String typeName = artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
+    // Only the OS family matters here, not the architecture.
+    final String typeName = artifacts.getEngineType(TargetPlatform.ios_arm64, buildInfo.mode);
     logger.printStatus(switch (xcodeBuildAction) {
       XcodeBuildAction.build => 'Building $app for $logTarget ($typeName)...',
       XcodeBuildAction.archive => 'Archiving $app...',

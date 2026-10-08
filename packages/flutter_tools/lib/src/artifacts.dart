@@ -194,10 +194,13 @@ enum HostArtifact {
 
 // TODO(knopp): Remove once darwin artifacts are universal and moved out of darwin-x64
 String _enginePlatformDirectoryName(TargetPlatform platform) {
-  if (platform == TargetPlatform.darwin) {
-    return 'darwin-x64';
-  }
-  return platform.getName();
+  return switch (platform) {
+    .darwin_x64 || .darwin_arm64 => 'darwin-x64',
+    // iOS engine artifacts live in a single `ios` directory regardless of the
+    // target architecture.
+    .ios_arm64 || .ios_x64 => 'ios',
+    _ => platform.getName(),
+  };
 }
 
 // Remove android target platform type.
@@ -205,8 +208,10 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
   switch (targetPlatform) {
     case TargetPlatform.android:
       return TargetPlatform.android_arm64;
-    case TargetPlatform.ios:
-    case TargetPlatform.darwin:
+    case TargetPlatform.ios_arm64:
+    case TargetPlatform.ios_x64:
+    case TargetPlatform.darwin_x64:
+    case TargetPlatform.darwin_arm64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.linux_riscv64:
@@ -483,9 +488,11 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android_x64:
         assert(platform != TargetPlatform.android);
         return _getAndroidArtifactPath(artifact, platform!, mode!);
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
+      case TargetPlatform.ios_x64:
         return _getIosArtifactPath(artifact, platform!, mode, environmentType);
-      case TargetPlatform.darwin:
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin_arm64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_riscv64:
@@ -838,7 +845,8 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_riscv64:
-      case TargetPlatform.darwin:
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin_arm64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
         // TODO(zanderso): remove once debug desktop artifacts are uploaded
@@ -855,7 +863,8 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.web_javascript:
         assert(mode == null, 'Platform $platform does not support different build modes.');
         return _fileSystem.path.join(engineDir, platformName);
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
+      case TargetPlatform.ios_x64:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
@@ -876,7 +885,9 @@ class CachedArtifacts implements Artifacts {
 
 TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils operatingSystemUtils) {
   if (platform.isMacOS) {
-    return TargetPlatform.darwin;
+    return operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64
+        ? TargetPlatform.darwin_arm64
+        : TargetPlatform.darwin_x64;
   }
   if (platform.isLinux) {
     return switch (operatingSystemUtils.hostPlatform) {
@@ -1549,7 +1560,8 @@ String _getFlutterPrebuiltsPath(String baseOutPath, FileSystem fileSystem) {
 String _getPrebuiltTarget(Platform platform, OperatingSystemUtils operatingSystemUtils) {
   final TargetPlatform hostPlatform = _currentHostPlatform(platform, operatingSystemUtils);
   switch (hostPlatform) {
-    case TargetPlatform.darwin:
+    case TargetPlatform.darwin_x64:
+    case TargetPlatform.darwin_arm64:
       return 'macos-x64';
     case TargetPlatform.linux_riscv64:
       return 'linux-riscv64';
@@ -1561,7 +1573,8 @@ String _getPrebuiltTarget(Platform platform, OperatingSystemUtils operatingSyste
       return 'windows-x64';
     case TargetPlatform.windows_arm64:
       return 'windows-arm64';
-    case TargetPlatform.ios:
+    case TargetPlatform.ios_arm64:
+    case TargetPlatform.ios_x64:
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:

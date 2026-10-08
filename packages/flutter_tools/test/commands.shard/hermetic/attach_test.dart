@@ -1927,7 +1927,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   String get displayName => name;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios_arm64;
 
   @override
   final PlatformType platformType = PlatformType.ios;
@@ -2006,7 +2006,7 @@ class FakeIOSSimulator extends Fake implements IOSSimulator {
   bool get ephemeral => true;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios_arm64;
 
   @override
   final PlatformType platformType = PlatformType.ios;

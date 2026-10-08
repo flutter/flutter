@@ -236,7 +236,8 @@ class KernelSnapshot extends Target {
     // See https://github.com/flutter/flutter/issues/44724
     final bool forceLinkPlatform;
     switch (targetPlatform) {
-      case TargetPlatform.darwin:
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin_arm64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
       case TargetPlatform.linux_x64:
@@ -247,7 +248,8 @@ class KernelSnapshot extends Target {
       case TargetPlatform.android_x64:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
+      case TargetPlatform.ios_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_riscv64:
       case TargetPlatform.tester:
@@ -263,8 +265,8 @@ class KernelSnapshot extends Target {
       TargetPlatform.android_arm ||
       TargetPlatform.android_arm64 ||
       TargetPlatform.android_x64 => 'android',
-      TargetPlatform.darwin => 'macos',
-      TargetPlatform.ios => 'ios',
+      TargetPlatform.darwin_x64 || TargetPlatform.darwin_arm64 => 'macos',
+      TargetPlatform.ios_arm64 || TargetPlatform.ios_x64 => 'ios',
       TargetPlatform.linux_arm64 ||
       TargetPlatform.linux_riscv64 ||
       TargetPlatform.linux_x64 => 'linux',

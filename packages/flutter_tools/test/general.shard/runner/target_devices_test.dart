@@ -3217,7 +3217,7 @@ class FakeDevice extends Fake implements Device {
   Category? get category => Category.mobile;
 
   @override
-  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).devicePlatformName;
 }
 
 class FakeIOSDevice extends Fake implements IOSDevice {

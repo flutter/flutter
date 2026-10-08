@@ -140,7 +140,8 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
     final Directory frameworkDsym = environment.fileSystem.directory(
       environment.artifacts.getArtifactPath(
         Artifact.flutterMacOSFrameworkDsym,
-        platform: TargetPlatform.darwin,
+        // macOS engine artifacts are universal, so any darwin_* value resolves to the same path.
+        platform: TargetPlatform.darwin_arm64,
         mode: buildMode,
       ),
     );
@@ -288,7 +289,8 @@ class CompileMacOSFramework extends Target {
     );
     final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
     final List<CpuArch> cpuArchs = getCpuArchsFromEnv(environment.defines);
-    if (targetPlatform != TargetPlatform.darwin) {
+    if (targetPlatform != TargetPlatform.darwin_x64 &&
+        targetPlatform != TargetPlatform.darwin_arm64) {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }
 
@@ -321,8 +323,7 @@ class CompileMacOSFramework extends Target {
           buildMode: buildMode,
           mainPath: environment.buildDir.childFile('app.dill').path,
           outputPath: environment.fileSystem.path.join(buildOutputPath, cpuArch.darwinArchName),
-          platform: TargetPlatform.darwin,
-          cpuArch: cpuArch,
+          platform: TargetPlatform.darwinForArch(cpuArch),
           splitDebugInfo: splitDebugInfo,
           dartObfuscation: dartObfuscation,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
@@ -362,7 +363,12 @@ class CompileMacOSFramework extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-    Source.artifact(Artifact.genSnapshot, mode: BuildMode.release, platform: TargetPlatform.darwin),
+    Source.artifact(
+      Artifact.genSnapshot,
+      mode: BuildMode.release,
+      // macOS engine artifacts are universal, so any darwin_* value resolves to the same path.
+      platform: TargetPlatform.darwin_arm64,
+    ),
   ];
 
   @override
@@ -451,7 +457,8 @@ abstract class MacOSBundleFlutterAssets extends Target {
       environment,
       assetDirectory,
       dartHookResult: dartHookResult,
-      targetPlatform: TargetPlatform.darwin,
+      // Only the OS family matters here, not the architecture.
+      targetPlatform: TargetPlatform.darwin_arm64,
       buildMode: buildMode,
       flavor: flavor,
       additionalContent: <String, DevFSContent>{
@@ -505,12 +512,14 @@ abstract class MacOSBundleFlutterAssets extends Target {
       try {
         final String vmSnapshotData = environment.artifacts.getArtifactPath(
           Artifact.vmSnapshotData,
-          platform: TargetPlatform.darwin,
+          // macOS engine artifacts are universal, so any darwin_* value resolves to the same path.
+          platform: TargetPlatform.darwin_arm64,
           mode: BuildMode.debug,
         );
         final String isolateSnapshotData = environment.artifacts.getArtifactPath(
           Artifact.isolateSnapshotData,
-          platform: TargetPlatform.darwin,
+          // macOS engine artifacts are universal, so any darwin_* value resolves to the same path.
+          platform: TargetPlatform.darwin_arm64,
           mode: BuildMode.debug,
         );
         environment.fileSystem
@@ -584,12 +593,14 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     const Source.pattern('{BUILD_DIR}/app.dill'),
     const Source.artifact(
       Artifact.isolateSnapshotData,
-      platform: TargetPlatform.darwin,
+      // macOS engine artifacts are universal, so any darwin_* value resolves to the same path.
+      platform: TargetPlatform.darwin_arm64,
       mode: BuildMode.debug,
     ),
     const Source.artifact(
       Artifact.vmSnapshotData,
-      platform: TargetPlatform.darwin,
+      // macOS engine artifacts are universal, so any darwin_* value resolves to the same path.
+      platform: TargetPlatform.darwin_arm64,
       mode: BuildMode.debug,
     ),
   ];

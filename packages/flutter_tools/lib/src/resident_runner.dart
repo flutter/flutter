@@ -1681,10 +1681,12 @@ Future<String?> getMissingPackageHintForPlatform(
       final FlutterProject project = projectFactory.fromDirectory(fileSystem.currentDirectory);
       final String manifestPath = fileSystem.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
-    case TargetPlatform.ios:
+    case TargetPlatform.ios_arm64:
+    case TargetPlatform.ios_x64:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.android:
-    case TargetPlatform.darwin:
+    case TargetPlatform.darwin_x64:
+    case TargetPlatform.darwin_arm64:
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.linux_arm64:

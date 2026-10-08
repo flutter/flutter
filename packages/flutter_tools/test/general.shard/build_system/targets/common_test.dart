@@ -63,7 +63,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: TargetPlatform.ios.getName(),
+        kTargetPlatform: TargetPlatform.ios_arm64.getName(),
       },
       inputs: <String, String>{},
       artifacts: artifacts,
@@ -380,7 +380,7 @@ void main() {
       final String build = androidEnvironment.buildDir.path;
       final String flutterPatchedSdkPath = artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.darwin,
+        platform: TargetPlatform.darwin_arm64,
         mode: BuildMode.debug,
       );
       processManager.addCommands(<FakeCommand>[
@@ -411,7 +411,7 @@ void main() {
 
       await const KernelSnapshot().build(
         androidEnvironment
-          ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
+          ..defines[kTargetPlatform] = TargetPlatform.darwin_arm64.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kTrackWidgetCreation] = 'false',
       );
@@ -468,7 +468,7 @@ void main() {
       final String build = iosEnvironment.buildDir.path;
       final String flutterPatchedSdkPath = artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.ios,
+        platform: TargetPlatform.ios_arm64,
         mode: BuildMode.debug,
       );
       fileSystem.directory('/ios/Runner.xcodeproj').createSync(recursive: true);
@@ -502,7 +502,7 @@ void main() {
 
       await const KernelSnapshot().build(
         iosEnvironment
-          ..defines[kTargetPlatform] = TargetPlatform.ios.getName()
+          ..defines[kTargetPlatform] = TargetPlatform.ios_arm64.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
           ..defines[kXcodeConfiguration] = 'Debug-chocolate'
@@ -527,7 +527,7 @@ void main() {
       final String build = iosEnvironment.buildDir.path;
       final String flutterPatchedSdkPath = artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.darwin,
+        platform: TargetPlatform.darwin_arm64,
         mode: BuildMode.debug,
       );
       fileSystem.directory('/macos/Runner.xcodeproj').createSync(recursive: true);
@@ -560,7 +560,7 @@ void main() {
 
       await const KernelSnapshot().build(
         iosEnvironment
-          ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
+          ..defines[kTargetPlatform] = TargetPlatform.darwin_arm64.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
           ..defines[kXcodeConfiguration] = 'Debug-chocolate'
@@ -585,7 +585,7 @@ void main() {
       final String build = iosEnvironment.buildDir.path;
       final String flutterPatchedSdkPath = artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.darwin,
+        platform: TargetPlatform.darwin_arm64,
         mode: BuildMode.debug,
       );
       processManager.addCommands(<FakeCommand>[
@@ -617,7 +617,7 @@ void main() {
 
       await const KernelSnapshot().build(
         iosEnvironment
-          ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
+          ..defines[kTargetPlatform] = TargetPlatform.darwin_arm64.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kDartDefines] = base64Encode(utf8.encode('FLUTTER_APP_FLAVOR=vanilla'))
           ..defines[kFlavor] = 'strawberry'
@@ -819,7 +819,7 @@ void main() {
         FakeCommand(
           command: <String>[
             // This path is not known by the cache due to the iOS gen_snapshot split.
-            'Artifact.genSnapshotArm64.TargetPlatform.ios.profile',
+            'Artifact.genSnapshotArm64.TargetPlatform.ios_arm64.profile',
             '--deterministic',
             '--write-v8-snapshot-profile-to=code_size_1/snapshot.arm64.json',
             '--trace-precompiler-to=code_size_1/trace.arm64.json',

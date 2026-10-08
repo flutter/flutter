@@ -1294,7 +1294,7 @@ class FakeIosDevice extends Fake implements IOSDevice {
   bool get isWirelesslyConnected => connectionInterface == DeviceConnectionInterface.wireless;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios_arm64;
 
   @override
   Future<LaunchResult> startApp(
@@ -1374,7 +1374,7 @@ class FakeWindowsDevice extends Fake implements Device {
 
 class FakeMacosDevice extends Fake implements Device {
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin_arm64;
   @override
   String get name => 'MacosDevice';
 }

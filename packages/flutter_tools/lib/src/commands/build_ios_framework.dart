@@ -784,7 +784,8 @@ end
     final Status status = logger.startProgress(' ├─Copying Flutter.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = artifacts.getArtifactPath(
       Artifact.flutterXcframework,
-      platform: TargetPlatform.ios,
+      // iOS engine artifacts are universal, so any ios_* value resolves to the same path.
+      platform: TargetPlatform.ios_arm64,
       mode: buildInfo.mode,
     );
     final String flutterFrameworkFileName = fs.path.basename(engineCacheFlutterFrameworkDirectory);
@@ -843,7 +844,8 @@ end
           flutterRootDir: fs.directory(Cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
-            kTargetPlatform: TargetPlatform.ios.getName(),
+            // Only identifies the OS; the architectures to build come from kIosArchs below.
+            kTargetPlatform: TargetPlatform.ios_arm64.getName(),
             kIosArchs: defaultIOSArchsForEnvironment(
               sdkType,
               artifacts,

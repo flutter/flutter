@@ -912,7 +912,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+          'Artifact.flutterFramework.TargetPlatform.ios_arm64.debug.EnvironmentType.physical',
           outputDir.path,
         ],
       );
@@ -924,7 +924,7 @@ void main() {
           'u+w',
           outputDir
               .childDirectory(
-                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+                'Artifact.flutterFramework.TargetPlatform.ios_arm64.debug.EnvironmentType.physical',
               )
               .path,
         ],
@@ -938,7 +938,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
+          'Artifact.flutterFrameworkDsym.TargetPlatform.ios_arm64.debug.EnvironmentType.physical',
           outputDir.path,
         ],
       );
@@ -951,7 +951,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
+          'Artifact.flutterFrameworkDsym.TargetPlatform.ios_arm64.debug.EnvironmentType.physical',
           outputDir.path,
         ],
         exitCode: 1,
@@ -981,7 +981,7 @@ void main() {
           'u+w',
           outputDir
               .childDirectory(
-                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+                'Artifact.flutterFramework.TargetPlatform.ios_arm64.debug.EnvironmentType.simulator',
               )
               .path,
         ],
@@ -1008,7 +1008,7 @@ void main() {
             '--filter',
             '- .DS_Store/',
             '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-            'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+            'Artifact.flutterFramework.TargetPlatform.ios_arm64.debug.EnvironmentType.simulator',
             outputDir.path,
           ],
           onRun: (_) => binary.createSync(recursive: true),
@@ -1057,7 +1057,7 @@ void main() {
       final Directory dSYM = fileSystem.directory(
         artifacts.getArtifactPath(
           Artifact.flutterFrameworkDsym,
-          platform: TargetPlatform.ios,
+          platform: TargetPlatform.ios_arm64,
           mode: BuildMode.debug,
           environmentType: EnvironmentType.physical,
         ),
@@ -1422,7 +1422,7 @@ void main() {
       final Directory dSYM = fileSystem.directory(
         artifacts.getArtifactPath(
           Artifact.flutterFrameworkDsym,
-          platform: TargetPlatform.ios,
+          platform: TargetPlatform.ios_arm64,
           mode: BuildMode.debug,
           environmentType: EnvironmentType.physical,
         ),

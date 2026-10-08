@@ -44,7 +44,7 @@ void main() {
     testWithoutContext('getArtifactPath', () {
       final String xcframeworkPath = artifacts.getArtifactPath(
         Artifact.flutterXcframework,
-        platform: TargetPlatform.ios,
+        platform: TargetPlatform.ios_arm64,
         mode: BuildMode.release,
       );
       expect(
@@ -62,7 +62,7 @@ void main() {
       expect(
         () => artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: TargetPlatform.ios,
+          platform: TargetPlatform.ios_arm64,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
         ),
@@ -72,7 +72,7 @@ void main() {
       expect(
         () => artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: TargetPlatform.ios,
+          platform: TargetPlatform.ios_arm64,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
         ),
@@ -93,7 +93,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: TargetPlatform.ios,
+          platform: TargetPlatform.ios_arm64,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
         ),
@@ -101,7 +101,7 @@ void main() {
       );
       final String actualReleaseFrameworkArtifact = artifacts.getArtifactPath(
         Artifact.flutterFramework,
-        platform: TargetPlatform.ios,
+        platform: TargetPlatform.ios_arm64,
         mode: BuildMode.release,
         environmentType: EnvironmentType.physical,
       );
@@ -114,7 +114,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.flutterXcframework,
-          platform: TargetPlatform.ios,
+          platform: TargetPlatform.ios_arm64,
           mode: BuildMode.release,
         ),
         fileSystem.path.join(
@@ -189,7 +189,7 @@ void main() {
         expect(
           artifacts.getArtifactPath(
             Artifact.flutterMacOSXcframework,
-            platform: TargetPlatform.darwin,
+            platform: TargetPlatform.darwin_arm64,
             mode: BuildMode.release,
           ),
           xcframeworkPath,
@@ -201,7 +201,7 @@ void main() {
         expect(
           () => artifacts.getArtifactPath(
             Artifact.flutterMacOSFramework,
-            platform: TargetPlatform.darwin,
+            platform: TargetPlatform.darwin_arm64,
             mode: BuildMode.release,
           ),
           throwsToolExit(message: 'No xcframework found at $xcframeworkPath.'),
@@ -214,7 +214,7 @@ void main() {
         expect(
           () => artifacts.getArtifactPath(
             Artifact.flutterMacOSFramework,
-            platform: TargetPlatform.darwin,
+            platform: TargetPlatform.darwin_arm64,
             mode: BuildMode.release,
           ),
           throwsToolExit(message: 'No macOS frameworks found in $xcframeworkPath'),
@@ -227,7 +227,7 @@ void main() {
         expect(
           artifacts.getArtifactPath(
             Artifact.flutterMacOSFramework,
-            platform: TargetPlatform.darwin,
+            platform: TargetPlatform.darwin_arm64,
             mode: BuildMode.release,
           ),
           fileSystem.path.join(xcframeworkPath, 'macos-arm64_x86_64', 'FlutterMacOS.framework'),
@@ -259,8 +259,8 @@ void main() {
 
     testWithoutContext('getEngineType', () {
       expect(artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug), 'android-arm');
-      expect(artifacts.getEngineType(TargetPlatform.ios, BuildMode.release), 'ios-release');
-      expect(artifacts.getEngineType(TargetPlatform.darwin), 'darwin-x64');
+      expect(artifacts.getEngineType(TargetPlatform.ios_arm64, BuildMode.release), 'ios-release');
+      expect(artifacts.getEngineType(TargetPlatform.darwin_arm64), 'darwin-x64');
     });
 
     testWithoutContext(
@@ -330,7 +330,7 @@ void main() {
         expect(
           artifacts.getArtifactPath(
             Artifact.flutterMacOSXcframework,
-            platform: TargetPlatform.darwin,
+            platform: TargetPlatform.darwin_arm64,
             mode: BuildMode.release,
           ),
           xcframeworkPath,
@@ -342,7 +342,7 @@ void main() {
         expect(
           () => artifacts.getArtifactPath(
             Artifact.flutterMacOSFramework,
-            platform: TargetPlatform.darwin,
+            platform: TargetPlatform.darwin_arm64,
             mode: BuildMode.release,
           ),
           throwsToolExit(
@@ -359,7 +359,7 @@ void main() {
         expect(
           () => artifacts.getArtifactPath(
             Artifact.flutterMacOSFramework,
-            platform: TargetPlatform.darwin,
+            platform: TargetPlatform.darwin_arm64,
             mode: BuildMode.release,
           ),
           throwsToolExit(
@@ -384,7 +384,7 @@ void main() {
         expect(
           artifacts.getArtifactPath(
             Artifact.flutterMacOSFramework,
-            platform: TargetPlatform.darwin,
+            platform: TargetPlatform.darwin_arm64,
             mode: BuildMode.release,
           ),
           fileSystem.path.join(xcframeworkPath, 'macos-arm64_x86_64', 'FlutterMacOS.framework'),
@@ -399,7 +399,7 @@ void main() {
     testWithoutContext('getArtifactPath', () {
       final String xcframeworkPath = artifacts.getArtifactPath(
         Artifact.flutterXcframework,
-        platform: TargetPlatform.ios,
+        platform: TargetPlatform.ios_arm64,
         mode: BuildMode.release,
       );
       expect(
@@ -409,7 +409,7 @@ void main() {
       expect(
         () => artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: TargetPlatform.ios,
+          platform: TargetPlatform.ios_arm64,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
         ),
@@ -421,7 +421,7 @@ void main() {
       expect(
         () => artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: TargetPlatform.ios,
+          platform: TargetPlatform.ios_arm64,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
         ),
@@ -450,7 +450,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: TargetPlatform.ios,
+          platform: TargetPlatform.ios_arm64,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
         ),
@@ -459,7 +459,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: TargetPlatform.ios,
+          platform: TargetPlatform.ios_arm64,
           mode: BuildMode.release,
           environmentType: EnvironmentType.physical,
         ),
@@ -468,7 +468,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.flutterXcframework,
-          platform: TargetPlatform.ios,
+          platform: TargetPlatform.ios_arm64,
           mode: BuildMode.release,
         ),
         fileSystem.path.join('/out', 'android_debug_unopt', 'Flutter.xcframework'),
@@ -675,8 +675,11 @@ void main() {
         artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug),
         'android_debug_unopt',
       );
-      expect(artifacts.getEngineType(TargetPlatform.ios, BuildMode.release), 'android_debug_unopt');
-      expect(artifacts.getEngineType(TargetPlatform.darwin), 'android_debug_unopt');
+      expect(
+        artifacts.getEngineType(TargetPlatform.ios_arm64, BuildMode.release),
+        'android_debug_unopt',
+      );
+      expect(artifacts.getEngineType(TargetPlatform.darwin_arm64), 'android_debug_unopt');
     });
 
     testWithoutContext('Looks up dart.exe on windows platforms', () async {

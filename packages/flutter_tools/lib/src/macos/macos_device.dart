@@ -43,18 +43,14 @@ class MacOSDevice extends DesktopDevice {
   bool get supportsFlavors => true;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
+  Future<TargetPlatform> get targetPlatform async =>
+      TargetPlatform.darwinForArch(CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform));
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
 
   @override
-  Future<String> get targetPlatformDisplayName async {
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
-      return 'darwin-arm64';
-    }
-    return 'darwin-x64';
-  }
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {

@@ -511,7 +511,7 @@ String? validatedBuildNumberForPlatform(
   if (buildNumber == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+  if (targetPlatform case .ios_arm64 || .ios_x64 || .darwin_x64 || .darwin_arm64) {
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
@@ -564,7 +564,7 @@ String? validatedBuildNameForPlatform(
   if (buildName == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+  if (targetPlatform case .ios_arm64 || .ios_x64 || .darwin_x64 || .darwin_arm64) {
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
@@ -688,8 +688,10 @@ enum CpuArch {
 
 enum TargetPlatform {
   android('android'),
-  ios('ios'),
-  darwin('darwin'),
+  ios_arm64('ios-arm64'),
+  ios_x64('ios-x64'),
+  darwin_x64('darwin-x64'),
+  darwin_arm64('darwin-arm64'),
   linux_x64('linux-x64'),
   linux_arm64('linux-arm64'),
   linux_riscv64('linux-riscv64'),
@@ -717,10 +719,15 @@ enum TargetPlatform {
       'android-x64' => TargetPlatform.android_x64,
       'fuchsia-arm64' => TargetPlatform.fuchsia_arm64,
       'fuchsia-x64' => TargetPlatform.fuchsia_x64,
-      'ios' => TargetPlatform.ios,
-      // For backward-compatibility and also for Tester, where it must match
-      // host platform name (HostPlatform.darwin_x64)
-      'darwin' || 'darwin-x64' || 'darwin-arm64' => TargetPlatform.darwin,
+      // The arch-less `ios` and `darwin` names are kept for backward
+      // compatibility (e.g. `flutter assemble -dTargetPlatform=ios`, and the
+      // daemon protocol, see [devicePlatformName]). The architecture of such
+      // builds is determined separately (e.g. via `kIosArchs`/`kDarwinArchs`),
+      // so they default to arm64 here.
+      'ios' || 'ios-arm64' => TargetPlatform.ios_arm64,
+      'ios-x64' || 'ios-x86_64' => TargetPlatform.ios_x64,
+      'darwin' || 'darwin-arm64' => TargetPlatform.darwin_arm64,
+      'darwin-x64' || 'darwin-x86_64' => TargetPlatform.darwin_x64,
       'linux-x64' => TargetPlatform.linux_x64,
       'linux-arm64' => TargetPlatform.linux_arm64,
       'linux-riscv64' => TargetPlatform.linux_riscv64,
@@ -732,15 +739,57 @@ enum TargetPlatform {
     };
   }
 
+  /// The iOS [TargetPlatform] for the given [cpuArch].
+  static TargetPlatform iosForArch(CpuArch cpuArch) => switch (cpuArch) {
+    .arm64 => ios_arm64,
+    .x64 => ios_x64,
+    .armv7 ||
+    .x86 ||
+    .riscv64 ||
+    .unknown => throw UnsupportedError('Unsupported iOS CPU arch $cpuArch'),
+  };
+
+  /// The macOS [TargetPlatform] for the given [cpuArch].
+  static TargetPlatform darwinForArch(CpuArch cpuArch) => switch (cpuArch) {
+    .arm64 => darwin_arm64,
+    .x64 => darwin_x64,
+    .armv7 ||
+    .x86 ||
+    .riscv64 ||
+    .unknown => throw UnsupportedError('Unsupported macOS CPU arch $cpuArch'),
+  };
+
   final String _defaultName;
 
-  String getName({CpuArch? cpuArch}) {
-    return switch (this) {
-      TargetPlatform.ios when cpuArch != null => 'ios-${cpuArch.darwinArchName}',
-      TargetPlatform.darwin when cpuArch != null => 'darwin-${cpuArch.darwinArchName}',
-      _ => _defaultName,
-    };
-  }
+  String getName() => _defaultName;
+
+  /// The platform name used to identify a device, e.g. in the `flutter devices`
+  /// output and the daemon protocol.
+  ///
+  /// This is like [getName], but omits the CPU architecture for iOS and macOS,
+  /// preserving the historical device platform identifiers (`ios`, `darwin`)
+  /// that IDE integrations rely on. The architecture of a device is reported
+  /// separately (via the device's `cpuArch`), so it is not duplicated here.
+  String get devicePlatformName => switch (this) {
+    ios_arm64 || ios_x64 => 'ios',
+    darwin_x64 || darwin_arm64 => 'darwin',
+    _ => getName(),
+  };
+
+  /// The CPU architecture of this platform, or [CpuArch.unknown] if the
+  /// platform is not architecture specific (e.g. [android], [web_javascript]).
+  CpuArch get cpuArch => switch (this) {
+    ios_arm64 ||
+    darwin_arm64 ||
+    linux_arm64 ||
+    windows_arm64 ||
+    fuchsia_arm64 ||
+    android_arm64 => .arm64,
+    ios_x64 || darwin_x64 || linux_x64 || windows_x64 || fuchsia_x64 || android_x64 => .x64,
+    linux_riscv64 => .riscv64,
+    android_arm => .armv7,
+    android || tester || web_javascript || unsupported => .unknown,
+  };
 
   String get fuchsiaArchForTargetPlatform => switch (this) {
     fuchsia_arm64 => 'arm64',
@@ -749,8 +798,10 @@ enum TargetPlatform {
     android_arm ||
     android_arm64 ||
     android_x64 ||
-    darwin ||
-    ios ||
+    darwin_x64 ||
+    darwin_arm64 ||
+    ios_arm64 ||
+    ios_x64 ||
     linux_arm64 ||
     linux_riscv64 ||
     linux_x64 ||
@@ -763,19 +814,19 @@ enum TargetPlatform {
 
   String get osName => switch (this) {
     linux_x64 || linux_arm64 || linux_riscv64 => 'linux',
-    darwin => 'macos',
+    darwin_x64 || darwin_arm64 => 'macos',
     windows_x64 || windows_arm64 => 'windows',
     android || android_arm || android_arm64 || android_x64 => 'android',
     fuchsia_arm64 || fuchsia_x64 => 'fuchsia',
-    ios => 'ios',
+    ios_arm64 || ios_x64 => 'ios',
     tester => 'flutter-tester',
     web_javascript => 'web',
     unsupported => throw UnsupportedError('Unexpected target platform $this'),
   };
 
   String get simpleName => switch (this) {
-    linux_x64 || darwin || windows_x64 => 'x64',
-    linux_arm64 || windows_arm64 => 'arm64',
+    linux_x64 || darwin_x64 || windows_x64 => 'x64',
+    linux_arm64 || darwin_arm64 || windows_arm64 => 'arm64',
     linux_riscv64 => 'riscv64',
     android ||
     android_arm ||
@@ -783,7 +834,8 @@ enum TargetPlatform {
     android_x64 ||
     fuchsia_arm64 ||
     fuchsia_x64 ||
-    ios ||
+    ios_arm64 ||
+    ios_x64 ||
     tester ||
     web_javascript ||
     unsupported => throw UnsupportedError('Unexpected target platform $this'),

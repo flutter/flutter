@@ -1278,7 +1278,12 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => switch (_cpuArch) {
+    .x64 => TargetPlatform.ios_x64,
+    // 32-bit (armv7) devices are reported as unsupported by [isSupported], so
+    // treat everything else as arm64.
+    _ => TargetPlatform.ios_arm64,
+  };
 
   @override
   Future<String> get sdkNameAndVersion async => 'iOS ${_sdkVersion ?? 'unknown version'}';

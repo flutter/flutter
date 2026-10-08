@@ -2213,7 +2213,7 @@ class TestDeviceManager extends DeviceManager {
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     this._isLocalEmulator = false,
-    this._targetPlatform = TargetPlatform.ios,
+    this._targetPlatform = TargetPlatform.ios_arm64,
     this._sdkNameAndVersion = '',
     this._platformType = PlatformType.ios,
     this._isSupported = true,
@@ -2276,7 +2276,7 @@ class FakeDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);
 
   @override
-  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).devicePlatformName;
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
@@ -2362,7 +2362,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   bool get isWirelesslyConnected => connectionInterface == DeviceConnectionInterface.wireless;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios_arm64;
 }
 
 class TestRunCommandForUsageValues extends RunCommand {

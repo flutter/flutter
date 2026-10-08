@@ -339,7 +339,7 @@ void main() {
           };
           final TargetPlatform targetPlatform = flutterTester
               ? TargetPlatform.tester
-              : TargetPlatform.darwin;
+              : TargetPlatform.darwin_arm64;
           final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,

@@ -114,7 +114,7 @@ void main() {
         await shaderCompiler.compileShader(
           input: fileSystem.file(fragPath),
           outputPath: outputPath,
-          targetPlatform: TargetPlatform.ios,
+          targetPlatform: TargetPlatform.ios_arm64,
         ),
         true,
       );
@@ -895,7 +895,7 @@ void main() {
         shaderCompiler.compileShader(
           input: fileSystem.file(fragPath),
           outputPath: outputPath,
-          targetPlatform: TargetPlatform.ios,
+          targetPlatform: TargetPlatform.ios_arm64,
         ),
         throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
       );
@@ -940,7 +940,7 @@ void main() {
         shaderCompiler.compileShader(
           input: fileSystem.file(fragPath),
           outputPath: outputPath,
-          targetPlatform: TargetPlatform.ios,
+          targetPlatform: TargetPlatform.ios_arm64,
         ),
         throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
       );
@@ -984,7 +984,7 @@ void main() {
         shaderCompiler.compileShader(
           input: fileSystem.file(fragPath),
           outputPath: outputPath,
-          targetPlatform: TargetPlatform.ios,
+          targetPlatform: TargetPlatform.ios_arm64,
         ),
         throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
       );
@@ -1029,7 +1029,7 @@ void main() {
         final bool success = await shaderCompiler.compileShader(
           input: fileSystem.file(fragPath),
           outputPath: outputPath,
-          targetPlatform: TargetPlatform.ios,
+          targetPlatform: TargetPlatform.ios_arm64,
           fatal: false,
         );
 
@@ -1068,7 +1068,7 @@ void main() {
         shaderCompiler.compileShader(
           input: fileSystem.file(fragPath),
           outputPath: outputPath,
-          targetPlatform: TargetPlatform.ios,
+          targetPlatform: TargetPlatform.ios_arm64,
         ),
         throwsA(
           isA<ProcessException>().having(
@@ -1128,7 +1128,7 @@ void main() {
       final bool success1 = await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        targetPlatform: TargetPlatform.ios,
+        targetPlatform: TargetPlatform.ios_arm64,
         fatal: false,
       );
       expect(success1, false);
@@ -1142,7 +1142,7 @@ void main() {
       final bool success2 = await shaderCompiler.compileShader(
         input: fileSystem.file(fragPath),
         outputPath: outputPath,
-        targetPlatform: TargetPlatform.ios,
+        targetPlatform: TargetPlatform.ios_arm64,
         fatal: false,
       );
       expect(success2, false);

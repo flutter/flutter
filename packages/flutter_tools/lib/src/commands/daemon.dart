@@ -1655,7 +1655,7 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
   return <String, Object?>{
     'id': device.id,
     'name': device.displayName,
-    'platform': (await device.targetPlatform).getName(),
+    'platform': (await device.targetPlatform).devicePlatformName,
     'emulator': await device.isLocalEmulator,
     'category': device.category?.toString(),
     'platformType': device.platformType?.toString(),

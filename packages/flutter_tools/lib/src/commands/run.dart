@@ -480,11 +480,11 @@ class RunCommand extends RunCommandBase {
       final Device device = devices![0];
       final TargetPlatform platform = await device.targetPlatform;
       anyAndroidDevices = platform == TargetPlatform.android;
-      anyIOSDevices = platform == TargetPlatform.ios;
+      anyIOSDevices = platform == TargetPlatform.ios_arm64 || platform == TargetPlatform.ios_x64;
       if (device is IOSDevice && device.isWirelesslyConnected) {
         anyWirelessIOSDevices = true;
       }
-      deviceType = platform.getName();
+      deviceType = platform.devicePlatformName;
       deviceOsVersion = await device.sdkNameAndVersion;
       isEmulator = await device.isLocalEmulator;
     } else {
@@ -494,7 +494,10 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices!) {
         final TargetPlatform platform = await device.targetPlatform;
         anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
-        anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
+        anyIOSDevices =
+            anyIOSDevices ||
+            platform == TargetPlatform.ios_arm64 ||
+            platform == TargetPlatform.ios_x64;
         if (device is IOSDevice && device.isWirelesslyConnected) {
           anyWirelessIOSDevices = true;
         }

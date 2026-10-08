@@ -842,7 +842,7 @@ flutter:
           platform,
           () async {
             final TargetPlatform targetPlatform = platform == 'android'
-                ? TargetPlatform.ios
+                ? TargetPlatform.ios_arm64
                 : TargetPlatform.android;
             final bool didInclude = await setupAndBuildPlatformAsset(platform, targetPlatform);
 

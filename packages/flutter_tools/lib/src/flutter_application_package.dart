@@ -71,13 +71,15 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
           userMessages: _userMessages,
           processUtils: _processUtils,
         );
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
+      case TargetPlatform.ios_x64:
         return applicationBinary == null
             ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.tester:
         return FlutterTesterApp.fromCurrentDirectory(globals.fs);
-      case TargetPlatform.darwin:
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin_arm64:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
             : MacOSApp.fromPrebuiltApp(applicationBinary);

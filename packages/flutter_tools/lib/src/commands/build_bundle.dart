@@ -130,7 +130,8 @@ class BuildBundleCommand extends BuildSubCommand {
     final platform = TargetPlatform.fromName(targetPlatform);
     // Check for target platforms that are only allowed via feature flags.
     switch (platform) {
-      case TargetPlatform.darwin:
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin_arm64:
         if (!featureFlags.isMacOSEnabled) {
           throwToolExit('macOS is not a supported target platform.');
         }
@@ -151,7 +152,8 @@ class BuildBundleCommand extends BuildSubCommand {
       case TargetPlatform.android_x64:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
+      case TargetPlatform.ios_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         break;

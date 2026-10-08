@@ -577,7 +577,8 @@ class MDnsVmServiceDiscovery {
     }
     final TargetPlatform targetPlatform = await device.targetPlatform;
     switch (targetPlatform) {
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
+      case TargetPlatform.ios_x64:
         _analytics.send(
           Event.appleUsageEvent(workflow: 'ios-mdns', parameter: 'no-ipv4-link-local'),
         );
@@ -592,7 +593,8 @@ class MDnsVmServiceDiscovery {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.darwin:
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.darwin_arm64:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.linux_arm64:

@@ -281,7 +281,8 @@ end
         flutterRootDir: fs.directory(Cache.flutterRoot),
         defines: <String, String>{
           kTargetFile: targetFile,
-          kTargetPlatform: TargetPlatform.darwin.getName(),
+          // Only identifies the OS; the architectures to build come from kDarwinArchs below.
+          kTargetPlatform: TargetPlatform.darwin_arm64.getName(),
           kDarwinArchs: defaultMacOSArchsForEnvironment(artifacts)
               .map((CpuArch e) => e.darwinArchName)
               .join(' '),
@@ -344,7 +345,8 @@ end
     final Status status = logger.startProgress(' ├─Copying FlutterMacOS.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = artifacts.getArtifactPath(
       Artifact.flutterMacOSXcframework,
-      platform: TargetPlatform.darwin,
+      // macOS engine artifacts are universal, so any darwin_* value resolves to the same path.
+      platform: TargetPlatform.darwin_arm64,
       mode: buildInfo.mode,
     );
     final String flutterFrameworkFileName = fs.path.basename(engineCacheFlutterFrameworkDirectory);
