@@ -14,8 +14,10 @@
 #include "impeller/renderer/backend/gles/pipeline_compile_queue_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/unique_handle_gles.h"
+#include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/shader_function.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -122,12 +124,71 @@ class PipelineLibraryGLES final
   const std::shared_ptr<ReactorGLES>& GetReactor() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Allocates a new program object and compiles and links the
-  ///             descriptor's shaders into it. Must be called on the reactor.
+  /// @brief      A program object whose shaders are compiled and linked in two
+  ///             steps: `Compile` issues the work, and `Wait` checks whether
+  ///             linking succeeded. Separating the two allows drivers that
+  ///             compile asynchronously to make progress in between.
   ///
-  /// @return     The linked program, or nullptr on failure.
+  ///             All methods, including the destructor, must be called on the
+  ///             reactor.
   ///
-  static std::shared_ptr<UniqueHandleGLES> CreateProgram(
+  class PendingProgram {
+   public:
+    PendingProgram(std::shared_ptr<ReactorGLES> reactor,
+                   std::shared_ptr<UniqueHandleGLES> handle,
+                   PipelineDescriptor desc,
+                   std::shared_ptr<const ShaderFunction> vert_function,
+                   std::shared_ptr<const ShaderFunction> frag_function);
+
+    ~PendingProgram();
+
+    PendingProgram(const PendingProgram&) = delete;
+
+    PendingProgram& operator=(const PendingProgram&) = delete;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Creates and compiles the shaders, attaches them to the
+    ///             program, and requests that the program be linked.
+    ///
+    /// @return     An error if the shaders could not be created or compiled.
+    ///
+    absl::Status Compile();
+
+    //--------------------------------------------------------------------------
+    /// @brief      Checks the result of linking the program and releases the
+    ///             shaders. Must only be called after `Compile` succeeds.
+    ///
+    /// @return     An error if the program failed to link.
+    ///
+    absl::Status Wait();
+
+    /// The program object. Usable once `Wait` returns OK.
+    const std::shared_ptr<UniqueHandleGLES>& GetHandle() const;
+
+   private:
+    absl::Status CompileShaders();
+
+    absl::Status CheckLinkStatus() const;
+
+    void ReleaseShaders();
+
+    std::shared_ptr<ReactorGLES> reactor_;
+    std::shared_ptr<UniqueHandleGLES> handle_;
+    PipelineDescriptor desc_;
+    std::shared_ptr<const ShaderFunction> vert_function_;
+    std::shared_ptr<const ShaderFunction> frag_function_;
+    GLuint program_ = 0;
+    GLuint vert_shader_ = 0;
+    GLuint frag_shader_ = 0;
+    bool shaders_attached_ = false;
+    bool link_pending_ = false;
+  };
+
+  //----------------------------------------------------------------------------
+  /// @brief      Allocates a new program object for the descriptor's shaders.
+  ///             The returned program has not been compiled yet.
+  ///
+  static PendingProgram CreateProgram(
       const std::shared_ptr<ReactorGLES>& reactor,
       const PipelineDescriptor& desc,
       const std::shared_ptr<const ShaderFunction>& vert_function,

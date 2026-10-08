@@ -127,5 +127,6 @@ impeller_component("gles") {
     "//flutter/fml",
     "//third_party/abseil-cpp/absl/container:flat_hash_map",
     "//third_party/abseil-cpp/absl/container:linked_hash_map",
+    "//third_party/abseil-cpp/absl/status",
   ]
 }

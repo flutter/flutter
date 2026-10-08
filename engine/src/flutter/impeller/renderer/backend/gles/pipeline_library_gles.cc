@@ -8,7 +8,6 @@
 #include <string>
 
 #include "flutter/fml/trace_event.h"
-#include "fml/closure.h"
 #include "impeller/base/promise.h"
 #include "impeller/renderer/backend/gles/pipeline_gles.h"
 #include "impeller/renderer/backend/gles/shader_function_gles.h"
@@ -50,11 +49,10 @@ static std::string GetShaderSource(const ProcTableGLES& gl, GLuint shader) {
   return result;
 }
 
-static void LogShaderCompilationFailure(const ProcTableGLES& gl,
-                                        GLuint shader,
-                                        std::string_view name,
-                                        const fml::Mapping& source_mapping,
-                                        ShaderStage stage) {
+static std::string GetShaderCompilationFailureMessage(const ProcTableGLES& gl,
+                                                      GLuint shader,
+                                                      std::string_view name,
+                                                      ShaderStage stage) {
   std::stringstream stream;
   stream << "Failed to compile ";
   switch (stage) {
@@ -75,98 +73,145 @@ static void LogShaderCompilationFailure(const ProcTableGLES& gl,
   stream << GetShaderInfoLog(gl, shader) << std::endl;
   stream << "Shader source was: " << std::endl;
   stream << GetShaderSource(gl, shader) << std::endl;
-  VALIDATION_LOG << stream.str();
+  return stream.str();
 }
 
-static bool LinkProgram(
-    const ReactorGLES& reactor,
-    GLuint program,
-    const PipelineDescriptor& descriptor,
-    const std::shared_ptr<const ShaderFunction>& vert_function,
-    const std::shared_ptr<const ShaderFunction>& frag_function) {
-  TRACE_EVENT0("impeller", __FUNCTION__);
+PipelineLibraryGLES::PendingProgram::PendingProgram(
+    std::shared_ptr<ReactorGLES> reactor,
+    std::shared_ptr<UniqueHandleGLES> handle,
+    PipelineDescriptor desc,
+    std::shared_ptr<const ShaderFunction> vert_function,
+    std::shared_ptr<const ShaderFunction> frag_function)
+    : reactor_(std::move(reactor)),
+      handle_(std::move(handle)),
+      desc_(std::move(desc)),
+      vert_function_(std::move(vert_function)),
+      frag_function_(std::move(frag_function)) {}
 
-  std::shared_ptr<const fml::Mapping> vert_mapping =
-      ShaderFunctionGLES::Cast(*vert_function).GetSourceMapping();
-  std::shared_ptr<const fml::Mapping> frag_mapping =
-      ShaderFunctionGLES::Cast(*frag_function).GetSourceMapping();
+PipelineLibraryGLES::PendingProgram::~PendingProgram() {
+  ReleaseShaders();
+}
 
-  const ProcTableGLES& gl = reactor.GetProcTable();
+absl::Status PipelineLibraryGLES::PendingProgram::Compile() {
+  TRACE_EVENT0("impeller", "PendingProgram::Compile");
 
-  GLuint vert_shader = gl.CreateShader(GL_VERTEX_SHADER);
-  GLuint frag_shader = gl.CreateShader(GL_FRAGMENT_SHADER);
+  std::optional<GLuint> program = reactor_->GetGLHandle(handle_->Get());
+  if (!program.has_value()) {
+    return absl::InternalError("Could not obtain program handle.");
+  }
+  program_ = *program;
 
-  if (vert_shader == 0 || frag_shader == 0) {
-    VALIDATION_LOG << "Could not create shader handles.";
-    return false;
+  if (absl::Status status = CompileShaders(); !status.ok()) {
+    ReleaseShaders();
+    return status;
   }
 
-  gl.SetDebugLabel(DebugResourceType::kShader, vert_shader,
-                   std::format("{} Vertex Shader", descriptor.GetLabel()));
-  gl.SetDebugLabel(DebugResourceType::kShader, frag_shader,
-                   std::format("{} Fragment Shader", descriptor.GetLabel()));
-
-  fml::ScopedCleanupClosure delete_vert_shader(
-      [&gl, vert_shader]() { gl.DeleteShader(vert_shader); });
-  fml::ScopedCleanupClosure delete_frag_shader(
-      [&gl, frag_shader]() { gl.DeleteShader(frag_shader); });
-
-  gl.ShaderSourceMapping(vert_shader, *vert_mapping,
-                         descriptor.GetSpecializationConstants());
-  gl.ShaderSourceMapping(frag_shader, *frag_mapping,
-                         descriptor.GetSpecializationConstants());
-
-  gl.CompileShader(vert_shader);
-  gl.CompileShader(frag_shader);
-
-  GLint vert_status = GL_FALSE;
-  GLint frag_status = GL_FALSE;
-
-  gl.GetShaderiv(vert_shader, GL_COMPILE_STATUS, &vert_status);
-  gl.GetShaderiv(frag_shader, GL_COMPILE_STATUS, &frag_status);
-
-  if (vert_status != GL_TRUE) {
-    LogShaderCompilationFailure(gl, vert_shader, descriptor.GetLabel(),
-                                *vert_mapping, ShaderStage::kVertex);
-    return false;
-  }
-
-  if (frag_status != GL_TRUE) {
-    LogShaderCompilationFailure(gl, frag_shader, descriptor.GetLabel(),
-                                *frag_mapping, ShaderStage::kFragment);
-    return false;
-  }
-
-  gl.AttachShader(program, vert_shader);
-  gl.AttachShader(program, frag_shader);
-
-  fml::ScopedCleanupClosure detach_vert_shader(
-      [&gl, program, vert_shader]() { gl.DetachShader(program, vert_shader); });
-  fml::ScopedCleanupClosure detach_frag_shader(
-      [&gl, program, frag_shader]() { gl.DetachShader(program, frag_shader); });
+  const ProcTableGLES& gl = reactor_->GetProcTable();
+  gl.AttachShader(program_, vert_shader_);
+  gl.AttachShader(program_, frag_shader_);
+  shaders_attached_ = true;
 
   for (const ShaderStageIOSlot& stage_input :
-       descriptor.GetVertexDescriptor()->GetStageInputs()) {
-    gl.BindAttribLocation(program,                                    //
+       desc_.GetVertexDescriptor()->GetStageInputs()) {
+    gl.BindAttribLocation(program_,                                   //
                           static_cast<GLuint>(stage_input.location),  //
                           stage_input.name                            //
     );
   }
 
-  gl.LinkProgram(program);
+  gl.LinkProgram(program_);
+  link_pending_ = true;
+  return absl::OkStatus();
+}
 
-  GLint link_status = GL_FALSE;
-  gl.GetProgramiv(program, GL_LINK_STATUS, &link_status);
-
-  if (link_status != GL_TRUE) {
-    VALIDATION_LOG << "Could not link shader program: "
-                   << gl.GetProgramInfoLogString(program)
-                   << "\nVertex Shader:\n"
-                   << GetShaderSource(gl, vert_shader) << "\nFragment Shader:\n"
-                   << GetShaderSource(gl, frag_shader);
-    return false;
+absl::Status PipelineLibraryGLES::PendingProgram::Wait() {
+  TRACE_EVENT0("impeller", "PendingProgram::Wait");
+  if (!link_pending_) {
+    return absl::FailedPreconditionError(
+        "Compile must succeed before calling Wait.");
   }
-  return true;
+  link_pending_ = false;
+  absl::Status status = CheckLinkStatus();
+  ReleaseShaders();
+  return status;
+}
+
+const std::shared_ptr<UniqueHandleGLES>&
+PipelineLibraryGLES::PendingProgram::GetHandle() const {
+  return handle_;
+}
+
+absl::Status PipelineLibraryGLES::PendingProgram::CompileShaders() {
+  const ProcTableGLES& gl = reactor_->GetProcTable();
+  const std::shared_ptr<const fml::Mapping>& vert_mapping =
+      ShaderFunctionGLES::Cast(*vert_function_).GetSourceMapping();
+  const std::shared_ptr<const fml::Mapping>& frag_mapping =
+      ShaderFunctionGLES::Cast(*frag_function_).GetSourceMapping();
+
+  vert_shader_ = gl.CreateShader(GL_VERTEX_SHADER);
+  frag_shader_ = gl.CreateShader(GL_FRAGMENT_SHADER);
+  if (vert_shader_ == 0 || frag_shader_ == 0) {
+    return absl::InternalError("Could not create shader handles.");
+  }
+
+  gl.SetDebugLabel(DebugResourceType::kShader, vert_shader_,
+                   std::format("{} Vertex Shader", desc_.GetLabel()));
+  gl.SetDebugLabel(DebugResourceType::kShader, frag_shader_,
+                   std::format("{} Fragment Shader", desc_.GetLabel()));
+
+  gl.ShaderSourceMapping(vert_shader_, *vert_mapping,
+                         desc_.GetSpecializationConstants());
+  gl.ShaderSourceMapping(frag_shader_, *frag_mapping,
+                         desc_.GetSpecializationConstants());
+
+  gl.CompileShader(vert_shader_);
+  gl.CompileShader(frag_shader_);
+
+  GLint vert_status = GL_FALSE;
+  GLint frag_status = GL_FALSE;
+  gl.GetShaderiv(vert_shader_, GL_COMPILE_STATUS, &vert_status);
+  gl.GetShaderiv(frag_shader_, GL_COMPILE_STATUS, &frag_status);
+
+  if (vert_status != GL_TRUE) {
+    return absl::InternalError(GetShaderCompilationFailureMessage(
+        gl, vert_shader_, desc_.GetLabel(), ShaderStage::kVertex));
+  }
+  if (frag_status != GL_TRUE) {
+    return absl::InternalError(GetShaderCompilationFailureMessage(
+        gl, frag_shader_, desc_.GetLabel(), ShaderStage::kFragment));
+  }
+  return absl::OkStatus();
+}
+
+absl::Status PipelineLibraryGLES::PendingProgram::CheckLinkStatus() const {
+  const ProcTableGLES& gl = reactor_->GetProcTable();
+  GLint link_status = GL_FALSE;
+  gl.GetProgramiv(program_, GL_LINK_STATUS, &link_status);
+  if (link_status == GL_TRUE) {
+    return absl::OkStatus();
+  }
+  std::stringstream stream;
+  stream << "Could not link shader program: "
+         << gl.GetProgramInfoLogString(program_) << "\nVertex Shader:\n"
+         << GetShaderSource(gl, vert_shader_) << "\nFragment Shader:\n"
+         << GetShaderSource(gl, frag_shader_);
+  return absl::InternalError(stream.str());
+}
+
+void PipelineLibraryGLES::PendingProgram::ReleaseShaders() {
+  if (vert_shader_ == 0 && frag_shader_ == 0) {
+    return;
+  }
+  const ProcTableGLES& gl = reactor_->GetProcTable();
+  if (shaders_attached_) {
+    gl.DetachShader(program_, vert_shader_);
+    gl.DetachShader(program_, frag_shader_);
+    shaders_attached_ = false;
+  }
+  gl.DeleteShader(vert_shader_);
+  gl.DeleteShader(frag_shader_);
+  vert_shader_ = 0;
+  frag_shader_ = 0;
 }
 
 // |PipelineLibrary|
@@ -174,7 +219,7 @@ bool PipelineLibraryGLES::IsValid() const {
   return reactor_ != nullptr;
 }
 
-std::shared_ptr<UniqueHandleGLES> PipelineLibraryGLES::CreateProgram(
+PipelineLibraryGLES::PendingProgram PipelineLibraryGLES::CreateProgram(
     const std::shared_ptr<ReactorGLES>& reactor,
     const PipelineDescriptor& desc,
     const std::shared_ptr<const ShaderFunction>& vert_function,
@@ -185,19 +230,8 @@ std::shared_ptr<UniqueHandleGLES> PipelineLibraryGLES::CreateProgram(
           ? std::make_shared<UniqueHandleGLES>(reactor, HandleType::kProgram)
           : std::make_shared<UniqueHandleGLES>(
                 UniqueHandleGLES::MakeUntracked(reactor, HandleType::kProgram));
-
-  std::optional<GLuint> program = reactor->GetGLHandle(program_handle->Get());
-  if (!program.has_value()) {
-    VALIDATION_LOG << "Could not obtain program handle.";
-    return nullptr;
-  }
-
-  if (!LinkProgram(*reactor, *program, desc, vert_function, frag_function)) {
-    VALIDATION_LOG << "Could not link pipeline program.";
-    return nullptr;
-  }
-
-  return program_handle;
+  return PendingProgram(reactor, std::move(program_handle), desc, vert_function,
+                        frag_function);
 }
 
 std::shared_ptr<PipelineGLES> PipelineLibraryGLES::CreatePipeline(
@@ -301,12 +335,19 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
       std::shared_ptr<UniqueHandleGLES> program =
           library.GetCachedProgram(program_key);
       if (!program) {
-        program = CreateProgram(reactor, descriptor, vert_function,
-                                frag_function, threadsafe);
-        if (!program) {
+        PendingProgram pending_program = CreateProgram(
+            reactor, descriptor, vert_function, frag_function, threadsafe);
+        absl::Status status = pending_program.Compile();
+        if (status.ok()) {
+          status = pending_program.Wait();
+        }
+        if (!status.ok()) {
+          VALIDATION_LOG << "Could not link pipeline program: "
+                         << status.message();
           promise->set_value(nullptr);
           return;
         }
+        program = pending_program.GetHandle();
         library.CacheProgram(program_key, program);
       }
       promise->set_value(
