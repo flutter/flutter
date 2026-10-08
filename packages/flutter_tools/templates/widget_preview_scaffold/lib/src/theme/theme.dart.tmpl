@@ -76,6 +76,7 @@ ThemeData _baseTheme({
         minimumSize: const Size(defaultButtonHeight, defaultButtonHeight),
         fixedSize: const Size(defaultButtonHeight, defaultButtonHeight),
         iconSize: defaultIconSize,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
