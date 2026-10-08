@@ -131,7 +131,6 @@ dependencies:
   http_parser: 4.1.2
   intl: ^0.20.3
   io: 1.1.0
-  isolate: 2.1.1
   json_annotation: 4.12.0
   leak_tracker: 11.0.2
   leak_tracker_flutter_testing: ^3.0.10
@@ -224,4 +223,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 6gsu5c
+# PUBSPEC CHECKSUM: t45n90
