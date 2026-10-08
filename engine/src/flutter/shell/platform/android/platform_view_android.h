@@ -20,6 +20,7 @@
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
+#include "flutter/shell/platform/embedder/platform_view_embedder.h"
 #include "shell/platform/android/image_external_texture.h"
 
 namespace flutter {
@@ -40,7 +41,11 @@ class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
   const bool lazy_shader_mode_;
 };
 
-class PlatformViewAndroid final : public PlatformView {
+// Renders on its own (Android surfaces and contexts) and takes the remaining
+// platform callbacks from the PlatformViewEmbedder dispatch table. The table
+// is empty for now, so every override below still decides the behavior. An
+// override that is deleted falls back to the embedder API callback for it.
+class PlatformViewAndroid final : public PlatformViewEmbedder {
  public:
   static bool Register(JNIEnv* env);
 

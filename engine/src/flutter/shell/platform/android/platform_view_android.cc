@@ -153,7 +153,7 @@ PlatformViewAndroid::PlatformViewAndroid(
     const flutter::TaskRunners& task_runners,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
     const std::shared_ptr<flutter::AndroidContext>& android_context)
-    : PlatformView(delegate, task_runners),
+    : PlatformViewEmbedder(delegate, task_runners, PlatformDispatchTable{}),
       jni_facade_(jni_facade),
       android_context_(android_context),
       platform_view_android_delegate_(jni_facade),
