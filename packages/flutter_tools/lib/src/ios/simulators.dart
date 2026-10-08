@@ -870,7 +870,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   /// Completes once the log stream is ready to deliver events, or has exited.
   ///
   /// `log stream` is ready once it prints its first line (a "Filtering the log
-  /// data using ..." header); events logged before that are dropped.
+  /// data using ..." header).
   ///
   /// Recreated on every listen, since each one starts a new `log stream`.
   var _ready = Completer<void>();
