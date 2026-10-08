@@ -16,6 +16,17 @@
 
 namespace flutter::testing {
 
+//------------------------------------------------------------------------------
+/// @brief      Returns the root of the source tree (the GN `//` directory).
+///
+///             The build system compiles a default location into the test
+///             executable. Setting the `FLUTTER_TEST_SOURCE_DIR` environment
+///             variable overrides it, which lets test runners relocate the
+///             sources (for example when running from a sandbox or runfiles
+///             tree).
+///
+/// @return     The source path.
+///
 const char* GetSourcePath();
 
 //------------------------------------------------------------------------------
@@ -25,6 +36,9 @@ const char* GetSourcePath();
 ///             this symbol, the unit-test target needs to depend on a
 ///             `test_fixtures` target.
 ///
+///             Setting the `FLUTTER_TEST_FIXTURES_DIR` environment variable
+///             overrides the compiled-in location.
+///
 /// @return     The fixtures path.
 ///
 const char* GetFixturesPath();
@@ -32,9 +46,28 @@ const char* GetFixturesPath();
 //------------------------------------------------------------------------------
 /// @brief      Returns the directory containing assets shared across all tests.
 ///
+///             Setting the `FLUTTER_TEST_TESTING_ASSETS_DIR` environment
+///             variable overrides the compiled-in location.
+///
 /// @return     The testing assets path.
 ///
 const char* GetTestingAssetsPath();
+
+//------------------------------------------------------------------------------
+/// @name       Compiled-in default locations.
+///
+///             These are not implemented in this library. The build system
+///             generates a translation unit defining them for every test
+///             executable (see the `fixtures_location` template in
+///             `//flutter/testing/testing.gni`). Tests must not call them
+///             directly; use the accessors above, which honor the environment
+///             overrides.
+///
+/// @{
+const char* GetCompiledInSourcePath();
+const char* GetCompiledInFixturesPath();
+const char* GetCompiledInTestingAssetsPath();
+/// @}
 
 //------------------------------------------------------------------------------
 /// @brief      Returns the default path to kernel_blob.bin. This file is within

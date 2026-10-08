@@ -4,12 +4,46 @@
 
 #include "testing.h"
 
+#include <cstdlib>
 #include <utility>
 
 #include "flutter/fml/file.h"
 #include "flutter/fml/paths.h"
 
 namespace flutter::testing {
+
+namespace {
+
+// Returns the value of the environment variable `env_var` if it is set and
+// non-empty, and `default_path` otherwise.
+std::string PathFromEnvironmentOrDefault(const char* env_var,
+                                         const char* default_path) {
+  const char* value = std::getenv(env_var);
+  if (value == nullptr || value[0] == '\0') {
+    return default_path;
+  }
+  return value;
+}
+
+}  // namespace
+
+const char* GetSourcePath() {
+  static const std::string path = PathFromEnvironmentOrDefault(
+      "FLUTTER_TEST_SOURCE_DIR", GetCompiledInSourcePath());
+  return path.c_str();
+}
+
+const char* GetFixturesPath() {
+  static const std::string path = PathFromEnvironmentOrDefault(
+      "FLUTTER_TEST_FIXTURES_DIR", GetCompiledInFixturesPath());
+  return path.c_str();
+}
+
+const char* GetTestingAssetsPath() {
+  static const std::string path = PathFromEnvironmentOrDefault(
+      "FLUTTER_TEST_TESTING_ASSETS_DIR", GetCompiledInTestingAssetsPath());
+  return path.c_str();
+}
 
 std::string GetCurrentTestName() {
   return ::testing::UnitTest::GetInstance()->current_test_info()->name();

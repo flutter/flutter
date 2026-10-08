@@ -24,8 +24,10 @@ declare_args() {
   enable_ios_unittests = is_ios && flutter_runtime_mode == "debug"
 }
 
-# Creates a translation unit that defines the flutter::testing::GetFixturesPath
-# method that tests can use to locate their fixtures.
+# Creates a translation unit that defines the compiled-in default locations
+# that flutter::testing::GetSourcePath, GetFixturesPath and
+# GetTestingAssetsPath (see //flutter/testing/testing.h) fall back to when the
+# corresponding FLUTTER_TEST_*_DIR environment variable is not set.
 #
 # Arguments
 #     assets_dir (required): The assets directory
@@ -42,9 +44,9 @@ template("fixtures_location") {
   # emitted by write_file() to comply with -Wnewline-eof.
   location_source = [
     "namespace flutter { namespace testing { ",
-    "const char* GetSourcePath() {return \"$source_path\";} ",
-    "const char* GetFixturesPath() {return \"$location_path\";} ",
-    "const char* GetTestingAssetsPath() {return \"$testing_assets_path\";} ",
+    "const char* GetCompiledInSourcePath() {return \"$source_path\";} ",
+    "const char* GetCompiledInFixturesPath() {return \"$location_path\";} ",
+    "const char* GetCompiledInTestingAssetsPath() {return \"$testing_assets_path\";} ",
     "}}",
   ]
   location_source_path = "$target_gen_dir/_fl_$target_name.cc"
