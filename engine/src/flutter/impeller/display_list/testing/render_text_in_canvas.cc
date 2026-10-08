@@ -4,6 +4,7 @@
 
 #include "impeller/display_list/testing/render_text_in_canvas.h"
 
+#include "flutter/testing/sk_data_fixtures.h"
 #include "flutter/testing/testing.h"
 #include "impeller/display_list/dl_text_impeller.h"
 #include "txt/platform.h"

@@ -13,6 +13,7 @@
 #include "runtime/test_font_data.h"
 #include "skia/paragraph_builder_skia.h"
 #include "testing/canvas_test.h"
+#include "testing/sk_data_fixtures.h"
 #include "testing/testing.h"
 #include "txt/platform.h"
 

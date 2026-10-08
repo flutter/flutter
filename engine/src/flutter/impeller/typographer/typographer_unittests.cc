@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/testing/dl_test_snippets.h"
+#include "flutter/testing/sk_data_fixtures.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/core/host_buffer.h"

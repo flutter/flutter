@@ -12,15 +12,17 @@ config("dynamic_symbols") {
   }
 }
 
-source_set("testing_lib") {
+# Test helpers that depend only on fml and googletest. Tests of code below
+# display_list (fml, tooling, ...) should depend on this target and
+# ":run_all_unittests" rather than on ":testing", so that they do not link
+# display_list, Impeller or Skia.
+source_set("testing_core") {
   testonly = true
 
   sources = [
     "assertions.h",
     "debugger_detection.cc",
     "debugger_detection.h",
-    "display_list_testing.cc",
-    "display_list_testing.h",
     "logger_listener.cc",
     "logger_listener.h",
     "post_task_sync.cc",
@@ -38,16 +40,34 @@ source_set("testing_lib") {
   ]
 
   public_deps = [
-    "//flutter/display_list",
     "//flutter/fml",
-    "//flutter/impeller/typographer",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
   ]
   public_configs = [ "//flutter:config" ]
 }
 
-source_set("testing") {
+# ":testing_core" plus the display_list test helpers.
+source_set("testing_lib") {
+  testonly = true
+
+  sources = [
+    "display_list_testing.cc",
+    "display_list_testing.h",
+    "sk_data_fixtures.cc",
+    "sk_data_fixtures.h",
+  ]
+
+  public_deps = [
+    ":testing_core",
+    "//flutter/display_list",
+    "//flutter/impeller/typographer",
+  ]
+  public_configs = [ "//flutter:config" ]
+}
+
+# The gtest main() used by the engine's unit test binaries.
+source_set("run_all_unittests") {
   testonly = true
 
   sources = [ "run_all_unittests.cc" ]
@@ -57,8 +77,18 @@ source_set("testing") {
     configs += [ "//flutter/shell/platform/linux/config:gtk" ]
   }
 
-  public_deps = [ ":testing_lib" ]
+  public_deps = [ ":testing_core" ]
   public_configs = [ ":dynamic_symbols" ]
+}
+
+# The gtest main() together with all test helpers.
+source_set("testing") {
+  testonly = true
+
+  public_deps = [
+    ":run_all_unittests",
+    ":testing_lib",
+  ]
 }
 
 source_set("dart") {
