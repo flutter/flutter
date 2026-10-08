@@ -237,8 +237,8 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
   // engine's frame texture is accessed directly without using EGLImage.
   self->task_runner =
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
-  self->compositor =
-      fl_compositor_opengl_new(fl_engine_get_opengl_manager(self->engine));
+  self->compositor = fl_compositor_opengl_new(
+      fl_engine_get_opengl_manager(self->engine), TRUE);
 
   // Create a subsurface on the toplevel's surface. This asks for a frame, as
   // any rendered before this point were dropped.

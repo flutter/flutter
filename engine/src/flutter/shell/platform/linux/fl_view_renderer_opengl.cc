@@ -136,8 +136,8 @@ static void fl_view_renderer_opengl_realize(GtkWidget* widget) {
   self->frame = fl_opengl_frame_new();
   self->task_runner =
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
-  self->compositor =
-      fl_compositor_opengl_new(fl_engine_get_opengl_manager(self->engine));
+  self->compositor = fl_compositor_opengl_new(
+      fl_engine_get_opengl_manager(self->engine), FALSE);
 
   // Any frames rendered before this point were dropped, as there was nothing
   // to present them to. Ask for another one so the view isn't left empty until

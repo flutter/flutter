@@ -47,12 +47,26 @@ void fl_scrolling_manager_set_last_mouse_position(FlScrollingManager* manager,
  * fl_scrolling_manager_handle_scroll_event:
  * @manager: an #FlScrollingManager.
  * @event: the scroll event.
+ * @x: the event x-position, in widget coordinates.
+ * @y: the event y-position, in widget coordinates.
+ * @position_valid: whether @x and @y contain a valid event position.
+ * @delta_x: the normalized horizontal scroll delta.
+ * @delta_y: the normalized vertical scroll delta.
  * @scale_factor: the GTK scaling factor of the window.
  *
  * Inform the scrolling manager of a scroll event.
  */
 void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* manager,
+#if FLUTTER_LINUX_GTK4
+                                              GdkEvent* event,
+#else
                                               GdkEventScroll* event,
+#endif
+                                              gdouble x,
+                                              gdouble y,
+                                              gboolean position_valid,
+                                              gdouble delta_x,
+                                              gdouble delta_y,
                                               gint scale_factor);
 
 /**

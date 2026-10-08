@@ -40,7 +40,9 @@ void main() {
 
       await const UnpackLinux(TargetPlatform.linux_x64).build(testEnvironment);
 
+      // GTK3 remains the default for compatibility.
       expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'), exists);
+      expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk4.so'), isNot(exists));
       expect(fileSystem.file('linux/flutter/ephemeral/unrelated-stuff'), isNot(exists));
 
       // Check if the target files are copied correctly.
@@ -70,6 +72,60 @@ void main() {
     },
   );
 
+  testWithoutContext(
+    'Copies gtk4 library when FLUTTER_LINUX_GTK=gtk4 is set',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final artifacts = Artifacts.test();
+      setUpCacheDirectory(fileSystem, artifacts);
+
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{
+          kBuildMode: 'debug',
+          'FLUTTER_LINUX_GTK': 'gtk4',
+        },
+        artifacts: artifacts,
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+      );
+      testEnvironment.buildDir.createSync(recursive: true);
+
+      await const UnpackLinux(TargetPlatform.linux_x64).build(testEnvironment);
+
+      expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk4.so'), exists);
+      expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'), isNot(exists));
+    },
+  );
+
+  testWithoutContext(
+    'Copies gtk3 library when FLUTTER_LINUX_GTK=gtk3 is set',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final artifacts = Artifacts.test();
+      setUpCacheDirectory(fileSystem, artifacts);
+
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{
+          kBuildMode: 'debug',
+          'FLUTTER_LINUX_GTK': 'gtk3',
+        },
+        artifacts: artifacts,
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+      );
+      testEnvironment.buildDir.createSync(recursive: true);
+
+      await const UnpackLinux(TargetPlatform.linux_x64).build(testEnvironment);
+
+      expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'), exists);
+      expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk4.so'), isNot(exists));
+    },
+  );
+
   // This test is basically the same logic as the above test.
   // The difference is the target CPU architecture.
   testWithoutContext(
@@ -91,7 +147,9 @@ void main() {
 
       await const UnpackLinux(TargetPlatform.linux_arm64).build(testEnvironment);
 
+      // GTK3 remains the default for compatibility.
       expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'), exists);
+      expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk4.so'), isNot(exists));
       expect(fileSystem.file('linux/flutter/ephemeral/unrelated-stuff'), isNot(exists));
 
       // Check if the target files are copied correctly.
@@ -338,8 +396,10 @@ void setUpCacheDirectory(FileSystem fileSystem, Artifacts artifacts) {
   );
   fileSystem.file('$desktopPathForX64/unrelated-stuff').createSync(recursive: true);
   fileSystem.file('$desktopPathForX64/libflutter_linux_gtk.so').createSync(recursive: true);
+  fileSystem.file('$desktopPathForX64/libflutter_linux_gtk4.so').createSync(recursive: true);
   fileSystem.file('$desktopPathForArm64/unrelated-stuff').createSync(recursive: true);
   fileSystem.file('$desktopPathForArm64/libflutter_linux_gtk.so').createSync(recursive: true);
+  fileSystem.file('$desktopPathForArm64/libflutter_linux_gtk4.so').createSync(recursive: true);
 
   final String headersPathForX64 = artifacts.getArtifactPath(
     Artifact.linuxHeaders,

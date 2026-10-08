@@ -1065,6 +1065,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       // Needed for Dart plugin registry generation.
       kTargetFile: mainPath,
       kBuildMode: debuggingOptions.buildInfo.mode.cliName,
+      ...debuggingOptions.buildInfo.toBuildSystemEnvironment(),
     },
   );
 

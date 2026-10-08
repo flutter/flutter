@@ -29,6 +29,9 @@ G_DECLARE_FINAL_TYPE(FlOpenGLManager,
  */
 FlOpenGLManager* fl_opengl_manager_new();
 
+// Returns the EGL display used by Flutter's rendering contexts.
+EGLDisplay fl_opengl_manager_get_egl_display(FlOpenGLManager* manager);
+
 /**
  * fl_opengl_manager_make_current:
  * @manager: an #FlOpenGLManager.

@@ -15,6 +15,10 @@ _pkg_configs = [
     package = "gtk+-3.0"
   },
   {
+    name = "gtk4"
+    package = "gtk4"
+  },
+  {
     name = "egl"
     package = "egl"
   },

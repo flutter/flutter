@@ -121,6 +121,20 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       allowed: <String>['java', 'kotlin'],
       help: 'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
     );
+    parser.addOption(
+      'linux-gtk',
+      defaultsTo: 'gtk3',
+      allowed: <String>['gtk4', 'gtk3', 'linux-gtk-unified'],
+      help:
+          'Select the GTK Linux template (gtk3 default, gtk4 opt-in, '
+          'linux-gtk-unified experimental).',
+    );
+    parser.addOption(
+      'linux-dir',
+      help:
+          'Override the Linux runner directory (relative to the project root). '
+          'Use this to generate an alternate Linux runner such as linux-gtk4.',
+    );
     parser.addFlag(
       'skip-name-checks',
       help:
@@ -614,6 +628,8 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       darwin: includeDarwin,
       web: includeWeb,
       linux: includeLinux,
+      linuxGtkVersion: stringArg('linux-gtk') ?? 'gtk3',
+      linuxDir: stringArg('linux-dir'),
       macos: includeMacos,
       windows: includeWindows,
       dartSdkVersionBounds: '^$dartSdk',

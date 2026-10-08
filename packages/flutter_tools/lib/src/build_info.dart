@@ -23,6 +23,9 @@ import 'runner/flutter_command.dart' show FlutterOptions;
 /// Whether icon font subsetting is enabled by default.
 const kIconTreeShakerEnabledDefault = true;
 
+/// Dart and build-system define for the selected Linux GTK variant.
+const kLinuxGtkDartDefine = 'FLUTTER_LINUX_GTK';
+
 /// Information about a build to be performed or used.
 class BuildInfo {
   const BuildInfo(
@@ -57,6 +60,7 @@ class BuildInfo {
     this.useLocalCanvasKit = false,
     this.includeUnsupportedPlatformLibraryStubs = false,
     this.webEnableHotReload = false,
+    this.linuxGtkVersion,
     this.deprecatedJsInterop,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
@@ -73,6 +77,7 @@ class BuildInfo {
     String? initializeFromDill,
     List<String>? dartDefines,
     bool? includeUnsupportedPlatformLibraryStubs,
+    String? linuxGtkVersion,
   }) {
     return BuildInfo(
       mode,
@@ -106,6 +111,7 @@ class BuildInfo {
       includeUnsupportedPlatformLibraryStubs:
           includeUnsupportedPlatformLibraryStubs ?? this.includeUnsupportedPlatformLibraryStubs,
       webEnableHotReload: webEnableHotReload,
+      linuxGtkVersion: linuxGtkVersion ?? this.linuxGtkVersion,
       deprecatedJsInterop: deprecatedJsInterop,
       treeShakeIcons: treeShakeIcons,
     );
@@ -115,6 +121,9 @@ class BuildInfo {
 
   /// Whether the build should subset icon fonts.
   final bool treeShakeIcons;
+
+  /// Linux GTK variant selected by `--linux-gtk`, if any.
+  final String? linuxGtkVersion;
 
   /// Represents a custom Android product flavor or an Xcode scheme, null for
   /// using the default.
@@ -412,6 +421,7 @@ class BuildInfo {
       kBuildName: ?buildName,
       kBuildNumber: ?buildNumber,
       if (useLocalCanvasKit) kUseLocalCanvasKitFlag: useLocalCanvasKit.toString(),
+      if (linuxGtkVersion != null) kLinuxGtkDartDefine: linuxGtkVersion!,
     };
   }
 
@@ -437,6 +447,7 @@ class BuildInfo {
       'PACKAGE_CONFIG': packageConfigPath,
       'CODE_SIZE_DIRECTORY': ?codeSizeDirectory,
       'FLAVOR': ?flavor,
+      if (linuxGtkVersion != null) kLinuxGtkDartDefine: linuxGtkVersion!,
     };
   }
 
@@ -934,13 +945,18 @@ String getWebBuildDirectory({required Config config, required FileSystem fileSys
 ///
 /// When [flavor] is non-empty, a `/<flavor>` segment is inserted so that
 /// different flavors can coexist on disk without overwriting each other.
-String getLinuxBuildDirectory([TargetPlatform? targetPlatform, String? flavor]) {
+String getLinuxBuildDirectory([
+  TargetPlatform? targetPlatform,
+  String? flavor,
+  String? linuxGtkVersion,
+]) {
   final String arch = (targetPlatform == null)
       ? _getCurrentHostPlatformArchName()
       : targetPlatform.simpleName;
+  final String baseDir = linuxGtkVersion == 'gtk4' ? 'linux-gtk4' : 'linux';
   final String subDirs = (flavor != null && flavor.isNotEmpty)
-      ? globals.fs.path.join('linux', arch, flavor)
-      : globals.fs.path.join('linux', arch);
+      ? globals.fs.path.join(baseDir, arch, flavor)
+      : globals.fs.path.join(baseDir, arch);
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 

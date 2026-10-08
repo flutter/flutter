@@ -4,9 +4,16 @@
 
 #include <epoxy/egl.h>
 #include <epoxy/gl.h>
+#if FLUTTER_LINUX_GTK4
+#include <gdk/wayland/gdkwayland.h>
+#ifdef GDK_WINDOWING_X11
+#include <gdk/x11/gdkx.h>
+#endif
+#else
 #include <gdk/gdkwayland.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
+#endif
 #endif
 
 #include <cstring>
@@ -96,6 +103,11 @@ FlOpenGLManager* fl_opengl_manager_new() {
   FlOpenGLManager* self =
       FL_OPENGL_MANAGER(g_object_new(fl_opengl_manager_get_type(), nullptr));
   return self;
+}
+
+EGLDisplay fl_opengl_manager_get_egl_display(FlOpenGLManager* self) {
+  g_return_val_if_fail(FL_IS_OPENGL_MANAGER(self), EGL_NO_DISPLAY);
+  return self->display;
 }
 
 gboolean fl_opengl_manager_make_current(FlOpenGLManager* self) {
