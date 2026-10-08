@@ -53,42 +53,9 @@ final _dotHomeStudioVersionMatcher = RegExp(r'^\.?(AndroidStudio[^\d]*)([\d.]+)'
 
 class AndroidStudio {
   /// A [version] value of null represents an unknown version.
-  factory AndroidStudio(
-    String directory, {
-    required ToolContext toolContext,
-    String? configuredPath,
-    String? presetPluginsPath,
-    String studioAppName = 'AndroidStudio',
-    Version? version,
-  }) {
-    final ToolContext(
-      :FileSystem fs,
-      :FileSystemUtils fileSystemUtils,
-      :Platform platform,
-      :ProcessManager processManager,
-      :ProcessUtils processUtils,
-    ) = toolContext;
-    return AndroidStudio._(
-      directory,
-      configuredPath: configuredPath,
-      fileSystem: fs,
-      fileSystemUtils: fileSystemUtils,
-      platform: platform,
-      presetPluginsPath: presetPluginsPath,
-      processManager: processManager,
-      processUtils: processUtils,
-      studioAppName: studioAppName,
-      version: version,
-    );
-  }
-
-  AndroidStudio._(
+  AndroidStudio(
     this.directory, {
-    required this._fileSystem,
-    required this._fileSystemUtils,
-    required this._platform,
-    required this._processManager,
-    required this._processUtils,
+    required this._toolContext,
     this.configuredPath,
     this.presetPluginsPath,
     this.studioAppName = 'AndroidStudio',
@@ -99,22 +66,15 @@ class AndroidStudio {
 
   static AndroidStudio? fromMacOSBundle(
     String bundlePath, {
+    required PlistParser plistParser,
     required ToolContext toolContext,
     String? configuredPath,
-    PlistParser? plistParser,
   }) {
-    final ToolContext(
-      :FileSystem fs,
-      :FileSystemUtils fileSystemUtils,
-      :Logger logger,
-      :ProcessManager processManager,
-    ) = toolContext;
-    final PlistParser resolvedPlistParser =
-        plistParser ?? PlistParser(fileSystem: fs, logger: logger, processManager: processManager);
+    final ToolContext(:FileSystem fs, :FileSystemUtils fileSystemUtils) = toolContext;
 
     final String studioPath = fs.path.join(bundlePath, 'Contents');
     final String plistFile = fs.path.join(studioPath, 'Info.plist');
-    final Map<String, Object> plistValues = resolvedPlistParser.parseFile(plistFile);
+    final Map<String, Object> plistValues = plistParser.parseFile(plistFile);
     // If we've found a JetBrainsToolbox wrapper, ignore it.
     if (plistValues.containsKey('JetBrainsToolboxApp')) {
       return null;
@@ -221,11 +181,7 @@ class AndroidStudio {
   final String? configuredPath;
   final String? presetPluginsPath;
 
-  final FileSystem _fileSystem;
-  final FileSystemUtils _fileSystemUtils;
-  final Platform _platform;
-  final ProcessManager _processManager;
-  final ProcessUtils _processUtils;
+  final ToolContext _toolContext;
 
   String? _javaPath;
   var _isValid = false;
@@ -246,10 +202,13 @@ class AndroidStudio {
       return presetPluginsPath!;
     }
 
+    final ToolContext(:FileSystem fs, :FileSystemUtils fileSystemUtils, :Platform platform) =
+        _toolContext;
+
     // JetBrains Toolbox writes plugins to a sibling directory with a ".plugins" suffix.
-    if (!_platform.isMacOS) {
+    if (!platform.isMacOS) {
       final toolboxPluginsPath = '$directory.plugins';
-      if (_fileSystem.directory(toolboxPluginsPath).existsSync()) {
+      if (fs.directory(toolboxPluginsPath).existsSync()) {
         return toolboxPluginsPath;
       }
     }
@@ -260,14 +219,14 @@ class AndroidStudio {
 
     final int major = version!.major;
     final int minor = version!.minor;
-    final String? homeDirPath = _fileSystemUtils.homeDirPath;
+    final String? homeDirPath = fileSystemUtils.homeDirPath;
     if (homeDirPath == null) {
       return null;
     }
-    if (_platform.isMacOS) {
+    if (platform.isMacOS) {
       /// plugin path of Android Studio has been changed after version 4.1.
       if (major >= 4 && minor >= 1) {
-        return _fileSystem.path.join(
+        return fs.path.join(
           homeDirPath,
           'Library',
           'Application Support',
@@ -275,7 +234,7 @@ class AndroidStudio {
           'AndroidStudio$major.$minor',
         );
       } else {
-        return _fileSystem.path.join(
+        return fs.path.join(
           homeDirPath,
           'Library',
           'Application Support',
@@ -283,8 +242,8 @@ class AndroidStudio {
         );
       }
     } else {
-      if (major >= 4 && minor >= 1 && _platform.isLinux) {
-        return _fileSystem.path.join(
+      if (major >= 4 && minor >= 1 && platform.isLinux) {
+        return fs.path.join(
           homeDirPath,
           '.local',
           'share',
@@ -293,12 +252,7 @@ class AndroidStudio {
         );
       }
 
-      return _fileSystem.path.join(
-        homeDirPath,
-        '.$studioAppName$major.$minor',
-        'config',
-        'plugins',
-      );
+      return fs.path.join(homeDirPath, '.$studioAppName$major.$minor', 'config', 'plugins');
     }
   }
 
@@ -660,6 +614,12 @@ the configured path by running this command: flutter config --android-studio-dir
   }
 
   void _initAndValidate() {
+    final ToolContext(
+      :FileSystem fs,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+    ) = _toolContext;
     _isValid = false;
     _validationMessages.clear();
 
@@ -667,35 +627,35 @@ the configured path by running this command: flutter config --android-studio-dir
       _validationMessages.add('android-studio-dir = $configuredPath');
     }
 
-    if (!_fileSystem.isDirectorySync(directory)) {
+    if (!fs.isDirectorySync(directory)) {
       _validationMessages.add('Android Studio not found at $directory');
       return;
     }
 
     final String javaPath;
-    if (_platform.isMacOS) {
+    if (platform.isMacOS) {
       if (version != null && version!.major < 2020) {
-        javaPath = _fileSystem.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
+        javaPath = fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
       } else if (version != null && version!.major < 2022) {
-        javaPath = _fileSystem.path.join(directory, 'jre', 'Contents', 'Home');
+        javaPath = fs.path.join(directory, 'jre', 'Contents', 'Home');
         // See https://github.com/flutter/flutter/issues/125246 for more context.
       } else {
-        javaPath = _fileSystem.path.join(directory, 'jbr', 'Contents', 'Home');
+        javaPath = fs.path.join(directory, 'jbr', 'Contents', 'Home');
       }
     } else {
       if (version != null && version!.major < 2022) {
-        javaPath = _fileSystem.path.join(directory, 'jre');
+        javaPath = fs.path.join(directory, 'jre');
       } else {
-        javaPath = _fileSystem.path.join(directory, 'jbr');
+        javaPath = fs.path.join(directory, 'jbr');
       }
     }
-    final String javaExecutable = _fileSystem.path.join(javaPath, 'bin', 'java');
-    if (!_processManager.canRun(javaExecutable)) {
+    final String javaExecutable = fs.path.join(javaPath, 'bin', 'java');
+    if (!processManager.canRun(javaExecutable)) {
       _validationMessages.add('Unable to find bundled Java version.');
     } else {
       RunResult? result;
       try {
-        result = _processUtils.runSync(<String>[javaExecutable, '-version']);
+        result = processUtils.runSync(<String>[javaExecutable, '-version']);
       } on ProcessException catch (e) {
         _validationMessages.add('Failed to run Java: $e');
       }

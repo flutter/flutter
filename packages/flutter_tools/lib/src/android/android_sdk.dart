@@ -48,44 +48,13 @@ final _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 // $ANDROID_HOME/platforms/android-23/android.jar
 // $ANDROID_HOME/platforms/android-N/android.jar
 class AndroidSdk {
-  factory AndroidSdk(Directory directory, {required ToolContext toolContext, Java? java}) {
-    final ToolContext(
-      :Config config,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-      :ProcessUtils processUtils,
-    ) = toolContext;
-    return AndroidSdk._(
-      directory,
-      config: config,
-      java: java,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-      processUtils: processUtils,
-    );
-  }
-
-  AndroidSdk._(
-    this.directory, {
-    required this._config,
-    required this._logger,
-    required this._platform,
-    required this._processManager,
-    required this._processUtils,
-    this._java,
-  });
+  AndroidSdk(this.directory, {required this._toolContext, this._java});
 
   /// The Android SDK root directory.
   final Directory directory;
 
-  final Config _config;
   final Java? _java;
-  final Logger _logger;
-  final Platform _platform;
-  final ProcessManager _processManager;
-  final ProcessUtils _processUtils;
+  final ToolContext _toolContext;
 
   FileSystem get _fileSystem => directory.fileSystem;
 
@@ -235,7 +204,9 @@ class AndroidSdk {
     return _latestVersion;
   }
 
-  late final String? adbPath = getPlatformToolsPath(_platform.isWindows ? 'adb.exe' : 'adb');
+  late final String? adbPath = getPlatformToolsPath(
+    _toolContext.platform.isWindows ? 'adb.exe' : 'adb',
+  );
 
   String? get emulatorPath => getEmulatorPath();
 
@@ -243,16 +214,17 @@ class AndroidSdk {
 
   /// Locate the path for storing AVD emulator images. Returns null if none found.
   String? getAvdPath() {
-    final String? avdHome = _platform.environment['ANDROID_AVD_HOME'];
-    final String? home = _platform.environment['HOME'];
+    final Platform platform = _toolContext.platform;
+    final String? avdHome = platform.environment['ANDROID_AVD_HOME'];
+    final String? home = platform.environment['HOME'];
     final searchPaths = <String>[
       ?avdHome,
       if (home != null) _fileSystem.path.join(home, '.android', 'avd'),
     ];
 
-    if (_platform.isWindows) {
-      final String? homeDrive = _platform.environment['HOMEDRIVE'];
-      final String? homePath = _platform.environment['HOMEPATH'];
+    if (platform.isWindows) {
+      final String? homeDrive = platform.environment['HOMEDRIVE'];
+      final String? homePath = platform.environment['HOMEPATH'];
 
       if (homeDrive != null && homePath != null) {
         // Can't use path.join for HOMEDRIVE/HOMEPATH
@@ -283,7 +255,8 @@ class AndroidSdk {
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
   List<String> validateSdkWellFormed() {
-    if (adbPath == null || !_processManager.canRun(adbPath)) {
+    final ProcessManager processManager = _toolContext.processManager;
+    if (adbPath == null || !processManager.canRun(adbPath)) {
       return <String>['Android SDK file not found: ${adbPath ?? 'adb'}.'];
     }
 
@@ -325,7 +298,8 @@ class AndroidSdk {
   }
 
   String? getEmulatorPath() {
-    final binaryName = _platform.isWindows ? 'emulator.exe' : 'emulator';
+    final Platform platform = _toolContext.platform;
+    final binaryName = platform.isWindows ? 'emulator.exe' : 'emulator';
     // Emulator now lives inside "emulator" but used to live inside "tools" so
     // try both.
     final searchFolders = <String>['emulator', 'tools'];
@@ -389,8 +363,10 @@ class AndroidSdk {
     return null;
   }
 
-  String? getAvdManagerPath() =>
-      getCmdlineToolsPath(_platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
+  String? getAvdManagerPath() {
+    final Platform platform = _toolContext.platform;
+    return getCmdlineToolsPath(platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
+  }
 
   /// From https://developer.android.com/ndk/guides/other_build_systems.
   static const _llvmHostDirectoryName = <String, String>{
@@ -410,10 +386,8 @@ class AndroidSdk {
   /// 5. Look for the default install location inside the Android SDK:
   ///    [directory]/ndk/\<version\>/. If multiple versions exist, use the
   ///    newest.
-  Iterable<Directory> getNdkDirectoriesInResolutionOrder({Platform? platform, Config? config}) {
-    platform ??= _platform;
-    config ??= _config;
-
+  Iterable<Directory> getNdkDirectoriesInResolutionOrder() {
+    final ToolContext(:Config config, :Platform platform) = _toolContext;
     final ndkDirectories = <Directory>[];
     String? androidNdkHomeDir;
     if (config.containsKey('android-ndk')) {
@@ -451,13 +425,9 @@ class AndroidSdk {
     return ndkDirectories;
   }
 
-  String? getNdkBinaryPath(String binaryName, {Platform? platform, Config? config}) {
-    platform ??= _platform;
-    config ??= _config;
-    for (final Directory androidNdkHomeDir in getNdkDirectoriesInResolutionOrder(
-      platform: platform,
-      config: config,
-    )) {
+  String? getNdkBinaryPath(String binaryName) {
+    final Platform platform = _toolContext.platform;
+    for (final Directory androidNdkHomeDir in getNdkDirectoriesInResolutionOrder()) {
       final File executable = androidNdkHomeDir
           .childDirectory('toolchains')
           .childDirectory('llvm')
@@ -473,31 +443,19 @@ class AndroidSdk {
     return null;
   }
 
-  String? getNdkClangPath({Platform? platform, Config? config}) {
-    platform ??= _platform;
-    return getNdkBinaryPath(
-      platform.isWindows ? 'clang.exe' : 'clang',
-      platform: platform,
-      config: config,
-    );
+  String? getNdkClangPath() {
+    final Platform platform = _toolContext.platform;
+    return getNdkBinaryPath(platform.isWindows ? 'clang.exe' : 'clang');
   }
 
-  String? getNdkArPath({Platform? platform, Config? config}) {
-    platform ??= _platform;
-    return getNdkBinaryPath(
-      platform.isWindows ? 'llvm-ar.exe' : 'llvm-ar',
-      platform: platform,
-      config: config,
-    );
+  String? getNdkArPath() {
+    final Platform platform = _toolContext.platform;
+    return getNdkBinaryPath(platform.isWindows ? 'llvm-ar.exe' : 'llvm-ar');
   }
 
-  String? getNdkLdPath({Platform? platform, Config? config}) {
-    platform ??= _platform;
-    return getNdkBinaryPath(
-      platform.isWindows ? 'ld.lld.exe' : 'ld.lld',
-      platform: platform,
-      config: config,
-    );
+  String? getNdkLdPath() {
+    final Platform platform = _toolContext.platform;
+    return getNdkBinaryPath(platform.isWindows ? 'ld.lld.exe' : 'ld.lld');
   }
 
   /// Sets up various paths used internally.
@@ -505,6 +463,7 @@ class AndroidSdk {
   /// This method should be called in a case where the tooling may have updated
   /// SDK artifacts, such as after running a gradle build.
   void reinitialize() {
+    final ProcessManager processManager = _toolContext.processManager;
     _reinitialized = true;
     var buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
@@ -571,7 +530,7 @@ class AndroidSdk {
             buildToolsVersion: buildToolsVersion,
             fileSystem: directory.fileSystem,
             platformName: platformName,
-            processManager: _processManager,
+            processManager: processManager,
             sdkLevel: platformVersion,
           );
         })
@@ -585,24 +544,27 @@ class AndroidSdk {
 
   /// Returns the filesystem path of the Android SDK manager tool.
   String? get sdkManagerPath {
-    final executable = _platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager';
+    final Platform platform = _toolContext.platform;
+    final executable = platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager';
     return getCmdlineToolsPath(executable, skipOldTools: true);
   }
 
   /// Returns the version of the Android SDK manager tool or null if not found.
   String? get sdkManagerVersion {
-    if (sdkManagerPath == null || !_processManager.canRun(sdkManagerPath)) {
+    final ToolContext(:Logger logger, :ProcessManager processManager, :ProcessUtils processUtils) =
+        _toolContext;
+    if (sdkManagerPath == null || !processManager.canRun(sdkManagerPath)) {
       throwToolExit(
         'Android sdkmanager not found. Update to the latest Android SDK and ensure that '
         'the cmdline-tools are installed to resolve this.',
       );
     }
-    final RunResult result = _processUtils.runSync(<String>[
+    final RunResult result = processUtils.runSync(<String>[
       sdkManagerPath!,
       '--version',
     ], environment: _java?.environment);
     if (result.exitCode != 0) {
-      _logger.printTrace(
+      logger.printTrace(
         'sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}',
       );
       return null;

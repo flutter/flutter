@@ -1703,21 +1703,7 @@ void main() {
             throwsToolExit(message: failedToStripDebugSymbolsErrorMessage),
           );
         },
-        overrides: <Type, Generator>{
-          AndroidSdk: () {
-            fileSystem.directory(sdkPath()).createSync(recursive: true);
-            fileSystem
-                .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-                .childFile(apkAnalyzerBinaryName)
-                .createSync(recursive: true);
-            return AndroidSdk(
-              fileSystem.directory(sdkPath()),
-              java: FakeJava(),
-              toolContext: const DelegatingToolContext(),
-            );
-          },
-          AndroidStudio: () => FakeAndroidStudio(),
-        },
+        overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
       );
 
       testUsingContext(

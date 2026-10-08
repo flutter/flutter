@@ -670,9 +670,9 @@ void main() {
         ld = binDir.childFile('ld.lld$extension')..createSync();
       }
       // Check the last NDK version is used.
-      expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
-      expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
-      expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
+      expect(sdk.getNdkClangPath(), clang.path);
+      expect(sdk.getNdkArPath(), ar.path);
+      expect(sdk.getNdkLdPath(), ld.path);
     });
 
     for (final envVar in <String>[kAndroidNdkHome, kAndroidNdkPath, kAndroidNdkRoot]) {
@@ -703,9 +703,9 @@ void main() {
           sdkDir,
           toolContext: FakeToolContext(config: config, fs: fileSystem, platform: platform),
         );
-        expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
-        expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
-        expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
+        expect(sdk.getNdkClangPath(), clang.path);
+        expect(sdk.getNdkArPath(), ar.path);
+        expect(sdk.getNdkLdPath(), ld.path);
       });
     }
 
@@ -734,9 +734,9 @@ void main() {
         sdkDir,
         toolContext: FakeToolContext(config: config, fs: fileSystem, platform: platform),
       );
-      expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
-      expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
-      expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
+      expect(sdk.getNdkClangPath(), clang.path);
+      expect(sdk.getNdkArPath(), ar.path);
+      expect(sdk.getNdkLdPath(), ld.path);
     });
 
     testWithoutContext(
@@ -768,9 +768,9 @@ void main() {
           sdkDir,
           toolContext: FakeToolContext(config: config, fs: fileSystem, platform: platform),
         );
-        expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
-        expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
-        expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
+        expect(sdk.getNdkClangPath(), clang.path);
+        expect(sdk.getNdkArPath(), ar.path);
+        expect(sdk.getNdkLdPath(), ld.path);
       },
     );
   }
