@@ -850,15 +850,6 @@ void main() {
     );
 
     testWithoutContext('Artifacts.getLocalEngine constructs local engine artifacts', () {
-      final Platform platform = FakePlatform();
-      final cache = Cache(
-        rootOverride: fileSystem.directory('root')..createSync(),
-        fileSystem: fileSystem,
-        platform: platform,
-        logger: BufferLogger.test(),
-        osUtils: FakeOperatingSystemUtils(),
-        artifacts: <ArtifactSet>[],
-      );
       final String targetEngine = fileSystem.path.join(
         fileSystem.currentDirectory.path,
         'out',
@@ -876,13 +867,7 @@ void main() {
       );
       final Artifacts localArtifacts = Artifacts.getLocalEngine(
         EngineBuildPaths(targetEngine: targetEngine, hostEngine: hostEngine, webSdk: webSdk),
-        toolContext: FakeToolContext(
-          cache: cache,
-          fs: fileSystem,
-          os: FakeOperatingSystemUtils(),
-          platform: platform,
-          processManager: FakeProcessManager.any(),
-        ),
+        toolContext: FakeToolContext(fs: fileSystem),
       );
 
       expect(localArtifacts.usesLocalArtifacts, isTrue);

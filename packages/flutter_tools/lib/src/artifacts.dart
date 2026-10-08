@@ -9,6 +9,7 @@ import 'package:process/process.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
@@ -1490,9 +1491,9 @@ class _TestLocalEngine extends _TestArtifacts {
 }
 
 String _getFileGeneratorsPath() {
-  final FileSystem localFileSystem = LocalFileSystem(
+  final localFileSystem = LocalFileSystem(
     LocalSignals.instance,
-    const [],
+    const <ProcessSignal>[],
     ShutdownHooks(),
   );
   final String flutterRoot = Cache.defaultFlutterRoot(
