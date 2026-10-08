@@ -2412,7 +2412,7 @@ void main() {
   });
 
   group('FocusNode.canRequestFocus - ', () {
-    // Builds a column of focusable nodes that can be individually disabled.
+    // Builds a column of focusable node.
     Widget buildNodeList(List<FocusNode> nodes, Set<int> disabledNodes) {
       return Column(
         children: List<Widget>.generate(
@@ -2443,7 +2443,6 @@ void main() {
       return List<FocusNode>.generate(count, (int index) => FocusNode(debugLabel: 'node$index'));
     }
 
-    // Creates ten focusable nodes, parks focus on node 8, and returns the nodes.
     Future<List<FocusNode>> createFocusedNodes(WidgetTester tester) async {
       final List<FocusNode> nodes = createFocusNodes(10);
       addTearDown(() {
