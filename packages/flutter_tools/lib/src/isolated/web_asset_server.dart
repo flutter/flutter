@@ -164,7 +164,7 @@ class WebAssetServer implements AssetReader {
       final metadata = ModuleMetadata.fromJson(
         json.decode(
           utf8.decode(_webMemoryFS.metadataFiles['$relativeModulePath.metadata']!.toList()),
-        ) as Map<String, dynamic>,
+        ) as Map<String, Object?>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
       moduleToLibrary.add(<String, Object>{
