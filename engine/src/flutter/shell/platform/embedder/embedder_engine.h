@@ -6,6 +6,8 @@
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_ENGINE_H_
 
 #include <memory>
+#include <optional>
+#include <string>
 #include <unordered_map>
 
 #include "flutter/fml/macros.h"
@@ -22,11 +24,21 @@ struct ShellArgs;
 // instance of the Flutter engine.
 class EmbedderEngine {
  public:
+  //----------------------------------------------------------------------------
+  /// @param[in]  thread_host  The threads and custom task runners of the
+  ///             engine. May be null when the embedder owns the threads behind
+  ///             |task_runners|; RunTask() then fails.
+  /// @param[in]  run_configuration  What RunRootIsolate() runs. May be
+  ///             std::nullopt when the embedder starts the root isolate some
+  ///             other way; RunRootIsolate() then fails.
+  /// @param[in]  external_texture_resolver  May be null; RegisterTexture()
+  ///             then fails.
+  ///
   EmbedderEngine(
       std::unique_ptr<EmbedderThreadHost> thread_host,
       const TaskRunners& task_runners,
       const Settings& settings,
-      RunConfiguration run_configuration,
+      std::optional<RunConfiguration> run_configuration,
       const Shell::CreateCallback<PlatformView>& on_create_platform_view,
       const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
       std::unique_ptr<EmbedderExternalTextureResolver>
@@ -35,6 +47,33 @@ class EmbedderEngine {
   ~EmbedderEngine();
 
   bool LaunchShell();
+
+  //----------------------------------------------------------------------------
+  /// @brief      Same as LaunchShell(), with |platform_data| as the initial
+  ///             state of ui.PlatformDispatcher instead of the defaults.
+  ///
+  bool LaunchShell(const PlatformData& platform_data);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Creates an engine from this one with Shell::Spawn. Must be
+  ///             called on the platform thread.
+  ///
+  ///             The new engine shares this engine's task runners, and its
+  ///             root isolate is already running |run_configuration| when this
+  ///             returns. It owns no threads, run configuration or texture
+  ///             resolver, so RunTask(), RunRootIsolate() and
+  ///             RegisterTexture() fail on it. It does not keep this engine
+  ///             alive, and it must be destroyed before the threads behind the
+  ///             shared task runners are.
+  ///
+  /// @return     The new engine, or nullptr if this engine has no shell or the
+  ///             spawn failed.
+  ///
+  std::unique_ptr<EmbedderEngine> Spawn(
+      RunConfiguration run_configuration,
+      const std::string& initial_route,
+      const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer) const;
 
   bool CollectShell();
 
@@ -91,9 +130,13 @@ class EmbedderEngine {
   Shell& GetShell();
 
  private:
+  // Adopts |spawned_shell|, a running shell returned by Shell::Spawn.
+  EmbedderEngine(const TaskRunners& task_runners,
+                 std::unique_ptr<Shell> spawned_shell);
+
   std::unique_ptr<EmbedderThreadHost> thread_host_;
   TaskRunners task_runners_;
-  RunConfiguration run_configuration_;
+  std::optional<RunConfiguration> run_configuration_;
   std::unique_ptr<ShellArgs> shell_args_;
   std::unique_ptr<Shell> shell_;
   std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver_;

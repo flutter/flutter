@@ -25,7 +25,7 @@ EmbedderEngine::EmbedderEngine(
     std::unique_ptr<EmbedderThreadHost> thread_host,
     const flutter::TaskRunners& task_runners,
     const flutter::Settings& settings,
-    RunConfiguration run_configuration,
+    std::optional<RunConfiguration> run_configuration,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
     std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
@@ -37,9 +37,17 @@ EmbedderEngine::EmbedderEngine(
                                               on_create_rasterizer)),
       external_texture_resolver_(std::move(external_texture_resolver)) {}
 
+EmbedderEngine::EmbedderEngine(const TaskRunners& task_runners,
+                               std::unique_ptr<Shell> spawned_shell)
+    : task_runners_(task_runners), shell_(std::move(spawned_shell)) {}
+
 EmbedderEngine::~EmbedderEngine() = default;
 
 bool EmbedderEngine::LaunchShell() {
+  return LaunchShell(flutter::PlatformData());
+}
+
+bool EmbedderEngine::LaunchShell(const PlatformData& platform_data) {
   if (!shell_args_) {
     FML_DLOG(ERROR) << "Invalid shell arguments.";
     return false;
@@ -49,15 +57,35 @@ bool EmbedderEngine::LaunchShell() {
     FML_DLOG(ERROR) << "Shell already initialized";
   }
 
-  shell_ = Shell::Create(
-      flutter::PlatformData(), task_runners_, shell_args_->settings,
-      shell_args_->on_create_platform_view, shell_args_->on_create_rasterizer);
+  shell_ = Shell::Create(platform_data, task_runners_, shell_args_->settings,
+                         shell_args_->on_create_platform_view,
+                         shell_args_->on_create_rasterizer);
 
   // Reset the args no matter what. They will never be used to initialize a
   // shell again.
   shell_args_.reset();
 
   return IsValid();
+}
+
+std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
+    RunConfiguration run_configuration,
+    const std::string& initial_route,
+    const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer) const {
+  if (!IsValid()) {
+    return nullptr;
+  }
+  std::unique_ptr<Shell> spawned_shell =
+      shell_->Spawn(std::move(run_configuration), initial_route,
+                    on_create_platform_view, on_create_rasterizer);
+  if (!spawned_shell) {
+    return nullptr;
+  }
+  const TaskRunners task_runners = spawned_shell->GetTaskRunners();
+  // std::make_unique cannot reach the private constructor.
+  return std::unique_ptr<EmbedderEngine>(
+      new EmbedderEngine(task_runners, std::move(spawned_shell)));
 }
 
 bool EmbedderEngine::CollectShell() {
@@ -106,10 +134,12 @@ void EmbedderEngine::CollectThreadHost() {
 }
 
 bool EmbedderEngine::RunRootIsolate() {
-  if (!IsValid() || !run_configuration_.IsValid()) {
+  if (!IsValid() || !run_configuration_.has_value() ||
+      !run_configuration_->IsValid()) {
     return false;
   }
-  shell_->RunEngine(std::move(run_configuration_));
+  shell_->RunEngine(std::move(run_configuration_.value()));
+  run_configuration_.reset();
   return true;
 }
 
@@ -186,7 +216,7 @@ bool EmbedderEngine::SendPlatformMessage(
 }
 
 bool EmbedderEngine::RegisterTexture(int64_t texture) {
-  if (!IsValid()) {
+  if (!IsValid() || !external_texture_resolver_) {
     return false;
   }
   shell_->GetPlatformView()->RegisterTexture(
@@ -283,7 +313,7 @@ bool EmbedderEngine::RunTask(const FlutterTask* task) {
   // The shell doesn't need to be running or valid for access to the thread
   // host. This is why there is no `IsValid` check here. This allows embedders
   // to perform custom task runner interop before the shell is running.
-  if (task == nullptr) {
+  if (task == nullptr || !thread_host_) {
     return false;
   }
   auto result = thread_host_->PostTask(reinterpret_cast<intptr_t>(task->runner),

@@ -1499,6 +1499,121 @@ TEST_F(EmbedderTest, CanDeinitializeAnEngine) {
 }
 
 //------------------------------------------------------------------------------
+/// The ui.PlatformDispatcher lifecycle state held by |engine|'s runtime
+/// controller. Callable from any thread: the read happens on the UI thread.
+///
+static std::string GetRuntimeLifecycleState(EmbedderEngine* engine) {
+  std::string lifecycle_state;
+  fml::AutoResetWaitableEvent latch;
+  Shell& shell = engine->GetShell();
+  fml::TaskRunner::RunNowOrPostTask(
+      shell.GetTaskRunners().GetUITaskRunner(), [&] {
+        lifecycle_state = shell.GetEngine()
+                              ->GetRuntimeController()
+                              ->GetPlatformData()
+                              .lifecycle_state;
+        latch.Signal();
+      });
+  latch.Wait();
+  return lifecycle_state;
+}
+
+//------------------------------------------------------------------------------
+/// LaunchShell() starts the shell with default PlatformData, which has no
+/// lifecycle state.
+///
+TEST_F(EmbedderTest, LaunchShellDefaultsToEmptyLifecycleState) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+  ASSERT_TRUE(embedder_engine->LaunchShell());
+  EXPECT_EQ(GetRuntimeLifecycleState(embedder_engine), "");
+  engine.reset();
+}
+
+//------------------------------------------------------------------------------
+/// LaunchShell(PlatformData) starts the shell with the given initial
+/// ui.PlatformDispatcher state. The Android embedder starts engines as
+/// "AppLifecycleState.detached".
+///
+TEST_F(EmbedderTest, LaunchShellUsesGivenPlatformData) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+  PlatformData platform_data;
+  platform_data.lifecycle_state = "AppLifecycleState.detached";
+  ASSERT_TRUE(embedder_engine->LaunchShell(platform_data));
+  EXPECT_EQ(GetRuntimeLifecycleState(embedder_engine),
+            "AppLifecycleState.detached");
+  engine.reset();
+}
+
+//------------------------------------------------------------------------------
+/// EmbedderEngine::Spawn returns an engine whose root isolate already runs the
+/// given entrypoint on the spawning engine's task runners. The spawned engine
+/// owns no threads, no run configuration and no texture resolver, so the calls
+/// that need them fail instead of crashing.
+///
+TEST_F(EmbedderTest, SpawnedEngineRunsEntrypointOnSharedTaskRunners) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent spawned_entrypoint_ran;
+  context.AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                                 spawned_entrypoint_ran.Signal();
+                               }));
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  EmbedderEngine* parent = ToEmbedderEngine(engine.get());
+
+  // The engine-managed thread host makes this thread the platform thread,
+  // which is where Shell::Spawn has to run.
+  RunConfiguration configuration =
+      RunConfiguration::InferFromSettings(parent->GetShell().GetSettings());
+  ASSERT_TRUE(configuration.IsValid());
+  configuration.SetEntrypoint("spawnedEngineMain");
+  std::unique_ptr<EmbedderEngine> spawned = parent->Spawn(
+      std::move(configuration), /*initial_route=*/"",
+      [](Shell& shell) {
+        return std::make_unique<PlatformView>(shell, shell.GetTaskRunners());
+      },
+      [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
+  ASSERT_NE(spawned, nullptr);
+  ASSERT_TRUE(spawned->IsValid());
+  spawned_entrypoint_ran.Wait();
+
+  const TaskRunners& parent_runners = parent->GetTaskRunners();
+  const TaskRunners& spawned_runners = spawned->GetTaskRunners();
+  EXPECT_EQ(spawned_runners.GetPlatformTaskRunner(),
+            parent_runners.GetPlatformTaskRunner());
+  EXPECT_EQ(spawned_runners.GetUITaskRunner(),
+            parent_runners.GetUITaskRunner());
+  EXPECT_EQ(spawned_runners.GetRasterTaskRunner(),
+            parent_runners.GetRasterTaskRunner());
+  EXPECT_EQ(spawned_runners.GetIOTaskRunner(),
+            parent_runners.GetIOTaskRunner());
+
+  EXPECT_FALSE(spawned->RunRootIsolate());
+  FlutterTask task = {};
+  EXPECT_FALSE(spawned->RunTask(&task));
+  // Any id: the spawned engine has no resolver to look it up with.
+  constexpr int64_t kTextureId = 1;
+  EXPECT_FALSE(spawned->RegisterTexture(kTextureId));
+
+  spawned.reset();
+  engine.reset();
+}
+
+//------------------------------------------------------------------------------
 /// Test that a view can be added to a running engine.
 ///
 TEST_F(EmbedderTest, CanAddView) {

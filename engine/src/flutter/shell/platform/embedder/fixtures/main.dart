@@ -90,6 +90,11 @@ void invokePlatformThreadIsolate() {
   runOnPlatformThread(ffiSignalNativeTest);
 }
 
+@pragma('vm:entry-point')
+void spawnedEngineMain() {
+  signalNativeTest();
+}
+
 Float64List kTestTransform = () {
   final values = Float64List(16);
   values[0] = 1.0; // scaleX
