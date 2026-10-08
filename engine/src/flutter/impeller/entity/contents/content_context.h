@@ -299,6 +299,9 @@ class ContentContext {
   /// @brief Clear all cached textures.
   void ClearCachedTextures() const;
 
+  /// @brief Clear all cached render targets from the render target cache.
+  void ClearRenderTargetCache() const;
+
   /// @brief Retrieve the current host buffer for transient storage of indexes
   ///        used for indexed draws.
   ///
