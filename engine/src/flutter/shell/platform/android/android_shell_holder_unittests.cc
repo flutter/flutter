@@ -2,11 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <memory>
+#include <android/looper.h>
 
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <vector>
+
+#include "flutter/flow/frame_timings.h"
+#include "flutter/fml/time/time_delta.h"
+#include "flutter/fml/time/time_point.h"
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/shell.h"
+#include "flutter/shell/common/vsync_waiter.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -154,6 +163,131 @@ class MockPlatformMessageResponse : public PlatformMessageResponse {
   MOCK_METHOD(void, Complete, (std::unique_ptr<fml::Mapping> data), (override));
   MOCK_METHOD(void, CompleteEmpty, (), (override));
 };
+
+// How long a test waits for a vsync. At 60 Hz this is 120 frames, so a busy
+// emulator does not flake.
+constexpr fml::TimeDelta kVsyncTimeout = fml::TimeDelta::FromSeconds(2);
+
+// How long the test thread keeps dispatching after the event it waited for,
+// to catch duplicate deliveries. At 60 Hz this is 6 frames.
+constexpr fml::TimeDelta kSettleTime = fml::TimeDelta::FromMilliseconds(100);
+
+// Upper bound for one ALooper_pollOnce call while pumping, in milliseconds.
+// Short, so the pump notices completion within a fraction of a frame.
+constexpr int kPollIntervalMs = 5;
+
+// Frame interval the vsync waiter reports before Java sets a refresh rate.
+// vsync_waiter_android.cc starts at 60 Hz and converts 1e9 ns / 60 to whole
+// nanoseconds by truncation.
+constexpr fml::TimeDelta kDefaultFrameInterval =
+    fml::TimeDelta::FromNanoseconds(16'666'666);
+
+// Creates a holder without calling NotifyCreated: a fake window makes the
+// Impeller GLES reactor abort on devices.
+std::unique_ptr<AndroidShellHolder> CreateHolderWithoutSurface(
+    Settings::MergedPlatformUIThread merged_platform_ui_thread) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  settings.merged_platform_ui_thread = merged_platform_ui_thread;
+  return std::make_unique<AndroidShellHolder>(
+      settings, std::make_shared<MockPlatformViewAndroidJNI>(),
+      AndroidRenderingAPI::kImpellerOpenGLES);
+}
+
+// Dispatches the ALooper of the current thread, which runs both fml tasks and
+// Choreographer frame callbacks, until |done| returns true or |timeout|
+// passes. With merged threads the UI task runner is the test thread, so
+// waiting on a latch instead would stall the vsync it waits for.
+bool PumpLooperUntil(const std::function<bool()>& done,
+                     fml::TimeDelta timeout) {
+  const fml::TimePoint deadline = fml::TimePoint::Now() + timeout;
+  while (!done()) {
+    if (fml::TimePoint::Now() >= deadline) {
+      return false;
+    }
+    if (ALooper_pollOnce(kPollIntervalMs, nullptr, nullptr, nullptr) ==
+        ALOOPER_POLL_ERROR) {
+      ADD_FAILURE() << "ALooper_pollOnce failed on the test thread.";
+      return false;
+    }
+  }
+  return true;
+}
+
+void PumpLooperFor(fml::TimeDelta duration) {
+  PumpLooperUntil([] { return false; }, duration);
+}
+
+// Records the frames a vsync waiter delivers. Frame callbacks run on the UI
+// thread, which is not the test thread when threads are not merged. Callbacks
+// share ownership of the recorder, so a late frame never reaches a destroyed
+// one.
+class VsyncFrameRecorder
+    : public std::enable_shared_from_this<VsyncFrameRecorder> {
+ public:
+  struct Frame {
+    fml::TimePoint start;
+    fml::TimePoint target;
+    fml::TimePoint delivered;
+    bool on_ui_thread = false;
+  };
+
+  explicit VsyncFrameRecorder(fml::RefPtr<fml::TaskRunner> ui_task_runner)
+      : ui_task_runner_(std::move(ui_task_runner)) {}
+
+  VsyncWaiter::Callback Callback() {
+    return [self = shared_from_this()](
+               std::unique_ptr<FrameTimingsRecorder> recorder) {
+      Frame frame{
+          .start = recorder->GetVsyncStartTime(),
+          .target = recorder->GetVsyncTargetTime(),
+          .delivered = fml::TimePoint::Now(),
+          .on_ui_thread = self->ui_task_runner_->RunsTasksOnCurrentThread(),
+      };
+      std::scoped_lock lock(self->mutex_);
+      self->frames_.push_back(frame);
+    };
+  }
+
+  std::vector<Frame> frames() const {
+    std::scoped_lock lock(mutex_);
+    return frames_;
+  }
+
+ private:
+  const fml::RefPtr<fml::TaskRunner> ui_task_runner_;
+  mutable std::mutex mutex_;
+  std::vector<Frame> frames_;
+};
+
+// Requests one frame from the vsync waiter the platform view creates for the
+// shell, from the UI thread like the animator does, and checks how it is
+// delivered.
+void ExpectOneFrameOnUIThread(
+    Settings::MergedPlatformUIThread merged_platform_ui_thread) {
+  std::unique_ptr<AndroidShellHolder> holder =
+      CreateHolderWithoutSurface(merged_platform_ui_thread);
+  ASSERT_TRUE(holder->IsValid());
+  fml::RefPtr<fml::TaskRunner> ui_task_runner =
+      holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner();
+  // Through the PlatformView base class, the way the shell calls it.
+  PlatformView& platform_view = *holder->GetPlatformView();
+  std::shared_ptr<VsyncWaiter> vsync_waiter = platform_view.CreateVSyncWaiter();
+  auto recorder = std::make_shared<VsyncFrameRecorder>(ui_task_runner);
+
+  fml::TaskRunner::RunNowOrPostTask(ui_task_runner, [vsync_waiter, recorder] {
+    vsync_waiter->AsyncWaitForVsync(recorder->Callback());
+  });
+  ASSERT_TRUE(PumpLooperUntil([&] { return !recorder->frames().empty(); },
+                              kVsyncTimeout));
+  PumpLooperFor(kSettleTime);
+
+  std::vector<VsyncFrameRecorder::Frame> frames = recorder->frames();
+  ASSERT_EQ(frames.size(), 1u);
+  EXPECT_TRUE(frames[0].on_ui_thread);
+  EXPECT_LE(frames[0].start, frames[0].delivered);
+  EXPECT_EQ(frames[0].target - frames[0].start, kDefaultFrameInterval);
+}
 }  // namespace
 
 TEST(AndroidShellHolder, Create) {
@@ -250,6 +384,43 @@ TEST(AndroidShellHolder, StartsWithDetachedLifecycleState) {
                 ->GetPlatformData()
                 .lifecycle_state,
             "AppLifecycleState.detached");
+}
+
+TEST(AndroidShellHolder, VsyncFrameOnUIThreadWithMergedThreads) {
+  ExpectOneFrameOnUIThread(Settings::MergedPlatformUIThread::kEnabled);
+}
+
+TEST(AndroidShellHolder, VsyncFrameOnUIThreadWithUnmergedThreads) {
+  ExpectOneFrameOnUIThread(Settings::MergedPlatformUIThread::kDisabled);
+}
+
+TEST(AndroidShellHolder, PendingVsyncIsDeliveredOnceAfterHolderIsDestroyed) {
+  // With merged threads the UI task runner is the message loop of the test
+  // thread, so it outlives the holder.
+  std::unique_ptr<AndroidShellHolder> holder =
+      CreateHolderWithoutSurface(Settings::MergedPlatformUIThread::kEnabled);
+  ASSERT_TRUE(holder->IsValid());
+  fml::RefPtr<fml::TaskRunner> ui_task_runner =
+      holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner();
+  ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
+  PlatformView& platform_view = *holder->GetPlatformView();
+  // The test keeps the waiter alive. In an app the shell owns it and it dies
+  // with the holder.
+  std::shared_ptr<VsyncWaiter> vsync_waiter = platform_view.CreateVSyncWaiter();
+  auto recorder = std::make_shared<VsyncFrameRecorder>(ui_task_runner);
+
+  vsync_waiter->AsyncWaitForVsync(recorder->Callback());
+  holder.reset();
+
+  ASSERT_TRUE(PumpLooperUntil([&] { return !recorder->frames().empty(); },
+                              kVsyncTimeout));
+  PumpLooperFor(kSettleTime);
+
+  std::vector<VsyncFrameRecorder::Frame> frames = recorder->frames();
+  ASSERT_EQ(frames.size(), 1u);
+  EXPECT_TRUE(frames[0].on_ui_thread);
+  EXPECT_LE(frames[0].start, frames[0].delivered);
+  EXPECT_EQ(frames[0].target - frames[0].start, kDefaultFrameInterval);
 }
 
 }  // namespace testing
