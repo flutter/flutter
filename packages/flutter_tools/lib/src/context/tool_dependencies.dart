@@ -36,6 +36,7 @@ import '../custom_devices/custom_devices_config.dart';
 import '../device.dart';
 import '../doctor.dart';
 import '../emulator.dart';
+import '../experimental/extension_build_manager.dart';
 import '../experimental/extension_discovery.dart';
 import '../experimental/extension_manager.dart';
 import '../features.dart';
@@ -97,6 +98,7 @@ class ToolDependencies {
     required this.emulatorManager,
     required this.featureFlags,
     required this.toolContext,
+    this.extensionBuildManager,
     this.extensionManager,
   });
 
@@ -126,6 +128,9 @@ class ToolDependencies {
 
   /// Manager for discovering, launching, and creating emulators.
   final EmulatorManager emulatorManager;
+
+  /// Manager for querying custom build targets and executing builds via tool extensions.
+  final ExtensionBuildManager? extensionBuildManager;
 
   /// Manager for discovering and communicating with active tool extensions.
   final ExtensionManager? extensionManager;
@@ -534,6 +539,12 @@ class ToolDependencies {
       logger: finalLogger,
     );
 
+    final extensionBuildManager = ExtensionBuildManager(
+      extensionManager: extensionManager,
+      featureFlags: finalFeatureFlags,
+      logger: finalLogger,
+    );
+
     final DeviceManager finalDeviceManager =
         deviceManager ??
         FlutterDeviceManager(
@@ -582,6 +593,7 @@ class ToolDependencies {
       deviceManager: finalDeviceManager,
       doctor: finalDoctor,
       emulatorManager: finalEmulatorManager,
+      extensionBuildManager: extensionBuildManager,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
       toolContext: ToolContext(
