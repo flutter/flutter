@@ -691,17 +691,21 @@ class _WidgetPreviewControlRow extends StatelessWidget {
     if (errorThrownDuringTreeConstruction) {
       return Container();
     }
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      // If an unhandled exception was caught and we're displaying an error
-      // widget, these controls should be disabled.
-      // TODO(bkonyi): improve layout of controls.
+    return Wrap(
+      spacing: largeSpacing,
+      runSpacing: denseSpacing,
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         ZoomControls(transformationController: transformationController),
-        const SizedBox(width: 30),
-        BrightnessToggleButton(brightnessListenable: brightnessListenable),
-        const SizedBox(width: 10),
-        SoftRestartButton(softRestartListenable: softRestartListenable),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            BrightnessToggleButton(brightnessListenable: brightnessListenable),
+            const SizedBox(width: intermediateSpacing),
+            SoftRestartButton(softRestartListenable: softRestartListenable),
+          ],
+        ),
       ],
     );
   }
@@ -1419,40 +1423,84 @@ class WidgetPreviewControls extends StatelessWidget {
   const WidgetPreviewControls({super.key, required this.controller});
 
   static const _controlsPadding = 20.0;
+  static const _compactControlsBreakpoint = 480.0;
+
   final WidgetPreviewScaffoldController controller;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         bottom: _controlsPadding,
         left: _controlsPadding,
         right: _controlsPadding,
       ),
-      child: Row(
-        children: [
-          LayoutTypeSelector(controller: controller),
-          ValueListenableBuilder(
-            valueListenable: controller.editorServiceAvailable,
-            builder: (context, editorServiceAvailable, _) {
-              if (!editorServiceAvailable) {
-                return Container();
-              }
-              return Row(
-                children: [
-                  HorizontalSpacer(),
-                  FilterBySelectedFileToggle(controller: controller),
-                ],
-              );
-            },
-          ),
-          HorizontalSpacer(),
-          Expanded(child: PreviewSearchControls(controller: controller)),
-          HorizontalSpacer(),
-          WidgetInspectorToggle(controller: controller),
-          Spacer(),
-          WidgetPreviewerRestartButton(controller: controller),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < _compactControlsBreakpoint) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                PreviewSearchControls(controller: controller),
+                const VerticalSpacer(),
+                ValueListenableBuilder<bool>(
+                  valueListenable: controller.editorServiceAvailable,
+                  builder: (context, editorServiceAvailable, _) {
+                    return Wrap(
+                      spacing: intermediateSpacing,
+                      runSpacing: denseSpacing,
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Wrap(
+                          spacing: intermediateSpacing,
+                          runSpacing: denseSpacing,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            LayoutTypeSelector(controller: controller),
+                            if (editorServiceAvailable)
+                              FilterBySelectedFileToggle(
+                                controller: controller,
+                              ),
+                            WidgetInspectorToggle(controller: controller),
+                          ],
+                        ),
+                        WidgetPreviewerRestartButton(controller: controller),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            );
+          }
+          return Row(
+            children: [
+              LayoutTypeSelector(controller: controller),
+              ValueListenableBuilder<bool>(
+                valueListenable: controller.editorServiceAvailable,
+                builder: (context, editorServiceAvailable, _) {
+                  if (!editorServiceAvailable) {
+                    return const SizedBox.shrink();
+                  }
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const HorizontalSpacer(),
+                      FilterBySelectedFileToggle(controller: controller),
+                    ],
+                  );
+                },
+              ),
+              const HorizontalSpacer(),
+              Expanded(child: PreviewSearchControls(controller: controller)),
+              const HorizontalSpacer(),
+              WidgetInspectorToggle(controller: controller),
+              const Spacer(),
+              WidgetPreviewerRestartButton(controller: controller),
+            ],
+          );
+        },
       ),
     );
   }
