@@ -2455,7 +2455,7 @@ void main() {
       return nodes;
     }
 
-    // Reproduces https://github.com/flutter/flutter/issues/185076.
+    // Regression test for https://github.com/flutter/flutter/issues/185076.
     testWidgets('disabling all siblings in the same build does not leave '
         'primary focus on an unfocusable node', (WidgetTester tester) async {
       final List<FocusNode> nodes = await createFocusedNodes(tester);
