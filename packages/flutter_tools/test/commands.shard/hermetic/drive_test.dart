@@ -33,7 +33,6 @@ import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
-import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -106,6 +105,10 @@ void main() {
       expect(capturingDriverService.platformArgs, containsPair('no-launch-chrome', true));
       expect(capturingDriverService.platformArgs, isNot(contains('--no-launch-chrome')));
       expect(capturingDriverService.webDefines, <String, String>{'FOO': 'bar'});
+      expect(capturingDriverService.lastSpec?.browserName, 'chrome');
+      expect(capturingDriverService.lastSpec?.chromeBinary, '/tmp/custom-chrome');
+      expect(capturingDriverService.lastSpec?.driverPort, 4444);
+      expect(capturingDriverService.lastSpec?.browserDimension, <String>['1600', '1024']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -1181,19 +1184,7 @@ class FakeDriverService extends Fake implements DriverService {
   ) async {}
 
   @override
-  Future<int> startTest(
-    String testFile,
-    List<String> arguments,
-    PackageConfig packageConfig, {
-    bool? headless,
-    String? chromeBinary,
-    String? browserName,
-    bool? androidEmulator,
-    int? driverPort,
-    List<String>? webBrowserFlags,
-    List<String>? browserDimension,
-    String? profileMemory,
-  }) async {
+  Future<int> startTest(String testFile, DriveTestSpecification spec) async {
     final Future<int> result = onStartTest?.call() ?? Completer<int>().future;
     return result;
   }
@@ -1207,6 +1198,7 @@ class FakeDriverService extends Fake implements DriverService {
 class CapturingDriverService extends Fake implements DriverService {
   Map<String, Object>? platformArgs;
   Map<String, String>? webDefines;
+  DriveTestSpecification? lastSpec;
 
   @override
   Future<void> start(
@@ -1232,19 +1224,10 @@ class CapturingDriverService extends Fake implements DriverService {
   ) async {}
 
   @override
-  Future<int> startTest(
-    String testFile,
-    List<String> arguments,
-    PackageConfig packageConfig, {
-    bool? headless,
-    String? chromeBinary,
-    String? browserName,
-    bool? androidEmulator,
-    int? driverPort,
-    List<String>? webBrowserFlags,
-    List<String>? browserDimension,
-    String? profileMemory,
-  }) async => 0;
+  Future<int> startTest(String testFile, DriveTestSpecification spec) async {
+    lastSpec = spec;
+    return 0;
+  }
 
   @override
   Future<void> stop({String? userIdentifier}) async {}
@@ -1264,19 +1247,7 @@ class FailingFakeDriverService extends Fake implements DriverService {
   ) async {}
 
   @override
-  Future<int> startTest(
-    String testFile,
-    List<String> arguments,
-    PackageConfig packageConfig, {
-    bool? headless,
-    String? chromeBinary,
-    String? browserName,
-    bool? androidEmulator,
-    int? driverPort,
-    List<String>? webBrowserFlags,
-    List<String>? browserDimension,
-    String? profileMemory,
-  }) async => 1;
+  Future<int> startTest(String testFile, DriveTestSpecification spec) async => 1;
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {

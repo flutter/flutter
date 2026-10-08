@@ -7,7 +7,6 @@ import 'dart:math' as math;
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
@@ -146,24 +145,13 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<int> startTest(
-    String testFile,
-    List<String> arguments,
-    PackageConfig packageConfig, {
-    bool? headless,
-    String? chromeBinary,
-    String? browserName,
-    bool? androidEmulator,
-    int? driverPort,
-    List<String> webBrowserFlags = const <String>[],
-    List<String>? browserDimension,
-    String? profileMemory,
-  }) async {
+  Future<int> startTest(String testFile, DriveTestSpecification spec) async {
     final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
         _toolContext;
     late async_io.WebDriver webDriver;
-    final Browser browser = Browser.fromCliName(browserName);
+    final Browser browser = Browser.fromCliName(spec.browserName);
     final isAndroidChrome = browser == Browser.androidChrome;
+    final List<String>? browserDimension = spec.browserDimension;
     late int width;
     late int height;
     Map<String, Object?>? mobileEmulation;
@@ -197,13 +185,13 @@ class WebDriverService extends DriverService {
 
     try {
       webDriver = await async_io.createDriver(
-        uri: Uri.parse('http://localhost:$driverPort/'),
+        uri: Uri.parse('http://localhost:${spec.driverPort}/'),
         desired: getDesiredCapabilities(
           browser,
-          headless,
+          spec.headless,
           platform: platform,
-          webBrowserFlags: webBrowserFlags,
-          chromeBinary: chromeBinary,
+          webBrowserFlags: spec.webBrowserFlags,
+          chromeBinary: spec.chromeBinary,
           mobileEmulation: mobileEmulation,
         ),
       );
@@ -211,7 +199,7 @@ class WebDriverService extends DriverService {
       logger.printTrace('$error');
       throwToolExit(
         'Unable to start a WebDriver session for web testing.\n'
-        'Make sure you have the correct WebDriver server (e.g. chromedriver) running at $driverPort.\n'
+        'Make sure you have the correct WebDriver server (e.g. chromedriver) running at ${spec.driverPort}.\n'
         'For instructions on how to obtain and run a WebDriver server, see:\n'
         'https://flutter.dev/to/integration-test-on-web\n',
       );
@@ -223,11 +211,11 @@ class WebDriverService extends DriverService {
       await window.setSize(math.Rectangle<int>(0, 0, width, height));
     }
     final int result = await processUtils.stream(
-      <String>[_dartSdkPath, ...arguments, testFile],
+      <String>[_dartSdkPath, ...spec.arguments, testFile],
       environment: <String, String>{
         ...platform.environment,
         'VM_SERVICE_URL': _webUri.toString(),
-        ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
+        ..._additionalDriverEnvironment(webDriver, spec.browserName, spec.androidEmulator),
       },
     );
     await webDriver.quit();
