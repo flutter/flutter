@@ -4,7 +4,6 @@
 
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
 import 'base/common.dart';
@@ -251,17 +250,11 @@ class LocalEngineInfo {
   /// The [targetOutPath] and [hostOutPath] are assumed to be resolvable
   /// paths to the built engine artifacts for the target (device) and host
   /// (build) platforms, respectively.
-  LocalEngineInfo({
-    required this.targetOutPath,
+  const LocalEngineInfo({
+    required FileSystem fileSystem,
     required this.hostOutPath,
-    FileSystem? fileSystem,
-    path.Context? pathContext,
-  }) : _pathContext =
-           pathContext ??
-           fileSystem?.path ??
-           (targetOutPath.contains(r'\') || hostOutPath.contains(r'\')
-               ? path.windows
-               : path.context);
+    required this.targetOutPath,
+  }) : _fileSystem = fileSystem;
 
   /// The path to the engine artifacts for the target (device) platform.
   ///
@@ -277,13 +270,13 @@ class LocalEngineInfo {
   /// (platform), see [localHostName].
   final String hostOutPath;
 
-  final path.Context _pathContext;
+  final FileSystem _fileSystem;
 
   /// The name of the target (device) platform, i.e. `android_debug_unopt`.
-  String get localTargetName => _pathContext.basename(targetOutPath);
+  String get localTargetName => _fileSystem.path.basename(targetOutPath);
 
   /// The name of the host (build) platform, e.g. `host_debug_unopt`.
-  String get localHostName => _pathContext.basename(hostOutPath);
+  String get localHostName => _fileSystem.path.basename(hostOutPath);
 }
 
 // Manages the engine artifacts of Flutter.

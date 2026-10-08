@@ -851,14 +851,24 @@ void main() {
       },
     );
 
-    testWithoutContext('determines engine names from Windows-style paths', () {
-      final windowsInfo = LocalEngineInfo(
-        targetOutPath: r'C:\engine\src\out\android_debug_unopt',
-        hostOutPath: r'C:\engine\src\out\host_debug_unopt',
+    testWithoutContext('determines engine names using the file system path style', () {
+      final windowsFileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final localArtifacts = Artifacts.testLocalEngine(
+        localEngine: windowsFileSystem.path.join(
+          windowsFileSystem.currentDirectory.path,
+          'out',
+          'android_debug_unopt',
+        ),
+        localEngineHost: windowsFileSystem.path.join(
+          windowsFileSystem.currentDirectory.path,
+          'out',
+          'host_debug_unopt',
+        ),
+        fileSystem: windowsFileSystem,
       );
 
-      expect(windowsInfo.localTargetName, 'android_debug_unopt');
-      expect(windowsInfo.localHostName, 'host_debug_unopt');
+      expect(localArtifacts.localEngineInfo?.localTargetName, 'android_debug_unopt');
+      expect(localArtifacts.localEngineInfo?.localHostName, 'host_debug_unopt');
     });
 
     testWithoutContext('Artifacts.getLocalEngine constructs local engine artifacts', () {
