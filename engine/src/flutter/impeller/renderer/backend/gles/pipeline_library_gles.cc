@@ -422,7 +422,10 @@ void PipelineLibraryGLES::CacheProgram(
 
 // |PipelineLibrary|
 void PipelineLibraryGLES::PerformEagerly(const PipelineDescriptor& descriptor) {
-  compile_queue_->PerformJobEagerly(descriptor);
+  // The compile queue is only present if an IO task runner was provided.
+  if (compile_queue_) {
+    compile_queue_->PerformJobEagerly(descriptor);
+  }
 }
 
 }  // namespace impeller
