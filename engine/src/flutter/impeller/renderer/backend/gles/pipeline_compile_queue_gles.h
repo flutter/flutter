@@ -20,11 +20,16 @@ namespace impeller {
 /// @brief      A task queue designed for managing compilation of pipeline state
 ///             objects for OpenGL ES backend.
 ///
-///             Jobs are processed sequentially in insertion order: at most one
-///             task is outstanding on the worker task runner at a time, and
-///             each task performs a single job before scheduling the next one.
-///             This prevents pipeline compilation from monopolizing the worker
-///             (IO) task runner, letting other tasks interleave between jobs.
+///             Jobs are performed in two steps, `Start` and `Finish`, so that
+///             several jobs can be compiling at once. Up to
+///             `max_active_jobs` jobs are started, in insertion order, before
+///             the oldest started job is finished.
+///
+///             At most one task is outstanding on the worker task runner at a
+///             time, and each task performs a single step before scheduling
+///             the next one. This prevents pipeline compilation from
+///             monopolizing the worker (IO) task runner, letting other tasks
+///             interleave between steps.
 ///
 class PipelineCompileQueueGLES final
     : public std::enable_shared_from_this<PipelineCompileQueueGLES> {
@@ -51,8 +56,12 @@ class PipelineCompileQueueGLES final
     virtual absl::Status Finish() = 0;
   };
 
+  /// The default maximum number of jobs that are started but not yet finished.
+  static constexpr size_t kDefaultMaxActiveJobs = 4;
+
   static std::shared_ptr<PipelineCompileQueueGLES> Create(
-      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
+      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner,
+      size_t max_active_jobs = kDefaultMaxActiveJobs);
 
   ~PipelineCompileQueueGLES();
 
@@ -63,14 +72,6 @@ class PipelineCompileQueueGLES final
   //----------------------------------------------------------------------------
   /// @brief      Post a compile job for the specified descriptor.
   ///
-  ///             When the job is run by the worker, `Finish` is posted as a
-  ///             separate task to the worker task runner, giving work started
-  ///             by `Start` (such as the driver linking a program) time to
-  ///             progress. That task can't be performed eagerly. When the job
-  ///             is performed eagerly (see `PerformJobEagerly`) or flushed
-  ///             because the queue is being destroyed, both steps run back to
-  ///             back on the calling thread.
-  ///
   /// @param[in]  desc  The description
   /// @param[in]  job   The job
   ///
@@ -80,42 +81,55 @@ class PipelineCompileQueueGLES final
                             std::unique_ptr<CompileJob> job);
 
   //----------------------------------------------------------------------------
-  /// @brief      If the job has not yet been done, perform it eagerly on the
-  ///             calling thread. This can be used in lieu of an idle wait for
-  ///             the job completion on the calling thread.
+  /// @brief      Ensures the job for the descriptor is done before returning.
+  ///             If the job has not been started, it is started and finished
+  ///             on the calling thread. If it has been started, the calling
+  ///             thread waits for the worker to finish it. Must not be called
+  ///             on the worker task runner.
   ///
   /// @param[in]  desc  The description
   ///
   void PerformJobEagerly(const PipelineDescriptor& desc);
 
  private:
-  explicit PipelineCompileQueueGLES(
-      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
+  using JobMap = absl::linked_hash_map<PipelineDescriptor,
+                                       std::unique_ptr<CompileJob>,
+                                       ComparableHash<PipelineDescriptor>,
+                                       ComparableEqual<PipelineDescriptor>>;
 
-  /// Posts a task to the worker that performs the next pending job and then
-  /// schedules a task for the next job in the queue.
-  void ScheduleNextJob();
+  PipelineCompileQueueGLES(
+      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner,
+      size_t max_active_jobs);
 
-  /// Removes and returns the oldest pending job. If there are none, marks the
-  /// queue as no longer processing and returns null.
-  std::unique_ptr<CompileJob> TakeNextJob();
+  /// Posts a task to the worker that calls `Run`.
+  void ScheduleRun();
 
-  /// Starts the job and posts its finish as a separate task to the worker task
-  /// runner. Must be called on the worker task runner.
-  static void PerformJobOnWorker(
-      const std::shared_ptr<fml::BasicTaskRunner>& worker_task_runner,
-      std::shared_ptr<CompileJob> job);
+  /// Performs a single step on the worker: starts the oldest inactive job if
+  /// there is room for another active job, otherwise finishes the oldest
+  /// active job. Schedules itself again until there is no work left.
+  void Run();
+
+  /// Starts the active job. Removes it if it fails to start.
+  void StartActiveJob(JobMap::iterator active_job);
+
+  /// Finishes and removes the active job.
+  void FinishActiveJob(JobMap::iterator active_job);
+
+  /// Removes the active job and wakes any threads waiting on it.
+  void RemoveActiveJob(JobMap::iterator active_job);
 
   /// Starts and finishes the job back to back on the calling thread.
   static void PerformJobImmediately(CompileJob& job);
 
   std::shared_ptr<fml::BasicTaskRunner> worker_task_runner_;
+  const size_t max_active_jobs_;
   Mutex mutex_;
-  absl::linked_hash_map<PipelineDescriptor,
-                        std::unique_ptr<CompileJob>,
-                        ComparableHash<PipelineDescriptor>,
-                        ComparableEqual<PipelineDescriptor>>
-      pending_jobs_ IPLR_GUARDED_BY(mutex_);
+  ConditionVariable active_job_removed_;
+  /// Jobs that have not been started, oldest first.
+  JobMap inactive_jobs_ IPLR_GUARDED_BY(mutex_);
+  /// Jobs that have been started on the worker but not yet finished, oldest
+  /// first. Only `Run`, on the worker, adds or removes entries.
+  JobMap active_jobs_ IPLR_GUARDED_BY(mutex_);
   bool is_processing_ IPLR_GUARDED_BY(mutex_) = false;
   size_t priorities_elevated_ IPLR_GUARDED_BY(mutex_) = 0;
 };

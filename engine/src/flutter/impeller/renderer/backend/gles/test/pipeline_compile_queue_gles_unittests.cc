@@ -5,9 +5,11 @@
 #include "impeller/renderer/backend/gles/pipeline_compile_queue_gles.h"
 
 #include <atomic>
+#include <chrono>
 #include <deque>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "flutter/fml/synchronization/count_down_latch.h"
@@ -355,9 +357,15 @@ TEST(PipelineCompileQueueGLESTest, WorkerRunsFinishAsSeparateTask) {
   runner->RunAll();
 }
 
-TEST(PipelineCompileQueueGLESTest, WorkerFinishesJobBeforeStartingNext) {
+TEST(PipelineCompileQueueGLESTest, CreateReturnsNullWithZeroMaxActiveJobs) {
   auto runner = std::make_shared<CapturingTaskRunner>();
-  auto queue = PipelineCompileQueueGLES::Create(runner);
+  EXPECT_EQ(PipelineCompileQueueGLES::Create(runner, /*max_active_jobs=*/0),
+            nullptr);
+}
+
+TEST(PipelineCompileQueueGLESTest, OneActiveJobFinishesBeforeStartingNext) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueGLES::Create(runner, /*max_active_jobs=*/1);
   ASSERT_NE(queue, nullptr);
 
   ::testing::InSequence sequence;
@@ -368,6 +376,32 @@ TEST(PipelineCompileQueueGLESTest, WorkerFinishesJobBeforeStartingNext) {
     PipelineDescriptor desc;
     desc.SetLabel(std::to_string(i));
     ASSERT_TRUE(queue->PostJobForDescriptor(desc, std::move(job)));
+  }
+  runner->RunAll();
+}
+
+TEST(PipelineCompileQueueGLESTest, StartsUpToMaxActiveJobsBeforeFinishing) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueGLES::Create(runner, /*max_active_jobs=*/2);
+  ASSERT_NE(queue, nullptr);
+
+  std::vector<std::unique_ptr<MockCompileJob>> jobs;
+  for (int i = 0; i < 3; i++) {
+    jobs.push_back(std::make_unique<MockCompileJob>());
+  }
+  {
+    ::testing::InSequence sequence;
+    EXPECT_CALL(*jobs[0], Start());
+    EXPECT_CALL(*jobs[1], Start());
+    EXPECT_CALL(*jobs[0], Finish());
+    EXPECT_CALL(*jobs[2], Start());
+    EXPECT_CALL(*jobs[1], Finish());
+    EXPECT_CALL(*jobs[2], Finish());
+  }
+  for (int i = 0; i < 3; i++) {
+    PipelineDescriptor desc;
+    desc.SetLabel(std::to_string(i));
+    ASSERT_TRUE(queue->PostJobForDescriptor(desc, std::move(jobs[i])));
   }
   runner->RunAll();
 }
@@ -413,26 +447,75 @@ TEST(PipelineCompileQueueGLESTest, DestructorRunsStartAndFinish) {
   after_reset.Call();
 }
 
-TEST(PipelineCompileQueueGLESTest, StartedJobCannotBePerformedEagerly) {
+TEST(PipelineCompileQueueGLESTest, PerformJobEagerlyWaitsForActiveJob) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueGLES::Create(runner);
+  ASSERT_NE(queue, nullptr);
+
+  const std::thread::id worker_thread_id = std::this_thread::get_id();
+  auto job = std::make_unique<MockCompileJob>();
+  EXPECT_CALL(*job, Start());
+  EXPECT_CALL(*job, Finish()).WillOnce([worker_thread_id]() {
+    // The job is finished by the worker, not by the waiting thread.
+    EXPECT_EQ(std::this_thread::get_id(), worker_thread_id);
+    return absl::OkStatus();
+  });
+  PipelineDescriptor desc;
+  ASSERT_TRUE(queue->PostJobForDescriptor(desc, std::move(job)));
+  runner->RunOne();  // Starts the job.
+
+  std::atomic<bool> performed = false;
+  std::thread waiter([&queue, &desc, &performed]() {
+    queue->PerformJobEagerly(desc);
+    performed = true;
+  });
+  // Give the waiter a chance to block on the active job.
+  std::this_thread::sleep_for(std::chrono::milliseconds(20));
+  EXPECT_FALSE(performed);
+
+  runner->RunAll();  // Finishes the job.
+  waiter.join();
+  EXPECT_TRUE(performed);
+}
+
+TEST(PipelineCompileQueueGLESTest, DestructorFinishesActiveJobsOnWorker) {
   auto runner = std::make_shared<CapturingTaskRunner>();
   auto queue = PipelineCompileQueueGLES::Create(runner);
   ASSERT_NE(queue, nullptr);
 
   auto job = std::make_unique<MockCompileJob>();
-  ::testing::MockFunction<void()> after_perform;
+  ::testing::MockFunction<void()> after_reset;
   {
     ::testing::InSequence sequence;
     EXPECT_CALL(*job, Start());
-    EXPECT_CALL(after_perform, Call());
+    EXPECT_CALL(after_reset, Call());
     EXPECT_CALL(*job, Finish());
   }
-  PipelineDescriptor desc;
-  ASSERT_TRUE(queue->PostJobForDescriptor(desc, std::move(job)));
-  runner->RunOne();
+  ASSERT_TRUE(
+      queue->PostJobForDescriptor(PipelineDescriptor{}, std::move(job)));
+  runner->RunOne();  // Starts the job.
 
-  // The finish step is waiting on the worker, so it isn't stolen.
-  queue->PerformJobEagerly(desc);
-  after_perform.Call();
+  queue.reset();
+  after_reset.Call();
+  runner->RunAll();
+}
+
+TEST(PipelineCompileQueueGLESTest, DuplicateOfActiveJobRunsOnWorker) {
+  auto runner = std::make_shared<CapturingTaskRunner>();
+  auto queue = PipelineCompileQueueGLES::Create(runner);
+  ASSERT_NE(queue, nullptr);
+
+  auto first_job = std::make_unique<MockCompileJob>();
+  EXPECT_CALL(*first_job, Start());
+  EXPECT_CALL(*first_job, Finish());
+  auto second_job = std::make_unique<MockCompileJob>();
+  EXPECT_CALL(*second_job, Start());
+  EXPECT_CALL(*second_job, Finish());
+
+  PipelineDescriptor desc;
+  ASSERT_TRUE(queue->PostJobForDescriptor(desc, std::move(first_job)));
+  runner->RunOne();  // Starts the first job.
+  ASSERT_TRUE(queue->PostJobForDescriptor(desc, std::move(second_job)));
   runner->RunAll();
 }
 
