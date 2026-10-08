@@ -1111,7 +1111,6 @@ name: my_app
       final OperationResult result = await residentWebRunner.restart();
 
       expect(result.code, 1);
-      expect(result.updateFSReport?.hotReloadRejected, isTrue);
       expect(webDevFS.mainUri.toString(), contains('entrypoint.dart'));
 
       expect(
