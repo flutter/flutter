@@ -8,13 +8,6 @@ import("//flutter/lib/web_ui/flutter_js/sources.gni")
 import("//flutter/web_sdk/web_sdk.gni")
 import("$dart_src/build/dart/dart_action.gni")
 
-web_ui_sources = exec_script("list_dart_files.py",
-                             [
-                               "absolute",
-                               rebase_path("//flutter/lib/web_ui/lib"),
-                             ],
-                             "list lines")
-
 web_engine_libraries = [
   ":skwasm_impl_library",
   ":skwasm_stub_library",
@@ -91,6 +84,21 @@ copy("web_ui_library") {
   sources = [ "//flutter/web_sdk/libraries.json" ]
 
   outputs = [ "$root_out_dir/flutter_web_sdk/{{source_file_part}}" ]
+}
+
+# The file outputs (stamps and libraries.json) of the targets that assemble
+# $root_out_dir/flutter_web_sdk/lib. The sdk_rewriter actions track every Dart
+# source they read through a depfile and refresh their stamp whenever they run,
+# so these outputs are a complete proxy for "any web engine Dart source
+# changed" and let the SDK compilation steps below rebuild without having to
+# enumerate the sources at GN time.
+web_engine_library_inputs = []
+foreach(lib, web_engine_libraries) {
+  web_engine_library_inputs += filter_include(get_target_outputs(lib),
+                                              [
+                                                "*.stamp",
+                                                "*.json",
+                                              ])
 }
 
 # Compiles a Dart program with dartdevc
@@ -206,7 +214,7 @@ template("_compile_platform") {
          "output_dill must be defined for $target_name")
 
   _kernel_worker(target_name) {
-    inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
+    inputs = [ "sdk_rewriter.dart" ] + web_engine_library_inputs
 
     outputs = [ invoker.output_dill ]
     args = []
@@ -300,7 +308,7 @@ template("_compile_ddc_sdk") {
   assert(defined(invoker.canary), "canary must be defined for $target_name")
 
   _dartdevc(target_name) {
-    inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
+    inputs = [ "sdk_rewriter.dart" ] + web_engine_library_inputs
 
     packages = dart_sdk_package_config
 
