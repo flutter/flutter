@@ -1764,6 +1764,9 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             secondLogProcess.write('Filtering the log data using "type == 1024"\n');
             async.flushMicrotasks();
             expect(simControl.requests, hasLength(2));
+
+            async.elapse(const Duration(seconds: 30));
+            expect(logger.errorText, isEmpty);
             expect(processManager, hasNoRemainingExpectations);
           });
         },
@@ -1822,33 +1825,29 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
 
       testUsingContext(
-        'startApp fails without launching the app if the log stream never becomes ready',
-        () async {
-          LaunchResult? result;
+        'startApp warns and keeps waiting if the log stream is slow to become ready',
+        () {
           fakeAsync((FakeAsync async) {
-            processManager.addCommand(
-              FakeCommand(command: logStreamCommand, completer: Completer<void>()),
+            final logProcess = FakeStreamingProcess();
+            processManager.addCommand(FakeCommand(command: logStreamCommand, process: logProcess));
+
+            buildDevice().startApp(
+              buildPackage(),
+              prebuiltApplication: true,
+              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
             );
-
-            buildDevice()
-                .startApp(
-                  buildPackage(),
-                  prebuiltApplication: true,
-                  debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-                )
-                .then((LaunchResult value) => result = value);
             async.elapse(const Duration(seconds: 30));
-          });
-          // Cancelling the log reader subscription resumes in the root zone.
-          await Future<void>.delayed(Duration.zero);
+            expect(
+              logger.errorText,
+              contains('The iOS simulator log stream did not start after 30 seconds.'),
+            );
+            expect(simControl.requests, isEmpty);
 
-          expect(result?.started, isFalse);
-          expect(
-            logger.errorText,
-            contains('The iOS simulator log stream did not start within 30 seconds.'),
-          );
-          expect(simControl.requests, isEmpty);
-          expect(processManager, hasNoRemainingExpectations);
+            logProcess.write('Filtering the log data using "type == 1024"\n');
+            async.flushMicrotasks();
+            expect(simControl.requests, hasLength(1));
+            expect(processManager, hasNoRemainingExpectations);
+          });
         },
         overrides: <Type, Generator>{
           PlistParser: () => testPlistParser,
