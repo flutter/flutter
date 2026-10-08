@@ -214,7 +214,7 @@ class PipelineLibraryGLES final
     bool threadsafe = false;
     /// Set by `StartPipelineCreation` if a program is being compiled, and
     /// consumed by `FinishPipelineCreation`.
-    std::shared_ptr<PendingProgram> pending_program;
+    std::unique_ptr<PendingProgram> pending_program;
   };
 
   //----------------------------------------------------------------------------
@@ -232,6 +232,12 @@ class PipelineLibraryGLES final
   ///             on the same thread that called `StartPipelineCreation`.
   ///
   static void FinishPipelineCreation(PipelineCreation& creation);
+
+  //----------------------------------------------------------------------------
+  /// @brief      A compile job whose steps run `StartPipelineCreation` and
+  ///             `FinishPipelineCreation` on the reactor.
+  ///
+  class PipelineCompileJob;
 
   std::shared_ptr<UniqueHandleGLES> GetCachedProgram(const ProgramKey& key);
 
