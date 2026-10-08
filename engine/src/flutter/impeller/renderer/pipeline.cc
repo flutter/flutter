@@ -47,6 +47,21 @@ PipelineFuture<ComputePipelineDescriptor> CreatePipelineFuture(
   return context.GetPipelineLibrary()->GetPipeline(std::move(desc));
 }
 
+std::shared_ptr<Pipeline<PipelineDescriptor>>
+GenericRenderPipelineHandle::WaitAndGet(PipelineLibrary& library) {
+  if (did_wait_) {
+    return pipeline_;
+  }
+  did_wait_ = true;
+  if (pipeline_future_.IsValid()) {
+    if (pipeline_future_.descriptor.has_value()) {
+      library.PerformEagerly(pipeline_future_.descriptor.value());
+    }
+    pipeline_ = pipeline_future_.Get();
+  }
+  return pipeline_;
+}
+
 template <typename T>
 const T& Pipeline<T>::GetDescriptor() const {
   return desc_;

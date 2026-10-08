@@ -306,8 +306,11 @@ PipelineLibraryVK::GetWorkerTaskRunner() const {
   return worker_task_runner_;
 }
 
-PipelineCompileQueue* PipelineLibraryVK::GetPipelineCompileQueue() const {
-  return compile_queue_.get();
+// |PipelineLibrary|
+void PipelineLibraryVK::PerformEagerly(const PipelineDescriptor& descriptor) {
+  if (compile_queue_) {
+    compile_queue_->PerformJobEagerly(descriptor);
+  }
 }
 
 }  // namespace impeller

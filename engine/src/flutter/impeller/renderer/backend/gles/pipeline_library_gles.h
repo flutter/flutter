@@ -202,8 +202,9 @@ class PipelineLibraryGLES final
 
   void CacheProgram(const ProgramKey& key,
                     std::shared_ptr<UniqueHandleGLES> program);
+
   // |PipelineLibrary|
-  PipelineCompileQueue* GetPipelineCompileQueue() const override;
+  void PerformEagerly(const PipelineDescriptor& descriptor) override;
 };
 
 }  // namespace impeller

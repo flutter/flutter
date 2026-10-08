@@ -13,7 +13,6 @@
 #include "impeller/renderer/compute_pipeline_descriptor.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline_builder.h"
-#include "impeller/renderer/pipeline_compile_queue.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/shader_stage_compatibility_checker.h"
 
@@ -126,20 +125,16 @@ class GenericRenderPipelineHandle {
 
   virtual ~GenericRenderPipelineHandle() = default;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Waits for the pipeline to be created and returns it. If the
+  ///             pipeline creation is still pending, the library is asked to
+  ///             perform it eagerly on the calling thread instead of idly
+  ///             waiting.
+  ///
+  /// @param[in]  library  The library the pipeline was requested from.
+  ///
   std::shared_ptr<Pipeline<PipelineDescriptor>> WaitAndGet(
-      PipelineCompileQueue* queue) {
-    if (did_wait_) {
-      return pipeline_;
-    }
-    did_wait_ = true;
-    if (pipeline_future_.IsValid()) {
-      if (queue != nullptr && pipeline_future_.descriptor.has_value()) {
-        queue->PerformJobEagerly(pipeline_future_.descriptor.value());
-      }
-      pipeline_ = pipeline_future_.Get();
-    }
-    return pipeline_;
-  }
+      PipelineLibrary& library);
 
   std::optional<PipelineDescriptor> GetDescriptor() const {
     return pipeline_future_.descriptor;

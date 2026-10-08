@@ -420,8 +420,11 @@ void PipelineLibraryGLES::CacheProgram(
   programs_[key] = std::move(program);
 }
 
-PipelineCompileQueue* PipelineLibraryGLES::GetPipelineCompileQueue() const {
-  return compile_queue_.get();
+// |PipelineLibrary|
+void PipelineLibraryGLES::PerformEagerly(const PipelineDescriptor& descriptor) {
+  if (compile_queue_) {
+    compile_queue_->PerformJobEagerly(descriptor);
+  }
 }
 
 }  // namespace impeller
