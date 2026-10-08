@@ -2461,7 +2461,6 @@ void main() {
         'primary focus on an unfocusable node', (WidgetTester tester) async {
       final List<FocusNode> nodes = await createFocusedNodes(tester);
 
-      // The scope the nodes live in, which is still focusable.
       final FocusScopeNode enclosingScope = nodes[8].enclosingScope!;
 
       // Disable every node in a single build.
