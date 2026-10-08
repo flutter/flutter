@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 
+#include <cmath>
 #include <format>
 #include <memory>
 
@@ -346,11 +347,20 @@ ImageDecoderImpeller::DecompressTexture(
 
   const SkISize source_size = SkISize::Make(descriptor->image_info().width,
                                             descriptor->image_info().height);
-  const SkISize target_size =
-      SkISize::Make(std::min(max_texture_size.width,
-                             static_cast<int64_t>(options.target_width)),
-                    std::min(max_texture_size.height,
-                             static_cast<int64_t>(options.target_height)));
+  SkISize target_size =
+      SkISize::Make(options.target_width, options.target_height);
+  // Shrink both sides by the same factor so the aspect ratio is kept, but
+  // never below one pixel.
+  if (options.target_width > max_texture_size.width ||
+      options.target_height > max_texture_size.height) {
+    const double scale = std::min(static_cast<double>(max_texture_size.width) /
+                                      std::max(options.target_width, 1u),
+                                  static_cast<double>(max_texture_size.height) /
+                                      std::max(options.target_height, 1u));
+    target_size =
+        SkISize::Make(std::max(1L, std::lround(options.target_width * scale)),
+                      std::max(1L, std::lround(options.target_height * scale)));
+  }
 
   // Fast path for when the input requires no decompressing or conversion.
   if (!descriptor->is_compressed() && source_size == target_size &&
