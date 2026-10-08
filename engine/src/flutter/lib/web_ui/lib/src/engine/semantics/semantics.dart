@@ -1105,9 +1105,9 @@ final class GenericRole extends SemanticRole {
       // has no other role for the screen reader to be aware of. Normally the
       // element does not need a `role` attribute at all, except when nested
       // inside a menu, menubar, or listbox (such as the outer ListView
-      // semantics node in DropdownButton or RawAutocomplete), where omitting
-      // `role="none"` causes the browser to expose the element as an extra
-      // generic child of the container.
+      // semantics node in DropdownButton or an Autocomplete options list),
+      // where omitting `role="none"` causes the browser to expose the element
+      // as an extra generic child of the container.
       super.update();
       semanticsObject.owner.addOneTimePostUpdateCallback(() {
         if (!semanticsObject.hasLabel && !semanticsObject.isTappable && hasMenuOrListBoxAncestor) {

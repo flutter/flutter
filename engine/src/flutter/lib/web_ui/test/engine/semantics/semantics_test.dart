@@ -3447,7 +3447,9 @@ void _testSelectables() {
                   role: ui.SemanticsRole.option,
                   label: 'apple',
                   hasTap: true,
-                  flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isTrue),
+                  // isButton mirrors material_ui's per-item Semantics(button: true,
+                  // selected: ...); the explicit role must win over the button flag.
+                  flags: const ui.SemanticsFlags(isButton: true, isSelected: ui.Tristate.isTrue),
                   rect: const ui.Rect.fromLTRB(0, 0, 100, 30),
                 ),
                 tester.updateNode(
