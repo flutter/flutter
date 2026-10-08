@@ -14,6 +14,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
+#include "impeller/entity/contents/pipeline_variant_recording.h"
 #include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/entity.h"
@@ -42,6 +43,7 @@ class GenericVariants {
         return;
       }
     }
+    IMPELLER_RECORD_PIPELINE_VARIANT(options, pipeline.get());
     pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
   }
 
@@ -170,6 +172,8 @@ RenderPipelineHandleT* CreateIfNeeded(
   if (RenderPipelineHandleT* found = container.Get(opts)) {
     return found;
   }
+
+  IMPELLER_PIPELINE_VARIANT_LAZY_SCOPE(context);
 
   RenderPipelineHandleT* default_handle =
       container.GetDefault(*context->GetContext());
@@ -573,6 +577,8 @@ ContentContext::ContentContext(
     return;
   }
 
+  IMPELLER_PIPELINE_VARIANT_WARMING_SCOPE(this);
+
   // On most backends, indexes and other data can be allocated into the same
   // buffers. However, some backends (namely WebGL) require indexes used in
   // indexed draws to be allocated separately from other data. For those
@@ -883,7 +889,9 @@ ContentContext::ContentContext(
   InitializeCommonlyUsedShadersIfNeeded();
 }
 
-ContentContext::~ContentContext() = default;
+ContentContext::~ContentContext() {
+  IMPELLER_REPORT_PIPELINE_VARIANTS(this, context_);
+}
 
 bool ContentContext::IsValid() const {
   return is_valid_;
@@ -1610,6 +1618,12 @@ void ContentContext::RemoveCachedTexture(const flutter::DlImage* image) const {
 
 void ContentContext::ClearCachedTextures() const {
   texture_cache_.clear();
+}
+
+void ContentContext::ClearRenderTargetCache() const {
+  if (render_target_cache_) {
+    render_target_cache_->Clear();
+  }
 }
 
 }  // namespace impeller

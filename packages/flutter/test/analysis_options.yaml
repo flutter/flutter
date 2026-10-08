@@ -15,3 +15,7 @@ linter:
     only_throw_errors: false
     avoid_catches_without_on_clauses: false
     avoid_catching_errors: false
+    # Material and Cupertino libraries and tests in flutter/flutter are
+    # permanently frozen, so unawaited_futures cannot be resolved in
+    # packages/flutter/test/{material,cupertino}.
+    unawaited_futures: false
