@@ -256,78 +256,58 @@ std::shared_ptr<PipelineGLES> PipelineLibraryGLES::CreatePipeline(
   return pipeline;
 }
 
-void PipelineLibraryGLES::StartPipelineCreation(
-    const std::shared_ptr<PipelinePromise>& promise,
-    const std::weak_ptr<PipelineLibrary>& weak_library,
-    const PipelineDescriptor& descriptor,
-    const std::shared_ptr<const ShaderFunction>& vert_function,
-    const std::shared_ptr<const ShaderFunction>& frag_function,
-    bool threadsafe,
-    bool eager) {
-  std::shared_ptr<PipelineLibrary> strong_library = weak_library.lock();
+void PipelineLibraryGLES::StartPipelineCreation(PipelineCreation& creation) {
+  std::shared_ptr<PipelineLibrary> strong_library =
+      creation.weak_library.lock();
   if (!strong_library) {
     VALIDATION_LOG << "Library was collected before a pending pipeline "
                       "creation could finish.";
-    promise->set_value(nullptr);
+    creation.promise->set_value(nullptr);
     return;
   }
   PipelineLibraryGLES& library = PipelineLibraryGLES::Cast(*strong_library);
   const std::shared_ptr<ReactorGLES>& reactor = library.GetReactor();
   if (!reactor) {
-    promise->set_value(nullptr);
+    creation.promise->set_value(nullptr);
     return;
   }
 
-  ProgramKey program_key{vert_function, frag_function,
-                         descriptor.GetSpecializationConstants()};
+  ProgramKey program_key{creation.vert_function, creation.frag_function,
+                         creation.descriptor.GetSpecializationConstants()};
   if (std::shared_ptr<UniqueHandleGLES> program =
           library.GetCachedProgram(program_key)) {
-    promise->set_value(
-        CreatePipeline(weak_library, reactor, descriptor, std::move(program)));
+    creation.promise->set_value(CreatePipeline(creation.weak_library, reactor,
+                                               creation.descriptor,
+                                               std::move(program)));
     return;
   }
 
   std::shared_ptr<PendingProgram> pending_program =
-      std::make_shared<PendingProgram>(reactor, descriptor, vert_function,
-                                       frag_function, threadsafe);
+      std::make_shared<PendingProgram>(
+          reactor, creation.descriptor, creation.vert_function,
+          creation.frag_function, creation.threadsafe);
   if (absl::Status status = pending_program->Compile(); !status.ok()) {
     VALIDATION_LOG << "Could not link pipeline program: " << status.message();
-    promise->set_value(nullptr);
+    creation.promise->set_value(nullptr);
     return;
   }
-
-  if (eager) {
-    FinishPipelineCreation(promise, weak_library, descriptor, program_key,
-                           pending_program);
-    return;
-  }
-  // Wait for the link as a separate event on the IO task runner, giving the
-  // driver time to link the program in between. The task can't be performed
-  // eagerly, so the program is always waited on by the thread that compiled it.
-  library.compile_queue_->PostTask(
-      [reactor, promise, weak_library, descriptor, program_key,
-       pending_program = std::move(pending_program)]() mutable {
-        const bool result = reactor->AddOperation(
-            [promise, weak_library, descriptor, program_key,
-             pending_program = std::move(pending_program)](const ReactorGLES&) {
-              FinishPipelineCreation(promise, weak_library, descriptor,
-                                     program_key, pending_program);
-            });
-        FML_CHECK(result);
-      });
+  creation.pending_program = std::move(pending_program);
 }
 
-void PipelineLibraryGLES::FinishPipelineCreation(
-    const std::shared_ptr<PipelinePromise>& promise,
-    const std::weak_ptr<PipelineLibrary>& weak_library,
-    const PipelineDescriptor& descriptor,
-    const ProgramKey& program_key,
-    const std::shared_ptr<PendingProgram>& pending_program) {
-  std::shared_ptr<PipelineLibrary> strong_library = weak_library.lock();
+void PipelineLibraryGLES::FinishPipelineCreation(PipelineCreation& creation) {
+  // Taking the program ensures it is destroyed here, on the reactor.
+  std::shared_ptr<PendingProgram> pending_program =
+      std::move(creation.pending_program);
+  if (!pending_program) {
+    // The promise was already fulfilled by `StartPipelineCreation`.
+    return;
+  }
+  std::shared_ptr<PipelineLibrary> strong_library =
+      creation.weak_library.lock();
   if (!strong_library) {
     VALIDATION_LOG << "Library was collected before a pending pipeline "
                       "creation could finish.";
-    promise->set_value(nullptr);
+    creation.promise->set_value(nullptr);
     return;
   }
   PipelineLibraryGLES& library = PipelineLibraryGLES::Cast(*strong_library);
@@ -337,12 +317,15 @@ void PipelineLibraryGLES::FinishPipelineCreation(
   if (!program.ok()) {
     VALIDATION_LOG << "Could not link pipeline program: "
                    << program.status().message();
-    promise->set_value(nullptr);
+    creation.promise->set_value(nullptr);
     return;
   }
+  ProgramKey program_key{creation.vert_function, creation.frag_function,
+                         creation.descriptor.GetSpecializationConstants()};
   library.CacheProgram(program_key, *program);
-  promise->set_value(CreatePipeline(weak_library, library.GetReactor(),
-                                    descriptor, *std::move(program)));
+  creation.promise->set_value(
+      CreatePipeline(creation.weak_library, library.GetReactor(),
+                     creation.descriptor, *std::move(program)));
 }
 
 // |PipelineLibrary|
@@ -379,34 +362,38 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
       descriptor, promise->get_future(), weak_from_this()};
   pipelines_[descriptor] = pipeline_future;
 
-  std::weak_ptr<PipelineLibrary> weak_this = weak_from_this();
+  std::shared_ptr<PipelineCreation> creation =
+      std::make_shared<PipelineCreation>(PipelineCreation{
+          .promise = promise,
+          .weak_library = weak_from_this(),
+          .descriptor = descriptor,
+          .vert_function = vert_function,
+          .frag_function = frag_function,
+          .threadsafe = threadsafe,
+      });
   std::shared_ptr<ReactorGLES> reactor = reactor_;
-  auto generation_task = [promise, weak_this, descriptor, vert_function,
-                          frag_function, threadsafe, reactor](bool eager) {
-    std::shared_ptr<PipelineLibrary> thiz = weak_this.lock();
-    if (!thiz) {
-      promise->set_value(nullptr);
+  // Reactor operations added on the same thread run in order, so the finish
+  // operation always runs after the start operation.
+  fml::closure start = [creation, reactor]() {
+    if (creation->weak_library.expired()) {
+      creation->promise->set_value(nullptr);
       return;
     }
-    const bool result = reactor->AddOperation([promise,        //
-                                               weak_this,      //
-                                               descriptor,     //
-                                               vert_function,  //
-                                               frag_function,  //
-                                               threadsafe,     //
-                                               eager           //
-    ](const ReactorGLES&) {
-      StartPipelineCreation(promise, weak_this, descriptor, vert_function,
-                            frag_function, threadsafe, eager);
-    });
+    const bool result = reactor->AddOperation(
+        [creation](const ReactorGLES&) { StartPipelineCreation(*creation); });
+    FML_CHECK(result);
+  };
+  fml::closure finish = [creation, reactor]() {
+    const bool result = reactor->AddOperation(
+        [creation](const ReactorGLES&) { FinishPipelineCreation(*creation); });
     FML_CHECK(result);
   };
 
   if (async && compile_queue_) {
-    compile_queue_->PostJobForDescriptor(descriptor,
-                                         std::move(generation_task));
+    compile_queue_->PostJobForDescriptor(descriptor, start, finish);
   } else {
-    generation_task(/*eager=*/true);
+    start();
+    finish();
   }
 
   return pipeline_future;

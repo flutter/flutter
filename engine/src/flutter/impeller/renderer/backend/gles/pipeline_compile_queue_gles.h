@@ -5,8 +5,8 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_PIPELINE_COMPILE_QUEUE_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_PIPELINE_COMPILE_QUEUE_GLES_H_
 
-#include <functional>
 #include <memory>
+#include <optional>
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/task_runner.h"
@@ -30,18 +30,6 @@ namespace impeller {
 class PipelineCompileQueueGLES final
     : public std::enable_shared_from_this<PipelineCompileQueueGLES> {
  public:
-  //----------------------------------------------------------------------------
-  /// A compile job.
-  ///
-  /// @param[in]  eager  `false` if the job is being run by the queue on the
-  ///                    worker task runner. `true` if it is being run
-  ///                    immediately on the calling thread because the caller
-  ///                    is about to wait on it (see `PerformJobEagerly`), or
-  ///                    because the queue is being destroyed. Eager jobs must
-  ///                    finish all of their work on the calling thread.
-  ///
-  using Job = std::function<void(bool eager)>;
-
   static std::shared_ptr<PipelineCompileQueueGLES> Create(
       std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
@@ -54,12 +42,25 @@ class PipelineCompileQueueGLES final
   //----------------------------------------------------------------------------
   /// @brief      Post a compile job for the specified descriptor.
   ///
-  /// @param[in]  desc  The description
-  /// @param[in]  job   The job
+  ///             A job has two steps, `start` and `finish`, which are always
+  ///             run in that order on the same thread. When the job is run by
+  ///             the worker, `finish` is posted as a separate task to the
+  ///             worker task runner, giving work started by `start` (such as
+  ///             the driver linking a program) time to progress. That task
+  ///             can't be performed eagerly. When the job is performed eagerly
+  ///             (see `PerformJobEagerly`) or flushed because the queue is
+  ///             being destroyed, both steps run back to back on the calling
+  ///             thread.
+  ///
+  /// @param[in]  desc    The description
+  /// @param[in]  start   The first step of the job
+  /// @param[in]  finish  The second step of the job
   ///
   /// @return     If the job was successfully posted to the worker task runner.
   ///
-  bool PostJobForDescriptor(const PipelineDescriptor& desc, const Job& job);
+  bool PostJobForDescriptor(const PipelineDescriptor& desc,
+                            const fml::closure& start,
+                            const fml::closure& finish);
 
   //----------------------------------------------------------------------------
   /// @brief      If the job has not yet been done, perform it eagerly on the
@@ -70,15 +71,12 @@ class PipelineCompileQueueGLES final
   ///
   void PerformJobEagerly(const PipelineDescriptor& desc);
 
-  //----------------------------------------------------------------------------
-  /// @brief      Posts a task directly to the worker task runner, bypassing the
-  ///             job queue. Unlike jobs, the task can't be performed eagerly.
-  ///
-  /// @param[in]  task  The task
-  ///
-  void PostTask(const fml::closure& task);
-
  private:
+  struct Job {
+    fml::closure start;
+    fml::closure finish;
+  };
+
   explicit PipelineCompileQueueGLES(
       std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
@@ -87,8 +85,17 @@ class PipelineCompileQueueGLES final
   void ScheduleNextJob();
 
   /// Removes and returns the oldest pending job. If there are none, marks the
-  /// queue as no longer processing and returns null.
-  Job TakeNextJob();
+  /// queue as no longer processing and returns nullopt.
+  std::optional<Job> TakeNextJob();
+
+  /// Runs the start of the job and posts its finish as a separate task to the
+  /// worker task runner. Must be called on the worker task runner.
+  static void PerformJobOnWorker(
+      const std::shared_ptr<fml::BasicTaskRunner>& worker_task_runner,
+      const Job& job);
+
+  /// Runs the start and finish of the job back to back on the calling thread.
+  static void PerformJobImmediately(const Job& job);
 
   std::shared_ptr<fml::BasicTaskRunner> worker_task_runner_;
   Mutex mutex_;
