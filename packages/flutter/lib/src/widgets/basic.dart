@@ -11,7 +11,13 @@ library;
 import 'dart:math' as math;
 import 'dart:ui'
     as ui
-    show Image, ImageFilter, SemanticsHitTestBehavior, SemanticsInputType, TextHeightBehavior;
+    show
+        Hyphens,
+        Image,
+        ImageFilter,
+        SemanticsHitTestBehavior,
+        SemanticsInputType,
+        TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -6532,6 +6538,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
+    this.hyphens = ui.Hyphens.manual,
     this.selectionRegistrar,
     this.selectionColor,
     this.searchHighlightColor,
@@ -6631,6 +6638,9 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
+  /// {@macro flutter.painting.textPainter.hyphens}
+  final ui.Hyphens hyphens;
+
   /// The [SelectionRegistrar] this rich text is subscribed to.
   ///
   /// If this is set, [selectionColor] must be non-null.
@@ -6672,6 +6682,7 @@ class RichText extends MultiChildRenderObjectWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
+      hyphens: hyphens,
       locale: locale ?? Localizations.maybeLocaleOf(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
@@ -6695,6 +6706,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
       ..textHeightBehavior = textHeightBehavior
+      ..hyphens = hyphens
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
@@ -6741,6 +6753,7 @@ class RichText extends MultiChildRenderObjectWidget {
         defaultValue: null,
       ),
     );
+    properties.add(EnumProperty<Hyphens>('hyphens', hyphens, defaultValue: Hyphens.manual));
   }
 }
 

@@ -13,7 +13,7 @@
 library;
 
 import 'dart:math';
-import 'dart:ui' as ui show TextHeightBehavior;
+import 'dart:ui' as ui show Hyphens, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -479,7 +479,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 ///
 /// [Text] is not selectable by default. To make a [Text] selectable, one can
 /// wrap a subtree with a [SelectionArea] widget. To exclude a part of a subtree
-/// under [SelectionArea] from selection, once can also wrap that part of the
+/// under [SelectionArea] from selection, one can also wrap that part of the
 /// subtree with [SelectionContainer.disabled].
 ///
 /// {@tool dartpad}
@@ -526,6 +526,7 @@ class Text extends StatelessWidget {
     this.semanticsIdentifier,
     this.textWidthBasis,
     this.textHeightBehavior,
+    this.hyphens,
     this.selectionColor,
   }) : textSpan = null,
        assert(
@@ -563,6 +564,7 @@ class Text extends StatelessWidget {
     this.semanticsIdentifier,
     this.textWidthBasis,
     this.textHeightBehavior,
+    this.hyphens,
     this.selectionColor,
   }) : data = null,
        assert(
@@ -702,6 +704,11 @@ class Text extends StatelessWidget {
   /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
+  /// {@macro flutter.painting.textPainter.hyphens}
+  ///
+  /// If null, [Hyphens.manual] is used.
+  final ui.Hyphens? hyphens;
+
   /// The color to use when painting the selection.
   ///
   /// This is ignored if [SelectionContainer.maybeOf] returns null
@@ -768,6 +775,7 @@ class Text extends StatelessWidget {
             textHeightBehavior ??
             defaultTextStyle.textHeightBehavior ??
             DefaultTextHeightBehavior.maybeOf(context),
+        hyphens: hyphens ?? ui.Hyphens.manual,
         selectionColor:
             selectionColor ?? selectionStyle.selectionColor ?? DefaultSelectionStyle.defaultColor,
         searchHighlightColor:
@@ -797,6 +805,7 @@ class Text extends StatelessWidget {
             textHeightBehavior ??
             defaultTextStyle.textHeightBehavior ??
             DefaultTextHeightBehavior.maybeOf(context),
+        hyphens: hyphens ?? ui.Hyphens.manual,
         selectionColor:
             selectionColor ?? selectionStyle.selectionColor ?? DefaultSelectionStyle.defaultColor,
         searchHighlightColor:
@@ -854,6 +863,7 @@ class Text extends StatelessWidget {
         defaultValue: null,
       ),
     );
+    properties.add(EnumProperty<ui.Hyphens>('hyphens', hyphens, defaultValue: null));
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }
@@ -876,6 +886,7 @@ class _SelectableTextContainer extends StatefulWidget {
     this.strutStyle,
     required this.textWidthBasis,
     this.textHeightBehavior,
+    required this.hyphens,
     required this.selectionColor,
     required this.searchHighlightColor,
     required this.activeSearchHighlightColor,
@@ -892,6 +903,7 @@ class _SelectableTextContainer extends StatefulWidget {
   final StrutStyle? strutStyle;
   final TextWidthBasis textWidthBasis;
   final ui.TextHeightBehavior? textHeightBehavior;
+  final ui.Hyphens hyphens;
   final Color selectionColor;
   final Color searchHighlightColor;
   final Color activeSearchHighlightColor;
@@ -934,6 +946,7 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
         strutStyle: widget.strutStyle,
         textWidthBasis: widget.textWidthBasis,
         textHeightBehavior: widget.textHeightBehavior,
+        hyphens: widget.hyphens,
         selectionColor: widget.selectionColor,
         searchHighlightColor: widget.searchHighlightColor,
         activeSearchHighlightColor: widget.activeSearchHighlightColor,
@@ -957,6 +970,7 @@ class _RichText extends StatelessWidget {
     this.strutStyle,
     required this.textWidthBasis,
     this.textHeightBehavior,
+    required this.hyphens,
     required this.selectionColor,
     required this.searchHighlightColor,
     required this.activeSearchHighlightColor,
@@ -974,6 +988,7 @@ class _RichText extends StatelessWidget {
   final StrutStyle? strutStyle;
   final TextWidthBasis textWidthBasis;
   final ui.TextHeightBehavior? textHeightBehavior;
+  final ui.Hyphens hyphens;
   final Color selectionColor;
   final Color searchHighlightColor;
   final Color activeSearchHighlightColor;
@@ -993,6 +1008,7 @@ class _RichText extends StatelessWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
+      hyphens: hyphens,
       selectionRegistrar: registrar,
       selectionColor: selectionColor,
       searchHighlightColor: searchHighlightColor,

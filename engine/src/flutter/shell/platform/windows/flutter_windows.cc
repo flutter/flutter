@@ -13,6 +13,7 @@
 #include <memory>
 #include <vector>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
 #include "flutter/shell/platform/common/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/common/path_utils.h"
@@ -93,7 +94,8 @@ static FlutterDesktopViewControllerRef CreateViewController(
   }
 
   std::unique_ptr<flutter::FlutterWindowsView> view = engine_ptr->CreateView(
-      std::move(window_wrapper), false, flutter::BoxConstraints());
+      std::move(window_wrapper), false, flutter::BoxConstraints(),
+      /*allow_implicit_view=*/true);
   if (!view) {
     return nullptr;
   }
@@ -260,20 +262,24 @@ void FlutterDesktopEnginePostPlatformThreadTask(FlutterDesktopEngineRef engine,
                                                 void* user_data) {
   FML_DCHECK(callback) << "Callback must not be null";
   struct Context {
-    VoidCallback callback;
-    VoidCallback on_cancel;
-    void* user_data;
-    bool invoked = false;
+    Context(VoidCallback callback, VoidCallback on_cancel, void* user_data)
+        : callback(callback), on_cancel(on_cancel), user_data(user_data) {}
 
     ~Context() {
       if (!invoked && on_cancel) {
         on_cancel(user_data);
       }
     }
+
+    VoidCallback callback;
+    VoidCallback on_cancel;
+    void* user_data;
+    bool invoked = false;
+
+    FML_DISALLOW_COPY_AND_ASSIGN(Context);
   };
 
-  auto context =
-      std::make_shared<Context>(Context{callback, on_cancel, user_data});
+  auto context = std::make_shared<Context>(callback, on_cancel, user_data);
   EngineFromHandle(engine)->task_runner()->PostTask([context]() {
     context->invoked = true;
     context->callback(context->user_data);

@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 
+#include <atomic>
 #include <cstdint>
 #include <cstring>
 #include <utility>
@@ -557,7 +558,9 @@ VkResult vkCreateImageView(VkDevice device,
                            const VkImageViewCreateInfo* pCreateInfo,
                            const VkAllocationCallbacks* pAllocator,
                            VkImageView* pView) {
-  *pView = reinterpret_cast<VkImageView>(0xFEE1DEAD);
+  // Handles are distinct so tests can tell two views of the same image apart.
+  static std::atomic_uint64_t next_handle = 0xFEE1DEAD;
+  *pView = reinterpret_cast<VkImageView>(next_handle.fetch_add(1));
   return VK_SUCCESS;
 }
 
@@ -1311,8 +1314,7 @@ MockVulkanContextBuilder::MockVulkanContextBuilder()
         }
       }) {}
 
-std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
-  auto message_loop = fml::ConcurrentMessageLoop::Create();
+ContextVK::Settings MockVulkanContextBuilder::PrepareSettings() {
   ContextVK::Settings settings;
   settings.proc_address_callback = GetMockVulkanProcAddress;
   if (settings_callback_) {
@@ -1331,8 +1333,17 @@ std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
   g_mock_vulkan_state->compression_exhausted_create_image_failures =
       compression_exhausted_create_image_failures_;
   settings.embedder_data = embedder_data_;
-  std::shared_ptr<ContextVK> result = ContextVK::Create(std::move(settings));
-  return result;
+  return settings;
+}
+
+absl::StatusOr<ContextVK::DeviceSelection>
+MockVulkanContextBuilder::SelectDevice() {
+  return ContextVK::SelectDevice(PrepareSettings());
+}
+
+std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
+  auto message_loop = fml::ConcurrentMessageLoop::Create();
+  return ContextVK::Create(PrepareSettings());
 }
 
 std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
