@@ -1979,7 +1979,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (marked != null && !marked.canRequestFocus) {
       // The node was marked for focus but became unfocusable before this update.
       marked.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
-      // unfocus() is a no-op for nodes without an enclosing scope.
+      // A node with no enclosing scope has nowhere to move focus to, so
+      // unfocus() leaves the marker alone.
       if (_markedForFocus == marked) {
         _markedForFocus = null;
       }
