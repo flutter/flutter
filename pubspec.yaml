@@ -4,7 +4,6 @@ environment:
   sdk: ^3.13.0-0
 
 workspace:
-  - dev/a11y_assessments
   - dev/flutter_analyzer_plugin
   - dev/automated_tests
   - dev/benchmarks/complex_layout
@@ -132,7 +131,6 @@ dependencies:
   http_parser: 4.1.2
   intl: ^0.20.3
   io: 1.1.0
-  isolate: 2.1.1
   js: 0.7.2
   json_annotation: 4.12.0
   leak_tracker: 11.0.2
@@ -226,4 +224,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 4ccg7b
+# PUBSPEC CHECKSUM: cglae1

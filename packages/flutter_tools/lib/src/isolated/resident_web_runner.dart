@@ -13,24 +13,23 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide
 
 import '../application_package.dart';
 import '../base/async_guard.dart';
-import '../base/command_help.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../hook_runner.dart' show hookRunner;
 import '../project.dart';
 import '../resident_runner.dart';
@@ -51,38 +50,32 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
   @override
   ResidentRunner createWebRunner(
     FlutterDevice device, {
-    String? target,
-    required bool stayResident,
-    required FlutterProject flutterProject,
-    required DebuggingOptions debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    UrlTunneller? urlTunneller,
-    required Logger logger,
-    required Terminal terminal,
-    required Platform platform,
-    required OutputPreferences outputPreferences,
-    required FileSystem fileSystem,
-    required SystemClock systemClock,
     required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
+    required DebuggingOptions debuggingOptions,
+    required FlutterProject flutterProject,
+    required bool stayResident,
+    required ToolContext toolContext,
     bool machine = false,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    String? target,
+    UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
   }) {
     return ResidentWebRunner(
       device,
-      target: target,
-      flutterProject: flutterProject,
+      analytics: analytics,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
       debuggingOptions: debuggingOptions,
+      flutterProject: flutterProject,
+      toolContext: toolContext,
+      machine: machine,
       platformArgs: platformArgs,
       stayResident: stayResident,
+      target: target,
       urlTunneller: urlTunneller,
-      machine: machine,
-      analytics: analytics,
-      systemClock: systemClock,
-      fileSystem: fileSystem,
-      logger: logger,
-      terminal: terminal,
-      platform: platform,
-      outputPreferences: outputPreferences,
       webDefines: webDefines,
     );
   }
@@ -98,51 +91,29 @@ const kNoClientConnectedMessage = 'Recompile complete. No client connected.';
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
     FlutterDevice device, {
-    String? target,
-    super.stayResident = true,
-    super.machine = false,
-    super.projectRootPath,
-    required this.flutterProject,
+    required super.analytics,
+    required super.buildSystem,
+    required super.buildTargets,
     required super.debuggingOptions,
+    required this.flutterProject,
+    required super.toolContext,
+    super.machine = false,
     this.platformArgs = const <String, Object?>{},
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Terminal terminal,
-    required Platform platform,
-    required OutputPreferences outputPreferences,
-    required this._systemClock,
-    required this._analytics,
+    super.projectRootPath,
+    super.stayResident = true,
+    String? target,
     this._urlTunneller,
     this._webDefines = const <String, String>{},
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _platform = platform,
-       super(
+  }) : super(
          <FlutterDevice>[device],
-         target: target ?? fileSystem.path.join('lib', 'main.dart'),
-         commandHelp: CommandHelp(
-           logger: logger,
-           terminal: terminal,
-           platform: platform,
-           outputPreferences: outputPreferences,
-         ),
+         target: target ?? toolContext.fs.path.join('lib', 'main.dart'),
+         xcode: null,
          dartBuilder: hookRunner,
        );
 
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final Platform _platform;
-  final SystemClock _systemClock;
-  final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
   final Map<String, String> _webDefines;
   final Map<String, Object?> platformArgs;
-
-  @override
-  Logger get logger => _logger;
-
-  @override
-  FileSystem get fileSystem => _fileSystem;
 
   FlutterDevice? get flutterDevice => flutterDevices.first;
   final FlutterProject flutterProject;
@@ -166,7 +137,20 @@ class ResidentWebRunner extends ResidentRunner {
       debuggingOptions.startPaused ||
       useDwdsWebSocketConnection;
 
-  late final useDwdsWebSocketConnection = flutterDevice!.device is! ChromiumDevice;
+  /// Whether the tool launches (and therefore owns a DevTools protocol
+  /// connection to) a Chromium instance for this run.
+  ///
+  /// This is false for non-Chromium devices and when the caller passes
+  /// `no-launch-chrome` (e.g. `flutter drive`, where WebDriver launches the
+  /// browser). In that case [ChromiumLauncher.connectedInstance] never
+  /// completes, so nothing may wait on it.
+  late final bool _toolLaunchesChromium =
+      flutterDevice?.device is ChromiumDevice && platformArgs['no-launch-chrome'] != true;
+
+  /// Chrome-based DWDS debugging requires a DevTools protocol connection to a
+  /// browser launched by the tool. Otherwise, use the DWDS WebSocket
+  /// connection.
+  late final bool useDwdsWebSocketConnection = !_toolLaunchesChromium;
 
   @override
   // Web uses a different plugin registry.
@@ -191,6 +175,7 @@ class ResidentWebRunner extends ResidentRunner {
   StreamSubscription<vmservice.Event>? _serviceSub;
   StreamSubscription<vmservice.Event>? _extensionEventSub;
   var _exited = false;
+  var _isRestarting = false;
   WipConnection? _wipConnection;
   ChromiumLauncher? _chromiumLauncher;
 
@@ -234,7 +219,7 @@ class ResidentWebRunner extends ResidentRunner {
       _generatedEntrypointDirectory?.deleteSync(recursive: true);
     } on FileSystemException {
       // Best effort to clean up temp dirs.
-      _logger.printTrace(
+      logger.printTrace(
         'Failed to clean up temp directory: ${_generatedEntrypointDirectory!.path}',
       );
     }
@@ -264,12 +249,12 @@ class ResidentWebRunner extends ResidentRunner {
           buildInfo: debuggingOptions.buildInfo,
         );
     if (package == null) {
-      _logger.printStatus('This application is not configured to build on the web.');
-      _logger.printStatus('To add web support to a project, run `flutter create .`.');
+      logger.printStatus('This application is not configured to build on the web.');
+      logger.printStatus('To add web support to a project, run `flutter create .`.');
     }
     final String modeName = debuggingOptions.buildInfo.mode.friendlyName;
-    _logger.printStatus(
-      'Launching ${getDisplayPath(target, _fileSystem)} '
+    logger.printStatus(
+      'Launching ${getDisplayPath(target, fileSystem)} '
       'on ${flutterDevice!.device!.displayName} in $modeName mode...',
     );
     if (flutterDevice!.device is ChromiumDevice) {
@@ -281,12 +266,12 @@ class ResidentWebRunner extends ResidentRunner {
         final WebDevServerConfig originalConfig =
             debuggingOptions.webDevServerConfig ?? const WebDevServerConfig();
 
-        final int resolvedPort = await resolvePort(originalConfig.port, globals.os);
+        final int resolvedPort = await resolvePort(originalConfig.port, osUtils);
 
         final WebDevServerConfig updatedConfig = originalConfig.copyWith(port: resolvedPort);
         final ExpressionCompiler? expressionCompiler =
             debuggingOptions.webEnableExpressionEvaluation
-            ? WebExpressionCompiler(flutterDevice!.generator!, fileSystem: _fileSystem)
+            ? WebExpressionCompiler(flutterDevice!.generator!, fileSystem: fileSystem)
             : null;
 
         flutterDevice!.developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript);
@@ -306,7 +291,7 @@ class ResidentWebRunner extends ResidentRunner {
             serveDevTools: debuggingOptions.enableDevTools,
             devToolsServerAddress: debuggingOptions.devToolsServerAddress,
           ),
-          entrypoint: _fileSystem.file(target).uri,
+          entrypoint: fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
@@ -320,7 +305,7 @@ class ResidentWebRunner extends ResidentRunner {
           webCrossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
           fileSystem: fileSystem,
           logger: logger,
-          platform: _platform,
+          platform: platform,
           webDefines: _webDefines,
         );
         Uri url = await flutterDevice!.devFS!.create();
@@ -331,7 +316,7 @@ class ResidentWebRunner extends ResidentRunner {
           await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true, resetCompiler: true);
           if (!report.success) {
-            _logger.printError('Failed to compile application.');
+            logger.printError('Failed to compile application.');
             appFailedToStart();
             return 1;
           }
@@ -339,18 +324,18 @@ class ResidentWebRunner extends ResidentRunner {
           cacheInitialDillCompilation();
         } else {
           final webBuilder = WebBuilder(
-            logger: _logger,
-            processManager: globals.processManager,
-            buildSystem: globals.buildSystem,
-            fileSystem: _fileSystem,
-            flutterVersion: globals.flutterVersion,
-            analytics: globals.analytics,
-            artifacts: globals.artifacts!,
-            buildTargets: globals.buildTargets,
-            cache: globals.cache,
-            config: globals.config,
-            platform: _platform,
-            terminal: globals.terminal,
+            logger: logger,
+            processManager: processManager,
+            buildSystem: buildSystem,
+            fileSystem: fileSystem,
+            flutterVersion: flutterVersion,
+            analytics: analytics,
+            artifacts: artifacts,
+            buildTargets: buildTargets,
+            cache: cache,
+            config: config,
+            platform: platform,
+            terminal: terminal,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -390,27 +375,27 @@ class ResidentWebRunner extends ResidentRunner {
       });
     } on WebSocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError(error.toString(), stackTrace: stackTrace);
+      logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on ChromeDebugException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError(error.toString(), stackTrace: stackTrace);
+      logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on AppConnectionException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError(error.toString(), stackTrace: stackTrace);
+      logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on SocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError(error.toString(), stackTrace: stackTrace);
+      logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on HttpException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError(error.toString(), stackTrace: stackTrace);
+      logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on TimeoutException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError(
+      logger.printError(
         'Failed to establish connection with the web debug service: $error',
         stackTrace: stackTrace,
       );
@@ -420,7 +405,7 @@ class ResidentWebRunner extends ResidentRunner {
       // its connection to DWDS. Don't treat this as an unhandled exception.
       appFailedToStart();
       if (error.errorCode != DartDevelopmentServiceException.failedToStartError) {
-        _logger.printError(error.message, stackTrace: stackTrace);
+        logger.printError(error.message, stackTrace: stackTrace);
       }
       throwToolExit(kExitMessage);
     } on Exception {
@@ -436,13 +421,13 @@ class ResidentWebRunner extends ResidentRunner {
     return JsCompilerConfig.run(
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,
       renderer: debuggingOptions.webRenderer,
+      deprecatedJsInterop: debuggingOptions.buildInfo.deprecatedJsInterop,
     );
   }
 
   /// Handles the no clients available scenario gracefully.
-  OperationResult _handleNoClientsAvailable(Status status) {
-    status.stop();
-    _logger.printStatus(kNoClientConnectedMessage);
+  OperationResult _handleNoClientsAvailable() {
+    logger.printStatus(kNoClientConnectedMessage);
     return OperationResult.ok;
   }
 
@@ -453,7 +438,15 @@ class ResidentWebRunner extends ResidentRunner {
     String? reason,
     bool benchmarkMode = false,
   }) async {
-    final DateTime start = _systemClock.now();
+    if (_exited) {
+      return OperationResult(1, 'Application has exited.');
+    }
+    if (_isRestarting) {
+      return OperationResult(1, 'A restart is already in progress.');
+    }
+    _isRestarting = true;
+    final SystemClock systemClock = toolContext.systemClock;
+    final DateTime start = systemClock.now();
     final Status status;
     if (debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
         !debuggingOptions.buildInfo.canaryFeatures) {
@@ -463,181 +456,184 @@ class ResidentWebRunner extends ResidentRunner {
       fullRestart = true;
     }
     if (fullRestart) {
-      status = _logger.startProgress('Performing hot restart...', progressId: 'hot.restart');
+      status = logger.startProgress('Performing hot restart...', progressId: 'hot.restart');
     } else {
-      status = _logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
+      status = logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
     }
 
     final String targetPlatform = TargetPlatform.web_javascript.getName();
-    final String sdkName = await flutterDevice!.device!.sdkNameAndVersion;
-
+    final String sdkName;
     // Will be null if there is no report.
     final UpdateFSReport? report;
-    if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
-      await runSourceGenerators();
-      // Don't reset the resident compiler for web, since the extra recompile is
-      // wasteful.
-      report = await _updateDevFS(fullRestart: fullRestart, resetCompiler: false);
-      if (report.success) {
-        flutterDevice!.generator!.accept();
-      } else {
-        status.stop();
-        await flutterDevice!.generator!.reject();
-        if (report.hotReloadRejected) {
-          // We cannot capture the reason why the reload was rejected as it may
-          // contain user information.
-          _analytics.send(
-            Event.hotRunnerInfo(
-              label: 'reload-reject',
-              targetPlatform: targetPlatform,
-              sdkName: sdkName,
-              emulator: false,
-              fullRestart: fullRestart,
-            ),
-          );
-        }
-        return OperationResult(1, 'Failed to recompile application.');
-      }
-    } else {
-      report = null;
-      try {
-        final webBuilder = WebBuilder(
-          logger: _logger,
-          processManager: globals.processManager,
-          buildSystem: globals.buildSystem,
-          fileSystem: _fileSystem,
-          flutterVersion: globals.flutterVersion,
-          analytics: globals.analytics,
-          artifacts: globals.artifacts!,
-          buildTargets: globals.buildTargets,
-          cache: globals.cache,
-          config: globals.config,
-          platform: _platform,
-          terminal: globals.terminal,
-        );
-        await webBuilder.buildWeb(
-          flutterProject,
-          target,
-          debuggingOptions.buildInfo,
-          ServiceWorkerStrategy.none,
-          compilerConfigs: <WebCompilerConfig>[_compilerConfig],
-          webDefines: _webDefines,
-        );
-      } on ToolExit {
-        return OperationResult(1, 'Failed to recompile application.');
-      }
-    }
-
-    if (supportsServiceProtocol && _connectionResult == null) {
-      return _handleNoClientsAvailable(status);
-    }
-
     // Both will be null when not assigned.
     Duration? reloadDuration;
     Duration? reassembleDuration;
     try {
-      if (!_deviceIsDebuggable) {
-        _logger.printStatus('Recompile complete. Page requires refresh.');
-      } else if (isRunningDebug) {
-        if (fullRestart) {
-          // If the hot-restart service extension method is registered, then use
-          // it. Otherwise, default to calling "hotRestart" without a namespace.
-          final String hotRestartMethod =
-              _registeredMethodsForService['hotRestart'] ?? 'hotRestart';
+      sdkName = await flutterDevice!.device!.sdkNameAndVersion;
 
-          try {
-            await _vmService.service.callMethod(hotRestartMethod);
-          } on vmservice.RPCError catch (e) {
-            // DWDS throws an RPC error with kIsolateCannotReload code when there are no
-            // browser clients currently connected during a hot restart operation.
-
-            // TODO(61757): Remove this temporary workaround once vm_service is fixed.
-            // There's a bug in vm_service where it re-encodes RPCErrors as kServerError
-            // instead of preserving the original error code. Until that's fixed, we need
-            // to check for both kIsolateCannotReload and kServerError for this method.
-            if (e.callingMethod == hotRestartMethod &&
-                (e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code ||
-                    e.code == vmservice.RPCErrorKind.kServerError.code)) {
-              return _handleNoClientsAvailable(status);
-            }
-            // Re-throw other RPC errors
-            rethrow;
-          }
+      if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
+        await runSourceGenerators();
+        // Don't reset the resident compiler for web, since the extra recompile is
+        // wasteful.
+        report = await _updateDevFS(fullRestart: fullRestart, resetCompiler: false);
+        if (report.success) {
+          flutterDevice!.generator!.accept();
         } else {
-          final DateTime reloadStart = _systemClock.now();
-          final vmservice.VM vm = await _vmService.service.getVM();
-          final String hotReloadMethod =
-              _registeredMethodsForService['reloadSources'] ?? 'reloadSources';
-
-          // Check if there are any isolates available
-          if (vm.isolates == null || vm.isolates!.isEmpty) {
-            _logger.printTrace('No isolates available for hot reload');
-            return _handleNoClientsAvailable(status);
+          await flutterDevice!.generator!.reject();
+          if (report.hotReloadRejected) {
+            // We cannot capture the reason why the reload was rejected as it may
+            // contain user information.
+            analytics.send(
+              Event.hotRunnerInfo(
+                label: 'reload-reject',
+                targetPlatform: targetPlatform,
+                sdkName: sdkName,
+                emulator: false,
+                fullRestart: fullRestart,
+              ),
+            );
           }
-
-          vmservice.ReloadReport report;
-          try {
-            report = await _vmService.service.reloadSources(vm.isolates!.first.id!);
-          } on vmservice.RPCError catch (e) {
-            // DWDS throws an RPC error with kIsolateCannotReload code when there are no
-            // browser clients currently connected during a hot reload operation.
-            if (e.callingMethod == hotReloadMethod &&
-                e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code) {
-              return _handleNoClientsAvailable(status);
-            }
-            // Re-throw other RPC errors
-            rethrow;
-          }
-
-          reloadDuration = _systemClock.now().difference(reloadStart);
-          final contents = ReloadReportContents.fromReloadReport(report);
-          final bool success = contents.success ?? false;
-          if (!success) {
-            // Rejections happen at compile-time for the web, so in theory,
-            // nothing should go wrong here. However, if DWDS or the DDC runtime
-            // has some internal error, we should still surface it to make
-            // debugging easier.
-            var reloadFailedMessage = 'Hot reload failed:';
-            _logger.printError(reloadFailedMessage);
-            for (final ReasonForCancelling reason in contents.notices) {
-              reloadFailedMessage += reason.toString();
-              _logger.printError(reason.toString());
-            }
-            return OperationResult(1, reloadFailedMessage);
-          }
-          await evictDirtyAssets();
-          String? failedReassemble;
-          final DateTime reassembleStart = _systemClock.now();
-          await _vmService
-              .flutterReassemble(isolateId: null)
-              .then(
-                (Object? o) => o,
-                onError: (Object error, StackTrace stackTrace) {
-                  failedReassemble = 'Reassembling failed: $error\n$stackTrace';
-                  _logger.printError(failedReassemble!);
-                },
-              );
-          reassembleDuration = _systemClock.now().difference(reassembleStart);
-          if (failedReassemble != null) {
-            return OperationResult(1, failedReassemble!);
-          }
+          return OperationResult(1, 'Failed to recompile application.');
         }
       } else {
-        // On non-debug builds, a hard refresh is required to ensure the
-        // up to date sources are loaded.
-        await _wipConnection?.sendCommand('Page.reload', <String, Object>{
-          'ignoreCache': !debuggingOptions.buildInfo.isDebug,
-        });
+        report = null;
+        try {
+          final webBuilder = WebBuilder(
+            logger: logger,
+            processManager: processManager,
+            buildSystem: buildSystem,
+            fileSystem: fileSystem,
+            flutterVersion: flutterVersion,
+            analytics: analytics,
+            artifacts: artifacts,
+            buildTargets: buildTargets,
+            cache: cache,
+            config: config,
+            platform: platform,
+            terminal: terminal,
+          );
+          await webBuilder.buildWeb(
+            flutterProject,
+            target,
+            debuggingOptions.buildInfo,
+            ServiceWorkerStrategy.none,
+            compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+            webDefines: _webDefines,
+          );
+        } on ToolExit {
+          return OperationResult(1, 'Failed to recompile application.');
+        }
       }
-    } on Exception catch (err) {
-      return OperationResult(1, err.toString(), fatal: true);
+
+      if (supportsServiceProtocol && _connectionResult == null) {
+        return _handleNoClientsAvailable();
+      }
+
+      try {
+        if (!_deviceIsDebuggable) {
+          logger.printStatus('Recompile complete. Page requires refresh.');
+        } else if (isRunningDebug) {
+          if (fullRestart) {
+            // If the hot-restart service extension method is registered, then use
+            // it. Otherwise, default to calling "hotRestart" without a namespace.
+            final String hotRestartMethod =
+                _registeredMethodsForService['hotRestart'] ?? 'hotRestart';
+
+            try {
+              await _vmService.service.callMethod(hotRestartMethod);
+            } on vmservice.RPCError catch (e) {
+              // DWDS throws an RPC error with kIsolateCannotReload code when there are no
+              // browser clients currently connected during a hot restart operation.
+
+              // TODO(61757): Remove this temporary workaround once vm_service is fixed.
+              // There's a bug in vm_service where it re-encodes RPCErrors as kServerError
+              // instead of preserving the original error code. Until that's fixed, we need
+              // to check for both kIsolateCannotReload and kServerError for this method.
+              if (e.callingMethod == hotRestartMethod &&
+                  (e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code ||
+                      e.code == vmservice.RPCErrorKind.kServerError.code)) {
+                return _handleNoClientsAvailable();
+              }
+              // Re-throw other RPC errors
+              rethrow;
+            }
+          } else {
+            final DateTime reloadStart = systemClock.now();
+            final vmservice.VM vm = await _vmService.service.getVM();
+            final String hotReloadMethod =
+                _registeredMethodsForService['reloadSources'] ?? 'reloadSources';
+
+            // Check if there are any isolates available
+            if (vm.isolates == null || vm.isolates!.isEmpty) {
+              logger.printTrace('No isolates available for hot reload');
+              return _handleNoClientsAvailable();
+            }
+
+            vmservice.ReloadReport report;
+            try {
+              report = await _vmService.service.reloadSources(vm.isolates!.first.id!);
+            } on vmservice.RPCError catch (e) {
+              // DWDS throws an RPC error with kIsolateCannotReload code when there are no
+              // browser clients currently connected during a hot reload operation.
+              if (e.callingMethod == hotReloadMethod &&
+                  e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code) {
+                return _handleNoClientsAvailable();
+              }
+              // Re-throw other RPC errors
+              rethrow;
+            }
+
+            reloadDuration = systemClock.now().difference(reloadStart);
+            final contents = ReloadReportContents.fromReloadReport(report);
+            final bool success = contents.success ?? false;
+            if (!success) {
+              // Rejections happen at compile-time for the web, so in theory,
+              // nothing should go wrong here. However, if DWDS or the DDC runtime
+              // has some internal error, we should still surface it to make
+              // debugging easier.
+              var reloadFailedMessage = 'Hot reload failed:';
+              logger.printError(reloadFailedMessage);
+              for (final ReasonForCancelling reason in contents.notices) {
+                reloadFailedMessage += reason.toString();
+                logger.printError(reason.toString());
+              }
+              return OperationResult(1, reloadFailedMessage);
+            }
+            await evictDirtyAssets();
+            String? failedReassemble;
+            final DateTime reassembleStart = systemClock.now();
+            await _vmService
+                .flutterReassemble(isolateId: null)
+                .then(
+                  (Object? o) => o,
+                  onError: (Object error, StackTrace stackTrace) {
+                    failedReassemble = 'Reassembling failed: $error\n$stackTrace';
+                    logger.printError(failedReassemble!);
+                  },
+                );
+            reassembleDuration = systemClock.now().difference(reassembleStart);
+            if (failedReassemble != null) {
+              return OperationResult(1, failedReassemble!);
+            }
+          }
+        } else {
+          // On non-debug builds, a hard refresh is required to ensure the
+          // up to date sources are loaded.
+          await _wipConnection?.sendCommand('Page.reload', <String, Object>{
+            'ignoreCache': !debuggingOptions.buildInfo.isDebug,
+          });
+        }
+      } on Exception catch (err) {
+        return OperationResult(1, err.toString(), fatal: true);
+      }
     } finally {
+      _isRestarting = false;
       status.stop();
     }
 
-    final Duration elapsed = _systemClock.now().difference(start);
+    final Duration elapsed = systemClock.now().difference(start);
     final String elapsedMS = getElapsedAsMilliseconds(elapsed);
-    _logger.printStatus('${fullRestart ? 'Restarted' : 'Reloaded'} application in $elapsedMS.');
+    logger.printStatus('${fullRestart ? 'Restarted' : 'Reloaded'} application in $elapsedMS.');
 
     if (fullRestart) {
       for (final FlutterDevice? device in flutterDevices) {
@@ -648,14 +644,14 @@ class ResidentWebRunner extends ResidentRunner {
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && _deviceIsDebuggable) {
       if (fullRestart) {
-        _analytics.send(
+        analytics.send(
           Event.timing(
             workflow: 'hot',
             variableName: 'web-incremental-restart',
             elapsedMilliseconds: elapsed.inMilliseconds,
           ),
         );
-        _analytics.send(
+        analytics.send(
           Event.hotRunnerInfo(
             label: 'restart',
             targetPlatform: targetPlatform,
@@ -673,14 +669,14 @@ class ResidentWebRunner extends ResidentRunner {
           ),
         );
       } else {
-        _analytics.send(
+        analytics.send(
           Event.timing(
             workflow: 'hot',
             variableName: 'reload',
             elapsedMilliseconds: elapsed.inMilliseconds,
           ),
         );
-        _analytics.send(
+        analytics.send(
           Event.hotRunnerInfo(
             label: 'reload',
             targetPlatform: targetPlatform,
@@ -710,7 +706,7 @@ class ResidentWebRunner extends ResidentRunner {
   Future<Uri> _generateEntrypoint(Uri mainUri, PackageConfig? packageConfig) async {
     File? result = _generatedEntrypointDirectory?.childFile('web_entrypoint.dart');
     if (_generatedEntrypointDirectory == null) {
-      _generatedEntrypointDirectory ??= _fileSystem.systemTempDirectory.createTempSync(
+      _generatedEntrypointDirectory ??= fileSystem.systemTempDirectory.createTempSync(
         'flutter_tools.',
       )..createSync();
       result = _generatedEntrypointDirectory!.childFile('web_entrypoint.dart');
@@ -727,10 +723,10 @@ class ResidentWebRunner extends ResidentRunner {
       Uri? importedEntrypoint = packageConfig!.toPackageUriForWorkspace(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
-        final String parent = _fileSystem.file(mainUri).parent.path;
+        final String parent = fileSystem.file(mainUri).parent.path;
         flutterDevices.first.generator!
           ..addFileSystemRoot(parent)
-          ..addFileSystemRoot(_fileSystem.directory('test').absolute.path);
+          ..addFileSystemRoot(fileSystem.directory('test').absolute.path);
         importedEntrypoint = Uri(
           scheme: 'org-dartlang-app',
           host: '',
@@ -738,7 +734,7 @@ class ResidentWebRunner extends ResidentRunner {
         );
       }
       final LanguageVersion languageVersion = determineLanguageVersion(
-        _fileSystem.file(mainUri),
+        fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
         Cache.flutterRoot!,
       );
@@ -761,12 +757,12 @@ class ResidentWebRunner extends ResidentRunner {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
-      _logger.printTrace('Updating assets');
+      logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
         flutterHookResult: await dartBuilder?.runHooks(
           targetPlatform: TargetPlatform.web_javascript,
           environment: environment,
-          logger: _logger,
+          logger: logger,
         ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,
@@ -775,6 +771,11 @@ class ResidentWebRunner extends ResidentRunner {
         return UpdateFSReport();
       }
     }
+    final projectFileInvalidator = ProjectFileInvalidator(
+      fileSystem: fileSystem,
+      platform: platform,
+      logger: logger,
+    );
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevice!.devFS!.lastCompiled,
       urisToMonitor: flutterDevice!.devFS!.sources,
@@ -782,13 +783,13 @@ class ResidentWebRunner extends ResidentRunner {
       packageConfig:
           flutterDevice!.devFS!.lastPackageConfig ?? debuggingOptions.buildInfo.packageConfig,
     );
-    final Status devFSStatus = _logger.startProgress(
+    final Status devFSStatus = logger.startProgress(
       'Waiting for connection from debug service on '
       '${flutterDevice!.device!.displayName}...',
     );
     final UpdateFSReport report = await flutterDevice!.devFS!.update(
       mainUri: await _generateEntrypoint(
-        _fileSystem.file(mainPath).absolute.uri,
+        fileSystem.file(mainPath).absolute.uri,
         invalidationResult.packageConfig,
       ),
       target: target,
@@ -805,7 +806,7 @@ class ResidentWebRunner extends ResidentRunner {
       shaderCompiler: flutterDevice!.developmentShaderCompiler,
     );
     devFSStatus.stop();
-    _logger.printTrace('Synced ${getSizeAsPlatformMB(report.syncedBytes)}.');
+    logger.printTrace('Synced ${getSizeAsPlatformMB(report.syncedBytes)}.');
     return report;
   }
 
@@ -816,7 +817,7 @@ class ResidentWebRunner extends ResidentRunner {
     Future<ConnectionResult?>? connectDebug,
     bool needsFullRestart = true,
   }) async {
-    if (_chromiumLauncher != null) {
+    if (_chromiumLauncher != null && _toolLaunchesChromium) {
       final Chromium chrome = await _chromiumLauncher!.connectedInstance;
       final ChromeTab? chromeTab = await getChromeTabGuarded(
         chrome.chromeConnection,
@@ -826,7 +827,7 @@ class ResidentWebRunner extends ResidentRunner {
         retryFor: const Duration(seconds: 5),
         onIoError: (Object error, StackTrace stackTrace) {
           // We were unable to unable to communicate with Chrome.
-          _logger.printError(error.toString(), stackTrace: stackTrace);
+          logger.printError(error.toString(), stackTrace: stackTrace);
         },
       );
       if (chromeTab == null) {
@@ -845,7 +846,7 @@ class ResidentWebRunner extends ResidentRunner {
 
           void onLogEvent(vmservice.Event event) {
             final String message = processVmServiceMessage(event);
-            _logger.printStatus(message);
+            logger.printStatus(message);
           }
 
           // This flag is needed to manage breakpoints properly.
@@ -856,10 +857,10 @@ class ResidentWebRunner extends ResidentRunner {
                 'true',
               );
               if (result is! vmservice.Success) {
-                _logger.printError('setFlag failure: $result');
+                logger.printError('setFlag failure: $result');
               }
             } on Exception catch (e) {
-              _logger.printError(
+              logger.printError(
                 'Failed to set pause_isolates_on_start=true, proceeding. '
                 'Error: $e',
               );
@@ -928,13 +929,13 @@ class ResidentWebRunner extends ResidentRunner {
           }
 
           if (debuggingOptions.vmserviceOutFile != null) {
-            _fileSystem.file(debuggingOptions.vmserviceOutFile)
+            fileSystem.file(debuggingOptions.vmserviceOutFile)
               ..createSync(recursive: true)
               ..writeAsStringSync(websocketUri.toString());
           }
           // TODO(bkonyi): consider removing this log message and using only the standard VM
           // service message instead.
-          _logger.printStatus('Debug service listening on $websocketUri');
+          logger.printStatus('Debug service listening on $websocketUri');
           final connectionInfo = DebugConnectionInfo(
             wsUri: websocketUri,
             devToolsUri: debugConnection.devToolsUri?.toUri(),
