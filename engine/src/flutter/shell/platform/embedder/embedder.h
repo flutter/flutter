@@ -2709,10 +2709,11 @@ typedef struct {
   /// to be returned back to the engine via `FlutterEngineOnVsync`. All batons
   /// must be retured to the engine before initializing a
   /// `FlutterEngineShutdown`. Not doing the same will result in a memory leak.
-  /// While the call to `FlutterEngineOnVsync` must occur on the thread that
-  /// made the call to `FlutterEngineRun`, the engine will make this callback on
-  /// an internal engine-managed thread. If the components accessed on the
-  /// embedder are not thread safe, the appropriate re-threading must be done.
+  /// The engine makes this callback on an internal engine-managed thread. The
+  /// call to `FlutterEngineOnVsync` must occur either on the thread that made
+  /// the call to `FlutterEngineRun` or on the thread the engine made this
+  /// callback on. If the components accessed on the embedder are not thread
+  /// safe, the appropriate re-threading must be done.
   VsyncCallback vsync_callback;
 
   /// The name of a custom Dart entrypoint. This is optional and specifying a
@@ -3372,8 +3373,11 @@ FlutterEngineResult FlutterEngineSendSemanticsAction(
 //------------------------------------------------------------------------------
 /// @brief      Notify the engine that a vsync event occurred. A baton passed to
 ///             the platform via the vsync callback must be returned. This call
-///             must be made on the thread on which the call to
-///             `FlutterEngineRun` was made.
+///             must be made either on the thread on which the call to
+///             `FlutterEngineRun` was made or on the thread on which the engine
+///             invoked the vsync callback that supplied the baton. A call on
+///             the vsync callback thread must return before
+///             `FlutterEngineShutdown` is called.
 ///
 /// @see        FlutterEngineGetCurrentTime()
 ///

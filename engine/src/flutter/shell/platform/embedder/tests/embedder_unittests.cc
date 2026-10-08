@@ -3970,6 +3970,73 @@ TEST_F(EmbedderTest, VsyncCallbackPostedIntoFuture) {
   shutdown_latch.Wait();
 }
 
+// The engine makes the vsync callback on its UI thread. An embedder whose vsync
+// source fires on the thread that asked for it, like the Android
+// Choreographer, returns the baton on that thread instead of the thread that
+// ran the engine. The Windows embedder already returns it from inside the
+// callback.
+TEST_F(EmbedderTest, VsyncBatonCanBeReturnedOnTheVsyncCallbackThread) {
+  // Frame interval the test reports to the engine: 60 Hz.
+  constexpr uint64_t kFrameIntervalNanos = 16'666'666;
+
+  UniqueEngine engine;
+  // Written on the platform thread before the engine runs, so before the
+  // engine can make the first vsync callback.
+  FLUTTER_API_SYMBOL(FlutterEngine) engine_handle = nullptr;
+  std::atomic<int> batons_returned = 0;
+  fml::AutoResetWaitableEvent begin_frame_latch;
+
+  // The thread that runs the engine. The engine does not make the vsync
+  // callback on it.
+  auto platform_task_runner = CreateNewThread("platform_thread");
+
+  platform_task_runner->PostTask([&]() {
+    auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+    context.SetVsyncCallback([&](intptr_t baton) {
+      EXPECT_FALSE(platform_task_runner->RunsTasksOnCurrentThread());
+      const uint64_t now = FlutterEngineGetCurrentTime();
+      ASSERT_EQ(FlutterEngineOnVsync(engine_handle, baton, now,
+                                     now + kFrameIntervalNanos),
+                kSuccess);
+      batons_returned++;
+    });
+    context.AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                                   begin_frame_latch.Signal();
+                                 }));
+
+    EmbedderConfigBuilder builder(context);
+    builder.SetSurface(DlISize(1, 1));
+    builder.SetupVsyncCallback();
+    builder.SetDartEntrypoint("empty_scene");
+    engine = builder.InitializeEngine();
+    ASSERT_TRUE(engine.is_valid());
+    engine_handle = engine.get();
+    ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+
+    // Send a window metrics events so frames may be scheduled.
+    FlutterWindowMetricsEvent event = {};
+    event.struct_size = sizeof(event);
+    event.width = 800;
+    event.height = 600;
+    event.pixel_ratio = 1.0;
+
+    ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+              kSuccess);
+  });
+
+  // The fixture signals from onBeginFrame, which only runs once a baton came
+  // back.
+  begin_frame_latch.Wait();
+  EXPECT_GE(batons_returned, 1);
+
+  fml::AutoResetWaitableEvent shutdown_latch;
+  platform_task_runner->PostTask([&]() {
+    engine.reset();
+    shutdown_latch.Signal();
+  });
+  shutdown_latch.Wait();
+}
+
 TEST_F(EmbedderTest, CanScheduleFrame) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   EmbedderConfigBuilder builder(context);
