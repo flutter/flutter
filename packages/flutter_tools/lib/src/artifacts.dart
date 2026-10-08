@@ -251,10 +251,10 @@ class LocalEngineInfo {
   /// paths to the built engine artifacts for the target (device) and host
   /// (build) platforms, respectively.
   const LocalEngineInfo({
-    required FileSystem fileSystem,
+    required this.fileSystem,
     required this.hostOutPath,
     required this.targetOutPath,
-  }) : _fileSystem = fileSystem;
+  });
 
   /// The path to the engine artifacts for the target (device) platform.
   ///
@@ -270,13 +270,14 @@ class LocalEngineInfo {
   /// (platform), see [localHostName].
   final String hostOutPath;
 
-  final FileSystem _fileSystem;
+  /// The [FileSystem] used to resolve paths.
+  final FileSystem fileSystem;
 
   /// The name of the target (device) platform, i.e. `android_debug_unopt`.
-  String get localTargetName => _fileSystem.path.basename(targetOutPath);
+  String get localTargetName => fileSystem.path.basename(targetOutPath);
 
   /// The name of the host (build) platform, e.g. `host_debug_unopt`.
-  String get localHostName => _fileSystem.path.basename(hostOutPath);
+  String get localHostName => fileSystem.path.basename(hostOutPath);
 }
 
 // Manages the engine artifacts of Flutter.
