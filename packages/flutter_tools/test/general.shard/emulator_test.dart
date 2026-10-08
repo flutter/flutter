@@ -65,10 +65,13 @@ void main() {
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
+        iosWorkflow: FakeIOSWorkflow(),
         logger: BufferLogger.test(),
+        platform: FakePlatform(),
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['emulator', '-list-avds'], stdout: 'existing-avd-1'),
         ]),
+        xcode: xcode,
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
       );
@@ -82,7 +85,9 @@ void main() {
         final emulatorManager = EmulatorManager(
           java: FakeJava(),
           fileSystem: MemoryFileSystem.test(),
+          iosWorkflow: FakeIOSWorkflow(),
           logger: BufferLogger.test(),
+          platform: FakePlatform(),
           processManager: FakeProcessManager.list(<FakeCommand>[
             const FakeCommand(
               command: <String>['emulator', '-list-avds'],
@@ -93,6 +98,7 @@ void main() {
                   'pixel-4.api-30',
             ),
           ]),
+          xcode: xcode,
           androidSdk: sdk,
           androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
         );
@@ -123,10 +129,13 @@ iOS Simulator       • iOS Simulator • Apple        • android
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
+        iosWorkflow: FakeIOSWorkflow(),
         logger: BufferLogger.test(),
+        platform: FakePlatform(),
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['emulator', '-list-avds'], stdout: 'existing-avd-1'),
         ]),
+        xcode: xcode,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
       );
 
@@ -141,6 +150,9 @@ iOS Simulator       • iOS Simulator • Apple        • android
         processManager: fakeProcessManager,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
         fileSystem: fileSystem,
+        iosWorkflow: FakeIOSWorkflow(),
+        platform: FakePlatform(),
+        xcode: xcode,
       );
 
       expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5'), <Emulator>[emulator1]);
@@ -163,10 +175,13 @@ iOS Simulator       • iOS Simulator • Apple        • android
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
+        iosWorkflow: FakeIOSWorkflow(),
         logger: BufferLogger.test(),
+        platform: FakePlatform(),
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['emulator', '-list-avds'], stdout: 'existing-avd-1'),
         ]),
+        xcode: xcode,
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
       );
@@ -181,7 +196,9 @@ iOS Simulator       • iOS Simulator • Apple        • android
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
+        iosWorkflow: FakeIOSWorkflow(),
         logger: BufferLogger.test(),
+        platform: FakePlatform(),
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['emulator', '-list-avds'], stdout: 'existing-avd-1'),
           const FakeCommand(
@@ -203,6 +220,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
             ],
           ),
         ]),
+        xcode: xcode,
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
       );
@@ -215,7 +233,9 @@ iOS Simulator       • iOS Simulator • Apple        • android
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
+        iosWorkflow: FakeIOSWorkflow(),
         logger: BufferLogger.test(),
+        platform: FakePlatform(),
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['avdmanager', 'list', 'device', '-c'],
@@ -237,6 +257,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
             ],
           ),
         ]),
+        xcode: xcode,
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
       );
@@ -249,7 +270,9 @@ iOS Simulator       • iOS Simulator • Apple        • android
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
+        iosWorkflow: FakeIOSWorkflow(),
         logger: BufferLogger.test(),
+        platform: FakePlatform(),
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['avdmanager', 'list', 'device', '-c'],
@@ -274,6 +297,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
                 'Use --force if you want to replace it.',
           ),
         ]),
+        xcode: xcode,
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
       );
@@ -291,7 +315,9 @@ iOS Simulator       • iOS Simulator • Apple        • android
         final emulatorManager = EmulatorManager(
           java: FakeJava(),
           fileSystem: MemoryFileSystem.test(),
+          iosWorkflow: FakeIOSWorkflow(),
           logger: BufferLogger.test(),
+          platform: FakePlatform(),
           processManager: FakeProcessManager.list(<FakeCommand>[
             const FakeCommand(
               command: <String>['emulator', '-list-avds'],
@@ -317,6 +343,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
               ],
             ),
           ]),
+          xcode: xcode,
           androidSdk: sdk,
           androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
         );
@@ -329,50 +356,42 @@ iOS Simulator       • iOS Simulator • Apple        • android
   });
 
   group('ios_emulators', () {
-    testUsingContext(
-      'runs correct launch commands',
-      () async {
-        fileSystem
-            .directory('/fake/Xcode.app/Contents/Developer/Applications/Simulator.app')
-            .createSync(recursive: true);
-        fakeProcessManager.addCommands(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['/usr/bin/xcode-select', '--print-path'],
-            stdout: '/fake/Xcode.app/Contents/Developer',
-          ),
-          const FakeCommand(
-            command: <String>[
-              'open',
-              '-n',
-              '-a',
-              '/fake/Xcode.app/Contents/Developer/Applications/Simulator.app',
-            ],
-          ),
-          const FakeCommand(
-            command: <String>[
-              'open',
-              '-a',
-              '/fake/Xcode.app/Contents/Developer/Applications/Simulator.app',
-            ],
-          ),
-        ]);
+    testWithoutContext('runs correct launch commands', () async {
+      fileSystem
+          .directory('/fake/Xcode.app/Contents/Developer/Applications/Simulator.app')
+          .createSync(recursive: true);
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['/usr/bin/xcode-select', '--print-path'],
+          stdout: '/fake/Xcode.app/Contents/Developer',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'open',
+            '-n',
+            '-a',
+            '/fake/Xcode.app/Contents/Developer/Applications/Simulator.app',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'open',
+            '-a',
+            '/fake/Xcode.app/Contents/Developer/Applications/Simulator.app',
+          ],
+        ),
+      ]);
 
-        final logger = BufferLogger.test();
-        final Emulator emulator = IOSEmulator(
-          'ios',
-          xcode: xcode,
-          logger: logger,
-          processUtils: ProcessUtils(logger: logger, processManager: fakeProcessManager),
-        );
-        await emulator.launch();
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => fakeProcessManager,
-        Xcode: () => xcode,
-        FileSystem: () => fileSystem,
-      },
-    );
+      final logger = BufferLogger.test();
+      final Emulator emulator = IOSEmulator(
+        'ios',
+        xcode: xcode,
+        logger: logger,
+        processUtils: ProcessUtils(logger: logger, processManager: fakeProcessManager),
+      );
+      await emulator.launch();
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
   });
 }
 
@@ -384,6 +403,9 @@ class TestEmulatorManager extends EmulatorManager {
     required super.processManager,
     required super.androidWorkflow,
     required super.fileSystem,
+    required super.iosWorkflow,
+    required super.platform,
+    required super.xcode,
   });
 
   final List<Emulator> allEmulators;

@@ -14,42 +14,44 @@ import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
   IOSEmulators({
-    Platform? platform,
-    this._iosWorkflow,
-    this._xcode,
-    required this._processUtils,
+    required this._iosWorkflow,
     required this._logger,
-  }) : _platform = platform ?? const LocalPlatform();
+    required this._platform,
+    required this._processUtils,
+    required this._xcode,
+  });
 
-  final Platform _platform;
   final IOSWorkflow? _iosWorkflow;
-  final Xcode? _xcode;
-  final ProcessUtils _processUtils;
   final Logger _logger;
+  final Platform _platform;
+  final ProcessUtils _processUtils;
+  final Xcode? _xcode;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
 
   @override
-  bool get canListAnything =>
-      _iosWorkflow?.canListEmulators ??
-      (_platform.isMacOS && (_xcode?.isInstalledAndMeetsVersionCheck ?? false));
+  bool get canListAnything => _iosWorkflow?.canListEmulators ?? false;
 
   @override
   Future<List<Emulator>> get emulators async =>
-      getEmulators(xcode: _xcode, processUtils: _processUtils, logger: _logger);
+      getEmulators(logger: _logger, processUtils: _processUtils, xcode: _xcode);
 
   @override
   bool get canLaunchAnything => canListAnything;
 }
 
 class IOSEmulator extends Emulator {
-  const IOSEmulator(String id, {this._xcode, required this._processUtils, required this._logger})
-    : super(id, true);
+  const IOSEmulator(
+    String id, {
+    required this._logger,
+    required this._processUtils,
+    required this._xcode,
+  }) : super(id, true);
 
-  final Xcode? _xcode;
-  final ProcessUtils _processUtils;
   final Logger _logger;
+  final ProcessUtils _processUtils;
+  final Xcode? _xcode;
 
   @override
   String get name => 'iOS Simulator';
@@ -93,9 +95,9 @@ class IOSEmulator extends Emulator {
 
 /// Return the list of iOS Simulators (there can only be zero or one).
 List<IOSEmulator> getEmulators({
-  Xcode? xcode,
-  required ProcessUtils processUtils,
   required Logger logger,
+  required ProcessUtils processUtils,
+  required Xcode? xcode,
 }) {
   final String? simulatorPath = xcode?.getSimulatorPath();
   if (simulatorPath == null) {
@@ -103,6 +105,6 @@ List<IOSEmulator> getEmulators({
   }
 
   return <IOSEmulator>[
-    IOSEmulator(iosSimulatorId, xcode: xcode, processUtils: processUtils, logger: logger),
+    IOSEmulator(iosSimulatorId, logger: logger, processUtils: processUtils, xcode: xcode),
   ];
 }

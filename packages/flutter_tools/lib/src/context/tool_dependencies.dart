@@ -466,19 +466,22 @@ class ToolDependencies {
         iosWorkflow ??
         IOSWorkflow(featureFlags: finalFeatureFlags, xcode: finalXcode, platform: finalPlatform);
 
-    final IOSSimulatorUtils finalIOSSimulatorUtils =
-        iosSimulatorUtils ??
-        IOSSimulatorUtils(
-          fileSystem: finalFS,
-          logger: finalLogger,
-          operatingSystemUtils: finalOS,
-          processManager: finalProcessManager,
-          xcode: finalXcode,
-        );
-
     final PlistParser finalPlistParser =
         plistParser ??
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
+
+    final IOSSimulatorUtils finalIOSSimulatorUtils =
+        iosSimulatorUtils ??
+        IOSSimulatorUtils(
+          analytics: finalAnalytics,
+          fileSystem: finalFS,
+          logger: finalLogger,
+          operatingSystemUtils: finalOS,
+          platform: finalPlatform,
+          plistParser: finalPlistParser,
+          processManager: finalProcessManager,
+          xcode: finalXcode,
+        );
 
     // 12. AndroidContext Dependencies
     final AndroidStudio? finalAndroidStudio = androidStudio ?? AndroidStudio.latestValid();
@@ -518,9 +521,12 @@ class ToolDependencies {
         EmulatorManager(
           androidWorkflow: finalAndroidWorkflow,
           fileSystem: finalFS,
+          iosWorkflow: finalIOSWorkflow,
           java: finalJava,
           logger: finalLogger,
+          platform: finalPlatform,
           processManager: finalProcessManager,
+          xcode: finalXcode,
           androidSdk: finalAndroidSdk,
         );
 

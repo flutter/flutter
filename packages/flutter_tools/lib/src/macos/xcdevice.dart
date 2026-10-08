@@ -52,63 +52,58 @@ enum XCDeviceEventInterface {
 /// A utility class for interacting with Xcode xcdevice command line tools.
 class XCDevice {
   XCDevice({
+    required this._analytics,
     required Artifacts artifacts,
     required Cache cache,
-    required ProcessManager processManager,
-    required Logger logger,
-    required Xcode xcode,
-    required Platform platform,
+    required this._fileSystem,
     required IProxy iproxy,
-    required FileSystem fileSystem,
-    required this._analytics,
-    required ShutdownHooks shutdownHooks,
+    required this._logger,
+    required this._platform,
+    required ProcessManager processManager,
+    required this._shutdownHooks,
     required this._templateRenderer,
+    required this._xcode,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
-  }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
+  }) : _processUtils = ProcessUtils(logger: _logger, processManager: processManager),
+       _fileSystemUtils = FileSystemUtils(fileSystem: _fileSystem, platform: _platform),
        _operatingSystemUtils = OperatingSystemUtils(
-         fileSystem: fileSystem,
-         logger: logger,
-         platform: platform,
+         fileSystem: _fileSystem,
+         logger: _logger,
+         platform: _platform,
          processManager: processManager,
        ),
-       _platform = platform,
-       _shutdownHooks = shutdownHooks,
        _iMobileDevice = IMobileDevice(
          artifacts: artifacts,
          cache: cache,
-         logger: logger,
+         logger: _logger,
          processManager: processManager,
        ),
        _iosDeploy = IOSDeploy(
          artifacts: artifacts,
          cache: cache,
-         logger: logger,
-         platform: platform,
+         logger: _logger,
+         platform: _platform,
          processManager: processManager,
        ),
        _coreDeviceControl =
            coreDeviceControl ??
            IOSCoreDeviceControl(
-             logger: logger,
+             fileSystem: _fileSystem,
+             logger: _logger,
              processManager: processManager,
-             xcode: xcode,
-             fileSystem: fileSystem,
+             xcode: _xcode,
            ),
        _xcodeDebug =
            xcodeDebug ??
            XcodeDebug(
-             logger: logger,
+             logger: _logger,
              processManager: processManager,
-             xcode: xcode,
-             fileSystem: fileSystem,
+             xcode: _xcode,
+             fileSystem: _fileSystem,
            ),
-       _iProxy = iproxy,
-       _xcode = xcode {
-    shutdownHooks.addShutdownHook(dispose);
+       _iProxy = iproxy {
+    _shutdownHooks.addShutdownHook(dispose);
 
     _setupDeviceIdentifierByEventStream();
   }

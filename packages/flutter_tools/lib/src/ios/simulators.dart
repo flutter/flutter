@@ -50,9 +50,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
   bool get supportsPlatform => (_platform ?? _iosSimulatorUtils._platform).isMacOS;
 
   @override
-  bool get canListAnything =>
-      _iosWorkflow?.canListDevices ??
-      (supportsPlatform && _iosSimulatorUtils._xcode.isSimctlInstalled);
+  bool get canListAnything => _iosWorkflow?.canListDevices ?? false;
 
   @override
   Future<List<Device>> pollingGetDevices({
@@ -66,18 +64,15 @@ class IOSSimulators extends PollingDeviceDiscovery {
 
 class IOSSimulatorUtils {
   IOSSimulatorUtils({
-    required Xcode xcode,
-    required Logger logger,
-    required ProcessManager processManager,
-    required this._operatingSystemUtils,
+    required this._analytics,
     required this._fileSystem,
-    Platform? platform,
-    this._plistParser,
-    this._analytics,
-  }) : _processManager = processManager,
-       _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
-       _xcode = xcode,
-       _platform = platform ?? const LocalPlatform();
+    required Logger logger,
+    required this._operatingSystemUtils,
+    required this._platform,
+    required this._plistParser,
+    required this._processManager,
+    required this._xcode,
+  }) : _simControl = SimControl(logger: logger, processManager: _processManager, xcode: _xcode);
 
   final ProcessManager _processManager;
   final SimControl _simControl;
@@ -85,8 +80,8 @@ class IOSSimulatorUtils {
   final OperatingSystemUtils _operatingSystemUtils;
   final FileSystem _fileSystem;
   final Platform _platform;
-  final PlistParser? _plistParser;
-  final Analytics? _analytics;
+  final PlistParser _plistParser;
+  final Analytics _analytics;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
@@ -387,23 +382,21 @@ class IOSSimulator extends Device {
     required this._simControl,
     required this._cpuArch,
     required super.logger,
-    required FileSystem fileSystem,
+    required this._fileSystem,
     Platform? platform,
     FileSystemUtils? fileSystemUtils,
     PlistParser? plistParser,
     Analytics? analytics,
     this._xcode,
     ProcessManager? processManager,
-  }) : _logger = logger,
-       _platform = platform ?? const LocalPlatform(),
-       _fileSystem = fileSystem,
+  }) : _platform = platform ?? const LocalPlatform(),
        _fileSystemUtils =
            fileSystemUtils ??
-           FileSystemUtils(fileSystem: fileSystem, platform: platform ?? const LocalPlatform()),
+           FileSystemUtils(fileSystem: _fileSystem, platform: platform ?? const LocalPlatform()),
        _plistParser =
            plistParser ??
            PlistParser(
-             fileSystem: fileSystem,
+             fileSystem: _fileSystem,
              logger: logger,
              processManager: processManager ?? const LocalProcessManager(),
            ),
@@ -412,6 +405,7 @@ class IOSSimulator extends Device {
          logger: logger,
          processManager: processManager ?? const LocalProcessManager(),
        ),
+       _logger = logger,
        super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
 
   @override
@@ -422,7 +416,6 @@ class IOSSimulator extends Device {
   final SimControl _simControl;
 
   final CpuArch _cpuArch;
-  final Logger _logger;
   final Platform _platform;
   final FileSystem _fileSystem;
   final FileSystemUtils _fileSystemUtils;
@@ -430,6 +423,7 @@ class IOSSimulator extends Device {
   final Analytics _analytics;
   final Xcode? _xcode;
   final ProcessUtils _processUtils;
+  final Logger _logger;
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {

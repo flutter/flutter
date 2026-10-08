@@ -754,7 +754,7 @@ void main() {
         outputFile = fileSystem.file('screenshot.png');
       });
 
-      testUsingContext('supportsScreenshot is false on CoreDevice with Xcode < 27', () async {
+      testWithoutContext('supportsScreenshot is false on CoreDevice with Xcode < 27', () async {
         device = IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
@@ -784,9 +784,9 @@ void main() {
         );
 
         expect(device.supportsScreenshot, isFalse);
-      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(15, 0, 0))});
+      });
 
-      testUsingContext(
+      testWithoutContext(
         'supportsScreenshot is true on CoreDevice with Xcode 27+ and devicectl installed',
         () async {
           final fakeXcode = FakeXcode(currentVersion: Version(27, 0, 0));
@@ -824,10 +824,9 @@ void main() {
           fakeXcode.isDevicectlInstalled = false;
           expect(device.supportsScreenshot, isFalse);
         },
-        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))},
       );
 
-      testUsingContext('takeScreenshot uses devicectl on CoreDevice with Xcode 27+', () async {
+      testWithoutContext('takeScreenshot uses devicectl on CoreDevice with Xcode 27+', () async {
         device = IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
@@ -861,9 +860,9 @@ void main() {
 
         fakeCoreDeviceControl.takeScreenshotSuccess = false;
         expect(() => device.takeScreenshot(outputFile), throwsToolExit());
-      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))});
+      });
 
-      testUsingContext('takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable', () async {
+      testWithoutContext('takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable', () async {
         device = IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
@@ -901,9 +900,9 @@ void main() {
             message: 'Failed to establish a connection to the device. Please make sure the device is available and try again.',
           ),
         );
-      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))});
+      });
 
-      testUsingContext('takeScreenshot throws ToolExit on CoreDevice with Xcode < 27', () async {
+      testWithoutContext('takeScreenshot throws ToolExit on CoreDevice with Xcode < 27', () async {
         device = IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
@@ -936,7 +935,7 @@ void main() {
           () => device.takeScreenshot(outputFile),
           throwsToolExit(message: 'flutter screenshot requires Xcode 27 or higher.'),
         );
-      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))});
+      });
     });
   });
 

@@ -20,11 +20,11 @@ import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -57,11 +57,9 @@ void main() {
 
   group('_IOSSimulatorDevicePortForwarder', () {
     late FakeSimControl simControl;
-    late Xcode xcode;
 
     setUp(() {
       simControl = FakeSimControl();
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
 
     testUsingContext(
@@ -91,7 +89,6 @@ void main() {
         Platform: () => osx,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
       testOn: 'posix',
     );
@@ -148,7 +145,6 @@ void main() {
       },
       overrides: <Type, Generator>{
         Platform: () => osx,
-        FileSystemUtils: () => fsUtils,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },
@@ -175,7 +171,6 @@ void main() {
       },
       overrides: <Type, Generator>{
         Platform: () => osx,
-        FileSystemUtils: () => fsUtils,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },
@@ -524,7 +519,6 @@ void main() {
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
         Platform: () => macosPlatform,
-        FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
       },
     );
 
@@ -689,7 +683,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           ProcessManager: () => fakeProcessManager,
           FileSystem: () => fileSystem,
           Platform: () => osx,
-          Xcode: () => xcode,
         },
       );
 
@@ -740,7 +733,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           ProcessManager: () => fakeProcessManager,
           FileSystem: () => fileSystem,
           Platform: () => osx,
-          Xcode: () => xcode,
         },
       );
 
@@ -807,7 +799,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           ProcessManager: () => fakeProcessManager,
           FileSystem: () => fileSystem,
           Platform: () => osx,
-          Xcode: () => xcode,
         },
       );
     });
@@ -962,7 +953,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           ProcessManager: () => fakeProcessManager,
           FileSystem: () => fileSystem,
           Platform: () => osx,
-          Xcode: () => xcode,
           Logger: () => logger,
         },
       );
@@ -1106,26 +1096,32 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         xcode: xcodeBadSimctl,
       );
       simulatorUtils = IOSSimulatorUtils(
+        analytics: const NoOpAnalytics(),
         fileSystem: fileSystem,
+        logger: logger,
         operatingSystemUtils: OperatingSystemUtils(
           fileSystem: fileSystem,
           logger: logger,
           platform: osx,
           processManager: FakeProcessManager.any(),
         ),
-        logger: logger,
+        platform: osx,
+        plistParser: FakePlistParser(),
         processManager: fakeProcessManager,
         xcode: xcode,
       );
       simulatorUtilsBadSimctl = IOSSimulatorUtils(
+        analytics: const NoOpAnalytics(),
         fileSystem: fileSystem,
+        logger: logger,
         operatingSystemUtils: OperatingSystemUtils(
           fileSystem: fileSystem,
           logger: logger,
           platform: osx,
           processManager: FakeProcessManager.any(),
         ),
-        logger: logger,
+        platform: osx,
+        plistParser: FakePlistParser(),
         processManager: fakeProcessManager,
         xcode: xcodeBadSimctl,
       );
@@ -1560,10 +1556,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         expect(simControl.requests.single.appIdentifier, 'correct');
       },
       overrides: <Type, Generator>{
-        PlistParser: () => testPlistParser,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
     );
 
@@ -1612,11 +1606,9 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         );
       },
       overrides: <Type, Generator>{
-        PlistParser: () => testPlistParser,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
-        Xcode: () => xcode,
       },
     );
 
@@ -1702,10 +1694,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         );
       },
       overrides: <Type, Generator>{
-        PlistParser: () => testPlistParser,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
     );
 
@@ -1751,21 +1741,17 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         expect(simControl.requests.single.launchArgs, contains('--route=/animation'));
       },
       overrides: <Type, Generator>{
-        PlistParser: () => testPlistParser,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
     );
   });
 
   group('IOSDevice.isSupportedForProject', () {
     late FakeSimControl simControl;
-    late Xcode xcode;
 
     setUp(() {
       simControl = FakeSimControl();
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
 
     testUsingContext(
@@ -1797,7 +1783,6 @@ flutter:
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
     );
 
@@ -1824,7 +1809,6 @@ flutter:
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
     );
 
@@ -1850,7 +1834,6 @@ flutter:
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
     );
 

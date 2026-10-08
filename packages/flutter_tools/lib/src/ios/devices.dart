@@ -1200,7 +1200,6 @@ class IOSDevice extends Device {
     });
 
     XcodeDebugProject debugProject;
-    final FlutterProject flutterProject = FlutterProject.current();
 
     if (package is PrebuiltIOSApp) {
       debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
@@ -1214,7 +1213,7 @@ class IOSDevice extends Device {
       // knows where to find the app bundle to launch.
       final Directory bundle = _fileSystem.directory(package.deviceBundlePath);
       await updateGeneratedXcodeProperties(
-        project: flutterProject,
+        project: package.project.parent,
         buildInfo: debuggingOptions.buildInfo,
         targetOverride: mainPath,
         configurationBuildDir: bundle.parent.absolute.path,

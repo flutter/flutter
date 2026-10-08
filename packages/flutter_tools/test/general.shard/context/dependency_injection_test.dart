@@ -179,6 +179,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       if (dependencies.toolContext.artifacts case final DeferredArtifacts artifacts) {

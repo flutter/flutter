@@ -37,18 +37,17 @@ import 'xcode_debug.dart';
 class IOSCoreDeviceLauncher {
   IOSCoreDeviceLauncher({
     required this._coreDeviceControl,
-    required Logger logger,
-    required this._xcodeDebug,
-    required this._fileSystem,
-    required ProcessUtils processUtils,
     required Version? deviceVersion,
+    required this._fileSystem,
+    required this._logger,
+    required ProcessUtils processUtils,
     required Xcode xcode,
+    required this._xcodeDebug,
     @visibleForTesting LLDB? lldb,
-  }) : _logger = logger,
-       _lldb =
+  }) : _lldb =
            lldb ??
            LLDB(
-             logger: logger,
+             logger: _logger,
              processUtils: processUtils,
              xcode: xcode,
              deviceVersion: deviceVersion,
@@ -348,17 +347,16 @@ class IOSCoreDeviceLogForwarder {
 /// interacting with CoreDevices.
 class IOSCoreDeviceControl {
   IOSCoreDeviceControl({
-    required Logger logger,
+    required this._fileSystem,
+    required this._logger,
     required ProcessManager processManager,
     required this._xcode,
-    required this._fileSystem,
-  }) : _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  }) : _processUtils = ProcessUtils(logger: _logger, processManager: processManager);
 
+  final FileSystem _fileSystem;
   final Logger _logger;
   final ProcessUtils _processUtils;
   final Xcode _xcode;
-  final FileSystem _fileSystem;
 
   /// When the `--timeout` flag is used with `devicectl`, it must be at
   /// least 5 seconds. If lower than 5 seconds, `devicectl` will error and not
