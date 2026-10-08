@@ -71,8 +71,7 @@ class GenSnapshot {
     // architecture (iOS: armv7, arm64; macOS: x86_64, arm64). Select the right
     // one for the target architecture in question.
     Artifact genSnapshotArtifact;
-    if (snapshotType.platform == TargetPlatform.ios ||
-        snapshotType.platform == TargetPlatform.darwin) {
+    if (snapshotType.platform.os case .ios || .macos) {
       genSnapshotArtifact = cpuArch == CpuArch.arm64
           ? Artifact.genSnapshotArm64
           : Artifact.genSnapshotX64;
@@ -133,19 +132,14 @@ class AOTSnapshotter {
 
     final genSnapshotArgs = <String>['--deterministic'];
 
-    final bool targetingApplePlatform =
-        platform == TargetPlatform.ios || platform == TargetPlatform.darwin;
+    final bool targetingApplePlatform = platform.os == .ios || platform.os == .macos;
     _logger.printTrace('targetingApplePlatform = $targetingApplePlatform');
 
     final bool extractAppleDebugSymbols =
         buildMode == BuildMode.profile || buildMode == BuildMode.release;
     _logger.printTrace('extractAppleDebugSymbols = $extractAppleDebugSymbols');
 
-    final bool targetingAndroidPlatform =
-        platform == TargetPlatform.android ||
-        platform == TargetPlatform.android_arm ||
-        platform == TargetPlatform.android_arm64 ||
-        platform == TargetPlatform.android_x64;
+    final targetingAndroidPlatform = platform.os == .android;
     _logger.printTrace('targetingAndroidPlatform = $targetingAndroidPlatform');
 
     // We strip snapshot by default, but allow to suppress this behavior
