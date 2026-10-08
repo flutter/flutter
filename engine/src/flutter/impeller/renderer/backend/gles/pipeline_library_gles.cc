@@ -422,9 +422,7 @@ void PipelineLibraryGLES::CacheProgram(
 
 // |PipelineLibrary|
 void PipelineLibraryGLES::PerformEagerly(const PipelineDescriptor& descriptor) {
-  if (compile_queue_) {
-    compile_queue_->PerformJobEagerly(descriptor);
-  }
+  compile_queue_->PerformJobEagerly(descriptor);
 }
 
 }  // namespace impeller
