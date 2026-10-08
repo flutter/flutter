@@ -36,7 +36,8 @@ final class _TestExtensionTarget extends ExtensionTarget {
     required this.name,
     this.errorMessage,
     this.shouldSucceed = true,
-  }) : super(targetPlatform: 'linux-x64');
+    super.targetPlatform = 'linux-x64',
+  });
 
   @override
   final String name;
@@ -67,6 +68,11 @@ final class _FailingAndConflictingBuildService extends BuildService {
       name: 'failing-build',
       shouldSucceed: false,
       errorMessage: 'Custom build compilation error.',
+    ),
+    _TestExtensionTarget(
+      description: 'Custom build target with invalid platform.',
+      name: 'invalid-platform-build',
+      targetPlatform: 'invalid-platform',
     ),
     _TestExtensionTarget(description: 'Conflicting bundle target.', name: 'bundle'),
     _TestExtensionTarget(description: 'Empty target name that should be skipped.', name: ''),
@@ -577,6 +583,13 @@ void main() {
         await expectLater(
           () => commandRunner.run(<String>['build', 'failing-build', '--no-pub']),
           throwsToolExit(message: 'Build failed: Custom build compilation error.'),
+        );
+
+        await expectLater(
+          () => commandRunner.run(<String>['build', 'invalid-platform-build', '--no-pub']),
+          throwsToolExit(
+            message: 'Invalid target platform "invalid-platform" for extension build target "invalid-platform-build".',
+          ),
         );
 
         expect(

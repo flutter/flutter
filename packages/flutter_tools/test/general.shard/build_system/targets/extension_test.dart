@@ -369,6 +369,49 @@ void main() {
       );
     },
   );
+
+  testUsingContext(
+    'ExtensionAssembleTarget throws ToolExit for invalid targetPlatform or artifact platformName',
+    () async {
+      final buildManager = FakeExtensionBuildManager();
+      final invalidTargetPlatformTarget = ExtensionAssembleTarget(
+        buildManager: buildManager,
+        buildTarget: const ExtensionBuildTarget(
+          description: 'description',
+          name: 'custom-target',
+          targetPlatform: 'invalid-platform',
+        ),
+        dependencyResolver: (String name) => throw UnimplementedError(),
+      );
+
+      await expectLater(
+        () => invalidTargetPlatformTarget.build(environment),
+        throwsToolExit(
+          message: 'Invalid target platform "invalid-platform" for extension build target "custom-target".',
+        ),
+      );
+
+      final invalidArtifactPlatformTarget = ExtensionAssembleTarget(
+        buildManager: buildManager,
+        buildTarget: const ExtensionBuildTarget(
+          description: 'description',
+          name: 'custom-target',
+          targetPlatform: 'linux-x64',
+          inputs: <Source>[
+            Source.artifact(BuiltInArtifacts.icuData, platform: 'invalid-artifact-platform'),
+          ],
+        ),
+        dependencyResolver: (String name) => throw UnimplementedError(),
+      );
+
+      await expectLater(
+        () => invalidArtifactPlatformTarget.build(environment),
+        throwsToolExit(
+          message: 'Invalid platform name "invalid-artifact-platform" for artifact "icuData".',
+        ),
+      );
+    },
+  );
 }
 
 final class FakeTarget extends Fake implements Target {

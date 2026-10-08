@@ -396,7 +396,7 @@ void _copyDirectory(Directory source, Directory destination) {
     destination.createSync(recursive: true);
   }
   for (final FileSystemEntity entity in source.listSync()) {
-    final String name = entity.path.substring(source.path.length + 1);
+    final String name = entity.uri.pathSegments.lastWhere((String e) => e.isNotEmpty);
     if (entity is Directory) {
       _copyDirectory(entity, Directory('${destination.path}/$name'));
     } else if (entity is File) {

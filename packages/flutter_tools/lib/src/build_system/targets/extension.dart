@@ -62,12 +62,21 @@ class ExtensionAssembleTarget extends Target {
     }
     final mode = BuildMode.fromCliName(buildMode);
 
+    TargetPlatform? targetPlatform;
+    if (buildTarget.targetPlatform.isNotEmpty) {
+      try {
+        targetPlatform = TargetPlatform.fromName(buildTarget.targetPlatform);
+      } on Exception {
+        throwToolExit(
+          'Invalid target platform "${buildTarget.targetPlatform}" for extension build target "${buildTarget.name}".',
+        );
+      }
+    }
+
     final resolver = ArtifactResolver(
       artifacts: artifacts,
       buildMode: mode,
-      targetPlatform: buildTarget.targetPlatform.isNotEmpty
-          ? TargetPlatform.fromName(buildTarget.targetPlatform)
-          : null,
+      targetPlatform: targetPlatform,
     );
     for (final Source input in buildTarget.inputs) {
       input.accept(resolver);
@@ -111,9 +120,14 @@ class ArtifactResolver implements core.SourceVisitor {
       (Artifact e) => e.name == artifact.name,
       orElse: () => throw ArgumentError.value(artifact.name, 'artifact', 'Unknown artifact name.'),
     );
-    final TargetPlatform? platform = platformName != null
-        ? TargetPlatform.fromName(platformName)
-        : null;
+    TargetPlatform? platform;
+    if (platformName != null) {
+      try {
+        platform = TargetPlatform.fromName(platformName);
+      } on Exception {
+        throwToolExit('Invalid platform name "$platformName" for artifact "${artifact.name}".');
+      }
+    }
 
     final String path = artifacts.getArtifactPath(
       hostArtifact,
