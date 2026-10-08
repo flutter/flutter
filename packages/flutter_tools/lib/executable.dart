@@ -10,6 +10,7 @@ import 'runner.dart' as runner;
 import 'src/android/android_workflow.dart' as android_workflow;
 import 'src/android/gradle.dart';
 import 'src/base/context.dart';
+import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
@@ -114,12 +115,17 @@ Future<void> main(List<String> args) async {
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
-      final ExtensionManager manager = toolDependencies.extensionManager!;
+      final ToolDependencies(
+        :ExtensionManager? extensionManager,
+        :FeatureFlags featureFlags,
+        toolContext: ToolContext(:FileSystem fs, :Logger logger),
+      ) = toolDependencies;
+      final ExtensionManager manager = extensionManager!;
       final templateManager = ExtensionTemplateManager(
         extensionManager: manager,
-        fileSystem: toolDependencies.toolContext.fs,
-        logger: toolDependencies.toolContext.logger,
         featureFlags: featureFlags,
+        fileSystem: fs,
+        logger: logger,
       );
       return generateCommands(
         toolDependencies: toolDependencies,
@@ -249,7 +255,13 @@ List<FlutterCommand> generateCommands({
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),
-  AttachCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
+  AttachCommand(
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: const BuildTargetsImpl(),
+    toolContext: toolDependencies.toolContext,
+    xcode: toolDependencies.appleContext.xcode,
+    verboseHelp: verboseHelp,
+  ),
   BuildCommand(
     androidBuilder: AndroidGradleBuilder.fromContexts(
       analytics: toolDependencies.analytics,
@@ -259,6 +271,7 @@ List<FlutterCommand> generateCommands({
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
     buildSystem: toolDependencies.buildSystem,
+    extensionBuildManager: toolDependencies.extensionBuildManager,
     featureFlags: toolDependencies.featureFlags,
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: toolDependencies.toolContext,
@@ -290,9 +303,12 @@ List<FlutterCommand> generateCommands({
   DaemonCommand(
     androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: const BuildTargetsImpl(),
     deviceManager: toolDependencies.deviceManager,
     hidden: !verboseHelp,
     toolContext: toolDependencies.toolContext,
+    xcode: toolDependencies.appleContext.xcode,
   ),
   DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(
@@ -347,7 +363,12 @@ List<FlutterCommand> generateCommands({
     verbose: verbose,
     nativeAssetsBuilder: toolDependencies.toolContext.nativeAssetsBuilder,
   ),
-  WidgetPreviewCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
+  WidgetPreviewCommand(
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: const BuildTargetsImpl(),
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
+  ),
   UpgradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   SymbolizeCommand(toolContext: toolDependencies.toolContext),
   // Development-only commands. These are always hidden,
