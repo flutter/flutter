@@ -82,8 +82,9 @@ static String getFlutterRoot(Project project) {
     return project.property("flutter-root")
 }
 
-// The software components that AGP creates for `singleVariant` publishing. `addAarTask` registers
-// one `assembleAar<Variant>` task for each of them.
+// Every software component of the project except "all". AGP adds one component for each
+// `singleVariant` or `multipleVariants` publishing declaration, named after it. `addAarTask`
+// registers one `assembleAar<Variant>` task for each.
 static Collection<SoftwareComponent> aarComponents(Project project) {
     return project.components.findAll { it.name != "all" }
 }
@@ -101,12 +102,12 @@ void addAarTask(Project project, component) {
         finalizedBy "publish"
     }
 
-    // This check is required to be able to configure the archives before `publish` runs.
+    // Only requested variants get a publication, so the `publish` finalizer publishes only those.
     if (!project.gradle.startParameter.taskNames.contains(taskName)) {
         return
     }
 
-    // Create a default MavenPublication for the variant (except "all" since that is used to publish artifacts in the new way)
+    // Create a default MavenPublication for the variant.
     // This runs outside the task's configuration action because maven-publish registers tasks for
     // each publication, and Gradle doesn't allow registering tasks while it realizes a task.
     project.publishing.publications.create(component.name, MavenPublication) { pub ->
@@ -130,7 +131,9 @@ static boolean isDuplicateSingleVariantError(Exception e, String variantName) {
 
 // Checks that the module and each Android plugin have every variant whose `assembleAar<Variant>`
 // task the tool requested. Returns normally if they do. Otherwise throws a GradleException that
-// names the variant and the first project without it.
+// names the variant and the first project without it. A requested task that matches no project's
+// variant (for example a misspelled `--flavor`) is left to Gradle, which fails with
+// `Task '<name>' not found in root project`.
 //
 // A project without the requested variant publishes no AAR, and the module's POM depends on each
 // plugin's AAR for the same variant name.
