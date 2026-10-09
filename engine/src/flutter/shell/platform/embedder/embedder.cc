@@ -3287,6 +3287,7 @@ FlutterEngineResult FlutterEngineSendSemanticsAction(
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
+  TRACE_EVENT0("flutter", "FlutterEngineSendSemanticsAction");
   auto engine_action = static_cast<flutter::SemanticsAction>(info->action);
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)
            ->DispatchSemanticsAction(
