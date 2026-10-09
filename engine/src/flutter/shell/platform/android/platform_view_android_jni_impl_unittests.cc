@@ -1680,8 +1680,17 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   EXPECT_CALL(*jni, GetDisplayDensity()).WillOnce(Return(kDisplayDensity));
 
   holder->UpdateDisplayMetrics();
-  EXPECT_DOUBLE_EQ(holder->GetShellForTesting()->GetDisplayRefreshRate(),
+  EXPECT_DOUBLE_EQ(holder->GetShellForTesting()->GetMainDisplayRefreshRate(),
                    kRefreshRateHz);
+  ASSERT_EQ(RuntimePlatformData(*holder).displays.size(), 1u);
+  EXPECT_DOUBLE_EQ(RuntimePlatformData(*holder).displays[0].refresh_rate,
+                   kRefreshRateHz);
+  EXPECT_DOUBLE_EQ(RuntimePlatformData(*holder).displays[0].width,
+                   kDisplayWidthPx);
+  EXPECT_DOUBLE_EQ(RuntimePlatformData(*holder).displays[0].height,
+                   kDisplayHeightPx);
+  EXPECT_DOUBLE_EQ(RuntimePlatformData(*holder).displays[0].pixel_ratio,
+                   kDisplayDensity);
 }
 
 TEST_F(PlatformViewAndroidJNIImplTest,
