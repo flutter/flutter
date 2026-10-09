@@ -6977,7 +6977,140 @@ void main() {
     expect(outerParagraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 3));
     expect(outerParagraph2.selections[0], const TextSelection(baseOffset: 2, extentOffset: 1));
   });
+
+  testWidgets(
+    'MultiSelectableSelectionContainerDelegate._compareScreenOrder does not crash with unlaid-out selectables',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/151536
+      //
+      // When _RenderTheater skips laying out an obscured OverlayEntry, selectables
+      // in that entry remain registered with their SelectionContainerDelegate but
+      // their RenderBoxes have no size. _flushAdditions then calls _compareScreenOrder
+      // which accesses paintBounds/getTransformTo and throws StateError in release
+      // mode / AssertionError in debug. This test drives
+      // MultiSelectableSelectionContainerDelegate._compareScreenOrder via multiple
+      // sibling Text widgets under a single SelectableRegion.
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Navigator(
+            pages: <Page<void>>[
+              TestPage<void>(
+                child: SelectableRegion(
+                  selectionControls: emptyTextSelectionControls,
+                  child: const Column(
+                    children: <Widget>[
+                      Text('Bottom page text A'),
+                      Text('Bottom page text B'),
+                      Text('Bottom page text C'),
+                    ],
+                  ),
+                ),
+              ),
+              const TestPage<void>(child: Text('Top page')),
+            ],
+            onDidRemovePage: _noopRemovePage,
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Top page'), findsOneWidget);
+    },
+  );
+
+  testWidgets('MultiSelectableSelectionContainerDelegate._compareScreenOrder catches '
+      'StateError from unlaid-out selectables', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/151536
+    //
+    // Red/green test that directly exercises the `on StateError` catch
+    // branch of MultiSelectableSelectionContainerDelegate._compareScreenOrder
+    // by registering mock Selectables whose `boundingBoxes` getter throws,
+    // simulating the production scenario where _RenderTheater skipped layout
+    // for an obscured OverlayEntry. Without the guard, _flushAdditions would
+    // propagate the StateError out of its post-frame callback and
+    // tester.takeException() would report it.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const Column(
+            children: <Widget>[
+              _ThrowingSelectionSpy(throwKind: _ThrowKind.stateError),
+              _ThrowingSelectionSpy(throwKind: _ThrowKind.stateError),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('MultiSelectableSelectionContainerDelegate._compareScreenOrder catches '
+      'AssertionError from unlaid-out selectables', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/151536
+    //
+    // Red/green test for the `on AssertionError` catch, which covers
+    // debug-mode builds where `assert(hasSize)` fires before the
+    // `_size ?? throw StateError(...)` expression in RenderBox.size.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const Column(
+            children: <Widget>[
+              _ThrowingSelectionSpy(throwKind: _ThrowKind.assertionError),
+              _ThrowingSelectionSpy(throwKind: _ThrowKind.assertionError),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('MultiSelectableSelectionContainerDelegate._compareScreenOrder places unlaid-out '
+      'selectables last and keeps laid-out ones in a consistent, deterministic order', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/151536
+    //
+    // Mixes laid-out and unlaid-out selectables. The unlaid-out one sits
+    // between the two laid-out ones in the widget tree, but the sort must
+    // still place it after both — otherwise `List.sort`, which requires a
+    // consistent comparator, could scramble the laid-out ones' relative
+    // order too.
+    SelectedContent? content;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
+          selectionControls: emptyTextSelectionControls,
+          child: const Column(
+            children: <Widget>[
+              _OrderProbeSelectionSpy(label: 'A'),
+              _OrderProbeSelectionSpy(label: 'Z', unlaidOut: true),
+              _OrderProbeSelectionSpy(label: 'B'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final SelectableRegionState state = tester.state<SelectableRegionState>(
+      find.byType(SelectableRegion),
+    );
+    state.selectAll();
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(content?.plainText, 'ABZ');
+  });
 }
+
+void _noopRemovePage(Page<Object?> page) {}
 
 class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {
   /// Copies the selected contents of all [Selectable]s, separating their
@@ -7193,4 +7326,165 @@ class _TextSelectionControlsSpy extends TextSelectionControls with TextSelection
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
   }
+}
+
+// Mock Selectable whose [boundingBoxes] getter throws — used by the
+// `_compareScreenOrder` regression tests for
+// https://github.com/flutter/flutter/issues/151536 to directly exercise the
+// `on StateError` / `on AssertionError` catch branches.
+enum _ThrowKind { stateError, assertionError }
+
+class _ThrowingSelectionSpy extends LeafRenderObjectWidget {
+  const _ThrowingSelectionSpy({required this.throwKind});
+
+  final _ThrowKind throwKind;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderThrowingSelectionSpy(SelectionContainer.maybeOf(context), throwKind);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {}
+}
+
+class _RenderThrowingSelectionSpy extends RenderProxyBox with Selectable, SelectionRegistrant {
+  _RenderThrowingSelectionSpy(SelectionRegistrar? registrar, this._throwKind) {
+    this.registrar = registrar;
+  }
+
+  final _ThrowKind _throwKind;
+
+  @override
+  List<Rect> get boundingBoxes {
+    switch (_throwKind) {
+      case _ThrowKind.stateError:
+        throw StateError('Bad state: RenderBox was not laid out (test)');
+      case _ThrowKind.assertionError:
+        throw AssertionError('RenderBox was not laid out (test)');
+    }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => constraints.smallest;
+
+  @override
+  void performLayout() => size = computeDryLayout(constraints);
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) => SelectionResult.end;
+
+  @override
+  SelectedContent? getSelectedContent() => null;
+
+  @override
+  SelectedContentRange? getSelection() => null;
+
+  @override
+  int get contentLength => 0;
+
+  @override
+  final SelectionGeometry value = const SelectionGeometry(
+    hasContent: true,
+    status: SelectionStatus.uncollapsed,
+    startSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+    endSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+  );
+
+  @override
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {}
+}
+
+// Mock Selectable with a fixed [size] and [getSelectedContent] result, and an
+// optional forced-unlaid-out `boundingBoxes` — used by the
+// `_compareScreenOrder` ordering regression test for
+// https://github.com/flutter/flutter/issues/151536 to observe the resulting
+// selectable order through the concatenated selected content.
+class _OrderProbeSelectionSpy extends LeafRenderObjectWidget {
+  const _OrderProbeSelectionSpy({required this.label, this.unlaidOut = false});
+
+  final String label;
+  final bool unlaidOut;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderOrderProbeSelectionSpy(SelectionContainer.maybeOf(context), label, unlaidOut);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {}
+}
+
+class _RenderOrderProbeSelectionSpy extends RenderProxyBox with Selectable, SelectionRegistrant {
+  _RenderOrderProbeSelectionSpy(SelectionRegistrar? registrar, this._label, this._unlaidOut) {
+    this.registrar = registrar;
+  }
+
+  final String _label;
+  final bool _unlaidOut;
+
+  @override
+  List<Rect> get boundingBoxes {
+    if (_unlaidOut) {
+      throw StateError('Bad state: RenderBox was not laid out (test)');
+    }
+    return <Rect>[Offset.zero & size];
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => const Size(20, 20);
+
+  @override
+  void performLayout() => size = computeDryLayout(constraints);
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) => SelectionResult.end;
+
+  @override
+  SelectedContent? getSelectedContent() => SelectedContent(plainText: _label);
+
+  @override
+  SelectedContentRange? getSelection() => null;
+
+  @override
+  int get contentLength => _label.length;
+
+  @override
+  final SelectionGeometry value = const SelectionGeometry(
+    hasContent: true,
+    status: SelectionStatus.uncollapsed,
+    startSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+    endSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+  );
+
+  @override
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {}
 }
