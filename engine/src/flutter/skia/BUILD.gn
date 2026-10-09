@@ -4,6 +4,7 @@
 
 _skia_root = "//flutter/third_party/skia"
 
+import("//build/toolchain/wasm.gni")
 import("$_skia_root/gn/shared_sources.gni")
 import("$_skia_root/gn/skia.gni")
 import("$_skia_root/gn/toolchain/wasm.gni")
@@ -672,6 +673,12 @@ skia_component("skia") {
 
   sources = []
   sources += skia_core_sources
+  if (is_wasm && wasm_use_workers) {
+    # POSIX semaphore functions are stubs when Wasm Workers are enabled without
+    # pthreads. Keep SkSemaphore's fast path, but provide a working slow path.
+    sources -= [ "$_skia_root/src/core/SkSemaphore.cpp" ]
+    sources += [ "SkSemaphore_wasm_workers.cpp" ]
+  }
   sources += skia_utils_private
   sources += skia_utils_chromium
   sources += skia_effects_sources
