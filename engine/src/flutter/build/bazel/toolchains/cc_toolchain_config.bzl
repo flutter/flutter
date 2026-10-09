@@ -84,6 +84,15 @@ _LINUX_DEFINES = [
     "_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS",
 ]
 
+# C-only flags (//build/config/compiler:compiler's cflags_c and
+# :cxx_disable_modules).
+_LINUX_C_FLAGS = [
+    "-std=c11",
+    "-fno-modules",
+    "-Xclang",
+    "-fno-cxx-modules",
+]
+
 # C++-only flags (//build/config/compiler:cxx_version_default,
 # :cxx_disable_modules, :no_rtti, //build/config/gcc:no_exceptions, the
 # libc++/libc++abi configs). The -nostdinc++ include paths are appended by the
@@ -180,6 +189,7 @@ def _impl(ctx):
             ALL_CC_COMPILE_ACTION_NAMES,
             _LINUX_COMPILE_FLAGS + _LINUX_X64_COMPILE_FLAGS + _defines(_LINUX_DEFINES),
         ),
+        _flag_feature("flutter_c_flags", [ACTION_NAMES.c_compile], _LINUX_C_FLAGS),
         _flag_feature("flutter_cxx_flags", ALL_CPP_COMPILE_ACTION_NAMES, _LINUX_CXX_FLAGS + cxx_include_flags),
         # Compilation modes; Bazel enables exactly one of dbg/opt/fastbuild.
         _mode_feature("dbg", _DBG_COMPILE_FLAGS + _defines(_DBG_DEFINES)),

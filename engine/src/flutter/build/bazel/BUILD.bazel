@@ -4,6 +4,15 @@
 
 # Bazel-only build support. This package exists so that the generated
 # `deps.lock.bzl` belongs to a Bazel package and can be loaded by module
-# extensions and tooling.
+# extensions and tooling, and holds the build-wide config_settings.
+
+package(default_visibility = ["//visibility:public"])
 
 exports_files(["deps.lock.bzl"])
+
+# GN's `is_debug` is "unoptimized", which Bazel spells -c dbg or -c fastbuild;
+# this is the complement (tools/gn without --unoptimized).
+config_setting(
+    name = "optimized",
+    values = {"compilation_mode": "opt"},
+)
