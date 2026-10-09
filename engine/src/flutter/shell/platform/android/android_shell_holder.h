@@ -123,6 +123,14 @@ class AndroidShellHolder {
   void SetAccessibilityFeatures(int32_t flags);
 
   //----------------------------------------------------------------------------
+  /// @brief      Sends a semantics action for a node on the implicit view
+  ///             through the embedder API.
+  ///
+  void DispatchSemanticsAction(int32_t node_id,
+                               int32_t action,
+                               fml::MallocMapping args);
+
+  //----------------------------------------------------------------------------
   /// @brief      Asks the engine for a frame through the embedder API.
   ///
   void ScheduleFrame();

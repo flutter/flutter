@@ -27,6 +27,7 @@
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
+#include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 
 namespace flutter {
@@ -82,6 +83,9 @@ static PlatformData GetDefaultPlatformData() {
 
 namespace {
 
+// The ID of the implicit view in single-view mode.
+constexpr int64_t kImplicitViewId = 0;
+
 // The holder owns its engine through an embedder API handle. Where embedder.h
 // has no equivalent yet, the holder reaches past the handle with a cast or
 // GetShell(). Keep each of those visible at its use so that
@@ -104,10 +108,24 @@ FlutterEngineProcTable LoadEmbedderApi() {
 // The embedder API callbacks of the PlatformView overrides that
 // PlatformViewAndroid no longer has.
 PlatformViewAndroid::PlatformDispatchTable MakePlatformDispatchTable(
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
     const std::shared_ptr<VsyncWaiterAndroid>& vsync_waiter) {
   return {
+      .update_semantics_callback =
+          [jni_facade](int64_t view_id, flutter::SemanticsNodeUpdates update,
+                       flutter::CustomAccessibilityActionUpdates actions) {
+            PlatformViewAndroidDelegate(jni_facade)
+                .UpdateSemantics(update, actions);
+          },
       .vsync_callback =
           [vsync_waiter](intptr_t baton) { vsync_waiter->AwaitVSync(baton); },
+      .compute_platform_resolved_locale_callback =
+          [jni_facade](const std::vector<std::string>& supported_locale_data) {
+            return jni_facade->FlutterViewComputePlatformResolvedLocale(
+                supported_locale_data);
+          },
+      .on_pre_engine_restart_callback =
+          [jni_facade]() { jni_facade->FlutterViewOnPreEngineRestart(); },
   };
 }
 
@@ -173,11 +191,12 @@ AndroidShellHolder::AndroidShellHolder(
             std::make_shared<VsyncWaiterAndroid>(shell.GetTaskRunners());
         std::unique_ptr<PlatformViewAndroid> platform_view_android;
         platform_view_android = std::make_unique<PlatformViewAndroid>(
-            shell,                                   // delegate
-            shell.GetTaskRunners(),                  // task runners
-            jni_facade,                              // JNI interop
-            rendering_api,                           // rendering API
-            MakePlatformDispatchTable(vsync_waiter)  // embedder callbacks
+            shell,                   // delegate
+            shell.GetTaskRunners(),  // task runners
+            jni_facade,              // JNI interop
+            rendering_api,           // rendering API
+            MakePlatformDispatchTable(jni_facade,
+                                      vsync_waiter)  // embedder callbacks
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;
@@ -340,11 +359,12 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
             std::make_shared<VsyncWaiterAndroid>(shell.GetTaskRunners());
         std::unique_ptr<PlatformViewAndroid> platform_view_android;
         platform_view_android = std::make_unique<PlatformViewAndroid>(
-            shell,                                   // delegate
-            shell.GetTaskRunners(),                  // task runners
-            jni_facade,                              // JNI interop
-            android_context,                         // Android context
-            MakePlatformDispatchTable(vsync_waiter)  // embedder callbacks
+            shell,                   // delegate
+            shell.GetTaskRunners(),  // task runners
+            jni_facade,              // JNI interop
+            android_context,         // Android context
+            MakePlatformDispatchTable(jni_facade,
+                                      vsync_waiter)  // embedder callbacks
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;
@@ -438,6 +458,26 @@ void AndroidShellHolder::SetAccessibilityFeatures(int32_t flags) {
   if (result != kSuccess) {
     FML_LOG(ERROR) << "FlutterEngineUpdateAccessibilityFeatures failed: "
                    << result;
+  }
+}
+
+void AndroidShellHolder::DispatchSemanticsAction(int32_t node_id,
+                                                 int32_t action,
+                                                 fml::MallocMapping args) {
+  // TODO(team-android): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
+  FlutterSendSemanticsActionInfo info = {
+      .struct_size = sizeof(FlutterSendSemanticsActionInfo),
+      .view_id = kImplicitViewId,
+      .node_id = static_cast<uint64_t>(node_id),
+      .action = static_cast<FlutterSemanticsAction>(action),
+      .data = args.GetMapping(),
+      .data_length = args.GetSize(),
+  };
+  FlutterEngineResult result =
+      embedder_api_.SendSemanticsAction(engine_.get(), &info);
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineSendSemanticsAction failed: " << result;
   }
 }
 

@@ -17,7 +17,6 @@
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
-#include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
@@ -44,8 +43,7 @@ class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
 // Renders on its own (Android surfaces and contexts) and takes the remaining
 // platform callbacks from the PlatformViewEmbedder dispatch table. An override
 // that is deleted falls back to the embedder API callback for it, which the
-// holder puts in the table. So far that is the vsync callback; every override
-// below still decides its own behavior.
+// holder puts in the table.
 class PlatformViewAndroid final : public PlatformViewEmbedder {
  public:
   static bool Register(JNIEnv* env);
@@ -89,12 +87,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   void DispatchEmptyPlatformMessage(JNIEnv* env,
                                     std::string name,
                                     jint response_id);
-
-  void DispatchSemanticsAction(JNIEnv* env,
-                               jint id,
-                               jint action,
-                               jobject args,
-                               jint args_position);
 
   void RegisterExternalTexture(
       int64_t texture_id,
@@ -140,17 +132,9 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   std::shared_ptr<AndroidContext> android_context_;
   std::shared_ptr<AndroidSurfaceFactoryImpl> surface_factory_;
 
-  PlatformViewAndroidDelegate platform_view_android_delegate_;
-
   std::unique_ptr<AndroidSurface> android_surface_;
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
   bool android_meets_hcpp_criteria_ = false;
-
-  // |PlatformView|
-  void UpdateSemantics(
-      int64_t view_id,
-      flutter::SemanticsNodeUpdates update,
-      flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |PlatformView|
   void SetApplicationLocale(std::string locale) override;
@@ -161,9 +145,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   // |PlatformView|
   void HandlePlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message) override;
-
-  // |PlatformView|
-  void OnPreEngineRestart() const override;
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
@@ -183,10 +164,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
 
   // |PlatformView|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
-
-  // |PlatformView|
-  std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocales(
-      const std::vector<std::string>& supported_locale_data) override;
 
   // |PlatformView|
   void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;

@@ -551,5 +551,63 @@ TEST(AndroidShellHolder, OnPreEngineRestartForwardsToJni) {
   platform_view.OnPreEngineRestart();
 }
 
+TEST(AndroidShellHolder,
+     DispatchSemanticsActionCallsFlutterEngineSendSemanticsAction) {
+  struct RecordedSemanticsAction {
+    FlutterViewId view_id;
+    uint64_t node_id;
+    FlutterSemanticsAction action;
+    std::vector<uint8_t> data;
+  };
+  std::vector<RecordedSemanticsAction> calls;
+  std::unique_ptr<AndroidShellHolder> holder =
+      CreateHolderWithoutSurface(Settings::MergedPlatformUIThread::kEnabled);
+  ASSERT_TRUE(holder->IsValid());
+
+  FlutterEngineProcTable& embedder_api = holder->GetEmbedderApiForTesting();
+  FlutterEngineSendSemanticsActionFnPtr real_send_semantics_action =
+      embedder_api.SendSemanticsAction;
+  embedder_api.SendSemanticsAction = MOCK_ENGINE_PROC(
+      SendSemanticsAction, ([&calls, real_send_semantics_action](
+                                FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                const FlutterSendSemanticsActionInfo* info) {
+        std::vector<uint8_t> payload;
+        if (info->data != nullptr && info->data_length > 0) {
+          payload.assign(info->data, info->data + info->data_length);
+        }
+        calls.push_back({
+            .view_id = info->view_id,
+            .node_id = info->node_id,
+            .action = info->action,
+            .data = std::move(payload),
+        });
+        return real_send_semantics_action(engine, info);
+      }));
+
+  // Implicit view ID (0), sample node IDs, and payload bytes.
+  constexpr FlutterViewId kExpectedImplicitViewId = 0;
+  constexpr int32_t kTapNodeId = 11;
+  constexpr int32_t kScrollNodeId = 23;
+  const std::vector<uint8_t> kPayload = {0x01, 0x02, 0x03, 0x04};
+
+  holder->DispatchSemanticsAction(
+      kTapNodeId, static_cast<int32_t>(kFlutterSemanticsActionTap),
+      fml::MallocMapping());
+  holder->DispatchSemanticsAction(
+      kScrollNodeId, static_cast<int32_t>(kFlutterSemanticsActionScrollLeft),
+      fml::MallocMapping::Copy(kPayload.data(), kPayload.size()));
+
+  ASSERT_EQ(calls.size(), 2u);
+  EXPECT_EQ(calls[0].view_id, kExpectedImplicitViewId);
+  EXPECT_EQ(calls[0].node_id, static_cast<uint64_t>(kTapNodeId));
+  EXPECT_EQ(calls[0].action, kFlutterSemanticsActionTap);
+  EXPECT_TRUE(calls[0].data.empty());
+
+  EXPECT_EQ(calls[1].view_id, kExpectedImplicitViewId);
+  EXPECT_EQ(calls[1].node_id, static_cast<uint64_t>(kScrollNodeId));
+  EXPECT_EQ(calls[1].action, kFlutterSemanticsActionScrollLeft);
+  EXPECT_EQ(calls[1].data, kPayload);
+}
+
 }  // namespace testing
 }  // namespace flutter

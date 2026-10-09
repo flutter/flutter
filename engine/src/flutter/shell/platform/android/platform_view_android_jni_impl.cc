@@ -529,13 +529,15 @@ static void DispatchSemanticsAction(JNIEnv* env,
                                     jint action,
                                     jobject args,
                                     jint args_position) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->DispatchSemanticsAction(
-      env,           //
-      id,            //
-      action,        //
-      args,          //
-      args_position  //
-  );
+  if (env->IsSameObject(args, NULL)) {
+    ANDROID_SHELL_HOLDER->DispatchSemanticsAction(id, action,
+                                                  fml::MallocMapping());
+    return;
+  }
+
+  uint8_t* args_data = static_cast<uint8_t*>(env->GetDirectBufferAddress(args));
+  ANDROID_SHELL_HOLDER->DispatchSemanticsAction(
+      id, action, fml::MallocMapping::Copy(args_data, args_position));
 }
 
 static void SetSemanticsEnabled(JNIEnv* env,
