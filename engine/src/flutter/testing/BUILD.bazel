@@ -1,0 +1,74 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Test support for the engine's gtest binaries. Mirrors BUILD.gn; targets that
+# need display_list, the Dart VM or Skia (testing_lib, testing, dart, skia,
+# ...) follow once those libraries build with Bazel.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+# Compiled by flutter_test_fixtures (testing.bzl) once per fixtures target.
+exports_files(["fixtures_location.cc"])
+
+# Test helpers that depend only on fml and googletest. Tests of code below
+# display_list (fml, tooling, ...) should depend on this target and
+# ":run_all_unittests" rather than on ":testing", so that they do not link
+# display_list, Impeller or Skia.
+cc_library(
+    name = "testing_core",
+    testonly = True,
+    srcs = [
+        "debugger_detection.cc",
+        "logger_listener.cc",
+        "post_task_sync.cc",
+        "stream_capture.cc",
+        "test_args.cc",
+        "test_timeout_listener.cc",
+        "testing.cc",
+        "thread_test.cc",
+    ],
+    hdrs = [
+        "assertions.h",
+        "debugger_detection.h",
+        "logger_listener.h",
+        "post_task_sync.h",
+        "stream_capture.h",
+        "test_args.h",
+        "test_timeout_listener.h",
+        "testing.h",
+        "thread_test.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+        "@googletest//:gtest",
+    ],
+)
+
+# The gtest main() used by the engine's unit test binaries.
+#
+# GN additionally links the GTK libraries into every Linux test binary through
+# //flutter/shell/platform/linux/config:gtk, a leftover from when main()
+# called gtk_init; nothing here uses them, so they are not reproduced.
+cc_library(
+    name = "run_all_unittests",
+    testonly = True,
+    srcs = ["run_all_unittests.cc"],
+    copts = FLUTTER_COPTS,
+    # config("dynamic_symbols"): export symbols so that backtraces can be
+    # symbolized.
+    linkopts = select({
+        "@platforms//os:linux": ["-rdynamic"],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [":testing_core"],
+    # main() must end up in every binary that lists this library.
+    alwayslink = True,
+)
