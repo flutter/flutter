@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 
+#include <functional>
 #include <utility>
 
 #include "flutter/fml/mapping.h"
@@ -229,7 +230,27 @@ class PlatformViewAndroidJNI {
   virtual void FlutterViewDestroyOverlaySurfaces() = 0;
 
   // New Platform View Support.
-  virtual ASurfaceTransaction* createTransaction() = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a transaction that is not yet visible to the platform
+  ///             thread, along with a callback that publishes it once the
+  ///             caller has finished writing into it.
+  ///
+  ///             The caller must invoke the publish callback only after its
+  ///             last write into the transaction (for example, setting buffers
+  ///             or completion callbacks). Until then the platform thread
+  ///             cannot merge, apply, or close it, and the underlying Java
+  ///             object is kept alive.
+  ///
+  /// @note       Must be called from the raster thread.
+  ///
+  /// @param[out] out_publish_callback  Receives the callback that publishes
+  ///                                   the transaction.
+  ///
+  /// @return     The native transaction, or null if one could not be created.
+  ///
+  virtual ASurfaceTransaction* createTransaction(
+      std::function<void()>& out_publish_callback) = 0;
 
   virtual void swapTransaction() = 0;
 
