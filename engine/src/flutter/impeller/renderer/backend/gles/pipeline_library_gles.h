@@ -136,7 +136,7 @@ class PipelineLibraryGLES final
   class PendingProgram {
    public:
     PendingProgram(std::shared_ptr<ReactorGLES> reactor,
-                   PipelineDescriptor desc,
+                   const PipelineDescriptor& desc,
                    std::shared_ptr<const ShaderFunction> vert_function,
                    std::shared_ptr<const ShaderFunction> frag_function,
                    bool threadsafe);

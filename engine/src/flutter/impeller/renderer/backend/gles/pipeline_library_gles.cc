@@ -78,12 +78,12 @@ static std::string GetShaderCompilationFailureMessage(const ProcTableGLES& gl,
 
 PipelineLibraryGLES::PendingProgram::PendingProgram(
     std::shared_ptr<ReactorGLES> reactor,
-    PipelineDescriptor desc,
+    const PipelineDescriptor& desc,
     std::shared_ptr<const ShaderFunction> vert_function,
     std::shared_ptr<const ShaderFunction> frag_function,
     bool threadsafe)
     : reactor_(std::move(reactor)),
-      desc_(std::move(desc)),
+      desc_(desc),
       vert_function_(std::move(vert_function)),
       frag_function_(std::move(frag_function)),
       threadsafe_(threadsafe) {}
