@@ -59,6 +59,7 @@ class EmbedderExternalTextureResolver {
 #ifdef SHELL_ENABLE_VULKAN
   EmbedderExternalTextureVulkan::ExternalTextureCallback vulkan_callback_;
 #endif
+
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureResolver);
 };
 }  // namespace flutter

@@ -78,31 +78,9 @@ class EmbedderExternalTextureVulkan : public flutter::Texture {
   using ExternalTextureCallback = std::function<
       std::unique_ptr<FlutterVulkanExternalTexture>(int64_t, size_t, size_t)>;
   EmbedderExternalTextureVulkan(int64_t texture_identifier,
-                                const ExternalTextureCallback& callback);
+                                ExternalTextureCallback callback);
 
-  ~EmbedderExternalTextureVulkan();
-
- private:
-  // The callback is owned by EmbedderExternalTextureResolver (itself owned
-  // by EmbedderEngine). It is only invoked from Paint(), which only runs
-  // while the engine is alive and the resolver exists, so the reference is
-  // always valid when used.
-  const ExternalTextureCallback& external_texture_callback_;
-
-  sk_sp<DlImage> last_image_;
-
-  sk_sp<DlImage> ResolveTexture(int64_t texture_id,
-                                GrDirectContext* context,
-                                impeller::AiksContext* aiks_context,
-                                const SkISize& size);
-  sk_sp<DlImage> ResolveTextureSkia(int64_t texture_id,
-                                    GrDirectContext* context,
-                                    const SkISize& size);
-#if IMPELLER_SUPPORTS_RENDERING
-  sk_sp<DlImage> ResolveTextureImpeller(int64_t texture_id,
-                                        impeller::AiksContext* aiks_context,
-                                        const SkISize& size);
-#endif  // IMPELLER_SUPPORTS_RENDERING
+  ~EmbedderExternalTextureVulkan() override;
 
   // |flutter::Texture|
   void Paint(PaintContext& context,
@@ -122,8 +100,29 @@ class EmbedderExternalTextureVulkan : public flutter::Texture {
   // |flutter::Texture|
   void OnTextureUnregistered() override;
 
+ private:
+  ExternalTextureCallback external_texture_callback_;
+
+  sk_sp<DlImage> last_image_;
+
+  sk_sp<DlImage> ResolveTexture(int64_t texture_id,
+                                GrDirectContext* context,
+                                impeller::AiksContext* aiks_context,
+                                const SkISize& size);
+  sk_sp<DlImage> ResolveTextureSkia(int64_t texture_id,
+                                    GrDirectContext* context,
+                                    const SkISize& size);
+#if IMPELLER_SUPPORTS_RENDERING
+  sk_sp<DlImage> ResolveTextureImpeller(int64_t texture_id,
+                                        impeller::AiksContext* aiks_context,
+                                        const SkISize& size);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureVulkan);
 };
+
+using EmbedderExternalTextureVK = EmbedderExternalTextureVulkan;
+
 }  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_VULKAN_H_

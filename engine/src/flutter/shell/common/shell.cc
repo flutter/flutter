@@ -1735,7 +1735,7 @@ void Shell::UpdateAssetResolverByType(
       fml::MakeCopyable(
           [engine = weak_engine_, type,
            asset_resolver = std::move(updated_asset_resolver)]() mutable {
-            if (engine) {
+            if (engine && engine->GetAssetManager()) {
               engine->GetAssetManager()->UpdateResolverByType(
                   std::move(asset_resolver), type);
             }

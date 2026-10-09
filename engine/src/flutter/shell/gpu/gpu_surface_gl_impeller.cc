@@ -84,7 +84,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
         [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
           return true;
         },
-        [](const SurfaceFrame& surface_frame) { return true; }, size);
+        [](const SurfaceFrame& surface_frame) { return true; }, size,
+        std::move(context_switch));
   }
 
   GLFrameInfo frame_info = {static_cast<uint32_t>(size.width),
