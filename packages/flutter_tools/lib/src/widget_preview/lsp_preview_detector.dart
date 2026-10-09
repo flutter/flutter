@@ -37,6 +37,7 @@ class LspPreviewDetector {
     required this.logger,
     required this.onChangeDetected,
     required this.onPubspecChangeDetected,
+    this.onNonDartFileChangeDetected,
     required this.dtd,
     required this.processManager,
     required this.terminal,
@@ -58,6 +59,7 @@ class LspPreviewDetector {
   final Logger logger;
   final void Function(FlutterWidgetPreviews) onChangeDetected;
   final void Function(String path) onPubspecChangeDetected;
+  final void Function(String path)? onNonDartFileChangeDetected;
   @visibleForTesting
   final void Function(String path)? onPackageConfigChangeDetected;
   final WatcherBuilder watcherBuilder;
@@ -196,6 +198,7 @@ class LspPreviewDetector {
       return;
     }
     if (!filePath.isDartFile) {
+      onNonDartFileChangeDetected?.call(filePath);
       return;
     }
     previewAnalytics.startPreviewReloadStopwatch();

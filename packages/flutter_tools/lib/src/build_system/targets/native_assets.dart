@@ -409,7 +409,7 @@ Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
   final BuildMode buildMode = buildModeEnvironment == null
       ? BuildMode.debug
       : BuildMode.fromCliName(buildModeEnvironment);
-  final bool includeDevDependencies = !buildMode.isRelease;
+  final bool includeDevDependencies = !buildMode.isRelease || _isTestTarget(environment);
   return FlutterNativeAssetsBuildRunnerImpl(
     environment.packageConfigPath,
     packageConfig,
@@ -420,4 +420,21 @@ Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
     includeDevDependencies: includeDevDependencies,
     pubspecPath,
   );
+}
+
+bool _isTestTarget(Environment environment) {
+  final String? targetFile = environment.defines[kTargetFile];
+  if (targetFile == null) {
+    return false;
+  }
+  final String absoluteTargetPath = environment.fileSystem.path.isAbsolute(targetFile)
+      ? targetFile
+      : environment.fileSystem.path.join(environment.projectDir.path, targetFile);
+  final String relativePath = environment.fileSystem.path.relative(
+    environment.fileSystem.path.normalize(absoluteTargetPath),
+    from: environment.projectDir.path,
+  );
+  final List<String> parts = environment.fileSystem.path.split(relativePath);
+  return parts.isNotEmpty &&
+      const <String>{'integration_test', 'test_driver', 'test'}.contains(parts.first);
 }

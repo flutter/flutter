@@ -275,6 +275,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     fs: fs,
     onChangeDetected: onLegacyChangeDetected,
     onPubspecChangeDetected: _onPubspecChangeDetected,
+    onNonDartFileChangeDetected: _onNonDartFileChangeDetected,
   );
 
   late final _lspPreviewDetector = LspPreviewDetector(
@@ -285,6 +286,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     fs: fs,
     onChangeDetected: onChangeDetected,
     onPubspecChangeDetected: _onPubspecChangeDetected,
+    onNonDartFileChangeDetected: _onNonDartFileChangeDetected,
     shutdownHooks: shutdownHooks,
     dtd: _dtdService,
     processManager: processManager,
@@ -557,6 +559,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(update);
     logger.printStatus('Triggering reload based on update to script: ${update.scriptUris}');
     unawaited(_triggerReload(.hotReload));
+  }
+
+  void _onNonDartFileChangeDetected(String path) {
+    if (_widgetPreviewApp?.assetBundle.needsBuild() ?? false) {
+      logger.printStatus('Triggering reload based on update to asset: $path');
+      _widgetPreviewApp?.restart();
+    }
   }
 
   /// Configures the Dart Tooling Daemon connection.

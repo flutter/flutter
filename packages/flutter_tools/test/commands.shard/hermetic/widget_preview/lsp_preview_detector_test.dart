@@ -45,6 +45,7 @@ void main() {
     late ShutdownHooks shutdownHooks;
     late List<FlutterWidgetPreviews> detectedChanges;
     late List<String> detectedPubspecChanges;
+    late List<String> detectedNonDartFileChanges;
     late LspPreviewDetector detector;
 
     setUp(() async {
@@ -63,6 +64,7 @@ void main() {
       shutdownHooks = ShutdownHooks();
       detectedChanges = <FlutterWidgetPreviews>[];
       detectedPubspecChanges = <String>[];
+      detectedNonDartFileChanges = <String>[];
 
       detector = LspPreviewDetector(
         platform: platform,
@@ -72,6 +74,7 @@ void main() {
         logger: logger,
         onChangeDetected: detectedChanges.add,
         onPubspecChangeDetected: detectedPubspecChanges.add,
+        onNonDartFileChangeDetected: detectedNonDartFileChanges.add,
         dtd: fakeDtd,
         processManager: FakeProcessManager.any(),
         terminal: Terminal.test(),
@@ -136,21 +139,20 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'does not report preview reload timing when non-Dart file is modified',
-      () async {
-        expectNPreviewReloadTimingEvents(0);
-        expect(detectedChanges, isEmpty);
-        expect(detectedPubspecChanges, isEmpty);
+    testWithoutContext('notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified', () async {
+      expectNPreviewReloadTimingEvents(0);
+      expect(detectedChanges, isEmpty);
+      expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, isEmpty);
 
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kNonDartFilePath));
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kNonDartFilePath));
 
-        expect(detectedChanges, isEmpty);
-        expect(detectedPubspecChanges, isEmpty);
-        expectNPreviewReloadTimingEvents(0);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-      },
-    );
+      expect(detectedChanges, isEmpty);
+      expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, <String>[_kNonDartFilePath]);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
 
     testWithoutContext('does not report preview reload timing for ignored directories', () async {
       expectNPreviewReloadTimingEvents(0);
@@ -159,6 +161,7 @@ void main() {
 
       expect(detectedChanges, isEmpty);
       expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, isEmpty);
       expectNPreviewReloadTimingEvents(0);
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
