@@ -6,6 +6,9 @@
 # subtree, so nested entries are omitted.
 .cipd
 bin/cache
+engine/src/build/linux/debian_bullseye_amd64-sysroot
+engine/src/build/linux/debian_bullseye_arm64-sysroot
+engine/src/build/linux/debian_trixie_riscv64-sysroot
 engine/src/flutter/build/rbe
 engine/src/flutter/buildtools
 engine/src/flutter/prebuilts
