@@ -81,7 +81,10 @@ void PumpPendingMessages() {
 fml::ScopedCleanupClosure AcquireCrossProcessLock() {
   HANDLE mutex =
       ::CreateMutex(nullptr, FALSE, L"Local\\flutter_windows_unittests_screen");
-  EXPECT_NE(mutex, nullptr) << "Failed to create the lock.";
+  if (mutex == nullptr) {
+    ADD_FAILURE() << "Failed to create the lock.";
+    return fml::ScopedCleanupClosure();
+  }
   ::WaitForSingleObject(mutex, INFINITE);
   return fml::ScopedCleanupClosure([mutex] {
     ::ReleaseMutex(mutex);
@@ -141,6 +144,7 @@ void ExpectCenterPixel(HWND view, COLORREF expected) {
     // window to paint itself (e.g. with PrintWindow), because the latter forces
     // a redraw and can capture a half-finished frame.
     HDC screen_dc = ::GetDC(nullptr);
+    ASSERT_NE(screen_dc, nullptr);
     pixel = ::GetPixel(screen_dc, center.x, center.y);
     ::ReleaseDC(nullptr, screen_dc);
   } while (pixel != expected && std::chrono::steady_clock::now() < deadline);
