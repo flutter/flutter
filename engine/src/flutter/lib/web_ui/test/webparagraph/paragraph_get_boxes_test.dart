@@ -301,4 +301,78 @@ Future<void> testMain() async {
     expect(boxes2.isNotEmpty && boxes2.length == 1, true);
     expect(boxes1.first.toRect().bottom >= boxes2.first.toRect().top, true);
   });
+
+  test('getBoxesForRange and getBoxesForPlaceholders return matching boxes for placeholders', () {
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
+    builder.addPlaceholder(
+      50,
+      30,
+      ui.PlaceholderAlignment.baseline,
+      baseline: ui.TextBaseline.alphabetic,
+    );
+    builder.addText('Hello ');
+    // A second taller placeholder on the same line increases `line.fontBoundingBoxAscent`
+    // after the first placeholder's initial pass
+    builder.addPlaceholder(
+      40,
+      60,
+      ui.PlaceholderAlignment.bottom,
+      baseline: ui.TextBaseline.alphabetic,
+    );
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 500));
+
+    final List<ui.TextBox> placeholderBoxes = paragraph.getBoxesForPlaceholders();
+    expect(placeholderBoxes, hasLength(2));
+
+    // Placeholder 1 is at text index 0..1; Placeholder 2 is at text index 7..8
+    final List<ui.TextBox> rangeBoxes1 = paragraph.getBoxesForRange(0, 1);
+    final List<ui.TextBox> rangeBoxes2 = paragraph.getBoxesForRange(7, 8);
+    expect(rangeBoxes1, hasLength(1));
+    expect(rangeBoxes2, hasLength(1));
+
+    expect(rangeBoxes1.first.toRect(), placeholderBoxes[0].toRect());
+    expect(rangeBoxes2.first.toRect(), placeholderBoxes[1].toRect());
+    expect(rangeBoxes1.first.top, greaterThanOrEqualTo(0.0));
+    expect(rangeBoxes1.first.toRect().width, 50.0);
+    expect(rangeBoxes1.first.toRect().height, 30.0);
+    expect(rangeBoxes2.first.top, greaterThanOrEqualTo(0.0));
+    expect(rangeBoxes2.first.toRect().width, 40.0);
+    expect(rangeBoxes2.first.toRect().height, 60.0);
+  });
+
+  test('BoxHeightStyle.tight uses unscaled glyph height and respects TextHeightBehavior', () {
+    final builderUnscaled = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20),
+    )..addText('Hello');
+    final ui.Paragraph paragraphUnscaled = builderUnscaled.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+    final ui.LineMetrics unscaledMetrics = paragraphUnscaled.computeLineMetrics().single;
+    final double rawGlyphHeight = unscaledMetrics.ascent + unscaledMetrics.descent;
+
+    final builderEven =
+        ui.ParagraphBuilder(
+            ui.ParagraphStyle(
+              fontFamily: 'Arial',
+              fontSize: 20,
+              height: 3.0,
+              textHeightBehavior: const ui.TextHeightBehavior(
+                leadingDistribution: ui.TextLeadingDistribution.even,
+              ),
+            ),
+          )
+          ..pushStyle(ui.TextStyle())
+          ..addText('Hello');
+    final ui.Paragraph paragraphEven = builderEven.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+
+    // Line height is scaled to 3.0 * 20 = 60.0, with extra leading split evenly above and below.
+    // BoxHeightStyle.tight should return the unscaled glyph height centered vertically in the line
+    expect(paragraphEven.height, 60.0);
+    final List<ui.TextBox> tightBoxes = paragraphEven.getBoxesForRange(0, 5);
+    expect(tightBoxes, hasLength(1));
+    expect(tightBoxes.single.toRect().height, closeTo(rawGlyphHeight, 1e-3));
+    expect(tightBoxes.single.top, closeTo((60.0 - rawGlyphHeight) / 2, 1e-3));
+  });
 }
