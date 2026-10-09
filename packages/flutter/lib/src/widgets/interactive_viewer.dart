@@ -1268,7 +1268,40 @@ Offset _exceedsBy(Quad boundary, Quad viewport) {
     }
   }
 
-  return _round(largestExcess);
+  return _snapToZero(_round(largestExcess), _precisionTolerance(boundary));
+}
+
+/// The distance from zero below which an excess computed by _exceedsBy is
+/// considered to be zero.
+///
+/// The floating point error in that excess grows with the magnitude of the
+/// coordinates it was computed from, so rounding to a fixed number of decimal
+/// places is not enough on its own: against a boundary that is tens of thousands
+/// of pixels away from the origin, an excess that should have been zero survives
+/// the rounding, and a viewport resting on the boundary is mistaken for one that
+/// lies outside of it.
+double _precisionTolerance(Quad boundary) {
+  // Spelled out rather than looped over a list of the points because this runs
+  // on every frame of a pan or a scale.
+  final double largestCoordinate = math.max(
+    math.max(
+      math.max(boundary.point0.x.abs(), boundary.point0.y.abs()),
+      math.max(boundary.point1.x.abs(), boundary.point1.y.abs()),
+    ),
+    math.max(
+      math.max(boundary.point2.x.abs(), boundary.point2.y.abs()),
+      math.max(boundary.point3.x.abs(), boundary.point3.y.abs()),
+    ),
+  );
+  return math.max(1e-9, largestCoordinate * 1e-11);
+}
+
+/// Snap the components that are nearer to zero than tolerance to exactly zero.
+Offset _snapToZero(Offset offset, double tolerance) {
+  return Offset(
+    offset.dx.abs() < tolerance ? 0.0 : offset.dx,
+    offset.dy.abs() < tolerance ? 0.0 : offset.dy,
+  );
 }
 
 // Round the output values. This works around a precision problem where
