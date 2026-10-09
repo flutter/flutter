@@ -39,6 +39,7 @@ load(
     "tool",
 )
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
+load("//engine/src/flutter/build/bazel:copts.bzl", "TOOLCHAIN_WARNING_FLAGS")
 
 # Flags GN passes to every C and C++ compile on Linux
 # (//build/config/compiler:compiler, :runtime_library, //build/config/gcc,
@@ -55,19 +56,12 @@ _LINUX_COMPILE_FLAGS = [
     "-pthread",
     "-fcolor-diagnostics",
     "-fvisibility=hidden",
-    "-Wendif-labels",
-    "-Wno-missing-field-initializers",
-    "-Wno-unused-parameter",
-    "-Wno-unused-but-set-parameter",
-    "-Wno-unused-but-set-variable",
-    "-Wno-psabi",
-    "-Wno-implicit-int-float-conversion",
-    "-Wno-deprecated-copy",
-    "-Wno-deprecated-literal-operator",
-    "-Wno-unqualified-std-cast-call",
-    "-Wno-nontrivial-memcall",
-    "-Wno-non-c-typedef-for-linkage",
-    "-Wno-range-loop-construct",
+    # GN's `default_warning_flags` (part of both the chromium_code and the
+    # no_chromium_code config, so every target gets them), without -Werror;
+    # see copts.bzl for why, and for the per-target lists that repeat them
+    # after -Wall -Wextra.
+] + TOOLCHAIN_WARNING_FLAGS + [
+    # //build/config/clang:extra_warnings.
     "-Wstring-conversion",
     "-Wnewline-eof",
 ]
@@ -191,6 +185,39 @@ def _impl(ctx):
         feature(name = "supports_pic", enabled = True),
         feature(name = "supports_dynamic_linker", enabled = True),
         feature(name = "supports_start_end_lib", enabled = False),
+        # Replaces Bazel's built-in include_paths feature, which passes the
+        # `includes` of cc_library rules with -isystem. GN passes every include
+        # directory with -I, and the difference matters: clang suppresses
+        # warnings in headers found through -isystem, so with Bazel's default
+        # -Werror would stop covering engine headers (all reached through
+        # -I engine/src) and third-party headers alike.
+        feature(
+            name = "include_paths",
+            enabled = True,
+            flag_sets = [
+                flag_set(
+                    actions = ALL_CC_COMPILE_ACTION_NAMES,
+                    flag_groups = [
+                        flag_group(
+                            flags = ["-iquote", "%{quote_include_paths}"],
+                            iterate_over = "quote_include_paths",
+                        ),
+                        flag_group(
+                            flags = ["-I%{include_paths}"],
+                            iterate_over = "include_paths",
+                        ),
+                        flag_group(
+                            flags = ["-I%{system_include_paths}"],
+                            iterate_over = "system_include_paths",
+                        ),
+                        flag_group(
+                            flags = ["-F%{framework_include_paths}"],
+                            iterate_over = "framework_include_paths",
+                        ),
+                    ],
+                ),
+            ],
+        ),
     ]
 
     # Which tool runs which action. Bazel supplies the mechanical flags (-c,
