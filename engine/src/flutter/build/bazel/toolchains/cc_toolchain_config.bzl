@@ -111,7 +111,6 @@ _LINUX_LINK_FLAGS = [
     "-Wl,-z,noexecstack",
     "-Wl,-z,now",
     "-Wl,-z,relro",
-    "-Wl,-z,defs",
     "-Wl,--undefined-version",
     "-Wl,--build-id=sha1",
     "-pthread",
@@ -122,6 +121,21 @@ _LINUX_LINK_FLAGS = [
 ]
 
 _LINUX_X64_LINK_FLAGS = ["-m64"]
+
+# Every link GN performs produces a complete artifact -- an executable, or a
+# shared library with all of its static dependencies linked in -- so GN can
+# reject unresolved symbols in all of them (//build/config/compiler:compiler).
+# Bazel additionally derives a `.so` from every cc_library (the
+# cpp_link_nodeps_dynamic_library action) that by design leaves the library's
+# dependencies, and with -nostdlib++ the C++ runtime, unresolved; it has no GN
+# counterpart and nothing consumes it with --dynamic_mode=off, but `bazel build
+# //...` still produces it, so it is excluded from this check.
+_LINUX_COMPLETE_LINK_FLAGS = ["-Wl,-z,defs"]
+
+_COMPLETE_LINK_ACTION_NAMES = CC_LINK_EXECUTABLE_ACTION_NAMES + [
+    ACTION_NAMES.cpp_link_dynamic_library,
+    ACTION_NAMES.lto_index_for_dynamic_library,
+]
 
 _LINUX_EXECUTABLE_LINK_FLAGS = [
     "-Wl,--disable-new-dtags",
@@ -173,6 +187,7 @@ def _impl(ctx):
         _mode_feature("opt", _OPT_COMPILE_FLAGS + _defines(_OPT_DEFINES), _OPT_LINK_FLAGS),
         # Link.
         _flag_feature("flutter_link_flags", ALL_CC_LINK_ACTION_NAMES, _LINUX_LINK_FLAGS + _LINUX_X64_LINK_FLAGS),
+        _flag_feature("flutter_complete_link_flags", _COMPLETE_LINK_ACTION_NAMES, _LINUX_COMPLETE_LINK_FLAGS),
         _flag_feature("flutter_executable_link_flags", CC_LINK_EXECUTABLE_ACTION_NAMES, _LINUX_EXECUTABLE_LINK_FLAGS),
         # System libraries go after everything Bazel adds (user_link_flags,
         # libraries_to_link), which is why they are a separate, late feature.
