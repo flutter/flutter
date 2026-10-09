@@ -1439,7 +1439,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     return Builder(
       key: key,
       builder: (BuildContext context) {
-        assert(debugCheckHasMediaQuery(context));
         return MediaQuery(
           data: MediaQuery.of(context).applyTextStyleOverrides(
             lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
@@ -1507,7 +1506,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     return Builder(
       key: key,
       builder: (BuildContext context) {
-        assert(debugCheckHasMediaQuery(context));
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
           child: child,
@@ -1540,7 +1538,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
 
     return Builder(
       builder: (BuildContext context) {
-        assert(debugCheckHasMediaQuery(context));
         final MediaQueryData data = MediaQuery.of(context);
         return MediaQuery(
           data: data.copyWith(
