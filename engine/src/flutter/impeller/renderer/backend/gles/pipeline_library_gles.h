@@ -14,8 +14,11 @@
 #include "impeller/renderer/backend/gles/pipeline_compile_queue_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/unique_handle_gles.h"
+#include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/shader_function.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
@@ -121,19 +124,128 @@ class PipelineLibraryGLES final
 
   const std::shared_ptr<ReactorGLES>& GetReactor() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      A program object whose shaders are compiled and linked in two
+  ///             steps: `Compile` issues the work, and `Wait` checks whether
+  ///             linking succeeded. Separating the two allows drivers that
+  ///             compile asynchronously to make progress in between.
+  ///
+  ///             All methods, including the destructor, must be called on the
+  ///             reactor.
+  ///
+  class PendingProgram {
+   public:
+    PendingProgram(std::shared_ptr<ReactorGLES> reactor,
+                   PipelineDescriptor desc,
+                   std::shared_ptr<const ShaderFunction> vert_function,
+                   std::shared_ptr<const ShaderFunction> frag_function,
+                   bool threadsafe);
+
+    ~PendingProgram();
+
+    PendingProgram(const PendingProgram&) = delete;
+
+    PendingProgram& operator=(const PendingProgram&) = delete;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Creates the program object, creates and compiles the
+    ///             shaders, attaches them to the program, and requests that the
+    ///             program be linked.
+    ///
+    /// @return     An error if the program or shaders could not be created or
+    ///             the shaders could not be compiled.
+    ///
+    absl::Status Compile();
+
+    //--------------------------------------------------------------------------
+    /// @brief      Checks the result of linking the program and releases the
+    ///             shaders. Must only be called after `Compile` succeeds.
+    ///
+    /// @return     The linked program object, or an error if the program
+    ///             failed to link.
+    ///
+    absl::StatusOr<std::shared_ptr<UniqueHandleGLES>> Wait();
+
+   private:
+    absl::Status CompileShaders();
+
+    absl::Status CheckLinkStatus() const;
+
+    void ReleaseShaders();
+
+    std::shared_ptr<ReactorGLES> reactor_;
+    PipelineDescriptor desc_;
+    std::shared_ptr<const ShaderFunction> vert_function_;
+    std::shared_ptr<const ShaderFunction> frag_function_;
+    bool threadsafe_ = false;
+    std::shared_ptr<UniqueHandleGLES> handle_;
+    GLuint program_ = 0;
+    GLuint vert_shader_ = 0;
+    GLuint frag_shader_ = 0;
+    bool shaders_attached_ = false;
+    bool link_pending_ = false;
+  };
+
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a pipeline for the descriptor that uses the given,
+  ///             already linked, program. Must be called on the reactor.
+  ///
+  /// @return     The pipeline, or nullptr on failure.
+  ///
   static std::shared_ptr<PipelineGLES> CreatePipeline(
       const std::weak_ptr<PipelineLibrary>& weak_library,
+      const std::shared_ptr<ReactorGLES>& reactor,
       const PipelineDescriptor& desc,
-      const std::shared_ptr<const ShaderFunction>& vert_shader,
-      const std::shared_ptr<const ShaderFunction>& frag_shader,
-      bool threadsafe);
+      std::shared_ptr<UniqueHandleGLES> program_handle);
 
-  std::shared_ptr<UniqueHandleGLES> GetProgramForKey(const ProgramKey& key);
+  using PipelinePromise =
+      std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>;
 
-  void SetProgramForKey(const ProgramKey& key,
-                        std::shared_ptr<UniqueHandleGLES> program);
+  //----------------------------------------------------------------------------
+  /// @brief      The state of a pipeline being created, shared between
+  ///             `StartPipelineCreation` and `FinishPipelineCreation`.
+  ///
+  struct PipelineCreation {
+    std::shared_ptr<PipelinePromise> promise;
+    std::weak_ptr<PipelineLibrary> weak_library;
+    PipelineDescriptor descriptor;
+    std::shared_ptr<const ShaderFunction> vert_function;
+    std::shared_ptr<const ShaderFunction> frag_function;
+    bool threadsafe = false;
+    /// Set by `StartPipelineCreation` if a program is being compiled, and
+    /// consumed by `FinishPipelineCreation`.
+    std::unique_ptr<PendingProgram> pending_program;
+  };
+
+  //----------------------------------------------------------------------------
+  /// @brief      The first step of creating a pipeline. Uses a cached program
+  ///             if there is one, otherwise starts compiling a new one that
+  ///             `FinishPipelineCreation` will wait on. Must be called on the
+  ///             reactor.
+  ///
+  static void StartPipelineCreation(PipelineCreation& creation);
+
+  //----------------------------------------------------------------------------
+  /// @brief      The second step of creating a pipeline. If a program was
+  ///             compiled, waits for it to link, caches it, and fulfills the
+  ///             promise with the new pipeline. Must be called on the reactor,
+  ///             on the same thread that called `StartPipelineCreation`.
+  ///
+  static void FinishPipelineCreation(PipelineCreation& creation);
+
+  //----------------------------------------------------------------------------
+  /// @brief      A compile job whose steps run `StartPipelineCreation` and
+  ///             `FinishPipelineCreation` on the reactor.
+  ///
+  class PipelineCompileJob;
+
+  std::shared_ptr<UniqueHandleGLES> GetCachedProgram(const ProgramKey& key);
+
+  void CacheProgram(const ProgramKey& key,
+                    std::shared_ptr<UniqueHandleGLES> program);
+
   // |PipelineLibrary|
-  PipelineCompileQueue* GetPipelineCompileQueue() const override;
+  void PerformEagerly(const PipelineDescriptor& descriptor) override;
 };
 
 }  // namespace impeller
