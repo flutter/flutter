@@ -185,12 +185,6 @@ class CupertinoApp extends StatefulWidget {
     this.actions,
     this.restorationScopeId,
     this.scrollBehavior,
-    @Deprecated(
-      'Remove this parameter as it is now ignored. '
-      'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.',
-    )
-    this.useInheritedMediaQuery = false,
   }) : routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
@@ -227,12 +221,6 @@ class CupertinoApp extends StatefulWidget {
     this.actions,
     this.restorationScopeId,
     this.scrollBehavior,
-    @Deprecated(
-      'Remove this parameter as it is now ignored. '
-      'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.',
-    )
-    this.useInheritedMediaQuery = false,
   }) : assert(routerDelegate != null || routerConfig != null),
        navigatorObservers = null,
        navigatorKey = null,
@@ -429,14 +417,6 @@ class CupertinoApp extends StatefulWidget {
   ///  * [ScrollConfiguration], which controls how [Scrollable] widgets behave
   ///    in a subtree.
   final ScrollBehavior? scrollBehavior;
-
-  /// {@macro flutter.widgets.widgetsApp.useInheritedMediaQuery}
-  @Deprecated(
-    'This setting is now ignored. '
-    'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-    'This feature was deprecated after v3.7.0-29.0.pre.',
-  )
-  final bool useInheritedMediaQuery;
 
   @override
   State<CupertinoApp> createState() => _CupertinoAppState();
