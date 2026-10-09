@@ -256,6 +256,10 @@ bool DlPath::IsConvex() const {
   return data_->sk_path.isConvex();
 }
 
+std::shared_ptr<const void> DlPath::GetCacheIdentity() const {
+  return data_;
+}
+
 DlPath DlPath::operator+(const DlPath& other) const {
   SkPathBuilder path = SkPathBuilder(GetSkPath());
   path.addPath(other.GetSkPath());

@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_GEOMETRY_PATH_SOURCE_H_
 #define FLUTTER_IMPELLER_GEOMETRY_PATH_SOURCE_H_
 
+#include <memory>
+
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 
@@ -59,6 +61,19 @@ class PathSource {
   virtual Rect GetBounds() const = 0;
   virtual bool IsConvex() const = 0;
   virtual void Dispatch(PathReceiver& receiver) const = 0;
+
+  /// @brief  An opaque, stable identity for this source that can be used to
+  ///         cache derived data such as tessellations.
+  ///
+  /// Returns nullptr when the source has no stable identity and therefore
+  /// cannot be cached. The returned shared pointer keeps the identity alive
+  /// for as long as the caller retains it, which prevents address reuse by
+  /// newly created sources. Tessellation caches insert on second use of a
+  /// key; a recycled address with no live cache entry may cache on first
+  /// use of the new path.
+  virtual std::shared_ptr<const void> GetCacheIdentity() const {
+    return nullptr;
+  }
 };
 
 /// @brief A PathSource object that provides path iteration for any TRect.

@@ -57,6 +57,7 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
+#include "impeller/tessellator/tessellator.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
 #include "third_party/imgui/imgui.h"
 
@@ -2353,6 +2354,100 @@ TEST_P(EntityTest, FillPathGeometryGetPositionBufferReturnsExpectedMode) {
     GeometryResult result = get_result(path);
     EXPECT_EQ(result.mode, GeometryResult::Mode::kNonZero);
   }
+}
+
+TEST_P(EntityTest, StrokePathGeometryCachesTessellationOnSecondUse) {
+  RenderTarget target;
+  testing::MockRenderPass mock_pass(GetContext(), target);
+  Tessellator& tessellator = GetContentContext().GetTessellator();
+  const size_t cache_before =
+      tessellator.GetStrokeTessellationCacheSizeForTesting();
+
+  flutter::DlPath path = flutter::DlPathBuilder{}
+                             .MoveTo({0, 0})
+                             .LineTo({40, 0})
+                             .QuadraticCurveTo({50, 5}, {40, 40})
+                             .LineTo({0, 40})
+                             .Close()
+                             .TakePath();
+  StrokeParameters stroke{.width = 2.0f};
+  auto geometry = Geometry::MakeStrokePath(path, stroke);
+  Entity entity;
+
+  auto copy_points = [](const GeometryResult& result) {
+    const BufferView& view = result.vertex_buffer.vertex_buffer;
+    const Point* ptr = reinterpret_cast<const Point*>(
+        view.GetBuffer()->OnGetContents() + view.GetRange().offset);
+    return std::vector<Point>(ptr, ptr + result.vertex_buffer.vertex_count);
+  };
+
+  GeometryResult first =
+      geometry->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(),
+            cache_before);
+  std::vector<Point> first_points = copy_points(first);
+
+  GeometryResult second =
+      geometry->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(),
+            cache_before + 1);
+  EXPECT_EQ(first_points, copy_points(second));
+
+  GeometryResult third =
+      geometry->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(),
+            cache_before + 1);
+  EXPECT_EQ(first_points, copy_points(third));
+
+  StrokeParameters round = stroke;
+  round.cap = Cap::kRound;
+  auto round_geom = Geometry::MakeStrokePath(path, round);
+  round_geom->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(),
+            cache_before + 1);
+  round_geom->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(),
+            cache_before + 2);
+
+  StrokeParameters join = stroke;
+  join.join = Join::kRound;
+  auto join_geom = Geometry::MakeStrokePath(path, join);
+  join_geom->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  join_geom->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(),
+            cache_before + 3);
+
+  StrokeParameters miter = stroke;
+  miter.miter_limit = 8.0f;
+  auto miter_geom = Geometry::MakeStrokePath(path, miter);
+  miter_geom->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  miter_geom->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(),
+            cache_before + 4);
+
+  StrokeParameters wide = stroke;
+  wide.width = 6.0f;
+  auto wide_geom = Geometry::MakeStrokePath(path, wide);
+  wide_geom->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  wide_geom->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(),
+            cache_before + 5);
+
+  StrokeParameters hairline{.width = 0.0f};
+  auto hairline_geom = Geometry::MakeStrokePath(path, hairline);
+  hairline_geom->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  hairline_geom->GetPositionBuffer(GetContentContext(), entity, mock_pass);
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(),
+            cache_before + 6);
+
+  Entity scaled;
+  scaled.SetTransform(Matrix::MakeScale({2.0f, 2.0f, 1.0f}));
+  hairline_geom->GetPositionBuffer(GetContentContext(), scaled, mock_pass);
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(),
+            cache_before + 6);
+  hairline_geom->GetPositionBuffer(GetContentContext(), scaled, mock_pass);
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(),
+            cache_before + 7);
 }
 
 TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
