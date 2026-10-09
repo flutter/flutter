@@ -18,11 +18,11 @@
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
-      "count": 152,
+      "count": 151,
       "enforce": "ratchet"
     },
     "jni_platform_view_calls": {
-      "count": 13,
+      "count": 11,
       "enforce": "ratchet"
     },
     "platform_view_android_overrides": {

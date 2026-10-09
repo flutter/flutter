@@ -41,7 +41,6 @@
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_wrapper.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
-#include "flutter/shell/platform/android/platform_message_response_android.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 #include "flutter/shell/platform/android/surface/snapshot_surface_producer.h"
 
@@ -247,41 +246,6 @@ void PlatformViewAndroid::NotifyChanged(const DlISize& size) {
         latch.Signal();
       });
   latch.Wait();
-}
-
-void PlatformViewAndroid::DispatchPlatformMessage(JNIEnv* env,
-                                                  std::string name,
-                                                  jobject java_message_data,
-                                                  jint java_message_position,
-                                                  jint response_id) {
-  uint8_t* message_data =
-      static_cast<uint8_t*>(env->GetDirectBufferAddress(java_message_data));
-  fml::MallocMapping message =
-      fml::MallocMapping::Copy(message_data, java_message_position);
-
-  fml::RefPtr<flutter::PlatformMessageResponse> response;
-  if (response_id) {
-    response = fml::MakeRefCounted<PlatformMessageResponseAndroid>(
-        response_id, jni_facade_, task_runners_.GetPlatformTaskRunner());
-  }
-
-  PlatformView::DispatchPlatformMessage(
-      std::make_unique<flutter::PlatformMessage>(
-          std::move(name), std::move(message), std::move(response)));
-}
-
-void PlatformViewAndroid::DispatchEmptyPlatformMessage(JNIEnv* env,
-                                                       std::string name,
-                                                       jint response_id) {
-  fml::RefPtr<flutter::PlatformMessageResponse> response;
-  if (response_id) {
-    response = fml::MakeRefCounted<PlatformMessageResponseAndroid>(
-        response_id, jni_facade_, task_runners_.GetPlatformTaskRunner());
-  }
-
-  PlatformView::DispatchPlatformMessage(
-      std::make_unique<flutter::PlatformMessage>(std::move(name),
-                                                 std::move(response)));
 }
 
 // |PlatformView|

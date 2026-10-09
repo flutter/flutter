@@ -187,6 +187,10 @@ namespace {
 using SetSemanticsEnabledFn = void (*)(JNIEnv*, jobject, jlong, jboolean);
 using SetAccessibilityFeaturesFn = void (*)(JNIEnv*, jobject, jlong, jint);
 using ScheduleFrameFn = void (*)(JNIEnv*, jobject, jlong);
+using DispatchPlatformMessageFn =
+    void (*)(JNIEnv*, jobject, jlong, jstring, jobject, jint, jint);
+using DispatchEmptyPlatformMessageFn =
+    void (*)(JNIEnv*, jobject, jlong, jstring, jint);
 using SetViewportMetricsFn = void (*)(JNIEnv*,
                                       jobject,
                                       jlong,
@@ -599,6 +603,277 @@ TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsCallsEmbedderApi) {
                        .viewport_metrics_for_views.at(0)
                        .physical_width,
                    0.0);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       DispatchPlatformMessageCallsEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto dispatch_platform_message = reinterpret_cast<DispatchPlatformMessageFn>(
+      RegisterNativesAndFind(mock_env, "nativeDispatchPlatformMessage"));
+  ASSERT_NE(dispatch_platform_message, nullptr);
+
+  const std::u16string kChannelU16 = u"test/channel";
+  jstring jchannel = reinterpret_cast<jstring>(2001);
+  jobject jbuffer = reinterpret_cast<jobject>(2002);
+  uint8_t payload[4] = {10, 20, 30, 40};
+
+  EXPECT_CALL(mock_env, GetStringChars(jchannel, _))
+      .WillRepeatedly(
+          Return(reinterpret_cast<const jchar*>(kChannelU16.data())));
+  EXPECT_CALL(mock_env, GetStringLength(jchannel))
+      .WillRepeatedly(Return(static_cast<jsize>(kChannelU16.size())));
+  EXPECT_CALL(mock_env, ReleaseStringChars(jchannel, _))
+      .WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, GetDirectBufferAddress(jbuffer))
+      .WillRepeatedly(Return(payload));
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  struct CapturedMessage {
+    std::string channel;
+    bool data_non_null = false;
+    std::vector<uint8_t> bytes;
+    bool has_response_handle = false;
+  };
+  std::vector<CapturedMessage> calls;
+  holder->GetEmbedderApiForTesting().SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage, ([&calls](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                     const FlutterPlatformMessage* message) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(message, nullptr);
+        CapturedMessage captured;
+        captured.channel = message->channel ? message->channel : "";
+        captured.data_non_null = (message->message != nullptr);
+        if (message->message != nullptr && message->message_size > 0) {
+          captured.bytes.assign(message->message,
+                                message->message + message->message_size);
+        }
+        captured.has_response_handle = (message->response_handle != nullptr);
+        calls.push_back(std::move(captured));
+        return kSuccess;
+      }));
+
+  // 1. Non-empty payload without response.
+  dispatch_platform_message(&mock_env, reinterpret_cast<jobject>(123),
+                            reinterpret_cast<jlong>(holder.get()), jchannel,
+                            jbuffer, /*position=*/4, /*responseId=*/0);
+  // 2. Zero-byte payload without response (must pass non-null message pointer
+  // so Dart receives ByteData(0) rather than null).
+  dispatch_platform_message(&mock_env, reinterpret_cast<jobject>(123),
+                            reinterpret_cast<jlong>(holder.get()), jchannel,
+                            jbuffer, /*position=*/0, /*responseId=*/0);
+
+  ASSERT_EQ(calls.size(), 2u);
+  EXPECT_EQ(calls[0].channel, "test/channel");
+  EXPECT_TRUE(calls[0].data_non_null);
+  EXPECT_THAT(calls[0].bytes, ElementsAre(10, 20, 30, 40));
+  EXPECT_FALSE(calls[0].has_response_handle);
+
+  EXPECT_EQ(calls[1].channel, "test/channel");
+  EXPECT_TRUE(calls[1].data_non_null);
+  EXPECT_TRUE(calls[1].bytes.empty());
+  EXPECT_FALSE(calls[1].has_response_handle);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       DispatchEmptyPlatformMessageCallsEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto dispatch_empty_message =
+      reinterpret_cast<DispatchEmptyPlatformMessageFn>(RegisterNativesAndFind(
+          mock_env, "nativeDispatchEmptyPlatformMessage"));
+  ASSERT_NE(dispatch_empty_message, nullptr);
+
+  const std::u16string kChannelU16 = u"test/empty";
+  jstring jchannel = reinterpret_cast<jstring>(2003);
+  EXPECT_CALL(mock_env, GetStringChars(jchannel, _))
+      .WillRepeatedly(
+          Return(reinterpret_cast<const jchar*>(kChannelU16.data())));
+  EXPECT_CALL(mock_env, GetStringLength(jchannel))
+      .WillRepeatedly(Return(static_cast<jsize>(kChannelU16.size())));
+  EXPECT_CALL(mock_env, ReleaseStringChars(jchannel, _))
+      .WillRepeatedly(Return());
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  bool called = false;
+  holder->GetEmbedderApiForTesting().SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage, ([&called](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                      const FlutterPlatformMessage* message) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(message, nullptr);
+        EXPECT_STREQ(message->channel, "test/empty");
+        EXPECT_EQ(message->message, nullptr);
+        EXPECT_EQ(message->message_size, 0u);
+        EXPECT_EQ(message->response_handle, nullptr);
+        called = true;
+        return kSuccess;
+      }));
+
+  dispatch_empty_message(&mock_env, reinterpret_cast<jobject>(123),
+                         reinterpret_cast<jlong>(holder.get()), jchannel,
+                         /*responseId=*/0);
+  EXPECT_TRUE(called);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       DispatchPlatformMessageWithResponseForwardsReplyToJniFacade) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto dispatch_empty_message =
+      reinterpret_cast<DispatchEmptyPlatformMessageFn>(RegisterNativesAndFind(
+          mock_env, "nativeDispatchEmptyPlatformMessage"));
+  ASSERT_NE(dispatch_empty_message, nullptr);
+
+  const std::u16string kChannelU16 = u"test/reply";
+  jstring jchannel = reinterpret_cast<jstring>(2004);
+  EXPECT_CALL(mock_env, GetStringChars(jchannel, _))
+      .WillRepeatedly(
+          Return(reinterpret_cast<const jchar*>(kChannelU16.data())));
+  EXPECT_CALL(mock_env, GetStringLength(jchannel))
+      .WillRepeatedly(Return(static_cast<jsize>(kChannelU16.size())));
+  EXPECT_CALL(mock_env, ReleaseStringChars(jchannel, _))
+      .WillRepeatedly(Return());
+
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+
+  struct CapturedResponse {
+    FlutterDataCallback callback = nullptr;
+    void* user_data = nullptr;
+    FlutterPlatformMessageResponseHandle* fake_handle = nullptr;
+    bool released = false;
+  };
+  std::vector<CapturedResponse> responses;
+
+  holder->GetEmbedderApiForTesting().PlatformMessageCreateResponseHandle =
+      MOCK_ENGINE_PROC(
+          PlatformMessageCreateResponseHandle,
+          ([&responses](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                        FlutterDataCallback data_callback, void* user_data,
+                        FlutterPlatformMessageResponseHandle** response_out) {
+            EXPECT_NE(engine, nullptr);
+            EXPECT_NE(data_callback, nullptr);
+            EXPECT_NE(response_out, nullptr);
+            auto* fake =
+                reinterpret_cast<FlutterPlatformMessageResponseHandle*>(
+                    static_cast<uintptr_t>(0x5000 + responses.size() + 1));
+            *response_out = fake;
+            responses.push_back({data_callback, user_data, fake, false});
+            return kSuccess;
+          }));
+
+  holder->GetEmbedderApiForTesting().SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage,
+      ([&responses](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                    const FlutterPlatformMessage* message) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(message, nullptr);
+        EXPECT_FALSE(responses.empty());
+        EXPECT_EQ(message->response_handle, responses.back().fake_handle);
+        return kSuccess;
+      }));
+
+  holder->GetEmbedderApiForTesting().PlatformMessageReleaseResponseHandle =
+      MOCK_ENGINE_PROC(
+          PlatformMessageReleaseResponseHandle,
+          ([&responses](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                        FlutterPlatformMessageResponseHandle* response) {
+            EXPECT_NE(engine, nullptr);
+            for (auto& entry : responses) {
+              if (entry.fake_handle == response) {
+                entry.released = true;
+              }
+            }
+            return kSuccess;
+          }));
+
+  // Send 3 messages expecting responses: non-empty, 0-byte non-null, and null.
+  dispatch_empty_message(&mock_env, reinterpret_cast<jobject>(123),
+                         reinterpret_cast<jlong>(holder.get()), jchannel,
+                         /*responseId=*/41);
+  dispatch_empty_message(&mock_env, reinterpret_cast<jobject>(123),
+                         reinterpret_cast<jlong>(holder.get()), jchannel,
+                         /*responseId=*/42);
+  dispatch_empty_message(&mock_env, reinterpret_cast<jobject>(123),
+                         reinterpret_cast<jlong>(holder.get()), jchannel,
+                         /*responseId=*/43);
+
+  ASSERT_EQ(responses.size(), 3u);
+  EXPECT_TRUE(responses[0].released);
+  EXPECT_TRUE(responses[1].released);
+  EXPECT_TRUE(responses[2].released);
+
+  // 1. Non-empty response (responseId = 41).
+  EXPECT_CALL(*jni, FlutterViewHandlePlatformMessageResponse(41, _))
+      .WillOnce([](int, std::unique_ptr<fml::Mapping> data) {
+        ASSERT_NE(data, nullptr);
+        ASSERT_EQ(data->GetSize(), 3u);
+        EXPECT_EQ(data->GetMapping()[0], 9);
+        EXPECT_EQ(data->GetMapping()[1], 8);
+        EXPECT_EQ(data->GetMapping()[2], 7);
+      });
+  const uint8_t kReplyBytes[3] = {9, 8, 7};
+  responses[0].callback(kReplyBytes, sizeof(kReplyBytes),
+                        responses[0].user_data);
+
+  // 2. Zero-byte non-null response (responseId = 42).
+  EXPECT_CALL(*jni, FlutterViewHandlePlatformMessageResponse(42, _))
+      .WillOnce([](int, std::unique_ptr<fml::Mapping> data) {
+        ASSERT_NE(data, nullptr);
+        EXPECT_EQ(data->GetSize(), 0u);
+      });
+  static const uint8_t kEmptyByte = 0;
+  responses[1].callback(&kEmptyByte, 0, responses[1].user_data);
+
+  // 3. Null response (responseId = 43).
+  EXPECT_CALL(*jni, FlutterViewHandlePlatformMessageResponse(43, _))
+      .WillOnce([](int, std::unique_ptr<fml::Mapping> data) {
+        EXPECT_EQ(data, nullptr);
+      });
+  responses[2].callback(nullptr, 0, responses[2].user_data);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       DispatchPlatformMessageRealProcsDoNotLeakUncompletedResponse) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto dispatch_platform_message = reinterpret_cast<DispatchPlatformMessageFn>(
+      RegisterNativesAndFind(mock_env, "nativeDispatchPlatformMessage"));
+  ASSERT_NE(dispatch_platform_message, nullptr);
+
+  const std::u16string kChannelU16 = u"test/uncompleted";
+  jstring jchannel = reinterpret_cast<jstring>(2005);
+  jobject jbuffer = reinterpret_cast<jobject>(2006);
+  uint8_t payload[2] = {1, 2};
+
+  EXPECT_CALL(mock_env, GetStringChars(jchannel, _))
+      .WillRepeatedly(
+          Return(reinterpret_cast<const jchar*>(kChannelU16.data())));
+  EXPECT_CALL(mock_env, GetStringLength(jchannel))
+      .WillRepeatedly(Return(static_cast<jsize>(kChannelU16.size())));
+  EXPECT_CALL(mock_env, ReleaseStringChars(jchannel, _))
+      .WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, GetDirectBufferAddress(jbuffer))
+      .WillRepeatedly(Return(payload));
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  // The root isolate is not running, so the real response handle is created,
+  // attached to the PlatformMessage, released, and dropped when the message is
+  // not handled. Tearing down the holder must clean up its pending response
+  // entry without leaking JNIMock.
+  dispatch_platform_message(&mock_env, reinterpret_cast<jobject>(123),
+                            reinterpret_cast<jlong>(holder.get()), jchannel,
+                            jbuffer, /*position=*/2, /*responseId=*/99);
 }
 
 // The load order is exercised with an injected loader rather than real

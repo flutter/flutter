@@ -8,9 +8,13 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <algorithm>
+#include <atomic>
+#include <cstdint>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -86,6 +90,95 @@ namespace {
 
 // The ID of the implicit view in single-view mode.
 constexpr int64_t kImplicitViewId = 0;
+
+uint64_t NextHolderId() {
+  static std::atomic<uint64_t> next_id{1};
+  return next_id.fetch_add(1, std::memory_order_relaxed);
+}
+
+struct PendingPlatformMessageResponse {
+  uint64_t holder_id = 0;
+  std::weak_ptr<PlatformViewAndroidJNI> jni_facade;
+  int response_id = 0;
+};
+
+// Maps integer tokens passed as |user_data| to
+// FlutterPlatformMessageCreateResponseHandle back to the originating holder's
+// JNI facade and response ID. Using integer tokens rather than heap pointers
+// guarantees that neither uncompleted response handles (e.g. when a message is
+// sent before the root isolate is launched or intercepted by a mock proc) nor
+// callbacks queued on the platform loop when ~AndroidShellHolder() runs can
+// leak or dereference freed memory.
+class PendingPlatformMessageResponseTable {
+ public:
+  uintptr_t Register(uint64_t holder_id,
+                     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+                     int response_id) {
+    std::scoped_lock lock(mutex_);
+    uintptr_t token = next_token_++;
+    if (token == 0) {
+      token = next_token_++;
+    }
+    entries_.emplace(token, PendingPlatformMessageResponse{
+                                holder_id, jni_facade, response_id});
+    return token;
+  }
+
+  std::optional<PendingPlatformMessageResponse> Take(uintptr_t token) {
+    std::scoped_lock lock(mutex_);
+    auto it = entries_.find(token);
+    if (it == entries_.end()) {
+      return std::nullopt;
+    }
+    PendingPlatformMessageResponse entry = std::move(it->second);
+    entries_.erase(it);
+    return entry;
+  }
+
+  void RemoveForHolder(uint64_t holder_id) {
+    std::scoped_lock lock(mutex_);
+    for (auto it = entries_.begin(); it != entries_.end();) {
+      if (it->second.holder_id == holder_id) {
+        it = entries_.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
+
+ private:
+  std::mutex mutex_;
+  uintptr_t next_token_ = 1;
+  std::unordered_map<uintptr_t, PendingPlatformMessageResponse> entries_;
+};
+
+PendingPlatformMessageResponseTable& GetPendingResponseTable() {
+  static auto* table = new PendingPlatformMessageResponseTable();
+  return *table;
+}
+
+void OnPlatformMessageResponse(const uint8_t* data,
+                               size_t size,
+                               void* user_data) {
+  const auto token = reinterpret_cast<uintptr_t>(user_data);
+  std::optional<PendingPlatformMessageResponse> entry =
+      GetPendingResponseTable().Take(token);
+  if (!entry.has_value()) {
+    return;
+  }
+  std::shared_ptr<PlatformViewAndroidJNI> jni_facade = entry->jni_facade.lock();
+  if (!jni_facade) {
+    return;
+  }
+  if (data == nullptr) {
+    jni_facade->FlutterViewHandlePlatformMessageResponse(entry->response_id,
+                                                         nullptr);
+  } else {
+    jni_facade->FlutterViewHandlePlatformMessageResponse(
+        entry->response_id, std::make_unique<fml::MallocMapping>(
+                                fml::MallocMapping::Copy(data, size)));
+  }
+}
 
 // The holder owns its engine through an embedder API handle. Where embedder.h
 // has no equivalent yet, the holder reaches past the handle with a cast or
@@ -173,6 +266,7 @@ AndroidShellHolder::AndroidShellHolder(
     : settings_(settings),
       jni_facade_(jni_facade),
       embedder_api_(LoadEmbedderApi()),
+      holder_id_(NextHolderId()),
       android_rendering_api_(android_rendering_api) {
   static size_t thread_host_count = 1;
   auto thread_label = std::to_string(thread_host_count++);
@@ -304,6 +398,7 @@ AndroidShellHolder::AndroidShellHolder(
       engine_(std::move(engine)),
       embedder_api_(LoadEmbedderApi()),
       vsync_waiter_(std::move(vsync_waiter)),
+      holder_id_(NextHolderId()),
       apk_asset_provider_(std::move(apk_asset_provider)),
       android_rendering_api_(rendering_api) {
   FML_DCHECK(jni_facade);
@@ -322,6 +417,7 @@ AndroidShellHolder::~AndroidShellHolder() {
   }
   engine_.reset();
   thread_host_.reset();
+  GetPendingResponseTable().RemoveForHolder(holder_id_);
 }
 
 void AndroidShellHolder::EngineDeleter::operator()(
@@ -627,6 +723,75 @@ void AndroidShellHolder::SetViewportMetrics(int64_t view_id,
       embedder_api_.SendWindowMetricsEvent(engine_.get(), &event);
   if (result != kSuccess) {
     FML_LOG(ERROR) << "FlutterEngineSendWindowMetricsEvent failed: " << result;
+  }
+}
+
+void AndroidShellHolder::DispatchPlatformMessage(const std::string& name,
+                                                 const void* message_data,
+                                                 int message_position,
+                                                 int response_id) {
+  if (message_position < 0) {
+    return;
+  }
+  static const uint8_t kEmptyByte = 0;
+  const uint8_t* bytes = message_position == 0
+                             ? &kEmptyByte
+                             : static_cast<const uint8_t*>(message_data);
+  SendPlatformMessage(name, bytes, static_cast<size_t>(message_position),
+                      response_id);
+}
+
+void AndroidShellHolder::DispatchEmptyPlatformMessage(const std::string& name,
+                                                      int response_id) {
+  SendPlatformMessage(name, nullptr, 0, response_id);
+}
+
+void AndroidShellHolder::SendPlatformMessage(const std::string& name,
+                                             const uint8_t* message_data,
+                                             size_t message_size,
+                                             int response_id) {
+  FlutterPlatformMessageResponseHandle* response_handle = nullptr;
+  uintptr_t response_token = 0;
+  if (response_id != 0) {
+    response_token = GetPendingResponseTable().Register(holder_id_, jni_facade_,
+                                                        response_id);
+    FlutterEngineResult create_result =
+        embedder_api_.PlatformMessageCreateResponseHandle(
+            engine_.get(), &OnPlatformMessageResponse,
+            reinterpret_cast<void*>(response_token), &response_handle);
+    if (create_result != kSuccess) {
+      GetPendingResponseTable().Take(response_token);
+      FML_LOG(ERROR) << "FlutterPlatformMessageCreateResponseHandle failed: "
+                     << create_result;
+      return;
+    }
+  }
+
+  FlutterPlatformMessage message = {};
+  message.struct_size = sizeof(FlutterPlatformMessage);
+  message.channel = name.c_str();
+  message.message = message_data;
+  message.message_size = message_size;
+  message.response_handle = response_handle;
+
+  FlutterEngineResult send_result =
+      embedder_api_.SendPlatformMessage(engine_.get(), &message);
+  if (send_result != kSuccess) {
+    if (response_token != 0) {
+      GetPendingResponseTable().Take(response_token);
+    }
+    FML_LOG(ERROR) << "FlutterEngineSendPlatformMessage failed: "
+                   << send_result;
+  }
+
+  if (response_handle != nullptr) {
+    FlutterEngineResult release_result =
+        embedder_api_.PlatformMessageReleaseResponseHandle(engine_.get(),
+                                                           response_handle);
+    if (release_result != kSuccess) {
+      FML_LOG(ERROR) << "FlutterPlatformMessageReleaseResponseHandle failed: "
+                     << release_result;
+    }
   }
 }
 

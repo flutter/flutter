@@ -78,16 +78,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   // |PlatformView|
   void NotifyDestroyed() override;
 
-  void DispatchPlatformMessage(JNIEnv* env,
-                               std::string name,
-                               jobject message_data,
-                               jint message_position,
-                               jint response_id);
-
-  void DispatchEmptyPlatformMessage(JNIEnv* env,
-                                    std::string name,
-                                    jint response_id);
-
   void RegisterExternalTexture(
       int64_t texture_id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture);

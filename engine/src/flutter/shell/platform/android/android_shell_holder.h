@@ -140,6 +140,21 @@ class AndroidShellHolder {
   ///
   void SetViewportMetrics(int64_t view_id, const ViewportMetrics& metrics);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Sends a binary platform message to the engine through the
+  ///             embedder API.
+  ///
+  void DispatchPlatformMessage(const std::string& name,
+                               const void* message_data,
+                               int message_position,
+                               int response_id);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Sends an empty (null payload) platform message to the engine
+  ///             through the embedder API.
+  ///
+  void DispatchEmptyPlatformMessage(const std::string& name, int response_id);
+
   // Visible for testing.
   Shell* GetShellForTesting() const;
 
@@ -168,8 +183,14 @@ class AndroidShellHolder {
   std::shared_ptr<VsyncWaiterAndroid> vsync_waiter_;
   bool is_valid_ = false;
   uint64_t next_pointer_flow_id_ = 0;
+  const uint64_t holder_id_;
   std::unique_ptr<APKAssetProvider> apk_asset_provider_;
   const AndroidRenderingAPI android_rendering_api_;
+
+  void SendPlatformMessage(const std::string& name,
+                           const uint8_t* message_data,
+                           size_t message_size,
+                           int response_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Constructor with its components injected.

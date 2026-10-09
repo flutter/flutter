@@ -70,6 +70,10 @@ class MockableJNIEnv : public JNIEnv {
     jni_.RegisterNatives = WrapRegisterNatives;
     jni_.GetArrayLength = WrapGetArrayLength;
     jni_.GetIntArrayRegion = WrapGetIntArrayRegion;
+    jni_.GetStringChars = WrapGetStringChars;
+    jni_.GetStringLength = WrapGetStringLength;
+    jni_.ReleaseStringChars = WrapReleaseStringChars;
+    jni_.GetDirectBufferAddress = WrapGetDirectBufferAddress;
   }
 
   virtual jobject CallObjectMethodV(jobject, jmethodID, va_list) = 0;
@@ -90,6 +94,10 @@ class MockableJNIEnv : public JNIEnv {
   virtual jint RegisterNatives(jclass, const JNINativeMethod*, jint) = 0;
   virtual jsize GetArrayLength(jarray) = 0;
   virtual void GetIntArrayRegion(jintArray, jsize, jsize, jint*) = 0;
+  virtual const jchar* GetStringChars(jstring, jboolean*) = 0;
+  virtual jsize GetStringLength(jstring) = 0;
+  virtual void ReleaseStringChars(jstring, const jchar*) = 0;
+  virtual void* GetDirectBufferAddress(jobject) = 0;
 
  private:
   static jobject WrapCallObjectMethod(JNIEnv* env,
@@ -183,6 +191,22 @@ class MockableJNIEnv : public JNIEnv {
     static_cast<MockableJNIEnv*>(env)->GetIntArrayRegion(array, start, len,
                                                          buf);
   }
+  static const jchar* WrapGetStringChars(JNIEnv* env,
+                                         jstring str,
+                                         jboolean* isCopy) {
+    return static_cast<MockableJNIEnv*>(env)->GetStringChars(str, isCopy);
+  }
+  static jsize WrapGetStringLength(JNIEnv* env, jstring str) {
+    return static_cast<MockableJNIEnv*>(env)->GetStringLength(str);
+  }
+  static void WrapReleaseStringChars(JNIEnv* env,
+                                     jstring str,
+                                     const jchar* chars) {
+    static_cast<MockableJNIEnv*>(env)->ReleaseStringChars(str, chars);
+  }
+  static void* WrapGetDirectBufferAddress(JNIEnv* env, jobject buf) {
+    return static_cast<MockableJNIEnv*>(env)->GetDirectBufferAddress(buf);
+  }
 
   JNINativeInterface jni_ = {};
 };
@@ -228,6 +252,10 @@ class MockJNIEnv : public MockableJNIEnv {
               GetIntArrayRegion,
               (jintArray, jsize, jsize, jint*),
               (override));
+  MOCK_METHOD(const jchar*, GetStringChars, (jstring, jboolean*), (override));
+  MOCK_METHOD(jsize, GetStringLength, (jstring), (override));
+  MOCK_METHOD(void, ReleaseStringChars, (jstring, const jchar*), (override));
+  MOCK_METHOD(void*, GetDirectBufferAddress, (jobject), (override));
 };
 
 }  // namespace flutter

@@ -482,13 +482,9 @@ static void DispatchPlatformMessage(JNIEnv* env,
                                     jobject message,
                                     jint position,
                                     jint responseId) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->DispatchPlatformMessage(
-      env,                                         //
-      fml::jni::JavaStringToString(env, channel),  //
-      message,                                     //
-      position,                                    //
-      responseId                                   //
-  );
+  ANDROID_SHELL_HOLDER->DispatchPlatformMessage(
+      fml::jni::JavaStringToString(env, channel),
+      env->GetDirectBufferAddress(message), position, responseId);
 }
 
 static void DispatchEmptyPlatformMessage(JNIEnv* env,
@@ -496,11 +492,8 @@ static void DispatchEmptyPlatformMessage(JNIEnv* env,
                                          jlong shell_holder,
                                          jstring channel,
                                          jint responseId) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->DispatchEmptyPlatformMessage(
-      env,                                         //
-      fml::jni::JavaStringToString(env, channel),  //
-      responseId                                   //
-  );
+  ANDROID_SHELL_HOLDER->DispatchEmptyPlatformMessage(
+      fml::jni::JavaStringToString(env, channel), responseId);
 }
 
 static void CleanupMessageData(JNIEnv* env,
