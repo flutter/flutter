@@ -63,6 +63,10 @@ class SurfaceTransaction {
 
   SurfaceTransaction& operator=(const SurfaceTransaction&) = delete;
 
+  SurfaceTransaction(SurfaceTransaction&&) = default;
+
+  SurfaceTransaction& operator=(SurfaceTransaction&&) = default;
+
   explicit SurfaceTransaction(ASurfaceTransaction* transaction);
 
   bool IsValid() const;

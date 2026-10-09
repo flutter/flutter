@@ -7,6 +7,7 @@ package io.flutter.plugin.platform;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 import android.app.Presentation;
 import android.content.Context;
@@ -24,6 +25,8 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.Build.API_LEVELS;
+import io.flutter.BuildConfig;
 import io.flutter.embedding.android.FlutterImageView;
 import io.flutter.embedding.android.FlutterSurfaceView;
 import io.flutter.embedding.android.FlutterView;
@@ -32,6 +35,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorView;
+import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
@@ -54,6 +58,7 @@ import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,9 +66,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.RealObject;
+import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowDialog;
 import org.robolectric.shadows.ShadowSurfaceView;
 
@@ -546,6 +554,7 @@ public class PlatformViewsController2Test {
     TransactionTrackingController controller = new TransactionTrackingController();
     AttachedSurfaceControl rootSurfaceControl = attachToViewWithOverlay(controller);
 
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     assertEquals(1, controller.transactions.size());
     SurfaceControl.Transaction platformTx = controller.transactions.get(0);
@@ -566,6 +575,7 @@ public class PlatformViewsController2Test {
     TransactionTrackingController controller = new TransactionTrackingController();
     attachToViewWithOverlay(controller);
 
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     controller.hideOverlaySurface();
     assertEquals(1, controller.transactions.size());
@@ -575,6 +585,7 @@ public class PlatformViewsController2Test {
 
     controller.swapTransactions();
 
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     assertEquals(2, controller.transactions.size());
     assertNotSame(platformTx, controller.transactions.get(1));
@@ -585,6 +596,7 @@ public class PlatformViewsController2Test {
   public void createTransactionIsolatesRasterSubmissionsRegardlessOfCallingThread() {
     TransactionTrackingController controller = new TransactionTrackingController();
     AttachedSurfaceControl rootSurfaceControl = attachToViewWithOverlay(controller);
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     SurfaceControl.Transaction platformTx = controller.transactions.get(0);
 
@@ -718,6 +730,7 @@ public class PlatformViewsController2Test {
   public void swapTransactionsClosesDiscardedPlatformTransaction() {
     TransactionTrackingController controller = new TransactionTrackingController();
     attachToViewWithOverlay(controller);
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     // Defensive coverage: production calls onEndFrame() between swaps.
     controller.swapTransactions();
@@ -732,10 +745,12 @@ public class PlatformViewsController2Test {
     TransactionTrackingController controller = new TransactionTrackingController();
     attachToViewWithOverlay(controller);
 
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     controller.swapTransactions();
     // The active transaction from the frame above and a pending one from the frame that never
     // reached onEndFrame().
+    controller.onBeginFrame();
     controller.showOverlaySurface();
     assertEquals(2, controller.transactions.size());
 
@@ -744,6 +759,46 @@ public class PlatformViewsController2Test {
     // Both target the overlay SurfaceControl that detachFromView() just released.
     verify(controller.transactions.get(0)).close();
     verify(controller.transactions.get(1)).close();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void overlayMutationOutsideOfAFrameThrowsInDebug() {
+    // Release builds only log the problem.
+    Assume.assumeTrue(BuildConfig.DEBUG);
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
+
+    // Nothing would apply a transaction recorded outside of a frame until some later frame goes
+    // through the platform thread, which the engine only does when View state is expected to
+    // change.
+    assertThrows(IllegalStateException.class, controller::showOverlaySurface);
+    assertThrows(IllegalStateException.class, controller::hideOverlaySurface);
+    assertEquals(0, controller.transactions.size());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void overlayMutationsAreAcceptedBetweenBeginFrameAndSwapOnly() {
+    Assume.assumeTrue(BuildConfig.DEBUG);
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
+
+    controller.onBeginFrame();
+    controller.showOverlaySurface();
+    assertEquals(1, controller.transactions.size());
+    controller.swapTransactions();
+
+    // The swap handed the pending transaction over to onEndFrame(); a mutation recorded now would
+    // only be picked up by a later frame.
+    assertThrows(IllegalStateException.class, controller::hideOverlaySurface);
+    controller.onEndFrame();
+    assertThrows(IllegalStateException.class, controller::hideOverlaySurface);
+    assertEquals(1, controller.transactions.size());
+
+    controller.onBeginFrame();
+    controller.hideOverlaySurface();
+    assertEquals(2, controller.transactions.size());
   }
 
   /**
@@ -804,6 +859,7 @@ public class PlatformViewsController2Test {
       for (int round = 0; round < rounds; round++) {
         roundStart.await(timeoutMs, TimeUnit.MILLISECONDS);
 
+        controller.onBeginFrame();
         controller.showOverlaySurface();
         controller.hideOverlaySurface();
 
@@ -880,6 +936,93 @@ public class PlatformViewsController2Test {
   }
 
   @Test
+  @Config(shadows = {ShadowPlatformTaskQueue.class, ShadowTransactionCommittedListeners.class})
+  public void onEndFrameReportsCommitOnlyAfterTheFrameTransactionIsCommitted() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterJNI mockJNI = mock(FlutterJNI.class);
+    controller.setFlutterJNI(mockJNI);
+
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    // applyTransactionOnDraw() merges the transaction into ViewRootImpl's own, which carries
+    // listeners along only if they were already registered. Record what is registered at that
+    // moment.
+    AtomicReference<ShadowTransactionCommittedListeners> listenersAtApply = new AtomicReference<>();
+    doAnswer(
+            invocation -> {
+              SurfaceControl.Transaction tx = invocation.getArgument(0);
+              listenersAtApply.set(Shadow.extract(tx));
+              return null;
+            })
+        .when(rootSurfaceControl)
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    controller.attachToView(flutterView);
+
+    controller.createTransaction();
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(rootSurfaceControl).applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    assertNotNull(listenersAtApply.get());
+    assertEquals(1, listenersAtApply.get().listeners.size());
+    // Handing the transaction to ViewRootImpl is not a commit.
+    verify(mockJNI, never()).onEndFrameTransactionCommitted();
+
+    listenersAtApply.get().fireAll();
+    // The callback hops to the main looper before reaching FlutterJNI.
+    verify(mockJNI, never()).onEndFrameTransactionCommitted();
+    shadowMainLooper().idle();
+    verify(mockJNI, times(1)).onEndFrameTransactionCommitted();
+  }
+
+  @Test
+  @Config(shadows = {ShadowPlatformTaskQueue.class})
+  public void onEndFrameReportsCommitImmediatelyWhenThereIsNoRootSurfaceControl() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterJNI mockJNI = mock(FlutterJNI.class);
+    controller.setFlutterJNI(mockJNI);
+
+    FlutterView flutterView = mock(FlutterView.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(null);
+    controller.attachToView(flutterView);
+
+    controller.createTransaction();
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    // The transaction was closed without being applied, so nothing will ever commit it. The
+    // engine must not be left waiting for it.
+    verify(mockJNI, times(1)).onEndFrameTransactionCommitted();
+  }
+
+  @Test
+  @Config(shadows = {ShadowPlatformTaskQueue.class})
+  public void onEndFrameReportsCommitImmediatelyAfterDetachFromView() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterJNI mockJNI = mock(FlutterJNI.class);
+    controller.setFlutterJNI(mockJNI);
+
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    controller.attachToView(flutterView);
+
+    controller.createTransaction();
+    controller.swapTransactions();
+    // The platform task that ends the frame can run after the view detached.
+    controller.detachFromView();
+    controller.onEndFrame();
+
+    verify(rootSurfaceControl, never())
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    verify(mockJNI, times(1)).onEndFrameTransactionCommitted();
+  }
+
+  @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void itInformsMutatorViewWhenGestureIsRejected() {
     PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
@@ -924,6 +1067,71 @@ public class PlatformViewsController2Test {
     // Matching gestureId sets flutterWonGesture.
     rejectGesturePlatformView(jni, platformViewsController, platformViewId, eventId.getId());
     assertTrue(parentView.getFlutterWonGesture());
+  }
+
+  @Test
+  @Config(minSdk = API_LEVELS.API_34)
+  public void surfaceCreated_appliesClipDirectlyViaApplyTransactionOnDraw() {
+    SurfaceControl.Transaction mockTx = mock(SurfaceControl.Transaction.class);
+    when(mockTx.setAlpha(any(), anyFloat())).thenReturn(mockTx);
+    when(mockTx.setCrop(any(), any())).thenReturn(mockTx);
+
+    PlatformViewsController2 controller =
+        new PlatformViewsController2() {
+          @Override
+          SurfaceControl.Transaction newTransaction() {
+            return mockTx;
+          }
+        };
+
+    PlatformViewRegistryImpl registry = new PlatformViewRegistryImpl();
+    controller.setRegistry(registry);
+
+    SurfaceView mockSurfaceView = mock(SurfaceView.class);
+    SurfaceHolder mockHolder = mock(SurfaceHolder.class);
+    when(mockSurfaceView.getHolder()).thenReturn(mockHolder);
+    // Initially null during onDisplayPlatformView so the callback is registered.
+    when(mockSurfaceView.getSurfaceControl()).thenReturn(null);
+
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(mockSurfaceView);
+    when(viewFactory.create(any(), eq(0), any())).thenReturn(platformView);
+    registry.registerViewFactory("testType", viewFactory);
+
+    FlutterJNI mockJNI = mock(FlutterJNI.class);
+    controller.setFlutterJNI(mockJNI);
+
+    FlutterView mockFlutterView = mock(FlutterView.class);
+    AttachedSurfaceControl mockRootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockRootSurfaceControl);
+    controller.attach(ApplicationProvider.getApplicationContext(), mock(DartExecutor.class));
+    controller.attachToView(mockFlutterView);
+
+    controller.createFlutterPlatformView(
+        PlatformViewCreationRequest.createHCPPRequest(
+            0, "testType", View.LAYOUT_DIRECTION_LTR, null));
+    controller.initializePlatformViewIfNeeded(0);
+
+    FlutterMutatorsStack stack = new FlutterMutatorsStack();
+    controller.onDisplayPlatformView(0, 10, 20, 100, 200, 100, 200, stack);
+
+    ArgumentCaptor<SurfaceHolder.Callback> callbackCaptor =
+        ArgumentCaptor.forClass(SurfaceHolder.Callback.class);
+    verify(mockHolder).addCallback(callbackCaptor.capture());
+
+    // Simulate surfaceCreated firing when SurfaceControl becomes valid.
+    SurfaceControl mockSurfaceControl = mock(SurfaceControl.class);
+    when(mockSurfaceControl.isValid()).thenReturn(true);
+    when(mockSurfaceView.getSurfaceControl()).thenReturn(mockSurfaceControl);
+
+    callbackCaptor.getValue().surfaceCreated(mockHolder);
+
+    verify(mockTx).setAlpha(eq(mockSurfaceControl), anyFloat());
+    verify(mockTx).setCrop(eq(mockSurfaceControl), any());
+    verify(mockFlutterView).invalidate();
+    verify(mockRootSurfaceControl).applyTransactionOnDraw(mockTx);
+    verify(mockJNI).scheduleFrame();
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {
@@ -1284,6 +1492,31 @@ public class PlatformViewsController2Test {
     @Implementation
     public SurfaceHolder getHolder() {
       return holder;
+    }
+  }
+
+  /**
+   * Records the committed listeners of a {@link SurfaceControl.Transaction} so a test can fire
+   * them. The native registration is a no-op under Robolectric.
+   */
+  @Implements(SurfaceControl.Transaction.class)
+  public static class ShadowTransactionCommittedListeners {
+    @RealObject private SurfaceControl.Transaction realTransaction;
+    final List<Runnable> listeners = new ArrayList<>();
+
+    public ShadowTransactionCommittedListeners() {}
+
+    @Implementation(minSdk = API_LEVELS.API_31)
+    protected SurfaceControl.Transaction addTransactionCommittedListener(
+        Executor executor, SurfaceControl.TransactionCommittedListener listener) {
+      listeners.add(() -> executor.execute(listener::onTransactionCommitted));
+      return realTransaction;
+    }
+
+    void fireAll() {
+      for (Runnable listener : listeners) {
+        listener.run();
+      }
     }
   }
 }

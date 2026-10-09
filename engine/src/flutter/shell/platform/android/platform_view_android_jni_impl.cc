@@ -88,6 +88,7 @@ static jfieldID g_jni_shell_holder_field = nullptr;
     "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
     "FlutterMutatorsStack;)V")                                                \
   V(g_hide_platform_view2_method, hidePlatformView2, "(I)V")                  \
+  V(g_on_begin_frame2_method, beginFrame2, "()V")                             \
   V(g_on_end_frame2_method, endFrame2, "()V")                                 \
   V(g_show_overlay_surface2_method, showOverlaySurface2, "()V")               \
   V(g_hide_overlay_surface2_method, hideOverlaySurface2, "()V")               \
@@ -604,6 +605,12 @@ static void ScheduleFrame(JNIEnv* env, jobject jcaller, jlong shell_holder) {
   ANDROID_SHELL_HOLDER->GetPlatformView()->ScheduleFrame();
 }
 
+static void OnEndFrameTransactionCommitted(JNIEnv* env,
+                                           jobject jcaller,
+                                           jlong shell_holder) {
+  ANDROID_SHELL_HOLDER->GetPlatformView()->OnPlatformFrameCommitted();
+}
+
 static void InvokePlatformMessageResponseCallback(JNIEnv* env,
                                                   jobject jcaller,
                                                   jlong shell_holder,
@@ -886,6 +893,11 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeScheduleFrame",
           .signature = "(J)V",
           .fnPtr = reinterpret_cast<void*>(&ScheduleFrame),
+      },
+      {
+          .name = "nativeOnEndFrameTransactionCommitted",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&OnEndFrameTransactionCommitted),
       },
       {
           .name = "nativeUnregisterTexture",
@@ -2365,6 +2377,19 @@ void PlatformViewAndroidJNIImpl::hidePlatformView2(int32_t view_id) {
   }
 
   env->CallVoidMethod(java_object.obj(), g_hide_platform_view2_method, view_id);
+}
+
+void PlatformViewAndroidJNIImpl::onBeginFrame2() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_on_begin_frame2_method);
+
+  FML_CHECK(fml::jni::CheckException(env));
 }
 
 void PlatformViewAndroidJNIImpl::onEndFrame2() {

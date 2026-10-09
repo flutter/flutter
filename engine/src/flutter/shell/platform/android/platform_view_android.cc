@@ -65,9 +65,11 @@ AndroidContext::ContextSettings CreateContextSettings(
 
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
+    std::shared_ptr<SurfaceTransactionRouter> transaction_router,
     bool enable_impeller,
     bool lazy_shader_mode)
     : android_context_(context),
+      transaction_router_(std::move(transaction_router)),
       enable_impeller_(enable_impeller),
       lazy_shader_mode_(lazy_shader_mode) {}
 
@@ -77,7 +79,8 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
   if (android_context_->IsDynamicSelection()) {
     auto cast_ptr = std::static_pointer_cast<AndroidContextDynamicImpeller>(
         android_context_);
-    return std::make_unique<AndroidSurfaceDynamicImpeller>(cast_ptr);
+    return std::make_unique<AndroidSurfaceDynamicImpeller>(cast_ptr,
+                                                           transaction_router_);
   }
   switch (android_context_->RenderingApi()) {
 #if !SLIMPELLER
@@ -92,11 +95,13 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
           std::static_pointer_cast<AndroidContextGLImpeller>(android_context_));
     case AndroidRenderingAPI::kImpellerVulkan:
       return std::make_unique<AndroidSurfaceVKImpeller>(
-          std::static_pointer_cast<AndroidContextVKImpeller>(android_context_));
+          std::static_pointer_cast<AndroidContextVKImpeller>(android_context_),
+          transaction_router_);
     case AndroidRenderingAPI::kImpellerAutoselect: {
       auto cast_ptr = std::static_pointer_cast<AndroidContextDynamicImpeller>(
           android_context_);
-      return std::make_unique<AndroidSurfaceDynamicImpeller>(cast_ptr);
+      return std::make_unique<AndroidSurfaceDynamicImpeller>(
+          cast_ptr, transaction_router_);
     }
   }
   FML_UNREACHABLE();
@@ -156,6 +161,7 @@ PlatformViewAndroid::PlatformViewAndroid(
     : PlatformView(delegate, task_runners),
       jni_facade_(jni_facade),
       android_context_(android_context),
+      transaction_router_(std::make_shared<SurfaceTransactionRouter>()),
       platform_view_android_delegate_(jni_facade),
       platform_message_handler_(new PlatformMessageHandlerAndroid(jni_facade)) {
   if (android_context_) {
@@ -163,6 +169,7 @@ PlatformViewAndroid::PlatformViewAndroid(
         << "Could not create surface from invalid Android context.";
     surface_factory_ = std::make_shared<AndroidSurfaceFactoryImpl>(
         android_context_,                                      //
+        transaction_router_,                                   //
         delegate.OnPlatformViewGetSettings().enable_impeller,  //
         delegate.OnPlatformViewGetSettings()
             .impeller_enable_lazy_shader_mode  //
@@ -436,7 +443,7 @@ std::shared_ptr<ExternalViewEmbedder>
 PlatformViewAndroid::CreateExternalViewEmbedder() {
   return std::make_shared<AndroidExternalViewEmbedderWrapper>(
       android_meets_hcpp_criteria_, *android_context_, jni_facade_,
-      surface_factory_, task_runners_);
+      surface_factory_, transaction_router_, task_runners_);
 }
 
 // |PlatformView|
@@ -562,6 +569,10 @@ bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
              AndroidRenderingAPI::kImpellerVulkan &&
          impeller::ContextVK::Cast(*android_context_->GetImpellerContext())
              .GetShouldEnableSurfaceControlSwapchain();
+}
+
+void PlatformViewAndroid::OnPlatformFrameCommitted() {
+  transaction_router_->OnPlatformFrameCommitted();
 }
 
 void PlatformViewAndroid::SetupImpellerContext() {
