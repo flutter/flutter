@@ -529,22 +529,7 @@ void main() {
 
   testWidgets('initState() dependency on Inherited asserts', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/5491
-    var exceptionCaught = false;
-
-    final parent = TestInherited(
-      child: ExpectFail((Object error) {
-        exceptionCaught = true;
-      }),
-    );
-    await tester.pumpWidget(parent);
-
-    expect(exceptionCaught, isTrue);
-  });
-
-  testWidgets('initState() dependency on Inherited explains why initState() is too early', (
-    WidgetTester tester,
-  ) async {
-    // This is a regression test for https://github.com/flutter/flutter/issues/105705
+    // and https://github.com/flutter/flutter/issues/105705.
     Object? error;
 
     final parent = TestInherited(
