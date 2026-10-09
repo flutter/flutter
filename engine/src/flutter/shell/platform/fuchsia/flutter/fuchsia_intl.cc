@@ -10,8 +10,8 @@
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
-#include "third_party/icu/source/common/unicode/locid.h"
-#include "third_party/icu/source/common/unicode/stringpiece.h"
+#include "unicode/locid.h"
+#include "unicode/stringpiece.h"
 
 using icu::Locale;
 
