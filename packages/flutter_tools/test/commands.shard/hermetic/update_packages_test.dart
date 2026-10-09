@@ -304,6 +304,44 @@ void main() {
     );
 
     testUsingContext(
+      'does not run pub offline by default',
+      () async {
+        final command = UpdatePackagesCommand(
+          toolContext: DelegatingToolContext(),
+          verboseHelp: false,
+        );
+        await createTestCommandRunner(command).run(<String>['update-packages']);
+        expect(pub.offlineArgs, isNotEmpty);
+        expect(pub.offlineArgs, everyElement(isFalse));
+      },
+      overrides: <Type, Generator>{
+        Pub: () => pub,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => Cache.test(processManager: processManager),
+      },
+    );
+
+    testUsingContext(
+      '--offline runs every pub get offline',
+      () async {
+        final command = UpdatePackagesCommand(
+          toolContext: DelegatingToolContext(),
+          verboseHelp: false,
+        );
+        await createTestCommandRunner(command).run(<String>['update-packages', '--offline']);
+        expect(pub.offlineArgs, isNotEmpty);
+        expect(pub.offlineArgs, everyElement(isTrue));
+      },
+      overrides: <Type, Generator>{
+        Pub: () => pub,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => Cache.test(processManager: processManager),
+      },
+    );
+
+    testUsingContext(
       '--force-upgrade updates packages',
       () async {
         //
@@ -613,6 +651,9 @@ class _FakePub extends Fake implements Pub {
 
   Map<String, List<Pubspec>> pubspecs = <String, List<Pubspec>>{};
 
+  /// The `offline` argument of every [get] call, in call order.
+  final List<bool> offlineArgs = <bool>[];
+
   @override
   Future<void> interactively(
     List<String> arguments, {
@@ -649,6 +690,7 @@ class _FakePub extends Fake implements Pub {
     bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
+    offlineArgs.add(offline);
     (pubspecs[project.directory.path] ??= <Pubspec>[]).add(
       Pubspec.parse(project.pubspecFile.readAsStringSync()),
     );
