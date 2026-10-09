@@ -254,7 +254,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
-      os: Mac-26.6
+      os: Mac-26.6 # Keep os the same as "Mac_build_test" targets' drone_dimensions
       cpu: arm64
       device_type: none
       $flutter/osx_sdk : >-
@@ -6036,6 +6036,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
+      # Keep os the same as "mac_build_test" platform_properties
       drone_dimensions: >
         ["device_os=iOS-18|iOS-26","os=Mac-26.6", "cpu=arm64"]
 
