@@ -1,0 +1,192 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The Dart SDK, built by the engine's GN rules inside one Bazel action (see
+# ../gn_build/gn_build.bzl), and the targets through which the rest of the
+# engine consumes it: the executables and snapshots as files, the libraries
+# as cc_library facades around archives of their object files.
+#
+# Host linux-x64 only for now; the tree below and the GN args name that
+# toolchain explicitly. Other hosts and target platforms will select()
+# between toolchain repositories once they exist.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:deps.lock.bzl", "GIT_DEPS")
+load("//engine/src/flutter/build/bazel/gn_build:gn_build.bzl", "gn_build")
+
+package(default_visibility = ["//visibility:public"])
+
+_DART_REVISION = GIT_DEPS["engine/src/flutter/third_party/dart"]["revision"]
+
+config_setting(
+    name = "opt",
+    values = {"compilation_mode": "opt"},
+)
+
+# What tools/gn would write to args.gn for this build, restricted to the
+# arguments the pruned GN graph declares (gn gen runs with
+# --fail-on-unused-args; dart_version, for one, belongs to
+# //flutter/shell/version). The SDK verification hash comes from the DEPS pin
+# rather than from git, as with tools/gn --no-dart-version-git-info.
+_GN_ARGS = {
+    "buildtools_path": '"//flutter/buildtools"',
+    "dart_component_kind": '"static_library"',
+    "dart_lib_export_symbols": "false",
+    "dart_sdk_verification_hash": '"%s"' % _DART_REVISION[:10],
+    "dart_target_arch": '"x64"',
+    "dart_version_git_info": "false",
+    "host_cpu": '"x64"',
+    "host_os": '"linux"',
+    "is_clang": "true",
+    # No system libraries: keeps //build/config/linux from probing the
+    # sysroot with the host's pkg-config (nothing in this graph uses them).
+    "is_minimal_linux": "true",
+    "is_official_build": "true",
+    "stripped_symbols": "true",
+    "target_cpu": '"x64"',
+    "target_os": '"linux"',
+} | select({
+    # -c opt is an optimized build (tools/gn without --unoptimized), which
+    # also enables LTO; anything else is --unoptimized.
+    ":opt": {
+        "enable_lto": "true",
+        "is_debug": "false",
+    },
+    "//conditions:default": {
+        "enable_lto": "false",
+        "is_debug": "true",
+    },
+}) | select({
+    "//engine/src/flutter/common:runtime_mode_debug": {"dart_runtime_mode": '"develop"'},
+    "//engine/src/flutter/common:runtime_mode_jit_release": {"dart_runtime_mode": '"release"'},
+    "//engine/src/flutter/common:runtime_mode_profile": {"dart_runtime_mode": '"profile"'},
+    "//engine/src/flutter/common:runtime_mode_release": {"dart_runtime_mode": '"release"'},
+})
+
+gn_build(
+    name = "dart_sdk",
+    # Executables and snapshots, in the GN root build directory.
+    outs = [
+        "analyze_snapshot",
+        "bootstrap_compile_platform.exe",
+        "frontend_server_aot.dart.snapshot",
+        "gen_snapshot",
+    ],
+    ar = "@clang_linux_x64//:bin/llvm-ar",
+    # ICU is linked from @icu; zlib and BoringSSL have no Bazel targets yet
+    # and stay inside libcommon_embedder_dart_io.a.
+    archive_boundaries = ["//flutter/third_party/icu"],
+    # Libraries. The facades below mirror the GN dependencies between them.
+    archives = {
+        "libcommon_embedder_dart_io.a": "//flutter/third_party/dart/runtime/bin:common_embedder_dart_io",
+        "libdart_builtin.a": "//flutter/third_party/dart/runtime/bin:libdart_builtin",
+        "libdart_jit.a": "//flutter/third_party/dart/runtime:libdart_jit",
+        "libdouble_conversion.a": "//flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion",
+        "libelf_loader.a": "//flutter/third_party/dart/runtime/bin:elf_loader",
+        "libnative_assets_api.a": "//flutter/third_party/dart/runtime/bin:native_assets_api",
+        "libprotozero.a": "//flutter/third_party/dart/third_party/perfetto:libprotozero",
+    },
+    build_file = "BUILD.gn",
+    gn_args = _GN_ARGS,
+    ninja_target = "dart_wrap",
+    root_target_dir = "flutter/build/bazel/dart_wrap",
+    # The GN source root: the engine's build configuration, the trees GN
+    # reads, and the toolchain, each at the path the engine's GN files expect.
+    tree = {
+        "//engine/src:gn_root_files": "",
+        "//engine/src/build:gn_files": "build",
+        "@sysroot_linux_x64//:build_tree": "build/linux/debian_bullseye_amd64-sysroot",
+        "//engine/src/flutter/build:gn_files": "flutter/build",
+        "@clang_linux_x64//:all_files": "flutter/buildtools/linux-x64/clang",
+        "@cpython3//:runtime": "flutter/buildtools/linux-x64/cpython3",
+        "//engine/src/flutter/third_party/boringssl:gn_files": "flutter/third_party/boringssl",
+        "@boringssl//:build_tree": "flutter/third_party/boringssl/src",
+        "@dart//:build_tree": "flutter/third_party/dart",
+        "@gn//:gn": "flutter/third_party/gn",
+        "@icu//:build_tree": "flutter/third_party/icu",
+        "@libcxx//:build_tree": "flutter/third_party/libcxx",
+        "@libcxxabi//:build_tree": "flutter/third_party/libcxxabi",
+        "@llvm_libc//:build_tree": "flutter/third_party/llvm_libc",
+        "@zlib//:build_tree": "flutter/third_party/zlib",
+    },
+)
+
+# ---------------------------------------------------------------------------
+# Library facades: one per exported GN library, with the GN target's deps,
+# libs and the headers the engine includes from it.
+# ---------------------------------------------------------------------------
+
+# //flutter/third_party/dart/runtime:libdart_jit -- the VM. Its GN deps are
+# the VM source sets (in the archive), double-conversion, protozero and ICU.
+cc_library(
+    name = "libdart_jit",
+    srcs = [":libdart_jit.a"],
+    linkopts = [
+        "-ldl",
+        "-lpthread",
+    ],
+    deps = [
+        ":libdouble_conversion",
+        ":libprotozero",
+        "@dart//:dart_api_headers",
+        "@icu//:icuuc",
+    ],
+)
+
+# //flutter/third_party/dart/runtime/bin:libdart_builtin -- shared by the
+# dart:io glue and the ELF loader.
+cc_library(
+    name = "libdart_builtin",
+    srcs = [":libdart_builtin.a"],
+    linkopts = ["-ldl"],
+    deps = ["@dart//:dart_api_headers"],
+)
+
+# //flutter/third_party/dart/runtime/bin:common_embedder_dart_io -- dart:io
+# for embedders. Carries BoringSSL and zlib for now (see archive_boundaries).
+cc_library(
+    name = "common_embedder_dart_io",
+    srcs = [":libcommon_embedder_dart_io.a"],
+    linkopts = ["-ldl"],
+    deps = [
+        ":libdart_builtin",
+        "@dart//:runtime_bin_headers",
+    ],
+)
+
+# //flutter/third_party/dart/runtime/bin:elf_loader
+cc_library(
+    name = "elf_loader",
+    srcs = [":libelf_loader.a"],
+    linkopts = ["-ldl"],
+    deps = [
+        ":libdart_builtin",
+        "@dart//:runtime_bin_headers",
+    ],
+)
+
+# //flutter/third_party/dart/runtime/bin:native_assets_api (its header is
+# runtime/include/bin/native_assets_api.h, in dart_api_headers).
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "native_assets_api",
+    srcs = [":libnative_assets_api.a"],
+    deps = ["@dart//:dart_api_headers"],
+)
+
+# //flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion.
+# Only linked, never included, by the engine.
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "libdouble_conversion",
+    srcs = [":libdouble_conversion.a"],
+)
+
+# //flutter/third_party/dart/third_party/perfetto:libprotozero. Only linked,
+# never included, by the engine.
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "libprotozero",
+    srcs = [":libprotozero.a"],
+)

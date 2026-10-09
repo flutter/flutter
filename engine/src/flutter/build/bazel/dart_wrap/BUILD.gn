@@ -1,0 +1,28 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The root target of the Bazel-wrapped GN build of the Dart SDK (see
+# BUILD.bazel next to this file). It is not part of the engine's own GN
+# build, which never references this directory: gn_build runs GN with
+# `--root-target=//flutter/build/bazel/dart_wrap`, so that only this file,
+# the Dart targets below and their dependencies are loaded.
+#
+# The list is every //flutter/third_party/dart target the engine's GN build
+# files depend on, besides create_sdk.
+
+group("dart_wrap") {
+  deps = [
+    "//flutter/third_party/dart/runtime:dart_api",
+    "//flutter/third_party/dart/runtime:libdart_jit",
+    "//flutter/third_party/dart/runtime/bin:analyze_snapshot",
+    "//flutter/third_party/dart/runtime/bin:common_embedder_dart_io",
+    "//flutter/third_party/dart/runtime/bin:elf_loader",
+    "//flutter/third_party/dart/runtime/bin:gen_snapshot",
+    "//flutter/third_party/dart/runtime/bin:native_assets_api",
+    "//flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion",
+    "//flutter/third_party/dart/third_party/perfetto:libprotozero",
+    "//flutter/third_party/dart/utils:bootstrap_compile_platform.exe",
+    "//flutter/third_party/dart/utils/kernel-service:frontend_server_aot",
+  ]
+}

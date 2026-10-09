@@ -27,6 +27,22 @@ cc_library(
     include_prefix = "third_party/dart",
 )
 
+# The embedder-side headers of runtime/bin that the engine includes
+# (elf_loader.h, io_natives.h, platform.h), with the bin/ and platform/
+# headers they include among themselves relative to runtime/ (hence
+# `includes`). The code behind them is in the archives of
+# //engine/src/flutter/build/bazel/dart_wrap.
+cc_library(
+    name = "runtime_bin_headers",
+    hdrs = glob([
+        "runtime/bin/*.h",
+        "runtime/platform/*.h",
+    ]),
+    include_prefix = "third_party/dart",
+    includes = ["runtime"],
+    deps = [":dart_api_headers"],
+)
+
 # Everything the engine's GN build of the Dart SDK targets reads, as measured
 # on the build graph of those targets (GN's own inputs, the compiler's
 # dependency output and the Dart compilers' depfiles): about 12k of the

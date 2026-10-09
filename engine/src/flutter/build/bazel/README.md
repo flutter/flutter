@@ -11,6 +11,8 @@ Nothing in this directory is used by the GN build.
 | `third_party/<name>/BUILD.<name>.bazel` | Overlay root `BUILD` files for dependencies that ship no usable Bazel build files. Deliberately not named `BUILD.bazel`, so Bazel does not treat them as packages of this repository. |
 | `toolchains/` | The hermetic C/C++ toolchains (`cc_toolchain_config.bzl` holds the flag tables, `BUILD.bazel` the `cc_toolchain`/`toolchain` targets per platform, `tests/` a smoke test). |
 | `copts.bzl` | What GN adds per target rather than per toolchain, for `BUILD` files to spell out: `FLUTTER_COPTS` / `FLUTTER_LOCAL_DEFINES` for first-party code (`chromium_code`, `//flutter:config`) and `FLUTTER_THIRD_PARTY_COPTS` for overlays (`no_chromium_code`). |
+| `gn_build/` | The `gn_build` rule (`gn_build.bzl`, action script `gn_build.py`): a GN build of part of the tree as one Bazel action, for the subtrees that keep their GN rules during the migration. |
+| `dart_wrap/` | The Dart SDK, built with `gn_build`: `BUILD.gn` lists the GN targets, `BUILD.bazel` the args, the inputs and the `cc_library` facades; `tests/` starts the VM from the archive. |
 
 ## How dependencies reach Bazel during the transition
 
@@ -97,6 +99,60 @@ scans the action graph of `deps(//...)` and fails if any command line,
 parameter file or environment variable mentions a path outside the execution
 root, or if a C/C++ action runs anything but a `clang_<platform>` binary (see
 `tools/bazel_tools/README.md`).
+
+## Wrapped GN builds: the Dart SDK
+
+The Dart SDK (VM, `gen_snapshot`, the frontend server, ...) is not converted
+to Bazel rules; the engine's GN build of it runs as one Bazel action, the
+`gn_build` rule in `gn_build/`. The action builds a GN source root out of
+symlinks to its declared inputs -- one link per file, so the GN build sees
+nothing else whether or not it is sandboxed -- runs `gn gen` with
+`--root-target` on `dart_wrap/BUILD.gn` (which loads only the Dart targets
+and their dependencies: 129 GN files instead of the engine's thousands) and
+`ninja`, then copies out the executables and snapshots and archives the
+libraries. For each exported library the archive holds the object files of
+the GN target's dependency closure, stopping at the other exported targets
+and at `archive_boundaries` (ICU, which `@icu` provides); the `cc_library`
+facades in `dart_wrap/BUILD.bazel` mirror those dependencies, and the action
+fails if two archives would contain the same object.
+
+The inputs are the trees GN reads, declared as filegroups: `build_tree` in
+the overlays (`@dart`, `@icu`, `@zlib`, `@boringssl`, libc++ and the sysroot)
+and `gn_files` in the main repository (`//engine/src/build`,
+`//engine/src/flutter/build`, ...). They were measured on the build graph
+(GN's inputs, clang's `-MMD` output, the Dart compilers' depfiles, `ninja -t
+inputs`) and written with some slack; a Dart roll that reads from a new area
+fails the sandboxed build with a missing file, and the fix is a glob. The
+tools come from the same places as for the rest of the build: `@gn`,
+`@ninja`, `@clang_linux_x64`, `@sysroot_linux_x64`, and `@cpython3` as the
+`--script-executable` in place of depot_tools' `vpython3`.
+
+```
+bazelisk build //engine/src/flutter/build/bazel/dart_wrap:dart_sdk   # everything
+bazelisk build //engine/src/flutter/build/bazel/dart_wrap:gen_snapshot
+bazelisk test  //engine/src/flutter/build/bazel/dart_wrap/tests:dart_vm_smoke_test
+```
+
+Products are targets of the package (`:gen_snapshot`, `:libdart_jit.a`,
+`:compile_commands.json`, ...), libraries are consumed through the facades
+(`:libdart_jit`, `:common_embedder_dart_io`, `:elf_loader`, ...). A full
+build takes as long as the GN build of the same targets (5-6 minutes of
+ninja on 24 cores, plus a few seconds for the symlink tree, `gn gen` and the
+archives); the action reserves the machine, so Bazel runs nothing else
+meanwhile. Under the default sandboxed execution every run is a full build
+and the result is cached by Bazel; to iterate on the Dart sources with
+incremental ninja builds, run with `--strategy=GnBuild=local`, which keeps
+the GN root and build directory in
+`bazel-bin/engine/src/flutter/build/bazel/dart_wrap/dart_sdk.gn/root/out/bazel`
+(a regular GN build directory: `gn args`, `ninja -t ...` and
+`compile_commands.json` all work there).
+
+Known limits of the first version: host linux-x64 only; zlib and BoringSSL
+have no Bazel targets yet and stay inside `libcommon_embedder_dart_io.a`;
+`bootstrap_compile_platform.exe`, which the prebuilt SDK's `dart compile exe`
+produces, embeds the absolute path of the build directory (as the GN build's
+does), so it differs between sandboxed runs; and the Dart version script
+looks for `git` on `PATH` at `gn gen` time (and copes without it).
 
 ## Adding a dependency
 
