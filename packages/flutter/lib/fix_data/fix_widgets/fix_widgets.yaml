@@ -1054,28 +1054,17 @@ transforms:
         kind: 'fragment'
         value: 'arguments[nullOk]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/68736.
+  # Changes made in https://github.com/flutter/flutter/pull/68736
+  # and https://github.com/flutter/flutter/issues/183701.
   - title: "Migrate from 'nullOk'"
-    date: 2021-01-27
+    date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
       method: 'of'
       inClass: 'MediaQuery'
-    oneOf:
-      - if: "nullOk == 'true'"
-        changes:
-          - kind: 'rename'
-            newName: 'maybeOf'
-          - kind: 'removeParameter'
-            name: 'nullOk'
-      - if: "nullOk == 'false'"
-        changes:
-          - kind: 'removeParameter'
-            name: 'nullOk'
-    variables:
-      nullOk:
-        kind: 'fragment'
-        value: 'arguments[nullOk]'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
 
   # Changes made in https://github.com/flutter/flutter/pull/68925.
   - title: "Migrate from 'nullOk'"

@@ -82,7 +82,7 @@ void main() {
       DropdownButtonFormField(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68736
-  MediaQuery.maybeOf(context);
+  MediaQuery.of(context);
   MediaQuery.of(context);
   MediaQuery.of(error: '');
 

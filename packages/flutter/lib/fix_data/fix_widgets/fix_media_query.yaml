@@ -18,11 +18,297 @@
 # * Fixes in this file are for MediaQuery and MediaQueryData from the widgets library. *
 version: 1
 transforms:
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'of'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'of'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'sizeOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeSizeOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'sizeOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'widthOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeWidthOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'widthOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'heightOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeHeightOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'heightOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'orientationOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeOrientationOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'orientationOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'devicePixelRatioOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeDevicePixelRatioOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'devicePixelRatioOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'textScalerOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeTextScalerOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'textScalerOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'platformBrightnessOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybePlatformBrightnessOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'platformBrightnessOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'paddingOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybePaddingOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'paddingOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'viewInsetsOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeViewInsetsOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'viewInsetsOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'systemGestureInsetsOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeSystemGestureInsetsOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'systemGestureInsetsOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'viewPaddingOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeViewPaddingOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'viewPaddingOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'alwaysUse24HourFormatOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeAlwaysUse24HourFormatOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'alwaysUse24HourFormatOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'accessibleNavigationOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeAccessibleNavigationOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'accessibleNavigationOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'invertColorsOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeInvertColorsOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'invertColorsOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'highContrastOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeHighContrastOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'highContrastOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'onOffSwitchLabelsOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeOnOffSwitchLabelsOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'onOffSwitchLabelsOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'disableAnimationsOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeDisableAnimationsOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'disableAnimationsOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'reduceMotionOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeReduceMotionOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'reduceMotionOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'boldTextOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeBoldTextOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'boldTextOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'supportsAnnounceOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeSupportsAnnounceOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'supportsAnnounceOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'navigationModeOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeNavigationModeOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'navigationModeOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'gestureSettingsOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeGestureSettingsOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'gestureSettingsOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'displayFeaturesOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeDisplayFeaturesOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'displayFeaturesOf'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'supportsShowingSystemContextMenu'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'maybeSupportsShowingSystemContextMenu'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'supportsShowingSystemContextMenu'
+
+  # Change made in https://github.com/flutter/flutter/issues/183701
+  - title: "Migrate to 'maybeDisplayCornerRadiiOf'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'displayCornerRadiiOf'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'maybeDisplayCornerRadiiOf'
+
   # Change made in https://github.com/flutter/flutter/pull/128522
   - title: "Migrate to 'textScaler'"
     date: 2023-06-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
       method: 'copyWith'
       inClass: 'MediaQueryData'
     changes:

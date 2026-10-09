@@ -5,6 +5,35 @@
 import 'package:flutter/widgets.dart';
 
 void main() {
+  BuildContext context;
+
+  // Change made in https://github.com/flutter/flutter/issues/183701
+  MediaQuery.maybeOf(context);
+  MediaQuery.maybeSizeOf(context);
+  MediaQuery.maybeWidthOf(context);
+  MediaQuery.maybeHeightOf(context);
+  MediaQuery.maybeOrientationOf(context);
+  MediaQuery.maybeDevicePixelRatioOf(context);
+  MediaQuery.maybeTextScalerOf(context);
+  MediaQuery.maybePlatformBrightnessOf(context);
+  MediaQuery.maybePaddingOf(context);
+  MediaQuery.maybeViewInsetsOf(context);
+  MediaQuery.maybeSystemGestureInsetsOf(context);
+  MediaQuery.maybeViewPaddingOf(context);
+  MediaQuery.maybeAlwaysUse24HourFormatOf(context);
+  MediaQuery.maybeAccessibleNavigationOf(context);
+  MediaQuery.maybeInvertColorsOf(context);
+  MediaQuery.maybeHighContrastOf(context);
+  MediaQuery.maybeOnOffSwitchLabelsOf(context);
+  MediaQuery.maybeDisableAnimationsOf(context);
+  MediaQuery.maybeReduceMotionOf(context);
+  MediaQuery.maybeBoldTextOf(context);
+  MediaQuery.maybeSupportsAnnounceOf(context);
+  MediaQuery.maybeNavigationModeOf(context);
+  MediaQuery.maybeGestureSettingsOf(context);
+  MediaQuery.maybeDisplayFeaturesOf(context);
+  MediaQuery.maybeSupportsShowingSystemContextMenu(context);
+  MediaQuery.displayCornerRadiiOf(context);
   // Change made in https://github.com/flutter/flutter/pull/128522
   MediaQueryData();
   MediaQueryData(textScaleFactor: 2.0)
