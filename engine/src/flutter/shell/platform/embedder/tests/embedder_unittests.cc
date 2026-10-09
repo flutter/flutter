@@ -5,6 +5,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -23,6 +24,7 @@
 #include "flutter/fml/thread.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
+#include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
@@ -4314,6 +4316,216 @@ TEST_F(EmbedderTest, PlatformThreadIsolatesWithCustomPlatformTaskRunner) {
 
   // Check that the FFI call was executed on the platform thread.
   ASSERT_EQ(platform_thread_id, ffi_call_thread_id);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineGetCallbackInformation retrieves callback
+/// representations from DartCallbackCache and validates arguments.
+///
+TEST_F(EmbedderTest, CallbackInformationLookup) {
+  FlutterCallbackInformation info = {};
+  info.struct_size = sizeof(FlutterCallbackInformation);
+
+  // Null output struct pointer.
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(0, nullptr), kInvalidArguments);
+
+  // Struct size mismatch.
+  FlutterCallbackInformation bad_info = {};
+  bad_info.struct_size = sizeof(FlutterCallbackInformation) - 1;
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(0, &bad_info),
+            kInvalidArguments);
+
+  // Non-existent callback handle returns kInternalInconsistency.
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(99999999, &info),
+            kInternalInconsistency);
+
+  // Register a top-level callback into DartCallbackCache.
+  int64_t top_level_handle = DartCallbackCache::GetCallbackHandle(
+      "topLevelMethod", "", "package:test_app/main.dart");
+  EXPECT_NE(top_level_handle, 0);
+
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(top_level_handle, &info),
+            kSuccess);
+  EXPECT_STREQ(info.name, "topLevelMethod");
+  EXPECT_EQ(info.class_name, nullptr);
+  EXPECT_STREQ(info.library_path, "package:test_app/main.dart");
+
+  // Register a class-scoped callback into DartCallbackCache.
+  int64_t class_method_handle = DartCallbackCache::GetCallbackHandle(
+      "classMethod", "TargetClass", "package:test_app/service.dart");
+  EXPECT_NE(class_method_handle, 0);
+
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(class_method_handle, &info),
+            kSuccess);
+  EXPECT_STREQ(info.name, "classMethod");
+  EXPECT_STREQ(info.class_name, "TargetClass");
+  EXPECT_STREQ(info.library_path, "package:test_app/service.dart");
+
+  // Forward compatibility: a struct_size larger than
+  // sizeof(FlutterCallbackInformation) must succeed and populate the known
+  // fields.
+  FlutterCallbackInformation forward_info = {};
+  forward_info.struct_size = sizeof(FlutterCallbackInformation) + 64;
+  EXPECT_EQ(
+      FlutterEngineGetCallbackInformation(class_method_handle, &forward_info),
+      kSuccess);
+  EXPECT_STREQ(forward_info.name, "classMethod");
+  EXPECT_STREQ(forward_info.class_name, "TargetClass");
+  EXPECT_STREQ(forward_info.library_path, "package:test_app/service.dart");
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterCallbackInformation struct layout and alignment strictly
+/// adhere to C-ABI rules across 32-bit and 64-bit architectures.
+///
+TEST_F(EmbedderTest, CallbackInformationStructSizesAndABI) {
+  // FlutterCallbackInformation consists of four pointer-width fields:
+  // size_t struct_size, const char* name, const char* class_name, and
+  // const char* library_path. Its size is naturally 4 * sizeof(void*)
+  // (32 bytes on 64-bit platforms, 16 bytes on 32-bit platforms) with zero
+  // internal or trailing padding across all architectures.
+  EXPECT_EQ(sizeof(FlutterCallbackInformation), 4 * sizeof(void*));
+  EXPECT_EQ(sizeof(FlutterCallbackInformation), sizeof(void*) == 8 ? 32u : 16u);
+
+  EXPECT_EQ(offsetof(FlutterCallbackInformation, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterCallbackInformation, name), sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterCallbackInformation, class_name),
+            sizeof(size_t) + sizeof(const char*));
+  EXPECT_EQ(offsetof(FlutterCallbackInformation, library_path),
+            sizeof(size_t) + 2 * sizeof(const char*));
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineGetProcAddresses populates GetCallbackInformation.
+///
+TEST_F(EmbedderTest, CallbackInformationProcTableEntry) {
+  FlutterEngineProcTable table = {};
+  table.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&table), kSuccess);
+  ASSERT_EQ(table.GetCallbackInformation, &FlutterEngineGetCallbackInformation);
+
+  int64_t handle = DartCallbackCache::GetCallbackHandle(
+      "procTableCallback", "ProcTableClass", "package:test_app/proc.dart");
+  EXPECT_NE(handle, 0);
+
+  FlutterCallbackInformation info = {};
+  info.struct_size = sizeof(FlutterCallbackInformation);
+  ASSERT_EQ(table.GetCallbackInformation(handle, &info), kSuccess);
+  EXPECT_STREQ(info.name, "procTableCallback");
+  EXPECT_STREQ(info.class_name, "ProcTableClass");
+  EXPECT_STREQ(info.library_path, "package:test_app/proc.dart");
+}
+
+//------------------------------------------------------------------------------
+/// Test that multiple calls to FlutterEngineGetCallbackInformation on the same
+/// thread return distinct string pointers that do not alias or invalidate each
+/// other.
+///
+TEST_F(EmbedderTest, CallbackInformationMultipleLookupsSameThread) {
+  int64_t handle_a = DartCallbackCache::GetCallbackHandle(
+      "callbackAlpha", "ClassAlpha", "package:test_app/alpha.dart");
+  int64_t handle_b = DartCallbackCache::GetCallbackHandle(
+      "callbackBeta", "ClassBeta", "package:test_app/beta.dart");
+  EXPECT_NE(handle_a, 0);
+  EXPECT_NE(handle_b, 0);
+  EXPECT_NE(handle_a, handle_b);
+
+  FlutterCallbackInformation info_a = {};
+  info_a.struct_size = sizeof(FlutterCallbackInformation);
+  ASSERT_EQ(FlutterEngineGetCallbackInformation(handle_a, &info_a), kSuccess);
+
+  FlutterCallbackInformation info_b = {};
+  info_b.struct_size = sizeof(FlutterCallbackInformation);
+  ASSERT_EQ(FlutterEngineGetCallbackInformation(handle_b, &info_b), kSuccess);
+
+  // Both structs must retain their distinct, correct values.
+  EXPECT_STREQ(info_a.name, "callbackAlpha");
+  EXPECT_STREQ(info_a.class_name, "ClassAlpha");
+  EXPECT_STREQ(info_a.library_path, "package:test_app/alpha.dart");
+
+  EXPECT_STREQ(info_b.name, "callbackBeta");
+  EXPECT_STREQ(info_b.class_name, "ClassBeta");
+  EXPECT_STREQ(info_b.library_path, "package:test_app/beta.dart");
+
+  // Pointers must not alias each other.
+  EXPECT_NE(info_a.name, info_b.name);
+  EXPECT_NE(info_a.class_name, info_b.class_name);
+  EXPECT_NE(info_a.library_path, info_b.library_path);
+}
+
+//------------------------------------------------------------------------------
+/// Test that string pointers returned from FlutterEngineGetCallbackInformation
+/// across multiple concurrent worker threads remain valid and do not cause
+/// data races or heap use-after-free during concurrent insertions or after
+/// worker threads terminate.
+///
+TEST_F(EmbedderTest, CallbackInformationWorkerThreadResolutionAndLifetime) {
+  int64_t shared_handle = DartCallbackCache::GetCallbackHandle(
+      "sharedWorkerMethod", "SharedWorkerClass",
+      "package:test_app/shared_worker.dart");
+  EXPECT_NE(shared_handle, 0);
+
+  constexpr size_t kNumThreads = 8;
+  std::vector<int64_t> unique_handles(kNumThreads);
+  for (size_t i = 0; i < kNumThreads; ++i) {
+    unique_handles[i] = DartCallbackCache::GetCallbackHandle(
+        "uniqueMethod_" + std::to_string(i), "UniqueClass_" + std::to_string(i),
+        "package:test_app/unique_" + std::to_string(i) + ".dart");
+    EXPECT_NE(unique_handles[i], 0);
+  }
+
+  std::vector<FlutterCallbackInformation> shared_infos(kNumThreads);
+  std::vector<FlutterCallbackInformation> unique_infos(kNumThreads);
+  std::vector<std::thread> workers;
+  workers.reserve(kNumThreads);
+
+  for (size_t i = 0; i < kNumThreads; ++i) {
+    shared_infos[i].struct_size = sizeof(FlutterCallbackInformation);
+    unique_infos[i].struct_size = sizeof(FlutterCallbackInformation);
+    workers.emplace_back([i, shared_handle, &unique_handles, &shared_infos,
+                          &unique_infos]() {
+      EXPECT_EQ(
+          FlutterEngineGetCallbackInformation(shared_handle, &shared_infos[i]),
+          kSuccess);
+      EXPECT_EQ(FlutterEngineGetCallbackInformation(unique_handles[i],
+                                                    &unique_infos[i]),
+                kSuccess);
+    });
+  }
+
+  for (auto& worker : workers) {
+    worker.join();
+  }
+
+  // All worker threads have exited and their thread-local storage destroyed.
+  // Verify that all returned string pointers remain valid and uncorrupted.
+  for (size_t i = 0; i < kNumThreads; ++i) {
+    ASSERT_NE(shared_infos[i].name, nullptr);
+    ASSERT_NE(shared_infos[i].class_name, nullptr);
+    ASSERT_NE(shared_infos[i].library_path, nullptr);
+    EXPECT_STREQ(shared_infos[i].name, "sharedWorkerMethod");
+    EXPECT_STREQ(shared_infos[i].class_name, "SharedWorkerClass");
+    EXPECT_STREQ(shared_infos[i].library_path,
+                 "package:test_app/shared_worker.dart");
+
+    // All threads resolving the same handle must receive the exact same
+    // canonical string pointers from the process-wide cache.
+    EXPECT_EQ(shared_infos[i].name, shared_infos[0].name);
+    EXPECT_EQ(shared_infos[i].class_name, shared_infos[0].class_name);
+    EXPECT_EQ(shared_infos[i].library_path, shared_infos[0].library_path);
+
+    std::string expected_name = "uniqueMethod_" + std::to_string(i);
+    std::string expected_class = "UniqueClass_" + std::to_string(i);
+    std::string expected_lib =
+        "package:test_app/unique_" + std::to_string(i) + ".dart";
+
+    ASSERT_NE(unique_infos[i].name, nullptr);
+    ASSERT_NE(unique_infos[i].class_name, nullptr);
+    ASSERT_NE(unique_infos[i].library_path, nullptr);
+    EXPECT_STREQ(unique_infos[i].name, expected_name.c_str());
+    EXPECT_STREQ(unique_infos[i].class_name, expected_class.c_str());
+    EXPECT_STREQ(unique_infos[i].library_path, expected_lib.c_str());
+  }
 }
 
 }  // namespace testing
