@@ -2028,4 +2028,13 @@ const config = {
       await webDevFS.destroy();
     }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()});
   }
+
+  runInTestbed(
+    'WebDevFS constructor creates a WebDevFS with web_javascript as target platform',
+    () {
+      final WebDevFS webDevFS = createWebDevFS();
+
+      expect(webDevFS.assetTransformer.targetPlatform, TargetPlatform.web_javascript);
+    },
+  );
 }

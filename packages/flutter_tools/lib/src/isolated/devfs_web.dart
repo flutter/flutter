@@ -96,6 +96,7 @@ class WebDevFS implements DevFS {
         fileSystem: fileSystem,
         dartBinaryPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
         buildMode: buildInfo.mode,
+        targetPlatform: TargetPlatform.web_javascript,
       ),
       fileSystem: fileSystem,
       logger: logger,
@@ -130,6 +131,10 @@ class WebDevFS implements DevFS {
   final Map<String, String> _webDefines;
 
   late WebAssetServer webAssetServer;
+
+  @override
+  @visibleForTesting
+  DevelopmentAssetTransformer get assetTransformer => _assetTransformer;
 
   Dwds get dwds => webAssetServer.dwds;
 
