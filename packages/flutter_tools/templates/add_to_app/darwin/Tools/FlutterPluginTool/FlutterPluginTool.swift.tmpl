@@ -14,6 +14,7 @@ struct FlutterPluginTool {
     try FlutterToolHelper.updateSymlink(
       targetBuildMode: buildMode,
       integrationPackagePath: packagePath,
+      useRemoteFlutterFramework: false,
       fileManager: fileManager
     )
   }

@@ -658,7 +658,12 @@ import PluginB
           utils: testUtils,
         );
         final Directory packageDirectory = fs.directory(debugPackagesDirectoryPath);
-        await flutterFrameworkDependency.generateSwiftPackage(packageDirectory);
+        await flutterFrameworkDependency.generateSwiftPackage(
+          packageDirectory,
+          cacheDirectory: fs.directory(cacheDirectoryPath),
+          buildMode: BuildMode.debug,
+          remote: false,
+        );
         expect(packageDirectory.existsSync(), isTrue);
         final File manifest = packageDirectory
             .childDirectory('FlutterFramework')
@@ -703,6 +708,83 @@ let package = Package(
               .resolveSymbolicLinksSync(),
           '/${xcframework.path}',
         );
+      });
+
+      testWithoutContext('generateSwiftPackage with remote = true', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final Directory packageDirectory = fs.directory(debugPackagesDirectoryPath);
+        final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
+        final Directory tempDir = cacheDirectory.childDirectory('temp_debug');
+
+        final processManager = FakeProcessManager.list([
+          FakeCommand(
+            command: const ['swift', 'package', 'compute-checksum', 'artifacts.zip'],
+            workingDirectory: tempDir.path,
+            stdout: 'fake_checksum_12345\n',
+          ),
+        ]);
+        const FlutterDarwinPlatform targetPlatform = .ios;
+        final BuildSwiftPackageUtils testUtils = _createTestUtils(
+          fs: fs,
+          logger: logger,
+          processManager: processManager,
+        );
+        final flutterFrameworkDependency = FlutterFrameworkDependency(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+        await flutterFrameworkDependency.generateSwiftPackage(
+          packageDirectory,
+          cacheDirectory: cacheDirectory,
+          buildMode: BuildMode.debug,
+          remote: true,
+        );
+
+        // Run again to verify checksum is cached and not downloaded/computed again
+        await flutterFrameworkDependency.generateSwiftPackage(
+          packageDirectory,
+          cacheDirectory: cacheDirectory,
+          buildMode: BuildMode.debug,
+          remote: true,
+        );
+        expect(processManager, hasNoRemainingExpectations);
+        expect(packageDirectory.existsSync(), isTrue);
+        expect(tempDir.existsSync(), isFalse);
+        final File manifest = packageDirectory
+            .childDirectory('FlutterFramework')
+            .childFile('Package.swift');
+        expect(manifest.existsSync(), isTrue);
+        expect(manifest.readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+// Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterFramework",
+    products: [
+        .library(name: "FlutterFramework", targets: ["FlutterFramework"])
+    ],
+    dependencies: [\n        \n    ],
+    targets: [
+        .target(
+            name: "FlutterFramework",
+            dependencies: [
+                .target(name: "Flutter")
+            ]
+        ),
+        .binaryTarget(
+            name: "Flutter",
+            url: "https://storage.googleapis.com/flutter_infra_release/flutter/$_engineVersion/ios/artifacts.zip",
+            checksum: "fake_checksum_12345"
+        )
+    ]
+)
+''');
       });
     });
 
@@ -3564,6 +3646,17 @@ class FakeCache extends Fake implements Cache {
 
   final FileSystem _fileSystem;
   final String flutterRoot;
+
+  @override
+  String get storageBaseUrl => 'https://storage.googleapis.com';
+
+  @override
+  String get engineRevision => _engineVersion;
+
+  @override
+  Future<void> downloadFile(String message, Uri url, Directory location) async {
+    location.childFile(_fileSystem.path.basename(url.path)).createSync(recursive: true);
+  }
 
   @override
   Directory getRoot() {

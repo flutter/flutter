@@ -6,6 +6,10 @@
 # It runs a Swift package tool that ensures the correct build mode is being used for Flutter
 # artifacts and re-builds the Flutter application if possible.
 
+if [[ "$ACTION" == "clean" ]]; then
+  exit 0
+fi
+
 set -euo pipefail
 
 # Needed because if it is set, cd may print the path it changed to.

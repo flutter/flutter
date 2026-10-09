@@ -336,6 +336,7 @@ class SwiftPackagePackageDependency {
 enum SwiftPackageTargetType {
   target(name: '.target'),
   binaryTarget(name: '.binaryTarget'),
+  remoteBinaryTarget(name: '.binaryTarget'),
   plugin(name: '.plugin'),
   executableTarget(name: '.executableTarget'),
   testTarget(name: '.testTarget');
@@ -380,34 +381,57 @@ ${_singleIndent * 3})''';
 class SwiftPackageTarget {
   SwiftPackageTarget.defaultTarget({required this.name, this.dependencies, this.path})
     : targetType = SwiftPackageTargetType.target,
-      commandCapability = null;
+      commandCapability = null,
+      url = null,
+      checksum = null;
 
   SwiftPackageTarget.binaryTarget({required this.name, required String relativePath})
     : path = relativePath,
       dependencies = null,
       targetType = SwiftPackageTargetType.binaryTarget,
-      commandCapability = null;
+      commandCapability = null,
+      url = null,
+      checksum = null;
+
+  SwiftPackageTarget.remoteBinaryTarget({
+    required this.name,
+    required String zipUrl,
+    required String zipChecksum,
+  }) : path = null,
+       url = zipUrl,
+       checksum = zipChecksum,
+       dependencies = null,
+       targetType = SwiftPackageTargetType.remoteBinaryTarget,
+       commandCapability = null;
 
   SwiftPackageTarget.executableTarget({required this.name, this.dependencies, this.path})
     : targetType = SwiftPackageTargetType.executableTarget,
-      commandCapability = null;
+      commandCapability = null,
+      url = null,
+      checksum = null;
 
   SwiftPackageTarget.pluginTarget({
     required this.name,
     this.path,
     this.dependencies,
     required this.commandCapability,
-  }) : targetType = SwiftPackageTargetType.plugin;
+  }) : targetType = SwiftPackageTargetType.plugin,
+       url = null,
+       checksum = null;
 
   SwiftPackageTarget.testTarget({required this.name, this.dependencies, this.path})
     : targetType = SwiftPackageTargetType.testTarget,
-      commandCapability = null;
+      commandCapability = null,
+      url = null,
+      checksum = null;
 
   final String name;
   final String? path;
   final List<SwiftPackageTargetDependency>? dependencies;
   final SwiftPackageTargetType targetType;
   final SwiftPackageCommandCapability? commandCapability;
+  final String? url;
+  final String? checksum;
 
   String format() {
     // targets: [
@@ -450,6 +474,16 @@ $targetDetailsIndent]''';
     if (path != null) {
       final pathString = 'path: "$path"';
       targetDetails.add(pathString);
+    }
+
+    if (url != null) {
+      final urlString = 'url: "$url"';
+      targetDetails.add(urlString);
+    }
+
+    if (checksum != null) {
+      final checksumString = 'checksum: "$checksum"';
+      targetDetails.add(checksumString);
     }
 
     return '''

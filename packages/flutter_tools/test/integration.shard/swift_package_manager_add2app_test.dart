@@ -419,6 +419,178 @@ void main() {
     },
     skip: !platform.isMacOS, // [intended] Swift Package Manager only works on macos.
   );
+
+  for (final targetPlatform in platforms) {
+    test(
+      'Generate and embed Flutter app in native ${targetPlatform.name} app using SwiftPM with remote framework',
+      () async {
+        final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync(
+          'swift_package_manager_add2app_remote_test_${targetPlatform.name}.',
+        )..createSync(recursive: true);
+        final String workingDirectoryPath = workingDirectory.path;
+        try {
+          // Create an app
+          final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+            flutterBin,
+            workingDirectoryPath,
+            platform: targetPlatform.name,
+            options: <String>['--platforms=${targetPlatform.name}'],
+            name: appName,
+          );
+          await _addPlugins(
+            platform: targetPlatform.name,
+            workingDirectoryPath: workingDirectoryPath,
+            appDirectoryPath: appDirectoryPath,
+          );
+
+          // Build Swift package with --remote
+          final String buildOutput = await _buildFlutterSwiftPackage(
+            buildModes: 'debug,release',
+            targetPlatform: targetPlatform,
+            appDirectoryPath: appDirectoryPath,
+            remote: true,
+          );
+          final expectedLogs = [
+            'Processing plugins...',
+            'Using code-signing identity: -',
+            'Building for Debug...',
+            '   ├─Building App.xcframework and native assets...',
+            '   ├─Building CocoaPod frameworks...',
+            '   ├─Generating swift packages...',
+            'Building for Release...',
+            '   ├─Building App.xcframework and native assets...',
+            '   ├─Building CocoaPod frameworks...',
+            '   ├─Generating swift packages...',
+          ];
+          for (final expectedLog in expectedLogs) {
+            expect(buildOutput, contains(expectedLog), reason: buildOutput);
+          }
+          expect(
+            buildOutput,
+            isNot(contains('   ├─Copying ${targetPlatform.binaryName}.xcframework...')),
+            reason: buildOutput,
+          );
+
+          // Verify file structure
+          final Directory appDir = fileSystem.directory(appDirectoryPath);
+          final Directory buildDir = appDir
+              .childDirectory('build')
+              .childDirectory(targetPlatform.name)
+              .childDirectory('SwiftPackages');
+          _verifyModeAgnosticFiles(
+            buildDir: buildDir,
+            platform: targetPlatform.name,
+            includeTests: false,
+            remote: true,
+          );
+          _verifyFilesForBuildMode(
+            buildDir: buildDir,
+            buildMode: 'Debug',
+            platform: targetPlatform,
+            remote: true,
+          );
+          _verifyFilesForBuildMode(
+            buildDir: buildDir,
+            buildMode: 'Release',
+            platform: targetPlatform,
+            remote: true,
+          );
+          await _verifyCodeSigning(
+            buildDir: buildDir,
+            buildMode: 'Debug',
+            platform: targetPlatform,
+            remote: true,
+          );
+          final Link pluginRegistrantLink = buildDir.childLink(
+            'FlutterNativeIntegration/FlutterPluginRegistrant',
+          );
+          expect(pluginRegistrantLink.existsSync(), true);
+          expect(pluginRegistrantLink.targetSync(), './Debug');
+
+          // Test integration
+          final String flutterRoot = getFlutterRoot();
+          final nativeProjectName = targetPlatform == .macos
+              ? 'MacOSNativeProject'
+              : 'iOSNativeProject';
+          final Directory nativeProjectTemplate = fileSystem.directory(
+            fileSystem.path.join(
+              flutterRoot,
+              'dev',
+              'integration_tests',
+              'darwin_add2app_swiftpm',
+              nativeProjectName,
+            ),
+          );
+          final XcodeSdk sdk = targetPlatform == .macos ? XcodeSdk.MacOSX : XcodeSdk.IPhoneOS;
+          final Directory nativeProject = workingDirectory.childDirectory(nativeProjectName);
+          copyDirectory(nativeProjectTemplate, nativeProject);
+          final Directory nativeBuildDir = nativeProject.childDirectory('build');
+
+          // CI code-signing is not set up for macOS.
+          final codesign = targetPlatform == .ios;
+
+          // When using a remote framework, building for a different build mode than the current
+          // symlink fails and instructs the user to switch build modes manually.
+          await _buildNativeProject(
+            nativeProjectPath: nativeProject.path,
+            nativeProjectName: nativeProjectName,
+            buildDir: nativeBuildDir.path,
+            buildMode: 'Release',
+            sdk: sdk,
+            platform: targetPlatform,
+            buildSettings: [
+              r'ENABLE_USER_SCRIPT_SANDBOXING=NO',
+              'FLUTTER_APPLICATION_PATH=\$SRCROOT/../$appName',
+            ],
+            codesign: codesign,
+            expectFailure: true,
+            expectedOutput: [
+              'error: The target build mode is set to Release, but Flutter packages are set to Debug.',
+              'error: This project uses a remote Flutter framework and requires the build mode to be switched manually. Please complete one of the following:',
+              'swift package plugin --allow-writing-to-package-directory switch-to-release',
+            ],
+          );
+          expect(pluginRegistrantLink.targetSync(), './Debug');
+
+          // Switch build mode manually via the Swift package plugin
+          final ProcessResult pluginResult = await processManager.run(<String>[
+            'swift',
+            'package',
+            'plugin',
+            '--allow-writing-to-package-directory',
+            'switch-to-release',
+          ], workingDirectory: buildDir.childDirectory('FlutterNativeIntegration').path);
+          expect(pluginResult.exitCode, 0, reason: pluginResult.stderr.toString());
+          expect(pluginRegistrantLink.targetSync(), './Release');
+
+          // Once switched to Release, building for Release succeeds
+          await _buildNativeProject(
+            nativeProjectPath: nativeProject.path,
+            nativeProjectName: nativeProjectName,
+            buildDir: nativeBuildDir.path,
+            buildMode: 'Release',
+            sdk: sdk,
+            platform: targetPlatform,
+            buildSettings: [
+              r'ENABLE_USER_SCRIPT_SANDBOXING=NO',
+              'FLUTTER_APPLICATION_PATH=\$SRCROOT/../$appName',
+            ],
+            codesign: codesign,
+            expectedOutput: [
+              'FlutterPluginRegistrant symlink is up-to-date.',
+              'Verification complete.',
+              'flutter --verbose assemble',
+              'release_unpack_${targetPlatform.name.toLowerCase()}: Starting',
+            ],
+          );
+          expect(pluginRegistrantLink.targetSync(), './Release');
+        } finally {
+          ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
+        }
+      },
+      skip: !platform.isMacOS, // [intended] Swift Package Manager only works on macos.
+    );
+  }
 }
 
 Future<String> _buildFlutterSwiftPackage({
@@ -427,6 +599,7 @@ Future<String> _buildFlutterSwiftPackage({
   required FlutterDarwinPlatform targetPlatform,
   int expectedExitCode = 0,
   bool includeTests = false,
+  bool remote = false,
 }) async {
   final ProcessResult result = await processManager.run(<String>[
     flutterBin,
@@ -436,6 +609,7 @@ Future<String> _buildFlutterSwiftPackage({
     '--codesign-identity',
     '-',
     if (includeTests) '--ci',
+    if (remote) '--remote',
     '--platform=${targetPlatform.name}',
     '--build-mode',
     buildModes,
@@ -604,6 +778,7 @@ void _verifyModeAgnosticFiles({
   required Directory buildDir,
   required String platform,
   required bool includeTests,
+  bool remote = false,
 }) {
   expect(buildDir, exists);
 
@@ -631,7 +806,14 @@ void _verifyModeAgnosticFiles({
     exists,
   );
   expect(toolsPackageDir.childFile('Sources/FlutterPluginTool/FlutterPluginTool.swift'), exists);
-  expect(toolsPackageDir.childFile('Sources/FlutterToolHelper/FlutterToolHelper.swift'), exists);
+  final File flutterToolHelper = toolsPackageDir.childFile(
+    'Sources/FlutterToolHelper/FlutterToolHelper.swift',
+  );
+  expect(flutterToolHelper, exists);
+  expect(
+    flutterToolHelper.readAsStringSync(),
+    contains('public static let useRemoteFlutterFramework = $remote'),
+  );
   expect(
     toolsPackageDir.childFile('Sources/FlutterToolHelper/FlutterAssembleToolHelper.swift'),
     exists,
@@ -674,6 +856,7 @@ void _verifyFilesForBuildMode({
   required Directory buildDir,
   required String buildMode,
   required FlutterDarwinPlatform platform,
+  bool remote = false,
 }) {
   expect(buildDir.childFile('FlutterNativeIntegration/$buildMode/Package.swift'), exists);
   expect(
@@ -698,7 +881,7 @@ void _verifyFilesForBuildMode({
     buildDir.childDirectory(
       'FlutterNativeIntegration/$buildMode/Frameworks/${platform.binaryName}.xcframework',
     ),
-    exists,
+    remote ? isNot(exists) : exists,
   );
   expect(
     buildDir.childDirectory(
@@ -708,10 +891,27 @@ void _verifyFilesForBuildMode({
   );
 
   // Verify Packages
-  expect(
-    buildDir.childDirectory('FlutterNativeIntegration/$buildMode/Packages/FlutterFramework'),
-    exists,
+  final Directory flutterFrameworkPackage = buildDir.childDirectory(
+    'FlutterNativeIntegration/$buildMode/Packages/FlutterFramework',
   );
+  expect(flutterFrameworkPackage, exists);
+  final File flutterFrameworkManifest = flutterFrameworkPackage.childFile('Package.swift');
+  expect(flutterFrameworkManifest, exists);
+  expect(
+    buildDir.childFile('.cache/$buildMode/flutter_framework_checksum.json'),
+    remote ? exists : isNot(exists),
+  );
+  if (remote) {
+    expect(
+      flutterFrameworkManifest.readAsStringSync(),
+      allOf(contains('url: "https://'), contains('checksum: "')),
+    );
+  } else {
+    expect(
+      flutterFrameworkManifest.readAsStringSync(),
+      contains('path: "../../Frameworks/${platform.binaryName}.xcframework"'),
+    );
+  }
   expect(
     buildDir
         .childLink('FlutterNativeIntegration/$buildMode/Packages/$migratedSwiftPackagePluginName')
@@ -730,11 +930,13 @@ Future<void> _verifyCodeSigning({
   required Directory buildDir,
   required String buildMode,
   required FlutterDarwinPlatform platform,
+  bool remote = false,
 }) async {
   final frameworks = <String>[
     'FlutterNativeIntegration/$buildMode/Frameworks/App.xcframework',
     'FlutterNativeIntegration/$buildMode/Frameworks/CocoaPods/$cocoaPodsPluginName.xcframework',
-    'FlutterNativeIntegration/$buildMode/Frameworks/${platform.binaryName}.xcframework',
+    if (!remote)
+      'FlutterNativeIntegration/$buildMode/Frameworks/${platform.binaryName}.xcframework',
     'FlutterNativeIntegration/$buildMode/Frameworks/NativeAssets/$nativeAssetName.xcframework',
   ];
   for (final framework in frameworks) {
