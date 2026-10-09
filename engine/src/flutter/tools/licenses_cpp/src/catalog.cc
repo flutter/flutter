@@ -8,8 +8,8 @@
 #include <fstream>
 #include <vector>
 
-#include "third_party/abseil-cpp/absl/log/log.h"
-#include "third_party/abseil-cpp/absl/strings/str_cat.h"
+#include "absl/log/log.h"
+#include "absl/strings/str_cat.h"
 
 namespace fs = std::filesystem;
 

@@ -10,14 +10,14 @@
 #include <span>
 #include <string_view>
 
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/strings/str_cat.h"
 #include "flutter/lib/gpu/shader.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/vertex_descriptor.h"
-#include "third_party/abseil-cpp/absl/status/status.h"
-#include "third_party/abseil-cpp/absl/status/statusor.h"
-#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {

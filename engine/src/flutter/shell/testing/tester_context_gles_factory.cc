@@ -13,6 +13,7 @@
 #include <memory>
 #include <vector>
 
+#include "absl/status/statusor.h"
 #include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
@@ -25,7 +26,6 @@
 #include "impeller/entity/gles3/modern_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
-#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace flutter {
 

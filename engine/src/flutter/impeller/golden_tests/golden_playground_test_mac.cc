@@ -9,6 +9,7 @@
 #include "display_list/display_list.h"
 #include "flutter/impeller/golden_tests/golden_playground_test.h"
 
+#include "absl/base/no_destructor.h"
 #include "flutter/impeller/golden_tests/golden_digest.h"
 #include "flutter/impeller/golden_tests/golden_screenshotter.h"
 #include "flutter/impeller/golden_tests/metal_golden_screenshotter.h"
@@ -24,7 +25,6 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
-#include "third_party/abseil-cpp/absl/base/no_destructor.h"
 
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"

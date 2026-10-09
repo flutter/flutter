@@ -7,7 +7,7 @@
 #include <atomic>
 #include <cstdint>
 
-#include "third_party/abseil-cpp/absl/strings/str_cat.h"
+#include "absl/strings/str_cat.h"
 
 namespace impeller {
 
