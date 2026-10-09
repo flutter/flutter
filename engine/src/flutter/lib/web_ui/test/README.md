@@ -45,6 +45,6 @@ config specifies the following:
 This is a fully specified run of a group of unit tests. They specify the following:
   * `name` - Name of the test suite.
   * `test-bundle` - Which compiled test bundle to use when running the suite.
-  * `run-config` - Which run configuration to use when runnin the tests.
+  * `run-config` - Which run configuration to use when running the tests.
   * `artifact-deps` - Which gn/ninja build artifacts are needed to run the suite.
     Valid values are `canvaskit`, `canvaskit_chromium` or `skwasm`.

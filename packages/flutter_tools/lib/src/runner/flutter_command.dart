@@ -741,9 +741,9 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   late final _targetDevices = TargetDevices(
-    platform: _platform,
     deviceManager: globals.deviceManager!,
-    logger: _logger,
+    doctor: globals.doctor!,
+    toolContext: toolContext!,
     deviceConnectionInterface: deviceConnectionInterface,
   );
 
@@ -1520,7 +1520,7 @@ abstract class FlutterCommand extends Command<void> {
     DateTime endTime,
   ) {
     // Send command result.
-    final int? maxRss = getMaxRss(processInfo);
+    final int? maxRss = getMaxRss(processInfo, logger: _logger);
     _analytics.send(
       Event.flutterCommandResult(
         commandPath: commandPath,
@@ -1852,39 +1852,31 @@ DevelopmentArtifact? artifactFromTargetPlatform(
   TargetPlatform targetPlatform,
   FeatureFlags featureFlags,
 ) {
-  switch (targetPlatform) {
-    case TargetPlatform.android:
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
+  switch (targetPlatform.os) {
+    case .android:
       return DevelopmentArtifact.androidGenSnapshot;
-    case TargetPlatform.web_javascript:
+    case .web:
       return DevelopmentArtifact.web;
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
+    case .fuchsia:
       return null;
-    case TargetPlatform.ios:
+    case .ios:
       return DevelopmentArtifact.iOS;
-    case TargetPlatform.darwin:
+    case .macos:
       if (featureFlags.isMacOSEnabled) {
         return DevelopmentArtifact.macOS;
       }
       return null;
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_arm64:
+    case .windows:
       if (featureFlags.isWindowsEnabled) {
         return DevelopmentArtifact.windows;
       }
       return null;
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.linux_arm64:
-    case TargetPlatform.linux_riscv64:
+    case .linux:
       if (featureFlags.isLinuxEnabled) {
         return DevelopmentArtifact.linux;
       }
       return null;
-    case TargetPlatform.tester:
-    case TargetPlatform.unsupported:
+    case .tester || .unsupported:
       return null;
   }
 }

@@ -1492,7 +1492,7 @@ class TextLine {
 
   void updateBoundingBox(LineBlock block) {
     if (block is TextBlock) {
-      // Line always counts multipled metrics.
+      // Line always counts multiplied metrics.
       fontBoundingBoxAscent = math.max(
         fontBoundingBoxAscent,
         block.multipliedFontBoundingBoxAscent,
