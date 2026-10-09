@@ -609,5 +609,63 @@ TEST(AndroidShellHolder,
   EXPECT_EQ(calls[1].data, kPayload);
 }
 
+TEST(AndroidShellHolder, SetApplicationLocaleForwardsToJni) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  ASSERT_TRUE(holder->IsValid());
+  EXPECT_CALL(*jni, FlutterViewSetApplicationLocale("es-MX"));
+
+  PlatformView& platform_view = *holder->GetPlatformView();
+  platform_view.SetApplicationLocale("es-MX");
+}
+
+TEST(AndroidShellHolder, SetSemanticsTreeEnabledForwardsToJni) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  ASSERT_TRUE(holder->IsValid());
+  EXPECT_CALL(*jni, FlutterViewSetSemanticsTreeEnabled(true));
+  EXPECT_CALL(*jni, FlutterViewSetSemanticsTreeEnabled(false));
+
+  PlatformView& platform_view = *holder->GetPlatformView();
+  platform_view.SetSemanticsTreeEnabled(true);
+  platform_view.SetSemanticsTreeEnabled(false);
+}
+
+TEST(AndroidShellHolder, RequestDartDeferredLibraryForwardsToJni) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  ASSERT_TRUE(holder->IsValid());
+  // Arbitrary deferred library loading unit ID to verify argument forwarding.
+  constexpr int kTestLoadingUnitId = 5;
+  EXPECT_CALL(*jni, RequestDartDeferredLibrary(kTestLoadingUnitId))
+      .WillOnce(::testing::Return(true));
+
+  PlatformView& platform_view = *holder->GetPlatformView();
+  platform_view.RequestDartDeferredLibrary(kTestLoadingUnitId);
+}
+
+TEST(AndroidShellHolder, GetScaledFontSizeForwardsToJni) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  ASSERT_TRUE(holder->IsValid());
+  // Sample unscaled font size (14 sp), configuration ID (3), and non-linearly
+  // scaled font size (17.5 px) returned by the platform.
+  constexpr double kUnscaledFontSize = 14.0;
+  constexpr int kConfigurationId = 3;
+  constexpr double kExpectedScaledFontSize = 17.5;
+  EXPECT_CALL(*jni,
+              FlutterViewGetScaledFontSize(kUnscaledFontSize, kConfigurationId))
+      .WillOnce(::testing::Return(kExpectedScaledFontSize));
+
+  const PlatformView& platform_view = *holder->GetPlatformView();
+  EXPECT_DOUBLE_EQ(
+      platform_view.GetScaledFontSize(kUnscaledFontSize, kConfigurationId),
+      kExpectedScaledFontSize);
+}
+
 }  // namespace testing
 }  // namespace flutter
