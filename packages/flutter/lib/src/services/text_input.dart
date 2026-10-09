@@ -2880,7 +2880,7 @@ class _PlatformTextInputControl with TextInputControl {
 ///
 ///  * [ContextMenuController], which controls Flutter-drawn context menus.
 ///  * [SystemContextMenu], which wraps this functionality in a widget.
-///  * [MediaQuery.maybeSupportsShowingSystemContextMenu], which indicates
+///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates
 ///    whether the system context menu is supported.
 class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   /// Creates an instance of [SystemContextMenuController].
@@ -2960,7 +2960,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   /// Shows the system context menu anchored on the given [Rect].
   ///
   /// Currently only supported on iOS 16.0 and later. Check
-  /// [MediaQuery.maybeSupportsShowingSystemContextMenu] before calling this.
+  /// [MediaQuery.supportsShowingSystemContextMenu] before calling this.
   ///
   /// The [Rect] represents what the context menu is pointing to. For example,
   /// for some text selection, this would be the selection [Rect].
@@ -3017,7 +3017,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   /// buttons.
   ///
   /// Currently only supported on iOS 16.0 and later. Check
-  /// [MediaQuery.maybeSupportsShowingSystemContextMenu] before calling this.
+  /// [MediaQuery.supportsShowingSystemContextMenu] before calling this.
   ///
   /// The [Rect] represents what the context menu is pointing to. For example,
   /// for some text selection, this would be the selection [Rect].

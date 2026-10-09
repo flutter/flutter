@@ -126,8 +126,9 @@ class View extends StatefulWidget {
   /// moved to render into a different [FlutterView] then before). The context
   /// will not be informed when the _properties_ on the [FlutterView] itself
   /// change their values. To access the property values of a [FlutterView] it
-  /// is best practice to use [MediaQuery.maybeOf] instead, which will ensure
-  /// that the `context` is informed when the view properties change.
+  /// is best practice to use [MediaQuery.of] or a more specific accessor such
+  /// as [MediaQuery.sizeOf], which will ensure that the `context` is informed
+  /// when the view properties change.
   ///
   /// See also:
   ///
