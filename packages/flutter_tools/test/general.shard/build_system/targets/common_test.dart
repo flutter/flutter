@@ -689,7 +689,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
-  testWithoutContext('AotElfProfile Produces correct output directory', () async {
+  testWithoutContext('AotSnapshotProfile Produces correct output directory', () async {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(
@@ -710,54 +710,57 @@ void main() {
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
     androidEnvironment.buildDir.childFile('native_assets.json').createSync();
 
-    await const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment);
+    await const AotSnapshotProfile(TargetPlatform.android_arm).build(androidEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('AotElfRelease configures gen_snapshot with code size directory', () async {
-    androidEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
-    final String build = androidEnvironment.buildDir.path;
-    processManager.addCommands(<FakeCommand>[
-      FakeCommand(
-        command: <String>[
-          artifacts.getArtifactPath(
-            Artifact.genSnapshot,
-            platform: TargetPlatform.android_arm,
-            mode: BuildMode.profile,
-          ),
-          '--deterministic',
-          '--write-v8-snapshot-profile-to=code_size_1/snapshot.android-arm.json',
-          '--trace-precompiler-to=code_size_1/trace.android-arm.json',
-          kElfAot,
-          '--elf=$build/app.so',
-          '--no-use-integer-division',
-          '$build/app.dill',
-        ],
-      ),
-    ]);
-    androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
-    androidEnvironment.buildDir.childFile('native_assets.json').createSync();
+  testWithoutContext(
+    'AotSnapshotRelease configures gen_snapshot with code size directory',
+    () async {
+      androidEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
+      final String build = androidEnvironment.buildDir.path;
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(
+              Artifact.genSnapshot,
+              platform: TargetPlatform.android_arm,
+              mode: BuildMode.profile,
+            ),
+            '--deterministic',
+            '--write-v8-snapshot-profile-to=code_size_1/snapshot.android-arm.json',
+            '--trace-precompiler-to=code_size_1/trace.android-arm.json',
+            kElfAot,
+            '--elf=$build/app.so',
+            '--no-use-integer-division',
+            '$build/app.dill',
+          ],
+        ),
+      ]);
+      androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
+      androidEnvironment.buildDir.childFile('native_assets.json').createSync();
 
-    await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
+      await const AotSnapshotRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
-    expect(processManager, hasNoRemainingExpectations);
-  });
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
 
-  testWithoutContext('AotElfProfile throws error if missing build mode', () async {
+  testWithoutContext('AotSnapshotProfile throws error if missing build mode', () async {
     androidEnvironment.defines.remove(kBuildMode);
 
     expect(
-      const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
+      const AotSnapshotProfile(TargetPlatform.android_arm).build(androidEnvironment),
       throwsA(isA<MissingDefineException>()),
     );
   });
 
-  testWithoutContext('AotElfProfile throws error if missing target platform', () async {
+  testWithoutContext('AotSnapshotProfile throws error if missing target platform', () async {
     androidEnvironment.defines.remove(kTargetPlatform);
 
     expect(
-      const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
+      const AotSnapshotProfile(TargetPlatform.android_arm).build(androidEnvironment),
       throwsA(isA<MissingDefineException>()),
     );
   });
@@ -898,7 +901,7 @@ void main() {
       ),
     ]);
 
-    await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
+    await const AotSnapshotRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
   });
