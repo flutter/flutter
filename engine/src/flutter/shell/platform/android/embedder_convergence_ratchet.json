@@ -22,7 +22,7 @@
       "enforce": "ratchet"
     },
     "jni_platform_view_calls": {
-      "count": 14,
+      "count": 13,
       "enforce": "ratchet"
     },
     "platform_view_android_overrides": {

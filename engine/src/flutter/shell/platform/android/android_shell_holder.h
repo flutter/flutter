@@ -135,6 +135,11 @@ class AndroidShellHolder {
   ///
   void ScheduleFrame();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Sends viewport metrics for a view through the embedder API.
+  ///
+  void SetViewportMetrics(int64_t view_id, const ViewportMetrics& metrics);
+
   // Visible for testing.
   Shell* GetShellForTesting() const;
 

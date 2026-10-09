@@ -427,8 +427,7 @@ static void SetViewportMetrics(JNIEnv* env,
           physicalDisplayCornerRadiusBottomLeft),  // p_physical_display_corner_radius_bottom_left
   };
 
-  ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(
-      kFlutterImplicitViewId, metrics);
+  ANDROID_SHELL_HOLDER->SetViewportMetrics(kFlutterImplicitViewId, metrics);
 }
 
 static void UpdateDisplayMetrics(JNIEnv* env,

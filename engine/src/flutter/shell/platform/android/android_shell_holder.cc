@@ -7,11 +7,12 @@
 #include <pthread.h>
 #include <sys/resource.h>
 #include <sys/time.h>
+#include <algorithm>
 #include <memory>
 #include <optional>
-
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "common/settings.h"
 #include "flutter/fml/cpu_affinity.h"
@@ -503,6 +504,129 @@ void AndroidShellHolder::ScheduleFrame() {
   FlutterEngineResult result = embedder_api_.ScheduleFrame(engine_.get());
   if (result != kSuccess) {
     FML_LOG(ERROR) << "FlutterEngineScheduleFrame failed: " << result;
+  }
+}
+
+void AndroidShellHolder::SetViewportMetrics(int64_t view_id,
+                                            const ViewportMetrics& metrics) {
+  if (metrics.device_pixel_ratio <= 0.0 || metrics.physical_width < 0.0 ||
+      metrics.physical_height < 0.0 ||
+      metrics.physical_min_width_constraint < 0.0 ||
+      metrics.physical_max_width_constraint < 0.0 ||
+      metrics.physical_min_height_constraint < 0.0 ||
+      metrics.physical_max_height_constraint < 0.0) {
+    return;
+  }
+
+  const double width = metrics.physical_width;
+  const double height = metrics.physical_height;
+  const bool tight_zero_width_constraints =
+      metrics.physical_min_width_constraint == 0.0 &&
+      metrics.physical_max_width_constraint == 0.0;
+  const bool tight_zero_height_constraints =
+      metrics.physical_min_height_constraint == 0.0 &&
+      metrics.physical_max_height_constraint == 0.0;
+  const double min_width = tight_zero_width_constraints
+                               ? width
+                               : metrics.physical_min_width_constraint;
+  const double max_width = tight_zero_width_constraints
+                               ? width
+                               : metrics.physical_max_width_constraint;
+  const double min_height = tight_zero_height_constraints
+                                ? height
+                                : metrics.physical_min_height_constraint;
+  const double max_height = tight_zero_height_constraints
+                                ? height
+                                : metrics.physical_max_height_constraint;
+
+  if ((width == 0.0 && min_width == max_width) ||
+      (height == 0.0 && min_height == max_height) || width < min_width ||
+      width > max_width || height < min_height || height > max_height) {
+    return;
+  }
+
+  constexpr size_t kCoordinatesPerFeatureBounds = 4;
+  const size_t feature_count =
+      std::min({metrics.physical_display_features_bounds.size() /
+                    kCoordinatesPerFeatureBounds,
+                metrics.physical_display_features_type.size(),
+                metrics.physical_display_features_state.size(),
+                static_cast<size_t>(kFlutterMaxDisplayFeatures)});
+
+  std::vector<int32_t> feature_types(feature_count);
+  std::vector<int32_t> feature_states(feature_count);
+  for (size_t i = 0; i < feature_count; ++i) {
+    const int32_t raw_type = metrics.physical_display_features_type[i];
+    feature_types[i] =
+        (raw_type >= kFlutterDisplayFeatureTypeUnknown &&
+         raw_type <= kFlutterDisplayFeatureTypeCutout)
+            ? raw_type
+            : static_cast<int32_t>(kFlutterDisplayFeatureTypeUnknown);
+    const int32_t raw_state = metrics.physical_display_features_state[i];
+    feature_states[i] =
+        raw_state >= kFlutterDisplayFeatureStateUnknown
+            ? raw_state
+            : static_cast<int32_t>(kFlutterDisplayFeatureStateUnknown);
+  }
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(FlutterWindowMetricsEvent);
+  event.width = static_cast<size_t>(width);
+  event.height = static_cast<size_t>(height);
+  event.pixel_ratio = metrics.device_pixel_ratio;
+  event.left = 0;
+  event.top = 0;
+  event.physical_view_inset_top =
+      std::clamp(metrics.physical_view_inset_top, 0.0, height);
+  event.physical_view_inset_right =
+      std::clamp(metrics.physical_view_inset_right, 0.0, width);
+  event.physical_view_inset_bottom =
+      std::clamp(metrics.physical_view_inset_bottom, 0.0, height);
+  event.physical_view_inset_left =
+      std::clamp(metrics.physical_view_inset_left, 0.0, width);
+  event.display_id = metrics.display_id;
+  event.view_id = view_id;
+  event.has_constraints = true;
+  event.min_width_constraint = static_cast<size_t>(min_width);
+  event.min_height_constraint = static_cast<size_t>(min_height);
+  event.max_width_constraint = static_cast<size_t>(max_width);
+  event.max_height_constraint = static_cast<size_t>(max_height);
+  event.has_extended_metrics = true;
+  event.physical_padding_top = std::max(0.0, metrics.physical_padding_top);
+  event.physical_padding_right = std::max(0.0, metrics.physical_padding_right);
+  event.physical_padding_bottom =
+      std::max(0.0, metrics.physical_padding_bottom);
+  event.physical_padding_left = std::max(0.0, metrics.physical_padding_left);
+  event.physical_system_gesture_inset_top =
+      std::max(0.0, metrics.physical_system_gesture_inset_top);
+  event.physical_system_gesture_inset_right =
+      std::max(0.0, metrics.physical_system_gesture_inset_right);
+  event.physical_system_gesture_inset_bottom =
+      std::max(0.0, metrics.physical_system_gesture_inset_bottom);
+  event.physical_system_gesture_inset_left =
+      std::max(0.0, metrics.physical_system_gesture_inset_left);
+  event.physical_touch_slop = metrics.physical_touch_slop;
+  event.display_features_count = feature_count;
+  event.display_features_bounds =
+      feature_count > 0 ? metrics.physical_display_features_bounds.data()
+                        : nullptr;
+  event.display_features_type =
+      feature_count > 0 ? feature_types.data() : nullptr;
+  event.display_features_state =
+      feature_count > 0 ? feature_states.data() : nullptr;
+  event.physical_display_corner_radius_top_left =
+      metrics.physical_display_corner_radius_top_left;
+  event.physical_display_corner_radius_top_right =
+      metrics.physical_display_corner_radius_top_right;
+  event.physical_display_corner_radius_bottom_right =
+      metrics.physical_display_corner_radius_bottom_right;
+  event.physical_display_corner_radius_bottom_left =
+      metrics.physical_display_corner_radius_bottom_left;
+
+  FlutterEngineResult result =
+      embedder_api_.SendWindowMetricsEvent(engine_.get(), &event);
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineSendWindowMetricsEvent failed: " << result;
   }
 }
 

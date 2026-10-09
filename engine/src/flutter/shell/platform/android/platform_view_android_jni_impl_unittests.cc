@@ -187,6 +187,36 @@ namespace {
 using SetSemanticsEnabledFn = void (*)(JNIEnv*, jobject, jlong, jboolean);
 using SetAccessibilityFeaturesFn = void (*)(JNIEnv*, jobject, jlong, jint);
 using ScheduleFrameFn = void (*)(JNIEnv*, jobject, jlong);
+using SetViewportMetricsFn = void (*)(JNIEnv*,
+                                      jobject,
+                                      jlong,
+                                      jfloat,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jintArray,
+                                      jintArray,
+                                      jintArray,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint,
+                                      jint);
 
 // Runs PlatformViewAndroid::Register against |mock_env| and returns the
 // function registered for the FlutterJNI native called |name|, or nullptr.
@@ -308,6 +338,108 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   EXPECT_EQ(RuntimePlatformData(*holder).accessibility_feature_flags_, 0);
 }
 
+TEST_F(PlatformViewAndroidJNIImplTest,
+       SetViewportMetricsUpdatesRuntimePlatformData) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto set_viewport_metrics = reinterpret_cast<SetViewportMetricsFn>(
+      RegisterNativesAndFind(mock_env, "nativeSetViewportMetrics"));
+  ASSERT_NE(set_viewport_metrics, nullptr);
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+  const jlong shell_holder = reinterpret_cast<jlong>(holder.get());
+  jobject jcaller = reinterpret_cast<jobject>(123);
+  jintArray bounds = reinterpret_cast<jintArray>(456);
+  jintArray type = reinterpret_cast<jintArray>(789);
+  jintArray state = reinterpret_cast<jintArray>(1011);
+
+  constexpr jint kFeatureBounds[4] = {10, 20, 30, 40};
+  constexpr jint kFeatureTypes[1] = {kFlutterDisplayFeatureTypeHinge};
+  constexpr jint kFeatureStates[1] = {
+      kFlutterDisplayFeatureStatePostureHalfOpened};
+
+  EXPECT_CALL(mock_env, GetArrayLength(bounds)).WillOnce(Return(4));
+  EXPECT_CALL(mock_env, GetIntArrayRegion(bounds, 0, 4, _))
+      .WillOnce([&](jintArray, jsize, jsize, jint* buf) {
+        std::copy(std::begin(kFeatureBounds), std::end(kFeatureBounds), buf);
+      });
+  EXPECT_CALL(mock_env, GetArrayLength(type)).WillOnce(Return(1));
+  EXPECT_CALL(mock_env, GetIntArrayRegion(type, 0, 1, _))
+      .WillOnce([&](jintArray, jsize, jsize, jint* buf) {
+        buf[0] = kFeatureTypes[0];
+      });
+  EXPECT_CALL(mock_env, GetArrayLength(state)).WillOnce(Return(1));
+  EXPECT_CALL(mock_env, GetIntArrayRegion(state, 0, 1, _))
+      .WillOnce([&](jintArray, jsize, jsize, jint* buf) {
+        buf[0] = kFeatureStates[0];
+      });
+
+  set_viewport_metrics(&mock_env, jcaller, shell_holder,
+                       /*devicePixelRatio=*/2.5f,
+                       /*physicalWidth=*/1080,
+                       /*physicalHeight=*/1920,
+                       /*physicalPaddingTop=*/48,
+                       /*physicalPaddingRight=*/12,
+                       /*physicalPaddingBottom=*/36,
+                       /*physicalPaddingLeft=*/8,
+                       /*physicalViewInsetTop=*/0,
+                       /*physicalViewInsetRight=*/0,
+                       /*physicalViewInsetBottom=*/600,
+                       /*physicalViewInsetLeft=*/0,
+                       /*systemGestureInsetTop=*/48,
+                       /*systemGestureInsetRight=*/24,
+                       /*systemGestureInsetBottom=*/64,
+                       /*systemGestureInsetLeft=*/24,
+                       /*physicalTouchSlop=*/16,
+                       /*javaDisplayFeaturesBounds=*/bounds,
+                       /*javaDisplayFeaturesType=*/type,
+                       /*javaDisplayFeaturesState=*/state,
+                       /*physicalMinWidth=*/800,
+                       /*physicalMaxWidth=*/1400,
+                       /*physicalMinHeight=*/1600,
+                       /*physicalMaxHeight=*/2400,
+                       /*physicalDisplayCornerRadiusTopLeft=*/32,
+                       /*physicalDisplayCornerRadiusTopRight=*/32,
+                       /*physicalDisplayCornerRadiusBottomRight=*/16,
+                       /*physicalDisplayCornerRadiusBottomLeft=*/16);
+
+  const auto& views = RuntimePlatformData(*holder).viewport_metrics_for_views;
+  auto it = views.find(0);
+  ASSERT_NE(it, views.end());
+  const ViewportMetrics& actual = it->second;
+  EXPECT_DOUBLE_EQ(actual.device_pixel_ratio, 2.5);
+  EXPECT_DOUBLE_EQ(actual.physical_width, 1080.0);
+  EXPECT_DOUBLE_EQ(actual.physical_height, 1920.0);
+  EXPECT_DOUBLE_EQ(actual.physical_min_width_constraint, 800.0);
+  EXPECT_DOUBLE_EQ(actual.physical_max_width_constraint, 1400.0);
+  EXPECT_DOUBLE_EQ(actual.physical_min_height_constraint, 1600.0);
+  EXPECT_DOUBLE_EQ(actual.physical_max_height_constraint, 2400.0);
+  EXPECT_DOUBLE_EQ(actual.physical_padding_top, 48.0);
+  EXPECT_DOUBLE_EQ(actual.physical_padding_right, 12.0);
+  EXPECT_DOUBLE_EQ(actual.physical_padding_bottom, 36.0);
+  EXPECT_DOUBLE_EQ(actual.physical_padding_left, 8.0);
+  EXPECT_DOUBLE_EQ(actual.physical_view_inset_top, 0.0);
+  EXPECT_DOUBLE_EQ(actual.physical_view_inset_right, 0.0);
+  EXPECT_DOUBLE_EQ(actual.physical_view_inset_bottom, 600.0);
+  EXPECT_DOUBLE_EQ(actual.physical_view_inset_left, 0.0);
+  EXPECT_DOUBLE_EQ(actual.physical_system_gesture_inset_top, 48.0);
+  EXPECT_DOUBLE_EQ(actual.physical_system_gesture_inset_right, 24.0);
+  EXPECT_DOUBLE_EQ(actual.physical_system_gesture_inset_bottom, 64.0);
+  EXPECT_DOUBLE_EQ(actual.physical_system_gesture_inset_left, 24.0);
+  EXPECT_DOUBLE_EQ(actual.physical_touch_slop, 16.0);
+  EXPECT_THAT(actual.physical_display_features_bounds,
+              ElementsAre(10.0, 20.0, 30.0, 40.0));
+  EXPECT_THAT(actual.physical_display_features_type,
+              ElementsAre(kFlutterDisplayFeatureTypeHinge));
+  EXPECT_THAT(actual.physical_display_features_state,
+              ElementsAre(kFlutterDisplayFeatureStatePostureHalfOpened));
+  EXPECT_DOUBLE_EQ(actual.physical_display_corner_radius_top_left, 32.0);
+  EXPECT_DOUBLE_EQ(actual.physical_display_corner_radius_top_right, 32.0);
+  EXPECT_DOUBLE_EQ(actual.physical_display_corner_radius_bottom_right, 16.0);
+  EXPECT_DOUBLE_EQ(actual.physical_display_corner_radius_bottom_left, 16.0);
+}
+
 // The natives below must reach the engine only through the holder's embedder
 // API proc table. Each test replaces the proc with a mock that does not
 // forward, so the runtime state must stay unchanged while the mock records
@@ -390,6 +522,83 @@ TEST_F(PlatformViewAndroidJNIImplTest, ScheduleFrameCallsEmbedderApi) {
                  reinterpret_cast<jlong>(holder.get()));
 
   EXPECT_EQ(calls, 1);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsCallsEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto set_viewport_metrics = reinterpret_cast<SetViewportMetricsFn>(
+      RegisterNativesAndFind(mock_env, "nativeSetViewportMetrics"));
+  ASSERT_NE(set_viewport_metrics, nullptr);
+
+  EXPECT_CALL(mock_env, GetArrayLength(_)).WillRepeatedly(Return(0));
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+  std::vector<FlutterWindowMetricsEvent> calls;
+  holder->GetEmbedderApiForTesting().SendWindowMetricsEvent =
+      MOCK_ENGINE_PROC(SendWindowMetricsEvent,
+                       ([&calls](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                 const FlutterWindowMetricsEvent* event) {
+                         EXPECT_NE(engine, nullptr);
+                         EXPECT_NE(event, nullptr);
+                         calls.push_back(*event);
+                         return kSuccess;
+                       }));
+
+  set_viewport_metrics(&mock_env, reinterpret_cast<jobject>(123),
+                       reinterpret_cast<jlong>(holder.get()),
+                       /*devicePixelRatio=*/3.0f,
+                       /*physicalWidth=*/1440,
+                       /*physicalHeight=*/2560,
+                       /*physicalPaddingTop=*/60,
+                       /*physicalPaddingRight=*/0,
+                       /*physicalPaddingBottom=*/40,
+                       /*physicalPaddingLeft=*/0,
+                       /*physicalViewInsetTop=*/0,
+                       /*physicalViewInsetRight=*/0,
+                       /*physicalViewInsetBottom=*/500,
+                       /*physicalViewInsetLeft=*/0,
+                       /*systemGestureInsetTop=*/60,
+                       /*systemGestureInsetRight=*/30,
+                       /*systemGestureInsetBottom=*/80,
+                       /*systemGestureInsetLeft=*/30,
+                       /*physicalTouchSlop=*/24,
+                       /*javaDisplayFeaturesBounds=*/
+                       reinterpret_cast<jintArray>(456),
+                       /*javaDisplayFeaturesType=*/
+                       reinterpret_cast<jintArray>(789),
+                       /*javaDisplayFeaturesState=*/
+                       reinterpret_cast<jintArray>(1011),
+                       /*physicalMinWidth=*/0,
+                       /*physicalMaxWidth=*/0,
+                       /*physicalMinHeight=*/0,
+                       /*physicalMaxHeight=*/0,
+                       /*physicalDisplayCornerRadiusTopLeft=*/20,
+                       /*physicalDisplayCornerRadiusTopRight=*/20,
+                       /*physicalDisplayCornerRadiusBottomRight=*/20,
+                       /*physicalDisplayCornerRadiusBottomLeft=*/20);
+
+  ASSERT_EQ(calls.size(), 1u);
+  EXPECT_EQ(calls[0].width, 1440u);
+  EXPECT_EQ(calls[0].height, 2560u);
+  EXPECT_DOUBLE_EQ(calls[0].pixel_ratio, 3.0);
+  EXPECT_TRUE(calls[0].has_constraints);
+  EXPECT_EQ(calls[0].min_width_constraint, 1440u);
+  EXPECT_EQ(calls[0].max_width_constraint, 1440u);
+  EXPECT_EQ(calls[0].min_height_constraint, 2560u);
+  EXPECT_EQ(calls[0].max_height_constraint, 2560u);
+  EXPECT_TRUE(calls[0].has_extended_metrics);
+  EXPECT_DOUBLE_EQ(calls[0].physical_padding_top, 60.0);
+  EXPECT_DOUBLE_EQ(calls[0].physical_padding_bottom, 40.0);
+  EXPECT_DOUBLE_EQ(calls[0].physical_view_inset_bottom, 500.0);
+  EXPECT_DOUBLE_EQ(calls[0].physical_system_gesture_inset_right, 30.0);
+  EXPECT_DOUBLE_EQ(calls[0].physical_touch_slop, 24.0);
+  EXPECT_DOUBLE_EQ(calls[0].physical_display_corner_radius_top_left, 20.0);
+  EXPECT_DOUBLE_EQ(RuntimePlatformData(*holder)
+                       .viewport_metrics_for_views.at(0)
+                       .physical_width,
+                   0.0);
 }
 
 // The load order is exercised with an injected loader rather than real
