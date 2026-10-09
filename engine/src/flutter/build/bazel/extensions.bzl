@@ -10,9 +10,11 @@ GN/Bazel transition every dependency is consumed from the directory
 `gclient sync` populated (`synced_repository`), so both build systems see
 identical trees and nothing is fetched twice.
 
-Toolchains (clang, sysroots, gn, ...) can instead be downloaded by Bazel
-itself by setting `FLUTTER_BAZEL_FETCH_TOOLCHAINS=1` (for example through
-`--repo_env`). The repositories have the same layout either way.
+Toolchains (clang, sysroots, gn, ninja, ...) can instead be downloaded by
+Bazel itself by setting `FLUTTER_BAZEL_FETCH_TOOLCHAINS=1` (for example
+through `--repo_env`). The repositories have the same layout either way.
+The few tools that are not in DEPS at all (`_DOWNLOADED_TOOL_REPOSITORIES`)
+are always downloaded.
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
@@ -70,6 +72,26 @@ _TOOL_REPOSITORIES = {
         path = "engine/src/flutter/third_party/gn",
         build_file = _OVERLAYS + ":gn/BUILD.gn_tool.bazel",
     ),
+    "ninja": struct(
+        path = "third_party/ninja",
+        build_file = _OVERLAYS + ":ninja/BUILD.ninja.bazel",
+    ),
+}
+
+# Prebuilt tools that are not in DEPS, keyed by repository name. They are
+# always downloaded from CIPD, whatever FLUTTER_BAZEL_FETCH_TOOLCHAINS says,
+# so their pins live here rather than in deps.lock.bzl.
+#
+# cpython3: the interpreter for the Python scripts GN builds run (DEPS and GN
+# rely on depot_tools' `vpython3` for that, which Bazel actions must not reach
+# for). The pin is the one Skia's Bazel build uses
+# (`third_party/skia/bazel/cipd_deps.bzl`); bump the two together.
+_DOWNLOADED_TOOL_REPOSITORIES = {
+    "cpython3": struct(
+        package = "infra/3pp/tools/cpython3/${platform}",
+        version = "version:3@3.11.9.chromium.36",
+        build_file = _OVERLAYS + ":cpython3/BUILD.cpython3.bazel",
+    ),
 }
 
 # Debian sysroots, keyed by repository name. They are not DEPS entries: the
@@ -100,6 +122,12 @@ _FETCH_TOOLCHAINS_ENV = "FLUTTER_BAZEL_FETCH_TOOLCHAINS"
 _CIPD_SHA256 = {
     ("fuchsia/third_party/clang/linux-amd64", "git_revision:07d67299a15ce03b053736e2d31a668ee0576987"): "6b657ccd9ca05c6b9e4458181ec71f1dbaf7122a5e6df7aaaec381a31ab34bd3",
     ("gn/gn/linux-amd64", "git_revision:81b24e01531ecf0eff12ec9359a555ec3944ec4e"): "cd330cb4f4e0d8e5c82ca3a583798ea5337fd01308952dbe227c9dd8bc51d854",
+    ("infra/3pp/tools/ninja/linux-amd64", "version:2@1.11.1.chromium.4"): "55833d93abb510f908b2347235116717b10ba6eca19e426a01e6a66b8c3cfd86",
+    # cpython3 hashes as recorded by Skia (same zip, same URL).
+    ("infra/3pp/tools/cpython3/linux-amd64", "version:3@3.11.9.chromium.36"): "a06bad297267859aad818d2d6c9cc2865f4b0087c71dbf020f6b8e0cb92746c2",
+    ("infra/3pp/tools/cpython3/mac-amd64", "version:3@3.11.9.chromium.36"): "787e1e98b6220b4bf887ae04a8a80fb4939ad3c24ca6e2e7753541048c97224a",
+    ("infra/3pp/tools/cpython3/mac-arm64", "version:3@3.11.9.chromium.36"): "6c7fb45e6ac6363c00b9820b259132554190a197d65437a0912025fa9c27e161",
+    ("infra/3pp/tools/cpython3/windows-amd64", "version:3@3.11.9.chromium.36"): "cdc51dd7d25bc6a249b076e117cdfe29456a93cddd48d4193ca3742a20ea7699",
 }
 
 def _cipd_platform(mctx):
@@ -136,6 +164,16 @@ def _cipd_pin(path):
         fail("synced_deps: %s installs %d CIPD packages; exactly one is supported" % (path, len(packages)))
     return packages[0]
 
+def _download_cipd_package(name, package_template, version, platform, build_file):
+    package = package_template.replace("${platform}", platform)
+    cipd_package(
+        name = name,
+        package = package,
+        version = version,
+        sha256 = _CIPD_SHA256.get((package, version), ""),
+        build_file = build_file,
+    )
+
 def _sysroot_repositories(mctx, fetch):
     sysroots = json.decode(mctx.read(_SYSROOTS_JSON))
     for name, spec in _SYSROOT_REPOSITORIES.items():
@@ -169,16 +207,12 @@ def _synced_deps_impl(mctx):
     for name, spec in _TOOL_REPOSITORIES.items():
         pin = _cipd_pin(spec.path)
         if fetch:
-            package = pin["package"].replace("${platform}", platform)
-            cipd_package(
-                name = name,
-                package = package,
-                version = pin["version"],
-                sha256 = _CIPD_SHA256.get((package, pin["version"]), ""),
-                build_file = spec.build_file,
-            )
+            _download_cipd_package(name, pin["package"], pin["version"], platform, spec.build_file)
         else:
             synced_repository(name = name, path = spec.path, build_file = spec.build_file)
+
+    for name, spec in _DOWNLOADED_TOOL_REPOSITORIES.items():
+        _download_cipd_package(name, spec.package, spec.version, platform, spec.build_file)
 
     _sysroot_repositories(mctx, fetch)
 
