@@ -721,7 +721,7 @@ static void LoadDartDeferredLibrary(JNIEnv* env,
       std::make_unique<const fml::SymbolMapping>(
           native_lib, DartSnapshot::kIsolateInstructionsSymbol);
 
-  ANDROID_SHELL_HOLDER->GetPlatformView()->LoadDartDeferredLibrary(
+  ANDROID_SHELL_HOLDER->LoadDartDeferredLibrary(
       loading_unit_id, std::move(data_mapping),
       std::move(instructions_mapping));
 }
@@ -736,9 +736,7 @@ static void UpdateJavaAssetManager(JNIEnv* env,
       jAssetManager,                                         // asset manager
       fml::jni::JavaStringToString(env, jAssetBundlePath));  // apk asset dir
 
-  ANDROID_SHELL_HOLDER->GetPlatformView()->UpdateAssetResolverByType(
-      std::move(asset_resolver),
-      AssetResolver::AssetResolverType::kApkAssetProvider);
+  ANDROID_SHELL_HOLDER->UpdateJavaAssetManager(std::move(asset_resolver));
 }
 
 bool RegisterApi(JNIEnv* env) {

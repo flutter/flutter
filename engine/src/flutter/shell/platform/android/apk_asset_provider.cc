@@ -91,7 +91,9 @@ bool APKAssetProvider::IsValidAfterAssetManagerChange() const {
 
 // |AssetResolver|
 AssetResolver::AssetResolverType APKAssetProvider::GetType() const {
-  return AssetResolver::AssetResolverType::kApkAssetProvider;
+  // Return kCustomResolver so that FlutterEngineUpdateAssetResolver replaces
+  // the initial APKAssetProvider in AssetManager::UpdateResolverByType.
+  return AssetResolver::AssetResolverType::kCustomResolver;
 }
 
 // |AssetResolver|
@@ -102,6 +104,50 @@ std::unique_ptr<fml::Mapping> APKAssetProvider::GetAsMapping(
 
 std::unique_ptr<APKAssetProvider> APKAssetProvider::Clone() const {
   return std::make_unique<APKAssetProvider>(impl_);
+}
+
+FlutterAssetResolver APKAssetProvider::ToFlutterAssetResolver() const {
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = new std::shared_ptr<APKAssetProviderInternal>(impl_);
+  resolver.find_asset_callback = [](void* user_data, const char* asset_name,
+                                    FlutterAsset* asset_out) -> bool {
+    if (!user_data || !asset_name || !asset_out) {
+      return false;
+    }
+    auto* holder =
+        static_cast<std::shared_ptr<APKAssetProviderInternal>*>(user_data);
+    if (!(*holder)) {
+      return false;
+    }
+    std::unique_ptr<fml::Mapping> mapping = (*holder)->GetAsMapping(asset_name);
+    if (!mapping) {
+      return false;
+    }
+    asset_out->struct_size = sizeof(FlutterAsset);
+    asset_out->data = mapping->GetMapping();
+    asset_out->size = mapping->GetSize();
+    asset_out->user_data = mapping.release();
+    asset_out->asset_free_callback = [](void* mapping_ptr) {
+      delete static_cast<fml::Mapping*>(mapping_ptr);
+    };
+    return true;
+  };
+  resolver.is_valid_callback = [](void* user_data) -> bool {
+    if (!user_data) {
+      return false;
+    }
+    auto* holder =
+        static_cast<std::shared_ptr<APKAssetProviderInternal>*>(user_data);
+    return static_cast<bool>(*holder);
+  };
+  resolver.is_valid_after_change_callback = [](void* user_data) -> bool {
+    return true;
+  };
+  resolver.destruction_callback = [](void* user_data) {
+    delete static_cast<std::shared_ptr<APKAssetProviderInternal>*>(user_data);
+  };
+  return resolver;
 }
 
 bool APKAssetProvider::operator==(const AssetResolver& other) const {

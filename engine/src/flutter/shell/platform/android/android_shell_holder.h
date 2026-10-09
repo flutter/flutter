@@ -162,6 +162,29 @@ class AndroidShellHolder {
   ///
   void DispatchPointerDataPacket(const uint8_t* buffer, int size_bytes);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Delivers a resolved deferred Dart loading unit's data and
+  ///             instructions mappings to the engine through the embedder API.
+  ///
+  void LoadDartDeferredLibrary(
+      intptr_t loading_unit_id,
+      std::unique_ptr<const fml::Mapping> snapshot_data,
+      std::unique_ptr<const fml::Mapping> snapshot_instructions);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Notifies the engine that a deferred Dart loading unit failed
+  ///             to load or install, through the embedder API.
+  ///
+  void LoadDartDeferredLibraryError(intptr_t loading_unit_id,
+                                    const std::string& error_message,
+                                    bool transient);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Replaces the engine's APK asset resolver through the embedder
+  ///             API.
+  ///
+  void UpdateJavaAssetManager(std::unique_ptr<APKAssetProvider> asset_provider);
+
   // Visible for testing.
   Shell* GetShellForTesting() const;
 

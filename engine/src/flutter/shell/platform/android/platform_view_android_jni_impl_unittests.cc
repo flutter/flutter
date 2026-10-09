@@ -1103,5 +1103,159 @@ TEST(FindFirstLoadableLibraryTest, EmptyReturnsNull) {
             nullptr);
 }
 
+namespace {
+
+class TestAPKAssetProviderImpl : public APKAssetProviderInternal {
+ public:
+  explicit TestAPKAssetProviderImpl(std::string payload)
+      : payload_(std::move(payload)) {}
+
+  std::unique_ptr<fml::Mapping> GetAsMapping(
+      const std::string& asset_name) const override {
+    if (asset_name == "test_asset.txt") {
+      return std::make_unique<fml::DataMapping>(payload_);
+    }
+    return nullptr;
+  }
+
+ private:
+  std::string payload_;
+};
+
+}  // namespace
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       LoadDartDeferredLibraryCallsEmbedderApiAndCleansUp) {
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  constexpr intptr_t kTestLoadingUnitId = 42;
+  const std::string kDataBytes = "deferred_data";
+  const std::string kInstrBytes = "deferred_instructions";
+
+  bool called = false;
+  holder->GetEmbedderApiForTesting().LoadDartDeferredLibrary = MOCK_ENGINE_PROC(
+      LoadDartDeferredLibrary,
+      ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+           const FlutterDartDeferredLibrary* deferred_library) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(deferred_library, nullptr);
+        EXPECT_EQ(deferred_library->struct_size,
+                  sizeof(FlutterDartDeferredLibrary));
+        EXPECT_EQ(deferred_library->loading_unit_id, kTestLoadingUnitId);
+        EXPECT_EQ(
+            std::string(reinterpret_cast<const char*>(deferred_library->data),
+                        deferred_library->data_size),
+            kDataBytes);
+        EXPECT_EQ(std::string(reinterpret_cast<const char*>(
+                                  deferred_library->instructions),
+                              deferred_library->instructions_size),
+                  kInstrBytes);
+        EXPECT_NE(deferred_library->destruction_callback, nullptr);
+        deferred_library->destruction_callback(deferred_library->user_data);
+        called = true;
+        return kSuccess;
+      }));
+
+  holder->LoadDartDeferredLibrary(
+      kTestLoadingUnitId, std::make_unique<fml::DataMapping>(kDataBytes),
+      std::make_unique<fml::DataMapping>(kInstrBytes));
+  EXPECT_TRUE(called);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       LoadDartDeferredLibraryErrorCallsEmbedderApi) {
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  constexpr intptr_t kTestLoadingUnitId = 17;
+  bool called = false;
+  holder->GetEmbedderApiForTesting().NotifyDartDeferredLibraryLoadError =
+      MOCK_ENGINE_PROC(NotifyDartDeferredLibraryLoadError,
+                       ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                            const FlutterDartDeferredLibraryLoadError* error) {
+                         EXPECT_NE(engine, nullptr);
+                         EXPECT_NE(error, nullptr);
+                         EXPECT_EQ(error->struct_size,
+                                   sizeof(FlutterDartDeferredLibraryLoadError));
+                         EXPECT_EQ(error->loading_unit_id, kTestLoadingUnitId);
+                         EXPECT_STREQ(error->error_message,
+                                      "missing split APK");
+                         EXPECT_TRUE(error->transient);
+                         called = true;
+                         return kSuccess;
+                       }));
+
+  holder->LoadDartDeferredLibraryError(kTestLoadingUnitId, "missing split APK",
+                                       /*transient=*/true);
+  EXPECT_TRUE(called);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       UpdateJavaAssetManagerCallsEmbedderApiAndResolvesAssets) {
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  bool called = false;
+  holder->GetEmbedderApiForTesting().UpdateAssetResolver = MOCK_ENGINE_PROC(
+      UpdateAssetResolver,
+      ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+           const FlutterAssetResolverRegistrationInfo* info) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(info, nullptr);
+        EXPECT_EQ(info->struct_size,
+                  sizeof(FlutterAssetResolverRegistrationInfo));
+        EXPECT_NE(info->resolver, nullptr);
+        FlutterAsset asset = {};
+        EXPECT_TRUE(info->resolver->find_asset_callback(
+            info->resolver->user_data, "test_asset.txt", &asset));
+        EXPECT_EQ(
+            std::string(reinterpret_cast<const char*>(asset.data), asset.size),
+            "updated_asset_content");
+        if (asset.asset_free_callback) {
+          asset.asset_free_callback(asset.user_data);
+        }
+        if (info->resolver->destruction_callback) {
+          info->resolver->destruction_callback(info->resolver->user_data);
+        }
+        called = true;
+        return kSuccess;
+      }));
+
+  auto provider = std::make_unique<APKAssetProvider>(
+      std::make_shared<TestAPKAssetProviderImpl>("updated_asset_content"));
+  holder->UpdateJavaAssetManager(std::move(provider));
+  EXPECT_TRUE(called);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       UpdateJavaAssetManagerRealProcForwardsToEngine) {
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  auto asset_manager = std::make_shared<AssetManager>();
+  asset_manager->PushBack(std::make_unique<APKAssetProvider>(
+      std::make_shared<TestAPKAssetProviderImpl>("initial_asset")));
+  holder->GetShellForTesting()->GetEngine()->UpdateAssetManager(asset_manager);
+
+  auto initial_mapping = asset_manager->GetAsMapping("test_asset.txt");
+  ASSERT_NE(initial_mapping, nullptr);
+  EXPECT_EQ(
+      std::string(reinterpret_cast<const char*>(initial_mapping->GetMapping()),
+                  initial_mapping->GetSize()),
+      "initial_asset");
+
+  auto provider = std::make_unique<APKAssetProvider>(
+      std::make_shared<TestAPKAssetProviderImpl>("real_proc_asset"));
+  holder->UpdateJavaAssetManager(std::move(provider));
+
+  auto updated_mapping = asset_manager->GetAsMapping("test_asset.txt");
+  ASSERT_NE(updated_mapping, nullptr);
+  EXPECT_EQ(
+      std::string(reinterpret_cast<const char*>(updated_mapping->GetMapping()),
+                  updated_mapping->GetSize()),
+      "real_proc_asset");
+}
+
 }  // namespace testing
 }  // namespace flutter

@@ -11,6 +11,7 @@
 #include "flutter/assets/asset_resolver.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 
@@ -36,6 +37,12 @@ class APKAssetProvider final : public AssetResolver {
   // Returns a new 'std::unique_ptr<APKAssetProvider>' with the same 'impl_' as
   // this provider.
   std::unique_ptr<APKAssetProvider> Clone() const;
+
+  // Returns a `FlutterAssetResolver` C-API struct backed by this provider's
+  // `APKAssetProviderInternal`. The returned struct's `user_data` owns a
+  // heap-allocated `std::shared_ptr<APKAssetProviderInternal>` that is freed
+  // when `destruction_callback` is invoked.
+  FlutterAssetResolver ToFlutterAssetResolver() const;
 
   // Obtain a raw pointer to the APKAssetProviderInternal.
   //

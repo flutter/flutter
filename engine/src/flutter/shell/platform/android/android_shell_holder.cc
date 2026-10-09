@@ -988,6 +988,81 @@ void AndroidShellHolder::DispatchPointerDataPacket(const uint8_t* buffer,
   }
 }
 
+void AndroidShellHolder::LoadDartDeferredLibrary(
+    intptr_t loading_unit_id,
+    std::unique_ptr<const fml::Mapping> snapshot_data,
+    std::unique_ptr<const fml::Mapping> snapshot_instructions) {
+  struct DeferredLibraryContext {
+    std::unique_ptr<const fml::Mapping> data;
+    std::unique_ptr<const fml::Mapping> instructions;
+  };
+  auto* context = new DeferredLibraryContext{
+      .data = std::move(snapshot_data),
+      .instructions = std::move(snapshot_instructions),
+  };
+
+  FlutterDartDeferredLibrary deferred_library = {};
+  deferred_library.struct_size = sizeof(FlutterDartDeferredLibrary);
+  deferred_library.loading_unit_id = static_cast<int64_t>(loading_unit_id);
+  if (context->data) {
+    deferred_library.data = context->data->GetMapping();
+    deferred_library.data_size = context->data->GetSize();
+  }
+  if (context->instructions) {
+    deferred_library.instructions = context->instructions->GetMapping();
+    deferred_library.instructions_size = context->instructions->GetSize();
+  }
+  deferred_library.user_data = context;
+  deferred_library.destruction_callback = [](void* user_data) {
+    delete static_cast<DeferredLibraryContext*>(user_data);
+  };
+
+  FlutterEngineResult result =
+      embedder_api_.LoadDartDeferredLibrary(engine_.get(), &deferred_library);
+  if (result != kSuccess) {
+    delete context;
+    FML_LOG(ERROR) << "FlutterEngineLoadDartDeferredLibrary failed: " << result;
+  }
+}
+
+void AndroidShellHolder::LoadDartDeferredLibraryError(
+    intptr_t loading_unit_id,
+    const std::string& error_message,
+    bool transient) {
+  FlutterDartDeferredLibraryLoadError error = {};
+  error.struct_size = sizeof(FlutterDartDeferredLibraryLoadError);
+  error.loading_unit_id = static_cast<int64_t>(loading_unit_id);
+  error.error_message = error_message.c_str();
+  error.transient = transient;
+
+  FlutterEngineResult result =
+      embedder_api_.NotifyDartDeferredLibraryLoadError(engine_.get(), &error);
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineNotifyDartDeferredLibraryLoadError failed: "
+                   << result;
+  }
+}
+
+void AndroidShellHolder::UpdateJavaAssetManager(
+    std::unique_ptr<APKAssetProvider> asset_provider) {
+  if (!asset_provider) {
+    return;
+  }
+  FlutterAssetResolver resolver = asset_provider->ToFlutterAssetResolver();
+  FlutterAssetResolverRegistrationInfo info = {};
+  info.struct_size = sizeof(FlutterAssetResolverRegistrationInfo);
+  info.resolver = &resolver;
+
+  FlutterEngineResult result =
+      embedder_api_.UpdateAssetResolver(engine_.get(), &info);
+  if (result != kSuccess) {
+    if (resolver.destruction_callback) {
+      resolver.destruction_callback(resolver.user_data);
+    }
+    FML_LOG(ERROR) << "FlutterEngineUpdateAssetResolver failed: " << result;
+  }
+}
+
 FlutterEngineProcTable& AndroidShellHolder::GetEmbedderApiForTesting() {
   return embedder_api_;
 }
