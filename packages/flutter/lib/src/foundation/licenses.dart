@@ -142,6 +142,11 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
   /// * Lines starting with a different number of space characters than the
   ///   previous line start a new paragraph, with those spaces removed.
   /// * Blank lines start a new paragraph.
+  /// * Separator lines, consisting of three or more of the same one of `-`,
+  ///   `=`, `*`, `_`, or `~`, form a paragraph of their own.
+  /// * A short line written entirely in capital letters that starts a
+  ///   paragraph and is followed by a line containing lowercase letters is
+  ///   treated as a heading, and forms a paragraph of its own.
   /// * Other line breaks are replaced by a single space character.
   /// * Leading spaces on a line are removed.
   ///
@@ -179,6 +184,53 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
       assert(result.text.isNotEmpty);
       lines.clear();
       return result;
+    }
+
+    // The following is a wild heuristic for guessing the indentation level.
+    // It happens to work for common variants of the BSD and LGPL licenses.
+    int indentationFor(int lineIndent) {
+      if (lineIndent > 10) {
+        return LicenseParagraph.centeredIndent;
+      }
+      return lineIndent ~/ 3;
+    }
+
+    // Returns the line after the one ending at currentPosition, or null if
+    // there is none.
+    String? nextLine() {
+      final int start = currentPosition + 1;
+      if (start >= text.length) {
+        return null;
+      }
+      final int end = text.indexOf('\n', start);
+      return text.substring(start, end == -1 ? text.length : end);
+    }
+
+    // Called after addLine(). If the line just added is a separator line (such
+    // as a row of hyphens) or a heading (a short line in capital letters that
+    // opens a paragraph and is followed by ordinary text), emits it as a
+    // paragraph of its own, emitting any preceding lines first, and returns
+    // true. Otherwise returns false and leaves the lines alone.
+    bool addStandaloneLine() {
+      final String line = lines.last;
+      if (_isSeparatorLine(line)) {
+        lines.removeLast();
+        if (lines.isNotEmpty) {
+          result.add(getParagraph());
+        }
+        lines.add(line);
+        currentParagraphIndentation = indentationFor(currentLineIndent);
+      } else if (lines.length == 1 && _isHeadingLine(line)) {
+        final String? next = nextLine();
+        if (next == null || next.toUpperCase() == next) {
+          return false;
+        }
+      } else {
+        return false;
+      }
+      result.add(getParagraph());
+      currentParagraphIndentation = null;
+      return true;
     }
 
     while (currentPosition < text.length) {
@@ -225,28 +277,22 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
                 result.add(getParagraph());
                 currentParagraphIndentation = null;
               }
-              // The following is a wild heuristic for guessing the indentation level.
-              // It happens to work for common variants of the BSD and LGPL licenses.
-              if (currentParagraphIndentation == null) {
-                if (currentLineIndent > 10) {
-                  currentParagraphIndentation = LicenseParagraph.centeredIndent;
-                } else {
-                  currentParagraphIndentation = currentLineIndent ~/ 3;
-                }
-              }
+              currentParagraphIndentation ??= indentationFor(currentLineIndent);
               state = _LicenseEntryWithLineBreaksParserState.inParagraph;
           }
         case _LicenseEntryWithLineBreaksParserState.inParagraph:
           switch (text[currentPosition]) {
             case '\n':
               addLine();
-              lastLineIndent = currentLineIndent;
+              lastLineIndent = addStandaloneLine() ? 0 : currentLineIndent;
               currentLineIndent = 0;
               lineStart = currentPosition + 1;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
             case '\f':
               addLine();
-              result.add(getParagraph());
+              if (!addStandaloneLine()) {
+                result.add(getParagraph());
+              }
               lastLineIndent = 0;
               currentLineIndent = 0;
               currentParagraphIndentation = null;
@@ -265,9 +311,32 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
         }
       case _LicenseEntryWithLineBreaksParserState.inParagraph:
         addLine();
-        result.add(getParagraph());
+        if (!addStandaloneLine()) {
+          result.add(getParagraph());
+        }
     }
     return result;
+  }
+
+  // Lines of three or more of the same one of these characters, like
+  // "-----------", are treated as separators rather than as part of the
+  // surrounding text.
+  static final RegExp _separatorLine = RegExp(r'^([-=*_~])\1{2,}$');
+
+  static bool _isSeparatorLine(String line) => _separatorLine.hasMatch(line.trimRight());
+
+  // Headings longer than this are assumed to be the start of a paragraph
+  // written in capitals, such as a warranty disclaimer, rather than a heading.
+  static const int _maxHeadingLength = 40;
+
+  static final RegExp _capitalizedWord = RegExp('[A-Z]{2,}');
+
+  static bool _isHeadingLine(String line) {
+    final String trimmed = line.trimRight();
+    return trimmed.length <= _maxHeadingLength &&
+        trimmed.toUpperCase() == trimmed &&
+        _capitalizedWord.hasMatch(trimmed) &&
+        !trimmed.endsWith(',');
   }
 }
 
