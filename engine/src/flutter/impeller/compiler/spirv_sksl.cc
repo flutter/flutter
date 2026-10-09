@@ -494,7 +494,7 @@ std::string CompilerSkSL::to_function_args(const TextureFunctionArguments& args,
   }
 
   // GLSL puts the shader as the first argument, but in SkSL the shader is
-  // implicitly passed as the reciever of the 'eval' method. Therefore, the
+  // implicitly passed as the receiver of the 'eval' method. Therefore, the
   // shader is removed from the GLSL argument list.
   std::string no_shader;
   auto npos = glsl_args.find(", ");  // The first ','.
