@@ -303,7 +303,7 @@ void main() {
       packageConfigPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       // These values are ignored by toEnvironmentConfig
-      androidProjectArgs: <String>['foo=bar', 'fizz=bazz'],
+      androidGradleConfig: AndroidGradleConfig(projectArgs: <String>['foo=bar', 'fizz=bazz']),
     );
 
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
@@ -335,7 +335,49 @@ void main() {
     expect(buildInfo.toEnvironmentConfig()['BUILD_NUMBER'], '7');
   });
 
-  testWithoutContext('toGradleConfig encoding of standard values', () {
+  testWithoutContext('AndroidGradleConfig defaults and overrides', () {
+    const defaultConfig = AndroidGradleConfig();
+    expect(defaultConfig.projectArgs, isEmpty);
+    expect(defaultConfig.projectCacheDir, isNull);
+    expect(defaultConfig.gradleDaemon, isTrue);
+    expect(defaultConfig.skipBuildDependencyValidation, isFalse);
+    expect(defaultConfig.enableHcpp, isNull);
+    expect(defaultConfig.explicitEnableHcpp, isNull);
+
+    expect(BuildInfo.debug.androidGradleConfig.projectArgs, isEmpty);
+    expect(BuildInfo.debug.androidGradleConfig.projectCacheDir, isNull);
+    expect(BuildInfo.debug.androidGradleConfig.gradleDaemon, isTrue);
+    expect(BuildInfo.debug.androidGradleConfig.skipBuildDependencyValidation, isFalse);
+    expect(BuildInfo.debug.androidGradleConfig.enableHcpp, isNull);
+    expect(BuildInfo.debug.androidGradleConfig.explicitEnableHcpp, isNull);
+
+    const defaultAndroidBuildInfo = AndroidBuildInfo(BuildInfo.debug);
+    expect(defaultAndroidBuildInfo.gradleDaemon, isTrue);
+    expect(defaultAndroidBuildInfo.skipBuildDependencyValidation, isFalse);
+
+    const customConfig = AndroidGradleConfig(
+      projectArgs: <String>['a=1', 'b=2'],
+      projectCacheDir: '/custom/cache',
+      gradleDaemon: false,
+      skipBuildDependencyValidation: true,
+      enableHcpp: true,
+      explicitEnableHcpp: false,
+    );
+    const customBuildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      treeShakeIcons: false,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+      androidGradleConfig: customConfig,
+    );
+    const customAndroidBuildInfo = AndroidBuildInfo(customBuildInfo);
+
+    expect(customAndroidBuildInfo.gradleDaemon, isFalse);
+    expect(customAndroidBuildInfo.skipBuildDependencyValidation, isTrue);
+    expect(customBuildInfo.copyWith().androidGradleConfig, same(customConfig));
+  });
+
+  testWithoutContext('AndroidBuildInfo.toGradleConfig encoding of standard values', () {
     const buildInfo = BuildInfo(
       BuildMode.debug,
       '',
@@ -348,11 +390,16 @@ void main() {
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       packageConfigPath: 'foo/.dart_tool/package_config.json',
+      performanceMeasurementFile: 'foo/performance.json',
       codeSizeDirectory: 'foo/code-size',
-      androidProjectArgs: <String>['foo=bar', 'fizz=bazz'],
+      androidGradleConfig: AndroidGradleConfig(
+        projectArgs: <String>['foo=bar', 'fizz=bazz'],
+        projectCacheDir: '/custom/cache',
+      ),
     );
+    const androidBuildInfo = AndroidBuildInfo(buildInfo);
 
-    expect(buildInfo.toGradleConfig(), <String>[
+    expect(androidBuildInfo.toGradleConfig(), <String>[
       '-Pdart-defines=${encodeDartDefinesMap(<String, String>{'foo': '2', 'bar': '2'})}',
       '-Pdart-obfuscation=true',
       '-Pfrontend-server-starter-path=foo/bar/frontend_server_starter.dart',
@@ -361,33 +408,35 @@ void main() {
       '-Psplit-debug-info=foo/',
       '-Ptrack-widget-creation=true',
       '-Ptree-shake-icons=true',
+      '-Pperformance-measurement-file=foo/performance.json',
       '-Pcode-size-directory=foo/code-size',
       '-Pfoo=bar',
       '-Pfizz=bazz',
+      '--project-cache-dir=/custom/cache',
     ]);
   });
 
-  testWithoutContext('toGradleConfig encoding of androidEnableHcpp', () {
+  testWithoutContext('AndroidBuildInfo.toGradleConfig encoding of enableHcpp', () {
     const buildInfo = BuildInfo(
       BuildMode.debug,
       '',
       treeShakeIcons: true,
       packageConfigPath: 'foo/.dart_tool/package_config.json',
-      androidEnableHcpp: true,
-      explicitAndroidEnableHcpp: true,
+      androidGradleConfig: AndroidGradleConfig(enableHcpp: true, explicitEnableHcpp: true),
     );
+    const androidBuildInfo = AndroidBuildInfo(buildInfo);
 
-    expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=true'));
-    expect(buildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
+    expect(androidBuildInfo.toGradleConfig(), contains('-Penable-hcpp=true'));
+    expect(androidBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
     expect(
-      buildInfo.copyWith().androidEnableHcpp,
+      buildInfo.copyWith().androidGradleConfig.enableHcpp,
       isTrue,
-      reason: 'copyWith should preserve androidEnableHcpp',
+      reason: 'copyWith should preserve enableHcpp',
     );
     expect(
-      buildInfo.copyWith().explicitAndroidEnableHcpp,
+      buildInfo.copyWith().androidGradleConfig.explicitEnableHcpp,
       isTrue,
-      reason: 'copyWith should preserve explicitAndroidEnableHcpp',
+      reason: 'copyWith should preserve explicitEnableHcpp',
     );
 
     const disabledBuildInfo = BuildInfo(
@@ -395,11 +444,11 @@ void main() {
       '',
       treeShakeIcons: true,
       packageConfigPath: 'foo/.dart_tool/package_config.json',
-      androidEnableHcpp: false,
-      explicitAndroidEnableHcpp: false,
+      androidGradleConfig: AndroidGradleConfig(enableHcpp: false, explicitEnableHcpp: false),
     );
-    expect(disabledBuildInfo.toGradleConfig(), contains('-Penable-hcpp=false'));
-    expect(disabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=false'));
+    const disabledAndroidBuildInfo = AndroidBuildInfo(disabledBuildInfo);
+    expect(disabledAndroidBuildInfo.toGradleConfig(), contains('-Penable-hcpp=false'));
+    expect(disabledAndroidBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=false'));
 
     const unsetBuildInfo = BuildInfo(
       BuildMode.debug,
@@ -407,13 +456,14 @@ void main() {
       treeShakeIcons: true,
       packageConfigPath: 'foo/.dart_tool/package_config.json',
     );
+    const unsetAndroidBuildInfo = AndroidBuildInfo(unsetBuildInfo);
     expect(
-      unsetBuildInfo.toGradleConfig(),
+      unsetAndroidBuildInfo.toGradleConfig(),
       isNot(anyElement(contains('-Penable-hcpp'))),
       reason: 'no property should be passed when unset',
     );
     expect(
-      unsetBuildInfo.toGradleConfig(),
+      unsetAndroidBuildInfo.toGradleConfig(),
       isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
       reason: 'no property should be passed when unset',
     );
