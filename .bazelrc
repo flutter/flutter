@@ -14,5 +14,20 @@ common --symlink_prefix=engine/src/out/bazel-
 # Actions must not inherit the invoking user's environment.
 build --incompatible_strict_action_env
 
+# C/C++ is built only with the hermetic toolchains registered in MODULE.bazel;
+# never auto-detect a compiler on the host.
+build --repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+
+# Mirror GN: every object is position independent (-fPIC on all platforms
+# that support it) and libraries are linked statically into executables and
+# shared libraries -- there is no component build.
+build --force_pic
+build --dynamic_mode=off
+
+# BUILDCONFIG.gn gives every executable, shared library and loadable module a
+# dependency on the engine's own libc++. cc_binary and cc_test get it through
+# this flag; cc_shared_library targets list it explicitly.
+build --@bazel_tools//tools/cpp:link_extra_libs=//engine/src/flutter/build/bazel/toolchains:cxx_runtime
+
 # Personal overrides (ignored by git).
 try-import %workspace%/user.bazelrc
