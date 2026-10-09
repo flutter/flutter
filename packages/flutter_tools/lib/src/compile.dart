@@ -94,9 +94,9 @@ class TargetModel {
 
   /// Infers the appropriate [TargetModel] from a given [TargetPlatform].
   static TargetModel fromTargetPlatform(TargetPlatform? platform) {
-    return switch (platform) {
-      TargetPlatform.web_javascript => TargetModel.dartdevc,
-      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => TargetModel.flutterRunner,
+    return switch (platform?.os) {
+      .web => TargetModel.dartdevc,
+      .fuchsia => TargetModel.flutterRunner,
       _ => TargetModel.flutter,
     };
   }

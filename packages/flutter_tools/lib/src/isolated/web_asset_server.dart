@@ -157,7 +157,7 @@ class WebAssetServer implements AssetReader {
       final metadata = ModuleMetadata.fromJson(
         json.decode(
           utf8.decode(_webMemoryFS.metadataFiles['$relativeModulePath.metadata']!.toList()),
-        ) as Map<String, dynamic>,
+        ) as Map<String, Object?>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
       moduleToLibrary.add(<String, Object>{
@@ -321,6 +321,7 @@ class WebAssetServer implements AssetReader {
       );
       final shelf.Handler releaseHandler = const shelf.Pipeline()
           .addMiddleware(waitMiddleware)
+          .addMiddleware(proxyMiddleware(proxy, logger))
           .addHandler(releaseAssetServer.handle);
       runZonedGuarded(
         () {
@@ -384,7 +385,7 @@ class WebAssetServer implements AssetReader {
     if (shouldEnableMiddleware) {
       pipeline = pipeline.addMiddleware(dwds.middleware);
     }
-    pipeline = pipeline.addMiddleware(proxyMiddleware(proxy, globals.logger));
+    pipeline = pipeline.addMiddleware(proxyMiddleware(proxy, logger));
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
     final shelf.Handler serverHandler = const shelf.Pipeline()

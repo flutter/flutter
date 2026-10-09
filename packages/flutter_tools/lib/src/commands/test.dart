@@ -845,6 +845,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       :Config config,
       :FileSystem fs,
       :Logger logger,
+      :Platform platform,
       :ProcessManager processManager,
     ) = _toolContext;
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
@@ -870,6 +871,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         logger: logger,
         projectDir: fs.currentDirectory,
         buildMode: buildMode,
+        platform: platform,
       );
 
       final File cachedFlavorFile = fs.file(

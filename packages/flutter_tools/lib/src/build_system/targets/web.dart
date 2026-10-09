@@ -1284,7 +1284,7 @@ class WebReleaseBundle extends Target {
   /// Create version.json file that contains data about version for package_info
   void createVersionFile(Environment environment, Map<String, String> defines) {
     final versionInfo =
-        jsonDecode(FlutterProject.current().getVersionInfo()) as Map<String, dynamic>;
+        jsonDecode(FlutterProject.current().getVersionInfo()) as Map<String, Object?>;
 
     if (defines.containsKey(kBuildNumber)) {
       versionInfo['build_number'] = defines[kBuildNumber];
@@ -1310,7 +1310,7 @@ class WebReleaseBundle extends Target {
         : <Object?>[];
 
     final bool hasRobotoFamily = manifestJson.any((Object? entry) {
-      return entry is Map<String, dynamic> && entry['family'] == _kBundledFallbackRobotoFamily;
+      return entry is Map<String, Object?> && entry['family'] == _kBundledFallbackRobotoFamily;
     });
     if (hasRobotoFamily) {
       return depfile;
