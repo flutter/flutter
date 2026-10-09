@@ -2386,10 +2386,13 @@ void main() {
 
     // Widget does not have focus anymore.
     expect(state.wantKeepAlive, false);
-    // No method calls are sent from the framework.
-    // This makes sure hide/clearClient methods are not called after connection
-    // closed.
-    expect(tester.testTextInput.log, isEmpty);
+    expect(
+      tester.testTextInput.log,
+      containsAllInOrder(<Matcher>[
+        matchesMethodCall('TextInput.clearClient'),
+        matchesMethodCall('TextInput.hide'),
+      ]),
+    );
   });
 
   testWidgets('closed connection reopened when user focused', (WidgetTester tester) async {
@@ -2428,10 +2431,13 @@ void main() {
 
     // Widget does not have focus anymore.
     expect(state.wantKeepAlive, false);
-    // No method calls are sent from the framework.
-    // This makes sure hide/clearClient methods are not called after connection
-    // closed.
-    expect(tester.testTextInput.log, isEmpty);
+    expect(
+      tester.testTextInput.log,
+      containsAllInOrder(<Matcher>[
+        matchesMethodCall('TextInput.clearClient'),
+        matchesMethodCall('TextInput.hide'),
+      ]),
+    );
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
@@ -2496,10 +2502,13 @@ void main() {
 
     // Widget does not have focus anymore.
     expect(state.wantKeepAlive, false);
-    // No method calls are sent from the framework.
-    // This makes sure hide/clearClient methods are not called after connection
-    // closed.
-    expect(tester.testTextInput.log, isEmpty);
+    expect(
+      tester.testTextInput.log,
+      containsAllInOrder(<Matcher>[
+        matchesMethodCall('TextInput.clearClient'),
+        matchesMethodCall('TextInput.hide'),
+      ]),
+    );
 
     // For the next fields, tap, enter text.
     await tester.tap(find.byWidget(testPhoneField));
