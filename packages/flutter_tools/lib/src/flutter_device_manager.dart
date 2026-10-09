@@ -71,7 +71,11 @@ class FlutterDeviceManager extends DeviceManager {
            iosWorkflow: iosWorkflow,
            logger: logger,
          ),
-         IOSSimulators(iosSimulatorUtils: iosSimulatorUtils),
+         IOSSimulators(
+           iosSimulatorUtils: iosSimulatorUtils,
+           iosWorkflow: iosWorkflow,
+           platform: platform,
+         ),
          FlutterTesterDevices(
            fileSystem: fileSystem,
            flutterVersion: flutterVersion,

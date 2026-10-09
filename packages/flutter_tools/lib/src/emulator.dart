@@ -14,21 +14,27 @@ import 'android/java.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'device.dart';
 import 'ios/ios_emulators.dart';
+import 'ios/ios_workflow.dart';
+import 'macos/xcode.dart';
 
 EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
 
 /// A class to get all available emulators.
 class EmulatorManager {
   EmulatorManager({
-    required this._java,
-    AndroidSdk? androidSdk,
-    required Logger logger,
-    required ProcessManager processManager,
     required AndroidWorkflow androidWorkflow,
     required FileSystem fileSystem,
+    required IOSWorkflow? iosWorkflow,
+    required this._java,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
+    required Xcode? xcode,
+    AndroidSdk? androidSdk,
   }) : _androidSdk = androidSdk,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _androidEmulators = AndroidEmulators(
@@ -38,6 +44,15 @@ class EmulatorManager {
          fileSystem: fileSystem,
          androidWorkflow: androidWorkflow,
        ) {
+    _emulatorDiscoverers.add(
+      IOSEmulators(
+        iosWorkflow: iosWorkflow,
+        logger: logger,
+        platform: platform,
+        processUtils: _processUtils,
+        xcode: xcode,
+      ),
+    );
     _emulatorDiscoverers.add(_androidEmulators);
   }
 
@@ -48,7 +63,7 @@ class EmulatorManager {
 
   // Constructing EmulatorManager is cheap; they only do expensive work if some
   // of their methods are called.
-  final _emulatorDiscoverers = <EmulatorDiscovery>[IOSEmulators()];
+  final _emulatorDiscoverers = <EmulatorDiscovery>[];
 
   Future<List<Emulator>> getEmulatorsMatching(String searchText) async {
     final List<Emulator> emulators = await getAllAvailableEmulators();

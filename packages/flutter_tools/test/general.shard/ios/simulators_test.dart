@@ -20,11 +20,11 @@ import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -47,7 +47,7 @@ void main() {
   late FakePlatform osx;
   late FileSystemUtils fsUtils;
   late MemoryFileSystem fileSystem;
-  final Logger logger = FakeLogger();
+  final Logger logger = BufferLogger.test();
 
   setUp(() {
     osx = FakePlatform(environment: <String, String>{}, operatingSystem: 'macos');
@@ -57,11 +57,9 @@ void main() {
 
   group('_IOSSimulatorDevicePortForwarder', () {
     late FakeSimControl simControl;
-    late Xcode xcode;
 
     setUp(() {
       simControl = FakeSimControl();
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
 
     testUsingContext(
@@ -74,6 +72,7 @@ void main() {
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
           logger: logger,
+          fileSystem: fileSystem,
         );
         final DevicePortForwarder portForwarder = simulator.portForwarder;
         await portForwarder.forward(123);
@@ -90,7 +89,6 @@ void main() {
         Platform: () => osx,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
       testOn: 'posix',
     );
@@ -106,6 +104,7 @@ void main() {
         simControl: FakeSimControl(),
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
         logger: logger,
+        fileSystem: fileSystem,
       );
 
       expect(simulator.supportsRuntimeMode(BuildMode.debug), true);
@@ -138,12 +137,14 @@ void main() {
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
           logger: logger,
+          platform: osx,
+          fileSystem: fileSystem,
+          fileSystemUtils: fsUtils,
         );
         expect(simulator.logFilePath, '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
       },
       overrides: <Type, Generator>{
         Platform: () => osx,
-        FileSystemUtils: () => fsUtils,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },
@@ -162,12 +163,14 @@ void main() {
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
           logger: logger,
+          platform: osx,
+          fileSystem: fileSystem,
+          fileSystemUtils: fsUtils,
         );
         expect(simulator.logFilePath, '/baz/qux/456/system.log');
       },
       overrides: <Type, Generator>{
         Platform: () => osx,
-        FileSystemUtils: () => fsUtils,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },
@@ -190,6 +193,7 @@ void main() {
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
         simControl: simControl,
         logger: logger,
+        fileSystem: fileSystem,
       );
 
       expect(await device.sdkMajorVersion, 11);
@@ -203,6 +207,7 @@ void main() {
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
         logger: logger,
+        fileSystem: fileSystem,
       );
 
       expect(await device.sdkMajorVersion, 11);
@@ -216,6 +221,7 @@ void main() {
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
         logger: logger,
+        fileSystem: fileSystem,
       );
 
       expect(device.category, Category.mobile);
@@ -239,6 +245,8 @@ void main() {
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.tvOS-14-5',
           logger: logger,
+          fileSystem: fileSystem,
+          platform: osx,
         );
         expect(await simulator.isSupported(), false);
       },
@@ -260,6 +268,8 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.watchOS-8-0',
             logger: logger,
+            fileSystem: fileSystem,
+            platform: osx,
           ).isSupported(),
           false,
         );
@@ -282,6 +292,8 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             logger: logger,
+            fileSystem: fileSystem,
+            platform: osx,
           ).isSupported(),
           true,
         );
@@ -304,6 +316,8 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             logger: logger,
+            fileSystem: fileSystem,
+            platform: osx,
           ).isSupported(),
           true,
         );
@@ -326,6 +340,8 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             logger: logger,
+            fileSystem: fileSystem,
+            platform: osx,
           ).isSupported(),
           true,
         );
@@ -348,6 +364,8 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             logger: logger,
+            fileSystem: fileSystem,
+            platform: osx,
           ).isSupported(),
           true,
         );
@@ -370,6 +388,8 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             logger: logger,
+            fileSystem: fileSystem,
+            platform: osx,
           ).isSupported(),
           true,
         );
@@ -392,6 +412,8 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             logger: logger,
+            fileSystem: fileSystem,
+            platform: osx,
           ).isSupported(),
           true,
         );
@@ -414,6 +436,8 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             logger: logger,
+            fileSystem: fileSystem,
+            platform: osx,
           ).isSupported(),
           true,
         );
@@ -450,6 +474,7 @@ void main() {
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
         logger: logger,
+        fileSystem: fileSystem,
       );
 
       final File screenshot = MemoryFileSystem.test().file('screenshot.png');
@@ -477,6 +502,10 @@ void main() {
           simulatorCategory: 'iOS 9.3',
           simControl: simControl,
           logger: logger,
+          fileSystem: fileSystem,
+          platform: macosPlatform,
+          fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
+          processManager: fakeProcessManager,
         );
         fakeProcessManager.addCommand(
           const FakeCommand(
@@ -490,7 +519,6 @@ void main() {
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
         Platform: () => macosPlatform,
-        FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
       },
     );
 
@@ -504,6 +532,8 @@ void main() {
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
           logger: logger,
+          fileSystem: fileSystem,
+          processManager: fakeProcessManager,
         );
         const expectedPredicate =
             'eventType = logEvent AND '
@@ -551,6 +581,8 @@ void main() {
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
           logger: logger,
+          fileSystem: fileSystem,
+          processManager: fakeProcessManager,
         );
         const expectedPredicate =
             'eventType = logEvent AND '
@@ -632,6 +664,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             simulatorCategory: 'iOS 10.0',
             simControl: simControl,
             logger: logger,
+            fileSystem: fileSystem,
+            platform: osx,
+            xcode: xcode,
+            processManager: fakeProcessManager,
           );
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -647,7 +683,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           ProcessManager: () => fakeProcessManager,
           FileSystem: () => fileSystem,
           Platform: () => osx,
-          Xcode: () => xcode,
         },
       );
 
@@ -677,6 +712,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             simulatorCategory: 'iOS 10.3',
             simControl: simControl,
             logger: logger,
+            fileSystem: fileSystem,
+            platform: osx,
+            xcode: xcode,
+            processManager: fakeProcessManager,
           );
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -694,7 +733,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           ProcessManager: () => fakeProcessManager,
           FileSystem: () => fileSystem,
           Platform: () => osx,
-          Xcode: () => xcode,
         },
       );
 
@@ -735,6 +773,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             simulatorCategory: 'iOS 10.3',
             simControl: simControl,
             logger: logger,
+            fileSystem: fileSystem,
+            platform: osx,
+            xcode: xcode,
+            processManager: fakeProcessManager,
           );
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -757,7 +799,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           ProcessManager: () => fakeProcessManager,
           FileSystem: () => fileSystem,
           Platform: () => osx,
-          Xcode: () => xcode,
         },
       );
     });
@@ -820,6 +861,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
             logger: logger,
+            fileSystem: fileSystem,
+            processManager: fakeProcessManager,
           );
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -882,6 +925,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
             logger: logger,
+            fileSystem: fileSystem,
+            platform: osx,
+            xcode: xcode,
+            processManager: fakeProcessManager,
           );
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -906,7 +953,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           ProcessManager: () => fakeProcessManager,
           FileSystem: () => fileSystem,
           Platform: () => osx,
-          Xcode: () => xcode,
           Logger: () => logger,
         },
       );
@@ -949,6 +995,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
             logger: logger,
+            fileSystem: fileSystem,
+            processManager: fakeProcessManager,
           );
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -1048,24 +1096,32 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         xcode: xcodeBadSimctl,
       );
       simulatorUtils = IOSSimulatorUtils(
+        analytics: const NoOpAnalytics(),
+        fileSystem: fileSystem,
+        logger: logger,
         operatingSystemUtils: OperatingSystemUtils(
           fileSystem: fileSystem,
           logger: logger,
           platform: osx,
           processManager: FakeProcessManager.any(),
         ),
-        logger: logger,
+        platform: osx,
+        plistParser: FakePlistParser(),
         processManager: fakeProcessManager,
         xcode: xcode,
       );
       simulatorUtilsBadSimctl = IOSSimulatorUtils(
+        analytics: const NoOpAnalytics(),
+        fileSystem: fileSystem,
+        logger: logger,
         operatingSystemUtils: OperatingSystemUtils(
           fileSystem: fileSystem,
           logger: logger,
           platform: osx,
           processManager: FakeProcessManager.any(),
         ),
-        logger: logger,
+        platform: osx,
+        plistParser: FakePlistParser(),
         processManager: fakeProcessManager,
         xcode: xcodeBadSimctl,
       );
@@ -1202,6 +1258,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         simulatorCategory: 'NaN',
         simControl: simControl,
         logger: logger,
+        fileSystem: fileSystem,
       );
 
       expect(await iosSimulatorA.sdkMajorVersion, 11);
@@ -1272,6 +1329,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         simulatorCategory: 'NaN',
         simControl: simControl,
         logger: logger,
+        fileSystem: fileSystem,
       );
 
       expect(await iosSimulator.stopApp(null), isFalse);
@@ -1471,6 +1529,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
           logger: logger,
+          fileSystem: fileSystem,
+          plistParser: testPlistParser,
+          xcode: xcode,
+          processManager: FakeProcessManager.any(),
         );
         testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
@@ -1494,10 +1556,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         expect(simControl.requests.single.appIdentifier, 'correct');
       },
       overrides: <Type, Generator>{
-        PlistParser: () => testPlistParser,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
     );
 
@@ -1511,6 +1571,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
           logger: logger,
+          fileSystem: fileSystem,
+          plistParser: testPlistParser,
+          xcode: xcode,
+          processManager: FakeProcessManager.any(),
         );
 
         final Directory mockDir = globals.fs.currentDirectory;
@@ -1542,11 +1606,9 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         );
       },
       overrides: <Type, Generator>{
-        PlistParser: () => testPlistParser,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
-        Xcode: () => xcode,
       },
     );
 
@@ -1560,6 +1622,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
           logger: logger,
+          fileSystem: fileSystem,
+          plistParser: testPlistParser,
+          xcode: xcode,
+          processManager: FakeProcessManager.any(),
         );
         testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
@@ -1628,10 +1694,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         );
       },
       overrides: <Type, Generator>{
-        PlistParser: () => testPlistParser,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
     );
 
@@ -1645,6 +1709,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
           logger: logger,
+          fileSystem: fileSystem,
+          plistParser: testPlistParser,
+          xcode: xcode,
+          processManager: FakeProcessManager.any(),
         );
         testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
@@ -1673,21 +1741,17 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         expect(simControl.requests.single.launchArgs, contains('--route=/animation'));
       },
       overrides: <Type, Generator>{
-        PlistParser: () => testPlistParser,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
     );
   });
 
   group('IOSDevice.isSupportedForProject', () {
     late FakeSimControl simControl;
-    late Xcode xcode;
 
     setUp(() {
       simControl = FakeSimControl();
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
 
     testUsingContext(
@@ -1712,13 +1776,13 @@ flutter:
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
           logger: logger,
+          fileSystem: fileSystem,
         );
         expect(simulator.isSupportedForProject(flutterProject), true);
       },
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
     );
 
@@ -1738,13 +1802,13 @@ flutter:
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
           logger: logger,
+          fileSystem: fileSystem,
         );
         expect(simulator.isSupportedForProject(flutterProject), true);
       },
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
     );
 
@@ -1763,13 +1827,13 @@ flutter:
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
           logger: logger,
+          fileSystem: fileSystem,
         );
         expect(simulator.isSupportedForProject(flutterProject), false);
       },
       overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => xcode,
       },
     );
 
@@ -1781,6 +1845,7 @@ flutter:
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
         logger: logger,
+        fileSystem: fileSystem,
       );
 
       expect(simulator.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());

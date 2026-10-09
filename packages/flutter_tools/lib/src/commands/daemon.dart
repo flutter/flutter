@@ -18,6 +18,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -32,6 +33,7 @@ import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../emulator.dart';
 import '../features.dart';
+import '../ios/ios_workflow.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../proxied_devices/debounce_data_stream.dart';
@@ -278,10 +280,16 @@ class Daemon {
   }) : _logger = notifyingLogger ?? toolContext.logger,
        _fs = toolContext.fs,
        _stdio = toolContext.stdio {
-    final ToolContext(:ProcessManager processManager, :FlutterProjectFactory projectFactory) =
-        toolContext;
+    final ToolContext(
+      :Platform platform,
+      :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
+    ) = toolContext;
     final AndroidWorkflow workflow =
         androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: featureFlags);
+    final IOSWorkflow? iosWorkflow = xcode == null
+        ? null
+        : IOSWorkflow(featureFlags: featureFlags, xcode: xcode, platform: platform);
 
     // Set up domains.
     registerDomain(
@@ -318,8 +326,11 @@ class Daemon {
         this,
         androidWorkflow: workflow,
         fileSystem: _fs,
+        iosWorkflow: iosWorkflow,
         logger: _logger,
+        platform: platform,
         processManager: processManager,
+        xcode: xcode,
         androidSdk: androidSdk,
         java: java,
       ),
@@ -1876,20 +1887,26 @@ class EmulatorDomain extends Domain {
     Daemon daemon, {
     required AndroidWorkflow androidWorkflow,
     required FileSystem fileSystem,
+    required IOSWorkflow? iosWorkflow,
     required Logger logger,
+    required Platform platform,
     required ProcessManager processManager,
+    required Xcode? xcode,
     AndroidSdk? androidSdk,
     EmulatorManager? emulatorManager,
     Java? java,
   }) : emulators =
            emulatorManager ??
            EmulatorManager(
-             fileSystem: fileSystem,
-             logger: logger,
-             java: java,
-             androidSdk: androidSdk,
-             processManager: processManager,
              androidWorkflow: androidWorkflow,
+             fileSystem: fileSystem,
+             iosWorkflow: iosWorkflow,
+             java: java,
+             logger: logger,
+             platform: platform,
+             processManager: processManager,
+             xcode: xcode,
+             androidSdk: androidSdk,
            ),
        super(daemon, 'emulator') {
     registerHandler('getEmulators', getEmulators);

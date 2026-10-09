@@ -103,6 +103,7 @@ Future<int> run(
       shutdownHooks: shutdownHooks,
       stdio: globals.stdio,
       systemClock: globals.systemClock,
+      templateRenderer: globals.templateRenderer,
       terminal: globals.terminal,
       userMessages: globals.userMessages,
       windowsWorkflow: windowsWorkflow,

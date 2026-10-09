@@ -26,6 +26,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/signals.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
@@ -150,6 +151,7 @@ class ToolDependencies {
   /// gets a lazy callback that returns [NoOpAnalytics] until [Analytics] has
   /// been constructed.
   static Future<ToolDependencies> bootstrap({
+    required TemplateRenderer templateRenderer,
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidStudio? androidStudio,
@@ -443,6 +445,7 @@ class ToolDependencies {
           fileSystem: finalFS,
           analytics: finalAnalytics,
           shutdownHooks: finalShutdownHooks,
+          templateRenderer: templateRenderer,
         );
 
     final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
@@ -468,18 +471,22 @@ class ToolDependencies {
         iosWorkflow ??
         IOSWorkflow(featureFlags: finalFeatureFlags, xcode: finalXcode, platform: finalPlatform);
 
-    final IOSSimulatorUtils finalIOSSimulatorUtils =
-        iosSimulatorUtils ??
-        IOSSimulatorUtils(
-          logger: finalLogger,
-          operatingSystemUtils: finalOS,
-          processManager: finalProcessManager,
-          xcode: finalXcode,
-        );
-
     final PlistParser finalPlistParser =
         plistParser ??
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
+
+    final IOSSimulatorUtils finalIOSSimulatorUtils =
+        iosSimulatorUtils ??
+        IOSSimulatorUtils(
+          analytics: finalAnalytics,
+          fileSystem: finalFS,
+          logger: finalLogger,
+          operatingSystemUtils: finalOS,
+          platform: finalPlatform,
+          plistParser: finalPlistParser,
+          processManager: finalProcessManager,
+          xcode: finalXcode,
+        );
 
     // 12. AndroidContext Dependencies
     final AndroidStudio? finalAndroidStudio = androidStudio ?? AndroidStudio.latestValid();
@@ -519,9 +526,12 @@ class ToolDependencies {
         EmulatorManager(
           androidWorkflow: finalAndroidWorkflow,
           fileSystem: finalFS,
+          iosWorkflow: finalIOSWorkflow,
           java: finalJava,
           logger: finalLogger,
+          platform: finalPlatform,
           processManager: finalProcessManager,
+          xcode: finalXcode,
           androidSdk: finalAndroidSdk,
         );
 

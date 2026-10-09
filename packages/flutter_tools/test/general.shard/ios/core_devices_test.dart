@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/device_support.dart';
 import 'package:flutter_tools/src/ios/lldb.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -91,7 +90,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -119,7 +118,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
         );
 
@@ -149,7 +148,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
         );
 
@@ -175,7 +174,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
         );
 
@@ -224,7 +223,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -277,7 +276,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -340,7 +339,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -408,7 +407,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -463,7 +462,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -511,7 +510,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -565,7 +564,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -613,7 +612,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -663,7 +662,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -715,7 +714,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -754,7 +753,7 @@ void main() {
           xcodeDebug: fakeXcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
         );
@@ -789,7 +788,7 @@ void main() {
           xcodeDebug: fakeXcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
         );
@@ -824,7 +823,7 @@ void main() {
           xcodeDebug: fakeXcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
         );
@@ -859,7 +858,7 @@ void main() {
           xcodeDebug: fakeXcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
         );
@@ -893,7 +892,7 @@ void main() {
           xcodeDebug: xcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -924,7 +923,7 @@ void main() {
           xcodeDebug: xcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -954,7 +953,7 @@ void main() {
           xcodeDebug: xcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -983,7 +982,7 @@ void main() {
           xcodeDebug: xcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcode: Xcode.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
