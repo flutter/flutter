@@ -1,0 +1,118 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine's hermetic C/C++ toolchains. Each one is the clang package,
+# sysroot and C++ standard library that the GN build uses for the same
+# platform, registered in the root MODULE.bazel.
+
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_toolchain")
+load(":cc_toolchain_config.bzl", "flutter_cc_toolchain_config")
+
+package(default_visibility = ["//visibility:public"])
+
+# The C++ standard library GN links into every executable, shared library and
+# loadable module (BUILDCONFIG.gn's default deps). The root .bazelrc attaches
+# it to every cc_binary and cc_test through --@bazel_tools//tools/cpp:link_extra_libs;
+# cc_shared_library targets must list it in their deps.
+cc_library(
+    name = "cxx_runtime",
+    deps = ["@libcxx"],
+)
+
+# ---------------------------------------------------------------------------
+# linux-x64
+# ---------------------------------------------------------------------------
+
+# The headers every C++ compile needs because the toolchain replaces the
+# standard library include paths (-nostdinc++).
+filegroup(
+    name = "linux_cxx_headers",
+    srcs = [
+        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config_headers",
+        "@libcxx//:headers",
+        "@libcxxabi//:headers",
+    ],
+)
+
+filegroup(
+    name = "linux_x64_compiler_files",
+    srcs = [
+        ":linux_cxx_headers",
+        "@clang_linux_x64//:compiler_files",
+        "@sysroot_linux_x64//:headers",
+    ],
+)
+
+filegroup(
+    name = "linux_x64_linker_files",
+    srcs = [
+        "@clang_linux_x64//:linker_files",
+        "@sysroot_linux_x64//:libraries",
+    ],
+)
+
+filegroup(
+    name = "linux_x64_all_files",
+    srcs = [
+        ":linux_x64_compiler_files",
+        ":linux_x64_linker_files",
+        "@clang_linux_x64//:all_files",
+    ],
+)
+
+flutter_cc_toolchain_config(
+    name = "linux_x64_clang_config",
+    ar = "@clang_linux_x64//:bin/llvm-ar",
+    clang = "@clang_linux_x64//:bin/clang",
+    clangxx = "@clang_linux_x64//:bin/clang++",
+    # Search order matches GN: libc++, libc++abi, then the engine's
+    # __config_site (found through libc++'s <__config>).
+    cxx_include_markers = [
+        "@libcxx//:include/__config",
+        "@libcxxabi//:include/cxxabi.h",
+        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
+    ],
+    objcopy = "@clang_linux_x64//:bin/llvm-objcopy",
+    strip = "@clang_linux_x64//:bin/llvm-strip",
+    sysroot_marker = "@sysroot_linux_x64//:BUILD.bazel",
+    target_cpu = "k8",
+    # The bullseye sysroot's library is glibc 2.31; its features.h is patched
+    # by the Chrome sysroot creator to advertise 2.26 (see the smoke test).
+    target_libc = "glibc_2.31",
+    target_system_name = "x86_64-unknown-linux-gnu",
+    toolchain_identifier = "linux_x64_clang",
+)
+
+cc_toolchain(
+    name = "linux_x64_clang",
+    all_files = ":linux_x64_all_files",
+    ar_files = "@clang_linux_x64//:ar_files",
+    compiler_files = ":linux_x64_compiler_files",
+    dwp_files = ":empty",
+    linker_files = ":linux_x64_linker_files",
+    objcopy_files = "@clang_linux_x64//:objcopy_files",
+    strip_files = "@clang_linux_x64//:strip_files",
+    supports_param_files = True,
+    toolchain_config = ":linux_x64_clang_config",
+    toolchain_identifier = "linux_x64_clang",
+)
+
+toolchain(
+    name = "linux_x64_clang_toolchain",
+    exec_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    toolchain = ":linux_x64_clang",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+filegroup(
+    name = "empty",
+    srcs = [],
+)

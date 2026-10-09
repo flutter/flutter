@@ -1,0 +1,65 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @libcxxabi: the libc++abi sources pinned in DEPS, built
+# into the engine's libc++. Mirrors
+# //flutter/build/secondary/flutter/third_party/libcxxabi/BUILD.gn.
+#
+# Like libc++'s, the public headers (include/) reach every C++ compile action
+# through the toolchain and are not declared on the library.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# The toolchain derives its include path from this file's location.
+exports_files(["include/cxxabi.h"])
+
+filegroup(
+    name = "headers",
+    srcs = glob(["include/**"]),
+)
+
+cc_library(
+    name = "libcxxabi",
+    srcs = [
+        "src/abort_message.cpp",
+        "src/cxa_aux_runtime.cpp",
+        "src/cxa_default_handlers.cpp",
+        "src/cxa_demangle.cpp",
+        # No translation unit in the engine is built with exceptions, but the
+        # sanitizer runtimes on Linux reference __cxa_begin_catch and
+        # __gxx_personality_v0, so the support is built here.
+        "src/cxa_exception.cpp",
+        "src/cxa_exception_storage.cpp",
+        "src/cxa_guard.cpp",
+        "src/cxa_handlers.cpp",
+        "src/cxa_personality.cpp",
+        "src/cxa_thread_atexit.cpp",
+        "src/cxa_vector.cpp",
+        "src/cxa_virtual.cpp",
+        "src/fallback_malloc.cpp",
+        "src/private_typeinfo.cpp",
+        "src/stdlib_exception.cpp",
+        "src/stdlib_stdexcept.cpp",
+        "src/stdlib_typeinfo.cpp",
+    ] + glob(["src/**/*.h"]),
+    copts = [
+        "-fexceptions",
+        "-frtti",
+    ],
+    implementation_deps = ["@libcxx//:src_headers"],
+    linkstatic = True,
+    local_defines = [
+        "_LIBCPP_BUILDING_LIBRARY",
+        "_LIBCXXABI_BUILDING_LIBRARY",
+        "LIBCXXABI_SILENT_TERMINATE",
+        "_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS",
+    ],
+    textual_hdrs = glob([
+        "src/**/*.def",
+        "src/**/*.inc",
+    ]),
+    visibility = ["@libcxx//:__pkg__"],
+)

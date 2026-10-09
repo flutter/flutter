@@ -4,16 +4,18 @@
 
 """Module extension that exposes the engine's dependencies as repositories.
 
-The pins come from `deps.lock.bzl` (generated from `DEPS`). During the GN/Bazel
-transition every dependency is consumed from the directory `gclient sync`
-populated (`synced_repository`), so both build systems see identical trees and
-nothing is fetched twice.
+The pins come from `deps.lock.bzl` (generated from `DEPS`) and, for the Debian
+sysroots, from `build/linux/sysroot_scripts/sysroots.json`. During the
+GN/Bazel transition every dependency is consumed from the directory
+`gclient sync` populated (`synced_repository`), so both build systems see
+identical trees and nothing is fetched twice.
 
-Toolchains (clang, gn, ...) can instead be downloaded by Bazel itself from the
-CIPD pins by setting `FLUTTER_BAZEL_FETCH_TOOLCHAINS=1` (for example through
+Toolchains (clang, sysroots, gn, ...) can instead be downloaded by Bazel
+itself by setting `FLUTTER_BAZEL_FETCH_TOOLCHAINS=1` (for example through
 `--repo_env`). The repositories have the same layout either way.
 """
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load(":deps.lock.bzl", "CIPD_DEPS", "GIT_DEPS")
 load(":repositories.bzl", "cipd_package", "synced_repository")
 
@@ -31,6 +33,20 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/googletest",
         build_file = None,
     ),
+    # The engine's own C++ runtime, built from source by the toolchain's
+    # `cxx_runtime` library (see toolchains/BUILD.bazel).
+    "libcxx": struct(
+        path = "engine/src/flutter/third_party/libcxx",
+        build_file = _OVERLAYS + ":libcxx/BUILD.libcxx.bazel",
+    ),
+    "libcxxabi": struct(
+        path = "engine/src/flutter/third_party/libcxxabi",
+        build_file = _OVERLAYS + ":libcxxabi/BUILD.libcxxabi.bazel",
+    ),
+    "llvm_libc": struct(
+        path = "engine/src/flutter/third_party/llvm_libc",
+        build_file = _OVERLAYS + ":llvm_libc/BUILD.llvm_libc.bazel",
+    ),
 }
 
 # Prebuilt tools from DEPS (CIPD packages), keyed by repository name. These
@@ -46,6 +62,21 @@ _TOOL_REPOSITORIES = {
         build_file = _OVERLAYS + ":gn/BUILD.gn_tool.bazel",
     ),
 }
+
+# Debian sysroots, keyed by repository name. They are not DEPS entries: the
+# linux_sysroot_* hooks unpack them with install-sysroot.py, whose pins live
+# in sysroots.json (read below, so there is one source of truth). Like the
+# tools, they are symlinked from the checkout by default and downloaded when
+# FLUTTER_BAZEL_FETCH_TOOLCHAINS is set.
+_SYSROOT_REPOSITORIES = {
+    "sysroot_linux_x64": struct(
+        key = "bullseye_amd64",
+        build_file = _OVERLAYS + ":sysroot/BUILD.sysroot_linux.bazel",
+    ),
+}
+
+_SYSROOTS_JSON = Label("//engine/src/build/linux/sysroot_scripts:sysroots.json")
+_SYSROOTS_DIR = "engine/src/build/linux"
 
 _FETCH_TOOLCHAINS_ENV = "FLUTTER_BAZEL_FETCH_TOOLCHAINS"
 
@@ -96,6 +127,28 @@ def _cipd_pin(path):
         fail("synced_deps: %s installs %d CIPD packages; exactly one is supported" % (path, len(packages)))
     return packages[0]
 
+def _sysroot_repositories(mctx, fetch):
+    sysroots = json.decode(mctx.read(_SYSROOTS_JSON))
+    for name, spec in _SYSROOT_REPOSITORIES.items():
+        entry = sysroots.get(spec.key)
+        if entry == None:
+            fail("synced_deps: %s has no %r entry" % (_SYSROOTS_JSON, spec.key))
+        if fetch:
+            # install-sysroot.py downloads `<URL>/<sha256>` (a .tar.xz).
+            http_archive(
+                name = name,
+                url = entry["URL"] + "/" + entry["Sha256Sum"],
+                sha256 = entry["Sha256Sum"],
+                type = "tar.xz",
+                build_file = spec.build_file,
+            )
+        else:
+            synced_repository(
+                name = name,
+                path = _SYSROOTS_DIR + "/" + entry["SysrootDir"],
+                build_file = spec.build_file,
+            )
+
 def _synced_deps_impl(mctx):
     for name, spec in _SOURCE_REPOSITORIES.items():
         if spec.path not in GIT_DEPS:
@@ -118,6 +171,8 @@ def _synced_deps_impl(mctx):
         else:
             synced_repository(name = name, path = spec.path, build_file = spec.build_file)
 
+    _sysroot_repositories(mctx, fetch)
+
     return mctx.extension_metadata(
         root_module_direct_deps = "all",
         root_module_direct_dev_deps = [],
@@ -128,5 +183,5 @@ def _synced_deps_impl(mctx):
 
 synced_deps = module_extension(
     implementation = _synced_deps_impl,
-    doc = "Exposes DEPS dependencies (synced trees, or CIPD downloads for toolchains) as repositories.",
+    doc = "Exposes DEPS dependencies (synced trees, or downloads for toolchains) as repositories.",
 )
