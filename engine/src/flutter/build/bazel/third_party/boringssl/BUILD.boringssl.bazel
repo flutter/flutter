@@ -1,0 +1,35 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @boringssl: the BoringSSL checkout pinned in DEPS, which
+# the engine builds with its own //flutter/third_party/boringssl/BUILD.gn
+# (the `src` subdirectory of that GN target is this repository). For now it
+# only exposes what that GN build reads, for rules that wrap a GN build; the
+# engine's own uses of BoringSSL are not built by Bazel yet.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "build_tree",
+    srcs = glob(
+        [
+            "crypto/**",
+            "decrepit/**",
+            # Generated source lists (sources.gni) and the assembly files.
+            "gen/**",
+            "include/**",
+            "pki/**",
+            "ssl/**",
+            "third_party/fiat/**",
+        ],
+        exclude = [
+            "**/test/**",
+            "**/testdata/**",
+            "**/*_test.cc",
+            "**/*_test.h",
+            "**/*_tests.cc",
+            "**/*_unittest.cc",
+        ],
+    ),
+)
