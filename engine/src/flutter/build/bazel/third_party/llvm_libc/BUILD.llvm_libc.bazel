@@ -21,3 +21,18 @@ cc_library(
     # llvm-libc is only used as a dependency of libc++.
     visibility = ["@libcxx//:__pkg__"],
 )
+
+# What the GN build of this tree reads (//flutter/third_party/llvm_libc in
+# flutter/build/secondary, which builds libc++'s number parsing and printing
+# from src/__support), for rules that wrap a GN build.
+filegroup(
+    name = "build_tree",
+    srcs = glob([
+        "hdr/**",
+        "include/**",
+        "shared/**",
+        "src/__support/**",
+        "src/errno/**",
+    ]),
+    visibility = ["//visibility:public"],
+)

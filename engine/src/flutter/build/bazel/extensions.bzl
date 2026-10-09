@@ -31,7 +31,13 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/third_party/abseil-cpp",
         build_file = None,
     ),
-    # Embedding API headers only, for now (see the overlay).
+    # Inputs of the wrapped GN build only, so far (see the overlay).
+    "boringssl": struct(
+        path = "engine/src/flutter/third_party/boringssl/src",
+        build_file = _OVERLAYS + ":boringssl/BUILD.boringssl.bazel",
+    ),
+    # Embedding API headers and the inputs of the wrapped GN build (see the
+    # overlay).
     "dart": struct(
         path = "engine/src/flutter/third_party/dart",
         build_file = _OVERLAYS + ":dart/BUILD.dart.bazel",
@@ -57,6 +63,11 @@ _SOURCE_REPOSITORIES = {
     "llvm_libc": struct(
         path = "engine/src/flutter/third_party/llvm_libc",
         build_file = _OVERLAYS + ":llvm_libc/BUILD.llvm_libc.bazel",
+    ),
+    # Inputs of the wrapped GN build only, so far (see the overlay).
+    "zlib": struct(
+        path = "engine/src/flutter/third_party/zlib",
+        build_file = _OVERLAYS + ":zlib/BUILD.zlib.bazel",
     ),
 }
 
