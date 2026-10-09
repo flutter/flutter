@@ -321,6 +321,111 @@ String generateReturnExpr(List<String> expressions, {bool isSingleStringVar = fa
   }
 }
 
+/// Generic representation of runtime symbols referenced by generated localization code.
+@immutable
+class LocalizationRuntimeSymbols {
+  const LocalizationRuntimeSymbols({
+    this.canonicalizedLocale = defaultCanonicalizedLocale,
+    this.pluralLogic = defaultPluralLogic,
+    this.selectLogic = defaultSelectLogic,
+    this.dateFormat = defaultDateFormat,
+    this.numberFormat = defaultNumberFormat,
+  });
+
+  static const String defaultCanonicalizedLocale = 'Intl.canonicalizedLocale';
+  static const String defaultPluralLogic = 'Intl.pluralLogic';
+  static const String defaultSelectLogic = 'Intl.selectLogic';
+  static const String defaultDateFormat = 'DateFormat';
+  static const String defaultNumberFormat = 'NumberFormat';
+
+  /// The symbol referenced for canonicalizing locales.
+  ///
+  /// Defaults to `'Intl.canonicalizedLocale'`.
+  final String canonicalizedLocale;
+
+  /// The symbol referenced for plural logic.
+  ///
+  /// Defaults to `'Intl.pluralLogic'`.
+  final String pluralLogic;
+
+  /// The symbol referenced for select logic.
+  ///
+  /// Defaults to `'Intl.selectLogic'`.
+  final String selectLogic;
+
+  /// The class or type name used for date formatting.
+  ///
+  /// Defaults to `'DateFormat'`.
+  final String dateFormat;
+
+  /// The class or type name used for number formatting.
+  ///
+  /// Defaults to `'NumberFormat'`.
+  final String numberFormat;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LocalizationRuntimeSymbols &&
+          canonicalizedLocale == other.canonicalizedLocale &&
+          pluralLogic == other.pluralLogic &&
+          selectLogic == other.selectLogic &&
+          dateFormat == other.dateFormat &&
+          numberFormat == other.numberFormat;
+
+  @override
+  int get hashCode =>
+      Object.hash(canonicalizedLocale, pluralLogic, selectLogic, dateFormat, numberFormat);
+}
+
+/// Configuration for the localization runtime library used by generated code.
+@immutable
+class LocalizationRuntimeOptions {
+  const LocalizationRuntimeOptions({
+    this.package = defaultPackage,
+    this.alias = defaultAlias,
+    this.symbols = const LocalizationRuntimeSymbols(),
+  });
+
+  static const String defaultPackage = 'package:intl/intl.dart';
+  static const String defaultAlias = 'intl';
+
+  /// The URI of the package imported by generated localization files.
+  ///
+  /// Defaults to `'package:intl/intl.dart'`.
+  final String package;
+
+  /// The import alias for the localization library.
+  ///
+  /// Defaults to `'intl'`. Can be empty if no alias is needed.
+  final String alias;
+
+  /// Configured symbol references used in generated localization code.
+  final LocalizationRuntimeSymbols symbols;
+
+  /// Returns [symbol] qualified with the library [alias] if non-empty and not already prefixed.
+  String qualifiedSymbol(String symbol) {
+    if (alias.isEmpty) {
+      return symbol;
+    }
+    if (symbol == alias || symbol.startsWith('$alias.')) {
+      return symbol;
+    }
+    return '$alias.$symbol';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LocalizationRuntimeOptions &&
+          package == other.package &&
+          alias == other.alias &&
+          symbols == other.symbols;
+
+  @override
+  int get hashCode => Object.hash(package, alias, symbols);
+}
+
 /// Typed configuration from the localizations config file.
 class LocalizationOptions {
   LocalizationOptions({
@@ -343,6 +448,15 @@ class LocalizationOptions {
     bool? suppressWarnings,
     bool? relaxSyntax,
     bool? useNamedParameters,
+    this.outputClassMixins,
+    this.outputBaseClassMixins,
+    this.fallbackLocale,
+    LocalizationRuntimeOptions? localizationRuntime,
+    String? libraryPackage,
+    String? libraryAlias,
+    this.arbDirs,
+    Set<String>? ignoreArbKeys,
+    ArbConflictResolution? arbConflictResolution,
   }) : templateArbFile = templateArbFile ?? 'app_en.arb',
        outputLocalizationFile = outputLocalizationFile ?? 'app_localizations.dart',
        outputClass = outputClass ?? 'AppLocalizations',
@@ -353,12 +467,23 @@ class LocalizationOptions {
        useEscaping = useEscaping ?? false,
        suppressWarnings = suppressWarnings ?? false,
        relaxSyntax = relaxSyntax ?? false,
-       useNamedParameters = useNamedParameters ?? false;
+       useNamedParameters = useNamedParameters ?? false,
+       localizationRuntime =
+           localizationRuntime ??
+           LocalizationRuntimeOptions(
+             package: libraryPackage ?? LocalizationRuntimeOptions.defaultPackage,
+             alias: libraryAlias ?? LocalizationRuntimeOptions.defaultAlias,
+           ),
+       ignoreArbKeys = ignoreArbKeys ?? const <String>{},
+       arbConflictResolution = arbConflictResolution ?? ArbConflictResolution.error;
 
   /// The `--arb-dir` argument.
   ///
   /// The directory where all input localization files should reside.
   final String arbDir;
+
+  /// The list of directories where input localization files reside if `arb-dir` was configured as a list of paths.
+  final List<String>? arbDirs;
 
   /// The `--output-dir` argument.
   ///
@@ -456,6 +581,37 @@ class LocalizationOptions {
   ///
   /// Defaults to `false`.
   final bool useNamedParameters;
+
+  /// Mixins to add to the generated output localization classes.
+  ///
+  /// Can be global (keyed with `'*'`), per-locale, or fallback (keyed with
+  /// `'fallback'` or falling back to [fallbackLocale]).
+  final Map<String, List<String>>? outputClassMixins;
+
+  /// Mixins to add to the generated base localization class.
+  final List<String>? outputBaseClassMixins;
+
+  /// Fallback locale when locale lookup cannot find a matching locale.
+  final String? fallbackLocale;
+
+  /// The localization runtime library configuration.
+  final LocalizationRuntimeOptions localizationRuntime;
+
+  /// The package URI of the localization library used by generated code.
+  ///
+  /// Defaults to `'package:intl/intl.dart'`.
+  String get libraryPackage => localizationRuntime.package;
+
+  /// The import alias for the localization library used by generated code.
+  ///
+  /// Defaults to `'intl'`.
+  String get libraryAlias => localizationRuntime.alias;
+
+  /// Set of ARB keys to ignore during code generation from `ignore-arb-keys`.
+  final Set<String> ignoreArbKeys;
+
+  /// The conflict resolution strategy for duplicate ARB keys across multiple ARB sources.
+  final ArbConflictResolution arbConflictResolution;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -499,8 +655,21 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
       );
     }
   }
+  final ({String arbDir, List<String>? arbDirs}) arbDirs = _tryReadArbDirs(
+    yamlNode,
+    'arb-dir',
+    logger,
+    fileSystem,
+    defaultArbDir,
+  );
+  final LocalizationRuntimeOptions localizationRuntime = _tryReadLocalizationRuntime(
+    yamlNode,
+    logger,
+  );
+
   return LocalizationOptions(
-    arbDir: _tryReadFilePath(yamlNode, 'arb-dir', logger, fileSystem) ?? defaultArbDir,
+    arbDir: arbDirs.arbDir,
+    arbDirs: arbDirs.arbDirs,
     outputDir: _tryReadFilePath(yamlNode, 'output-dir', logger, fileSystem),
     templateArbFile: _tryReadFilePath(yamlNode, 'template-arb-file', logger, fileSystem),
     outputLocalizationFile: _tryReadFilePath(
@@ -527,6 +696,12 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     suppressWarnings: _tryReadBool(yamlNode, 'suppress-warnings', logger),
     relaxSyntax: _tryReadBool(yamlNode, 'relax-syntax', logger),
     useNamedParameters: _tryReadBool(yamlNode, 'use-named-parameters', logger),
+    outputClassMixins: _tryReadClassMixins(yamlNode, 'output-class-mixins', logger),
+    outputBaseClassMixins: _tryReadBaseClassMixins(yamlNode, 'output-base-class-mixins', logger),
+    fallbackLocale: _tryReadFallbackLocale(yamlNode, 'fallback-locale', logger),
+    localizationRuntime: localizationRuntime,
+    ignoreArbKeys: _tryReadIgnoreArbKeys(yamlNode, logger),
+    arbConflictResolution: _tryReadArbConflictResolution(yamlNode, logger),
   );
 }
 
@@ -624,4 +799,413 @@ String? _tryReadFilePath(YamlMap yamlMap, String key, Logger logger, FileSystem 
     logger.printError('"$value" must be a relative file URI');
   }
   return uri != null ? fileSystem.path.normalize(uri.path) : null;
+}
+
+/// Checks whether [name] is a valid Dart identifier.
+bool isValidDartIdentifier(String name) {
+  if (name.isEmpty) {
+    return false;
+  }
+  if (name.contains(RegExp(r'[^a-zA-Z_\d$]'))) {
+    return false;
+  }
+  if (name[0].contains(RegExp(r'\d'))) {
+    return false;
+  }
+  return true;
+}
+
+/// Checks whether [symbol] is a valid Dart symbol reference (e.g., `DateFormat` or `Intl.pluralLogic`).
+bool isValidSymbolReference(String symbol) {
+  if (symbol.isEmpty) {
+    return false;
+  }
+  final List<String> parts = symbol.split('.');
+  return parts.every(isValidDartIdentifier);
+}
+
+/// Checks whether [className] is a valid public Dart class name.
+bool isValidClassName(String className) {
+  if (className.isEmpty) {
+    return false;
+  }
+  if (className[0] == '_') {
+    return false;
+  }
+  if (className.contains(RegExp(r'[^a-zA-Z_\d]'))) {
+    return false;
+  }
+  if (className[0].contains(RegExp(r'[a-z]'))) {
+    return false;
+  }
+  if (className[0].contains(RegExp(r'\d'))) {
+    return false;
+  }
+  return true;
+}
+
+/// Checks whether [typeRef] is a valid Dart mixin type reference.
+///
+/// Supports either an unqualified class name (e.g. `CoreLocalizations`) or a
+/// library-prefixed class name (e.g. `coreX.CoreLocalizations`).
+bool isValidMixinTypeReference(String typeRef) {
+  if (typeRef.isEmpty) {
+    return false;
+  }
+  final List<String> parts = typeRef.split('.');
+  if (parts.length == 1) {
+    return isValidClassName(parts[0]);
+  }
+  if (parts.length == 2) {
+    return isValidDartIdentifier(parts[0]) && isValidClassName(parts[1]);
+  }
+  return false;
+}
+
+Map<String, List<String>>? _tryReadClassMixins(YamlMap yamlMap, String key, Logger logger) {
+  final Object? value = yamlMap[key];
+  if (value == null) {
+    return null;
+  }
+  if (value is YamlList || value is List) {
+    final list = <String>[];
+    for (final Object? item in value as Iterable) {
+      if (item is! String || !isValidMixinTypeReference(item)) {
+        logger.printError(
+          'Expected "$key" entries to be valid Dart mixin type references, instead found "$item"',
+        );
+        throw L10nException(
+          'The mixin "$item" specified in "$key" is not a valid Dart mixin type reference.',
+        );
+      }
+      list.add(item);
+    }
+    return <String, List<String>>{'*': list};
+  }
+  if (value is YamlMap || value is Map) {
+    final result = <String, List<String>>{};
+    for (final MapEntry<dynamic, dynamic> entry in (value as Map).entries) {
+      final Object? localeKey = entry.key;
+      if (localeKey is! String || localeKey.isEmpty) {
+        logger.printError(
+          'Expected "$key" keys to be non-empty strings, instead found "$localeKey"',
+        );
+        throw L10nException('Invalid locale "$localeKey" specified in "$key".');
+      }
+      final Object? mixins = entry.value;
+      if (mixins is! Iterable) {
+        logger.printError(
+          'Expected "$key.$localeKey" to be a list of mixin class names, instead found "$mixins"',
+        );
+        throw L10nException('Expected a list of mixins for locale "$localeKey" in "$key".');
+      }
+      final list = <String>[];
+      for (final Object? item in mixins) {
+        if (item is! String || !isValidMixinTypeReference(item)) {
+          logger.printError(
+            'Expected "$key.$localeKey" entries to be valid Dart mixin type references, instead found "$item"',
+          );
+          throw L10nException(
+            'The mixin "$item" specified in "$key.$localeKey" is not a valid Dart mixin type reference.',
+          );
+        }
+        list.add(item);
+      }
+      result[localeKey] = list;
+    }
+    return result;
+  }
+  logger.printError('Expected "$key" to be a List or Map, instead was "$value"');
+  throw L10nException('Expected "$key" to be a list or map of mixin class names.');
+}
+
+List<String>? _tryReadBaseClassMixins(YamlMap yamlMap, String key, Logger logger) {
+  final Object? value = yamlMap[key];
+  if (value == null) {
+    return null;
+  }
+  if (value is! Iterable) {
+    logger.printError('Expected "$key" to be a list of mixin class names, instead was "$value"');
+    throw L10nException('Expected "$key" to be a list of mixin class names.');
+  }
+  final list = <String>[];
+  for (final Object? item in value) {
+    if (item is! String || !isValidMixinTypeReference(item)) {
+      logger.printError(
+        'Expected "$key" entries to be valid Dart mixin type references, instead found "$item"',
+      );
+      throw L10nException(
+        'The mixin "$item" specified in "$key" is not a valid Dart mixin type reference.',
+      );
+    }
+    list.add(item);
+  }
+  return list;
+}
+
+String? _tryReadFallbackLocale(YamlMap yamlMap, String key, Logger logger) {
+  final Object? value = yamlMap[key];
+  if (value == null) {
+    return null;
+  }
+  if (value is! String) {
+    logger.printError('Expected "$key" to be a non-empty string, instead found "$value"');
+    throw L10nException('Expected "$key" to be a valid locale string.');
+  }
+  final String trimmed = value.trim();
+  if (trimmed.isEmpty) {
+    logger.printError('Expected "$key" to be a non-empty string, instead found "$value"');
+    throw L10nException('Expected "$key" to be a valid locale string.');
+  }
+  final localeInfo = LocaleInfo.fromString(trimmed);
+  if (localeInfo.languageCode.isEmpty || trimmed.contains(' ')) {
+    logger.printError('Invalid locale identifier for "$key": "$trimmed"');
+    throw L10nException('Invalid fallback-locale "$trimmed": must be a valid locale identifier.');
+  }
+  return trimmed;
+}
+
+LocalizationRuntimeOptions _tryReadLocalizationRuntime(YamlMap yamlMap, Logger logger) {
+  if (yamlMap.containsKey('localization-library')) {
+    logger.printError(
+      'The "localization-library" configuration key is not supported. Use "localization-runtime" instead.',
+    );
+    throw L10nException(
+      'The "localization-library" configuration key is not supported. Use "localization-runtime" instead.',
+    );
+  }
+  if (!yamlMap.containsKey('localization-runtime')) {
+    return const LocalizationRuntimeOptions();
+  }
+  const key = 'localization-runtime';
+  final Object? value = yamlMap[key];
+  if (value == null) {
+    return const LocalizationRuntimeOptions();
+  }
+  if (value is! YamlMap && value is! Map) {
+    logger.printError('Expected "$key" to be a map, instead was "$value"');
+    throw L10nException('Expected "$key" to be a map.');
+  }
+  final map = value as Map<dynamic, dynamic>;
+  for (final Object? subKey in map.keys) {
+    if (subKey != 'package' &&
+        subKey != 'alias' &&
+        subKey != 'symbols' &&
+        subKey != 'apis' &&
+        subKey != 'references') {
+      logger.printError(
+        'Invalid key "$subKey" in "$key". Allowed keys are "package", "alias", and "symbols".',
+      );
+      throw L10nException('Invalid key "$subKey" specified in "$key".');
+    }
+  }
+
+  final Object? packageVal = map['package'];
+  String package = LocalizationRuntimeOptions.defaultPackage;
+  if (packageVal != null) {
+    if (packageVal is! String || packageVal.trim().isEmpty) {
+      logger.printError(
+        'Expected "$key.package" to be a non-empty string, instead was "$packageVal"',
+      );
+      throw L10nException('Expected "$key.package" to be a non-empty string.');
+    }
+    final String trimmed = packageVal.trim();
+    final Uri? parsedUri = Uri.tryParse(trimmed);
+    if (parsedUri == null || !trimmed.contains(':')) {
+      logger.printError('Expected "$key.package" to be a valid URI, instead was "$packageVal"');
+      throw L10nException('The package "$packageVal" specified in "$key" is not a valid URI.');
+    }
+    package = trimmed;
+  }
+
+  final Object? aliasVal = map['alias'];
+  String alias = LocalizationRuntimeOptions.defaultAlias;
+  if (aliasVal != null) {
+    if (aliasVal is! String) {
+      logger.printError('Expected "$key.alias" to be a string, instead was "$aliasVal"');
+      throw L10nException('Expected "$key.alias" to be a string.');
+    }
+    final String trimmed = aliasVal.trim();
+    if (trimmed.isNotEmpty && !isValidDartIdentifier(trimmed)) {
+      logger.printError(
+        'Expected "$key.alias" to be a valid Dart identifier, instead was "$aliasVal"',
+      );
+      throw L10nException(
+        'The alias "$aliasVal" specified in "$key.alias" is not a valid Dart identifier.',
+      );
+    }
+    alias = trimmed;
+  }
+
+  final Object? symbolsVal = map['symbols'] ?? map['apis'] ?? map['references'];
+  var symbols = const LocalizationRuntimeSymbols();
+  if (symbolsVal != null) {
+    if (symbolsVal is! YamlMap && symbolsVal is! Map) {
+      logger.printError('Expected "$key.symbols" to be a map, instead was "$symbolsVal"');
+      throw L10nException('Expected "$key.symbols" to be a map.');
+    }
+    final symbolsMap = symbolsVal as Map<dynamic, dynamic>;
+
+    String canonicalizedLocale = LocalizationRuntimeSymbols.defaultCanonicalizedLocale;
+    String pluralLogic = LocalizationRuntimeSymbols.defaultPluralLogic;
+    String selectLogic = LocalizationRuntimeSymbols.defaultSelectLogic;
+    String dateFormat = LocalizationRuntimeSymbols.defaultDateFormat;
+    String numberFormat = LocalizationRuntimeSymbols.defaultNumberFormat;
+
+    for (final MapEntry<dynamic, dynamic> entry in symbolsMap.entries) {
+      final Object? symbolKey = entry.key;
+      if (symbolKey is! String || symbolKey.trim().isEmpty) {
+        logger.printError(
+          'Expected "$key.symbols" keys to be non-empty strings, instead found "$symbolKey"',
+        );
+        throw L10nException('Invalid symbol key "$symbolKey" specified in "$key.symbols".');
+      }
+      final String trimmedKey = symbolKey.trim();
+      final Object? val = entry.value;
+
+      String readSimpleSymbol(String name) {
+        if (val is String && val.trim().isNotEmpty) {
+          final String trimmed = val.trim();
+          if (!isValidSymbolReference(trimmed)) {
+            logger.printError(
+              'The symbol "$trimmed" specified in "$key.symbols.$trimmedKey" is not a valid Dart symbol reference.',
+            );
+            throw L10nException(
+              'The symbol "$trimmed" specified in "$key.symbols.$trimmedKey" is not a valid Dart symbol reference.',
+            );
+          }
+          return trimmed;
+        }
+        if (val is Map) {
+          final Map<dynamic, dynamic> m = val;
+          final Object? sym =
+              m['symbol'] ?? m['name'] ?? m['member'] ?? m['function'] ?? m['method'];
+          if (sym is String && sym.trim().isNotEmpty && isValidSymbolReference(sym.trim())) {
+            return sym.trim();
+          }
+        }
+        logger.printError(
+          'Expected "$key.symbols.$trimmedKey" to be a non-empty string, instead found "$val"',
+        );
+        throw L10nException('Expected "$key.symbols.$trimmedKey" to be a non-empty string.');
+      }
+
+      switch (trimmedKey) {
+        case 'canonicalized-locale':
+        case 'canonicalizedLocale':
+        case 'canonicalize-locale':
+        case 'canonicalizeLocale':
+          canonicalizedLocale = readSimpleSymbol('canonicalizedLocale');
+        case 'plural-logic':
+        case 'pluralLogic':
+        case 'plural':
+          pluralLogic = readSimpleSymbol('pluralLogic');
+        case 'select-logic':
+        case 'selectLogic':
+        case 'select':
+          selectLogic = readSimpleSymbol('selectLogic');
+        case 'date-format':
+        case 'dateFormat':
+          dateFormat = readSimpleSymbol('dateFormat');
+        case 'number-format':
+        case 'numberFormat':
+          numberFormat = readSimpleSymbol('numberFormat');
+        default:
+          logger.printError('Invalid symbol key "$trimmedKey" in "$key.symbols".');
+          throw L10nException('Invalid symbol key "$trimmedKey" specified in "$key.symbols".');
+      }
+    }
+
+    symbols = LocalizationRuntimeSymbols(
+      canonicalizedLocale: canonicalizedLocale,
+      pluralLogic: pluralLogic,
+      selectLogic: selectLogic,
+      dateFormat: dateFormat,
+      numberFormat: numberFormat,
+    );
+  }
+
+  return LocalizationRuntimeOptions(package: package, alias: alias, symbols: symbols);
+}
+
+({String arbDir, List<String>? arbDirs}) _tryReadArbDirs(
+  YamlMap yamlMap,
+  String key,
+  Logger logger,
+  FileSystem fileSystem,
+  String defaultArbDir,
+) {
+  final Object? value = yamlMap[key];
+  if (value == null) {
+    return (arbDir: defaultArbDir, arbDirs: null);
+  }
+  if (value is YamlList || value is List) {
+    final paths = <String>[];
+    for (final Object? item in value as Iterable) {
+      if (item is! String || item.trim().isEmpty) {
+        logger.printError('Expected "$key" entries to be non-empty strings, instead was "$item"');
+        throw L10nException('Expected "$key" entries to be non-empty directory paths.');
+      }
+      final Uri? uri = Uri.tryParse(item.trim());
+      if (uri == null) {
+        logger.printError('"$item" must be a relative file URI');
+        throw L10nException('"$item" must be a relative file URI');
+      }
+      paths.add(fileSystem.path.normalize(uri.path));
+    }
+    if (paths.isEmpty) {
+      return (arbDir: defaultArbDir, arbDirs: null);
+    }
+    return (arbDir: paths.first, arbDirs: paths);
+  }
+  final String? singlePath = _tryReadFilePath(yamlMap, key, logger, fileSystem);
+  return (arbDir: singlePath ?? defaultArbDir, arbDirs: null);
+}
+
+Set<String> _tryReadIgnoreArbKeys(YamlMap yamlMap, Logger logger) {
+  const key = 'ignore-arb-keys';
+  if (!yamlMap.containsKey(key)) {
+    return const <String>{};
+  }
+  final Object? value = yamlMap[key];
+  if (value == null) {
+    return const <String>{};
+  }
+  if (value is Iterable) {
+    final result = <String>{};
+    for (final Object? item in value) {
+      if (item is! String || item.trim().isEmpty) {
+        logger.printError('Expected "$key" entries to be non-empty strings, instead was "$item"');
+        throw L10nException('Expected "$key" entries to be non-empty strings.');
+      }
+      result.add(item.trim());
+    }
+    return Set<String>.unmodifiable(result);
+  }
+  logger.printError('Expected "$key" to be a list of ARB keys, instead was "$value"');
+  throw L10nException('Expected "$key" to be a list of ARB keys.');
+}
+
+ArbConflictResolution _tryReadArbConflictResolution(YamlMap yamlMap, Logger logger) {
+  const key = 'arb-conflict-resolution';
+  if (!yamlMap.containsKey(key)) {
+    return ArbConflictResolution.error;
+  }
+  final Object? value = yamlMap[key];
+  if (value == null) {
+    return ArbConflictResolution.error;
+  }
+  if (value is! String) {
+    logger.printError('Expected "$key" to have a String value, instead was "$value"');
+    throw L10nException(
+      'Invalid "$key" value: "$value". Supported values are "error", "first", and "last".',
+    );
+  }
+  final String trimmed = value.trim();
+  try {
+    return ArbConflictResolution.fromString(trimmed);
+  } on L10nException catch (e) {
+    logger.printError(e.message);
+    rethrow;
+  }
 }

@@ -639,6 +639,29 @@ class Message {
   }
 }
 
+/// Defines how conflicting ARB keys are resolved when merging multiple ARB files.
+enum ArbConflictResolution {
+  error,
+  first,
+  last;
+
+  /// The default conflict resolution behavior.
+  static const ArbConflictResolution defaultResolution = ArbConflictResolution.error;
+
+  /// Parse a string into [ArbConflictResolution], or throw [L10nException] if invalid.
+  static ArbConflictResolution fromString(String value) {
+    return switch (value) {
+      'error' => ArbConflictResolution.error,
+      'first' => ArbConflictResolution.first,
+      'last' => ArbConflictResolution.last,
+      _ => throw L10nException(
+        'Invalid "arb-conflict-resolution" value: "$value". '
+        'Supported values are "error", "first", and "last".',
+      ),
+    };
+  }
+}
+
 /// Represents the contents of one ARB file.
 class AppResourceBundle {
   /// Assuming that the caller has verified that the file exists and is readable.
@@ -714,14 +737,153 @@ class AppResourceBundle {
     return AppResourceBundle._(file, LocaleInfo.fromString(localeString), resources, ids);
   }
 
-  const AppResourceBundle._(this.file, this.locale, this.resources, this.resourceIds);
+  AppResourceBundle._(
+    this.file,
+    this.locale,
+    this.resources,
+    this.resourceIds, {
+    List<File>? files,
+    Map<String, File>? keyToFile,
+  }) : files = files ?? <File>[file],
+       _keyToFile = keyToFile ?? <String, File>{for (final String k in resources.keys) k: file};
 
   final File file;
+  final List<File> files;
   final LocaleInfo locale;
 
   /// JSON representation of the contents of the ARB file.
   final Map<String, Object?> resources;
   final Iterable<String> resourceIds;
+  final Map<String, File> _keyToFile;
+
+  AppResourceBundle merge(
+    AppResourceBundle other, {
+    ArbConflictResolution conflictResolution = ArbConflictResolution.error,
+  }) {
+    if (locale != other.locale) {
+      throw L10nException(
+        'Cannot merge resource bundles with different locales: "$locale" and "${other.locale}".',
+      );
+    }
+
+    final mergedResources = Map<String, Object?>.of(resources);
+    final mergedResourceIds = Set<String>.of(resourceIds);
+    final keyToFile = Map<String, File>.of(_keyToFile);
+
+    for (final String key in other.resources.keys) {
+      if (key == '@@locale') {
+        continue;
+      }
+      final Object? otherValue = other.resources[key];
+
+      if (!key.startsWith('@')) {
+        // Message key.
+        if (mergedResources.containsKey(key)) {
+          final Object? existingValue = mergedResources[key];
+          if (existingValue != otherValue) {
+            switch (conflictResolution) {
+              case ArbConflictResolution.error:
+                final File sourceFile = keyToFile[key] ?? file;
+                throw L10nException(
+                  'Conflicting values for message "$key" found for locale "$locale":\n'
+                  '  "${sourceFile.path}": $existingValue\n'
+                  '  "${other.file.path}": $otherValue',
+                );
+              case ArbConflictResolution.first:
+                // Keep the value from the first matching ARB source.
+                break;
+              case ArbConflictResolution.last:
+                // Keep the value from the last matching ARB source.
+                mergedResources[key] = otherValue;
+                keyToFile[key] = other.file;
+            }
+          }
+          // Duplicate with identical value: silently deduplicated.
+        } else {
+          mergedResources[key] = otherValue;
+          keyToFile[key] = other.file;
+          mergedResourceIds.add(key);
+        }
+      } else {
+        // Metadata key, e.g. @message.
+        if (mergedResources.containsKey(key)) {
+          final Object? existingMeta = mergedResources[key];
+          if (!_areMetadataCompatible(existingMeta, otherValue)) {
+            switch (conflictResolution) {
+              case ArbConflictResolution.error:
+                final String resourceName = key.substring(1);
+                final File sourceFile = keyToFile[key] ?? file;
+                throw L10nException(
+                  'Conflicting metadata for message "$resourceName" found for locale "$locale" '
+                  'between "${sourceFile.path}" and "${other.file.path}".',
+                );
+              case ArbConflictResolution.first:
+                // Keep metadata from first matching source.
+                break;
+              case ArbConflictResolution.last:
+                // Keep metadata from last matching source.
+                mergedResources[key] = otherValue;
+                keyToFile[key] = other.file;
+            }
+          } else if (existingMeta is Map && otherValue is Map) {
+            mergedResources[key] = switch (conflictResolution) {
+              ArbConflictResolution.last => <String, Object?>{
+                ...existingMeta.cast<String, Object?>(),
+                ...otherValue.cast<String, Object?>(),
+              },
+              _ => <String, Object?>{
+                ...otherValue.cast<String, Object?>(),
+                ...existingMeta.cast<String, Object?>(),
+              },
+            };
+          }
+        } else {
+          mergedResources[key] = otherValue;
+          keyToFile[key] = other.file;
+        }
+      }
+    }
+
+    return AppResourceBundle._(
+      file,
+      locale,
+      mergedResources,
+      mergedResourceIds,
+      files: <File>[...files, ...other.files],
+      keyToFile: keyToFile,
+    );
+  }
+
+  static bool _areMetadataCompatible(Object? a, Object? b) {
+    if (identical(a, b)) {
+      return true;
+    }
+    if (a == null || b == null) {
+      return true;
+    }
+    if (a is Map && b is Map) {
+      for (final Object? key in a.keys) {
+        if (b.containsKey(key)) {
+          if (!_areMetadataCompatible(a[key], b[key])) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+    if (a is List && b is List) {
+      if (a.length != b.length) {
+        return false;
+      }
+      for (var i = 0; i < a.length; i++) {
+        if (!_areMetadataCompatible(a[i], b[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return a == b;
+  }
 
   String? translationFor(String resourceId) {
     final Object? result = resources[resourceId];
@@ -742,33 +904,59 @@ class AppResourceBundle {
 
 // Represents all of the ARB files in [directory] as [AppResourceBundle]s.
 class AppResourceBundleCollection {
-  factory AppResourceBundleCollection(Directory directory) {
+  factory AppResourceBundleCollection(
+    Directory directory, {
+    List<Directory>? additionalDirectories,
+    ArbConflictResolution conflictResolution = ArbConflictResolution.error,
+  }) {
     // Assuming that the caller has verified that the directory is readable.
 
     final filenameRE = RegExp(r'(\w+)\.arb$');
     final localeToBundle = <LocaleInfo, AppResourceBundle>{};
     final languageToLocales = <String, List<LocaleInfo>>{};
-    // We require the list of files to be sorted so that
-    // "languageToLocales[bundle.locale.languageCode]" is not null
-    // by the time we handle locales with country codes.
-    final List<File> files =
-        directory
-            .listSync()
-            .whereType<File>()
-            .where((File e) => filenameRE.hasMatch(e.path))
-            .toList()
-          ..sort(sortFilesByPath);
-    for (final file in files) {
-      final bundle = AppResourceBundle(file);
-      if (localeToBundle[bundle.locale] != null) {
-        throw L10nException(
-          "Multiple arb files with the same '${bundle.locale}' locale detected. \n"
-          'Ensure that there is exactly one arb file for each locale.',
-        );
+
+    final allDirectories = <Directory>[directory, ...?additionalDirectories];
+
+    final bool hasMultipleDirectories =
+        additionalDirectories != null && additionalDirectories.isNotEmpty;
+
+    final bundles = <AppResourceBundle>[];
+    for (final dir in allDirectories) {
+      if (dir.existsSync()) {
+        final List<File> dirFiles =
+            dir.listSync().whereType<File>().where((File e) => filenameRE.hasMatch(e.path)).toList()
+              ..sort(sortFilesByPath);
+        final seenLocalesInDir = <LocaleInfo>{};
+        for (final file in dirFiles) {
+          final bundle = AppResourceBundle(file);
+          if (!seenLocalesInDir.add(bundle.locale)) {
+            throw L10nException(
+              "Multiple arb files with the same '${bundle.locale}' locale detected. \n"
+              'Ensure that there is exactly one arb file for each locale.',
+            );
+          }
+          bundles.add(bundle);
+        }
       }
-      localeToBundle[bundle.locale] = bundle;
-      languageToLocales[bundle.locale.languageCode] ??= <LocaleInfo>[];
-      languageToLocales[bundle.locale.languageCode]!.add(bundle.locale);
+    }
+
+    for (final bundle in bundles) {
+      if (localeToBundle[bundle.locale] != null) {
+        if (!hasMultipleDirectories) {
+          throw L10nException(
+            "Multiple arb files with the same '${bundle.locale}' locale detected. \n"
+            'Ensure that there is exactly one arb file for each locale.',
+          );
+        }
+        localeToBundle[bundle.locale] = localeToBundle[bundle.locale]!.merge(
+          bundle,
+          conflictResolution: conflictResolution,
+        );
+      } else {
+        localeToBundle[bundle.locale] = bundle;
+        languageToLocales[bundle.locale.languageCode] ??= <LocaleInfo>[];
+        languageToLocales[bundle.locale.languageCode]!.add(bundle.locale);
+      }
     }
 
     languageToLocales.forEach((String language, List<LocaleInfo> listOfCorrespondingLocales) {
@@ -802,6 +990,7 @@ class AppResourceBundleCollection {
 
   Iterable<LocaleInfo> get locales => _localeToBundle.keys;
   Iterable<AppResourceBundle> get bundles => _localeToBundle.values;
+  Iterable<File> get files => _localeToBundle.values.expand((AppResourceBundle b) => b.files);
   AppResourceBundle? bundleFor(LocaleInfo locale) => _localeToBundle[locale];
 
   Iterable<String> get languages => _languageToLocales.keys;
