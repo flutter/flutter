@@ -30,6 +30,12 @@ const List<String> defaultIgnoredDirectories = <String>[
   // Populated by gclient hooks (clang, gn, ninja, sysroots, emsdk, ...).
   'engine/src/flutter/buildtools',
   'engine/src/flutter/prebuilts',
+  // Debian sysroots installed by the linux_sysroot_* hooks
+  // (engine/src/build/linux/sysroot_scripts/install-sysroot.py); the Bazel
+  // toolchains reach them through a repository instead.
+  'engine/src/build/linux/debian_bullseye_amd64-sysroot',
+  'engine/src/build/linux/debian_bullseye_arm64-sysroot',
+  'engine/src/build/linux/debian_trixie_riscv64-sysroot',
   // Downloaded by tools/download_fuchsia_sdk.py.
   'engine/src/third_party/fuchsia-sdk',
 ];
