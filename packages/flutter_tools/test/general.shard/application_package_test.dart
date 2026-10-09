@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -109,6 +110,7 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
+        config: Config.test(),
         processManager: fakeProcessManager,
         userMessages: UserMessages(),
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
@@ -180,6 +182,7 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
+        config: Config.test(),
         processManager: fakeProcessManager,
         userMessages: UserMessages(),
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
@@ -230,6 +233,7 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
+        config: Config.test(),
         processManager: fakeProcessManager,
         userMessages: UserMessages(),
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
@@ -281,6 +285,7 @@ void main() {
         final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
           project.android,
           androidSdk: sdk,
+          config: Config.test(),
           processManager: fakeProcessManager,
           userMessages: UserMessages(),
           processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
@@ -435,6 +440,7 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
+        config: Config.test(),
         processManager: fakeProcessManager,
         userMessages: UserMessages(),
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
@@ -509,6 +515,7 @@ void main() {
         final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
           project.android,
           androidSdk: sdk,
+          config: Config.test(),
           processManager: fakeProcessManager,
           userMessages: UserMessages(),
           processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),

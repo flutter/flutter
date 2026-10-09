@@ -282,7 +282,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final String buildDirectoryPath = getIosBuildDirectory();
+  final String buildDirectoryPath = getIosBuildDirectory(
+    config: globals.config,
+    fileSystem: globals.fs,
+  );
 
   final Map<String, String> buildSettings =
       await app.project.buildSettingsForBuildInfo(
@@ -446,7 +449,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(getCurrentHostPlatform());
+      final onlyActiveArch =
+          activeArch ==
+          CpuArch.fromHostPlatform(
+            getCurrentHostPlatform(operatingSystemUtils: globals.os, platform: globals.platform),
+          );
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
       buildCommands.add('ARCHS=${activeArch.darwinArchName}');

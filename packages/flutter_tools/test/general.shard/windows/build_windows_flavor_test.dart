@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -133,33 +134,28 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('getWindowsBuildDirectory', () {
-    testUsingContext(
-      'returns legacy path when no flavor',
-      () {
-        expect(
-          getWindowsBuildDirectory(TargetPlatform.windows_x64),
-          endsWith(fileSystem.path.join('windows', 'x64')),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+    testWithoutContext('returns legacy path when no flavor', () {
+      expect(
+        getWindowsBuildDirectory(
+          TargetPlatform.windows_x64,
+          config: Config.test(),
+          fileSystem: fileSystem,
+        ),
+        endsWith(fileSystem.path.join('windows', 'x64')),
+      );
+    });
 
-    testUsingContext(
-      'inserts flavor segment when flavor is set',
-      () {
-        expect(
-          getWindowsBuildDirectory(TargetPlatform.windows_x64, 'apple'),
-          endsWith(fileSystem.path.join('windows', 'x64', 'apple')),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+    testWithoutContext('inserts flavor segment when flavor is set', () {
+      expect(
+        getWindowsBuildDirectory(
+          TargetPlatform.windows_x64,
+          config: Config.test(),
+          fileSystem: fileSystem,
+          flavor: 'apple',
+        ),
+        endsWith(fileSystem.path.join('windows', 'x64', 'apple')),
+      );
+    });
   });
 
   // ---------------------------------------------------------------------------

@@ -556,7 +556,10 @@ class CachedArtifacts implements Artifacts {
         // TODO(cbracken): Build Android gen_snapshot as Arm64 binary to run
         // natively on Apple Silicon. See:
         // https://github.com/flutter/flutter/issues/152281
-        HostPlatform hostPlatform = getCurrentHostPlatform();
+        HostPlatform hostPlatform = getCurrentHostPlatform(
+          operatingSystemUtils: _operatingSystemUtils,
+          platform: _platform,
+        );
         if (hostPlatform == HostPlatform.darwin_arm64) {
           hostPlatform = HostPlatform.darwin_x64;
         }
@@ -1156,7 +1159,10 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.skyEnginePath:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
       case Artifact.fuchsiaKernelCompiler:
-        final String hostPlatform = getCurrentHostPlatform().cliName;
+        final String hostPlatform = getCurrentHostPlatform(
+          operatingSystemUtils: _operatingSystemUtils,
+          platform: _platform,
+        ).cliName;
         final modeName = mode!.isRelease ? 'release' : mode.toString();
         final dartBinaries = 'dart_binaries-$modeName-$hostPlatform';
         return _fileSystem.path.join(

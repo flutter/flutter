@@ -7,12 +7,14 @@ import 'dart:async';
 import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/release_asset_server.dart';
 import 'package:flutter_tools/src/isolated/web_asset_server.dart';
 import 'package:flutter_tools/src/web/compile.dart';
@@ -694,6 +696,50 @@ void main() {
       },
       overrides: <Type, Generator>{
         Artifacts: () => Artifacts.test(),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'serves assets from configured build-dir',
+      () async {
+        globals.config.setValue('build-dir', 'out');
+        fileSystem.file('out/flutter_assets/assets/custom_dir_asset.txt')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('custom dir asset');
+
+        final WebAssetServer server = await WebAssetServer.start(
+          null,
+          null,
+          false,
+          false,
+          false,
+          BuildInfo.debug,
+          false,
+          const DartDevelopmentServiceConfiguration(enable: false),
+          Uri.base,
+          null,
+          crossOriginIsolation: false,
+          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webRenderer: WebRendererMode.canvaskit,
+          isWasm: false,
+          useLocalCanvasKit: false,
+          testMode: true,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        );
+
+        final Response response = await server.handleRequest(
+          Request('GET', Uri.parse('http://localhost:8080/assets/assets/custom_dir_asset.txt')),
+        );
+        expect(response.statusCode, HttpStatus.ok);
+        expect(await response.readAsString(), 'custom dir asset');
+      },
+      overrides: <Type, Generator>{
+        Artifacts: () => Artifacts.test(),
+        Config: () => Config.test(),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },

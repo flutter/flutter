@@ -6,6 +6,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -78,6 +79,7 @@ void main() {
           artifacts: FakeArtifacts(_engineArtifactPath),
           buildSystem: FakeBuildSystem(),
           cache: FakeCache(fs, _flutterRoot),
+          config: Config.test(),
           fileSystem: fs,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
@@ -117,6 +119,7 @@ void main() {
           artifacts: FakeArtifacts(_engineArtifactPath),
           buildSystem: FakeBuildSystem(),
           cache: FakeCache(fs, _flutterRoot),
+          config: Config.test(),
           fileSystem: fs,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
@@ -158,6 +161,7 @@ void main() {
             artifacts: FakeArtifacts(_engineArtifactPath),
             buildSystem: FakeBuildSystem(),
             cache: FakeCache(fs, _flutterRoot),
+            config: Config.test(),
             fileSystem: fs,
             flutterVersion: FakeFlutterVersion(),
             logger: logger,
@@ -212,6 +216,7 @@ void main() {
               artifacts: FakeArtifacts(_engineArtifactPath),
               buildSystem: FakeBuildSystem(),
               cache: FakeCache(fs, _flutterRoot),
+              config: Config.test(),
               fileSystem: fs,
               flutterVersion: FakeFlutterVersion(),
               logger: logger,
@@ -271,6 +276,7 @@ void main() {
               artifacts: FakeArtifacts(_engineArtifactPath),
               buildSystem: FakeBuildSystem(),
               cache: FakeCache(fs, _flutterRoot),
+              config: Config.test(),
               fileSystem: fs,
               flutterVersion: FakeFlutterVersion(),
               logger: logger,
@@ -332,6 +338,7 @@ void main() {
         artifacts: FakeArtifacts(_engineArtifactPath),
         buildSystem: FakeBuildSystem(),
         cache: FakeCache(fs, _flutterRoot),
+        config: Config.test(),
         fileSystem: fs,
         flutterVersion: FakeFlutterVersion(),
         logger: logger,
@@ -360,6 +367,7 @@ void main() {
         artifacts: FakeArtifacts(_engineArtifactPath),
         buildSystem: FakeBuildSystem(),
         cache: FakeCache(fs, _flutterRoot),
+        config: Config.test(),
         fileSystem: fs,
         flutterVersion: FakeFlutterVersion(),
         logger: logger,
@@ -3440,6 +3448,7 @@ BuildSwiftPackageUtils _createTestUtils({
     artifacts: FakeArtifacts(_engineArtifactPath),
     buildSystem: buildSystem ?? FakeBuildSystem(),
     cache: FakeCache(fs, _flutterRoot),
+    config: Config.test(),
     fileSystem: fs,
     flutterRoot: _flutterRoot,
     flutterVersion: FakeFlutterVersion(),

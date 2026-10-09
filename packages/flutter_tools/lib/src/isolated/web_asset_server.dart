@@ -558,7 +558,7 @@ class WebAssetServer implements AssetReader {
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
       final Uri potential = fileSystem
-          .directory(getAssetBuildDirectory(null, fileSystem))
+          .directory(getAssetBuildDirectory(globals.config, fileSystem))
           .uri
           .resolve(requestPath.replaceFirst('assets/', ''));
       file = fileSystem.file(potential);

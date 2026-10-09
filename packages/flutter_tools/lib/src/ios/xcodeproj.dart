@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -47,6 +48,7 @@ class XcodeProjectInterpreter {
     required Logger logger,
     required FileSystem fileSystem,
     required Analytics analytics,
+    required Config config,
   }) {
     return XcodeProjectInterpreter._(
       platform: platform,
@@ -54,6 +56,7 @@ class XcodeProjectInterpreter {
       logger: logger,
       fileSystem: fileSystem,
       analytics: analytics,
+      config: config,
     );
   }
 
@@ -63,6 +66,7 @@ class XcodeProjectInterpreter {
     required Logger logger,
     required FileSystem fileSystem,
     required this._analytics,
+    required this._config,
     Version? version,
     this._build,
   }) : _platform = platform,
@@ -89,6 +93,7 @@ class XcodeProjectInterpreter {
     Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
     String? build = '13C100',
     Analytics? analytics,
+    Config? config,
   }) {
     final Platform platform = FakePlatform(
       operatingSystem: 'macos',
@@ -102,11 +107,13 @@ class XcodeProjectInterpreter {
       version: version,
       build: build,
       analytics: analytics ?? const NoOpAnalytics(),
+      config: config ?? Config.test(),
     );
   }
 
   final Platform _platform;
   final FileSystem _fileSystem;
+  final Config _config;
   final ProcessUtils _processUtils;
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
@@ -253,9 +260,11 @@ class XcodeProjectInterpreter {
     final String? target = buildContext.target;
     final String? deviceId = buildContext.deviceId;
     final String buildDir = switch (buildContext.sdk) {
-      XcodeSdk.MacOSX => getMacOSBuildDirectory(),
-      XcodeSdk.IPhoneOS || XcodeSdk.IPhoneSimulator => getIosBuildDirectory(),
-      XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
+      XcodeSdk.MacOSX => getMacOSBuildDirectory(config: _config, fileSystem: _fileSystem),
+      XcodeSdk.IPhoneOS ||
+      XcodeSdk.IPhoneSimulator => getIosBuildDirectory(config: _config, fileSystem: _fileSystem),
+      XcodeSdk.WatchOS ||
+      XcodeSdk.WatchSimulator => getIosBuildDirectory(config: _config, fileSystem: _fileSystem),
     };
     final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
       xcodeProject,
@@ -326,7 +335,9 @@ class XcodeProjectInterpreter {
       return null;
     }
     final Status status = _logger.startSpinner();
-    final String buildDirectory = _fileSystem.path.absolute(getIosBuildDirectory());
+    final String buildDirectory = _fileSystem.path.absolute(
+      getIosBuildDirectory(config: _config, fileSystem: _fileSystem),
+    );
     final showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',

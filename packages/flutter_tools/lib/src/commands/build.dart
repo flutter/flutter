@@ -10,6 +10,7 @@ import '../android/android_builder.dart';
 import '../android/gradle.dart';
 import '../artifacts.dart';
 import '../base/common.dart' show throwToolExit;
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -57,6 +58,7 @@ class BuildCommand extends FlutterCommand {
     final ToolContext(
       :Artifacts artifacts,
       :Cache cache,
+      :Config config,
       :FlutterVersion flutterVersion,
       fs: FileSystem fileSystem,
       :Logger logger,
@@ -137,6 +139,7 @@ class BuildCommand extends FlutterCommand {
         buildSystem: buildSystem,
         cache: cache,
         codesign: codesign,
+        config: config,
         featureFlags: featureFlags,
         fileSystem: fileSystem,
         flutterVersion: flutterVersion,
