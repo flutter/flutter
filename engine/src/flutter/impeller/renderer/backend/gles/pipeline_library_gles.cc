@@ -346,10 +346,7 @@ class PipelineLibraryGLES::PipelineCompileJob final
   }
 
   // |CompileJob|
-  absl::Status Finish() override {
-    AddReactorOperation(&FinishPipelineCreation);
-    return absl::OkStatus();
-  }
+  void Finish() override { AddReactorOperation(&FinishPipelineCreation); }
 
  private:
   /// Runs the step on the reactor. Reactor operations added on the same thread
@@ -413,7 +410,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
   if (async && compile_queue_) {
     compile_queue_->PostJobForDescriptor(descriptor, std::move(job));
   } else if (job->Start().ok()) {
-    job->Finish().IgnoreError();
+    job->Finish();
   }
 
   return pipeline_future;
