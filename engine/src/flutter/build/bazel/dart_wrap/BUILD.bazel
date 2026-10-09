@@ -19,11 +19,6 @@ package(default_visibility = ["//visibility:public"])
 
 _DART_REVISION = GIT_DEPS["engine/src/flutter/third_party/dart"]["revision"]
 
-config_setting(
-    name = "opt",
-    values = {"compilation_mode": "opt"},
-)
-
 # What tools/gn would write to args.gn for this build, restricted to the
 # arguments the pruned GN graph declares (gn gen runs with
 # --fail-on-unused-args; dart_version, for one, belongs to
@@ -49,7 +44,7 @@ _GN_ARGS = {
 } | select({
     # -c opt is an optimized build (tools/gn without --unoptimized), which
     # also enables LTO; anything else is --unoptimized.
-    ":opt": {
+    "//engine/src/flutter/build/bazel:optimized": {
         "enable_lto": "true",
         "is_debug": "false",
     },
@@ -74,9 +69,12 @@ gn_build(
         "gen_snapshot",
     ],
     ar = "@clang_linux_x64//:bin/llvm-ar",
-    # ICU is linked from @icu; zlib and BoringSSL have no Bazel targets yet
-    # and stay inside libcommon_embedder_dart_io.a.
-    archive_boundaries = ["//flutter/third_party/icu"],
+    # Dependencies the Bazel side builds itself (the facades depend on them).
+    archive_boundaries = [
+        "//flutter/third_party/boringssl",
+        "//flutter/third_party/icu",
+        "//flutter/third_party/zlib",
+    ],
     # Libraries. The facades below mirror the GN dependencies between them.
     archives = {
         "libcommon_embedder_dart_io.a": "//flutter/third_party/dart/runtime/bin:common_embedder_dart_io",
@@ -143,14 +141,16 @@ cc_library(
 )
 
 # //flutter/third_party/dart/runtime/bin:common_embedder_dart_io -- dart:io
-# for embedders. Carries BoringSSL and zlib for now (see archive_boundaries).
+# for embedders, on BoringSSL and zlib.
 cc_library(
     name = "common_embedder_dart_io",
     srcs = [":libcommon_embedder_dart_io.a"],
     linkopts = ["-ldl"],
     deps = [
         ":libdart_builtin",
+        "//engine/src/flutter/third_party/boringssl",
         "@dart//:runtime_bin_headers",
+        "@zlib",
     ],
 )
 
