@@ -75,6 +75,7 @@ UINT DefaultMapVkToScan(UINT virtual_key, bool extended) {
 
 constexpr uint64_t kScanCodeKeyA = 0x1e;
 constexpr uint64_t kScanCodeAltLeft = 0x38;
+constexpr uint64_t kScanCodeSpace = 0x39;
 constexpr uint64_t kScanCodeNumpad1 = 0x4f;
 constexpr uint64_t kScanCodeNumLock = 0x45;
 constexpr uint64_t kScanCodeControl = 0x1d;
@@ -325,6 +326,71 @@ TEST(KeyboardKeyEmbedderHandlerTest, ImeEventsAreIgnored) {
   event = &results[0];
   event->callback(true, event->user_data);
   EXPECT_EQ(last_handled, true);
+}
+
+// Press Alt+Space, miss Space's key-up, and press Space with an IME.
+//
+// This is special because the previous Microsoft IME reports the next Space as
+// VK_PROCESSKEY while Flutter still records the previous Space as pressed.
+TEST(KeyboardKeyEmbedderHandlerTest, FreshImeKeyDownReleasesStalePressedKey) {
+  TestKeystate key_state;
+  std::vector<TestFlutterKeyEvent> results;
+  bool last_handled = false;
+
+  std::unique_ptr<KeyboardKeyEmbedderHandler> handler =
+      std::make_unique<KeyboardKeyEmbedderHandler>(
+          [&results](const FlutterKeyEvent& event,
+                     FlutterKeyEventCallback callback, void* user_data) {
+            results.emplace_back(event, callback, user_data);
+          },
+          key_state.Getter(), DefaultMapVkToScan);
+
+  // Press Space while Alt is held. Omit its key-up.
+  handler->KeyboardHook(VK_SPACE, kScanCodeSpace, WM_SYSKEYDOWN, 0, false,
+                        false, [](bool) {});
+  ASSERT_EQ(results.size(), 1u);
+  results[0].callback(false, results[0].user_data);
+  results.clear();
+
+  // Press Space through the IME.
+  handler->KeyboardHook(
+      VK_PROCESSKEY, kScanCodeSpace, WM_KEYDOWN, 0, false, false,
+      [&last_handled](bool handled) { last_handled = handled; });
+  EXPECT_EQ(last_handled, true);
+  ASSERT_EQ(results.size(), 1u);
+  EXPECT_EQ(results[0].type, kFlutterKeyEventTypeUp);
+  EXPECT_EQ(results[0].physical, kPhysicalSpace);
+  EXPECT_EQ(results[0].logical, kLogicalSpace);
+  EXPECT_EQ(results[0].synthesized, true);
+  EXPECT_EQ(handler->GetPressedState().empty(), true);
+  results.clear();
+
+  // Dispatch the translated Space key-down.
+  handler->KeyboardHook(VK_SPACE, kScanCodeSpace, WM_KEYDOWN, ' ', false, false,
+                        [](bool) {});
+  ASSERT_EQ(results.size(), 1u);
+  EXPECT_EQ(results[0].type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(results[0].physical, kPhysicalSpace);
+  EXPECT_EQ(results[0].logical, kLogicalSpace);
+  ASSERT_EQ(handler->GetPressedState().size(), 1u);
+  EXPECT_EQ(handler->GetPressedState().at(kPhysicalSpace), kLogicalSpace);
+  results[0].callback(false, results[0].user_data);
+  results.clear();
+
+  // Repeat Space through the IME.
+  last_handled = false;
+  handler->KeyboardHook(
+      VK_PROCESSKEY, kScanCodeSpace, WM_KEYDOWN, 0, false, true,
+      [&last_handled](bool handled) { last_handled = handled; });
+  EXPECT_EQ(last_handled, false);
+  ASSERT_EQ(results.size(), 1u);
+  EXPECT_EQ(results[0].type, kFlutterKeyEventTypeRepeat);
+  EXPECT_EQ(results[0].logical, kLogicalSpace);
+  EXPECT_EQ(results[0].synthesized, false);
+  ASSERT_EQ(handler->GetPressedState().size(), 1u);
+  EXPECT_EQ(handler->GetPressedState().at(kPhysicalSpace), kLogicalSpace);
+  results[0].callback(false, results[0].user_data);
+  EXPECT_EQ(last_handled, false);
 }
 
 // Test if modifier keys that are told apart by the extended bit can be
