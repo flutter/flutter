@@ -227,8 +227,7 @@ class KernelSnapshot extends Target {
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
 
     TargetModel targetModel = TargetModel.flutter;
-    if (targetPlatform == TargetPlatform.fuchsia_x64 ||
-        targetPlatform == TargetPlatform.fuchsia_arm64) {
+    if (targetPlatform.os == .fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
     // Force linking of the platform for desktop embedder targets since these
@@ -257,20 +256,15 @@ class KernelSnapshot extends Target {
         TargetPlatform.throwUnsupportedTarget();
     }
 
-    final String? targetOS = switch (targetPlatform) {
-      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => 'fuchsia',
-      TargetPlatform.android ||
-      TargetPlatform.android_arm ||
-      TargetPlatform.android_arm64 ||
-      TargetPlatform.android_x64 => 'android',
-      TargetPlatform.darwin => 'macos',
-      TargetPlatform.ios => 'ios',
-      TargetPlatform.linux_arm64 ||
-      TargetPlatform.linux_riscv64 ||
-      TargetPlatform.linux_x64 => 'linux',
-      TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
-      TargetPlatform.tester || TargetPlatform.web_javascript => null,
-      TargetPlatform.unsupported => TargetPlatform.throwUnsupportedTarget(),
+    final String? targetOS = switch (targetPlatform.os) {
+      .fuchsia => 'fuchsia',
+      .android => 'android',
+      .macos => 'macos',
+      .ios => 'ios',
+      .linux => 'linux',
+      .windows => 'windows',
+      .tester || .web => null,
+      .unsupported => TargetPlatform.throwUnsupportedTarget(),
     };
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
