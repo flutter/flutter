@@ -1,0 +1,132 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @icu: Chromium's ICU fork pinned in DEPS. Mirrors
+# //flutter/third_party/icu/BUILD.gn (the targets the engine uses, as a static
+# library with icu_use_data_file = true and icu_use_stub_data = true).
+#
+# Upstream ships BUILD.bazel files under source/ for its own data-generation
+# tools only; they do not build the libraries and are hidden by the
+# synced_repository rule in favor of this file.
+#
+# The source lists are globs. They are identical to the icuuc_sources and
+# icu18n_sources lists in sources.gni, which is generated from the
+# source/*/sources.txt manifests and therefore also covers every .cpp file in
+# those directories.
+
+# This file is loaded as the root of @icu, so the main module is named.
+load("@flutter//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_THIRD_PARTY_COPTS")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# config("icu_config"): what every user of ICU compiles with.
+_ICU_CONFIG_DEFINES = [
+    # Tell ICU to not insert |using namespace icu;| into its headers, so that
+    # engine sources explicitly have to use |icu::|.
+    "U_USING_ICU_NAMESPACE=0",
+    # We don't use ICU plugins and dyload is only necessary for them.
+    "U_ENABLE_DYLOAD=0",
+    # v8/Blink need to know whether Chromium's copy of ICU is used or not.
+    "USE_CHROMIUM_ICU=1",
+    # Enable tracing to connect to UMA but disable tracing of resource to
+    # avoid performance issues.
+    "U_ENABLE_TRACING=1",
+    "U_ENABLE_RESOURCE_TRACING=0",
+    # !is_component_build
+    "U_STATIC_IMPLEMENTATION",
+    # icu_use_data_file
+    "ICU_UTIL_DATA_IMPL=ICU_UTIL_DATA_FILE",
+]
+
+# config("icu_code"): what ICU itself compiles with.
+_ICU_CODE_DEFINES = [
+    "HAVE_DLOPEN=0",
+    # Only build encoding coverters and detectors necessary for HTML5.
+    "UCONFIG_ONLY_HTML_CONVERSION=1",
+    "UCONFIG_USE_ML_PHRASE_BREAKING=1",
+    "UCONFIG_USE_WINDOWS_LCID_MAPPING_API=0",
+    # No dependency on the default platform encoding. Will cut down the code
+    # size.
+    "U_CHARSET_IS_UTF8=1",
+]
+
+_ICU_COPTS = FLUTTER_THIRD_PARTY_COPTS + [
+    # ICU uses RTTI; BUILD.gn swaps the default no_rtti config for rtti.
+    "-frtti",
+    # ICU has some code with the pattern:
+    #   if (found = uprv_getWindowsTimeZoneInfo(...))
+    "-Wno-parentheses",
+    # ucnv2022.cpp contains three functions that are only used when certain
+    # preprocessor defines are set. unistr.cpp also has an unused function
+    # for non-component builds.
+    "-Wno-unused-function",
+    # putil.cpp contains unused variables when building for iOS simulators.
+    "-Wno-unused-variable",
+    # Required for uversion.h putting a using namespace directive in the
+    # header.
+    "-Wno-header-hygiene",
+    # ICU has decided not to fix this warning as doing so would break its
+    # stable API.
+    "-Wno-ambiguous-reversed-operator",
+    # ICU uses its own deprecated functions.
+    "-Wno-deprecated-declarations",
+]
+
+# Meta target that includes both icuuc and icui18n. Most targets want both.
+cc_library(
+    name = "icu",
+    deps = [
+        ":icui18n",
+        ":icuuc",
+    ],
+)
+
+# generate_icuuc("icuuc_private") plus the icuuc_public headers. Private
+# headers are exported too: icui18n includes them, as GN allows through the
+# source/common include directory.
+cc_library(
+    name = "icuuc",
+    srcs = glob(["source/common/*.cpp"]) + [
+        # icu_use_data_file && icu_use_stub_data
+        "source/stubdata/stubdata.cpp",
+        "source/stubdata/stubdata.h",
+    ],
+    hdrs = glob([
+        "source/common/*.h",
+        "source/common/unicode/*.h",
+    ]),
+    copts = _ICU_COPTS,
+    defines = _ICU_CONFIG_DEFINES,
+    includes = ["source/common"],
+    linkstatic = True,
+    local_defines = _ICU_CODE_DEFINES + [
+        "U_COMMON_IMPLEMENTATION",
+        "U_ICUDATAENTRY_IN_COMMON",
+    ],
+)
+
+# generate_icui18n("icui18n").
+cc_library(
+    name = "icui18n",
+    srcs = glob(["source/i18n/*.cpp"]),
+    hdrs = glob([
+        "source/i18n/*.h",
+        "source/i18n/unicode/*.h",
+    ]),
+    copts = _ICU_COPTS,
+    defines = _ICU_CONFIG_DEFINES,
+    includes = ["source/i18n"],
+    linkstatic = True,
+    local_defines = _ICU_CODE_DEFINES + ["U_I18N_IMPLEMENTATION"],
+    deps = [":icuuc"],
+)
+
+# The data file (copy("copy_icudata") puts it at the root of the GN output
+# directory as icudtl.dat). Binaries that initialize ICU load it at runtime;
+# list it in their `data`.
+filegroup(
+    name = "icudata",
+    srcs = ["common/icudtl.dat"],
+)

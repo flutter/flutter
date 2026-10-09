@@ -29,9 +29,18 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/third_party/abseil-cpp",
         build_file = None,
     ),
+    # Embedding API headers only, for now (see the overlay).
+    "dart": struct(
+        path = "engine/src/flutter/third_party/dart",
+        build_file = _OVERLAYS + ":dart/BUILD.dart.bazel",
+    ),
     "googletest": struct(
         path = "engine/src/flutter/third_party/googletest",
         build_file = None,
+    ),
+    "icu": struct(
+        path = "engine/src/flutter/third_party/icu",
+        build_file = _OVERLAYS + ":icu/BUILD.icu.bazel",
     ),
     # The engine's own C++ runtime, built from source by the toolchain's
     # `cxx_runtime` library (see toolchains/BUILD.bazel).
