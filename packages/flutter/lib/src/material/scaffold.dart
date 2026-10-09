@@ -3490,6 +3490,11 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   Widget build(BuildContext context) {
     // Non-zero only while the keyboard lifts this sheet, see _ScaffoldLayout.
     final double keyboardInset = _BottomSheetKeyboardInset.of(context);
+    // The constraints describe the content, so they grow by the part of the
+    // Material that extends behind the keyboard. This mirrors BottomSheet's own
+    // lookup; its defaults, used when both are null, don't limit the height.
+    final BoxConstraints? constraints =
+        widget.constraints ?? Theme.of(context).bottomSheetTheme.constraints;
 
     return AnimatedBuilder(
       animation: widget.animationController,
@@ -3512,13 +3517,20 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
             onDragStart: _handleDragStart,
             onDragEnd: _handleDragEnd,
             onClosing: widget.onClosing!,
-            builder: widget.builder,
-            bottomInset: keyboardInset,
+            // Extends the Material behind the keyboard. Always present, so the
+            // content keeps its state when the keyboard shows or hides.
+            builder: (BuildContext context) => Padding(
+              padding: EdgeInsets.only(bottom: keyboardInset),
+              child: widget.builder(context),
+            ),
             backgroundColor: widget.backgroundColor,
             elevation: widget.elevation,
             shape: widget.shape,
             clipBehavior: widget.clipBehavior,
-            constraints: widget.constraints,
+            constraints: constraints?.copyWith(
+              minHeight: constraints.minHeight + keyboardInset,
+              maxHeight: constraints.maxHeight + keyboardInset,
+            ),
           ),
         ),
       ),

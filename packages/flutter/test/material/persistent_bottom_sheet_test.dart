@@ -899,8 +899,9 @@ void main() {
       expect(find.text('sheet'), findsNothing);
     });
 
-    testWidgets('showBottomSheet drag-to-close threshold is measured against the content, '
-        'not the Material behind the keyboard', (WidgetTester tester) async {
+    testWidgets('showBottomSheet sheet follows the drag with the keyboard up', (
+      WidgetTester tester,
+    ) async {
       final scaffoldKey = GlobalKey<ScaffoldState>();
       await tester.pumpWidget(
         MaterialApp(
@@ -918,15 +919,22 @@ void main() {
       expect(tester.getRect(find.text('sheet')).top, 200.0);
       expect(tester.getRect(sheetMaterial()).height, 400.0);
 
-      // Less than half of the content height: springs back open.
-      await tester.drag(find.text('sheet'), const Offset(0.0, 60.0));
+      // The whole sheet moves with the finger.
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('sheet')));
+      await gesture.moveBy(const Offset(0.0, 20.0)); // Past the touch slop.
+      await tester.pump();
+      await gesture.moveBy(const Offset(0.0, 100.0));
+      await tester.pump();
+      expect(tester.getRect(find.text('sheet')).top, 300.0);
+
+      // Less than half of the whole sheet, including the part behind the
+      // keyboard: springs back open.
+      await gesture.up();
       await tester.pumpAndSettle();
-      expect(find.text('sheet'), findsOneWidget);
       expect(tester.getRect(find.text('sheet')).top, 200.0);
 
-      // More than half of the content height (but less than half of the
-      // Material's height): closes, exactly as it does without a keyboard.
-      await tester.drag(find.text('sheet'), const Offset(0.0, 150.0));
+      // More than half of the whole sheet: closes.
+      await tester.drag(find.text('sheet'), const Offset(0.0, 250.0));
       await tester.pumpAndSettle();
       expect(find.text('sheet'), findsNothing);
     });
@@ -1050,10 +1058,8 @@ void main() {
       Finder materialOf(Finder sheet) =>
           find.descendant(of: sheet, matching: find.byType(Material)).first;
 
-      // Only the Scaffold's own sheet carries the inset. The user's sheet, and
-      // its Material, end with the content.
-      expect(tester.widget<BottomSheet>(sheets.first).bottomInset, 200.0);
-      expect(tester.widget<BottomSheet>(sheets.last).bottomInset, 0.0);
+      // Only the Scaffold's own sheet extends behind the keyboard. The user's
+      // sheet, and its Material, end with the content.
       expect(tester.getRect(find.byKey(const Key('content'))).bottom, 400.0);
       expect(tester.getRect(materialOf(sheets.first)).bottom, 600.0);
       expect(tester.getRect(materialOf(sheets.last)).bottom, 400.0);

@@ -95,11 +95,9 @@ class BottomSheet extends StatefulWidget {
     this.shape,
     this.clipBehavior,
     this.constraints,
-    this.bottomInset = 0.0,
     required this.onClosing,
     required this.builder,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(bottomInset >= 0.0);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
@@ -236,21 +234,6 @@ class BottomSheet extends StatefulWidget {
   /// the available space. Otherwise, no alignment is applied.
   final BoxConstraints? constraints;
 
-  /// The distance by which the sheet's [Material] extends below its content.
-  ///
-  /// The widget produced by [builder] is laid out above this inset, and
-  /// dragging, [constraints] and the drag-to-dismiss threshold are measured
-  /// against the content alone. Only the sheet's surface (its color, tint,
-  /// elevation and [shape]) continues through the inset, so that a translucent
-  /// system keyboard shows the sheet's own surface instead of whatever is
-  /// painted behind the sheet.
-  ///
-  /// [Scaffold] sets this for persistent bottom sheets that it lifts above the
-  /// keyboard when [Scaffold.resizeToAvoidBottomInset] is true.
-  ///
-  /// Defaults to zero and must not be negative.
-  final double bottomInset;
-
   @override
   State<BottomSheet> createState() => _BottomSheetState();
 
@@ -276,11 +259,9 @@ class BottomSheet extends StatefulWidget {
 class _BottomSheetState extends State<BottomSheet> {
   final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
 
-  // The height of the sheet's content, excluding the Material that extends
-  // below it by [BottomSheet.bottomInset].
   double get _childHeight {
     final renderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
-    return renderBox.size.height - widget.bottomInset;
+    return renderBox.size.height;
   }
 
   bool get _dismissUnderway => widget.animationController!.status == AnimationStatus.reverse;
@@ -413,40 +394,28 @@ class _BottomSheetState extends State<BottomSheet> {
       shadowColor: shadowColor,
       shape: shape,
       clipBehavior: clipBehavior,
-      // The content is padded inside the Material (rather than the Material
-      // being padded) so the surface continues behind the inset. The Padding
-      // is always present so the content's element tree, and e.g. a text
-      // field's focus, survive the inset changing.
-      child: Padding(
-        padding: EdgeInsets.only(bottom: widget.bottomInset),
-        child: NotificationListener<DraggableScrollableNotification>(
-          onNotification: extentChanged,
-          child: !showDragHandle
-              ? widget.builder(context)
-              : Stack(
-                  alignment: Alignment.topCenter,
-                  children: <Widget>[
-                    dragHandle!,
-                    Padding(
-                      padding: const EdgeInsets.only(top: kMinInteractiveDimension),
-                      child: widget.builder(context),
-                    ),
-                  ],
-                ),
-        ),
+      child: NotificationListener<DraggableScrollableNotification>(
+        onNotification: extentChanged,
+        child: !showDragHandle
+            ? widget.builder(context)
+            : Stack(
+                alignment: Alignment.topCenter,
+                children: <Widget>[
+                  dragHandle!,
+                  Padding(
+                    padding: const EdgeInsets.only(top: kMinInteractiveDimension),
+                    child: widget.builder(context),
+                  ),
+                ],
+              ),
       ),
     );
 
     if (constraints != null) {
-      // The constraints describe the content; the Material below it is extra.
-      final BoxConstraints sheetConstraints = constraints.copyWith(
-        minHeight: constraints.minHeight + widget.bottomInset,
-        maxHeight: constraints.maxHeight + widget.bottomInset,
-      );
       bottomSheet = Align(
         alignment: Alignment.bottomCenter,
         heightFactor: 1.0,
-        child: ConstrainedBox(constraints: sheetConstraints, child: bottomSheet),
+        child: ConstrainedBox(constraints: constraints, child: bottomSheet),
       );
     }
 
