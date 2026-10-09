@@ -497,8 +497,12 @@ FlutterError
     ScrollableState scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
     final ScrollPosition firstPosition = scrollable.position;
     expect(
-      (firstPosition.physics as BouncingScrollPhysics).decelerationRate,
-      ScrollDecelerationRate.normal,
+      firstPosition.physics,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.normal,
+      ),
     );
 
     // Identical configuration should not recreate ScrollPosition.
@@ -506,8 +510,12 @@ FlutterError
     scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
     expect(scrollable.position, same(firstPosition));
     expect(
-      (scrollable.position.physics as BouncingScrollPhysics).decelerationRate,
-      ScrollDecelerationRate.normal,
+      scrollable.position.physics,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.normal,
+      ),
     );
 
     // Different decelerationRate should recreate ScrollPosition.
@@ -518,8 +526,12 @@ FlutterError
     final ScrollPosition secondPosition = scrollable.position;
     expect(secondPosition, isNot(same(firstPosition)));
     expect(
-      (secondPosition.physics as BouncingScrollPhysics).decelerationRate,
-      ScrollDecelerationRate.fast,
+      secondPosition.physics,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.fast,
+      ),
     );
   });
 
@@ -593,17 +605,29 @@ FlutterError
   test('ScrollPhysics supports shorthands for BouncingScrollPhysics', () {
     const ScrollPhysics physics = .bouncing();
 
-    expect(physics, isA<BouncingScrollPhysics>());
     expect(physics.parent, isNull);
-    expect((physics as BouncingScrollPhysics).decelerationRate, ScrollDecelerationRate.normal);
+    expect(
+      physics,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.normal,
+      ),
+    );
 
     const ScrollPhysics physics2 = .bouncing(
       parent: ClampingScrollPhysics(),
       decelerationRate: ScrollDecelerationRate.fast,
     );
-    expect(physics2, isA<BouncingScrollPhysics>());
+    expect(
+      physics2,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.fast,
+      ),
+    );
     expect(physics2.parent, isA<ClampingScrollPhysics>());
-    expect((physics2 as BouncingScrollPhysics).decelerationRate, ScrollDecelerationRate.fast);
   });
 
   test('ScrollPhysics supports shorthands for ClampingScrollPhysics', () {
@@ -639,7 +663,6 @@ FlutterError
     physics = const .rangeMaintaining(parent: ClampingScrollPhysics());
 
     expect(physics, isA<RangeMaintainingScrollPhysics>());
-
     expect(physics.parent, isA<ClampingScrollPhysics>());
   });
 }
