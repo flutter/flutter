@@ -511,7 +511,7 @@ String? validatedBuildNumberForPlatform(
   if (buildNumber == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+  if (targetPlatform.os case .ios || .macos) {
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
@@ -534,9 +534,7 @@ String? validatedBuildNumberForPlatform(
     }
     return tmpBuildNumber;
   }
-  if (targetPlatform == TargetPlatform.android_arm ||
-      targetPlatform == TargetPlatform.android_arm64 ||
-      targetPlatform == TargetPlatform.android_x64) {
+  if (targetPlatform.os == .android) {
     // See versionCode at https://developer.android.com/studio/publish/versioning
     final disallowed = RegExp(r'[^\d]');
     String tmpBuildNumberStr = buildNumber.replaceAll(disallowed, '');
@@ -564,7 +562,7 @@ String? validatedBuildNameForPlatform(
   if (buildName == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+  if (targetPlatform.os case .ios || .macos) {
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
@@ -587,10 +585,7 @@ String? validatedBuildNameForPlatform(
     }
     return tmpBuildName;
   }
-  if (targetPlatform == TargetPlatform.android ||
-      targetPlatform == TargetPlatform.android_arm ||
-      targetPlatform == TargetPlatform.android_arm64 ||
-      targetPlatform == TargetPlatform.android_x64) {
+  if (targetPlatform.os == .android) {
     // See versionName at https://developer.android.com/studio/publish/versioning
     return buildName;
   }
@@ -686,6 +681,31 @@ enum CpuArch {
   };
 }
 
+/// The operating system (or runtime environment) that a [TargetPlatform]
+/// targets, independent of CPU architecture.
+///
+/// Use [TargetPlatform.os] to obtain the operating system of a target platform.
+/// This is preferable to switching over [TargetPlatform] directly when the
+/// decision being made only depends on the operating system, since it avoids
+/// having to enumerate every architecture-specific variant.
+enum TargetOperatingSystem {
+  android,
+  ios,
+  macos,
+  linux,
+  windows,
+  fuchsia,
+
+  /// The web platform.
+  web,
+
+  /// The `flutter_tester` desktop embedder used by `flutter test`.
+  tester,
+
+  /// An unsupported target. See [TargetPlatform.unsupported].
+  unsupported,
+}
+
 enum TargetPlatform {
   android('android'),
   ios('ios'),
@@ -761,16 +781,30 @@ enum TargetPlatform {
     unsupported => throw UnsupportedError('Unexpected Fuchsia platform $this'),
   };
 
-  String get osName => switch (this) {
-    linux_x64 || linux_arm64 || linux_riscv64 => 'linux',
-    darwin => 'macos',
-    windows_x64 || windows_arm64 => 'windows',
-    android || android_arm || android_arm64 || android_x64 => 'android',
-    fuchsia_arm64 || fuchsia_x64 => 'fuchsia',
-    ios => 'ios',
-    tester => 'flutter-tester',
-    web_javascript => 'web',
-    unsupported => throw UnsupportedError('Unexpected target platform $this'),
+  /// The operating system this platform targets, independent of CPU
+  /// architecture.
+  TargetOperatingSystem get os => switch (this) {
+    android || android_arm || android_arm64 || android_x64 => .android,
+    ios => .ios,
+    darwin => .macos,
+    linux_x64 || linux_arm64 || linux_riscv64 => .linux,
+    windows_x64 || windows_arm64 => .windows,
+    fuchsia_arm64 || fuchsia_x64 => .fuchsia,
+    web_javascript => .web,
+    tester => .tester,
+    unsupported => .unsupported,
+  };
+
+  String get osName => switch (os) {
+    .linux => 'linux',
+    .macos => 'macos',
+    .windows => 'windows',
+    .android => 'android',
+    .fuchsia => 'fuchsia',
+    .ios => 'ios',
+    .tester => 'flutter-tester',
+    .web => 'web',
+    .unsupported => throw UnsupportedError('Unexpected target platform $this'),
   };
 
   String get simpleName => switch (this) {

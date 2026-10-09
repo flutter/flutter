@@ -230,7 +230,7 @@ Future<void> testMain() async {
       editingStrategy.disable();
     });
 
-    test('should be [0, compostionStrLength] on new composition', () {
+    test('should be [0, compositionStrLength] on new composition', () {
       const composingText = 'hi';
 
       _inputElement.dispatchEvent(
@@ -260,7 +260,7 @@ Future<void> testMain() async {
       );
     });
 
-    test('should be [beforeComposingText - composingText, compostionStrLength] on composition in the middle of text', () {
+    test('should be [beforeComposingText - composingText, compositionStrLength] on composition in the middle of text', () {
       const composingText = 'hi';
       const beforeComposingText = 'beforeComposingText';
       const afterComposingText = 'afterComposingText';
