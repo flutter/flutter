@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
 #include <memory>
 
 #include "display_list/display_list.h"
@@ -735,6 +736,43 @@ TEST_P(AiksTest, ForegroundPipelineBlendAppliesTransformCorrectly) {
 
   builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(200, 200),
                     DlImageSampling::kMipmapLinear, &image_paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Draws an image through a DlBlendColorFilter for every Porter-Duff mode.
+// `Canvas::AttemptColorFilterOptimization` turns each draw into an
+// AtlasContents draw that selects the matching `PorterDuffBlend` pipeline
+// variant without inverting the mode, so each cell exercises one
+// specialization of that shader on every backend.
+TEST_P(AiksTest, DrawImageWithPorterDuffBlendColorFilters) {
+  auto image =
+      DlImageImpeller::Make(CreateTextureForFixture("blend_mode_dst.png"));
+  // Every mode that ContentContext builds a PorterDuffBlend variant for and
+  // that `GetPorterDuffPipeline` can be asked for (kScreen is gated out).
+  constexpr std::array<DlBlendMode, 14> kModes = {
+      DlBlendMode::kClear,   DlBlendMode::kSrc,      DlBlendMode::kDst,
+      DlBlendMode::kSrcOver, DlBlendMode::kDstOver,  DlBlendMode::kSrcIn,
+      DlBlendMode::kDstIn,   DlBlendMode::kSrcOut,   DlBlendMode::kDstOut,
+      DlBlendMode::kSrcATop, DlBlendMode::kDstATop,  DlBlendMode::kXor,
+      DlBlendMode::kPlus,    DlBlendMode::kModulate,
+  };
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kDarkGrey(), DlBlendMode::kSrc);
+
+  constexpr Scalar kCell = 180;
+  constexpr int kColumns = 5;
+  for (size_t i = 0; i < kModes.size(); i++) {
+    DlPaint paint;
+    paint.setColorFilter(DlColorFilter::MakeBlend(
+        DlColor::kOrange().withAlphaF(0.6f), kModes[i]));
+    DlRect dest = DlRect::MakeXYWH((i % kColumns) * kCell + 20,
+                                   (i / kColumns) * kCell + 20,  //
+                                   kCell - 40, kCell - 40);
+    builder.DrawImageRect(image, dest, DlImageSampling::kLinear, &paint);
+  }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
+
 #include "display_list/dl_sampling_options.h"
 #include "display_list/dl_tile_mode.h"
 #include "display_list/dl_vertices.h"
@@ -157,6 +159,56 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlend) {
       MakeVertices(DlVertexMode::kTriangles, positions, {}, {}, colors);
 
   builder.DrawVertices(vertices, DlBlendMode::kColorBurn, paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// drawVertices with vertex colors, an image color source, and a blend mode
+// above kHardLight is drawn with the second "uber" vertices shader (see
+// ContentContext::GetDrawVerticesUberPipeline). One cell per such mode.
+TEST_P(AiksTest, DrawVerticesImageSourceWithUpperAdvancedBlendModes) {
+  auto image =
+      DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
+  ContentContext content_context(GetContext(), nullptr);
+  auto size = image->GetImpellerTexture(content_context)->GetSize();
+
+  constexpr std::array<DlBlendMode, 8> kModes = {
+      DlBlendMode::kSoftLight, DlBlendMode::kDifference,
+      DlBlendMode::kExclusion, DlBlendMode::kMultiply,
+      DlBlendMode::kHue,       DlBlendMode::kSaturation,
+      DlBlendMode::kColor,     DlBlendMode::kLuminosity,
+  };
+
+  // A triangle strip over the four corners covers the whole image exactly once.
+  std::vector<DlPoint> positions = {
+      DlPoint(0, 0),
+      DlPoint(size.width, 0),
+      DlPoint(0, size.height),
+      DlPoint(size.width, size.height),
+  };
+  std::vector<DlColor> colors = {
+      DlColor::kRed().modulateOpacity(0.5),
+      DlColor::kBlue().modulateOpacity(0.5),
+      DlColor::kGreen().modulateOpacity(0.5),
+      DlColor::kRed().modulateOpacity(0.5),
+  };
+  auto vertices =
+      MakeVertices(DlVertexMode::kTriangleStrip, positions, {}, {}, colors);
+
+  DlPaint paint;
+  paint.setColorSource(
+      DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
+
+  constexpr int kColumns = 4;
+  constexpr Scalar kGap = 8;
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  for (size_t i = 0; i < kModes.size(); i++) {
+    builder.Save();
+    builder.Translate((i % kColumns) * (size.width + kGap),
+                      (i / kColumns) * (size.height + kGap));
+    builder.DrawVertices(vertices, kModes[i], paint);
+    builder.Restore();
+  }
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 

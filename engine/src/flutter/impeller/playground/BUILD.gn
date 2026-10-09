@@ -17,6 +17,8 @@ impeller_component("playground") {
     "switches.h",
     "widgets.cc",
     "widgets.h",
+    "yuv_test_textures.cc",
+    "yuv_test_textures.h",
   ]
 
   deps = [
