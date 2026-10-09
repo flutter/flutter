@@ -177,7 +177,7 @@ class BuildableMacOSApp extends MacOSApp {
 
     return globals.fs.path.join(
       project.parent.directory.path,
-      getMacOSBuildDirectory(),
+      getMacOSBuildDirectory(config: globals.config, fileSystem: globals.fs),
       'Build',
       'Products',
       bundleDirectory(buildInfo),

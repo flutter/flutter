@@ -15,9 +15,9 @@ import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
+import 'base/platform.dart';
 import 'convert.dart';
 import 'darwin/darwin.dart';
-import 'globals.dart' as globals;
 import 'runner/flutter_command.dart' show FlutterOptions;
 
 /// Whether icon font subsetting is enabled by default.
@@ -889,72 +889,71 @@ List<CpuArch> getCpuArchsFromEnv(Map<String, String> defines) {
       defaultDarwinArchitectures;
 }
 
-HostPlatform getCurrentHostPlatform() {
-  if (globals.platform.isMacOS) {
-    return switch (globals.os.hostPlatform) {
+/// Returns the current [HostPlatform] for the given [platform] and
+/// [operatingSystemUtils].
+///
+/// On macOS, throws an [Exception] if [OperatingSystemUtils.hostPlatform] is
+/// not a Darwin platform. On Windows, always returns
+/// [HostPlatform.windows_x64]. On unrecognized host platforms, defaults to
+/// [HostPlatform.linux_x64].
+HostPlatform getCurrentHostPlatform({
+  required OperatingSystemUtils operatingSystemUtils,
+  required Platform platform,
+}) {
+  if (platform.isMacOS) {
+    return switch (operatingSystemUtils.hostPlatform) {
       HostPlatform.darwin_arm64 => .darwin_arm64,
       HostPlatform.darwin_x64 => .darwin_x64,
-      _ => throw Exception('Unsupported Darwin host platform "${globals.os.hostPlatform}"'),
+      _ => throw Exception(
+        'Unsupported Darwin host platform "${operatingSystemUtils.hostPlatform}"',
+      ),
     };
   }
-  if (globals.platform.isLinux) {
+  if (platform.isLinux) {
     // support x64 and arm64 architecture.
-    return globals.os.hostPlatform;
+    return operatingSystemUtils.hostPlatform;
   }
-  if (globals.platform.isWindows) {
+  if (platform.isWindows) {
     return HostPlatform.windows_x64;
   }
-
-  globals.printWarning('Unsupported host platform, defaulting to Linux');
 
   return HostPlatform.linux_x64;
 }
 
 /// Returns the top-level build output directory.
-String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
-  // TODO(andrewkolos): Prefer required parameters instead of falling back to globals.
+String getBuildDirectory(Config config, FileSystem fileSystem) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  final Config localConfig = config ?? globals.config;
-  final FileSystem localFilesystem = fileSystem ?? globals.fs;
-
-  final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
-  if (localFilesystem.path.isAbsolute(buildDir)) {
-    throw Exception('build-dir config setting in ${localConfig.configPath} must be relative');
+  final String buildDir = config.getValue('build-dir') as String? ?? 'build';
+  if (fileSystem.path.isAbsolute(buildDir)) {
+    throw Exception('build-dir config setting in ${config.configPath} must be relative');
   }
   return buildDir;
 }
 
 /// Returns the Android build output directory.
-String getAndroidBuildDirectory() {
+String getAndroidBuildDirectory({required Config config, required FileSystem fileSystem}) {
   // TODO(cbracken): move to android subdir.
-  return getBuildDirectory();
+  return getBuildDirectory(config, fileSystem);
 }
 
 /// Returns the asset build output directory.
-String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
-  return (fileSystem ?? globals.fs).path.join(
-    getBuildDirectory(config, fileSystem),
-    'flutter_assets',
-  );
+String getAssetBuildDirectory(Config config, FileSystem fileSystem) {
+  return fileSystem.path.join(getBuildDirectory(config, fileSystem), 'flutter_assets');
 }
 
 /// Returns the iOS build output directory.
-String getIosBuildDirectory({Config? config, FileSystem? fileSystem}) {
-  final Config localConfig = config ?? globals.config;
-  final FileSystem localFilesystem = fileSystem ?? globals.fs;
-  return localFilesystem.path.join(
-    getBuildDirectory(localConfig, localFilesystem),
+String getIosBuildDirectory({required Config config, required FileSystem fileSystem}) {
+  return fileSystem.path.join(
+    getBuildDirectory(config, fileSystem),
     FlutterDarwinPlatform.ios.name,
   );
 }
 
 /// Returns the macOS build output directory.
-String getMacOSBuildDirectory({Config? config, FileSystem? fileSystem}) {
-  final Config localConfig = config ?? globals.config;
-  final FileSystem localFilesystem = fileSystem ?? globals.fs;
-  return localFilesystem.path.join(
-    getBuildDirectory(localConfig, localFilesystem),
+String getMacOSBuildDirectory({required Config config, required FileSystem fileSystem}) {
+  return fileSystem.path.join(
+    getBuildDirectory(config, fileSystem),
     FlutterDarwinPlatform.macos.name,
   );
 }
@@ -968,26 +967,43 @@ String getWebBuildDirectory({required Config config, required FileSystem fileSys
 ///
 /// When [flavor] is non-empty, a `/<flavor>` segment is inserted so that
 /// different flavors can coexist on disk without overwriting each other.
-String getLinuxBuildDirectory([TargetPlatform? targetPlatform, String? flavor]) {
-  final String arch = (targetPlatform == null)
-      ? _getCurrentHostPlatformArchName()
-      : targetPlatform.simpleName;
+String getLinuxBuildDirectory(
+  TargetPlatform? targetPlatform, {
+  required Config config,
+  required FileSystem fileSystem,
+  String? flavor,
+  OperatingSystemUtils? operatingSystemUtils,
+  Platform? platform,
+}) {
+  final String arch = switch ((targetPlatform, operatingSystemUtils, platform)) {
+    (final TargetPlatform target, _, _) => target.simpleName,
+    (null, final OperatingSystemUtils osUtils, final Platform hostPlatform) =>
+      _getCurrentHostPlatformArchName(operatingSystemUtils: osUtils, platform: hostPlatform),
+    _ => throw ArgumentError(
+      'operatingSystemUtils and platform are required when targetPlatform is null.',
+    ),
+  };
   final String subDirs = (flavor != null && flavor.isNotEmpty)
-      ? globals.fs.path.join('linux', arch, flavor)
-      : globals.fs.path.join('linux', arch);
-  return globals.fs.path.join(getBuildDirectory(), subDirs);
+      ? fileSystem.path.join('linux', arch, flavor)
+      : fileSystem.path.join('linux', arch);
+  return fileSystem.path.join(getBuildDirectory(config, fileSystem), subDirs);
 }
 
 /// Returns the Windows build output directory.
 ///
 /// When [flavor] is non-empty, a `/<flavor>` segment is inserted so that
 /// different flavors can coexist on disk without overwriting each other.
-String getWindowsBuildDirectory(TargetPlatform targetPlatform, [String? flavor]) {
+String getWindowsBuildDirectory(
+  TargetPlatform targetPlatform, {
+  required Config config,
+  required FileSystem fileSystem,
+  String? flavor,
+}) {
   final String arch = targetPlatform.simpleName;
   final String subDirs = (flavor != null && flavor.isNotEmpty)
-      ? globals.fs.path.join('windows', arch, flavor)
-      : globals.fs.path.join('windows', arch);
-  return globals.fs.path.join(getBuildDirectory(), subDirs);
+      ? fileSystem.path.join('windows', arch, flavor)
+      : fileSystem.path.join('windows', arch);
+  return fileSystem.path.join(getBuildDirectory(config, fileSystem), subDirs);
 }
 
 /// Defines specified via the `--dart-define` command-line option.
@@ -1224,8 +1240,14 @@ _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(List<String>? extraFrontEndArg
   return (ddcModuleFormat: ddcModuleFormat, canaryFeatures: canaryFeatures);
 }
 
-String _getCurrentHostPlatformArchName() {
-  final HostPlatform hostPlatform = getCurrentHostPlatform();
+String _getCurrentHostPlatformArchName({
+  required OperatingSystemUtils operatingSystemUtils,
+  required Platform platform,
+}) {
+  final HostPlatform hostPlatform = getCurrentHostPlatform(
+    operatingSystemUtils: operatingSystemUtils,
+    platform: platform,
+  );
   return hostPlatform.platformName;
 }
 

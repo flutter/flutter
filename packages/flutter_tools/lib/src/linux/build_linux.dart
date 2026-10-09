@@ -83,7 +83,14 @@ Future<void> buildLinux(
   final String buildModeName = buildInfo.mode.cliName;
   final Directory platformBuildDirectory = globals.fs
       .directory(linuxProject.parent.directory.path)
-      .childDirectory(getLinuxBuildDirectory(targetPlatform, buildInfo.flavor));
+      .childDirectory(
+        getLinuxBuildDirectory(
+          targetPlatform,
+          config: globals.config,
+          fileSystem: globals.fs,
+          flavor: buildInfo.flavor,
+        ),
+      );
   final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
   try {
     await _runCmake(
@@ -130,7 +137,12 @@ Future<void> buildLinux(
       // This analysis is only supported for release builds.
       outputDirectory: globals.fs.directory(
         globals.fs.path.join(
-          getLinuxBuildDirectory(targetPlatform, buildInfo.flavor),
+          getLinuxBuildDirectory(
+            targetPlatform,
+            config: globals.config,
+            fileSystem: globals.fs,
+            flavor: buildInfo.flavor,
+          ),
           'release',
           'bundle',
         ),

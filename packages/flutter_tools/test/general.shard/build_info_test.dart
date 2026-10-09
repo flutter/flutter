@@ -8,11 +8,13 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/test_build_system.dart';
 
 void main() {
@@ -500,6 +502,70 @@ void main() {
     expect(CpuArch.riscv64.name, 'riscv64');
   });
 
+  group('getCurrentHostPlatform', () {
+    testWithoutContext('returns darwin host platform on macOS', () {
+      final platform = FakePlatform(operatingSystem: 'macos');
+      expect(
+        getCurrentHostPlatform(
+          operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+          platform: platform,
+        ),
+        HostPlatform.darwin_arm64,
+      );
+      expect(
+        getCurrentHostPlatform(
+          operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+          platform: platform,
+        ),
+        HostPlatform.darwin_x64,
+      );
+    });
+
+    testWithoutContext('throws on unsupported Darwin host platform', () {
+      expect(
+        () => getCurrentHostPlatform(
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          platform: FakePlatform(operatingSystem: 'macos'),
+        ),
+        throwsA(
+          isA<Exception>().having(
+            (Exception e) => '$e',
+            'message',
+            contains('Unsupported Darwin host platform'),
+          ),
+        ),
+      );
+    });
+
+    testWithoutContext('returns host platform on Linux', () {
+      final platform = FakePlatform();
+      expect(
+        getCurrentHostPlatform(
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          platform: platform,
+        ),
+        HostPlatform.linux_x64,
+      );
+      expect(
+        getCurrentHostPlatform(
+          operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+          platform: platform,
+        ),
+        HostPlatform.linux_arm64,
+      );
+    });
+
+    testWithoutContext('returns windows_x64 on Windows', () {
+      expect(
+        getCurrentHostPlatform(
+          operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.windows_arm64),
+          platform: FakePlatform(operatingSystem: 'windows'),
+        ),
+        HostPlatform.windows_x64,
+      );
+    });
+  });
+
   group('getBuildDirectory', () {
     testWithoutContext('defaults to "build" when config does not specify build-dir', () {
       final fileSystem = MemoryFileSystem.test();
@@ -521,14 +587,55 @@ void main() {
       expect(() => getBuildDirectory(config, fileSystem), throwsException);
     });
 
-    testUsingContext('defaults to "build" when config does not specify build-dir in context', () {
-      expect(getBuildDirectory(), 'build');
-    }, overrides: <Type, Generator>{Config: () => Config.test()});
-
-    testUsingContext('uses zone injected config', () {
-      globals.config.setValue('build-dir', 'injected_build_dir');
-      expect(getBuildDirectory(), 'injected_build_dir');
-    }, overrides: <Type, Generator>{Config: () => Config.test()});
+    testWithoutContext('platform build directory helpers respect configured build-dir', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test()..setValue('build-dir', 'custom_build_out');
+      expect(getAndroidBuildDirectory(config: config, fileSystem: fileSystem), 'custom_build_out');
+      expect(
+        getAssetBuildDirectory(config, fileSystem),
+        fileSystem.path.join('custom_build_out', 'flutter_assets'),
+      );
+      expect(
+        getIosBuildDirectory(config: config, fileSystem: fileSystem),
+        fileSystem.path.join('custom_build_out', 'ios'),
+      );
+      expect(
+        getMacOSBuildDirectory(config: config, fileSystem: fileSystem),
+        fileSystem.path.join('custom_build_out', 'macos'),
+      );
+      expect(
+        getLinuxBuildDirectory(
+          TargetPlatform.linux_arm64,
+          config: config,
+          fileSystem: fileSystem,
+          flavor: 'prod',
+        ),
+        fileSystem.path.join('custom_build_out', 'linux', 'arm64', 'prod'),
+      );
+      expect(
+        getLinuxBuildDirectory(
+          null,
+          config: config,
+          fileSystem: fileSystem,
+          operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+          platform: FakePlatform(),
+        ),
+        fileSystem.path.join('custom_build_out', 'linux', 'arm64'),
+      );
+      expect(
+        () => getLinuxBuildDirectory(null, config: config, fileSystem: fileSystem),
+        throwsArgumentError,
+      );
+      expect(
+        getWindowsBuildDirectory(
+          TargetPlatform.windows_x64,
+          config: config,
+          fileSystem: fileSystem,
+          flavor: 'prod',
+        ),
+        fileSystem.path.join('custom_build_out', 'windows', 'x64', 'prod'),
+      );
+    });
   });
 
   group('deprecatedJsInterop', () {

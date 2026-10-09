@@ -8,6 +8,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/fingerprint.dart';
@@ -65,6 +66,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required this._artifacts,
     required this._buildSystem,
     required this._cache,
+    required this._config,
     required this._featureFlags,
     required this._fileSystem,
     required this._flutterVersion,
@@ -129,6 +131,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   final ProcessManager _processManager;
   final Xcode? _xcode;
   final Cache _cache;
+  final Config _config;
   final Analytics _analytics;
   final TemplateRenderer _templateRenderer;
   final FlutterVersion _flutterVersion;
@@ -222,6 +225,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     artifacts: _artifacts,
     buildSystem: _buildSystem,
     cache: _cache,
+    config: _config,
     fileSystem: _fileSystem,
     flutterRoot: Cache.flutterRoot!,
     flutterVersion: _flutterVersion,
@@ -1579,7 +1583,7 @@ class CocoaPodPluginDependencies {
   Future<void> processPods(XcodeBasedProject xcodeProject, BuildInfo buildInfo) async {
     await processPodsIfNeeded(
       xcodeProject,
-      _targetPlatform.buildDirectory(),
+      _targetPlatform.buildDirectory(config: _utils.config, fileSystem: _utils.fileSystem),
       buildInfo.mode,
       // Normal module builds (like when running "flutter build ios" with a module), do not support
       // SwiftPM. Since "flutter build swift-package" builds Swift packages and CocoaPods
@@ -2156,6 +2160,7 @@ class BuildSwiftPackageUtils {
     required this.artifacts,
     required this.buildSystem,
     required this.cache,
+    required this.config,
     required this.fileSystem,
     required this.flutterRoot,
     required this.flutterVersion,
@@ -2171,6 +2176,7 @@ class BuildSwiftPackageUtils {
   final Artifacts artifacts;
   final BuildSystem buildSystem;
   final Cache cache;
+  final Config config;
   final FileSystem fileSystem;
   final String flutterRoot;
   final FlutterVersion flutterVersion;

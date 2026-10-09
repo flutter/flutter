@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -79,6 +80,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       analytics: const NoOpAnalytics(),
+      config: Config.test(),
     );
   });
 
@@ -198,6 +200,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       analytics: const NoOpAnalytics(),
+      config: Config.test(),
     );
     fileSystem.file(xcodebuild).deleteSync();
 
@@ -650,6 +653,7 @@ void main() {
         platform: platform,
         processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
+        config: Config.test(),
       );
 
       expect(
@@ -695,6 +699,7 @@ void main() {
         platform: platform,
         processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
+        config: Config.test(),
       );
 
       await expectLater(
@@ -740,6 +745,7 @@ void main() {
         platform: platform,
         processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
+        config: Config.test(),
       );
 
       await expectLater(
@@ -786,6 +792,7 @@ void main() {
         platform: platform,
         processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
+        config: Config.test(),
       );
 
       await expectLater(
@@ -833,6 +840,7 @@ void main() {
         platform: platform,
         processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
+        config: Config.test(),
       );
 
       await expectLater(
@@ -954,6 +962,7 @@ Information about project "Runner":
       platform: platform,
       processManager: fakeProcessManager,
       analytics: const NoOpAnalytics(),
+      config: Config.test(),
     );
 
     final XcodeProjectInfo? info = await xcodeProjectInterpreter.getInfo(
@@ -1035,6 +1044,7 @@ Information about project "Runner":
       platform: platform,
       processManager: fakeProcessManager,
       analytics: const NoOpAnalytics(),
+      config: Config.test(),
     );
 
     final XcodeProjectInfo? info = await xcodeProjectInterpreter.getInfo(
@@ -2705,6 +2715,7 @@ flutter:
       platform: platform,
       processManager: fakeProcessManager,
       analytics: const NoOpAnalytics(),
+      config: Config.test(),
     );
     expect(
       xcodeProjectInterpreter.swiftPackageCachePath(buildDirectory),

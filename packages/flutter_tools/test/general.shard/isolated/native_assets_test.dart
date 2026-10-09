@@ -7,6 +7,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -91,7 +92,9 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
-        targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/test/'),
+        targetUri: projectUri.resolve(
+          '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/test/',
+        ),
       );
       expect(testLogger.traceText, isNot(contains('Copying native assets to')));
     },
@@ -307,7 +310,9 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
-        targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/linux/'),
+        targetUri: projectUri.resolve(
+          '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/linux/',
+        ),
       );
 
       // Verify installed files only contain native_assets.json and used.so, but not unused.so.

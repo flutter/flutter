@@ -944,8 +944,9 @@ void main() {
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
 
     // Setup assets
-    final Directory assetDir = globals.fs.directory(getAssetBuildDirectory())
-      ..createSync(recursive: true);
+    final Directory assetDir = globals.fs.directory(
+      getAssetBuildDirectory(globals.config, globals.fs),
+    )..createSync(recursive: true);
     final File shaderFile = globals.fs.file(globals.fs.path.join(assetDir.path, 'my_shader.frag'))
       ..createSync(recursive: true)
       ..writeAsStringSync('shader_source');
@@ -1076,7 +1077,7 @@ void main() {
 
     // Verify asset was written
     final File destinationFile = globals.fs.file(
-      globals.fs.path.join(getAssetBuildDirectory(), 'my_image.png'),
+      globals.fs.path.join(getAssetBuildDirectory(globals.config, globals.fs), 'my_image.png'),
     );
     expect(destinationFile.existsSync(), isTrue);
     expect(destinationFile.readAsBytesSync(), equals(<int>[1, 2, 3, 4]));
@@ -1145,10 +1146,10 @@ void main() {
 
     // Verify assets were written
     final File destinationShader = globals.fs.file(
-      globals.fs.path.join(getAssetBuildDirectory(), 'my_shader.frag'),
+      globals.fs.path.join(getAssetBuildDirectory(globals.config, globals.fs), 'my_shader.frag'),
     );
     final File destinationImage = globals.fs.file(
-      globals.fs.path.join(getAssetBuildDirectory(), 'my_image.png'),
+      globals.fs.path.join(getAssetBuildDirectory(globals.config, globals.fs), 'my_image.png'),
     );
     expect(destinationShader.existsSync(), isTrue);
     expect(destinationShader.readAsStringSync(), equals('compiled_shader: shader_source'));
@@ -1235,7 +1236,7 @@ void main() {
 
     // Verify shader was NOT overwritten
     final File destinationFile = globals.fs.file(
-      globals.fs.path.join(getAssetBuildDirectory(), 'my_shader.frag'),
+      globals.fs.path.join(getAssetBuildDirectory(globals.config, globals.fs), 'my_shader.frag'),
     );
     expect(destinationFile.existsSync(), isTrue);
     expect(

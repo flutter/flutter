@@ -384,6 +384,7 @@ class ToolDependencies {
           logger: finalLogger,
           fileSystem: finalFS,
           analytics: finalAnalytics,
+          config: finalConfig,
         );
 
     final Xcode finalXcode =

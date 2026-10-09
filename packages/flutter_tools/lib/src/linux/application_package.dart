@@ -54,7 +54,14 @@ class BuildableLinuxApp extends LinuxApp {
   String executable(BuildMode buildMode, [String? flavor]) {
     final String? binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
-      getLinuxBuildDirectory(null, flavor),
+      getLinuxBuildDirectory(
+        null,
+        config: globals.config,
+        fileSystem: globals.fs,
+        flavor: flavor,
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
+      ),
       buildMode.cliName,
       'bundle',
       binaryName,

@@ -42,7 +42,7 @@ class BundleBuilder {
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
-    assetDirPath ??= getAssetBuildDirectory();
+    assetDirPath ??= getAssetBuildDirectory(globals.config, globals.fs);
     buildSystem ??= globals.buildSystem;
 
     // If the precompiled flag was not passed, force us into debug mode.
@@ -112,7 +112,7 @@ Future<AssetBundle?> buildAssets({
   required TargetPlatform targetPlatform,
   String? flavor,
 }) async {
-  assetDirPath ??= getAssetBuildDirectory();
+  assetDirPath ??= getAssetBuildDirectory(globals.config, globals.fs);
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();

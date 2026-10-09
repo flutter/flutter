@@ -7,6 +7,7 @@ import 'package:process/process.dart';
 import 'android/android_sdk.dart';
 import 'android/application_package.dart';
 import 'application_package.dart';
+import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
@@ -29,6 +30,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
     required Logger logger,
     required this._userMessages,
     required this._fileSystem,
+    required this._config,
   }) : _processManager = processManager,
        _logger = logger,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
@@ -39,6 +41,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   final ProcessUtils _processUtils;
   final UserMessages _userMessages;
   final FileSystem _fileSystem;
+  final Config _config;
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -57,6 +60,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             androidSdk: _androidSdk,
             userMessages: _userMessages,
             fileSystem: _fileSystem,
+            config: _config,
             buildInfo: buildInfo,
           );
         }

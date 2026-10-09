@@ -10,6 +10,7 @@ import 'package:xml/xml.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -112,6 +113,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     required ProcessUtils processUtils,
     required Logger logger,
     required FileSystem fileSystem,
+    required Config config,
     BuildInfo? buildInfo,
   }) async {
     final File apkFile;
@@ -154,7 +156,12 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       // command will grab a new AndroidApk after building, to get the updated
       // IDs.
     } else {
-      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), filename));
+      apkFile = fileSystem.file(
+        fileSystem.path.join(
+          getAndroidBuildDirectory(config: config, fileSystem: fileSystem),
+          filename,
+        ),
+      );
     }
 
     final File manifest = androidProject.appManifestFile;
