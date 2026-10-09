@@ -19,6 +19,7 @@ import 'dart:ui'
         AccessibilityFeatures,
         Brightness,
         FlutterView,
+        Offset,
         PlatformDispatcher,
         Size,
         ViewConstraints,
@@ -27,6 +28,7 @@ import 'dart:ui'
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
+import 'collections.dart';
 import 'diagnostics.dart';
 import 'memory_allocations.dart';
 import 'platform.dart';
@@ -190,79 +192,10 @@ bool debugMaybeDispatchDisposed(Object object) {
   return true;
 }
 
-/// A distance for each of the four edges of a [ui.FlutterView], in physical
-/// pixels, for use in a [DebugViewMetricsOverride].
-///
-/// [ui.ViewPadding] cannot be constructed outside `dart:ui`, so this stands in
-/// for it. It is only a value holder: the framework reads it through the
-/// [ui.ViewPadding] interface, exactly as it reads the padding the platform
-/// reports.
-///
-/// The values are in physical pixels, like [ui.FlutterView.padding], not in
-/// logical pixels like [EdgeInsets]. To express a 24 logical pixel status bar
-/// on a device with a device pixel ratio of 3, use `24 * 3`.
-@immutable
-class DebugViewPadding implements ui.ViewPadding {
-  /// Creates a view padding.
-  ///
-  /// All four distances default to zero.
-  const DebugViewPadding({this.left = 0.0, this.top = 0.0, this.right = 0.0, this.bottom = 0.0})
-    : assert(left >= 0.0 && left < double.infinity, 'left must be non-negative and finite.'),
-      assert(top >= 0.0 && top < double.infinity, 'top must be non-negative and finite.'),
-      assert(right >= 0.0 && right < double.infinity, 'right must be non-negative and finite.'),
-      assert(bottom >= 0.0 && bottom < double.infinity, 'bottom must be non-negative and finite.');
-
-  /// Creates a view padding with the same distance on all four edges.
-  const DebugViewPadding.all(double value)
-    : assert(value >= 0.0 && value < double.infinity, 'value must be non-negative and finite.'),
-      left = value,
-      top = value,
-      right = value,
-      bottom = value;
-
-  /// Creates a view padding with the same distances as [padding].
-  DebugViewPadding.fromViewPadding(ui.ViewPadding padding)
-    : this(left: padding.left, top: padding.top, right: padding.right, bottom: padding.bottom);
-
-  @override
-  final double left;
-
-  @override
-  final double top;
-
-  @override
-  final double right;
-
-  @override
-  final double bottom;
-
-  // Only compares equal to other DebugViewPaddings, never to a ui.ViewPadding
-  // reported by the platform. ui.ViewPadding does not define == at all, so
-  // making this asymmetric with it would be worse than leaving those
-  // comparisons identity based, which is what they already are.
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    return other is DebugViewPadding &&
-        other.left == left &&
-        other.top == top &&
-        other.right == right &&
-        other.bottom == bottom;
-  }
-
-  @override
-  int get hashCode => Object.hash(left, top, right, bottom);
-
-  @override
-  String toString() => 'DebugViewPadding(left: $left, top: $top, right: $right, bottom: $bottom)';
-}
-
 /// Debug-only overrides for the view metrics of a single [ui.FlutterView].
 ///
 /// View metrics are platform-level settings that influence how an application
-/// is presented, such as the text scale factor, whether bold text is requested,
+/// is presented, such as how text is scaled, whether bold text is requested,
 /// or how large the window is. They originate in the platform embedding and are
 /// exposed to the framework through `dart:ui`, on [ui.FlutterView] and on
 /// [ui.PlatformDispatcher].
@@ -283,8 +216,9 @@ class DebugViewPadding implements ui.ViewPadding {
 /// [ui.PlatformDispatcher.instance] also continue to report the real platform
 /// metrics.
 ///
-/// All values are in the units `dart:ui` uses, which for sizes and insets means
-/// physical pixels rather than the logical pixels [MediaQueryData] reports.
+/// All values are in the units `dart:ui` uses, which for [physicalSize] and the
+/// paddings means physical pixels rather than the logical pixels
+/// [MediaQueryData] reports.
 ///
 /// This class has no effect outside of debug mode (in profile or release mode).
 ///
@@ -307,16 +241,16 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// [devicePixelRatio], if given, must be finite and greater than zero,
   /// because it is divided into layout constraints and a zero or non-finite
   /// value would produce infinite or NaN sizes throughout the render tree.
-  /// [textScaleFactor], if given, must be finite and non-negative.
   ///
-  /// [physicalSize] must have finite, non-negative dimensions too, but a
-  /// `const` constructor cannot inspect a [ui.Size], so that is checked by
-  /// [DebugViewMetricsOverride.fromJson] and [debugSetViewMetricsOverride]
-  /// instead. The paddings are checked by the [DebugViewPadding] constructors.
+  /// [physicalSize] and the paddings must have finite, non-negative extents,
+  /// and [textScaling] has the requirements described on it, but a `const`
+  /// constructor cannot inspect a [ui.Size], a [ui.ViewPadding] or a [List],
+  /// so those are checked by [DebugViewMetricsOverride.fromJson] and
+  /// [debugSetViewMetricsOverride] instead.
   const DebugViewMetricsOverride({
     this.devicePixelRatio,
     this.physicalSize,
-    this.textScaleFactor,
+    this.textScaling,
     this.platformBrightness,
     this.padding,
     this.viewPadding,
@@ -337,10 +271,6 @@ class DebugViewMetricsOverride with Diagnosticable {
   }) : assert(
          devicePixelRatio == null || (devicePixelRatio > 0 && devicePixelRatio < double.infinity),
          'devicePixelRatio must be finite and greater than zero.',
-       ),
-       assert(
-         textScaleFactor == null || (textScaleFactor >= 0 && textScaleFactor < double.infinity),
-         'textScaleFactor must be finite and non-negative.',
        );
 
   /// Creates a set of view metric overrides from the wire format [toJson]
@@ -351,6 +281,9 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// throws a [FormatException], so that a tooling mistake surfaces at the
   /// service extension boundary instead of as a metric that silently failed to
   /// apply.
+  ///
+  /// [textScaling] is a list of `[unscaled, scaled]` number pairs, such as
+  /// `[[8, 16], [100, 100]]`.
   ///
   /// [platformBrightness] is `'light'` or `'dark'`. `'Brightness.light'` and
   /// `'Brightness.dark'`, the spelling
@@ -374,13 +307,7 @@ class DebugViewMetricsOverride with Diagnosticable {
         null => null,
       },
       physicalSize: _sizeFromJson(json, 'physicalSize'),
-      textScaleFactor: switch (_doubleFromJson(json, 'textScaleFactor')) {
-        final double value when value >= 0 && value < double.infinity => value,
-        final double value => throw FormatException(
-          'textScaleFactor must be finite and non-negative, got $value.',
-        ),
-        null => null,
-      },
+      textScaling: _textScalingFromJson(json, 'textScaling'),
       platformBrightness: switch (json['platformBrightness']) {
         null => null,
         'light' || 'Brightness.light' => ui.Brightness.light,
@@ -424,12 +351,23 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// instead of merely reporting it.
   final ui.Size? physicalSize;
 
-  /// Overrides [ui.PlatformDispatcher.textScaleFactor].
+  /// Overrides [ui.PlatformDispatcher.scaleFontSize] and
+  /// [ui.PlatformDispatcher.textScaleFactor].
   ///
-  /// Font sizes are then scaled linearly by this factor, because the platform
-  /// curve [ui.PlatformDispatcher.scaleFontSize] normally applies is not
-  /// parameterized by a factor and cannot be evaluated for a hypothetical one.
-  final double? textScaleFactor;
+  /// Each point maps an unscaled font size, its [ui.Offset.dx], to the size it
+  /// is scaled to, its [ui.Offset.dy], both in logical pixels. A font size
+  /// between two points is interpolated linearly between them, and one outside
+  /// the points is scaled by the ratio of the nearest point, which is how
+  /// Android applies its non-linear font scaling tables.
+  /// [ui.PlatformDispatcher.textScaleFactor] then reports the ratio of the
+  /// first point, `dy / dx`.
+  ///
+  /// A single point therefore scales every font size linearly:
+  /// `<ui.Offset>[ui.Offset(1, 2)]` doubles them all.
+  ///
+  /// The unscaled sizes must be finite, greater than zero and increasing, and
+  /// the scaled sizes finite, non-negative and non-decreasing.
+  final List<ui.Offset>? textScaling;
 
   /// Overrides [ui.PlatformDispatcher.platformBrightness].
   ///
@@ -438,20 +376,25 @@ class DebugViewMetricsOverride with Diagnosticable {
   final ui.Brightness? platformBrightness;
 
   /// Overrides [ui.FlutterView.padding], in physical pixels.
-  final DebugViewPadding? padding;
+  ///
+  /// [ui.ViewPadding] has no public constructor, so a value for this and the
+  /// other paddings comes from [DebugViewMetricsOverride.fromJson] or from an
+  /// implementation of the interface, such as `FakeViewPadding` in
+  /// `flutter_test`.
+  final ui.ViewPadding? padding;
 
   /// Overrides [ui.FlutterView.viewPadding], in physical pixels.
-  final DebugViewPadding? viewPadding;
+  final ui.ViewPadding? viewPadding;
 
   /// Overrides [ui.FlutterView.viewInsets], in physical pixels.
   ///
   /// This is what an on-screen keyboard occupies, so overriding it exercises
   /// the layout an application adopts while the keyboard is up without a
   /// keyboard being up.
-  final DebugViewPadding? viewInsets;
+  final ui.ViewPadding? viewInsets;
 
   /// Overrides [ui.FlutterView.systemGestureInsets], in physical pixels.
-  final DebugViewPadding? systemGestureInsets;
+  final ui.ViewPadding? systemGestureInsets;
 
   /// Overrides [ui.PlatformDispatcher.alwaysUse24HourFormat].
   final bool? alwaysUse24HourFormat;
@@ -513,24 +456,24 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// contradiction, and asserts.
   ///
   /// {@tool snippet}
-  /// This stops overriding the text scale factor while leaving every other
-  /// metric of `metricsOverride` in place:
+  /// This stops overriding text scaling while leaving every other metric of
+  /// `metricsOverride` in place:
   ///
   /// ```dart
   /// metricsOverride.copyWith(
-  ///   clear: <DebugViewMetric>{DebugViewMetric.textScaleFactor},
+  ///   clear: <DebugViewMetric>{DebugViewMetric.textScaling},
   /// );
   /// ```
   /// {@end-tool}
   DebugViewMetricsOverride copyWith({
     double? devicePixelRatio,
     ui.Size? physicalSize,
-    double? textScaleFactor,
+    List<ui.Offset>? textScaling,
     ui.Brightness? platformBrightness,
-    DebugViewPadding? padding,
-    DebugViewPadding? viewPadding,
-    DebugViewPadding? viewInsets,
-    DebugViewPadding? systemGestureInsets,
+    ui.ViewPadding? padding,
+    ui.ViewPadding? viewPadding,
+    ui.ViewPadding? viewInsets,
+    ui.ViewPadding? systemGestureInsets,
     bool? alwaysUse24HourFormat,
     bool? accessibleNavigation,
     bool? invertColors,
@@ -562,11 +505,7 @@ class DebugViewMetricsOverride with Diagnosticable {
         this.devicePixelRatio,
       ),
       physicalSize: resolve(DebugViewMetric.physicalSize, physicalSize, this.physicalSize),
-      textScaleFactor: resolve(
-        DebugViewMetric.textScaleFactor,
-        textScaleFactor,
-        this.textScaleFactor,
-      ),
+      textScaling: resolve(DebugViewMetric.textScaling, textScaling, this.textScaling),
       platformBrightness: resolve(
         DebugViewMetric.platformBrightness,
         platformBrightness,
@@ -621,7 +560,7 @@ class DebugViewMetricsOverride with Diagnosticable {
         this.deterministicCursor,
       ),
     );
-    assert(result._debugAssertGeometryIsValid());
+    assert(result._debugAssertIsValid());
     return result;
   }
 
@@ -637,7 +576,10 @@ class DebugViewMetricsOverride with Diagnosticable {
           'width': physicalSize!.width,
           'height': physicalSize!.height,
         },
-      if (textScaleFactor != null) 'textScaleFactor': textScaleFactor,
+      if (textScaling != null)
+        'textScaling': <List<double>>[
+          for (final ui.Offset point in textScaling!) <double>[point.dx, point.dy],
+        ],
       if (platformBrightness != null) 'platformBrightness': platformBrightness!.name,
       if (padding != null) 'padding': _viewPaddingToJson(padding!),
       if (viewPadding != null) 'viewPadding': _viewPaddingToJson(viewPadding!),
@@ -664,29 +606,24 @@ class DebugViewMetricsOverride with Diagnosticable {
   // PlatformDispatcher.onPlatformConfigurationChanged because it has no
   // callback of its own.
   //
-  // This grouping, `_accessibilityFeatures`, and the standalone `textScaleFactor`
+  // This grouping, `_accessibilityFeatures`, and the standalone `textScaling`
   // and `platformBrightness` are what == and hashCode compare, so a metric that
   // reaches none of them is never compared. A record is used so that adding a
   // field without adding it here shows up as a completeness guard failure
-  // rather than as a metric that only sometimes takes effect.
-  (
-    double?,
-    ui.Size?,
-    DebugViewPadding?,
-    DebugViewPadding?,
-    DebugViewPadding?,
-    DebugViewPadding?,
-    bool?,
-  )
-  get _viewMetrics => (
+  // rather than as a metric that only sometimes takes effect. The paddings are
+  // reduced to their edges because ui.ViewPadding has no == of its own.
+  (double?, ui.Size?, _Edges?, _Edges?, _Edges?, _Edges?, bool?) get _viewMetrics => (
     devicePixelRatio,
     physicalSize,
-    padding,
-    viewPadding,
-    viewInsets,
-    systemGestureInsets,
+    _edges(padding),
+    _edges(viewPadding),
+    _edges(viewInsets),
+    _edges(systemGestureInsets),
     alwaysUse24HourFormat,
   );
+
+  static _Edges? _edges(ui.ViewPadding? padding) =>
+      padding == null ? null : (padding.left, padding.top, padding.right, padding.bottom);
 
   // The flags dart:ui delivers through
   // PlatformDispatcher.onAccessibilityFeaturesChanged.
@@ -712,33 +649,37 @@ class DebugViewMetricsOverride with Diagnosticable {
     }
     return other is DebugViewMetricsOverride &&
         other._viewMetrics == _viewMetrics &&
-        other.textScaleFactor == textScaleFactor &&
+        listEquals(other.textScaling, textScaling) &&
         other.platformBrightness == platformBrightness &&
         other._accessibilityFeatures == _accessibilityFeatures;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(_viewMetrics, textScaleFactor, platformBrightness, _accessibilityFeatures);
+  int get hashCode => Object.hash(
+    _viewMetrics,
+    textScaling == null ? null : Object.hashAll(textScaling!),
+    platformBrightness,
+    _accessibilityFeatures,
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('devicePixelRatio', devicePixelRatio, defaultValue: null));
     properties.add(DiagnosticsProperty<ui.Size>('physicalSize', physicalSize, defaultValue: null));
-    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    properties.add(IterableProperty<ui.Offset>('textScaling', textScaling, defaultValue: null));
     properties.add(
       EnumProperty<ui.Brightness>('platformBrightness', platformBrightness, defaultValue: null),
     );
-    properties.add(DiagnosticsProperty<DebugViewPadding>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<ui.ViewPadding>('padding', padding, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<DebugViewPadding>('viewPadding', viewPadding, defaultValue: null),
+      DiagnosticsProperty<ui.ViewPadding>('viewPadding', viewPadding, defaultValue: null),
     );
     properties.add(
-      DiagnosticsProperty<DebugViewPadding>('viewInsets', viewInsets, defaultValue: null),
+      DiagnosticsProperty<ui.ViewPadding>('viewInsets', viewInsets, defaultValue: null),
     );
     properties.add(
-      DiagnosticsProperty<DebugViewPadding>(
+      DiagnosticsProperty<ui.ViewPadding>(
         'systemGestureInsets',
         systemGestureInsets,
         defaultValue: null,
@@ -772,7 +713,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     for (final DebugViewMetric metric in DebugViewMetric.values) metric.name,
   };
 
-  static Map<String, Object?> _viewPaddingToJson(DebugViewPadding padding) {
+  static Map<String, Object?> _viewPaddingToJson(ui.ViewPadding padding) {
     return <String, Object?>{
       'left': padding.left,
       'top': padding.top,
@@ -809,7 +750,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     };
   }
 
-  static DebugViewPadding? _viewPaddingFromJson(Map<Object?, Object?> json, String key) {
+  static ui.ViewPadding? _viewPaddingFromJson(Map<Object?, Object?> json, String key) {
     const members = <String>{'left', 'top', 'right', 'bottom'};
     final Object? value = _checkedMembers(json[key], key, members);
     if (value == null) {
@@ -828,7 +769,7 @@ class DebugViewMetricsOverride with Diagnosticable {
       };
     }
 
-    return DebugViewPadding(
+    return _ViewPadding(
       left: edgeExtent('left'),
       top: edgeExtent('top'),
       right: edgeExtent('right'),
@@ -836,20 +777,47 @@ class DebugViewMetricsOverride with Diagnosticable {
     );
   }
 
-  /// Throws a [FlutterError] describing the first geometry this override sets
-  /// that cannot be used as layout input.
+  static List<ui.Offset>? _textScalingFromJson(Map<Object?, Object?> json, String key) {
+    final Object? value = json[key];
+    if (value == null) {
+      return null;
+    }
+    if (value is! List<Object?>) {
+      throw FormatException('Expected a list of [unscaled, scaled] pairs for $key, got $value.');
+    }
+    final points = <ui.Offset>[
+      for (final Object? point in value)
+        switch (point) {
+          [final num unscaled, final num scaled] => ui.Offset(
+            unscaled.toDouble(),
+            scaled.toDouble(),
+          ),
+          _ => throw FormatException(
+            'Expected [unscaled, scaled] number pairs in $key, got $point.',
+          ),
+        },
+    ];
+    if (_textScalingProblem(points) case final String problem) {
+      throw FormatException('$key $problem.');
+    }
+    return points;
+  }
+
+  /// Throws a [FlutterError] describing the first value this override sets
+  /// that cannot be applied.
   ///
-  /// The constructor checks [devicePixelRatio] and [textScaleFactor], and
-  /// [DebugViewPadding] asserts on its own edges, but [physicalSize] cannot be
-  /// asserted in a `const` constructor because reading a field off a [ui.Size]
-  /// is not a constant expression.
+  /// The constructor checks [devicePixelRatio], but [physicalSize], the
+  /// paddings and [textScaling] cannot be asserted in a `const` constructor
+  /// because reading a field off a [ui.Size] or a [ui.ViewPadding], or an
+  /// element of a [List], is not a constant expression.
   /// [DebugViewMetricsOverride.fromJson] rejects them for values arriving from
   /// tooling, and [debugSetViewMetricsOverride] calls this for values built
   /// directly, so that a negative or non-finite size cannot reach layout as a
-  /// tight [ui.ViewConstraints] or as NaN [MediaQueryData] geometry.
+  /// tight [ui.ViewConstraints] or as NaN [MediaQueryData] geometry, and a
+  /// table that cannot be interpolated cannot reach text layout.
   ///
   /// Returns true so it can be used inside an `assert`.
-  bool _debugAssertGeometryIsValid() {
+  bool _debugAssertIsValid() {
     void checkExtent(double extent, String description) {
       if (!_isUsableExtent(extent)) {
         throw FlutterError(
@@ -859,7 +827,7 @@ class DebugViewMetricsOverride with Diagnosticable {
       }
     }
 
-    void checkPadding(DebugViewPadding? padding, String name) {
+    void checkPadding(ui.ViewPadding? padding, String name) {
       if (padding == null) {
         return;
       }
@@ -877,6 +845,11 @@ class DebugViewMetricsOverride with Diagnosticable {
     checkPadding(viewPadding, 'viewPadding');
     checkPadding(viewInsets, 'viewInsets');
     checkPadding(systemGestureInsets, 'systemGestureInsets');
+    if (textScaling case final List<ui.Offset> points) {
+      if (_textScalingProblem(points) case final String problem) {
+        throw FlutterError('DebugViewMetricsOverride.textScaling $problem.');
+      }
+    }
     return true;
   }
 
@@ -910,6 +883,35 @@ class DebugViewMetricsOverride with Diagnosticable {
   // values. A negative or non-finite component would produce negative or NaN
   // geometry rather than an obviously wrong looking screen.
   static bool _isUsableExtent(double extent) => extent.isFinite && extent >= 0;
+
+  // What is wrong with [points] as a value for [textScaling], or null if
+  // nothing is, stated once so that the JSON boundary and the direct one accept
+  // the same tables: the ones that interpolate every font size to a finite,
+  // non-negative one that does not shrink as the input grows, and whose first
+  // point yields a finite scale factor.
+  static String? _textScalingProblem(List<ui.Offset> points) {
+    if (points.isEmpty) {
+      return 'must have at least one point';
+    }
+    for (var i = 0; i < points.length; i += 1) {
+      final ui.Offset point = points[i];
+      if (!point.dx.isFinite || point.dx <= 0) {
+        return 'must have finite, positive unscaled font sizes, but point $i is $point';
+      }
+      if (!_isUsableExtent(point.dy)) {
+        return 'must have finite, non-negative scaled font sizes, but point $i is $point';
+      }
+      if (i > 0 && point.dx <= points[i - 1].dx) {
+        return 'must have increasing unscaled font sizes, '
+            'but point $i is $point after ${points[i - 1]}';
+      }
+      if (i > 0 && point.dy < points[i - 1].dy) {
+        return 'must have non-decreasing scaled font sizes, '
+            'but point $i is $point after ${points[i - 1]}';
+      }
+    }
+    return null;
+  }
 }
 
 /// Debug-only view metric overrides, keyed by [ui.FlutterView.viewId].
@@ -955,7 +957,7 @@ bool debugSetViewMetricsOverride(int viewId, DebugViewMetricsOverride? override)
   var changed = false;
   assert(() {
     assert(viewId >= 0, 'viewId must be non-negative, got $viewId.');
-    assert(override?._debugAssertGeometryIsValid() ?? true);
+    assert(override?._debugAssertIsValid() ?? true);
     final DebugViewMetricsOverride? previous = _viewMetricsOverrides[viewId];
     final DebugViewMetricsOverride? next = override == null || override.isEmpty ? null : override;
     if (previous == next) {
@@ -1006,8 +1008,8 @@ enum DebugViewMetric {
   /// Names [DebugViewMetricsOverride.physicalSize].
   physicalSize,
 
-  /// Names [DebugViewMetricsOverride.textScaleFactor].
-  textScaleFactor,
+  /// Names [DebugViewMetricsOverride.textScaling].
+  textScaling,
 
   /// Names [DebugViewMetricsOverride.platformBrightness].
   platformBrightness,
@@ -1059,4 +1061,34 @@ enum DebugViewMetric {
 
   /// Names [DebugViewMetricsOverride.deterministicCursor].
   deterministicCursor,
+}
+
+// The edges of a [ui.ViewPadding], which has no == of its own, as left, top,
+// right, bottom.
+typedef _Edges = (double, double, double, double);
+
+// What [DebugViewMetricsOverride.fromJson] builds for the paddings, because
+// [ui.ViewPadding] cannot be constructed outside `dart:ui`.
+class _ViewPadding implements ui.ViewPadding {
+  const _ViewPadding({
+    required this.left,
+    required this.top,
+    required this.right,
+    required this.bottom,
+  });
+
+  @override
+  final double left;
+
+  @override
+  final double top;
+
+  @override
+  final double right;
+
+  @override
+  final double bottom;
+
+  @override
+  String toString() => 'ViewPadding(left: $left, top: $top, right: $right, bottom: $bottom)';
 }

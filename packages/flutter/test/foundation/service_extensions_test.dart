@@ -1458,6 +1458,11 @@ void main() {
 
     const firstOverride = <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true};
     const firstOverrideJson = '{"boldText": true, "devicePixelRatio": 3.5}';
+    const secondOverride = <String, Object?>{
+      'textScaling': <Object?>[
+        <Object?>[1.0, 2.0],
+      ],
+    };
     final firstOverrideReply = <String, Object?>{
       'overrides': <String, Object?>{'$viewId': firstOverride},
     };
@@ -1493,20 +1498,17 @@ void main() {
     // client that missed the earlier ones is not left with half of it.
     await call(<String, String>{
       'viewId': '${viewId + 1}',
-      'overrides': '{"textScaleFactor": 2.0}',
+      'overrides': '{"textScaling": [[1, 2]]}',
     });
     expect(extensionChangedEvents.length, 2);
     expect(lastEventValue(), <String, Object?>{
       '$viewId': firstOverride,
-      '${viewId + 1}': <String, Object?>{'textScaleFactor': 2.0},
+      '${viewId + 1}': secondOverride,
     });
 
     // A parameterless read returns the whole registry.
     expect(await call(<String, String>{}), <String, Object?>{
-      'overrides': <String, Object?>{
-        '$viewId': firstOverride,
-        '${viewId + 1}': <String, Object?>{'textScaleFactor': 2.0},
-      },
+      'overrides': <String, Object?>{'$viewId': firstOverride, '${viewId + 1}': secondOverride},
     });
     expect(extensionChangedEvents.length, 2);
 
@@ -1540,8 +1542,8 @@ void main() {
     expect(
       debugViewMetricsOverrides[viewId],
       const DebugViewMetricsOverride(
-        padding: DebugViewPadding(top: 48),
-        systemGestureInsets: DebugViewPadding(left: 20, right: 20),
+        padding: FakeViewPadding(top: 48),
+        systemGestureInsets: FakeViewPadding(left: 20, right: 20),
       ),
     );
     expect(extensionChangedEvents.length, 4);

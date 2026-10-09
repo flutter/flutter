@@ -13,12 +13,12 @@ import 'package:flutter_test/flutter_test.dart';
 const DebugViewMetricsOverride _fullyPopulated = DebugViewMetricsOverride(
   devicePixelRatio: 3.5,
   physicalSize: ui.Size(1170, 2532),
-  textScaleFactor: 1.75,
+  textScaling: <ui.Offset>[ui.Offset(8, 16), ui.Offset(30, 38), ui.Offset(100, 100)],
   platformBrightness: ui.Brightness.dark,
-  padding: DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4),
-  viewPadding: DebugViewPadding(left: 5, top: 6, right: 7, bottom: 8),
-  viewInsets: DebugViewPadding(left: 9, top: 10, right: 11, bottom: 12),
-  systemGestureInsets: DebugViewPadding(left: 13, top: 14, right: 15, bottom: 16),
+  padding: FakeViewPadding(left: 1, top: 2, right: 3, bottom: 4),
+  viewPadding: FakeViewPadding(left: 5, top: 6, right: 7, bottom: 8),
+  viewInsets: FakeViewPadding(left: 9, top: 10, right: 11, bottom: 12),
+  systemGestureInsets: FakeViewPadding(left: 13, top: 14, right: 15, bottom: 16),
   alwaysUse24HourFormat: true,
   accessibleNavigation: true,
   invertColors: true,
@@ -33,6 +33,9 @@ const DebugViewMetricsOverride _fullyPopulated = DebugViewMetricsOverride(
   deterministicCursor: true,
 );
 
+/// A padding that shares no edge with any padding of [_fullyPopulated].
+const FakeViewPadding _otherPadding = FakeViewPadding(left: 99, top: 99, right: 99, bottom: 99);
+
 /// Every metric [_fullyPopulated] sets, paired with a way to change just that
 /// one metric.
 ///
@@ -44,17 +47,15 @@ final Map<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> _
       'devicePixelRatio': (DebugViewMetricsOverride o) => o.copyWith(devicePixelRatio: 2.0),
       'physicalSize': (DebugViewMetricsOverride o) =>
           o.copyWith(physicalSize: const ui.Size(10, 20)),
-      'textScaleFactor': (DebugViewMetricsOverride o) => o.copyWith(textScaleFactor: 0.5),
+      'textScaling': (DebugViewMetricsOverride o) =>
+          o.copyWith(textScaling: const <ui.Offset>[ui.Offset(1, 0.5)]),
       'platformBrightness': (DebugViewMetricsOverride o) =>
           o.copyWith(platformBrightness: ui.Brightness.light),
-      'padding': (DebugViewMetricsOverride o) =>
-          o.copyWith(padding: const DebugViewPadding.all(99)),
-      'viewPadding': (DebugViewMetricsOverride o) =>
-          o.copyWith(viewPadding: const DebugViewPadding.all(99)),
-      'viewInsets': (DebugViewMetricsOverride o) =>
-          o.copyWith(viewInsets: const DebugViewPadding.all(99)),
+      'padding': (DebugViewMetricsOverride o) => o.copyWith(padding: _otherPadding),
+      'viewPadding': (DebugViewMetricsOverride o) => o.copyWith(viewPadding: _otherPadding),
+      'viewInsets': (DebugViewMetricsOverride o) => o.copyWith(viewInsets: _otherPadding),
       'systemGestureInsets': (DebugViewMetricsOverride o) =>
-          o.copyWith(systemGestureInsets: const DebugViewPadding.all(99)),
+          o.copyWith(systemGestureInsets: _otherPadding),
       'alwaysUse24HourFormat': (DebugViewMetricsOverride o) =>
           o.copyWith(alwaysUse24HourFormat: false),
       'accessibleNavigation': (DebugViewMetricsOverride o) =>
@@ -72,6 +73,25 @@ final Map<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> _
       'deterministicCursor': (DebugViewMetricsOverride o) => o.copyWith(deterministicCursor: false),
     };
 
+/// Tables that cannot be interpolated, or that would report a scale factor
+/// that is not a finite number, by what is wrong with each.
+///
+/// Both gates, [DebugViewMetricsOverride.fromJson] and
+/// [debugSetViewMetricsOverride], have to reject every one of them.
+const Map<String, List<ui.Offset>> _invalidTextScaling = <String, List<ui.Offset>>{
+  'no points': <ui.Offset>[],
+  'zero unscaled size': <ui.Offset>[ui.Offset(0, 1)],
+  'negative unscaled size': <ui.Offset>[ui.Offset(-1, 1)],
+  'infinite unscaled size': <ui.Offset>[ui.Offset(double.infinity, 1)],
+  'NaN unscaled size': <ui.Offset>[ui.Offset(double.nan, 1)],
+  'negative scaled size': <ui.Offset>[ui.Offset(1, -1)],
+  'infinite scaled size': <ui.Offset>[ui.Offset(1, double.infinity)],
+  'NaN scaled size': <ui.Offset>[ui.Offset(1, double.nan)],
+  'repeated unscaled size': <ui.Offset>[ui.Offset(1, 1), ui.Offset(1, 2)],
+  'decreasing unscaled size': <ui.Offset>[ui.Offset(2, 2), ui.Offset(1, 1)],
+  'decreasing scaled size': <ui.Offset>[ui.Offset(1, 2), ui.Offset(2, 1)],
+};
+
 /// Every metric [DebugViewMetricsOverride] supports as reported by
 /// [DebugViewMetricsOverride.fromJson] when it rejects an unknown metric.
 Set<String> _allOverridableMetricsFromJsonError() {
@@ -84,26 +104,6 @@ Set<String> _allOverridableMetricsFromJsonError() {
     return error.message.substring(start + marker.length).replaceAll('.', '').split(', ').toSet();
   }
   fail('fromJson accepted an unknown metric');
-}
-
-// DebugViewPadding's constructors assert their edges, so an out-of-range
-// padding can only come from a class that implements the interface instead of
-// constructing it. This is what an application that does so, deliberately or
-// not, hands to debugSetViewMetricsOverride or to fromViewPadding.
-class _UncheckedDebugViewPadding implements DebugViewPadding {
-  const _UncheckedDebugViewPadding({this.left = 0, this.top = 0, this.right = 0, this.bottom = 0});
-
-  @override
-  final double left;
-
-  @override
-  final double top;
-
-  @override
-  final double right;
-
-  @override
-  final double bottom;
 }
 
 void main() {
@@ -140,12 +140,12 @@ void main() {
       const copy = DebugViewMetricsOverride(
         devicePixelRatio: 3.5,
         physicalSize: ui.Size(1170, 2532),
-        textScaleFactor: 1.75,
+        textScaling: <ui.Offset>[ui.Offset(8, 16), ui.Offset(30, 38), ui.Offset(100, 100)],
         platformBrightness: ui.Brightness.dark,
-        padding: DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4),
-        viewPadding: DebugViewPadding(left: 5, top: 6, right: 7, bottom: 8),
-        viewInsets: DebugViewPadding(left: 9, top: 10, right: 11, bottom: 12),
-        systemGestureInsets: DebugViewPadding(left: 13, top: 14, right: 15, bottom: 16),
+        padding: FakeViewPadding(left: 1, top: 2, right: 3, bottom: 4),
+        viewPadding: FakeViewPadding(left: 5, top: 6, right: 7, bottom: 8),
+        viewInsets: FakeViewPadding(left: 9, top: 10, right: 11, bottom: 12),
+        systemGestureInsets: FakeViewPadding(left: 13, top: 14, right: 15, bottom: 16),
         alwaysUse24HourFormat: true,
         accessibleNavigation: true,
         invertColors: true,
@@ -170,17 +170,6 @@ void main() {
         throwsAssertionError,
       );
       expect(() => DebugViewMetricsOverride(devicePixelRatio: double.nan), throwsAssertionError);
-    });
-
-    test('rejects a text scale factor that would break text layout', () {
-      expect(() => DebugViewMetricsOverride(textScaleFactor: -1.0), throwsAssertionError);
-      expect(
-        () => DebugViewMetricsOverride(textScaleFactor: double.infinity),
-        throwsAssertionError,
-      );
-      expect(() => DebugViewMetricsOverride(textScaleFactor: double.nan), throwsAssertionError);
-      // Zero is a legitimate setting: it hides text entirely.
-      expect(const DebugViewMetricsOverride(textScaleFactor: 0.0).textScaleFactor, 0.0);
     });
 
     test('copyWith replaces only what it is given', () {
@@ -210,13 +199,16 @@ void main() {
         throwsAssertionError,
       );
 
-      // Passing invalid geometry or ratios throws an error.
+      // Passing invalid geometry, ratios or tables throws an error.
       expect(
         () => original.copyWith(physicalSize: const ui.Size(-10, 10)),
         throwsA(isA<FlutterError>()),
       );
       expect(() => original.copyWith(devicePixelRatio: 0.0), throwsAssertionError);
-      expect(() => original.copyWith(textScaleFactor: -1.0), throwsAssertionError);
+      expect(
+        () => original.copyWith(textScaling: const <ui.Offset>[]),
+        throwsA(isA<FlutterError>()),
+      );
     });
 
     test('equality covers every metric', () {
@@ -232,6 +224,24 @@ void main() {
           reason: 'Changing ${entry.key} did not change equality.',
         );
       }
+    });
+
+    test('compares paddings and text scaling by value', () {
+      // ui.ViewPadding has no == of its own and a List compares by identity, so
+      // equality has to look inside both, or reinstalling the override that is
+      // already installed would count as a change and post an event.
+      const json = <String, Object?>{
+        'padding': <String, Object?>{'top': 1},
+        'textScaling': <Object?>[
+          <Object?>[1, 2],
+        ],
+      };
+      const override = DebugViewMetricsOverride(
+        padding: FakeViewPadding(top: 1),
+        textScaling: <ui.Offset>[ui.Offset(1, 2)],
+      );
+      expect(DebugViewMetricsOverride.fromJson(json), override);
+      expect(DebugViewMetricsOverride.fromJson(json).hashCode, override.hashCode);
     });
 
     test('copyWith changes only the metric it names', () {
@@ -304,16 +314,22 @@ void main() {
     });
 
     test('accepts integers where doubles are expected', () {
-      final override = DebugViewMetricsOverride.fromJson(const <String, Object?>{
-        'devicePixelRatio': 3,
-        'textScaleFactor': 2,
-        'physicalSize': <String, Object?>{'width': 100, 'height': 200},
-        'padding': <String, Object?>{'left': 1, 'top': 2, 'right': 3, 'bottom': 4},
-      });
-      expect(override.devicePixelRatio, 3.0);
-      expect(override.textScaleFactor, 2.0);
-      expect(override.physicalSize, const ui.Size(100, 200));
-      expect(override.padding, const DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4));
+      expect(
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'devicePixelRatio': 3,
+          'textScaling': <Object?>[
+            <Object?>[1, 2],
+          ],
+          'physicalSize': <String, Object?>{'width': 100, 'height': 200},
+          'padding': <String, Object?>{'left': 1, 'top': 2, 'right': 3, 'bottom': 4},
+        }),
+        const DebugViewMetricsOverride(
+          devicePixelRatio: 3.0,
+          textScaling: <ui.Offset>[ui.Offset(1, 2)],
+          physicalSize: ui.Size(100, 200),
+          padding: FakeViewPadding(left: 1, top: 2, right: 3, bottom: 4),
+        ),
+      );
     });
 
     test('rejects unknown metrics rather than silently dropping them', () {
@@ -358,14 +374,32 @@ void main() {
         }),
         throwsFormatException,
       );
+      // A bare number is not read as a linear factor, so that linear scaling
+      // has one spelling on the wire: a single point, [[1, factor]].
+      for (final malformed in <Object>[
+        2,
+        <Object?>[1, 2],
+        <Object?>[
+          <Object?>[1],
+        ],
+        <Object?>[
+          <Object?>['1', '2'],
+        ],
+      ]) {
+        expect(
+          () => DebugViewMetricsOverride.fromJson(<String, Object?>{'textScaling': malformed}),
+          throwsFormatException,
+          reason: 'textScaling: $malformed was accepted.',
+        );
+      }
     });
 
     test('defaults missing padding edges to zero', () {
       expect(
         DebugViewMetricsOverride.fromJson(const <String, Object?>{
           'padding': <String, Object?>{'left': 1, 'top': 2, 'right': 3},
-        }).padding,
-        const DebugViewPadding(left: 1, top: 2, right: 3),
+        }),
+        const DebugViewMetricsOverride(padding: FakeViewPadding(left: 1, top: 2, right: 3)),
       );
     });
 
@@ -423,11 +457,6 @@ void main() {
       }
       for (final value in <Object>[-1, double.infinity, double.nan]) {
         expect(
-          () => DebugViewMetricsOverride.fromJson(<String, Object?>{'textScaleFactor': value}),
-          throwsFormatException,
-          reason: 'textScaleFactor: $value was accepted.',
-        );
-        expect(
           () => DebugViewMetricsOverride.fromJson(<String, Object?>{
             'physicalSize': <String, Object?>{'width': value, 'height': 100},
           }),
@@ -465,57 +494,37 @@ void main() {
         ui.Size.zero,
       );
     });
-  });
 
-  group('DebugViewPadding', () {
-    test('defaults every edge to zero', () {
-      const padding = DebugViewPadding();
-      expect(padding.left, 0.0);
-      expect(padding.top, 0.0);
-      expect(padding.right, 0.0);
-      expect(padding.bottom, 0.0);
-      expect(const DebugViewPadding.all(3).bottom, 3.0);
-    });
-
-    test('is a ui.ViewPadding with value equality', () {
-      const padding = DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4);
-      expect(padding, isA<ui.ViewPadding>());
-      expect(padding, const DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4));
+    test('rejects text scaling that cannot be interpolated', () {
+      for (final MapEntry<String, List<ui.Offset>> entry in _invalidTextScaling.entries) {
+        expect(
+          () => DebugViewMetricsOverride.fromJson(<String, Object?>{
+            'textScaling': <Object?>[
+              for (final ui.Offset point in entry.value) <Object?>[point.dx, point.dy],
+            ],
+          }),
+          throwsFormatException,
+          reason: 'textScaling with ${entry.key} was accepted.',
+        );
+      }
+      // Scaling to zero is legal: it hides text. So is scaling two sizes to the
+      // same size; only a decrease is rejected.
       expect(
-        padding.hashCode,
-        const DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4).hashCode,
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'textScaling': <Object?>[
+            <Object?>[1, 0],
+          ],
+        }).textScaling,
+        const <ui.Offset>[ui.Offset(1, 0)],
       );
-      expect(padding, isNot(const DebugViewPadding(left: 1, top: 2, right: 3, bottom: 5)));
-    });
-
-    test('fromViewPadding copies all edges from a ui.ViewPadding', () {
-      final copyFromZero = DebugViewPadding.fromViewPadding(ui.ViewPadding.zero);
-      expect(copyFromZero, const DebugViewPadding());
-
-      const ui.ViewPadding original = DebugViewPadding(left: 10, top: 20, right: 30, bottom: 40);
-      final copy = DebugViewPadding.fromViewPadding(original);
-      expect(copy.left, 10.0);
-      expect(copy.top, 20.0);
-      expect(copy.right, 30.0);
-      expect(copy.bottom, 40.0);
-      expect(copy, original);
-    });
-
-    test('rejects negative or non-finite distances', () {
-      expect(() => DebugViewPadding(left: -1), throwsAssertionError);
-      expect(() => DebugViewPadding(left: double.nan), throwsAssertionError);
-      expect(() => DebugViewPadding(top: -1), throwsAssertionError);
-      expect(() => DebugViewPadding(top: double.nan), throwsAssertionError);
-      expect(() => DebugViewPadding(right: -1), throwsAssertionError);
-      expect(() => DebugViewPadding(right: double.infinity), throwsAssertionError);
-      expect(() => DebugViewPadding(bottom: -1), throwsAssertionError);
-      expect(() => DebugViewPadding(bottom: double.infinity), throwsAssertionError);
-      expect(() => DebugViewPadding.all(-1), throwsAssertionError);
-      expect(() => DebugViewPadding.all(double.nan), throwsAssertionError);
-      expect(() => DebugViewPadding.all(double.infinity), throwsAssertionError);
       expect(
-        () => DebugViewPadding.fromViewPadding(const _UncheckedDebugViewPadding(left: -1)),
-        throwsAssertionError,
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'textScaling': <Object?>[
+            <Object?>[1, 2],
+            <Object?>[2, 2],
+          ],
+        }).textScaling,
+        const <ui.Offset>[ui.Offset(1, 2), ui.Offset(2, 2)],
       );
     });
   });
@@ -582,21 +591,22 @@ void main() {
       expect(debugClearViewMetricsOverrides(), isFalse);
     });
 
-    test('rejects geometry that cannot be laid out, built directly', () {
-      // physicalSize cannot assert in a const constructor, and tooling payloads
-      // go through fromJson, so debugSetViewMetricsOverride is the only gate a
-      // directly built override with an invalid physicalSize passes through.
-      // The paddings assert in their own constructors, but only for values that
-      // went through one, so this is their only gate too.
-      const invalid = <DebugViewMetricsOverride>[
-        DebugViewMetricsOverride(physicalSize: ui.Size(double.nan, 100)),
-        DebugViewMetricsOverride(physicalSize: ui.Size(100, double.infinity)),
-        DebugViewMetricsOverride(physicalSize: ui.Size(-1, 100)),
-        DebugViewMetricsOverride(physicalSize: ui.Size(100, -1)),
-        DebugViewMetricsOverride(padding: _UncheckedDebugViewPadding(left: -1)),
-        DebugViewMetricsOverride(viewPadding: _UncheckedDebugViewPadding(top: double.nan)),
-        DebugViewMetricsOverride(viewInsets: _UncheckedDebugViewPadding(right: double.infinity)),
-        DebugViewMetricsOverride(systemGestureInsets: _UncheckedDebugViewPadding(bottom: -1)),
+    test('rejects values that cannot be applied, built directly', () {
+      // physicalSize, the paddings and textScaling cannot assert in a const
+      // constructor, and tooling payloads go through fromJson, so
+      // debugSetViewMetricsOverride is the only gate a directly built override
+      // with an invalid one of them passes through.
+      final invalid = <DebugViewMetricsOverride>[
+        const DebugViewMetricsOverride(physicalSize: ui.Size(double.nan, 100)),
+        const DebugViewMetricsOverride(physicalSize: ui.Size(100, double.infinity)),
+        const DebugViewMetricsOverride(physicalSize: ui.Size(-1, 100)),
+        const DebugViewMetricsOverride(physicalSize: ui.Size(100, -1)),
+        const DebugViewMetricsOverride(padding: FakeViewPadding(left: -1)),
+        const DebugViewMetricsOverride(viewPadding: FakeViewPadding(top: double.nan)),
+        const DebugViewMetricsOverride(viewInsets: FakeViewPadding(right: double.infinity)),
+        const DebugViewMetricsOverride(systemGestureInsets: FakeViewPadding(bottom: -1)),
+        for (final List<ui.Offset> points in _invalidTextScaling.values)
+          DebugViewMetricsOverride(textScaling: points),
       ];
       for (final override in invalid) {
         expect(
@@ -607,11 +617,12 @@ void main() {
         expect(debugViewMetricsOverrides, isEmpty, reason: '$override left state behind');
       }
 
-      // Zero extents are legal, and a rejected override does not disturb one
-      // that is already installed.
+      // Zero extents and scaling to zero are legal, and a rejected override
+      // does not disturb one that is already installed.
       const valid = DebugViewMetricsOverride(
         physicalSize: ui.Size.zero,
-        padding: DebugViewPadding(),
+        padding: FakeViewPadding.zero,
+        textScaling: <ui.Offset>[ui.Offset(1, 0)],
       );
       expect(debugSetViewMetricsOverride(1, valid), isTrue);
       expect(
