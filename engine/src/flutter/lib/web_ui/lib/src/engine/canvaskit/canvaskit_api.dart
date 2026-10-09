@@ -2435,7 +2435,7 @@ String canvasKitWasmModuleUrl(String file, String canvasKitBase) => canvasKitBas
 /// Download and initialize the CanvasKit module.
 ///
 /// Downloads the CanvasKit JavaScript, then calls `CanvasKitInit` to download
-/// and intialize the CanvasKit wasm.
+/// and initialize the CanvasKit wasm.
 Future<CanvasKit> downloadCanvasKit() async {
   final CanvasKitModule canvasKitModule = await _downloadOneOf(_canvasKitJsUrls);
 
