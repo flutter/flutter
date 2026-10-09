@@ -12,6 +12,9 @@ filegroup(
     srcs = glob(
         ["**"],
         exclude = [
+            # Bazel's own files are not GN inputs.
+            "**/BUILD.bazel",
+            "**/*.bzl",
             "**/__pycache__/**",
             "**/*.pyc",
         ],

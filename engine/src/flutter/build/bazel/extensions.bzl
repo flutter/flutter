@@ -31,7 +31,7 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/third_party/abseil-cpp",
         build_file = None,
     ),
-    # Inputs of the wrapped GN build only, so far (see the overlay).
+    # The overlay mirrors the engine's //flutter/third_party/boringssl/BUILD.gn.
     "boringssl": struct(
         path = "engine/src/flutter/third_party/boringssl/src",
         build_file = _OVERLAYS + ":boringssl/BUILD.boringssl.bazel",
@@ -64,7 +64,6 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/llvm_libc",
         build_file = _OVERLAYS + ":llvm_libc/BUILD.llvm_libc.bazel",
     ),
-    # Inputs of the wrapped GN build only, so far (see the overlay).
     "zlib": struct(
         path = "engine/src/flutter/third_party/zlib",
         build_file = _OVERLAYS + ":zlib/BUILD.zlib.bazel",
