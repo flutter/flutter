@@ -80,4 +80,19 @@ void main() {
     );
     expect(Directionality.of(hasDirectionality.currentContext!), TextDirection.rtl);
   });
+
+  testWidgets('Directionality does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    const key = Key('Directionality');
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Directionality(key: key, textDirection: TextDirection.rtl, child: Placeholder()),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byKey(key)), Size.zero);
+  });
 }
