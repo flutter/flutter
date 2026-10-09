@@ -277,6 +277,7 @@ class ResidentWebRunner extends ResidentRunner {
         flutterDevice!.developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript);
 
         flutterDevice!.devFS = WebDevFS(
+          artifacts: artifacts,
           webDevServerConfig: updatedConfig,
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
@@ -284,6 +285,7 @@ class ResidentWebRunner extends ResidentRunner {
           useSseForDebugBackend: debuggingOptions.webUseSseForDebugBackend,
           useSseForInjectedClient: debuggingOptions.webUseSseForInjectedClient,
           buildInfo: debuggingOptions.buildInfo,
+          config: config,
           enableDwds: supportsServiceProtocol,
           ddsConfig: DartDevelopmentServiceConfiguration(
             enable: debuggingOptions.enableDds,
@@ -304,8 +306,10 @@ class ResidentWebRunner extends ResidentRunner {
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
           webCrossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
           fileSystem: fileSystem,
+          flutterVersion: flutterVersion,
           logger: logger,
           platform: platform,
+          processManager: processManager,
           webDefines: _webDefines,
         );
         Uri url = await flutterDevice!.devFS!.create();

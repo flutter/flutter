@@ -121,7 +121,13 @@ class WebBuilder {
     final sw = Stopwatch()..start();
     try {
       final BuildResult result = await _buildSystem.build(
-        _buildTargets.webServiceWorker(_fileSystem, compilerConfigs, _analytics),
+        _buildTargets.webServiceWorker(
+          _fileSystem,
+          compilerConfigs,
+          _analytics,
+          _artifacts,
+          engineRevision: _flutterVersion.engineRevision,
+        ),
         Environment(
           projectDir: flutterProject.directory,
           outputDir: outputDirectory,

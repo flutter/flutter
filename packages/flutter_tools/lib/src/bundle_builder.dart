@@ -4,14 +4,18 @@
 
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'artifacts.dart';
 import 'asset.dart' hide defaultManifestPath;
 import 'base/common.dart';
+import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
+import 'build_system/build_targets.dart';
 import 'build_system/depfile.dart';
 import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/shader_compiler.dart';
@@ -19,11 +23,37 @@ import 'bundle.dart';
 import 'cache.dart';
 import 'devfs.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 import 'project.dart';
+import 'version.dart';
 
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
+  BundleBuilder({
+    required this._analytics,
+    required this._artifacts,
+    required this._buildSystem,
+    required this._buildTargets,
+    required this._cache,
+    required this._config,
+    required this._fileSystem,
+    required this._flutterVersion,
+    required this._logger,
+    required this._platform,
+    required this._processManager,
+  });
+
+  final Analytics _analytics;
+  final Artifacts _artifacts;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
+  final Cache _cache;
+  final Config _config;
+  final FileSystem _fileSystem;
+  final FlutterVersion _flutterVersion;
+  final Logger _logger;
+  final Platform _platform;
+  final ProcessManager _processManager;
+
   /// Builds the bundle for the given target platform.
   ///
   /// The default `mainPath` is `lib/main.dart`.
@@ -40,22 +70,20 @@ class BundleBuilder {
     BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
-    mainPath ??= defaultMainPath;
-    depfilePath ??= defaultDepfilePath;
-    assetDirPath ??= getAssetBuildDirectory();
-    buildSystem ??= globals.buildSystem;
+    mainPath ??= defaultMainPath(_fileSystem);
+    depfilePath ??= defaultDepfilePath(config: _config, fileSystem: _fileSystem);
+    assetDirPath ??= getAssetBuildDirectory(_config, _fileSystem);
+    buildSystem ??= _buildSystem;
 
     // If the precompiled flag was not passed, force us into debug mode.
     final environment = Environment(
       projectDir: project.directory,
       packageConfigPath: buildInfo.packageConfigPath,
-      outputDir: globals.fs.directory(assetDirPath),
+      outputDir: _fileSystem.directory(assetDirPath),
       buildDir: project.dartTool.childDirectory('flutter_build'),
-      cacheDir: globals.cache.getRoot(),
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      engineVersion: globals.artifacts!.usesLocalArtifacts
-          ? null
-          : globals.flutterVersion.engineRevision,
+      cacheDir: _cache.getRoot(),
+      flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
+      engineVersion: _artifacts.usesLocalArtifacts ? null : _flutterVersion.engineRevision,
       defines: <String, String>{
         // used by the KernelSnapshot target
         kTargetPlatform: platform.getName(),
@@ -63,22 +91,22 @@ class BundleBuilder {
         kDeferredComponents: 'false',
         ...buildInfo.toBuildSystemEnvironment(),
       },
-      artifacts: globals.artifacts!,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      analytics: globals.analytics,
-      platform: globals.platform,
+      artifacts: _artifacts,
+      fileSystem: _fileSystem,
+      logger: _logger,
+      processManager: _processManager,
+      analytics: _analytics,
+      platform: _platform,
       generateDartPluginRegistry: true,
     );
     final Target target = buildInfo.mode == BuildMode.debug
-        ? globals.buildTargets.copyFlutterBundle
-        : globals.buildTargets.releaseCopyFlutterBundle;
+        ? _buildTargets.copyFlutterBundle
+        : _buildTargets.releaseCopyFlutterBundle;
     final BuildResult result = await buildSystem.build(target, environment);
 
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError(
+        _logger.printError(
           'Target ${measurement.target} failed: ${measurement.exception}',
           stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
               ? measurement.stackTrace
@@ -88,7 +116,7 @@ class BundleBuilder {
       throwToolExit('Failed to build bundle.');
     }
     final depfile = Depfile(result.inputFiles, result.outputFiles);
-    final File outputDepfile = globals.fs.file(depfilePath);
+    final File outputDepfile = _fileSystem.file(depfilePath);
     if (!outputDepfile.parent.existsSync()) {
       outputDepfile.parent.createSync(recursive: true);
     }
@@ -96,7 +124,7 @@ class BundleBuilder {
 
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
-      final File outputDill = globals.fs.directory(assetDirPath).childFile('kernel_blob.bin');
+      final File outputDill = _fileSystem.directory(assetDirPath).childFile('kernel_blob.bin');
       if (outputDill.existsSync()) {
         outputDill.copySync(applicationKernelFilePath);
       }
@@ -112,8 +140,6 @@ Future<AssetBundle?> buildAssets({
   required TargetPlatform targetPlatform,
   String? flavor,
 }) async {
-  assetDirPath ??= getAssetBuildDirectory();
-
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(

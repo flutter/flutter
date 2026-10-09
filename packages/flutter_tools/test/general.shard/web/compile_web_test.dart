@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -307,6 +308,56 @@ environement:
 
       computed = WebRendererMode.fromDartDefines(<String>{}, useWasm: true);
       expect(computed, WebRendererMode.getDefault(useWasm: true));
+    },
+  );
+
+  testUsingContext(
+    'WebBuilder passes flutterVersion.engineRevision to WebServiceWorker on local engine builds',
+    () async {
+      final buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        expect(environment.engineVersion, isNull);
+        expect(
+          target,
+          isA<WebServiceWorker>().having(
+            (WebServiceWorker t) => t.engineRevision,
+            'engineRevision',
+            '9.8.7',
+          ),
+        );
+      });
+
+      final webBuilder = WebBuilder(
+        logger: logger,
+        processManager: FakeProcessManager.any(),
+        buildSystem: buildSystem,
+        flutterVersion: flutterVersion,
+        fileSystem: fileSystem,
+        analytics: fakeAnalytics,
+        artifacts: Artifacts.testLocalEngine(
+          localEngine: 'out/host_debug_unopt',
+          localEngineHost: 'out/host_debug_unopt',
+          fileSystem: fileSystem,
+        ),
+        buildTargets: const BuildTargetsImpl(),
+        cache: FakeCache(fileSystem: fileSystem),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        terminal: FakeTerminal(),
+      );
+      await webBuilder.buildWeb(
+        flutterProject,
+        'target',
+        BuildInfo.debug,
+        ServiceWorkerStrategy.offlineFirst,
+        compilerConfigs: const <WebCompilerConfig>[],
+      );
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: ThrowingPub.new,
     },
   );
 }

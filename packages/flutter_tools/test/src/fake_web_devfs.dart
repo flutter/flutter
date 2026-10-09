@@ -6,7 +6,9 @@ import 'dart:async';
 import 'dart:io' hide Directory, File;
 
 import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
@@ -18,21 +20,25 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 /// Helper function to create a [WebDevFS] with sensible testbed defaults.
 WebDevFS createWebDevFS({
+  Artifacts? artifacts,
   String packagesFilePath = '.dart_tool/package_config.json',
   UrlTunneller? urlTunneller,
   bool useSseForDebugProxy = false,
   bool useSseForDebugBackend = false,
   bool useSseForInjectedClient = false,
   BuildInfo buildInfo = BuildInfo.debug,
+  Config? config,
   bool enableDwds = false,
   DartDevelopmentServiceConfiguration ddsConfig = const DartDevelopmentServiceConfiguration(),
   Uri? entrypoint,
@@ -49,18 +55,22 @@ WebDevFS createWebDevFS({
   bool useDwdsWebSocketConnection = false,
   bool webCrossOriginIsolation = false,
   FileSystem? fileSystem,
+  FlutterVersion? flutterVersion,
   Logger? logger,
   Platform? platform,
+  ProcessManager? processManager,
   bool testMode = true,
   Map<String, String> webDefines = const <String, String>{},
 }) {
   return WebDevFS(
+    artifacts: artifacts ?? globals.artifacts!,
     packagesFilePath: packagesFilePath,
     urlTunneller: urlTunneller,
     useSseForDebugProxy: useSseForDebugProxy,
     useSseForDebugBackend: useSseForDebugBackend,
     useSseForInjectedClient: useSseForInjectedClient,
     buildInfo: buildInfo,
+    config: config ?? globals.config,
     enableDwds: enableDwds,
     ddsConfig: ddsConfig,
     entrypoint: entrypoint ?? globals.fs.file('lib/main.dart').uri,
@@ -77,8 +87,10 @@ WebDevFS createWebDevFS({
     useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     webCrossOriginIsolation: webCrossOriginIsolation,
     fileSystem: fileSystem ?? globals.fs,
+    flutterVersion: flutterVersion ?? globals.flutterVersion,
     logger: logger ?? globals.logger,
     platform: platform ?? globals.platform,
+    processManager: processManager ?? globals.processManager,
     testMode: testMode,
     webDefines: webDefines,
   );

@@ -7,11 +7,13 @@ import 'dart:async';
 import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../artifacts.dart';
 import '../asset.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -22,8 +24,8 @@ import '../build_system/tools/asset_transformer.dart';
 import '../build_system/tools/shader_compiler.dart';
 import '../compile.dart';
 import '../devfs.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
+import '../version.dart';
 import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
@@ -82,6 +84,10 @@ class WebDevFS implements DevFS {
     required this.fileSystem,
     required this.logger,
     required this.platform,
+    required this.artifacts,
+    required this.config,
+    required this.flutterVersion,
+    required this.processManager,
     this.testMode = false,
     this._webDefines = const <String, String>{},
   }) {
@@ -92,9 +98,9 @@ class WebDevFS implements DevFS {
     }
     _assetTransformer = DevelopmentAssetTransformer(
       transformer: AssetTransformer(
-        processManager: globals.processManager,
+        processManager: processManager,
         fileSystem: fileSystem,
-        dartBinaryPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+        dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
         buildMode: buildInfo.mode,
       ),
       fileSystem: fileSystem,
@@ -102,6 +108,7 @@ class WebDevFS implements DevFS {
     );
   }
 
+  final Artifacts artifacts;
   final Uri entrypoint;
   final String packagesFilePath;
   final UrlTunneller? urlTunneller;
@@ -109,6 +116,7 @@ class WebDevFS implements DevFS {
   final bool useSseForDebugBackend;
   final bool useSseForInjectedClient;
   final BuildInfo buildInfo;
+  final Config config;
   final bool enableDwds;
   final DartDevelopmentServiceConfiguration ddsConfig;
   final bool testMode;
@@ -125,8 +133,10 @@ class WebDevFS implements DevFS {
   final bool useDwdsWebSocketConnection;
   final bool webCrossOriginIsolation;
   final FileSystem fileSystem;
+  final FlutterVersion flutterVersion;
   final Logger logger;
   final Platform platform;
+  final ProcessManager processManager;
   final Map<String, String> _webDefines;
 
   late WebAssetServer webAssetServer;
@@ -235,6 +245,9 @@ class WebDevFS implements DevFS {
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
+      artifacts: artifacts,
+      config: config,
+      flutterVersion: flutterVersion,
       crossOriginIsolation: webCrossOriginIsolation,
       shouldEnableMiddleware: shouldEnableMiddleware,
       webDefines: _webDefines,
@@ -362,7 +375,9 @@ class WebDevFS implements DevFS {
     }
     var syncedBytes = 0;
     if (bundle != null) {
-      final String assetDirectory = fileSystem.path.absolute(getAssetBuildDirectory());
+      final String assetDirectory = fileSystem.path.absolute(
+        getAssetBuildDirectory(config, fileSystem),
+      );
       final Directory assetDir = fileSystem.directory(assetDirectory);
 
       if (bundleFirstUpload && assetDir.existsSync()) {
@@ -486,7 +501,7 @@ class WebDevFS implements DevFS {
   @visibleForTesting
   File get requireJS => fileSystem.file(
     fileSystem.path.join(
-      globals.artifacts!.getArtifactPath(
+      artifacts.getArtifactPath(
         Artifact.engineDartSdkPath,
         platform: TargetPlatform.web_javascript,
       ),
@@ -500,7 +515,7 @@ class WebDevFS implements DevFS {
   @visibleForTesting
   File get ddcModuleLoaderJS => fileSystem.file(
     fileSystem.path.join(
-      globals.artifacts!.getArtifactPath(
+      artifacts.getArtifactPath(
         Artifact.engineDartSdkPath,
         platform: TargetPlatform.web_javascript,
       ),
@@ -514,7 +529,7 @@ class WebDevFS implements DevFS {
   @visibleForTesting
   File get flutterJs => fileSystem.file(
     fileSystem.path.join(
-      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      artifacts.getHostArtifact(HostArtifact.flutterJsDirectory).path,
       'flutter.js',
     ),
   );
@@ -522,7 +537,7 @@ class WebDevFS implements DevFS {
   @visibleForTesting
   File get stackTraceMapper => fileSystem.file(
     fileSystem.path.join(
-      globals.artifacts!.getArtifactPath(
+      artifacts.getArtifactPath(
         Artifact.engineDartSdkPath,
         platform: TargetPlatform.web_javascript,
       ),

@@ -17,6 +17,7 @@ import 'package:shelf/shelf_io.dart' as shelf;
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -26,7 +27,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
-import '../globals.dart' as globals;
+import '../version.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
@@ -77,7 +78,10 @@ class WebAssetServer implements AssetReader {
     this._canaryFeatures, {
     required this.webRenderer,
     required this.useLocalCanvasKit,
+    required this.artifacts,
+    required this.config,
     required this.fileSystem,
+    required this.flutterVersion,
     required this.logger,
     this._baseHref,
     this._webDefines = const <String, String>{},
@@ -225,7 +229,10 @@ class WebAssetServer implements AssetReader {
     bool ddcModuleSystem = false,
     bool canaryFeatures = false,
     bool useDwdsWebSocketConnection = false,
+    required Artifacts artifacts,
+    required Config config,
     required FileSystem fileSystem,
+    required FlutterVersion flutterVersion,
     required Logger logger,
     required Platform platform,
     bool shouldEnableMiddleware = true,
@@ -296,7 +303,10 @@ class WebAssetServer implements AssetReader {
       canaryFeatures,
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
+      artifacts: artifacts,
+      config: config,
       fileSystem: fileSystem,
+      flutterVersion: flutterVersion,
       logger: logger,
       baseHref: webDevServerConfig.baseHref,
       webDefines: webDefines,
@@ -332,7 +342,7 @@ class WebAssetServer implements AssetReader {
         fileSystem: fileSystem,
         platform: platform,
         flutterRoot: Cache.flutterRoot,
-        webBuildDirectory: getWebBuildDirectory(config: globals.config, fileSystem: fileSystem),
+        webBuildDirectory: getWebBuildDirectory(config: config, fileSystem: fileSystem),
         basePath: server.basePath,
         needsCoopCoep: crossOriginIsolation,
       );
@@ -544,7 +554,7 @@ class WebAssetServer implements AssetReader {
     if (!file.existsSync() && requestPath.startsWith('canvaskit/')) {
       final Directory canvasKitDirectory = fileSystem.directory(
         fileSystem.path.join(
-          globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
+          artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
           'canvaskit',
         ),
       );
@@ -558,7 +568,7 @@ class WebAssetServer implements AssetReader {
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
       final Uri potential = fileSystem
-          .directory(getAssetBuildDirectory(null, fileSystem))
+          .directory(getAssetBuildDirectory(config, fileSystem))
           .uri
           .resolve(requestPath.replaceFirst('assets/', ''));
       file = fileSystem.file(potential);
@@ -631,7 +641,10 @@ class WebAssetServer implements AssetReader {
 
   final bool useLocalCanvasKit;
 
+  final Artifacts artifacts;
+  final Config config;
   final FileSystem fileSystem;
+  final FlutterVersion flutterVersion;
   final Logger logger;
 
   String get _buildConfigString {
@@ -641,9 +654,7 @@ class WebAssetServer implements AssetReader {
         wasmHashes[path] = crypto.sha256.convert(_webMemoryFS.files[path]!).toString();
       }
     }
-    final String canvasKitPath = globals.artifacts!
-        .getHostArtifact(HostArtifact.flutterWebSdk)
-        .path;
+    final String canvasKitPath = artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path;
     final Directory canvasKitDirectory = fileSystem.directory(
       fileSystem.path.join(canvasKitPath, 'canvaskit'),
     );
@@ -659,7 +670,7 @@ class WebAssetServer implements AssetReader {
     }
 
     final buildConfig = <String, Object>{
-      'engineRevision': globals.flutterVersion.engineRevision,
+      'engineRevision': flutterVersion.engineRevision,
       'wasmHashes': wasmHashes,
       'builds': <Object>[
         <String, Object>{
@@ -680,7 +691,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
   File get _flutterJsFile => fileSystem.file(
     fileSystem.path.join(
-      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      artifacts.getHostArtifact(HostArtifact.flutterJsDirectory).path,
       'flutter.js',
     ),
   );
@@ -775,7 +786,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
       final Directory dartSdkParent = fileSystem
           .directory(
-            globals.artifacts!.getArtifactPath(
+            artifacts.getArtifactPath(
               Artifact.engineDartSdkPath,
               platform: TargetPlatform.web_javascript,
             ),
@@ -787,7 +798,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       }
 
       final Directory flutterWebSdk = fileSystem.directory(
-        globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk),
+        artifacts.getHostArtifact(HostArtifact.flutterWebSdk),
       );
       final File webSdkFile = fileSystem.file(flutterWebSdk.uri.resolve(path));
       if (webSdkFile.existsSync()) {
@@ -802,14 +813,14 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _canaryFeatures
         ? kDDCCanarySdkArtifactMap
         : kDDCStableSdkArtifactMap;
-    return fileSystem.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
+    return fileSystem.file(artifacts.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File get _resolveDartSdkJsMapFile {
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _canaryFeatures
         ? kDDCCanarySdkSourcemapsArtifactMap
         : kDDCStableSdkSourcemapsArtifactMap;
-    return fileSystem.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
+    return fileSystem.file(artifacts.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   @override
