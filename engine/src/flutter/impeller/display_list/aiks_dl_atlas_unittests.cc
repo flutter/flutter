@@ -108,6 +108,7 @@ TEST_P(AiksTest, DrawAtlasWithOpacity) {
   auto [texture_coordinates, transforms, atlas] = CreateTestData(this);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setAlpha(128);
   builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.DrawAtlas(atlas, transforms.data(), texture_coordinates.data(),
@@ -268,8 +269,9 @@ TEST_P(AiksTest, DrawImageRectWithBlendColorFilter) {
       DlImageImpeller::Make(CreateTextureForFixture("bay_bridge.jpg"));
 
   DisplayListBuilder builder;
-  DlPaint paint = DlPaint().setColorFilter(DlColorFilter::MakeBlend(
-      DlColor::kRed().withAlphaF(0.4), DlBlendMode::kSrcOver));
+  DlPaint paint =
+      DlPaint().setAntiAlias(true).setColorFilter(DlColorFilter::MakeBlend(
+          DlColor::kRed().withAlphaF(0.4), DlBlendMode::kSrcOver));
 
   DlMatrix filter_matrix = DlMatrix();
   auto filter = flutter::DlMatrixImageFilter(filter_matrix,
@@ -278,7 +280,7 @@ TEST_P(AiksTest, DrawImageRectWithBlendColorFilter) {
   paint_with_filter.setImageFilter(&filter);
 
   // Compare porter-duff blend modes.
-  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+  builder.DrawPaint(DlPaint().setAntiAlias(true).setColor(DlColor::kWhite()));
   // Uses image filter to disable atlas conversion.
   builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
                         DlRect::MakeLTRB(0, 0, 500, 500), {},
@@ -304,7 +306,7 @@ TEST_P(AiksTest, DrawImageRectWithMatrixColorFilter) {
           0,    0,    -1.0, 1.0, 0,  //
           1.0,  1.0,  1.0,  1.0, 0   //
       }};
-  DlPaint paint = DlPaint().setColorFilter(
+  DlPaint paint = DlPaint().setAntiAlias(true).setColorFilter(
       DlColorFilter::MakeMatrix(kColorInversion.array));
 
   DlMatrix filter_matrix = DlMatrix();
@@ -314,7 +316,7 @@ TEST_P(AiksTest, DrawImageRectWithMatrixColorFilter) {
   paint_with_filter.setImageFilter(&filter);
 
   // Compare inverting color matrix filter.
-  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+  builder.DrawPaint(DlPaint().setAntiAlias(true).setColor(DlColor::kWhite()));
   // Uses image filter to disable atlas conversion.
   builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
                         DlRect::MakeLTRB(0, 0, 500, 500), {},

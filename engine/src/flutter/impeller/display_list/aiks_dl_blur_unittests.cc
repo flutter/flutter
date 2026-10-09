@@ -46,6 +46,7 @@ TEST_P(AiksTest, SolidColorOvalsMaskBlurTinySigma) {
                                  DlColor::kRed()};
   for (uint32_t i = 0; i < sigmas.size(); ++i) {
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(colors[i]);
     paint.setMaskFilter(
         DlBlurMaskFilter::Make(DlBlurStyle::kNormal, sigmas[i]));
@@ -71,6 +72,7 @@ sk_sp<flutter::DisplayList> DoGradientOvalStrokeMaskBlur(
   builder.Scale(content_Scale.x, content_Scale.y);
 
   DlPaint background_paint;
+  background_paint.setAntiAlias(true);
   background_paint.setColor(DlColor(1, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
   builder.DrawPaint(background_paint);
 
@@ -78,6 +80,7 @@ sk_sp<flutter::DisplayList> DoGradientOvalStrokeMaskBlur(
   std::vector<Scalar> stops = {0.0, 1.0};
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setMaskFilter(DlBlurMaskFilter::Make(style, sigma));
   auto gradient = DlColorSource::MakeLinear(
       {0, 0}, {200, 200}, 2, colors.data(), stops.data(), DlTileMode::kClamp);
@@ -92,6 +95,7 @@ sk_sp<flutter::DisplayList> DoGradientOvalStrokeMaskBlur(
 
   {
     DlPaint line_paint;
+    line_paint.setAntiAlias(true);
     line_paint.setColor(DlColor::kWhite());
     builder.DrawLine(DlPoint(100, 0), DlPoint(100, 60), line_paint);
     builder.DrawLine(DlPoint(0, 30), DlPoint(200, 30), line_paint);
@@ -175,6 +179,7 @@ TEST_P(AiksTest, SolidColorCircleMaskBlurTinySigma) {
                                  DlColor::kRed()};
   for (uint32_t i = 0; i < sigmas.size(); ++i) {
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(colors[i]);
     paint.setMaskFilter(
         DlBlurMaskFilter::Make(DlBlurStyle::kNormal, sigmas[i]));
@@ -194,6 +199,7 @@ TEST_P(AiksTest, CanRenderMaskBlurHugeSigma) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kGreen());
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 99999));
   builder.DrawCircle(DlPoint(400, 400), 300, paint);
@@ -209,6 +215,7 @@ TEST_P(AiksTest, CanRenderForegroundBlendWithMaskBlur) {
   builder.ClipRect(DlRect::MakeXYWH(100, 150, 400, 400));
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kWhite());
 
   Sigma sigma = Radius(20);
@@ -228,6 +235,7 @@ TEST_P(AiksTest, CanRenderForegroundAdvancedBlendWithMaskBlur) {
   builder.ClipRect(DlRect::MakeXYWH(100, 150, 400, 400));
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(
       DlColor::RGBA(128.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f, 1.0f));
 
@@ -250,6 +258,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurInteractive) {
 
     DisplayListBuilder builder;
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kCornflowerBlue());
     builder.DrawCircle(DlPoint(100, 100), 50, paint);
 
@@ -267,6 +276,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurInteractive) {
     builder.ClipRoundRect(rrect);
 
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     save_paint.setBlendMode(DlBlendMode::kSrc);
 
     auto backdrop_filter = DlImageFilter::MakeBlur(20, 20, DlTileMode::kClamp);
@@ -283,6 +293,7 @@ TEST_P(AiksTest, CanRenderBackdropBlur) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kCornflowerBlue());
   builder.DrawCircle(DlPoint(100, 100), 50, paint);
 
@@ -300,6 +311,7 @@ TEST_P(AiksTest, CanRenderBackdropBlur) {
   builder.ClipRoundRect(rrect);
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setBlendMode(DlBlendMode::kSrc);
   auto backdrop_filter = DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
@@ -314,6 +326,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurWithSingleBackdropId) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.DrawImage(image, DlPoint(50.0, 50.0),
                     DlImageSampling::kNearestNeighbor, &paint);
 
@@ -323,6 +336,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurWithSingleBackdropId) {
   builder.ClipRoundRect(rrect);
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setBlendMode(DlBlendMode::kSrc);
   auto backdrop_filter = DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get(),
@@ -347,6 +361,7 @@ TEST_P(AiksTest, CanRenderMultipleBackdropBlurWithSingleBackdropId) {
     DisplayListBuilder builder;
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     builder.DrawImage(image, DlPoint(50.0, 50.0),
                       DlImageSampling::kNearestNeighbor, &paint);
 
@@ -360,6 +375,7 @@ TEST_P(AiksTest, CanRenderMultipleBackdropBlurWithSingleBackdropId) {
       builder.ClipRoundRect(rrect);
 
       DlPaint save_paint;
+      save_paint.setAntiAlias(true);
       save_paint.setBlendMode(DlBlendMode::kSrc);
       auto backdrop_filter =
           DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
@@ -382,6 +398,7 @@ TEST_P(AiksTest,
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.DrawImage(image, DlPoint(50.0, 50.0),
                     DlImageSampling::kNearestNeighbor, &paint);
 
@@ -392,6 +409,7 @@ TEST_P(AiksTest,
     builder.ClipRoundRect(rrect);
 
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     save_paint.setBlendMode(DlBlendMode::kSrc);
     auto backdrop_filter =
         DlImageFilter::MakeBlur(30 + i, 30, DlTileMode::kClamp);
@@ -408,10 +426,12 @@ TEST_P(AiksTest, CanRenderBackdropBlurHugeSigma) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kGreen());
   builder.DrawCircle(DlPoint(400, 400), 300, paint);
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setBlendMode(DlBlendMode::kSrc);
 
   auto backdrop_filter =
@@ -428,10 +448,12 @@ TEST_P(AiksTest, CanRenderBoundedBlur) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.DrawImage(image, DlPoint(0.0, 0.0), DlImageSampling::kNearestNeighbor,
                     &paint);
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setBlendMode(DlBlendMode::kSrcOver);
   builder.Save();
 
@@ -470,10 +492,12 @@ TEST_P(AiksTest, CanRenderBoundedBlurWithTranslation) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.DrawImage(image, DlPoint(0.0, 0.0), DlImageSampling::kNearestNeighbor,
                     &paint);
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setBlendMode(DlBlendMode::kSrcOver);
 
   // Subcase 1: Simple translation (e.g., scrolled list item).
@@ -508,6 +532,7 @@ TEST_P(AiksTest, CanRenderClippedBlur) {
   builder.ClipRect(DlRect::MakeXYWH(100, 150, 400, 400));
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kGreen());
   paint.setImageFilter(DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal));
   builder.DrawCircle(DlPoint(400, 400), 200, paint);
@@ -520,10 +545,12 @@ TEST_P(AiksTest, ComposePaintBlurOuter) {
   DisplayListBuilder builder;
 
   DlPaint background;
+  background.setAntiAlias(true);
   background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
   builder.DrawPaint(background);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kGreen());
   float matrix[] = {
       0, 1, 0, 0, 0,  //
@@ -545,10 +572,12 @@ TEST_P(AiksTest, ComposePaintBlurInner) {
   DisplayListBuilder builder;
 
   DlPaint background;
+  background.setAntiAlias(true);
   background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
   builder.DrawPaint(background);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kGreen());
   float matrix[] = {
       0, 1, 0, 0, 0,  //
@@ -577,6 +606,7 @@ TEST_P(AiksTest, ClippedBlurFilterRendersCorrectlyInteractive) {
     builder.Translate(location.x, location.y);
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     Sigma sigma = Radius{120 * 3};
     paint.setMaskFilter(
         DlBlurMaskFilter::Make(DlBlurStyle::kNormal, sigma.sigma));
@@ -594,6 +624,7 @@ TEST_P(AiksTest, ClippedBlurFilterRendersCorrectly) {
   DisplayListBuilder builder;
   builder.Translate(0, -400);
   DlPaint paint;
+  paint.setAntiAlias(true);
 
   Sigma sigma = Radius{120 * 3};
   paint.setMaskFilter(
@@ -610,10 +641,12 @@ TEST_P(AiksTest, ClippedBlurFilterRendersCorrectly) {
 TEST_P(AiksTest, ClearBlendWithBlur) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 600.0, 600.0), paint);
 
   DlPaint clear;
+  clear.setAntiAlias(true);
   clear.setBlendMode(DlBlendMode::kClear);
   clear.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 20));
 
@@ -635,6 +668,7 @@ TEST_P(AiksTest, BlurHasNoEdge) {
     builder.DrawPaint({});
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kGreen());
     paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, sigma));
 
@@ -649,6 +683,7 @@ TEST_P(AiksTest, MaskBlurWithZeroSigmaIsSkipped) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 0));
 
@@ -673,6 +708,7 @@ TEST_P(AiksTest, MaskBlurOnZeroDimensionIsSkippedWideGamut) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10));
 
@@ -705,12 +741,14 @@ static sk_sp<DisplayList> MaskBlurVariantTest(
   builder.Translate(50.f, 50.f);
 
   DlPaint draw_paint;
+  draw_paint.setAntiAlias(true);
   draw_paint.setColor(
       DlColor::RGBA(Color::AntiqueWhite().red, Color::AntiqueWhite().green,
                     Color::AntiqueWhite().blue, Color::AntiqueWhite().alpha));
   builder.DrawPaint(draw_paint);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setMaskFilter(DlBlurMaskFilter::Make(config.style, config.sigma));
   paint.setInvertColors(config.invert_colors);
   paint.setImageFilter(config.image_filter);
@@ -843,6 +881,7 @@ TEST_P(AiksTest, GaussianBlurStyleInner) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1));
   builder.DrawPaint(paint);
 
@@ -859,6 +898,7 @@ TEST_P(AiksTest, GaussianBlurStyleInner) {
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
+  red.setAntiAlias(true);
   red.setColor(DlColor::kRed());
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 200, 200), red);
 
@@ -870,6 +910,7 @@ TEST_P(AiksTest, GaussianBlurStyleOuter) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1.0));
   builder.DrawPaint(paint);
 
@@ -886,6 +927,7 @@ TEST_P(AiksTest, GaussianBlurStyleOuter) {
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
+  red.setAntiAlias(true);
   red.setColor(DlColor::kRed());
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 200, 200), red);
 
@@ -897,6 +939,7 @@ TEST_P(AiksTest, GaussianBlurStyleSolid) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1.0));
   builder.DrawPaint(paint);
 
@@ -913,6 +956,7 @@ TEST_P(AiksTest, GaussianBlurStyleSolid) {
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
+  red.setAntiAlias(true);
   red.setColor(DlColor::kRed());
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 200, 200), red);
 
@@ -932,6 +976,7 @@ TEST_P(AiksTest, MaskBlurTexture) {
     builder.Scale(GetContentScale().x, GetContentScale().y);
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kGreen());
     paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, sigma));
 
@@ -940,6 +985,7 @@ TEST_P(AiksTest, MaskBlurTexture) {
         DlPoint(200, 200), DlImageSampling::kNearestNeighbor, &paint);
 
     DlPaint red;
+    red.setAntiAlias(true);
     red.setColor(DlColor::kRed());
     builder.DrawRect(DlRect::MakeXYWH(0, 0, 200, 200), red);
 
@@ -961,6 +1007,7 @@ TEST_P(AiksTest, MaskBlurDoesntStretchContents) {
     builder.Scale(GetContentScale().x, GetContentScale().y);
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1.0));
     builder.DrawPaint(paint);
 
@@ -987,6 +1034,7 @@ TEST_P(AiksTest, GaussianBlurAtPeripheryVertical) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   paint.setColor(DlColor::kLimeGreen());
@@ -1001,6 +1049,7 @@ TEST_P(AiksTest, GaussianBlurAtPeripheryVertical) {
   builder.ClipRect(DlRect::MakeLTRB(100, 0, 200, GetWindowSize().height));
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setBlendMode(DlBlendMode::kSrc);
 
   auto backdrop_filter = DlImageFilter::MakeBlur(20, 20, DlTileMode::kClamp);
@@ -1023,6 +1072,7 @@ TEST_P(AiksTest, GaussianBlurAtPeripheryHorizontal) {
       DlImageSampling::kNearestNeighbor);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kMagenta());
 
   DlRoundRect rrect = DlRoundRect::MakeRectXY(
@@ -1031,6 +1081,7 @@ TEST_P(AiksTest, GaussianBlurAtPeripheryHorizontal) {
   builder.ClipRect(DlRect::MakeLTRB(0, 50, GetWindowSize().width, 150));
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setBlendMode(DlBlendMode::kSrc);
 
   auto backdrop_filter = DlImageFilter::MakeBlur(20, 20, DlTileMode::kClamp);
@@ -1077,6 +1128,7 @@ TEST_P(AiksTest, GaussianBlurAnimatedBackdrop) {
     builder.ClipRect(DlRect::MakeLTRB(100, 100, 900, 700));
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setBlendMode(DlBlendMode::kSrc);
 
     auto backdrop_filter =
@@ -1094,6 +1146,7 @@ TEST_P(AiksTest, GaussianBlurStyleInnerGradient) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1.0));
   builder.DrawPaint(paint);
 
@@ -1101,7 +1154,7 @@ TEST_P(AiksTest, GaussianBlurStyleInnerGradient) {
                                  DlColor::RGBA(0.7568, 0.2627, 0.2118, 1.0)};
   std::vector<Scalar> stops = {0.0, 1.0};
 
-  paint = DlPaint{};
+  paint = DlPaint{}.setAntiAlias(true);
   paint.setColorSource(DlColorSource::MakeLinear(
       /*start_point=*/{0, 0},
       /*end_point=*/{200, 200},
@@ -1120,6 +1173,7 @@ TEST_P(AiksTest, GaussianBlurStyleInnerGradient) {
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
+  red.setAntiAlias(true);
   red.setColor(DlColor::kRed());
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 200, 200), red);
 
@@ -1131,6 +1185,7 @@ TEST_P(AiksTest, GaussianBlurStyleSolidGradient) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1.0));
   builder.DrawPaint(paint);
 
@@ -1138,7 +1193,7 @@ TEST_P(AiksTest, GaussianBlurStyleSolidGradient) {
                                  DlColor::RGBA(0.7568, 0.2627, 0.2118, 1.0)};
   std::vector<Scalar> stops = {0.0, 1.0};
 
-  paint = DlPaint{};
+  paint = DlPaint{}.setAntiAlias(true);
   paint.setColorSource(DlColorSource::MakeLinear(
       /*start_point=*/{0, 0},
       /*end_point=*/{200, 200},
@@ -1157,6 +1212,7 @@ TEST_P(AiksTest, GaussianBlurStyleSolidGradient) {
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
+  red.setAntiAlias(true);
   red.setColor(DlColor::kRed());
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 200, 200), red);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -1167,6 +1223,7 @@ TEST_P(AiksTest, GaussianBlurStyleOuterGradient) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1.0));
   builder.DrawPaint(paint);
 
@@ -1174,7 +1231,7 @@ TEST_P(AiksTest, GaussianBlurStyleOuterGradient) {
                                  DlColor::RGBA(0.7568, 0.2627, 0.2118, 1.0)};
   std::vector<Scalar> stops = {0.0, 1.0};
 
-  paint = DlPaint{};
+  paint = DlPaint{}.setAntiAlias(true);
   paint.setColorSource(DlColorSource::MakeLinear(
       /*start_point=*/{0, 0},
       /*end_point=*/{200, 200},
@@ -1193,6 +1250,7 @@ TEST_P(AiksTest, GaussianBlurStyleOuterGradient) {
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
+  red.setAntiAlias(true);
   red.setColor(DlColor::kRed());
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 200, 200), red);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -1206,6 +1264,7 @@ TEST_P(AiksTest, GaussianBlurScaledAndClipped) {
   Vector2 image_center = Vector2(bounds.GetSize() / 2);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setImageFilter(DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal));
 
   Vector2 clip_size = {150, 75};
@@ -1256,6 +1315,7 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClippedInteractive) {
         Rect::MakeXYWH(0, 0, boston->GetSize().width, boston->GetSize().height);
     Vector2 image_center = Vector2(bounds.GetSize() / 2);
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setImageFilter(
         DlImageFilter::MakeBlur(20, 20, tile_modes[selected_tile_mode]));
 
@@ -1295,6 +1355,7 @@ TEST_P(AiksTest, GaussianBlurOneDimension) {
   builder.DrawImage(DlImageImpeller::Make(boston), DlPoint(100, 100), {});
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setBlendMode(DlBlendMode::kSrc);
 
   auto backdrop_filter = DlImageFilter::MakeBlur(50, 0, DlTileMode::kClamp);
@@ -1315,6 +1376,7 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClipped) {
       Rect::MakeXYWH(0, 0, boston->GetSize().width, boston->GetSize().height);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setImageFilter(DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal));
 
   Vector2 image_center = Vector2(bounds.GetSize() / 2);
@@ -1365,6 +1427,7 @@ TEST_P(AiksTest, GaussianBlurRotatedNonUniform) {
     DisplayListBuilder builder;
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kGreen());
     paint.setImageFilter(
         DlImageFilter::MakeBlur(50, 0, tile_modes[selected_tile_mode]));
@@ -1407,6 +1470,7 @@ TEST_P(AiksTest, BlurredRectangleWithShader) {
     for (int y = 0; y < 5; ++y) {
       DlRect rect = DlRect::MakeXYWH(x * 20, y * 20, 20, 20);
       DlPaint paint;
+      paint.setAntiAlias(true);
       paint.setColor(((x + y) & 1) == 0 ? DlColor::kYellow()
                                         : DlColor::kBlue());
 
@@ -1421,6 +1485,7 @@ TEST_P(AiksTest, BlurredRectangleWithShader) {
   auto blur_filter = DlImageFilter::MakeBlur(5, 5, DlTileMode::kDecal);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kDarkGreen());
   builder.DrawRect(DlRect::MakeLTRB(0, 0, 300, 600), paint);
 
@@ -1458,6 +1523,7 @@ TEST_P(AiksTest, GaussianBlurSolidColorTinyMipMap) {
     path_builder.LineTo(DlPoint(100 + fi, 100 + fi));
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kChartreuse());
     auto blur_filter = DlImageFilter::MakeBlur(0.1, 0.1, DlTileMode::kClamp);
     paint.setImageFilter(blur_filter);
@@ -1483,6 +1549,7 @@ TEST_P(AiksTest, GaussianBlurBackdropTinyMipMap) {
         DlRect::MakeXYWH(400, 400, clip_size.width, clip_size.height));
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kGreen());
     auto blur_filter = DlImageFilter::MakeBlur(0.1, 0.1, DlTileMode::kDecal);
     paint.setImageFilter(blur_filter);
@@ -1502,12 +1569,14 @@ TEST_P(AiksTest,
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.DrawImage(image, DlPoint(50.0, 50.0),
                     DlImageSampling::kNearestNeighbor, &paint);
 
   for (int i = 0; i < 6; i++) {
     if (i != 0) {
       DlPaint paint;
+      paint.setAntiAlias(true);
       paint.setColor(DlColor::kWhite().withAlphaF(0.95));
       builder.SaveLayer(std::nullopt, &paint);
     }
@@ -1517,6 +1586,7 @@ TEST_P(AiksTest,
     builder.ClipRoundRect(rrect);
 
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     save_paint.setBlendMode(DlBlendMode::kSrc);
     auto backdrop_filter = DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
     builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get(),
@@ -1537,6 +1607,7 @@ TEST_P(AiksTest, BackdropGroupUsesCoverageUnionSnapshot) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.DrawImage(image, DlPoint(0.0, 0.0), DlImageSampling::kNearestNeighbor,
                     &paint);
 
@@ -1549,6 +1620,7 @@ TEST_P(AiksTest, BackdropGroupUsesCoverageUnionSnapshot) {
     builder.ClipRoundRect(rrect);
 
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     save_paint.setBlendMode(DlBlendMode::kSrc);
     auto backdrop_filter = DlImageFilter::MakeBlur(20, 20, DlTileMode::kClamp);
     builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get(),
@@ -1594,10 +1666,12 @@ TEST_P(AiksTest, BlurGradientWithOpacity) {
       {0, 0}, {400, 400}, 2, colors.data(), stops.data(), DlTileMode::kClamp);
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setOpacity(0.5);
   builder.SaveLayer(std::nullopt, &save_paint);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColorSource(gradient);
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 1));
   builder.DrawRect(DlRect::MakeXYWH(100, 100, 200, 200), paint);
@@ -1622,6 +1696,7 @@ TEST_P(AiksTest, CanRenderNestedBackdropBlur) {
 
     // Draw some background content to be blurred.
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kCornflowerBlue());
     builder.DrawCircle(DlPoint(100 + offset, 100), 50, paint);
     paint.setColor(DlColor::kGreenYellow());
@@ -1637,6 +1712,7 @@ TEST_P(AiksTest, CanRenderNestedBackdropBlur) {
 
     // Draw the semi-transparent container from the second screen.
     DlPaint transparent_paint;
+    transparent_paint.setAntiAlias(true);
     transparent_paint.setColor(DlColor::kWhite().withAlpha(0.1 * 255));
     builder.DrawPaint(transparent_paint);
 
@@ -1664,15 +1740,16 @@ TEST_P(AiksTest, GaussianBlurFlipped) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 350, 350),
-                   DlPaint().setColor(DlColor::kWhite()));
+                   DlPaint().setAntiAlias(true).setColor(DlColor::kWhite()));
 
   builder.Save();
   builder.Scale(-1, 1);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setImageFilter(DlBlurImageFilter::Make(10, 10, DlTileMode::kDecal));
   builder.SaveLayer(DlRect::MakeLTRB(-150, 100, 150, 200), &paint);
   builder.DrawRect(DlRect::MakeLTRB(-150, 0, 150, 300),
-                   DlPaint().setColor(DlColor::kRed()));
+                   DlPaint().setAntiAlias(true).setColor(DlColor::kRed()));
   builder.Restore();
   builder.Restore();
 

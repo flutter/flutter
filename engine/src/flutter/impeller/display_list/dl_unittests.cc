@@ -47,16 +47,18 @@ INSTANTIATE_PLAYGROUND_SUITE(DisplayListTest);
 
 TEST_P(DisplayListTest, CanDrawRect) {
   flutter::DisplayListBuilder builder;
-  builder.DrawRect(DlRect::MakeXYWH(10, 10, 100, 100),
-                   flutter::DlPaint(flutter::DlColor::kBlue()));
+  builder.DrawRect(
+      DlRect::MakeXYWH(10, 10, 100, 100),
+      flutter::DlPaint(flutter::DlColor::kBlue()).setAntiAlias(true));
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 TEST_P(DisplayListTest, CanDrawTextBlob) {
   flutter::DisplayListBuilder builder;
-  builder.DrawText(flutter::DlTextImpeller::MakeFromBlob(
-                       SkTextBlob::MakeFromString("Hello", CreateTestFont())),
-                   100, 100, flutter::DlPaint(flutter::DlColor::kBlue()));
+  builder.DrawText(
+      flutter::DlTextImpeller::MakeFromBlob(
+          SkTextBlob::MakeFromString("Hello", CreateTestFont())),
+      100, 100, flutter::DlPaint(flutter::DlColor::kBlue()).setAntiAlias(true));
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
@@ -71,6 +73,7 @@ TEST_P(DisplayListTest, CanDrawTextBlobWithGradient) {
       {0.0, 0.0}, {300.0, 300.0}, 2, colors.data(), stops,
       flutter::DlTileMode::kMirror);
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColorSource(linear);
 
   builder.DrawText(
@@ -82,18 +85,20 @@ TEST_P(DisplayListTest, CanDrawTextBlobWithGradient) {
 
 TEST_P(DisplayListTest, CanDrawTextWithSaveLayer) {
   flutter::DisplayListBuilder builder;
-  builder.DrawText(flutter::DlTextImpeller::MakeFromBlob(
-                       SkTextBlob::MakeFromString("Hello", CreateTestFont())),
-                   100, 100, flutter::DlPaint(flutter::DlColor::kRed()));
+  builder.DrawText(
+      flutter::DlTextImpeller::MakeFromBlob(
+          SkTextBlob::MakeFromString("Hello", CreateTestFont())),
+      100, 100, flutter::DlPaint(flutter::DlColor::kRed()).setAntiAlias(true));
 
   flutter::DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   float alpha = 0.5;
   save_paint.setAlpha(static_cast<uint8_t>(255 * alpha));
   builder.SaveLayer(std::nullopt, &save_paint);
   builder.DrawText(
       flutter::DlTextImpeller::MakeFromBlob(SkTextBlob::MakeFromString(
           "Hello with half alpha", CreateTestFontOfSize(100))),
-      100, 300, flutter::DlPaint(flutter::DlColor::kRed()));
+      100, 300, flutter::DlPaint(flutter::DlColor::kRed()).setAntiAlias(true));
   builder.Restore();
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -109,6 +114,7 @@ TEST_P(DisplayListTest, CanDrawImage) {
 TEST_P(DisplayListTest, CanDrawCapsAndJoins) {
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
   paint.setStrokeWidth(30);
@@ -198,6 +204,7 @@ TEST_P(DisplayListTest, CanDrawArc) {
 
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
 
     Vector2 scale = GetContentScale();
     builder.Scale(scale.x, scale.y);
@@ -222,6 +229,7 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
   auto callback = [&]() {
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
 
     paint.setColor(flutter::DlColor::kRed());
     paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
@@ -404,6 +412,7 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
 TEST_P(DisplayListTest, CanDrawWithOddPathWinding) {
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   paint.setColor(flutter::DlColor::kRed());
   paint.setDrawStyle(flutter::DlDrawStyle::kFill);
@@ -424,6 +433,7 @@ TEST_P(DisplayListTest, CanDrawWithOddPathWinding) {
 TEST_P(DisplayListTest, CanDrawAnOpenPath) {
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   paint.setColor(flutter::DlColor::kRed());
   paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
@@ -449,6 +459,7 @@ TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
   auto texture = CreateTextureForFixture("embarcadero.jpg");
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   // Mask blurred image.
   {
@@ -485,6 +496,7 @@ TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
 TEST_P(DisplayListTest, CanDrawStrokedText) {
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
   paint.setColor(flutter::DlColor::kRed());
@@ -500,6 +512,7 @@ TEST_P(DisplayListTest, CanDrawStrokedText) {
 TEST_P(DisplayListTest, StrokedTextNotOffsetFromNormalText) {
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
   auto const& text_blob = SkTextBlob::MakeFromString("00000", CreateTestFont());
   auto text = flutter::DlTextImpeller::MakeFromBlob(text_blob);
 
@@ -528,6 +541,7 @@ TEST_P(DisplayListTest, IgnoreMaskFilterWhenSavingLayer) {
   flutter::DisplayListBuilder builder;
   auto filter = flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kNormal, 10.0f);
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setMaskFilter(&filter);
   builder.SaveLayer(std::nullopt, &paint);
   builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(100, 100),
@@ -540,6 +554,7 @@ TEST_P(DisplayListTest, CanDrawWithBlendColorFilter) {
   auto texture = CreateTextureForFixture("embarcadero.jpg");
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   // Pipeline blended image.
   {
@@ -572,6 +587,7 @@ TEST_P(DisplayListTest, CanDrawWithColorFilterImageFilter) {
   auto texture = CreateTextureForFixture("boston.jpg");
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   auto color_filter = flutter::DlColorFilter::MakeMatrix(invert_color_matrix);
   auto image_filter = flutter::DlImageFilter::MakeColorFilter(color_filter);
@@ -601,6 +617,7 @@ TEST_P(DisplayListTest, CanDrawWithImageBlurFilter) {
 
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
 
     auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1],
                                              flutter::DlTileMode::kClamp);
@@ -618,6 +635,7 @@ TEST_P(DisplayListTest, CanDrawWithComposeImageFilter) {
   auto texture = CreateTextureForFixture("boston.jpg");
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   auto dilate = std::make_shared<flutter::DlDilateImageFilter>(10.0, 10.0);
   auto erode = std::make_shared<flutter::DlErodeImageFilter>(10.0, 10.0);
@@ -658,6 +676,7 @@ TEST_P(DisplayListTest, CanClampTheResultingColorOfColorMatrixFilter) {
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setImageFilter(compose.get());
   builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(100, 100),
                     flutter::DlImageSampling::kNearestNeighbor, &paint);
@@ -720,6 +739,7 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
       auto circle_center = DrawPlaygroundPoint(center_point);
 
       flutter::DlPaint paint;
+      paint.setAntiAlias(true);
       paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
       paint.setStrokeCap(flutter::DlStrokeCap::kButt);
       paint.setStrokeJoin(flutter::DlStrokeJoin::kBevel);
@@ -793,6 +813,7 @@ TEST_P(DisplayListTest, CanDrawBoundedBlur) {
     builder.Save();
 
     flutter::DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     save_paint.setBlendMode(flutter::DlBlendMode::kSrcOver);
 
     std::optional<DlRect> blur_bounds;
@@ -905,6 +926,7 @@ TEST_P(DisplayListTest, NinePatchImageColorFilter) {
   auto filter = flutter::DlColorFilter::MakeBlend(flutter::DlColor::kGreen(),
                                                   flutter::DlBlendMode::kSrcIn);
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColorFilter(filter);
 
   flutter::DisplayListBuilder builder;
@@ -932,7 +954,8 @@ TEST_P(DisplayListTest, CanDrawPoints) {
       flutter::DlStrokeCap::kSquare,
   };
   flutter::DlPaint paint =
-      flutter::DlPaint()                                         //
+      flutter::DlPaint()
+          .setAntiAlias(true)                                    //
           .setColor(flutter::DlColor::kYellow().withAlpha(127))  //
           .setStrokeWidth(20);
   builder.Translate(50, 50);
@@ -958,7 +981,8 @@ TEST_P(DisplayListTest, CanDrawZeroLengthLine) {
       flutter::DlStrokeCap::kSquare,
   };
   flutter::DlPaint paint =
-      flutter::DlPaint()                                         //
+      flutter::DlPaint()
+          .setAntiAlias(true)                                    //
           .setColor(flutter::DlColor::kYellow().withAlpha(127))  //
           .setDrawStyle(flutter::DlDrawStyle::kStroke)           //
           .setStrokeCap(flutter::DlStrokeCap::kButt)             //
@@ -976,6 +1000,7 @@ TEST_P(DisplayListTest, CanDrawZeroLengthLine) {
 TEST_P(DisplayListTest, CanDrawShadow) {
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   auto content_scale = GetContentScale() * 0.8;
   builder.Scale(content_scale.x, content_scale.y);
@@ -1028,13 +1053,15 @@ TEST_P(DisplayListTest, CanDrawZeroWidthLine) {
       flutter::DlStrokeCap::kRound,
       flutter::DlStrokeCap::kSquare,
   };
-  flutter::DlPaint paint =                              //
-      flutter::DlPaint()                                //
+  flutter::DlPaint paint =  //
+      flutter::DlPaint()
+          .setAntiAlias(true)                           //
           .setColor(flutter::DlColor::kWhite())         //
           .setDrawStyle(flutter::DlDrawStyle::kStroke)  //
           .setStrokeWidth(0);
-  flutter::DlPaint outline_paint =                      //
-      flutter::DlPaint()                                //
+  flutter::DlPaint outline_paint =  //
+      flutter::DlPaint()
+          .setAntiAlias(true)                           //
           .setColor(flutter::DlColor::kYellow())        //
           .setDrawStyle(flutter::DlDrawStyle::kStroke)  //
           .setStrokeCap(flutter::DlStrokeCap::kSquare)  //
@@ -1104,6 +1131,7 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
 
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
 
     if (enable_savelayer) {
       builder.SaveLayer(std::nullopt, nullptr);
@@ -1176,6 +1204,7 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilterWhenSavingLayer) {
     builder.Save();
     builder.Scale(2.0, 2.0);
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(flutter::DlColor::kYellow());
     builder.DrawRect(DlRect::MakeWH(300, 300), paint);
     paint.setStrokeWidth(1.0);
@@ -1185,6 +1214,7 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilterWhenSavingLayer) {
     builder.DrawLine(DlPoint(0, 150), DlPoint(300, 150), paint);
 
     flutter::DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     DlRect bounds = DlRect::MakeXYWH(100, 100, 100, 100);
     Matrix translate_matrix =
         Matrix::MakeTranslation({translation[0], translation[1]});
@@ -1209,6 +1239,7 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilterWhenSavingLayer) {
 
     builder.SaveLayer(bounds, &save_paint);
     flutter::DlPaint paint2;
+    paint2.setAntiAlias(true);
     paint2.setColor(flutter::DlColor::kBlue());
     builder.DrawRect(bounds, paint2);
     builder.Restore();
@@ -1221,6 +1252,7 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilterWhenSavingLayer) {
 
 TEST_P(DisplayListTest, CanDrawRectWithLinearToSrgbColorFilter) {
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(flutter::DlColor(0xFF2196F3).withAlpha(128));
   flutter::DisplayListBuilder builder;
   paint.setColorFilter(flutter::DlColorFilter::MakeLinearToSrgbGamma());
@@ -1240,6 +1272,7 @@ TEST_P(DisplayListTest, CanDrawPaintWithColorSource) {
   };
   const float stops[2] = {0.0, 1.0};
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
   flutter::DisplayListBuilder builder;
   auto clip_bounds = DlRect::MakeWH(300.0, 300.0);
   builder.Save();
@@ -1292,6 +1325,7 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
     builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(100, 100);
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(flutter::DlColor::kRed());
     builder.DrawRect(DlRect::MakeWH(200, 200), paint);
     paint.setColor(flutter::DlColor::kBlue().withAlpha(127));
@@ -1303,6 +1337,7 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
     builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(300, 100);
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(flutter::DlColor::kBlue().withAlpha(127));
     builder.DrawRect(DlRect::MakeWH(200, 200), paint);
     paint.setColor(flutter::DlColor::kRed());
@@ -1314,6 +1349,7 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
     builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(100, 300);
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(flutter::DlColor::kRed());
     builder.DrawRect(DlRect::MakeWH(200, 200), paint);
     paint.setColor(flutter::DlColor::kBlue().withAlpha(127));
@@ -1325,6 +1361,7 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
     builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(300, 300);
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(flutter::DlColor::kBlue().withAlpha(127));
     builder.DrawRect(DlRect::MakeWH(200, 200), paint);
     paint.setColor(flutter::DlColor::kRed());
@@ -1358,6 +1395,7 @@ TEST_P(DisplayListTest, CanDrawCorrectlyWithColorFilterAndImageFilter) {
       flutter::DlImageFilter::MakeColorFilter(blue_color_filter);
 
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(flutter::DlColor::kRed());
   paint.setColorFilter(green_color_filter);
   paint.setImageFilter(blue_image_filter);
@@ -1390,6 +1428,7 @@ TEST_P(DisplayListTest, MaskBlursApplyCorrectlyToColorSources) {
   builder.Translate(0, 100);
   for (const auto& color_source : color_sources) {
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColorSource(color_source);
     paint.setMaskFilter(blur_filter);
 
@@ -1420,13 +1459,15 @@ TEST_P(DisplayListTest, DrawShapes) {
       flutter::DlStrokeJoin::kRound,
       flutter::DlStrokeJoin::kMiter,
   };
-  flutter::DlPaint paint =                            //
-      flutter::DlPaint()                              //
+  flutter::DlPaint paint =  //
+      flutter::DlPaint()
+          .setAntiAlias(true)                         //
           .setColor(flutter::DlColor::kWhite())       //
           .setDrawStyle(flutter::DlDrawStyle::kFill)  //
           .setStrokeWidth(10);
-  flutter::DlPaint stroke_paint =                       //
-      flutter::DlPaint()                                //
+  flutter::DlPaint stroke_paint =  //
+      flutter::DlPaint()
+          .setAntiAlias(true)                           //
           .setColor(flutter::DlColor::kWhite())         //
           .setDrawStyle(flutter::DlDrawStyle::kStroke)  //
           .setStrokeWidth(10);
@@ -1478,6 +1519,7 @@ TEST_P(DisplayListTest, DrawCirclesWithTransformations) {
 
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
 
     paint.setColor(flutter::DlColor::kBlue().withAlpha(filled_alpha));
     paint.setDrawStyle(flutter::DlDrawStyle::kFill);
@@ -1502,13 +1544,15 @@ TEST_P(DisplayListTest, DrawCirclesWithTransformations) {
 TEST_P(DisplayListTest, ClipDrawRRectWithNonCircularRadii) {
   flutter::DisplayListBuilder builder;
 
-  flutter::DlPaint fill_paint =                       //
-      flutter::DlPaint()                              //
+  flutter::DlPaint fill_paint =  //
+      flutter::DlPaint()
+          .setAntiAlias(true)                         //
           .setColor(flutter::DlColor::kBlue())        //
           .setDrawStyle(flutter::DlDrawStyle::kFill)  //
           .setStrokeWidth(10);
-  flutter::DlPaint stroke_paint =                       //
-      flutter::DlPaint()                                //
+  flutter::DlPaint stroke_paint =  //
+      flutter::DlPaint()
+          .setAntiAlias(true)                           //
           .setColor(flutter::DlColor::kGreen())         //
           .setDrawStyle(flutter::DlDrawStyle::kStroke)  //
           .setStrokeWidth(10);
@@ -1527,8 +1571,9 @@ TEST_P(DisplayListTest, ClipDrawRRectWithNonCircularRadii) {
       DlRoundRect::MakeRectXY(DlRect::MakeXYWH(100, 500, 300, 300), 40, 120),
       stroke_paint);
 
-  flutter::DlPaint reference_paint =                  //
-      flutter::DlPaint()                              //
+  flutter::DlPaint reference_paint =  //
+      flutter::DlPaint()
+          .setAntiAlias(true)                         //
           .setColor(flutter::DlColor::kMidGrey())     //
           .setDrawStyle(flutter::DlDrawStyle::kFill)  //
           .setStrokeWidth(10);
@@ -1540,8 +1585,9 @@ TEST_P(DisplayListTest, ClipDrawRRectWithNonCircularRadii) {
       DlRoundRect::MakeRectXY(DlRect::MakeXYWH(100, 100, 300, 300), 120, 120),
       reference_paint);
 
-  flutter::DlPaint clip_fill_paint =                  //
-      flutter::DlPaint()                              //
+  flutter::DlPaint clip_fill_paint =  //
+      flutter::DlPaint()
+          .setAntiAlias(true)                         //
           .setColor(flutter::DlColor::kCyan())        //
           .setDrawStyle(flutter::DlDrawStyle::kFill)  //
           .setStrokeWidth(10);
@@ -1642,6 +1688,7 @@ TEST_P(DisplayListTest, DrawVerticesBlendModes) {
 
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
 
     paint.setColor(toColor(src_color).modulateOpacity(src_alpha));
     builder.DrawVertices(vertices, blend_mode_values[current_blend_index],
@@ -1654,11 +1701,13 @@ TEST_P(DisplayListTest, DrawVerticesBlendModes) {
 
 TEST_P(DisplayListTest, DrawPaintIgnoresMaskFilter) {
   flutter::DisplayListBuilder builder;
-  builder.DrawPaint(flutter::DlPaint().setColor(flutter::DlColor::kWhite()));
+  builder.DrawPaint(flutter::DlPaint().setAntiAlias(true).setColor(
+      flutter::DlColor::kWhite()));
 
   auto filter = flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kNormal, 10.0f);
-  builder.DrawCircle(DlPoint(300, 300), 200,
-                     flutter::DlPaint().setMaskFilter(&filter));
+  builder.DrawCircle(
+      DlPoint(300, 300), 200,
+      flutter::DlPaint().setAntiAlias(true).setMaskFilter(&filter));
 
   std::vector<flutter::DlColor> colors = {flutter::DlColor::kGreen(),
                                           flutter::DlColor::kGreen()};
@@ -1667,7 +1716,8 @@ TEST_P(DisplayListTest, DrawPaintIgnoresMaskFilter) {
       {100.0, 100.0}, {300.0, 300.0}, 2, colors.data(), stops,
       flutter::DlTileMode::kRepeat);
   flutter::DlPaint blend_paint =
-      flutter::DlPaint()           //
+      flutter::DlPaint()
+          .setAntiAlias(true)      //
           .setColorSource(linear)  //
           .setBlendMode(flutter::DlBlendMode::kScreen);
   builder.DrawPaint(blend_paint);
@@ -1687,7 +1737,8 @@ TEST_P(DisplayListTest, DrawMaskBlursThatMightUseSaveLayers) {
   auto solid_filter =
       flutter::DlBlurMaskFilter::Make(flutter::DlBlurStyle::kSolid, 5.0f);
   flutter::DlPaint solid_alpha_paint =
-      flutter::DlPaint()                        //
+      flutter::DlPaint()
+          .setAntiAlias(true)                   //
           .setMaskFilter(solid_filter)          //
           .setColor(flutter::DlColor::kBlue())  //
           .setAlpha(0x7f);
@@ -1706,7 +1757,8 @@ TEST_P(DisplayListTest, DrawMaskBlursThatMightUseSaveLayers) {
   auto rotate_if = flutter::DlMatrixImageFilter::Make(
       Matrix::MakeRotationZ(Degrees(10)), flutter::DlImageSampling::kLinear);
   flutter::DlPaint normal_if_paint =
-      flutter::DlPaint()                         //
+      flutter::DlPaint()
+          .setAntiAlias(true)                    //
           .setMaskFilter(solid_filter)           //
           .setImageFilter(rotate_if)             //
           .setColor(flutter::DlColor::kGreen())  //
@@ -1727,6 +1779,7 @@ TEST_P(DisplayListTest, FirstPassDispatcherBackdropCoverageUnion) {
   auto blur =
       flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
   flutter::DlPaint save_paint;
+  save_paint.setAntiAlias(true);
 
   // Layer 1: clipped to (10, 20, 60, 80)
   builder.Save();
@@ -1763,6 +1816,7 @@ TEST_P(DisplayListTest, FirstPassDispatcherBackdropCoverageUnionClippedOut) {
   auto blur =
       flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
   flutter::DlPaint save_paint;
+  save_paint.setAntiAlias(true);
 
   // Layer 1: clipped out completely (cull rect is outside initial cull rect or
   // empty)
@@ -1800,6 +1854,7 @@ TEST_P(DisplayListTest,
   auto blur =
       flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
   flutter::DlPaint save_paint;
+  save_paint.setAntiAlias(true);
 
   // Layer 1: clipped out completely
   builder.Save();
@@ -1835,6 +1890,7 @@ TEST_P(DisplayListTest,
   auto blur =
       flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
   flutter::DlPaint save_paint;
+  save_paint.setAntiAlias(true);
 
   // Layer 1: disjoint bounds (outside initial cull rect 0, 0, 1000, 1000)
   builder.SaveLayer(DlRect::MakeLTRB(-100, -100, -50, -50), &save_paint,

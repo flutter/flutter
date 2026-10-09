@@ -20,6 +20,7 @@ using namespace flutter;
 TEST_P(AiksTest, CanRenderNestedClips) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kFuchsia());
 
   builder.Save();
@@ -53,6 +54,7 @@ TEST_P(AiksTest, CanRenderDifferenceClips) {
 
   // Draw a huge yellow rectangle to prove the clipping works.
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kYellow());
   builder.DrawRect(DlRect::MakeCircleBounds({0, 0}, 1000), paint);
 
@@ -76,6 +78,7 @@ TEST_P(AiksTest, CanRenderWithContiguousClipRestores) {
 
   // Cover the whole canvas with red.
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   builder.DrawPaint(paint);
 
@@ -101,6 +104,7 @@ TEST_P(AiksTest, ClipsUseCurrentTransform) {
                                    DlColor::kYellow()};
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
 
   builder.Translate(300, 300);
   for (int i = 0; i < 15; i++) {
@@ -120,6 +124,7 @@ TEST_P(AiksTest, FramebufferBlendsRespectClips) {
 
   // Clear the whole canvas with white.
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kWhite());
   builder.DrawPaint(paint);
 

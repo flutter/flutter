@@ -90,6 +90,7 @@ TEST_P(DlGoldenTest, ShimmerTest) {
     canvas->Scale(content_scale.x, content_scale.y);
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     canvas->DrawImage(images[0], DlPoint(10.135, 10.36334),
                       DlImageSampling::kLinear, &paint);
 
@@ -160,7 +161,7 @@ TEST_P(DlGoldenTest, StrokedRRectFastBlur) {
   impeller::Point content_scale = GetContentScale();
   DlRect rect = DlRect::MakeXYWH(50, 50, 100, 100);
   DlRoundRect rrect = DlRoundRect::MakeRectRadius(rect, 10.0f);
-  DlPaint fill = DlPaint().setColor(DlColor::kBlue());
+  DlPaint fill = DlPaint().setAntiAlias(true).setColor(DlColor::kBlue());
   DlPaint stroke =
       DlPaint(fill).setDrawStyle(DlDrawStyle::kStroke).setStrokeWidth(10.0f);
   DlPaint blur = DlPaint(fill).setMaskFilter(
@@ -191,6 +192,7 @@ TEST_P(DlGoldenTest, LargeDownscaleRrect) {
       canvas->Save();
       canvas->Scale(0.25, 0.25);
       DlPaint paint;
+      paint.setAntiAlias(true);
       paint.setColor(DlColor::kYellow());
       paint.setMaskFilter(
           DlBlurMaskFilter::Make(DlBlurStyle::kNormal, /*sigma=*/1000));
@@ -199,6 +201,7 @@ TEST_P(DlGoldenTest, LargeDownscaleRrect) {
     }
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kYellow());
     paint.setMaskFilter(
         DlBlurMaskFilter::Make(DlBlurStyle::kNormal, /*sigma=*/250));

@@ -32,6 +32,7 @@ using namespace flutter;
 TEST_P(AiksTest, CanRenderColoredRect) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
   builder.DrawPath(DlPath::MakeRectXYWH(100.0f, 100.0f, 100.0f, 100.0f), paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -40,6 +41,7 @@ TEST_P(AiksTest, CanRenderColoredRect) {
 TEST_P(AiksTest, CanRenderColoredRectPrimitive) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
   builder.DrawRect(DlRect::MakeXYWH(100.f, 100.f, 100.f, 100.f), paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -56,6 +58,7 @@ sk_sp<DisplayList> MakeWideStrokedRects(Point scale,
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue().withAlphaF(0.5));
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(30.0f);
@@ -117,6 +120,7 @@ TEST_P(AiksTest, CanRenderWideStrokedRectPathWithoutOverlap) {
 TEST_P(AiksTest, CanRenderImage) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
   builder.DrawImage(image, DlPoint(100.0, 100.0),
@@ -127,6 +131,7 @@ TEST_P(AiksTest, CanRenderImage) {
 TEST_P(AiksTest, CanRenderInvertedImageWithColorFilter) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setColorFilter(
       DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kSrcOver));
@@ -141,6 +146,7 @@ TEST_P(AiksTest, CanRenderInvertedImageWithColorFilter) {
 TEST_P(AiksTest, CanRenderColorFilterWithInvertColors) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setColorFilter(
       DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kSrcOver));
@@ -153,6 +159,7 @@ TEST_P(AiksTest, CanRenderColorFilterWithInvertColors) {
 TEST_P(AiksTest, CanRenderColorFilterWithInvertColorsDrawPaint) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setColorFilter(
       DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kSrcOver));
@@ -195,6 +202,7 @@ void CanRenderTiledTexture(AiksTest* aiks_test,
 
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kWhite());
   paint.setColorSource(color_source);
 
@@ -314,6 +322,7 @@ TEST_P(AiksTest, DrawImageRectSrcOutsideBounds) {
   auto dest_rect = DlRect::MakeXYWH(100, 100, 600, 600);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kMidGrey());
   builder.DrawRect(dest_rect, paint);
 
@@ -326,6 +335,7 @@ TEST_P(AiksTest, CanRenderSimpleClips) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
 
   paint.setColor(DlColor::kWhite());
   builder.DrawPaint(paint);
@@ -410,9 +420,11 @@ TEST_P(AiksTest, CanSaveLayerStandalone) {
   DisplayListBuilder builder;
 
   DlPaint red;
+  red.setAntiAlias(true);
   red.setColor(DlColor::kRed());
 
   DlPaint alpha;
+  alpha.setAntiAlias(true);
   alpha.setColor(DlColor::kRed().modulateOpacity(0.5));
 
   builder.SaveLayer(std::nullopt, &alpha);
@@ -427,6 +439,7 @@ TEST_P(AiksTest, CanSaveLayerStandalone) {
 TEST_P(AiksTest, CanRenderDifferentShapesWithSameColorSource) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
 
   DlColor colors[2] = {
       DlColor::RGBA(0.9568, 0.2627, 0.2118, 1.0),
@@ -461,6 +474,7 @@ TEST_P(AiksTest, CanRenderDifferentShapesWithSameColorSource) {
 TEST_P(AiksTest, CanRenderRoundedRectWithNonUniformRadii) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
 
   RoundingRadii radii = {
@@ -494,6 +508,7 @@ TEST_P(AiksTest, CanRenderRoundedRectWithUniformRadii) {
 
     DisplayListBuilder builder;
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kRed());
 
     RoundingRadii radii = {
@@ -518,7 +533,7 @@ TEST_P(AiksTest, CanDrawPaint) {
 
   DisplayListBuilder builder;
   builder.Scale(0.2, 0.2);
-  builder.DrawPaint(DlPaint().setColor(medium_turquoise));
+  builder.DrawPaint(DlPaint().setAntiAlias(true).setColor(medium_turquoise));
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
@@ -530,8 +545,9 @@ TEST_P(AiksTest, CanDrawPaintMultipleTimes) {
 
   DisplayListBuilder builder;
   builder.Scale(0.2, 0.2);
-  builder.DrawPaint(DlPaint().setColor(medium_turquoise));
-  builder.DrawPaint(DlPaint().setColor(orange_red.modulateOpacity(0.5f)));
+  builder.DrawPaint(DlPaint().setAntiAlias(true).setColor(medium_turquoise));
+  builder.DrawPaint(
+      DlPaint().setAntiAlias(true).setColor(orange_red.modulateOpacity(0.5f)));
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
@@ -540,6 +556,7 @@ TEST_P(AiksTest, StrokedRectsRenderCorrectly) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kPurple());
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(20.0f);
@@ -653,6 +670,7 @@ TEST_P(AiksTest, StrokedRectsRenderCorrectly) {
   builder.DrawRect(rect.Shift({700, 500}), thin_paint);
 
   DlPaint round_mock_paint;
+  round_mock_paint.setAntiAlias(true);
   round_mock_paint.setColor(DlColor::kGreen());
   round_mock_paint.setDrawStyle(DlDrawStyle::kFill);
 
@@ -674,6 +692,7 @@ TEST_P(AiksTest, FilledCirclesRenderCorrectly) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   const int color_count = 3;
   DlColor colors[color_count] = {
       DlColor::kBlue(),
@@ -752,10 +771,12 @@ TEST_P(AiksTest, DrawThinStrokedCircle) {
     flutter::DisplayListBuilder builder;
 
     DlPaint background_paint;
+    background_paint.setAntiAlias(true);
     background_paint.setColor(DlColor(1, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
     builder.DrawPaint(background_paint);
 
     flutter::DlPaint paint;
+    paint.setAntiAlias(true);
 
     paint.setColor(flutter::DlColor::kRed().withAlpha(stroked_alpha));
     paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
@@ -776,6 +797,7 @@ TEST_P(AiksTest, StrokedCirclesRenderCorrectly) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   const int color_count = 3;
   DlColor colors[color_count] = {
       DlColor::kBlue(),
@@ -875,9 +897,11 @@ void DrawStrokedAndFilledCirclesWithZoom(AiksTest* test,
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint fill_paint;
+  fill_paint.setAntiAlias(true);
   fill_paint.setColor(DlColor::kBlue());
 
   DlPaint stroke_paint;
+  stroke_paint.setAntiAlias(true);
   stroke_paint.setColor(DlColor::kGreen());
   stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
   stroke_paint.setStrokeWidth(stroke_width);
@@ -937,6 +961,7 @@ TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   const int color_count = 3;
   DlColor colors[color_count] = {
       DlColor::kBlue(),
@@ -1060,6 +1085,7 @@ TEST_P(AiksTest, FilledArcsRenderCorrectly) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
 
   RenderArcFarm(builder, paint,
@@ -1077,6 +1103,7 @@ TEST_P(AiksTest, TranslucentFilledArcsRenderCorrectly) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
 
   RenderArcFarm(builder, paint,
@@ -1094,6 +1121,7 @@ TEST_P(AiksTest, FilledArcsRenderCorrectlyWithCenter) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
 
   RenderArcFarm(builder, paint,
@@ -1111,6 +1139,7 @@ TEST_P(AiksTest, NonSquareFilledArcsRenderCorrectly) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
 
   RenderArcFarm(builder, paint,
@@ -1129,6 +1158,7 @@ TEST_P(AiksTest, NonSquareFilledArcsRenderCorrectlyWithCenter) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
 
   RenderArcFarm(builder, paint,
@@ -1147,6 +1177,7 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithButtEnds) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(6.0f);
   paint.setStrokeCap(DlStrokeCap::kButt);
@@ -1167,6 +1198,7 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareEnds) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(6.0f);
   paint.setStrokeCap(DlStrokeCap::kSquare);
@@ -1187,6 +1219,7 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithTranslucencyAndSquareEnds) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeCap(DlStrokeCap::kSquare);
   paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
@@ -1202,6 +1235,7 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithRoundEnds) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(6.0f);
   paint.setStrokeCap(DlStrokeCap::kRound);
@@ -1222,6 +1256,7 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithTranslucencyAndRoundEnds) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeCap(DlStrokeCap::kRound);
   paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
@@ -1237,6 +1272,7 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithBevelJoinsAndCenter) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(6.0f);
   paint.setStrokeJoin(DlStrokeJoin::kBevel);
@@ -1258,6 +1294,7 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithMiterJoinsAndCenter) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(6.0f);
   paint.setStrokeJoin(DlStrokeJoin::kMiter);
@@ -1282,6 +1319,7 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithRoundJoinsAndCenter) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(6.0f);
   paint.setStrokeJoin(DlStrokeJoin::kRound);
@@ -1303,6 +1341,7 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareAndButtEnds) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(8.0f);
   paint.setStrokeCap(DlStrokeCap::kSquare);
@@ -1332,6 +1371,7 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareAndButtAndRoundEnds) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(8.0f);
   paint.setStrokeCap(DlStrokeCap::kSquare);
@@ -1381,6 +1421,7 @@ TEST_P(AiksTest, StrokedArcsCoverFullArcWithButtEnds) {
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(6.0f);
   paint.setStrokeCap(DlStrokeCap::kButt);
@@ -1409,6 +1450,7 @@ TEST_P(AiksTest, FilledRoundRectsRenderCorrectly) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   const int color_count = 3;
   DlColor colors[color_count] = {
       DlColor::kBlue(),
@@ -1517,9 +1559,10 @@ TEST_P(AiksTest, SolidColorCirclesOvalsRRectsMaskBlurCorrectly) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 1.0f));
 
-  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+  builder.DrawPaint(DlPaint().setAntiAlias(true).setColor(DlColor::kWhite()));
 
   paint.setColor(
       DlColor::RGBA(220.0f / 255.0f, 20.0f / 255.0f, 60.0f / 255.0f, 1.0f));
@@ -1591,6 +1634,7 @@ TEST_P(AiksTest, CanRenderClippedBackdropFilter) {
       1.0,
   };
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColorSource(DlColorSource::MakeLinear(
       /*start_point=*/DlPoint(0, 0),     //
       /*end_point=*/DlPoint(100, 100),   //
@@ -1610,6 +1654,7 @@ TEST_P(AiksTest, CanRenderClippedBackdropFilter) {
   builder.ClipRoundRect(clip_rrect, DlClipOp::kIntersect);
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   auto backdrop_filter = DlImageFilter::MakeColorFilter(
       DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kExclusion));
   builder.SaveLayer(clip_rect, &save_paint, backdrop_filter.get());
@@ -1632,6 +1677,7 @@ TEST_P(AiksTest, CanDrawPerspectiveTransformWithClips) {
       builder.Save();
       {
         DlPaint paint;
+        paint.setAntiAlias(true);
         paint.setColor(DlColor::kGreen());
         builder.DrawPaint(paint);
         builder.ClipRect(DlRect::MakeLTRB(-180, -180, 180, 180),
@@ -1668,6 +1714,7 @@ TEST_P(AiksTest, CanDrawPerspectiveTransformWithClips) {
 
       // 4. Draw a semi-translucent blue circle atop all previous draws.
       DlPaint paint;
+      paint.setAntiAlias(true);
       paint.setColor(DlColor::kBlue().modulateOpacity(0.4));
       builder.DrawCircle(DlPoint(), 230, paint);
     }
@@ -1685,6 +1732,7 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
   auto texture = DlImageImpeller::Make(CreateTextureForFixture("monkey.png"));
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kWhite());
   builder.DrawPaint(paint);
 
@@ -1692,6 +1740,7 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
   {
     DlMatrix matrix = DlMatrix::MakeTranslation({50, 50});
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColorSource(DlColorSource::MakeImage(
         texture, DlTileMode::kRepeat, DlTileMode::kRepeat,
         DlImageSampling::kNearestNeighbor, &matrix));
@@ -1704,6 +1753,7 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
     builder.Save();
     builder.Rotate(45);
     DlPaint paint;
+    paint.setAntiAlias(true);
 
     Matrix matrix(1, -1, 0, 0,  //
                   1, 1, 0, 0,   //
@@ -1722,6 +1772,7 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
     builder.Translate(100, 0);
     builder.Scale(100, 100);
     DlPaint paint;
+    paint.setAntiAlias(true);
 
     DlMatrix matrix = DlMatrix::MakeScale({0.005, 0.005, 1});
     paint.setColorSource(DlColorSource::MakeImage(
@@ -1737,6 +1788,7 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
     builder.Save();
     builder.Translate(150, 150);
     DlPaint paint;
+    paint.setAntiAlias(true);
 
     DlMatrix matrix =
         DlMatrix::MakePerspective(Radians{0.5}, ISize{200, 200}, 0.05, 1);
@@ -1757,6 +1809,7 @@ TEST_P(AiksTest, SubpassWithClearColorOptimization) {
   // Use a non-srcOver blend mode to ensure that we don't detect this as an
   // opacity peephole optimization.
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
   paint.setBlendMode(DlBlendMode::kSrc);
 
@@ -1787,12 +1840,14 @@ TEST_P(AiksTest, MatrixImageFilterDoesntCullWhenTranslatedFromOffscreen) {
   // Draw a circle in a SaveLayer at -300, but move it back on-screen with a
   // +300 translation applied by a SaveLayer image filter.
   DlPaint paint;
+  paint.setAntiAlias(true);
   DlMatrix translate = DlMatrix::MakeTranslation({300, 0});
   paint.setImageFilter(
       DlImageFilter::MakeMatrix(translate, DlImageSampling::kLinear));
   builder.SaveLayer(std::nullopt, &paint);
 
   DlPaint circle_paint;
+  circle_paint.setAntiAlias(true);
   circle_paint.setColor(DlColor::kGreen());
   builder.DrawCircle(DlPoint(-300, 0), 100, circle_paint);
   builder.Restore();
@@ -1810,12 +1865,14 @@ TEST_P(AiksTest,
   // +300 translation applied by a SaveLayer image filter.
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setImageFilter(DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({300, 0}) * DlMatrix::MakeScale({2, 2, 1}),
       DlImageSampling::kNearestNeighbor));
   builder.SaveLayer(std::nullopt, &paint);
 
   DlPaint circle_paint;
+  circle_paint.setAntiAlias(true);
   circle_paint.setColor(DlColor::kGreen());
   builder.DrawCircle(DlPoint(-150, 0), 50, circle_paint);
   builder.Restore();
@@ -1831,6 +1888,7 @@ TEST_P(AiksTest, ClearColorOptimizationWhenSubpassIsBiggerThanParentPass) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   builder.DrawRect(DlRect::MakeLTRB(200, 200, 300, 300), paint);
 
@@ -1855,6 +1913,7 @@ TEST_P(AiksTest, EmptySaveLayerIgnoresPaint) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   builder.DrawPaint(paint);
   builder.ClipRect(DlRect::MakeXYWH(100, 100, 200, 200));
@@ -1873,6 +1932,7 @@ TEST_P(AiksTest, EmptySaveLayerRendersWithClear) {
   builder.ClipRect(DlRect::MakeXYWH(100, 100, 200, 200));
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setBlendMode(DlBlendMode::kClear);
   builder.SaveLayer(std::nullopt, &paint);
   builder.Restore();
@@ -1885,15 +1945,19 @@ TEST_P(AiksTest,
   DisplayListBuilder builder;
 
   DlPaint red;
+  red.setAntiAlias(true);
   red.setColor(DlColor::kRed());
 
   DlPaint green;
+  green.setAntiAlias(true);
   green.setColor(DlColor::kGreen());
 
   DlPaint blue;
+  blue.setAntiAlias(true);
   blue.setColor(DlColor::kBlue());
 
   DlPaint save;
+  save.setAntiAlias(true);
   save.setColor(DlColor::kBlack().modulateOpacity(0.5));
 
   DlRect huge_bounds = DlRect::MakeXYWH(0, 0, 100000, 100000);
@@ -1946,11 +2010,13 @@ TEST_P(AiksTest, CoordinateConversionsAreCorrect) {
   // Render an offscreen rendered texture.
   {
     DlPaint alpha;
+    alpha.setAntiAlias(true);
     alpha.setColor(DlColor::kRed().modulateOpacity(0.5));
 
     builder.SaveLayer(std::nullopt, &alpha);
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kRed());
     builder.DrawRect(DlRect::MakeXYWH(000, 000, 100, 100), paint);
     paint.setColor(DlColor::kGreen());
@@ -1968,6 +2034,7 @@ TEST_P(AiksTest, CanPerformFullScreenMSAA) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   builder.DrawCircle(DlPoint(250, 250), 125, paint);
 
@@ -1978,6 +2045,7 @@ TEST_P(AiksTest, CanPerformSkew) {
   DisplayListBuilder builder;
 
   DlPaint red;
+  red.setAntiAlias(true);
   red.setColor(DlColor::kRed());
   builder.Skew(2, 5);
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 100, 100), red);
@@ -1989,12 +2057,14 @@ TEST_P(AiksTest, CanPerformSaveLayerWithBounds) {
   DisplayListBuilder builder;
 
   DlPaint save;
+  save.setAntiAlias(true);
   save.setColor(DlColor::kBlack());
 
   DlRect save_bounds = DlRect::MakeXYWH(0, 0, 50, 50);
   builder.SaveLayer(save_bounds, &save);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 100, 100), paint);
   paint.setColor(DlColor::kGreen());
@@ -2012,6 +2082,7 @@ TEST_P(AiksTest, FilledRoundRectPathsRenderCorrectly) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   const int color_count = 3;
   DlColor colors[color_count] = {
       DlColor::kBlue(),
@@ -2115,6 +2186,7 @@ TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
     builder.Scale(GetContentScale().x, GetContentScale().y);
 
     DlPaint alpha;
+    alpha.setAntiAlias(true);
     alpha.setColor(DlColor::kRed().modulateOpacity(0.5));
 
     auto current = Point{25, 25};
@@ -2127,6 +2199,7 @@ TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
     DlRect bounds = DlRect::MakeLTRB(b0.x, b0.y, b1.x, b1.y);
 
     DlPaint stroke_paint;
+    stroke_paint.setAntiAlias(true);
     stroke_paint.setColor(DlColor::kYellow());
     stroke_paint.setStrokeWidth(5);
     stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
@@ -2135,6 +2208,7 @@ TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
     builder.SaveLayer(bounds, &alpha);
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kRed());
     builder.DrawRect(
         DlRect::MakeXYWH(current.x, current.y, size.width, size.height), paint);
@@ -2161,6 +2235,7 @@ TEST_P(AiksTest, SaveLayerDrawsBehindSubsequentEntities) {
   // Compare with https://fiddle.skia.org/c/9e03de8567ffb49e7e83f53b64bcf636
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
 
   paint.setColor(DlColor::kBlack());
   DlRect rect = DlRect::MakeXYWH(25, 25, 25, 25);
@@ -2169,6 +2244,7 @@ TEST_P(AiksTest, SaveLayerDrawsBehindSubsequentEntities) {
   builder.Translate(10, 10);
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   builder.SaveLayer(std::nullopt, &save_paint);
 
   paint.setColor(DlColor::kGreen());
@@ -2186,11 +2262,13 @@ TEST_P(AiksTest, SaveLayerDrawsBehindSubsequentEntities) {
 TEST_P(AiksTest, SiblingSaveLayerBoundsAreRespected) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   DlRect rect = DlRect::MakeXYWH(0, 0, 1000, 1000);
 
   // Black, green, and red squares offset by [10, 10].
   {
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     DlRect bounds = DlRect::MakeXYWH(25, 25, 25, 25);
     builder.SaveLayer(bounds, &save_paint);
     paint.setColor(DlColor::kBlack());
@@ -2200,6 +2278,7 @@ TEST_P(AiksTest, SiblingSaveLayerBoundsAreRespected) {
 
   {
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     DlRect bounds = DlRect::MakeXYWH(35, 35, 25, 25);
     builder.SaveLayer(bounds, &save_paint);
     paint.setColor(DlColor::kGreen());
@@ -2209,6 +2288,7 @@ TEST_P(AiksTest, SiblingSaveLayerBoundsAreRespected) {
 
   {
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     DlRect bounds = DlRect::MakeXYWH(45, 45, 25, 25);
     builder.SaveLayer(bounds, &save_paint);
     paint.setColor(DlColor::kRed());
@@ -2223,6 +2303,7 @@ TEST_P(AiksTest, CanRenderClippedLayers) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kWhite());
   builder.DrawPaint(paint);
 
@@ -2234,6 +2315,7 @@ TEST_P(AiksTest, CanRenderClippedLayers) {
 
     DlRect bounds = DlRect::MakeXYWH(50, 50, 100, 100);
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     builder.SaveLayer(bounds, &save_paint);
 
     // Fill the layer with white.
@@ -2263,6 +2345,7 @@ TEST_P(AiksTest, SaveLayerFiltersScaleWithTransform) {
   };
 
   DlPaint effect_paint;
+  effect_paint.setAntiAlias(true);
   effect_paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 6));
   draw_image_layer(effect_paint);
 
@@ -2278,9 +2361,11 @@ TEST_P(AiksTest, FastEllipticalRRectMaskBlursRenderCorrectly) {
 
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 1));
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setColor(DlColor::kWhite());
   builder.DrawPaint(save_paint);
 
@@ -2307,6 +2392,7 @@ TEST_P(AiksTest, PipelineBlendSingleParameter) {
 
   // Should render a green square in the middle of a blue circle.
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.SaveLayer(std::nullopt, &paint);
   {
     builder.Translate(100, 100);
@@ -2346,10 +2432,12 @@ TEST_P(AiksTest, MassiveScalingMatrixImageFilter) {
       DlMatrix::MakeScale({0.001, 0.001, 1}), DlImageSampling::kLinear);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setImageFilter(filter);
   builder.SaveLayer(std::nullopt, &paint);
   {
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kRed());
     builder.DrawRect(DlRect::MakeLTRB(0, 0, 100000, 100000), paint);
   }
@@ -2377,6 +2465,7 @@ TEST_P(AiksTest, NoDimplesInRRectPath) {
     builder.Scale(GetContentScale().x, GetContentScale().y);
 
     DlPaint background_paint;
+    background_paint.setAntiAlias(true);
     background_paint.setColor(DlColor(1, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
     builder.DrawPaint(background_paint);
 
@@ -2384,6 +2473,7 @@ TEST_P(AiksTest, NoDimplesInRRectPath) {
     std::vector<Scalar> stops = {0.0, 1.0};
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     auto gradient = DlColorSource::MakeLinear(DlPoint(0, 0), DlPoint(200, 200),
                                               2, colors.data(), stops.data(),
                                               DlTileMode::kClamp);
@@ -2413,7 +2503,7 @@ TEST_P(AiksTest, NoDimplesInRRectPath) {
 TEST_P(AiksTest, BackdropFilterOverUnclosedClip) {
   DisplayListBuilder builder;
 
-  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+  builder.DrawPaint(DlPaint().setAntiAlias(true).setColor(DlColor::kWhite()));
   builder.Save();
   {
     builder.ClipRect(DlRect::MakeLTRB(100, 100, 800, 800));
@@ -2421,10 +2511,12 @@ TEST_P(AiksTest, BackdropFilterOverUnclosedClip) {
     builder.Save();
     {
       builder.ClipRect(DlRect::MakeLTRB(600, 600, 800, 800));
-      builder.DrawPaint(DlPaint().setColor(DlColor::kRed()));
-      builder.DrawPaint(DlPaint().setColor(DlColor::kBlue().withAlphaF(0.5)));
+      builder.DrawPaint(DlPaint().setAntiAlias(true).setColor(DlColor::kRed()));
+      builder.DrawPaint(DlPaint().setAntiAlias(true).setColor(
+          DlColor::kBlue().withAlphaF(0.5)));
       builder.ClipRect(DlRect::MakeLTRB(700, 700, 750, 800));
-      builder.DrawPaint(DlPaint().setColor(DlColor::kRed().withAlphaF(0.5)));
+      builder.DrawPaint(DlPaint().setAntiAlias(true).setColor(
+          DlColor::kRed().withAlphaF(0.5)));
     }
     builder.Restore();
 
@@ -2433,7 +2525,7 @@ TEST_P(AiksTest, BackdropFilterOverUnclosedClip) {
   }
   builder.Restore();
   builder.DrawCircle(DlPoint(100, 100), 100,
-                     DlPaint().setColor(DlColor::kAqua()));
+                     DlPaint().setAntiAlias(true).setColor(DlColor::kAqua()));
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -2478,6 +2570,7 @@ TEST_P(AiksTest, PerspectiveRectangle) {
     }
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kBlue());
     builder.DrawRect(DlRect::MakeLTRB(0, 0, 400, 800), paint);
 
@@ -2493,6 +2586,7 @@ TEST_P(AiksTest, CanRenderFilledRoundSuperellipses) {
   DisplayListBuilder builder;
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
 
   // Square
@@ -2518,6 +2612,7 @@ TEST_P(AiksTest, CanRenderAsymmetricRoundSuperellipses) {
   DisplayListBuilder builder;
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
 
   builder.DrawRoundSuperellipse(
@@ -2571,6 +2666,7 @@ TEST_P(AiksTest, CanRenderStrokedRoundSuperellipses) {
   DisplayListBuilder builder;
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(5.0f);
@@ -2598,6 +2694,7 @@ TEST_P(AiksTest, CanRenderSmallRadiusRoundSuperellipses) {
   DisplayListBuilder builder;
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
 
   // Square
@@ -2623,6 +2720,7 @@ TEST_P(AiksTest, CanRenderThickStrokedRoundSuperellipses) {
   DisplayListBuilder builder;
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue().withAlphaF(0.5));
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(40.0f);
@@ -2650,6 +2748,7 @@ TEST_P(AiksTest, CanRenderRoundSuperellipseGrid) {
   DisplayListBuilder builder;
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
 
   DlScalar radii[] = {10.0f, 30.0f, 50.0f};
@@ -2688,6 +2787,7 @@ TEST_P(AiksTest, CanRenderTransformedRoundSuperellipse) {
   builder.Scale(1.5f, 0.8f);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
   builder.DrawRoundSuperellipse(
       DlRoundSuperellipse::MakeRectRadius(
@@ -2703,12 +2803,14 @@ TEST_P(AiksTest, CompareAntiAliasAndNonAntiAlias) {
   builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kWhite());
 
   DlRect bounds = DlRect::MakeXYWH(75, 75, 50, 50);
 
   // --- Left Half: Zoom-in on the top-left corner WITH anti-aliasing (SDF) ---
   DlPaint layer_paint_left;
+  layer_paint_left.setAntiAlias(true);
   layer_paint_left.setImageFilter(DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({200, 300}) * DlMatrix::MakeScale({8, 8, 1}) *
           DlMatrix::MakeTranslation({-100, -100}),
@@ -2723,6 +2825,7 @@ TEST_P(AiksTest, CompareAntiAliasAndNonAntiAlias) {
 
   // --- Right Half: Zoom-in on the top-left corner WITHOUT anti-aliasing ---
   DlPaint layer_paint_right;
+  layer_paint_right.setAntiAlias(true);
   layer_paint_right.setImageFilter(DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({600, 300}) * DlMatrix::MakeScale({8, 8, 1}) *
           DlMatrix::MakeTranslation({-100, -100}),
@@ -2761,15 +2864,17 @@ TEST_P(AiksTest, CompareDiffRoundRectAndRoundRect) {
   builder.Translate(50, 50);
 
   // Draw DiffRoundRect.
-  builder.DrawDiffRoundRect(outer_rrect, inner_rrect,
-                            DlPaint().setColor(DlColor::kSkyBlue()));
+  builder.DrawDiffRoundRect(
+      outer_rrect, inner_rrect,
+      DlPaint().setAntiAlias(true).setColor(DlColor::kSkyBlue()));
 
   // Draw simalated DiffRoundRect by drawing the outer RoundRect and clearing
   // the inner RoundRect.
   builder.Translate(200, 0);
-  builder.DrawRoundRect(outer_rrect, DlPaint().setColor(DlColor::kSkyBlue()));
-  builder.DrawRoundRect(inner_rrect,
-                        DlPaint().setBlendMode(DlBlendMode::kClear));
+  builder.DrawRoundRect(
+      outer_rrect, DlPaint().setAntiAlias(true).setColor(DlColor::kSkyBlue()));
+  builder.DrawRoundRect(inner_rrect, DlPaint().setAntiAlias(true).setBlendMode(
+                                         DlBlendMode::kClear));
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -2795,6 +2900,7 @@ TEST_P(AiksTest, CanRenderLinesWithCapsAnglesAndAlphas) {
   };
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(stroke_width);
 

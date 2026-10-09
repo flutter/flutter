@@ -36,6 +36,7 @@ void CanRenderLinearGradient(AiksTest* aiks_test, DlTileMode tile_mode) {
   Point scale = aiks_test->GetContentScale();
   builder.Scale(scale.x, scale.y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0f, 0);
 
   std::vector<DlColor> colors = {
@@ -137,6 +138,7 @@ TEST_P(AiksTest, CanRenderLinearGradientDecalWithColorFilter) {
   Point scale = GetContentScale();
   builder.Scale(scale.x, scale.y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0f, 0);
 
   std::vector<DlColor> colors = {
@@ -161,6 +163,7 @@ TEST_P(AiksTest, CanRenderLinearGradientWithImageFilter) {
   Point scale = GetContentScale();
   builder.Scale(scale.x, scale.y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0f, 0);
 
   std::vector<DlColor> colors = {
@@ -179,6 +182,7 @@ TEST_P(AiksTest, CanRenderLinearGradientWithImageFilter) {
 static void CanRenderLinearGradientWithDithering(AiksTest* aiks_test) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0, 100.0);
 
   // 0xffcccccc --> 0xff333333, taken from
@@ -199,6 +203,7 @@ TEST_P(AiksTest, CanRenderLinearGradientWithDitheringEnabled) {
 static void CanRenderRadialGradientWithDithering(AiksTest* aiks_test) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0, 100.0);
 
   // #FFF -> #000
@@ -220,6 +225,7 @@ static void CanRenderSweepGradientWithDithering(AiksTest* aiks_test) {
   DisplayListBuilder builder;
   builder.Scale(aiks_test->GetContentScale().x, aiks_test->GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0, 100.0);
 
   // #FFF -> #000
@@ -243,6 +249,7 @@ static void CanRenderConicalGradientWithDithering(AiksTest* aiks_test) {
   DisplayListBuilder builder;
   builder.Scale(aiks_test->GetContentScale().x, aiks_test->GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0, 100.0);
 
   // #FFF -> #000
@@ -267,6 +274,7 @@ void CanRenderLinearGradientWithOverlappingStops(AiksTest* aiks_test,
                                                  DlTileMode tile_mode) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0, 100.0);
 
   std::vector<DlColor> colors = {
@@ -313,7 +321,7 @@ void CanRenderGradientWithIncompleteStops(AiksTest* aiks_test,
 
   DisplayListBuilder builder;
   builder.DrawRect(DlRect::MakeWH(quadrant_size * 2, quadrant_size * 2),
-                   DlPaint().setColor(DlColor::kDarkGrey()));
+                   DlPaint().setAntiAlias(true).setColor(DlColor::kDarkGrey()));
 
   for (int quadrant = 0; quadrant < 4; quadrant++) {
     builder.Save();
@@ -328,6 +336,7 @@ void CanRenderGradientWithIncompleteStops(AiksTest* aiks_test,
       for (int i = gradient_size / 2; i <= test_size / 2; i += gradient_size) {
         auto draw_at = [=](DlCanvas& canvas, DlScalar offset, DlColor color) {
           DlPaint line_paint;
+          line_paint.setAntiAlias(true);
           line_paint.setColor(color);
           // strokewidth of 2 straddles the dividing line
           line_paint.setStrokeWidth(2.0f);
@@ -361,6 +370,7 @@ void CanRenderGradientWithIncompleteStops(AiksTest* aiks_test,
     std::vector<Scalar> stops = {0.1, 0.3, 0.7, 0.9};
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     switch (type) {
       case DlColorSourceType::kLinearGradient:
         paint.setColorSource(DlColorSource::MakeLinear(
@@ -432,6 +442,7 @@ void CanRenderLinearGradientManyColors(AiksTest* aiks_test,
   DisplayListBuilder builder;
   builder.Scale(aiks_test->GetContentScale().x, aiks_test->GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100, 100);
 
   std::vector<DlColor> colors = {
@@ -481,6 +492,7 @@ void CanRenderLinearGradientWayManyColors(AiksTest* aiks_test,
                                           DlTileMode tile_mode) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0, 100.0);
   auto color = DlColor(Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0}.ToARGB());
   std::vector<DlColor> colors;
@@ -530,6 +542,7 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColorsUnevenStops) {
 
     DisplayListBuilder builder;
     DlPaint paint;
+    paint.setAntiAlias(true);
     builder.Translate(100.0, 100.0);
     auto tile_mode = tile_modes[selected_tile_mode];
 
@@ -566,6 +579,7 @@ TEST_P(AiksTest, CanRenderLinearGradientMaskBlur) {
                                0.6, 0.7, 0.8, 0.9, 1.0};
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kWhite());
   paint.setColorSource(DlColorSource::MakeLinear(
       {200, 200}, {400, 400}, stops.size(), colors.data(), stops.data(),
@@ -601,6 +615,7 @@ TEST_P(AiksTest, CanRenderRadialGradient) {
 
     DisplayListBuilder builder;
     DlPaint paint;
+    paint.setAntiAlias(true);
     builder.Translate(100.0, 100.0);
     auto tile_mode = tile_modes[selected_tile_mode];
 
@@ -646,6 +661,7 @@ TEST_P(AiksTest, CanRenderRadialGradientManyColors) {
 
     DisplayListBuilder builder;
     DlPaint paint;
+    paint.setAntiAlias(true);
     builder.Translate(100.0, 100.0);
     auto tile_mode = tile_modes[selected_tile_mode];
 
@@ -681,6 +697,7 @@ void CanRenderSweepGradient(AiksTest* aiks_test, DlTileMode tile_mode) {
   DisplayListBuilder builder;
   builder.Scale(aiks_test->GetContentScale().x, aiks_test->GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100, 100);
 
   std::vector<DlColor> colors = {
@@ -715,6 +732,7 @@ void CanRenderSweepGradientManyColors(AiksTest* aiks_test,
                                       DlTileMode tile_mode) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0, 100.0);
 
   std::vector<DlColor> colors = {
@@ -761,6 +779,7 @@ TEST_P(AiksTest, CanRenderConicalGradient) {
   Scalar size = 256;
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kWhite());
   builder.DrawRect(DlRect::MakeXYWH(0, 0, size * 3, size * 3), paint);
   std::vector<DlColor> colors = {
@@ -824,6 +843,7 @@ TEST_P(AiksTest, CanRenderGradientDecalWithBackground) {
 
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kWhite());
   builder.DrawRect(DlRect::MakeLTRB(0, 0, 605, 205), paint);
   for (int i = 0; i < 3; i++) {
@@ -860,6 +880,7 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
     DisplayListBuilder builder;
     builder.Scale(GetContentScale().x, GetContentScale().y);
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kWhite());
     builder.DrawPaint(paint);
 
@@ -930,6 +951,7 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
 TEST_P(AiksTest, FastGradientTestHorizontal) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0f, 0);
 
   std::vector<DlColor> colors = {DlColor::kRed(), DlColor::kBlue(),
@@ -953,6 +975,7 @@ TEST_P(AiksTest, FastGradientTestHorizontal) {
 TEST_P(AiksTest, FastGradientTestVertical) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0f, 0);
 
   std::vector<DlColor> colors = {DlColor::kRed(), DlColor::kBlue(),
@@ -976,6 +999,7 @@ TEST_P(AiksTest, FastGradientTestVertical) {
 TEST_P(AiksTest, FastGradientTestHorizontalReversed) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0f, 0);
 
   std::vector<DlColor> colors = {DlColor::kRed(), DlColor::kBlue(),
@@ -999,6 +1023,7 @@ TEST_P(AiksTest, FastGradientTestHorizontalReversed) {
 TEST_P(AiksTest, FastGradientTestVerticalReversed) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0f, 0);
 
   std::vector<DlColor> colors = {DlColor::kRed(), DlColor::kBlue(),
@@ -1021,6 +1046,7 @@ TEST_P(AiksTest, FastGradientTestVerticalReversed) {
 TEST_P(AiksTest, VerifyNonOptimizedGradient) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Translate(100.0f, 0);
 
   std::vector<DlColor> colors = {DlColor::kRed(), DlColor::kBlue(),

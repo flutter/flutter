@@ -36,6 +36,7 @@ TEST_P(DlGoldenTest, CanDrawPaint) {
                  const std::vector<std::unique_ptr<DlImage>>& images) {
     canvas->Scale(0.2, 0.2);
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kCyan());
     canvas->DrawPaint(paint);
   };
@@ -50,6 +51,7 @@ TEST_P(DlGoldenTest, CanRenderImage) {
   auto draw = [](DlCanvas* canvas, const std::vector<sk_sp<DlImage>>& images) {
     FML_CHECK(images.size() >= 1);
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kRed());
     canvas->DrawImage(images[0], DlPoint(100.0, 100.0),
                       DlImageSampling::kLinear, &paint);
@@ -71,6 +73,7 @@ TEST_P(DlGoldenTest, Bug147807) {
                               const std::vector<sk_sp<DlImage>>& images) {
     canvas->Scale(content_scale.x, content_scale.y);
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor(0xfffef7ff));
     canvas->DrawRect(DlRect::MakeLTRB(0, 0, 375, 667), paint);
     paint.setColor(DlColor(0xffff9800));
@@ -120,11 +123,14 @@ TEST_P(DlGoldenTest, FractionalDilation) {
   auto draw = [](DlCanvas* canvas) {
     const DlRect rect = DlRect::MakeLTRB(32, 32, 382, 382);
     DlPaint layer_paint;
+    layer_paint.setAntiAlias(true);
     layer_paint.setImageFilter(DlImageFilter::MakeDilate(3.95f, 3.95f));
     canvas->SaveLayer(rect.Expand(8.0f), &layer_paint);
-    canvas->DrawRect(rect, DlPaint().setColor(DlColor::kRed()));
+    canvas->DrawRect(rect,
+                     DlPaint().setAntiAlias(true).setColor(DlColor::kRed()));
     canvas->Restore();
-    canvas->DrawRect(rect, DlPaint().setColor(DlColor::kBlack()));
+    canvas->DrawRect(rect,
+                     DlPaint().setAntiAlias(true).setColor(DlColor::kBlack()));
   };
 
   DisplayListBuilder builder;
@@ -143,6 +149,7 @@ TEST_P(DlGoldenTest, FractionalDilation) {
 namespace {
 void DrawBlurGrid(DlCanvas* canvas) {
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor(0xfffef7ff));
   Scalar width = 150;
   Scalar height = 150;
@@ -172,7 +179,8 @@ TEST_P(DlGoldenTest, GaussianVsRRectBlur) {
   auto draw = [content_scale](DlCanvas* canvas,
                               const std::vector<sk_sp<DlImage>>& images) {
     canvas->Scale(content_scale.x, content_scale.y);
-    canvas->DrawPaint(DlPaint().setColor(DlColor(0xff112233)));
+    canvas->DrawPaint(
+        DlPaint().setAntiAlias(true).setColor(DlColor(0xff112233)));
     DrawBlurGrid(canvas);
   };
 
@@ -188,7 +196,8 @@ TEST_P(DlGoldenTest, GaussianVsRRectBlurScaled) {
   auto draw = [content_scale](DlCanvas* canvas,
                               const std::vector<sk_sp<DlImage>>& images) {
     canvas->Scale(content_scale.x, content_scale.y);
-    canvas->DrawPaint(DlPaint().setColor(DlColor(0xff112233)));
+    canvas->DrawPaint(
+        DlPaint().setAntiAlias(true).setColor(DlColor(0xff112233)));
     canvas->Scale(0.33, 0.33);
     DrawBlurGrid(canvas);
   };
@@ -206,7 +215,8 @@ TEST_P(DlGoldenTest, GaussianVsRRectBlurScaledRotated) {
                               const std::vector<sk_sp<DlImage>>& images) {
     canvas->Scale(content_scale.x, content_scale.y);
     canvas->Translate(200, 200);
-    canvas->DrawPaint(DlPaint().setColor(DlColor(0xff112233)));
+    canvas->DrawPaint(
+        DlPaint().setAntiAlias(true).setColor(DlColor(0xff112233)));
     canvas->Scale(0.33, 0.33);
     canvas->Translate(300, 300);
     canvas->Rotate(45);
@@ -270,7 +280,8 @@ TEST_P(DlGoldenTest, FastVsGeneralGaussianMaskBlur) {
 
   for (size_t i = 0; i < blur_sigmas.size(); i++) {
     auto rect = DlRect::MakeXYWH(i * 320.0f + 50.0f, 50.0f, 100.0f, 100.0f);
-    DlPaint paint = DlPaint()  //
+    DlPaint paint = DlPaint()
+                        .setAntiAlias(true)  //
                         .setColor(blur_colors[i])
                         .setMaskFilter(DlBlurMaskFilter::Make(
                             DlBlurStyle::kNormal, blur_sigmas[i]));
@@ -301,7 +312,7 @@ TEST_P(DlGoldenTest, DashedLinesTest) {
   auto draw = [content_scale](DlCanvas* canvas,
                               const std::vector<sk_sp<DlImage>>& images) {
     canvas->Scale(content_scale.x, content_scale.y);
-    canvas->DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+    canvas->DrawPaint(DlPaint().setAntiAlias(true).setColor(DlColor::kWhite()));
 
     auto draw_one = [canvas](DlStrokeCap cap, Scalar x, Scalar y,
                              Scalar dash_on, Scalar dash_off) {
@@ -309,14 +320,17 @@ TEST_P(DlGoldenTest, DashedLinesTest) {
       Scalar inner = 20.0f;
       Scalar outer = 100.0f;
       DlPaint thick_paint = DlPaint()
+                                .setAntiAlias(true)
                                 .setColor(DlColor::kBlue())
                                 .setStrokeCap(cap)
                                 .setStrokeWidth(8.0f);
       DlPaint middle_paint = DlPaint()
+                                 .setAntiAlias(true)
                                  .setColor(DlColor::kGreen())
                                  .setStrokeCap(cap)
                                  .setStrokeWidth(5.0f);
       DlPaint thin_paint = DlPaint()
+                               .setAntiAlias(true)
                                .setColor(DlColor::kMagenta())
                                .setStrokeCap(cap)
                                .setStrokeWidth(2.0f);
@@ -361,20 +375,21 @@ TEST_P(DlGoldenTest, SaveLayerAtFractionalValue) {
   // be adjusted so that we still have room to draw it, even though it lies on
   // the fractional bounds of the saveLayer.
   DisplayListBuilder builder;
-  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
-  auto save_paint = DlPaint().setAlpha(100);
+  builder.DrawPaint(DlPaint().setAntiAlias(true).setColor(DlColor::kWhite()));
+  auto save_paint = DlPaint().setAntiAlias(true).setAlpha(100);
   builder.SaveLayer(std::nullopt, &save_paint);
 
   builder.DrawRoundRect(DlRoundRect::MakeRectRadius(
                             DlRect::MakeLTRB(10.5, 10.5, 200.5, 200.5), 10),
                         DlPaint()
+                            .setAntiAlias(true)
                             .setDrawStyle(DlDrawStyle::kStroke)
                             .setStrokeWidth(1.5)
                             .setColor(DlColor::kBlack()));
   builder.DrawCircle(DlPoint::MakeXY(100, 100), 50.5,
-                     DlPaint().setColor(DlColor::kAqua()));
+                     DlPaint().setAntiAlias(true).setColor(DlColor::kAqua()));
   builder.DrawCircle(DlPoint::MakeXY(110, 110), 50.5,
-                     DlPaint().setColor(DlColor::kCyan()));
+                     DlPaint().setAntiAlias(true).setColor(DlColor::kCyan()));
 
   builder.Restore();
 
@@ -427,6 +442,7 @@ TEST_P(DlGoldenTest, BaselineHE) {
                       impeller::Scalar scale) -> sk_sp<DisplayList> {
     DisplayListBuilder builder;
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
     builder.Scale(scale, scale);
@@ -468,6 +484,7 @@ TEST_P(DlGoldenTest, MaintainsSpace) {
     {
       DisplayListBuilder builder;
       DlPaint paint;
+      paint.setAntiAlias(true);
       paint.setColor(DlColor::ARGB(1, 0, 0, 0));
       builder.DrawPaint(paint);
       builder.Scale(scale, scale);
@@ -537,6 +554,7 @@ TEST_P(DlGoldenTest, Subpixel) {
   auto callback = [&](Scalar offset_x) -> sk_sp<DisplayList> {
     DisplayListBuilder builder;
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
     EXPECT_TRUE(RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
@@ -578,6 +596,7 @@ TEST_P(DlGoldenTest, SubpixelScaled) {
     DisplayListBuilder builder;
     builder.Scale(scalar, scalar);
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
     EXPECT_TRUE(RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
@@ -620,6 +639,7 @@ TEST_P(DlGoldenTest, SubpixelScaledTranslated) {
     DisplayListBuilder builder;
     builder.Scale(scalar, scalar);
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
     builder.Translate(offset_x, 180);
@@ -724,10 +744,12 @@ TEST_P(DlGoldenTest, StackedOffscreenAdvancedBlendsDoNotResample) {
 
     // A backdrop with a hard vertical edge for the blends to resample.
     DlPaint backdrop;
+    backdrop.setAntiAlias(true);
     backdrop.setColor(DlColor(0xFFA0A0A0));
     canvas->DrawRect(DlRect::MakeLTRB(750, 0, 5120, 3840), backdrop);
 
     DlPaint blend;
+    blend.setAntiAlias(true);
     blend.setColor(DlColor(0xFF808080));
     blend.setBlendMode(DlBlendMode::kLighten);
     for (int i = 0; i < blend_count; ++i) {
@@ -790,11 +812,13 @@ TEST_P(DlGoldenTest, OffscreenAdvancedBlendMatchesFramebufferFetch) {
     builder.DrawColor(DlColor(0xFF404040), DlBlendMode::kSrcOver);
     builder.Scale(scale, scale);
     DlPaint backdrop;
+    backdrop.setAntiAlias(true);
     backdrop.setColor(DlColor(0xFFA0A0A0));
     builder.DrawRect(
         DlRect::MakeLTRB(300 / scale, 0, 2048 / scale, 1536 / scale), backdrop);
     // A blend that reaches into the last column and row of the pass.
     DlPaint blend;
+    blend.setAntiAlias(true);
     blend.setColor(DlColor(0xFF20C020));
     blend.setBlendMode(DlBlendMode::kLighten);
     builder.DrawRect(DlRect::MakeLTRB(100 / scale, 100 / scale, 2047.5f / scale,

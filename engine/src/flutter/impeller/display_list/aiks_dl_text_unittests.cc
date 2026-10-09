@@ -70,6 +70,7 @@ bool RenderTextInCanvasSkia(
     std::map<std::string, sk_sp<SkTypeface>>* typeface_cache = nullptr) {
   // Draw the baseline.
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kAqua().withAlpha(255 * 0.25));
   canvas.DrawRect(
       DlRect::MakeXYWH(options.position.x - 50, options.position.y, 900, 10),
@@ -121,6 +122,7 @@ bool RenderTextInCanvasSkia(
   auto frame = MakeTextFrameFromTextBlobSkia(blob);
 
   DlPaint text_paint;
+  text_paint.setAntiAlias(true);
   text_paint.setColor(options.color);
   text_paint.setMaskFilter(options.filter);
   text_paint.setStrokeWidth(options.stroke_width);
@@ -135,6 +137,7 @@ TEST_P(AiksTest, CanRenderTextFrame) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
   ASSERT_TRUE(RenderTextInCanvasSkia(
@@ -148,6 +151,7 @@ TEST_P(AiksTest, CanRenderTextFrameWithInvertedTransform) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
   builder.Translate(1000, 0);
@@ -164,6 +168,7 @@ TEST_P(AiksTest, CanRenderStrokedTextFrame) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -180,6 +185,7 @@ TEST_P(AiksTest, CanRenderTextStrokeWidth) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -196,6 +202,7 @@ TEST_P(AiksTest, CanRenderTextFrameWithHalfScaling) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
   builder.Scale(0.5, 0.5);
@@ -210,6 +217,7 @@ TEST_P(AiksTest, CanRenderTextFrameWithHalfScaling) {
 TEST_P(AiksTest, ScaledK) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
   for (int i = 0; i < 6; ++i) {
@@ -240,6 +248,7 @@ TEST_P(AiksTest, MassiveScaleConvertToPath) {
 
     DisplayListBuilder builder;
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
     builder.DrawPaint(paint);
 
@@ -271,6 +280,7 @@ TEST_P(AiksTest, CanRenderTextFrameWithScalingOverflow) {
     DisplayListBuilder builder;
     builder.Scale(GetContentScale().x, GetContentScale().y);
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
     builder.DrawPaint(paint);
     builder.Scale(scale, scale);
@@ -298,6 +308,7 @@ TEST_P(AiksTest, CanRenderTextFrameWithFractionScaling) {
 
     DisplayListBuilder builder;
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
     builder.DrawPaint(paint);
     Scalar scale = 2.625 + fine_scale;
@@ -330,7 +341,8 @@ TEST_P(AiksTest, TextRotated180Degrees) {
     }
     DisplayListBuilder builder;
     builder.Scale(GetContentScale().x, GetContentScale().y);
-    builder.DrawPaint(DlPaint().setColor(DlColor(0xffffeeff)));
+    builder.DrawPaint(
+        DlPaint().setAntiAlias(true).setColor(DlColor(0xffffeeff)));
 
     builder.Save();
     DlPoint pivot = Point(fpivot[0], fpivot[1]);
@@ -400,6 +412,7 @@ TEST_P(AiksTest, CanRenderItalicizedText) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -420,6 +433,7 @@ TEST_P(AiksTest, CanRenderEmojiTextFrame) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -433,6 +447,7 @@ TEST_P(AiksTest, CanRenderEmojiTextFrameWithBlur) {
 
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -448,6 +463,7 @@ TEST_P(AiksTest, CanRenderEmojiTextFrameWithAlpha) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -461,6 +477,7 @@ TEST_P(AiksTest, CanRenderTextInSaveLayer) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(0.1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -496,6 +513,7 @@ TEST_P(AiksTest, CanRenderTextOutsideBoundaries) {
   SkFont sk_font(font_mgr->makeFromData(mapping), font_size);
 
   DlPaint text_paint;
+  text_paint.setAntiAlias(true);
   text_paint.setColor(DlColor::kBlue().withAlpha(255 * 0.8));
 
   struct {
@@ -537,6 +555,7 @@ TEST_P(AiksTest, TextRotated) {
 
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(0.1, 0.1, 0.1, 1.0));
   builder.DrawPaint(paint);
 
@@ -577,6 +596,7 @@ TEST_P(AiksTest, DrawScaledTextWithPerspectiveSaveLayer) {
                   Matrix::MakeRotationY({Degrees{10}});
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   DlRect window_bounds =
       DlRect::MakeXYWH(0, 0, GetWindowSize().width, GetWindowSize().height);
   // Note: bounds were not needed by the AIKS version, which may indicate a bug.
@@ -597,6 +617,7 @@ TEST_P(AiksTest, CanRenderTextWithLargePerspectiveTransform) {
   DisplayListBuilder builder;
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   builder.SaveLayer(std::nullopt, &save_paint);
   builder.Transform(Matrix(2000, 0, 0, 0,   //
                            0, 2000, 0, 0,   //
@@ -623,6 +644,7 @@ TEST_P(AiksTest, CanRenderTextWithPerspectiveTransformInSublist) {
                                   0.0, 0.002, 0.0, 1.0);
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   DlRect window_bounds =
       DlRect::MakeXYWH(0, 0, GetWindowSize().width, GetWindowSize().height);
   builder.SaveLayer(window_bounds, &save_paint);
@@ -645,6 +667,7 @@ TEST_P(AiksTest, TextForegroundShaderWithTransform) {
   SkFont sk_font(font_mgr->makeFromData(mapping), font_size);
 
   DlPaint text_paint;
+  text_paint.setAntiAlias(true);
   text_paint.setColor(DlColor::kBlue());
 
   std::vector<DlColor> colors = {DlColor::RGBA(0.9568, 0.2627, 0.2118, 1.0),
@@ -679,6 +702,7 @@ TEST_P(AiksTest, DifferenceClipsMustRenderIdenticallyAcrossBackends) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   DlColor clear_color(1.0, 0.5, 0.5, 0.5, DlColorSpace::kSRGB);
   paint.setColor(clear_color);
   builder.DrawPaint(paint);
@@ -815,6 +839,7 @@ TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
 TEST_P(AiksTest, CanRenderTextFrameWithThinLightAndDarkColors) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -841,6 +866,7 @@ TEST_P(AiksTest, CanRenderTextFrameWithThinLightAndDarkColors) {
 
   // Render dark text on a light background
   DlPaint dart_text_background_paint;
+  dart_text_background_paint.setAntiAlias(true);
   dart_text_background_paint.setColor(DlColor::ARGB(1, 0.9, 0.9, 0.9));
   builder.DrawRect(DlRect::MakeXYWH(50, 250, 900, 100),
                    dart_text_background_paint);
@@ -858,6 +884,7 @@ TEST_P(AiksTest, TextWithShadowCache) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -888,6 +915,7 @@ TEST_P(AiksTest, MultipleTextWithShadowCache) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -921,6 +949,7 @@ TEST_P(AiksTest, DuplicateTextWithShadowCache) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -1002,6 +1031,7 @@ TEST_P(AiksTest, SingleGlyphTextShadowCache) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -1042,6 +1072,7 @@ TEST_P(AiksTest, MultipleColorWithShadowCache) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kWhite());
   builder.DrawPaint(paint);
 
@@ -1080,6 +1111,7 @@ TEST_P(AiksTest, SingleIconShadowTest) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -1119,6 +1151,7 @@ TEST_P(AiksTest, SingleIconShadowTest) {
 TEST_P(AiksTest, VarietyOfTextScalesShowingRasterAndPath) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
   builder.Scale(GetContentScale().x, GetContentScale().y);
@@ -1174,14 +1207,14 @@ void DrawTextFramesMultipleScalesWithReuse(AiksTest* test,
   builder.Translate(100, 100);
   builder.Scale(first_scale, first_scale);
   builder.DrawText(DlTextImpeller::Make(reuse_frame), 0, 0,
-                   DlPaint(DlColor::kBlue()));
+                   DlPaint(DlColor::kBlue()).setAntiAlias(true));
   builder.Restore();
 
   builder.Save();
   builder.Translate(400, 100);
   builder.Scale(second_scale, second_scale);
   builder.DrawText(DlTextImpeller::Make(reuse_frame), 0, 0,
-                   DlPaint(DlColor::kPurple()));
+                   DlPaint(DlColor::kPurple()).setAntiAlias(true));
   builder.Restore();
 
   builder.Save();
@@ -1190,7 +1223,7 @@ void DrawTextFramesMultipleScalesWithReuse(AiksTest* test,
   std::shared_ptr<TextFrame> single_use_frame1 =
       MakeDefaultTextFrame("Hi", 20.0f);
   builder.DrawText(DlTextImpeller::Make(single_use_frame1), 0, 0,
-                   DlPaint(DlColor::kBlue()));
+                   DlPaint(DlColor::kBlue()).setAntiAlias(true));
   builder.Restore();
 
   builder.Save();
@@ -1199,7 +1232,7 @@ void DrawTextFramesMultipleScalesWithReuse(AiksTest* test,
   std::shared_ptr<TextFrame> single_use_frame2 =
       MakeDefaultTextFrame("Hi", 20.0f);
   builder.DrawText(DlTextImpeller::Make(single_use_frame2), 0, 0,
-                   DlPaint(DlColor::kPurple()));
+                   DlPaint(DlColor::kPurple()).setAntiAlias(true));
   builder.Restore();
 
   ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
@@ -1225,6 +1258,7 @@ TEST_P(AiksTest, TextWithNonUniformScale) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
 
@@ -1289,10 +1323,12 @@ TEST_P(AiksTest, TextGammaCorrectionGoldenTest) {
     DisplayListBuilder builder;
 
     DlPaint bg_paint;
+    bg_paint.setAntiAlias(true);
     bg_paint.setColor(DlColor::ARGB(1.0, 0.1, 0.1, 0.1));
     builder.DrawPaint(bg_paint);
 
     DlPaint text_paint;
+    text_paint.setAntiAlias(true);
     text_paint.setColor(DlColor::kWhite());
 
     builder.DrawText(/*text=*/DlTextImpeller::Make(text_frame_corrected),
@@ -1320,10 +1356,10 @@ TEST_P(AiksTest, TextWithShadowAndPosition) {
 
   auto frame = MakeDefaultTextFrame("Hi", 25.0f);
   auto text = DlTextImpeller::Make(frame);
-  DlPaint paint = DlPaint().setColor(DlColor::kMagenta());
-  DlPaint shadow_paint_ctm = DlPaint().setMaskFilter(
+  DlPaint paint = DlPaint().setAntiAlias(true).setColor(DlColor::kMagenta());
+  DlPaint shadow_paint_ctm = DlPaint().setAntiAlias(true).setMaskFilter(
       DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 5.0f, true));
-  DlPaint shadow_paint_no_ctm = DlPaint().setMaskFilter(
+  DlPaint shadow_paint_no_ctm = DlPaint().setAntiAlias(true).setMaskFilter(
       DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 5.0f, false));
 
   builder.Translate(100, 100);
@@ -1346,8 +1382,8 @@ TEST_P(AiksTest, SingleGlyphTextWithShadowAndPosition) {
 
   std::shared_ptr<TextFrame> frame = MakeDefaultTextFrame("X", 25.0f);
 
-  DlPaint paint = DlPaint().setColor(DlColor::kMagenta());
-  DlPaint shadow_paint_ctm = DlPaint().setMaskFilter(
+  DlPaint paint = DlPaint().setAntiAlias(true).setColor(DlColor::kMagenta());
+  DlPaint shadow_paint_ctm = DlPaint().setAntiAlias(true).setMaskFilter(
       DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 5.0f, true));
 
   builder.Translate(100, 100);

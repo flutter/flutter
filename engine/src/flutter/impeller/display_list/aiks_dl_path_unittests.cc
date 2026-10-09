@@ -41,6 +41,7 @@ TEST_P(AiksTest, RotateColorFilteredPath) {
       DlColorFilter::MakeBlend(DlColor::kAliceBlue(), DlBlendMode::kSrcIn);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setStrokeWidth(15.0);
   paint.setStrokeCap(DlStrokeCap::kRound);
   paint.setStrokeJoin(DlStrokeJoin::kRound);
@@ -58,6 +59,7 @@ TEST_P(AiksTest, RotateColorFilteredPath) {
 TEST_P(AiksTest, CanRenderStrokes) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setStrokeWidth(20);
   paint.setDrawStyle(DlDrawStyle::kStroke);
@@ -71,6 +73,7 @@ TEST_P(AiksTest, CanRenderStrokes) {
 TEST_P(AiksTest, CanRenderCurvedStrokes) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setStrokeWidth(25);
   paint.setDrawStyle(DlDrawStyle::kStroke);
@@ -83,6 +86,7 @@ TEST_P(AiksTest, CanRenderCurvedStrokes) {
 TEST_P(AiksTest, CanRenderThickCurvedStrokes) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setStrokeWidth(100);
   paint.setDrawStyle(DlDrawStyle::kStroke);
@@ -95,6 +99,7 @@ TEST_P(AiksTest, CanRenderThickCurvedStrokes) {
 TEST_P(AiksTest, CanRenderThinCurvedStrokes) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setStrokeWidth(0.01);
   paint.setDrawStyle(DlDrawStyle::kStroke);
@@ -107,6 +112,7 @@ TEST_P(AiksTest, CanRenderThinCurvedStrokes) {
 TEST_P(AiksTest, CanRenderStrokePathThatEndsAtSharpTurn) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setStrokeWidth(200);
   paint.setDrawStyle(DlDrawStyle::kStroke);
@@ -123,6 +129,7 @@ TEST_P(AiksTest, CanRenderStrokePathWithCubicLine) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setStrokeWidth(20);
   paint.setDrawStyle(DlDrawStyle::kStroke);
@@ -140,6 +147,7 @@ TEST_P(AiksTest, CanRenderQuadraticStrokeWithInstantTurn) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setStrokeWidth(50);
   paint.setDrawStyle(DlDrawStyle::kStroke);
@@ -161,10 +169,12 @@ TEST_P(AiksTest, CanRenderFilledConicPaths) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setDrawStyle(DlDrawStyle::kFill);
 
   DlPaint reference_paint;
+  reference_paint.setAntiAlias(true);
   reference_paint.setColor(DlColor::kGreen());
   reference_paint.setDrawStyle(DlDrawStyle::kFill);
 
@@ -211,6 +221,7 @@ TEST_P(AiksTest, CanRenderStrokedConicPaths) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setStrokeWidth(10);
   paint.setDrawStyle(DlDrawStyle::kStroke);
@@ -218,6 +229,7 @@ TEST_P(AiksTest, CanRenderStrokedConicPaths) {
   paint.setStrokeJoin(DlStrokeJoin::kRound);
 
   DlPaint reference_paint;
+  reference_paint.setAntiAlias(true);
   reference_paint.setColor(DlColor::kGreen());
   reference_paint.setStrokeWidth(10);
   reference_paint.setDrawStyle(DlDrawStyle::kStroke);
@@ -295,9 +307,11 @@ static void DrawLinesTest(AiksTest* test, const DrawLinesCallback& draw_fn) {
     // are testing specific line widths relative to a device pixel size.
 
     builder.DrawPaint(
-        DlPaint(invert_colors ? DlColor(0xffeeeeee) : DlColor(0xff111111)));
+        DlPaint(invert_colors ? DlColor(0xffeeeeee) : DlColor(0xff111111))
+            .setAntiAlias(true));
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(invert_colors ? DlColor::kBlack() : DlColor::kWhite());
 
     std::vector<Scalar> widths = {0.0f, 0.3f, 1.0f};
@@ -395,10 +409,12 @@ TEST_P(AiksTest, CanRenderTightConicPath) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setDrawStyle(DlDrawStyle::kFill);
 
   DlPaint reference_paint;
+  reference_paint.setAntiAlias(true);
   reference_paint.setColor(DlColor::kGreen());
   reference_paint.setDrawStyle(DlDrawStyle::kFill);
 
@@ -420,6 +436,7 @@ TEST_P(AiksTest, CanRenderTightConicPath) {
   reference_builder.LineTo(component.p2);
 
   DlPaint line_paint;
+  line_paint.setAntiAlias(true);
   line_paint.setColor(DlColor::kYellow());
   line_paint.setDrawStyle(DlDrawStyle::kStroke);
   line_paint.setStrokeWidth(1.0f);
@@ -443,6 +460,7 @@ TEST_P(AiksTest, CanRenderDifferencePaths) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
 
   RoundingRadii radii = {
@@ -486,6 +504,7 @@ TEST_P(AiksTest, CanDrawAnOpenPath) {
   path_builder.LineTo(DlPoint(100, 50));
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(10);
@@ -508,6 +527,7 @@ TEST_P(AiksTest, CanDrawAnOpenPathThatIsntARect) {
   path_builder.Close();
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(10);
@@ -535,6 +555,7 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
     DisplayListBuilder builder;
     builder.Scale(GetContentScale().x, GetContentScale().y);
     DlPaint paint;
+    paint.setAntiAlias(true);
 
     paint.setColor(DlColor::kWhite());
     builder.DrawPaint(paint);
@@ -602,6 +623,7 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
   paint.setStrokeWidth(10);
 
@@ -672,6 +694,7 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
 TEST_P(AiksTest, DrawRectStrokesRenderCorrectly) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(10);
@@ -685,6 +708,7 @@ TEST_P(AiksTest, DrawRectStrokesRenderCorrectly) {
 TEST_P(AiksTest, DrawRectStrokesWithBevelJoinRenderCorrectly) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(10);
@@ -718,6 +742,7 @@ TEST_P(AiksTest, CanDrawMultiContourConvexPath) {
 
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed().withAlpha(102));
   builder.DrawPath(path, paint);
 
@@ -729,6 +754,7 @@ TEST_P(AiksTest, ArcWithZeroSweepAndBlur) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
 
   std::vector<DlColor> colors = {DlColor::RGBA(1.0, 0.0, 0.0, 1.0),
@@ -752,6 +778,7 @@ TEST_P(AiksTest, ArcWithZeroSweepAndBlur) {
 TEST_P(AiksTest, CanRenderClips) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kFuchsia());
 
   builder.ClipPath(DlPath::MakeRect(DlRect::MakeXYWH(0, 0, 500, 500)));
@@ -777,14 +804,17 @@ TEST_P(AiksTest, FatStrokeArc) {
 
     DisplayListBuilder builder;
     DlPaint grey_paint;
+    grey_paint.setAntiAlias(true);
     grey_paint.setColor(DlColor(0xff111111));
     builder.DrawPaint(grey_paint);
 
     DlPaint white_paint;
+    white_paint.setAntiAlias(true);
     white_paint.setColor(DlColor::kWhite());
     white_paint.setStrokeWidth(stroke_width);
     white_paint.setDrawStyle(DlDrawStyle::kStroke);
     DlPaint red_paint;
+    red_paint.setAntiAlias(true);
     red_paint.setColor(DlColor::kRed());
 
     Rect rect = Rect::MakeXYWH(100, 100, 100, aspect * 100);
@@ -803,6 +833,7 @@ TEST_P(AiksTest, CanRenderOverlappingMultiContourPath) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
 
   RoundingRadii radii = {
@@ -853,6 +884,7 @@ TEST_P(AiksTest, TwoContourPathWithSinglePointContour) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(15.0);
@@ -873,6 +905,7 @@ TEST_P(AiksTest, TwoContourPathWithConnectingLines) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kRed());
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(15.0);
@@ -914,6 +947,7 @@ TEST_P(AiksTest, StrokeCapsAndJoins) {
     DlPath path = path_builder.TakePath();
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kRed());
     paint.setDrawStyle(DlDrawStyle::kStroke);
     paint.setStrokeWidth(20.0f);
@@ -971,6 +1005,7 @@ TEST_P(AiksTest, StrokeCapsAndJoins) {
     DlPath path = path_builder.TakePath();
 
     DlPaint paint;
+    paint.setAntiAlias(true);
 
     paint.setColor(DlColor::kRed());
     paint.setDrawStyle(DlDrawStyle::kStroke);
@@ -994,6 +1029,7 @@ TEST_P(AiksTest, StrokeCapsAndJoins) {
 TEST_P(AiksTest, BlurredCircleWithStrokeWidth) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kGreen());
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(30);
