@@ -88,11 +88,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
     return android_context_;
   }
 
-  std::shared_ptr<PlatformMessageHandler> GetPlatformMessageHandler()
-      const override {
-    return platform_message_handler_;
-  }
-
   /// @brief Whether the SurfaceControl based swapchain is enabled and active.
   bool IsSurfaceControlEnabled() const;
 
@@ -113,7 +108,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   std::shared_ptr<AndroidSurfaceFactoryImpl> surface_factory_;
 
   std::unique_ptr<AndroidSurface> android_surface_;
-  std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
   bool android_meets_hcpp_criteria_ = false;
 
   // |PlatformView|

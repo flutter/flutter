@@ -205,6 +205,7 @@ using SurfaceWindowChangedFn = void (*)(JNIEnv*, jobject, jlong, jobject);
 using SurfaceChangedFn = void (*)(JNIEnv*, jobject, jlong, jint, jint);
 using SurfaceDestroyedFn = void (*)(JNIEnv*, jobject, jlong);
 using UpdateDisplayMetricsFn = void (*)(JNIEnv*, jobject, jlong);
+using NotifyLowMemoryWarningFn = void (*)(JNIEnv*, jobject, jlong);
 using SetViewportMetricsFn = void (*)(JNIEnv*,
                                       jobject,
                                       jlong,
@@ -1720,6 +1721,104 @@ TEST_F(PlatformViewAndroidJNIImplTest,
       std::make_unique<flutter::PlatformMessage>(
           "flutter/test_embedder_forward", nullptr));
   EXPECT_EQ(captured_channel, "flutter/test_embedder_forward");
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest, NotifyLowMemoryWarningCallsEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto notify_low_memory = reinterpret_cast<NotifyLowMemoryWarningFn>(
+      RegisterNativesAndFind(mock_env, "nativeNotifyLowMemoryWarning"));
+  ASSERT_NE(notify_low_memory, nullptr);
+
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+
+  bool called = false;
+  holder->GetEmbedderApiForTesting().NotifyLowMemoryWarning = MOCK_ENGINE_PROC(
+      NotifyLowMemoryWarning, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_NE(engine, nullptr);
+        called = true;
+        return kSuccess;
+      }));
+
+  // Placeholder JNI caller object for JNI invocation.
+  constexpr intptr_t kFakeJCaller = 123;
+  notify_low_memory(&mock_env, reinterpret_cast<jobject>(kFakeJCaller),
+                    reinterpret_cast<jlong>(holder.get()));
+  EXPECT_TRUE(called);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       ScreenshotCallsEmbedderApiAndFreesScreenshot) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+
+  // Fake RGBA pixel buffer (4 bytes = 1 pixel) returned by the mocked C-API.
+  constexpr uint8_t kFakePixelBytes[] = {0xAA, 0xBB, 0xCC, 0xDD};
+  constexpr size_t kFakeScreenshotWidth = 640;
+  constexpr size_t kFakeScreenshotHeight = 480;
+  bool screenshot_called = false;
+  bool free_screenshot_called = false;
+  FlutterScreenshotType captured_type = kFlutterScreenshotTypeSkiaPicture;
+  bool captured_base64_encode = false;
+
+  holder->GetEmbedderApiForTesting().Screenshot = MOCK_ENGINE_PROC(
+      Screenshot, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                       const FlutterScreenshotRequest* request,
+                       FlutterScreenshot* screenshot_out) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(request, nullptr);
+        EXPECT_EQ(request->struct_size, sizeof(FlutterScreenshotRequest));
+        captured_type = request->type;
+        captured_base64_encode = request->base64_encode;
+        EXPECT_NE(screenshot_out, nullptr);
+        EXPECT_EQ(screenshot_out->struct_size, sizeof(FlutterScreenshot));
+        screenshot_out->data = kFakePixelBytes;
+        screenshot_out->data_length = sizeof(kFakePixelBytes);
+        screenshot_out->width = kFakeScreenshotWidth;
+        screenshot_out->height = kFakeScreenshotHeight;
+        screenshot_out->format = kFlutterScreenshotFormatR8G8B8A8UNormInt;
+        screenshot_out->format_description =
+            "ScreenshotType::UncompressedImage";
+        screenshot_called = true;
+        return kSuccess;
+      }));
+
+  holder->GetEmbedderApiForTesting().FreeScreenshot =
+      MOCK_ENGINE_PROC(FreeScreenshot, ([&](FlutterScreenshot* screenshot) {
+                         EXPECT_NE(screenshot, nullptr);
+                         EXPECT_EQ(screenshot->data, kFakePixelBytes);
+                         free_screenshot_called = true;
+                         return kSuccess;
+                       }));
+
+  Rasterizer::Screenshot result = holder->Screenshot(
+      Rasterizer::ScreenshotType::UncompressedImage, /*base64_encode=*/true);
+
+  EXPECT_TRUE(screenshot_called);
+  EXPECT_TRUE(free_screenshot_called);
+  EXPECT_EQ(captured_type, kFlutterScreenshotTypeUncompressedImage);
+  EXPECT_TRUE(captured_base64_encode);
+  ASSERT_NE(result.data, nullptr);
+  ASSERT_EQ(result.data->size(), sizeof(kFakePixelBytes));
+  EXPECT_EQ(std::memcmp(result.data->bytes(), kFakePixelBytes,
+                        sizeof(kFakePixelBytes)),
+            0);
+  EXPECT_EQ(result.frame_size.width,
+            static_cast<int32_t>(kFakeScreenshotWidth));
+  EXPECT_EQ(result.frame_size.height,
+            static_cast<int32_t>(kFakeScreenshotHeight));
+  EXPECT_EQ(result.format, "ScreenshotType::UncompressedImage");
+  EXPECT_EQ(result.pixel_format,
+            Rasterizer::ScreenshotFormat::kR8G8B8A8UNormInt);
 }
 
 }  // namespace testing

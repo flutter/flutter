@@ -612,14 +612,29 @@ AndroidShellHolder::AndroidShellHolder(
   }
 
   if (engine_) {
-    GetShell(engine_.get())
-        .GetDartVM()
-        ->GetConcurrentMessageLoop()
-        ->PostTaskToAllWorkers([]() {
-          if (::setpriority(PRIO_PROCESS, gettid(), 1) != 0) {
-            FML_LOG(ERROR) << "Failed to set Workers task runner priority";
-          }
-        });
+    // Concurrent worker threads are raw std::threads without an
+    // fml::MessageLoop, whereas the dedicated IO thread (also tagged
+    // kFlutterNativeThreadTypeWorker) always has an initialized
+    // fml::MessageLoop.
+    constexpr int kWorkerThreadPriority = 1;
+    FlutterEngineResult priority_result =
+        embedder_api_.PostCallbackOnAllNativeThreads(
+            engine_.get(),
+            [](FlutterNativeThreadType type, void* /*baton*/) {
+              if (type == kFlutterNativeThreadTypeWorker &&
+                  !fml::MessageLoop::IsInitializedForCurrentThread()) {
+                if (::setpriority(PRIO_PROCESS, gettid(),
+                                  kWorkerThreadPriority) != 0) {
+                  FML_LOG(ERROR)
+                      << "Failed to set Workers task runner priority";
+                }
+              }
+            },
+            nullptr);
+    if (priority_result != kSuccess) {
+      FML_LOG(ERROR) << "FlutterEnginePostCallbackOnAllNativeThreads failed: "
+                     << priority_result;
+    }
 
     GetShell(engine_.get())
         .RegisterImageDecoder(
@@ -805,7 +820,61 @@ Rasterizer::Screenshot AndroidShellHolder::Screenshot(
   if (!IsValid()) {
     return {nullptr, DlISize(), "", Rasterizer::ScreenshotFormat::kUnknown};
   }
-  return GetShell(engine_.get()).Screenshot(type, base64_encode);
+  FlutterScreenshotType screenshot_type;
+  switch (type) {
+    case Rasterizer::ScreenshotType::SkiaPicture:
+      screenshot_type = kFlutterScreenshotTypeSkiaPicture;
+      break;
+    case Rasterizer::ScreenshotType::UncompressedImage:
+      screenshot_type = kFlutterScreenshotTypeUncompressedImage;
+      break;
+    case Rasterizer::ScreenshotType::CompressedImage:
+      screenshot_type = kFlutterScreenshotTypeCompressedImage;
+      break;
+    case Rasterizer::ScreenshotType::SurfaceData:
+      screenshot_type = kFlutterScreenshotTypeSurfaceData;
+      break;
+  }
+  FlutterScreenshotRequest request = {
+      .struct_size = sizeof(FlutterScreenshotRequest),
+      .type = screenshot_type,
+      .base64_encode = base64_encode,
+  };
+  FlutterScreenshot c_screenshot = {
+      .struct_size = sizeof(FlutterScreenshot),
+  };
+  FlutterEngineResult result =
+      embedder_api_.Screenshot(engine_.get(), &request, &c_screenshot);
+  if (result != kSuccess) {
+    return {nullptr, DlISize(), "", Rasterizer::ScreenshotFormat::kUnknown};
+  }
+  sk_sp<SkData> data =
+      c_screenshot.data != nullptr
+          ? SkData::MakeWithCopy(c_screenshot.data, c_screenshot.data_length)
+          : nullptr;
+  DlISize frame_size(static_cast<int32_t>(c_screenshot.width),
+                     static_cast<int32_t>(c_screenshot.height));
+  std::string format = c_screenshot.format_description != nullptr
+                           ? c_screenshot.format_description
+                           : "";
+  Rasterizer::ScreenshotFormat pixel_format =
+      Rasterizer::ScreenshotFormat::kUnknown;
+  switch (c_screenshot.format) {
+    case kFlutterScreenshotFormatUnknown:
+      pixel_format = Rasterizer::ScreenshotFormat::kUnknown;
+      break;
+    case kFlutterScreenshotFormatR8G8B8A8UNormInt:
+      pixel_format = Rasterizer::ScreenshotFormat::kR8G8B8A8UNormInt;
+      break;
+    case kFlutterScreenshotFormatB8G8R8A8UNormInt:
+      pixel_format = Rasterizer::ScreenshotFormat::kB8G8R8A8UNormInt;
+      break;
+    case kFlutterScreenshotFormatR16G16B16A16Float:
+      pixel_format = Rasterizer::ScreenshotFormat::kR16G16B16A16Float;
+      break;
+  }
+  embedder_api_.FreeScreenshot(&c_screenshot);
+  return {std::move(data), frame_size, std::move(format), pixel_format};
 }
 
 fml::WeakPtr<PlatformViewAndroid> AndroidShellHolder::GetPlatformView() {
@@ -815,7 +884,11 @@ fml::WeakPtr<PlatformViewAndroid> AndroidShellHolder::GetPlatformView() {
 
 void AndroidShellHolder::NotifyLowMemoryWarning() {
   FML_DCHECK(engine_);
-  GetShell(engine_.get()).NotifyLowMemoryWarning();
+  FlutterEngineResult result =
+      embedder_api_.NotifyLowMemoryWarning(engine_.get());
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineNotifyLowMemoryWarning failed: " << result;
+  }
 }
 
 const std::shared_ptr<PlatformMessageHandler>&

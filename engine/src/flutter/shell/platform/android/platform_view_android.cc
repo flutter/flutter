@@ -186,10 +186,10 @@ PlatformViewAndroid::PlatformViewAndroid(
           delegate,
           task_runners,
           WithPlatformMessageCallback(std::move(platform_dispatch_table),
-                                      platform_message_handler)),
+                                      platform_message_handler),
+          platform_message_handler),
       jni_facade_(jni_facade),
-      android_context_(android_context),
-      platform_message_handler_(std::move(platform_message_handler)) {
+      android_context_(android_context) {
   if (android_context_) {
     FML_CHECK(android_context_->IsValid())
         << "Could not create surface from invalid Android context.";
