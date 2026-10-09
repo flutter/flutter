@@ -1,0 +1,19 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine (GN's `//flutter`).
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+# config("config") in BUILD.gn: the two include roots engine code is written
+# against -- engine/src ("flutter/fml/...") and this directory
+# ("impeller/...", "fml/..."). Every engine library depends on it; the
+# accompanying -Wunreachable-code is in FLUTTER_COPTS (build/bazel/copts.bzl),
+# since compiler flags do not propagate through dependencies.
+cc_library(
+    name = "config",
+    includes = ["."],
+    visibility = ["//visibility:public"],
+    deps = ["//engine/src:include_root"],
+)

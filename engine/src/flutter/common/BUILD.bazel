@@ -1,0 +1,65 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Build-wide engine configuration: the Bazel side of config.gni.
+
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# GN's `flutter_runtime_mode` argument. Orthogonal to Bazel's compilation
+# mode, exactly as in GN: host_debug_unopt is `-c dbg`, host_debug is
+# `-c opt`, and host_release is `-c opt --//engine/src/flutter/common:runtime_mode=release`.
+string_flag(
+    name = "runtime_mode",
+    build_setting_default = "debug",
+    values = [
+        "debug",
+        "profile",
+        "release",
+        "jit_release",
+    ],
+)
+
+[
+    config_setting(
+        name = "runtime_mode_" + mode,
+        flag_values = {":runtime_mode": mode},
+    )
+    for mode in [
+        "debug",
+        "profile",
+        "release",
+        "jit_release",
+    ]
+]
+
+# config("flutter_config"): `feature_defines_list` from config.gni, which
+# every engine library propagates to its dependents through fml.
+cc_library(
+    name = "flutter_config",
+    defines = [
+        "FLUTTER_RUNTIME_MODE_DEBUG=1",
+        "FLUTTER_RUNTIME_MODE_PROFILE=2",
+        "FLUTTER_RUNTIME_MODE_RELEASE=3",
+        "FLUTTER_RUNTIME_MODE_JIT_RELEASE=4",
+        "DART_LEGACY_API=[[deprecated]]",
+    ] + select({
+        ":runtime_mode_debug": [
+            "FLUTTER_RUNTIME_MODE=1",
+            "FLUTTER_JIT_RUNTIME=1",
+        ],
+        ":runtime_mode_profile": ["FLUTTER_RUNTIME_MODE=2"],
+        ":runtime_mode_release": [
+            "FLUTTER_RUNTIME_MODE=3",
+            "FLUTTER_RELEASE=1",
+        ],
+        ":runtime_mode_jit_release": [
+            "FLUTTER_RUNTIME_MODE=4",
+            "FLUTTER_RELEASE=1",
+            "FLUTTER_JIT_RUNTIME=1",
+        ],
+    }),
+)
