@@ -4,9 +4,11 @@
 
 import '../application_package.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
 import '../template.dart';
 import '../xcode_project.dart';
 import 'plist_parser.dart';
@@ -19,31 +21,37 @@ abstract class IOSApp extends ApplicationPackage {
   IOSApp({required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new IOSApp from an existing app bundle or IPA.
-  static IOSApp? fromPrebuiltApp(FileSystemEntity applicationBinary) {
-    final FileSystemEntityType entityType = globals.fs.typeSync(applicationBinary.path);
+  static IOSApp? fromPrebuiltApp(
+    FileSystemEntity applicationBinary, {
+    required FileSystem fileSystem,
+    required Logger logger,
+    required OperatingSystemUtils operatingSystemUtils,
+    required PlistParser plistParser,
+  }) {
+    final FileSystemEntityType entityType = fileSystem.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
-      globals.printError(
+      logger.printError(
         'File "${applicationBinary.path}" does not exist. Use an app bundle or an ipa.',
       );
       return null;
     }
     Directory uncompressedBundle;
     if (entityType == FileSystemEntityType.directory) {
-      final Directory directory = globals.fs.directory(applicationBinary);
+      final Directory directory = fileSystem.directory(applicationBinary);
       if (!_isBundleDirectory(directory)) {
-        globals.printError('Folder "${applicationBinary.path}" is not an app bundle.');
+        logger.printError('Folder "${applicationBinary.path}" is not an app bundle.');
         return null;
       }
-      uncompressedBundle = globals.fs.directory(applicationBinary);
+      uncompressedBundle = fileSystem.directory(applicationBinary);
     } else {
       // Try to unpack as an ipa.
-      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_app.');
-      globals.os.unzip(globals.fs.file(applicationBinary), tempDir);
-      final Directory payloadDir = globals.fs.directory(
-        globals.fs.path.join(tempDir.path, 'Payload'),
+      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_app.');
+      operatingSystemUtils.unzip(fileSystem.file(applicationBinary), tempDir);
+      final Directory payloadDir = fileSystem.directory(
+        fileSystem.path.join(tempDir.path, 'Payload'),
       );
       if (!payloadDir.existsSync()) {
-        globals.printError('Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.');
+        logger.printError('Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.');
         return null;
       }
       try {
@@ -51,34 +59,40 @@ abstract class IOSApp extends ApplicationPackage {
           _isBundleDirectory,
         );
       } on StateError {
-        globals.printError('Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
+        logger.printError('Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
         return null;
       }
     }
-    final String plistPath = globals.fs.path.join(uncompressedBundle.path, 'Info.plist');
-    if (!globals.fs.file(plistPath).existsSync()) {
-      globals.printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
+    final String plistPath = fileSystem.path.join(uncompressedBundle.path, 'Info.plist');
+    if (!fileSystem.file(plistPath).existsSync()) {
+      logger.printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
       return null;
     }
-    final String? id = globals.plistParser.getValueFromFile<String>(
+    final String? id = plistParser.getValueFromFile<String>(
       plistPath,
       PlistParser.kCFBundleIdentifierKey,
     );
     if (id == null) {
-      globals.printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
+      logger.printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
       return null;
     }
 
     return PrebuiltIOSApp(
       uncompressedBundle: uncompressedBundle,
-      bundleName: globals.fs.path.basename(uncompressedBundle.path),
+      bundleName: fileSystem.path.basename(uncompressedBundle.path),
       projectBundleId: id,
       applicationPackage: applicationBinary,
     );
   }
 
-  static Future<IOSApp?> fromIosProject(IosProject project, BuildInfo? buildInfo) async {
-    if (!globals.platform.isMacOS) {
+  static Future<IOSApp?> fromIosProject(
+    IosProject project,
+    BuildInfo? buildInfo, {
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+  }) async {
+    if (!platform.isMacOS) {
       return null;
     }
     if (!project.exists) {
@@ -87,14 +101,14 @@ abstract class IOSApp extends ApplicationPackage {
       return null;
     }
     if (!project.xcodeProject.existsSync()) {
-      globals.printError('Expected ios/Runner.xcodeproj but this file is missing.');
+      logger.printError('Expected ios/Runner.xcodeproj but this file is missing.');
       return null;
     }
     if (!project.xcodeProjectInfoFile.existsSync()) {
-      globals.printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
+      logger.printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
       return null;
     }
-    return BuildableIOSApp.fromProject(project, buildInfo);
+    return BuildableIOSApp.fromProject(project, buildInfo, fileSystem: fileSystem, logger: logger);
   }
 
   @override
@@ -110,20 +124,38 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project, String projectBundleId, String? productName)
-    : _appProductName = productName,
-      super(projectBundleId: projectBundleId);
+  BuildableIOSApp(
+    this.project,
+    String projectBundleId,
+    String? productName, {
+    required this._fileSystem,
+    required this._logger,
+  }) : _appProductName = productName,
+       super(projectBundleId: projectBundleId);
 
-  static Future<BuildableIOSApp?> fromProject(IosProject project, BuildInfo? buildInfo) async {
+  static Future<BuildableIOSApp?> fromProject(
+    IosProject project,
+    BuildInfo? buildInfo, {
+    required FileSystem fileSystem,
+    required Logger logger,
+  }) async {
     final String? productName = await project.productName(buildInfo);
     final String? projectBundleId = await project.productBundleIdentifier(buildInfo);
     if (projectBundleId != null) {
-      return BuildableIOSApp(project, projectBundleId, productName);
+      return BuildableIOSApp(
+        project,
+        projectBundleId,
+        productName,
+        fileSystem: fileSystem,
+        logger: logger,
+      );
     }
     return null;
   }
 
   final IosProject project;
+  final FileSystem _fileSystem;
+  final Logger _logger;
 
   final String? _appProductName;
 
@@ -138,18 +170,18 @@ class BuildableIOSApp extends IOSApp {
 
   @override
   Directory get appDeltaDirectory =>
-      globals.fs.directory(globals.fs.path.join(getIosBuildDirectory(), 'app-delta'));
+      _fileSystem.directory(_fileSystem.path.join(getIosBuildDirectory(), 'app-delta'));
 
   // Xcode uses this path for the final archive bundle location,
   // not a top-level output directory.
   // Specifying `build/ios/archive/Runner` will result in `build/ios/archive/Runner.xcarchive`.
   String get archiveBundlePath =>
-      globals.fs.path.join(getIosBuildDirectory(), 'archive', _appProductName ?? 'Runner');
+      _fileSystem.path.join(getIosBuildDirectory(), 'archive', _appProductName ?? 'Runner');
 
   // The output xcarchive bundle path `build/ios/archive/Runner.xcarchive`.
   String get archiveBundleOutputPath => '$archiveBundlePath.xcarchive';
 
-  String get builtInfoPlistPathAfterArchive => globals.fs.path.join(
+  String get builtInfoPlistPathAfterArchive => _fileSystem.path.join(
     archiveBundleOutputPath,
     'Products',
     'Applications',
@@ -173,17 +205,17 @@ class BuildableIOSApp extends IOSApp {
   Future<String> get templateLaunchImageDirNameForImages async =>
       _templateImageAssetDirNameForImages(_launchImageAsset);
 
-  String get ipaOutputPath => globals.fs.path.join(getIosBuildDirectory(), 'ipa');
+  String get ipaOutputPath => _fileSystem.path.join(getIosBuildDirectory(), 'ipa');
 
   String _buildAppPath(String type) {
-    return globals.fs.path.join(getIosBuildDirectory(), type, '$_appProductName.app');
+    return _fileSystem.path.join(getIosBuildDirectory(), type, '$_appProductName.app');
   }
 
   String _projectImageAssetDirName(String asset) =>
-      globals.fs.path.join('ios', 'Runner', 'Assets.xcassets', asset);
+      _fileSystem.path.join('ios', 'Runner', 'Assets.xcassets', asset);
 
   // Template asset's Contents.json file is in flutter_tools, but the actual
-  String _templateImageAssetDirNameForContentsJson(String asset) => globals.fs.path.join(
+  String _templateImageAssetDirNameForContentsJson(String asset) => _fileSystem.path.join(
     Cache.flutterRoot!,
     'packages',
     'flutter_tools',
@@ -195,14 +227,14 @@ class BuildableIOSApp extends IOSApp {
   Future<String> _templateImageAssetDirNameForImages(String asset) async {
     final Directory imageTemplate = await templatePathProvider.imageDirectory(
       null,
-      globals.fs,
-      globals.logger,
+      _fileSystem,
+      _logger,
     );
-    return globals.fs.path.join(imageTemplate.path, _templateImageAssetDirNameSuffix(asset));
+    return _fileSystem.path.join(imageTemplate.path, _templateImageAssetDirNameSuffix(asset));
   }
 
   String _templateImageAssetDirNameSuffix(String asset) =>
-      globals.fs.path.join('app', 'ios.tmpl', 'Runner', 'Assets.xcassets', asset);
+      _fileSystem.path.join('app', 'ios.tmpl', 'Runner', 'Assets.xcassets', asset);
 
   String get _appIconAsset => 'AppIcon.appiconset';
   String get _launchImageAsset => 'LaunchImage.imageset';

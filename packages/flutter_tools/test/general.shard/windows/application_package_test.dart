@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/windows/application_package.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   group('PrebuiltWindowsApp', () {
@@ -19,53 +18,64 @@ void main() {
     late FileSystem fileSystem;
     late BufferLogger logger;
 
-    final overrides = <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      OperatingSystemUtils: () => os,
-      Logger: () => logger,
-    };
-
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       os = FakeOperatingSystemUtils();
       logger = BufferLogger.test();
     });
 
-    testUsingContext('Error on non-existing exe file', () {
-      final windowsApp =
-          WindowsApp.fromPrebuiltApp(fileSystem.file('not_existing.exe')) as PrebuiltWindowsApp?;
+    testWithoutContext('Error on non-existing exe file', () {
+      final windowsApp = WindowsApp.fromPrebuiltApp(
+        fileSystem.file('not_existing.exe'),
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: os,
+      ) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
       expect(logger.errorText, contains('File "not_existing.exe" does not exist.'));
-    }, overrides: overrides);
+    });
 
-    testUsingContext('Success on exe file', () {
+    testWithoutContext('Success on exe file', () {
       fileSystem.file('file.exe').createSync();
       final windowsApp =
-          WindowsApp.fromPrebuiltApp(fileSystem.file('file.exe'))! as PrebuiltWindowsApp;
+          WindowsApp.fromPrebuiltApp(
+                fileSystem.file('file.exe'),
+                fileSystem: fileSystem,
+                logger: logger,
+                operatingSystemUtils: os,
+              )!
+              as PrebuiltWindowsApp;
 
       expect(windowsApp.name, 'file.exe');
-    }, overrides: overrides);
+    });
 
-    testUsingContext('Error on non-existing zip file', () {
-      final windowsApp =
-          WindowsApp.fromPrebuiltApp(fileSystem.file('not_existing.zip')) as PrebuiltWindowsApp?;
+    testWithoutContext('Error on non-existing zip file', () {
+      final windowsApp = WindowsApp.fromPrebuiltApp(
+        fileSystem.file('not_existing.zip'),
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: os,
+      ) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
       expect(logger.errorText, contains('File "not_existing.zip" does not exist.'));
-    }, overrides: overrides);
+    });
 
-    testUsingContext('Bad zipped app, no payload dir', () {
+    testWithoutContext('Bad zipped app, no payload dir', () {
       fileSystem.file('app.zip').createSync();
-      final windowsApp =
-          WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip')) as PrebuiltWindowsApp?;
+      final windowsApp = WindowsApp.fromPrebuiltApp(
+        fileSystem.file('app.zip'),
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: os,
+      ) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
       expect(logger.errorText, contains('Cannot find .exe files in the zip archive.'));
-    }, overrides: overrides);
+    });
 
-    testUsingContext('Bad zipped app, two .exe files', () {
+    testWithoutContext('Bad zipped app, two .exe files', () {
       fileSystem.file('app.zip').createSync();
       os.unzipOverride = (File zipFile, Directory targetDirectory) {
         if (zipFile.path != 'app.zip') {
@@ -76,14 +86,18 @@ void main() {
         fileSystem.directory(exePath1).createSync(recursive: true);
         fileSystem.directory(exePath2).createSync(recursive: true);
       };
-      final windowsApp =
-          WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip')) as PrebuiltWindowsApp?;
+      final windowsApp = WindowsApp.fromPrebuiltApp(
+        fileSystem.file('app.zip'),
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: os,
+      ) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
       expect(logger.errorText, contains('Archive "app.zip" contains more than one .exe files.'));
-    }, overrides: overrides);
+    });
 
-    testUsingContext('Success with zipped app', () {
+    testWithoutContext('Success with zipped app', () {
       fileSystem.file('app.zip').createSync();
       String? exePath;
       os.unzipOverride = (File zipFile, Directory targetDirectory) {
@@ -94,21 +108,31 @@ void main() {
         fileSystem.directory(exePath).createSync(recursive: true);
       };
       final windowsApp =
-          WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip'))! as PrebuiltWindowsApp;
+          WindowsApp.fromPrebuiltApp(
+                fileSystem.file('app.zip'),
+                fileSystem: fileSystem,
+                logger: logger,
+                operatingSystemUtils: os,
+              )!
+              as PrebuiltWindowsApp;
 
       expect(logger.errorText, isEmpty);
       expect(windowsApp.name, exePath);
       expect(windowsApp.applicationPackage.path, 'app.zip');
-    }, overrides: overrides);
+    });
 
-    testUsingContext('Error on unknown file type', () {
+    testWithoutContext('Error on unknown file type', () {
       fileSystem.file('not_existing.app').createSync();
-      final windowsApp =
-          WindowsApp.fromPrebuiltApp(fileSystem.file('not_existing.app')) as PrebuiltWindowsApp?;
+      final windowsApp = WindowsApp.fromPrebuiltApp(
+        fileSystem.file('not_existing.app'),
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: os,
+      ) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
       expect(logger.errorText, contains('Unknown windows application type.'));
-    }, overrides: overrides);
+    });
   });
 }
 

@@ -151,7 +151,8 @@ BuildCommand createFakeBuildCommand({
     verboseHelp: verboseHelp,
   );
   final ApplicationPackageFactory packageFactory =
-      applicationPackageFactory ?? FakeIOSApplicationPackageFactory(fileSystem: fs);
+      applicationPackageFactory ??
+      FakeIOSApplicationPackageFactory(fileSystem: fs, logger: resolvedLogger);
   command.applicationPackages = packageFactory;
   for (final Command<void> subcommand in command.subcommands.values) {
     if (subcommand is FlutterCommand) {
@@ -162,9 +163,10 @@ BuildCommand createFakeBuildCommand({
 }
 
 class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeIOSApplicationPackageFactory({required this.fileSystem});
+  FakeIOSApplicationPackageFactory({required this.fileSystem, required this.logger});
 
   final FileSystem fileSystem;
+  final Logger logger;
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -179,6 +181,12 @@ class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackag
     if (!project.ios.exists) {
       return null;
     }
-    return BuildableIOSApp(project.ios, 'com.example.test', 'Runner');
+    return BuildableIOSApp(
+      project.ios,
+      'com.example.test',
+      'Runner',
+      fileSystem: fileSystem,
+      logger: logger,
+    );
   }
 }
