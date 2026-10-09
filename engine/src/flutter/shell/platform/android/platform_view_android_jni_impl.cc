@@ -509,9 +509,7 @@ static void DispatchPointerDataPacket(JNIEnv* env,
                                       jobject buffer,
                                       jint position) {
   uint8_t* data = static_cast<uint8_t*>(env->GetDirectBufferAddress(buffer));
-  auto packet = std::make_unique<flutter::PointerDataPacket>(data, position);
-  ANDROID_SHELL_HOLDER->GetPlatformView()->DispatchPointerDataPacket(
-      std::move(packet));
+  ANDROID_SHELL_HOLDER->DispatchPointerDataPacket(data, position);
 }
 
 static void DispatchSemanticsAction(JNIEnv* env,

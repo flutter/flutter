@@ -191,6 +191,8 @@ using DispatchPlatformMessageFn =
     void (*)(JNIEnv*, jobject, jlong, jstring, jobject, jint, jint);
 using DispatchEmptyPlatformMessageFn =
     void (*)(JNIEnv*, jobject, jlong, jstring, jint);
+using DispatchPointerDataPacketFn =
+    void (*)(JNIEnv*, jobject, jlong, jobject, jint);
 using SetViewportMetricsFn = void (*)(JNIEnv*,
                                       jobject,
                                       jlong,
@@ -874,6 +876,197 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   dispatch_platform_message(&mock_env, reinterpret_cast<jobject>(123),
                             reinterpret_cast<jlong>(holder.get()), jchannel,
                             jbuffer, /*position=*/2, /*responseId=*/99);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       DispatchPointerDataPacketUnpacksAndForwardsAllFieldsThroughEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto dispatch_pointer_data_packet =
+      reinterpret_cast<DispatchPointerDataPacketFn>(
+          RegisterNativesAndFind(mock_env, "nativeDispatchPointerDataPacket"));
+  ASSERT_NE(dispatch_pointer_data_packet, nullptr);
+
+  PointerData records[2] = {};
+  records[0].Clear();
+  records[0].embedder_id = 77;
+  records[0].time_stamp = 123456;
+  records[0].change = PointerData::Change::kDown;
+  records[0].kind = PointerData::DeviceKind::kStylus;
+  records[0].signal_kind = PointerData::SignalKind::kNone;
+  records[0].device = 3;
+  records[0].physical_x = 12.5;
+  records[0].physical_y = 34.5;
+  records[0].buttons =
+      kFlutterPointerButtonStylusContact | kFlutterPointerButtonStylusPrimary;
+  records[0].pressure = 0.75;
+  records[0].pressure_min = 0.1;
+  records[0].pressure_max = 1.0;
+  records[0].distance = 1.5;
+  records[0].distance_max = 8.0;
+  records[0].size = 0.4;
+  records[0].radius_major = 6.0;
+  records[0].radius_minor = 3.0;
+  records[0].radius_min = 1.0;
+  records[0].radius_max = 10.0;
+  records[0].orientation = 0.25;
+  records[0].tilt = 0.5;
+  records[0].platformData = 101;
+  records[0].scale = 1.0;
+  records[0].view_id = 0;
+
+  records[1].Clear();
+  records[1].embedder_id = 78;
+  records[1].time_stamp = 123789;
+  records[1].change = PointerData::Change::kPanZoomUpdate;
+  records[1].kind = PointerData::DeviceKind::kTrackpad;
+  records[1].signal_kind = PointerData::SignalKind::kScroll;
+  records[1].device = 4;
+  records[1].physical_x = 50.0;
+  records[1].physical_y = 60.0;
+  records[1].scroll_delta_x = -4.0;
+  records[1].scroll_delta_y = 8.0;
+  records[1].pan_x = 15.0;
+  records[1].pan_y = -25.0;
+  records[1].scale = 1.25;
+  records[1].rotation = 0.125;
+  records[1].view_id = 2;
+
+  jobject jbuffer = reinterpret_cast<jobject>(3001);
+  EXPECT_CALL(mock_env, GetDirectBufferAddress(jbuffer))
+      .WillRepeatedly(Return(records));
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  std::vector<FlutterPointerEvent> captured;
+  holder->GetEmbedderApiForTesting().SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&captured](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                   const FlutterPointerEvent* events, size_t events_count) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(events, nullptr);
+        captured.assign(events, events + events_count);
+        return kSuccess;
+      }));
+
+  dispatch_pointer_data_packet(&mock_env, reinterpret_cast<jobject>(123),
+                               reinterpret_cast<jlong>(holder.get()), jbuffer,
+                               static_cast<jint>(sizeof(records)));
+
+  ASSERT_EQ(captured.size(), 2u);
+  EXPECT_EQ(captured[0].struct_size, sizeof(FlutterPointerEvent));
+  EXPECT_EQ(captured[0].embedder_id, 77);
+  EXPECT_EQ(captured[0].timestamp, 123456u);
+  EXPECT_EQ(captured[0].phase, FlutterPointerPhase::kDown);
+  EXPECT_EQ(captured[0].device_kind, kFlutterPointerDeviceKindStylus);
+  EXPECT_EQ(captured[0].signal_kind, kFlutterPointerSignalKindNone);
+  EXPECT_EQ(captured[0].device, 3);
+  EXPECT_DOUBLE_EQ(captured[0].x, 12.5);
+  EXPECT_DOUBLE_EQ(captured[0].y, 34.5);
+  EXPECT_EQ(captured[0].buttons, kFlutterPointerButtonStylusContact |
+                                     kFlutterPointerButtonStylusPrimary);
+  EXPECT_DOUBLE_EQ(captured[0].pressure, 0.75);
+  EXPECT_DOUBLE_EQ(captured[0].pressure_min, 0.1);
+  EXPECT_DOUBLE_EQ(captured[0].pressure_max, 1.0);
+  EXPECT_DOUBLE_EQ(captured[0].distance, 1.5);
+  EXPECT_DOUBLE_EQ(captured[0].distance_max, 8.0);
+  EXPECT_DOUBLE_EQ(captured[0].size, 0.4);
+  EXPECT_DOUBLE_EQ(captured[0].radius_major, 6.0);
+  EXPECT_DOUBLE_EQ(captured[0].radius_minor, 3.0);
+  EXPECT_DOUBLE_EQ(captured[0].radius_min, 1.0);
+  EXPECT_DOUBLE_EQ(captured[0].radius_max, 10.0);
+  EXPECT_DOUBLE_EQ(captured[0].orientation, 0.25);
+  EXPECT_DOUBLE_EQ(captured[0].tilt, 0.5);
+  EXPECT_EQ(captured[0].platform_data, 101);
+  EXPECT_EQ(captured[0].view_id, 0);
+
+  EXPECT_EQ(captured[1].struct_size, sizeof(FlutterPointerEvent));
+  EXPECT_EQ(captured[1].embedder_id, 78);
+  EXPECT_EQ(captured[1].timestamp, 123789u);
+  EXPECT_EQ(captured[1].phase, FlutterPointerPhase::kPanZoomUpdate);
+  EXPECT_EQ(captured[1].device_kind, kFlutterPointerDeviceKindTrackpad);
+  EXPECT_EQ(captured[1].signal_kind, kFlutterPointerSignalKindScroll);
+  EXPECT_EQ(captured[1].device, 4);
+  EXPECT_DOUBLE_EQ(captured[1].x, 50.0);
+  EXPECT_DOUBLE_EQ(captured[1].y, 60.0);
+  EXPECT_DOUBLE_EQ(captured[1].scroll_delta_x, -4.0);
+  EXPECT_DOUBLE_EQ(captured[1].scroll_delta_y, 8.0);
+  EXPECT_DOUBLE_EQ(captured[1].pan_x, 15.0);
+  EXPECT_DOUBLE_EQ(captured[1].pan_y, -25.0);
+  EXPECT_DOUBLE_EQ(captured[1].scale, 1.25);
+  EXPECT_DOUBLE_EQ(captured[1].rotation, 0.125);
+  EXPECT_EQ(captured[1].view_id, 2);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       DispatchPointerDataPacketIgnoresNullEmptyOrTruncatedBuffers) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto dispatch_pointer_data_packet =
+      reinterpret_cast<DispatchPointerDataPacketFn>(
+          RegisterNativesAndFind(mock_env, "nativeDispatchPointerDataPacket"));
+  ASSERT_NE(dispatch_pointer_data_packet, nullptr);
+
+  PointerData record = {};
+  record.Clear();
+  jobject jbuffer = reinterpret_cast<jobject>(3002);
+  jobject jnull_buffer = reinterpret_cast<jobject>(3003);
+  EXPECT_CALL(mock_env, GetDirectBufferAddress(jbuffer))
+      .WillRepeatedly(Return(&record));
+  EXPECT_CALL(mock_env, GetDirectBufferAddress(jnull_buffer))
+      .WillRepeatedly(Return(nullptr));
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  bool called = false;
+  holder->GetEmbedderApiForTesting().SendPointerEvent =
+      MOCK_ENGINE_PROC(SendPointerEvent, ([&called](auto, auto, auto) {
+                         called = true;
+                         return kSuccess;
+                       }));
+
+  const jlong shell_holder = reinterpret_cast<jlong>(holder.get());
+  jobject jcaller = reinterpret_cast<jobject>(123);
+
+  dispatch_pointer_data_packet(&mock_env, jcaller, shell_holder, jbuffer, 0);
+  dispatch_pointer_data_packet(&mock_env, jcaller, shell_holder, jbuffer, -1);
+  dispatch_pointer_data_packet(&mock_env, jcaller, shell_holder, jbuffer,
+                               static_cast<jint>(sizeof(PointerData) - 1));
+  dispatch_pointer_data_packet(&mock_env, jcaller, shell_holder, jnull_buffer,
+                               static_cast<jint>(sizeof(PointerData)));
+  EXPECT_FALSE(called);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       DispatchPointerDataPacketRealProcForwardsToEngine) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto dispatch_pointer_data_packet =
+      reinterpret_cast<DispatchPointerDataPacketFn>(
+          RegisterNativesAndFind(mock_env, "nativeDispatchPointerDataPacket"));
+  ASSERT_NE(dispatch_pointer_data_packet, nullptr);
+
+  PointerData record = {};
+  record.Clear();
+  record.embedder_id = 55;
+  record.time_stamp = 1000;
+  record.change = PointerData::Change::kAdd;
+  record.kind = PointerData::DeviceKind::kTouch;
+  record.physical_x = 10.0;
+  record.physical_y = 20.0;
+
+  jobject jbuffer = reinterpret_cast<jobject>(3004);
+  EXPECT_CALL(mock_env, GetDirectBufferAddress(jbuffer))
+      .WillRepeatedly(Return(&record));
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  dispatch_pointer_data_packet(&mock_env, reinterpret_cast<jobject>(123),
+                               reinterpret_cast<jlong>(holder.get()), jbuffer,
+                               static_cast<jint>(sizeof(record)));
 }
 
 // The load order is exercised with an injected loader rather than real

@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <atomic>
 #include <cstdint>
+#include <cstring>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -90,6 +91,141 @@ namespace {
 
 // The ID of the implicit view in single-view mode.
 constexpr int64_t kImplicitViewId = 0;
+
+// Matches PointerChange in AndroidTouchProcessor.java.
+enum class RawPointerChange : int64_t {
+  kCancel = 0,
+  kAdd = 1,
+  kRemove = 2,
+  kHover = 3,
+  kDown = 4,
+  kMove = 5,
+  kUp = 6,
+  kPanZoomStart = 7,
+  kPanZoomUpdate = 8,
+  kPanZoomEnd = 9,
+};
+
+// Matches PointerDeviceKind in AndroidTouchProcessor.java.
+enum class RawPointerDeviceKind : int64_t {
+  kTouch = 0,
+  kMouse = 1,
+  kStylus = 2,
+  kInvertedStylus = 3,
+  kTrackpad = 4,
+};
+
+// Matches PointerSignalKind in AndroidTouchProcessor.java.
+enum class RawPointerSignalKind : int64_t {
+  kNone = 0,
+  kScroll = 1,
+  kScrollInertiaCancel = 2,
+  kScale = 3,
+};
+
+// Binary layout of each pointer record packed into a direct ByteBuffer by
+// AndroidTouchProcessor.java (36 8-byte fields = 288 bytes per record).
+struct alignas(8) RawPointerDataRecord {
+  int64_t embedder_id;
+  int64_t time_stamp;
+  RawPointerChange change;
+  RawPointerDeviceKind kind;
+  RawPointerSignalKind signal_kind;
+  int64_t device;
+  int64_t pointer_identifier;
+  double physical_x;
+  double physical_y;
+  double physical_delta_x;
+  double physical_delta_y;
+  int64_t buttons;
+  int64_t obscured;
+  int64_t synthesized;
+  double pressure;
+  double pressure_min;
+  double pressure_max;
+  double distance;
+  double distance_max;
+  double size;
+  double radius_major;
+  double radius_minor;
+  double radius_min;
+  double radius_max;
+  double orientation;
+  double tilt;
+  int64_t platform_data;
+  double scroll_delta_x;
+  double scroll_delta_y;
+  double pan_x;
+  double pan_y;
+  double pan_delta_x;
+  double pan_delta_y;
+  double scale;
+  double rotation;
+  int64_t view_id;
+};
+
+// Matches POINTER_DATA_FIELD_COUNT (36) * BYTES_PER_FIELD (8) in
+// AndroidTouchProcessor.java.
+constexpr size_t kPointerDataFieldCount = 36;
+static_assert(sizeof(RawPointerDataRecord) ==
+              kPointerDataFieldCount * sizeof(int64_t));
+
+FlutterPointerPhase ToFlutterPointerPhase(RawPointerChange change) {
+  switch (change) {
+    case RawPointerChange::kCancel:
+      return FlutterPointerPhase::kCancel;
+    case RawPointerChange::kAdd:
+      return FlutterPointerPhase::kAdd;
+    case RawPointerChange::kRemove:
+      return FlutterPointerPhase::kRemove;
+    case RawPointerChange::kHover:
+      return FlutterPointerPhase::kHover;
+    case RawPointerChange::kDown:
+      return FlutterPointerPhase::kDown;
+    case RawPointerChange::kMove:
+      return FlutterPointerPhase::kMove;
+    case RawPointerChange::kUp:
+      return FlutterPointerPhase::kUp;
+    case RawPointerChange::kPanZoomStart:
+      return FlutterPointerPhase::kPanZoomStart;
+    case RawPointerChange::kPanZoomUpdate:
+      return FlutterPointerPhase::kPanZoomUpdate;
+    case RawPointerChange::kPanZoomEnd:
+      return FlutterPointerPhase::kPanZoomEnd;
+  }
+  return FlutterPointerPhase::kCancel;
+}
+
+FlutterPointerDeviceKind ToFlutterPointerDeviceKind(RawPointerDeviceKind kind) {
+  switch (kind) {
+    case RawPointerDeviceKind::kTouch:
+      return kFlutterPointerDeviceKindTouch;
+    case RawPointerDeviceKind::kMouse:
+      return kFlutterPointerDeviceKindMouse;
+    case RawPointerDeviceKind::kStylus:
+      return kFlutterPointerDeviceKindStylus;
+    case RawPointerDeviceKind::kInvertedStylus:
+      return kFlutterPointerDeviceKindInvertedStylus;
+    case RawPointerDeviceKind::kTrackpad:
+      return kFlutterPointerDeviceKindTrackpad;
+  }
+  return kFlutterPointerDeviceKindTouch;
+}
+
+FlutterPointerSignalKind ToFlutterPointerSignalKind(
+    RawPointerSignalKind signal_kind) {
+  switch (signal_kind) {
+    case RawPointerSignalKind::kNone:
+      return kFlutterPointerSignalKindNone;
+    case RawPointerSignalKind::kScroll:
+      return kFlutterPointerSignalKindScroll;
+    case RawPointerSignalKind::kScrollInertiaCancel:
+      return kFlutterPointerSignalKindScrollInertiaCancel;
+    case RawPointerSignalKind::kScale:
+      return kFlutterPointerSignalKindScale;
+  }
+  return kFlutterPointerSignalKindNone;
+}
 
 uint64_t NextHolderId() {
   static std::atomic<uint64_t> next_id{1};
@@ -792,6 +928,63 @@ void AndroidShellHolder::SendPlatformMessage(const std::string& name,
       FML_LOG(ERROR) << "FlutterPlatformMessageReleaseResponseHandle failed: "
                      << release_result;
     }
+  }
+}
+
+void AndroidShellHolder::DispatchPointerDataPacket(const uint8_t* buffer,
+                                                   int size_bytes) {
+  if (buffer == nullptr || size_bytes <= 0) {
+    return;
+  }
+  const auto unsigned_size = static_cast<size_t>(size_bytes);
+  if (unsigned_size % sizeof(RawPointerDataRecord) != 0) {
+    FML_LOG(ERROR) << "Pointer data packet size (" << size_bytes
+                   << ") is not a multiple of " << sizeof(RawPointerDataRecord);
+    return;
+  }
+  const size_t count = unsigned_size / sizeof(RawPointerDataRecord);
+  std::vector<FlutterPointerEvent> events(count);
+  for (size_t i = 0; i < count; ++i) {
+    RawPointerDataRecord record = {};
+    std::memcpy(&record, buffer + i * sizeof(RawPointerDataRecord),
+                sizeof(RawPointerDataRecord));
+    FlutterPointerEvent& event = events[i];
+    event.struct_size = sizeof(FlutterPointerEvent);
+    event.phase = ToFlutterPointerPhase(record.change);
+    event.timestamp = static_cast<size_t>(record.time_stamp);
+    event.x = record.physical_x;
+    event.y = record.physical_y;
+    event.device = static_cast<int32_t>(record.device);
+    event.signal_kind = ToFlutterPointerSignalKind(record.signal_kind);
+    event.scroll_delta_x = record.scroll_delta_x;
+    event.scroll_delta_y = record.scroll_delta_y;
+    event.device_kind = ToFlutterPointerDeviceKind(record.kind);
+    event.buttons = record.buttons;
+    event.pan_x = record.pan_x;
+    event.pan_y = record.pan_y;
+    event.scale = record.scale;
+    event.rotation = record.rotation;
+    event.view_id = record.view_id;
+    event.pressure = record.pressure;
+    event.pressure_min = record.pressure_min;
+    event.pressure_max = record.pressure_max;
+    event.distance = record.distance;
+    event.distance_max = record.distance_max;
+    event.size = record.size;
+    event.radius_major = record.radius_major;
+    event.radius_minor = record.radius_minor;
+    event.radius_min = record.radius_min;
+    event.radius_max = record.radius_max;
+    event.orientation = record.orientation;
+    event.tilt = record.tilt;
+    event.platform_data = record.platform_data;
+    event.embedder_id = record.embedder_id;
+  }
+
+  FlutterEngineResult result = embedder_api_.SendPointerEvent(
+      engine_.get(), events.data(), events.size());
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineSendPointerEvent failed: " << result;
   }
 }
 

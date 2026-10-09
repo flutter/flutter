@@ -155,6 +155,13 @@ class AndroidShellHolder {
   ///
   void DispatchEmptyPlatformMessage(const std::string& name, int response_id);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Unpacks a binary pointer data packet buffer from
+  ///             AndroidTouchProcessor and dispatches the events to the engine
+  ///             through the embedder API.
+  ///
+  void DispatchPointerDataPacket(const uint8_t* buffer, int size_bytes);
+
   // Visible for testing.
   Shell* GetShellForTesting() const;
 
