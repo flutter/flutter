@@ -50,9 +50,9 @@ class PipelineCompileQueueGLES final
                             const fml::closure& job);
 
   //----------------------------------------------------------------------------
-  /// @brief      If the task has not yet been done, perform it eagerly on the
+  /// @brief      If the job has not yet been done, perform it eagerly on the
   ///             calling thread. This can be used in lieu of an idle wait for
-  ///             the task completion on the calling thread.
+  ///             the job completion on the calling thread.
   ///
   /// @param[in]  desc  The description
   ///
@@ -63,7 +63,7 @@ class PipelineCompileQueueGLES final
       std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
   /// Posts a task to the worker that performs the next pending job and then
-  /// schedules itself again. Stops once the queue is empty.
+  /// schedules a task for the next job in the queue.
   void ScheduleNextJob();
 
   /// Removes and returns the oldest pending job. If there are none, marks the

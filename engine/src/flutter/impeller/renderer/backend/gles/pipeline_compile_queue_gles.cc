@@ -50,8 +50,8 @@ bool PipelineCompileQueueGLES::PostJobForDescriptor(
 
   if (!inserted) {
     // This bit is being extremely conservative. If insertion did not take
-    // place, someone gave the compile queue a job for the same description.
-    // This is highly unusual but technically not impossible. Just run the job
+    // place, someone gave the compile queue a job for the same descritor. This
+    // is highly unusual but technically not impossible. Just run the job
     // eagerly.
     FML_LOG(WARNING) << "Got multiple compile jobs for the same descriptor. "
                         "Running eagerly.";
