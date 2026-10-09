@@ -4,17 +4,19 @@
 
 """The Flutter repository's Bazel module.
 
-This is the bootstrap for migrating the engine build from GN to Bazel. Nothing
-is built with Bazel yet and the GN build remains the source of truth: this
-file, `.bazelrc`, `.bazelversion` and the generated `.bazelignore` must stay
-inert for GN users. Bazel is always driven through `bazelisk`, which reads
-`.bazelversion`; bazelisk itself is a locally installed prerequisite (like
-git or depot_tools) and is deliberately not synced by gclient.
+This is the bootstrap for migrating the engine build from GN to Bazel. The GN
+build remains the source of truth: this file, `.bazelrc`, `.bazelversion` and
+the generated `.bazelignore` must stay inert for GN users. Bazel is always
+driven through `bazelisk`, which reads `.bazelversion`; bazelisk itself is a
+locally installed prerequisite (like git or depot_tools) and is deliberately
+not synced by gclient.
 
 Dependency pins are mirrored from `DEPS` into
 `engine/src/flutter/build/bazel/deps.lock.bzl` by
 `engine/src/flutter/tools/bazel_tools/bin/gen_deps.dart`; the trees gclient
 syncs are consumed in place and listed in `.bazelignore`.
+
+See `engine/src/flutter/build/bazel/README.md` for the layout.
 """
 
 module(
@@ -31,7 +33,7 @@ bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_cc", version = "0.1.5")
 
 # Dependencies from DEPS: synced trees consumed in place, and toolchains that
-# can also be downloaded from CIPD (see extensions.bzl).
+# can also be downloaded (see extensions.bzl).
 synced_deps = use_extension("//engine/src/flutter/build/bazel:extensions.bzl", "synced_deps")
 use_repo(
     synced_deps,
@@ -39,4 +41,14 @@ use_repo(
     "clang_linux_x64",
     "gn",
     "googletest",
+    "libcxx",
+    "libcxxabi",
+    "llvm_libc",
+    "sysroot_linux_x64",
+)
+
+# The engine's hermetic C/C++ toolchains. Nothing falls back to a compiler
+# found on the host (see BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN in .bazelrc).
+register_toolchains(
+    "//engine/src/flutter/build/bazel/toolchains:linux_x64_clang_toolchain",
 )
