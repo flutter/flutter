@@ -838,7 +838,12 @@ class BrowserManager {
 
     unawaited(
       _browser.onExit.then((int exitCode) {
-        if (!_closed) {
+        if (_unexpectedDisconnect) {
+          _logger.printError(
+            'Chrome browser process (PID: ${_browser.pid}) '
+            'exited with code $exitCode after disconnecting from the test host.',
+          );
+        } else if (!_closed) {
           _logger.printError(
             'Chrome browser process (PID: ${_browser.pid}) '
             'exited unexpectedly with code $exitCode during test execution.',
@@ -922,6 +927,9 @@ class BrowserManager {
 
   /// Whether the channel to the browser has closed.
   var _closed = false;
+
+  /// Whether the browser disconnected before this manager started closing it.
+  var _unexpectedDisconnect = false;
 
   /// The completer for [_BrowserEnvironment.displayPause].
   ///
@@ -1240,35 +1248,23 @@ class BrowserManager {
     return report.toString();
   }
 
-  /// How long to wait for the browser process to report its exit code after
-  /// it closed its connection, before closing the browser and this manager.
-  ///
-  /// A process that dies takes its connection with it and is reaped within
-  /// milliseconds; the wait only has to outlast that.
-  static const Duration _browserExitGrace = Duration(seconds: 1);
-
   /// Handles the browser closing its end of the channel.
   ///
-  /// When this side did not initiate the close, every unfinished suite is
-  /// about to be reported as "did not complete", so the run has to say why
-  /// before anything else happens. If the browser process itself died, its
-  /// exit code is reported by the handler in the constructor and by
-  /// [Chromium], but only while neither has been marked closed, so [close]
-  /// waits for the exit code to have had a chance to arrive. If the process
-  /// is still running, only its page or renderer went away, which nothing
-  /// else reports.
-  Future<void> _onDisconnect() async {
+  /// Report an unexpected disconnect before cleanup starts. Keep reporting the
+  /// process exit code after cleanup starts, because the exit notification can
+  /// arrive after the connection closes. This does not imply that the process
+  /// crashed: cleanup may have closed a browser whose page or renderer died.
+  Future<void> _onDisconnect() {
     if (!_closed) {
+      _unexpectedDisconnect = true;
       _logger.printError(
         'The ${_runtime.name} browser closed its connection to the test host '
         'unexpectedly, so any unfinished test suites are reported as '
-        '"did not complete". Unless the browser process is reported to have '
-        'exited, it is still running and its page or renderer was most '
-        'likely terminated, for example after running out of memory.',
+        '"did not complete". The browser process, page, or renderer may have '
+        'crashed or been terminated, for example after running out of memory.',
       );
-      await _browser.onExit.timeout(_browserExitGrace, onTimeout: () => 0);
     }
-    await close();
+    return close();
   }
 
   /// Closes the manager and releases any resources it owns, including closing

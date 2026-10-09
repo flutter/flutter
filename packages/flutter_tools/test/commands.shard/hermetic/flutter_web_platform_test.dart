@@ -396,17 +396,39 @@ void main() {
   testWithoutContext('BrowserManager reports a browser that closed its connection', () {
     // Regression test for https://github.com/flutter/flutter/issues/191920.
     FakeAsync().run((FakeAsync time) {
+      final exitCode = Completer<int>();
       final controller = StreamChannelController<dynamic>();
-      createBrowserManager(controller, FakeProcess(exitCode: Completer<int>().future));
+      createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
 
       controller.local.sink.close();
-      time.elapse(const Duration(seconds: 2));
+      time.flushMicrotasks();
 
       expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+
+      exitCode.complete(0);
+      time.flushMicrotasks();
     });
   });
 
-  testWithoutContext('BrowserManager reports the exit code of a browser process that died', () {
+  testWithoutContext('BrowserManager starts cleanup without waiting for the browser to exit', () {
+    FakeAsync().run((FakeAsync time) {
+      logger = BufferLogger.test(verbose: true);
+      final exitCode = Completer<int>();
+      final controller = StreamChannelController<dynamic>();
+      createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
+
+      controller.local.sink.close();
+      time.flushMicrotasks();
+
+      expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+      expect(logger.traceText, contains('Shutting down Chromium.'));
+
+      exitCode.complete(0);
+      time.flushMicrotasks();
+    });
+  });
+
+  testWithoutContext('BrowserManager reports an exit code delivered after cleanup starts', () {
     // Regression test for https://github.com/flutter/flutter/issues/191920.
     FakeAsync().run((FakeAsync time) {
       final exitCode = Completer<int>();
@@ -417,11 +439,78 @@ void main() {
       // seen to close before the exit code arrives.
       controller.local.sink.close();
       time.flushMicrotasks();
-      exitCode.complete(-9);
+      // The exit notification can be delivered after cleanup starts. It must
+      // not depend on an arbitrary grace period after the channel closes.
       time.elapse(const Duration(seconds: 2));
+      exitCode.complete(-9);
+      time.flushMicrotasks();
 
       expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+      expect(
+        logger.errorText,
+        contains('exited with code -9 after disconnecting from the test host'),
+      );
+    });
+  });
+
+  testWithoutContext('BrowserManager reports a process exit before the connection closes', () {
+    FakeAsync().run((FakeAsync time) {
+      final exitCode = Completer<int>();
+      final controller = StreamChannelController<dynamic>();
+      createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
+
+      exitCode.complete(-9);
+      time.flushMicrotasks();
+
       expect(logger.errorText, contains('exited unexpectedly with code -9'));
+
+      controller.local.sink.close();
+      time.flushMicrotasks();
+
+      expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+    });
+  });
+
+  testWithoutContext(
+    'BrowserManager does not diagnose an intentional shutdown as a disconnect',
+    () {
+      FakeAsync().run((FakeAsync time) {
+        final exitCode = Completer<int>();
+        final controller = StreamChannelController<dynamic>();
+        final BrowserManager manager = createBrowserManager(
+          controller,
+          FakeProcess(exitCode: exitCode.future),
+        );
+
+        manager.close();
+        controller.local.sink.close();
+        time.flushMicrotasks();
+        exitCode.complete(-15);
+        time.flushMicrotasks();
+
+        expect(logger.errorText, isEmpty);
+      });
+    },
+  );
+
+  testWithoutContext('BrowserManager does not attribute cleanup to an unexpected process exit', () {
+    FakeAsync().run((FakeAsync time) {
+      final exitCode = Completer<int>();
+      final controller = StreamChannelController<dynamic>();
+      createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
+
+      controller.local.sink.close();
+      time.flushMicrotasks();
+      // A healthy browser may exit normally when closed after its page dies.
+      exitCode.complete(0);
+      time.flushMicrotasks();
+
+      expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+      expect(
+        logger.errorText,
+        contains('exited with code 0 after disconnecting from the test host'),
+      );
+      expect(logger.errorText, isNot(contains('exited unexpectedly')));
     });
   });
 }
