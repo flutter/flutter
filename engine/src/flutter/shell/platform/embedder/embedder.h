@@ -1097,6 +1097,39 @@ typedef struct {
 /// stable until the Flutter application restarts.
 typedef uint64_t FlutterEngineDisplayId;
 
+/// The type of a display feature reported in |FlutterWindowMetricsEvent|.
+///
+/// These values must be kept in sync with the `DisplayFeatureType` enum in
+/// `lib/ui/platform_dispatcher.dart`.
+typedef enum {
+  /// The display feature is new and not yet known to Flutter.
+  kFlutterDisplayFeatureTypeUnknown = 0,
+  /// A fold in a flexible screen without a physical gap.
+  kFlutterDisplayFeatureTypeFold = 1,
+  /// A physical separation with a hinge that allows two panels to fold.
+  kFlutterDisplayFeatureTypeHinge = 2,
+  /// A non-displaying area of the screen, usually housing cameras or sensors.
+  kFlutterDisplayFeatureTypeCutout = 3,
+} FlutterDisplayFeatureType;
+
+/// The posture of a display feature reported in |FlutterWindowMetricsEvent|.
+///
+/// These values must be kept in sync with the `DisplayFeatureState` enum in
+/// `lib/ui/platform_dispatcher.dart`.
+typedef enum {
+  /// The display feature is a cutout, or the state is not known to Flutter.
+  kFlutterDisplayFeatureStateUnknown = 0,
+  /// The foldable device is completely open; the screen space is flat.
+  kFlutterDisplayFeatureStatePostureFlat = 1,
+  /// The fold angle is between the opened and closed states.
+  kFlutterDisplayFeatureStatePostureHalfOpened = 2,
+} FlutterDisplayFeatureState;
+
+/// The maximum number of display features the engine accepts in a single
+/// |FlutterWindowMetricsEvent|. Anything larger is rejected as invalid rather
+/// than being used to size an allocation.
+#define kFlutterMaxDisplayFeatures 256
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterWindowMetricsEvent).
   size_t struct_size;
@@ -1145,6 +1178,51 @@ typedef struct {
   /// If |has_constraints| is `true`, this must be greater than or equal to
   /// |min_height_constraint| and |height|.
   size_t max_height_constraint;
+  /// If `true`, extended padding, gesture inset, touch slop, display feature,
+  /// and display corner radius fields below are populated.
+  ///
+  /// Embedders that set |struct_size| to a size that includes these fields
+  /// must initialize every field below, even when this flag is `false`. The
+  /// simplest way to guarantee that is to zero-initialize the whole struct.
+  bool has_extended_metrics;
+  /// Physical padding, in physical pixels. Must be non-negative.
+  double physical_padding_top;
+  double physical_padding_right;
+  double physical_padding_bottom;
+  double physical_padding_left;
+  /// System gesture insets, in physical pixels. Must be non-negative.
+  double physical_system_gesture_inset_top;
+  double physical_system_gesture_inset_right;
+  double physical_system_gesture_inset_bottom;
+  double physical_system_gesture_inset_left;
+  /// The touch slop, in physical pixels. Any value that is not positive means
+  /// that the platform default should be used; in particular a zero-initialized
+  /// struct correctly requests the platform default.
+  double physical_touch_slop;
+  /// The number of display features described by the three arrays below.
+  ///
+  /// Must not exceed |kFlutterMaxDisplayFeatures|. If this is non-zero, all
+  /// three arrays below must be non-null and must remain readable for this many
+  /// elements: the engine reads all of them.
+  size_t display_features_count;
+  /// Array of 4 * display_features_count doubles (left, top, right, bottom).
+  const double* display_features_bounds;
+  /// Array of display_features_count values, each of which must be a valid
+  /// |FlutterDisplayFeatureType|. A type the engine does not recognize is
+  /// rejected, so embedders must map unknown platform features to
+  /// |kFlutterDisplayFeatureTypeUnknown|.
+  const int32_t* display_features_type;
+  /// Array of display_features_count non-negative values, each of which should
+  /// be a |FlutterDisplayFeatureState|. Unlike the type, a value the engine
+  /// does not recognize is accepted and reported to the framework as unknown,
+  /// so that a newer embedder keeps working against an older engine.
+  const int32_t* display_features_state;
+  /// Display corner radii, in physical pixels, or a negative value to indicate
+  /// that the corner radius is unknown.
+  double physical_display_corner_radius_top_left;
+  double physical_display_corner_radius_top_right;
+  double physical_display_corner_radius_bottom_right;
+  double physical_display_corner_radius_bottom_left;
 } FlutterWindowMetricsEvent;
 
 typedef struct {

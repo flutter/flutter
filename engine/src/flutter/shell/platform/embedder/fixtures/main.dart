@@ -1807,3 +1807,20 @@ Future<void> a11y_main_multi_view() async {
   await semanticsChanged;
   notifySemanticsEnabled(PlatformDispatcher.instance.semanticsEnabled);
 }
+
+@pragma('vm:entry-point')
+void reportViewportMetricsDetails() {
+  PlatformDispatcher.instance.onMetricsChanged = () {
+    final FlutterView view = PlatformDispatcher.instance.views.first;
+    final features = StringBuffer();
+    for (final DisplayFeature feature in view.displayFeatures) {
+      features.write(' ${feature.type}/${feature.state}');
+    }
+    notifyStringValue(
+      'touchSlop=${view.gestureSettings.physicalTouchSlop} '
+      'padding=${view.viewPadding.left},${view.viewPadding.top} '
+      'features=${view.displayFeatures.length}$features',
+    );
+  };
+  signalNativeTest();
+}

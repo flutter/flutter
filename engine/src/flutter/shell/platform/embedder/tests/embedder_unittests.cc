@@ -3240,6 +3240,178 @@ TEST_F(EmbedderTest, InvalidFlutterWindowMetricsEvent) {
             kInvalidArguments);
 }
 
+TEST_F(EmbedderTest, ExtendedWindowMetricsReachTheFrameworkIntact) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("reportViewportMetricsDetails");
+
+  fml::AutoResetWaitableEvent latch;
+  std::string last_report;
+
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.Signal(); }));
+  context.AddFfiNativeCallback(
+      "NotifyStringValue", CREATE_FFI_LAMBDA([&](Dart_Handle value) {
+        last_report = tonic::DartConverter<std::string>::FromDart(value);
+        latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  // Wait until the metrics handler is attached.
+  latch.Wait();
+  latch.Reset();
+
+  // A state the engine does not know about, to prove it degrades rather than
+  // being rejected at the boundary.
+  const double kBounds[4] = {0.0, 0.0, 10.0, 600.0};
+  const int32_t kType[1] = {kFlutterDisplayFeatureTypeHinge};
+  const int32_t kState[1] = {kFlutterDisplayFeatureStatePostureHalfOpened + 1};
+
+  // Deliberately zero-initialized and then only partially populated, which is
+  // exactly what the header tells embedders to do.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  event.has_extended_metrics = true;
+  event.physical_padding_left = 4.0;
+  event.physical_padding_top = 8.0;
+  event.display_features_count = 1;
+  event.display_features_bounds = kBounds;
+  event.display_features_type = kType;
+  event.display_features_state = kState;
+
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  latch.Wait();
+
+  // `physical_touch_slop` was left at zero by the zero-initialization. The
+  // framework must see the platform default (null), not a touch slop of zero,
+  // which would turn every touch into an immediate drag.
+  EXPECT_EQ(last_report,
+            "touchSlop=null padding=4.0,8.0 features=1 "
+            "DisplayFeatureType.hinge/DisplayFeatureState.unknown");
+}
+
+TEST_F(EmbedderTest, InvalidFlutterWindowMetricsEventExtendedMetrics) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+
+  // A well formed event that the mutations below are applied to. Note the
+  // zero-initialization: every field of an extended metrics event must be
+  // initialized because the engine reads all of them once `struct_size` says
+  // they are present.
+  const double kBounds[4] = {0.0, 0.0, 10.0, 600.0};
+  const int32_t kType[1] = {kFlutterDisplayFeatureTypeHinge};
+  const int32_t kState[1] = {kFlutterDisplayFeatureStatePostureFlat};
+
+  FlutterWindowMetricsEvent valid = {};
+  valid.struct_size = sizeof(valid);
+  valid.width = 800;
+  valid.height = 600;
+  valid.pixel_ratio = 1.0;
+  valid.has_extended_metrics = true;
+  valid.display_features_count = 1;
+  valid.display_features_bounds = kBounds;
+  valid.display_features_type = kType;
+  valid.display_features_state = kState;
+
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &valid),
+            kSuccess);
+
+  // Padding must be non-negative.
+  FlutterWindowMetricsEvent negative_padding = valid;
+  negative_padding.physical_padding_left = -1.0;
+  ASSERT_EQ(
+      FlutterEngineSendWindowMetricsEvent(engine.get(), &negative_padding),
+      kInvalidArguments);
+
+  // System gesture insets must be non-negative.
+  FlutterWindowMetricsEvent negative_inset = valid;
+  negative_inset.physical_system_gesture_inset_bottom = -1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &negative_inset),
+            kInvalidArguments);
+
+  // The display feature count is capped so that it can never be used to size
+  // an allocation or overflow `count * 4`.
+  FlutterWindowMetricsEvent too_many_features = valid;
+  too_many_features.display_features_count = kFlutterMaxDisplayFeatures + 1;
+  ASSERT_EQ(
+      FlutterEngineSendWindowMetricsEvent(engine.get(), &too_many_features),
+      kInvalidArguments);
+
+  FlutterWindowMetricsEvent overflowing_features = valid;
+  overflowing_features.display_features_count =
+      std::numeric_limits<size_t>::max();
+  ASSERT_EQ(
+      FlutterEngineSendWindowMetricsEvent(engine.get(), &overflowing_features),
+      kInvalidArguments);
+
+  // All three arrays must be supplied when the count is non-zero.
+  FlutterWindowMetricsEvent missing_bounds = valid;
+  missing_bounds.display_features_bounds = nullptr;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &missing_bounds),
+            kInvalidArguments);
+
+  FlutterWindowMetricsEvent missing_type = valid;
+  missing_type.display_features_type = nullptr;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &missing_type),
+            kInvalidArguments);
+
+  FlutterWindowMetricsEvent missing_state = valid;
+  missing_state.display_features_state = nullptr;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &missing_state),
+            kInvalidArguments);
+
+  // Types are indices into a Dart enum that `hooks.dart` reads unchecked, so
+  // they must be in range.
+  const int32_t kOutOfRangeType[1] = {kFlutterDisplayFeatureTypeCutout + 1};
+  FlutterWindowMetricsEvent bad_type = valid;
+  bad_type.display_features_type = kOutOfRangeType;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &bad_type),
+            kInvalidArguments);
+
+  const int32_t kNegativeType[1] = {-1};
+  FlutterWindowMetricsEvent negative_type = valid;
+  negative_type.display_features_type = kNegativeType;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &negative_type),
+            kInvalidArguments);
+
+  // A state the engine does not know is forward compatible: `hooks.dart`
+  // bounds checks it and falls back to `DisplayFeatureState.unknown`, so a
+  // newer embedder must keep working against this engine.
+  const int32_t kUnknownState[1] = {
+      kFlutterDisplayFeatureStatePostureHalfOpened + 1};
+  FlutterWindowMetricsEvent newer_state = valid;
+  newer_state.display_features_state = kUnknownState;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &newer_state),
+            kSuccess);
+
+  // A negative state is not: that same guard is upper bound only, so Dart
+  // would index the enum with it and throw.
+  const int32_t kNegativeState[1] = {-1};
+  FlutterWindowMetricsEvent negative_state = valid;
+  negative_state.display_features_state = kNegativeState;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &negative_state),
+            kInvalidArguments);
+
+  // Zero display features with null arrays remains valid.
+  FlutterWindowMetricsEvent no_features = valid;
+  no_features.display_features_count = 0;
+  no_features.display_features_bounds = nullptr;
+  no_features.display_features_type = nullptr;
+  no_features.display_features_state = nullptr;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &no_features),
+            kSuccess);
+}
+
 TEST_F(EmbedderTest, WindowMetricsEventWithConstraints) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   EmbedderConfigBuilder builder(context);

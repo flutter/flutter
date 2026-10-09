@@ -1688,6 +1688,120 @@ MakeViewportMetricsFromWindowMetrics(
            "physical height or width.";
   }
 
+  if (SAFE_ACCESS(flutter_metrics, has_extended_metrics, false)) {
+    metrics.physical_padding_top =
+        SAFE_ACCESS(flutter_metrics, physical_padding_top, 0.0);
+    metrics.physical_padding_right =
+        SAFE_ACCESS(flutter_metrics, physical_padding_right, 0.0);
+    metrics.physical_padding_bottom =
+        SAFE_ACCESS(flutter_metrics, physical_padding_bottom, 0.0);
+    metrics.physical_padding_left =
+        SAFE_ACCESS(flutter_metrics, physical_padding_left, 0.0);
+    metrics.physical_system_gesture_inset_top =
+        SAFE_ACCESS(flutter_metrics, physical_system_gesture_inset_top, 0.0);
+    metrics.physical_system_gesture_inset_right =
+        SAFE_ACCESS(flutter_metrics, physical_system_gesture_inset_right, 0.0);
+    metrics.physical_system_gesture_inset_bottom =
+        SAFE_ACCESS(flutter_metrics, physical_system_gesture_inset_bottom, 0.0);
+    metrics.physical_system_gesture_inset_left =
+        SAFE_ACCESS(flutter_metrics, physical_system_gesture_inset_left, 0.0);
+    metrics.physical_touch_slop =
+        SAFE_ACCESS(flutter_metrics, physical_touch_slop, -1.0);
+
+    // `lib/ui/platform_dispatcher.dart` treats a negative touch slop as "use
+    // the platform default" and any other value as a real setting, so a slop
+    // of zero would make every touch an immediate drag. Embedders are told to
+    // zero-initialize this struct, which means an embedder that only wants to
+    // report padding would otherwise disable touch slop by accident. Fold
+    // every non-positive value into the unset sentinel instead.
+    if (metrics.physical_touch_slop <= 0) {
+      metrics.physical_touch_slop = -1.0;
+    }
+
+    // Padding and system gesture insets are validated for non-negativity for
+    // the same reason `physical_view_inset_*` is above. They are deliberately
+    // not also bounded by the view dimensions: unlike view insets, an embedder
+    // that hosts Flutter in a partial-screen view can legitimately report a
+    // system padding (a status bar or cutout, for example) that is larger than
+    // the view itself.
+    if (metrics.physical_padding_top < 0 ||
+        metrics.physical_padding_right < 0 ||
+        metrics.physical_padding_bottom < 0 ||
+        metrics.physical_padding_left < 0) {
+      return "Physical padding is invalid. It must be non-negative.";
+    }
+
+    if (metrics.physical_system_gesture_inset_top < 0 ||
+        metrics.physical_system_gesture_inset_right < 0 ||
+        metrics.physical_system_gesture_inset_bottom < 0 ||
+        metrics.physical_system_gesture_inset_left < 0) {
+      return "System gesture insets are invalid. They must be non-negative.";
+    }
+
+    size_t feature_count =
+        SAFE_ACCESS(flutter_metrics, display_features_count, 0u);
+    const double* bounds =
+        SAFE_ACCESS(flutter_metrics, display_features_bounds, nullptr);
+    const int32_t* types =
+        SAFE_ACCESS(flutter_metrics, display_features_type, nullptr);
+    const int32_t* states =
+        SAFE_ACCESS(flutter_metrics, display_features_state, nullptr);
+
+    if (feature_count > 0) {
+      // Every display feature rectangle has 4 coordinates (left, top, right,
+      // bottom). Reject before computing `feature_count * 4`, which would
+      // otherwise overflow size_t, and before sizing any allocation from it.
+      constexpr size_t kCoordinatesPerFeatureBounds = 4;
+      if (feature_count > kFlutterMaxDisplayFeatures) {
+        return "Display feature count is invalid. It must not exceed "
+               "kFlutterMaxDisplayFeatures.";
+      }
+
+      if (bounds == nullptr || types == nullptr || states == nullptr) {
+        return "Display features are invalid. When display_features_count is "
+               "non-zero, display_features_bounds, display_features_type, and "
+               "display_features_state must all be provided.";
+      }
+
+      // These values are forwarded to `_decodeDisplayFeatures` in
+      // `lib/ui/hooks.dart`, whose guards are asymmetric:
+      //
+      //   * `type` indexes `DisplayFeatureType.values` unchecked, so an
+      //     out-of-range type would throw a `RangeError` inside the engine.
+      //     Both bounds must be enforced here.
+      //   * `state` is checked against `DisplayFeatureState.values.length` and
+      //     falls back to `unknown`, so a state the engine does not know yet is
+      //     deliberately accepted to keep newer embedders forward compatible.
+      //     That guard is upper bound only, so a negative index would still
+      //     throw and must be rejected here.
+      for (size_t i = 0; i < feature_count; i++) {
+        if (types[i] < kFlutterDisplayFeatureTypeUnknown ||
+            types[i] > kFlutterDisplayFeatureTypeCutout) {
+          return "Display feature type is invalid. It must be a valid "
+                 "FlutterDisplayFeatureType.";
+        }
+        if (states[i] < kFlutterDisplayFeatureStateUnknown) {
+          return "Display feature state is invalid. It must not be negative.";
+        }
+      }
+
+      metrics.physical_display_features_bounds.assign(
+          bounds, bounds + feature_count * kCoordinatesPerFeatureBounds);
+      metrics.physical_display_features_type.assign(types,
+                                                    types + feature_count);
+      metrics.physical_display_features_state.assign(states,
+                                                     states + feature_count);
+    }
+    metrics.physical_display_corner_radius_top_left = SAFE_ACCESS(
+        flutter_metrics, physical_display_corner_radius_top_left, -1.0);
+    metrics.physical_display_corner_radius_top_right = SAFE_ACCESS(
+        flutter_metrics, physical_display_corner_radius_top_right, -1.0);
+    metrics.physical_display_corner_radius_bottom_right = SAFE_ACCESS(
+        flutter_metrics, physical_display_corner_radius_bottom_right, -1.0);
+    metrics.physical_display_corner_radius_bottom_left = SAFE_ACCESS(
+        flutter_metrics, physical_display_corner_radius_bottom_left, -1.0);
+  }
+
   return metrics;
 }
 
