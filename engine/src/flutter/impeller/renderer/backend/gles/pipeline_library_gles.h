@@ -90,7 +90,8 @@ class PipelineLibraryGLES final
                                         ProgramKey::Equal>;
 
   std::shared_ptr<ReactorGLES> reactor_;
-  PipelineMap pipelines_;
+  Mutex pipelines_mutex_;
+  PipelineMap pipelines_ IPLR_GUARDED_BY(pipelines_mutex_);
   Mutex programs_mutex_;
   ProgramMap programs_ IPLR_GUARDED_BY(programs_mutex_);
   std::shared_ptr<PipelineCompileQueueGLES> compile_queue_;

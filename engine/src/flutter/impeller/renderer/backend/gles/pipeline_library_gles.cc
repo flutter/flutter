@@ -273,8 +273,11 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
     PipelineDescriptor descriptor,
     bool async,
     bool threadsafe) {
-  if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
-    return found->second;
+  {
+    Lock lock(pipelines_mutex_);
+    if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
+      return found->second;
+    }
   }
 
   if (!reactor_) {
@@ -298,7 +301,14 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
       std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
   auto pipeline_future =
       PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
-  pipelines_[descriptor] = pipeline_future;
+  {
+    Lock lock(pipelines_mutex_);
+    auto [found, inserted] =
+        pipelines_.try_emplace(descriptor, pipeline_future);
+    if (!inserted) {
+      return found->second;
+    }
+  }
 
   std::weak_ptr<PipelineLibrary> weak_this = weak_from_this();
   std::shared_ptr<ReactorGLES> reactor = reactor_;
@@ -344,13 +354,15 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryGLES::GetPipeline(
 
 // |PipelineLibrary|
 bool PipelineLibraryGLES::HasPipeline(const PipelineDescriptor& descriptor) {
+  Lock lock(pipelines_mutex_);
   return pipelines_.find(descriptor) != pipelines_.end();
 }
 
 // |PipelineLibrary|
 void PipelineLibraryGLES::RemovePipelinesWithEntryPoint(
     std::shared_ptr<const ShaderFunction> function) {
-  Lock lock(programs_mutex_);
+  Lock pipelines_lock(pipelines_mutex_);
+  Lock programs_lock(programs_mutex_);
 
   PipelineMap::iterator it = pipelines_.begin();
   while (it != pipelines_.end()) {
