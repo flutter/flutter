@@ -1,0 +1,25 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @dart: the Dart SDK sources pinned in DEPS.
+#
+# For now this exposes only the embedding API headers. The engine includes
+# them as "third_party/dart/runtime/include/<name>.h", which GN resolves
+# through the engine root include directory; include_prefix reproduces that
+# path here so no source has to change. Building the VM, gen_snapshot and the
+# dart binary from these sources comes later in the migration.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# The C API an embedder compiles against: the headers of
+# //third_party/dart/runtime:dart_api (runtime/BUILD.gn) plus the bin/ ones
+# the engine's dart:io glue includes. Header-only: dart_api_dl.c belongs to
+# the embedder that uses the dynamic linking API, not here.
+cc_library(
+    name = "dart_api_headers",
+    hdrs = glob(["runtime/include/**/*.h"]),
+    include_prefix = "third_party/dart",
+)
