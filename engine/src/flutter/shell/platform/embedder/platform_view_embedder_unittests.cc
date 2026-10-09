@@ -24,6 +24,7 @@ constexpr fml::TimeDelta kFrameInterval =
     fml::TimeDelta::FromMicroseconds(16667);
 
 class MockDelegate : public PlatformView::Delegate {
+ public:
   MOCK_METHOD(void,
               OnPlatformViewCreated,
               (std::unique_ptr<Surface>),
@@ -318,6 +319,104 @@ TEST(PlatformViewEmbedderTest,
   // The timer fallback would also fire the frame, so this is what shows that
   // the dispatch table was used.
   EXPECT_EQ(vsync_callback_calls, 1);
+}
+
+TEST(PlatformViewEmbedderTest,
+     SubclassWithoutSurfaceForwardsCallbacksThroughDispatchTable) {
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform);
+  flutter::TaskRunners task_runners = flutter::TaskRunners(
+      GetCurrentTestName(), thread_host.platform_thread->GetTaskRunner(),
+      nullptr, nullptr, nullptr);
+  fml::AutoResetWaitableEvent latch;
+  task_runners.GetPlatformTaskRunner()->PostTask([&latch, task_runners] {
+    MockDelegate delegate;
+    std::string recorded_locale;
+    std::vector<bool> recorded_semantics_tree_enabled;
+    std::vector<intptr_t> recorded_loading_units;
+    // Sample unscaled font size (16 sp), configuration ID (2), and non-linearly
+    // scaled font size (20 px) returned by the callback.
+    constexpr intptr_t kTestLoadingUnitId = 9;
+    constexpr double kUnscaledFontSize = 16.0;
+    constexpr int kConfigurationId = 2;
+    constexpr double kExpectedScaledFontSize = 20.0;
+
+    PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table;
+    platform_dispatch_table.set_application_locale_callback =
+        [&recorded_locale](std::string locale) {
+          recorded_locale = std::move(locale);
+        };
+    platform_dispatch_table.set_semantics_tree_enabled_callback =
+        [&recorded_semantics_tree_enabled](bool enabled) {
+          recorded_semantics_tree_enabled.push_back(enabled);
+        };
+    platform_dispatch_table.request_dart_deferred_library_callback =
+        [&recorded_loading_units](intptr_t loading_unit_id) {
+          recorded_loading_units.push_back(loading_unit_id);
+        };
+    platform_dispatch_table.get_scaled_font_size_callback =
+        [kConfigurationId](double unscaled_font_size, int configuration_id) {
+          EXPECT_DOUBLE_EQ(unscaled_font_size, kUnscaledFontSize);
+          EXPECT_EQ(configuration_id, kConfigurationId);
+          return kExpectedScaledFontSize;
+        };
+
+    SurfacelessPlatformViewEmbedder embedder(
+        delegate, task_runners, std::move(platform_dispatch_table));
+    PlatformView& platform_view = embedder;
+    const PlatformView& const_platform_view = embedder;
+
+    platform_view.SetApplicationLocale("ja-JP");
+    platform_view.SetSemanticsTreeEnabled(true);
+    platform_view.SetSemanticsTreeEnabled(false);
+    platform_view.RequestDartDeferredLibrary(kTestLoadingUnitId);
+    double scaled = const_platform_view.GetScaledFontSize(kUnscaledFontSize,
+                                                          kConfigurationId);
+
+    EXPECT_EQ(recorded_locale, "ja-JP");
+    EXPECT_THAT(recorded_semantics_tree_enabled,
+                ::testing::ElementsAre(true, false));
+    EXPECT_THAT(recorded_loading_units,
+                ::testing::ElementsAre(kTestLoadingUnitId));
+    EXPECT_DOUBLE_EQ(scaled, kExpectedScaledFontSize);
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+TEST(PlatformViewEmbedderTest,
+     SubclassWithoutSurfaceForwardsDeferredLibraryAndAssetResolverToDelegate) {
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform);
+  flutter::TaskRunners task_runners = flutter::TaskRunners(
+      GetCurrentTestName(), thread_host.platform_thread->GetTaskRunner(),
+      nullptr, nullptr, nullptr);
+  fml::AutoResetWaitableEvent latch;
+  task_runners.GetPlatformTaskRunner()->PostTask([&latch, task_runners] {
+    MockDelegate delegate;
+    SurfacelessPlatformViewEmbedder embedder(delegate, task_runners, {});
+    PlatformView& platform_view = embedder;
+
+    // Sample loading unit IDs for success and error paths.
+    constexpr intptr_t kLoadedUnitId = 4;
+    constexpr intptr_t kFailedUnitId = 6;
+    EXPECT_CALL(delegate, LoadDartDeferredLibrary(kLoadedUnitId, ::testing::_,
+                                                  ::testing::_));
+    EXPECT_CALL(delegate, LoadDartDeferredLibraryError(kFailedUnitId,
+                                                       "missing .so", true));
+    EXPECT_CALL(
+        delegate,
+        UpdateAssetResolverByType(
+            ::testing::_, AssetResolver::AssetResolverType::kApkAssetProvider));
+
+    platform_view.LoadDartDeferredLibrary(kLoadedUnitId, nullptr, nullptr);
+    platform_view.LoadDartDeferredLibraryError(kFailedUnitId, "missing .so",
+                                               true);
+    platform_view.UpdateAssetResolverByType(
+        nullptr, AssetResolver::AssetResolverType::kApkAssetProvider);
+    latch.Signal();
+  });
+  latch.Wait();
 }
 
 }  // namespace testing
