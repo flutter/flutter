@@ -83,6 +83,7 @@ config("disable_warnings") {
 
 source_set("flutter_linux_sources") {
   public = _public_headers + [
+             "fl_atk_compat.h",
              "fl_binary_messenger_private.h",
              "fl_engine_private.h",
              "fl_key_channel_responder.h",
