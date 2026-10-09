@@ -10,10 +10,13 @@
 #include "display_list/dl_text_skia.h"
 #include "display_list/geometry/dl_geometry_conversions.h"
 #include "fml/logging.h"
-#include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/src/core/SkTextBlobPriv.h"  // nogncheck
+
+#ifdef IMPELLER_SUPPORTS_RENDERING
+#include "impeller/display_list/dl_text_impeller.h"
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 namespace txt {
 
