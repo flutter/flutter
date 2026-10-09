@@ -55,6 +55,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/embedder_asset_resolver.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
 #include "flutter/shell/platform/embedder/embedder_platform_message_response.h"
@@ -2158,7 +2159,12 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
                               "The Flutter project arguments were missing.");
   }
 
-  if (SAFE_ACCESS(args, assets_path, nullptr) == nullptr) {
+  bool has_custom_asset_resolvers =
+      SAFE_ACCESS(args, asset_resolvers, nullptr) != nullptr &&
+      SAFE_ACCESS(args, asset_resolvers_count, 0) > 0;
+
+  if (SAFE_ACCESS(args, assets_path, nullptr) == nullptr &&
+      !has_custom_asset_resolvers) {
     return LOG_EMBEDDER_ERROR(
         kInvalidArguments,
         "The assets path in the Flutter project arguments was missing.");
@@ -2225,7 +2231,9 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   }
 
   settings.icu_data_path = icu_data_path;
-  settings.assets_path = args->assets_path;
+  if (SAFE_ACCESS(args, assets_path, nullptr) != nullptr) {
+    settings.assets_path = args->assets_path;
+  }
   settings.leak_vm = !SAFE_ACCESS(args, shutdown_dart_vm_when_done, false);
   settings.old_gen_heap_size = SAFE_ACCESS(args, dart_old_gen_heap_size, -1);
   settings.enable_wide_gamut = SAFE_ACCESS(args, enable_wide_gamut, false);
@@ -2233,12 +2241,14 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   if (!flutter::DartVM::IsRunningPrecompiledCode()) {
     // Verify the assets path contains Dart 2 kernel assets.
     const std::string kApplicationKernelSnapshotFileName = "kernel_blob.bin";
-    std::string application_kernel_path = fml::paths::JoinPaths(
-        {settings.assets_path, kApplicationKernelSnapshotFileName});
-    if (!fml::IsFile(application_kernel_path)) {
-      return LOG_EMBEDDER_ERROR(
-          kInvalidArguments,
-          "Not running in AOT mode but could not resolve the kernel binary.");
+    if (!settings.assets_path.empty() && !has_custom_asset_resolvers) {
+      std::string application_kernel_path = fml::paths::JoinPaths(
+          {settings.assets_path, kApplicationKernelSnapshotFileName});
+      if (!fml::IsFile(application_kernel_path)) {
+        return LOG_EMBEDDER_ERROR(
+            kInvalidArguments,
+            "Not running in AOT mode but could not resolve the kernel binary.");
+      }
     }
     settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
   }
@@ -2412,6 +2422,17 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         };
   }
 
+  flutter::PlatformViewEmbedder::RequestDartDeferredLibraryCallback
+      request_dart_deferred_library_callback = nullptr;
+  if (SAFE_ACCESS(args, dart_deferred_library_loader_callback, nullptr) !=
+      nullptr) {
+    request_dart_deferred_library_callback =
+        [ptr = args->dart_deferred_library_loader_callback,
+         user_data](intptr_t loading_unit_id) {
+          ptr(static_cast<int64_t>(loading_unit_id), user_data);
+        };
+  }
+
   auto external_view_embedder_result = InferExternalViewEmbedderFromArgs(
       SAFE_ACCESS(args, compositor, nullptr), settings.enable_impeller);
   if (!external_view_embedder_result.ok()) {
@@ -2429,6 +2450,10 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
           on_pre_engine_restart_callback,             //
           channel_update_callback,                    //
           view_focus_change_request_callback,         //
+          nullptr,                                    //
+          nullptr,                                    //
+          request_dart_deferred_library_callback,     //
+          nullptr,                                    //
   };
 
   impeller::Flags impeller_flags;
@@ -2586,8 +2611,45 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     }
   };
 
-  auto run_configuration =
-      flutter::RunConfiguration::InferFromSettings(settings);
+  auto asset_manager = std::make_shared<flutter::AssetManager>();
+
+  if (fml::UniqueFD::traits_type::IsValid(settings.assets_dir)) {
+    asset_manager->PushBack(std::make_unique<flutter::DirectoryAssetBundle>(
+        fml::Duplicate(settings.assets_dir), true));
+  }
+
+  if (!settings.assets_path.empty()) {
+    asset_manager->PushBack(std::make_unique<flutter::DirectoryAssetBundle>(
+        fml::OpenDirectory(settings.assets_path.c_str(), false,
+                           fml::FilePermission::kRead),
+        true));
+  }
+
+  if (has_custom_asset_resolvers) {
+    size_t count = args->asset_resolvers_count;
+    for (size_t i = 0; i < count; ++i) {
+      const FlutterAssetResolver* resolver = args->asset_resolvers[i];
+      if (resolver != nullptr) {
+        if (resolver->struct_size < sizeof(FlutterAssetResolver)) {
+          return LOG_EMBEDDER_ERROR(
+              kInvalidArguments,
+              "FlutterAssetResolver struct_size is invalid.");
+        }
+        if (resolver->find_asset_callback == nullptr) {
+          return LOG_EMBEDDER_ERROR(
+              kInvalidArguments,
+              "FlutterAssetResolver find_asset_callback is required.");
+        }
+        auto asset_resolver =
+            std::make_unique<flutter::EmbedderAssetResolver>(*resolver);
+        asset_manager->PushBack(std::move(asset_resolver));
+      }
+    }
+  }
+
+  flutter::RunConfiguration run_configuration(
+      flutter::IsolateConfiguration::InferFromSettings(settings, asset_manager),
+      asset_manager);
 
   if (SAFE_ACCESS(args, custom_dart_entrypoint, nullptr) != nullptr) {
     auto dart_entrypoint = std::string{args->custom_dart_entrypoint};
@@ -3892,6 +3954,164 @@ FlutterEngineResult FlutterEngineSetNextFrameCallback(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineUpdateAssetResolver(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterAssetResolverRegistrationInfo* info) {
+  if (engine == nullptr || info == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine or info was null.");
+  }
+
+  if (info->struct_size < sizeof(FlutterAssetResolverRegistrationInfo)) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "FlutterAssetResolverRegistrationInfo struct_size is invalid.");
+  }
+
+  if (info->resolver == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Asset resolver was null.");
+  }
+
+  if (info->resolver->struct_size < sizeof(FlutterAssetResolver)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "FlutterAssetResolver struct_size is invalid.");
+  }
+
+  if (info->resolver->find_asset_callback == nullptr) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "FlutterAssetResolver find_asset_callback is required.");
+  }
+
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  auto asset_resolver =
+      std::make_unique<flutter::EmbedderAssetResolver>(*info->resolver);
+
+  if (!embedder_engine->UpdateAssetResolver(
+          std::move(asset_resolver),
+          flutter::AssetResolver::AssetResolverType::kCustomResolver)) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not update asset resolver.");
+  }
+
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineLoadDartDeferredLibrary(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterDartDeferredLibrary* deferred_library) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  if (deferred_library == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "FlutterDartDeferredLibrary was null.");
+  }
+
+  if (deferred_library->struct_size < sizeof(FlutterDartDeferredLibrary)) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "FlutterDartDeferredLibrary struct_size was invalid.");
+  }
+
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Engine handle was not running.");
+  }
+
+  if (deferred_library->data == nullptr &&
+      SAFE_ACCESS(deferred_library, instructions, nullptr) == nullptr) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "Neither snapshot data nor instructions buffer was provided.");
+  }
+
+  auto user_data = SAFE_ACCESS(deferred_library, user_data, nullptr);
+  auto destruction_callback =
+      SAFE_ACCESS(deferred_library, destruction_callback, nullptr);
+
+  std::shared_ptr<fml::ScopedCleanupClosure> cleanup;
+  if (destruction_callback != nullptr) {
+    cleanup = std::make_shared<fml::ScopedCleanupClosure>(
+        [destruction_callback, user_data]() {
+          destruction_callback(user_data);
+        });
+  }
+
+  std::unique_ptr<const fml::Mapping> data_mapping;
+  if (deferred_library->data != nullptr) {
+    data_mapping = std::make_unique<const fml::NonOwnedMapping>(
+        deferred_library->data, deferred_library->data_size,
+        [cleanup](const uint8_t* ptr, size_t size) {
+          // Retains cleanup closure.
+        });
+  }
+
+  std::unique_ptr<const fml::Mapping> instructions_mapping;
+  if (SAFE_ACCESS(deferred_library, instructions, nullptr) != nullptr) {
+    instructions_mapping = std::make_unique<const fml::NonOwnedMapping>(
+        deferred_library->instructions, deferred_library->instructions_size,
+        [cleanup](const uint8_t* ptr, size_t size) {
+          // Retains cleanup closure.
+        });
+  }
+
+  if (!embedder_engine->LoadDartDeferredLibrary(
+          deferred_library->loading_unit_id, std::move(data_mapping),
+          std::move(instructions_mapping))) {
+    if (cleanup) {
+      cleanup->Release();
+    }
+    return LOG_EMBEDDER_ERROR(
+        kInternalInconsistency,
+        "Could not dispatch LoadDartDeferredLibrary to the engine.");
+  }
+
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineNotifyDartDeferredLibraryLoadError(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterDartDeferredLibraryLoadError* error) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  if (error == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "FlutterDartDeferredLibraryLoadError was null.");
+  }
+
+  if (error->struct_size < sizeof(FlutterDartDeferredLibraryLoadError)) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "FlutterDartDeferredLibraryLoadError struct_size was invalid.");
+  }
+
+  if (SAFE_ACCESS(error, error_message, nullptr) == nullptr) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "FlutterDartDeferredLibraryLoadError error_message was null.");
+  }
+
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Engine handle was not running.");
+  }
+
+  if (!embedder_engine->LoadDartDeferredLibraryError(
+          error->loading_unit_id, std::string{error->error_message},
+          SAFE_ACCESS(error, transient, false))) {
+    return LOG_EMBEDDER_ERROR(
+        kInternalInconsistency,
+        "Could not dispatch LoadDartDeferredLibraryError to the engine.");
+  }
+
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -3948,6 +4168,10 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(AddView, FlutterEngineAddView);
   SET_PROC(RemoveView, FlutterEngineRemoveView);
   SET_PROC(SendViewFocusEvent, FlutterEngineSendViewFocusEvent);
+  SET_PROC(UpdateAssetResolver, FlutterEngineUpdateAssetResolver);
+  SET_PROC(LoadDartDeferredLibrary, FlutterEngineLoadDartDeferredLibrary);
+  SET_PROC(NotifyDartDeferredLibraryLoadError,
+           FlutterEngineNotifyDartDeferredLibraryLoadError);
 #undef SET_PROC
 
   return kSuccess;

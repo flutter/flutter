@@ -24,6 +24,7 @@
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/shell/platform/embedder/embedder_asset_resolver.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
@@ -4845,6 +4846,436 @@ TEST_F(EmbedderTest, PlatformThreadIsolatesWithCustomPlatformTaskRunner) {
 
   // Check that the FFI call was executed on the platform thread.
   ASSERT_EQ(platform_thread_id, ffi_call_thread_id);
+}
+
+TEST_F(EmbedderTest, EmbedderAssetResolverDirect) {
+  std::string test_data = "Hello Flutter Assets!";
+
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = &test_data;
+  resolver.find_asset_callback = [](void* user_data, const char* name,
+                                    FlutterAsset* asset_out) -> bool {
+    auto* str = static_cast<std::string*>(user_data);
+    if (std::string(name) == "test_asset.txt") {
+      asset_out->struct_size = sizeof(FlutterAsset);
+      asset_out->data = reinterpret_cast<const uint8_t*>(str->data());
+      asset_out->size = str->size();
+      asset_out->user_data = nullptr;
+      asset_out->asset_free_callback = nullptr;
+      return true;
+    }
+    return false;
+  };
+  resolver.is_valid_callback = [](void* user_data) { return true; };
+  resolver.is_valid_after_change_callback = [](void* user_data) {
+    return true;
+  };
+  resolver.destruction_callback = [](void* user_data) {};
+
+  {
+    EmbedderAssetResolver embedder_resolver(resolver);
+    EXPECT_TRUE(embedder_resolver.IsValid());
+    EXPECT_TRUE(embedder_resolver.IsValidAfterAssetManagerChange());
+    EXPECT_EQ(embedder_resolver.GetType(),
+              AssetResolver::AssetResolverType::kCustomResolver);
+
+    auto mapping = embedder_resolver.GetAsMapping("test_asset.txt");
+    ASSERT_NE(mapping, nullptr);
+    EXPECT_EQ(mapping->GetSize(), test_data.size());
+    EXPECT_EQ(std::string(reinterpret_cast<const char*>(mapping->GetMapping()),
+                          mapping->GetSize()),
+              test_data);
+
+    auto missing_mapping = embedder_resolver.GetAsMapping("missing.txt");
+    EXPECT_EQ(missing_mapping, nullptr);
+
+    EmbedderAssetResolver identical_resolver(resolver);
+    EXPECT_TRUE(embedder_resolver == identical_resolver);
+
+    // Differing by `user_data` is compared as data, so no linker optimization
+    // can make these two look alike.
+    std::string other_data = test_data;
+    FlutterAssetResolver different_user_data_resolver = resolver;
+    different_user_data_resolver.user_data = &other_data;
+    EmbedderAssetResolver different_user_data(different_user_data_resolver);
+    EXPECT_FALSE(embedder_resolver == different_user_data);
+
+    // Differing by a callback has to be done with a body that is not merely
+    // another empty function: two identical captureless lambdas may be folded
+    // into a single function by the linker (MSVC's identical COMDAT folding
+    // does exactly that), which would give them the same address and make the
+    // two resolvers compare equal. The body must stay inert and must not
+    // dereference `user_data`, which still points at the `std::string` the
+    // original resolver was built with, not at anything this callback owns.
+    FlutterAssetResolver different_destructor_resolver = resolver;
+    different_destructor_resolver.destruction_callback = [](void* user_data) {
+      static int destruction_count = 0;
+      destruction_count++;
+    };
+    EmbedderAssetResolver different_resolver(different_destructor_resolver);
+    EXPECT_FALSE(embedder_resolver == different_resolver);
+  }
+}
+
+TEST_F(EmbedderTest, EmbedderAssetResolverFreeCallback) {
+  bool asset_freed = false;
+
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = &asset_freed;
+  resolver.find_asset_callback = [](void* user_data, const char* name,
+                                    FlutterAsset* asset_out) -> bool {
+    static const char kStaticData[] = "Resource To Free";
+    asset_out->struct_size = sizeof(FlutterAsset);
+    asset_out->data = reinterpret_cast<const uint8_t*>(kStaticData);
+    asset_out->size = sizeof(kStaticData);
+    asset_out->user_data = user_data;
+    asset_out->asset_free_callback = [](void* baton) {
+      *static_cast<bool*>(baton) = true;
+    };
+    return true;
+  };
+
+  {
+    EmbedderAssetResolver embedder_resolver(resolver);
+    auto mapping = embedder_resolver.GetAsMapping("test.txt");
+    ASSERT_NE(mapping, nullptr);
+    EXPECT_FALSE(asset_freed);
+  }
+  EXPECT_TRUE(asset_freed);
+}
+
+TEST_F(EmbedderTest, EmbedderAssetResolverNullDataFreeCallback) {
+  bool asset_freed = false;
+
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = &asset_freed;
+  resolver.find_asset_callback = [](void* user_data, const char* name,
+                                    FlutterAsset* asset_out) -> bool {
+    asset_out->struct_size = sizeof(FlutterAsset);
+    asset_out->data = nullptr;
+    asset_out->size = 0;
+    asset_out->user_data = user_data;
+    asset_out->asset_free_callback = [](void* baton) {
+      *static_cast<bool*>(baton) = true;
+    };
+    return true;
+  };
+
+  {
+    EmbedderAssetResolver embedder_resolver(resolver);
+    auto mapping = embedder_resolver.GetAsMapping("test.txt");
+    // An asset that resolves successfully with no bytes is a valid, empty
+    // asset. This matches `fml::FileMapping`, which reports a zero-length file
+    // as a valid mapping with a null pointer and a size of zero, so
+    // `DirectoryAssetBundle` returns a mapping for an empty asset too.
+    ASSERT_NE(mapping, nullptr);
+    EXPECT_EQ(mapping->GetSize(), 0u);
+    EXPECT_EQ(mapping->GetMapping(), nullptr);
+    // The asset is only released once the mapping that owns it is destroyed.
+    EXPECT_FALSE(asset_freed);
+  }
+  EXPECT_TRUE(asset_freed);
+}
+
+TEST_F(EmbedderTest, EmbedderAssetResolverDestructionCallback) {
+  bool resolver_destroyed = false;
+
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = &resolver_destroyed;
+  resolver.find_asset_callback = [](void* user_data, const char* name,
+                                    FlutterAsset* asset_out) -> bool {
+    return false;
+  };
+  resolver.destruction_callback = [](void* user_data) {
+    *static_cast<bool*>(user_data) = true;
+  };
+
+  {
+    EmbedderAssetResolver embedder_resolver(resolver);
+    EXPECT_FALSE(resolver_destroyed);
+  }
+  EXPECT_TRUE(resolver_destroyed);
+}
+
+TEST_F(EmbedderTest, EmbedderCustomAssetResolversInProjectArgs) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = nullptr;
+  resolver.find_asset_callback = [](void* user_data, const char* name,
+                                    FlutterAsset* asset_out) -> bool {
+    return false;
+  };
+
+  const FlutterAssetResolver* resolvers[] = {&resolver};
+  builder.GetProjectArgs().asset_resolvers = resolvers;
+  builder.GetProjectArgs().asset_resolvers_count = 1;
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+}
+
+TEST_F(EmbedderTest, EmbedderUpdateAssetResolver) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Test invalid arguments.
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(nullptr, nullptr),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), nullptr),
+            kInvalidArguments);
+
+  FlutterAssetResolverRegistrationInfo invalid_info = {};
+  invalid_info.struct_size = sizeof(FlutterAssetResolverRegistrationInfo) - 1;
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), &invalid_info),
+            kInvalidArguments);
+
+  FlutterAssetResolverRegistrationInfo info = {};
+  info.struct_size = sizeof(FlutterAssetResolverRegistrationInfo);
+  info.resolver = nullptr;
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), &info),
+            kInvalidArguments);
+
+  FlutterAssetResolver invalid_resolver = {};
+  invalid_resolver.struct_size = sizeof(FlutterAssetResolver) - 1;
+  info.resolver = &invalid_resolver;
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), &info),
+            kInvalidArguments);
+
+  FlutterAssetResolver missing_callback_resolver = {};
+  missing_callback_resolver.struct_size = sizeof(FlutterAssetResolver);
+  missing_callback_resolver.find_asset_callback = nullptr;
+  info.resolver = &missing_callback_resolver;
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), &info),
+            kInvalidArguments);
+
+  // Test valid update.
+  FlutterAssetResolver valid_resolver = {};
+  valid_resolver.struct_size = sizeof(FlutterAssetResolver);
+  valid_resolver.user_data = nullptr;
+  valid_resolver.find_asset_callback = [](void* user_data, const char* name,
+                                          FlutterAsset* asset_out) -> bool {
+    return false;
+  };
+  info.resolver = &valid_resolver;
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), &info), kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderGetProcAddressesUpdateAssetResolver) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  EXPECT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+  EXPECT_EQ(procs.UpdateAssetResolver, &FlutterEngineUpdateAssetResolver);
+}
+
+TEST_F(EmbedderTest, EmbedderLoadDartDeferredLibraryInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Null engine.
+  FlutterDartDeferredLibrary valid_lib = {};
+  valid_lib.struct_size = sizeof(FlutterDartDeferredLibrary);
+  // Non-empty placeholder bytes for snapshot data validation.
+  const uint8_t dummy_data[] = {0x01, 0x02};
+  valid_lib.data = dummy_data;
+  valid_lib.data_size = sizeof(dummy_data);
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(nullptr, &valid_lib),
+            kInvalidArguments);
+
+  // Null deferred library.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), nullptr),
+            kInvalidArguments);
+
+  // Invalid struct_size.
+  FlutterDartDeferredLibrary invalid_size_lib = {};
+  invalid_size_lib.struct_size = sizeof(FlutterDartDeferredLibrary) - 1;
+  invalid_size_lib.data = dummy_data;
+  invalid_size_lib.data_size = sizeof(dummy_data);
+  EXPECT_EQ(
+      FlutterEngineLoadDartDeferredLibrary(engine.get(), &invalid_size_lib),
+      kInvalidArguments);
+
+  // Missing data and instructions.
+  FlutterDartDeferredLibrary empty_lib = {};
+  empty_lib.struct_size = sizeof(FlutterDartDeferredLibrary);
+  constexpr int64_t kTestLoadingUnitId = 1;
+  empty_lib.loading_unit_id = kTestLoadingUnitId;
+  empty_lib.data = nullptr;
+  empty_lib.instructions = nullptr;
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), &empty_lib),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest,
+       EmbedderNotifyDartDeferredLibraryLoadErrorInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  constexpr int64_t kTestLoadingUnitId = 1;
+  FlutterDartDeferredLibraryLoadError valid_error = {};
+  valid_error.struct_size = sizeof(FlutterDartDeferredLibraryLoadError);
+  valid_error.loading_unit_id = kTestLoadingUnitId;
+  valid_error.error_message = "Test error";
+  valid_error.transient = true;
+
+  // Null engine.
+  EXPECT_EQ(
+      FlutterEngineNotifyDartDeferredLibraryLoadError(nullptr, &valid_error),
+      kInvalidArguments);
+
+  // Null error.
+  EXPECT_EQ(
+      FlutterEngineNotifyDartDeferredLibraryLoadError(engine.get(), nullptr),
+      kInvalidArguments);
+
+  // Invalid struct_size.
+  FlutterDartDeferredLibraryLoadError invalid_size_error = {};
+  invalid_size_error.struct_size =
+      sizeof(FlutterDartDeferredLibraryLoadError) - 1;
+  invalid_size_error.loading_unit_id = kTestLoadingUnitId;
+  invalid_size_error.error_message = "Test error";
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(
+                engine.get(), &invalid_size_error),
+            kInvalidArguments);
+
+  // Null error message.
+  FlutterDartDeferredLibraryLoadError null_msg_error = {};
+  null_msg_error.struct_size = sizeof(FlutterDartDeferredLibraryLoadError);
+  null_msg_error.loading_unit_id = kTestLoadingUnitId;
+  null_msg_error.error_message = nullptr;
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(engine.get(),
+                                                            &null_msg_error),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, EmbedderLoadDartDeferredLibraryDirect) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  bool destruction_called = false;
+  // Arbitrary test byte sequences representing deferred snapshot data and
+  // instructions.
+  const uint8_t dummy_data[] = {0x00, 0x01, 0x02, 0x03};
+  const uint8_t dummy_instructions[] = {0x10, 0x11, 0x12, 0x13};
+  constexpr int64_t kTestLoadingUnitId = 42;
+
+  FlutterDartDeferredLibrary deferred_library = {};
+  deferred_library.struct_size = sizeof(FlutterDartDeferredLibrary);
+  deferred_library.loading_unit_id = kTestLoadingUnitId;
+  deferred_library.data = dummy_data;
+  deferred_library.data_size = sizeof(dummy_data);
+  deferred_library.instructions = dummy_instructions;
+  deferred_library.instructions_size = sizeof(dummy_instructions);
+  deferred_library.user_data = &destruction_called;
+  deferred_library.destruction_callback = [](void* user_data) {
+    *reinterpret_cast<bool*>(user_data) = true;
+  };
+
+  EXPECT_EQ(
+      FlutterEngineLoadDartDeferredLibrary(engine.get(), &deferred_library),
+      kSuccess);
+
+  // Mappings are retained while engine is running.
+  EXPECT_FALSE(destruction_called);
+
+  // Shutdown engine to release snapshot mappings and trigger destruction
+  // callback.
+  engine.reset();
+  EXPECT_TRUE(destruction_called);
+}
+
+TEST_F(EmbedderTest, EmbedderNotifyDartDeferredLibraryLoadErrorDirect) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  constexpr int64_t kTestLoadingUnitId = 99;
+  FlutterDartDeferredLibraryLoadError error = {};
+  error.struct_size = sizeof(FlutterDartDeferredLibraryLoadError);
+  error.loading_unit_id = kTestLoadingUnitId;
+  error.error_message = "Module failed to download from network.";
+  error.transient = true;
+
+  EXPECT_EQ(
+      FlutterEngineNotifyDartDeferredLibraryLoadError(engine.get(), &error),
+      kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderDartDeferredLibraryRequestCallback) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  struct CallbackPayload {
+    int64_t loading_unit_id = -1;
+    void* user_data = nullptr;
+  };
+
+  CallbackPayload payload;
+  EmbedderConfigBuilder builder(
+      context, EmbedderConfigBuilder::InitializationPreference::kNoInitialize);
+  builder.SetAssetsPath();
+  builder.SetSnapshots();
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+  builder.GetProjectArgs().platform_message_callback = nullptr;
+  builder.GetProjectArgs().dart_deferred_library_loader_callback =
+      [](int64_t loading_unit_id, void* user_data) {
+        auto* data = reinterpret_cast<CallbackPayload*>(user_data);
+        data->loading_unit_id = loading_unit_id;
+        data->user_data = user_data;
+      };
+
+  FlutterEngine engine = nullptr;
+  auto renderer_config = context.GetRendererConfig();
+  auto project_args = builder.GetProjectArgs();
+  ASSERT_EQ(FlutterEngineInitialize(FLUTTER_ENGINE_VERSION, &renderer_config,
+                                    &project_args, &payload, &engine),
+            kSuccess);
+  ASSERT_EQ(FlutterEngineRunInitialized(engine), kSuccess);
+
+  constexpr intptr_t kRequestedLoadingUnitId = 77;
+  flutter::Shell& shell = ToEmbedderEngine(engine)->GetShell();
+  shell.GetPlatformView()->RequestDartDeferredLibrary(kRequestedLoadingUnitId);
+
+  EXPECT_EQ(payload.loading_unit_id, kRequestedLoadingUnitId);
+  EXPECT_EQ(payload.user_data, &payload);
+
+  EXPECT_EQ(FlutterEngineShutdown(engine), kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderGetProcAddressesDeferredLibrary) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  EXPECT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+  EXPECT_EQ(procs.LoadDartDeferredLibrary,
+            &FlutterEngineLoadDartDeferredLibrary);
+  EXPECT_EQ(procs.NotifyDartDeferredLibraryLoadError,
+            &FlutterEngineNotifyDartDeferredLibraryLoadError);
 }
 
 }  // namespace testing
