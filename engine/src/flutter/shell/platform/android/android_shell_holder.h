@@ -185,6 +185,35 @@ class AndroidShellHolder {
   ///
   void UpdateJavaAssetManager(std::unique_ptr<APKAssetProvider> asset_provider);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Registers an Android SurfaceTexture-backed external texture
+  ///             with the engine through the embedder API.
+  ///
+  void RegisterExternalTexture(
+      int64_t texture_id,
+      const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Registers an Android ImageTextureEntry-backed external
+  ///             texture with the engine through the embedder API.
+  ///
+  void RegisterImageTexture(
+      int64_t texture_id,
+      const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
+      ImageExternalTexture::ImageLifecycle lifecycle);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Unregisters an external texture from the engine through the
+  ///             embedder API.
+  ///
+  void UnregisterTexture(int64_t texture_id);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Notifies the engine that a new frame is available on an
+  ///             external texture through the embedder API.
+  ///
+  void MarkTextureFrameAvailable(int64_t texture_id);
+
   // Visible for testing.
   Shell* GetShellForTesting() const;
 
@@ -237,6 +266,7 @@ class AndroidShellHolder {
                      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
                      const std::shared_ptr<ThreadHost>& thread_host,
                      UniqueEngine engine,
+                     uint64_t holder_id,
                      std::unique_ptr<APKAssetProvider> apk_asset_provider,
                      const fml::WeakPtr<PlatformViewAndroid>& platform_view,
                      std::shared_ptr<VsyncWaiterAndroid> vsync_waiter,

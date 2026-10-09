@@ -553,7 +553,7 @@ static void RegisterTexture(JNIEnv* env,
                             jlong shell_holder,
                             jlong texture_id,
                             jobject surface_texture) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterExternalTexture(
+  ANDROID_SHELL_HOLDER->RegisterExternalTexture(
       static_cast<int64_t>(texture_id),                             //
       fml::jni::ScopedJavaGlobalRef<jobject>(env, surface_texture)  //
   );
@@ -569,7 +569,7 @@ static void RegisterImageTexture(JNIEnv* env,
       reset_on_background ? ImageExternalTexture::ImageLifecycle::kReset
                           : ImageExternalTexture::ImageLifecycle::kKeepAlive;
 
-  ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterImageTexture(
+  ANDROID_SHELL_HOLDER->RegisterImageTexture(
       static_cast<int64_t>(texture_id),                                  //
       fml::jni::ScopedJavaGlobalRef<jobject>(env, image_texture_entry),  //
       lifecycle                                                          //
@@ -580,15 +580,14 @@ static void UnregisterTexture(JNIEnv* env,
                               jobject jcaller,
                               jlong shell_holder,
                               jlong texture_id) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->UnregisterTexture(
-      static_cast<int64_t>(texture_id));
+  ANDROID_SHELL_HOLDER->UnregisterTexture(static_cast<int64_t>(texture_id));
 }
 
 static void MarkTextureFrameAvailable(JNIEnv* env,
                                       jobject jcaller,
                                       jlong shell_holder,
                                       jlong texture_id) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->MarkTextureFrameAvailable(
+  ANDROID_SHELL_HOLDER->MarkTextureFrameAvailable(
       static_cast<int64_t>(texture_id));
 }
 

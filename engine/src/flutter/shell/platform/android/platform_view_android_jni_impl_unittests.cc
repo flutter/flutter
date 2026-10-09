@@ -193,6 +193,11 @@ using DispatchEmptyPlatformMessageFn =
     void (*)(JNIEnv*, jobject, jlong, jstring, jint);
 using DispatchPointerDataPacketFn =
     void (*)(JNIEnv*, jobject, jlong, jobject, jint);
+using RegisterTextureFn = void (*)(JNIEnv*, jobject, jlong, jlong, jobject);
+using RegisterImageTextureFn =
+    void (*)(JNIEnv*, jobject, jlong, jlong, jobject, jboolean);
+using UnregisterTextureFn = void (*)(JNIEnv*, jobject, jlong, jlong);
+using MarkTextureFrameAvailableFn = void (*)(JNIEnv*, jobject, jlong, jlong);
 using SetViewportMetricsFn = void (*)(JNIEnv*,
                                       jobject,
                                       jlong,
@@ -1255,6 +1260,162 @@ TEST_F(PlatformViewAndroidJNIImplTest,
       std::string(reinterpret_cast<const char*>(updated_mapping->GetMapping()),
                   updated_mapping->GetSize()),
       "real_proc_asset");
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       RegisterTextureCallsEmbedderApiIncludingZeroId) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto register_texture = reinterpret_cast<RegisterTextureFn>(
+      RegisterNativesAndFind(mock_env, "nativeRegisterTexture"));
+  ASSERT_NE(register_texture, nullptr);
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  std::vector<int64_t> registered_ids;
+  holder->GetEmbedderApiForTesting().RegisterExternalTexture = MOCK_ENGINE_PROC(
+      RegisterExternalTexture,
+      ([&registered_ids](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                         int64_t texture_identifier) {
+        EXPECT_NE(engine, nullptr);
+        registered_ids.push_back(texture_identifier);
+        return kSuccess;
+      }));
+
+  const jlong shell_holder = reinterpret_cast<jlong>(holder.get());
+  jobject jcaller = reinterpret_cast<jobject>(123);
+  jobject jsurface_texture = reinterpret_cast<jobject>(4001);
+
+  constexpr jlong kFirstTextureId = 0;
+  constexpr jlong kSecondTextureId = 5;
+  register_texture(&mock_env, jcaller, shell_holder, kFirstTextureId,
+                   jsurface_texture);
+  register_texture(&mock_env, jcaller, shell_holder, kSecondTextureId,
+                   jsurface_texture);
+
+  EXPECT_THAT(registered_ids, ElementsAre(kFirstTextureId, kSecondTextureId));
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest, RegisterImageTextureCallsEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto register_image_texture = reinterpret_cast<RegisterImageTextureFn>(
+      RegisterNativesAndFind(mock_env, "nativeRegisterImageTexture"));
+  ASSERT_NE(register_image_texture, nullptr);
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  std::vector<int64_t> registered_ids;
+  holder->GetEmbedderApiForTesting().RegisterExternalTexture = MOCK_ENGINE_PROC(
+      RegisterExternalTexture,
+      ([&registered_ids](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                         int64_t texture_identifier) {
+        EXPECT_NE(engine, nullptr);
+        registered_ids.push_back(texture_identifier);
+        return kSuccess;
+      }));
+
+  const jlong shell_holder = reinterpret_cast<jlong>(holder.get());
+  jobject jcaller = reinterpret_cast<jobject>(123);
+  jobject jimage_entry = reinterpret_cast<jobject>(4002);
+
+  constexpr jlong kKeepAliveTextureId = 0;
+  constexpr jlong kResetTextureId = 1;
+  register_image_texture(&mock_env, jcaller, shell_holder, kKeepAliveTextureId,
+                         jimage_entry, JNI_FALSE);
+  register_image_texture(&mock_env, jcaller, shell_holder, kResetTextureId,
+                         jimage_entry, JNI_TRUE);
+
+  EXPECT_THAT(registered_ids,
+              ElementsAre(kKeepAliveTextureId, kResetTextureId));
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       UnregisterAndMarkTextureFrameAvailableCallEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto mark_frame_available = reinterpret_cast<MarkTextureFrameAvailableFn>(
+      RegisterNativesAndFind(mock_env, "nativeMarkTextureFrameAvailable"));
+  auto unregister_texture = reinterpret_cast<UnregisterTextureFn>(
+      RegisterNativesAndFind(mock_env, "nativeUnregisterTexture"));
+  ASSERT_NE(mark_frame_available, nullptr);
+  ASSERT_NE(unregister_texture, nullptr);
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  std::vector<int64_t> marked_ids;
+  std::vector<int64_t> unregistered_ids;
+  holder->GetEmbedderApiForTesting().MarkExternalTextureFrameAvailable =
+      MOCK_ENGINE_PROC(MarkExternalTextureFrameAvailable,
+                       ([&marked_ids](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                      int64_t texture_identifier) {
+                         EXPECT_NE(engine, nullptr);
+                         marked_ids.push_back(texture_identifier);
+                         return kSuccess;
+                       }));
+  holder->GetEmbedderApiForTesting().UnregisterExternalTexture =
+      MOCK_ENGINE_PROC(
+          UnregisterExternalTexture,
+          ([&unregistered_ids](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                               int64_t texture_identifier) {
+            EXPECT_NE(engine, nullptr);
+            unregistered_ids.push_back(texture_identifier);
+            return kSuccess;
+          }));
+
+  const jlong shell_holder = reinterpret_cast<jlong>(holder.get());
+  jobject jcaller = reinterpret_cast<jobject>(123);
+
+  constexpr jlong kZeroTextureId = 0;
+  constexpr jlong kNonZeroTextureId = 9;
+  mark_frame_available(&mock_env, jcaller, shell_holder, kZeroTextureId);
+  mark_frame_available(&mock_env, jcaller, shell_holder, kNonZeroTextureId);
+  unregister_texture(&mock_env, jcaller, shell_holder, kZeroTextureId);
+  unregister_texture(&mock_env, jcaller, shell_holder, kNonZeroTextureId);
+
+  EXPECT_THAT(marked_ids, ElementsAre(kZeroTextureId, kNonZeroTextureId));
+  EXPECT_THAT(unregistered_ids, ElementsAre(kZeroTextureId, kNonZeroTextureId));
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       RegisterMarkAndUnregisterTextureRealProcsForwardToEngine) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto register_texture = reinterpret_cast<RegisterTextureFn>(
+      RegisterNativesAndFind(mock_env, "nativeRegisterTexture"));
+  auto register_image_texture = reinterpret_cast<RegisterImageTextureFn>(
+      RegisterNativesAndFind(mock_env, "nativeRegisterImageTexture"));
+  auto mark_frame_available = reinterpret_cast<MarkTextureFrameAvailableFn>(
+      RegisterNativesAndFind(mock_env, "nativeMarkTextureFrameAvailable"));
+  auto unregister_texture = reinterpret_cast<UnregisterTextureFn>(
+      RegisterNativesAndFind(mock_env, "nativeUnregisterTexture"));
+  ASSERT_NE(register_texture, nullptr);
+  ASSERT_NE(register_image_texture, nullptr);
+  ASSERT_NE(mark_frame_available, nullptr);
+  ASSERT_NE(unregister_texture, nullptr);
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  const jlong shell_holder = reinterpret_cast<jlong>(holder.get());
+  jobject jcaller = reinterpret_cast<jobject>(123);
+  jobject jsurface_texture = reinterpret_cast<jobject>(4003);
+  jobject jimage_entry = reinterpret_cast<jobject>(4004);
+
+  // Android's FlutterRenderer starts assigning texture IDs at 0.
+  constexpr jlong kSurfaceTextureId = 0;
+  constexpr jlong kImageTextureId = 1;
+  register_texture(&mock_env, jcaller, shell_holder, kSurfaceTextureId,
+                   jsurface_texture);
+  register_image_texture(&mock_env, jcaller, shell_holder, kImageTextureId,
+                         jimage_entry, JNI_FALSE);
+  mark_frame_available(&mock_env, jcaller, shell_holder, kSurfaceTextureId);
+  mark_frame_available(&mock_env, jcaller, shell_holder, kImageTextureId);
+  unregister_texture(&mock_env, jcaller, shell_holder, kSurfaceTextureId);
+  unregister_texture(&mock_env, jcaller, shell_holder, kImageTextureId);
 }
 
 }  // namespace testing
