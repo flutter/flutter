@@ -21,6 +21,8 @@ import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -30,6 +32,7 @@ import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../emulator.dart';
 import '../features.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../proxied_devices/debounce_data_stream.dart';
 import '../proxied_devices/file_transfer.dart';
@@ -51,7 +54,10 @@ const protocolVersion = '0.6.1';
 class DaemonCommand extends FlutterCommand {
   DaemonCommand({
     required this._androidContext,
+    required this._buildSystem,
+    required this._buildTargets,
     required super.toolContext,
+    required this._xcode,
     this._androidWorkflow,
     this._deviceManager,
     this.hidden = false,
@@ -64,6 +70,9 @@ class DaemonCommand extends FlutterCommand {
   }
 
   final AndroidContext _androidContext;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
+  final Xcode? _xcode;
   final AndroidWorkflow? _androidWorkflow;
   final DeviceManager? _deviceManager;
 
@@ -104,6 +113,8 @@ class DaemonCommand extends FlutterCommand {
 
       await DaemonServer(
         analytics: analytics,
+        buildSystem: _buildSystem,
+        buildTargets: _buildTargets,
         featureFlags: featureFlags,
         logger: StdoutLogger(
           terminal: terminal,
@@ -111,6 +122,7 @@ class DaemonCommand extends FlutterCommand {
           outputPreferences: outputPreferences,
         ),
         toolContext: toolContext,
+        xcode: _xcode,
         androidSdk: _androidSdk,
         androidWorkflow: _androidWorkflow,
         deviceManager: _deviceManager,
@@ -126,8 +138,11 @@ class DaemonCommand extends FlutterCommand {
         logger: logger,
       ),
       analytics: analytics,
+      buildSystem: _buildSystem,
+      buildTargets: _buildTargets,
       featureFlags: featureFlags,
       toolContext: toolContext,
+      xcode: _xcode,
       androidSdk: _androidSdk,
       androidWorkflow: _androidWorkflow,
       deviceManager: _deviceManager,
@@ -147,9 +162,12 @@ class DaemonCommand extends FlutterCommand {
 class DaemonServer {
   DaemonServer({
     required this.analytics,
+    required this.buildSystem,
+    required this.buildTargets,
     required this.featureFlags,
     required this.logger,
     required this.toolContext,
+    required this.xcode,
     this.androidSdk,
     this.androidWorkflow,
     @visibleForTesting this._bind = ServerSocket.bind,
@@ -160,7 +178,10 @@ class DaemonServer {
   });
 
   final int? port;
+  final BuildSystem buildSystem;
+  final BuildTargets buildTargets;
   final ToolContext toolContext;
+  final Xcode? xcode;
 
   /// Stdout logger used to print general server-related errors.
   final Logger logger;
@@ -208,7 +229,10 @@ class DaemonServer {
           logger: logger,
         ),
         analytics: analytics,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: toolContext,
+        xcode: xcode,
         notifyingLogger: notifyingLogger,
         deviceManager: deviceManager,
         java: java,
@@ -221,7 +245,11 @@ class DaemonServer {
     });
 
     // Wait indefinitely until the server closes.
-    await subscription.cancel();
+    try {
+      await subscription.asFuture<void>();
+    } finally {
+      await subscription.cancel();
+    }
   }
 }
 
@@ -235,8 +263,11 @@ class Daemon {
   Daemon(
     this.connection, {
     required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required FeatureFlags featureFlags,
     required ToolContext toolContext,
+    required Xcode? xcode,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
@@ -263,7 +294,16 @@ class Daemon {
         stdio: _stdio,
       ),
     );
-    registerDomain(appDomain = AppDomain(this, analytics: analytics, toolContext: toolContext));
+    registerDomain(
+      appDomain = AppDomain(
+        this,
+        analytics: analytics,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        toolContext: toolContext,
+        xcode: xcode,
+      ),
+    );
     registerDomain(
       deviceDomain = DeviceDomain(
         this,
@@ -303,8 +343,11 @@ class Daemon {
 
   factory Daemon.createMachineDaemon({
     required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required FeatureFlags featureFlags,
     required ToolContext toolContext,
+    required Xcode? xcode,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
@@ -317,7 +360,10 @@ class Daemon {
         logger: logger,
       ),
       analytics: analytics,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
       toolContext: toolContext,
+      xcode: xcode,
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
@@ -781,10 +827,16 @@ typedef RunOrAttach = Future<void> Function({
 ///
 /// It fires events for application start, stop, and stdout and stderr.
 class AppDomain extends Domain {
-  AppDomain(Daemon daemon, {required this._analytics, required this._toolContext})
-    : _fs = _toolContext.fs,
-      _logger = _toolContext.logger,
-      super(daemon, 'app') {
+  AppDomain(
+    Daemon daemon, {
+    required this._analytics,
+    required this._buildSystem,
+    required this._buildTargets,
+    required this._toolContext,
+    required this._xcode,
+  }) : _fs = _toolContext.fs,
+       _logger = _toolContext.logger,
+       super(daemon, 'app') {
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
@@ -795,6 +847,9 @@ class AppDomain extends Domain {
   final Analytics _analytics;
   final Logger _logger;
   final ToolContext _toolContext;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
+  final Xcode? _xcode;
 
   static const _uuidGenerator = Uuid();
 
@@ -855,12 +910,9 @@ class AppDomain extends Domain {
         urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
         analytics: _analytics,
-        systemClock: _toolContext.systemClock,
-        logger: _logger,
-        terminal: _toolContext.terminal,
-        platform: _toolContext.platform,
-        outputPreferences: _toolContext.outputPreferences,
-        fileSystem: _fs,
+        buildSystem: _buildSystem,
+        buildTargets: _buildTargets,
+        toolContext: _toolContext,
         webDefines: webDefines,
       );
     } else if (enableHotReload) {
@@ -874,7 +926,10 @@ class AppDomain extends Domain {
         hostIsIde: true,
         machine: machine,
         analytics: _analytics,
-        logger: _logger,
+        buildSystem: _buildSystem,
+        buildTargets: _buildTargets,
+        toolContext: _toolContext,
+        xcode: _xcode,
       );
     } else {
       runner = ColdRunner(
@@ -883,6 +938,11 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         machine: machine,
+        analytics: _analytics,
+        buildSystem: _buildSystem,
+        buildTargets: _buildTargets,
+        toolContext: _toolContext,
+        xcode: _xcode,
       );
     }
 

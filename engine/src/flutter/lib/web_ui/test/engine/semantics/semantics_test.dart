@@ -2932,6 +2932,39 @@ void _testIncrementables() {
 
     semantics().semanticsEnabled = false;
   });
+
+  test('propagates aria-label to inner slider input and cleans up when cleared', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+    addTearDown(() {
+      semantics().semanticsEnabled = false;
+    });
+
+    void pumpSlider({required String label}) {
+      final tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        label: label,
+        hasIncrease: true,
+        hasDecrease: true,
+        flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue),
+        value: '50%',
+        increasedValue: '60%',
+        decreasedValue: '40%',
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+    }
+
+    pumpSlider(label: 'Volume');
+    final DomElement input = owner().debugSemanticsTree![0]!.element.querySelector('input')!;
+    expect(input.getAttribute('aria-label'), 'Volume');
+
+    pumpSlider(label: '');
+    expect(input.getAttribute('aria-label'), isNull);
+  });
 }
 
 void _testTextField() {
@@ -4594,7 +4627,7 @@ void _testRoute() {
   // Test the scenario of a route coming up and containing non-focusable
   // descendants that can have a11y focus. The expectation is that the first
   // descendant will be auto-focused, even if it's not input-focusable.
-  test('focuses on the first non-focusable descedant', () async {
+  test('focuses on the first non-focusable descendant', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5276,7 +5309,7 @@ void _testMenus() {
     expect(object.element.getAttribute('role'), 'menu');
   });
 
-  test('menu can have non-immidiate menu item nodes', () {
+  test('menu can have non-immediate menu item nodes', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5399,7 +5432,7 @@ void _testMenus() {
     expect(object1.element.getAttribute('aria-owns'), 'flt-semantic-node-7 flt-semantic-node-8');
   });
 
-  test('menu bar can have non-immidiate menu item nodes', () {
+  test('menu bar can have non-immediate menu item nodes', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
