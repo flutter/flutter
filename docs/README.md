@@ -12,6 +12,7 @@ If you intend to contribute to Flutter, welcome! You are encouraged to start wit
 * [Actionable bugs](./triage/README.md#what-makes-an-issue-actionable), and the closing of unactionable bugs
 * [AI contribution guidelines](../CONTRIBUTING.ai.md)
 * [Breaking changes](./contributing/Tree-hygiene.md#handling-breaking-changes)
+* [Capturing startup traces on Android with Perfetto](./platforms/android/Capturing-startup-traces-with-Perfetto.md)
 * [Cherrypick process](./releases/Flutter-Cherrypick-Process.md)
 * [Closing issues](./contributing/issue_hygiene/README.md#closing-issues)
 * [Dashboards](./infra/Dashboards.md)
